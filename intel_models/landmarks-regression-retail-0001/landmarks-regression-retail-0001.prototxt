@@ -1,0 +1,394 @@
+name: "LandmarksNet"
+layer {
+name: "data"
+type: "Input"
+top: "data"
+input_param: { shape: {dim: 1 dim: 3 dim: 48 dim: 48} }
+}
+
+layer {
+    name: "BatchNormBackward_1_bn"
+    type: "BatchNorm"
+    bottom: "data"
+    top: "ConvNdBackward_0"
+    batch_norm_param {
+        use_global_stats: true
+        eps: 1e-05
+    }
+}
+layer {
+    name: "BatchNormBackward_1_scale"
+    type: "Scale"
+    bottom: "ConvNdBackward_0"
+    top: "ConvNdBackward_0"
+    scale_param {
+        bias_term: true
+    }
+}
+layer {
+    name: "ConvNdBackward_2"
+    type: "Convolution"
+    bottom: "ConvNdBackward_0"
+    top: "ConvNdBackward_2"
+    convolution_param {
+        num_output: 16
+        pad_h: 1
+        pad_w: 1
+        kernel_h: 3
+        kernel_w: 3
+        stride: 1
+        dilation: 1
+        group: 1
+    }
+}
+layer {
+    name: "EluBackward_3"
+    type: "ELU"
+    bottom: "ConvNdBackward_2"
+    top: "ConvNdBackward_2"
+}
+layer {
+    name: "MaxPool2DBackward_4"
+    type: "Pooling"
+    bottom: "ConvNdBackward_2"
+    top: "MaxPool2DBackward_4"
+    pooling_param {
+        pool: MAX
+        kernel_size: 2
+        stride: 2
+        pad: 0
+    }
+}
+layer {
+    name: "BatchNormBackward_5_bn"
+    type: "BatchNorm"
+    bottom: "MaxPool2DBackward_4"
+    top: "ConvNdBackward_4"
+    batch_norm_param {
+        use_global_stats: true
+        eps: 1e-05
+    }
+}
+layer {
+    name: "BatchNormBackward_5_scale"
+    type: "Scale"
+    bottom: "ConvNdBackward_4"
+    top: "ConvNdBackward_4"
+    scale_param {
+        bias_term: true
+    }
+}
+layer {
+    name: "ConvNdBackward_6"
+    type: "Convolution"
+    bottom: "ConvNdBackward_4"
+    top: "ConvNdBackward_6"
+    convolution_param {
+        num_output: 32
+        pad_h: 1
+        pad_w: 1
+        kernel_h: 3
+        kernel_w: 3
+        stride: 1
+        dilation: 1
+        group: 1
+    }
+}
+layer {
+    name: "EluBackward_7"
+    type: "ELU"
+    bottom: "ConvNdBackward_6"
+    top: "ConvNdBackward_6"
+}
+layer {
+    name: "MaxPool2DBackward_8"
+    type: "Pooling"
+    bottom: "ConvNdBackward_6"
+    top: "MaxPool2DBackward_8"
+    pooling_param {
+        pool: MAX
+        kernel_size: 2
+        stride: 2
+        pad: 0
+    }
+}
+layer {
+    name: "BatchNormBackward_9_bn"
+    type: "BatchNorm"
+    bottom: "MaxPool2DBackward_8"
+    top: "ConvNdBackward_8"
+    batch_norm_param {
+        use_global_stats: true
+        eps: 1e-05
+    }
+}
+layer {
+    name: "BatchNormBackward_9_scale"
+    type: "Scale"
+    bottom: "ConvNdBackward_8"
+    top: "ConvNdBackward_8"
+    scale_param {
+        bias_term: true
+    }
+}
+layer {
+    name: "ConvNdBackward_10"
+    type: "Convolution"
+    bottom: "ConvNdBackward_8"
+    top: "ConvNdBackward_10"
+    convolution_param {
+        num_output: 64
+        pad_h: 1
+        pad_w: 1
+        kernel_h: 3
+        kernel_w: 3
+        stride: 1
+        dilation: 1
+        group: 1
+    }
+}
+layer {
+    name: "MaxPool2DBackward_11"
+    type: "Pooling"
+    bottom: "ConvNdBackward_10"
+    top: "MaxPool2DBackward_11"
+    pooling_param {
+        pool: MAX
+        kernel_size: 2
+        stride: 2
+        pad: 0
+    }
+}
+layer {
+    name: "EluBackward_12"
+    type: "ELU"
+    bottom: "MaxPool2DBackward_11"
+    top: "MaxPool2DBackward_11"
+}
+layer {
+    name: "BatchNormBackward_13_bn"
+    type: "BatchNorm"
+    bottom: "MaxPool2DBackward_11"
+    top: "ConvNdBackward_12"
+    batch_norm_param {
+        use_global_stats: true
+        eps: 1e-05
+    }
+}
+layer {
+    name: "BatchNormBackward_13_scale"
+    type: "Scale"
+    bottom: "ConvNdBackward_12"
+    top: "ConvNdBackward_12"
+    scale_param {
+        bias_term: true
+    }
+}
+layer {
+    name: "ConvNdBackward_14"
+    type: "Convolution"
+    bottom: "ConvNdBackward_12"
+    top: "ConvNdBackward_14"
+    convolution_param {
+        num_output: 64
+        pad_h: 1
+        pad_w: 1
+        kernel_h: 3
+        kernel_w: 3
+        stride: 1
+        dilation: 1
+        group: 1
+    }
+}
+layer {
+    name: "EluBackward_15"
+    type: "ELU"
+    bottom: "ConvNdBackward_14"
+    top: "ConvNdBackward_14"
+}
+layer {
+    name: "BatchNormBackward_16_bn"
+    type: "BatchNorm"
+    bottom: "ConvNdBackward_14"
+    top: "ConvNdBackward_15"
+    batch_norm_param {
+        use_global_stats: true
+        eps: 1e-05
+    }
+}
+layer {
+    name: "BatchNormBackward_16_scale"
+    type: "Scale"
+    bottom: "ConvNdBackward_15"
+    top: "ConvNdBackward_15"
+    scale_param {
+        bias_term: true
+    }
+}
+layer {
+    name: "ConvNdBackward_17"
+    type: "Convolution"
+    bottom: "ConvNdBackward_15"
+    top: "ConvNdBackward_17"
+    convolution_param {
+        num_output: 128
+        pad_h: 1
+        pad_w: 1
+        kernel_h: 3
+        kernel_w: 3
+        stride: 1
+        dilation: 1
+        group: 1
+    }
+}
+layer {
+    name: "EluBackward_18"
+    type: "ELU"
+    bottom: "ConvNdBackward_17"
+    top: "ConvNdBackward_17"
+}
+layer {
+    name: "BatchNormBackward_19_bn"
+    type: "BatchNorm"
+    bottom: "ConvNdBackward_17"
+    top: "ConvNdBackward_18"
+    batch_norm_param {
+        use_global_stats: true
+        eps: 1e-05
+    }
+}
+layer {
+    name: "BatchNormBackward_19_scale"
+    type: "Scale"
+    bottom: "ConvNdBackward_18"
+    top: "ConvNdBackward_18"
+    scale_param {
+        bias_term: true
+    }
+}
+layer {
+    name: "ConvNdBackward_20"
+    type: "Convolution"
+    bottom: "ConvNdBackward_18"
+    top: "ConvNdBackward_20"
+    convolution_param {
+        num_output: 128
+        pad_h: 0
+        pad_w: 0
+        kernel_h: 6
+        kernel_w: 6
+        stride: 1
+        dilation: 1
+        group: 128
+    }
+}
+layer {
+    name: "EluBackward_21"
+    type: "ELU"
+    bottom: "ConvNdBackward_20"
+    top: "ConvNdBackward_20"
+}
+layer {
+    name: "BatchNormBackward_22_bn"
+    type: "BatchNorm"
+    bottom: "ConvNdBackward_20"
+    top: "ConvNdBackward_21"
+    batch_norm_param {
+        use_global_stats: true
+        eps: 1e-05
+    }
+}
+layer {
+    name: "BatchNormBackward_22_scale"
+    type: "Scale"
+    bottom: "ConvNdBackward_21"
+    top: "ConvNdBackward_21"
+    scale_param {
+        bias_term: true
+    }
+}
+layer {
+    name: "ConvNdBackward_23"
+    type: "Convolution"
+    bottom: "ConvNdBackward_21"
+    top: "ConvNdBackward_23"
+    convolution_param {
+        num_output: 256
+        pad_h: 0
+        pad_w: 0
+        kernel_h: 1
+        kernel_w: 1
+        stride: 1
+        dilation: 1
+        group: 1
+    }
+}
+layer {
+    name: "EluBackward_24"
+    type: "ELU"
+    bottom: "ConvNdBackward_23"
+    top: "ConvNdBackward_23"
+}
+layer {
+    name: "BatchNormBackward_25_bn"
+    type: "BatchNorm"
+    bottom: "ConvNdBackward_23"
+    top: "ConvNdBackward_24"
+    batch_norm_param {
+        use_global_stats: true
+        eps: 1e-05
+    }
+}
+layer {
+    name: "BatchNormBackward_25_scale"
+    type: "Scale"
+    bottom: "ConvNdBackward_24"
+    top: "ConvNdBackward_24"
+    scale_param {
+        bias_term: true
+    }
+}
+layer {
+    name: "ConvNdBackward_26"
+    type: "Convolution"
+    bottom: "ConvNdBackward_24"
+    top: "ConvNdBackward_26"
+    convolution_param {
+        num_output: 64
+        pad_h: 0
+        pad_w: 0
+        kernel_h: 1
+        kernel_w: 1
+        stride: 1
+        dilation: 1
+        group: 1
+    }
+}
+layer {
+    name: "EluBackward_27"
+    type: "ELU"
+    bottom: "ConvNdBackward_26"
+    top: "ConvNdBackward_26"
+}
+layer {
+    name: "ConvNdBackward_28"
+    type: "Convolution"
+    bottom: "ConvNdBackward_26"
+    top: "ConvNdBackward_28"
+    convolution_param {
+        num_output: 10
+        pad_h: 0
+        pad_w: 0
+        kernel_h: 1
+        kernel_w: 1
+        stride: 1
+        dilation: 1
+        group: 1
+    }
+}
+layer {
+    name: "SigmoidBackward0_29"
+    type: "Sigmoid"
+    bottom: "ConvNdBackward_28"
+    top: "SigmoidBackward0_29"
+}
