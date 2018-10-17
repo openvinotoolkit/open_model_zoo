@@ -74,6 +74,54 @@ Usage
    googlenet-v4
    alexnet
    ssd_mobilenet_v2_coco
+   age-gender-recognition-retail-0013
+   age-gender-recognition-retail-0013-fp16
+   emotions-recognition-retail-0003
+   emotions-recognition-retail-0003-fp16
+   face-detection-adas-0001
+   face-detection-adas-0001-fp16
+   face-detection-retail-0004
+   face-detection-retail-0004-fp16
+   face-person-detection-retail-0002
+   face-person-detection-retail-0002-fp16
+   face-reidentification-retail-0001
+   face-reidentification-retail-0001-fp16
+   head-pose-estimation-adas-0001
+   head-pose-estimation-adas-0001-fp16
+   landmarks-regression-retail-0001
+   landmarks-regression-retail-0001-fp16
+   license-plate-recognition-barrier-0001
+   license-plate-recognition-barrier-0001-fp16
+   pedestrian-and-vehicle-detector-adas-0001
+   pedestrian-and-vehicle-detector-adas-0001-fp16
+   pedestrian-detection-adas-0002
+   pedestrian-detection-adas-0002-fp16
+   person-attributes-recognition-crossroad-0031
+   person-attributes-recognition-crossroad-0031-fp16
+   person-detection-action-recognition-0001
+   person-detection-action-recognition-0001-fp16
+   person-detection-retail-0001
+   person-detection-retail-0001-fp16
+   person-detection-retail-0013
+   person-detection-retail-0013-fp16
+   person-reidentification-retail-0031
+   person-reidentification-retail-0031-fp16
+   person-reidentification-retail-0076
+   person-reidentification-retail-0076-fp16
+   person-reidentification-retail-0079
+   person-reidentification-retail-0079-fp16
+   person-vehicle-bike-detection-crossroad-0078
+   person-vehicle-bike-detection-crossroad-0078-fp16
+   road-segmentation-adas-0001
+   road-segmentation-adas-0001-fp16
+   semantic-segmentation-adas-0001
+   semantic-segmentation-adas-0001-fp16
+   vehicle-attributes-recognition-barrier-0039
+   vehicle-attributes-recognition-barrier-0039-fp16
+   vehicle-detection-adas-0002
+   vehicle-detection-adas-0002-fp16
+   vehicle-license-plate-detection-barrier-0106
+   vehicle-license-plate-detection-barrier-0106-fp16
    ```
 
 *  Download only one topology (mtcnn-p in the following code example):
@@ -82,7 +130,7 @@ Usage
    ./downloader.py --name mtcnn-p
    ```
 
-Expected free space to download all the topologies with the default configuration file is around 3.4 GB.
+Expected free space to download all the topologies with the default configuration file is around 3.5 GB.
 
 __________
 

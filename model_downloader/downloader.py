@@ -49,12 +49,15 @@ def process_download(chunk_size, response, size, file):
                 sys.stdout.flush()
             file.write(chunk)
 
-def download(url, path, name):
+def download(url, path, name, total_size = 0):
     destination = os.path.join(path, name)
     chunk_size = 8192
     with requests.Session() as session, open(destination, 'wb') as f:
         response = session.get(url, stream = True)
-        size = int(response.headers.get('content-length', 0))
+        if total_size != 0:
+            size = total_size
+        else:
+            size = int(response.headers.get('content-length', 0))
         process_download(chunk_size, response, size, f)
     print(name, '====>', destination)
     print('')
@@ -64,7 +67,7 @@ def get_extensions(framework):
     if framework == 'caffe':
         extensions = ['.prototxt', '.caffemodel']
     elif framework == 'tf':
-        extensions = ['.prototxt', '.pb']
+        extensions = ['.prototxt', '.frozen.pb']
     elif framework == 'mxnet':
         extensions = ['.json', '.params']
     elif framework == 'dldt':
@@ -157,6 +160,8 @@ for top in topologies:
     os.makedirs(output, exist_ok=True)
     if {'model_google_drive_id', 'model_size'} <= top.keys():
         download_file_from_google_drive(top['model_google_drive_id'], output, top['name'] + get_extensions(top['framework'])[0], top['model_size'])
+    elif 'model_size' in top:
+        download(top['model'], output, top['name'] + get_extensions(top['framework'])[0], top['model_size'])
     elif 'model' in top:
         download(top['model'], output, top['name'] + get_extensions(top['framework'])[0])
 print('###############|| Start downloading weights ||###############')
@@ -165,6 +170,8 @@ for top in topologies:
     output = os.path.join(args.output_dir, top['output'])
     if {'weights_google_drive_id', 'weights_size'} <= top.keys():
         download_file_from_google_drive(top['weights_google_drive_id'], output, top['name'] + get_extensions(top['framework'])[1], top['weights_size'])
+    elif 'weights_size' in top:
+        download(top['weights'], output, top['name']+ get_extensions(top['framework'])[1], top['weights_size'])
     elif 'weights' in top:
         download(top['weights'], output, top['name']+ get_extensions(top['framework'])[1])
 print('###############|| Start downloading topologies in tarballs ||###############')
@@ -197,7 +204,7 @@ for top in topologies:
             print('========= Moving %s and %s to %s after untarring the archive =========' % (model_name, weights_name, output))
             shutil.move(downloaded_model, path_to_model)
             shutil.move(downloaded_weights, path_to_weights)
-    if 'model_path_prefix' in top and len(top.keys())==1:
+    elif 'model_path_prefix' in top:
         downloaded_model = os.path.join(output, top['model_path_prefix'])
         if os.path.exists(downloaded_model):
             print('========= Moving %s to %s after untarring the archive =========' % (weights_name, output))
