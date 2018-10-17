@@ -25,6 +25,8 @@ topologies:
     output: "classification/densenet/121/caffe/"
     weights_google_drive_id: 0B7ubpZO7HnlCcHlfNmJkU2VPelE
     weights_size: 32303870
+    image_mean: [103.94, 116.78, 123.68]
+    image_scale: 0.017
     framework: caffe
     license: https://github.com/liuzhuang13/DenseNet/blob/master/LICENSE
   - name: "densenet-161"
