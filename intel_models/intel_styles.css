@@ -1,0 +1,440 @@
+/* Colors used ===========================================================================
+Intel Blue: #0071C5 - banner and footer color, heading level color, links in body.
+White: #FFFFFF - body background, font color for banner and footer, link color in footer
+Black: #000000 - text color for all normal text
+Smoke: #F5F5F5 - alternate row color in tables
+Shadow: #888888 - drop shadows (alternate color is #999999, which is web safe)
+Unique gray: # EEEEEE - gray-ish background for code, menu hover link background
+Do not add any colors without testing them on all target operating systems.
+=========================================================================================== */
+/* -------------------------------------- */
+/* General classes - Use these classes as the foundation for clean, well-formed HTML. */
+/* -------------------------------------- */
+
+/* Enable fixed footer: 1 of 3 */
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+background-color:#FFFFFF;
+font-family: "Intel Clear", Verdana, Arial, sans-serif;
+font-size: 10pt;
+margin: 0px;
+padding: 0px;
+}
+
+/* Enable fixed footer: 2 of 3 */
+body {
+    /*margin: 0 0 100px; /* bottom = footer height */
+}
+
+p, td {
+font-family: "Intel Clear", Verdana, Arial, sans-serif;
+font-size: inherit;
+margin-top: 0;
+line-height: 120%;
+margin-bottom: 10px;
+}
+HR {
+color: #0071C5;
+background-color: #0071C5;
+height: 1px;
+margin-top: 20px;
+margin-bottom: -10px;
+margin-right: 10px;
+margin-left: 0px;
+border: none;
+}
+
+.codeph, .filepath, .keyword  {
+font-family:"Courier New", Courier, monospace;
+}
+pre, code {
+/* Class for code tags. */
+font-family:"Courier New", Courier, monospace;
+background-color: #f3f3f3;
+word-break: keep-all;
+}
+
+/* -------------------------------------- */
+/* Classes to control the images          */
+/* -------------------------------------- */
+.graphic_right {
+ border-left: 20px #ffffff solid; /*In case of overlapping with H2 blue line, this adds a white border to cover the blue*/
+ border-bottom: 20px #ffffff solid; /*In case of overlapping with H2 blue line, this adds a white border to cover the blue*/
+ position: relative;
+ float: right;
+ /*padding-left: 10px; */ /*This would be instead of the white border defined above*/
+ /*padding-bottom: 10px; */ /*This would be instead of the white border defined above*/
+ }
+
+
+/* -------------------------------------- */
+/* Divs and classes to control the banner */
+/* -------------------------------------- */
+
+#banner {
+/* Div for banner */
+float:left;
+margin-bottom: 20px;
+width: 100%;
+background-color: #0071C5;
+/*z-index: 0;*/
+}
+
+#bannerblock {
+/* Div for text and icons in the banner. */
+margin: 0 auto;
+max-width: 1325px;
+}
+
+#banner h1.title {
+/* Add as class to H1 in banner */
+font-family: "Intel Clear", Verdana, Arial, sans-serif;
+font-weight:normal;
+color: #FFFFFF;
+font-size: 170%;
+margin-right: 60px;
+margin-left: 40px;
+padding-right: 20px;
+/*text-indent: 20px;*/
+/*padding-left: 10px;*/
+vertical-align:top;
+}
+
+
+#banner .intellogo {
+/* Apply to Intel logo in banner. Add as class to image tag. */
+float: left;
+margin-right: 20px;
+margin-left: 20px;
+/*margin-top: 10px; */
+margin-top: 0px;
+padding-bottom: 10px;
+}
+#banner .componentlogo {
+/* Apply to component logo in banner. Add as class to image tag. */
+
+float: right;
+z-index: 1;
+margin-left: 20px;
+margin-right: 20px;
+/*margin-top: 10px; */
+margin-top: 0px;
+width: 45px;
+height: 45px;
+}
+
+.page_controls {
+    font-family: "intel-clear","Arial","Tahoma","Helvetica",sans-serif;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 5px 20px;
+    margin: 5px 0;
+    display: inline-block;
+    background-color: #fff;
+}
+
+
+/* -------------------------------------- */
+/* Divs and classes to control footer. Media rule for screen only. */
+/* -------------------------------------- */
+@media screen {
+  #footer {
+  /* Div for footer */
+  text-align:center;
+  color: #FFFFFF;
+  font-family: "Intel Clear", Verdana, Arial, sans-serif;
+  padding-top: 5px;
+  padding-bottom: 0.5px;
+/*  position: fixed; */
+  bottom: 0px;
+  width: 100%;
+  background-color: #0071C5;
+  clear: both;
+  z-index: 9999;
+  }
+
+  /* Added code to enable fixed footer: 3 of 3 */
+#footer {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+ /*   height: 100px;*/
+    width: 100%;
+}
+
+  #footer a, #footer a:visited, #footer a:active, #footer a.hover {
+  /* Control links in footer only. */
+  color: #FFFFFF;
+  font-family: "Intel Clear", Verdana, Arial, sans-serif;
+  font-size: x-small;
+  padding-top: 5px;
+  }
+}
+/* -------------------------------------- */
+/* Classes to control lists               */
+/* -------------------------------------- */
+#contentblock  ol, #contentblock  ul{
+font-family: inherit;
+font-size: 100%;
+margin-top: 0px;
+margin-bottom: 10px;
+}
+#contentblock ul li p, #contentblock ol li p{
+/*line-height:inherit;*/
+margin-bottom:inherit;
+}
+#contentblock li p{
+line-height:inherit;
+/*margin-bottom:inherit;*/
+}
+#contentblock li p:nth-of-type(1n+2){
+margin-top:1px;
+}
+/* -------------------------------------- */
+/* Classes to control tables              */
+/* -------------------------------------- */
+#contentblock table {
+/* ----tablecontrol table with alternating grey rows --------- */
+border-spacing: 0px;
+border-collapse: collapse;
+/*width: auto;*/
+}
+#contentblock table tr:nth-child(odd){
+background-color: #FFFFFF;
+}
+#contentblock table tr:nth-child(even){
+background-color: #F5F5F5;
+}
+#contentblock table td {
+vertical-align: top;
+padding: 5px;
+font-size: 100%;
+text-align: left;
+border: 1px #DDDDDD solid;
+}
+
+table.layout_table, table{
+/* ----layout_table table with margins and no border --------- */
+border-collapse: collapse;
+border: none;
+/*width: 100%;
+margin-right: auto;
+margin-left: auto;*/
+}
+
+#startup_table  table {
+/* ---- Startup topic only: layout_table table with 70% width --------- */
+/* ---- Layout tables in GSGs are 100% width --------- */
+width: 70%;
+}
+
+.layout_table tr{
+background-color:#FFFFFF;
+}
+
+.layout_table td {
+vertical-align: top;
+padding: 5px;
+font-size: 100%;
+border: none;
+}
+
+#contentblock th, #contentblock th h3{
+padding:1px;
+text-align:left;
+background-color: #0071C5;
+font-weight:normal;
+margin-top:0;
+margin-bottom:0;
+color:#FFFFFF;
+font-size:100%;
+border: 1px #DDDDDD solid;
+padding: 5px;
+}
+/* -------------------------------------- */
+/* Divs and classes to control main content */
+/* -------------------------------------- */
+#contentblock {
+/* Div for main content container. Everything not in the banner and
+   footer should be wrapped in this container, including the menu. */
+/*float:left; */
+margin-left: auto;
+margin-right: auto;
+margin-bottom: 10px;
+margin-top: 0;
+z-index: 1;
+padding-bottom: 75px;
+/*padding-rigth and padding-left let the logo, and optionally the component icon, hang of the edge.*/
+padding-right: 70px;
+padding-left: 70px;
+max-width: 1200px;
+}
+
+#contentblock h2 {
+border-top-width: 1px;
+border-top-style: solid;
+border-top-color: #0071C5;
+padding-top: 15px;
+font-family: "Intel Clear", Verdana, Arial, sans-serif;
+color: #0071C5;
+font-size: 170%;
+font-weight: normal;
+line-height: 1.33em;
+}
+#contentblock h3 {
+color: #0071C5;
+margin-top: 25px;
+margin-bottom: 15px;
+font-size: 150%;
+font-weight: normal;
+line-height: 1.3em;
+}
+#contentblock h4, #contentblock h5, #contentblock h6 {
+color: #0071C5;
+margin-top: 30px;
+margin-bottom:5px;
+font-size: 120%;
+font-weight: bold;
+}
+
+#contentblock a:link, #contentblock a:active, #contentblock a:visited {
+font-size:inherit;
+text-decoration: none;
+color: #0071C5;
+}
+#contentblock a:hover {
+font-size: inherit;
+text-decoration: underline;
+color: #0071C5;
+}
+
+/* Div for content section with text and a related graphic. */
+.contentsection {
+float: left;
+width: 100%;
+/*z-index: 1;*/
+}
+
+/* -------------------------------------- */
+/* Styles to control notes                */
+/* -------------------------------------- */
+/*
+#contentblock div.note, #contentblock div.Note {
+    width:85%;
+    max-width:600px;
+    margin-top:15px;
+    margin-left:15px;
+    margin-bottom: 20px;
+    padding-top:0px;
+    padding-left:10px;
+    padding-right:5px;
+    padding-bottom:5px;
+    background-color: #F5F5F5;
+    box-shadow: 2px 3px 3px 1px #888888;
+    border: 1px #CCCCCC solid;
+    border-top-right-radius: 20px;
+    -webkit-border-top-right-radius: 20px;
+    -moz-border-top-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    -webkit-border-bottom-left-radius: 20px;
+    -moz-border-bottom-left-radius: 20px;
+}
+#contentblock div.note h3, #contentblock div.Note h3 {
+    margin-top:10px;
+    text-transform:uppercase;
+}
+*/
+/* -------------------------------------- */
+/* Divs and classes to control menus */
+/* -------------------------------------- */
+
+#mainmenu {
+/* Div to control menu container. */
+font-family: "Intel Clear", Verdana, Tahoma, Arial, sans-serif;
+text-align: left;
+width: 200px;
+background-color: #e6e6e6;
+border-left: 20px #ffffff solid;
+border: 1 px #888888 solid;
+padding-top: 10px;
+padding-right: 10px;
+padding-bottom: 25px;
+padding-left: 10px;
+float: right;
+z-index: 1;
+margin-bottom: 20px;
+margin-left: 30px;
+}
+
+#mainmenu h3 {
+margin-top:10px;
+margin-bottom:10px;
+font-weight: bold;
+font-size: 110%;
+color: #343434;
+/*line-height: 120%;*/
+}
+
+#mainmenu a.mainmenulinks:link, #mainmenu a.mainmenulinks:visited, #mainmenu a.mainmenulinks:hover, #mainmenu a.mainmenulinks:active {
+/* Classes for menu links. */
+font-family: "Intel Clear", Verdana, Arial, sans-serif;
+font-size: inherit;
+font-weight: normal;
+color: #0061b5;
+text-decoration: underline;
+}
+#mainmenu a.mainmenulinks:hover {
+/* Classes for menu links. */
+text-decoration: none;
+}
+#mainmenu p, #mainmenu li{
+/* Classes for menu text. */
+font-size: 95%;
+word-wrap: normal;
+line-height: 140%;
+margin-bottom: 5px;
+}
+#mainmenu li, l#mainmenu li p{
+margin-left:-3ex;
+}
+/*--------------------------------------*/
+/*----- STYLES FOR EXPANDABLE GSGS -----*/
+/*--------------------------------------*/
+
+.expand_button, .collapse_button {
+    position: relative;
+	height: 18px;
+	width: 1px;
+    left: -25px;
+	margin-bottom: -2.1ex;
+	vertical-align: middle;
+	padding-left: 25px;
+/*	z-index: -1;	*/
+}
+
+@media print{
+	#banner .intellogo {
+	/* Apply to Intel logo in banner. Add as class to image tag. */
+	display: none;
+	}
+	#banner .componentlogo {
+	/* Apply to component logo in banner. Add as class to image tag. */
+	display: none;
+	}
+	#page_controls {
+	display: none;
+	}
+	#banner h1.title {
+	/* Add as class to H1 in banner */
+	color: #000000;
+	}
+	#contentblock th, #contentblock th h3{
+	border: 1px #000000 solid;
+	color:#000000
+	}
+}

@@ -1,0 +1,3916 @@
+name: "road-segmentation-adas-0001"
+input: "data"
+input_dim: 1
+input_dim: 3
+input_dim: 512
+input_dim: 896
+layer {
+  name: "L0000_Conv2d_BN"
+  type: "Convolution"
+  bottom: "data"
+  top: "L0000_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 1
+    stride: 2
+    stride: 2
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0001_ReLU"
+  type: "ReLU"
+  bottom: "L0000_Conv2d_BN"
+  top: "L0001_ReLU"
+}
+layer {
+  name: "L0002_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0001_ReLU"
+  top: "L0002_Conv2d_BN"
+  convolution_param {
+    num_output: 8
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0003_ReLU"
+  type: "ReLU"
+  bottom: "L0002_Conv2d_BN"
+  top: "L0003_ReLU"
+}
+layer {
+  name: "L0004_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0003_ReLU"
+  top: "L0004_Conv2d_BN"
+  convolution_param {
+    num_output: 8
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 8
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0005_ReLU"
+  type: "ReLU"
+  bottom: "L0004_Conv2d_BN"
+  top: "L0005_ReLU"
+}
+layer {
+  name: "L0006_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0005_ReLU"
+  top: "L0006_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0007_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0006_Conv2d_BN"
+  bottom: "L0001_ReLU"
+  top: "L0007_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0008_ReLU"
+  type: "ReLU"
+  bottom: "L0007_AddBackward1"
+  top: "L0008_ReLU"
+}
+layer {
+  name: "L0009_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0008_ReLU"
+  top: "L0009_Conv2d_BN"
+  convolution_param {
+    num_output: 8
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0010_ReLU"
+  type: "ReLU"
+  bottom: "L0009_Conv2d_BN"
+  top: "L0010_ReLU"
+}
+layer {
+  name: "L0011_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0010_ReLU"
+  top: "L0011_Conv2d_BN"
+  convolution_param {
+    num_output: 8
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 8
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0012_ReLU"
+  type: "ReLU"
+  bottom: "L0011_Conv2d_BN"
+  top: "L0012_ReLU"
+}
+layer {
+  name: "L0013_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0012_ReLU"
+  top: "L0013_Conv2d_BN"
+  convolution_param {
+    num_output: 24
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0014_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0008_ReLU"
+  top: "L0014_Conv2d_BN"
+  convolution_param {
+    num_output: 24
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0015_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0013_Conv2d_BN"
+  bottom: "L0014_Conv2d_BN"
+  top: "L0015_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0016_ReLU"
+  type: "ReLU"
+  bottom: "L0015_AddBackward1"
+  top: "L0016_ReLU"
+}
+layer {
+  name: "L0017_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0016_ReLU"
+  top: "L0017_Conv2d_BN"
+  convolution_param {
+    num_output: 8
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0018_ReLU"
+  type: "ReLU"
+  bottom: "L0017_Conv2d_BN"
+  top: "L0018_ReLU"
+}
+layer {
+  name: "L0019_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0018_ReLU"
+  top: "L0019_Conv2d_BN"
+  convolution_param {
+    num_output: 8
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 8
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0020_ReLU"
+  type: "ReLU"
+  bottom: "L0019_Conv2d_BN"
+  top: "L0020_ReLU"
+}
+layer {
+  name: "L0021_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0020_ReLU"
+  top: "L0021_Conv2d_BN"
+  convolution_param {
+    num_output: 24
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0022_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0021_Conv2d_BN"
+  bottom: "L0016_ReLU"
+  top: "L0022_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0023_ReLU"
+  type: "ReLU"
+  bottom: "L0022_AddBackward1"
+  top: "L0023_ReLU"
+}
+layer {
+  name: "L0024_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0023_ReLU"
+  top: "L0024_Conv2d_BN"
+  convolution_param {
+    num_output: 8
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0025_ReLU"
+  type: "ReLU"
+  bottom: "L0024_Conv2d_BN"
+  top: "L0025_ReLU"
+}
+layer {
+  name: "L0026_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0025_ReLU"
+  top: "L0026_Conv2d_BN"
+  convolution_param {
+    num_output: 8
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 8
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0027_ReLU"
+  type: "ReLU"
+  bottom: "L0026_Conv2d_BN"
+  top: "L0027_ReLU"
+}
+layer {
+  name: "L0028_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0027_ReLU"
+  top: "L0028_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0029_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0023_ReLU"
+  top: "L0029_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0030_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0028_Conv2d_BN"
+  bottom: "L0029_Conv2d_BN"
+  top: "L0030_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0031_ReLU"
+  type: "ReLU"
+  bottom: "L0030_AddBackward1"
+  top: "L0031_ReLU"
+}
+layer {
+  name: "L0032_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0031_ReLU"
+  top: "L0032_Conv2d_BN"
+  convolution_param {
+    num_output: 8
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0033_ReLU"
+  type: "ReLU"
+  bottom: "L0032_Conv2d_BN"
+  top: "L0033_ReLU"
+}
+layer {
+  name: "L0034_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0033_ReLU"
+  top: "L0034_Conv2d_BN"
+  convolution_param {
+    num_output: 8
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 8
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0035_ReLU"
+  type: "ReLU"
+  bottom: "L0034_Conv2d_BN"
+  top: "L0035_ReLU"
+}
+layer {
+  name: "L0036_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0035_ReLU"
+  top: "L0036_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0037_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0036_Conv2d_BN"
+  bottom: "L0031_ReLU"
+  top: "L0037_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0038_ReLU"
+  type: "ReLU"
+  bottom: "L0037_AddBackward1"
+  top: "L0038_ReLU"
+}
+layer {
+  name: "L0039_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0038_ReLU"
+  top: "L0039_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 2
+    kernel_size: 2
+    group: 1
+    stride: 2
+    stride: 2
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0040_ReLU"
+  type: "ReLU"
+  bottom: "L0039_Conv2d_BN"
+  top: "L0040_ReLU"
+}
+layer {
+  name: "L0041_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0040_ReLU"
+  top: "L0041_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 16
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0042_ReLU"
+  type: "ReLU"
+  bottom: "L0041_Conv2d_BN"
+  top: "L0042_ReLU"
+}
+layer {
+  name: "L0043_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0042_ReLU"
+  top: "L0043_Conv2d_BN"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0044_MaxPool2d"
+  type: "Pooling"
+  bottom: "L0038_ReLU"
+  top: "L0044_MaxPool2d"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+    pad: 0
+  }
+}
+layer {
+  name: "L0045_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0044_MaxPool2d"
+  top: "L0045_Conv2d_BN"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0046_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0043_Conv2d_BN"
+  bottom: "L0045_Conv2d_BN"
+  top: "L0046_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0047_ReLU"
+  type: "ReLU"
+  bottom: "L0046_AddBackward1"
+  top: "L0047_ReLU"
+}
+layer {
+  name: "L0048_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0047_ReLU"
+  top: "L0048_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0049_ReLU"
+  type: "ReLU"
+  bottom: "L0048_Conv2d_BN"
+  top: "L0049_ReLU"
+}
+layer {
+  name: "L0050_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0049_ReLU"
+  top: "L0050_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 16
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0051_ReLU"
+  type: "ReLU"
+  bottom: "L0050_Conv2d_BN"
+  top: "L0051_ReLU"
+}
+layer {
+  name: "L0052_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0051_ReLU"
+  top: "L0052_Conv2d_BN"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0053_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0052_Conv2d_BN"
+  bottom: "L0047_ReLU"
+  top: "L0053_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0054_ReLU"
+  type: "ReLU"
+  bottom: "L0053_AddBackward1"
+  top: "L0054_ReLU"
+}
+layer {
+  name: "L0055_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0054_ReLU"
+  top: "L0055_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0056_ReLU"
+  type: "ReLU"
+  bottom: "L0055_Conv2d_BN"
+  top: "L0056_ReLU"
+}
+layer {
+  name: "L0057_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0056_ReLU"
+  top: "L0057_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 16
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0058_ReLU"
+  type: "ReLU"
+  bottom: "L0057_Conv2d_BN"
+  top: "L0058_ReLU"
+}
+layer {
+  name: "L0059_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0058_ReLU"
+  top: "L0059_Conv2d_BN"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0060_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0059_Conv2d_BN"
+  bottom: "L0054_ReLU"
+  top: "L0060_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0061_ReLU"
+  type: "ReLU"
+  bottom: "L0060_AddBackward1"
+  top: "L0061_ReLU"
+}
+layer {
+  name: "L0062_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0061_ReLU"
+  top: "L0062_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0063_ReLU"
+  type: "ReLU"
+  bottom: "L0062_Conv2d_BN"
+  top: "L0063_ReLU"
+}
+layer {
+  name: "L0064_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0063_ReLU"
+  top: "L0064_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 2
+    pad: 2
+    kernel_size: 3
+    kernel_size: 3
+    group: 16
+    stride: 1
+    stride: 1
+    dilation: 2
+    dilation: 2
+  }
+}
+layer {
+  name: "L0065_ReLU"
+  type: "ReLU"
+  bottom: "L0064_Conv2d_BN"
+  top: "L0065_ReLU"
+}
+layer {
+  name: "L0066_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0065_ReLU"
+  top: "L0066_Conv2d_BN"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0067_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0066_Conv2d_BN"
+  bottom: "L0061_ReLU"
+  top: "L0067_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0068_ReLU"
+  type: "ReLU"
+  bottom: "L0067_AddBackward1"
+  top: "L0068_ReLU"
+}
+layer {
+  name: "L0069_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0068_ReLU"
+  top: "L0069_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0070_ReLU"
+  type: "ReLU"
+  bottom: "L0069_Conv2d_BN"
+  top: "L0070_ReLU"
+}
+layer {
+  name: "L0071_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0070_ReLU"
+  top: "L0071_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 3
+    pad: 3
+    kernel_size: 3
+    kernel_size: 3
+    group: 16
+    stride: 1
+    stride: 1
+    dilation: 3
+    dilation: 3
+  }
+}
+layer {
+  name: "L0072_ReLU"
+  type: "ReLU"
+  bottom: "L0071_Conv2d_BN"
+  top: "L0072_ReLU"
+}
+layer {
+  name: "L0073_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0072_ReLU"
+  top: "L0073_Conv2d_BN"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0074_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0073_Conv2d_BN"
+  bottom: "L0068_ReLU"
+  top: "L0074_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0075_ReLU"
+  type: "ReLU"
+  bottom: "L0074_AddBackward1"
+  top: "L0075_ReLU"
+}
+layer {
+  name: "L0076_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0075_ReLU"
+  top: "L0076_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0077_ReLU"
+  type: "ReLU"
+  bottom: "L0076_Conv2d_BN"
+  top: "L0077_ReLU"
+}
+layer {
+  name: "L0078_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0077_ReLU"
+  top: "L0078_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 16
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0079_ReLU"
+  type: "ReLU"
+  bottom: "L0078_Conv2d_BN"
+  top: "L0079_ReLU"
+}
+layer {
+  name: "L0080_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0079_ReLU"
+  top: "L0080_Conv2d_BN"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0081_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0080_Conv2d_BN"
+  bottom: "L0075_ReLU"
+  top: "L0081_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0082_ReLU"
+  type: "ReLU"
+  bottom: "L0081_AddBackward1"
+  top: "L0082_ReLU"
+}
+layer {
+  name: "L0083_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0082_ReLU"
+  top: "L0083_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0084_ReLU"
+  type: "ReLU"
+  bottom: "L0083_Conv2d_BN"
+  top: "L0084_ReLU"
+}
+layer {
+  name: "L0085_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0084_ReLU"
+  top: "L0085_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 2
+    pad: 2
+    kernel_size: 3
+    kernel_size: 3
+    group: 16
+    stride: 1
+    stride: 1
+    dilation: 2
+    dilation: 2
+  }
+}
+layer {
+  name: "L0086_ReLU"
+  type: "ReLU"
+  bottom: "L0085_Conv2d_BN"
+  top: "L0086_ReLU"
+}
+layer {
+  name: "L0087_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0086_ReLU"
+  top: "L0087_Conv2d_BN"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0088_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0087_Conv2d_BN"
+  bottom: "L0082_ReLU"
+  top: "L0088_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0089_ReLU"
+  type: "ReLU"
+  bottom: "L0088_AddBackward1"
+  top: "L0089_ReLU"
+}
+layer {
+  name: "L0090_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0089_ReLU"
+  top: "L0090_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0091_ReLU"
+  type: "ReLU"
+  bottom: "L0090_Conv2d_BN"
+  top: "L0091_ReLU"
+}
+layer {
+  name: "L0092_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0091_ReLU"
+  top: "L0092_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 3
+    pad: 3
+    kernel_size: 3
+    kernel_size: 3
+    group: 16
+    stride: 1
+    stride: 1
+    dilation: 3
+    dilation: 3
+  }
+}
+layer {
+  name: "L0093_ReLU"
+  type: "ReLU"
+  bottom: "L0092_Conv2d_BN"
+  top: "L0093_ReLU"
+}
+layer {
+  name: "L0094_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0093_ReLU"
+  top: "L0094_Conv2d_BN"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0095_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0094_Conv2d_BN"
+  bottom: "L0089_ReLU"
+  top: "L0095_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0096_ReLU"
+  type: "ReLU"
+  bottom: "L0095_AddBackward1"
+  top: "L0096_ReLU"
+}
+layer {
+  name: "L0097_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0096_ReLU"
+  top: "L0097_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0098_ReLU"
+  type: "ReLU"
+  bottom: "L0097_Conv2d_BN"
+  top: "L0098_ReLU"
+}
+layer {
+  name: "L0099_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0098_ReLU"
+  top: "L0099_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 16
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0100_ReLU"
+  type: "ReLU"
+  bottom: "L0099_Conv2d_BN"
+  top: "L0100_ReLU"
+}
+layer {
+  name: "L0101_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0100_ReLU"
+  top: "L0101_Conv2d_BN"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0102_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0101_Conv2d_BN"
+  bottom: "L0096_ReLU"
+  top: "L0102_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0103_ReLU"
+  type: "ReLU"
+  bottom: "L0102_AddBackward1"
+  top: "L0103_ReLU"
+}
+layer {
+  name: "L0104_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0103_ReLU"
+  top: "L0104_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 2
+    kernel_size: 2
+    group: 1
+    stride: 2
+    stride: 2
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0105_ReLU"
+  type: "ReLU"
+  bottom: "L0104_Conv2d_BN"
+  top: "L0105_ReLU"
+}
+layer {
+  name: "L0106_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0105_ReLU"
+  top: "L0106_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 32
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0107_ReLU"
+  type: "ReLU"
+  bottom: "L0106_Conv2d_BN"
+  top: "L0107_ReLU"
+}
+layer {
+  name: "L0108_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0107_ReLU"
+  top: "L0108_Conv2d_BN"
+  convolution_param {
+    num_output: 64
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0109_MaxPool2d"
+  type: "Pooling"
+  bottom: "L0103_ReLU"
+  top: "L0109_MaxPool2d"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
+    pad: 0
+  }
+}
+layer {
+  name: "L0110_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0109_MaxPool2d"
+  top: "L0110_Conv2d_BN"
+  convolution_param {
+    num_output: 64
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0111_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0108_Conv2d_BN"
+  bottom: "L0110_Conv2d_BN"
+  top: "L0111_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0112_ReLU"
+  type: "ReLU"
+  bottom: "L0111_AddBackward1"
+  top: "L0112_ReLU"
+}
+layer {
+  name: "L0113_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0112_ReLU"
+  top: "L0113_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0114_ReLU"
+  type: "ReLU"
+  bottom: "L0113_Conv2d_BN"
+  top: "L0114_ReLU"
+}
+layer {
+  name: "L0115_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0114_ReLU"
+  top: "L0115_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 32
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0116_ReLU"
+  type: "ReLU"
+  bottom: "L0115_Conv2d_BN"
+  top: "L0116_ReLU"
+}
+layer {
+  name: "L0117_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0116_ReLU"
+  top: "L0117_Conv2d_BN"
+  convolution_param {
+    num_output: 64
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0118_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0117_Conv2d_BN"
+  bottom: "L0112_ReLU"
+  top: "L0118_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0119_ReLU"
+  type: "ReLU"
+  bottom: "L0118_AddBackward1"
+  top: "L0119_ReLU"
+}
+layer {
+  name: "L0120_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0119_ReLU"
+  top: "L0120_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0121_ReLU"
+  type: "ReLU"
+  bottom: "L0120_Conv2d_BN"
+  top: "L0121_ReLU"
+}
+layer {
+  name: "L0122_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0121_ReLU"
+  top: "L0122_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 32
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0123_ReLU"
+  type: "ReLU"
+  bottom: "L0122_Conv2d_BN"
+  top: "L0123_ReLU"
+}
+layer {
+  name: "L0124_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0123_ReLU"
+  top: "L0124_Conv2d_BN"
+  convolution_param {
+    num_output: 64
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0125_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0124_Conv2d_BN"
+  bottom: "L0119_ReLU"
+  top: "L0125_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0126_ReLU"
+  type: "ReLU"
+  bottom: "L0125_AddBackward1"
+  top: "L0126_ReLU"
+}
+layer {
+  name: "L0127_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0126_ReLU"
+  top: "L0127_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0128_ReLU"
+  type: "ReLU"
+  bottom: "L0127_Conv2d_BN"
+  top: "L0128_ReLU"
+}
+layer {
+  name: "L0129_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0128_ReLU"
+  top: "L0129_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 32
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0130_ReLU"
+  type: "ReLU"
+  bottom: "L0129_Conv2d_BN"
+  top: "L0130_ReLU"
+}
+layer {
+  name: "L0131_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0130_ReLU"
+  top: "L0131_Conv2d_BN"
+  convolution_param {
+    num_output: 64
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0132_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0131_Conv2d_BN"
+  bottom: "L0126_ReLU"
+  top: "L0132_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0133_ReLU"
+  type: "ReLU"
+  bottom: "L0132_AddBackward1"
+  top: "L0133_ReLU"
+}
+layer {
+  name: "L0134_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0133_ReLU"
+  top: "L0134_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0135_ReLU"
+  type: "ReLU"
+  bottom: "L0134_Conv2d_BN"
+  top: "L0135_ReLU"
+}
+layer {
+  name: "L0136_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0135_ReLU"
+  top: "L0136_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 2
+    pad: 2
+    kernel_size: 3
+    kernel_size: 3
+    group: 40
+    stride: 1
+    stride: 1
+    dilation: 2
+    dilation: 2
+  }
+}
+layer {
+  name: "L0137_ReLU"
+  type: "ReLU"
+  bottom: "L0136_Conv2d_BN"
+  top: "L0137_ReLU"
+}
+layer {
+  name: "L0138_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0137_ReLU"
+  top: "L0138_Conv2d_BN"
+  convolution_param {
+    num_output: 80
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0139_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0133_ReLU"
+  top: "L0139_Conv2d_BN"
+  convolution_param {
+    num_output: 80
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0140_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0138_Conv2d_BN"
+  bottom: "L0139_Conv2d_BN"
+  top: "L0140_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0141_ReLU"
+  type: "ReLU"
+  bottom: "L0140_AddBackward1"
+  top: "L0141_ReLU"
+}
+layer {
+  name: "L0142_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0141_ReLU"
+  top: "L0142_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0143_ReLU"
+  type: "ReLU"
+  bottom: "L0142_Conv2d_BN"
+  top: "L0143_ReLU"
+}
+layer {
+  name: "L0144_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0143_ReLU"
+  top: "L0144_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 3
+    pad: 3
+    kernel_size: 3
+    kernel_size: 3
+    group: 40
+    stride: 1
+    stride: 1
+    dilation: 3
+    dilation: 3
+  }
+}
+layer {
+  name: "L0145_ReLU"
+  type: "ReLU"
+  bottom: "L0144_Conv2d_BN"
+  top: "L0145_ReLU"
+}
+layer {
+  name: "L0146_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0145_ReLU"
+  top: "L0146_Conv2d_BN"
+  convolution_param {
+    num_output: 80
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0147_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0146_Conv2d_BN"
+  bottom: "L0141_ReLU"
+  top: "L0147_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0148_ReLU"
+  type: "ReLU"
+  bottom: "L0147_AddBackward1"
+  top: "L0148_ReLU"
+}
+layer {
+  name: "L0149_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0148_ReLU"
+  top: "L0149_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0150_ReLU"
+  type: "ReLU"
+  bottom: "L0149_Conv2d_BN"
+  top: "L0150_ReLU"
+}
+layer {
+  name: "L0151_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0150_ReLU"
+  top: "L0151_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 4
+    pad: 4
+    kernel_size: 3
+    kernel_size: 3
+    group: 40
+    stride: 1
+    stride: 1
+    dilation: 4
+    dilation: 4
+  }
+}
+layer {
+  name: "L0152_ReLU"
+  type: "ReLU"
+  bottom: "L0151_Conv2d_BN"
+  top: "L0152_ReLU"
+}
+layer {
+  name: "L0153_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0152_ReLU"
+  top: "L0153_Conv2d_BN"
+  convolution_param {
+    num_output: 80
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0154_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0153_Conv2d_BN"
+  bottom: "L0148_ReLU"
+  top: "L0154_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0155_ReLU"
+  type: "ReLU"
+  bottom: "L0154_AddBackward1"
+  top: "L0155_ReLU"
+}
+layer {
+  name: "L0156_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0155_ReLU"
+  top: "L0156_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0157_ReLU"
+  type: "ReLU"
+  bottom: "L0156_Conv2d_BN"
+  top: "L0157_ReLU"
+}
+layer {
+  name: "L0158_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0157_ReLU"
+  top: "L0158_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 40
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0159_ReLU"
+  type: "ReLU"
+  bottom: "L0158_Conv2d_BN"
+  top: "L0159_ReLU"
+}
+layer {
+  name: "L0160_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0159_ReLU"
+  top: "L0160_Conv2d_BN"
+  convolution_param {
+    num_output: 80
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0161_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0160_Conv2d_BN"
+  bottom: "L0155_ReLU"
+  top: "L0161_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0162_ReLU"
+  type: "ReLU"
+  bottom: "L0161_AddBackward1"
+  top: "L0162_ReLU"
+}
+layer {
+  name: "L0163_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0162_ReLU"
+  top: "L0163_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0164_ReLU"
+  type: "ReLU"
+  bottom: "L0163_Conv2d_BN"
+  top: "L0164_ReLU"
+}
+layer {
+  name: "L0165_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0164_ReLU"
+  top: "L0165_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 40
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0166_ReLU"
+  type: "ReLU"
+  bottom: "L0165_Conv2d_BN"
+  top: "L0166_ReLU"
+}
+layer {
+  name: "L0167_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0166_ReLU"
+  top: "L0167_Conv2d_BN"
+  convolution_param {
+    num_output: 80
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0168_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0167_Conv2d_BN"
+  bottom: "L0162_ReLU"
+  top: "L0168_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0169_ReLU"
+  type: "ReLU"
+  bottom: "L0168_AddBackward1"
+  top: "L0169_ReLU"
+}
+layer {
+  name: "L0170_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0169_ReLU"
+  top: "L0170_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0171_ReLU"
+  type: "ReLU"
+  bottom: "L0170_Conv2d_BN"
+  top: "L0171_ReLU"
+}
+layer {
+  name: "L0172_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0171_ReLU"
+  top: "L0172_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 2
+    pad: 2
+    kernel_size: 3
+    kernel_size: 3
+    group: 40
+    stride: 1
+    stride: 1
+    dilation: 2
+    dilation: 2
+  }
+}
+layer {
+  name: "L0173_ReLU"
+  type: "ReLU"
+  bottom: "L0172_Conv2d_BN"
+  top: "L0173_ReLU"
+}
+layer {
+  name: "L0174_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0173_ReLU"
+  top: "L0174_Conv2d_BN"
+  convolution_param {
+    num_output: 80
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0175_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0174_Conv2d_BN"
+  bottom: "L0169_ReLU"
+  top: "L0175_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0176_ReLU"
+  type: "ReLU"
+  bottom: "L0175_AddBackward1"
+  top: "L0176_ReLU"
+}
+layer {
+  name: "L0177_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0176_ReLU"
+  top: "L0177_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0178_ReLU"
+  type: "ReLU"
+  bottom: "L0177_Conv2d_BN"
+  top: "L0178_ReLU"
+}
+layer {
+  name: "L0179_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0178_ReLU"
+  top: "L0179_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 3
+    pad: 3
+    kernel_size: 3
+    kernel_size: 3
+    group: 40
+    stride: 1
+    stride: 1
+    dilation: 3
+    dilation: 3
+  }
+}
+layer {
+  name: "L0180_ReLU"
+  type: "ReLU"
+  bottom: "L0179_Conv2d_BN"
+  top: "L0180_ReLU"
+}
+layer {
+  name: "L0181_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0180_ReLU"
+  top: "L0181_Conv2d_BN"
+  convolution_param {
+    num_output: 80
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0182_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0181_Conv2d_BN"
+  bottom: "L0176_ReLU"
+  top: "L0182_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0183_ReLU"
+  type: "ReLU"
+  bottom: "L0182_AddBackward1"
+  top: "L0183_ReLU"
+}
+layer {
+  name: "L0184_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0183_ReLU"
+  top: "L0184_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0185_ReLU"
+  type: "ReLU"
+  bottom: "L0184_Conv2d_BN"
+  top: "L0185_ReLU"
+}
+layer {
+  name: "L0186_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0185_ReLU"
+  top: "L0186_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 4
+    pad: 4
+    kernel_size: 3
+    kernel_size: 3
+    group: 40
+    stride: 1
+    stride: 1
+    dilation: 4
+    dilation: 4
+  }
+}
+layer {
+  name: "L0187_ReLU"
+  type: "ReLU"
+  bottom: "L0186_Conv2d_BN"
+  top: "L0187_ReLU"
+}
+layer {
+  name: "L0188_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0187_ReLU"
+  top: "L0188_Conv2d_BN"
+  convolution_param {
+    num_output: 80
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0189_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0188_Conv2d_BN"
+  bottom: "L0183_ReLU"
+  top: "L0189_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0190_ReLU"
+  type: "ReLU"
+  bottom: "L0189_AddBackward1"
+  top: "L0190_ReLU"
+}
+layer {
+  name: "L0191_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0190_ReLU"
+  top: "L0191_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0192_ReLU"
+  type: "ReLU"
+  bottom: "L0191_Conv2d_BN"
+  top: "L0192_ReLU"
+}
+layer {
+  name: "L0193_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0192_ReLU"
+  top: "L0193_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 40
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0194_ReLU"
+  type: "ReLU"
+  bottom: "L0193_Conv2d_BN"
+  top: "L0194_ReLU"
+}
+layer {
+  name: "L0195_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0194_ReLU"
+  top: "L0195_Conv2d_BN"
+  convolution_param {
+    num_output: 80
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0196_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0195_Conv2d_BN"
+  bottom: "L0190_ReLU"
+  top: "L0196_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0197_ReLU"
+  type: "ReLU"
+  bottom: "L0196_AddBackward1"
+  top: "L0197_ReLU"
+}
+layer {
+  name: "L0198_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0197_ReLU"
+  top: "L0198_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0199_ReLU"
+  type: "ReLU"
+  bottom: "L0198_Conv2d_BN"
+  top: "L0199_ReLU"
+}
+layer {
+  name: "L0200_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0199_ReLU"
+  top: "L0200_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 40
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0201_ReLU"
+  type: "ReLU"
+  bottom: "L0200_Conv2d_BN"
+  top: "L0201_ReLU"
+}
+layer {
+  name: "L0202_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0201_ReLU"
+  top: "L0202_Conv2d_BN"
+  convolution_param {
+    num_output: 80
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0203_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0202_Conv2d_BN"
+  bottom: "L0197_ReLU"
+  top: "L0203_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0204_ReLU"
+  type: "ReLU"
+  bottom: "L0203_AddBackward1"
+  top: "L0204_ReLU"
+}
+layer {
+  name: "L0205_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0204_ReLU"
+  top: "L0205_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0206_ReLU"
+  type: "ReLU"
+  bottom: "L0205_Conv2d_BN"
+  top: "L0206_ReLU"
+}
+layer {
+  name: "L0207_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0206_ReLU"
+  top: "L0207_Conv2d_BN"
+  convolution_param {
+    num_output: 40
+    bias_term: true
+    pad: 2
+    pad: 2
+    kernel_size: 3
+    kernel_size: 3
+    group: 40
+    stride: 1
+    stride: 1
+    dilation: 2
+    dilation: 2
+  }
+}
+layer {
+  name: "L0208_ReLU"
+  type: "ReLU"
+  bottom: "L0207_Conv2d_BN"
+  top: "L0208_ReLU"
+}
+layer {
+  name: "L0209_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0208_ReLU"
+  top: "L0209_Conv2d_BN"
+  convolution_param {
+    num_output: 80
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0210_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0209_Conv2d_BN"
+  bottom: "L0204_ReLU"
+  top: "L0210_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0211_ReLU"
+  type: "ReLU"
+  bottom: "L0210_AddBackward1"
+  top: "L0211_ReLU"
+}
+layer {
+  name: "L0212_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0211_ReLU"
+  top: "L0212_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0213_ReLU"
+  type: "ReLU"
+  bottom: "L0212_Conv2d_BN"
+  top: "L0213_ReLU"
+}
+layer {
+  name: "L0214_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0213_ReLU"
+  top: "L0214_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 4
+    pad: 4
+    kernel_size: 3
+    kernel_size: 3
+    group: 32
+    stride: 1
+    stride: 1
+    dilation: 4
+    dilation: 4
+  }
+}
+layer {
+  name: "L0215_ReLU"
+  type: "ReLU"
+  bottom: "L0214_Conv2d_BN"
+  top: "L0215_ReLU"
+}
+layer {
+  name: "L0216_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0215_ReLU"
+  top: "L0216_Conv2d_BN"
+  convolution_param {
+    num_output: 64
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0217_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0211_ReLU"
+  top: "L0217_Conv2d_BN"
+  convolution_param {
+    num_output: 64
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0218_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0216_Conv2d_BN"
+  bottom: "L0217_Conv2d_BN"
+  top: "L0218_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0219_ReLU"
+  type: "ReLU"
+  bottom: "L0218_AddBackward1"
+  top: "L0219_ReLU"
+}
+layer {
+  name: "L0220_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0219_ReLU"
+  top: "L0220_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0221_ReLU"
+  type: "ReLU"
+  bottom: "L0220_Conv2d_BN"
+  top: "L0221_ReLU"
+}
+layer {
+  name: "L0222_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0221_ReLU"
+  top: "L0222_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 6
+    pad: 6
+    kernel_size: 3
+    kernel_size: 3
+    group: 32
+    stride: 1
+    stride: 1
+    dilation: 6
+    dilation: 6
+  }
+}
+layer {
+  name: "L0223_ReLU"
+  type: "ReLU"
+  bottom: "L0222_Conv2d_BN"
+  top: "L0223_ReLU"
+}
+layer {
+  name: "L0224_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0223_ReLU"
+  top: "L0224_Conv2d_BN"
+  convolution_param {
+    num_output: 64
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0225_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0224_Conv2d_BN"
+  bottom: "L0219_ReLU"
+  top: "L0225_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0226_ReLU"
+  type: "ReLU"
+  bottom: "L0225_AddBackward1"
+  top: "L0226_ReLU"
+}
+layer {
+  name: "L0227_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0226_ReLU"
+  top: "L0227_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0228_ReLU"
+  type: "ReLU"
+  bottom: "L0227_Conv2d_BN"
+  top: "L0228_ReLU"
+}
+layer {
+  name: "L0229_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0228_ReLU"
+  top: "L0229_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 8
+    pad: 8
+    kernel_size: 3
+    kernel_size: 3
+    group: 32
+    stride: 1
+    stride: 1
+    dilation: 8
+    dilation: 8
+  }
+}
+layer {
+  name: "L0230_ReLU"
+  type: "ReLU"
+  bottom: "L0229_Conv2d_BN"
+  top: "L0230_ReLU"
+}
+layer {
+  name: "L0231_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0230_ReLU"
+  top: "L0231_Conv2d_BN"
+  convolution_param {
+    num_output: 64
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0232_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0231_Conv2d_BN"
+  bottom: "L0226_ReLU"
+  top: "L0232_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0233_ReLU"
+  type: "ReLU"
+  bottom: "L0232_AddBackward1"
+  top: "L0233_ReLU"
+}
+layer {
+  name: "L0234_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0233_ReLU"
+  top: "L0234_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0235_ReLU"
+  type: "ReLU"
+  bottom: "L0234_Conv2d_BN"
+  top: "L0235_ReLU"
+}
+layer {
+  name: "L0236_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0235_ReLU"
+  top: "L0236_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 32
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0237_ReLU"
+  type: "ReLU"
+  bottom: "L0236_Conv2d_BN"
+  top: "L0237_ReLU"
+}
+layer {
+  name: "L0238_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0237_ReLU"
+  top: "L0238_Conv2d_BN"
+  convolution_param {
+    num_output: 56
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0239_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0233_ReLU"
+  top: "L0239_Conv2d_BN"
+  convolution_param {
+    num_output: 56
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0240_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0238_Conv2d_BN"
+  bottom: "L0239_Conv2d_BN"
+  top: "L0240_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0241_ReLU"
+  type: "ReLU"
+  bottom: "L0240_AddBackward1"
+  top: "L0241_ReLU"
+}
+layer {
+  name: "L0242_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0241_ReLU"
+  top: "L0242_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0243_ReLU"
+  type: "ReLU"
+  bottom: "L0242_Conv2d_BN"
+  top: "L0243_ReLU"
+}
+layer {
+  name: "L0244_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0243_ReLU"
+  top: "L0244_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 32
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0245_ReLU"
+  type: "ReLU"
+  bottom: "L0244_Conv2d_BN"
+  top: "L0245_ReLU"
+}
+layer {
+  name: "L0246_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0245_ReLU"
+  top: "L0246_Conv2d_BN"
+  convolution_param {
+    num_output: 56
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0247_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0246_Conv2d_BN"
+  bottom: "L0241_ReLU"
+  top: "L0247_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0248_ReLU"
+  type: "ReLU"
+  bottom: "L0247_AddBackward1"
+  top: "L0248_ReLU"
+}
+layer {
+  name: "L0249_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0248_ReLU"
+  top: "L0249_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0250_ReLU"
+  type: "ReLU"
+  bottom: "L0249_Conv2d_BN"
+  top: "L0250_ReLU"
+}
+layer {
+  name: "L0251_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0250_ReLU"
+  top: "L0251_Conv2d_BN"
+  convolution_param {
+    num_output: 32
+    bias_term: true
+    pad: 2
+    pad: 2
+    kernel_size: 3
+    kernel_size: 3
+    group: 32
+    stride: 1
+    stride: 1
+    dilation: 2
+    dilation: 2
+  }
+}
+layer {
+  name: "L0252_ReLU"
+  type: "ReLU"
+  bottom: "L0251_Conv2d_BN"
+  top: "L0252_ReLU"
+}
+layer {
+  name: "L0253_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0252_ReLU"
+  top: "L0253_Conv2d_BN"
+  convolution_param {
+    num_output: 56
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0254_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0253_Conv2d_BN"
+  bottom: "L0248_ReLU"
+  top: "L0254_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0255_ReLU"
+  type: "ReLU"
+  bottom: "L0254_AddBackward1"
+  top: "L0255_ReLU"
+}
+layer {
+  name: "L0256_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0255_ReLU"
+  top: "L0256_Conv2d_BN"
+  convolution_param {
+    num_output: 24
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0257_ReLU"
+  type: "ReLU"
+  bottom: "L0256_Conv2d_BN"
+  top: "L0257_ReLU"
+}
+layer {
+  name: "L0258_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0257_ReLU"
+  top: "L0258_Conv2d_BN"
+  convolution_param {
+    num_output: 24
+    bias_term: true
+    pad: 4
+    pad: 4
+    kernel_size: 3
+    kernel_size: 3
+    group: 24
+    stride: 1
+    stride: 1
+    dilation: 4
+    dilation: 4
+  }
+}
+layer {
+  name: "L0259_ReLU"
+  type: "ReLU"
+  bottom: "L0258_Conv2d_BN"
+  top: "L0259_ReLU"
+}
+layer {
+  name: "L0260_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0259_ReLU"
+  top: "L0260_Conv2d_BN"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0261_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0255_ReLU"
+  top: "L0261_Conv2d_BN"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0262_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0260_Conv2d_BN"
+  bottom: "L0261_Conv2d_BN"
+  top: "L0262_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0263_ReLU"
+  type: "ReLU"
+  bottom: "L0262_AddBackward1"
+  top: "L0263_ReLU"
+}
+layer {
+  name: "L0264_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0263_ReLU"
+  top: "L0264_Conv2d_BN"
+  convolution_param {
+    num_output: 24
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0265_ReLU"
+  type: "ReLU"
+  bottom: "L0264_Conv2d_BN"
+  top: "L0265_ReLU"
+}
+layer {
+  name: "L0266_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0265_ReLU"
+  top: "L0266_Conv2d_BN"
+  convolution_param {
+    num_output: 24
+    bias_term: true
+    pad: 6
+    pad: 6
+    kernel_size: 3
+    kernel_size: 3
+    group: 24
+    stride: 1
+    stride: 1
+    dilation: 6
+    dilation: 6
+  }
+}
+layer {
+  name: "L0267_ReLU"
+  type: "ReLU"
+  bottom: "L0266_Conv2d_BN"
+  top: "L0267_ReLU"
+}
+layer {
+  name: "L0268_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0267_ReLU"
+  top: "L0268_Conv2d_BN"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0269_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0268_Conv2d_BN"
+  bottom: "L0263_ReLU"
+  top: "L0269_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0270_ReLU"
+  type: "ReLU"
+  bottom: "L0269_AddBackward1"
+  top: "L0270_ReLU"
+}
+layer {
+  name: "L0271_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0270_ReLU"
+  top: "L0271_Conv2d_BN"
+  convolution_param {
+    num_output: 24
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0272_ReLU"
+  type: "ReLU"
+  bottom: "L0271_Conv2d_BN"
+  top: "L0272_ReLU"
+}
+layer {
+  name: "L0273_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0272_ReLU"
+  top: "L0273_Conv2d_BN"
+  convolution_param {
+    num_output: 24
+    bias_term: true
+    pad: 8
+    pad: 8
+    kernel_size: 3
+    kernel_size: 3
+    group: 24
+    stride: 1
+    stride: 1
+    dilation: 8
+    dilation: 8
+  }
+}
+layer {
+  name: "L0274_ReLU"
+  type: "ReLU"
+  bottom: "L0273_Conv2d_BN"
+  top: "L0274_ReLU"
+}
+layer {
+  name: "L0275_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0274_ReLU"
+  top: "L0275_Conv2d_BN"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0276_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0275_Conv2d_BN"
+  bottom: "L0270_ReLU"
+  top: "L0276_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0277_ReLU"
+  type: "ReLU"
+  bottom: "L0276_AddBackward1"
+  top: "L0277_ReLU"
+}
+layer {
+  name: "L0278_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0277_ReLU"
+  top: "L0278_Conv2d_BN"
+  convolution_param {
+    num_output: 24
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0279_ReLU"
+  type: "ReLU"
+  bottom: "L0278_Conv2d_BN"
+  top: "L0279_ReLU"
+}
+layer {
+  name: "L0280_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0279_ReLU"
+  top: "L0280_Conv2d_BN"
+  convolution_param {
+    num_output: 24
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 24
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0281_ReLU"
+  type: "ReLU"
+  bottom: "L0280_Conv2d_BN"
+  top: "L0281_ReLU"
+}
+layer {
+  name: "L0282_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0281_ReLU"
+  top: "L0282_Conv2d_BN"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0283_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0282_Conv2d_BN"
+  bottom: "L0277_ReLU"
+  top: "L0283_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0284_ReLU"
+  type: "ReLU"
+  bottom: "L0283_AddBackward1"
+  top: "L0284_ReLU"
+}
+layer {
+  name: "L0285_AvgPool2d"
+  type: "Pooling"
+  bottom: "L0284_ReLU"
+  top: "L0285_AvgPool2d"
+  pooling_param {
+    pool: AVE
+    kernel_size: 2
+    stride: 2
+    pad: 0
+  }
+}
+layer {
+  name: "L0286_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0285_AvgPool2d"
+  top: "L0286_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0287_ReLU"
+  type: "ReLU"
+  bottom: "L0286_Conv2d_BN"
+  top: "L0287_ReLU"
+}
+layer {
+  name: "L0288_Upsample"
+  type: "Interp"
+  bottom: "L0287_ReLU"
+  top: "L0288_Upsample"
+  interp_param {
+    zoom_factor: 2
+  }
+}
+layer {
+  name: "L0289_Conv2d"
+  type: "Convolution"
+  bottom: "L0288_Upsample"
+  top: "L0289_Conv2d"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0290_ReLU"
+  type: "ReLU"
+  bottom: "L0289_Conv2d"
+  top: "L0290_ReLU"
+}
+layer {
+  name: "L0291_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0284_ReLU"
+  bottom: "L0290_ReLU"
+  top: "L0291_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0292_AvgPool2d"
+  type: "Pooling"
+  bottom: "L0284_ReLU"
+  top: "L0292_AvgPool2d"
+  pooling_param {
+    pool: AVE
+    kernel_size: 4
+    stride: 4
+    pad: 0
+  }
+}
+layer {
+  name: "L0293_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0292_AvgPool2d"
+  top: "L0293_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0294_ReLU"
+  type: "ReLU"
+  bottom: "L0293_Conv2d_BN"
+  top: "L0294_ReLU"
+}
+layer {
+  name: "L0295_Upsample"
+  type: "Interp"
+  bottom: "L0294_ReLU"
+  top: "L0295_Upsample"
+  interp_param {
+    zoom_factor: 4
+  }
+}
+layer {
+  name: "L0296_Conv2d"
+  type: "Convolution"
+  bottom: "L0295_Upsample"
+  top: "L0296_Conv2d"
+  convolution_param {
+    num_output: 48
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0297_ReLU"
+  type: "ReLU"
+  bottom: "L0296_Conv2d"
+  top: "L0297_ReLU"
+}
+layer {
+  name: "L0298_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0291_AddBackward1"
+  bottom: "L0297_ReLU"
+  top: "L0298_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0299_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0298_AddBackward1"
+  top: "L0299_Conv2d_BN"
+  convolution_param {
+    num_output: 24
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0300_ReLU"
+  type: "ReLU"
+  bottom: "L0299_Conv2d_BN"
+  top: "L0300_ReLU"
+}
+layer {
+  name: "L0301_Upsample"
+  type: "Interp"
+  bottom: "L0300_ReLU"
+  top: "L0301_Upsample"
+  interp_param {
+    zoom_factor: 2
+  }
+}
+layer {
+  name: "L0302_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0103_ReLU"
+  top: "L0302_Conv2d_BN"
+  convolution_param {
+    num_output: 24
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0303_ReLU"
+  type: "ReLU"
+  bottom: "L0302_Conv2d_BN"
+  top: "L0303_ReLU"
+}
+layer {
+  name: "L0304_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0301_Upsample"
+  bottom: "L0303_ReLU"
+  top: "L0304_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0305_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0304_AddBackward1"
+  top: "L0305_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0306_ReLU"
+  type: "ReLU"
+  bottom: "L0305_Conv2d_BN"
+  top: "L0306_ReLU"
+}
+layer {
+  name: "L0307_Upsample"
+  type: "Interp"
+  bottom: "L0306_ReLU"
+  top: "L0307_Upsample"
+  interp_param {
+    zoom_factor: 2
+  }
+}
+layer {
+  name: "L0308_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0038_ReLU"
+  top: "L0308_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0309_ReLU"
+  type: "ReLU"
+  bottom: "L0308_Conv2d_BN"
+  top: "L0309_ReLU"
+}
+layer {
+  name: "L0310_AddBackward1"
+  type: "Eltwise"
+  bottom: "L0307_Upsample"
+  bottom: "L0309_ReLU"
+  top: "L0310_AddBackward1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "L0311_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0310_AddBackward1"
+  top: "L0311_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0312_ReLU"
+  type: "ReLU"
+  bottom: "L0311_Conv2d_BN"
+  top: "L0312_ReLU"
+}
+layer {
+  name: "L0313_Conv2d_BN"
+  type: "Convolution"
+  bottom: "L0312_ReLU"
+  top: "L0313_Conv2d_BN"
+  convolution_param {
+    num_output: 16
+    bias_term: true
+    pad: 1
+    pad: 1
+    kernel_size: 3
+    kernel_size: 3
+    group: 16
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0314_ReLU"
+  type: "ReLU"
+  bottom: "L0313_Conv2d_BN"
+  top: "L0314_ReLU"
+}
+layer {
+  name: "L0315_Conv2d"
+  type: "Convolution"
+  bottom: "L0314_ReLU"
+  top: "L0315_Conv2d"
+  convolution_param {
+    num_output: 4
+    bias_term: true
+    pad: 0
+    pad: 0
+    kernel_size: 1
+    kernel_size: 1
+    group: 1
+    stride: 1
+    stride: 1
+    dilation: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "L0317_ReWeight_Scale"
+  type: "Scale"
+  bottom: "L0315_Conv2d"
+  top: "L0317_ReWeight_Scale"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "L0316_Upsample"
+  type: "Interp"
+  bottom: "L0317_ReWeight_Scale"
+  top: "L0316_Upsample"
+  interp_param {
+    zoom_factor: 2
+  }
+}
+layer {
+  name: "L0317_ReWeight_SoftMax"
+  type: "Softmax"
+  bottom: "L0316_Upsample"
+  top: "L0317_ReWeight"
+}
+

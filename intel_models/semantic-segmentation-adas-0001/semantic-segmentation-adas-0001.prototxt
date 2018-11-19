@@ -1,0 +1,1675 @@
+name: "semantic-segmentation-adas-0001"
+layer {
+  name: "data"
+  type: "Input"
+  top: "data"
+  input_param {
+    shape {
+      dim: 1
+      dim: 3
+      dim: 1024
+      dim: 2048
+    }
+  }
+}
+layer {
+  name: "BatchNormBackward1_bn"
+  type: "BatchNorm"
+  bottom: "data"
+  top: "ConvNdBackward0"
+  batch_norm_param {
+    use_global_stats: true
+    eps: 1e-05
+  }
+}
+layer {
+  name: "BatchNormBackward1_scale"
+  type: "Scale"
+  bottom: "ConvNdBackward0"
+  top: "ConvNdBackward0"
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "AvgPool2DBackward2"
+  type: "Pooling"
+  bottom: "ConvNdBackward0"
+  top: "AvgPool2DBackward2"
+  pooling_param {
+    pool: AVE
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  name: "ConvNdBackward3"
+  type: "Convolution"
+  bottom: "AvgPool2DBackward2"
+  top: "ConvNdBackward3"
+  convolution_param {
+    num_output: 32
+    stride: 2
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward5"
+  type: "ReLU"
+  bottom: "ConvNdBackward3"
+  top: "ConvNdBackward3"
+}
+layer {
+  name: "ConvNdBackward6"
+  type: "Convolution"
+  bottom: "ConvNdBackward3"
+  top: "ConvNdBackward6"
+  convolution_param {
+    num_output: 32
+    stride: 1
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward8"
+  type: "ReLU"
+  bottom: "ConvNdBackward6"
+  top: "ConvNdBackward6"
+}
+layer {
+  name: "ConvNdBackward9"
+  type: "Convolution"
+  bottom: "ConvNdBackward6"
+  top: "ConvNdBackward9"
+  convolution_param {
+    num_output: 64
+    stride: 1
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward11"
+  type: "ReLU"
+  bottom: "ConvNdBackward9"
+  top: "ConvNdBackward9"
+}
+layer {
+  name: "MaxPool2DBackward12"
+  type: "Pooling"
+  bottom: "ConvNdBackward9"
+  top: "MaxPool2DBackward12"
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+    pad: 0
+  }
+}
+layer {
+  name: "ConvNdBackward13"
+  type: "Convolution"
+  bottom: "MaxPool2DBackward12"
+  top: "ConvNdBackward13"
+  convolution_param {
+    num_output: 32
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward15"
+  type: "ReLU"
+  bottom: "ConvNdBackward13"
+  top: "ConvNdBackward13"
+}
+layer {
+  name: "ConvNdBackward16"
+  type: "Convolution"
+  bottom: "ConvNdBackward13"
+  top: "ConvNdBackward16"
+  convolution_param {
+    num_output: 32
+    stride: 1
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward18"
+  type: "ReLU"
+  bottom: "ConvNdBackward16"
+  top: "ConvNdBackward16"
+}
+layer {
+  name: "ConvNdBackward19"
+  type: "Convolution"
+  bottom: "ConvNdBackward16"
+  top: "ConvNdBackward19"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ConvNdBackward22"
+  type: "Convolution"
+  bottom: "MaxPool2DBackward12"
+  top: "ConvNdBackward22"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward124"
+  type: "Eltwise"
+  bottom: "ConvNdBackward19"
+  bottom: "ConvNdBackward22"
+  top: "AddBackward124"
+}
+layer {
+  name: "ThresholdBackward25"
+  type: "ReLU"
+  bottom: "AddBackward124"
+  top: "AddBackward124"
+}
+layer {
+  name: "ConvNdBackward26"
+  type: "Convolution"
+  bottom: "AddBackward124"
+  top: "ConvNdBackward26"
+  convolution_param {
+    num_output: 32
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward28"
+  type: "ReLU"
+  bottom: "ConvNdBackward26"
+  top: "ConvNdBackward26"
+}
+layer {
+  name: "ConvNdBackward29"
+  type: "Convolution"
+  bottom: "ConvNdBackward26"
+  top: "ConvNdBackward29"
+  convolution_param {
+    num_output: 32
+    stride: 1
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward31"
+  type: "ReLU"
+  bottom: "ConvNdBackward29"
+  top: "ConvNdBackward29"
+}
+layer {
+  name: "ConvNdBackward32"
+  type: "Convolution"
+  bottom: "ConvNdBackward29"
+  top: "ConvNdBackward32"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward135"
+  type: "Eltwise"
+  bottom: "ConvNdBackward32"
+  bottom: "AddBackward124"
+  top: "AddBackward135"
+}
+layer {
+  name: "ThresholdBackward36"
+  type: "ReLU"
+  bottom: "AddBackward135"
+  top: "AddBackward135"
+}
+layer {
+  name: "ConvNdBackward37"
+  type: "Convolution"
+  bottom: "AddBackward135"
+  top: "ConvNdBackward37"
+  convolution_param {
+    num_output: 32
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward39"
+  type: "ReLU"
+  bottom: "ConvNdBackward37"
+  top: "ConvNdBackward37"
+}
+layer {
+  name: "ConvNdBackward40"
+  type: "Convolution"
+  bottom: "ConvNdBackward37"
+  top: "ConvNdBackward40"
+  convolution_param {
+    num_output: 32
+    stride: 1
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward42"
+  type: "ReLU"
+  bottom: "ConvNdBackward40"
+  top: "ConvNdBackward40"
+}
+layer {
+  name: "ConvNdBackward43"
+  type: "Convolution"
+  bottom: "ConvNdBackward40"
+  top: "ConvNdBackward43"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward146"
+  type: "Eltwise"
+  bottom: "ConvNdBackward43"
+  bottom: "AddBackward135"
+  top: "AddBackward146"
+}
+layer {
+  name: "ThresholdBackward47"
+  type: "ReLU"
+  bottom: "AddBackward146"
+  top: "AddBackward146"
+}
+layer {
+  name: "ConvNdBackward48"
+  type: "Convolution"
+  bottom: "AddBackward146"
+  top: "ConvNdBackward48"
+  convolution_param {
+    num_output: 64
+    stride: 2
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward50"
+  type: "ReLU"
+  bottom: "ConvNdBackward48"
+  top: "ConvNdBackward48"
+}
+layer {
+  name: "ConvNdBackward51"
+  type: "Convolution"
+  bottom: "ConvNdBackward48"
+  top: "ConvNdBackward51"
+  convolution_param {
+    num_output: 64
+    stride: 1
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward53"
+  type: "ReLU"
+  bottom: "ConvNdBackward51"
+  top: "ConvNdBackward51"
+}
+layer {
+  name: "ConvNdBackward54"
+  type: "Convolution"
+  bottom: "ConvNdBackward51"
+  top: "ConvNdBackward54"
+  convolution_param {
+    num_output: 256
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ConvNdBackward57"
+  type: "Convolution"
+  bottom: "AddBackward146"
+  top: "ConvNdBackward57"
+  convolution_param {
+    num_output: 256
+    stride: 2
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward159"
+  type: "Eltwise"
+  bottom: "ConvNdBackward54"
+  bottom: "ConvNdBackward57"
+  top: "AddBackward159"
+}
+layer {
+  name: "ThresholdBackward60"
+  type: "ReLU"
+  bottom: "AddBackward159"
+  top: "AddBackward159"
+}
+layer {
+  name: "AvgPool2DBackward61"
+  type: "Pooling"
+  bottom: "AddBackward159"
+  top: "AvgPool2DBackward61"
+  pooling_param {
+    pool: AVE
+    kernel_size: 2
+    stride: 2
+  }
+}
+layer {
+  name: "ConvNdBackward62"
+  type: "Convolution"
+  bottom: "AvgPool2DBackward61"
+  top: "ConvNdBackward62"
+  convolution_param {
+    num_output: 64
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward64"
+  type: "ReLU"
+  bottom: "ConvNdBackward62"
+  top: "ConvNdBackward62"
+}
+layer {
+  name: "ConvNdBackward65"
+  type: "Convolution"
+  bottom: "ConvNdBackward62"
+  top: "ConvNdBackward65"
+  convolution_param {
+    num_output: 64
+    stride: 1
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward67"
+  type: "ReLU"
+  bottom: "ConvNdBackward65"
+  top: "ConvNdBackward65"
+}
+layer {
+  name: "ConvNdBackward68"
+  type: "Convolution"
+  bottom: "ConvNdBackward65"
+  top: "ConvNdBackward68"
+  convolution_param {
+    num_output: 256
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward171"
+  type: "Eltwise"
+  bottom: "ConvNdBackward68"
+  bottom: "AvgPool2DBackward61"
+  top: "AddBackward171"
+}
+layer {
+  name: "ThresholdBackward72"
+  type: "ReLU"
+  bottom: "AddBackward171"
+  top: "AddBackward171"
+}
+layer {
+  name: "ConvNdBackward73"
+  type: "Convolution"
+  bottom: "AddBackward171"
+  top: "ConvNdBackward73"
+  convolution_param {
+    num_output: 64
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward75"
+  type: "ReLU"
+  bottom: "ConvNdBackward73"
+  top: "ConvNdBackward73"
+}
+layer {
+  name: "ConvNdBackward76"
+  type: "Convolution"
+  bottom: "ConvNdBackward73"
+  top: "ConvNdBackward76"
+  convolution_param {
+    num_output: 64
+    stride: 1
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward78"
+  type: "ReLU"
+  bottom: "ConvNdBackward76"
+  top: "ConvNdBackward76"
+}
+layer {
+  name: "ConvNdBackward79"
+  type: "Convolution"
+  bottom: "ConvNdBackward76"
+  top: "ConvNdBackward79"
+  convolution_param {
+    num_output: 256
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward182"
+  type: "Eltwise"
+  bottom: "ConvNdBackward79"
+  bottom: "AddBackward171"
+  top: "AddBackward182"
+}
+layer {
+  name: "ThresholdBackward83"
+  type: "ReLU"
+  bottom: "AddBackward182"
+  top: "AddBackward182"
+}
+layer {
+  name: "ConvNdBackward84"
+  type: "Convolution"
+  bottom: "AddBackward182"
+  top: "ConvNdBackward84"
+  convolution_param {
+    num_output: 64
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward86"
+  type: "ReLU"
+  bottom: "ConvNdBackward84"
+  top: "ConvNdBackward84"
+}
+layer {
+  name: "ConvNdBackward87"
+  type: "Convolution"
+  bottom: "ConvNdBackward84"
+  top: "ConvNdBackward87"
+  convolution_param {
+    num_output: 64
+    stride: 1
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward89"
+  type: "ReLU"
+  bottom: "ConvNdBackward87"
+  top: "ConvNdBackward87"
+}
+layer {
+  name: "ConvNdBackward90"
+  type: "Convolution"
+  bottom: "ConvNdBackward87"
+  top: "ConvNdBackward90"
+  convolution_param {
+    num_output: 256
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward193"
+  type: "Eltwise"
+  bottom: "ConvNdBackward90"
+  bottom: "AddBackward182"
+  top: "AddBackward193"
+}
+layer {
+  name: "ThresholdBackward94"
+  type: "ReLU"
+  bottom: "AddBackward193"
+  top: "AddBackward193"
+}
+layer {
+  name: "ConvNdBackward95"
+  type: "Convolution"
+  bottom: "AddBackward193"
+  top: "ConvNdBackward95"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward97"
+  type: "ReLU"
+  bottom: "ConvNdBackward95"
+  top: "ConvNdBackward95"
+}
+layer {
+  name: "ConvNdBackward98"
+  type: "Convolution"
+  bottom: "ConvNdBackward95"
+  top: "ConvNdBackward98"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward100"
+  type: "ReLU"
+  bottom: "ConvNdBackward98"
+  top: "ConvNdBackward98"
+}
+layer {
+  name: "ConvNdBackward101"
+  type: "Convolution"
+  bottom: "ConvNdBackward98"
+  top: "ConvNdBackward101"
+  convolution_param {
+    num_output: 512
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ConvNdBackward104"
+  type: "Convolution"
+  bottom: "AddBackward193"
+  top: "ConvNdBackward104"
+  convolution_param {
+    num_output: 512
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward1106"
+  type: "Eltwise"
+  bottom: "ConvNdBackward101"
+  bottom: "ConvNdBackward104"
+  top: "AddBackward1106"
+}
+layer {
+  name: "ThresholdBackward107"
+  type: "ReLU"
+  bottom: "AddBackward1106"
+  top: "AddBackward1106"
+}
+layer {
+  name: "ConvNdBackward108"
+  type: "Convolution"
+  bottom: "AddBackward1106"
+  top: "ConvNdBackward108"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward110"
+  type: "ReLU"
+  bottom: "ConvNdBackward108"
+  top: "ConvNdBackward108"
+}
+layer {
+  name: "ConvNdBackward111"
+  type: "Convolution"
+  bottom: "ConvNdBackward108"
+  top: "ConvNdBackward111"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 2
+    pad_w: 2
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 2
+  }
+}
+layer {
+  name: "ThresholdBackward113"
+  type: "ReLU"
+  bottom: "ConvNdBackward111"
+  top: "ConvNdBackward111"
+}
+layer {
+  name: "ConvNdBackward114"
+  type: "Convolution"
+  bottom: "ConvNdBackward111"
+  top: "ConvNdBackward114"
+  convolution_param {
+    num_output: 512
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward1117"
+  type: "Eltwise"
+  bottom: "ConvNdBackward114"
+  bottom: "AddBackward1106"
+  top: "AddBackward1117"
+}
+layer {
+  name: "ThresholdBackward118"
+  type: "ReLU"
+  bottom: "AddBackward1117"
+  top: "AddBackward1117"
+}
+layer {
+  name: "ConvNdBackward119"
+  type: "Convolution"
+  bottom: "AddBackward1117"
+  top: "ConvNdBackward119"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward121"
+  type: "ReLU"
+  bottom: "ConvNdBackward119"
+  top: "ConvNdBackward119"
+}
+layer {
+  name: "ConvNdBackward122"
+  type: "Convolution"
+  bottom: "ConvNdBackward119"
+  top: "ConvNdBackward122"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 2
+    pad_w: 2
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 2
+  }
+}
+layer {
+  name: "ThresholdBackward124"
+  type: "ReLU"
+  bottom: "ConvNdBackward122"
+  top: "ConvNdBackward122"
+}
+layer {
+  name: "ConvNdBackward125"
+  type: "Convolution"
+  bottom: "ConvNdBackward122"
+  top: "ConvNdBackward125"
+  convolution_param {
+    num_output: 512
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward1128"
+  type: "Eltwise"
+  bottom: "ConvNdBackward125"
+  bottom: "AddBackward1117"
+  top: "AddBackward1128"
+}
+layer {
+  name: "ThresholdBackward129"
+  type: "ReLU"
+  bottom: "AddBackward1128"
+  top: "AddBackward1128"
+}
+layer {
+  name: "ConvNdBackward130"
+  type: "Convolution"
+  bottom: "AddBackward1128"
+  top: "ConvNdBackward130"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward132"
+  type: "ReLU"
+  bottom: "ConvNdBackward130"
+  top: "ConvNdBackward130"
+}
+layer {
+  name: "ConvNdBackward133"
+  type: "Convolution"
+  bottom: "ConvNdBackward130"
+  top: "ConvNdBackward133"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 2
+    pad_w: 2
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 2
+  }
+}
+layer {
+  name: "ThresholdBackward135"
+  type: "ReLU"
+  bottom: "ConvNdBackward133"
+  top: "ConvNdBackward133"
+}
+layer {
+  name: "ConvNdBackward136"
+  type: "Convolution"
+  bottom: "ConvNdBackward133"
+  top: "ConvNdBackward136"
+  convolution_param {
+    num_output: 512
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward1139"
+  type: "Eltwise"
+  bottom: "ConvNdBackward136"
+  bottom: "AddBackward1128"
+  top: "AddBackward1139"
+}
+layer {
+  name: "ThresholdBackward140"
+  type: "ReLU"
+  bottom: "AddBackward1139"
+  top: "AddBackward1139"
+}
+layer {
+  name: "ConvNdBackward141"
+  type: "Convolution"
+  bottom: "AddBackward1139"
+  top: "ConvNdBackward141"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward143"
+  type: "ReLU"
+  bottom: "ConvNdBackward141"
+  top: "ConvNdBackward141"
+}
+layer {
+  name: "ConvNdBackward144"
+  type: "Convolution"
+  bottom: "ConvNdBackward141"
+  top: "ConvNdBackward144"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 2
+    pad_w: 2
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 2
+  }
+}
+layer {
+  name: "ThresholdBackward146"
+  type: "ReLU"
+  bottom: "ConvNdBackward144"
+  top: "ConvNdBackward144"
+}
+layer {
+  name: "ConvNdBackward147"
+  type: "Convolution"
+  bottom: "ConvNdBackward144"
+  top: "ConvNdBackward147"
+  convolution_param {
+    num_output: 512
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward1150"
+  type: "Eltwise"
+  bottom: "ConvNdBackward147"
+  bottom: "AddBackward1139"
+  top: "AddBackward1150"
+}
+layer {
+  name: "ThresholdBackward151"
+  type: "ReLU"
+  bottom: "AddBackward1150"
+  top: "AddBackward1150"
+}
+layer {
+  name: "ConvNdBackward152"
+  type: "Convolution"
+  bottom: "AddBackward1150"
+  top: "ConvNdBackward152"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward154"
+  type: "ReLU"
+  bottom: "ConvNdBackward152"
+  top: "ConvNdBackward152"
+}
+layer {
+  name: "ConvNdBackward155"
+  type: "Convolution"
+  bottom: "ConvNdBackward152"
+  top: "ConvNdBackward155"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 2
+    pad_w: 2
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 2
+  }
+}
+layer {
+  name: "ThresholdBackward157"
+  type: "ReLU"
+  bottom: "ConvNdBackward155"
+  top: "ConvNdBackward155"
+}
+layer {
+  name: "ConvNdBackward158"
+  type: "Convolution"
+  bottom: "ConvNdBackward155"
+  top: "ConvNdBackward158"
+  convolution_param {
+    num_output: 512
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward1161"
+  type: "Eltwise"
+  bottom: "ConvNdBackward158"
+  bottom: "AddBackward1150"
+  top: "AddBackward1161"
+}
+layer {
+  name: "ThresholdBackward162"
+  type: "ReLU"
+  bottom: "AddBackward1161"
+  top: "AddBackward1161"
+}
+layer {
+  name: "ConvNdBackward163"
+  type: "Convolution"
+  bottom: "AddBackward1161"
+  top: "ConvNdBackward163"
+  convolution_param {
+    num_output: 256
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward165"
+  type: "ReLU"
+  bottom: "ConvNdBackward163"
+  top: "ConvNdBackward163"
+}
+layer {
+  name: "ConvNdBackward166"
+  type: "Convolution"
+  bottom: "ConvNdBackward163"
+  top: "ConvNdBackward166"
+  convolution_param {
+    num_output: 256
+    stride: 1
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward168"
+  type: "ReLU"
+  bottom: "ConvNdBackward166"
+  top: "ConvNdBackward166"
+}
+layer {
+  name: "ConvNdBackward169"
+  type: "Convolution"
+  bottom: "ConvNdBackward166"
+  top: "ConvNdBackward169"
+  convolution_param {
+    num_output: 1024
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ConvNdBackward172"
+  type: "Convolution"
+  bottom: "AddBackward1161"
+  top: "ConvNdBackward172"
+  convolution_param {
+    num_output: 1024
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward1174"
+  type: "Eltwise"
+  bottom: "ConvNdBackward169"
+  bottom: "ConvNdBackward172"
+  top: "AddBackward1174"
+}
+layer {
+  name: "ThresholdBackward175"
+  type: "ReLU"
+  bottom: "AddBackward1174"
+  top: "AddBackward1174"
+}
+layer {
+  name: "ConvNdBackward176"
+  type: "Convolution"
+  bottom: "AddBackward1174"
+  top: "ConvNdBackward176"
+  convolution_param {
+    num_output: 256
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward178"
+  type: "ReLU"
+  bottom: "ConvNdBackward176"
+  top: "ConvNdBackward176"
+}
+layer {
+  name: "ConvNdBackward179"
+  type: "Convolution"
+  bottom: "ConvNdBackward176"
+  top: "ConvNdBackward179"
+  convolution_param {
+    num_output: 256
+    stride: 1
+    pad_h: 4
+    pad_w: 4
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 4
+  }
+}
+layer {
+  name: "ThresholdBackward181"
+  type: "ReLU"
+  bottom: "ConvNdBackward179"
+  top: "ConvNdBackward179"
+}
+layer {
+  name: "ConvNdBackward182"
+  type: "Convolution"
+  bottom: "ConvNdBackward179"
+  top: "ConvNdBackward182"
+  convolution_param {
+    num_output: 1024
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward1185"
+  type: "Eltwise"
+  bottom: "ConvNdBackward182"
+  bottom: "AddBackward1174"
+  top: "AddBackward1185"
+}
+layer {
+  name: "ThresholdBackward186"
+  type: "ReLU"
+  bottom: "AddBackward1185"
+  top: "AddBackward1185"
+}
+layer {
+  name: "ConvNdBackward187"
+  type: "Convolution"
+  bottom: "AddBackward1185"
+  top: "ConvNdBackward187"
+  convolution_param {
+    num_output: 256
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward189"
+  type: "ReLU"
+  bottom: "ConvNdBackward187"
+  top: "ConvNdBackward187"
+}
+layer {
+  name: "ConvNdBackward190"
+  type: "Convolution"
+  bottom: "ConvNdBackward187"
+  top: "ConvNdBackward190"
+  convolution_param {
+    num_output: 256
+    stride: 1
+    pad_h: 4
+    pad_w: 4
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 4
+  }
+}
+layer {
+  name: "ThresholdBackward192"
+  type: "ReLU"
+  bottom: "ConvNdBackward190"
+  top: "ConvNdBackward190"
+}
+layer {
+  name: "ConvNdBackward193"
+  type: "Convolution"
+  bottom: "ConvNdBackward190"
+  top: "ConvNdBackward193"
+  convolution_param {
+    num_output: 1024
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward1196"
+  type: "Eltwise"
+  bottom: "ConvNdBackward193"
+  bottom: "AddBackward1185"
+  top: "AddBackward1196"
+}
+layer {
+  name: "ThresholdBackward197"
+  type: "ReLU"
+  bottom: "AddBackward1196"
+  top: "AddBackward1196"
+}
+layer {
+  name: "AdaptiveAvgPool2dBackward199"
+  type: "Pooling"
+  bottom: "AddBackward1196"
+  top: "AdaptiveAvgPool2dBackward199"
+  pooling_param {
+    pool: AVE
+    kernel_h: 32
+    kernel_w: 64
+    stride_h: 32
+    stride_w: 64
+  }
+}
+layer {
+  name: "UpsamplingBilinear2dBackward200"
+  type: "Interp"
+  bottom: "AdaptiveAvgPool2dBackward199"
+  top: "UpsamplingBilinear2dBackward200"
+  interp_param {
+    height: 32
+    width: 64
+  }
+}
+layer {
+  name: "AddBackward1201"
+  type: "Eltwise"
+  bottom: "AddBackward1196"
+  bottom: "UpsamplingBilinear2dBackward200"
+  top: "AddBackward1201"
+}
+layer {
+  name: "AdaptiveAvgPool2dBackward203"
+  type: "Pooling"
+  bottom: "AddBackward1196"
+  top: "AdaptiveAvgPool2dBackward203"
+  pooling_param {
+    pool: AVE
+    kernel_h: 16
+    kernel_w: 32
+    stride_h: 16
+    stride_w: 32
+  }
+}
+layer {
+  name: "UpsamplingBilinear2dBackward204"
+  type: "Interp"
+  bottom: "AdaptiveAvgPool2dBackward203"
+  top: "UpsamplingBilinear2dBackward204"
+  interp_param {
+    height: 32
+    width: 64
+  }
+}
+layer {
+  name: "AddBackward1205"
+  type: "Eltwise"
+  bottom: "AddBackward1201"
+  bottom: "UpsamplingBilinear2dBackward204"
+  top: "AddBackward1205"
+}
+layer {
+  name: "AdaptiveAvgPool2dBackward207"
+  type: "Pooling"
+  bottom: "AddBackward1196"
+  top: "AdaptiveAvgPool2dBackward207"
+  pooling_param {
+    pool: AVE
+    kernel_h: 12
+    kernel_w: 22
+    stride_h: 11
+    stride_w: 22
+  }
+}
+layer {
+  name: "UpsamplingBilinear2dBackward208"
+  type: "Interp"
+  bottom: "AdaptiveAvgPool2dBackward207"
+  top: "UpsamplingBilinear2dBackward208"
+  interp_param {
+    height: 32
+    width: 64
+  }
+}
+layer {
+  name: "AddBackward1209"
+  type: "Eltwise"
+  bottom: "AddBackward1205"
+  bottom: "UpsamplingBilinear2dBackward208"
+  top: "AddBackward1209"
+}
+layer {
+  name: "AdaptiveAvgPool2dBackward211"
+  type: "Pooling"
+  bottom: "AddBackward1196"
+  top: "AdaptiveAvgPool2dBackward211"
+  pooling_param {
+    pool: AVE
+    kernel_h: 6
+    kernel_w: 12
+    stride_h: 6
+    stride_w: 11
+  }
+}
+layer {
+  name: "UpsamplingBilinear2dBackward212"
+  type: "Interp"
+  bottom: "AdaptiveAvgPool2dBackward211"
+  top: "UpsamplingBilinear2dBackward212"
+  interp_param {
+    height: 32
+    width: 64
+  }
+}
+layer {
+  name: "AddBackward1213"
+  type: "Eltwise"
+  bottom: "AddBackward1209"
+  bottom: "UpsamplingBilinear2dBackward212"
+  top: "AddBackward1213"
+}
+layer {
+  name: "ConvNdBackward214"
+  type: "Convolution"
+  bottom: "AddBackward1213"
+  top: "ConvNdBackward214"
+  convolution_param {
+    num_output: 256
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward216"
+  type: "ReLU"
+  bottom: "ConvNdBackward214"
+  top: "ConvNdBackward214"
+}
+layer {
+  name: "UpsamplingBilinear2dBackward217"
+  type: "Interp"
+  bottom: "ConvNdBackward214"
+  top: "UpsamplingBilinear2dBackward217"
+  interp_param {
+    zoom_factor: 2
+  }
+}
+layer {
+  name: "ConvNdBackward218"
+  type: "Convolution"
+  bottom: "UpsamplingBilinear2dBackward217"
+  top: "ConvNdBackward218"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 2
+    pad_w: 2
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 2
+  }
+}
+layer {
+  name: "ConvNdBackward221"
+  type: "Convolution"
+  bottom: "AddBackward159"
+  top: "ConvNdBackward221"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward1223"
+  type: "Eltwise"
+  bottom: "ConvNdBackward218"
+  bottom: "ConvNdBackward221"
+  top: "AddBackward1223"
+}
+layer {
+  name: "ThresholdBackward224"
+  type: "ReLU"
+  bottom: "AddBackward1223"
+  top: "AddBackward1223"
+}
+layer {
+  name: "UpsamplingBilinear2dBackward225"
+  type: "Interp"
+  bottom: "AddBackward1223"
+  top: "UpsamplingBilinear2dBackward225"
+  interp_param {
+    zoom_factor: 2
+  }
+}
+layer {
+  name: "ConvNdBackward226"
+  type: "Convolution"
+  bottom: "UpsamplingBilinear2dBackward225"
+  top: "ConvNdBackward226"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 2
+    pad_w: 2
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 2
+  }
+}
+layer {
+  name: "ConvNdBackward229"
+  type: "Convolution"
+  bottom: "ConvNdBackward0"
+  top: "ConvNdBackward229"
+  convolution_param {
+    num_output: 32
+    stride: 2
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward231"
+  type: "ReLU"
+  bottom: "ConvNdBackward229"
+  top: "ConvNdBackward229"
+}
+layer {
+  name: "ConvNdBackward232"
+  type: "Convolution"
+  bottom: "ConvNdBackward229"
+  top: "ConvNdBackward232"
+  convolution_param {
+    num_output: 32
+    stride: 2
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward234"
+  type: "ReLU"
+  bottom: "ConvNdBackward232"
+  top: "ConvNdBackward232"
+}
+layer {
+  name: "ConvNdBackward235"
+  type: "Convolution"
+  bottom: "ConvNdBackward232"
+  top: "ConvNdBackward235"
+  convolution_param {
+    num_output: 64
+    stride: 2
+    pad_h: 1
+    pad_w: 1
+    kernel_h: 3
+    kernel_w: 3
+    dilation: 1
+  }
+}
+layer {
+  name: "ThresholdBackward237"
+  type: "ReLU"
+  bottom: "ConvNdBackward235"
+  top: "ConvNdBackward235"
+}
+layer {
+  name: "ConvNdBackward238"
+  type: "Convolution"
+  bottom: "ConvNdBackward235"
+  top: "ConvNdBackward238"
+  convolution_param {
+    num_output: 128
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "AddBackward1240"
+  type: "Eltwise"
+  bottom: "ConvNdBackward226"
+  bottom: "ConvNdBackward238"
+  top: "AddBackward1240"
+}
+layer {
+  name: "ThresholdBackward241"
+  type: "ReLU"
+  bottom: "AddBackward1240"
+  top: "AddBackward1240"
+}
+layer {
+  name: "UpsamplingBilinear2dBackward242"
+  type: "Interp"
+  bottom: "AddBackward1240"
+  top: "UpsamplingBilinear2dBackward242"
+  interp_param {
+    zoom_factor: 2
+  }
+}
+layer {
+  name: "ConvNdBackward243"
+  type: "Convolution"
+  bottom: "UpsamplingBilinear2dBackward242"
+  top: "ConvNdBackward243"
+  convolution_param {
+    num_output: 20
+    stride: 1
+    pad_h: 0
+    pad_w: 0
+    kernel_h: 1
+    kernel_w: 1
+    dilation: 1
+  }
+}
+layer {
+  name: "LogSoftmaxBackward244"
+  type: "Softmax"
+  bottom: "ConvNdBackward243"
+  top: "LogSoftmaxBackward244"
+}
+layer {
+  name: "UpsamplingBilinear2dBackward245"
+  type: "Interp"
+  bottom: "LogSoftmaxBackward244"
+  top: "UpsamplingBilinear2dBackward245"
+  interp_param {
+    zoom_factor: 4
+  }
+}
+layer {
+  name: "Rectify"
+  type: "Scale"
+  bottom: "UpsamplingBilinear2dBackward245"
+  top: "UpsamplingBilinear2dBackward245"
+  scale_param {
+    bias_term: false
+  }
+}
+layer {
+  name: "argmax"
+  type: "ArgMax"
+  bottom: "UpsamplingBilinear2dBackward245"
+  top: "argmax"
+  argmax_param {
+    axis: 1
+  }
+}
