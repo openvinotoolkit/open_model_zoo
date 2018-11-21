@@ -1,0 +1,3677 @@
+input: "data"
+input_dim: 1
+input_dim: 3
+input_dim: 60
+input_dim: 60
+
+############################ Network ##################################
+
+layer {
+  name: "bn/data"
+  type: "BatchNorm"
+  bottom: "data"
+  batch_norm_param {
+    use_global_stats: true
+    moving_average_fraction: 1.0
+  }
+  param {
+      lr_mult: 0
+  }
+  param {
+      lr_mult: 0
+  }
+  param {
+     lr_mult: 0
+  }
+  
+  top: "data"
+}
+
+layer {
+  name: "Scale1"
+  type: "Scale"
+  bottom: "data"
+  top: "data"
+  param {
+    lr_mult: 0.0
+    decay_mult: 0.0
+  }
+  param {
+    lr_mult: 0.0
+    decay_mult: 0.0
+  }
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  convolution_param {
+    num_output: 16
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 0.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+layer {
+  name: "bn1"
+  type: "BatchNorm"
+  bottom: "conv1"
+  top: "conv1"
+  batch_norm_param {
+    use_global_stats: true
+    moving_average_fraction: 1.0
+  }
+  
+  param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+}
+
+layer {
+  name: "relu_conv1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "relu1"
+}
+
+layer {
+  name: "pool1"
+  type: "Convolution"
+  bottom: "relu1"
+  top: "pool1"
+    convolution_param {
+    num_output: 16
+    kernel_size: 3
+    stride: 2
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 0.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "pool1"
+  top: "conv2"
+  convolution_param {
+    num_output: 32
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 0.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+layer {
+  name: "bn2"
+  type: "BatchNorm"
+  bottom: "conv2"
+  top: "conv2"
+  batch_norm_param {
+    use_global_stats: true
+    moving_average_fraction: 1.0
+  }
+  
+  param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+}
+
+layer {
+  name: "relu_conv2"
+  type: "ReLU"
+  bottom: "conv2"
+  top: "relu2"
+}
+
+
+layer {
+  name: "pool2"
+  type: "Convolution"
+  bottom: "relu2"
+  top: "pool2"
+    convolution_param {
+    num_output: 16
+    kernel_size: 3
+    stride: 2
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 0.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+layer {
+  name: "conv3"
+  type: "Convolution"
+  bottom: "pool2"
+  top: "conv3"
+  convolution_param {
+    num_output: 64
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 0.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+layer {
+  name: "bn3"
+  type: "BatchNorm"
+  bottom: "conv3"
+  top: "conv3"
+  batch_norm_param {
+    use_global_stats: true
+    moving_average_fraction: 1.0
+  }
+  
+  param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+}
+
+layer {
+  name: "relu_conv3"
+  type: "ReLU"
+  bottom: "conv3"
+  top: "relu3"
+}
+
+layer {
+  name: "pool3"
+  type: "Convolution"
+  bottom: "relu3"
+  top: "pool3"
+    convolution_param {
+    num_output: 32
+    kernel_size: 3
+    stride: 2
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 0.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+layer {
+  name: "conv4"
+  type: "Convolution"
+  bottom: "pool3"
+  top: "conv4"
+  convolution_param {
+    num_output: 128
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 0.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+layer {
+  name: "bn4"
+  type: "BatchNorm"
+  bottom: "conv4"
+  top: "conv4"
+  batch_norm_param {
+    use_global_stats: true
+    moving_average_fraction: 1.0
+  }
+  
+  param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+}
+
+layer {
+  name: "relu_conv4"
+  type: "ReLU"
+  bottom: "conv4"
+  top: "relu4"
+}
+
+layer {
+  name: "pool4"
+  type: "Convolution"
+  bottom: "relu4"
+  top: "pool4"
+    convolution_param {
+    num_output: 64
+    kernel_size: 3
+    stride: 2
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 0.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+
+layer {
+  name: "conv5"
+  type: "Convolution"
+  bottom: "pool4"
+  top: "conv5"
+  convolution_param {
+    num_output: 256
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 0.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+layer {
+  name: "bn5"
+  type: "BatchNorm"
+  bottom: "conv5"
+  top: "conv5"
+  batch_norm_param {
+    use_global_stats: true
+    moving_average_fraction: 1.0
+  }
+  
+  param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+}
+
+layer {
+  name: "relu_conv5"
+  type: "ReLU"
+  bottom: "conv5"
+  top: "relu5"
+}
+
+
+layer {
+  name: "conv_fm"
+  type: "Convolution"
+  bottom: "relu5"
+  top: "conv_fm"
+  convolution_param {
+    num_output: 512
+    kernel_size: 3
+    #stride: 2
+    #pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  param {
+    lr_mult: 0.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+######################### landmarks #################################
+
+###################### landmarks ##############################
+
+###### leye_corner ######
+layer {
+  name: "landmarks_conv_leye_corner"
+  type: "Convolution"
+  bottom: "conv_fm"
+  top: "landmarks_conv_leye_corner"
+  param {
+    lr_mult: 0.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 0.0
+    decay_mult: 0.0
+  }
+  convolution_param {
+    num_output: 256
+    kernel_size: 1
+    weight_filler {
+      type: "xavier"
+      std: 0.3
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.0
+    }
+  }
+}
+
+layer {
+  name: "bn/landmarks_conv_leye_corner"
+  type: "BatchNorm"
+  bottom: "landmarks_conv_leye_corner"
+  top: "landmarks_conv_leye_corner"
+  batch_norm_param {
+    use_global_stats: true
+    moving_average_fraction: 1.0
+  }
+  
+  param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+}
+
+
+
+layer {
+  name: "relu_leye_corner"
+  type: "ReLU"
+  bottom: "landmarks_conv_leye_corner"
+  top: "landmarks_conv_leye_corner"
+}
+
+layer {
+  name: "drop/conv_leye_corner"
+  type: "Dropout"
+  bottom: "landmarks_conv_leye_corner"
+  top: "landmarks_conv_leye_corner"
+  dropout_param {
+    dropout_ratio: 0.1
+  }
+}
+
+
+
+#### heads ####
+
+
+### leye_corner ###
+layer {
+  name: "landmarks_fc_leye_corner_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_leye_corner"
+  top: "landmarks_fc_leye_corner_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_leye_corner_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_leye_corner"
+  top: "landmarks_fc_leye_corner_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### leye ###
+layer {
+  name: "landmarks_fc_leye_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_leye_corner"
+  top: "landmarks_fc_leye_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_leye_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_leye_corner"
+  top: "landmarks_fc_leye_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+###### reye ######
+layer {
+  name: "landmarks_conv_reye"
+  type: "Convolution"
+  bottom: "conv_fm"
+  top: "landmarks_conv_reye"
+  param {
+    lr_mult: 0.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 0.0
+    decay_mult: 0.0
+  }
+  convolution_param {
+    num_output: 256
+    kernel_size: 1
+    weight_filler {
+      type: "xavier"
+      std: 0.3
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.0
+    }
+  }
+}
+
+layer {
+  name: "bn/landmarks_conv_reye"
+  type: "BatchNorm"
+  bottom: "landmarks_conv_reye"
+  top: "landmarks_conv_reye"
+  batch_norm_param {
+    use_global_stats: true
+    moving_average_fraction: 1.0
+  }
+  
+  param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+}
+
+
+
+layer {
+  name: "relu_reye"
+  type: "ReLU"
+  bottom: "landmarks_conv_reye"
+  top: "landmarks_conv_reye"
+}
+
+layer {
+  name: "drop/conv_reye"
+  type: "Dropout"
+  bottom: "landmarks_conv_reye"
+  top: "landmarks_conv_reye"
+  dropout_param {
+    dropout_ratio: 0.1
+  }
+}
+
+
+
+#### heads ####
+
+
+### reye ###
+layer {
+  name: "landmarks_fc_reye_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_reye"
+  top: "landmarks_fc_reye_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_reye_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_reye"
+  top: "landmarks_fc_reye_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### reye_corner ###
+layer {
+  name: "landmarks_fc_reye_corner_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_reye"
+  top: "landmarks_fc_reye_corner_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_reye_corner_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_reye"
+  top: "landmarks_fc_reye_corner_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+###### lnose ######
+layer {
+  name: "landmarks_conv_lnose"
+  type: "Convolution"
+  bottom: "conv_fm"
+  top: "landmarks_conv_lnose"
+  param {
+    lr_mult: 0.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 0.0
+    decay_mult: 0.0
+  }
+  convolution_param {
+    num_output: 256
+    kernel_size: 1
+    weight_filler {
+      type: "xavier"
+      std: 0.3
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.0
+    }
+  }
+}
+
+layer {
+  name: "bn/landmarks_conv_lnose"
+  type: "BatchNorm"
+  bottom: "landmarks_conv_lnose"
+  top: "landmarks_conv_lnose"
+  batch_norm_param {
+    use_global_stats: true
+    moving_average_fraction: 1.0
+  }
+  
+  param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+}
+
+
+
+layer {
+  name: "relu_lnose"
+  type: "ReLU"
+  bottom: "landmarks_conv_lnose"
+  top: "landmarks_conv_lnose"
+}
+
+layer {
+  name: "drop/conv_lnose"
+  type: "Dropout"
+  bottom: "landmarks_conv_lnose"
+  top: "landmarks_conv_lnose"
+  dropout_param {
+    dropout_ratio: 0.1
+  }
+}
+
+
+
+#### heads ####
+
+
+### lnose ###
+layer {
+  name: "landmarks_fc_lnose_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_lnose"
+  top: "landmarks_fc_lnose_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_lnose_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_lnose"
+  top: "landmarks_fc_lnose_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### nose_bottom ###
+layer {
+  name: "landmarks_fc_nose_bottom_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_lnose"
+  top: "landmarks_fc_nose_bottom_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_nose_bottom_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_lnose"
+  top: "landmarks_fc_nose_bottom_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### rnose ###
+layer {
+  name: "landmarks_fc_rnose_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_lnose"
+  top: "landmarks_fc_rnose_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_rnose_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_lnose"
+  top: "landmarks_fc_rnose_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### nose_tip ###
+layer {
+  name: "landmarks_fc_nose_tip_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_lnose"
+  top: "landmarks_fc_nose_tip_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_nose_tip_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_lnose"
+  top: "landmarks_fc_nose_tip_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+###### rmouth_corner ######
+layer {
+  name: "landmarks_conv_rmouth_corner"
+  type: "Convolution"
+  bottom: "conv_fm"
+  top: "landmarks_conv_rmouth_corner"
+  param {
+    lr_mult: 0.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 0.0
+    decay_mult: 0.0
+  }
+  convolution_param {
+    num_output: 256
+    kernel_size: 1
+    weight_filler {
+      type: "xavier"
+      std: 0.3
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.0
+    }
+  }
+}
+
+layer {
+  name: "bn/landmarks_conv_rmouth_corner"
+  type: "BatchNorm"
+  bottom: "landmarks_conv_rmouth_corner"
+  top: "landmarks_conv_rmouth_corner"
+  batch_norm_param {
+    use_global_stats: true
+    moving_average_fraction: 1.0
+  }
+  
+  param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+}
+
+
+
+layer {
+  name: "relu_rmouth_corner"
+  type: "ReLU"
+  bottom: "landmarks_conv_rmouth_corner"
+  top: "landmarks_conv_rmouth_corner"
+}
+
+layer {
+  name: "drop/conv_rmouth_corner"
+  type: "Dropout"
+  bottom: "landmarks_conv_rmouth_corner"
+  top: "landmarks_conv_rmouth_corner"
+  dropout_param {
+    dropout_ratio: 0.1
+  }
+}
+
+
+
+#### heads ####
+
+
+### rmouth_corner ###
+layer {
+  name: "landmarks_fc_rmouth_corner_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_rmouth_corner"
+  top: "landmarks_fc_rmouth_corner_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_rmouth_corner_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_rmouth_corner"
+  top: "landmarks_fc_rmouth_corner_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### top_mouth_center ###
+layer {
+  name: "landmarks_fc_top_mouth_center_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_rmouth_corner"
+  top: "landmarks_fc_top_mouth_center_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_top_mouth_center_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_rmouth_corner"
+  top: "landmarks_fc_top_mouth_center_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### bottom_mouth_center ###
+layer {
+  name: "landmarks_fc_bottom_mouth_center_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_rmouth_corner"
+  top: "landmarks_fc_bottom_mouth_center_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_bottom_mouth_center_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_rmouth_corner"
+  top: "landmarks_fc_bottom_mouth_center_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### lmouth_corner ###
+layer {
+  name: "landmarks_fc_lmouth_corner_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_rmouth_corner"
+  top: "landmarks_fc_lmouth_corner_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_lmouth_corner_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_rmouth_corner"
+  top: "landmarks_fc_lmouth_corner_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+###### leyebrow_right ######
+layer {
+  name: "landmarks_conv_leyebrow_right"
+  type: "Convolution"
+  bottom: "conv_fm"
+  top: "landmarks_conv_leyebrow_right"
+  param {
+    lr_mult: 0.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 0.0
+    decay_mult: 0.0
+  }
+  convolution_param {
+    num_output: 256
+    kernel_size: 1
+    weight_filler {
+      type: "xavier"
+      std: 0.3
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.0
+    }
+  }
+}
+
+layer {
+  name: "bn/landmarks_conv_leyebrow_right"
+  type: "BatchNorm"
+  bottom: "landmarks_conv_leyebrow_right"
+  top: "landmarks_conv_leyebrow_right"
+  batch_norm_param {
+    use_global_stats: true
+    moving_average_fraction: 1.0
+  }
+  
+  param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+}
+
+
+
+layer {
+  name: "relu_leyebrow_right"
+  type: "ReLU"
+  bottom: "landmarks_conv_leyebrow_right"
+  top: "landmarks_conv_leyebrow_right"
+}
+
+layer {
+  name: "drop/conv_leyebrow_right"
+  type: "Dropout"
+  bottom: "landmarks_conv_leyebrow_right"
+  top: "landmarks_conv_leyebrow_right"
+  dropout_param {
+    dropout_ratio: 0.1
+  }
+}
+
+
+
+#### heads ####
+
+
+### leyebrow_right ###
+layer {
+  name: "landmarks_fc_leyebrow_right_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_leyebrow_right"
+  top: "landmarks_fc_leyebrow_right_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_leyebrow_right_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_leyebrow_right"
+  top: "landmarks_fc_leyebrow_right_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### leyebrow_center ###
+layer {
+  name: "landmarks_fc_leyebrow_center_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_leyebrow_right"
+  top: "landmarks_fc_leyebrow_center_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_leyebrow_center_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_leyebrow_right"
+  top: "landmarks_fc_leyebrow_center_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### leyebrow_left ###
+layer {
+  name: "landmarks_fc_leyebrow_left_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_leyebrow_right"
+  top: "landmarks_fc_leyebrow_left_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_leyebrow_left_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_leyebrow_right"
+  top: "landmarks_fc_leyebrow_left_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+###### reyebrow_center ######
+layer {
+  name: "landmarks_conv_reyebrow_center"
+  type: "Convolution"
+  bottom: "conv_fm"
+  top: "landmarks_conv_reyebrow_center"
+  param {
+    lr_mult: 0.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 0.0
+    decay_mult: 0.0
+  }
+  convolution_param {
+    num_output: 256
+    kernel_size: 1
+    weight_filler {
+      type: "xavier"
+      std: 0.3
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.0
+    }
+  }
+}
+
+layer {
+  name: "bn/landmarks_conv_reyebrow_center"
+  type: "BatchNorm"
+  bottom: "landmarks_conv_reyebrow_center"
+  top: "landmarks_conv_reyebrow_center"
+  batch_norm_param {
+    use_global_stats: true
+    moving_average_fraction: 1.0
+  }
+  
+  param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+}
+
+
+
+layer {
+  name: "relu_reyebrow_center"
+  type: "ReLU"
+  bottom: "landmarks_conv_reyebrow_center"
+  top: "landmarks_conv_reyebrow_center"
+}
+
+layer {
+  name: "drop/conv_reyebrow_center"
+  type: "Dropout"
+  bottom: "landmarks_conv_reyebrow_center"
+  top: "landmarks_conv_reyebrow_center"
+  dropout_param {
+    dropout_ratio: 0.1
+  }
+}
+
+
+
+#### heads ####
+
+
+### reyebrow_center ###
+layer {
+  name: "landmarks_fc_reyebrow_center_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_reyebrow_center"
+  top: "landmarks_fc_reyebrow_center_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_reyebrow_center_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_reyebrow_center"
+  top: "landmarks_fc_reyebrow_center_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### reyebrow_left ###
+layer {
+  name: "landmarks_fc_reyebrow_left_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_reyebrow_center"
+  top: "landmarks_fc_reyebrow_left_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_reyebrow_left_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_reyebrow_center"
+  top: "landmarks_fc_reyebrow_left_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### reyebrow_right ###
+layer {
+  name: "landmarks_fc_reyebrow_right_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_reyebrow_center"
+  top: "landmarks_fc_reyebrow_right_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_reyebrow_right_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_reyebrow_center"
+  top: "landmarks_fc_reyebrow_right_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+###### edge_61 ######
+layer {
+  name: "landmarks_conv_edge_61"
+  type: "Convolution"
+  bottom: "conv_fm"
+  top: "landmarks_conv_edge_61"
+  param {
+    lr_mult: 0.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 0.0
+    decay_mult: 0.0
+  }
+  convolution_param {
+    num_output: 256
+    kernel_size: 1
+    weight_filler {
+      type: "xavier"
+      std: 0.3
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.0
+    }
+  }
+}
+
+layer {
+  name: "bn/landmarks_conv_edge_61"
+  type: "BatchNorm"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_conv_edge_61"
+  batch_norm_param {
+    use_global_stats: true
+  }
+  param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+    param {
+      lr_mult: 0
+    }
+}
+
+
+
+layer {
+  name: "relu_edge_61"
+  type: "ReLU"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_conv_edge_61"
+}
+
+layer {
+  name: "drop/conv_edge_61"
+  type: "Dropout"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_conv_edge_61"
+  dropout_param {
+    dropout_ratio: 0.1
+  }
+}
+
+
+
+#### heads ####
+
+
+### edge_61 ###
+layer {
+  name: "landmarks_fc_edge_61_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_61_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_61_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_61_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_56 ###
+layer {
+  name: "landmarks_fc_edge_56_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_56_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_56_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_56_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_64 ###
+layer {
+  name: "landmarks_fc_edge_64_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_64_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_64_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_64_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_59 ###
+layer {
+  name: "landmarks_fc_edge_59_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_59_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_59_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_59_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_58 ###
+layer {
+  name: "landmarks_fc_edge_58_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_58_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_58_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_58_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_66 ###
+layer {
+  name: "landmarks_fc_edge_66_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_66_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_66_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_66_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_65 ###
+layer {
+  name: "landmarks_fc_edge_65_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_65_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_65_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_65_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_69 ###
+layer {
+  name: "landmarks_fc_edge_69_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_69_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_69_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_69_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_57 ###
+layer {
+  name: "landmarks_fc_edge_57_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_57_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_57_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_57_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_63 ###
+layer {
+  name: "landmarks_fc_edge_63_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_63_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_63_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_63_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_55 ###
+layer {
+  name: "landmarks_fc_edge_55_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_55_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_55_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_55_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_67 ###
+layer {
+  name: "landmarks_fc_edge_67_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_67_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_67_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_67_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_54 ###
+layer {
+  name: "landmarks_fc_edge_54_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_54_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_54_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_54_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_62 ###
+layer {
+  name: "landmarks_fc_edge_62_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_62_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_62_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_62_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_68 ###
+layer {
+  name: "landmarks_fc_edge_68_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_68_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_68_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_68_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_60 ###
+layer {
+  name: "landmarks_fc_edge_60_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_60_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_60_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_60_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+### edge_53 ###
+layer {
+  name: "landmarks_fc_edge_53_x"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_53_x"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "landmarks_fc_edge_53_y"
+  type: "InnerProduct"
+  bottom: "landmarks_conv_edge_61"
+  top: "landmarks_fc_edge_53_y"
+
+  param {
+    lr_mult: 0
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 60
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+
+###################### loss/accuracy ##############################
+
+### leye_corner ###
+layer {
+  name: "softmax_landmarks_leye_corner_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_leye_corner_x"
+  top: "softmax_landmarks_leye_corner_x"
+}
+layer {
+  name: "softmax_landmarks_leye_corner_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_leye_corner_y"
+  top: "softmax_landmarks_leye_corner_y"
+}
+
+### leye ###
+layer {
+  name: "softmax_landmarks_leye_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_leye_x"
+  top: "softmax_landmarks_leye_x"
+}
+layer {
+  name: "softmax_landmarks_leye_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_leye_y"
+  top: "softmax_landmarks_leye_y"
+}
+
+### reye ###
+layer {
+  name: "softmax_landmarks_reye_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_reye_x"
+  top: "softmax_landmarks_reye_x"
+}
+layer {
+  name: "softmax_landmarks_reye_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_reye_y"
+  top: "softmax_landmarks_reye_y"
+}
+
+### reye_corner ###
+layer {
+  name: "softmax_landmarks_reye_corner_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_reye_corner_x"
+  top: "softmax_landmarks_reye_corner_x"
+}
+layer {
+  name: "softmax_landmarks_reye_corner_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_reye_corner_y"
+  top: "softmax_landmarks_reye_corner_y"
+}
+
+### nose_bottom ###
+layer {
+  name: "softmax_landmarks_nose_bottom_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_nose_bottom_x"
+  top: "softmax_landmarks_nose_bottom_x"
+}
+layer {
+  name: "softmax_landmarks_nose_bottom_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_nose_bottom_y"
+  top: "softmax_landmarks_nose_bottom_y"
+}
+
+### nose_tip ###
+layer {
+  name: "softmax_landmarks_nose_tip_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_nose_tip_x"
+  top: "softmax_landmarks_nose_tip_x"
+}
+layer {
+  name: "softmax_landmarks_nose_tip_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_nose_tip_y"
+  top: "softmax_landmarks_nose_tip_y"
+}
+
+### lnose ###
+layer {
+  name: "softmax_landmarks_lnose_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_lnose_x"
+  top: "softmax_landmarks_lnose_x"
+}
+layer {
+  name: "softmax_landmarks_lnose_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_lnose_y"
+  top: "softmax_landmarks_lnose_y"
+}
+
+### rnose ###
+layer {
+  name: "softmax_landmarks_rnose_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_rnose_x"
+  top: "softmax_landmarks_rnose_x"
+}
+layer {
+  name: "softmax_landmarks_rnose_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_rnose_y"
+  top: "softmax_landmarks_rnose_y"
+}
+
+### rmouth_corner ###
+layer {
+  name: "softmax_landmarks_rmouth_corner_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_rmouth_corner_x"
+  top: "softmax_landmarks_rmouth_corner_x"
+}
+layer {
+  name: "softmax_landmarks_rmouth_corner_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_rmouth_corner_y"
+  top: "softmax_landmarks_rmouth_corner_y"
+}
+
+### top_mouth_center ###
+layer {
+  name: "softmax_landmarks_top_mouth_center_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_top_mouth_center_x"
+  top: "softmax_landmarks_top_mouth_center_x"
+}
+layer {
+  name: "softmax_landmarks_top_mouth_center_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_top_mouth_center_y"
+  top: "softmax_landmarks_top_mouth_center_y"
+}
+
+### lmouth_corner ###
+layer {
+  name: "softmax_landmarks_lmouth_corner_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_lmouth_corner_x"
+  top: "softmax_landmarks_lmouth_corner_x"
+}
+layer {
+  name: "softmax_landmarks_lmouth_corner_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_lmouth_corner_y"
+  top: "softmax_landmarks_lmouth_corner_y"
+}
+
+### bottom_mouth_center ###
+layer {
+  name: "softmax_landmarks_bottom_mouth_center_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_bottom_mouth_center_x"
+  top: "softmax_landmarks_bottom_mouth_center_x"
+}
+layer {
+  name: "softmax_landmarks_bottom_mouth_center_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_bottom_mouth_center_y"
+  top: "softmax_landmarks_bottom_mouth_center_y"
+}
+
+### leyebrow_right ###
+layer {
+  name: "softmax_landmarks_leyebrow_right_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_leyebrow_right_x"
+  top: "softmax_landmarks_leyebrow_right_x"
+}
+layer {
+  name: "softmax_landmarks_leyebrow_right_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_leyebrow_right_y"
+  top: "softmax_landmarks_leyebrow_right_y"
+}
+
+### leyebrow_center ###
+layer {
+  name: "softmax_landmarks_leyebrow_center_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_leyebrow_center_x"
+  top: "softmax_landmarks_leyebrow_center_x"
+}
+layer {
+  name: "softmax_landmarks_leyebrow_center_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_leyebrow_center_y"
+  top: "softmax_landmarks_leyebrow_center_y"
+}
+
+### leyebrow_left ###
+layer {
+  name: "softmax_landmarks_leyebrow_left_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_leyebrow_left_x"
+  top: "softmax_landmarks_leyebrow_left_x"
+}
+layer {
+  name: "softmax_landmarks_leyebrow_left_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_leyebrow_left_y"
+  top: "softmax_landmarks_leyebrow_left_y"
+}
+
+### reyebrow_left ###
+layer {
+  name: "softmax_landmarks_reyebrow_left_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_reyebrow_left_x"
+  top: "softmax_landmarks_reyebrow_left_x"
+}
+layer {
+  name: "softmax_landmarks_reyebrow_left_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_reyebrow_left_y"
+  top: "softmax_landmarks_reyebrow_left_y"
+}
+
+### reyebrow_right ###
+layer {
+  name: "softmax_landmarks_reyebrow_right_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_reyebrow_right_x"
+  top: "softmax_landmarks_reyebrow_right_x"
+}
+layer {
+  name: "softmax_landmarks_reyebrow_right_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_reyebrow_right_y"
+  top: "softmax_landmarks_reyebrow_right_y"
+}
+
+### reyebrow_center ###
+layer {
+  name: "softmax_landmarks_reyebrow_center_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_reyebrow_center_x"
+  top: "softmax_landmarks_reyebrow_center_x"
+}
+layer {
+  name: "softmax_landmarks_reyebrow_center_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_reyebrow_center_y"
+  top: "softmax_landmarks_reyebrow_center_y"
+}
+
+### edge_62 ###
+layer {
+  name: "softmax_landmarks_edge_62_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_62_x"
+  top: "softmax_landmarks_edge_62_x"
+}
+layer {
+  name: "softmax_landmarks_edge_62_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_62_y"
+  top: "softmax_landmarks_edge_62_y"
+}
+
+### edge_69 ###
+layer {
+  name: "softmax_landmarks_edge_69_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_69_x"
+  top: "softmax_landmarks_edge_69_x"
+}
+layer {
+  name: "softmax_landmarks_edge_69_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_69_y"
+  top: "softmax_landmarks_edge_69_y"
+}
+
+### edge_55 ###
+layer {
+  name: "softmax_landmarks_edge_55_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_55_x"
+  top: "softmax_landmarks_edge_55_x"
+}
+layer {
+  name: "softmax_landmarks_edge_55_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_55_y"
+  top: "softmax_landmarks_edge_55_y"
+}
+
+### edge_64 ###
+layer {
+  name: "softmax_landmarks_edge_64_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_64_x"
+  top: "softmax_landmarks_edge_64_x"
+}
+layer {
+  name: "softmax_landmarks_edge_64_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_64_y"
+  top: "softmax_landmarks_edge_64_y"
+}
+
+### edge_63 ###
+layer {
+  name: "softmax_landmarks_edge_63_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_63_x"
+  top: "softmax_landmarks_edge_63_x"
+}
+layer {
+  name: "softmax_landmarks_edge_63_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_63_y"
+  top: "softmax_landmarks_edge_63_y"
+}
+
+### edge_58 ###
+layer {
+  name: "softmax_landmarks_edge_58_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_58_x"
+  top: "softmax_landmarks_edge_58_x"
+}
+layer {
+  name: "softmax_landmarks_edge_58_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_58_y"
+  top: "softmax_landmarks_edge_58_y"
+}
+
+### edge_60 ###
+layer {
+  name: "softmax_landmarks_edge_60_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_60_x"
+  top: "softmax_landmarks_edge_60_x"
+}
+layer {
+  name: "softmax_landmarks_edge_60_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_60_y"
+  top: "softmax_landmarks_edge_60_y"
+}
+
+### edge_67 ###
+layer {
+  name: "softmax_landmarks_edge_67_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_67_x"
+  top: "softmax_landmarks_edge_67_x"
+}
+layer {
+  name: "softmax_landmarks_edge_67_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_67_y"
+  top: "softmax_landmarks_edge_67_y"
+}
+
+### edge_59 ###
+layer {
+  name: "softmax_landmarks_edge_59_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_59_x"
+  top: "softmax_landmarks_edge_59_x"
+}
+layer {
+  name: "softmax_landmarks_edge_59_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_59_y"
+  top: "softmax_landmarks_edge_59_y"
+}
+
+### edge_61 ###
+layer {
+  name: "softmax_landmarks_edge_61_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_61_x"
+  top: "softmax_landmarks_edge_61_x"
+}
+layer {
+  name: "softmax_landmarks_edge_61_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_61_y"
+  top: "softmax_landmarks_edge_61_y"
+}
+
+### edge_53 ###
+layer {
+  name: "softmax_landmarks_edge_53_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_53_x"
+  top: "softmax_landmarks_edge_53_x"
+}
+layer {
+  name: "softmax_landmarks_edge_53_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_53_y"
+  top: "softmax_landmarks_edge_53_y"
+}
+
+### edge_54 ###
+layer {
+  name: "softmax_landmarks_edge_54_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_54_x"
+  top: "softmax_landmarks_edge_54_x"
+}
+layer {
+  name: "softmax_landmarks_edge_54_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_54_y"
+  top: "softmax_landmarks_edge_54_y"
+}
+
+### edge_68 ###
+layer {
+  name: "softmax_landmarks_edge_68_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_68_x"
+  top: "softmax_landmarks_edge_68_x"
+}
+layer {
+  name: "softmax_landmarks_edge_68_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_68_y"
+  top: "softmax_landmarks_edge_68_y"
+}
+
+### edge_56 ###
+layer {
+  name: "softmax_landmarks_edge_56_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_56_x"
+  top: "softmax_landmarks_edge_56_x"
+}
+layer {
+  name: "softmax_landmarks_edge_56_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_56_y"
+  top: "softmax_landmarks_edge_56_y"
+}
+
+### edge_66 ###
+layer {
+  name: "softmax_landmarks_edge_66_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_66_x"
+  top: "softmax_landmarks_edge_66_x"
+}
+layer {
+  name: "softmax_landmarks_edge_66_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_66_y"
+  top: "softmax_landmarks_edge_66_y"
+}
+
+### edge_57 ###
+layer {
+  name: "softmax_landmarks_edge_57_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_57_x"
+  top: "softmax_landmarks_edge_57_x"
+}
+layer {
+  name: "softmax_landmarks_edge_57_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_57_y"
+  top: "softmax_landmarks_edge_57_y"
+}
+
+### edge_65 ###
+layer {
+  name: "softmax_landmarks_edge_65_x"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_65_x"
+  top: "softmax_landmarks_edge_65_x"
+}
+layer {
+  name: "softmax_landmarks_edge_65_y"
+  type: "Softmax"
+  bottom: "landmarks_fc_edge_65_y"
+  top: "softmax_landmarks_edge_65_y"
+}
+
+
+layer {
+  name: "raw_predicts"
+  type: "Concat"
+  
+  bottom: "softmax_landmarks_leye_corner_x"
+  bottom: "softmax_landmarks_leye_corner_y"
+  bottom: "softmax_landmarks_leye_x"
+  bottom: "softmax_landmarks_leye_y"
+  bottom: "softmax_landmarks_reye_x"
+  bottom: "softmax_landmarks_reye_y"
+  bottom: "softmax_landmarks_reye_corner_x"
+  bottom: "softmax_landmarks_reye_corner_y"
+  bottom: "softmax_landmarks_nose_bottom_x"
+  bottom: "softmax_landmarks_nose_bottom_y"
+  bottom: "softmax_landmarks_nose_tip_x"
+  bottom: "softmax_landmarks_nose_tip_y"
+  bottom: "softmax_landmarks_lnose_x"
+  bottom: "softmax_landmarks_lnose_y"
+  bottom: "softmax_landmarks_rnose_x"
+  bottom: "softmax_landmarks_rnose_y"
+  bottom: "softmax_landmarks_rmouth_corner_x"
+  bottom: "softmax_landmarks_rmouth_corner_y"
+  bottom: "softmax_landmarks_top_mouth_center_x"
+  bottom: "softmax_landmarks_top_mouth_center_y"
+  bottom: "softmax_landmarks_lmouth_corner_x"
+  bottom: "softmax_landmarks_lmouth_corner_y"
+  bottom: "softmax_landmarks_bottom_mouth_center_x"
+  bottom: "softmax_landmarks_bottom_mouth_center_y"
+  bottom: "softmax_landmarks_leyebrow_right_x"
+  bottom: "softmax_landmarks_leyebrow_right_y"
+  bottom: "softmax_landmarks_leyebrow_center_x"
+  bottom: "softmax_landmarks_leyebrow_center_y"
+  bottom: "softmax_landmarks_leyebrow_left_x"
+  bottom: "softmax_landmarks_leyebrow_left_y"
+  bottom: "softmax_landmarks_reyebrow_left_x"
+  bottom: "softmax_landmarks_reyebrow_left_y"
+  bottom: "softmax_landmarks_reyebrow_right_x"
+  bottom: "softmax_landmarks_reyebrow_right_y"
+  bottom: "softmax_landmarks_reyebrow_center_x"
+  bottom: "softmax_landmarks_reyebrow_center_y"
+  bottom: "softmax_landmarks_edge_62_x"
+  bottom: "softmax_landmarks_edge_62_y"
+  bottom: "softmax_landmarks_edge_69_x"
+  bottom: "softmax_landmarks_edge_69_y"
+  bottom: "softmax_landmarks_edge_55_x"
+  bottom: "softmax_landmarks_edge_55_y"
+  bottom: "softmax_landmarks_edge_64_x"
+  bottom: "softmax_landmarks_edge_64_y"
+  bottom: "softmax_landmarks_edge_63_x"
+  bottom: "softmax_landmarks_edge_63_y"
+  bottom: "softmax_landmarks_edge_58_x"
+  bottom: "softmax_landmarks_edge_58_y"
+  bottom: "softmax_landmarks_edge_60_x"
+  bottom: "softmax_landmarks_edge_60_y"
+  bottom: "softmax_landmarks_edge_67_x"
+  bottom: "softmax_landmarks_edge_67_y"
+  bottom: "softmax_landmarks_edge_59_x"
+  bottom: "softmax_landmarks_edge_59_y"
+  bottom: "softmax_landmarks_edge_61_x"
+  bottom: "softmax_landmarks_edge_61_y"
+  bottom: "softmax_landmarks_edge_53_x"
+  bottom: "softmax_landmarks_edge_53_y"
+  bottom: "softmax_landmarks_edge_54_x"
+  bottom: "softmax_landmarks_edge_54_y"
+  bottom: "softmax_landmarks_edge_68_x"
+  bottom: "softmax_landmarks_edge_68_y"
+  bottom: "softmax_landmarks_edge_56_x"
+  bottom: "softmax_landmarks_edge_56_y"
+  bottom: "softmax_landmarks_edge_66_x"
+  bottom: "softmax_landmarks_edge_66_y"
+  bottom: "softmax_landmarks_edge_57_x"
+  bottom: "softmax_landmarks_edge_57_y"
+  bottom: "softmax_landmarks_edge_65_x"
+  bottom: "softmax_landmarks_edge_65_y"
+  
+  
+  top: "raw_predicts"
+}
+
+layer {
+  name: "drop/raw_predicts"
+  type: "Dropout"
+  bottom: "raw_predicts"
+  top: "raw_predicts"
+  dropout_param {
+    dropout_ratio: 0.3
+  }
+}
+
+
+layer {
+  name: "align_fc1"
+  type: "InnerProduct"
+  bottom: "raw_predicts"
+  top: "align_fc1"
+
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 256
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "relu_align1"
+  type: "ReLU"
+  bottom: "align_fc1"
+  top: "align_fc1"
+}
+
+layer {
+  name: "bn/align_fc1"
+  type: "BatchNorm"
+  bottom: "align_fc1"
+  top: "bn/align_fc1"
+}
+
+layer {
+  name: "align_fc2"
+  type: "InnerProduct"
+  bottom: "bn/align_fc1"
+  top: "align_fc2"
+
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 128
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+layer {
+  name: "relu_align2"
+  type: "ReLU"
+  bottom: "align_fc2"
+  top: "align_fc2"
+}
+
+layer {
+  name: "bn/align_fc2"
+  type: "BatchNorm"
+  bottom: "align_fc2"
+  top: "bn/align_fc2"
+}
+
+layer {
+  name: "align_fc3"
+  type: "InnerProduct"
+  bottom: "bn/align_fc2"
+  top: "align_fc3"
+
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+
+  inner_product_param {
+    num_output: 70
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+

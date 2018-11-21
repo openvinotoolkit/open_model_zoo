@@ -12,15 +12,20 @@ This is a person reidentification model for a general scenario. It uses a whole 
 
 | Metric                            | Value                                     |
 |-----------------------------------|-------------------------------------------|
-| Pairwise accuracy                 | 92.11%                                    |
+| Market-1501 rank@1 accuracy       | 77.91                                     |
+| Market-1501 mAP                   | 61.80                                     |
 | Pose coverage                     | Standing upright, parallel to image plane |
 | Support of occluded pedestrians   | YES                                       |
 | Occlusion coverage                | <50%                                      |
-| GFlops                            | 0.03                                      |
-| MParams                           | 0.28                                      |
+| GFlops                            | 0.028                                     |
+| MParams                           | 0.280                                     |
 | Source framework                  | Caffe*                                    |
 
-Pairwise accuracy is defined as the [accuracy](https://en.wikipedia.org/wiki/Precision_and_recall) of the binary classification problem, where a positive class means that a pair of images represents the same person. Validation dataset consists of 10,000 image pairs of about 1500 persons.
+The cumulative matching curve (CMC) at rank-1 is accuracy denoting the possibility to locate at least one true positive in the top-1 rank.
+Mean Average Precision (mAP) is the mean across all queries’ Average Precision (AP) and AP is defined as an area under the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall) curve.
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 
@@ -39,3 +44,4 @@ Pairwise accuracy is defined as the [accuracy](https://en.wikipedia.org/wiki/Pre
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
+

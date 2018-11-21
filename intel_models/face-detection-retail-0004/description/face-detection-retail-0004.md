@@ -16,14 +16,17 @@ head from 1/16 scale feature map has nine clustered prior boxes.
 | Metric                                                        | Value                   |
 |---------------------------------------------------------------|-------------------------|
 | AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 83.00%                  |
-| GFlops                                                        | 1.1                     |
-| MParams                                                       | 0.6                     |
+| GFlops                                                        | 1.067                   |
+| MParams                                                       | 0.588                   |
 | Source framework                                              | Caffe*                  |
 
 Average Precision (AP) is defined as an area under the
 [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 curve. All numbers were evaluated by taking into account only faces bigger than
 60 x 60 pixels.
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

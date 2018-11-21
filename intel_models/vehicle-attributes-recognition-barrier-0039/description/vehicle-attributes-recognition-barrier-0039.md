@@ -17,13 +17,16 @@ This model presents a vehicle attributes classification algorithm for a traffic 
 | Min object width      | 72 pixels                                    |
 | Supported colors      | White, gray, yellow, red, green, blue, black |
 | Supported types       | Car, bus, truck, van                         |
-| GFlops                | 0.13                                         |
-| MParams               | 0.6                                          |
+| GFlops                | 0.126                                        |
+| MParams               | 0.626                                        |
 | Source framework      | Caffe*                                       |
 
 ## Accuracy - Confusion Matrix
 
 ![](./vehicle-attributes-recognition-barrier-0039-2.png)
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

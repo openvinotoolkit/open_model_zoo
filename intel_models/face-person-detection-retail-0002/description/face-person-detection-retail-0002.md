@@ -20,13 +20,16 @@ and 1/16 (for person detection) scale feature maps has 9 clustered prior boxes.
 | Pose coverage                   | Standing upright, parallel to image plane |
 | Support of occluded persons     | YES                                       |
 | Occlusion coverage              | <50%                                      |
-| GFlops                          | 2.8                                       |
-| MParams                         | 0.8                                       |
+| GFlops                          | 2.757                                     |
+| MParams                         | 0.791                                     |
 | Source framework                | Caffe*                                    |
 
 Average Precision (AP) is defined as an area under
 the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 curve.
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

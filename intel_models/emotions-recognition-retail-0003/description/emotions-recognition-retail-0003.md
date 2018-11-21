@@ -24,8 +24,8 @@ only the images containing five aforementioned emotions is chosen. The total amo
 | Rotation in-plane     | ±15˚                    |
 | Rotation out-of-plane | Yaw: ±15˚ / Pitch: ±15˚ |
 | Min object width      | 64 pixels               |
-| GFlops                | 0.13                    |
-| MParams               | 2.5                     |
+| GFlops                | 0.126                   |
+| MParams               | 2.483                   |
 | Source framework      | Caffe                   |
 
 ## Accuracy
@@ -33,6 +33,9 @@ only the images containing five aforementioned emotions is chosen. The total amo
 | Metric          | Value      |
 |-----------------|------------|
 | Accuracy        |     70.20% |
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

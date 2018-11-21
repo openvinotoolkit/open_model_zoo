@@ -25,16 +25,19 @@ applicable for children since their faces were not in the training set.
 | Rotation in-plane     | ±45˚                    |
 | Rotation out-of-plane | Yaw: ±45˚ / Pitch: ±45˚ |
 | Min object width      | 62 pixels               |
-| GFlops                | 0.09                    |
-| MParams               | 2.1                     |
+| GFlops                | 0.094                   |
+| MParams               | 2.138                   |
 | Source framework      | Caffe*                  |
 
 ## Accuracy
 
 | Metric          | Value      |
 |-----------------|------------|
-| Avg. age error  | 6.07 years |
-| Gender accuracy |     96.66% |
+| Avg. age error  | 6.99 years |
+| Gender accuracy |     95.80% |
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

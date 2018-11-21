@@ -19,13 +19,16 @@ based on a backbone with hyper-feature + R-FCN.
 | Occlusion coverage              | <50%                                      |
 | Min pedestrian height           | 80 pixels (on 1080p)                      |
 | Max objects to detect           | 200                                       |
-| GFlops                          | 12.4                                      |
-| MParams                         | 3.2                                       |
+| GFlops                          | 12.422                                    |
+| MParams                         | 3.244                                     |
 | Source framework                | Caffe                                     |
 
 Average Precision (AP) is defined as an area under
 the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 curve. Validation dataset consists of about 50,000 images from about 100 scenes.
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

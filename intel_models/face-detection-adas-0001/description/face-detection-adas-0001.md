@@ -19,14 +19,17 @@ amount of computation for the 3x3 convolution block.
 | AP (head height >64px)          | 93.1%                 |
 | AP (head height >100px)         | 94.1%                 |
 | Min head size                   | 90x90 pixels on 1080p |
-| GFlops                          | 2.8                   |
-| MParams                         | 1.1                   |
+| GFlops                          | 2.835                 |
+| MParams                         | 1.053                 |
 | Source framework                | Caffe*                |
 
 Average Precision (AP) is defined as an area under the
 [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 curve. Numbers are on
 [Wider Face](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/) validation subset.
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

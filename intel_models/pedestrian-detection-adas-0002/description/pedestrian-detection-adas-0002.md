@@ -15,14 +15,17 @@ Pedestrian detection network based on SSD framework with tuned MobileNet v1 as a
 | Average Precision (AP)          | 88%                                       |
 | Target pedestrian size          | 60 x 120 pixels on Full HD image          |
 | Max objects to detect           | 200                                       |
-| GFlops                          | 2.8                                       |
-| MParams                         | 1.2                                       |
+| GFlops                          | 2.836                                     |
+| MParams                         | 1.165                                     |
 | Source framework                | Caffe*                                    |
 
 Average Precision metric described in: Mark Everingham et al.
 [“The PASCAL Visual Object Classes (VOC) Challenge”](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf).
 
 Tested on an internal dataset with 1001 pedestrian to detect.
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

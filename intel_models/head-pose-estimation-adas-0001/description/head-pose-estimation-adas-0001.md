@@ -20,8 +20,8 @@ one output.
 |-----------------------|---------------------------------------------|
 | Min face size         | 60x60 pixels (fixed)                        |
 | Supported ranges      | YAW [-90,90], PITCH [-70,70], ROLL [-70,70] |
-| GFlops                | 0.1                                         |
-| MParams               | 1.9                                         |
+| GFlops                | 0.105                                       |
+| MParams               | 1.911                                       |
 | Source framework      | Caffe*                                      |
 
 ## Accuracy
@@ -31,6 +31,9 @@ one output.
 | yaw   |  5.4 ± 4.4                                                                                                                                            |
 | pitch |  5.5 ± 5.3                                                                                                                                            |
 | roll  |  4.6 ± 5.6                                                                                                                                            |
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 
