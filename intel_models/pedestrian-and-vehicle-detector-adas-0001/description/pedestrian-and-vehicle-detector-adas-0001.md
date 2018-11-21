@@ -16,14 +16,17 @@ Pedestrian and vehicle detection network based on MobileNet v1.0 + SSD.
 | AP for vehicles                 | 90%                   |
 | Target pedestrian size          | 60x120 pixels         |
 | Target vehicle size             | 40x30 pixels          |
-| GFLOPS                          | 4.0                   |
-| MParams                         | 1.6                   |
+| GFLOPS                          | 3.974                 |
+| MParams                         | 1.650                 |
 | Source framework                | Caffe*                |
 
 Average Precision (AP) metric is described in: Mark Everingham et al.
 [“The PASCAL Visual Object Classes (VOC) Challenge”](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf).
 
 Tested on challenging internal datasets with 1001 pedestrian and 12585 vehicles to detect.
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

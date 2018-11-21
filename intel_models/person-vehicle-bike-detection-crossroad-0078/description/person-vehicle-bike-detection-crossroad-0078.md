@@ -19,8 +19,8 @@ conditions.
 | AP vehicles                     | 74.66%                                    |
 | AP bikes                        | 42.56%                                    |
 | Max objects to detect           | 200                                       |
-| GFlops                          | 3.9                                       |
-| MParams                         | 1.2                                       |
+| GFlops                          | 3.964                                     |
+| MParams                         | 1.178                                     |
 | Source framework                | Caffe*                                    |
 
 Average Precision (AP) is defined as an area under the
@@ -42,6 +42,9 @@ Similarly, training dataset has 160,297 images with:
 | Vehicle        | 501,548                  |
 | Pedestrian     | 706,786                  |
 | Bike           | 55,692                   |
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

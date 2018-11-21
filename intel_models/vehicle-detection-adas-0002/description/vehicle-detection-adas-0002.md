@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Vehicle detection network based on SSD framework with tuned MobileNet v1 as a feature extractor.
+This is a vehicle detection network based on an SSD framework with tuned MobileNet v1 as a feature extractor.
 
 ## Example
 
@@ -15,14 +15,17 @@ Vehicle detection network based on SSD framework with tuned MobileNet v1 as a fe
 | Average Precision (AP)          | 90.6%                                     |
 | Target vehicle size             | 40 x 30 pixels on Full HD image           |
 | Max objects to detect           | 200                                       |
-| GFlops                          | 2.8                                       |
-| MParams                         | 1.1                                       |
+| GFlops                          | 2.798                                     |
+| MParams                         | 1.079                                     |
 | Source framework                | Caffe*                                    |
 
 Average Precision metric described in: Mark Everingham et al.
-[“The PASCAL Visual Object Classes (VOC) Challenge”](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf).
+["The PASCAL Visual Object Classes (VOC) Challenge"](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf).
 
-Tested on challenging internal dataset with 3000 images and 12585 vehicles to detect.
+Tested on a challenging internal dataset with 3000 images and 12585 vehicles to detect.
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 
@@ -36,7 +39,7 @@ Tested on challenging internal dataset with 3000 images and 12585 vehicles to de
 
 ## Outputs
 
-1. The net outputs blob with shape: [1, 1, N, 7], where N is the number of detected
+1. The net outputs a blob with the shape: [1, 1, N, 7], where N is the number of detected
    bounding boxes. For each detection, the description has the format:
    [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`]
     - `image_id` - ID of the image in the batch

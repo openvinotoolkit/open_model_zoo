@@ -7,7 +7,7 @@ Chinese license plates in traffic.
 
 ## Validation Dataset - Internal
 
-~10K Chinese plates from different provinces
+1165 Chinese plates from different provinces
 
 ## Example
 
@@ -22,15 +22,18 @@ Chinese license plates in traffic.
 | Rotation in-plane      | ±10˚                    |
 | Rotation out-of-plane  | Yaw: ±45˚ / Pitch: ±45˚ |
 | Min plate width        | 94 pixels               |
-| Ratio of correct reads | 95%                     |
-| GFlops                 | 0.33                    |
-| MParams                | 1.2                     |
+| Ratio of correct reads | 88.58%                  |
+| GFlops                 | 0.328                   |
+| MParams                | 1.218                   |
 | Source framework       | Caffe*                  |
 
 ## Limitations
 
 Only "blue" license plates, which are common in public, were tested
 thoroughly. Other types of license plates may underperform.
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

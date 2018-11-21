@@ -20,13 +20,16 @@ feature map has 12 clustered prior boxes.
 | Support of occluded pedestrians | YES                                       |
 | Occlusion coverage              | <50%                                      |
 | Min pedestrian height           | 100 pixels (on 1080p)                     |
-| GFlops                          | 2.3                                       |
-| MParams                         | 0.7                                       |
+| GFlops                          | 2.300                                     |
+| MParams                         | 0.723                                     |
 | Source framework                | Caffe*                                    |
 
 Average Precision (AP) is defined as an area under
 the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 curve.
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

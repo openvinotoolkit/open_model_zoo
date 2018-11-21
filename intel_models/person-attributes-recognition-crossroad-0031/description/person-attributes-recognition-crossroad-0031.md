@@ -24,8 +24,8 @@ This model presents a person attributes classification algorithm for a traffic a
 | Occlusion coverage    | <20%                                                                           |
 | Min object width      | 80 pixels                                                                      |
 | Supported attributes  | gender, has hat, has longsleeves, has longpants, has longhair, has coat_jacket |
-| GFlops                | 0.22                                                                           |
-| MParams               | 1.1                                                                            |
+| GFlops                | 0.219                                                                          |
+| MParams               | 1.102                                                                          |
 | Source framework      | Caffe*                                                                         |
 
 ## Accuracy
@@ -39,6 +39,9 @@ This model presents a person attributes classification algorithm for a traffic a
 | `has_longpants`   | 0.97      | 0.96   | 0.96 | 0.94     |
 | `has_longhair`    | 0.80      | 0.73   | 0.76 | 0.91     |
 | `has_coat_jacket` | 0.73      | 0.52   | 0.61 | 0.84     |
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 
