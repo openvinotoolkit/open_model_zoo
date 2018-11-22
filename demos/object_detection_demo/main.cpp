@@ -38,15 +38,18 @@
 
 using namespace InferenceEngine;
 
+ConsoleErrorListener error_listener;
+
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
-    slog::info << "Parsing input parameters" << slog::endl;
 
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
         return false;
     }
+
+    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_ni < 1) {
         throw std::logic_error("Parameter -ni should be greater than 0 (default: 1)");
@@ -80,13 +83,16 @@ int main(int argc, char *argv[]) {
 
         /** This vector stores paths to the processed images **/
         std::vector<std::string> images;
-        parseImagesArguments(images);
+        parseInputFilesArguments(images);
         if (images.empty()) throw std::logic_error("No suitable images were found");
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 1. Load Plugin for inference engine -------------------------------------
         slog::info << "Loading plugin" << slog::endl;
         InferencePlugin plugin = PluginDispatcher({ FLAGS_pp, "../../../lib/intel64" , "" }).getPluginByDevice(FLAGS_d);
+        if (FLAGS_p_msg) {
+            static_cast<InferenceEngine::InferenceEnginePluginPtr>(plugin)->SetLogCallback(error_listener);
+        }
 
         /*If CPU device, load default library with extensions that comes with the product*/
         if (FLAGS_d.find("CPU") != std::string::npos) {
@@ -321,9 +327,8 @@ int main(int argc, char *argv[]) {
         if (batchSize != imagesData.size()) {
             slog::warn << "Number of images " + std::to_string(imagesData.size()) + \
                 " doesn't match batch size " + std::to_string(batchSize) << slog::endl;
-            slog::warn << std::to_string(std::min(imagesData.size(), batchSize)) + \
-                " images will be processed" << slog::endl;
             batchSize = std::min(batchSize, imagesData.size());
+            slog::warn << "Number of images to be processed is "<< std::to_string(batchSize) << slog::endl;
         }
 
         /** Creating input blob **/
@@ -406,17 +411,16 @@ int main(int argc, char *argv[]) {
         /* Each detection has image_id that denotes processed image */
         for (int curProposal = 0; curProposal < maxProposalCount; curProposal++) {
             float image_id = detection[curProposal * objectSize + 0];
+            if (image_id < 0) {
+                break;
+            }
+
             float label = detection[curProposal * objectSize + 1];
             float confidence = detection[curProposal * objectSize + 2];
             float xmin = detection[curProposal * objectSize + 3] * imageWidths[image_id];
             float ymin = detection[curProposal * objectSize + 4] * imageHeights[image_id];
             float xmax = detection[curProposal * objectSize + 5] * imageWidths[image_id];
             float ymax = detection[curProposal * objectSize + 6] * imageHeights[image_id];
-
-            /* MKLDnn and clDNN have little differente in DetectionOutput layer, so we need this check */
-            if (image_id < 0 || confidence == 0) {
-                continue;
-            }
 
             std::cout << "[" << curProposal << "," << label << "] element, prob = " << confidence <<
                 "    (" << xmin << "," << ymin << ")-(" << xmax << "," << ymax << ")" << " batch id : " << image_id;

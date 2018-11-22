@@ -14,6 +14,11 @@
 // limitations under the License.
 */
 
+/**
+ * @brief The entry point for inference engine Mask RCNN demo application
+ * @file mask_rcnn_demo/main.cpp
+ * @example mask_rcnn_demo/main.cpp
+ */
 #include <gflags/gflags.h>
 #include <functional>
 #include <iostream>
@@ -43,39 +48,43 @@
 
 using namespace InferenceEngine;
 
-/**
- * @brief The entry point for inference engine Mask RCNN demo application
- * @file mask_rcnn_demo/main.cpp
- * @example mask_rcnn_demo/main.cpp
- */
+bool ParseAndCheckCommandLine(int argc, char *argv[]) {
+    // ---------------------------Parsing and validation of input args--------------------------------------
+    gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
+    if (FLAGS_h) {
+        showUsage();
+        return false;
+    }
+
+    slog::info << "Parsing input parameters" << slog::endl;
+
+    if (FLAGS_ni < 1) {
+        throw std::logic_error("Parameter -ni should be greater than 0 (default: 1)");
+    }
+
+    if (FLAGS_i.empty()) {
+        throw std::logic_error("Parameter -i is not set");
+    }
+
+    if (FLAGS_m.empty()) {
+        throw std::logic_error("Parameter -m is not set");
+    }
+
+    return true;
+}
+
 int main(int argc, char *argv[]) {
     try {
-        slog::info << "InferenceEngine: " << InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        std::cout << "InferenceEngine: " << InferenceEngine::GetInferenceEngineVersion() << std::endl;
 
-        // ---------------------------Parsing and validation of input args--------------------------------------
-        slog::info << "Parsing input parameters" << slog::endl;
-
-        gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
-        if (FLAGS_h) {
-            showUsage();
+        // ------------------------------ Parsing and validation of input args ---------------------------------
+        if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
-        }
-
-        if (FLAGS_ni < 1) {
-            throw std::logic_error("Parameter -ni should be greater than 0 (default: 1)");
-        }
-
-        if (FLAGS_i.empty()) {
-            throw std::logic_error("Parameter -i is not set");
-        }
-
-        if (FLAGS_m.empty()) {
-            throw std::logic_error("Parameter -m is not set");
         }
 
         /** This vector stores paths to the processed images **/
         std::vector<std::string> images;
-        parseImagesArguments(images);
+        parseInputFilesArguments(images);
         if (images.empty()) throw std::logic_error("No suitable images were found");
         if (images.size() > 1) throw std::logic_error("The topology support only one input image");
         // -----------------------------------------------------------------------------------------------------

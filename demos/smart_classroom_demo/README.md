@@ -1,6 +1,13 @@
-# Smart Classroom Demo {#InferenceEngineSmartClassroomDemoApplication}
+# Smart Classroom Demo
 
-The demo demonstrates an example of joint usage of several neural networks to detect 3 basic actions (sitting, standing, raising hand) and recognize people by faces in the classroom environment. Demo uses Async API for action and face detection nets. It allows to parallelize execution of face recognition and detection: while face recognition is running on one accelerator face and action detection could performed on other.
+The demo demonstrates an example of joint usage of several neural networks to detect 3 basic actions (sitting, standing, raising hand) and recognize people by faces in the classroom environment. Sample uses Async API for action and face detection nets. It allows to parallelize execution of face recognition and detection: while face recognition is running on one accelerator face and action detection could performed on other. The corresponding pre-trained models are delivered with the product:
+
+* `face-detection-retail-0004`, which is a primary detection network for finding faces.
+* `landmarks-regression-retail-0009`, which is executed on top of the results from the first network and outputs
+a vector of facial landmarks for each detected face.
+* `face-reidentification-retail-0071`,  which is executed on top of the results from the first network and outputs
+a vector of features for each detected face.
+* `person-detection-action-recognition-0003`, which is a detection network for finding persons and simultaneously predicting their current actions.
 
 ### How it works
 
@@ -8,7 +15,7 @@ On the start-up the application reads command line parameters and loads to the I
 
 ### Creating a gallery for face recognition
 
-To recognize faces on a frame demo needs a gallery of reference images. Each image should contain a tight crop of face.
+To recognize faces on a frame the demo needs a gallery of reference images. Each image should contain a tight crop of face.
 - Gallery can be created from an arbitrary list of images. Put images containing tight crops of frontal-oriented faces to a separate empty folder. Each identity could have multiple images. Naming convention: `id_name.0.png, id_name.1.png, ...`.
 - Run `create_list.py <path_to_folder_with_images>` to get a list of files and identities in `json` format.
 
@@ -18,7 +25,8 @@ Running the application with the <code>-h</code> option yields the following usa
 ```sh
 ./smart_classroom_demo -h
 InferenceEngine:
-	API version ............ 1.2
+    API version ............ <version>
+    Build .................. <number>
 
 smart_classroom_demo [OPTION]
 Options:
@@ -36,10 +44,14 @@ Options:
     -d_fd "<device>"             Optional. Specify the target device for Face Detection Retail (CPU, GPU, FPGA, MYRIAD, or HETERO).
     -d_lm "<device>"             Optional. Specify the target device for Landmarks Regression Retail (CPU, GPU, FPGA, MYRIAD, or HETERO).
     -d_reid "<device>"           Optional. Specify the target device for Face Reidentification Retail (CPU, GPU, FPGA, MYRIAD, or HETERO).
+    -out_v  "<path>"             Optional. File to write output video with visualization to.
     -pc                          Optional. Enables per-layer performance statistics.
     -r                           Optional. Output Inference results as raw values.
     -t_act                       Optional. Probability threshold for persons/actions detections.
     -t_fd                        Optional. Probability threshold for face detections.
+    -inh_fd                      Optional. Input image height for face detector.
+    -inw_fd                      Optional. Input image width for face detector.
+    -exp_r_fd                    Optional. Expand ratio for bbox before face recognition.
     -t_reid                      Optional. Cosine distance threshold between two vectors for face reidentification.
     -fg                          Optional. Path to a faces gallery in json format.
     -no_show                     Optional. No show processed video.
@@ -61,4 +73,4 @@ Notice that the network should be converted from the Caffe* (*.prototxt + *.mode
 The demo uses OpenCV to display the resulting frame with labeled actions and faces.
 
 ## See Also
-* [Using Inference Engine Demos](@ref DemosOverview)
+* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)

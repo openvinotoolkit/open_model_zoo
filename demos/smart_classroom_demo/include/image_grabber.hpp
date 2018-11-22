@@ -27,6 +27,7 @@ public:
     bool Retrieve(cv::Mat& img);
     bool IsOpened() const;
     int GetFrameIndex() const;
+    int GetFPS() const;
     std::string GetVideoPath() const;
 
 private:

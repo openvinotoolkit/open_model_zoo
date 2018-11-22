@@ -16,9 +16,9 @@
 
 #include "perf_timer.hpp"
 
-PerfTimer::PerfTimer(size_t max_count_):
-    max_count(max_count_) {
-    values.reserve(max_count);
+PerfTimer::PerfTimer(size_t maxCount_):
+    maxCount(maxCount_) {
+    values.reserve(maxCount);
 }
 
 float PerfTimer::getValue() const {
@@ -26,5 +26,5 @@ float PerfTimer::getValue() const {
 }
 
 bool PerfTimer::enabled() const {
-    return max_count > 0;
+    return maxCount > 0;
 }

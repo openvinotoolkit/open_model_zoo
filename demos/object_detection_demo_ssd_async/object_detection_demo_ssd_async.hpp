@@ -32,7 +32,7 @@
 static const char help_message[] = "Print a usage message.";
 
 /// @brief message for images argument
-static const char video_message[] = "Required. Path to an video file (specify \"cam\" to work with camera).";
+static const char video_message[] = "Required. Path to a video file (specify \"cam\" to work with camera).";
 
 /// @brief message for model argument
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
@@ -43,17 +43,17 @@ static const char plugin_message[] = "Optional. Plugin name. For example MKLDNNP
 
 /// @brief message for assigning cnn calculation to device
 static const char target_device_message[] = "Optional. Specify the target device to infer on (CPU, GPU, FPGA, or MYRIAD). " \
-"Demo will look for a suitable plugin for device specified";
+"The demo will look for a suitable plugin for a specified device.";
 
 /// @brief message for performance counters
 static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
 
 /// @brief message for clDNN custom kernels desc
-static const char custom_cldnn_message[] = "Optional. Required for clDNN (GPU)-targeted custom kernels."\
+static const char custom_cldnn_message[] = "Optional. Required for clDNN (GPU)-targeted custom kernels. "\
 "Absolute path to the xml file with the kernels desc.";
 
 /// @brief message for user library argument
-static const char custom_cpu_library_message[] = "Optional. Required for MKLDNN (CPU)-targeted custom layers." \
+static const char custom_cpu_library_message[] = "Optional. Required for MKLDNN (CPU)-targeted custom layers. " \
 "Absolute path to a shared library with the kernels impl.";
 
 /// @brief message for probability threshold argument
@@ -108,7 +108,7 @@ DEFINE_bool(auto_resize, false, input_resizable_message);
 */
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "async_object_detection_ssd [OPTION]" << std::endl;
+    std::cout << "object_detection_demo_ssd_async [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;

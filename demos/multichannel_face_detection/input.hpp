@@ -26,59 +26,83 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "graph.hpp"
+#ifdef USE_NATIVE_CAMERA_API
+#include "multicam/controller.hpp"
+#endif
 
-struct Face;
-class VideoFrame{
+#include "decoder.hpp"
+
+struct Face {
+    cv::Rect2f rect;
+    float confidence;
+    unsigned char age;
+    unsigned char gender;
+    Face(cv::Rect2f r, float c, unsigned char a, unsigned char g): rect(r), confidence(c), age(a), gender(g) {}
+};
+
+
+class VideoFrame final {
 public:
-    std::shared_ptr<cv::Mat> frame;
-    std::size_t source_idx;
-    std::size_t frame_idx;
+    cv::Mat frame;
+    std::size_t sourceIdx = 0;
     std::vector<Face> detections;
-    VideoFrame() { frame.reset(new cv::Mat()); frame_idx = 0; source_idx = 0;}
+    VideoFrame() = default;
 
-    void operator =(VideoFrame const& vf);
+    void operator =(VideoFrame const& vf) = delete;
 };
 
 class VideoSource;
+class VideoSourceNative;
+class VideoSourceOCV;
+class VideoSourceStreamFile;
 
-class VideoSources{
+class VideoSources {
 private:
+    Decoder decoder;
+#ifdef USE_NATIVE_CAMERA_API
+    mcam::controller controller;
+#endif
+
+    std::mutex decode_mutex;  // hardware decoding enqueue lock
+
     std::vector<std::unique_ptr<VideoSource>> inputs;
-    std::size_t internal_idx;
     const bool isAsync = false;
-    const bool collect_stats = false;
-    std::vector<size_t> connected_idxs;
+    const bool collectStats = false;
 
-    std::thread workThread;
-    std::atomic_bool terminate = {true};
+    bool realFps;
 
-    std::size_t duplicate_channels_num = 0;
-    bool real_fps;
-
-    const size_t queue_size = 1;
-    const size_t polling_time_msec = 1000;
-
-public:
-    VideoSources(bool async, std::size_t dc_num, bool collect_stats_,
-                 size_t queue_size_, size_t polling_time_msec_, bool real_fps);
-    ~VideoSources();
+    const size_t queueSize = 1;
+    const size_t pollingTimeMSec = 1000;
 
     void stop();
 
-    size_t getNewIdx();
+    friend VideoSourceNative;
+    friend VideoSourceOCV;
+    friend VideoSourceStreamFile;
 
-    size_t getInputsNum();
+public:
+    struct InitParams {
+        std::size_t queueSize = 5;
+        std::size_t pollingTimeMSec = 1000;
+        bool isAsync = true;
+        bool collectStats = false;
+        bool realFps = false;
+        unsigned expectedWidth = 0;
+        unsigned expectedHeight = 0;
+    };
 
-    bool openVideo(const std::string& source);
+    explicit VideoSources(const InitParams& p);
+    ~VideoSources();
+
+    void openVideo(const std::string& source, bool native);
 
     void start();
 
-    bool getFrame(VideoFrame& frame);
-    bool getFrame(cv::Mat& frame);
+    bool getFrame(size_t index, VideoFrame& frame);
 
     struct Stats {
-        std::vector<float> read_times;
+        std::vector<float> readTimes;
+        float decodingLatency = 0.0f;
     };
 
     Stats getStats() const;

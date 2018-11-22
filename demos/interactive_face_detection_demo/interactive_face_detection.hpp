@@ -39,6 +39,7 @@ static const char face_detection_model_message[] = "Required. Path to an .xml fi
 static const char age_gender_model_message[] = "Optional. Path to an .xml file with a trained age gender model.";
 static const char head_pose_model_message[] = "Optional. Path to an .xml file with a trained head pose model.";
 static const char emotions_model_message[] = "Optional. Path to an .xml file with a trained emotions model.";
+static const char facial_landmarks_model_message[] = "Optional. Path to an .xml file with a trained facial landmarks model.";
 
 /// @brief message for plugin argument
 static const char plugin_message[] = "Plugin name. For example MKLDNNPlugin. If this parameter is pointed, " \
@@ -46,18 +47,23 @@ static const char plugin_message[] = "Plugin name. For example MKLDNNPlugin. If 
 
 /// @brief message for assigning face detection calculation to device
 static const char target_device_message[] = "Specify the target device for Face Detection (CPU, GPU, FPGA, or MYRIAD). " \
-"Demo will look for a suitable plugin for device specified.";
+"The demo will look for a suitable plugin for a specified device.";
 
 /// @brief message for assigning age gender calculation to device
 static const char target_device_message_ag[] = "Specify the target device for Age Gender Detection (CPU, GPU, FPGA, or MYRIAD). " \
-"Demo will look for a suitable plugin for device specified.";
+"The demo will look for a suitable plugin for a specified device.";
 
-/// @brief message for assigning age gender calculation to device
+/// @brief message for assigning head pose calculation to device
 static const char target_device_message_hp[] = "Specify the target device for Head Pose Detection (CPU, GPU, FPGA, or MYRIAD). " \
-"Demo will look for a suitable plugin for device specified.";
+"The demo will look for a suitable plugin for a specified device.";
 
+/// @brief message for assigning emotions calculation to device
 static const char target_device_message_em[] = "Specify the target device for Emotions Detection (CPU, GPU, FPGA, or MYRIAD). " \
-"Demo will look for a suitable plugin for device specified.";
+"The demo will look for a suitable plugin for a specified device.";
+
+/// @brief message for assigning facial landmarks calculation to device
+static const char target_device_message_lm[] = "Specify the target device for Facial Landmarks Detection (CPU, GPU, FPGA, or MYRIAD). " \
+"The demo will look for a suitable plugin for device specified.";
 
 /// @brief message for the maximum number of simultaneously processed faces for Age Gender net
 static const char num_batch_ag_message[] = "Specify number of maximum simultaneously processed faces for Age Gender Detection (default is 16).";
@@ -68,6 +74,9 @@ static const char num_batch_hp_message[] = "Specify number of maximum simultaneo
 /// @brief message for the maximum number of simultaneously processed faces for Emotions net
 static const char num_batch_em_message[] = "Specify number of maximum simultaneously processed faces for Emotions Detection (default is 16).";
 
+/// @brief message for the maximum number of simultaneously processed faces for Facial Landmarks net
+static const char num_batch_lm_message[] = "Specify number of maximum simultaneously processed faces for Facial Landmarks Detection (default is 16).";
+
 /// @brief message for dynamic batching support for AgeGender net
 static const char dyn_batch_ag_message[] = "Enable dynamic batch size for AgeGender net.";
 
@@ -77,15 +86,18 @@ static const char dyn_batch_hp_message[] = "Enable dynamic batch size for HeadPo
 /// @brief message for dynamic batching support for Emotions net
 static const char dyn_batch_em_message[] = "Enable dynamic batch size for Emotions net.";
 
+/// @brief message for dynamic batching support for Facial Landmarks net
+static const char dyn_batch_lm_message[] = "Enable dynamic batch size for Facial Landmarks net.";
+
 /// @brief message for performance counters
 static const char performance_counter_message[] = "Enables per-layer performance report.";
 
 /// @brief message for clDNN custom kernels desc
-static const char custom_cldnn_message[] = "Required for clDNN (GPU)-targeted custom kernels."\
+static const char custom_cldnn_message[] = "Required for clDNN (GPU)-targeted custom kernels. "\
 "Absolute path to the xml file with the kernels desc.";
 
 /// @brief message for user library argument
-static const char custom_cpu_library_message[] = "Required for MKLDNN (CPU)-targeted custom layers." \
+static const char custom_cpu_library_message[] = "Required for MKLDNN (CPU)-targeted custom layers. " \
 "Absolute path to a shared library with the kernels impl.";
 
 /// @brief message for probability threshold argument
@@ -127,6 +139,10 @@ DEFINE_string(m_hp, "", head_pose_model_message);
 /// It is a required parameter
 DEFINE_string(m_em, "", emotions_model_message);
 
+/// \brief Define parameter for facial landmarks detection model file <br>
+/// It is an optional parameter
+DEFINE_string(m_lm, "", facial_landmarks_model_message);
+
 /// \brief target device for face detection <br>
 DEFINE_string(d, "CPU", target_device_message);
 
@@ -138,6 +154,9 @@ DEFINE_string(d_hp, "CPU", target_device_message_hp);
 
 /// \brief target device for Emotions net <br>
 DEFINE_string(d_em, "CPU", target_device_message_em);
+
+/// \brief target device for Facial Landmarks net <br>
+DEFINE_string(d_lm, "CPU", target_device_message_lm);
 
 /// \brief maximum batch size for AgeGender net <br>
 DEFINE_uint32(n_ag, 16, num_batch_ag_message);
@@ -156,6 +175,12 @@ DEFINE_uint32(n_em, 16, num_batch_em_message);
 
 /// \brief enable dynamic batch size for Emotions net <br>
 DEFINE_bool(dyn_em, false, dyn_batch_em_message);
+
+/// \brief maximum batch size for Facial Landmarks net <br>
+DEFINE_uint32(n_lm, 16, num_batch_em_message);
+
+/// \brief enable dynamic batch size for Facial Landmarks net <br>
+DEFINE_bool(dyn_lm, false, dyn_batch_em_message);
 
 /// \brief enable per-layer performance report <br>
 DEFINE_bool(pc, false, performance_counter_message);
@@ -189,8 +214,9 @@ DEFINE_bool(no_show, false, no_show_processed_video);
 DEFINE_bool(async, false, async_message);
 
 /**
-* \brief This function show a help message
+* \brief This function shows a help message
 */
+
 static void showUsage() {
     std::cout << std::endl;
     std::cout << "interactive_face_detection [OPTION]" << std::endl;
@@ -202,6 +228,7 @@ static void showUsage() {
     std::cout << "    -m_ag \"<path>\"             " << age_gender_model_message << std::endl;
     std::cout << "    -m_hp \"<path>\"             " << head_pose_model_message << std::endl;
     std::cout << "    -m_em \"<path>\"             " << emotions_model_message << std::endl;
+    std::cout << "    -m_lm \"<path>\"             " << facial_landmarks_model_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"     " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"     " << custom_cldnn_message << std::endl;
@@ -209,12 +236,15 @@ static void showUsage() {
     std::cout << "    -d_ag \"<device>\"           " << target_device_message_ag << std::endl;
     std::cout << "    -d_hp \"<device>\"           " << target_device_message_hp << std::endl;
     std::cout << "    -d_em \"<device>\"           " << target_device_message_em << std::endl;
+    std::cout << "    -d_lm \"<device>\"           " << target_device_message_lm << std::endl;
     std::cout << "    -n_ag \"<num>\"              " << num_batch_ag_message << std::endl;
     std::cout << "    -n_hp \"<num>\"              " << num_batch_hp_message << std::endl;
     std::cout << "    -n_em \"<num>\"              " << num_batch_em_message << std::endl;
+    std::cout << "    -n_lm \"<num>\"              " << num_batch_lm_message << std::endl;
     std::cout << "    -dyn_ag                    " << dyn_batch_ag_message << std::endl;
     std::cout << "    -dyn_hp                    " << dyn_batch_hp_message << std::endl;
     std::cout << "    -dyn_em                    " << dyn_batch_em_message << std::endl;
+    std::cout << "    -dyn_lm                    " << dyn_batch_lm_message << std::endl;
     std::cout << "    -async                     " << async_message << std::endl;
     std::cout << "    -no_wait                   " << no_wait_for_keypress_message << std::endl;
     std::cout << "    -no_show                   " << no_show_processed_video << std::endl;
@@ -222,3 +252,4 @@ static void showUsage() {
     std::cout << "    -r                         " << raw_output_message << std::endl;
     std::cout << "    -t                         " << thresh_output_message << std::endl;
 }
+

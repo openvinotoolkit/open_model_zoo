@@ -1,4 +1,4 @@
-# Object Detection SSD Demo, Async API performance showcase {#InferenceEngineObjectDetectionSSDDemoAsyncApplication}
+# Object Detection SSD Demo, Async API performance showcase
 
 This demo showcases Object Detection with SSD and new Async API.
 Async API usage can improve overall frame-rate of the application, because rather than wait for inference to complete,
@@ -93,7 +93,7 @@ that reporting the time between StartAsync and Wait would obviously incorrect.
 That is why in the "ASYNC" mode the inference speed is not reported.
 
 
-[More details on the new, requests-based Inference Engine API, including async execution](@ref IntegrateIEInAppNewAPI).
+[More details on the new, requests-based Inference Engine API, including async execution](./docs/Inference_Engine_Developer_Guide/Integrate_with_customer_application_new_API.md).
 
 
 ## Running
@@ -109,12 +109,12 @@ object_detection_demo_ssd_async [OPTION]
 Options:
 
     -h                        Print a usage message.
-    -i "<path>"               Required. Path to an video file (specify "cam" to work with camera).
+    -i "<path>"               Required. Path to a video file (specify "cam" to work with camera).
     -m "<path>"               Required. Path to an .xml file with a trained model.
-      -l "<absolute_path>"    Optional. Required for MKLDNN (CPU)-targeted custom layers.Absolute path to a shared library with the kernels impl.
+      -l "<absolute_path>"    Optional. Required for MKLDNN (CPU)-targeted custom layers. Absolute path to a shared library with the kernels impl.
           Or
-      -c "<absolute_path>"    Optional. Required for clDNN (GPU)-targeted custom kernels.Absolute path to the xml file with the kernels desc.
-    -d "<device>"             Optional. Specify the target device to infer on (CPU, GPU, FPGA, or MYRIAD). Demo will look for a suitable plugin for device specified
+      -c "<absolute_path>"    Optional. Required for clDNN (GPU)-targeted custom kernels. Absolute path to the xml file with the kernels desc.
+    -d "<device>"             Optional. Specify the target device to infer on (CPU, GPU, FPGA, or MYRIAD). The demo will look for a suitable plugin for a specified device.
     -pc                       Optional. Enables per-layer performance report.
     -r                        Optional. Inference results as raw values.
     -t                        Optional. Probability threshold for detections.
@@ -126,7 +126,7 @@ You can use the following command to do inference on GPU with a pre-trained obje
 ```sh
 ./object_detection_demo_ssd_async -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/ssd.xml -d GPU
 ```
-**NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer](@ref MODevGuide) tool.
+**NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer](./docs/Model_Optimizer_Developer_Guide/Deep_Learning_Model_Optimizer_DevGuide.md) tool.
 
 The only GUI knob is using 'Tab' to switch between the synchronized execution and the true Async mode.
 
@@ -140,4 +140,4 @@ In the default mode the demo reports
 
 
 ## See Also
-* [Using Inference Engine Demos](@ref DemosOverview)
+* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)

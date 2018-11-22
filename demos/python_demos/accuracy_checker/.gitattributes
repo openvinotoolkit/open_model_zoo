@@ -1,0 +1,8 @@
+data/annotations/* filter=lfs diff=lfs merge=lfs -text
+data/test_models/*.caffemodel filter=lfs diff=lfs merge=lfs -text
+data/test_data/*.jpg filter=lfs diff=lfs merge=lfs -text
+data/test_models/*.bin filter=lfs diff=lfs merge=lfs -text
+sample/sample_dataset.tar.gz filter=lfs diff=lfs merge=lfs -text
+sample/model/SampLeNet.prototxt filter=lfs diff=lfs merge=lfs -text
+sample/model/SampLeNet.caffemodel filter=lfs diff=lfs merge=lfs -text
+*.caffemodel filter=lfs diff=lfs merge=lfs -text

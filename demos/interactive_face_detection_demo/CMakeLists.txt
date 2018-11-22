@@ -16,11 +16,7 @@ cmake_minimum_required(VERSION 2.8)
 set(TARGET_NAME "interactive_face_detection_demo")
 
 find_package(OpenCV)
-if(OpenCV_FOUND)
-    message(STATUS "OPENCV is enabled")
-    message(STATUS "OpenCV_INCLUDE_DIRS=${OpenCV_INCLUDE_DIRS}")
-    message(STATUS "OpenCV_LIBS=${OpenCV_LIBS}")
-else()
+if(NOT(OpenCV_FOUND))
     message(STATUS "OPENCV is disabled or not found, " ${TARGET_NAME} " skiped")
     return()
 endif()
@@ -35,7 +31,7 @@ file (GLOB MAIN_SRC
         )
 
 file (GLOB MAIN_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/*.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/*.h*
         )
 
 # Create named folders for the sources within the .vcproj
@@ -55,8 +51,8 @@ set_target_properties(${TARGET_NAME} PROPERTIES "CMAKE_CXX_FLAGS" "${CMAKE_CXX_F
 COMPILE_PDB_NAME ${TARGET_NAME})
 
 
-target_link_libraries(${TARGET_NAME} format_reader cpu_extension ${InferenceEngine_LIBRARIES} gflags)
+target_link_libraries(${TARGET_NAME} IE::ie_cpu_extension ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES})
 
 if(UNIX)
-    target_link_libraries( ${TARGET_NAME} ${LIB_DL} pthread ${OpenCV_LIBRARIES})
+    target_link_libraries( ${TARGET_NAME} ${LIB_DL} pthread)
 endif()

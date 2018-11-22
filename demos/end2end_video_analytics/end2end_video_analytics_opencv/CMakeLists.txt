@@ -16,11 +16,7 @@ cmake_minimum_required(VERSION 2.8)
 set(TARGET_NAME "end2end_video_analytics_opencv")
 
 find_package(OpenCV)
-if(OpenCV_FOUND)
-    message(STATUS "OPENCV is enabled")
-    message(STATUS "OpenCV_INCLUDE_DIRS=${OpenCV_INCLUDE_DIRS}")
-    message(STATUS "OpenCV_LIBS=${OpenCV_LIBS}")
-else()
+if(NOT(OpenCV_FOUND))
     message(STATUS "OPENCV is disabled or not found, " ${TARGET_NAME} " skipped")
     return()
 endif()
@@ -38,8 +34,6 @@ file (GLOB MAIN_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h ${CMAKE_CURRENT_SOURCE_D
 source_group("src" FILES ${MAIN_SRC})
 source_group("include" FILES ${MAIN_HEADERS})
 
-include_directories (${OpenCV_INCLUDE_DIRS})
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../common)
 link_directories(${LIB_FOLDER})
 
 # Create library file from sources.
@@ -54,5 +48,3 @@ target_link_libraries(${TARGET_NAME} gflags ${OpenCV_LIBRARIES})
 if(UNIX)
     target_link_libraries( ${TARGET_NAME} ${LIB_DL} pthread)
 endif()
-
-

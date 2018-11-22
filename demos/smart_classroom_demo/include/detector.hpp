@@ -55,8 +55,8 @@ private:
     InferenceEngine::ExecutableNetwork net_;
     std::string input_name_;
     std::string output_name_;
-    int max_detections_count_;
-    int object_size_;
+    int max_detections_count_ = 0;
+    int object_size_ = 0;
     int enqueued_frames_ = 0;
     float width_ = 0;
     float height_ = 0;

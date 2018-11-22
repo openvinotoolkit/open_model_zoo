@@ -31,24 +31,24 @@ class AsyncOutput{
 public:
     using DrawFunc = std::function<bool(const std::vector<std::shared_ptr<VideoFrame>>&)>;
 
-    AsyncOutput(bool collect_stats_, size_t queue_size_, DrawFunc draw_func_);
+    AsyncOutput(bool collectStats, size_t queueSize, DrawFunc drawFunc);
     ~AsyncOutput();
     void push(std::vector<std::shared_ptr<VideoFrame>>&& item);
     void start();
     bool isAlive() const;
     struct Stats {
-        float render_time;
+        float renderTime;
     };
     Stats getStats() const;
 
 private:
-    const size_t queue_size;
-    DrawFunc draw_func;
+    const size_t queueSize;
+    DrawFunc drawFunc;
     std::queue<std::vector<std::shared_ptr<VideoFrame>>> queue;
     std::atomic_bool terminate = {false};
     std::thread thread;
     std::mutex mutex;
-    std::condition_variable cond_var;
+    std::condition_variable condVar;
 
-    PerfTimer perf_timer;
+    PerfTimer perfTimer;
 };

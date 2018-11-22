@@ -21,20 +21,24 @@
 #include <atomic>
 #include <numeric>
 
-class PerfTimer final{
-    const size_t max_count;
+class PerfTimer final {
+    const size_t maxCount;
     using duration = std::chrono::duration<float, std::milli>;
     std::vector<duration> values;
     std::atomic<float> avgValue = {0.0f};
 
 public:
-    explicit PerfTimer(size_t max_count_);
+    enum {
+        DefaultIterationsCount = 50
+    };
+
+    explicit PerfTimer(size_t maxCount_);
 
     template<typename T>
     void addValue(const T& dur) {
         assert(enabled());
         values.push_back(std::chrono::duration_cast<duration>(dur));
-        if (values.size() >= max_count) {
+        if (values.size() >= maxCount) {
             auto res = std::accumulate(values.begin(),
                                        values.end(),
                                        duration(0.0f));

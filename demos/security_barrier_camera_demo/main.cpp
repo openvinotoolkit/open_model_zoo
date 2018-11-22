@@ -31,12 +31,15 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <queue>
 
 #include <inference_engine.hpp>
 
 #include <samples/common.hpp>
+#include <samples/slog.hpp>
+#include <samples/args_helper.hpp>
 #include "security_barrier_camera.hpp"
-#include "mkldnn/mkldnn_extension_ptr.hpp"
+#include <ie_iextension.h>
 #include <ext_list.hpp>
 
 #include <opencv2/opencv.hpp>
@@ -52,7 +55,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         return false;
     }
 
-    std::cout << "[ INFO ] Parsing input parameters" << std::endl;
+    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -67,57 +70,85 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 // -------------------------Generic routines for detection networks-------------------------------------------------
 
-struct BaseDetection {
-    ExecutableNetwork net;
-    InferencePlugin plugin;
-    InferRequest request;
-    std::string & commandLineFlag;
-    std::string topoName;
-    Blob::Ptr inputBlob;
+typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
+
+struct BaseInferRequest {
+    InferRequest::Ptr request;
     std::string inputName;
-    std::string outputName;
+    std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
+    std::chrono::time_point<std::chrono::high_resolution_clock> endTime;
+    size_t requestId;
 
-    BaseDetection(std::string &commandLineFlag, std::string topoName)
-            : commandLineFlag(commandLineFlag), topoName(topoName) {}
-
-    ExecutableNetwork  * operator ->() {
-        return &net;
-    }
-    virtual CNNNetwork read()  = 0;
-
-    virtual void setRoiBlob(const Blob::Ptr &roiBlob) {
-        if (!enabled())
-            return;
-        if (!request)
-            request = net.CreateInferRequest();
-
-        request.SetBlob(inputName, roiBlob);
+    BaseInferRequest(ExecutableNetwork& net, std::string& inputName) :
+        request(net.CreateInferRequestPtr()), inputName(inputName) {
+        auto lambda = [&] {
+               endTime = std::chrono::high_resolution_clock::now();
+            };
+        request->SetCompletionCallback(lambda);
     }
 
-    virtual void enqueue(const cv::Mat &frame) {
-        if (!enabled())
-            return;
-        if (!request)
-            request = net.CreateInferRequest();
+    virtual ~BaseInferRequest() {}
+
+    virtual void startAsync() {
+        startTime = std::chrono::high_resolution_clock::now();
+        request->StartAsync();
+    }
+
+    virtual void wait() {
+        request->Wait(IInferRequest::WaitMode::RESULT_READY);
+    }
+
+    virtual void setBlob(const Blob::Ptr &frameBlob) {
+        request->SetBlob(inputName, frameBlob);
+    }
+
+    virtual void setImage(const cv::Mat &frame) {
+        Blob::Ptr inputBlob;
 
         if (FLAGS_auto_resize) {
             inputBlob = wrapMat2Blob(frame);
-            request.SetBlob(inputName, inputBlob);
+            request->SetBlob(inputName, inputBlob);
         } else {
-            inputBlob = request.GetBlob(inputName);
+            inputBlob = request->GetBlob(inputName);
             matU8ToBlob<uint8_t>(frame, inputBlob);
         }
     }
 
-    virtual void submitRequest() {
-        if (!enabled() || !request) return;
-        request.StartAsync();
+    virtual Blob::Ptr getBlob(const std::string &name) {
+        return request->GetBlob(name);
     }
 
-    virtual void wait() {
-        if (!enabled()|| !request) return;
-        request.Wait(IInferRequest::WaitMode::RESULT_READY);
+    virtual ms getTime() {
+        return std::chrono::duration_cast<ms>(endTime - startTime);
     }
+
+    void setId(size_t id) {
+        requestId = id;
+    }
+
+    size_t getId() {
+        return requestId;
+    }
+
+    using Ptr = std::shared_ptr<BaseInferRequest>;
+};
+
+struct BaseDetection {
+    ExecutableNetwork net;
+    InferencePlugin plugin;
+    std::string & commandLineFlag;
+    std::string topoName;
+    std::string inputName;
+    std::string outputName;
+
+    BaseDetection(std::string &commandLineFlag, std::string topoName)
+            : commandLineFlag(commandLineFlag), topoName(topoName)  {}
+
+    ExecutableNetwork * operator ->() {
+        return &net;
+    }
+    virtual CNNNetwork read()  = 0;
+
     mutable bool enablingChecked = false;
     mutable bool _enabled = false;
 
@@ -125,7 +156,7 @@ struct BaseDetection {
         if (!enablingChecked) {
             _enabled = !commandLineFlag.empty();
             if (!_enabled) {
-                std::cout << "[ INFO ] " << topoName << " detection DISABLED" << std::endl;
+                slog::info << topoName << " detection DISABLED" << slog::endl;
             }
             enablingChecked = true;
         }
@@ -133,47 +164,58 @@ struct BaseDetection {
     }
 };
 
-struct VehicleDetection : BaseDetection{
+struct VehicleDetectionInferRequest : BaseInferRequest {
+    cv::Size srcImageSize;
+
+    VehicleDetectionInferRequest(ExecutableNetwork& net, std::string& inputName) :
+        BaseInferRequest(net, inputName), srcImageSize(0, 0) {}
+
+    void setImage(const cv::Mat &frame) override {
+        BaseInferRequest::setImage(frame);
+
+        srcImageSize.height = frame.rows;
+        srcImageSize.width = frame.cols;
+    }
+
+    void setSourceImageSize(int width, int height) {
+        srcImageSize.height = height;
+        srcImageSize.width = width;
+    }
+
+    cv::Size getSourceImageSize() {
+        return srcImageSize;
+    }
+
+    using Ptr = std::shared_ptr<VehicleDetectionInferRequest>;
+};
+
+struct VehicleDetection : BaseDetection {
     int maxProposalCount;
     int objectSize;
-    float width = 0;
-    float height = 0;
-    bool resultsFetched = false;
 
     struct Result {
         int label;
         float confidence;
         cv::Rect location;
+        size_t channelId;
     };
 
-    std::vector<Result> results;
-
-    void submitRequest() override {
-        resultsFetched = false;
-        results.clear();
-        BaseDetection::submitRequest();
-    }
-
-    void setRoiBlob(const Blob::Ptr &frameBlob) override {
-        height = frameBlob->getTensorDesc().getDims()[2];
-        width = frameBlob->getTensorDesc().getDims()[3];
-        BaseDetection::setRoiBlob(frameBlob);
-    }
-
-    void enqueue(const cv::Mat &frame) override {
-        height = frame.rows;
-        width = frame.cols;
-        BaseDetection::enqueue(frame);
-    }
-
     VehicleDetection() : BaseDetection(FLAGS_m, "Vehicle") {}
+
+    VehicleDetectionInferRequest::Ptr createInferRequest() {
+        if (!enabled())
+            return nullptr;
+
+        return std::make_shared<VehicleDetectionInferRequest>(net, inputName);
+    }
+
     CNNNetwork read() override {
-        std::cout << "[ INFO ] Loading network files for VehicleDetection" << std::endl;
+        slog::info << "Loading network files for VehicleDetection" << slog::endl;
         CNNNetReader netReader;
         /** Read network model **/
         netReader.ReadNetwork(FLAGS_m);
         /** Set batch size to 1 **/
-        std::cout << "[ INFO ] Batch size is forced to  1" << std::endl;
+        slog::info << "Batch size is forced to  1" << slog::endl;
         netReader.getNetwork().setBatchSize(1);
         /** Extract model name and load it's weights **/
         std::string binFileName = fileNameNoExt(FLAGS_m) + ".bin";
@@ -182,7 +224,7 @@ struct VehicleDetection : BaseDetection{
 
         /** SSD-based network should have one input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
-        std::cout << "[ INFO ] Checking Vehicle Detection inputs" << std::endl;
+        slog::info << "Checking Vehicle Detection inputs" << slog::endl;
         InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Vehicle Detection network should have only one input");
@@ -200,7 +242,7 @@ struct VehicleDetection : BaseDetection{
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Check outputs ------------------------------------------------------
-        std::cout << "[ INFO ] Checking Vehicle Detection outputs" << std::endl;
+        slog::info << "Checking Vehicle Detection outputs" << slog::endl;
         OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
         if (outputInfo.size() != 1) {
             throw std::logic_error("Vehicle Detection network should have only one output");
@@ -219,16 +261,14 @@ struct VehicleDetection : BaseDetection{
         _output->setPrecision(Precision::FP32);
         _output->setLayout(Layout::NCHW);
 
-        std::cout << "[ INFO ] Loading Vehicle Detection model to the "<< FLAGS_d << " plugin" << std::endl;
+        slog::info << "Loading Vehicle Detection model to the "<< FLAGS_d << " plugin" << slog::endl;
         return netReader.getNetwork();
     }
 
-    void fetchResults() {
-        if (!enabled()) return;
-        results.clear();
-        if (resultsFetched) return;
-        resultsFetched = true;
-        const float *detections = request.GetBlob(outputName)->buffer().as<float *>();
+    void fetchResults(VehicleDetectionInferRequest::Ptr request, std::vector<Result>& results) {
+        cv::Size srcImageSize = request->getSourceImageSize();
+        size_t channelId = request->getId();
+        const float *detections = request->getBlob(outputName)->buffer().as<float *>();
         // pretty much regular SSD post-processing
         for (int i = 0; i < maxProposalCount; i++) {
             float image_id = detections[i * objectSize + 0];  // in case of batch
@@ -239,10 +279,12 @@ struct VehicleDetection : BaseDetection{
                 continue;
             }
 
-            r.location.x = detections[i * objectSize + 3] * width;
-            r.location.y = detections[i * objectSize + 4] * height;
-            r.location.width = detections[i * objectSize + 5] * width - r.location.x;
-            r.location.height = detections[i * objectSize + 6] * height - r.location.y;
+            r.location.x = detections[i * objectSize + 3] * srcImageSize.width;
+            r.location.y = detections[i * objectSize + 4] * srcImageSize.height;
+            r.location.width = detections[i * objectSize + 5] * srcImageSize.width - r.location.x;
+            r.location.height = detections[i * objectSize + 6] * srcImageSize.height - r.location.y;
+
+            r.channelId = channelId;
 
             if (image_id < 0) {  // indicates end of detections
                 break;
@@ -253,6 +295,7 @@ struct VehicleDetection : BaseDetection{
                           << r.location.height << ")"
                           << ((r.confidence > FLAGS_t) ? " WILL BE RENDERED!" : "") << std::endl;
             }
+
             results.push_back(r);
         }
     }
@@ -264,8 +307,15 @@ struct VehicleAttribsDetection : BaseDetection {
 
     VehicleAttribsDetection() : BaseDetection(FLAGS_m_va, "Vehicle Attribs") {}
 
+    BaseInferRequest::Ptr createInferRequest() {
+        if (!enabled())
+            return nullptr;
+
+        return std::make_shared<BaseInferRequest>(net, inputName);
+    }
+
     struct Attributes { std::string type; std::string color;};
-    Attributes GetAttributes() {
+    Attributes GetAttributes(BaseInferRequest::Ptr request) {
         static const std::string colors[] = {
                 "white", "gray", "yellow", "red", "green", "blue", "black"
         };
@@ -274,22 +324,23 @@ struct VehicleAttribsDetection : BaseDetection {
         };
 
         // 7 possible colors for each vehicle and we should select the one with the maximum probability
-        auto colorsValues = request.GetBlob(outputNameForColor)->buffer().as<float*>();
+        auto colorsValues = request->getBlob(outputNameForColor)->buffer().as<float*>();
         // 4 possible types for each vehicle and we should select the one with the maximum probability
-        auto typesValues  = request.GetBlob(outputNameForType)->buffer().as<float*>();
+        auto typesValues  = request->getBlob(outputNameForType)->buffer().as<float*>();
 
         const auto color_id = std::max_element(colorsValues, colorsValues + 7) - colorsValues;
         const auto type_id =  std::max_element(typesValues,  typesValues  + 4) - typesValues;
+
         return {types[type_id], colors[color_id]};
     }
 
     CNNNetwork read() override {
-        std::cout << "[ INFO ] Loading network files for VehicleAttribs" << std::endl;
+        slog::info << "Loading network files for VehicleAttribs" << slog::endl;
         CNNNetReader netReader;
         /** Read network model **/
         netReader.ReadNetwork(FLAGS_m_va);
         netReader.getNetwork().setBatchSize(1);
-        std::cout << "[ INFO ] Batch size is forced to 1 for Vehicle Attribs" << std::endl;
+        slog::info << "Batch size is forced to 1 for Vehicle Attribs" << slog::endl;
 
         /** Extract model name and load it's weights **/
         std::string binFileName = fileNameNoExt(FLAGS_m_va) + ".bin";
@@ -298,7 +349,7 @@ struct VehicleAttribsDetection : BaseDetection {
 
         /** Vehicle Attribs network should have one input two outputs **/
         // ---------------------------Check inputs ------------------------------------------------------
-        std::cout << "[ INFO ] Checking VehicleAttribs inputs" << std::endl;
+        slog::info << "Checking VehicleAttribs inputs" << slog::endl;
         InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Vehicle Attribs topology should have only one input");
@@ -315,7 +366,7 @@ struct VehicleAttribsDetection : BaseDetection {
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Check outputs ------------------------------------------------------
-        std::cout << "[ INFO ] Checking Vehicle Attribs outputs" << std::endl;
+        slog::info << "Checking Vehicle Attribs outputs" << slog::endl;
         OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
         if (outputInfo.size() != 2) {
             throw std::logic_error("Vehicle Attribs Network expects networks having two outputs");
@@ -324,19 +375,21 @@ struct VehicleAttribsDetection : BaseDetection {
         outputNameForColor = (it++)->second->name;  // color is the first output
         outputNameForType = (it++)->second->name;  // type is the second output
 
-        std::cout << "[ INFO ] Loading Vehicle Attribs model to the "<< FLAGS_d_va << " plugin" << std::endl;
+        slog::info << "Loading Vehicle Attribs model to the "<< FLAGS_d_va << " plugin" << slog::endl;
         _enabled = true;
         return netReader.getNetwork();
     }
 };
 
-struct LPRDetection : BaseDetection {
+struct LPRInferRequest : BaseInferRequest {
     std::string inputSeqName;
-    const int maxSequenceSizePerPlate = 88;
-    LPRDetection() : BaseDetection(FLAGS_m_lpr, "License Plate Recognition") {}
+
+    LPRInferRequest(ExecutableNetwork& net, std::string& inputName, std::string& inputSeqName) :
+        BaseInferRequest(net, inputName), inputSeqName(inputSeqName) {}
 
     void fillSeqBlob() {
-        Blob::Ptr seqBlob = request.GetBlob(inputSeqName);
+        Blob::Ptr seqBlob = request->GetBlob(inputSeqName);
+        int maxSequenceSizePerPlate = seqBlob->getTensorDesc().getDims()[0];
         // second input is sequence, which is some relic from the training
         // it should have the leading 0.0f and rest 1.0f
         float* blob_data = seqBlob->buffer().as<float*>();
@@ -344,17 +397,33 @@ struct LPRDetection : BaseDetection {
         std::fill(blob_data + 1, blob_data + maxSequenceSizePerPlate, 1.0f);
     }
 
-    void setRoiBlob(const Blob::Ptr &lprBlob) {
-        BaseDetection::setRoiBlob(lprBlob);
+    void setBlob(const Blob::Ptr &frameBlob) override {
+        BaseInferRequest::setBlob(frameBlob);
         fillSeqBlob();
     }
 
-    void enqueue(const cv::Mat &frame) override {
-        BaseDetection::enqueue(frame);
+    void setImage(const cv::Mat &frame) override {
+        BaseInferRequest::setImage(frame);
         fillSeqBlob();
     }
 
-    std::string GetLicencePlateText() {
+    using Ptr = std::shared_ptr<LPRInferRequest>;
+};
+
+struct LPRDetection : BaseDetection {
+    std::string inputSeqName;
+    const int maxSequenceSizePerPlate = 88;
+
+    LPRDetection() : BaseDetection(FLAGS_m_lpr, "License Plate Recognition") {}
+
+    BaseInferRequest::Ptr createInferRequest() {
+        if (!enabled())
+            return nullptr;
+
+        return std::make_shared<LPRInferRequest>(net, inputName, inputSeqName);
+    }
+
+    std::string GetLicencePlateText(BaseInferRequest::Ptr request) {
         static std::vector<std::string> items = {
                 "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
                 "<Anhui>", "<Beijing>", "<Chongqing>", "<Fujian>",
@@ -371,21 +440,22 @@ struct LPRDetection : BaseDetection {
                 "U", "V", "W", "X", "Y", "Z"
         };
         // up to 88 items per license plate, ended with "-1"
-        const auto data = request.GetBlob(outputName)->buffer().as<float*>();
+        const auto data = request->getBlob(outputName)->buffer().as<float*>();
         std::string result;
         for (int i = 0; i < maxSequenceSizePerPlate; i++) {
             if (data[i] == -1)
                 break;
             result += items[data[i]];
         }
+
         return result;
     }
     CNNNetwork read() override {
-        std::cout << "[ INFO ] Loading network files for Licence Plate Recognition (LPR)" << std::endl;
+        slog::info << "Loading network files for Licence Plate Recognition (LPR)" << slog::endl;
         CNNNetReader netReader;
         /** Read network model **/
         netReader.ReadNetwork(FLAGS_m_lpr);
-        std::cout << "[ INFO ] Batch size is forced to  1 for LPR Network" << std::endl;
+        slog::info << "Batch size is forced to  1 for LPR Network" << slog::endl;
         netReader.getNetwork().setBatchSize(1);
         /** Extract model name and load it's weights **/
         std::string binFileName = fileNameNoExt(FLAGS_m_lpr) + ".bin";
@@ -393,7 +463,7 @@ struct LPRDetection : BaseDetection {
 
         /** LPR network should have 2 inputs (and second is just a stub) and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
-        std::cout << "[ INFO ] Checking LPR Network inputs" << std::endl;
+        slog::info << "Checking LPR Network inputs" << slog::endl;
         InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
         if (inputInfo.size() != 2) {
             throw std::logic_error("LPR should have 2 inputs");
@@ -415,13 +485,13 @@ struct LPRDetection : BaseDetection {
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Check outputs ------------------------------------------------------
-        std::cout << "[ INFO ] Checking LPR Network outputs" << std::endl;
+        slog::info << "Checking LPR Network outputs" << slog::endl;
         OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
         if (outputInfo.size() != 1) {
             throw std::logic_error("LPR should have 1 output");
         }
         outputName = outputInfo.begin()->first;
-        std::cout << "[ INFO ] Loading LPR model to the "<< FLAGS_d_lpr << " plugin" << std::endl;
+        slog::info << "Loading LPR model to the "<< FLAGS_d_lpr << " plugin" << slog::endl;
 
         _enabled = true;
         return netReader.getNetwork();
@@ -440,35 +510,179 @@ struct Load {
     }
 };
 
+struct VehicleObject {
+    std::string type;
+    std::string color;
+    cv::Rect location;
+    int channelId;
+};
+
+struct LicensePlateObject {
+    std::string text;
+    cv::Rect location;
+    int channelId;
+};
+
+const size_t MAX_DISP_WIDTH  = 1920;
+const size_t MAX_DISP_HEIGHT = 1080;
+
+struct GridMat {
+    cv::Mat outimg;
+    cv::Size cellSize;
+    std::vector<cv::Point> points;
+
+    explicit GridMat(std::vector<cv::VideoCapture>& cap, std::vector<cv::Mat>& images) {
+        int nChannels = cap.size() + images.size();
+
+        size_t maxWidth = 0;
+        size_t maxHeight = 0;
+        for (size_t i = 0; i < cap.size(); i++) {
+            maxWidth = std::max(maxWidth, (size_t) cap[i].get(cv::CAP_PROP_FRAME_WIDTH));
+            maxHeight = std::max(maxHeight, (size_t) cap[i].get(cv::CAP_PROP_FRAME_HEIGHT));
+        }
+
+        for (size_t i = 0; i < images.size(); i++) {
+            maxWidth = std::max(maxWidth, (size_t) images[i].cols);
+            maxHeight = std::max(maxHeight, (size_t) images[i].rows);
+        }
+
+        size_t nGridCols = static_cast<size_t>(ceil(sqrt(static_cast<float>(nChannels))));
+        size_t nGridRows = (nChannels - 1) / nGridCols + 1;
+        size_t gridMaxWidth = static_cast<size_t>(MAX_DISP_WIDTH/nGridCols);
+        size_t gridMaxHeight = static_cast<size_t>(MAX_DISP_HEIGHT/nGridRows);
+
+        float scaleWidth = static_cast<float>(gridMaxWidth) / maxWidth;
+        float scaleHeight = static_cast<float>(gridMaxHeight) / maxHeight;
+        float scaleFactor = std::min(1.f, std::min(scaleWidth, scaleHeight));
+
+        cellSize.width = maxWidth * scaleFactor;
+        cellSize.height = maxHeight * scaleFactor;
+
+        for (size_t i = 0; i < nChannels; i++) {
+            cv::Point p;
+            p.x = cellSize.width * (i % nGridCols);
+            p.y = cellSize.height * (i / nGridCols);
+            points.push_back(p);
+        }
+
+        outimg.create(cellSize.height * nGridRows, cellSize.width * nGridCols, CV_8UC3);
+        outimg.setTo(0);
+    }
+
+    void fill(std::vector<cv::Mat>& frames) {
+        if (frames.size() > points.size()) {
+            throw std::logic_error("Cannot display " + std::to_string(frames.size()) + " channels in a grid with " + std::to_string(points.size()) + " cells");
+        }
+
+        for (size_t i = 0; i < frames.size(); i++) {
+            cv::Mat cell = outimg(cv::Rect(points[i].x, points[i].y, cellSize.width, cellSize.height));
+
+            if ((cellSize.width == frames[i].cols) && (cellSize.height == frames[i].rows)) {
+                frames[i].copyTo(cell);
+            } else if ((cellSize.width > frames[i].cols) && (cellSize.height > frames[i].rows)) {
+                frames[i].copyTo(cell(cv::Rect(0, 0, frames[i].cols, frames[i].rows)));
+            } else {
+                float scaleWidth = static_cast<float>(cellSize.width) / frames[i].cols;
+                float scaleHeight = static_cast<float>(cellSize.height) / frames[i].rows;
+                float scaleFactor = std::min(1.f, std::min(scaleWidth, scaleHeight));
+
+                cv::Size newSize;
+                newSize.width = frames[i].cols * scaleFactor;
+                newSize.height = frames[i].rows * scaleFactor;
+                cv::resize(frames[i], cell(cv::Rect(0, 0, newSize.width, newSize.height)), newSize);
+            }
+        }
+    }
+
+    const cv::Mat& getMat() {
+        return outimg;
+    }
+};
+
+/** Map {device : plugin} for each topology **/
+std::map<std::string, InferencePlugin> pluginsForNetworks;
+
 int main(int argc, char *argv[]) {
     try {
         /** This demo covers 3 certain topologies and cannot be generalized **/
-        std::cout << "InferenceEngine: " << GetInferenceEngineVersion() << std::endl;
+        slog::info << "InferenceEngine: " << GetInferenceEngineVersion() << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
 
-        std::cout << "[ INFO ] Reading input" << std::endl;
-        cv::Mat frame = cv::imread(FLAGS_i, cv::IMREAD_COLOR);
-        const bool isVideo = frame.empty();
-        cv::VideoCapture cap;
-        if (isVideo && !(FLAGS_i == "cam" ? cap.open(0) : cap.open(FLAGS_i))) {
-            throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);
+        std::vector<cv::VideoCapture> cap;
+        std::vector<cv::Mat> images;
+
+        if (FLAGS_i == "cam") {
+            slog::info << "Capturing video streams from the cameras" << slog::endl;
+            slog::info << "Number of input web cams:    " << FLAGS_nc << slog::endl;
+
+            if (FLAGS_nc > 0) {
+                slog::info << "Trying to connect " << FLAGS_nc << " web cams ..." << slog::endl;
+                for (size_t i = 0; i < FLAGS_nc; i++) {
+                    cv::VideoCapture camera(i);
+                    if (!camera.isOpened()) {
+                        throw std::logic_error("Cannot open camera: " + std::to_string(i));
+                    }
+
+                    cap.push_back(camera);
+                }
+            }
+        } else {
+            slog::info << "Capturing video streams from the video files or loading images" << slog::endl;
+            /** This vector stores paths to the processed videos and images **/
+            std::vector<std::string> inputFiles;
+            parseInputFilesArguments(inputFiles);
+
+            std::vector<std::string> videoFiles;
+            for (auto && name : inputFiles) {
+                cv::Mat frame = cv::imread(name, cv::IMREAD_COLOR);
+                if (frame.empty()) {
+                    videoFiles.push_back(name);
+                } else {
+                    images.push_back(frame);
+                }
+            }
+
+            size_t nImageFiles = images.size();
+            size_t nVideoFiles = videoFiles.size();
+
+            slog::info << "Number of input image files: " << nImageFiles << slog::endl;
+            slog::info << "Number of input video files: " << nVideoFiles << slog::endl;
+
+            if (nVideoFiles > 0) {
+                slog::info << "Trying to open input video ..." << slog::endl;
+                for (auto && videoFile : videoFiles) {
+                    cv::VideoCapture video(videoFile);
+                    if (!video.isOpened()) {
+                        throw std::logic_error("Cannot open input file: " + videoFile);
+                    }
+
+                    cap.push_back(video);
+                }
+            }
         }
-        const size_t width  = isVideo ? (size_t) cap.get(CV_CAP_PROP_FRAME_WIDTH) : frame.size().width;
-        const size_t height = isVideo ? (size_t) cap.get(CV_CAP_PROP_FRAME_HEIGHT) : frame.size().height;
+
+        size_t nInputChannels = cap.size() + images.size();
+        slog::info << "Number of input channels:    " << nInputChannels << slog::endl;
+
+        /** Create display image **/
+        GridMat displayImage(cap, images);
+
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 1. Load Plugin for inference engine -------------------------------------
-        std::map<std::string, InferencePlugin> pluginsForNetworks;
-        std::vector<std::string> pluginNames = {
-                FLAGS_d, FLAGS_d_va, FLAGS_d_lpr
-        };
         LPRDetection LPR;
-        VehicleDetection VehicleDetection;
+        VehicleDetection VehicleDetector;
         VehicleAttribsDetection VehicleAttribs;
+
+        std::vector<std::string> pluginNames = {
+                FLAGS_d,
+                VehicleAttribs.enabled() ? FLAGS_d_va : "",
+                LPR.enabled() ? FLAGS_d_lpr : ""
+        };
 
         for (auto && flag : pluginNames) {
             if (flag == "") continue;
@@ -476,7 +690,7 @@ int main(int argc, char *argv[]) {
             if (i != pluginsForNetworks.end()) {
                 continue;
             }
-            std::cout << "[ INFO ] Loading plugin " << flag << std::endl;
+            slog::info << "Loading plugin " << flag << slog::endl;
             InferencePlugin plugin = PluginDispatcher({"../../../lib/intel64", ""}).getPluginByDevice(flag);
 
             /** Printing plugin version **/
@@ -485,10 +699,12 @@ int main(int argc, char *argv[]) {
             if ((flag.find("CPU") != std::string::npos)) {
                 /** Load default extensions lib for the CPU plugin (e.g. SSD's DetectionOutput)**/
                 plugin.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>());
+
                 if (!FLAGS_l.empty()) {
-                    // Any user-specified CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = make_so_pointer<MKLDNNPlugin::IMKLDNNExtension>(FLAGS_l);
-                    plugin.AddExtension(std::static_pointer_cast<IExtension>(extension_ptr));
+                    // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
+                    auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
+                    plugin.AddExtension(extension_ptr);
+                    slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
             }
 
@@ -508,180 +724,424 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 2. Read IR models and load them to plugins ------------------------------
-        Load(VehicleDetection).into(pluginsForNetworks[FLAGS_d]);
+        Load(VehicleDetector).into(pluginsForNetworks[FLAGS_d]);
         Load(VehicleAttribs).into(pluginsForNetworks[FLAGS_d_va]);
         Load(LPR).into(pluginsForNetworks[FLAGS_d_lpr]);
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 3. Do inference ---------------------------------------------------------
-        Blob::Ptr frameBlob;  // this blob includes pixel data from each frame
-        ROI cropRoi;  // cropped image coordinates
-        Blob::Ptr roiBlob;  // This blob contains data from cropped image (vehicle or license plate)
+        // --------------------------- 3. Create inferense requests --------------------------------------------
+        std::queue<VehicleDetectionInferRequest::Ptr> availableVDetectionRequests, pendingVDetectionRequests;
+        std::queue<BaseInferRequest::Ptr> availableVAttribsRequestes, pendingVAttribsRequestes;
+        std::queue<BaseInferRequest::Ptr> availableLPRRequests, pendingLPRRequests;
+        for (size_t i = 0; i < FLAGS_nireq; i++) {
+            availableVDetectionRequests.push(VehicleDetector.createInferRequest());
+            availableVAttribsRequestes.push(VehicleAttribs.createInferRequest());
+            availableLPRRequests.push(LPR.createInferRequest());
+        }
+        // -----------------------------------------------------------------------------------------------------
 
-        std::cout << "[ INFO ] Start inference " << std::endl;
+        // --------------------------- 4. Do inference ---------------------------------------------------------
+        std::vector<cv::Mat> frames(nInputChannels);  // frame images
+        std::vector<Blob::Ptr> frameBlobs(nInputChannels);  // this blobs includes pixel data from each frame
+
+        slog::info << "Start inference " << slog::endl;
         typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
 
         /** Start inference & calc performance **/
+        ms total_inference_time(0);
+        size_t nFrames(0);
+        size_t nImageChannels = images.size();
+        size_t nVideoChannels = cap.size();
+        bool isVideo = (nImageChannels == 0);
+        int pause(isVideo ? 1 :0);
         auto total_t0 = std::chrono::high_resolution_clock::now();
         do {
-            // get and enqueue the next frame (in case of video)
-            if (isVideo && !cap.read(frame)) {
-                if (frame.empty())
-                    break;  // end of video file
-                throw std::logic_error("Failed to get frame from cv::VideoCapture");
+            /** set images **/
+            for (size_t i = 0; i < nImageChannels; i++) {
+                frames[i] = images[i];
             }
 
-            if (FLAGS_auto_resize) {
-                // just wrap Mat object with Blob::Ptr without additional memory allocation
-                frameBlob = wrapMat2Blob(frame);
-                VehicleDetection.setRoiBlob(frameBlob);
-            } else {
-                VehicleDetection.enqueue(frame);
-            }
-            // ----------------------------Run Vehicle detection inference------------------------------------------
-            auto t0 = std::chrono::high_resolution_clock::now();
-            VehicleDetection.submitRequest();
-            VehicleDetection.wait();
-            auto t1 = std::chrono::high_resolution_clock::now();
-            ms detection = std::chrono::duration_cast<ms>(t1 - t0);
-            // parse inference results internally (e.g. apply a threshold, etc)
-            VehicleDetection.fetchResults();
-            // -----------------------------------------------------------------------------------------------------
-
-            // ----------------------------Process the results down to the pipeline---------------------------------
-            ms AttribsNetworkTime(0), LPRNetworktime(0);
-            int AttribsInferred = 0,  LPRInferred = 0;
-            for (auto && result : VehicleDetection.results) {
-                std::string attrColor = "";
-                std::string attrType = "";
-                std::string lprStr = "";
-
-                if (result.label == 1) {  // vehicle
-                    if (VehicleAttribs.enabled()) {
-                        // ----------------------------Run vehicle attribute ----------------
-                        if (FLAGS_auto_resize) {
-                            cropRoi.posX = (result.location.x < 0) ? 0 : result.location.x;
-                            cropRoi.posY = (result.location.y < 0) ? 0 : result.location.y;
-                            cropRoi.sizeX = std::min((size_t) result.location.width, width - cropRoi.posX);
-                            cropRoi.sizeY = std::min((size_t) result.location.height, height - cropRoi.posY);
-                            roiBlob = make_shared_blob(frameBlob, cropRoi);
-                            VehicleAttribs.setRoiBlob(roiBlob);
-                        } else {
-                            // To crop ROI manually and allocate required memory (cv::Mat) again
-                            auto clippedRect = result.location & cv::Rect(0, 0, width, height);
-                            cv::Mat vehicle = frame(clippedRect);
-                            VehicleAttribs.enqueue(vehicle);
-                        }
-
-                        t0 = std::chrono::high_resolution_clock::now();
-                        VehicleAttribs.submitRequest();
-                        VehicleAttribs.wait();
-                        t1 = std::chrono::high_resolution_clock::now();
-                        AttribsNetworkTime += std::chrono::duration_cast<ms>(t1 - t0);
-                        AttribsInferred++;
-
-                        attrColor = VehicleAttribs.GetAttributes().color;
-                        attrType = VehicleAttribs.GetAttributes().type;
+            /** decode frames **/
+            bool endOfVideo = false;
+            for (size_t i = 0; i < nVideoChannels; i++) {
+                if (!cap[i].read(frames[i + nImageChannels])) {
+                    if (frames[i + nImageChannels].empty()) {
+                         endOfVideo = true;  // end of video file
+                         break;
                     }
-                    cv::rectangle(frame, result.location, cv::Scalar(0, 255, 0), 2);
+                    throw std::logic_error("Failed to get frame from cv::VideoCapture from " + std::to_string(i) + " channel");
+                }
+            }
+
+            /** stop processing if one of the input channel is empty **/
+            if (endOfVideo) {
+                break;
+            }
+
+            /** inference **/
+            std::vector<VehicleObject> vehicles;
+            std::vector<LicensePlateObject> licensePlates;
+            std::vector<VehicleDetection::Result> results;
+            ms VehicleDetectorTime(0), AttribsNetworkTime(0), LPRNetworkTime(0);
+            int VehicleDetectorInferred = 0, AttribsInferred = 0,  LPRInferred = 0;
+            auto inference_t0 = std::chrono::high_resolution_clock::now();
+            for (size_t i = 0; i < nInputChannels; i++) {
+                if (availableVDetectionRequests.empty()) {
+                    // ----------------------------Get vehicle detection results -------------------------------------------
+                    VehicleDetectionInferRequest::Ptr vehicleDetectionRequest = pendingVDetectionRequests.front();
+
+                    vehicleDetectionRequest->wait();
+
+                    VehicleDetector.fetchResults(vehicleDetectionRequest, results);
+
+                    VehicleDetectorTime += vehicleDetectionRequest->getTime();
+                    VehicleDetectorInferred++;
+
+                    pendingVDetectionRequests.pop();
+                    availableVDetectionRequests.push(vehicleDetectionRequest);
+                    // -----------------------------------------------------------------------------------------------------
+                }
+
+                // ----------------------------Asynchronous run of a vehicle detection inference -----------------------
+                VehicleDetectionInferRequest::Ptr vehicleDetectionRequest = availableVDetectionRequests.front();
+
+                vehicleDetectionRequest->setId(i);
+
+                if (FLAGS_auto_resize) {
+                    // just wrap Mat object with Blob::Ptr without additional memory allocation
+                    frameBlobs[i] = wrapMat2Blob(frames[i]);
+                    vehicleDetectionRequest->setBlob(frameBlobs[i]);
+                    vehicleDetectionRequest->setSourceImageSize(frames[i].cols, frames[i].rows);
                 } else {
-                    if (LPR.enabled()) {  // licence plate
-                        // ----------------------------Run License Plate Recognition ----------------
-                        // expanding a bounding box a bit, better for the license plate recognition
-                        result.location.x -= 5;
-                        result.location.y -= 5;
-                        result.location.width += 10;
-                        result.location.height += 10;
-                        if (FLAGS_auto_resize) {
-                            cropRoi.posX = (result.location.x < 0) ? 0 : result.location.x;
-                            cropRoi.posY = (result.location.y < 0) ? 0 : result.location.y;
-                            cropRoi.sizeX = std::min((size_t) result.location.width, width - cropRoi.posX);
-                            cropRoi.sizeY = std::min((size_t) result.location.height, height - cropRoi.posY);
-                            roiBlob = make_shared_blob(frameBlob, cropRoi);
-                            LPR.setRoiBlob(roiBlob);
-                        } else {
-                            // To crop ROI manually and allocate required memory (cv::Mat) again
-                            auto clippedRect = result.location & cv::Rect(0, 0, width, height);
-                            cv::Mat plate = frame(clippedRect);
-                            LPR.enqueue(plate);
-                        }
+                    vehicleDetectionRequest->setImage(frames[i]);
+                }
 
-                        t0 = std::chrono::high_resolution_clock::now();
-                        LPR.submitRequest();
-                        LPR.wait();
-                        t1 = std::chrono::high_resolution_clock::now();
-                        LPRNetworktime += std::chrono::duration_cast<ms>(t1 - t0);
-                        LPRInferred++;
-                        lprStr = LPR.GetLicencePlateText();
-                    }
-                    cv::rectangle(frame, result.location, cv::Scalar(0, 0, 255), 2);
+                vehicleDetectionRequest->startAsync();
+
+                availableVDetectionRequests.pop();
+                pendingVDetectionRequests.push(vehicleDetectionRequest);
+                // -----------------------------------------------------------------------------------------------------
+            }
+
+            size_t pidx = 0;
+            while (!pendingVDetectionRequests.empty()) {
+                if (pidx == results.size()) {
+                    // ----------------------------Get vehicle detection results -------------------------------------------
+                    VehicleDetectionInferRequest::Ptr vehicleDetectionRequest = pendingVDetectionRequests.front();
+
+                    vehicleDetectionRequest->wait();
+
+                    VehicleDetector.fetchResults(vehicleDetectionRequest, results);
+
+                    VehicleDetectorTime += vehicleDetectionRequest->getTime();
+                    VehicleDetectorInferred++;
+
+                    pendingVDetectionRequests.pop();
+                    availableVDetectionRequests.push(vehicleDetectionRequest);
+                    // -----------------------------------------------------------------------------------------------------
                 }
-                // ----------------------------Process outputs-----------------------------------------------------
-                if (!attrColor.empty() && !attrType.empty()) {
-                    cv::putText(frame,
-                                attrColor,
-                                cv::Point2f(result.location.x, result.location.y + 15),
-                                cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                0.8,
-                                cv::Scalar(255, 255, 255));
-                    cv::putText(frame,
-                                attrType,
-                                cv::Point2f(result.location.x, result.location.y + 30),
-                                cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                0.8,
-                                cv::Scalar(255, 255, 255));
-                    if (FLAGS_r) {
-                        std::cout << "Vehicle Attributes results:" << attrColor << ";" << attrType << std::endl;
-                    }
-                }
-                if (!lprStr.empty()) {
-                    cv::putText(frame,
-                                lprStr,
-                                cv::Point2f(result.location.x, result.location.y + result.location.height + 15),
-                                cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                0.8,
-                                cv::Scalar(0, 0, 255));
-                    if (FLAGS_r) {
-                        std::cout << "License Plate Recognition results:" << lprStr << std::endl;
+
+                for (; pidx < results.size(); pidx++) {
+                    if (results[pidx].label == 1) {  // vehicle
+                        if (VehicleAttribs.enabled()) {
+                            // ----------------------------Run Vehicle Attributes Classification -----------------------
+                            if (availableVAttribsRequestes.empty()) {
+                                // ----------------------------Get vehicle attributes --------------------------------------
+                                BaseInferRequest::Ptr VehicleAttribsRequest = pendingVAttribsRequestes.front();
+
+                                VehicleAttribsRequest->wait();
+
+                                auto attr = VehicleAttribs.GetAttributes(VehicleAttribsRequest);
+                                size_t ridx = VehicleAttribsRequest->getId();
+
+                                VehicleObject v;
+                                v.location = results[ridx].location;
+                                v.color = attr.color;
+                                v.type = attr.type;
+                                v.channelId = results[ridx].channelId;
+
+                                vehicles.push_back(v);
+
+                                AttribsNetworkTime += VehicleAttribsRequest->getTime();
+                                AttribsInferred++;
+
+                                pendingVAttribsRequestes.pop();
+                                availableVAttribsRequestes.push(VehicleAttribsRequest);
+                                // -----------------------------------------------------------------------------------------
+                            }
+
+                            // -----------------------Asynchronous run of a vehicle attributes classification --------------
+                            BaseInferRequest::Ptr VehicleAttribsRequest = availableVAttribsRequestes.front();
+
+                            VehicleAttribsRequest->setId(pidx);
+
+                            cv::Mat frame = frames[results[pidx].channelId];
+                            if (FLAGS_auto_resize) {
+                                ROI cropRoi;
+                                cropRoi.posX = (results[pidx].location.x < 0) ? 0 : results[pidx].location.x;
+                                cropRoi.posY = (results[pidx].location.y < 0) ? 0 : results[pidx].location.y;
+                                cropRoi.sizeX = std::min((size_t) results[pidx].location.width, frame.cols - cropRoi.posX);
+                                cropRoi.sizeY = std::min((size_t) results[pidx].location.height, frame.rows - cropRoi.posY);
+                                Blob::Ptr roiBlob = make_shared_blob(frameBlobs[results[pidx].channelId], cropRoi);
+                                VehicleAttribsRequest->setBlob(roiBlob);
+                            } else {
+                                // To crop ROI manually and allocate required memory (cv::Mat) again
+                                auto clippedRect = results[pidx].location & cv::Rect(0, 0, frame.cols, frame.rows);
+                                cv::Mat vehicle = frame(clippedRect);
+                                VehicleAttribsRequest->setImage(vehicle);
+                            }
+
+                            VehicleAttribsRequest->startAsync();
+
+                            availableVAttribsRequestes.pop();
+                            pendingVAttribsRequestes.push(VehicleAttribsRequest);
+                            // -----------------------------------------------------------------------------------------
+                        } else {
+                            VehicleObject v;
+                            v.location = results[pidx].location;
+                            v.channelId = results[pidx].channelId;
+                            vehicles.push_back(v);
+                        }
+                    } else {
+                        if (LPR.enabled()) {  // licence plate
+                            // ----------------------------Run License Plate Recognition -------------------------------
+                            if (availableLPRRequests.empty()) {
+                                // ----------------------------Get License Plate Text --------------------------------------
+                                BaseInferRequest::Ptr LPRRequest = pendingLPRRequests.front();
+
+                                LPRRequest->wait();
+
+                                std::string text = LPR.GetLicencePlateText(LPRRequest);
+                                size_t ridx = LPRRequest->getId();
+
+                                LicensePlateObject lp;
+                                lp.location = results[ridx].location;
+                                lp.text = text;
+                                lp.channelId = results[ridx].channelId;
+
+                                licensePlates.push_back(lp);
+
+                                LPRNetworkTime += LPRRequest->getTime();
+                                LPRInferred++;
+
+                                pendingLPRRequests.pop();
+                                availableLPRRequests.push(LPRRequest);
+                                // -----------------------------------------------------------------------------------------
+                            }
+
+                            // ----------------------------Asynchronous run of a license plate decoding ----------------
+                            BaseInferRequest::Ptr LPRRequest = availableLPRRequests.front();
+
+                            LPRRequest->setId(pidx);
+
+                            cv::Mat frame = frames[results[pidx].channelId];
+                            // expanding a bounding box a bit, better for the license plate recognition
+                            results[pidx].location.x -= 5;
+                            results[pidx].location.y -= 5;
+                            results[pidx].location.width += 10;
+                            results[pidx].location.height += 10;
+                            if (FLAGS_auto_resize) {
+                                ROI cropRoi;
+                                cropRoi.posX = (results[pidx].location.x < 0) ? 0 : results[pidx].location.x;
+                                cropRoi.posY = (results[pidx].location.y < 0) ? 0 : results[pidx].location.y;
+                                cropRoi.sizeX = std::min((size_t) results[pidx].location.width, frame.cols - cropRoi.posX);
+                                cropRoi.sizeY = std::min((size_t) results[pidx].location.height, frame.rows - cropRoi.posY);
+                                Blob::Ptr roiBlob = make_shared_blob(frameBlobs[results[pidx].channelId], cropRoi);
+                                LPRRequest->setBlob(roiBlob);
+                            } else {
+                                // To crop ROI manually and allocate required memory (cv::Mat) again
+                                auto clippedRect = results[pidx].location & cv::Rect(0, 0, frame.cols, frame.rows);
+                                cv::Mat plate = frame(clippedRect);
+                                LPRRequest->setImage(plate);
+                            }
+
+                            LPRRequest->startAsync();
+
+                            availableLPRRequests.pop();
+                            pendingLPRRequests.push(LPRRequest);
+                            // -----------------------------------------------------------------------------------------
+                        } else {
+                            LicensePlateObject lp;
+                            lp.location = results[pidx].location;
+                            lp.channelId = results[pidx].channelId;
+                            licensePlates.push_back(lp);
+                        }
                     }
                 }
             }
+
+            // ----------------------------Get results from pending requests --------------------------------------
+            while (!pendingVAttribsRequestes.empty()) {
+                // ----------------------------Get vehicle attributes --------------------------------------
+                BaseInferRequest::Ptr VehicleAttribsRequest = pendingVAttribsRequestes.front();
+
+                VehicleAttribsRequest->wait();
+
+                auto attr = VehicleAttribs.GetAttributes(VehicleAttribsRequest);
+                size_t ridx = VehicleAttribsRequest->getId();
+
+                VehicleObject v;
+                v.location = results[ridx].location;
+                v.color = attr.color;
+                v.type = attr.type;
+                v.channelId = results[ridx].channelId;
+
+                vehicles.push_back(v);
+
+                AttribsNetworkTime += VehicleAttribsRequest->getTime();
+                AttribsInferred++;
+
+                pendingVAttribsRequestes.pop();
+                availableVAttribsRequestes.push(VehicleAttribsRequest);
+                // -----------------------------------------------------------------------------------------
+            }
+
+            while (!pendingLPRRequests.empty()) {
+                // ----------------------------Get License Plate Text --------------------------------------
+                BaseInferRequest::Ptr LPRRequest = pendingLPRRequests.front();
+
+                LPRRequest->wait();
+
+                std::string text = LPR.GetLicencePlateText(LPRRequest);
+                size_t ridx = LPRRequest->getId();
+
+                LicensePlateObject lp;
+                lp.location = results[ridx].location;
+                lp.text = text;
+                lp.channelId = results[ridx].channelId;
+
+                licensePlates.push_back(lp);
+
+                LPRNetworkTime += LPRRequest->getTime();
+                LPRInferred++;
+
+                pendingLPRRequests.pop();
+                availableLPRRequests.push(LPRRequest);
+                // -----------------------------------------------------------------------------------------
+            }
+
+            auto inference_t1 = std::chrono::high_resolution_clock::now();
+            ms inference = std::chrono::duration_cast<ms>(inference_t1 - inference_t0);
+            total_inference_time += inference;
+            nFrames++;
+
+            // ----------------------------Process outputs-----------------------------------------------------
+            for (auto && v : vehicles) {
+                cv::rectangle(frames[v.channelId], v.location, cv::Scalar(0, 255, 0), 4);
+
+                if (!v.color.empty() && !v.type.empty()) {
+                    cv::putText(frames[v.channelId],
+                                v.color,
+                                cv::Point2f(v.location.x + 5, v.location.y + 25),
+                                cv::FONT_HERSHEY_COMPLEX_SMALL,
+                                1.3,
+                                cv::Scalar(255, 0, 0),
+                                2);
+                    cv::putText(frames[v.channelId],
+                                v.type,
+                                cv::Point2f(v.location.x + 5, v.location.y + 50),
+                                cv::FONT_HERSHEY_COMPLEX_SMALL,
+                                1.3,
+                                cv::Scalar(255, 0, 0),
+                                2);
+                    if (FLAGS_r) {
+                        std::cout << "Vehicle Attributes results:" << v.color << ";" << v.type << std::endl;
+                    }
+                }
+            }
+
+            for (auto && lp : licensePlates) {
+                cv::rectangle(frames[lp.channelId], lp.location, cv::Scalar(0, 255, 0), 2);
+
+                if (!lp.text.empty()) {
+                    cv::putText(frames[lp.channelId],
+                                lp.text,
+                                cv::Point2f(lp.location.x, lp.location.y + lp.location.height + 30),
+                                cv::FONT_HERSHEY_COMPLEX_SMALL,
+                                1.3,
+                                cv::Scalar(0, 0, 255),
+                                2);
+                    if (FLAGS_r) {
+                        std::cout << "License Plate Recognition results:" << lp.text << std::endl;
+                    }
+                }
+            }
+
+            // ----------------------------Fill display images ------------------------------------------------------
+            displayImage.fill(frames);
 
             // ----------------------------Execution statistics -----------------------------------------------------
             std::ostringstream out;
-            out << "Vehicle detection time  : " << std::fixed << std::setprecision(2) << detection.count()
+            out << "Time for processing " << nInputChannels << ((nInputChannels == 1) ? " stream" : " streams")
+                << " (nireq = " << FLAGS_nireq << ") : "
+                << std::fixed << std::setprecision(2) << inference.count()
                 << " ms ("
-                << 1000.f / detection.count() << " fps)";
-            cv::putText(frame, out.str(), cv::Point2f(0, 20), cv::FONT_HERSHEY_TRIPLEX, 0.5,
+                << 1000.f / inference.count() << " fps)";
+            cv::putText(displayImage.getMat(), out.str(), cv::Point2f(0, 20), cv::FONT_HERSHEY_TRIPLEX, 0.5,
                         cv::Scalar(255, 0, 0));
-            if (VehicleDetection.results.size()) {
-                if (VehicleAttribs.enabled() && AttribsInferred) {
-                    float average_time = AttribsNetworkTime.count() / AttribsInferred;
+
+            if (nInputChannels == 1) {
+                float average_time = VehicleDetectorTime.count() / VehicleDetectorInferred;
+                out.str("");
+                out << "Vehicle detection time (" << FLAGS_d << ") : " << std::fixed << std::setprecision(2)
+                    << average_time
+                    << " ms ("
+                    << 1000.f / average_time << " fps)";
+                cv::putText(displayImage.getMat(), out.str(), cv::Point2f(0, 40), cv::FONT_HERSHEY_TRIPLEX, 0.5,
+                            cv::Scalar(255, 0, 0));
+                if (results.size()) {
+                    if (VehicleAttribs.enabled() && AttribsInferred) {
+                        average_time = AttribsNetworkTime.count() / AttribsInferred;
+                        out.str("");
+                        out << "Vehicle Attribs time (" << FLAGS_d_va << ", averaged over " << AttribsInferred << " detections) : "
+                            << std::fixed << std::setprecision(2) << average_time << " ms " << "(" << 1000.f / average_time << " fps)";
+                        cv::putText(displayImage.getMat(), out.str(), cv::Point2f(0, 60), cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                                    cv::Scalar(255, 0, 0));
+                    }
+                    if (LPR.enabled() && LPRInferred) {
+                        average_time = LPRNetworkTime.count() / LPRInferred;
+                        out.str("");
+                        out << "LPR time (" << FLAGS_d_lpr << ", averaged over " << LPRInferred << " detections) : " << std::fixed
+                            << std::setprecision(2) << average_time << " ms " << "(" << 1000.f / average_time << " fps)";
+                        cv::putText(displayImage.getMat(), out.str(), cv::Point2f(0, 80), cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                                    cv::Scalar(255, 0, 0));
+                    }
+                }
+            } else {
+                out.str("");
+                out << "Vehicle and license plate detection : " << FLAGS_d;
+                cv::putText(displayImage.getMat(), out.str(), cv::Point2f(0, 40), cv::FONT_HERSHEY_TRIPLEX, 0.5,
+                            cv::Scalar(255, 0, 0));
+                if (VehicleAttribs.enabled()) {
                     out.str("");
-                    out << "Vehicle Attribs time (averaged over " << AttribsInferred << " detections) :" << std::fixed
-                        << std::setprecision(2) << average_time << " ms " << "(" << 1000.f / average_time << " fps)";
-                    cv::putText(frame, out.str(), cv::Point2f(0, 40), cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                    out << "Vehicle Attribs classification : " << FLAGS_d_va;
+                    cv::putText(displayImage.getMat(), out.str(), cv::Point2f(0, 60), cv::FONT_HERSHEY_SIMPLEX, 0.5,
                                 cv::Scalar(255, 0, 0));
                 }
-                if (LPR.enabled() && LPRInferred) {
-                    float average_time = LPRNetworktime.count() / LPRInferred;
+                if (LPR.enabled()) {
                     out.str("");
-                    out << "LPR time (averaged over " << LPRInferred << " detections) :" << std::fixed
-                        << std::setprecision(2) << average_time << " ms " << "(" << 1000.f / average_time << " fps)";
-                    cv::putText(frame, out.str(), cv::Point2f(0, 60), cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                    out << "LPR : " << FLAGS_d_lpr;
+                    cv::putText(displayImage.getMat(), out.str(), cv::Point2f(0, 80), cv::FONT_HERSHEY_SIMPLEX, 0.5,
                                 cv::Scalar(255, 0, 0));
                 }
             }
 
             if (!FLAGS_no_show) {
-                cv::imshow("Detection results", frame);
+                cv::imshow("Detection results", displayImage.getMat());
+
+                const int key = cv::waitKey(pause);
+                if (key == 27) {
+                    break;
+                } else if (key == 32) {
+                    pause = (pause + 1) & 1;
+                }
             }
-            // for still images wait until any key is pressed, for video 1 ms is enough per frame
-            const int key = cv::waitKey(isVideo ? 1 : 0);
-            if (27 == key)  // Esc
-                break;
         } while (isVideo);
         // -----------------------------------------------------------------------------------------------------
+        float average_time = total_inference_time.count() /  nFrames;
+        std::cout << std::endl << "Avarage inference time: " << average_time << " ms ("
+                  << 1000.f / average_time << " fps)" << std::endl;
+
         auto total_t1 = std::chrono::high_resolution_clock::now();
         ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
         std::cout << std::endl << "Total execution time: " << total.count() << std::endl << std::endl;
@@ -689,10 +1149,17 @@ int main(int argc, char *argv[]) {
         /** Show performace results **/
         if (FLAGS_pc) {
             for (auto && plugin : pluginsForNetworks) {
-                std::cout << "[ INFO ] Performance counts for " << plugin.first << " plugin";
+                std::cout << "Performance counts for " << plugin.first << " plugin";
                 printPerformanceCountsPlugin(plugin.second, std::cout);
             }
         }
+
+        /** release input channels **/
+        for (auto && c : cap) {
+            c.release();
+        }
+
+        cv::destroyAllWindows();
     }
     catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
@@ -703,6 +1170,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    std::cout << "[ INFO ] Execution successful" << std::endl;
+    slog::info << "Execution successful" << slog::endl;
     return 0;
 }

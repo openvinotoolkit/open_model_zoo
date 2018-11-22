@@ -1,0 +1,60 @@
+models:
+  - name: landmarks-regression-retail-0009
+
+    launchers:
+      - framework: dlsdk
+        device: CPU
+        model: landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
+        weights: landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
+        adapter: landmarks_regression
+        cpu_extensions: libcpu_extension_avx2.so
+
+      - framework: dlsdk
+        device: GPU
+        model: landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
+        weights: landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
+        adapter: landmarks_regression
+
+      - framework: dlsdk
+        device: GPU
+        model: landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
+        weights: landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
+        adapter: landmarks_regression
+
+      - framework: dlsdk
+        device: HETERO:FPGA,CPU
+        model: landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
+        weights: landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
+        adapter: landmarks_regression
+        cpu_extensions: libcpu_extension_avx2.so
+        bitstream: 4-0_A10DK_FP16_MobileNet_SqueezeNet_VGG_ELU.aocx
+
+      - framework: dlsdk
+        device: HETERO:FPGA,CPU
+        model: landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
+        weights: landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
+        adapter: landmarks_regression
+        cpu_extensions: libcpu_extension_avx2.so
+        bitstream: 4-0_A10DK_FP11_TinyYolo_SSD300.aocx
+
+    datasets:
+      - name: vgg2face
+
+        data_source: vgg2face/test
+        annotation: landmark_regression.pickle
+
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: normalization
+            std: 255
+          - type: resize
+            size: 48
+
+        postprocessing:
+          - type: normalize_landmarks_points
+
+        metrics:
+          - type: per_point_regression
+            presenter: print_vector
+
+          - type: average_point_error

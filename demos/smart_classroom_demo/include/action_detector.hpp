@@ -58,8 +58,8 @@ struct ActionDetectorConfig : public CnnConfig {
     std::string loc_blob_name{"mbox_loc1/out/conv/flat"};
     /** @brief Name of output blob with detection confidence info */
     std::string detection_conf_blob_name{"mbox_main_conf/out/conv/flat/softmax/flat"};
-    /** @brief Name of output blob with action confidence info */
-    std::string action_conf_blob_name{"mbox_add_conf/out/conv/flat/argmax/flat"};
+    /** @brief Prefix of name of output blob with action confidence info */
+    std::string action_conf_blob_name_prefix{"out/anchor"};
     /** @brief Name of output blob with priorbox info */
     std::string priorbox_blob_name{"mbox/priorbox"};
     /** @brief BBox overlap threshold for NMS algorithm */
@@ -70,9 +70,11 @@ struct ActionDetectorConfig : public CnnConfig {
     float detection_confidence_threshold = 0.65;
     /** @brief Number of top-score bboxes in output */
     int keep_top_k = 200;
+    /** @brief Number of SSD anchors */
+    int num_anchors = 4;
     /** @brief Number of actions to detect */
     int num_action_classes = 3;
-    /** @brief Async exacution flag */
+    /** @brief Async execution flag */
     bool is_async = true;
 };
 
@@ -119,8 +121,8 @@ private:
     */
     void GetDetections(const cv::Mat& loc,
                        const cv::Mat& main_conf,
-                       const cv::Mat& add_conf,
                        const cv::Mat& priorbox,
+                       const std::vector<cv::Mat>& add_conf,
                        const cv::Size& frame_size,
                        DetectedActions* detections) const;
 

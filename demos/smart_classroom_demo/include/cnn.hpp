@@ -41,6 +41,8 @@ struct CnnConfig {
     std::string path_to_weights;
     /** @brief Maximal size of batch */
     int max_batch_size{1};
+    /** @brief Enabled/disabled status */
+    bool enabled{true};
 
     /** @brief Plugin to use for inference */
     InferenceEngine::InferencePlugin plugin;
@@ -72,6 +74,11 @@ public:
     * @brief Prints performance report
     */
     void PrintPerformanceCounts() const;
+
+    /**
+    * @brief Indicates whether model enabled or not
+    */
+    bool Enabled() const;
 
 protected:
     /**
@@ -124,10 +131,12 @@ class BaseCnnDetection {
 protected:
     InferenceEngine::InferRequest::Ptr request;
     const bool isAsync;
+    const bool enabledFlag;
     std::string topoName;
 
 public:
-    explicit BaseCnnDetection(bool isAsync = false) : isAsync(isAsync) {}
+    explicit BaseCnnDetection(bool enabled = true, bool isAsync = false) :
+                              enabledFlag(enabled), isAsync(isAsync) {}
 
     virtual ~BaseCnnDetection() {}
 
@@ -146,7 +155,7 @@ public:
     }
 
     bool enabled() const  {
-        return true;
+        return enabledFlag;
     }
 
     void PrintPerformanceCounts() {
