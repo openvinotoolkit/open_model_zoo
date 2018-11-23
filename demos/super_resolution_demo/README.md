@@ -60,4 +60,4 @@ The application outputs a reconstructed high-resolution image and saves it in
 the current working directory as `*.bmp` file with `sr` prefix.
 
 ## See Also
-* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)
+* [Using Inference Engine Demos](../Readme.md)

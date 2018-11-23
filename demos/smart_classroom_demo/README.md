@@ -1,6 +1,6 @@
 # Smart Classroom Demo
 
-The demo demonstrates an example of joint usage of several neural networks to detect 3 basic actions (sitting, standing, raising hand) and recognize people by faces in the classroom environment. Sample uses Async API for action and face detection nets. It allows to parallelize execution of face recognition and detection: while face recognition is running on one accelerator face and action detection could performed on other. The corresponding pre-trained models are delivered with the product:
+The demo demonstrates an example of joint usage of several neural networks to detect 3 basic actions (sitting, standing, raising hand) and recognize people by faces in the classroom environment. The demo uses Async API for action and face detection nets. It allows to parallelize execution of face recognition and detection: while face recognition is running on one accelerator face and action detection could performed on other. The corresponding pre-trained models are delivered with the product:
 
 * `face-detection-retail-0004`, which is a primary detection network for finding faces.
 * `landmarks-regression-retail-0009`, which is executed on top of the results from the first network and outputs
@@ -73,4 +73,4 @@ Notice that the network should be converted from the Caffe* (*.prototxt + *.mode
 The demo uses OpenCV to display the resulting frame with labeled actions and faces.
 
 ## See Also
-* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)
+* [Using Inference Engine Demos](../Readme.md)

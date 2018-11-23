@@ -85,9 +85,7 @@ To do inference for two video inputs using two asynchronous infer request on FPG
 
 ### Demo Output
 
-The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text:
-![Security Camera Demo example output](example_sample_output.png)
-
+The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
 
 ## See Also
-* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)
+* [Using Inference Engine Samples](../Readme.md)

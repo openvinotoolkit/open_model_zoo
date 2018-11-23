@@ -15,7 +15,7 @@
 */
 
 /**
- * @brief The entry point for inference engine Super Resolution sample application
+ * @brief The entry point for inference engine Super Resolution demo application
  * @file super_resolution_demo/main.cpp
  * @example super_resolution_demo/main.cpp
  */
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
         /** Taking information about all topology inputs **/
         InputsDataMap inputInfo(network.getInputsInfo());
 
-        if (inputInfo.size() != 1) throw std::logic_error("Sample supports topologies only with 1 input");
+        if (inputInfo.size() != 1) throw std::logic_error("The demo supports topologies only with 1 input");
         auto inputInfoItem = *inputInfo.begin();
 
         /** Iterate over all the input blobs **/

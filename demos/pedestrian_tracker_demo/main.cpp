@@ -68,7 +68,7 @@ CreatePedestrianTracker(const std::string& reid_model,
             std::make_shared<DescriptorIE>(reid_config, reid_plugin);
 
         if (descriptor_strong == nullptr) {
-            THROW_IE_EXCEPTION << "[SAMPLES] shared_ptr descriptor_strong == nullptr";
+            THROW_IE_EXCEPTION << "[DEMOS] shared_ptr descriptor_strong == nullptr";
         }
         std::shared_ptr<IDescriptorDistance> distance_strong =
             std::make_shared<CosDistance>(descriptor_strong->size());

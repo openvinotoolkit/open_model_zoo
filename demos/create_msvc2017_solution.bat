@@ -18,7 +18,7 @@
 @setlocal
 set "ROOT_DIR=%~dp0"
 
-set "SOLUTION_DIR64=%USERPROFILE%\Documents\Intel\OpenVINO\inference_engine_samples_2017"
+set "SOLUTION_DIR64=%USERPROFILE%\Documents\Intel\OpenVINO\inference_engine_demos_2017"
 if exist "%SOLUTION_DIR64%" rd /s /q "%SOLUTION_DIR64%"
 
 echo Creating Visual Studio 2017 (x64) files in %SOLUTION_DIR64%... && ^

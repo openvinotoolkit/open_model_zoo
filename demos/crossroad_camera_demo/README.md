@@ -89,4 +89,4 @@ If Person Attributes Recognition or Person Reidentification Retail are enabled, 
 
 
 ## See Also
-* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)
+* [Using Inference Engine Demos](../Readme.md)

@@ -78,4 +78,4 @@ The demo uses OpenCV to display the resulting frame with detections rendered as 
 
 
 ## See Also
-* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)
+* [Using Inference Engine Demos](../Readme.md)

@@ -11,11 +11,11 @@ directory in the Inference Engine installation directory:
  - [End to end video analytics end2end_video_analytics_ie Demo](./end2end_video_analytics/end2end_video_analytics_ie/README.md) - End to end demo application for image classification with inference engine.
  - [End to end video analytics end2end_video_analytics_opencv Demo](./end2end_video_analytics/end2end_video_analytics_opencv/README.md) - End to end demo application for image classification with OpenCVDNN.
  - [Human Pose Estimation Demo](./human_pose_estimation_demo/README.md) - Human pose estimation demo. *NEW MODELS SHOWCASE, below*.
- - [Image Segmentation Demo](./segmentation_demo/README.md) - Inference of image segmentation networks like FCN8 (the sample supports only images as inputs).
+ - [Image Segmentation Demo](./segmentation_demo/README.md) - Inference of image segmentation networks like FCN8 (the demo supports only images as inputs).
  - [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md) - Face Detection coupled with Age/Gender, Head-Pose, Emotion, and Facial Landmarks detectors. Supports video and camera inputs.  *NEW MODELS SHOWCASE, below*.
  - [Mask R-CNN Demo for TensorFlow* Object Detection API models](./mask_rcnn_demo/README.md) - Inference of semantic segmentation networks created with TensorFlow\* Object Detection API.
  - [Multi-Channel Face Detection Demo](./multichannel_face_detection/README.md) - Simultaneous Multi Camera Face Detection demo.
- - [Object Detection Demo](./object_detection_demo/README.md) - Inference of object detection networks like Faster R-CNN (the sample supports only images as inputs).
+ - [Object Detection Demo](./object_detection_demo/README.md) - Inference of object detection networks like Faster R-CNN (the demo supports only images as inputs).
  - [Object Detection for SSD Demo app](./object_detection_demo_ssd_async/README.md) - Demo application for SSD-based Object Detection networks, new Async API performance showcase, and simple OpenCV interoperability (supports video and camera inputs).
  - [Object Detection for YOLO V3 Demo app](./object_detection_demo_yolov3_async/README.md) - Demo application for YOLOV3-based Object Detection networks, new Async API performance showcase, and simple OpenCV interoperability (supports video and camera inputs).
  - [Pedestrian Tracker Demo](./pedestrian_tracker_demo/README.md) - Demo application for pedestrian tracking scenario.
@@ -30,7 +30,7 @@ directory in the Inference Engine installation directory:
 (!) Important Note: Inference Engine MYRIAD and FPGA plugins are available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
 
 The product includes several pre-trained  [models] (../intel_models/index.html).
-The table below shows the correlation between models and demos/plugins (_the plugins names are exactly as they are passed to the demos with `-d` option_). The correlation between the plugins and supported devices see in the [Supported Devices](@ref SupportedPlugins) section. The demos are available in `<INSTALL_DIR>/deployment_tools/inference_engine/samples`.
+The table below shows the correlation between models and demos/plugins (_the plugins names are exactly as they are passed to the demos with `-d` option_).
 
 | Model                                           | Demoss supported on the model                                                                     | CPU         | GPU         |HETERO:FPGA,CPU| MYRIAD    |
 |-------------------------------------------------|---------------------------------------------------------------------------------------------------|-------------|-------------|---------------|-----------|
@@ -120,7 +120,7 @@ The recommended Windows build environment is the following:
 Generate Microsoft Visual Studio solution file using `create_msvc2015_solution.bat` file or `create_msvc2017_solution.bat` file
 and then build the resulting solution `Demos.sln` in the Microsoft Visual Studio 2015 or Microsoft Visual Studio 2015 accordingly.
 
-## Running the Sample Applications
+## Running the Demo Applications
 
 Before running compiled binary files, make sure your application can find the Inference Engine libraries.
 Use the `setupvars.sh` script (or `setupvars.bat` on Windows), which will set all necessary environment variables pointing to the binaries from the installed
