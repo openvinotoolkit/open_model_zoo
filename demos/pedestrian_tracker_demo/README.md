@@ -73,8 +73,7 @@ run the following command:
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes, curves (for trajectories displaying), and text:
-![Pedestrian Tracker Demo example output](example_demo_output.png)
+The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes, curves (for trajectories displaying), and text.
 
 
 ## See Also

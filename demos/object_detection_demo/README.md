@@ -77,4 +77,4 @@ Usage example:
 
 ## See Also 
 * [Using Inference Engine Demos](../Readme.md)
-* [Model Optimizer Development Guide]  (https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer)
+* [Model Optimizer Development Guide](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer)

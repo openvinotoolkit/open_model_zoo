@@ -74,7 +74,7 @@ To do inference for two video inputs using two asynchronous infer request on FPG
 ```sh
 ./security_barrier_camera_demo -i <path_to_video>/inputVideo_0.mp4 <path_to_video>/inputVideo_1.mp4 -m vehicle-license-plate-detection-barrier-0106.xml -m_va vehicle-attributes-recognition-barrier-0039.xml -m_lpr license-plate-recognition-barrier-0001.xml -d HETERO:FPGA,CPU -d_va HETERO:FPGA,CPU -d_lpr HETERO:FPGA,CPU -nireq 2
 ```
-**NOTE**: Public models must be first converted to the Inference Engine format (`.xml` + `.bin`) using the [Model Optimizer](./docs/Model_Optimizer_Developer_Guide/Deep_Learning_Model_Optimizer_DevGuide.md) tool.
+**NOTE**: Public models must be first converted to the Inference Engine format (`.xml` + `.bin`) using the [Model Optimizer](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer) tool.
 
 
 ### Optimization Hints for Heterogeneous Scenarios with FPGA

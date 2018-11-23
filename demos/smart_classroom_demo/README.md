@@ -65,8 +65,7 @@ Example of a valid command line to run the application:
 ```
 
 Notice that the network should be converted from the Caffe* (*.prototxt + *.model) to the Inference Engine format
-(*.xml + *bin) first, by use of the ModelOptimizer tool
-(https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
+(*.xml + *bin) first, by use of the [Model Optimizer](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer) tool.
 
 ### Demo Output
 

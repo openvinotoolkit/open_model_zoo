@@ -100,4 +100,4 @@ If Age/Gender recognition, Head Pose estimation, Emotions recognition, or Facial
 age/gender, head pose, emotion, and facial landmarks recognition networks.
 
 ## See Also
-* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)
+* [Using Inference Engine Samples](../Readme.md)

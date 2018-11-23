@@ -92,10 +92,6 @@ And if the request is completed earlier than the Wait is called in the main thre
 that reporting the time between StartAsync and Wait would obviously incorrect.
 That is why in the "ASYNC" mode the inference speed is not reported.
 
-
-[More details on the new, requests-based Inference Engine API, including async execution](./docs/Inference_Engine_Developer_Guide/Integrate_with_customer_application_new_API.md).
-
-
 ## Running
 
 Running the application with the <code>-h</code> option yields the following usage message:

@@ -6,7 +6,6 @@ The Inference Engine demo applications are simple console applications that demo
 The Deep Learning Inference Engine release package provides the following demo applications available in the demos
 directory in the Inference Engine installation directory:
 
- - [CPU Extensions](@ref CPUExtensions) library with topology-specific layers (like DetectionOutput used in the SSD*, below)
  - [Crossroad Camera Demo](./crossroad_camera_demo/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs. *NEW MODELS SHOWCASE, below*.
  - [End to end video analytics end2end_video_analytics_ie Demo](./end2end_video_analytics/end2end_video_analytics_ie/README.md) - End to end demo application for image classification with inference engine.
  - [End to end video analytics end2end_video_analytics_opencv Demo](./end2end_video_analytics/end2end_video_analytics_opencv/README.md) - End to end demo application for image classification with OpenCVDNN.
