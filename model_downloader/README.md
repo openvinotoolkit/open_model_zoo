@@ -74,6 +74,10 @@ Usage
    googlenet-v4
    alexnet
    ssd_mobilenet_v2_coco
+   resnet-50
+   resnet-101
+   resnet-152
+   googlenet-v3
    age-gender-recognition-retail-0013
    age-gender-recognition-retail-0013-fp16
    emotions-recognition-retail-0003
@@ -84,12 +88,16 @@ Usage
    face-detection-retail-0004-fp16
    face-person-detection-retail-0002
    face-person-detection-retail-0002-fp16
-   face-reidentification-retail-0001
-   face-reidentification-retail-0001-fp16
+   face-reidentification-retail-0071
+   face-reidentification-retail-0071-fp16
+   facial-landmarks-35-adas-0001
+   facial-landmarks-35-adas-0001-fp16
    head-pose-estimation-adas-0001
    head-pose-estimation-adas-0001-fp16
-   landmarks-regression-retail-0001
-   landmarks-regression-retail-0001-fp16
+   human-pose-estimation-0001
+   human-pose-estimation-0001-fp16
+   landmarks-regression-retail-0009
+   landmarks-regression-retail-0009-fp16
    license-plate-recognition-barrier-0001
    license-plate-recognition-barrier-0001-fp16
    pedestrian-and-vehicle-detector-adas-0001
@@ -98,8 +106,8 @@ Usage
    pedestrian-detection-adas-0002-fp16
    person-attributes-recognition-crossroad-0031
    person-attributes-recognition-crossroad-0031-fp16
-   person-detection-action-recognition-0001
-   person-detection-action-recognition-0001-fp16
+   person-detection-action-recognition-0003
+   person-detection-action-recognition-0003-fp16
    person-detection-retail-0001
    person-detection-retail-0001-fp16
    person-detection-retail-0013
@@ -116,6 +124,8 @@ Usage
    road-segmentation-adas-0001-fp16
    semantic-segmentation-adas-0001
    semantic-segmentation-adas-0001-fp16
+   single-image-super-resolution-0034
+   single-image-super-resolution-0034-fp16
    vehicle-attributes-recognition-barrier-0039
    vehicle-attributes-recognition-barrier-0039-fp16
    vehicle-detection-adas-0002
@@ -130,7 +140,7 @@ Usage
    ./downloader.py --name mtcnn-p
    ```
 
-Expected free space to download all the topologies with the default configuration file is around 3.5 GB.
+Expected free space to download all the topologies with the default configuration file is around 4.3 GB.
 
 __________
 
