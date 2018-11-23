@@ -18,7 +18,7 @@ The stages to run the tutorial
 
 1. "Model Downloader" --  Download the Deep Learning model using "Model Downloader"
 2. "Model Optimizer"  --  Install prerequisites and run "Model Optimizer" to prepare the model for inference (and generate IR files)
-3. Build inference engine demoss
+3. Build inference engine demos
 4. Run the tutorials
 
 

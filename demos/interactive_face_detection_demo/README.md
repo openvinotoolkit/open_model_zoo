@@ -84,7 +84,7 @@ For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-train
 ```sh
 ./interactive_face_detection_demo -i <path_to_video>/inputVideo.mp4 -m face-detection-adas-0001.xml -m_ag age-gender-recognition-retail-0013.xml -m_hp head-pose-estimation-adas-0001.xml -m_em emotions-recognition-retail-0003.xml -m_lm facial-landmarks-35-adas-0001.xml -d GPU
 ```
-**NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer](./docs/Model_Optimizer_Developer_Guide/Deep_Learning_Model_Optimizer_DevGuide.md) tool.
+**NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer) tool.
 
 ## Demo Output
 
