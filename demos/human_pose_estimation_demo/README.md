@@ -51,4 +51,4 @@ For example, to do inference on a CPU, run the following command:
 The demo uses OpenCV to display the resulting frame with estimated poses and text report of **FPS** - frames per second performance for the human pose estimation demo.
 
 ## See Also
-* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)
+* [Using Inference Engine Demos](../Readme.md)

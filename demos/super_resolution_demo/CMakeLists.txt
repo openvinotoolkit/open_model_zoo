@@ -15,7 +15,7 @@ cmake_minimum_required(VERSION 2.8)
 
 set (TARGET_NAME "super_resolution_demo")
 
-if( BUILD_SAMPLE_NAME AND NOT ${BUILD_SAMPLE_NAME} STREQUAL ${TARGET_NAME} )
+if( BUILD_DEMO_NAME AND NOT ${BUILD_DEMO_NAME} STREQUAL ${TARGET_NAME} )
     message(STATUS "DEMO ${TARGET_NAME} SKIPPED")
     return()
 endif()

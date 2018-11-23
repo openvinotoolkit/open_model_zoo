@@ -60,13 +60,13 @@ DEFINE_bool(h, false, help_message);
 #ifdef WIN32
     /// \brief Define parameter for video file <br>
     /// It is a required parameter
-    DEFINE_string(i, "../../../samples/end2end_video_analytics/test_content/video/cars_1920x1080.h264", image_message);
+    DEFINE_string(i, "../../../end2end_video_analytics/test_content/video/cars_1920x1080.h264", image_message);
     /// \brief Define parameter for set model file <br>
     /// It is a required parameter
     DEFINE_string(m, "", model_message);
     /// \brief Define parameter for labels file <br>
     /// It is a required parameter
-    DEFINE_string(l, "../../../samples/end2end_video_analytics/test_content/IR/SSD/pascal_voc_classes.txt", labels_message);
+    DEFINE_string(l, "../../../end2end_video_analytics/test_content/IR/SSD/pascal_voc_classes.txt", labels_message);
 #else
     /// \brief Define parameter for video file <br>
     /// It is a required parameter

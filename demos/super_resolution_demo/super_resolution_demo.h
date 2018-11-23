@@ -41,7 +41,7 @@ static const char model_message[] = "Required. Path to an .xml file with a train
 
 /// @brief message for plugin argument
 static const char plugin_message[] = "Plugin name. For example MKLDNNPlugin. If this parameter is pointed, " \
-"the sample will look for this plugin only";
+"the demo will look for this plugin only";
 
 /// @brief message for assigning cnn calculation to device
 static const char target_device_message[] = "Specify the target device to infer on (CPU, GPU, FPGA, or MYRIAD). "\

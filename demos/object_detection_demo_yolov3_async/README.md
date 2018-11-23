@@ -2,13 +2,13 @@
 
 This demo showcases Object Detection with YOLO* V3 and Async API.
 
-To learn more about Async API features, please refer to [Object Detection for SSD Demo, Async API Performance Showcase](./samples/object_detection_demo_ssd_async/README.md).
+To learn more about Async API features, please refer to [Object Detection for SSD Demo, Async API Performance Showcase](../object_detection_demo_ssd_async/README.md).
 
 Other demo objectives are:
 * Video as input support via OpenCV*
 * Visualization of the resulting bounding boxes and text labels (from the `.labels` file) or class number (if no file is provided)
 * OpenCV provides resulting bounding boxes, labels, and other information.
-You can copy and paste this code without pulling Inference Engine samples helpers into your application
+You can copy and paste this code without pulling Inference Engine demos helpers into your application
 * Demonstration of the Async API in action. For this, the demo features two modes toggled by the **Tab** key:
     -  Old-style "Sync" way, where the frame captured with OpenCV executes back-to-back with the Detection
     -  Truly "Async" way, where the detection is performed on a current frame, while OpenCV captures the next frame
@@ -62,4 +62,4 @@ In the default mode, the demo reports:
 * **Wallclock time**, which is combined application-level performance.
 
 ## See Also
-* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)
+* [Using Inference Engine Demos](../Readme.md)

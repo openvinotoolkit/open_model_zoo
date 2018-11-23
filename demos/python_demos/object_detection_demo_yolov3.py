@@ -39,7 +39,7 @@ def build_argparser():
                              "impl.", type=str, default=None)
     parser.add_argument("-pp", "--plugin_dir", help="Path to a plugin folder", type=str, default=None)
     parser.add_argument("-d", "--device",
-                        help="Specify the target device to infer on; CPU, GPU, FPGA or MYRIAD is acceptable. Sample "
+                        help="Specify the target device to infer on; CPU, GPU, FPGA or MYRIAD is acceptable. The demo "
                              "will look for a suitable plugin for device specified (CPU by default)", default="CPU",
                         type=str)
     parser.add_argument("--labels", help="Labels mapping file", default=None, type=str)
@@ -150,12 +150,12 @@ def main():
         if len(not_supported_layers) != 0:
             log.error("Following layers are not supported by the plugin for specified device {}:\n {}".
                       format(plugin.device, ', '.join(not_supported_layers)))
-            log.error("Please try to specify cpu extensions library path in sample's command line parameters using -l "
+            log.error("Please try to specify cpu extensions library path in demo's command line parameters using -l "
                       "or --cpu_extension command line argument")
             sys.exit(1)
 
-    assert len(net.inputs.keys()) == 1, "Sample supports only YOLO V3 based single input topologies"
-    assert len(net.outputs) == 3, "Sample supports only YOLO V3 based triple output topologies"
+    assert len(net.inputs.keys()) == 1, "The demo supports only YOLO V3 based single input topologies"
+    assert len(net.outputs) == 3, "The demo supports only YOLO V3 based triple output topologies"
 
     log.info("Preparing input blobs")
     input_blob = next(iter(net.inputs))

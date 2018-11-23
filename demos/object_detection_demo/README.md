@@ -76,6 +76,5 @@ Usage example:
 ```
 
 ## See Also 
-* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)
-* [Converting a Model Using General Conversion Parameters](@ref ConvertGeneral)
-* [Converting a Caffe Model](./docs/Model_Optimizer_Developer_Guide/prepare_trained_model/convert_model/Convert_Model_From_Caffe.md)
+* [Using Inference Engine Demos](../Readme.md)
+* [Model Optimizer Development Guide](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer)

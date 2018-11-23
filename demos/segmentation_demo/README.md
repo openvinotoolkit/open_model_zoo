@@ -44,4 +44,4 @@ Upon the start-up the demo application reads command line parameters and loads a
 Inference Engine plugin. When inference is done, the application creates an output image.
 
 ## See Also 
-* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)
+* [Using Inference Engine Samples](../Readme.md)

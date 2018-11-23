@@ -56,8 +56,8 @@ For example, to run the demo with the pre-trained face detection model on FPGA w
 
 To run the demo using two recorded video files, use the following command:
 ```sh
-./multi-channel-sample -m <INSTALL_DIR>/deployment_tools/intel_models/face-detection-retail-0004/FP32/face-detection-retail-0004.xml 
--l <samples_build_folder>/intel64/Release/lib/libcpu_extension.so -d HETERO:FPGA,CPU -i /path/to/file1 /path/to/file2
+./multi-channel-demo -m <INSTALL_DIR>/deployment_tools/intel_models/face-detection-retail-0004/FP32/face-detection-retail-0004.xml 
+-l <demos_build_folder>/intel64/Release/lib/libcpu_extension.so -d HETERO:FPGA,CPU -i /path/to/file1 /path/to/file2
 ```
 Video files will be processed repeatedly.
 
@@ -71,4 +71,4 @@ The demo uses OpenCV to display the resulting bunch of frames with detections re
 On the top of the screen, the demo reports throughput (in frames per second). If needed, it also reports more detailed statistics (use `-show_stats` option while running the demo to enable it).
 
 ## See Also
-* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)
+* [Using Inference Engine Demos](../Readme.md)
