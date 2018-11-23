@@ -48,9 +48,9 @@ public:
     explicit DetectionOutputPostProcessor(const CNNLayer* layer): cnnLayer(*layer) {
         try {
             if (cnnLayer.insData.size() != 3)
-                THROW_IE_EXCEPTION << "Incorrect number of input edges.";
+                THROW_IE_EXCEPTION << "Incorrect number of input edges for layer " << cnnLayer.name;
             if (cnnLayer.outData.empty())
-                THROW_IE_EXCEPTION << "Incorrect number of output edges.";
+                THROW_IE_EXCEPTION << "Incorrect number of output edges for layer " << cnnLayer.name;
 
             _num_classes = cnnLayer.GetParamAsInt("num_classes");
             _background_label_id = cnnLayer.GetParamAsInt("background_label_id", 0);
@@ -73,21 +73,21 @@ public:
 
             auto prior_ptr = cnnLayer.insData[idx_priors].lock();
             if (!prior_ptr) {
-                THROW_IE_EXCEPTION << "Pointer to the input data " << prior_ptr->name << " of layer " << cnnLayer.name << " is exprired";
+                THROW_IE_EXCEPTION << "Pointer to the input data of layer " << cnnLayer.name << " is exprired";
             }
             auto prior_dims = prior_ptr->dims;
             int priors_size = prior_dims[0]*prior_dims[1];
 
             auto loc_ptr = cnnLayer.insData[idx_location].lock();
             if (!loc_ptr) {
-                THROW_IE_EXCEPTION << "Pointer to the input data " << loc_ptr->name << " of layer " << cnnLayer.name << " is exprired";
+                THROW_IE_EXCEPTION << "Pointer to the input data of layer " << cnnLayer.name << " is exprired";
             }
             auto loc_dims = loc_ptr->dims;
             int loc_size = loc_dims[loc_dims.size() - 2]*loc_dims[loc_dims.size() - 1];
 
             auto conf_ptr = cnnLayer.insData[idx_confidence].lock();
             if (!conf_ptr) {
-                THROW_IE_EXCEPTION << "Pointer to the input data " << conf_ptr->name << " of layer " << cnnLayer.name << " is exprired";
+                THROW_IE_EXCEPTION << "Pointer to the input data of layer " << cnnLayer.name << " is exprired";
             }
             auto conf_dims = conf_ptr->dims;
             uint32_t conf_size = conf_dims[conf_dims.size() - 2]*conf_dims[conf_dims.size() - 1];
@@ -202,7 +202,6 @@ public:
         for (int n = 0; n < N; ++n) {
             int detections_total = 0;
 
-#pragma omp parallel for schedule(static)
             for (int c = 0; c < _num_classes; ++c) {
                 if (c == _background_label_id) {
                     // Ignore background class.
@@ -432,7 +431,6 @@ void DetectionOutputPostProcessor::decodeBBoxes(const float *prior_data,
         }
     }
 
-    #pragma omp parallel for schedule(static)
     for (int p = 0; p < num_priors_actual[n]; ++p) {
         float new_xmin = 0.0f;
         float new_ymin = 0.0f;

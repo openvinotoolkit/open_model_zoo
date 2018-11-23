@@ -32,13 +32,52 @@
 #include <memory>
 #include <string>
 
+#ifdef USE_TBB
+#include <tbb/parallel_for.h>
+#endif
+
 #include <opencv2/opencv.hpp>
 
 #include <samples/slog.hpp>
-#include "multichannel_face_detection.hpp"
+
+#include <samples/args_helper.hpp>
+
 #include "input.hpp"
+#include "multichannel_face_detection.hpp"
 #include "output.hpp"
+#include "threading.hpp"
 #include "graph.hpp"
+
+namespace {
+
+/**
+* \brief This function show a help message
+*/
+void showUsage() {
+    std::cout << std::endl;
+    std::cout << "multichannel_face_detection [OPTION]" << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << std::endl;
+    std::cout << "    -h                           " << help_message << std::endl;
+    std::cout << "    -m \"<path>\"                  " << face_detection_model_message<< std::endl;
+    std::cout << "      -l \"<absolute_path>\"       " << custom_cpu_library_message << std::endl;
+    std::cout << "          Or" << std::endl;
+    std::cout << "      -c \"<absolute_path>\"       " << custom_cldnn_message << std::endl;
+    std::cout << "    -d \"<device>\"                " << target_device_message << std::endl;
+    std::cout << "    -nc                          " << num_cameras << std::endl;
+    std::cout << "    -bs                          " << batch_size << std::endl;
+    std::cout << "    -n_ir                        " << num_infer_requests << std::endl;
+    std::cout << "    -n_iqs                       " << input_queue_size << std::endl;
+    std::cout << "    -fps_sp                      " << fps_sampling_period << std::endl;
+    std::cout << "    -n_sp                        " << num_sampling_periods << std::endl;
+    std::cout << "    -pc                          " << performance_counter_message << std::endl;
+    std::cout << "    -t                           " << thresh_output_message << std::endl;
+    std::cout << "    -no_show                     " << no_show_processed_video << std::endl;
+    std::cout << "    -show_stats                  " << show_statistics << std::endl;
+    std::cout << "    -duplicate_num               " << duplication_channel_number << std::endl;
+    std::cout << "    -real_input_fps              " << real_input_fps << std::endl;
+    std::cout << "    -i                           " << input_video << std::endl;
+}
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
@@ -52,11 +91,8 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     if (FLAGS_m.empty()) {
         throw std::logic_error("Parameter -m is not set");
     }
-    if (FLAGS_nc*(1+FLAGS_duplicate_num) > 16 - ((FLAGS_show_stats&&!FLAGS_no_show)?1:0)) {
-        throw std::logic_error("Final number of channels exceed maximum [16]");
-    }
-    if (FLAGS_nc == 0) {
-        throw std::logic_error("Number of input cameras must be greater 0");
+    if (FLAGS_nc == 0 && FLAGS_i.empty()) {
+        throw std::logic_error("Please specify at least one video source(web cam or video file)");
     }
     slog::info << "\tDetection model:           " << FLAGS_m << slog::endl;
     slog::info << "\tDetection threshold:       " << FLAGS_t << slog::endl;
@@ -67,14 +103,12 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     if (!FLAGS_c.empty()) {
         slog::info << "\tCLDNN custom kernels map:  " << FLAGS_c << slog::endl;
     }
-    slog::info << "\tNumber of input channels:  " << FLAGS_nc << slog::endl;
     slog::info << "\tBatch size:                " << FLAGS_bs << slog::endl;
     slog::info << "\tNumber of infer requests:  " << FLAGS_n_ir << slog::endl;
+    slog::info << "\tNumber of input web cams:  "  << FLAGS_nc << slog::endl;
 
     return true;
 }
-
-namespace {
 
 void drawDetections(cv::Mat& img, const std::vector<Face>& detections) {
     for (const Face& f : detections) {
@@ -88,115 +122,94 @@ void drawDetections(cv::Mat& img, const std::vector<Face>& detections) {
 
 const size_t DISP_WIDTH  = 1920;
 const size_t DISP_HEIGHT = 1080;
+const size_t MAX_INPUTS  = 25;
 
-void displayNSources(const std::string& name,
-                     const std::vector<std::shared_ptr<VideoFrame>>& data,
-                     size_t count,
+struct DisplayParams {
+    std::string name;
+    cv::Size windowSize;
+    cv::Size frameSize;
+    size_t count;
+    cv::Point points[MAX_INPUTS];
+};
+
+DisplayParams prepareDisplayParams(size_t count) {
+    DisplayParams params;
+    params.count = count;
+    params.windowSize = cv::Size(DISP_WIDTH, DISP_HEIGHT);
+
+    size_t gridCount = static_cast<size_t>(ceil(sqrt(count)));
+    size_t gridStepX = static_cast<size_t>(DISP_WIDTH/gridCount);
+    size_t gridStepY = static_cast<size_t>(DISP_HEIGHT/gridCount);
+    params.frameSize = cv::Size(gridStepX, gridStepY);
+
+    for (size_t i = 0; i < count; i++) {
+        cv::Point p;
+        p.x = gridStepX * (i/gridCount);
+        p.y = gridStepY * (i%gridCount);
+        params.points[i] = p;
+    }
+    return params;
+}
+
+void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
                      float time,
-                     const std::string& stats
-                   ) {
-    size_t showStatsDec = (FLAGS_show_stats ? 1 : 0);
-    assert(count <= (16 - showStatsDec));
-    assert(data.size() <= (16 - showStatsDec));
-    static const cv::Size window_size = cv::Size(DISP_WIDTH, DISP_HEIGHT);
-    cv::Mat window_image = cv::Mat::zeros(window_size, CV_8UC3);
-
-    static const cv::Point points4[] = {
-        cv::Point(0, 0),
-        cv::Point(0, window_size.height/2),
-        cv::Point(window_size.width/2, 0),
-        cv::Point(window_size.width/2, window_size.height/2),  // Reserve for show stats option
-    };
-
-    static const cv::Point points9[] = {
-        cv::Point(0, 0),
-        cv::Point(0, window_size.height/3),
-        cv::Point(0, 2*window_size.height/3),
-
-        cv::Point(window_size.width/3, 0),
-        cv::Point(window_size.width/3, window_size.height/3),
-        cv::Point(window_size.width/3, 2*window_size.height/3),
-
-        cv::Point(2*window_size.width/3, 0),
-        cv::Point(2*window_size.width/3, window_size.height/3),
-        cv::Point(2*window_size.width/3, 2*window_size.height/3),  // Reserve for show stats option
-    };
-
-    static const cv::Point points16[] = {
-        cv::Point(0, 0),
-        cv::Point(0, window_size.height/4),
-        cv::Point(0, window_size.height/2),
-        cv::Point(0, window_size.height*3/4),
-
-        cv::Point(window_size.width/4, 0),
-        cv::Point(window_size.width/4, window_size.height/4),
-        cv::Point(window_size.width/4, window_size.height/2),
-        cv::Point(window_size.width/4, window_size.height*3/4),
-
-        cv::Point(window_size.width/2, 0),
-        cv::Point(window_size.width/2, window_size.height/4),
-        cv::Point(window_size.width/2, window_size.height/2),
-        cv::Point(window_size.width/2, window_size.height*3/4),
-
-        cv::Point(window_size.width*3/4, 0),
-        cv::Point(window_size.width*3/4, window_size.height/4),
-        cv::Point(window_size.width*3/4, window_size.height/2),
-        cv::Point(window_size.width*3/4, window_size.height*3/4),  // Reserve for show stats option
-    };
-
-    static cv::Size frame_size;
-    const cv::Point* points;
-    size_t lastPos;
-
-    if (count <= (4 - showStatsDec)) {
-        frame_size =  cv::Size(window_size/2);
-        points = points4;
-        lastPos = 3;
-    } else if (count <= (9 - showStatsDec)) {
-        frame_size =  cv::Size(window_size/3);
-        points = points9;
-        lastPos = 8;
-    } else {
-        frame_size =  cv::Size(window_size/4);
-        points = points16;
-        lastPos = 15;
-    }
-
-    for (size_t i = 0; i < data.size(); ++i) {
+                     const std::string& stats,
+                     DisplayParams params) {
+    cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
+    auto loopBody = [&](size_t i) {
         auto& elem = data[i];
-        if (!elem->frame->empty()) {
-            cv::Rect rect_frame1 = cv::Rect(points[i], frame_size);
-            cv::Mat window_part = window_image(rect_frame1);
-            cv::resize(*elem->frame.get(), window_part, frame_size);
-            drawDetections(window_part, elem->detections);
+        if (!elem->frame.empty()) {
+            cv::Rect rectFrame = cv::Rect(params.points[i], params.frameSize);
+            cv::Mat windowPart = windowImage(rectFrame);
+            cv::resize(elem->frame, windowPart, params.frameSize);
+            drawDetections(windowPart, elem->detections);
         }
+    };
+
+    auto drawStats = [&]() {
+        if (FLAGS_show_stats && !stats.empty()) {
+            static const cv::Point posPoint = cv::Point(3*DISP_WIDTH/4, 4*DISP_HEIGHT/5);
+            auto pos = posPoint + cv::Point(0, 25);
+            size_t currPos = 0;
+            while (true) {
+                auto newPos = stats.find('\n', currPos);
+                cv::putText(windowImage, stats.substr(currPos, newPos - currPos), pos, cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 0.8,  cv::Scalar(0, 0, 255), 1);
+                if (newPos == std::string::npos) {
+                    break;
+                }
+                pos += cv::Point(0, 25);
+                currPos = newPos + 1;
+            }
+        }
+    };
+
+//  #ifdef USE_TBB
+#if 0  // disable multithreaded rendering for now
+    run_in_arena([&](){
+        tbb::parallel_for<size_t>(0, data.size(), [&](size_t i) {
+            loopBody(i);
+        });
+    });
+#else
+    for (size_t i = 0; i < data.size(); ++i) {
+        loopBody(i);
     }
+#endif
+    drawStats();
 
     char str[256];
     snprintf(str, sizeof(str), "%5.2f fps", static_cast<double>(1000.0f/time));
-    cv::putText(window_image, str, cv::Point(800, 100), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 255, 0), 2);
-
-    if (FLAGS_show_stats && !stats.empty()) {
-        auto pos = points[lastPos] + cv::Point(0, 25);
-        size_t curr_pos = 0;
-        while (true) {
-            auto new_pos = stats.find('\n', curr_pos);
-            cv::putText(window_image, stats.substr(curr_pos, new_pos - curr_pos), pos, cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 0.8,  cv::Scalar(0, 0, 255), 1);
-            if (new_pos == std::string::npos) {
-                break;
-            }
-            pos += cv::Point(0, 25);
-            curr_pos = new_pos + 1;
-        }
-    }
-
-    cv::imshow(name, window_image);
+    cv::putText(windowImage, str, cv::Point(800, 100), cv::HersheyFonts::FONT_HERSHEY_COMPLEX, 2.0,  cv::Scalar(0, 255, 0), 2);
+    cv::imshow(params.name, windowImage);
 }
 
 }  // namespace
 
 int main(int argc, char* argv[]) {
     try {
+#if USE_TBB
+        TbbArenaWrapper arena;
+#endif
         slog::info << "InferenceEngine: " << InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
@@ -204,46 +217,96 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
-        size_t inputPollingTimeout = 1000;  // msec
-        VideoSources sources(/*async*/true, FLAGS_duplicate_num, FLAGS_show_stats,
-                              FLAGS_n_iqs, inputPollingTimeout, FLAGS_real_input_fps);
+        std::string weightsPath;
+        std::string modelPath = FLAGS_m;
+        std::size_t found = modelPath.find_last_of(".");
+        if (found > modelPath.size()) {
+            slog::info << "Invalid model name: " << modelPath << slog::endl;
+            slog::info << "Expected to be <model_name>.xml" << slog::endl;
+            return -1;
+        }
+        weightsPath = modelPath.substr(0, found) + ".bin";
+        slog::info << "Model   path: " << modelPath << slog::endl;
+        slog::info << "Weights path: " << weightsPath << slog::endl;
 
-        slog::info << "Trying to connect " << FLAGS_nc << " web cams ..." << slog::endl;
-        for (size_t i = 0; i < FLAGS_nc; ++i) {
-            if (!sources.openVideo(std::to_string(i))) {
-                slog::info << "Web cam" << i << ": returned false" << slog::endl;
-                return -1;
+        IEGraph::InitParams graphParams;
+        graphParams.batchSize       = FLAGS_bs;
+        graphParams.maxRequests     = FLAGS_n_ir;
+        graphParams.collectStats    = FLAGS_show_stats;
+        graphParams.reportPerf      = FLAGS_pc;
+        graphParams.modelPath       = modelPath;
+        graphParams.weightsPath     = weightsPath;
+        graphParams.cpuExtPath      = FLAGS_l;
+        graphParams.cldnnConfigPath = FLAGS_c;
+        graphParams.deviceName      = FLAGS_d;
+
+        std::shared_ptr<IEGraph> network(new IEGraph(graphParams));
+        auto inputDims = network->getInputDims();
+        if (4 != inputDims.size()) {
+            throw std::runtime_error("Invalid network input dimensions");
+        }
+
+        std::vector<std::string> files;
+        parseInputFilesArguments(files);
+
+        slog::info << "\tNumber of input web cams:    " << FLAGS_nc << slog::endl;
+        slog::info << "\tNumber of input video files: " << files.size() << slog::endl;
+        slog::info << "\tDuplication multiplayer:     " << FLAGS_duplicate_num << slog::endl;
+
+        const auto duplicateFactor = (1 + FLAGS_duplicate_num);
+        size_t numberOfInputs = (FLAGS_nc + files.size()) * duplicateFactor;
+
+        DisplayParams params = prepareDisplayParams(numberOfInputs);
+
+        slog::info << "\tNumber of input channels:    " << numberOfInputs << slog::endl;
+        if (numberOfInputs > MAX_INPUTS) {
+            throw std::logic_error("Number of inputs exceed maximum value [25]");
+        }
+
+        VideoSources::InitParams vsParams;
+        vsParams.queueSize            = FLAGS_n_iqs;
+        vsParams.collectStats         = FLAGS_show_stats;
+        vsParams.realFps              = FLAGS_real_input_fps;
+        vsParams.expectedHeight = static_cast<unsigned>(inputDims[2]);
+        vsParams.expectedWidth  = static_cast<unsigned>(inputDims[3]);
+
+        VideoSources sources(vsParams);
+        if (!files.empty()) {
+            slog::info << "Trying to open input video ..." << slog::endl;
+            for (auto& file : files) {
+                try {
+                    sources.openVideo(file, false);
+                } catch (...) {
+                    slog::info << "Cannot open video [" << file << "]" << slog::endl;
+                    throw;
+                }
+            }
+        }
+        if (FLAGS_nc) {
+            slog::info << "Trying to connect " << FLAGS_nc << " web cams ..." << slog::endl;
+            for (size_t i = 0; i < FLAGS_nc; ++i) {
+                try {
+                    sources.openVideo(std::to_string(i), true);
+                } catch (...) {
+                    slog::info << "Cannot open web cam [" << i << "]" << slog::endl;
+                    throw;
+                }
             }
         }
         sources.start();
 
-        std::string weights_path;
-        std::string model_path = FLAGS_m;
-        std::size_t found = model_path.find_last_of(".");
-        if (found > model_path.size()) {
-            slog::info << "Invalid model name: " << model_path << slog::endl;
-            slog::info << "Expected to be <model_name>.xml" << slog::endl;
-            return -1;
-        }
-        weights_path = model_path.substr(0, found) + ".bin";
-        slog::info << "Model   path: " << model_path << slog::endl;
-        slog::info << "Weights path: " << weights_path << slog::endl;
+        size_t currentFrame = 0;
 
-        std::shared_ptr<IEGraph> network(new IEGraph(
-                                             FLAGS_show_stats,
-                                             FLAGS_n_ir,
-                                             FLAGS_bs,
-                                             model_path,
-                                             weights_path,
-                                             FLAGS_l,
-                                             FLAGS_c,
-                                             FLAGS_d,
-                                             [&](VideoFrame& img) {
-            return sources.getFrame(img);
-        }));
-        network->setDetectionConfidence(FLAGS_t);
+        network->start([&](VideoFrame& img) {
+            img.sourceIdx = currentFrame;
+            auto camIdx = currentFrame / duplicateFactor;
+            currentFrame = (currentFrame + 1) % numberOfInputs;
+            return sources.getFrame(camIdx, img);
+        });
 
-        std::atomic<float> average_fps = {0.0f};
+        network->setDetectionConfidence(static_cast<float>(FLAGS_t));
+
+        std::atomic<float> averageFps = {0.0f};
 
         std::vector<std::shared_ptr<VideoFrame>> batchRes;
 
@@ -258,9 +321,7 @@ int main(int argc, char* argv[]) {
                 std::unique_lock<std::mutex> lock(statMutex);
                 str = statStream.str();
             }
-            displayNSources("Demo",
-                            result, FLAGS_nc*(1 + FLAGS_duplicate_num),
-                            average_fps, str);
+            displayNSources(result, averageFps, str, params);
 
             return (cv::waitKey(1) != 27);
         });
@@ -277,18 +338,18 @@ int main(int argc, char* argv[]) {
         size_t perfItersCounter = 0;
 
         while (true) {
-            bool read_data = true;
-            while (read_data) {
+            bool readData = true;
+            while (readData) {
                 auto br = network->getBatchData();
                 for (size_t i = 0; i < br.size(); i++) {
-                    unsigned int  val = br[i]->source_idx;
-                    auto it = find_if(batchRes.begin(), batchRes.end(), [val] (const std::shared_ptr<VideoFrame>& vf) { return vf->source_idx == val; } );
+                    auto val = static_cast<unsigned int>(br[i]->sourceIdx);
+                    auto it = find_if(batchRes.begin(), batchRes.end(), [val] (const std::shared_ptr<VideoFrame>& vf) { return vf->sourceIdx == val; } );
                     if (it != batchRes.end()) {
                         if (!FLAGS_no_show) {
                             output.push(std::move(batchRes));
                         }
                         batchRes.clear();
-                        read_data = false;
+                        readData = false;
                     }
                     batchRes.push_back(std::move(br[i]));
                 }
@@ -314,7 +375,7 @@ int main(int argc, char* argv[]) {
                         break;
                     }
                 } else {
-                    average_fps = frameTime;
+                    averageFps = frameTime;
                 }
 
                 if (FLAGS_show_stats) {
@@ -326,21 +387,24 @@ int main(int argc, char* argv[]) {
                     statStream.str(std::string());
                     statStream << std::fixed << std::setprecision(1);
                     statStream << "Input reads: ";
-                    for (size_t i = 0; i < inputStat.read_times.size(); ++i) {
+                    for (size_t i = 0; i < inputStat.readTimes.size(); ++i) {
                         if (0 == (i % 4)) {
                             statStream << std::endl;
                         }
-                        statStream << inputStat.read_times[i] << "ms ";
+                        statStream << inputStat.readTimes[i] << "ms ";
                     }
                     statStream << std::endl;
+                    statStream << "HW decoding latency: "
+                               << inputStat.decodingLatency << "ms";
+                    statStream << std::endl;
                     statStream << "Preprocess time: "
-                               << inferStat.preprocess_time << "ms";
+                               << inferStat.preprocessTime << "ms";
                     statStream << std::endl;
                     statStream << "Plugin latency: "
-                               << inferStat.infer_time << "ms";
+                               << inferStat.inferTime << "ms";
                     statStream << std::endl;
 
-                    statStream << "Render time: " << outputStat.render_time
+                    statStream << "Render time: " << outputStat.renderTime
                                << "ms" << std::endl;
 
                     if (FLAGS_no_show) {
@@ -349,6 +413,8 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
+
+        network.reset();
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

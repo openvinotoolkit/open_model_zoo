@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
 
         /** This vector stores paths to the processed images **/
         std::vector<std::string> images;
-        parseImagesArguments(images);
+        parseInputFilesArguments(images);
         if (images.empty()) throw std::logic_error("No suitable images were found");
         // -----------------------------------------------------------------------------------------------------
 

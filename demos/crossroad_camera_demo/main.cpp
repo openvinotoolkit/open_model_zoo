@@ -466,8 +466,8 @@ int main(int argc, char *argv[]) {
         if (isVideo && !(FLAGS_i == "cam" ? cap.open(0) : cap.open(FLAGS_i))) {
             throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);
         }
-        const size_t width  = isVideo ? (size_t) cap.get(CV_CAP_PROP_FRAME_WIDTH) : frame.size().width;
-        const size_t height = isVideo ? (size_t) cap.get(CV_CAP_PROP_FRAME_HEIGHT) : frame.size().height;
+        const size_t width  = isVideo ? (size_t) cap.get(cv::CAP_PROP_FRAME_WIDTH) : frame.size().width;
+        const size_t height = isVideo ? (size_t) cap.get(cv::CAP_PROP_FRAME_HEIGHT) : frame.size().height;
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 1. Load Plugin for inference engine -------------------------------------
@@ -496,9 +496,10 @@ int main(int argc, char *argv[]) {
                 /** Load default extensions lib for the CPU plugin (e.g. SSD's DetectionOutput)**/
                 plugin.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>());
                 if (!FLAGS_l.empty()) {
-                    // Any user-specified CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = make_so_pointer<MKLDNNPlugin::IMKLDNNExtension>(FLAGS_l);
-                    plugin.AddExtension(std::static_pointer_cast<IExtension>(extension_ptr));
+                    // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
+                    auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
+                    plugin.AddExtension(extension_ptr);
+                    std::cout << "CPU Extension loaded: " << FLAGS_l << std::endl;
                 }
             }
 

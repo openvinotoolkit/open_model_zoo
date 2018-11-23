@@ -15,6 +15,7 @@
 */
 
 #include "face_reid.hpp"
+#include "tracker.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -56,6 +57,9 @@ namespace {
 
 }  // namespace
 
+const std::string EmbeddingsGallery::unknown_label = "Unknown";
+const int EmbeddingsGallery::unknown_id = -1;
+
 EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
                                      double threshold,
                                      const VectorCNN& landmarks_det,
@@ -66,8 +70,14 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
         return;
     }
 
+    if (!landmarks_det.Enabled() || !image_reid.Enabled()) {
+        std::cout << "Warning: face recognition models are disabled!" << "\n";
+        return;
+    }
+
     cv::FileStorage fs(ids_list, cv::FileStorage::Mode::READ);
     cv::FileNode fn = fs.root();
+    int total_images = 0;
     int id = 0;
     for (cv::FileNodeIterator fit = fn.begin(); fit != fn.end(); ++fit) {
         cv::FileNode item = *fit;
@@ -79,7 +89,7 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
             if (file_exists(item[i])) {
                 path = std::string(item[i]);
             } else {
-                path = folder_name(ids_list) + separator() + item[i];
+                path = folder_name(ids_list) + separator() + std::string(item[i]);
             }
 
             cv::Mat image = cv::imread(path);
@@ -91,35 +101,44 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
             AlignFaces(&images, &landmarks_vec);
             image_reid.Compute(images[0], &emb);
             embeddings.push_back(emb);
+            idx_to_id.push_back(total_images);
+            total_images++;
         }
         identities.emplace_back(embeddings, label, id);
         ++id;
     }
 }
 
-int EmbeddingsGallery::ComputeId(const cv::Mat& emb) const {
-    int argmin = -1;
-    double min_dist = std::numeric_limits<double>::max();
-    for (size_t i = 0; i < identities.size(); i++) {
-        for (const auto& reference_emb : identities[i].embeddings) {
-            double dist = ComputeReidDistance(reference_emb, emb);
-            if (dist < min_dist) {
-                min_dist = dist;
-                argmin = i;
+std::vector<int> EmbeddingsGallery::GetIDsByEmbeddings(const std::vector<cv::Mat>& embeddings) const {
+    if (embeddings.empty() || idx_to_id.empty())
+        return std::vector<int>();
+
+    cv::Mat distances(static_cast<int>(embeddings.size()), static_cast<int>(idx_to_id.size()), CV_32F);
+
+    for (int i = 0; i < distances.rows; i++) {
+        int k = 0;
+        for (size_t j = 0; j < identities.size(); j++) {
+            for (const auto& reference_emb : identities[j].embeddings) {
+                distances.at<float>(i, k) = ComputeReidDistance(embeddings[i], reference_emb);
+                k++;
             }
         }
     }
-
-    if (min_dist < reid_threshold) {
-        return identities[argmin].id;
+    KuhnMunkres matcher;
+    auto matched_idx = matcher.Solve(distances);
+    std::vector<int> output_ids;
+    for (auto col_idx : matched_idx) {
+        if (distances.at<float>(output_ids.size(), col_idx) > reid_threshold)
+            output_ids.push_back(unknown_id);
+        else
+            output_ids.push_back(idx_to_id[col_idx]);
     }
-
-    return -1;
+    return output_ids;
 }
 
-std::string EmbeddingsGallery::GetLabelById(int id) const {
+std::string EmbeddingsGallery::GetLabelByID(int id) const {
     if (id >= 0 && id < static_cast<int>(identities.size()))
         return identities[id].label;
     else
-        return std::string("Unknown");
+        return unknown_label;
 }

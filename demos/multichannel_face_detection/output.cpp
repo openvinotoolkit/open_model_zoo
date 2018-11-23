@@ -19,16 +19,15 @@
 
 #include "output.hpp"
 
-
-AsyncOutput::AsyncOutput(bool collect_stats_, size_t queue_size_,
-                         DrawFunc draw_func_):
-    queue_size(queue_size_),
-    draw_func(std::move(draw_func_)),
-    perf_timer(collect_stats_ ? 50 : 0) {}
+AsyncOutput::AsyncOutput(bool collectStats, size_t queueSize,
+                         DrawFunc drawFunc):
+    queueSize(queueSize),
+    drawFunc(std::move(drawFunc)),
+    perfTimer(collectStats ? PerfTimer::DefaultIterationsCount : 0) {}
 
 AsyncOutput::~AsyncOutput() {
     terminate = true;
-    cond_var.notify_one();
+    condVar.notify_one();
     if (thread.joinable()) {
         thread.join();
     }
@@ -36,12 +35,12 @@ AsyncOutput::~AsyncOutput() {
 
 void AsyncOutput::push(std::vector<std::shared_ptr<VideoFrame> > &&item) {
     std::unique_lock<std::mutex> lock(mutex);
-    while (queue.size() >= queue_size) {
+    while (queue.size() >= queueSize) {
         queue.pop();
     }
     queue.push(std::move(item));
     lock.unlock();
-    cond_var.notify_one();
+    condVar.notify_one();
 }
 
 void AsyncOutput::start() {
@@ -49,7 +48,7 @@ void AsyncOutput::start() {
         std::vector<std::shared_ptr<VideoFrame>> elem;
         while (!terminate) {
             std::unique_lock<std::mutex> lock(mutex);
-            cond_var.wait(lock, [&]() {
+            condVar.wait(lock, [&]() {
                 return !queue.empty() || terminate;
             });
             if (terminate) {
@@ -60,13 +59,13 @@ void AsyncOutput::start() {
             queue.pop();
             lock.unlock();
 
-            if (perf_timer.enabled()) {
-                ScopedTimer sc(perf_timer);
-                if (!draw_func(elem)) {
+            if (perfTimer.enabled()) {
+                ScopedTimer sc(perfTimer);
+                if (!drawFunc(elem)) {
                     terminate = true;
                 }
             } else {
-                if (!draw_func(elem)) {
+                if (!drawFunc(elem)) {
                     terminate = true;
                 }
             }
@@ -80,5 +79,5 @@ bool AsyncOutput::isAlive() const {
 }
 
 AsyncOutput::Stats AsyncOutput::getStats() const {
-    return Stats{perf_timer.getValue()};
+    return Stats{perfTimer.getValue()};
 }

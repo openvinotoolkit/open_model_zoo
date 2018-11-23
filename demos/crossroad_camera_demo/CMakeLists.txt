@@ -15,18 +15,14 @@ cmake_minimum_required(VERSION 2.8)
 
 set(TARGET_NAME "crossroad_camera_demo")
 
-find_package(OpenCV)
-if(OpenCV_FOUND)
-    message(STATUS "OPENCV is enabled")
-    message(STATUS "OpenCV_INCLUDE_DIRS=${OpenCV_INCLUDE_DIRS}")
-    message(STATUS "OpenCV_LIBS=${OpenCV_LIBS}")
-else()
-    message(STATUS "OPENCV is disabled or not found, " ${TARGET_NAME} " skiped")
+if( BUILD_DEMO_NAME AND NOT ${BUILD_DEMO_NAME} STREQUAL ${TARGET_NAME} )
+    message(STATUS "DEMO ${TARGET_NAME} SKIPPED")
     return()
 endif()
 
-if( BUILD_DEMO_NAME AND NOT ${BUILD_DEMO_NAME} STREQUAL ${TARGET_NAME} )
-    message(STATUS "DEMO ${TARGET_NAME} SKIPPED")
+find_package(OpenCV)
+if(NOT(OpenCV_FOUND))
+    message(STATUS "OPENCV is disabled or not found, " ${TARGET_NAME} " skiped")
     return()
 endif()
 
@@ -53,7 +49,7 @@ set_target_properties(${TARGET_NAME} PROPERTIES "CMAKE_CXX_FLAGS" "${CMAKE_CXX_F
         COMPILE_PDB_NAME ${TARGET_NAME})
 
 
-target_link_libraries(${TARGET_NAME} format_reader cpu_extension ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES})
+target_link_libraries(${TARGET_NAME} IE::ie_cpu_extension ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES})
 
 if(UNIX)
     target_link_libraries( ${TARGET_NAME} ${LIB_DL} pthread)

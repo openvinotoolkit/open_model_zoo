@@ -1,0 +1,53 @@
+models:
+  - name: face-reidentification-retail-0071
+
+    launchers:
+            - framework: dlsdk
+        device: CPU
+        model:   face-reidentification-retail-0001/FP32/face-reidentification-retail-0071.xml
+        weights: face-reidentification-retail-0001/FP32/face-reidentification-retail-0071.bin
+        adapter: reid
+
+      - framework: dlsdk
+        device: GPU
+        model:   face-reidentification-retail-0071/FP32/face-reidentification-retail-0071.xml
+        weights: face-reidentification-retail-0071/FP32/face-reidentification-retail-0071.bin
+        adapter: reid
+
+      - framework: dlsdk
+        device: GPU
+        model:   face-reidentification-retail-0071/FP16/face-reidentification-retail-0071.xml
+        weights: face-reidentification-retail-0071/FP16/face-reidentification-retail-0071.bin
+        adapter: reid
+
+      - framework: dlsdk
+        device: HETERO:FPGA,CPU
+        model:   face-reidentification-retail-0071/FP32/face-reidentification-retail-0071.xml
+        weights: face-reidentification-retail-0071/FP32/face-reidentification-retail-0071.bin
+        adapter: reid
+        bitstream: 4-0_A10DK_FP16_MobileNet_SqueezeNet_VGG_ELU.aocx
+
+      - framework: dlsdk
+        device: HETERO:FPGA,CPU
+        model:   face-reidentification-retail-0071/FP32/face-reidentification-retail-0071.xml
+        weights: face-reidentification-retail-0071/FP32/face-reidentification-retail-0071.bin
+        adapter: reid
+        bitstream: 4-0_A10DK_FP11_TinyYolo_SSD300.aocx
+
+    datasets:
+     - name: lfw
+
+       data_source: LFW/lfw
+       annotation: lfw.pickle
+       dataset_meta: lfw.json
+
+       preprocessing:
+         - type: point_aligment
+           size: 400
+         - type: resize
+           size: 128
+         - type: normalization
+           std: 255
+
+       metrics:
+         - type: pairwise_accuracy_subsets

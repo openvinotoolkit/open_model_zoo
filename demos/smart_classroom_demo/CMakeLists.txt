@@ -14,9 +14,13 @@
 
 set (TARGET_NAME "smart_classroom_demo")
 
-find_package(Threads)
+if( BUILD_DEMO_NAME AND NOT ${BUILD_DEMO_NAME} STREQUAL ${TARGET_NAME} )
+    message(STATUS "DEMO ${TARGET_NAME} SKIPPED")
+    return()
+endif()
+
 find_package(OpenCV)
-if(NOT OpenCV_FOUND)
+if(NOT(OpenCV_FOUND))
     message(STATUS "OPENCV is disabled or not found, " ${TARGET_NAME} " skiped")
     return()
 endif()
@@ -46,7 +50,7 @@ set_target_properties(${TARGET_NAME} PROPERTIES "CMAKE_CXX_FLAGS" "${CMAKE_CXX_F
 
 target_include_directories(${TARGET_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")
 target_include_directories(${TARGET_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(${TARGET_NAME} cpu_extension ${InferenceEngine_LIBRARIES} ${OpenCV_LIBS} gflags)
+target_link_libraries(${TARGET_NAME} IE::ie_cpu_extension ${InferenceEngine_LIBRARIES} ${OpenCV_LIBS} gflags)
 if(UNIX)
   target_link_libraries(${TARGET_NAME} ${LIB_DL} pthread)
 endif()

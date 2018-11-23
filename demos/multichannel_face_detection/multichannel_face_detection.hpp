@@ -18,7 +18,6 @@
 #include <string>
 #include <vector>
 #include <gflags/gflags.h>
-#include <iostream>
 
 #ifdef _WIN32
 #include <os/windows/w_dirent.h>
@@ -38,17 +37,17 @@ static const char plugin_message[] = "Plugin name. For example MKLDNNPlugin. If 
 
 /// @brief message for assigning face detection calculation to device
 static const char target_device_message[] = "Specify the target device for Face Detection (CPU, GPU, FPGA, or MYRIAD). " \
-"Demo will look for a suitable plugin for device specified.";
+"The demo will look for a suitable plugin for a specified device.";
 
 /// @brief message for performance counters
 static const char performance_counter_message[] = "Enables per-layer performance report.";
 
 /// @brief message for clDNN custom kernels desc
-static const char custom_cldnn_message[] = "Required for clDNN (GPU)-targeted custom kernels."\
+static const char custom_cldnn_message[] = "Required for clDNN (GPU)-targeted custom kernels. "\
 "Absolute path to the xml file with the kernels desc.";
 
 /// @brief message for user library argument
-static const char custom_cpu_library_message[] = "Required for MKLDNN (CPU)-targeted custom layers." \
+static const char custom_cpu_library_message[] = "Required for MKLDNN (CPU)-targeted custom layers. " \
 "Absolute path to a shared library with the kernels impl.";
 
 /// @brief message for probability threshold argument
@@ -73,7 +72,7 @@ static const char input_queue_size[] = "Frame queue size for input channels";
 static const char fps_sampling_period[] = "FPS measurement sampling period. Duration between timepoints, msec";
 
 /// @brief message for FPS measurement sampling period
-static const char num_sampling_periods[] = "Exit after N sampling periods in performance testing(No show) mode";
+static const char num_sampling_periods[] = "Number of sampling periods";
 
 /// @brief message for enabling statistics output
 static const char show_statistics[] = "Enable statictics output";
@@ -83,6 +82,9 @@ static const char duplication_channel_number[] = "Enable and specify number of c
 
 /// @brief message for enabling real input FPS
 static const char real_input_fps[] = "Disable input frames caching, for maximum throughput pipeline";
+
+/// @brief message for enabling input video
+static const char input_video[] = "Specify full path to input video files";
 
 /// \brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
@@ -149,30 +151,6 @@ DEFINE_uint32(duplicate_num, 0, duplication_channel_number);
 /// It is an optional parameter
 DEFINE_bool(real_input_fps, false, real_input_fps);
 
-/**
-* \brief This function show a help message
-*/
-static void showUsage() {
-    std::cout << std::endl;
-    std::cout << "multichannel_face_detection [OPTION]" << std::endl;
-    std::cout << "Options:" << std::endl;
-    std::cout << std::endl;
-    std::cout << "    -h                           " << help_message << std::endl;
-    std::cout << "    -m \"<path>\"                  " << face_detection_model_message<< std::endl;
-    std::cout << "      -l \"<absolute_path>\"       " << custom_cpu_library_message << std::endl;
-    std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"       " << custom_cldnn_message << std::endl;
-    std::cout << "    -d \"<device>\"                " << target_device_message << std::endl;
-    std::cout << "    -nc                          " << num_cameras << std::endl;
-    std::cout << "    -bs                          " << batch_size << std::endl;
-    std::cout << "    -n_ir                        " << num_infer_requests << std::endl;
-    std::cout << "    -n_iqs                       " << input_queue_size << std::endl;
-    std::cout << "    -fps_sp                      " << fps_sampling_period << std::endl;
-    std::cout << "    -num_sp                      " << num_sampling_periods << std::endl;
-    std::cout << "    -pc                          " << performance_counter_message << std::endl;
-    std::cout << "    -t                           " << thresh_output_message << std::endl;
-    std::cout << "    -no_show                     " << no_show_processed_video << std::endl;
-    std::cout << "    -show_stats                  " << show_statistics << std::endl;
-    std::cout << "    -duplicate_num               " << duplication_channel_number << std::endl;
-    std::cout << "    -real_input_fps              " << real_input_fps << std::endl;
-}
+/// \brief Define parameter for input video files <br>
+/// It is a optional parameter
+DEFINE_string(i, "", input_video);

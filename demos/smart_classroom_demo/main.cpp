@@ -24,8 +24,7 @@
 #include <memory>
 #include <vector>
 #include <map>
-
-#include "mkldnn/mkldnn_extension_ptr.hpp"
+#include <ie_iextension.h>
 
 #include "action_detector.hpp"
 #include "cnn.hpp"
@@ -39,23 +38,86 @@
 using namespace InferenceEngine;
 
 namespace {
-void DrawObject(const cv::Rect& rect, const std::string& label,
-                const cv::Scalar& text_color, bool plot_bg, cv::Mat* image) {
-    cv::rectangle(*image, rect, cv::Scalar(255, 255, 255));
 
-    if (plot_bg) {
-        int baseLine = 0;
-        const cv::Size label_size =
-                cv::getTextSize(label, cv::FONT_HERSHEY_PLAIN, 1, 1, &baseLine);
+class Visualizer {
+private:
+    cv::Mat frame_;
+    const bool enabled_;
+    cv::VideoWriter& writer_;
+    float rect_scale_x_;
+    float rect_scale_y_;
+    static int const max_input_width_ = 1920;
 
-        cv::rectangle(*image, cv::Point(rect.x, rect.y - label_size.height),
-                      cv::Point(rect.x + label_size.width, rect.y + baseLine),
-                      cv::Scalar(255, 255, 255), cv::FILLED);
+public:
+    Visualizer(bool enabled, cv::VideoWriter& writer) : enabled_(enabled), writer_(writer) {}
+
+    static cv::Size GetOutputSize(const cv::Size& input_size) {
+        if (input_size.width > max_input_width_) {
+            float ratio = static_cast<float>(input_size.height) / input_size.width;
+            return cv::Size(max_input_width_, cvRound(ratio*max_input_width_));
+        }
+        return input_size;
     }
 
-    putText(*image, label, cv::Point(rect.x, rect.y), cv::FONT_HERSHEY_PLAIN, 1,
-            text_color, 1, cv::LINE_AA);
-}
+    void SetFrame(const cv::Mat& frame) {
+        if (enabled_ || writer_.isOpened()) {
+            frame_ = frame.clone();
+            rect_scale_x_ = 1;
+            rect_scale_y_ = 1;
+            cv::Size new_size = GetOutputSize(frame_.size());
+            if (new_size != frame_.size()) {
+                rect_scale_x_ = static_cast<float>(new_size.height) / frame_.size().height;
+                rect_scale_y_ = static_cast<float>(new_size.width) / frame_.size().width;
+                cv::resize(frame_, frame_, new_size);
+            }
+        }
+    }
+
+    void Show() const {
+        if (enabled_) {
+            cv::imshow("Smart classroom demo", frame_);
+        }
+        if (writer_.isOpened()) {
+            writer_ << frame_;
+        }
+    }
+
+    void DrawObject(cv::Rect rect, const std::string& label,
+                    const cv::Scalar& text_color, bool plot_bg) {
+        if (enabled_ || writer_.isOpened()) {
+            if (rect_scale_x_ != 1 || rect_scale_y_ != 1) {
+                rect.x = cvRound(rect.x * rect_scale_x_);
+                rect.y = cvRound(rect.y * rect_scale_y_);
+
+                rect.height = cvRound(rect.height * rect_scale_y_);
+                rect.width = cvRound(rect.width * rect_scale_x_);
+            }
+            cv::rectangle(frame_, rect, cv::Scalar(255, 255, 255));
+
+            if (plot_bg && label != EmbeddingsGallery::unknown_label) {
+                int baseLine = 0;
+                const cv::Size label_size =
+                    cv::getTextSize(label, cv::FONT_HERSHEY_PLAIN, 1, 1, &baseLine);
+                cv::rectangle(frame_, cv::Point(rect.x, rect.y - label_size.height),
+                              cv::Point(rect.x + label_size.width, rect.y + baseLine),
+                              cv::Scalar(255, 255, 255), cv::FILLED);
+            }
+            if (label != EmbeddingsGallery::unknown_label) {
+                putText(frame_, label, cv::Point(rect.x, rect.y), cv::FONT_HERSHEY_PLAIN, 1,
+                        text_color, 1, cv::LINE_AA);
+            }
+        }
+    }
+
+    void DrawFPS(float fps) {
+        if (enabled_ && !writer_.isOpened()) {
+            cv::putText(frame_,
+                        std::to_string(static_cast<int>(fps)) + " fps",
+                        cv::Point(10, 50), cv::FONT_HERSHEY_SIMPLEX, 2,
+                        cv::Scalar(0, 0, 255), 2, cv::LINE_AA);
+        }
+    }
+};
 
 std::string GetActionTextLabel(const unsigned label) {
     static std::vector<std::string> actions_map = {"sitting", "standing",
@@ -90,21 +152,8 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
     }
-
-    if (FLAGS_m_act.empty()) {
-        throw std::logic_error("Parameter -m_act is not set");
-    }
-
-    if (FLAGS_m_fd.empty()) {
-        throw std::logic_error("Parameter -m_fd is not set");
-    }
-
-    if (FLAGS_m_lm.empty()) {
-        throw std::logic_error("Parameter -m_lm is not set");
-    }
-
-    if (FLAGS_m_reid.empty()) {
-        throw std::logic_error("Parameter -m_reid is not set");
+    if (FLAGS_m_act.empty() && FLAGS_m_fd.empty()) {
+        throw std::logic_error("At least one parameter -m_act or -m_fd must be set");
     }
 
     return true;
@@ -153,10 +202,12 @@ int main(int argc, char* argv[]) {
             /** Load extensions for the CPU plugin **/
             if ((device.find("CPU") != std::string::npos)) {
                 plugin.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>());
+
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-                    auto extension_ptr = make_so_pointer<MKLDNNPlugin::IMKLDNNExtension>(FLAGS_l);
-                    plugin.AddExtension(std::static_pointer_cast<IExtension>(extension_ptr));
+                    auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
+                    plugin.AddExtension(extension_ptr);
+                    std::cout << "CPU Extension loaded: " << FLAGS_l << std::endl;
                 }
             } else if (!FLAGS_c.empty()) {
                 // Load Extensions for other plugins not CPU
@@ -172,6 +223,7 @@ int main(int argc, char* argv[]) {
         ActionDetectorConfig action_config(ad_model_path, ad_weights_path);
         action_config.plugin = plugins_for_devices[FLAGS_d_act];
         action_config.is_async = true;
+        action_config.enabled = !ad_model_path.empty();
         action_config.detection_confidence_threshold = FLAGS_t_act;
         ActionDetection action_detector(action_config);
 
@@ -179,20 +231,25 @@ int main(int argc, char* argv[]) {
         detection::DetectorConfig face_config(fd_model_path, fd_weights_path);
         face_config.plugin = plugins_for_devices[FLAGS_d_fd];
         face_config.is_async = true;
+        face_config.enabled = !fd_model_path.empty();
         face_config.confidence_threshold = FLAGS_t_fd;
-        face_config.input_h = 600;
-        face_config.input_w = 600;
+        face_config.input_h = FLAGS_inh_fd;
+        face_config.input_w = FLAGS_inw_fd;
+        face_config.increase_scale_x = FLAGS_exp_r_fd;
+        face_config.increase_scale_y = FLAGS_exp_r_fd;
         detection::FaceDetection face_detector(face_config);
 
         // Load face reid
         CnnConfig reid_config(fr_model_path, fr_weights_path);
         reid_config.max_batch_size = 16;
+        reid_config.enabled = face_config.enabled && !fr_model_path.empty() && !lm_model_path.empty();
         reid_config.plugin = plugins_for_devices[FLAGS_d_reid];
         VectorCNN face_reid(reid_config);
 
         // Load landmarks detector
         CnnConfig landmarks_config(lm_model_path, lm_weights_path);
         landmarks_config.max_batch_size = 16;
+        landmarks_config.enabled = face_config.enabled && reid_config.enabled && !lm_model_path.empty();
         landmarks_config.plugin = plugins_for_devices[FLAGS_d_lm];
         VectorCNN landmarks_detector(landmarks_config);
 
@@ -201,10 +258,9 @@ int main(int argc, char* argv[]) {
 
         // Create tracker for reid
         TrackerParams tracker_reid_params;
-        tracker_reid_params.min_track_duration = 1000;
+        tracker_reid_params.min_track_duration = 750;
         tracker_reid_params.forget_delay = 150;
         tracker_reid_params.affinity_thr = 0.8;
-        tracker_reid_params.min_det_conf = 0.5;
         tracker_reid_params.bbox_heights_range = cv::Vec2f(10, 1080);
         tracker_reid_params.drop_forgotten_tracks = true;
         tracker_reid_params.max_num_objects_in_track = 10000;
@@ -214,10 +270,9 @@ int main(int argc, char* argv[]) {
 
         // Create Tracker for action recognition
         TrackerParams tracker_action_params;
-        tracker_action_params.min_track_duration = 1000;
+        tracker_action_params.min_track_duration = 250;
         tracker_action_params.forget_delay = 150;
-        tracker_action_params.affinity_thr = 0.8;
-        tracker_action_params.min_det_conf = 0.5;
+        tracker_action_params.affinity_thr = 0.95;
         tracker_action_params.bbox_heights_range = cv::Vec2f(10, 1080);
         tracker_action_params.drop_forgotten_tracks = true;
         tracker_action_params.max_num_objects_in_track = 10;
@@ -226,7 +281,6 @@ int main(int argc, char* argv[]) {
         Tracker tracker_action(tracker_action_params);
 
         cv::Mat frame, prev_frame;
-        cv::Mat out_image;
         DetectedActions actions;
         detection::DetectedObjects faces;
 
@@ -234,8 +288,7 @@ int main(int argc, char* argv[]) {
         size_t num_frames = 0;
         const char ESC_KEY = 27;
         const cv::Scalar red_color(0, 0, 255);
-
-        float frame_delay = 1000.0f / 30.0f;  // 30 fps is assumed.
+        float frame_delay = 1000.0f / cap.GetFPS();
 
         if (cap.GrabNext()) {
             cap.Retrieve(frame);
@@ -254,19 +307,20 @@ int main(int argc, char* argv[]) {
         auto prev_frame_path = cap.GetVideoPath();
         int prev_fame_idx = cap.GetFrameIndex();
 
+        cv::VideoWriter vid_writer(FLAGS_out_v, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+                                   cap.GetFPS(), Visualizer::GetOutputSize(frame.size()));
+        Visualizer sc_visualizer(!FLAGS_no_show, vid_writer);
+
         while (!is_last_frame) {
+            auto started = std::chrono::high_resolution_clock::now();
+
             is_last_frame = !cap.GrabNext();
             if (!is_last_frame)
                 cap.Retrieve(frame);
 
-            if (!FLAGS_no_show) {
-                prev_frame.copyTo(out_image);
-            }
-
+            sc_visualizer.SetFrame(prev_frame);
             logger.CreateNextFrameRecord(prev_frame_path, prev_fame_idx,
                                          prev_frame.cols, prev_frame.rows);
-
-            auto started = std::chrono::high_resolution_clock::now();
 
             face_detector.wait();
             face_detector.fetchResults();
@@ -294,20 +348,19 @@ int main(int argc, char* argv[]) {
             landmarks_detector.Compute(face_rois, &landmarks, cv::Size(2, 5));
             AlignFaces(&face_rois, &landmarks);
             face_reid.Compute(face_rois, &embeddings);
+            auto ids = face_gallery.GetIDsByEmbeddings(embeddings);
 
             for (size_t i = 0; i < faces.size(); i++) {
-                auto id = face_gallery.ComputeId(embeddings[i]);
-                tracked_face_objects.emplace_back(faces[i].rect, faces[i].confidence, id);
+                int label = ids.empty() ? EmbeddingsGallery::unknown_id : ids[i];
+                tracked_face_objects.emplace_back(faces[i].rect, faces[i].confidence, label);
             }
             tracker_reid.Process(prev_frame, tracked_face_objects, num_frames * frame_delay);
 
             const auto tracked_faces = tracker_reid.TrackedDetectionsWithLabels();
             for (const auto& face : tracked_faces) {
-                if (!FLAGS_no_show) {
-                    DrawObject(face.rect, face_gallery.GetLabelById(face.label),
-                               red_color, true, &out_image);
-                }
-                logger.AddFaceToFrame(face.rect, face_gallery.GetLabelById(face.label));
+                sc_visualizer.DrawObject(face.rect, face_gallery.GetLabelByID(face.label),
+                                         red_color, true);
+                logger.AddFaceToFrame(face.rect, face_gallery.GetLabelByID(face.label));
             }
 
             TrackedObjects tracked_action_objects;
@@ -329,21 +382,12 @@ int main(int argc, char* argv[]) {
                 auto label_desc = GetActionTextLabel(action.label);
                 auto label_color = GetActionTextColor(action.label);
 
-                if (!FLAGS_no_show) {
-                    DrawObject(action.rect, label_desc, label_color, false, &out_image);
-                }
+                sc_visualizer.DrawObject(action.rect, label_desc, label_color, false);
                 logger.AddPersonToFrame(action.rect, label_desc);
             }
             logger.FinalizeFrameRecord();
-
-            if (!FLAGS_no_show) {
-                cv::putText(out_image,
-                            std::to_string(static_cast<int>(1e3f / elapsed_ms)) + " fps",
-                            cv::Point(10, 50), CV_FONT_HERSHEY_SIMPLEX, 2,
-                            cv::Scalar(0, 0, 255), 2);
-
-                cv::imshow("Smart classroom demo", out_image);
-            }
+            sc_visualizer.DrawFPS(1e3f / (total_time_ms / static_cast<float>(num_frames) + 1e-6));
+            sc_visualizer.Show();
 
             char key = cv::waitKey(1);
             if (key == ESC_KEY) {

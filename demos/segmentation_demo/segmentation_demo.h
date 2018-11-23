@@ -41,7 +41,7 @@ static const char model_message[] = "Required. Path to an .xml file with a train
 
 /// @brief message for assigning cnn calculation to device
 static const char target_device_message[] = "Specify the target device to infer on: CPU, GPU, FPGA or MYRIAD is acceptable. " \
-"Demo will look for a suitable plugin for device specified (CPU by default)";
+"The demo will look for a suitable plugin for a specified device (CPU by default).";
 
 /// @brief message for performance counters
 static const char performance_counter_message[] = "Enables per-layer performance report";
@@ -50,11 +50,11 @@ static const char performance_counter_message[] = "Enables per-layer performance
 static const char iterations_count_message[] = "Number of iterations (default 1)";
 
 /// @brief message for clDNN custom kernels desc
-static const char custom_cldnn_message[] = "Required for clDNN (GPU)-targeted custom kernels."\
+static const char custom_cldnn_message[] = "Required for clDNN (GPU)-targeted custom kernels. "\
 "Absolute path to the xml file with the kernels desc.";
 
 /// @brief message for user library argument
-static const char custom_cpu_library_message[] = "Required for MKLDNN (CPU)-targeted custom layers." \
+static const char custom_cpu_library_message[] = "Required for MKLDNN (CPU)-targeted custom layers. " \
 "Absolute path to a shared library with the kernels impl.";
 
 /// @brief Define parameter for clDNN custom kernels path <br>

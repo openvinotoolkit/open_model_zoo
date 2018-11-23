@@ -21,7 +21,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#include <samples/slog.hpp>
+#include <../samples/slog.hpp>
 
 using namespace std;
 using namespace FormatReader;

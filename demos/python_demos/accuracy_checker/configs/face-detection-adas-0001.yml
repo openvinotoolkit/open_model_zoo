@@ -1,0 +1,66 @@
+models:
+  - name: fase-detection-adas-0001
+
+    launchers:
+      - framework: dlsdk
+        device: CPU
+        model:   face-detection-adas-0001/FP32/face-detection-adas-0001.xml
+        weights: face-detection-adas-0001/FP32/face-detection-adas-0001.bin
+        adapter: ssd
+        cpu_extensions: libcpu_extension_avx2.so
+
+      - framework: dlsdk
+        device: GPU
+        model:   face-detection-adas-0001/FP32/face-detection-adas-0001.xml
+        weights: face-detection-adas-0001/FP32/face-detection-adas-0001.bin
+        adapter: ssd
+
+      - framework: dlsdk
+        device: GPU
+        model:   face-detection-adas-0001/FP16/face-detection-adas-0001.xml
+        weights: face-detection-adas-0001/FP16/face-detection-adas-0001.bin
+        adapter: ssd
+
+      - framework: dlsdk
+        device: HETERO:FPGA,CPU
+        model:   face-detection-adas-0001/FP32/face-detection-adas-0001.xml
+        weights: face-detection-adas-0001/FP32/face-detection-adas-0001.bin
+        adapter: ssd
+        cpu_extensions: libcpu_extension_avx2.so
+        bitstream: 4-0_A10DK_FP16_MobileNet_SqueezeNet_VGG_ELU.aocx
+
+      - framework: dlsdk
+        device: HETERO:FPGA,CPU
+        model:   face-detection-adas-0001/FP32/face-detection-adas-0001.xml
+        weights: face-detection-adas-0001/FP32/face-detection-adas-0001.bin
+        adapter: ssd
+        cpu_extensions: libcpu_extension_avx2.so
+        bitstream: 4-0_A10DK_FP11_MobileNet.aocx
+
+    datasets:
+      - name: wider
+
+        data_source: WIDER_val/images
+        annotation: wider.pickle
+        dataset_meta: wider.json
+
+        preprocessing:
+          - type: resize
+            dst_width:  672
+            dst_height: 384
+          - type: normalization
+            mean: 89, 117, 123
+            std: 76.9230769230769
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: filter
+            height_range: 100
+            apply_to: annotatio
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False
+            allow_multiple_matches_per_ignored: True
+            use_filtered_tp: True

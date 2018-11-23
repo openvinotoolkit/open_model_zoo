@@ -24,6 +24,8 @@
 #include <tuple>
 #include <set>
 
+#define UNKNOWN_LABEL_IDX -1
+
 class KuhnMunkres::Impl {
 public:
     Impl() : n_() {}
@@ -219,7 +221,7 @@ TrackerParams::TrackerParams()
       affinity_thr(0.85),
       shape_affinity_w(0.5),
       motion_affinity_w(0.2),
-      min_det_conf(0.65),
+      min_det_conf(0.0),
       bbox_aspect_ratios_range(0.666, 5.0),
       bbox_heights_range(1, 1280),
       drop_forgotten_tracks(true),
@@ -531,6 +533,23 @@ TrackedObjects Tracker::TrackedDetectionsWithLabels() const {
         auto track = tracks().at(idx);
         if (IsTrackValid(idx) && !track.lost) {
             TrackedObject object = track.objects.back();
+            int counter = 1;
+            const int averaging_window_size = 5;
+            int start = track.objects.size() >= averaging_window_size ?
+                        track.objects.size() - averaging_window_size : 0;
+
+            for (int i = start; i < track.objects.size() - 1; i++) {
+                object.rect.width += track.objects[i].rect.width;
+                object.rect.height += track.objects[i].rect.height;
+                object.rect.x += track.objects[i].rect.x;
+                object.rect.y += track.objects[i].rect.y;
+                counter++;
+            }
+            object.rect.width /= counter;
+            object.rect.height /= counter;
+            object.rect.x /= counter;
+            object.rect.y /= counter;
+
             object.label = LabelWithMaxFrequencyInTrack(track);
             detections.push_back(object);
         }
@@ -544,7 +563,7 @@ int Tracker::LabelWithMaxFrequencyInTrack(const Track &track) const {
     int max_frequent_id = -1;
     for (const auto detection : track.objects) {
         int count = ++frequencies[detection.label];
-        if (count > max_frequent_count) {
+        if (count > max_frequent_count && detection.label != UNKNOWN_LABEL_IDX) {
             max_frequent_count = count;
             max_frequent_id = detection.label;
         }

@@ -29,6 +29,10 @@ using namespace InferenceEngine;
 
 CnnDLSDKBase::CnnDLSDKBase(const Config& config) : config_(config) {}
 
+bool CnnDLSDKBase::Enabled() const {
+    return config_.enabled;
+}
+
 void CnnDLSDKBase::Load() {
     CNNNetReader net_reader;
     net_reader.ReadNetwork(config_.path_to_model);
@@ -76,6 +80,9 @@ void CnnDLSDKBase::Load() {
 void CnnDLSDKBase::InferBatch(
         const std::vector<cv::Mat>& frames,
         std::function<void(const InferenceEngine::BlobMap&, size_t)> fetch_results) const {
+    if (!config_.enabled) {
+        return;
+    }
     const size_t batch_size = input_blob_->getTensorDesc().getDims()[0];
 
     size_t num_imgs = frames.size();
@@ -93,6 +100,9 @@ void CnnDLSDKBase::InferBatch(
 }
 
 void CnnDLSDKBase::PrintPerformanceCounts() const {
+    if (!config_.enabled) {
+        return;
+    }
     std::cout << "Performance counts for " << config_.path_to_model << std::endl << std::endl;
     ::printPerformanceCounts(infer_request_.GetPerformanceCounts(), std::cout, false);
 }
@@ -104,10 +114,11 @@ void CnnDLSDKBase::Infer(const cv::Mat& frame,
 
 VectorCNN::VectorCNN(const Config& config)
     : CnnDLSDKBase(config) {
-    Load();
-
-    if (outputs_.size() != 1) {
-        THROW_IE_EXCEPTION << "Demo supports topologies only with 1 output";
+    if (config.enabled) {
+        Load();
+        if (outputs_.size() != 1) {
+            THROW_IE_EXCEPTION << "Demo supports topologies only with 1 output";
+        }
     }
 }
 

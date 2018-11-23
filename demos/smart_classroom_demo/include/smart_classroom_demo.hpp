@@ -78,12 +78,23 @@ static const char threshold_output_message_face_reid[] = "Optional. Cosine dista
 /// @brief message for faces gallery path
 static const char reid_gallery_path_message[] = "Optional. Path to a faces gallery in json format.";
 
+/// @brief message for output video path
+static const char output_video_message[] = "Optional. File to write output video with visualization to.";
+
 /// @brief message raw output flag
 static const char raw_output_message[] = "Optional. Output Inference results as raw values.";
 
 /// @brief message no show processed video
 static const char no_show_processed_video[] = "Optional. No show processed video.";
 
+/// @brief message input image height for face detector
+static const char input_image_height_output_message[] = "Optional. Input image height for face detector.";
+
+/// @brief message input image width for face detector
+static const char input_image_width_output_message[] = "Optional. Input image width for face detector.";
+
+/// @brief message expand ratio for bbox
+static const char expand_ratio_output_message[] = "Optional. Expand ratio for bbox before face recognition.";
 
 /// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
@@ -151,9 +162,25 @@ DEFINE_double(t_reid, 0.7, threshold_output_message_face_reid);
 /// It is a optional parameter
 DEFINE_string(fg, "", reid_gallery_path_message);
 
+/// @brief File to write output video with visualization to.
+/// It is a optional parameter
+DEFINE_string(out_v, "", output_video_message);
+
 /// @brief Flag to disable processed video showing<br>
 /// It is an optional parameter
 DEFINE_bool(no_show, false, no_show_processed_video);
+
+/// @brief Input image height for face detector<br>
+/// It is an optional parameter
+DEFINE_int32(inh_fd, 600, input_image_height_output_message);
+
+/// @brief Input image width for face detector<br>
+/// It is an optional parameter
+DEFINE_int32(inw_fd, 600, input_image_width_output_message);
+
+/// @brief Expand ratio for bbox before face recognition<br>
+/// It is an optional parameter
+DEFINE_double(exp_r_fd, 1.15, face_threshold_output_message);
 
 /**
 * @brief This function show a help message
@@ -176,10 +203,14 @@ static void showUsage() {
     std::cout << "    -d_fd \"<device>\"             " << target_device_message_face_detection << std::endl;
     std::cout << "    -d_lm \"<device>\"             " << target_device_message_landmarks_regression << std::endl;
     std::cout << "    -d_reid \"<device>\"           " << target_device_message_face_reid << std::endl;
+    std::cout << "    -out_v  \"<path>\"             " << output_video_message << std::endl;
     std::cout << "    -pc                            " << performance_counter_message << std::endl;
     std::cout << "    -r                             " << raw_output_message << std::endl;
     std::cout << "    -t_act                         " << person_threshold_output_message << std::endl;
     std::cout << "    -t_fd                          " << face_threshold_output_message << std::endl;
+    std::cout << "    -inh_fd                        " << input_image_height_output_message << std::endl;
+    std::cout << "    -inw_fd                        " << input_image_width_output_message << std::endl;
+    std::cout << "    -exp_r_fd                      " << expand_ratio_output_message << std::endl;
     std::cout << "    -t_reid                        " << threshold_output_message_face_reid << std::endl;
     std::cout << "    -fg                            " << reid_gallery_path_message << std::endl;
     std::cout << "    -no_show                       " << no_show_processed_video << std::endl;

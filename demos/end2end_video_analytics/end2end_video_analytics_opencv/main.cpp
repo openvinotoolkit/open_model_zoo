@@ -117,8 +117,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    const size_t input_width   = cap.get(CV_CAP_PROP_FRAME_WIDTH);
-    const size_t input_height  = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
+    const size_t input_width   = cap.get(CAP_PROP_FRAME_WIDTH);
+    const size_t input_height  = cap.get(CAP_PROP_FRAME_HEIGHT);
     const size_t output_width  = FLAGS_output_w;
     const size_t output_height = FLAGS_output_h;
 
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
 
     VideoWriter video;
     if (!bSingleImageMode) {
-        video.open("out.h264", CV_FOURCC('H', '2', '6', '4'), 24, outputFrameSize, true);
+        video.open("out.h264", VideoWriter::fourcc('H', '2', '6', '4'), 24, outputFrameSize, true);
         cout << "video mode: output written to out.h264" << endl;
     }
 
@@ -299,7 +299,7 @@ int main(int argc, char *argv[]) {
                     char tmplabel[32] = {0};
                     snprintf(tmplabel, sizeof(tmplabel), "%s %d%%", labeldata[labelnum].label.c_str(), static_cast<int>(confidence*100.0));
 
-                    rectangle(output_frames[mb], Point(xmin, ymin-16), Point(xmin+strlen(tmplabel)*8, ymin), Scalar(155, 155, 155), CV_FILLED, LINE_8, 0);
+                    rectangle(output_frames[mb], Point(xmin, ymin-16), Point(xmin+strlen(tmplabel)*8, ymin), Scalar(155, 155, 155), FILLED, LINE_8, 0);
                     putText(output_frames[mb], tmplabel, Point(xmin, ymin-4), FONT_HERSHEY_PLAIN, .7, Scalar(0, 0, 0));
                     rectangle(output_frames[mb], Point(xmin, ymin), Point(xmax, ymax), Scalar(0, 255, 0), 4, LINE_AA, 0);
                 }

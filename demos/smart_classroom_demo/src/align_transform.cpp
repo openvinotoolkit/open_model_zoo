@@ -62,6 +62,9 @@ cv::Mat GetTransform(cv::Mat* src, cv::Mat* dst) {
 
 void AlignFaces(std::vector<cv::Mat>* face_images,
                 std::vector<cv::Mat>* landmarks_vec) {
+    if (landmarks_vec->size() == 0) {
+        return;
+    }
     CV_Assert(face_images->size() == landmarks_vec->size());
     cv::Mat ref_landmarks = cv::Mat(5, 2, CV_32F);
 

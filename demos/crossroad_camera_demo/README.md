@@ -1,4 +1,4 @@
-# Crossroad Camera Demo {#InferenceEngineCrossroadCameraDemoApplication}
+# Crossroad Camera Demo
 
 This demo provides an inference pipeline for persons' detection, recognition and reidentification. The demo uses Person Detection network followed by the Person Attributes Recognition and Person Reidentification Retail networks applied on top of the detection results. The corresponding pre-trained models are delivered with the product:
 
@@ -38,7 +38,8 @@ Running the application with the `-h` option yields the following usage message:
 ```sh
 ./crossroad_camera_demo -h
 InferenceEngine:
-	API version ............ 1.0
+    API version ............ <version>
+    Build .................. <number>
 
 crossroad_camera_demo [OPTION]
 Options:
@@ -75,7 +76,7 @@ For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-train
 ```sh
 ./crossroad_camera_demo -i <path_to_video>/inputVideo.mp4 -m person-vehicle-bike-detection-crossroad-0078.xml -m_pa person-attributes-recognition-crossroad-0031.xml -m_reid person-reidentification-retail-0079.xml -d GPU
 ```
-**NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer](@ref MODevGuide) tool.
+**NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer](./docs/Model_Optimizer_Developer_Guide/Deep_Learning_Model_Optimizer_DevGuide.md) tool.
 
 ## Demo Output
 
@@ -88,4 +89,4 @@ If Person Attributes Recognition or Person Reidentification Retail are enabled, 
 
 
 ## See Also
-* [Using Inference Engine Demos](@ref DemosOverview)
+* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)

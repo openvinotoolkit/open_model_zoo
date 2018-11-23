@@ -35,6 +35,10 @@ std::string ImageGrabber::GetVideoPath() const {
     return current_video_idx >= 0 ? videos[current_video_idx] : std::string("");
 }
 
+int ImageGrabber::GetFPS() const {
+    return static_cast<int>(cap.get(cv::CAP_PROP_FPS));
+}
+
 bool ImageGrabber::IsOpened() const { return is_opened; }
 
 int ImageGrabber::GetFrameIndex() const { return cap_frame_index; }

@@ -38,12 +38,12 @@ link_directories(${LIB_FOLDER})
 # Create library file from sources.
 add_executable(${TARGET_NAME} ${MAIN_SRC} ${MAIN_HEADERS})
 
-add_dependencies(${TARGET_NAME} gflags cpu_extension)
+add_dependencies(${TARGET_NAME} gflags IE::ie_cpu_extension)
 
 set_target_properties(${TARGET_NAME} PROPERTIES "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS} -fPIE"
 COMPILE_PDB_NAME ${TARGET_NAME})
 
-target_link_libraries(${TARGET_NAME} format_reader cpu_extension gflags ${InferenceEngine_LIBRARIES})
+target_link_libraries(${TARGET_NAME} format_reader IE::ie_cpu_extension gflags ${InferenceEngine_LIBRARIES})
 
 #file(COPY fasterrcnn_extensions DESTINATION ${BIN_FOLDER})
 

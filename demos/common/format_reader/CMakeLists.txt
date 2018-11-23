@@ -26,8 +26,12 @@ file (GLOB LIBRARY_HEADERS
 
 # Find OpenCV libray if exists
 find_package(OpenCV)
-include_directories(${OpenCV_INCLUDE_DIRS})
-		
+if(OpenCV_FOUND)
+    include_directories(${OpenCV_INCLUDE_DIRS})
+else()
+    message(STATUS "OPENCV is disabled or not found, " ${TARGET_NAME} " is built without OPENCV support")
+endif()
+
 if(UNIX)
     list(REMOVE_ITEM MAIN_SRC ${CMAKE_CURRENT_SOURCE_DIR}/dllmain.cpp)
 else()

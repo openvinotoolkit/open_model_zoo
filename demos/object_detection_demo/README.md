@@ -1,7 +1,7 @@
-# Object Detection Faster R-CNN Demo {#InferenceEngineObjectDetectionDemoApplication}
+# Object Detection Faster R-CNN Demo
 
 This topic demonstrates how to run the Object Detection demo application, which does inference using object detection
-networks like Faster R-CNN on Intel® Processors and Intel® HD Graphics.
+networks like Faster R-CNN on IntelÂ® Processors and IntelÂ® HD Graphics.
 
 ## Downloading and Converting Caffe* Model
 VGG16-Faster-RCNN is a public CNN that can be easily obtained from GitHub:
@@ -16,7 +16,7 @@ You can use the following command to convert the source model:
 python3 ${MO_ROOT_PATH}/mo_caffe.py --input_model <path_to_model>/VGG16_faster_rcnn_final.caffemodel --input_proto <path_to_model>/deploy.prototxt
 ```
 
-For documentation on how to convert Caffe models, refer to [Converting a Caffe Model](@ref ConvertFromCaffe). 
+For documentation on how to convert Caffe models, refer to [Converting a Caffe Model](./docs/Model_Optimizer_Developer_Guide/prepare_trained_model/convert_model/Convert_Model_From_Caffe.md).
 
 ## Running
 
@@ -33,17 +33,16 @@ Options:
     -h                        Print a usage message.
     -i "<path>"               Required. Path to an .bmp image.
     -m "<path>"               Required. Path to an .xml file with a trained model.
-      -l "<absolute_path>"    Required for MKLDNN (CPU)-targeted custom layers.Absolute path to a shared library with the kernels impl.
-          Or
-      -c "<absolute_path>"    Required for clDNN (GPU)-targeted custom kernels.Absolute path to the xml file with the kernels desc.
+      -l "<absolute_path>"    Required for MKLDNN (CPU)-targeted custom layers. Absolute path to a shared library with the kernels impl.
+      -c "<absolute_path>"    Required for clDNN (GPU)-targeted custom kernels. Absolute path to the xml file with the kernels desc.
     -pp "<path>"              Path to a plugin folder.
-    -d "<device>"             Specify the target device to infer on; CPU, GPU, FPGA or MYRIAD is acceptable. Demo will look for a suitable plugin for device specified
+    -d "<device>"             Specify the target device to infer on; CPU, GPU, FPGA or MYRIAD is acceptable. The demo will look for a suitable plugin for a specified device.
     -pc                       Enables per-layer performance report
     -ni "<integer>"           Number of iterations (default 1)
     -bbox_name "<string>"     The name of output box prediction layer (default: bbox_pred)
     -proposal_name "<string>" The name of output proposal layer (default: proposal)
     -prob_name "<string>"     The name of output probability layer (default: cls_prob)
-
+    -p_msg                    Enables messages from a plugin
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
@@ -61,7 +60,7 @@ rectangles to the standard output stream.
 
 ### How it works
 
-Upon the start-up the demo application reads command line parameters and loads a network and an image to the Inference 
+Upon the start-up the demo application reads command line parameters and loads a network and an image to the Inference
 Engine plugin. When inference is done, the application creates an 
 output image and outputs data to the standard output stream.
 
@@ -77,6 +76,6 @@ Usage example:
 ```
 
 ## See Also 
-* [Using Inference Engine Demos](@ref DemosOverview)
+* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)
 * [Converting a Model Using General Conversion Parameters](@ref ConvertGeneral)
-* [Converting a Caffe Model](@ref ConvertFromCaffe)
+* [Converting a Caffe Model](./docs/Model_Optimizer_Developer_Guide/prepare_trained_model/convert_model/Convert_Model_From_Caffe.md)

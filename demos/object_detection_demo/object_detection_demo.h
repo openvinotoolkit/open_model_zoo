@@ -45,7 +45,7 @@ static const char model_message[] = "Required. Path to an .xml file with a train
 
 /// @brief message for assigning cnn calculation to device
 static const char target_device_message[] = "Specify the target device to infer on; CPU, GPU, FPGA or MYRIAD is acceptable. " \
-"Demo will look for a suitable plugin for device specified";
+"The demo will look for a suitable plugin for a specified device.";
 
 /// @brief message for performance counters
 static const char performance_counter_message[] = "Enables per-layer performance report";
@@ -54,11 +54,11 @@ static const char performance_counter_message[] = "Enables per-layer performance
 static const char iterations_count_message[] = "Number of iterations (default 1)";
 
 /// @brief message for clDNN custom kernels desc
-static const char custom_cldnn_message[] = "Required for clDNN (GPU)-targeted custom kernels."\
+static const char custom_cldnn_message[] = "Required for clDNN (GPU)-targeted custom kernels. "\
 "Absolute path to the xml file with the kernels desc.";
 
 /// @brief message for user library argument
-static const char custom_cpu_library_message[] = "Required for MKLDNN (CPU)-targeted custom layers." \
+static const char custom_cpu_library_message[] = "Required for MKLDNN (CPU)-targeted custom layers. " \
 "Absolute path to a shared library with the kernels impl.";
 
 /// @brief message for bbox layer name argument
@@ -68,6 +68,8 @@ static const char proposal_layer_name_message[] = "The name of output proposal l
 /// @brief message for prob layer name argument
 static const char prob_layer_name_message[] = "The name of output probability layer (default: cls_prob)";
 
+/// @brief message for plugin messages
+static const char plugin_message[] = "Enables messages from a plugin";
 
 /// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
@@ -107,6 +109,9 @@ DEFINE_string(proposal_name, "proposal", proposal_layer_name_message);
 /// @brief Custom prob layer name
 DEFINE_string(prob_name, "cls_prob", prob_layer_name_message);
 
+/// @brief Enable plugin messages
+DEFINE_bool(p_msg, false, plugin_message);
+
 /**
 * @brief This function show a help message
 */
@@ -127,4 +132,5 @@ static void showUsage() {
     std::cout << "    -bbox_name \"<string>\"     " << bbox_layer_name_message << std::endl;
     std::cout << "    -proposal_name \"<string>\" " << proposal_layer_name_message << std::endl;
     std::cout << "    -prob_name \"<string>\"     " << prob_layer_name_message << std::endl;
+    std::cout << "    -p_msg                    " << plugin_message << std::endl;
 }

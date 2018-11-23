@@ -41,7 +41,7 @@ static const char model_message[] = "Required. Path to an .xml file with a train
 
 /// @brief message for assigning cnn calculation to device
 static const char target_device_message[] = "Specify the target device to infer on; CPU, GPU, FPGA or MYRIAD is acceptable. " \
-"Demo will look for a suitable plugin for device specified (CPU bu default)";
+"The demo will look for a suitable plugin for a specified device (CPU by default)";
 
 /// @brief message for performance counters
 static const char performance_counter_message[] = "Enables per-layer performance report";
@@ -106,7 +106,7 @@ DEFINE_string(masks_name, "masks", masks_layer_name_message);
 */
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "segmentation_demo [OPTION]" << std::endl;
+    std::cout << "mask_rcnn_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                      " << help_message << std::endl;

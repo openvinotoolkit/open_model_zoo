@@ -22,8 +22,7 @@ from argparse import ArgumentParser
 import cv2
 import time
 import logging as log
-from openvino.inference_engine import IENetwork, IEPlugin
-
+from  openvino.inference_engine import IENetwork, IEPlugin
 
 def build_argparser():
     parser = ArgumentParser()
@@ -56,12 +55,11 @@ def main():
     plugin = IEPlugin(device=args.device, plugin_dirs=args.plugin_dir)
     if args.cpu_extension and 'CPU' in args.device:
         plugin.add_cpu_extension(args.cpu_extension)
-
     # Read IR
     log.info("Reading IR...")
     net = IENetwork.from_ir(model=model_xml, weights=model_bin)
 
-    if "CPU" in plugin.device:
+    if plugin.device == "CPU":
         supported_layers = plugin.get_supported_layers(net)
         not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
         if len(not_supported_layers) != 0:
@@ -77,7 +75,7 @@ def main():
     log.info("Loading IR to the plugin...")
     exec_net = plugin.load(network=net, num_requests=2)
     # Read and pre-process input image
-    n, c, h, w = net.inputs[input_blob]
+    n, c, h, w = net.inputs[input_blob].shape
     del net
     if args.input == 'cam':
         input_stream = 0
@@ -100,23 +98,29 @@ def main():
     log.info("To stop the demo execution press Esc button")
     is_async_mode = True
     render_time = 0
+    ret, frame = cap.read()
     while cap.isOpened():
-        ret, frame = cap.read()
+        if is_async_mode:
+            ret, next_frame = cap.read()
+        else:
+            ret, frame = cap.read()
         if not ret:
             break
         initial_w = cap.get(3)
         initial_h = cap.get(4)
-        in_frame = cv2.resize(frame, (w, h))
-        in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-        in_frame = in_frame.reshape((n, c, h, w))
-
         # Main sync point:
         # in the truly Async mode we start the NEXT infer request, while waiting for the CURRENT to complete
         # in the regular mode we start the CURRENT request and immediately wait for it's completion
         inf_start = time.time()
         if is_async_mode:
+            in_frame = cv2.resize(next_frame, (w, h))
+            in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+            in_frame = in_frame.reshape((n, c, h, w))
             exec_net.start_async(request_id=next_request_id, inputs={input_blob: in_frame})
         else:
+            in_frame = cv2.resize(frame, (w, h))
+            in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+            in_frame = in_frame.reshape((n, c, h, w))
             exec_net.start_async(request_id=cur_request_id, inputs={input_blob: in_frame})
         if exec_net.requests[cur_request_id].wait(-1) == 0:
             inf_end = time.time()
@@ -157,15 +161,16 @@ def main():
         render_end = time.time()
         render_time = render_end - render_start
 
+        if is_async_mode:
+            cur_request_id, next_request_id = next_request_id, cur_request_id
+            frame = next_frame
+
         key = cv2.waitKey(1)
         if key == 27:
             break
         if (9 == key):
             is_async_mode = not is_async_mode
             log.info("Switched to {} mode".format("async" if is_async_mode else "sync"))
-
-        if is_async_mode:
-            cur_request_id, next_request_id = next_request_id, cur_request_id
 
     cv2.destroyAllWindows()
     del exec_net

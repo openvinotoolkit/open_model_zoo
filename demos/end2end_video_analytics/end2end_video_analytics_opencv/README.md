@@ -1,4 +1,4 @@
-# End to end video analytics end2end_video_analytics_opencv Demo {#InferenceEngine_end2end_video_analytics_end2end_video_analytics_opencv_DemoApplication}
+# End to end video analytics end2end_video_analytics_opencv Demo
 
 (Ubuntu instructions..)
 
@@ -12,7 +12,7 @@ The code includes few pipe stages.
 
 This tutorial demonstrates how to run image classification application, while utilizing OpenCV DNN for inferencing. 
 
-Test contents are located in "demos/end2end_video_analytics/test_content" folder.
+Test contents are located in "samples/end2end_video_analytics/test_content" folder.
 
 The stages to run the tutorial
 
@@ -86,4 +86,4 @@ The application outputs out.h264 (h264 video elementary stream with bounding box
 Upon the start-up of the demo application, it reads command line parameters and loads a network and an image or a video to the OpenCVDNN plugin. When the inference is done, the application will compose bounding boxes, class labels, and accuracy rates on the detected objects and encode it to h264 video elementary stream.
 
 ## See Also 
-* [Using Inference Engine Samples](@ref SamplesOverview)
+* [Using Inference Engine Samples](./docs/Inference_Engine_Developer_Guide/Samples_Overview.md)
