@@ -76,7 +76,7 @@ For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-train
 ```sh
 ./crossroad_camera_demo -i <path_to_video>/inputVideo.mp4 -m person-vehicle-bike-detection-crossroad-0078.xml -m_pa person-attributes-recognition-crossroad-0031.xml -m_reid person-reidentification-retail-0079.xml -d GPU
 ```
-**NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer](./docs/Model_Optimizer_Developer_Guide/Deep_Learning_Model_Optimizer_DevGuide.md) tool.
+**NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer) tool.
 
 ## Demo Output
 

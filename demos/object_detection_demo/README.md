@@ -16,7 +16,7 @@ You can use the following command to convert the source model:
 python3 ${MO_ROOT_PATH}/mo_caffe.py --input_model <path_to_model>/VGG16_faster_rcnn_final.caffemodel --input_proto <path_to_model>/deploy.prototxt
 ```
 
-For documentation on how to convert Caffe models, refer to [Converting a Caffe Model](./docs/Model_Optimizer_Developer_Guide/prepare_trained_model/convert_model/Convert_Model_From_Caffe.md).
+For documentation on how to convert Caffe models, refer to the documentation of the [Model Optimizer tool](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer) tool.
 
 ## Running
 
