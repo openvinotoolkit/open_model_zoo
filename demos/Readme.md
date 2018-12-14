@@ -72,8 +72,8 @@ Please run the following command (assuming that the binary package was installed
 ```sh
 source <INSTALL_DIR>/deployment_tools/bin/setupvars.sh
 ```
-Also, you can build IE binaries from the _dldt_ repo. In this case please set `InferenceEngine_DIR` to a CMake folder you built the dldt binaries from.
-Please also set the `OpenCV_DIR` variable pointing to the required OpenCV package.
+Also, you can build IE binaries from the _dldt_ repo. In this case please set `InferenceEngine_DIR` to a CMake folder you built the dldt binaries from, for example `<dldt_repo>/inference-engine/build`.
+Please also set the `OpenCV_DIR` variable pointing to the required OpenCV 4.0 package. OpenCV DNN module from OpenVINO binary package depends on libinference_engine.so, therefore you have to add path to Inference Engine libraries to `LD_LIBRARY_PATH` variable before building the demos.
 
 ### Linux* OS
 The officially supported Linux build environment is the following:
