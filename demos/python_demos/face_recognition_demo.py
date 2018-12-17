@@ -40,9 +40,9 @@ def build_argparser():
         help="(optional) Path to save the output video to")
     general.add_argument('-no_show', action='store_true',
         help="(optional) Do not display output")
-    general.add_argument('-cw', '--crop_width', default=600, type=int,
+    general.add_argument('-cw', '--crop_width', default=0, type=int,
         help="Crop input stream to this width.")
-    general.add_argument('-ch', '--crop_height', default=600, type=int,
+    general.add_argument('-ch', '--crop_height', default=0, type=int,
         help="Crop input stream to this height.")
 
     faces = parser.add_argument_group('Faces database')
@@ -772,7 +772,9 @@ class Visualizer:
         self.frame_start_time = 0
         self.fps = 0
 
-        self.input_crop = np.array((args.crop_width, args.crop_height))
+        self.input_crop = None
+        if args.crop_width and args.crop_height:
+            self.input_crop = np.array((args.crop_width, args.crop_height))
 
     def update_fps(self):
         now = time.time()
@@ -905,8 +907,6 @@ class Visualizer:
                  int(self.input_stream.get(cv2.CAP_PROP_FRAME_COUNT)),
                  len(detections[3]), self.frame_time, self.fps
                 ))
-            
-
 
     def process(self, input_stream, output_stream):
         self.input_stream = input_stream
@@ -918,7 +918,8 @@ class Visualizer:
             if not has_frame:
                 break
 
-            frame = self.center_crop(frame, self.input_crop)
+            if self.input_crop is not None:
+                frame = self.center_crop(frame, self.input_crop)
             detections = self.frame_processor.process(frame)
 
             self.draw_detections(frame, detections)
@@ -936,6 +937,28 @@ class Visualizer:
         return frame[(fh - crop_size[1]) // 2 : (fh + crop_size[1]) // 2,
                      (fw - crop_size[0]) // 2 : (fw + crop_size[0]) // 2,
                      :]
+
+    def run(self, args):
+        input_stream = open_input_stream(args.input)
+        fps = input_stream.get(cv2.CAP_PROP_FPS)
+        frame_size = (args.crop_width or \
+                int(input_stream.get(cv2.CAP_PROP_FRAME_WIDTH)), 
+            args.crop_height or \
+                int(input_stream.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            )
+        log.info("Input stream info: %d x %d @ %.2f FPS" % \
+            (frame_size[0], frame_size[1], fps))
+        output_stream = open_output_stream(args.output, fps, frame_size)
+
+        self.process(input_stream, output_stream)
+
+        # Release resources
+        if output_stream:
+            output_stream.release()
+        if input_stream:
+            input_stream.release()
+
+        cv2.destroyAllWindows()
 
 def open_input_stream(path):
     log.info("Reading input data from '%s'" % (path))
@@ -962,28 +985,10 @@ def main():
         level=log.INFO, stream=sys.stdout)
 
     args = build_argparser().parse_args()
-
     log.info(str(args))
 
     visualizer = Visualizer(args)
-
-    input_stream = open_input_stream(args.input)
-    fps = input_stream.get(cv2.CAP_PROP_FPS)
-    frame_size = (int(input_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                  int(input_stream.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-    log.info("Input stream info: %d x %d @ %.2f FPS" % \
-        (frame_size[0], frame_size[1], fps))
-    output_stream = open_output_stream(args.output, fps, frame_size)
-
-    visualizer.process(input_stream, output_stream)
-
-    # Release resources
-    if output_stream:
-        output_stream.release()
-    if input_stream:
-        input_stream.release()
-
-    cv2.destroyAllWindows()
+    visualizer.run(args)
 
 if __name__ == '__main__':
     main()
