@@ -109,7 +109,7 @@ class InferenceContext:
     def __init__(self):
         self.plugins = {}
 
-    def load_plugins(self, devices, cpu_ext=""):
+    def load_plugins(self, devices, cpu_ext="", gpu_ext=""):
         log.info("Loading plugins for devices: %s" % (devices))
 
         plugins = { d: IEPlugin(d) for d in devices }
@@ -117,6 +117,11 @@ class InferenceContext:
             log.info("Using CPU extensions library '%s'" % (cpu_ext))
             assert osp.isfile(cpu_ext), "Failed to open CPU extensions library"
             plugins['CPU'].add_cpu_extension(cpu_ext)
+
+        if 'GPU' in plugins and not len(gpu_ext) == 0:
+            assert osp.isfile(gpu_ext), "Failed to open GPU definitions file"
+            plugins['GPU'].set_config({"CONFIG_FILE": gpu_ext})
+
         self.plugins = plugins
 
         log.info("Plugins are loaded")
@@ -480,7 +485,7 @@ class FacesDatabase:
                       if f.endswith(ext[0]) or f.endswith(ext[1])]
         else:
             raise Exception("Wrong face images database path. Expected path to" \
-                            "to a directory containing '%s' files, got '%s'" % \
+                            "a directory containing '%s' files, got '%s'" % \
                             (self.IMAGE_EXTENSIONS, path))
 
         self.database = []
@@ -697,11 +702,10 @@ class FrameProcessor:
         used_devices = set([args.d_fd, args.d_hp, args.d_lm, args.d_reid])
         self.context = InferenceContext()
         context = self.context
-        context.load_plugins(used_devices, args.cpu_lib)
+        context.load_plugins(used_devices, args.cpu_lib, args.gpu_lib)
         for d in used_devices:
-            context.get_plugin(d).set_config({"PERF_COUNT": args.verbose})
-        if 'GPU' in used_devices:
-            context.get_plugin('GPU').set_config({"CONFIG_FILE": args.gpu_lib})
+            context.get_plugin(d).set_config({
+                "PERF_COUNT": "YES" if args.perf_stats else "NO"})
 
         log.info("Loading models")
         face_detector_net = self.load_model(args.m_fd)
@@ -943,6 +947,9 @@ class Visualizer:
             log.info(self.frame_processor.get_performance_stats())
 
     def process(self, input_stream, output_stream):
+        if self.display:
+            log.info("Interactive mode is active. Press 'q' key to exit.")
+
         self.input_stream = input_stream
         self.output_stream = output_stream
 
@@ -961,6 +968,8 @@ class Visualizer:
 
             if self.display:
                 cv2.imshow('Face recognition demo', frame)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
             if output_stream:
                 output_stream.write(frame)
 
