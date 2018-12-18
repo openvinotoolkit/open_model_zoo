@@ -84,14 +84,14 @@ def build_argparser():
         help="(optional) For MKLDNN (CPU)-targeted custom layers, " \
             "if any. Path to a shared library with " \
             "implementations of the kernels")
-    # infer.add_argument('-c', '--gpu_lib', metavar="PATH", default="",
-    #     help="(optional) For clDNN (GPU)-targeted custom layers, " \
-    #         "if any. Path to the XML file with " \
-    #         "descriptions of the kernels")
-    # infer.add_argument('-pc', action='store_true',
-    #     help="(optional) Output per-layer performance statistics")
-    infer.add_argument('--verbose', action='store_true',
+    infer.add_argument('-c', '--gpu_lib', metavar="PATH", default="",
+        help="(optional) For clDNN (GPU)-targeted custom layers, " \
+            "if any. Path to the XML file with " \
+            "descriptions of the kernels")
+    infer.add_argument('-v', '--verbose', action='store_true',
         help="(optional) Be more verbose")
+    infer.add_argument('-pc', '--perf_stats', action='store_true',
+        help="(optional) Output detailed per-layer performance stats")
     infer.add_argument('-t_fd', metavar='[0..1]', type=float, default=0.6,
         help="(optional) Probability threshold for face detections" \
             "(default: %(default)s)")
@@ -120,6 +120,9 @@ class InferenceContext:
         self.plugins = plugins
 
         log.info("Plugins are loaded")
+
+    def get_plugin(self, device):
+        return self.plugins.get(device, None)
 
     def check_model_support(self, net, device):
         plugin = self.plugins[device]
@@ -162,7 +165,7 @@ class Module:
         self.max_requests = 0
         self.active_requests = 0
 
-        self.outputs = []
+        self.flush_outputs()
 
     def deploy(self, device, context, queue_size=1):
         self.context = context
@@ -172,7 +175,7 @@ class Module:
         self.model = None
 
     def enqueue(self, input):
-        self.outputs = []
+        self.flush_outputs()
 
         if self.max_requests <= self.active_requests:
             log.warn("Processing request rejected - too much requests")
@@ -186,18 +189,25 @@ class Module:
         if self.active_requests <= 0:
             return
 
+        self.perf_stats = [None, ] * self.active_requests
         self.outputs = [None, ] * self.active_requests
         for i in range(self.active_requests):
             self.device_model.requests[i].wait()
             self.outputs[i] = self.device_model.requests[i].outputs
+            self.perf_stats[i] = self.device_model.requests[i].get_perf_counts()
 
         self.active_requests = 0
 
     def get_outputs(self):
         self.wait()
-        outputs = self.outputs
+        return self.outputs
+
+    def get_performance_stats(self):
+        return self.perf_stats
+
+    def flush_outputs(self):
+        self.perf_stats = []
         self.outputs = []
-        return outputs
 
     def adjust_size(self, frame, target_shape):
         assert len(frame.shape) == len(target_shape), \
@@ -688,6 +698,10 @@ class FrameProcessor:
         self.context = InferenceContext()
         context = self.context
         context.load_plugins(used_devices, args.cpu_lib)
+        for d in used_devices:
+            context.get_plugin(d).set_config({"PERF_COUNT": args.verbose})
+        if 'GPU' in used_devices:
+            context.get_plugin('GPU').set_config({"CONFIG_FILE": args.gpu_lib})
 
         log.info("Loading models")
         face_detector_net = self.load_model(args.m_fd)
@@ -727,6 +741,11 @@ class FrameProcessor:
         return model
 
     def process(self, frame):
+        self.face_detector.flush_outputs()
+        self.head_pose_estimator.flush_outputs()
+        self.landmarks_detector.flush_outputs()
+        self.face_identifier.flush_outputs()
+
         input_size = (frame.shape[1], frame.shape[0])
         n, c, h, w = self.face_detector.get_input_shape()
         frame = cv2.resize(frame, (w, h))
@@ -760,6 +779,16 @@ class FrameProcessor:
             roi.size *= scale
         return detections
 
+    def get_performance_stats(self):
+        stats = {
+            'face_detector': self.face_detector.get_performance_stats(),
+            'head_pose': self.head_pose_estimator.get_performance_stats(),
+            'landmarks': self.landmarks_detector.get_performance_stats(),
+            'face_identifier': self.face_identifier.get_performance_stats(),
+        }
+        return stats
+
+
 class Visualizer:
     DEFAULT_CAMERA_FOCAL_DISTANCE = 950.0
 
@@ -767,6 +796,7 @@ class Visualizer:
         self.frame_processor = FrameProcessor(args)
         self.display = not args.no_show
         self.verbose = args.verbose
+        self.print_perf_stats = args.perf_stats
 
         self.frame_time = 0
         self.frame_start_time = 0
@@ -907,6 +937,10 @@ class Visualizer:
                  int(self.input_stream.get(cv2.CAP_PROP_FRAME_COUNT)),
                  len(detections[3]), self.frame_time, self.fps
                 ))
+
+        if self.print_perf_stats:
+            log.info('Performance stats:')
+            log.info(self.frame_processor.get_performance_stats())
 
     def process(self, input_stream, output_stream):
         self.input_stream = input_stream
