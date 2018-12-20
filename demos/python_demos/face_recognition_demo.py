@@ -15,20 +15,24 @@
  limitations under the License.
 """
 
-from __future__ import print_function
-import sys
+import logging as log
+import math
 import os
 import os.path as osp
+import sys
+import time
 from argparse import ArgumentParser
+
 import cv2
 import numpy as np
-from scipy.optimize import linear_sum_assignment
-import math
-import time
-import logging as log
+
 from openvino.inference_engine import IENetwork, IEPlugin
+from scipy.optimize import linear_sum_assignment
+from scipy.spatial.distance import cosine
+
 
 DEVICE_KINDS = ['CPU', 'GPU', 'FPGA', 'MYRIAD', 'HETERO']
+
 
 def build_argparser():
     parser = ArgumentParser()
@@ -81,13 +85,12 @@ def build_argparser():
             "Head Pose Estimation Retail model " \
             "(default: %(default)s)")
     infer.add_argument('-l', '--cpu_lib', metavar="PATH", default="",
-        help="(optional) For MKLDNN (CPU)-targeted custom layers, " \
-            "if any. Path to a shared library with " \
-            "implementations of the kernels")
+        help="(optional) For MKLDNN (CPU)-targeted custom layers, if any. " \
+            "Path to a shared library with custom layers " \
+            "implementations")
     infer.add_argument('-c', '--gpu_lib', metavar="PATH", default="",
-        help="(optional) For clDNN (GPU)-targeted custom layers, " \
-            "if any. Path to the XML file with " \
-            "descriptions of the kernels")
+        help="(optional) For clDNN (GPU)-targeted custom layers, if any. " \
+            "Path to the XML file with descriptions of the kernels")
     infer.add_argument('-v', '--verbose', action='store_true',
         help="(optional) Be more verbose")
     infer.add_argument('-pc', '--perf_stats', action='store_true',
@@ -99,11 +102,12 @@ def build_argparser():
         help="(optional) Cosine distance threshold between two vectors " \
             "for face identification" \
             "(default: %(default)s)")
-    infer.add_argument('-exp_r_fd', metavar='NUMBER', type=float, default=1.15,
+    infer.add_argument('-exp_r_fd', metavar='NUMBER', type=float, default=0.95,
         help="(optional) Scaling ratio for bbox passed to face recognition" \
             "(default: %(default)s)")
 
     return parser
+
 
 class InferenceContext:
     def __init__(self):
@@ -152,6 +156,7 @@ class InferenceContext:
         deployed_model = plugin.load(network=model, num_requests=max_requests)
         return deployed_model
 
+
 def cut_roi(frame, roi):
     p1 = roi.position.astype(int)
     p1 = np.maximum(np.minimum(p1, frame.shape[-2:]), [0, 0])
@@ -161,6 +166,7 @@ def cut_roi(frame, roi):
 
 def cut_rois(frame, rois):
     return [cut_roi(frame, roi) for roi in rois]
+
 
 class Module:
     def __init__(self, model):
@@ -214,21 +220,22 @@ class Module:
         self.perf_stats = []
         self.outputs = []
 
-    def adjust_size(self, frame, target_shape):
+    def _resize(self, frame, target_shape):
         assert len(frame.shape) == len(target_shape), \
             "Expected a frame with %s dimensions, but got %s" % \
             (len(target_shape), len(frame.shape))
 
-        assert frame.shape[0] == 1, "Only batch size of 1 is supported"
+        assert frame.shape[0] == 1, "Only batch size 1 is supported"
         n, c, h, w = target_shape
-        
+
         input = frame[0]
-        if True or tuple(target_shape[-2:]) != tuple(frame.shape[-2:]):
+        if not np.array_equal(target_shape[-2:], frame.shape[-2:]):
             input = input.transpose((1, 2, 0)) # to HWC
             input = cv2.resize(input, (w, h))
             input = input.transpose((2, 0, 1)) # to CHW
 
         return input.reshape((n, c, h, w))
+
 
 class FaceDetector(Module):
     class Result:
@@ -241,31 +248,24 @@ class FaceDetector(Module):
             self.position = np.array((output[3], output[4])) # x, y
             self.size = np.array((output[5], output[6])) # width, height
 
-        def __str__(self):
-            return str(vars(self))
-
-        def __repr__(self):
-            return str(vars(self))
-
     def __init__(self, model, confidence_threshold=0.5, roi_scale_factor=1.15):
         super(FaceDetector, self).__init__(model)
 
-        assert len(model.inputs) == 1, \
-            "The model is expected to have 1 input blob"
-        assert len(model.outputs) == 1, \
-            "The model is expected to have 1 output blob"
+        assert len(model.inputs) == 1, "Expected 1 input blob"
+        assert len(model.outputs) == 1, "Expected 1 output blob"
         self.input_blob = next(iter(model.inputs))
         self.output_blob = next(iter(model.outputs))
         self.input_shape = model.inputs[self.input_blob].shape
         self.output_shape = model.outputs[self.output_blob].shape
 
-        assert tuple(self.input_shape) == (1, 3, 300, 300), \
-            "The model is expected to have an input shape %s, but has %s" % \
-            ((1, 3, 300, 300), self.input_shape)
+        assert np.array_equal([1, 3, 300, 300], self.input_shape), \
+            "Expected model input shape %s, but got %s" % \
+            ([1, 3, 300, 300], self.input_shape)
 
         assert len(self.output_shape) == 4 and \
-            self.output_shape[3] == self.Result.OUTPUT_SIZE, \
-            "Model is expected to have %s outputs" % (self.Result.OUTPUT_SIZE)
+               self.output_shape[3] == self.Result.OUTPUT_SIZE, \
+            "Expected model output shape with %s outputs" % \
+            (self.Result.OUTPUT_SIZE)
 
         assert 0.0 <= confidence_threshold and confidence_threshold <= 1.0, \
             "Confidence threshold is expected to be in range [0; 1]"
@@ -278,8 +278,7 @@ class FaceDetector(Module):
         return self.input_shape
 
     def preprocess(self, frame):
-        # inputs = [ frame ]
-        inputs = [ self.adjust_size(frame, self.input_shape) ]
+        inputs = [ self._resize(frame, self.input_shape) ]
         return inputs
 
     def start_async(self, frame):
@@ -289,6 +288,8 @@ class FaceDetector(Module):
 
     def enqueue(self, input):
         # Expected input: (1, 3, 300, 300) BGR
+        assert np.array_equal(self.input_shape, input.shape), \
+            "Expected input shape %s, got %s" % (self.input_shape, input.shape)
         return super(FaceDetector, self).enqueue({self.input_blob: input})
 
     def get_roi_proposals(self, frame):
@@ -328,6 +329,7 @@ class FaceDetector(Module):
         result.size[1] = result.size[1] * frame_height - result.position[1]
         return result
 
+
 class HeadPoseEstimator(Module):
     OUTPUT_PITCH = 'angle_p_fc'
     OUTPUT_YAW = 'angle_y_fc'
@@ -339,43 +341,37 @@ class HeadPoseEstimator(Module):
             self.yaw = yaw
             self.roll = roll
 
-        def __str__(self):
-            return str(vars(self))
-
-        def __repr__(self):
-            return str(vars(self))
-
     def __init__(self, model):
         super(HeadPoseEstimator, self).__init__(model)
 
-        assert len(model.inputs) == 1, \
-            "The model is expected to have 1 input blob"
-        assert len(model.outputs) == 3, \
-            "The model is expected to have 3 output blobs"
+        assert len(model.inputs) == 1, "Expected 1 input blob"
+        assert len(model.outputs) == 3, "Expected 3 output blobs"
         self.input_blob = next(iter(model.inputs))
         self.input_shape = model.inputs[self.input_blob].shape
 
-        assert tuple(self.input_shape) == (1, 3, 60, 60), \
-            "The model is expected to have an input shape %s, but has %s" % \
-            ((1, 3, 60, 60), self.input_shape)
+        assert np.array_equal([1, 3, 60, 60], self.input_shape), \
+            "Expected model input shape %s, but got %s" % \
+            ([1, 3, 60, 60], self.input_shape)
 
-        assert model.outputs[self.OUTPUT_PITCH].shape == [1, 1], \
-            "Expected '%s' blob output shape (1, 1), got %s" % \
-            (self.OUTPUT_PITCH, model.outputs[self.OUTPUT_PITCH].shape)
-        assert model.outputs[self.OUTPUT_YAW].shape == [1, 1], \
-            "Expected '%s' blob output shape (1, 1), got %s" % \
-            (self.OUTPUT_YAW, model.outputs[self.OUTPUT_YAW].shape)
-        assert model.outputs[self.OUTPUT_ROLL].shape == [1, 1], \
-            "Expected '%s' blob output shape (1, 1), got %s" % \
-            (self.OUTPUT_ROLL, model.outputs[self.OUTPUT_ROLL].shape)
+        assert np.array_equal([1, 1], model.outputs[self.OUTPUT_PITCH].shape), \
+            "Expected '%s' blob output shape %s, got %s" % \
+            (self.OUTPUT_PITCH, [1, 1], model.outputs[self.OUTPUT_PITCH].shape)
+        assert np.array_equal([1, 1], model.outputs[self.OUTPUT_YAW].shape), \
+            "Expected '%s' blob output shape %s, got %s" % \
+            (self.OUTPUT_YAW, [1, 1], model.outputs[self.OUTPUT_YAW].shape)
+        assert np.array_equal([1, 1], model.outputs[self.OUTPUT_ROLL].shape), \
+            "Expected '%s' blob output shape %s, got %s" % \
+            (self.OUTPUT_ROLL, [1, 1], model.outputs[self.OUTPUT_ROLL].shape)
 
     def preprocess(self, frame, rois):
         inputs = cut_rois(frame, rois)
-        inputs = [self.adjust_size(input, self.input_shape) for input in inputs]
+        inputs = [self._resize(input, self.input_shape) for input in inputs]
         return inputs
 
     def enqueue(self, input):
         # Expected input: (1, 3, 60, 60) BGR
+        assert np.array_equal(self.input_shape, input.shape), \
+            "Expected input shape %s, got %s" % (self.input_shape, input.shape)
         return super(HeadPoseEstimator, self).enqueue({self.input_blob: input})
 
     def start_async(self, frame, rois):
@@ -395,63 +391,53 @@ class HeadPoseEstimator(Module):
 
         return results
 
-class LandmarksDetector(Module):
-    # Taken from:
-    # https://github.com/opencv/open_model_zoo/blob/2018/intel_models/facial-landmarks-35-adas-0001/description/facial-landmarks-35-adas-0001.md
-    DEFAULT_CHANNEL_MEAN = np.array((120, 110, 104), dtype=np.uint8)
 
-    POINTS_NUMBER = 35
+class LandmarksDetector(Module):
+    POINTS_NUMBER = 5
 
     class Result:
         def __init__(self, outputs):
-            self.points = outputs[0]
+            self.points = outputs
 
             p = lambda i: self[i]
-            self.left_eye = (p(0) + p(1)) * 0.5
-            self.right_eye = (p(2) + p(3)) * 0.5
-            self.nose_tip = p(4)
-            self.left_lip_corner = p(8)
-            self.right_lip_corner = p(9)
-
-        def __str__(self):
-            return str(vars(self))
-
-        def __repr__(self):
-            return str(vars(self))
+            self.left_eye = p(0)
+            self.right_eye = p(1)
+            self.nose_tip = p(2)
+            self.left_lip_corner = p(3)
+            self.right_lip_corner = p(4)
 
         def __getitem__(self, idx):
-            return np.array(self.points[idx : idx + 2])
+            return self.points[idx]
 
     def __init__(self, model):
         super(LandmarksDetector, self).__init__(model)
 
-        assert len(model.inputs) == 1, \
-            "The model is expected to have 1 input blob"
-        assert len(model.outputs) == 1, \
-            "The model is expected to have 1 output blob"
+        assert len(model.inputs) == 1, "Expected 1 input blob"
+        assert len(model.outputs) == 1, "Expected 1 output blob"
         self.input_blob = next(iter(model.inputs))
         self.output_blob = next(iter(model.outputs))
         self.input_shape = model.inputs[self.input_blob].shape
 
-        assert tuple(self.input_shape) == (1, 3, 60, 60), \
-            "The model is expected to have an input shape %s, but has %s" % \
-            ((1, 3, 60, 60), self.input_shape)
+        assert np.array_equal([1, 3, 48, 48], self.input_shape), \
+            "Expected model input shape %s, but got %s" % \
+            ([1, 3, 48, 48], self.input_shape)
 
-        assert model.outputs[self.output_blob].shape == \
-               [1, self.POINTS_NUMBER * 2], \
-            "Expected output shape (1, %s), but got %s" % \
-            (self.POINTS_NUMBER * 2, model.outputs[self.output_blob].shape)
+        assert np.array_equal([1, self.POINTS_NUMBER * 2, 1, 1],
+                model.outputs[self.output_blob].shape), \
+            "Expected model output shape %s, but got %s" % \
+            ([1, self.POINTS_NUMBER * 2, 1, 1],
+             model.outputs[self.output_blob].shape)
 
     def preprocess(self, frame, rois):
-        for channel, mean in zip(frame[0], self.DEFAULT_CHANNEL_MEAN):
-            channel -= mean
-
+        frame = self._adjust_color(frame)
         inputs = cut_rois(frame, rois)
-        inputs = [self.adjust_size(input, self.input_shape) for input in inputs]
+        inputs = [self._resize(input, self.input_shape) for input in inputs]
         return inputs
 
     def enqueue(self, input):
-        # Expected input: (1, 3, 60, 60) BGR mean subtracted
+        # Expected input: (1, 3, 48, 48) RGB
+        assert np.array_equal(self.input_shape, input.shape), \
+            "Expected input shape %s, got %s" % (self.input_shape, input.shape)
         return super(LandmarksDetector, self).enqueue({self.input_blob: input})
 
     def start_async(self, frame, rois):
@@ -461,22 +447,32 @@ class LandmarksDetector(Module):
 
     def get_landmarks(self):
         outputs = self.get_outputs()
-
-        results = []
-        for output in outputs:
-            results.append(self.Result(output[self.output_blob]))
-
+        results = [ self.Result(out[self.output_blob].reshape((-1, 2))) \
+                    for out in outputs ]
         return results
 
+    def _adjust_color(self, frame):
+        assert len(frame.shape) == 4 and frame.shape[1] == 3, \
+            "Expected input of shape [1, 3, h, w] in BGR format"
+        image = frame[0]
+        return np.array([[image[2], image[1], image[0]]]) # convert BGR to RGB
+
+
 class FacesDatabase:
-    IMAGE_EXTENSIONS = [ '.jpg', '.png' ]
+    IMAGE_EXTENSIONS = ['.jpg', '.png']
 
     class Identity:
         def __init__(self, label, descriptor):
             self.label = label
             self.descriptor = descriptor
 
-    def __init__(self, path, face_identifier_model):
+    class ROI:
+        def __init__(self, x, y, w, h):
+            self.data = np.array((x, y, w, h))
+            self.position = self.data[0:2]
+            self.size = self.data[2:4]
+
+    def __init__(self, path, face_identifier, landmarks_detector):
         path = osp.abspath(path)
         paths = []
         if osp.isdir(path):
@@ -493,13 +489,18 @@ class FacesDatabase:
             label = osp.splitext(osp.basename(path))[0]
             image = cv2.imread(path)
 
-            n, c, h, w = face_identifier_model.get_input_shape()
+            n, c, h, w = face_identifier.get_input_shape()
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
             image = cv2.resize(image, (w, h))
             image = image.transpose((2, 0, 1)) # HWC to CHW
             image = image.reshape((n, c, h, w))
 
-            descriptor = face_identifier_model.get_descriptors([image])[0]
+            rois = [ self.ROI(0, 0, w, h) ]
+            landmarks_detector.start_async(image, rois)
+            landmarks = landmarks_detector.get_landmarks()
+
+            face_identifier.start_async(image, rois, landmarks)
+            descriptor = face_identifier.get_descriptors()[0]
             self.database.append(self.Identity(label, descriptor))
 
     def match_faces(self, descriptors):
@@ -507,7 +508,7 @@ class FacesDatabase:
         distances = np.empty((len(descriptors), len(database)))
         for i, desc in enumerate(descriptors):
             for j, identity in enumerate(database):
-                distances[i][j] = self._cosine_distance(desc, identity.descriptor)
+                distances[i][j] = cosine(desc, identity.descriptor) * 0.5
 
         # Find best assignments, prevent repeats (assuming faces can not repeat)
         _, assignments = linear_sum_assignment(distances)
@@ -524,9 +525,6 @@ class FacesDatabase:
     def __len__(self):
         return len(self.database)
 
-    def _cosine_distance(self, x, y):
-        norm = math.sqrt(np.dot(x, x) * np.dot(y, y)) + 1e-6
-        return 1.0 - np.dot(x, y) / norm
 
 class FaceIdentifier(Module):
     # Taken from:
@@ -547,30 +545,22 @@ class FaceIdentifier(Module):
             self.id = id
             self.distance = distance
 
-        def __str__(self):
-            return str(vars(self))
-
-        def __repr__(self):
-            return str(vars(self))
-
     def __init__(self, model, match_threshold=0.5):
         super(FaceIdentifier, self).__init__(model)
 
-        assert len(model.inputs) == 1, \
-            "The model is expected to have 1 input blob"
-        assert len(model.outputs) == 1, \
-            "The model is expected to have 1 output blob"
+        assert len(model.inputs) == 1, "Expected 1 input blob"
+        assert len(model.outputs) == 1, "Expected 1 output blob"
 
         self.input_blob = next(iter(model.inputs))
         self.output_blob = next(iter(model.outputs))
         self.input_shape = model.inputs[self.input_blob].shape
 
-        assert tuple(self.input_shape) == (1, 3, 128, 128), \
-            "The model is expected to have an input shape %s, but has %s" % \
-            ((1, 3, 128, 128), self.input_shape)
+        assert np.array_equal([1, 3, 128, 128], self.input_shape), \
+            "Expected model input shape %s, but got %s" % \
+            ([1, 3, 128, 128], self.input_shape)
 
         assert len(model.outputs[self.output_blob].shape) == 4, \
-            "Expected output shape (1, n, 1, 1), got %s" % \
+            "Expected model output shape [1, n, 1, 1], got %s" % \
             (model.outputs[self.output_blob].shape)
 
         self.faces_database = None
@@ -580,14 +570,8 @@ class FaceIdentifier(Module):
     def get_input_shape(self):
         return self.input_shape
 
-    def build_faces_database(self, database_path):
-        log.info("Building faces database using images from '%s'" % \
-            (database_path))
-
-        self.faces_database = FacesDatabase(database_path, self)
-
-        log.info("Database is built, registered %s identities" % \
-            (len(self.faces_database)))
+    def set_faces_database(self, database):
+        self.faces_database = database
 
     def get_identity_label(self, id):
         if not self.faces_database or id == self.UNKNOWN_ID:
@@ -595,15 +579,17 @@ class FaceIdentifier(Module):
         return self.faces_database[id].label
 
     def preprocess(self, frame, rois, landmarks):
-        assert len(frame.shape) == 4, "Frame shape should be (1, c, h, w)"
+        assert len(frame.shape) == 4, "Frame shape should be [1, c, h, w]"
         frame = self._adjust_color(frame)
         inputs = cut_rois(frame, rois)
         self._align_rois(inputs, landmarks)
-        inputs = [self.adjust_size(input, self.input_shape) for input in inputs]
+        inputs = [self._resize(input, self.input_shape) for input in inputs]
         return inputs
 
     def enqueue(self, input):
         # Expected input: (1, 3, 128, 128) RGB
+        assert np.array_equal(self.input_shape, input.shape), \
+            "Expected input shape %s, got %s" % (self.input_shape, input.shape)
         return super(FaceIdentifier, self).enqueue({self.input_blob: input})
 
     def start_async(self, frame, rois, landmarks):
@@ -612,8 +598,7 @@ class FaceIdentifier(Module):
             self.enqueue(input)
 
     def get_matches(self):
-        outputs = self.get_outputs()
-        descriptors = [out[self.output_blob].squeeze() for out in outputs]
+        descriptors = self.get_descriptors()
 
         matches = []
         if len(descriptors) != 0:
@@ -628,12 +613,8 @@ class FaceIdentifier(Module):
             results.append(self.Result(id, distance))
         return results
 
-    def get_descriptors(self, face_images):
-        results = []
-        for image in face_images:
-            self.enqueue(image)
-            results.append(self.get_outputs()[0][self.output_blob].squeeze())
-        return results
+    def get_descriptors(self):
+        return [out[self.output_blob].flatten() for out in self.get_outputs()]
 
     def _normalize(self, array, axis):
         mean = array.mean(axis=axis)
@@ -642,20 +623,18 @@ class FaceIdentifier(Module):
         return mean, std
 
     def _get_transform(self, src, dst):
-        assert np.all(src.shape == dst.shape) and len(src.shape) == 2, \
+        assert np.array_equal(src.shape, dst.shape) and len(src.shape) == 2, \
             "2d input arrays are expected, got %s" % (src.shape)
-        src = np.matrix(src)
-        dst = np.matrix(dst)
         src_col_mean, src_col_std = self._normalize(src, axis=(0))
         dst_col_mean, dst_col_std = self._normalize(dst, axis=(0))
 
-        s, u, vt = np.linalg.svd(src.T * dst)
-        r = (u * vt).T
+        u, _, vt = np.linalg.svd(np.matmul(src.T, dst))
+        r = np.matmul(u, vt).T
 
-        transform = np.matrix(np.empty((2, 3)))
+        transform = np.empty((2, 3))
         transform[:, 0:2] = r * (dst_col_std / src_col_std)
         transform[:,   2] = dst_col_std.T - \
-            transform[:, 0:2] * src_col_mean.T
+            np.matmul(transform[:, 0:2], src_col_mean.T)
         return transform
 
     def _align_rois(self, face_images, face_landmarks):
@@ -690,10 +669,10 @@ class FaceIdentifier(Module):
 
     def _adjust_color(self, frame):
         assert len(frame.shape) == 4 and frame.shape[1] == 3, \
-            "Expected input of shape (1, 3, h, w) in BGR format"
-        # convert BGR to RGB
+            "Expected input of shape [1, 3, h, w] in BGR format"
         image = frame[0]
-        return np.array([[image[2], image[1], image[0]]])
+        return np.array([[image[2], image[1], image[0]]]) # convert BGR to RGB
+
 
 class FrameProcessor:
     QUEUE_SIZE = 16
@@ -729,7 +708,12 @@ class FrameProcessor:
             queue_size=self.QUEUE_SIZE)
         log.info("Models are loaded")
 
-        self.face_identifier.build_faces_database(args.fg)
+        log.info("Building faces database using images from '%s'" % (args.fg))
+        faces_database = FacesDatabase(args.fg,
+            self.face_identifier, self.landmarks_detector)
+        self.face_identifier.set_faces_database(faces_database)
+        log.info("Database is built, registered %s identities" % \
+            (len(faces_database)))
 
     def load_model(self, model_path):
         model_path = osp.abspath(model_path)
@@ -795,6 +779,10 @@ class FrameProcessor:
 
 class Visualizer:
     DEFAULT_CAMERA_FOCAL_DISTANCE = 950.0
+
+    BREAK_KEY_LABEL = 'q'
+    BREAK_KEY = ord(BREAK_KEY_LABEL)
+
 
     def __init__(self, args):
         self.frame_processor = FrameProcessor(args)
@@ -907,8 +895,8 @@ class Visualizer:
             tuple(make_point(center, y_axis.A1, distance).astype(int)),
             (0, 255, 0), 2)
 
-        p1 = make_point(center, z_axis.A1, distance).astype(int)
-        p2 = make_point(center, z_axis1.A1, distance).astype(int)
+        p1 = make_point(center, z_axis1.A1, distance).astype(int)
+        p2 = make_point(center, z_axis.A1, distance).astype(int)
         cv2.line(frame, tuple(p1), tuple(p2), (255, 0, 0), 2)
         cv2.circle(frame, tuple(p2), 2, (255, 0, 0), 2)
 
@@ -946,10 +934,21 @@ class Visualizer:
             log.info('Performance stats:')
             log.info(self.frame_processor.get_performance_stats())
 
-    def process(self, input_stream, output_stream):
-        if self.display:
-            log.info("Interactive mode is active. Press 'q' key to exit.")
+    def display_interactive_window(self, frame):
+        color = (255, 255, 255)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        text_scale = 0.5
+        text = "Press '%s' key to exit" % (self.BREAK_KEY_LABEL)
+        thickness = 2
+        text_size = cv2.getTextSize(text, font, text_scale, thickness)
+        origin = np.array([frame.shape[-2] - text_size[0][0] - 10, 10])
+        line_height = np.array([0, text_size[0][1]]) * 1.5
+        cv2.putText(frame, text,
+            tuple(origin.astype(int)), font, text_scale, color, thickness)
 
+        cv2.imshow('Face recognition demo', frame)
+
+    def process(self, input_stream, output_stream):
         self.input_stream = input_stream
         self.output_stream = output_stream
 
@@ -966,12 +965,12 @@ class Visualizer:
             self.draw_detections(frame, detections)
             self.draw_status(frame, detections)
 
-            if self.display:
-                cv2.imshow('Face recognition demo', frame)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
             if output_stream:
                 output_stream.write(frame)
+            if self.display:
+                self.display_interactive_window(frame)
+                if cv2.waitKey(1) & 0xFF == self.BREAK_KEY:
+                    break
 
             self.update_fps()
 
@@ -984,8 +983,9 @@ class Visualizer:
     def run(self, args):
         input_stream = open_input_stream(args.input)
         fps = input_stream.get(cv2.CAP_PROP_FPS)
-        frame_size = (args.crop_width or \
-                int(input_stream.get(cv2.CAP_PROP_FRAME_WIDTH)), 
+        frame_size = (
+            args.crop_width or \
+                int(input_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
             args.crop_height or \
                 int(input_stream.get(cv2.CAP_PROP_FRAME_HEIGHT))
             )
@@ -1002,6 +1002,7 @@ class Visualizer:
             input_stream.release()
 
         cv2.destroyAllWindows()
+
 
 def open_input_stream(path):
     log.info("Reading input data from '%s'" % (path))
@@ -1032,6 +1033,7 @@ def main():
 
     visualizer = Visualizer(args)
     visualizer.run(args)
+
 
 if __name__ == '__main__':
     main()
