@@ -39,15 +39,16 @@ def build_argparser():
 
     general = parser.add_argument_group('General')
     general.add_argument('-i', '--input', metavar="PATH", default='cam',
-        help="Path to the input video ('cam' for the camera, default)")
+        help="(optional) Path to the input video " \
+            "('cam' for the camera, default)")
     general.add_argument('-o', '--output', metavar="PATH", default="",
         help="(optional) Path to save the output video to")
     general.add_argument('-no_show', action='store_true',
         help="(optional) Do not display output")
     general.add_argument('-cw', '--crop_width', default=0, type=int,
-        help="Crop input stream to this width.")
+        help="(optional) Crop the input stream to this width")
     general.add_argument('-ch', '--crop_height', default=0, type=int,
-        help="Crop input stream to this height.")
+        help="(optional) Crop the input stream to this height")
 
     faces = parser.add_argument_group('Faces database')
     faces.add_argument('-fg', metavar="PATH", required=True,
@@ -55,17 +56,13 @@ def build_argparser():
 
     models = parser.add_argument_group('Models')
     models.add_argument('-m_fd', metavar="PATH", default="", required=True,
-        help="Path to the " \
-            "Face Detection Retail model XML file")
-    models.add_argument('-m_lm', metavar="PATH", default="",
-        help="(optional) Path to the " \
-            "Facial Landmarks Regression Retail model XML file")
-    models.add_argument('-m_reid', metavar="PATH", default="",
-        help="(optional) Path to the " \
-            "Face Reidentification Retail model XML file")
-    models.add_argument('-m_hp', metavar="PATH", default="",
-        help="(optional) Path to the " \
-            "Head Pose Estimation Retail model XML file")
+        help="Path to the Face Detection Retail model XML file")
+    models.add_argument('-m_lm', metavar="PATH", default="", required=True,
+        help="Path to the Facial Landmarks Regression Retail model XML file")
+    models.add_argument('-m_reid', metavar="PATH", default="", required=True,
+        help="Path to the Face Reidentification Retail model XML file")
+    models.add_argument('-m_hp', metavar="PATH", default="", required=True,
+        help="Path to the Head Pose Estimation Retail model XML file")
 
     infer = parser.add_argument_group('Inference options')
     infer.add_argument('-d_fd', default='CPU', choices=DEVICE_KINDS,
@@ -168,7 +165,7 @@ def cut_rois(frame, rois):
     return [cut_roi(frame, roi) for roi in rois]
 
 
-class Module:
+class Module(object):
     def __init__(self, model):
         self.model = model
         self.device_model = None
@@ -976,6 +973,8 @@ class Visualizer:
 
     def center_crop(self, frame, crop_size):
         fh, fw, fc = frame.shape
+        crop_size[0] = min(fw, crop_size[0])
+        crop_size[1] = min(fh, crop_size[1])
         return frame[(fh - crop_size[1]) // 2 : (fh + crop_size[1]) // 2,
                      (fw - crop_size[0]) // 2 : (fw + crop_size[0]) // 2,
                      :]
@@ -983,12 +982,11 @@ class Visualizer:
     def run(self, args):
         input_stream = open_input_stream(args.input)
         fps = input_stream.get(cv2.CAP_PROP_FPS)
-        frame_size = (
-            args.crop_width or \
-                int(input_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
-            args.crop_height or \
-                int(input_stream.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            )
+        frame_size = (int(input_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
+                      int(input_stream.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        if args.crop_width and args.crop_height:
+            crop_size = (args.crop_width, args.crop_height)
+            frame_size = tuple(np.minimum(frame_size, crop_size))
         log.info("Input stream info: %d x %d @ %.2f FPS" % \
             (frame_size[0], frame_size[1], fps))
         output_stream = open_output_stream(args.output, fps, frame_size)
