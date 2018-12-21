@@ -19,9 +19,9 @@ network to detect objects of the same type better.
 | [face-detection-adas-0001](./face-detection-adas-0001/description/face-detection-adas-0001.md)                               | 2.835                | 1.053      | X     |         |          |       |                |
 | [face-detection-retail-0004](./face-detection-retail-0004/description/face-detection-retail-0004.md)                                                        | 1.067                | 0.588      | X     |         |          |       |                |
 | [face-person-detection-retail-0002](./face-person-detection-retail-0002/description/face-person-detection-retail-0002.md)                              | 2.757                | 0.791      | X     | X       |          |       |                |
-| [person-detection-retail-0001](./person-detection-retail-0001/description/person-detection-retail-0001.md)                                                  | 12.422               | 3.244      |       | X       |          |       |                |
+| [person-detection-retail-0002](./person-detection-retail-0002/description/person-detection-retail-0002.md)                                 | 12.427               | 3.244      |       | X       |          |       |                |
 | [person-detection-retail-0013](./person-detection-retail-0013/description/person-detection-retail-0013.md)                                                      | 2.300                | 0.723      |       | X       |          |       |                |
-| [person-detection-action-recognition-0003](./person-detection-action-recognition-0003/description/person-detection-action-recognition-0003.md)                              | 4.542                | 1.951      |       | X       |          |       |                |
+| [person-detection-action-recognition-0004](./person-detection-action-recognition-0004/description/person-detection-action-recognition-0004.md)                              | 7.140                | 1.951      |       | X       |          |       |                |
 | [pedestrian-detection-adas-0002](./pedestrian-detection-adas-0002/description/pedestrian-detection-adas-0002.md)                                   | 2.836                | 1.165      |       | X       |          |       |                |
 | [pedestrian-and-vehicle-detector-adas-0001](./pedestrian-and-vehicle-detector-adas-0001/description/pedestrian-and-vehicle-detector-adas-0001.md) | 3.974                | 1.650      |       | X       | X        |       |                |
 | [vehicle-detection-adas-0002](./vehicle-detection-adas-0002/description/vehicle-detection-adas-0002.md)                                            | 2.798                | 1.079      |       |         | X        |       |                |
@@ -43,7 +43,7 @@ Age/Gender recognition after Face Detection).
 | [emotions-recognition-retail-0003](./emotions-recognition-retail-0003/description/emotions-recognition-retail-0003.md)                                                         | 0.126                | 2.483      |
 | [landmarks-regression-retail-0009](./landmarks-regression-retail-0009/description/landmarks-regression-retail-0009.md)                                                          | 0.021                | 0.191      |
 | [facial-landmarks-35-adas-0001](./facial-landmarks-35-adas-0001/description/facial-landmarks-35-adas-0001.md)                                     | 0.042                | 4.595      |
-| [person-attributes-recognition-crossroad-0031](./person-attributes-recognition-crossroad-0031/description/person-attributes-recognition-crossroad-0031.md) | 0.219                | 1.102      |
+| [person-attributes-recognition-crossroad-0200](./person-attributes-recognition-crossroad-0200/description/person-attributes-recognition-crossroad-0200.md)  | 0.174                | 0.735      |
 
 ## Reidentification Models
 
@@ -68,7 +68,7 @@ and accuracy (expect a bigger model to perform better).
 | [person-reidentification-retail-0031](./person-reidentification-retail-0031/description/person-reidentification-retail-0031.md)   | 0.028                | 0.280      | 92.11%            |
 | [person-reidentification-retail-0079](./person-reidentification-retail-0079/description/person-reidentification-retail-0079.md)   | 0.124                | 0.820      | 92.93%            |
 | [person-reidentification-retail-0076](./person-reidentification-retail-0076/description/person-reidentification-retail-0076.md)   | 0.594                | 0.820      | 93.35%            |
-| [face-reidentification-retail-0071](./face-reidentification-retail-0071/description/face-reidentification-retail-0071.md)          | 0.586                | 1.059      | 99.33%            |
+| [face-reidentification-retail-0095](./face-reidentification-retail-0095/description/face-reidentification-retail-0095.md)          | 0.588                | 1.107      | 99.33%            |
 
 
 ## Semantic Segmentation Models
@@ -107,7 +107,17 @@ increase the quality of the output.
 
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
-| [single-image-super-resolution-0034](./single-image-super-resolution-0034/description/single-image-super-resolution-0034.md)                     | 39.713               | 0.363      |
+| [single-image-super-resolution-0063](./single-image-super-resolution-0063/description/single-image-super-resolution-0063.md)                | 39.713               | 0.363      |
+| [single-image-super-resolution-1011](./single-image-super-resolution-1011/description/single-image-super-resolution-1011.md)                | 11.654               | 0.030      |
+| [single-image-super-resolution-1021](./single-image-super-resolution-1021/description/single-image-super-resolution-1021.md)                | 16.062               | 0.030      |
+
+## Text Detection
+
+Deep Learning models for text detection in various applications
+
+| Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
+|------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [text-detection-0001](./text-detection-0001/description/text-detection-0001.md)                              | 51.256               | 6.747      |
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
