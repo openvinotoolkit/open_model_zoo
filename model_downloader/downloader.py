@@ -126,9 +126,16 @@ def change_dim(model, old_dim, new_dim):
         output_file.write(data)
     shutil.move(tmpfile, model)
 
-parser = argparse.ArgumentParser(epilog = 'list_topologies.yml - default configuration file')
+class DownloaderArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        sys.stderr.write('error: %s\n' % message)
+        self.print_help()
+        sys.exit(2)
+
+parser = DownloaderArgumentParser(epilog = 'list_topologies.yml - default configuration file')
 parser.add_argument('-c', '--config', type = str, default = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'list_topologies.yml'), help = 'path to YML configuration file')
-parser.add_argument('--name', help = 'name of topology for downloading')
+parser.add_argument('--name', help = 'names of topologies for downloading with comma separation')
+parser.add_argument('--all',  action = 'store_true', help = 'download all topologies from the configuration file')
 parser.add_argument('--print_all', action = 'store_true', help = 'print all available topologies')
 parser.add_argument('-o', '--output_dir' , type = str, default = os.getcwd(), help = 'path where to save topologies')
 args = parser.parse_args()
@@ -140,15 +147,31 @@ with open(path_to_config) as stream:
     except yaml.YAMLError as exc:
         print(exc)
         sys.exit('Cannot parse the YML, please check the configuration file')
-if  args.print_all:
+
+if not (args.all or args.name):
+    print('Please choose either "--all" or "--name"', file = sys.stderr)
+    parser.print_help()
+    print('')
+    print('========== All available topologies ==========')
+    print('')
+    for top in c_new['topologies']:
+        print(top['name'])
+    sys.exit()
+if args.all and args.name:
+    parser.error('Please choose either "--all" or "--name"')
+if args.print_all:
     for top in c_new['topologies']:
         print(top['name'])
     sys.exit()
 if args.name != None:
-    try:
-        topologies = next([top] for top in c_new['topologies'] if top['name'] == args.name)
-    except StopIteration:
-        sys.exit('No such topology: "{}"'.format(args.name))
+    names = args.name.split(',')
+    topologies = []
+    for name in names:
+        try:
+            topology = next(top for top in c_new['topologies'] if top['name'] == name)
+            topologies.append(topology)
+        except StopIteration:
+            sys.exit('No such topology: "{}"'.format(name))
 else:
     topologies = c_new['topologies']
 
