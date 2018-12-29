@@ -7,15 +7,16 @@ parallel or sequential execution using OpenVINO library in Python.
 In particular, this demo uses 4 models to build a pipeline able to detect
 faces on videos, detect face direction and its keypoints (aka "landmarks"),
 and recognize persons using provided face database (gallery). The corresponding
-pretrained models can be bound in this repository:
+pretrained models can be found in this repository:
 
-* `intel_models/face-detection-retail-0004`,
-    which is used to detect faces and predict their bounding boxes;
+* `intel_models/face-detection-retail-0004` and
+  `intel_models/face-detection-adas-0001`,
+    which are used to detect faces and predict their bounding boxes;
 * `intel_models/head-pose-estimation-adas-0001`,
     which is used to predict head direction;
 * `intel_models/landmarks-regression-retail-0009`,
     which is used to predict face keypoints;
-* `intel_models/face-reidentification-retail-0071`,
+* `intel_models/face-reidentification-retail-0095`,
     which is used to recognize persons.
 
 ### How it works
@@ -45,12 +46,12 @@ Use the following name convention: `person_N_name.png` or `person_N_name.jpg`.
 
 The demo depends on:
 - OpenVINO library (R4)
-- Python (any of 2.7+ or 3.5+, which is supported by OpenVINO)
-- NumPy
-- SciPy
-- OpenCV
+- Python (any of 2.7+ or 3.4+, which is supported by OpenVINO)
+- NumPy (>=1.11.0)
+- SciPy (>=1.1.0)
+- OpenCV (>=3.4.0)
 
-To install all the required Python modules use:
+To install all the required Python modules you can use:
 
 ``` sh
 pip install -r requirements.txt
@@ -93,7 +94,8 @@ Faces database:
   -fg PATH              Path to the face images directory
 
 Models:
-  -m_fd PATH            Path to the Face Detection Retail model XML file
+  -m_fd PATH            Path to the Face Detection Adas or Retail model XML
+                        file
   -m_lm PATH            Path to the Facial Landmarks Regression Retail model
                         XML file
   -m_reid PATH          Path to the Face Reidentification Retail model XML
@@ -128,8 +130,7 @@ Inference options:
   -t_id [0..1]          (optional) Cosine distance threshold between two
                         vectors for face identification(default: 0.3)
   -exp_r_fd NUMBER      (optional) Scaling ratio for bbox passed to face
-                        recognition(default: 0.95)
-
+                        recognition(default: 1.15)
 ```
 
 Example of a valid command line to run the application:

@@ -25,6 +25,7 @@ from argparse import ArgumentParser
 
 import cv2
 import numpy as np
+from numpy import clip
 
 from openvino.inference_engine import IENetwork, IEPlugin
 from scipy.optimize import linear_sum_assignment
@@ -56,7 +57,7 @@ def build_argparser():
 
     models = parser.add_argument_group('Models')
     models.add_argument('-m_fd', metavar="PATH", default="", required=True,
-        help="Path to the Face Detection Retail model XML file")
+        help="Path to the Face Detection Adas or Retail model XML file")
     models.add_argument('-m_lm', metavar="PATH", default="", required=True,
         help="Path to the Facial Landmarks Regression Retail model XML file")
     models.add_argument('-m_reid', metavar="PATH", default="", required=True,
@@ -99,7 +100,7 @@ def build_argparser():
         help="(optional) Cosine distance threshold between two vectors " \
             "for face identification" \
             "(default: %(default)s)")
-    infer.add_argument('-exp_r_fd', metavar='NUMBER', type=float, default=0.95,
+    infer.add_argument('-exp_r_fd', metavar='NUMBER', type=float, default=1.15,
         help="(optional) Scaling ratio for bbox passed to face recognition" \
             "(default: %(default)s)")
 
@@ -156,9 +157,9 @@ class InferenceContext:
 
 def cut_roi(frame, roi):
     p1 = roi.position.astype(int)
-    p1 = np.maximum(np.minimum(p1, frame.shape[-2:]), [0, 0])
+    p1 = clip(p1, [0, 0], [frame.shape[-1], frame.shape[-2]])
     p2 = (roi.position + roi.size).astype(int)
-    p2 = np.maximum(np.minimum(p2, frame.shape[-2:]), [0, 0])
+    p2 = clip(p2, [0, 0], [frame.shape[-1], frame.shape[-2]])
     return np.array(frame[ :, :, p1[1]:p2[1], p1[0]:p2[0] ])
 
 def cut_rois(frame, rois):
@@ -173,7 +174,7 @@ class Module(object):
         self.max_requests = 0
         self.active_requests = 0
 
-        self.flush_outputs()
+        self.clear()
 
     def deploy(self, device, context, queue_size=1):
         self.context = context
@@ -183,7 +184,7 @@ class Module(object):
         self.model = None
 
     def enqueue(self, input):
-        self.flush_outputs()
+        self.clear()
 
         if self.max_requests <= self.active_requests:
             log.warn("Processing request rejected - too much requests")
@@ -213,7 +214,7 @@ class Module(object):
     def get_performance_stats(self):
         return self.perf_stats
 
-    def flush_outputs(self):
+    def clear(self):
         self.perf_stats = []
         self.outputs = []
 
@@ -235,6 +236,10 @@ class Module(object):
 
 
 class FaceDetector(Module):
+    RETAIL_INPUT_SHAPE = [1, 3, 300, 300]
+    ADAS_INPUT_SHAPE = [1, 3, 384, 672]
+
+
     class Result:
         OUTPUT_SIZE = 7
 
@@ -242,8 +247,8 @@ class FaceDetector(Module):
             self.image_id = output[0]
             self.label = int(output[1])
             self.confidence = output[2]
-            self.position = np.array((output[3], output[4])) # x, y
-            self.size = np.array((output[5], output[6])) # width, height
+            self.position = np.array((output[3], output[4])) # (x, y)
+            self.size = np.array((output[5], output[6])) # (w, h)
 
     def __init__(self, model, confidence_threshold=0.5, roi_scale_factor=1.15):
         super(FaceDetector, self).__init__(model)
@@ -255,9 +260,11 @@ class FaceDetector(Module):
         self.input_shape = model.inputs[self.input_blob].shape
         self.output_shape = model.outputs[self.output_blob].shape
 
-        assert np.array_equal([1, 3, 300, 300], self.input_shape), \
+        assert np.array_equal(self.ADAS_INPUT_SHAPE, self.input_shape) or \
+               np.array_equal(self.RETAIL_INPUT_SHAPE, self.input_shape), \
             "Expected model input shape %s, but got %s" % \
-            ([1, 3, 300, 300], self.input_shape)
+            (" or ".join([self.ADAS_INPUT_SHAPE, self.RETAIL_INPUT_SHAPE]),
+             self.input_shape)
 
         assert len(self.output_shape) == 4 and \
                self.output_shape[3] == self.Result.OUTPUT_SIZE, \
@@ -275,24 +282,20 @@ class FaceDetector(Module):
         return self.input_shape
 
     def preprocess(self, frame):
-        inputs = [ self._resize(frame, self.input_shape) ]
-        return inputs
+        assert len(frame.shape) == 4, "Frame shape should be [1, c, h, w]"
+        input = self._resize(frame, self.input_shape)
+        return input
 
     def start_async(self, frame):
-        inputs = self.preprocess(frame)
-        for input in inputs:
-            self.enqueue(input)
+        input = self.preprocess(frame)
+        self.enqueue(input)
 
     def enqueue(self, input):
-        # Expected input: (1, 3, 300, 300) BGR
-        assert np.array_equal(self.input_shape, input.shape), \
-            "Expected input shape %s, got %s" % (self.input_shape, input.shape)
         return super(FaceDetector, self).enqueue({self.input_blob: input})
 
     def get_roi_proposals(self, frame):
-        self.start_async(frame)
         outputs = self.get_outputs()[0][self.output_blob]
-        # outputs shape is [N_requests, 1, 1, N_found_faces, 7]
+        # outputs shape is [N_requests, 1, 1, N_max_faces, 7]
 
         frame_width = frame.shape[-1]
         frame_height = frame.shape[-2]
@@ -301,29 +304,34 @@ class FaceDetector(Module):
         for output in outputs[0][0]:
             result = self.Result(output)
             if result.confidence < self.confidence_threshold:
-                continue
+                break # results are sorted by confidence decrease
 
-            self._rescale(result, frame_width, frame_height)
-            self._centrify_squarify(result, self.roi_scale_factor)
+            self._clip(result, 1, 1)
+            self._resize_roi(result, frame_width, frame_height)
+            self._rescale_roi(result, self.roi_scale_factor)
+            self._clip(result, frame_width, frame_height)
+
             results.append(result)
 
         return results
 
-    def _centrify_squarify(self, result, roi_scale_factor=1.0):
-        bbox = result.size
-        bbox_center = result.position + result.size * 0.5
-        max_side = max(bbox)
-        bbox_square = np.repeat(roi_scale_factor * max_side, 2)
-        result.position[:] = bbox_center - bbox_square * 0.5
-        result.size[:] = bbox_square
-
+    def _rescale_roi(self, result, roi_scale_factor=1.0):
+        result.position -= result.size * 0.5 * (roi_scale_factor - 1.0)
+        result.size *= roi_scale_factor
         return result
 
-    def _rescale(self, result, frame_width, frame_height):
-        result.position[0] = result.position[0] * frame_width
-        result.position[1] = result.position[1] * frame_height
+    def _resize_roi(self, result, frame_width, frame_height):
+        result.position[0] *= frame_width
+        result.position[1] *= frame_height
         result.size[0] = result.size[0] * frame_width - result.position[0]
         result.size[1] = result.size[1] * frame_height - result.position[1]
+        return result
+
+    def _clip(self, result, width, height):
+        min = [0, 0]
+        max = [width, height]
+        result.position[:] = clip(result.position, min, max)
+        result.size[:] = clip(result.size, min, max)
         return result
 
 
@@ -361,14 +369,12 @@ class HeadPoseEstimator(Module):
             (self.OUTPUT_ROLL, [1, 1], model.outputs[self.OUTPUT_ROLL].shape)
 
     def preprocess(self, frame, rois):
+        assert len(frame.shape) == 4, "Frame shape should be [1, c, h, w]"
         inputs = cut_rois(frame, rois)
         inputs = [self._resize(input, self.input_shape) for input in inputs]
         return inputs
 
     def enqueue(self, input):
-        # Expected input: (1, 3, 60, 60) BGR
-        assert np.array_equal(self.input_shape, input.shape), \
-            "Expected input shape %s, got %s" % (self.input_shape, input.shape)
         return super(HeadPoseEstimator, self).enqueue({self.input_blob: input})
 
     def start_async(self, frame, rois):
@@ -426,15 +432,12 @@ class LandmarksDetector(Module):
              model.outputs[self.output_blob].shape)
 
     def preprocess(self, frame, rois):
-        frame = self._adjust_color(frame)
+        assert len(frame.shape) == 4, "Frame shape should be [1, c, h, w]"
         inputs = cut_rois(frame, rois)
         inputs = [self._resize(input, self.input_shape) for input in inputs]
         return inputs
 
     def enqueue(self, input):
-        # Expected input: (1, 3, 48, 48) RGB
-        assert np.array_equal(self.input_shape, input.shape), \
-            "Expected input shape %s, got %s" % (self.input_shape, input.shape)
         return super(LandmarksDetector, self).enqueue({self.input_blob: input})
 
     def start_async(self, frame, rois):
@@ -448,12 +451,6 @@ class LandmarksDetector(Module):
                     for out in outputs ]
         return results
 
-    def _adjust_color(self, frame):
-        assert len(frame.shape) == 4 and frame.shape[1] == 3, \
-            "Expected input of shape [1, 3, h, w] in BGR format"
-        image = frame[0]
-        return np.array([[image[2], image[1], image[0]]]) # convert BGR to RGB
-
 
 class FacesDatabase:
     IMAGE_EXTENSIONS = ['.jpg', '.png']
@@ -463,13 +460,8 @@ class FacesDatabase:
             self.label = label
             self.descriptor = descriptor
 
-    class ROI:
-        def __init__(self, x, y, w, h):
-            self.data = np.array((x, y, w, h))
-            self.position = self.data[0:2]
-            self.size = self.data[2:4]
-
-    def __init__(self, path, face_identifier, landmarks_detector):
+    def __init__(self, path,
+            face_detector, face_identifier, landmarks_detector):
         path = osp.abspath(path)
         paths = []
         if osp.isdir(path):
@@ -477,40 +469,60 @@ class FacesDatabase:
             paths = [osp.join(path, f) for f in os.listdir(path) \
                       if f.endswith(ext[0]) or f.endswith(ext[1])]
         else:
-            raise Exception("Wrong face images database path. Expected path to" \
-                            "a directory containing '%s' files, got '%s'" % \
-                            (self.IMAGE_EXTENSIONS, path))
+            raise Exception("Wrong face images database path. Expected a " \
+                            "path to the directory containing %s files, " \
+                            "but got '%s'" % \
+                            (" or ".join(self.IMAGE_EXTENSIONS), path))
+
+        if len(paths) == 0:
+            raise Exception("The images database folder has no images")
 
         self.database = []
         for path in paths:
             label = osp.splitext(osp.basename(path))[0]
-            image = cv2.imread(path)
+            image = cv2.imread(path, flags=cv2.IMREAD_COLOR)
 
-            n, c, h, w = face_identifier.get_input_shape()
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            assert len(image.shape) == 3, \
+                "Expected input image in (H, W, C) format"
+            assert image.shape[2] in [3, 4], \
+                "Expected BGR or BGRA input"
+            n, c, h, w = face_detector.get_input_shape()
             image = cv2.resize(image, (w, h))
             image = image.transpose((2, 0, 1)) # HWC to CHW
             image = image.reshape((n, c, h, w))
 
-            rois = [ self.ROI(0, 0, w, h) ]
-            landmarks_detector.start_async(image, rois)
-            landmarks = landmarks_detector.get_landmarks()
+            face_detector.start_async(image)
+            rois = face_detector.get_roi_proposals(image)
+            if len(rois) < 1:
+                log.warn("Not found faces on the image '%s'" % (path))
+                continue
 
-            face_identifier.start_async(image, rois, landmarks)
-            descriptor = face_identifier.get_descriptors()[0]
-            self.database.append(self.Identity(label, descriptor))
+            for i, roi in enumerate(rois):
+                r = [ roi ]
+                landmarks_detector.start_async(image, r)
+                landmarks = landmarks_detector.get_landmarks()
+
+                face_identifier.start_async(image, r, landmarks)
+                descriptor = face_identifier.get_descriptors()[0]
+
+                self.database.append(
+                    self.Identity("%s-%s" % (label, i), descriptor))
 
     def match_faces(self, descriptors):
         database = self
         distances = np.empty((len(descriptors), len(database)))
         for i, desc in enumerate(descriptors):
             for j, identity in enumerate(database):
-                distances[i][j] = cosine(desc, identity.descriptor) * 0.5
+                distances[i][j] = self.cosine_dist(desc, identity.descriptor)
 
-        # Find best assignments, prevent repeats (assuming faces can not repeat)
+        # Find best assignments, prevent repeats, assuming faces can not repeat
         _, assignments = linear_sum_assignment(distances)
         matches = []
         for i in range(len(descriptors)):
+            if len(assignments) <= i: # assignment failure, too many faces
+                matches.append( (0, 1.0) )
+                continue
+
             id = assignments[i]
             distance = distances[i, id]
             matches.append( (id, distance) )
@@ -522,10 +534,13 @@ class FacesDatabase:
     def __len__(self):
         return len(self.database)
 
+    def cosine_dist(self, x, y):
+        return cosine(x, y) * 0.5
+
 
 class FaceIdentifier(Module):
-    # Taken from:
-    # https://github.com/opencv/open_model_zoo/blob/2018/intel_models/face-reidentification-retail-0071/description/face-reidentification-retail-0071.md
+    # Taken from the description of the model:
+    # intel_models/face-reidentification-retail-0095
     REFERENCE_LANDMARKS = {
         "left_eye": (0.31556875, 0.46157410),
         "right_eye": (0.68262292, 0.46157410),
@@ -577,16 +592,12 @@ class FaceIdentifier(Module):
 
     def preprocess(self, frame, rois, landmarks):
         assert len(frame.shape) == 4, "Frame shape should be [1, c, h, w]"
-        frame = self._adjust_color(frame)
         inputs = cut_rois(frame, rois)
         self._align_rois(inputs, landmarks)
         inputs = [self._resize(input, self.input_shape) for input in inputs]
         return inputs
 
     def enqueue(self, input):
-        # Expected input: (1, 3, 128, 128) RGB
-        assert np.array_equal(self.input_shape, input.shape), \
-            "Expected input shape %s, got %s" % (self.input_shape, input.shape)
         return super(FaceIdentifier, self).enqueue({self.input_blob: input})
 
     def start_async(self, frame, rois, landmarks):
@@ -643,7 +654,7 @@ class FaceIdentifier(Module):
             assert len(image.shape) == 4, "Face image is expected"
             image = image[0]
 
-            scale = np.array(image.shape[1:3])
+            scale = np.array((image.shape[-1], image.shape[-2]))
             desired_landmarks = np.array([
                 self.REFERENCE_LANDMARKS["left_eye"],
                 self.REFERENCE_LANDMARKS["right_eye"],
@@ -661,14 +672,10 @@ class FaceIdentifier(Module):
             ]) * scale
 
             transform = self._get_transform(desired_landmarks, landmarks)
-            cv2.warpAffine(image, transform, tuple(scale), image,
+            img = image.transpose((1, 2, 0))
+            cv2.warpAffine(img, transform, tuple(scale), img,
                 cv2.WARP_INVERSE_MAP)
-
-    def _adjust_color(self, frame):
-        assert len(frame.shape) == 4 and frame.shape[1] == 3, \
-            "Expected input of shape [1, 3, h, w] in BGR format"
-        image = frame[0]
-        return np.array([[image[2], image[1], image[0]]]) # convert BGR to RGB
+            image[:] = img.transpose((2, 0, 1))
 
 
 class FrameProcessor:
@@ -706,7 +713,7 @@ class FrameProcessor:
         log.info("Models are loaded")
 
         log.info("Building faces database using images from '%s'" % (args.fg))
-        faces_database = FacesDatabase(args.fg,
+        faces_database = FacesDatabase(args.fg, self.face_detector,
             self.face_identifier, self.landmarks_detector)
         self.face_identifier.set_faces_database(faces_database)
         log.info("Database is built, registered %s identities" % \
@@ -726,22 +733,31 @@ class FrameProcessor:
         return model
 
     def process(self, frame):
-        self.face_detector.flush_outputs()
-        self.head_pose_estimator.flush_outputs()
-        self.landmarks_detector.flush_outputs()
-        self.face_identifier.flush_outputs()
+        assert len(frame.shape) == 3, \
+            "Expected input frame in (H, W, C) format"
+        assert frame.shape[2] in [3, 4], \
+            "Expected BGR or BGRA input"
+
+        self.face_detector.clear()
+        self.head_pose_estimator.clear()
+        self.landmarks_detector.clear()
+        self.face_identifier.clear()
 
         input_size = (frame.shape[1], frame.shape[0])
+
         n, c, h, w = self.face_detector.get_input_shape()
         frame = cv2.resize(frame, (w, h))
         frame = frame.transpose((2, 0, 1)) # HWC to CHW
+        if frame.shape[0] == 4: # assume BGRA
+            frame = frame[:c]
         frame = frame.reshape((n, c, h, w))
 
+        self.face_detector.start_async(frame)
         rois = self.face_detector.get_roi_proposals(frame)
         if self.QUEUE_SIZE < len(rois):
             log.warn("Too much faces for processing, dropping all " \
-                "the redundant. Will be processed only %s of total %s." % \
-                (self.QUEUE_SIZE, len(rois))
+                     "the redundant. Will be processed only %s of total %s." % \
+                     (self.QUEUE_SIZE, len(rois))
                 )
             rois = rois[:self.QUEUE_SIZE]
         self.head_pose_estimator.start_async(frame, rois)
@@ -804,13 +820,11 @@ class Visualizer:
     def draw_detection_roi(self, frame, roi, identity):
         label = self.frame_processor \
             .face_identifier.get_identity_label(identity.id)
-        color = (int(min(identity.id * 12.5, 255)),
-                 int(min(identity.id * 7, 255)),
-                 int(min(identity.id * 5, 255)))
 
         # Draw face ROI border
         cv2.rectangle(frame,
-            tuple(roi.position), tuple(roi.position + roi.size), color)
+            tuple(roi.position), tuple(roi.position + roi.size),
+            (255, 255, 255), 2)
 
         # Draw identity label
         text_scale = 0.5
@@ -949,7 +963,6 @@ class Visualizer:
         self.input_stream = input_stream
         self.output_stream = output_stream
 
-        has_frame, frame = input_stream.read()
         while input_stream.isOpened():
             has_frame, frame = input_stream.read()
             if not has_frame:
