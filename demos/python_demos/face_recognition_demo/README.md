@@ -37,15 +37,16 @@ visualized and displayed on the screen or written to the output file.
 
 In order to recognize faces the application needs a face database, or a gallery.
 The gallery is a folder with images of persons. Each image in the gallery can
-be of arbitrary size and should contain a tight crop of face. To obtain better
-results use images of square shapes. Image file name is used as a person name
-during the visualization.
+be of arbitrary size and should contain a frontally-oriented face with
+decent quality. To obtain better results use images of square shapes and do not
+use tight crops of faces.
+Image file name is used as a person name during the visualization.
 Use the following name convention: `person_N_name.png` or `person_N_name.jpg`.
 
 ### Installation and dependencies
 
 The demo depends on:
-- OpenVINO library (R4)
+- OpenVINO library (R5)
 - Python (any of 2.7+ or 3.4+, which is supported by OpenVINO)
 - NumPy (>=1.11.0)
 - SciPy (>=1.1.0)
@@ -145,7 +146,7 @@ source /opt/intel/computer_vision_sdk/bin/setupvars.sh
 -m_fd /opt/intel/computer_vision_sdk/deployment_tools/intel_models/face-detection-retail-0004/FP32/face-detection-retail-0004.xml \
 -m_hp /opt/intel/computer_vision_sdk/deployment_tools/intel_models/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml \
 -m_lm /opt/intel/computer_vision_sdk/deployment_tools/intel_models/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml \
--m_reid /opt/intel/computer_vision_sdk/deployment_tools/intel_models/face-reidentification-retail-0071/FP32/face-reidentification-retail-0071.xml \
+-m_reid /opt/intel/computer_vision_sdk/deployment_tools/intel_models/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml \
 -l /opt/intel/computer_vision_sdk/deployment_tools/inference_engine/lib/ubuntu_16.04/intel64/libcpu_extension_sse4.so \
 --verbose \
 -fg "/home/face_gallery"
@@ -161,7 +162,7 @@ python ./face_recognition_demo.py ^
 -m_fd C:/Intel/computer_vision_sdk/deployment_tools/intel_models/face-detection-retail-0004/FP32/face-detection-retail-0004.xml ^
 -m_hp C:/Intel/computer_vision_sdk/deployment_tools/intel_models/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml ^
 -m_lm C:/Intel/computer_vision_sdk/deployment_tools/intel_models/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml ^
--m_reid C:/Intel/computer_vision_sdk/deployment_tools/intel_models/face-reidentification-retail-0071/FP32/face-reidentification-retail-0071.xml ^
+-m_reid C:/Intel/computer_vision_sdk/deployment_tools/intel_models/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml ^
 -l C:/Intel/computer_vision_sdk/inference_engine/bin/intel64/Release/cpu_extension_avx2.dll ^
 --verbose ^
 -fg "C:/face_gallery"
