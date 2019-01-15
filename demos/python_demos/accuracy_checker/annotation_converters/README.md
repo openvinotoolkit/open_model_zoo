@@ -10,13 +10,14 @@ The command line for annotation conversion looks like:
 ```bash
 python3 convert_annotation.py <converter_name> <converter_specific parameters>
 ```
+
 You may refer to `-h, --help` to full list of command line options. Some optional arguments are:
 
 * `-o, --output_dir` - directory to save converted annotation and meta info.
 * `-a, --annotation_name` - annotation file name.
 * `-m, --meta_name` - meta info file name.
 
-Accuracy Checker supports following list of annotation conveters and specific for them parameters:
+Accuracy Checker supports following list of annotation converters and specific for them parameters:
 * `wider` - converts from Wider Face dataset to `DetectionAnnotation`.
   * `annotation_file` - path to txt file, which contains ground truth data in WiderFace dataset format.
   * `label_start` - specifies face label index in label map. Default value is 1. You can provide another value, if you want to use this dataset for separate label validation,
@@ -25,6 +26,7 @@ Accuracy Checker supports following list of annotation conveters and specific fo
   * `labels_file` - path to txt file which contains labels name.
 * `voc07` - converts Pascal VOC 2007 annotation for detection task to `DetectionAnnotation`.
   * `devkit_dir` - path to VOC Devkit root directory.
+  * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is True) 
 * `voc_segmentation` - converts Pascal VOC annotation for semantic segmentation task to `SegmentationAnnotation`.
   * `devkit_dir` - path to VOC Devkit root directory.
 * `detection_opencv_storage` - converts detection annotation stored in Detection OpenCV storage format to `DetectionAnnotation`.
@@ -36,6 +38,8 @@ Accuracy Checker supports following list of annotation conveters and specific fo
   * `pairs_file` - path to file with annotation positive and negative pairs.
   * `train_file` - path to file with annotation positive and negative pairs used for network train (optional parameter).
   * `landmarks_file` - path to file with facial landmarks coordinates for annotation images (optional parameter).
-* `landmarks_regression` - converts VGG Face 2 dataset for facial landmarks regression task to `PointRegressionAnnotation`.
+* `landmarks_regression` - converts VGG Face 2 dataset for facial landmarks regression task to `FacialLandmarksAnnotation`.
   * `landmarks_csv` - path to csv file with coordinates of landmarks points.
   * `bbox_csv` - path to cvs file which contains bounding box coordinates for faces (optional parameter).
+* `market1501` - converts Market1501 person reidentification dataset to `ReidentificationAnnotation`.
+  * `data_dir` - path to data directory, where gallery (`bounding_box_test`) and `query` subdirectories are located.

@@ -1,18 +1,19 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
+
 import numpy as np
 
 from ..dependency import ClassProvider
@@ -53,12 +54,18 @@ class IOU(Overlap):
     def evaluate(self, prediction_box, annotation_boxes):
         intersections_area = self.area(self.intersections(prediction_box, annotation_boxes))
         unions = self.area(prediction_box) + self.area(annotation_boxes) - intersections_area
-        return intersections_area / unions
+        return np.divide(
+            intersections_area, unions, out=np.zeros_like(intersections_area, dtype=float), where=unions != 0
+        )
 
 
 class IOA(Overlap):
     __provider__ = 'ioa'
 
     def evaluate(self, prediction_box, annotation_boxes):
-        intersections = self.intersections(prediction_box, annotation_boxes)
-        return self.area(intersections) / self.area(prediction_box)
+        intersections_area = self.area(self.intersections(prediction_box, annotation_boxes))
+        prediction_area = self.area(prediction_box)
+        return np.divide(
+            intersections_area, prediction_area, out=np.zeros_like(intersections_area, dtype=float),
+            where=prediction_area != 0
+        )

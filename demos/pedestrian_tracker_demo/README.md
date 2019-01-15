@@ -6,7 +6,7 @@ The corresponding pre-trained models are delivered with the product:
 * _person-detection-retail-0013_ - The primary detection network for finding pedestrians
 * _person-reidentification-retail-0031_ - Network that is executed on top of the results from inference of the first network and makes reidentification of the pedestrians
 
-For more details on the topologies, refer to the descriptions in the `deployment_tools/intel_models` folder of the Intel OpenVINO&trade; toolkit installation.
+For more details on the topologies, refer to the descriptions in the `open_model_zoo/intel_models` folder.
 
 ## How It Works
 
@@ -54,13 +54,12 @@ Options:
 [ INFO ] Execution successful
 ```
 
-To run the demo, you can use public models or the following pre-trained and optimized models delivered with the package:
+To run the demo, you can use public models or the following pre-trained and optimized models:
 
-* `<INSTAL_DIR>/deployment_tools/intel_models/person-detection-retail-0013`
-* `<INSTAL_DIR>/deployment_tools/intel_models/person-reidentification-retail-0031`
+* `open_model_zoo/intel_models/person-detection-retail-0013`
+* `open_model_zoo/intel_models/person-reidentification-retail-0031`
 
-For example, to run the application with the OpenVINO&trade; toolkit pre-trained models with inferencing pedestrian detector on a GPU and pedestrian reidentification on a CPU,
-run the following command:
+For example, to run the application with the pre-trained models with inferencing pedestrian detector on a GPU and pedestrian reidentification on a CPU, run the following command:
 
 ```sh
 ./pedestrian_tracker_demo -i <path_video_file> \
@@ -69,7 +68,7 @@ run the following command:
                           -d_det GPU
 ```
 
-**NOTE**: Public models should be first converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
+> **NOTE**: Public models should be first converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
 
 ## Demo Output
 

@@ -1,28 +1,13 @@
-# Copyright (c) 2018 Intel Corporation
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-
-#      http://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Copyright (C) 2018 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+#
 
 set (TARGET_NAME "pedestrian_tracker_demo")
 
-if( BUILD_DEMO_NAME AND NOT ${BUILD_DEMO_NAME} STREQUAL ${TARGET_NAME} )
-    message(STATUS "DEMO ${TARGET_NAME} SKIPPED")
-    return()
-endif()
-
-find_package(Threads)
-find_package(OpenCV)
+# Find OpenCV components if exist
+find_package(OpenCV COMPONENTS highgui QUIET)
 if(NOT(OpenCV_FOUND))
-    message(STATUS "OPENCV is disabled or not found, " ${TARGET_NAME} " skipped")
+    message(WARNING "OPENCV is disabled or not found, " ${TARGET_NAME} " skipped")
     return()
 endif()
 
@@ -55,7 +40,6 @@ set_target_properties(${TARGET_NAME} PROPERTIES "CMAKE_CXX_FLAGS" "${CMAKE_CXX_F
   COMPILE_PDB_NAME ${TARGET_NAME})
 
 target_include_directories(${TARGET_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")
-target_include_directories(${TARGET_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(${TARGET_NAME} IE::ie_cpu_extension ${InferenceEngine_LIBRARIES} ${OpenCV_LIBS} gflags)
 if(UNIX)
   target_link_libraries(${TARGET_NAME} ${LIB_DL} pthread)

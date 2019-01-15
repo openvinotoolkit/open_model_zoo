@@ -1,8 +1,8 @@
-# How to configurate OpenVINO launcher
+# How to configure OpenVINO launcher
 
 For enabling OpenVINO launcher you need to add `framework: dlsdk` in launchers section of your configuration file and provide following parameters:
 
-* `device` - specifing which device will be used for infer. Supported: `CPU`, `GPU`, `FPGA`, `MYRIAD` and Heterogenious plagin as `HETERO:target_device,fallback_device`
+* `device` - specifying which device will be used for infer. Supported: `CPU`, `GPU`, `FPGA`, `MYRIAD` and Heterogeneous plugin as `HETERO:target_device,fallback_device`
 * `model` - path to xml file with Caffe model for your topology.
 * `weights` - path to bin file with weights for your topology.
 
@@ -16,10 +16,11 @@ You can provide:
 * `onnx_model` for ONNX model (*.onnx).
 * `kaldi_model` for Kaldi model (*.nnet).
 
-In case when you want to determine additional parameters for model conversion (data_type, input_shape, reverse_input_channels and so on), you can set them into `mo_params`.
+In case when you want to determine additional parameters for model conversion (data_type, input_shape and so on), you can use `mo_params` for arguments with values and `mo_flags` for positional arguments like `legacy_mxnet_model` .
 Full list of supported parameters you can find in Model Optimizer Developer Guide.
-Model will be converted before every evaluation. You can miss conversion step and use stored in cache converted model if add `use_cached_model: True`.
-When you use stored model any additional `mo_params` will be ignored.
+
+Model will be converted before every evaluation. 
+You can provide `converted_model_dir` for saving converted model in specific folder, otherwise, converted models will be saved in path provided via `-C` command line argument or source model directory.
 
 * `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here][adapters].
 
@@ -42,8 +43,10 @@ launchers:
     adapter: classification
     mo_params:
       batch: 4
-    cpu_extensions: cpu_extentions_avx512.so
+    mo_flags:
+      - reverse_input_channels
+    cpu_extensions: cpu_extentions_avx2.so
 ```
 
-[adapters]: accuracy_checker/adapter/README.md
+[adapters]: ../adapters/README.md
 [openvino-mo]: https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer

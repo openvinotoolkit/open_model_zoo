@@ -92,6 +92,10 @@ And if the request is completed earlier than the Wait is called in the main thre
 that reporting the time between StartAsync and Wait would obviously incorrect.
 That is why in the "ASYNC" mode the inference speed is not reported.
 
+
+[More details on the new, requests-based Inference Engine API, including async execution](https://software.intel.com/en-us/articles/OpenVINO-Inference-Engine-Optimization-Guide#new-request-based-api).
+
+
 ## Running
 
 Running the application with the <code>-h</code> option yields the following usage message:
@@ -122,7 +126,8 @@ You can use the following command to do inference on GPU with a pre-trained obje
 ```sh
 ./object_detection_demo_ssd_async -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/ssd.xml -d GPU
 ```
-**NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer) tool.
+
+> **NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
 
 The only GUI knob is using 'Tab' to switch between the synchronized execution and the true Async mode.
 
@@ -135,5 +140,5 @@ In the default mode the demo reports
 * **Wallclock time**, which is combined (application level) performance.
 
 
-## See Also
+## See Also 
 * [Using Inference Engine Demos](../Readme.md)

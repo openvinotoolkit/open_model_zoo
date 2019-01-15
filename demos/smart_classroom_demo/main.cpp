@@ -1,29 +1,20 @@
-/*
-// Copyright (c) 2018 Intel Corporation
+// Copyright (C) 2018 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
 
 #include <chrono>  // NOLINT
 
 #include <gflags/gflags.h>
-#include <opencv2/opencv.hpp>
-#include <samples/common.hpp>
+#include <samples/ocv_common.hpp>
+#include <samples/slog.hpp>
 #include <ext_list.hpp>
 #include <string>
 #include <memory>
+#include <limits>
 #include <vector>
+#include <deque>
 #include <map>
+#include <algorithm>
 #include <ie_iextension.h>
 
 #include "action_detector.hpp"
@@ -47,6 +38,7 @@ private:
     float rect_scale_x_;
     float rect_scale_y_;
     static int const max_input_width_ = 1920;
+    std::string const window_name_ = "Smart classroom demo";
 
 public:
     Visualizer(bool enabled, cv::VideoWriter& writer) : enabled_(enabled), writer_(writer) {}
@@ -75,15 +67,15 @@ public:
 
     void Show() const {
         if (enabled_) {
-            cv::imshow("Smart classroom demo", frame_);
+            cv::imshow(window_name_, frame_);
         }
         if (writer_.isOpened()) {
             writer_ << frame_;
         }
     }
 
-    void DrawObject(cv::Rect rect, const std::string& label,
-                    const cv::Scalar& text_color, bool plot_bg) {
+    void DrawObject(cv::Rect rect, const std::string& label_to_draw,
+                    const cv::Scalar& text_color, const cv::Scalar& bbox_color, bool plot_bg) {
         if (enabled_ || writer_.isOpened()) {
             if (rect_scale_x_ != 1 || rect_scale_y_ != 1) {
                 rect.x = cvRound(rect.x * rect_scale_x_);
@@ -92,18 +84,18 @@ public:
                 rect.height = cvRound(rect.height * rect_scale_y_);
                 rect.width = cvRound(rect.width * rect_scale_x_);
             }
-            cv::rectangle(frame_, rect, cv::Scalar(255, 255, 255));
+            cv::rectangle(frame_, rect, bbox_color);
 
-            if (plot_bg && label != EmbeddingsGallery::unknown_label) {
+            if (plot_bg && !label_to_draw.empty()) {
                 int baseLine = 0;
                 const cv::Size label_size =
-                    cv::getTextSize(label, cv::FONT_HERSHEY_PLAIN, 1, 1, &baseLine);
+                    cv::getTextSize(label_to_draw, cv::FONT_HERSHEY_PLAIN, 1, 1, &baseLine);
                 cv::rectangle(frame_, cv::Point(rect.x, rect.y - label_size.height),
                               cv::Point(rect.x + label_size.width, rect.y + baseLine),
-                              cv::Scalar(255, 255, 255), cv::FILLED);
+                              bbox_color, cv::FILLED);
             }
-            if (label != EmbeddingsGallery::unknown_label) {
-                putText(frame_, label, cv::Point(rect.x, rect.y), cv::FONT_HERSHEY_PLAIN, 1,
+            if (!label_to_draw.empty()) {
+                putText(frame_, label_to_draw, cv::Point(rect.x, rect.y), cv::FONT_HERSHEY_PLAIN, 1,
                         text_color, 1, cv::LINE_AA);
             }
         }
@@ -117,11 +109,18 @@ public:
                         cv::Scalar(0, 0, 255), 2, cv::LINE_AA);
         }
     }
+
+    void Finalize() const {
+        cv::destroyWindow(window_name_);
+        if (writer_.isOpened())
+            writer_.release();
+    }
 };
 
+const std::vector<std::string> actions_map = {"sitting", "standing", "raising_hand"};
+const int default_action_index = 0;  //  sitting
+
 std::string GetActionTextLabel(const unsigned label) {
-    static std::vector<std::string> actions_map = {"sitting", "standing",
-                                                   "raising_hand"};
     if (label < actions_map.size()) {
         return actions_map[label];
     }
@@ -136,6 +135,67 @@ cv::Scalar GetActionTextColor(const unsigned label) {
     }
     return cv::Scalar(0, 0, 0);
 }
+
+float CalculateIoM(const cv::Rect& rect1, const cv::Rect& rect2) {
+  int area1 = rect1.area();
+  int area2 = rect2.area();
+
+  float area_min = std::min(area1, area2);
+  float area_intersect = (rect1 & rect2).area();
+
+  return area_intersect / area_min;
+}
+
+cv::Rect DecreaseRectByRelBorders(const cv::Rect& r) {
+    float w = r.width;
+    float h = r.height;
+
+    float left = std::ceil(w * 0);
+    float top = std::ceil(h * 0);
+    float right = std::ceil(w * 0);
+    float bottom = std::ceil(h * .7);
+
+    cv::Rect res;
+    res.x = r.x + left;
+    res.y = r.y + top;
+    res.width = r.width - left - right;
+    res.height = r.height - top - bottom;
+    return res;
+}
+
+int GetIndexOfTheNearestPerson(const TrackedObject& face, const std::vector<TrackedObject>& tracked_persons) {
+    int argmax = -1;
+    float max_iom = std::numeric_limits<float>::lowest();
+    for (size_t i = 0; i < tracked_persons.size(); i++) {
+        float iom = CalculateIoM(face.rect, DecreaseRectByRelBorders(tracked_persons[i].rect));
+        if ((iom > 0) && (iom > max_iom)) {
+            max_iom = iom;
+            argmax = i;
+        }
+    }
+    return argmax;
+}
+
+std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_tracks) {
+    std::map<int, int> face_track_id_to_label;
+    for (const auto& track : face_tracks) {
+        const auto& first_obj = track.first_object;
+        // check consistency
+        // to receive this consistency for labels
+        // use the function UpdateTrackLabelsToBestAndFilterOutUnknowns
+        for (const auto& obj : track.objects) {
+            SCR_CHECK_EQ(obj.label, first_obj.label);
+            SCR_CHECK_EQ(obj.object_id, first_obj.object_id);
+        }
+
+        auto cur_obj_id = first_obj.object_id;
+        auto cur_label = first_obj.label;
+        SCR_CHECK(face_track_id_to_label.count(cur_obj_id) == 0) << " Repeating face tracks";
+        face_track_id_to_label[cur_obj_id] = cur_label;
+    }
+    return face_track_id_to_label;
+}
+
 }  // namespace
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -147,7 +207,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         return false;
     }
 
-    std::cout << "[ INFO ] Parsing input parameters" << std::endl;
+    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -163,7 +223,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 int main(int argc, char* argv[]) {
     try {
         /** This demo covers 4 certain topologies and cannot be generalized **/
-        std::cout << "InferenceEngine: " << GetInferenceEngineVersion() << std::endl;
+        slog::info << "InferenceEngine: " << GetInferenceEngineVersion() << slog::endl;
 
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
@@ -179,12 +239,10 @@ int main(int argc, char* argv[]) {
         auto lm_model_path = FLAGS_m_lm;
         auto lm_weights_path = fileNameNoExt(FLAGS_m_lm) + ".bin";
 
-        DetectionsLogger logger(std::cout, FLAGS_r);
-
-        std::cout << "Reading video '" << video_path << "'" << std::endl;
+        slog::info << "Reading video '" << video_path << "'" << slog::endl;
         ImageGrabber cap(video_path);
         if (!cap.IsOpened()) {
-            std::cout << "Cannot open the video" << std::endl;
+            slog::err << "Cannot open the video" << slog::endl;
             return 1;
         }
 
@@ -196,7 +254,7 @@ int main(int argc, char* argv[]) {
             if (plugins_for_devices.find(device) != plugins_for_devices.end()) {
                 continue;
             }
-            std::cout << "Loading plugin " << device << std::endl;
+            slog::info << "Loading plugin " << device << slog::endl;
             InferencePlugin plugin = PluginDispatcher({"../../../lib/intel64", ""}).getPluginByDevice(device);
             printPluginVersion(plugin, std::cout);
             /** Load extensions for the CPU plugin **/
@@ -207,7 +265,7 @@ int main(int argc, char* argv[]) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
                     plugin.AddExtension(extension_ptr);
-                    std::cout << "CPU Extension loaded: " << FLAGS_l << std::endl;
+                    slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
             } else if (!FLAGS_c.empty()) {
                 // Load Extensions for other plugins not CPU
@@ -258,24 +316,26 @@ int main(int argc, char* argv[]) {
 
         // Create tracker for reid
         TrackerParams tracker_reid_params;
-        tracker_reid_params.min_track_duration = 750;
+        tracker_reid_params.min_track_duration = 1;
         tracker_reid_params.forget_delay = 150;
         tracker_reid_params.affinity_thr = 0.8;
+        tracker_reid_params.averaging_window_size = 1;
         tracker_reid_params.bbox_heights_range = cv::Vec2f(10, 1080);
-        tracker_reid_params.drop_forgotten_tracks = true;
-        tracker_reid_params.max_num_objects_in_track = 10000;
+        tracker_reid_params.drop_forgotten_tracks = false;
+        tracker_reid_params.max_num_objects_in_track = std::numeric_limits<int>::max();
         tracker_reid_params.objects_type = "face";
 
         Tracker tracker_reid(tracker_reid_params);
 
         // Create Tracker for action recognition
         TrackerParams tracker_action_params;
-        tracker_action_params.min_track_duration = 250;
+        tracker_action_params.min_track_duration = 8;
         tracker_action_params.forget_delay = 150;
         tracker_action_params.affinity_thr = 0.95;
+        tracker_action_params.averaging_window_size = 5;
         tracker_action_params.bbox_heights_range = cv::Vec2f(10, 1080);
-        tracker_action_params.drop_forgotten_tracks = true;
-        tracker_action_params.max_num_objects_in_track = 10;
+        tracker_action_params.drop_forgotten_tracks = false;
+        tracker_action_params.max_num_objects_in_track = std::numeric_limits<int>::max();
         tracker_action_params.objects_type = "action";
 
         Tracker tracker_action(tracker_action_params);
@@ -288,12 +348,13 @@ int main(int argc, char* argv[]) {
         size_t num_frames = 0;
         const char ESC_KEY = 27;
         const cv::Scalar red_color(0, 0, 255);
-        float frame_delay = 1000.0f / cap.GetFPS();
+        const cv::Scalar white_color(255, 255, 255);
+        std::vector<std::map<int, int>> face_obj_id_to_action_maps;
 
         if (cap.GrabNext()) {
             cap.Retrieve(frame);
         } else {
-            std::cout << "Can't read the first frame" << std::endl;
+            slog::err << "Can't read the first frame" << slog::endl;
             return 1;
         }
 
@@ -319,9 +380,6 @@ int main(int argc, char* argv[]) {
                 cap.Retrieve(frame);
 
             sc_visualizer.SetFrame(prev_frame);
-            logger.CreateNextFrameRecord(prev_frame_path, prev_fame_idx,
-                                         prev_frame.cols, prev_frame.rows);
-
             face_detector.wait();
             face_detector.fetchResults();
             faces = face_detector.results;
@@ -354,21 +412,16 @@ int main(int argc, char* argv[]) {
                 int label = ids.empty() ? EmbeddingsGallery::unknown_id : ids[i];
                 tracked_face_objects.emplace_back(faces[i].rect, faces[i].confidence, label);
             }
-            tracker_reid.Process(prev_frame, tracked_face_objects, num_frames * frame_delay);
+            tracker_reid.Process(prev_frame, tracked_face_objects, num_frames);
 
             const auto tracked_faces = tracker_reid.TrackedDetectionsWithLabels();
-            for (const auto& face : tracked_faces) {
-                sc_visualizer.DrawObject(face.rect, face_gallery.GetLabelByID(face.label),
-                                         red_color, true);
-                logger.AddFaceToFrame(face.rect, face_gallery.GetLabelByID(face.label));
-            }
 
             TrackedObjects tracked_action_objects;
             for (const auto& action : actions) {
                 tracked_action_objects.emplace_back(action.rect, action.detection_conf, action.label);
             }
 
-            tracker_action.Process(prev_frame, tracked_action_objects, num_frames * frame_delay);
+            tracker_action.Process(prev_frame, tracked_action_objects, num_frames);
             const auto tracked_actions = tracker_action.TrackedDetectionsWithLabels();
 
             auto elapsed = std::chrono::high_resolution_clock::now() - started;
@@ -378,14 +431,26 @@ int main(int argc, char* argv[]) {
             total_time_ms += elapsed_ms;
             num_frames += 1;
 
-            for (const auto& action : tracked_actions) {
-                auto label_desc = GetActionTextLabel(action.label);
-                auto label_color = GetActionTextColor(action.label);
+            std::map<int, int> frame_face_obj_id_to_action;
+            for (size_t j = 0; j < tracked_faces.size(); j++) {
+                const auto& face = tracked_faces[j];
+                std::string label_to_draw;
+                if (face.label != EmbeddingsGallery::unknown_id)
+                    label_to_draw += face_gallery.GetLabelByID(face.label);
 
-                sc_visualizer.DrawObject(action.rect, label_desc, label_color, false);
-                logger.AddPersonToFrame(action.rect, label_desc);
+                int person_ind = GetIndexOfTheNearestPerson(face, tracked_actions);
+                int action_ind = default_action_index;
+                if (person_ind >= 0) {
+                    action_ind = tracked_actions[person_ind].label;
+                }
+
+                label_to_draw += "[" + GetActionTextLabel(action_ind) + "]";
+                frame_face_obj_id_to_action[face.object_id] = action_ind;
+
+                sc_visualizer.DrawObject(face.rect, label_to_draw, red_color, white_color, true);
             }
-            logger.FinalizeFrameRecord();
+            face_obj_id_to_action_maps.push_back(frame_face_obj_id_to_action);
+
             sc_visualizer.DrawFPS(1e3f / (total_time_ms / static_cast<float>(num_frames) + 1e-6));
             sc_visualizer.Show();
 
@@ -393,11 +458,17 @@ int main(int argc, char* argv[]) {
             if (key == ESC_KEY) {
                 break;
             }
+            if (FLAGS_last_frame >= 0 && num_frames > FLAGS_last_frame) {
+                break;
+            }
             prev_frame = frame.clone();
         }
+        sc_visualizer.Finalize();
 
+        slog::info << slog::endl;
         float mean_time_ms = total_time_ms / static_cast<float>(num_frames);
-        std::cout << "Mean FPS: " << 1e3f / mean_time_ms << std::endl;
+        slog::info << "Mean FPS: " << 1e3f / mean_time_ms << slog::endl;
+        slog::info << "Frames processed: " << num_frames << slog::endl;
         if (FLAGS_pc) {
             face_detector.wait();
             action_detector.wait();
@@ -406,17 +477,30 @@ int main(int argc, char* argv[]) {
             face_reid.PrintPerformanceCounts();
             landmarks_detector.PrintPerformanceCounts();
         }
+
+        auto face_tracks = tracker_reid.vector_tracks();
+
+        // correct labels for track
+        std::vector<Track> new_face_tracks = UpdateTrackLabelsToBestAndFilterOutUnknowns(face_tracks);
+        std::map<int, int> face_track_id_to_label = GetMapFaceTrackIdToLabel(new_face_tracks);
+
+        DetectionsLogger logger(std::cout, FLAGS_r, FLAGS_ad);
+        logger.DumpDetections(cap.GetVideoPath(), frame.size(), num_frames,
+                              new_face_tracks,
+                              face_track_id_to_label,
+                              actions_map, face_gallery.GetIDToLabelMap(),
+                              face_obj_id_to_action_maps);
     }
     catch (const std::exception& error) {
-        std::cerr << "[ ERROR ] " << error.what() << std::endl;
+        slog::err << error.what() << slog::endl;
         return 1;
     }
     catch (...) {
-        std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
+        slog::err << "Unknown/internal exception happened." << slog::endl;
         return 1;
     }
 
-    std::cout << "[ INFO ] Execution successful" << std::endl;
+    slog::info << "Execution successful" << slog::endl;
 
     return 0;
 }

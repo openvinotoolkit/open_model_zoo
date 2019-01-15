@@ -1,21 +1,23 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
+
 import pytest
 from accuracy_checker.config import ConfigError
 from accuracy_checker.metrics import ClassificationAccuracy, MetricsExecutor
+from accuracy_checker.metrics.metric import Metric
 from accuracy_checker.representation import (ClassificationAnnotation, ClassificationPrediction, ContainerAnnotation,
                                              ContainerPrediction, DetectionAnnotation, DetectionPrediction)
 from tests.test_detection_metrics import DummyDataset
@@ -371,3 +373,127 @@ class TestMetric:
             assert evaluation_result.evaluated_value[3] == pytest.approx(0.0)
             assert evaluation_result.reference_value is None
             assert evaluation_result.threshold is None
+
+
+class TestMetricExtraArgs:
+    def test_all_metrics_raise_config_error_on_extra_args(self):
+        for provider in Metric.providers:
+            adapter_config = {'type': provider, 'something_extra': 'extra'}
+            with pytest.raises(ConfigError):
+                Metric.provide(provider, adapter_config, None)
+
+    def test_detection_recall_raise_config_error_on_extra_args(self):
+        adapter_config = {'type': 'recall', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('recall', adapter_config, None)
+
+    def test_detection_miss_rate_raise_config_error_on_extra_args(self):
+        adapter_config = {'type': 'miss_rate', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('miss_rate', adapter_config, None)
+
+    def test_accuracy_raise_config_error_on_extra_args(self):
+        adapter_config = {'type': 'accuracy', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('accuracy', adapter_config, None)
+
+    def test_per_class_accuracy_raise_config_error_on_extra_args(self):
+        adapter_config = {'type': 'accuracy_per_class', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('accuracy_per_class', adapter_config, None)
+
+    def test_character_recognition_accuracy_raise_config_error_on_extra_args(self):
+        adapter_config = {'type': 'character_recognition_accuracy', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('character_recognition_accuracy', adapter_config, None)
+
+    def test_multi_accuracy_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'multi_accuracy', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('multi_accuracy', metric_config, None)
+
+    def test_multi_precision_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'multi_precision', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('multi_precision', metric_config, None)
+
+    def test_f1_score_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'f1-score', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('f1-score', metric_config, None)
+
+    def test_mae_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'mae', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('mae', metric_config, None)
+
+    def test_mse_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'mse', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('mse', metric_config, None)
+
+    def test_rmse_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'rmse', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('rmse', metric_config, None)
+
+    def test_mae_on_interval_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'mae_on_interval', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('mae_on_interval', metric_config, None)
+
+    def test_mse_on_interval_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'mse_on_interval', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('mse_on_interval', metric_config, None)
+
+    def test_rmse_on_interval_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'rmse_on_interval', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('rmse_on_interval', metric_config, None)
+
+    def test_per_point_normed_error_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'per_point_normed_error', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('per_point_normed_error', metric_config, None)
+
+    def test_average_point_error_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'normed_error', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('normed_error', metric_config, None)
+
+    def test_reid_cmc_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'cmc', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('cmc', metric_config, None)
+
+    def test_reid_map_raise_config_error_on_extra_args(self):
+        adapter_config = {'type': 'reid_map', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('reid_map', adapter_config, None)
+
+    def test_pairwise_accuracy_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'pairwise_accuracy', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('pairwise_accuracy', metric_config, None)
+
+    def test_segmentation_accuracy_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'segmentation_accuracy', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('segmentation_accuracy', metric_config, None)
+
+    def test_mean_iou_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'mean_iou', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('mean_iou', metric_config, None)
+
+    def test_mean_accuracy_raise_config_error_on_extra_args(self):
+        metric_config= {'type': 'mean_accuracy', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('mean_accuracy', metric_config, None)
+
+    def test_frequency_weighted_accuracy_raise_config_error_on_extra_args(self):
+        metric_config = {'type': 'frequency_weighted_accuracy', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            Metric.provide('frequency_weighted_accuracy', metric_config, None)
+

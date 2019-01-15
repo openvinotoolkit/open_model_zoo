@@ -1,18 +1,6 @@
-/*
-// Copyright (c) 2018 Intel Corporation
+// Copyright (C) 2018 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
 
 /**
  * \brief Format reader abstract class implementation
@@ -25,10 +13,20 @@
 #include <vector>
 #include<iostream>
 
-#ifdef _WIN32
-    #define FORMAT_READER_API(TYPE) extern "C"   __declspec(dllexport)  TYPE __cdecl
-#else  // Linux and Mac
-    #define FORMAT_READER_API(TYPE) extern "C" TYPE
+#if defined(_WIN32)
+# ifdef IMPLEMENT_FORMAT_READER
+# define FORMAT_READER_API(type) extern "C"   __declspec(dllexport) type
+# else
+# define FORMAT_READER_API(type) extern "C" type
+# endif
+#elif(__GNUC__ >= 4)
+# ifdef IMPLEMENT_FORMAT_READER
+#  define FORMAT_READER_API(type) extern "C"   __attribute__((visibility("default"))) type
+# else
+#  define FORMAT_READER_API(type) extern "C" type
+# endif
+#else
+# define FORMAT_READER_API(TYPE) extern "C" TYPE
 #endif
 
 
@@ -80,4 +78,4 @@ public:
  * \brief Function for create reader
  * @return FormatReader pointer
  */
-FORMAT_READER_API(FormatReader::Reader*)CreateFormatReader(const char *filename);
+FORMAT_READER_API(FormatReader::Reader*) CreateFormatReader(const char *filename);

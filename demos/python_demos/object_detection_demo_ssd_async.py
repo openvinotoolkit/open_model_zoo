@@ -22,7 +22,8 @@ from argparse import ArgumentParser
 import cv2
 import time
 import logging as log
-from  openvino.inference_engine import IENetwork, IEPlugin
+from openvino.inference_engine import IENetwork, IEPlugin
+
 
 def build_argparser():
     parser = ArgumentParser()
@@ -57,7 +58,7 @@ def main():
         plugin.add_cpu_extension(args.cpu_extension)
     # Read IR
     log.info("Reading IR...")
-    net = IENetwork.from_ir(model=model_xml, weights=model_bin)
+    net = IENetwork(model=model_xml, weights=model_bin)
 
     if plugin.device == "CPU":
         supported_layers = plugin.get_supported_layers(net)

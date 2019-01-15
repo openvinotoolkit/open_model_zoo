@@ -1,18 +1,19 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
+
 import bisect
 import enum
 import warnings
@@ -86,7 +87,7 @@ class BaseDetectionMetricMixin:
 
             labels_stat[label] = {
                 'precision': tp / np.maximum(tp + fp, np.finfo(np.float64).eps),
-                'recall': tp / n,
+                'recall': tp / np.maximum(n, np.finfo(np.float64).eps),
                 'thresholds': conf[threshold_idxs],
                 'fppi': fp / len(annotations)
             }
@@ -195,8 +196,99 @@ class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
                 recalls.append(max_recall)
             else:
                 recalls.append(np.nan)
-                recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['names'])
+        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['names'])
         return recalls
+
+
+class DetectionAccuracyMetric(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
+    __provider__ = 'detection_accuracy'
+    annotation_types = (DetectionAnnotation, )
+    prediction_types = (DetectionPrediction, )
+
+    def validate_config(self):
+        class _DAConfigValidator(BaseDetectionMetricConfig):
+            use_normalization = BoolField(optional=True)
+
+        da_config_validator = _DAConfigValidator(
+            self.__provider__, on_extra_argument=_DAConfigValidator.ERROR_ON_EXTRA_ARGUMENT
+        )
+        da_config_validator.validate(self.config)
+
+    def configure(self):
+        super().configure()
+        self.use_normalization = self.config.get('use_normalization', False)
+
+    def evaluate(self, annotations, predictions):
+        all_matches, _, _ = match_detections_class_agnostic(
+            predictions, annotations, self.overlap_threshold, self.overlap_method
+        )
+        cm = confusion_matrix(all_matches, predictions, annotations, len(self.labels))
+        if self.use_normalization:
+            return np.mean(normalize_confusion_matrix(cm).diagonal())
+
+        return float(np.sum(cm.diagonal())) / float(np.maximum(1, np.sum(cm)))
+
+
+def confusion_matrix(all_matched_ids, predicted_data, gt_data, num_classes):
+    out_cm = np.zeros([num_classes, num_classes], dtype=np.int32)
+    for gt, prediction in zip(gt_data, predicted_data):
+        for match_pair in all_matched_ids[gt.identifier]:
+            gt_label = int(gt.labels[match_pair[0]])
+            pred_label = int(prediction.labels[match_pair[1]])
+            out_cm[gt_label, pred_label] += 1
+
+    return out_cm
+
+
+def normalize_confusion_matrix(cm):
+    row_sums = np.maximum(1, np.sum(cm, axis=1, keepdims=True)).astype(np.float32)
+    return cm.astype(np.float32) / row_sums
+
+
+def match_detections_class_agnostic(predicted_data, gt_data, min_iou, overlap_method):
+    all_matches = {}
+    total_gt_bbox_num = 0
+    matched_gt_bbox_num = 0
+
+    for gt, prediction in zip(gt_data, predicted_data):
+        gt_bboxes = np.stack((gt.x_mins, gt.y_mins, gt.x_maxs, gt.y_maxs), axis=-1)
+        predicted_bboxes = np.stack(
+            (prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs), axis=-1
+        )
+
+        total_gt_bbox_num += len(gt_bboxes)
+
+        similarity_matrix = calculate_similarity_matrix(gt_bboxes, predicted_bboxes, overlap_method)
+
+        matches = []
+        for _ in gt_bboxes:
+            best_match_pos = np.unravel_index(similarity_matrix.argmax(), similarity_matrix.shape)
+            best_match_value = similarity_matrix[best_match_pos]
+
+            if best_match_value <= min_iou:
+                break
+
+            gt_id = best_match_pos[0]
+            predicted_id = best_match_pos[1]
+
+            similarity_matrix[gt_id, :] = 0.0
+            similarity_matrix[:, predicted_id] = 0.0
+
+            matches.append((gt_id, predicted_id))
+            matched_gt_bbox_num += 1
+
+        all_matches[gt.identifier] = matches
+
+    return all_matches, total_gt_bbox_num, matched_gt_bbox_num
+
+
+def calculate_similarity_matrix(set_a, set_b, overlap):
+    similarity = np.zeros([len(set_a), len(set_b)], dtype=np.float32)
+    for i, box_a in enumerate(set_a):
+        for j, box_b in enumerate(set_b):
+            similarity[i, j] = overlap(box_a, box_b)
+
+    return similarity
 
 
 def average_precision(precision_, recall_, integral):

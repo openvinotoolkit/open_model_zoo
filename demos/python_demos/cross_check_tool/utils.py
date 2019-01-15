@@ -21,8 +21,19 @@ import sys
 import traceback
 import xml
 
-import cv2
-import numpy as np
+try:
+    import cv2
+except Exception as e:
+    log.error("Can not import OpenCV Python package.\nPlease install required python packages by running:\n"
+              "pip3 install -r requirements.txt\n\n Original error message: {}".format(e))
+    sys.exit(1)
+
+try:
+    import numpy as np
+except Exception as e:
+    log.error("Can not import numpy python package.\nPlease install required python packages by running:\n"
+              "pip3 install -r requirements.txt\n\n Original error message: {}".format(e))
+    sys.exit(1)
 
 verbosity = False
 
@@ -209,6 +220,7 @@ def build_parser():
     return parser
 
 
+@error_handling('validating arguments passed to cross_check_tool.py')
 def validate_args(args):
     # input check
     if args.input is None:
@@ -335,10 +347,14 @@ def read_multi_input_file(input_file: str, net_inputs: dict):
     return dump
 
 
+@error_handling('reading --input/-i by OpenCV python module. OpenCV version: {}. '
+                'It may happen due to wrong input image format'.format(cv2.__version__))
 def read_image_file(input_file: str, net_inputs: dict):
     inputs = dict()
     if len(net_inputs) == 1:
         image = cv2.imread(input_file)
+        if image is None:
+            raise Exception('Can not read input image ' + input_file)
         only_layer_name = list(net_inputs.keys())[0]
         shape = net_inputs[only_layer_name].shape
         if len(shape) != 4:

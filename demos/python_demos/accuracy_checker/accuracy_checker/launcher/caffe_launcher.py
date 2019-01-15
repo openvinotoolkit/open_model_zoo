@@ -1,24 +1,25 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
+
 import re
 
 import caffe
 import numpy as np
 
-from ..utils import parse_inputs, check_user_inputs
+from ..utils import parse_inputs, check_user_inputs, extract_image_representations
 from ..config import NumberField
 from ..config import PathField, StringField
 from .launcher import Launcher, LauncherConfig
@@ -49,8 +50,8 @@ class CaffeLauncher(Launcher):
         caffe_launcher_config = CaffeLauncherConfig('Caffe_Launcher')
         caffe_launcher_config.validate(self._config)
 
-        self.model = self._config['model']
-        self.weights = self._config['weights']
+        self.model = str(self._config['model'])
+        self.weights = str(self._config['weights'])
 
         self.network = caffe.Net(self.model, self.weights, caffe.TEST)
 
@@ -92,14 +93,15 @@ class CaffeLauncher(Launcher):
     def batch(self):
         return self._batch
 
-    def predict(self, identifiers, data, *args, **kwargs):
+    def predict(self, identifiers, data_representation, *args, **kwargs):
         """
         Args:
             identifiers: list of input data identifiers
-            data: input data
+             data_representation: list of input data representations, which contain preprocessed data and its metadata
         Returns:
             output of model converted to appropriate representation
         """
+        data, meta = extract_image_representations(data_representation)
         data = np.transpose(data, (0, 3, 1, 2))
         dataset_inputs = {}
         for input_blob in self.network.inputs:
@@ -114,7 +116,7 @@ class CaffeLauncher(Launcher):
         res = self.network.forward(**self._config_inputs, **dataset_inputs)
 
         if self.adapter is not None:
-            res = self.adapter(res, identifiers)
+            res = self.adapter(res, identifiers, meta)
 
         return res
 

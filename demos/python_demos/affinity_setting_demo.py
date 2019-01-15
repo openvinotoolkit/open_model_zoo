@@ -55,9 +55,9 @@ def main():
     if args.cpu_extension and 'CPU' in args.device:
         plugin.add_cpu_extension(args.cpu_extension)
     # Read IR
-    net = IENetwork.from_ir(model=model_xml, weights=model_bin)
+    net = IENetwork(model=model_xml, weights=model_bin)
 
-    if "CPU" in plugin.device:
+    if plugin.device == "CPU":
         supported_layers = plugin.get_supported_layers(net)
         not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
         if len(not_supported_layers) != 0:
@@ -86,7 +86,7 @@ def main():
     input_blob = next(iter(net.inputs))
     out_blob = next(iter(net.outputs))
     # Read and pre-process input image
-    n, c, h, w = net.inputs[input_blob]
+    n, c, h, w = net.inputs[input_blob].shape
     image = cv2.imread(args.input)
     image = cv2.resize(image, (w, h))
     image = image.transpose((2, 0, 1))  # Change data layout from HWC to CHW
@@ -104,7 +104,7 @@ def main():
     cwd = os.getcwd()
     log.info(
         "Graphs representing default and resulting affinities dumped to {} and {} files respectively"
-            .format(os.path.join(cwd, 'hetero_affinity.dot'), os.path.join(cwd, 'hetero_subgraphs.dot'))
+        .format(os.path.join(cwd, 'hetero_affinity.dot'), os.path.join(cwd, 'hetero_subgraphs.dot'))
     )
 
 

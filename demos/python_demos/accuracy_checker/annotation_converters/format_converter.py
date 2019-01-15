@@ -1,30 +1,29 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
+
 import inspect
 from argparse import ArgumentParser
 from itertools import islice
 
 from accuracy_checker.dependency import ClassProvider
+from accuracy_checker.utils import format_key
 
 
 class BaseFormatConverter(ClassProvider):
     __provider_type__ = "converter"
-
-    def __init__(self):
-        self.image_root = None
 
     def convert(self, *args, **kwargs):
         """
@@ -49,10 +48,10 @@ class BaseFormatConverter(ClassProvider):
                 default_value = param.default
                 if default_value == inspect.Parameter.empty:
                     if param.annotation == bool:
-                        parser.add_argument("--{}".format(name), action='store_true')
+                        parser.add_argument(format_key(name), action='store_true')
                     else:
                         parser.add_argument(name)
                 else:
-                    parser.add_argument("--{}".format(name), default=default_value, required=False)
+                    parser.add_argument(format_key(name), default=default_value, required=False)
 
         return parser

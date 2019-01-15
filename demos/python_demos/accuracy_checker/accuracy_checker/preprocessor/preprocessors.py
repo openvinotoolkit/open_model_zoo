@@ -1,25 +1,26 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
+
 import cv2
 import numpy as np
 from PIL import Image
 
 from ..config import BaseField, BoolField, ConfigValidator, NumberField, StringField
 from ..dependency import ClassProvider
-from ..utils import string_to_tuple, get_size_from_config
+from ..utils import get_size_from_config, get_or_parse_value
 
 
 class BasePreprocessorConfig(ConfigValidator):
@@ -46,8 +47,22 @@ class Preprocessor(ClassProvider):
         pass
 
     def validate_config(self):
-        BasePreprocessorConfig(self.name).validate(self.config)
+        BasePreprocessorConfig(self.name,
+                               on_extra_argument=BasePreprocessorConfig.ERROR_ON_EXTRA_ARGUMENT).validate(self.config)
 
+
+def scale_width(dst_width, dst_height, image_width, image_height,):
+    return int(dst_width * image_width / image_height), dst_height
+
+
+def scale_height(dst_width, dst_height, image_width, image_height):
+    return dst_width, int(dst_height * image_height / image_width)
+
+
+def scale_greater(dst_width, dst_height, image_width, image_height):
+    if image_height > image_width:
+        return scale_height(dst_width, dst_height, image_width, image_height)
+    return scale_width(dst_width, dst_height, image_width, image_height)
 
 class Resize(Preprocessor):
     __provider__ = 'resize'
@@ -76,24 +91,32 @@ class Resize(Preprocessor):
         'LANCZOS4': cv2.INTER_LANCZOS4,
     }
 
+    ASPECT_RATIO_SCALE = {
+        'width': scale_width,
+        'height': scale_height,
+        'greater': scale_greater,
+    }
+
     def validate_config(self):
         class _ConfigValidator(BasePreprocessorConfig):
             size = NumberField(floats=False, optional=True)
             dst_width = NumberField(floats=False, optional=True)
             dst_height = NumberField(floats=False, optional=True)
-            rescale_greater_dim = BoolField(optional=True)
+            aspect_ratio_scale = StringField(choices=set(Resize.ASPECT_RATIO_SCALE), optional=True)
             interpolation = StringField(choices=set(Resize.PIL_INTERPOLATION) | set(Resize.OPENCV_INTERPOLATION),
                                         optional=True)
             use_pil = BoolField(optional=True)
 
-        _ConfigValidator(self.name).validate(self.config)
+        _ConfigValidator(self.name, on_extra_argument=_ConfigValidator.ERROR_ON_EXTRA_ARGUMENT).validate(self.config)
 
     def configure(self):
         self.dst_height, self.dst_width = get_size_from_config(self.config)
         self.use_pil = self.config.get('use_pil', False)
 
         interpolation = self.config.get('interpolation', 'LINEAR')
-        self.rescale_greater = self.config.get('rescale_greater_dim', False)
+
+        self.scaling_func = Resize.ASPECT_RATIO_SCALE.get(self.config.get('aspect_ratio_scale'))
+
         if self.use_pil and interpolation.upper() not in Resize.PIL_INTERPOLATION:
             raise ValueError("Incorrect interpolation option: {} for resize preprocessing".format(interpolation))
         if not self.use_pil and interpolation.upper() not in Resize.OPENCV_INTERPOLATION:
@@ -105,18 +128,19 @@ class Resize(Preprocessor):
             self.interpolation = Resize.OPENCV_INTERPOLATION[interpolation]
 
     def process(self, image, annotation_meta=None):
+        image_ = image.data
         new_height, new_width = self.dst_height, self.dst_width
-        if self.rescale_greater:
-            image_h, image_w = image.shape[:2]
-            if image_h > image_w:
-                new_height, new_width = int(self.dst_height * image_h / image_w), self.dst_width
-            else:
-                new_height, new_width = int(self.dst_width * image_w / image_h), self.dst_height
+        if self.scaling_func is not None:
+            image_h, image_w = image_.shape[:2]
+            new_width, new_height = self.scaling_func(self.dst_width, self.dst_height, image_w, image_h)
+
         if self.use_pil:
-            image = Image.fromarray(image)
-            image = image.resize((new_width, new_height), self.interpolation)
-            return np.array(image)
-        return cv2.resize(image, (new_width, new_height), interpolation=self.interpolation).astype(np.float32)
+            image_ = Image.fromarray(image_)
+            image_ = image_.resize((new_width, new_height), self.interpolation)
+            image.data = np.array(image_)
+            return image
+        image.data = cv2.resize(image_, (new_width, new_height), interpolation=self.interpolation).astype(np.float32)
+        return image
 
 
 class Normalize(Preprocessor):
@@ -137,17 +161,17 @@ class Normalize(Preprocessor):
             mean = BaseField(optional=True)
             std = BaseField(optional=True)
 
-        _ConfigValidator(self.name).validate(self.config)
+        _ConfigValidator(self.name, on_extra_argument=_ConfigValidator.ERROR_ON_EXTRA_ARGUMENT).validate(self.config)
 
     def configure(self):
-        self.mean = _get_or_parse(self.config.get('mean'), Normalize.PRECOMPUTED_MEANS)
-        self.std = _get_or_parse(self.config.get('std'), Normalize.PRECOMPUTED_STDS)
+        self.mean = get_or_parse_value(self.config.get('mean'), Normalize.PRECOMPUTED_MEANS)
+        self.std = get_or_parse_value(self.config.get('std'), Normalize.PRECOMPUTED_STDS)
 
     def process(self, image, annotation_meta=None):
         if self.mean is not None:
-            image = image - self.mean
+            image.data = image.data - self.mean
         if self.std is not None:
-            image = image / self.std
+            image.data = image.data / self.std
         return image
 
 
@@ -155,7 +179,8 @@ class BgrToRgb(Preprocessor):
     __provider__ = 'bgr_to_rgb'
 
     def process(self, image, annotation_meta=None):
-        return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image.data = cv2.cvtColor(image.data, cv2.COLOR_BGR2RGB)
+        return image
 
 
 class Flip(Preprocessor):
@@ -168,17 +193,18 @@ class Flip(Preprocessor):
 
     def validate_config(self):
         class _ConfigValidator(BasePreprocessorConfig):
-            mode = StringField(choices=Flip.FLIP_MODES)
+            mode = StringField(choices=Flip.FLIP_MODES.keys())
 
-        _ConfigValidator(self.name).validate(self.config)
+        _ConfigValidator(self.name, on_extra_argument=_ConfigValidator.ERROR_ON_EXTRA_ARGUMENT).validate(self.config)
 
     def configure(self):
-        mode = self.config.get('mode')
+        mode = self.config.get('mode', 'horizontal')
         if isinstance(mode, str):
-            self.mode = None if mode not in Flip.FLIP_MODES else Flip.FLIP_MODES[mode]
+            self.mode = Flip.FLIP_MODES[mode]
 
     def process(self, image, annotation_meta=None):
-        return image if self.mode is None else cv2.flip(image, self.mode)
+        image.data = cv2.flip(image.data, self.mode)
+        return image
 
 
 class Crop(Preprocessor):
@@ -190,13 +216,14 @@ class Crop(Preprocessor):
             dst_width = NumberField(floats=False, optional=True)
             dst_height = NumberField(floats=False, optional=True)
 
-        _ConfigValidator(self.name).validate(self.config)
+        _ConfigValidator(self.name, on_extra_argument=_ConfigValidator.ERROR_ON_EXTRA_ARGUMENT).validate(self.config)
 
     def configure(self):
         self.dst_height, self.dst_width = get_size_from_config(self.config)
 
     def process(self, image, annotation_meta=None):
-        height, width, _ = image.shape
+        image_ = image.data
+        height, width, _ = image_.shape
         if width < self.dst_width or height < self.dst_height:
             resized = np.array([width, height])
             if resized[0] < self.dst_width:
@@ -204,33 +231,14 @@ class Crop(Preprocessor):
             if resized[1] < self.dst_height:
                 resized = resized * self.dst_height / resized[1]
 
-            image = cv2.resize(image, tuple(np.ceil(resized).astype(int)))
+            image_ = cv2.resize(image_, tuple(np.ceil(resized).astype(int)))
 
-        height, width, _ = image.shape
+        height, width, _ = image_.shape
         start_height = (height - self.dst_height) // 2
         start_width = (width - self.dst_width) // 2
 
-        return image[start_height:start_height + self.dst_height, start_width:start_width + self.dst_width]
-
-
-def _get_or_parse(item, supported_values, default=None):
-    if isinstance(item, str):
-        item = item.lower()
-        if item in supported_values:
-            return supported_values[item]
-
-        try:
-            return string_to_tuple(item)
-        except ValueError:
-            message = 'Invalid value "{}", expected one of precomputed: ({}) or list of channel-wise values'.format(
-                item, ', '.join(supported_values.keys())
-            )
-            raise ValueError(message)
-
-    if isinstance(item, (float, int)):
-        return item
-
-    return default
+        image.data = image_[start_height:start_height + self.dst_height, start_width:start_width + self.dst_width]
+        return image
 
 
 class CropRect(Preprocessor):
@@ -238,7 +246,7 @@ class CropRect(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         rect = annotation_meta.get('rect')
-        rows, cols = image.shape[:2]
+        rows, cols = image.data.shape[:2]
         if rect is None:
             return image
         rect_x_min, rect_y_min, rect_x_max, rect_y_max = rect
@@ -246,7 +254,8 @@ class CropRect(Preprocessor):
         start_height = max(0, rect_y_min)
         width = min(start_width + (rect_x_max - rect_x_min), cols)
         height = min(start_height + (rect_y_max - rect_y_min), rows)
-        return image[start_height:height, start_width:width]
+        image.data = image.data[start_height:height, start_width:width]
+        return image
 
 
 class ExtendAroundRect(Preprocessor):
@@ -256,14 +265,14 @@ class ExtendAroundRect(Preprocessor):
         class _ConfigValidator(BasePreprocessorConfig):
             augmentation_param = NumberField(floats=True, optional=True)
 
-        _ConfigValidator(self.name).validate(self.config)
+        _ConfigValidator(self.name, on_extra_argument=_ConfigValidator.ERROR_ON_EXTRA_ARGUMENT).validate(self.config)
 
     def configure(self):
         self.augmentation_param = self.config.get('augmentation_param', 0)
 
     def process(self, image, annotation_meta=None):
         rect = annotation_meta.get('rect')
-        rows, cols = image.shape[:2]
+        rows, cols = image.data.shape[:2]
 
         rect_x_left, rect_y_top, rect_x_right, rect_y_bottom = rect
         if None in rect:
@@ -298,11 +307,11 @@ class ExtendAroundRect(Preprocessor):
         rect_x_right = int(rect_x_right + width_extent + 0.5)
         border_right = abs(max(0, rect_x_right - cols))
 
-        image = cv2.copyMakeBorder(image, int(border_top), int(border_bottom),
-                                   int(border_left), int(border_right),
-                                   cv2.BORDER_REPLICATE)
+        image.data = cv2.copyMakeBorder(image.data, int(border_top), int(border_bottom),
+                                        int(border_left), int(border_right), cv2.BORDER_REPLICATE)
 
-        rect = (int(rect_x_left), int(rect_y_top), int(rect_w + width_extent * 2), int(rect_h + height_extent * 2))
+        rect = (int(rect_x_left), int(rect_y_top), int(rect_x_left) + int(rect_w + width_extent * 2),
+                int(rect_y_top) + int(rect_h + height_extent * 2))
         annotation_meta['rect'] = rect
         return image
 
@@ -324,7 +333,7 @@ class PointAligner(Preprocessor):
             dst_width = NumberField(floats=False, optional=True)
             dst_height = NumberField(floats=False, optional=True)
 
-        _ConfigValidator(self.name).validate(self.config)
+        _ConfigValidator(self.name, on_extra_argument=_ConfigValidator.ERROR_ON_EXTRA_ARGUMENT).validate(self.config)
 
     def configure(self):
         self.draw_points = self.config.get('draw_points', False)
@@ -333,7 +342,8 @@ class PointAligner(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         keypoints = annotation_meta.get('keypoints')
-        return self.align(image, keypoints)
+        image.data = self.align(image.data, keypoints)
+        return image
 
     def align(self, img, points):
         points_number = len(points) // 2

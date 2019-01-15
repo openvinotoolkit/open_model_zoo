@@ -1,22 +1,23 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
-import pathlib
+
 import re
 
 from accuracy_checker.representation import ClassificationAnnotation
+from accuracy_checker.utils import get_path, read_txt
 
 from .format_converter import BaseFormatConverter
 
@@ -47,8 +48,7 @@ class SampleConverter(BaseFormatConverter):
             meta: dictionary with additional dataset level metadata
 
         """
-        # convert path string to Path object
-        dataset_directory = pathlib.Path(dataset_directory)
+        dataset_directory = get_path(dataset_directory, is_directory=True)
 
         # read and convert annotation
         labels = self._read_labels(dataset_directory / 'labels.txt')
@@ -63,10 +63,7 @@ class SampleConverter(BaseFormatConverter):
     @staticmethod
     def _read_labels(labels_file):
         """Extract label names from labels.txt file"""
-        with labels_file.open() as f:
-            lines = f.read().split()
-
-        return lines
+        return read_txt(labels_file)
 
     @staticmethod
     def _convert_annotations(test_dir, labels):

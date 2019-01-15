@@ -1,23 +1,24 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
+
 import pytest
 import numpy as np
 from accuracy_checker.metrics import DetectionMAP
 from accuracy_checker.metrics.detection import Recall, bbox_match
-from accuracy_checker.metrics.overlap import IOU
+from accuracy_checker.metrics.overlap import IOU,IOA
 from tests.common import make_representation
 
 
@@ -177,6 +178,51 @@ class TestBoxMatch:
         assert n == 1
         assert len(tp) == 0
         assert len(fp) == 0
+
+    def test_iou_empty_prediction_box(self):
+        gt = "0 0 0 5 5"
+        pred = "0 0 0 0 0"
+
+        gt = make_representation(gt, is_ground_truth=True)
+        pred = make_representation(pred, score=1)
+        overlap_evaluator = IOU({})
+
+        with pytest.warns(None) as warnings:
+            tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)
+            assert len(warnings) == 0
+            assert n == 1
+            assert tp[0] == 0
+            assert fp[0] == 1
+
+    def test_ioa_empty_prediction_box(self):
+        gt = "0 0 0 5 5"
+        pred = "0 0 0 0 0"
+
+        gt = make_representation(gt, is_ground_truth=True)
+        pred = make_representation(pred, score=1)
+        overlap_evaluator = IOA({})
+
+        with pytest.warns(None) as warnings:
+            tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)
+            assert len(warnings) == 0
+            assert n == 1
+            assert tp[0] == 0
+            assert fp[0] == 1
+
+    def test_iou_zero_union(self):
+        gt = "0 0 0 0 0"
+        pred = "0 0 0 0 0"
+
+        gt = make_representation(gt, is_ground_truth=True)
+        pred = make_representation(pred, score=1)
+        overlap_evaluator = IOA({})
+
+        with pytest.warns(None) as warnings:
+            tp, fp, _, n = bbox_match(gt, pred, 0, overlap_evaluator)
+            assert len(warnings) == 0
+            assert n == 1
+            assert tp[0] == 0
+            assert fp[0] == 1
 
     def test_single_difficult(self):
         gt = "0 0 0 5 5"
@@ -362,6 +408,14 @@ class TestRecall:
             _test_metric_wrapper(Recall, multi_class_dataset_without_background)(gt, pred)
         assert len(warnings) == 0
 
+    def test_not_gt_boxes_for_matching(self, multi_class_dataset_without_background):
+        gt = make_representation(["0 0 0 5 5"], is_ground_truth=True)
+        pred = make_representation(["1 0 0 5 5"], score=1)
+
+        metric = _test_metric_wrapper(Recall, multi_class_dataset_without_background)
+        assert 0 == metric(gt, pred)[0]
+        assert metric.meta.get('names') == ['cat']
+
 
 class TestMAP:
     def test_selects_all_detections(self, single_class_dataset):
@@ -428,3 +482,11 @@ class TestMAP:
             mean = np.mean(map_)
             assert 1.0 == mean
         assert len(warnings) == 0
+
+    def test_not_gt_boxes_for_box_matching(self, multi_class_dataset_without_background):
+        gt = make_representation(["0 0 0 5 5"], is_ground_truth=True)
+        pred = make_representation(["1 0 0 5 5"], score=1)
+
+        metric = _test_metric_wrapper(Recall, multi_class_dataset_without_background)
+        assert 0 == metric(gt, pred)[0]
+        assert metric.meta.get('names') == ['cat']

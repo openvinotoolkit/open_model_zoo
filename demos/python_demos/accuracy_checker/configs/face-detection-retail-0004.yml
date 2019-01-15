@@ -4,43 +4,40 @@ models:
     launchers:
       - framework: dlsdk
         device: CPU
-        model: face-detection-retail-0004/FP32/face-detection-retail-0004.xml
+        model:   face-detection-retail-0004/FP32/face-detection-retail-0004.xml
         weights: face-detection-retail-0004/FP32/face-detection-retail-0004.bin
         adapter: ssd
         cpu_extensions: libcpu_extension_avx2.so
 
       - framework: dlsdk
         device: GPU
-        model: face-detection-retail-0004/FP32/face-detection-retail-0004.xml
+        model:   face-detection-retail-0004/FP32/face-detection-retail-0004.xml
         weights: face-detection-retail-0004/FP32/face-detection-retail-0004.bin
         adapter: ssd
 
       - framework: dlsdk
         device: GPU
-        model: face-detection-retail-0004/FP16/face-detection-retail-0004.xml
+        model:   face-detection-retail-0004/FP16/face-detection-retail-0004.xml
+        weights: face-detection-retail-0004/FP16/face-detection-retail-0004.bin
+        adapter: ssd
+
+      - framework: dlsdk
+        device: MYRIAD
+        model:   face-detection-retail-0004/FP16/face-detection-retail-0004.xml
         weights: face-detection-retail-0004/FP16/face-detection-retail-0004.bin
         adapter: ssd
 
       - framework: dlsdk
         device: HETERO:FPGA,CPU
-        model: face-detection-retail-0004/FP32/face-detection-retail-0004.xml
+        model:  face-detection-retail-0004/FP32/face-detection-retail-0004.xml
         weights: face-detection-retail-0004/FP32/face-detection-retail-0004.bin
         adapter: ssd
         cpu_extensions: libcpu_extension_avx2.so
-        bitstream: 4-0_A10DK_FP16_MobileNet_SqueezeNet_VGG_ELU.aocx
-
-      - framework: dlsdk
-        device: HETERO:FPGA,CPU
-        model: face-detection-retail-0004/FP32/face-detection-retail-0004.xml
-        weights: face-detection-retail-0004/FP32/face-detection-retail-0004.bin
-        adapter: ssd
-        cpu_extensions: libcpu_extension_avx2.so
-        bitstream: 4-0_A10DK_FP11_MobileNet.aocx
+        bitstream: 4-0_A10DK_FP16_MobileNet_ResNet_SqueezeNet_Clamp.aocx
 
     datasets:
       - name: wider
-
-        data_source: WIDER_val/images
+        data_source: WiderFace/WIDER_val/images
         annotation: wider.pickle
         dataset_meta: wider.json
 
@@ -56,7 +53,7 @@ models:
             height_range: 60
             is_empty: True
           - type: filter
-            min_confidence: 0.00
+            min_confidence: 0.0
             apply_to: prediction
 
         metrics:

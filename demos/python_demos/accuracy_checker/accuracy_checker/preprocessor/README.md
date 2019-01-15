@@ -13,7 +13,10 @@ Accuracy Checker supports following set of preprocessors:
     Possible values depend on image processing library:
       * **OpenCV**: Nearest, Linear, Cubic, Area, Max, Lanczos4, Bits, Bits32
       * **Pillow**: None, Nearest, Cubic, Bicubic, Box, Bilinear, Lanczos, Antialias, Hamming
-  * `rescale_greater_dim` allows save image proportions rescaling greater image dimention on destination size.
+  * `aspect_ratio_scale` allows save image aspect ratio using one of these ways: 
+    - `width` - rescale width.
+    - `height` - rescale height.
+    - `greater` - rescale greater from image sizes.
 
 * `normalization` - changing the range of pixel intensity values.
   * `mean` values which will be subtracted from image channels.

@@ -1,23 +1,24 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
+
 from enum import Enum
 
 from PIL import Image
-import scipy.misc
 import cv2
+import scipy.misc
 import numpy as np
 
 from .base_representation import BaseRepresentation
@@ -25,8 +26,14 @@ from .base_representation import BaseRepresentation
 
 class GTMaskLoader(Enum):
     PIL = 0
-    SCIPY = 1
-    OPENCV = 2
+    OPENCV = 1
+    SCIPY = 2
+
+loaders = {
+    GTMaskLoader.PIL: Image.open,
+    GTMaskLoader.OPENCV: cv2.imread,
+    GTMaskLoader.SCIPY: scipy.misc.imread
+}
 
 
 class SegmentationRepresentation(BaseRepresentation):
@@ -57,15 +64,10 @@ class SegmentationAnnotation(SegmentationRepresentation):
         self._mask = value
 
     def _load_mask(self):
-        if self._mask_loader == GTMaskLoader.PIL:
-            mask = Image.open(self._mask_path)
-        elif self._mask_loader == GTMaskLoader.SCIPY:
-            mask = scipy.misc.imread(self._mask_path)
-        elif self._mask_loader == GTMaskLoader.OPENCV:
-            mask = cv2.imread(self._mask_path)
-        else:
-            raise RuntimeError("Unknown Mask Loader type")
-        return np.array(mask, dtype=np.uint8)
+        loader = loaders.get(self._mask_loader)
+        if not loader:
+            raise RuntimeError("Unknown Mask Loader type {}".format(self._mask_loader))
+        return np.array(loader(str(self.metadata['data_source'] / self._mask_path)), dtype=np.uint8)
 
 
 class SegmentationPrediction(SegmentationRepresentation):

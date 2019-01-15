@@ -1,20 +1,6 @@
-/*
-// Copyright (c) 2018 Intel Corporation
+// Copyright (C) 2018 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
-
-
 
 #include <map>
 #include <set>
@@ -561,8 +547,8 @@ void PedestrianTracker::DropForgottenTrack(size_t track_id) {
 
 float PedestrianTracker::ShapeAffinity(float weight, const cv::Rect &trk,
                                        const cv::Rect &det) {
-    float w_dist = fabs(trk.width - det.width) / (trk.width + det.width);
-    float h_dist = fabs(trk.height - det.height) / (trk.height + det.height);
+    float w_dist = std::fabs(trk.width - det.width) / (trk.width + det.width);
+    float h_dist = std::fabs(trk.height - det.height) / (trk.height + det.height);
     return exp(-weight * (w_dist + h_dist));
 }
 
@@ -577,7 +563,7 @@ float PedestrianTracker::MotionAffinity(float weight, const cv::Rect &trk,
 
 float PedestrianTracker::TimeAffinity(float weight, const float &trk_time,
                                       const float &det_time) {
-    return exp(-weight * fabs(trk_time - det_time));
+    return exp(-weight * std::fabs(trk_time - det_time));
 }
 
 void PedestrianTracker::ComputeFastDesciptors(

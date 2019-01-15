@@ -1,18 +1,19 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
+
 import numpy as np
 import pytest
 
@@ -874,5 +875,52 @@ class TestPostprocessor:
     def test_cast_to_int_to_unknown_raise_config_error(self):
         config = [{'type': 'cast_to_int', 'round_policy': 'unknown'}]
 
+        with pytest.raises(ConfigError):
+            postprocess_data(PostprocessingExecutor(config), [None], [None])
+
+
+class TestPostprocessorExtraArgs:
+    def test_cast_to_int_raise_config_error_on_extra_args(self):
+        config = {'type': 'cast_to_int', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            postprocess_data(PostprocessingExecutor(config), [None], [None])
+
+    def test_clip_boxes_raise_config_error_on_extra_args(self):
+        config = {'type': 'clip_boxes', 'size': 1, 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            postprocess_data(PostprocessingExecutor(config), [None], [None])
+
+    def test_correct_yolo_v2_boxes_raise_config_error_on_extra_args(self):
+        config = {'type': 'correct_yolo_v2_boxes', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            postprocess_data(PostprocessingExecutor(config), [None], [None])
+
+    def test_encode_segmentation_mask_raise_config_error_on_extra_args(self):
+        config = {'type': 'encode_segmentation_mask', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            postprocess_data(PostprocessingExecutor(config), [None], [None])
+
+    def test_filter_raise_config_error_on_extra_args(self):
+        config = {'type': 'filter', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            postprocess_data(PostprocessingExecutor(config), [None], [None])
+
+    def test_nms_raise_config_error_on_extra_args(self):
+        config = {'type': 'nms', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            postprocess_data(PostprocessingExecutor(config), [None], [None])
+
+    def test_normalize_landmarks_points_raise_config_error_on_extra_args(self):
+        config = {'type': 'normalize_landmarks_points', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            postprocess_data(PostprocessingExecutor(config), [None], [None])
+
+    def test_resize_prediction_boxes_raise_config_error_on_extra_args(self):
+        config = {'type': 'resize_prediction_boxes', 'something_extra': 'extra'}
+        with pytest.raises(ConfigError):
+            postprocess_data(PostprocessingExecutor(config), [None], [None])
+
+    def test_rresize_segmentation_mask_raise_config_error_on_extra_args(self):
+        config = {'type': 'resize_segmentation_mask', 'something_extra': 'extra'}
         with pytest.raises(ConfigError):
             postprocess_data(PostprocessingExecutor(config), [None], [None])

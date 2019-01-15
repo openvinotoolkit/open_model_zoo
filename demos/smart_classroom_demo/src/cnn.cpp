@@ -1,18 +1,6 @@
-/*
-// Copyright (c) 2018 Intel Corporation
+// Copyright (C) 2018 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
 
 #include "cnn.hpp"
 
@@ -46,35 +34,22 @@ void CnnDLSDKBase::Load() {
     if (currentBatchSize != config_.max_batch_size)
         net_reader.getNetwork().setBatchSize(config_.max_batch_size);
 
-    InferenceEngine::InputsDataMap in;
-    in = net_reader.getNetwork().getInputsInfo();
+    InferenceEngine::InputsDataMap in = net_reader.getNetwork().getInputsInfo();
     if (in.size() != 1) {
         THROW_IE_EXCEPTION << "Network should have only one input";
     }
-
-    SizeVector inputDims = in.begin()->second->getTensorDesc().getDims();
     in.begin()->second->setInputPrecision(Precision::U8);
-    input_blob_ = make_shared_blob<uint8_t>(TensorDesc(Precision::U8, inputDims, Layout::NCHW));
-    input_blob_->allocate();
-    BlobMap inputs;
-    inputs[in.begin()->first] = input_blob_;
-    OutputsDataMap out = net_reader.getNetwork().getOutputsInfo();
+    in.begin()->second->setLayout(Layout::NCHW);
+    input_blob_name_ = in.begin()->first;
 
+    OutputsDataMap out = net_reader.getNetwork().getOutputsInfo();
     for (auto&& item : out) {
-        SizeVector outputDims = item.second->getTensorDesc().getDims();
-        item.second->precision = Precision::FP32;
-        TBlob<float>::Ptr output =
-                    make_shared_blob<float>(TensorDesc(Precision::FP32, outputDims, Layout::NCHW));
-        output->allocate();
-        outputs_[item.first] = output;
+        item.second->setPrecision(Precision::FP32);
+        output_blobs_names_.push_back(item.first);
     }
 
-    net_plugin_ = config_.plugin;
-
-    executable_network_ = net_plugin_.LoadNetwork(net_reader.getNetwork(), {});
+    executable_network_ = config_.plugin.LoadNetwork(net_reader.getNetwork(), {});
     infer_request_ = executable_network_.CreateInferRequest();
-    infer_request_.SetInput(inputs);
-    infer_request_.SetOutput(outputs_);
 }
 
 void CnnDLSDKBase::InferBatch(
@@ -83,19 +58,24 @@ void CnnDLSDKBase::InferBatch(
     if (!config_.enabled) {
         return;
     }
-    const size_t batch_size = input_blob_->getTensorDesc().getDims()[0];
+    Blob::Ptr input = infer_request_.GetBlob(input_blob_name_);
+    const size_t batch_size = input->getTensorDesc().getDims()[0];
 
     size_t num_imgs = frames.size();
     for (size_t batch_i = 0; batch_i < num_imgs; batch_i += batch_size) {
         const size_t current_batch_size = std::min(batch_size, num_imgs - batch_i);
         for (size_t b = 0; b < current_batch_size; b++) {
-            matU8ToBlob<uint8_t>(frames[batch_i + b], input_blob_, b);
+            matU8ToBlob<uint8_t>(frames[batch_i + b], input, b);
         }
 
         infer_request_.SetBatch(current_batch_size);
         infer_request_.Infer();
 
-        fetch_results(outputs_, current_batch_size);
+        InferenceEngine::BlobMap blobs;
+        for (const auto& name : output_blobs_names_)  {
+            blobs[name] = infer_request_.GetBlob(name);
+        }
+        fetch_results(blobs, current_batch_size);
     }
 }
 
@@ -116,7 +96,7 @@ VectorCNN::VectorCNN(const Config& config)
     : CnnDLSDKBase(config) {
     if (config.enabled) {
         Load();
-        if (outputs_.size() != 1) {
+        if (output_blobs_names_.size() != 1) {
             THROW_IE_EXCEPTION << "Demo supports topologies only with 1 output";
         }
     }

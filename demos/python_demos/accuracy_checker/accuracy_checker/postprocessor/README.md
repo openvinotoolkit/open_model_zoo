@@ -12,7 +12,7 @@ Every postprocessor has parameters available for configuration.
 Accuracy Checker supports following set of postprocessors:
 
 * `cast_to_int` - casting detection bounding box coordinates given in floating point format to integer. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
-*  `clip_boxes` - cliping detection bounding box sizes. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
+*  `clip_boxes` - clipping detection bounding box sizes. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
    * `dst_width` and `dst_height` - destination width and height for box clipping respectively. You can also use `size` instead in case when destination sizes are equal.
    * `apply_to` - option which determines target boxes for processing (`annotation` for ground truth boxes and `prediction` for detection results, `all` for both).
    * `bboxes_normalized` is flag which says that target bounding boxes are in normalized format.
@@ -30,5 +30,5 @@ Accuracy Checker supports following set of postprocessors:
     * `apply_to` - determines target boxes for processing (`annotation` for ground truth boxes and `prediction` for detection results, `all` for both).
     * `remove_filtered` - removing filtered data. Annotations support ignoring filtered data without removing as default, in other cases filtered data will be removed automatically.
     * Supported parameters for filtering: `labels`, `min_confidence`, `height_range`, `width_range`, `is_empty`, `min_visibility`, `aspect_ratio`, `area_ratio`.
-* `normalize_landmarks_points` - normalazing ground truth landmarks points. Supported representations: `PointRegressionAnnotation`, `PointRegressionPrediction`.
+* `normalize_landmarks_points` - normalizing ground truth landmarks points. Supported representations: `FacialLandmarksAnnotation`, `FacialLandmarksPrediction`.
     * `use_annotation_rect` - allows to use size of rectangle saved in annotation metadata for point scaling instead source image size.

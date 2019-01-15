@@ -16,7 +16,7 @@ You can use the following command to convert the source model:
 python3 ${MO_ROOT_PATH}/mo_caffe.py --input_model <path_to_model>/VGG16_faster_rcnn_final.caffemodel --input_proto <path_to_model>/deploy.prototxt
 ```
 
-For documentation on how to convert Caffe models, refer to the documentation of the [Model Optimizer tool](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer) tool.
+For documentation on how to convert Caffe models, refer to the documentation of the [Model Optimizer tool](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
 
 ## Running
 
@@ -63,17 +63,6 @@ rectangles to the standard output stream.
 Upon the start-up the demo application reads command line parameters and loads a network and an image to the Inference
 Engine plugin. When inference is done, the application creates an 
 output image and outputs data to the standard output stream.
-
-## Using This Demo with Intel's Person Detection model
-
-This model has a non-default (for Faster-RCNN) output layer name. In order to score it correctly, you should add an option 
-`--bbox_name detector/bbox/ave_pred` to the command line.
-
-Usage example: 
-
-```sh
-./object_detection_demo -i <path_to_image>/people.jpg -m <INSTALL_DIR>/deployment_tools/intel_models/person-detection-retail-0001/FP32/person-detection-retail-0001.xml --bbox_name detector/bbox/ave_pred -d CPU
-```
 
 ## See Also 
 * [Using Inference Engine Demos](../Readme.md)

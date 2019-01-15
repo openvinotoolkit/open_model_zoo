@@ -1,18 +1,19 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
+
 from ..config import NumberField
 from .postprocessor import BasePostprocessorConfig, Postprocessor
 from ..representation import DetectionPrediction, DetectionAnnotation
@@ -30,7 +31,8 @@ class CorrectYoloV2Boxes(Postprocessor):
             dst_height = NumberField(floats=False, optional=True)
             size = NumberField(floats=False, optional=True)
 
-        clip_config_validator = _CorrectYoloV2BoxesConfigValidator(self.__provider__)
+        clip_config_validator = _CorrectYoloV2BoxesConfigValidator(
+            self.__provider__, on_extra_argument=_CorrectYoloV2BoxesConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
         clip_config_validator.validate(self.config)
 
     def configure(self):

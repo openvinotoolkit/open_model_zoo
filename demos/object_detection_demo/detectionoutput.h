@@ -1,18 +1,6 @@
-/*
-// Copyright (c) 2017-2018 Intel Corporation
+// Copyright (C) 2018 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
 
 #include "ext_list.hpp"
 #include "ext_base.hpp"
@@ -106,24 +94,24 @@ public:
                                                     static_cast<size_t>(_num_classes),
                                                     static_cast<size_t>(_num_priors),
                                                     4};
-            _decoded_bboxes = make_shared_blob<float>({Precision::UNSPECIFIED, bboxes_size, NCHW});
+            _decoded_bboxes = make_shared_blob<float>({Precision::FP32, bboxes_size, NCHW});
             _decoded_bboxes->allocate();
 
             SizeVector buf_size{static_cast<size_t>(_num),
                                                  static_cast<size_t>(_num_classes),
                                                  static_cast<size_t>(_num_priors)};
-            _buffer = make_shared_blob<int>({Precision::UNSPECIFIED, buf_size, {buf_size, {0, 1, 2}}});
+            _buffer = make_shared_blob<int>({Precision::I32, buf_size, {buf_size, {0, 1, 2}}});
             _buffer->allocate();
 
             SizeVector indices_size{static_cast<size_t>(_num),
                                                      static_cast<size_t>(_num_classes),
                                                      static_cast<size_t>(_num_priors)};
             _indices = make_shared_blob<int>(
-                    {Precision::UNSPECIFIED, indices_size, {indices_size, {0, 1, 2}}});
+                    {Precision::I32, indices_size, {indices_size, {0, 1, 2}}});
             _indices->allocate();
 
             SizeVector detections_size{static_cast<size_t>(_num * _num_classes)};
-            _detections_count = make_shared_blob<int>({Precision::UNSPECIFIED, detections_size, C});
+            _detections_count = make_shared_blob<int>({Precision::I32, detections_size, C});
             _detections_count->allocate();
 
             SizeVector conf_size1 = { conf_size, 1 };
@@ -138,7 +126,7 @@ public:
             _bbox_sizes->allocate();
 
             SizeVector num_priors_actual_size{static_cast<size_t>(_num)};
-            _num_priors_actual = make_shared_blob<int>({Precision::UNSPECIFIED, num_priors_actual_size, C});
+            _num_priors_actual = make_shared_blob<int>({Precision::I32, num_priors_actual_size, C});
             _num_priors_actual->allocate();
         } catch (const InferenceEngineException& ex) {
             throw std::logic_error(std::string("Can't create detection output: ") + ex.what());

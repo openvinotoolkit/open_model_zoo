@@ -65,4 +65,4 @@ python3 -c 'import caffe, cv2'
 ```
 
 [openvino-get-started]: https://software.intel.com/en-us/openvino-toolkit/documentation/get-started
-[opencv-install]: docs/source/install_opencv.rst
+[opencv-install]: https://docs.opencv.org/3.4/d7/d9f/tutorial_linux_install.html

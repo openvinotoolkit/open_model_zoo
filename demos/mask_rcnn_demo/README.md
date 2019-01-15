@@ -37,6 +37,8 @@ You can use the following command to do inference on Intel&reg; Processors on an
 ./mask_rcnn_demo -i <path_to_image>/inputImage.bmp -m <path_to_model>/faster_rcnn.xml
 ```
 
+> **NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
+
 ### Outputs
 
 The application output is a segmented image (out.png).
@@ -46,4 +48,4 @@ The application output is a segmented image (out.png).
 Upon the start-up the demo application reads command line parameters and loads a network and an image to the Inference Engine plugin. When inference is done, the application creates an output image.
 
 ## See Also 
-* [Using Inference Engine Samples](../Readme.md)
+* [Using Inference Engine Demos](../Readme.md)

@@ -2,7 +2,7 @@
 
 This demo provides an inference pipeline for multi-channel face detection. The demo uses Face Detection network. The corresponding pre-trained model delivered with the product is `face-detection-retail-0004`, which is a primary detection network for finding faces.
 
-For details on the models, please refer to the descriptions in the `deployment_tools/intel_models` folder of the OpenVINO&trade; toolkit installation directory.
+For details on the models, please refer to the descriptions in the `open_model_zoo/intel_models` folder.
 
 Other demo objectives are:
 
@@ -12,7 +12,7 @@ Other demo objectives are:
 
 ## How It Works
 
-**NOTE**: Running the demo requires using at least one web camera attached to your machine.
+> **NOTE**: Running the demo requires using at least one web camera attached to your machine.
  
 On the start-up, the application reads command line parameters and loads the specified networks. The Face Detection network is required.
 
@@ -50,14 +50,14 @@ Options:
 
 For example, to run the demo with the pre-trained face detection model on FPGA with fallback on CPU, with one single camera, use the following command:
 ```sh
-./multi-channel-demo -m <INSTALL_DIR>/deployment_tools/intel_models/face-detection-retail-0004/FP32/face-detection-retail-0004.xml
--l <demos_build_folder>/intel64/Release/lib/libcpu_extension.so -d HETERO:FPGA,CPU -nc 1
+./multi-channel-demo -m open_model_zoo/intel_models/face-detection-retail-0004/FP32/face-detection-retail-0004.xml
+-l <bin_folder>/intel64/Release/lib/libcpu_extension.so -d HETERO:FPGA,CPU -nc 1
 ```
 
 To run the demo using two recorded video files, use the following command:
 ```sh
-./multi-channel-demo -m <INSTALL_DIR>/deployment_tools/intel_models/face-detection-retail-0004/FP32/face-detection-retail-0004.xml 
--l <demos_build_folder>/intel64/Release/lib/libcpu_extension.so -d HETERO:FPGA,CPU -i /path/to/file1 /path/to/file2
+./multi-channel-sample -m open_model_zoo/intel_models/face-detection-retail-0004/FP32/face-detection-retail-0004.xml 
+-l <bin_folder>/intel64/Release/lib/libcpu_extension.so -d HETERO:FPGA,CPU -i /path/to/file1 /path/to/file2
 ```
 Video files will be processed repeatedly.
 
@@ -70,5 +70,5 @@ To run the demo with a single input source(a web camera or a video file), but se
 The demo uses OpenCV to display the resulting bunch of frames with detections rendered as bounding boxes.
 On the top of the screen, the demo reports throughput (in frames per second). If needed, it also reports more detailed statistics (use `-show_stats` option while running the demo to enable it).
 
-## See Also
+## See Also 
 * [Using Inference Engine Demos](../Readme.md)

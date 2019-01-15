@@ -15,7 +15,6 @@ models:
         # launcher returns raw result, so it should be converted
         # to an appropriate representation with adapter
         adapter: classification
-        # batch size.
 
     # metrics, preprocessing and postprocessing are typically dataset specific, so dataset field
     # specifies data and all other steps required to validate topology
