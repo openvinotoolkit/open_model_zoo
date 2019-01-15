@@ -18,7 +18,6 @@ one output.
 
 | Metric                | Value                                       |
 |-----------------------|---------------------------------------------|
-| Min face size         | 60x60 pixels (fixed)                        |
 | Supported ranges      | YAW [-90,90], PITCH [-70,70], ROLL [-70,70] |
 | GFlops                | 0.105                                       |
 | MParams               | 1.911                                       |
@@ -37,21 +36,22 @@ Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/be
 
 ## Inputs
 
-Image in BGR format with size 60x60.
+1. name: "data" , shape: [1x3x60x60] - An input image in [1xCxHxW] format. Expected color order is BGR.
 
 ## Outputs
 
 Output layer names in Inference Engine format:
 
-- `angle_y_fc`
-- `angle_p_fc`
-- `angle_r_fc`
+1. name: "angle_y_fc", shape: [1, 1] - Estimated yaw (in degrees).
+2. name: "angle_p_fc", shape: [1, 1] - Estimated pitch (in degrees).
+3. name: "angle_r_fc", shape: [1, 1] - Estimated roll (in degrees).
 
 Output layer names in Caffe* format:
 
-- `fc_y`
-- `fc_p`
-- `fc_r`
+1. name: "fc_y", shape: [1, 1] - Estimated yaw (in degrees).
+2. name: "fc_p", shape: [1, 1] - Estimated pitch (in degrees).
+3. name: "fc_r", shape: [1, 1] - Estimated roll (in degrees).
+
 
 Each output contains one float value that represents value in Tait-Bryan angles
 (yaw, pitсh or roll).

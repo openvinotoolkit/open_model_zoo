@@ -20,7 +20,7 @@ This is a lightweight landmarks regressor for the Smart Classroom scenario. It h
 
 Normed Error (NE) for i<sup>th</sup> sample has the following form:
 
-<img src="./normed_error.png" alt="drawing" width="200px"/>
+![](./normed_error.png)
 
 where N is the number of landmarks, _p_-hat and _p_ are, correspondingly, the prediction and ground truth vectors of k<sup>th</sup> landmark of i<sup>th</sup> sample, and d<sub>i</sub> is the interocular distance for i<sup>th</sup> sample.
 
