@@ -1,18 +1,6 @@
-/*
-// Copyright (c) 2018 Intel Corporation
+// Copyright (C) 2018 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
 
 /**
 * \brief The entry point for the Inference Engine Human Pose Estimation demo application
@@ -23,9 +11,8 @@
 #include <vector>
 
 #include <inference_engine.hpp>
-#include <opencv2/opencv.hpp>
 
-#include <samples/common.hpp>
+#include <samples/ocv_common.hpp>
 
 #include "human_pose_estimation_demo.hpp"
 #include "human_pose_estimator.hpp"
@@ -74,7 +61,11 @@ int main(int argc, char* argv[]) {
         int delay = 33;
         double inferenceTime = 0.0;
         cv::Mat image;
-        while (cap.read(image)) {
+        if (!cap.read(image)) {
+            throw std::logic_error("Failed to get frame from cv::VideoCapture");
+        }
+        estimator.estimate(image);  // Do not measure network reshape, if it happened
+        do {
             double t1 = cv::getTickCount();
             std::vector<HumanPose> poses = estimator.estimate(image);
             double t2 = cv::getTickCount();
@@ -117,7 +108,7 @@ int main(int argc, char* argv[]) {
             } else if (key == 27) {
                 break;
             }
-        }
+        } while (cap.read(image));
     }
     catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;

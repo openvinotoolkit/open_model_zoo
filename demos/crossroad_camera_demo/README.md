@@ -3,13 +3,12 @@
 This demo provides an inference pipeline for persons' detection, recognition and reidentification. The demo uses Person Detection network followed by the Person Attributes Recognition and Person Reidentification Retail networks applied on top of the detection results. The corresponding pre-trained models are delivered with the product:
 
 * `person-vehicle-bike-detection-crossroad-0078`, which is a primary detection network for finding the persons (and other objects if needed)
-* `person-attributes-recognition-crossroad-0031`, which is executed on top of the results from the first network and
+* `person-attributes-recognition-crossroad-0200`, which is executed on top of the results from the first network and
 reports person attributes like gender, has hat, has long-sleeved clothes
 * `person-reidentification-retail-0079`, which is executed on top of the results from the first network and prints
 a vector of features for each detected person. This vector is used to conclude if it is already detected person or not.
 
-For details on the models, please refer to the descriptions in the `deployment_tools/intel_models` folder of the
- OpenVINO&trade; toolkit installation directory.
+For details on the models, please refer to the descriptions in the `open_model_zoo/intel_models` folder.
 
 Other demo objectives are:
 * Images/Video/Camera as inputs, via OpenCV*
@@ -65,18 +64,18 @@ Options:
 
 Running the application with an empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public models or a set of pre-trained and optimized models delivered with the package:
+To run the demo, you can use public models or a set of pre-trained and optimized models:
 
-* `<INSTAL_DIR>/deployment_tools/intel_models/person-vehicle-bike-detection-crossroad-0078`
-* `<INSTAL_DIR>/deployment_tools/intel_models/person-attributes-recognition-crossroad-0031`
-* `<INSTAL_DIR>/deployment_tools/intel_models/person-reidentification-retail-0079`
+* `open_model_zoo/intel_models/person-vehicle-bike-detection-crossroad-0078`
+* `open_model_zoo/intel_models/person-attributes-recognition-crossroad-0200`
+* `open_model_zoo/intel_models/person-reidentification-retail-0079`
 
-For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
+For example, to do inference on a GPU with the pre-trained models, run the following command:
 
 ```sh
 ./crossroad_camera_demo -i <path_to_video>/inputVideo.mp4 -m person-vehicle-bike-detection-crossroad-0078.xml -m_pa person-attributes-recognition-crossroad-0031.xml -m_reid person-reidentification-retail-0079.xml -d GPU
 ```
-**NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer) tool.
+> **NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
 
 ## Demo Output
 

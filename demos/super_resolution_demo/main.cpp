@@ -1,18 +1,6 @@
-/*
-// Copyright (c) 2018 Intel Corporation
+// Copyright (C) 2018 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
 
 /**
  * @brief The entry point for inference engine Super Resolution demo application
@@ -32,9 +20,9 @@
 #include <inference_engine.hpp>
 #include <ext_list.hpp>
 
-#include <samples/common.hpp>
 #include <samples/slog.hpp>
 #include <samples/args_helper.hpp>
+#include <samples/ocv_common.hpp>
 
 #include "super_resolution_demo.h"
 
@@ -135,34 +123,37 @@ int main(int argc, char *argv[]) {
         /** Taking information about all topology inputs **/
         InputsDataMap inputInfo(network.getInputsInfo());
 
-        if (inputInfo.size() != 1) throw std::logic_error("The demo supports topologies only with 1 input");
-        auto inputInfoItem = *inputInfo.begin();
+        if (inputInfo.size() != 1 && inputInfo.size() != 2)
+            throw std::logic_error("The demo supports topologies with 1 or 2 inputs only");
 
-        /** Iterate over all the input blobs **/
-        std::vector<std::shared_ptr<uint8_t>> imagesData;
+        const std::string lrInputBlobName = "0";
 
-        /** Specifying the precision of input data.
-         * This should be called before load of the network to the plugin **/
-        inputInfoItem.second->setPrecision(Precision::FP32);
-
-        /** Collect images data ptrs **/
-        for (auto & i : imageNames) {
-            FormatReader::ReaderPtr reader(i.c_str());
-            if (reader.get() == nullptr) {
+        /** Collect images**/
+        std::vector<cv::Mat> inputImages;
+        for (const auto &i : imageNames) {
+            cv::Mat img = cv::imread(i);
+            if (img.empty()) {
                 slog::warn << "Image " + i + " cannot be read!" << slog::endl;
                 continue;
             }
-            /** Store image data **/
-            std::shared_ptr<unsigned char> data(reader->getData(inputInfoItem.second->getTensorDesc().getDims()[3],
-                                                                inputInfoItem.second->getTensorDesc().getDims()[2]));
-            if (data.get() != nullptr) {
-                imagesData.push_back(data);
+
+            /** Get size of low resolution input **/
+            auto lrInputInfoItem = inputInfo[lrInputBlobName];
+            size_t w = lrInputInfoItem->getTensorDesc().getDims()[3];
+            size_t h = lrInputInfoItem->getTensorDesc().getDims()[2];
+
+            if (w != img.cols || h != img.rows) {
+                slog::warn << "Size of the image " << i << " is not equal to WxH = " << w << "x" << h << slog::endl;
+                continue;
             }
+
+            inputImages.push_back(img);
         }
-        if (imagesData.empty()) throw std::logic_error("Valid input images were not found!");
+
+        if (inputImages.empty()) throw std::logic_error("Valid input images were not found!");
 
         /** Setting batch size using image count **/
-        network.setBatchSize(imagesData.size());
+        network.setBatchSize(imageNames.size());
         slog::info << "Batch size is " << std::to_string(network.getBatchSize()) << slog::endl;
 
         // ------------------------------ Prepare output blobs -------------------------------------------------
@@ -171,8 +162,7 @@ int main(int argc, char *argv[]) {
         OutputsDataMap outputInfo(network.getOutputsInfo());
         // BlobMap outputBlobs;
         std::string firstOutputName;
-
-        for (auto & item : outputInfo) {
+        for (auto &item : outputInfo) {
             if (firstOutputName.empty()) {
                 firstOutputName = item.first;
             }
@@ -187,34 +177,32 @@ int main(int argc, char *argv[]) {
 
         // --------------------------- 4. Loading model to the plugin ------------------------------------------
         slog::info << "Loading model to the plugin" << slog::endl;
-        ExecutableNetwork executable_network = plugin.LoadNetwork(network, {});
+        ExecutableNetwork executableNetwork = plugin.LoadNetwork(network, {});
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 5. Create infer request -------------------------------------------------
-        InferRequest infer_request = executable_network.CreateInferRequest();
+        slog::info << "Create infer request" << slog::endl;
+        InferRequest inferRequest = executableNetwork.CreateInferRequest();
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 6. Prepare input --------------------------------------------------------
-        /** Iterate over all the input blobs **/
-        for (const auto & item : inputInfo) {
-            Blob::Ptr input = infer_request.GetBlob(item.first);
-            /** Filling input tensor with images. First b channel, then g and r channels **/
-            size_t num_channels = input->getTensorDesc().getDims()[1];
-            size_t image_size = input->getTensorDesc().getDims()[3] * input->getTensorDesc().getDims()[2];
+        Blob::Ptr lrInputBlob = inferRequest.GetBlob(lrInputBlobName);
+        for (size_t i = 0; i < inputImages.size(); ++i) {
+            cv::Mat img = inputImages[i];
+            matU8ToBlob<float_t>(img, lrInputBlob, i);
 
-            auto data = input->buffer().as<PrecisionTrait<Precision::FP32>::value_type*>();
+            bool twoInputs = inputInfo.size() == 2;
+            if (twoInputs) {
+                const std::string bicInputBlobName = "1";
+                Blob::Ptr bicInputBlob = inferRequest.GetBlob(bicInputBlobName);
 
-            /** Iterate over all input images **/
-            for (size_t image_id = 0; image_id < imagesData.size(); ++image_id) {
-                /** Iterate over all pixel in image (b,g,r) **/
-                for (size_t pid = 0; pid < image_size; pid++) {
-                    /** Iterate over all channels **/
-                    for (size_t ch = 0; ch < num_channels; ++ch) {
-                        /**          [images stride + channels stride + pixel id ] all in bytes            **/
-                        data[image_id * image_size * num_channels + ch * image_size + pid ] =
-                            imagesData.at(image_id).get()[pid*num_channels + ch];
-                    }
-                }
+                int w = bicInputBlob->getTensorDesc().getDims()[3];
+                int h = bicInputBlob->getTensorDesc().getDims()[2];
+
+                cv::Mat resized;
+                cv::resize(img, resized, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
+
+                matU8ToBlob<float_t>(resized, bicInputBlob, i);
             }
         }
         // -----------------------------------------------------------------------------------------------------
@@ -230,7 +218,7 @@ int main(int argc, char *argv[]) {
         /** Start inference & calc performance **/
         for (int iter = 0; iter < FLAGS_ni; ++iter) {
             auto t0 = Time::now();
-            infer_request.Infer();
+            inferRequest.Infer();
             auto t1 = Time::now();
             fsec fs = t1 - t0;
             ms d = std::chrono::duration_cast<ms>(fs);
@@ -242,49 +230,39 @@ int main(int argc, char *argv[]) {
                   << " ms" << std::endl;
 
         if (FLAGS_pc) {
-            printPerformanceCounts(infer_request, std::cout);
+            printPerformanceCounts(inferRequest, std::cout);
         }
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 8. Process output -------------------------------------------------------
-        const Blob::Ptr output_blob = infer_request.GetBlob(firstOutputName);
-        const auto output_data = output_blob->buffer().as<PrecisionTrait<Precision::FP32>::value_type*>();
+        const Blob::Ptr outputBlob = inferRequest.GetBlob(firstOutputName);
+        const auto outputData = outputBlob->buffer().as<PrecisionTrait<Precision::FP32>::value_type*>();
 
-        size_t num_images = output_blob->getTensorDesc().getDims()[0];
-        size_t num_channels = output_blob->getTensorDesc().getDims()[1];
-        size_t H = output_blob->getTensorDesc().getDims()[2];
-        size_t W = output_blob->getTensorDesc().getDims()[3];
-        size_t nPixels = W * H;
+        size_t numOfImages = outputBlob->getTensorDesc().getDims()[0];
+        size_t numOfChannels = outputBlob->getTensorDesc().getDims()[1];
+        size_t h = outputBlob->getTensorDesc().getDims()[2];
+        size_t w = outputBlob->getTensorDesc().getDims()[3];
+        size_t nunOfPixels = w * h;
 
-        slog::info << "Output size [N,C,H,W]: " << num_images << ", " << num_channels << ", " << H << ", " << W << slog::endl;
+        slog::info << "Output size [N,C,H,W]: " << numOfImages << ", " << numOfChannels << ", " << h << ", " << w << slog::endl;
 
-        {
-            std::vector<float> data_img(nPixels * num_channels);
+        for (size_t i = 0; i < numOfImages; ++i) {
+            std::vector<cv::Mat> imgPlanes{cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels])),
+                                           cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels + nunOfPixels])),
+                                           cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels + nunOfPixels * 2]))};
+            for (auto & img : imgPlanes)
+                img.convertTo(img, CV_8UC1, 255);
 
-            for (size_t n = 0; n < num_images; n++) {
-                for (size_t i = 0; i < nPixels; i++) {
-                    data_img[i * num_channels + 0] = 255.f * output_data[i + n * nPixels * num_channels];
-                    data_img[i * num_channels + 1] = 255.f * output_data[(i + nPixels) + n * nPixels * num_channels];
-                    data_img[i * num_channels + 2] = 255.f * output_data[(i + 2 * nPixels) + n * nPixels * num_channels];
+            cv::Mat resultImg;
+            cv::merge(imgPlanes, resultImg);
 
-                    // input was in BGR, need to reverse channels for bmp output
-                    std::swap(data_img[i * num_channels], data_img[i * num_channels + 2]);
-
-                    data_img[i * num_channels + 0] = clip(data_img[i * num_channels + 0], 0.f, 255.f);
-                    data_img[i * num_channels + 1] = clip(data_img[i * num_channels + 1], 0.f, 255.f);
-                    data_img[i * num_channels + 2] = clip(data_img[i * num_channels + 2], 0.f, 255.f);
-                }
-                std::string out_img_name = std::string("sr_" + std::to_string(n + 1) + ".bmp");
-                std::ofstream outFile;
-                outFile.open(out_img_name.c_str(), std::ios_base::binary);
-                if (!outFile.is_open()) {
-                    throw new std::runtime_error("Cannot create " + out_img_name);
-                }
-                std::vector<unsigned char> data_img2(data_img.begin(), data_img.end());
-                writeOutputBmp(data_img2.data(), H, W, outFile);
-                outFile.close();
-                slog::info << "Image " << out_img_name << " created!" << slog::endl;
+            if (FLAGS_show) {
+                cv::imshow("result", resultImg);
+                cv::waitKey();
             }
+
+            std::string outImgName = std::string("sr_" + std::to_string(i + 1) + ".png");
+            cv::imwrite(outImgName, resultImg);
         }
         // -----------------------------------------------------------------------------------------------------
     }

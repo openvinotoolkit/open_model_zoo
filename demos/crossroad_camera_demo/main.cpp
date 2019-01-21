@@ -1,18 +1,6 @@
-/*
-// Copyright (c) 2018 Intel Corporation
+// Copyright (C) 2018 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
 
 /**
 * \brief The entry point for the Inference Engine crossroad_camera demo application
@@ -34,11 +22,9 @@
 
 #include <inference_engine.hpp>
 
-#include <samples/common.hpp>
+#include <samples/ocv_common.hpp>
 #include "crossroad_camera_demo.hpp"
 #include <ext_list.hpp>
-
-#include <opencv2/opencv.hpp>
 
 using namespace InferenceEngine;
 
@@ -260,29 +246,91 @@ struct PersonDetection : BaseDetection{
 };
 
 struct PersonAttribsDetection : BaseDetection {
+    std::string outputNameForAttributes;
+    std::string outputNameForTopColorPoint;
+    std::string outputNameForBottomColorPoint;
+
+
     PersonAttribsDetection() : BaseDetection(FLAGS_m_pa, "Person Attributes Recognition") {}
 
-    std::string GetPersonAttributes() {
+    struct AttributesAndColorPoints{
+        std::vector<std::string> attributes_strings;
+        std::vector<bool> attributes_indicators;
+        cv::Point2f top_color_point;
+        cv::Point2f bottom_color_point;
+        cv::Vec3b top_color;
+        cv::Vec3b bottom_color;
+    };
+
+    static cv::Vec3b GetAvgColor(const cv::Mat& image) {
+        int clusterCount = 5;
+        cv::Mat labels;
+        cv::Mat centers;
+        cv::Mat image32f;
+        image.convertTo(image32f, CV_32F);
+        image32f = image32f.reshape(1, image32f.rows*image32f.cols);
+        cv::kmeans(image32f, clusterCount, labels, cv::TermCriteria(cv::TermCriteria::EPS+cv::TermCriteria::MAX_ITER, 10, 1.0),
+                    10, cv::KMEANS_RANDOM_CENTERS, centers);
+        centers.convertTo(centers, CV_8U);
+        centers = centers.reshape(0, clusterCount);
+        std::map<int, cv::Vec3b, std::greater<int>> max_color;
+        std::vector<int> freq(clusterCount);
+
+        for (size_t i = 0; i < labels.rows * labels.cols; ++i) {
+            freq[labels.at<int>(i)]++;
+        }
+
+        for (size_t i = 0; i < freq.size(); ++i) {
+            max_color[freq[i]] = centers.at<cv::Vec3b>(i);
+        }
+
+        return max_color.begin()->second;
+    }
+
+    AttributesAndColorPoints GetPersonAttributes() {
         static const std::vector<std::string> attributesVec = {
-                "is male", "has hat", "has longsleeves", "has longpants", "has longhair", "has coat_jacket"
+                "is male", "has_bag", "has_backpack" , "has hat", "has longsleeves", "has longpants", "has longhair", "has coat_jacket"
         };
 
-        Blob::Ptr attribsBlob = request.GetBlob(outputName);
-        int numOfChannels = attribsBlob->getTensorDesc().getDims().at(1);
-        if (numOfChannels != attributesVec.size()) {
-            throw std::logic_error("Output size (" + std::to_string(numOfChannels) + ") of the "
+        Blob::Ptr attribsBlob = request.GetBlob(outputNameForAttributes);
+        Blob::Ptr topColorPointBlob = request.GetBlob(outputNameForTopColorPoint);
+        Blob::Ptr bottomColorPointBlob = request.GetBlob(outputNameForBottomColorPoint);
+        int numOfAttrChannels = attribsBlob->getTensorDesc().getDims().at(1);
+        int numOfTCPointChannels = topColorPointBlob->getTensorDesc().getDims().at(1);
+        int numOfBCPointChannels = bottomColorPointBlob->getTensorDesc().getDims().at(1);
+
+        if (numOfAttrChannels != attributesVec.size()) {
+            throw std::logic_error("Output size (" + std::to_string(numOfAttrChannels) + ") of the "
                                    "Person Attributes Recognition network is not equal to used person "
                                    "attributes vector size (" + std::to_string(attributesVec.size()) + ")");
         }
-
-        auto outputValues = attribsBlob->buffer().as<float*>();
-
-        std::string returnStr = (outputValues[0] > 0.5) ? "M" : "F";
-
-        for (int i = 1; i < attributesVec.size(); i++) {
-            returnStr += (outputValues[i] > 0.5) ? ", " + attributesVec[i] : "";
+        if (numOfTCPointChannels != 2) {
+            throw std::logic_error("Output size (" + std::to_string(numOfTCPointChannels) + ") of the "
+                                   "Person Attributes Recognition network is not equal to point coordinates(2)");
         }
-        return returnStr;
+        if (numOfBCPointChannels != 2) {
+            throw std::logic_error("Output size (" + std::to_string(numOfBCPointChannels) + ") of the "
+                                   "Person Attributes Recognition network is not equal to point coordinates (2)");
+        }
+
+        auto outputAttrValues = attribsBlob->buffer().as<float*>();
+        auto outputTCPointValues = topColorPointBlob->buffer().as<float*>();
+        auto outputBCPointValues = bottomColorPointBlob->buffer().as<float*>();
+
+        AttributesAndColorPoints returnValue;
+
+        returnValue.top_color_point.x = outputTCPointValues[0];
+        returnValue.top_color_point.y = outputTCPointValues[1];
+
+        returnValue.bottom_color_point.x = outputBCPointValues[0];
+        returnValue.bottom_color_point.y = outputBCPointValues[1];
+
+        for (int i = 0; i < attributesVec.size(); i++) {
+            returnValue.attributes_strings.push_back(attributesVec[i]);
+            returnValue.attributes_indicators.push_back(outputAttrValues[i] > 0.5);
+        }
+
+        return returnValue;
     }
 
     CNNNetwork read() override {
@@ -319,11 +367,13 @@ struct PersonAttribsDetection : BaseDetection {
         // ---------------------------Check outputs ------------------------------------------------------
         std::cout << "[ INFO ] Checking Person Attribs outputs" << std::endl;
         OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
-        if (outputInfo.size() != 1) {
-            throw std::logic_error("Person Attribs Network expects networks having one output");
+        if (outputInfo.size() != 3) {
+             throw std::logic_error("Person Attribs Network expects networks having one output");
         }
-        outputName = outputInfo.begin()->second->name;
-
+        auto it = outputInfo.begin();
+        outputNameForAttributes = (it++)->second->name;  // attribute probabilities
+        outputNameForTopColorPoint = (it++)->second->name;  // top color location
+        outputNameForBottomColorPoint = (it++)->second->name;  // bottom color location
         std::cout << "[ INFO ] Loading Person Attributes Recognition model to the "<< FLAGS_d_pa << " plugin" << std::endl;
         _enabled = true;
         return netReader.getNetwork();
@@ -448,6 +498,8 @@ struct Load {
         }
     }
 };
+
+
 
 int main(int argc, char *argv[]) {
     try {
@@ -574,8 +626,10 @@ int main(int argc, char *argv[]) {
                         auto clippedRect = result.location & cv::Rect(0, 0, width, height);
                         person = frame(clippedRect);
                     }
-                    std::string resPersAttr = "";
+                    PersonAttribsDetection::AttributesAndColorPoints resPersAttrAndColor;
                     std::string resPersReid = "";
+                    cv::Point top_color_p;
+                    cv::Point bottom_color_p;
 
                     if (personAttribs.enabled()) {
                         // --------------------------- Run Person Attributes Recognition -----------------------
@@ -592,7 +646,38 @@ int main(int argc, char *argv[]) {
                         personAttribsNetworkTime += std::chrono::duration_cast<ms>(t1 - t0);
                         personAttribsInferred++;
                         // --------------------------- Process outputs -----------------------------------------
-                        resPersAttr = personAttribs.GetPersonAttributes();
+
+                        resPersAttrAndColor = personAttribs.GetPersonAttributes();
+
+                        top_color_p.x = resPersAttrAndColor.top_color_point.x * person.cols;
+                        top_color_p.y = resPersAttrAndColor.top_color_point.y * person.rows;
+
+                        bottom_color_p.x = resPersAttrAndColor.bottom_color_point.x * person.cols;
+                        bottom_color_p.y = resPersAttrAndColor.bottom_color_point.y * person.rows;
+
+
+                        cv::Rect person_rect(0, 0, person.cols, person.rows);
+
+                        // Define area around top color's location
+                        cv::Rect tc_rect;
+                        tc_rect.x = top_color_p.x - person.cols / 6;
+                        tc_rect.y = top_color_p.y - person.rows / 10;
+                        tc_rect.height = 2 * person.rows / 8;
+                        tc_rect.width = 2 * person.cols / 6;
+
+                        tc_rect = tc_rect & person_rect;
+
+                        // Define area around bottom color's location
+                        cv::Rect bc_rect;
+                        bc_rect.x = bottom_color_p.x - person.cols / 6;
+                        bc_rect.y = bottom_color_p.y - person.rows / 10;
+                        bc_rect.height =  2 * person.rows / 8;
+                        bc_rect.width = 2 * person.cols / 6;
+
+                        bc_rect = bc_rect & person_rect;
+
+                        resPersAttrAndColor.top_color = PersonAttribsDetection::GetAvgColor(person(tc_rect));
+                        resPersAttrAndColor.bottom_color = PersonAttribsDetection::GetAvgColor(person(bc_rect));
                     }
                     if (personReId.enabled()) {
                         // --------------------------- Run Person Reidentification -----------------------------
@@ -621,16 +706,39 @@ int main(int argc, char *argv[]) {
                     }
 
                     // --------------------------- Process outputs -----------------------------------------
-                    if (!resPersAttr.empty()) {
-                        cv::putText(frame,
-                                    resPersAttr,
-                                    cv::Point2f(result.location.x, result.location.y + 15),
+                    if (!resPersAttrAndColor.attributes_strings.empty()) {
+                        cv::Rect image_area(0, 0, frame.cols, frame.rows);
+                        cv::Rect tc_label(result.location.x + result.location.width, result.location.y,
+                                          result.location.width / 4, result.location.height / 2);
+                        cv::Rect bc_label(result.location.x + result.location.width, result.location.y + result.location.height / 2,
+                                            result.location.width / 4, result.location.height / 2);
+
+                        frame(tc_label & image_area) = resPersAttrAndColor.top_color;
+                        frame(bc_label & image_area) = resPersAttrAndColor.bottom_color;
+
+                        for (size_t i = 0; i < resPersAttrAndColor.attributes_strings.size(); ++i) {
+                            cv::Scalar color;
+                            if (resPersAttrAndColor.attributes_indicators[i]) {
+                                color = cv::Scalar(0, 255, 0);
+                            } else {
+                                color = cv::Scalar(0, 0, 255);
+                            }
+                            cv::putText(frame,
+                                    resPersAttrAndColor.attributes_strings[i],
+                                    cv::Point2f(result.location.x + 5 * result.location.width / 4, result.location.y + 15 + 15 * i),
                                     cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                    0.6,
-                                    cv::Scalar(255, 255, 255));
+                                    0.5,
+                                    color);
+                        }
 
                         if (FLAGS_r) {
-                            std::cout << "Person Attributes results:" << resPersAttr << std::endl;
+                            std::string output_attribute_string;
+                            for (size_t i = 0; i < resPersAttrAndColor.attributes_strings.size(); ++i)
+                                if (resPersAttrAndColor.attributes_indicators[i])
+                                    output_attribute_string += resPersAttrAndColor.attributes_strings[i] + ",";
+                            std::cout << "Person Attributes results: " << output_attribute_string << std::endl;
+                            std::cout << "Person top color: " << resPersAttrAndColor.top_color << std::endl;
+                            std::cout << "Person bottom color: " << resPersAttrAndColor.bottom_color << std::endl;
                         }
                     }
                     if (!resPersReid.empty()) {
@@ -645,7 +753,7 @@ int main(int argc, char *argv[]) {
                             std::cout << "Person Reidentification results:" << resPersReid << std::endl;
                         }
                     }
-                    cv::rectangle(frame, result.location, cv::Scalar(0, 255, 0), 2);
+                    cv::rectangle(frame, result.location, cv::Scalar(0, 255, 0), 1);
                 }
             }
 

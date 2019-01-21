@@ -1,18 +1,6 @@
-/*
-// Copyright (c) 2018 Intel Corporation
+// Copyright (C) 2018 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
 
 #pragma once
 
@@ -30,15 +18,17 @@ struct TrackedObject {
     cv::Rect rect;
     float confidence;
 
-    int64_t object_id;
-    int label;
-    uint64_t timestamp;
+    int object_id;
+    int label;  // either id of a label, or UNKNOWN_LABEL_IDX
+    static const int UNKNOWN_LABEL_IDX;  // the value (-1) for unknown label
+
+    int frame_idx;      ///< Frame index where object was detected (-1 if N/A).
 
     TrackedObject(const cv::Rect &rect = cv::Rect(), float conf = -1.0f,
-                  int label = -1, int object_id = -1, uint64_t timestamp = 0)
+                  int label = -1, int object_id = -1)
         : rect(rect),  confidence(conf),
           label(label), object_id(object_id),
-          timestamp(timestamp) {}
+          frame_idx(-1) {}
 };
 
 using TrackedObjects = std::vector<TrackedObject>;
@@ -72,7 +62,7 @@ private:
 /// \brief The Params struct stores parameters of Tracker.
 ///
 struct TrackerParams {
-    size_t min_track_duration;  ///< Min track duration in milliseconds.
+    size_t min_track_duration;  ///< Min track duration in frames
 
     size_t forget_delay;  ///< Forget about track if the last bounding box in
     /// track was detected more than specified number of
@@ -97,6 +87,8 @@ struct TrackerParams {
     int max_num_objects_in_track;  ///< The number of objects in track is
     /// restricted by this parameter. If it is negative or zero, the max number of
     /// objects in track is not restricted.
+
+    int averaging_window_size;  ///< The number of objects in track for averaging predictions.
 
     std::string objects_type;  ///< The type of boxes which will be grabbed from
     /// detector. Boxes with other types are ignored.
@@ -171,7 +163,7 @@ struct Track {
 
     TrackedObject first_object;  ///< First object in track.
     size_t length;  ///< Length of a track including number of objects that were
-    /// removed from track in order to avoid memory usage growth.
+                    /// removed from track in order to avoid memory usage growth.
 };
 
 ///
@@ -198,7 +190,7 @@ public:
     /// milliseconds
     ///
     void Process(const cv::Mat &frame, const TrackedObjects &detections,
-                 uint64_t timestamp);
+                 int frame_idx);
 
     ///
     /// \brief Pipeline parameters getter.
@@ -262,6 +254,13 @@ public:
     const std::unordered_map<size_t, Track> &tracks() const;
 
     ///
+    /// \brief tracks Returns all tracks including forgotten (lost too many frames
+    /// ago).
+    /// \return Vector of tracks
+    ///
+    std::vector<Track> vector_tracks() const;
+
+    ///
     /// \brief IsTrackValid Checks whether track is valid (duration > threshold).
     /// \param id Index of checked track.
     /// \return True if track duration exceeds some predefined value.
@@ -275,7 +274,6 @@ public:
     void DropForgottenTracks();
 
 private:
-    int LabelWithMaxFrequencyInTrack(const Track &track) const;
     void DropForgottenTrack(size_t track_id);
 
     const std::set<size_t> &active_track_ids() const { return active_track_ids_; }
@@ -338,3 +336,6 @@ private:
 
     cv::Size frame_size_;
 };
+
+int LabelWithMaxFrequencyInTrack(const Track &track);
+std::vector<Track> UpdateTrackLabelsToBestAndFilterOutUnknowns(const std::vector<Track>& tracks);

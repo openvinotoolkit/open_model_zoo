@@ -1,18 +1,19 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
+
 from ..representation import ContainerRepresentation
 from ..config import ConfigError
 from ..utils import is_single_metric_source, get_supported_representations
@@ -97,7 +98,7 @@ class Metric(ClassProvider):
         """
         Validate that metric entry meets all configuration structure requirements
         """
-        BaseMetricConfig(self.name).validate(self.config)
+        BaseMetricConfig(self.name, on_extra_argument=BaseMetricConfig.ERROR_ON_EXTRA_ARGUMENT).validate(self.config)
 
     def _update_state(self, fn, state_key, default_factory=None):
         iter_key = "{}_global_it".format(state_key)

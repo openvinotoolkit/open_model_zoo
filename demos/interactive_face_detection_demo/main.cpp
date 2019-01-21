@@ -1,18 +1,6 @@
-/*
-// Copyright (c) 2018 Intel Corporation
+// Copyright (C) 2018 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
 
 /**
 * \brief The entry point for the Inference Engine interactive_face_detection demo application
@@ -35,7 +23,7 @@
 
 #include <inference_engine.hpp>
 
-#include <samples/common.hpp>
+#include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
 #include "interactive_face_detection.hpp"
@@ -44,13 +32,11 @@
 #include <ie_iextension.h>
 #include <ext_list.hpp>
 
-#include <opencv2/opencv.hpp>
-
 using namespace InferenceEngine;
 
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
-    // ---------------------------Parsing and validation of input args--------------------------------------
+    // ---------------------------Parsing and validating input arguments--------------------------------------
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
@@ -85,7 +71,7 @@ int main(int argc, char *argv[]) {
     try {
         std::cout << "InferenceEngine: " << GetInferenceEngineVersion() << std::endl;
 
-        // ------------------------------ Parsing and validation of input args ---------------------------------
+        // ------------------------------ Parsing and validating of input arguments --------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
@@ -104,8 +90,8 @@ int main(int argc, char *argv[]) {
         if (!cap.read(frame)) {
             throw std::logic_error("Failed to get frame from cv::VideoCapture");
         }
-        // -----------------------------------------------------------------------------------------------------
-        // --------------------------- 1. Load Plugin for inference engine -------------------------------------
+        // ---------------------------------------------------------------------------------------------------
+        // --------------------------- 1. Loading plugin to the Inference Engine -----------------------------
         std::map<std::string, InferencePlugin> pluginsForDevices;
         std::vector<std::pair<std::string, std::string>> cmdOptions = {
             {FLAGS_d, FLAGS_m}, {FLAGS_d_ag, FLAGS_m_ag}, {FLAGS_d_hp, FLAGS_m_hp},
@@ -134,7 +120,7 @@ int main(int argc, char *argv[]) {
             /** Printing plugin version **/
             printPluginVersion(plugin, std::cout);
 
-            /** Load extensions for the CPU plugin **/
+            /** Loading extensions for the CPU plugin **/
             if ((deviceName.find("CPU") != std::string::npos)) {
                 plugin.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>());
 
@@ -145,31 +131,31 @@ int main(int argc, char *argv[]) {
                     slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
             } else if (!FLAGS_c.empty()) {
-                // Load Extensions for other plugins not CPU
+                // Loading extensions for other plugins not CPU
                 plugin.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}});
             }
             pluginsForDevices[deviceName] = plugin;
         }
 
-        /** Per layer metrics **/
+        /** Per-layer metrics **/
         if (FLAGS_pc) {
             for (auto && plugin : pluginsForDevices) {
                 plugin.second.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
             }
         }
-        // -----------------------------------------------------------------------------------------------------
+        // ---------------------------------------------------------------------------------------------------
 
-        // --------------------------- 2. Read IR models and load them to plugins ------------------------------
-        // Disable dynamic batching for face detector as long it processes one image at a time.
+        // --------------------------- 2. Reading IR models and loading them to plugins ----------------------
+        // Disable dynamic batching for face detector as it processes one image at a time
         Load(faceDetector).into(pluginsForDevices[FLAGS_d], false);
         Load(ageGenderDetector).into(pluginsForDevices[FLAGS_d_ag], FLAGS_dyn_ag);
         Load(headPoseDetector).into(pluginsForDevices[FLAGS_d_hp], FLAGS_dyn_hp);
         Load(emotionsDetector).into(pluginsForDevices[FLAGS_d_em], FLAGS_dyn_em);
         Load(facialLandmarksDetector).into(pluginsForDevices[FLAGS_d_lm], FLAGS_dyn_lm);
-        // -----------------------------------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 3. Do inference ---------------------------------------------------------
-        // Start inference & calc performance.
+        // --------------------------- 3. Doing inference -----------------------------------------------------
+        // Starting inference & calculating performance
         slog::info << "Start inference " << slog::endl;
         if (!FLAGS_no_show) {
             std::cout << "Press any key to stop" << std::endl;
@@ -187,7 +173,7 @@ int main(int argc, char *argv[]) {
         bool isLastFrame;
         cv::Mat prev_frame, next_frame;
 
-        // Detect all faces on the first frame and read the next one.
+        // Detecting all faces on the first frame and reading the next one
         timer.start("detection");
         faceDetector.enqueue(frame);
         faceDetector.submitRequest();
@@ -195,7 +181,7 @@ int main(int argc, char *argv[]) {
 
         prev_frame = frame.clone();
 
-        // Read next frame.
+        // Reading the next frame
         timer.start("video frame decoding");
         frameReadStatus = cap.read(frame);
         timer.finish("video frame decoding");
@@ -205,12 +191,12 @@ int main(int argc, char *argv[]) {
             isLastFrame = !frameReadStatus;
 
             timer.start("detection");
-            // Retrieve face detection results for previous frame.
+            // Retrieving face detection results for the previous frame
             faceDetector.wait();
             faceDetector.fetchResults();
             auto prev_detection_results = faceDetector.results;
 
-            // No valid frame to infer if previous frame is last.
+            // No valid frame to infer if previous frame is the last
             if (!isLastFrame) {
                 faceDetector.enqueue(frame);
                 faceDetector.submitRequest();
@@ -218,7 +204,7 @@ int main(int argc, char *argv[]) {
             timer.finish("detection");
 
             timer.start("data preprocessing");
-            // Fill inputs of face analytics networks.
+            // Filling inputs of face analytics networks
             for (auto &&face : prev_detection_results) {
                 if (isFaceAnalyticsEnabled) {
                     auto clippedRect = face.location & cv::Rect(0, 0, width, height);
@@ -231,7 +217,7 @@ int main(int argc, char *argv[]) {
             }
             timer.finish("data preprocessing");
 
-            // Run age-gender recognition, head pose estimation and emotions recognition simultaneously.
+            // Running Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, and Facial Landmarks Estimation networks simultaneously
             timer.start("face analytics call");
             if (isFaceAnalyticsEnabled) {
                 ageGenderDetector.submitRequest();
@@ -241,7 +227,7 @@ int main(int argc, char *argv[]) {
             }
             timer.finish("face analytics call");
 
-            // Read next frame if current one is not last.
+            // Reading the next frame if the current one is not the last
             if (!isLastFrame) {
                 timer.start("video frame decoding");
                 frameReadStatus = cap.read(next_frame);
@@ -257,7 +243,7 @@ int main(int argc, char *argv[]) {
             }
             timer.finish("face analytics wait");
 
-            // Visualize results.
+            // Visualizing results
             if (!FLAGS_no_show) {
                 timer.start("visualization");
                 out.str("");
@@ -294,7 +280,7 @@ int main(int argc, char *argv[]) {
                                 cv::Scalar(255, 0, 0));
                 }
 
-                // For every detected face.
+                // For every detected face
                 int i = 0;
                 for (auto &result : prev_detection_results) {
                     cv::Rect rect = result.location;
@@ -354,7 +340,7 @@ int main(int argc, char *argv[]) {
                             }
                             int x_lm = rect.x + rect.width * normed_x;
                             int y_lm = rect.y + rect.height * normed_y;
-                            // Draw facial landmarks on the frame
+                            // Drawing facial landmarks on the frame
                             cv::circle(prev_frame, cv::Point(x_lm, y_lm), 1 + static_cast<int>(0.012 * rect.width), cv::Scalar(0, 255, 255), -1);
                         }
                     }
@@ -370,7 +356,7 @@ int main(int argc, char *argv[]) {
                 cv::imshow("Detection results", prev_frame);
                 timer.finish("visualization");
             } else if (FLAGS_r) {
-                // For every detected face.
+                // For every detected face
                 for (int i = 0; i < prev_detection_results.size(); i++) {
                     if (ageGenderDetector.enabled() && i < ageGenderDetector.maxBatch) {
                         out.str("");
@@ -404,7 +390,7 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            // End of file (or a single frame file like an image). We just keep last frame displayed to let user check what was shown
+            // End of file (or a single frame file like an image). The last frame is displayed to let you check what is shown
             if (isLastFrame) {
                 timer.finish("total");
                 if (!FLAGS_no_wait) {
@@ -425,7 +411,7 @@ int main(int argc, char *argv[]) {
         slog::info << "Number of processed frames: " << framesCounter << slog::endl;
         slog::info << "Total image throughput: " << framesCounter * (1000.f / timer["total"].getTotalDuration()) << " fps" << slog::endl;
 
-        // Show performace results.
+        // Showing performance results
         if (FLAGS_pc) {
             faceDetector.printPerformanceCounts();
             ageGenderDetector.printPerformanceCounts();
@@ -433,7 +419,7 @@ int main(int argc, char *argv[]) {
             emotionsDetector.printPerformanceCounts();
             facialLandmarksDetector.printPerformanceCounts();
         }
-        // -----------------------------------------------------------------------------------------------------
+        // ---------------------------------------------------------------------------------------------------
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -447,5 +433,3 @@ int main(int argc, char *argv[]) {
     slog::info << "Execution successful" << slog::endl;
     return 0;
 }
-
-

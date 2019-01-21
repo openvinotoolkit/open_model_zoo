@@ -38,7 +38,7 @@ Options:
 
 Running the application with an empty list of options yields an error message.
 
-To run the demo, use the pre-trained and optimized `human-pose-estimation-0001` model delivered with the product. The model is located at `<INSTALL_DIR>/deployment_tools/intel_models/`.
+To run the demo, use the pre-trained and optimized `human-pose-estimation-0001` model located at `open_model_zoo/intel_models/`.
 
 For example, to do inference on a CPU, run the following command:
 

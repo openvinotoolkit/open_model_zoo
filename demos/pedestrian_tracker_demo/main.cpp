@@ -1,18 +1,6 @@
-/*
-// Copyright (c) 2018 Intel Corporation
+// Copyright (C) 2018 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
 
 #include "core.hpp"
 #include "utils.hpp"
@@ -68,7 +56,7 @@ CreatePedestrianTracker(const std::string& reid_model,
             std::make_shared<DescriptorIE>(reid_config, reid_plugin);
 
         if (descriptor_strong == nullptr) {
-            THROW_IE_EXCEPTION << "[DEMOS] shared_ptr descriptor_strong == nullptr";
+            THROW_IE_EXCEPTION << "[SAMPLES] internal error - invalid descriptor";
         }
         std::shared_ptr<IDescriptorDistance> distance_strong =
             std::make_shared<CosDistance>(descriptor_strong->size());

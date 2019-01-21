@@ -1,18 +1,19 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
+
 import numpy as np
 from .metric import PerImageEvaluationMetric, BaseMetricConfig
 from ..representation import MultilabelRecognitionAnnotation, MultilabelRecognitionPrediction
@@ -36,7 +37,10 @@ class MultilabelMetric(PerImageEvaluationMetric):
     def configure(self):
         label_map = self.config.get('label_map', 'label_map')
         self.labels = self.dataset.metadata.get(label_map)
-        self.meta['names'] = list(self.labels.values())
+        self.meta['scale'] = 1
+        self.meta['postfix'] = ''
+        self.meta['calculate_mean'] = False
+        self.meta['names'] = list(self.labels.values()) + ['average']
         self.tp = np.zeros_like(list(self.labels.keys()), dtype=np.float)
         self.fp = np.zeros_like(list(self.labels.keys()), dtype=np.float)
         self.tn = np.zeros_like(list(self.labels.keys()), dtype=np.float)
@@ -91,7 +95,9 @@ class MultilabelAccuracy(MultilabelMetric):
 
     def evaluate(self, annotations, predictions):
         tp_tn = np.add(self.tp, self.tn, dtype=float)
-        return np.divide(tp_tn, self.counter, out=np.zeros_like(tp_tn, dtype=float), where=self.counter != 0)
+        per_class = np.divide(tp_tn, self.counter, out=np.zeros_like(tp_tn, dtype=float), where=self.counter != 0)
+        average = np.sum(tp_tn) / np.sum(self.counter)
+        return [*per_class, average]
 
 
 class MultilabelPrecision(MultilabelMetric):
@@ -99,7 +105,9 @@ class MultilabelPrecision(MultilabelMetric):
 
     def evaluate(self, annotations, predictions):
         tp_fp = np.add(self.tp, self.fp, dtype=float)
-        return np.divide(self.tp, tp_fp, out=np.zeros_like(self.tp, dtype=float), where=tp_fp != 0)
+        per_class = np.divide(self.tp, tp_fp, out=np.zeros_like(self.tp, dtype=float), where=tp_fp != 0)
+        average = np.sum(self.tp) / np.sum(tp_fp)
+        return [*per_class, average]
 
 
 class MultilabelRecall(MultilabelMetric):
@@ -107,7 +115,9 @@ class MultilabelRecall(MultilabelMetric):
 
     def evaluate(self, annotations, predictions):
         tp_fn = np.add(self.tp, self.fn, dtype=float)
-        return np.divide(self.tp, tp_fn, out=np.zeros_like(self.tp, dtype=float), where=tp_fn != 0)
+        per_class = np.divide(self.tp, tp_fn, out=np.zeros_like(self.tp, dtype=float), where=tp_fn != 0)
+        average = np.sum(self.tp) / np.sum(tp_fn)
+        return [*per_class, average]
 
 
 class F1Score(PerImageEvaluationMetric):
@@ -133,7 +143,10 @@ class F1Score(PerImageEvaluationMetric):
     def configure(self):
         label_map = self.config.get('label_map', 'label_map')
         self.labels = self.dataset.metadata.get(label_map)
-        self.meta['names'] = list(self.labels.values())
+        self.meta['scale'] = 1
+        self.meta['postfix'] = ''
+        self.meta['calculate_mean'] = False
+        self.meta['names'] = list(self.labels.values()) + ['average']
 
     def update(self, annotation, prediction):
         self.precision.update(annotation, prediction)
@@ -142,7 +155,9 @@ class F1Score(PerImageEvaluationMetric):
     def evaluate(self, annotations, predictions):
         precisions = self.precision.evaluate(annotations, predictions)
         recalls = self.recall.evaluate(annotations, predictions)
-        pr_sum = np.add(precisions, recalls, dtype=float)
-        pr_mult = np.multiply(precisions, recalls, dtype=float)
+        pr_sum = np.add(precisions[:-1], recalls[:-1], dtype=float)
+        pr_mult = np.multiply(precisions[:-1], recalls[:-1], dtype=float)
+        per_class = np.divide(pr_mult, pr_sum, out=np.zeros_like(pr_mult, dtype=float), where=pr_sum != 0) * 2
+        average = 2 * (precisions[-1] * recalls[-1]) / (precisions[-1] + recalls[-1])
 
-        return np.divide(pr_mult, pr_sum, out=np.zeros_like(pr_mult, dtype=float), where=pr_sum != 0) * 2
+        return [*per_class, average]

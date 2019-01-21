@@ -1,18 +1,6 @@
-/*
-// Copyright (c) 2018 Intel Corporation
+// Copyright (C) 2018 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
 
 #include "face_reid.hpp"
 #include "tracker.hpp"
@@ -58,7 +46,7 @@ namespace {
 }  // namespace
 
 const std::string EmbeddingsGallery::unknown_label = "Unknown";
-const int EmbeddingsGallery::unknown_id = -1;
+const int EmbeddingsGallery::unknown_id = TrackedObject::UNKNOWN_LABEL_IDX;
 
 EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
                                      double threshold,
@@ -86,10 +74,10 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
 
         for (size_t i = 0; i < item.size(); i++) {
             std::string path;
-            if (file_exists(item[i])) {
-                path = std::string(item[i]);
+            if (file_exists(item[i].string())) {
+                path = item[i].string();
             } else {
-                path = folder_name(ids_list) + separator() + std::string(item[i]);
+                path = folder_name(ids_list) + separator() + item[i].string();
             }
 
             cv::Mat image = cv::imread(path);
@@ -141,4 +129,17 @@ std::string EmbeddingsGallery::GetLabelByID(int id) const {
         return identities[id].label;
     else
         return unknown_label;
+}
+
+size_t EmbeddingsGallery::size() const {
+    return identities.size();
+}
+
+std::vector<std::string> EmbeddingsGallery::GetIDToLabelMap() const  {
+    std::vector<std::string> map;
+    map.reserve(identities.size());
+    for (const auto& item : identities)  {
+        map.emplace_back(item.label);
+    }
+    return map;
 }

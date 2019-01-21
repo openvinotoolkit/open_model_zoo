@@ -1,26 +1,25 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
-import collections
+
 import copy
-import pathlib
+from pathlib import Path
 
 import warnings
-import yaml
 
-from ..utils import check_exists
+from ..utils import read_yaml, to_lower_register
 
 
 class ConfigReader:
@@ -47,35 +46,13 @@ class ConfigReader:
         ConfigReader._provide_cmd_arguments(arguments, config)
         ConfigReader._merge_paths_with_prefixes(arguments, config)
         ConfigReader._filter_launchers(config, arguments)
+
         return config
 
     @staticmethod
     def _read_configs(arguments):
-        yaml.add_representer(
-            collections.OrderedDict,
-            lambda dumper, data: dumper.represent_dict(data.iteritems())
-        )
-        yaml.add_constructor(
-            yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-            lambda loader, node: collections.OrderedDict(loader.construct_pairs(node))
-        )
-
-        global_config = None
-        if arguments.definitions is not None:
-            definitions_path = check_exists(arguments.definitions)
-            if not definitions_path.is_absolute():
-                definitions_path = arguments.root / definitions_path
-
-            if definitions_path.is_file():
-                with pathlib.Path(definitions_path).open() as file:
-                    global_config = yaml.load(file)
-
-        config_path = check_exists(arguments.config)
-        if not config_path.is_absolute():
-            config_path = arguments.root / config_path
-
-        with pathlib.Path(config_path).open() as file:
-            local_config = yaml.load(file)
+        global_config = read_yaml(arguments.definitions) if arguments.definitions else None
+        local_config = read_yaml(arguments.config)
 
         return global_config, local_config
 
@@ -201,15 +178,11 @@ class ConfigReader:
                 if field not in value:
                     continue
 
-                config_path = pathlib.Path(value[field])
+                config_path = Path(value[field])
                 if config_path.is_absolute():
                     continue
 
-                prefix = args[argument]
-                if not prefix.is_absolute():
-                    prefix = args['root'] / prefix
-
-                value[field] = (prefix / config_path).as_posix()
+                value[field] = args[argument] / config_path
 
         for model in config['models']:
             for entry, command_line_arg in entries_paths.items():
@@ -231,26 +204,23 @@ class ConfigReader:
                 launcher_entry['_converted_models'] = converted_models
                 launcher_entry['_models_prefix'] = arguments.models
                 launcher_entry['_model_optimizer'] = arguments.model_optimizer
+                launcher_entry['_tf_custom_config_dir'] = arguments.tf_custom_op_config
 
     @staticmethod
     def _filter_launchers(config, arguments):
-        def filtered(launcher):
-            config_framework = launcher['framework']
-            target_framework = args.get('target_framework')
-            if target_framework and target_framework.lower() != config_framework.lower():
+        def filtered(launcher, target_devices):
+            config_framework = launcher['framework'].lower()
+            target_framework = (args.get('target_framework') or config_framework).lower()
+            if config_framework != target_framework:
                 return True
 
-            config_device = launcher.get('device')
-            target_device = args.get('target_device')
-            if target_device and config_device and target_device.lower() != config_device.lower():
-                return True
-
-            return False
+            return target_devices and launcher.get('device', '').lower() not in target_devices
 
         args = arguments if isinstance(arguments, dict) else vars(arguments)
+        target_devices = to_lower_register(args.get('target_devices') or [])
         for model in config['models']:
             launchers = model['launchers']
-            launchers = [launcher for launcher in launchers if not filtered(launcher)]
+            launchers = [launcher for launcher in launchers if not filtered(launcher, target_devices)]
 
             if not launchers:
                 warnings.warn('Model "{}" has no launchers'.format(model['name']))

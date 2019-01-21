@@ -1,18 +1,6 @@
-/*
-// Copyright (c) 2018 Intel Corporation
+// Copyright (C) 2018 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
 
 #pragma once
 
@@ -61,6 +49,9 @@ static const char custom_cpu_library_message[] = "Required for MKLDNN (CPU)-targ
 static const char custom_cldnn_message[] = "Required for clDNN (GPU)-targeted custom kernels."\
                                             "Absolute path to the xml file with the kernels desc.";
 
+/// @brief message for show argument
+static const char show_processed_images[] = "Show processed images. Default value is false.";
+
 
 /// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
@@ -94,6 +85,10 @@ DEFINE_string(l, "", custom_cpu_library_message);
 /// Default is ./lib
 DEFINE_string(c, "", custom_cldnn_message);
 
+/// @brief Flag to show processed images<br>
+/// It is an optional parameter
+DEFINE_bool(show, false, show_processed_images);
+
 /**
 * @brief This function show a help message
 */
@@ -109,4 +104,5 @@ static void showUsage() {
     std::cout << "    -d \"<device>\"           " << target_device_message << std::endl;
     std::cout << "    -ni \"<integer>\"         " << iterations_count_message << std::endl;
     std::cout << "    -pc                       " << performance_counter_message << std::endl;
+    std::cout << "    -show                     " << show_processed_images << std::endl;
 }

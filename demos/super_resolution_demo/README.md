@@ -9,8 +9,7 @@ The corresponding pre-trained model is delivered with the product:
   performs super resolution 4x upscale on a 200x200 image
 
 For details on the model, please refer to the description in the
-`deployment_tools/intel_models` folder of the OpenVINO&trade; toolkit
-installation directory.
+`open_model_zoo/intel_models` folder.
 
 ## How It Works
 
@@ -42,9 +41,9 @@ Options:
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public models or a pre-trained and optimized model delivered with the package:
+To run the demo, you can use public models or a pre-trained and optimized model:
 
-* `<INSTAL_DIR>/deployment_tools/intel_models/single-image-super-resolution-0034`
+* `open_model_zoo/intel_models/single-image-super-resolution-0034`
 
 To do inference on CPU using a trained model, run the following command:
 
@@ -52,7 +51,7 @@ To do inference on CPU using a trained model, run the following command:
 ./super_resolution_demo -i <path_to_image>/image.bmp -m <path_to_model>/model.xml
 ```
 
-**NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer) tool.
+> **NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer Tool](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
 
 ### Demo Output
 

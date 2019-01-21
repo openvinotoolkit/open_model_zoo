@@ -75,7 +75,7 @@ def get_plugin(device: str, cpu_ext: str = None, plugin_dir: str = None, config:
 def get_net(model: str):
     model_xml = model
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
-    net = IENetwork.from_ir(model=model_xml, weights=model_bin)
+    net = IENetwork(model=model_xml, weights=model_bin)
     return net
 
 
@@ -122,8 +122,11 @@ def infer(net: IENetwork, plugin: IEPlugin, inputs: dict, output: list):
     pc = get_perf_counts(executable_network=executable_network, device=device)
     no_i = 'no_info'
     no_info_pc = {'cpu_time': no_i, 'exec_time': no_i, 'layer_type': no_i, 'real_time': no_i, 'status': no_i}
-    result = []
+    result = {}
     for out in output:
+        if out not in infer_dict:
+            log.warning("There is no '{}' layer in Inference Engine outputs results".format(out))
+            continue
         pc = pc[out] if out in pc else no_info_pc
         pc['device'] = device
         result = {out: [infer_dict[out], pc]}
@@ -169,8 +172,14 @@ def one_ir_mode(args):
     for out_layer in out_layers:
         log.info('Layer {} statistics'.format(out_layer))
         net_copy = get_net_copy_with_output(model=args.model, output=out_layer)
-        out_blob, pc = infer(net=net_copy, plugin=plugin, inputs=inputs, output=[out_layer])[out_layer]
-        ref_out_blob, ref_pc = infer(net=net_copy, plugin=ref_plugin, inputs=inputs, output=[out_layer])[out_layer]
+        results = infer(net=net_copy, plugin=plugin, inputs=inputs, output=[out_layer])
+        if out_layer not in results:
+            continue
+        out_blob, pc = results[out_layer]
+        ref_results = infer(net=net_copy, plugin=ref_plugin, inputs=inputs, output=[out_layer])
+        if out_layer not in ref_results:
+            continue
+        ref_out_blob, ref_pc = ref_results[out_layer]
         a_m = accuracy_metrics(out_blob=out_blob, ref_out_blob=ref_out_blob)
         performance_metrics(pc=pc, ref_pc=ref_pc)
         blob_counters(out_blob=out_blob, ref_out_blob=ref_out_blob)
@@ -213,9 +222,14 @@ def two_ir_mode(args):
             log.info('Statistics \'{}\' vs \'{}\''.format(out_layer, ref_out_layer))
         net_copy = get_net_copy_with_output(model=args.model, output=out_layer)
         ref_net_copy = get_net_copy_with_output(model=args.reference_model, output=ref_out_layer)
-        out_blob, pc = infer(net=net_copy, plugin=plugin, inputs=inputs, output=[out_layer])[out_layer]
-        ref_out_blob, ref_pc = infer(net=ref_net_copy, plugin=ref_plugin, inputs=ref_inputs, output=[ref_out_layer])[
-            ref_out_layer]
+        results = infer(net=net_copy, plugin=plugin, inputs=inputs, output=[out_layer])
+        if out_layer not in results:
+            continue
+        out_blob, pc = results[out_layer]
+        ref_results = infer(net=ref_net_copy, plugin=ref_plugin, inputs=ref_inputs, output=[ref_out_layer])
+        ref_out_blob, ref_pc = ref_results[ref_out_layer]
+        if ref_out_layer not in ref_results:
+            continue
         a_m = accuracy_metrics(out_blob=out_blob, ref_out_blob=ref_out_blob)
         performance_metrics(pc=pc, ref_pc=ref_pc)
         blob_counters(out_blob=out_blob, ref_out_blob=ref_out_blob)
@@ -233,7 +247,10 @@ def dump_mode(args):
     for out_layer in out_layers:
         log.info('Layer {} processing'.format(out_layer))
         net_copy = get_net_copy_with_output(model=args.model, output=out_layer)
-        out_blob, pc = infer(net=net_copy, plugin=plugin, inputs=inputs, output=[out_layer])[out_layer]
+        results = infer(net=net_copy, plugin=plugin, inputs=inputs, output=[out_layer])
+        if out_layer not in results:
+            continue
+        out_blob, pc = results[out_layer]
         dump_dict[out_layer] = np.array({'blob': out_blob, 'pc': pc})
     dump_output_file(args.model + '_' + plugin.device + '_dump.npz', dump_dict)
 
@@ -259,7 +276,12 @@ def load_mode(args):
         else:
             log.info('Statistics \'{}\' vs \'{}\''.format(out_layer, ref_out_layer))
         net_copy = get_net_copy_with_output(model=args.model, output=out_layer)
-        out_blob, pc = infer(net=net_copy, plugin=plugin, inputs=inputs, output=[out_layer])[out_layer]
+        results = infer(net=net_copy, plugin=plugin, inputs=inputs, output=[out_layer])
+        if out_layer not in results:
+            continue
+        out_blob, pc = results[out_layer]
+        if ref_out_layer not in loaded:
+            continue
         ref_out_blob = loaded[ref_out_layer]['blob']
         a_m = accuracy_metrics(out_blob=out_blob, ref_out_blob=ref_out_blob)
         if 'pc' in loaded[ref_out_layer]:

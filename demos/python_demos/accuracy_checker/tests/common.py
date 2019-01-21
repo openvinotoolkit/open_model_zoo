@@ -1,32 +1,35 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
-import pytest
-from unittest.mock import MagicMock
+
+from typing import List
 
 from contextlib import contextmanager
-from pathlib import Path, PosixPath
+from pathlib import Path
 
 from tempfile import TemporaryDirectory
 import numpy as np
 
 from accuracy_checker.representation import DetectionAnnotation, DetectionPrediction
+from accuracy_checker.utils import get_path
 
 
 @contextmanager
-def mock_filesystem(hierarchy):
+# since it seems not possible to create pathlib.Path from str with '/' at the end we accept strings
+# expect paths in posix format
+def mock_filesystem(hierarchy: List[str]):
     with TemporaryDirectory() as prefix:
         for entry in hierarchy:
             path = Path(prefix) / entry
@@ -39,7 +42,7 @@ def mock_filesystem(hierarchy):
                 # create file
                 path.open('w').close()
 
-        yield prefix
+        yield get_path(prefix, is_directory=True)
 
 
 def make_representation(bounding_boxes, is_ground_truth=False, score=None):

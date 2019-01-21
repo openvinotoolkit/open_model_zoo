@@ -1,20 +1,21 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
+
 import copy
-import pathlib
+from pathlib import Path
 from argparse import Namespace
 
 import pytest
@@ -27,7 +28,6 @@ class TestConfigReader:
             {
                 'framework': 'dlsdk',
                 'device': 'fpga',
-                # 'precision': ['fp32'],
                 'cpu_extensions': 'dlsdk_shared.so',
                 'bitstream': 'bitstream'
             },
@@ -78,14 +78,20 @@ class TestConfigReader:
 
         self.module = 'accuracy_checker.config.ConfigReader'
         self.arguments = Namespace(**{
-            'root': pathlib.Path('root'),
-            'models': pathlib.Path('models'),
-            'extensions': pathlib.Path('extensions'),
-            'source': pathlib.Path('source'),
-            'annotations': pathlib.Path('annotations'),
-            'converted_models': pathlib.Path('converted_models'),
-            'model_optimizer': pathlib.Path('model_optimizer'),
-            'bitstreams': pathlib.Path('bitstreams')
+            'models': Path('models'),
+            'extensions': Path('extensions'),
+            'source': Path('source'),
+            'annotations': Path('annotations'),
+            'converted_models': Path('converted_models'),
+            'model_optimizer': Path('model_optimizer'),
+            'bitstreams': Path('bitstreams'),
+            'definitions': None,
+            'stored_predictions': None,
+            'tf_custom_op_config': None,
+            'progress': 'bar',
+            'target_framework': None,
+            'target_devices': None,
+            'log_file': None
         })
 
     def test_read_configs_without_global_config(self, mocker):
@@ -94,10 +100,13 @@ class TestConfigReader:
             'launchers': [{'framework': 'dlsdk', 'model': '/absolute_path', 'weights': '/absolute_path'}],
             'datasets': [{'name': 'global_dataset'}]
         }]}
-        empty_args = Namespace(**{'root': None, 'models': None, 'extensions': None, 'source': None, 'annotations': None,
-                                  'converted_models': None, 'model_optimizer': None, 'bitstreams': None,
-                                  'definitions': None, 'config': None})
-        mocker.patch('accuracy_checker.config.config_reader.check_exists', return_value=pathlib.Path.cwd())
+        empty_args = Namespace(**{
+            'models': None, 'extensions': None, 'source': None, 'annotations': None,
+            'converted_models': None, 'model_optimizer': None, 'bitstreams': None,
+            'definitions': None, 'config': None,'stored_predictions': None,'tf_custom_op_config': None,
+            'progress': 'bar', 'target_framework': None, 'target_devices': None, 'log_file': None
+        })
+        mocker.patch('accuracy_checker.utils.get_path', return_value=Path.cwd())
         mocker.patch('yaml.load', return_value=config)
         mocker.patch('pathlib.Path.open')
 
@@ -209,27 +218,24 @@ class TestConfigReader:
     def test_expand_relative_paths_in_datasets_config_using_command_line(self):
         local_config = {'models': [{
             'name': 'model',
-            'datasets': [{'name': 'global_dataset', 'dataset_meta': 'relative_annotation_path',
-                          'data_source': 'relative_source_path', 'segmentation_masks_source': 'relative_source_path',
-                          'annotation': 'relative_annotation_path'}]
+            'datasets': [{
+                'name': 'global_dataset',
+                'dataset_meta': 'relative_annotation_path',
+                'data_source': 'relative_source_path',
+                'segmentation_masks_source': 'relative_source_path',
+                'annotation': 'relative_annotation_path'
+            }]
         }]}
-        expected_dataset = copy.deepcopy(local_config['models'][0]['datasets'][0])
-        expected_dataset['annotation'] = self.merge(
-            self.arguments.root, self.arguments.annotations, 'relative_annotation_path'
-        )
-        expected_dataset['dataset_meta'] = self.merge(
-            self.arguments.root, self.arguments.annotations, 'relative_annotation_path'
-        )
-        expected_dataset['segmentation_masks_source'] = self.merge(
-            self.arguments.root, self.arguments.source, 'relative_source_path'
-        )
-        expected_dataset['data_source'] = self.merge(
-            self.arguments.root, self.arguments.source, 'relative_source_path'
-        )
+
+        expected = copy.deepcopy(local_config['models'][0]['datasets'][0])
+        expected['annotation'] = self.arguments.annotations / 'relative_annotation_path'
+        expected['dataset_meta'] = self.arguments.annotations / 'relative_annotation_path'
+        expected['segmentation_masks_source'] = self.arguments.source / 'relative_source_path'
+        expected['data_source'] = self.arguments.source / 'relative_source_path'
 
         ConfigReader._merge_paths_with_prefixes(self.arguments, local_config)
 
-        assert local_config['models'][0]['datasets'][0] == expected_dataset
+        assert local_config['models'][0]['datasets'][0] == expected
 
     def test_merge_launchers_with_definitions(self):
         local_config = {'models': [{
@@ -258,47 +264,43 @@ class TestConfigReader:
     def test_expand_relative_paths_in_launchers_config_using_command_line(self):
         local_config = {'models': [{
             'name': 'model',
-            'launchers': [{'framework': 'dlsdk', 'model': 'relative_model_path', 'weights': 'relative_weights_path',
-                           'cpu_extensions': 'relative_extensions_path', 'gpu_extensions': 'relative_extensions_path',
-                           'caffe_model': 'relative_model_path', 'caffe_weights': 'relative_weights_path',
-                           'tf_model': 'relative_model_path', 'mxnet_weights': 'relative_weights_path',
-                           'bitstream': 'relative_bitstreams_path'}]
+            'launchers': [{
+                'framework': 'dlsdk',
+                'model': 'relative_model_path',
+                'weights': 'relative_weights_path',
+                'cpu_extensions': 'relative_extensions_path',
+                'gpu_extensions': 'relative_extensions_path',
+                'caffe_model': 'relative_model_path',
+                'caffe_weights': 'relative_weights_path',
+                'tf_model': 'relative_model_path',
+                'mxnet_weights': 'relative_weights_path',
+                'bitstream': 'relative_bitstreams_path'
+            }]
         }]}
-        expected_launcher = copy.deepcopy(local_config['models'][0]['launchers'][0])
-        expected_launcher['model'] = self.merge(self.arguments.root, self.arguments.models, 'relative_model_path')
-        expected_launcher['caffe_model'] = self.merge(self.arguments.root, self.arguments.models, 'relative_model_path')
-        expected_launcher['tf_model'] = self.merge(self.arguments.root, self.arguments.models, 'relative_model_path')
-        expected_launcher['weights'] = self.merge(self.arguments.root, self.arguments.models, 'relative_weights_path')
-        expected_launcher['caffe_weights'] = self.merge(
-            self.arguments.root, self.arguments.models, 'relative_weights_path'
-        )
-        expected_launcher['mxnet_weights'] = self.merge(
-            self.arguments.root, self.arguments.models, 'relative_weights_path'
-        )
-        expected_launcher['cpu_extensions'] = self.merge(
-            self.arguments.root, self.arguments.extensions, 'relative_extensions_path'
-        )
-        expected_launcher['gpu_extensions'] = self.merge(
-            self.arguments.root, self.arguments.extensions, 'relative_extensions_path'
-        )
-        expected_launcher['bitstream'] = self.merge(
-            self.arguments.root, self.arguments.bitstreams, 'relative_bitstreams_path'
-        )
+
+        expected = copy.deepcopy(local_config['models'][0]['launchers'][0])
+        expected['model'] = self.arguments.models / 'relative_model_path'
+        expected['caffe_model'] = self.arguments.models / 'relative_model_path'
+        expected['tf_model'] = self.arguments.models / 'relative_model_path'
+        expected['weights'] = self.arguments.models / 'relative_weights_path'
+        expected['caffe_weights'] = self.arguments.models / 'relative_weights_path'
+        expected['mxnet_weights'] = self.arguments.models / 'relative_weights_path'
+        expected['cpu_extensions'] = self.arguments.extensions / 'relative_extensions_path'
+        expected['gpu_extensions'] = self.arguments.extensions / 'relative_extensions_path'
+        expected['bitstream'] = self.arguments.bitstreams / 'relative_bitstreams_path'
 
         ConfigReader._merge_paths_with_prefixes(self.arguments, local_config)
 
-        assert local_config['models'][0]['launchers'][0] == expected_launcher
+        assert local_config['models'][0]['launchers'][0] == expected
 
     def test_launcher_is_not_filtered_by_the_same_framework(self):
-        config_launchers = [
-            {
-                'framework': 'dlsdk',
-                'model': '/absolute_path1',
-                'weights': '/absolute_path1',
-                'adapter': 'classification',
-                'device': 'CPU'
-            }
-        ]
+        config_launchers = [{
+            'framework': 'dlsdk',
+            'model': '/absolute_path1',
+            'weights': '/absolute_path1',
+            'adapter': 'classification',
+            'device': 'CPU'
+        }]
         config = {'models': [{'name': 'name', 'launchers': config_launchers}]}
         self.arguments.target_framework = 'dlsdk'
 
@@ -333,14 +335,12 @@ class TestConfigReader:
         assert launchers == config_launchers
 
     def test_launcher_is_filtered_by_another_framework(self):
-        config = {'models': [{'name': 'name', 'launchers': [
-            {
-                'framework': 'dlsdk',
-                'model': '/absolute_path',
-                'weights': '/absolute_path',
-                'adapter': 'classification'
-            }
-        ]}]}
+        config = {'models': [{'name': 'name', 'launchers': [{
+            'framework': 'dlsdk',
+            'model': '/absolute_path',
+            'weights': '/absolute_path',
+            'adapter': 'classification'
+        }]}]}
         self.arguments.target_framework = 'caffe'
 
         with pytest.warns(Warning):
@@ -402,17 +402,15 @@ class TestConfigReader:
         assert launchers[0] == config_launchers[1]
 
     def test_launcher_is_not_filtered_by_the_same_device(self):
-        config_launchers = [
-            {
-                'framework': 'dlsdk',
-                'model': '/absolute_path1',
-                'weights': '/absolute_path1',
-                'adapter': 'classification',
-                'device': 'CPU'
-            }
-        ]
+        config_launchers = [{
+            'framework': 'dlsdk',
+            'model': '/absolute_path1',
+            'weights': '/absolute_path1',
+            'adapter': 'classification',
+            'device': 'CPU'
+        }]
         config = {'models': [{'name': 'name', 'launchers': config_launchers}]}
-        self.arguments.target_device = 'CPU'
+        self.arguments.target_devices = ['CPU']
 
         ConfigReader._filter_launchers(config, self.arguments)
 
@@ -437,7 +435,7 @@ class TestConfigReader:
             }
         ]
         config = {'models': [{'name': 'name', 'launchers': config_launchers}]}
-        self.arguments.target_device = 'CPU'
+        self.arguments.target_devices = ['CPU']
 
         ConfigReader._filter_launchers(config, self.arguments)
 
@@ -445,17 +443,15 @@ class TestConfigReader:
         assert launchers == config_launchers
 
     def test_launcher_is_filtered_by_another_device(self):
-        config_launchers = [
-            {
-                'framework': 'dlsdk',
-                'model': '/absolute_path1',
-                'weights': '/absolute_path1',
-                'adapter': 'classification',
-                'device': 'CPU'
-            }
-        ]
+        config_launchers = [{
+            'framework': 'dlsdk',
+            'model': '/absolute_path1',
+            'weights': '/absolute_path1',
+            'adapter': 'classification',
+            'device': 'CPU'
+        }]
         config = {'models': [{'name': 'name', 'launchers': config_launchers}]}
-        self.arguments.target_device = 'GPU'
+        self.arguments.target_devices = ['GPU']
 
         with pytest.warns(Warning):
             ConfigReader._filter_launchers(config, self.arguments)
@@ -481,7 +477,7 @@ class TestConfigReader:
             }
         ]
         config = {'models': [{'name': 'name', 'launchers': config_launchers}]}
-        self.arguments.target_device = 'GPU'
+        self.arguments.target_devices = ['GPU']
 
         with pytest.warns(Warning):
             ConfigReader._filter_launchers(config, self.arguments)
@@ -507,7 +503,7 @@ class TestConfigReader:
             }
         ]
         config = {'models': [{'name': 'name', 'launchers': config_launchers}]}
-        self.arguments.target_device = 'GPU'
+        self.arguments.target_devices = ['GPU']
 
         ConfigReader._filter_launchers(config, self.arguments)
 
@@ -515,9 +511,115 @@ class TestConfigReader:
         assert len(launchers) == 1
         assert launchers[0] == config_launchers[1]
 
-    @staticmethod
-    def merge(root, prefix, body):
-        return (root / prefix / pathlib.Path(body)).as_posix()
+
+    def test_only_appropriate_launcher_is_filtered_by_user_input_devices(self):
+        config_launchers = [
+            {
+                'framework': 'dlsdk',
+                'model': '/absolute_path1',
+                'weights': '/absolute_path1',
+                'adapter': 'classification',
+                'device': 'CPU'
+            },
+            {
+                'framework': 'dlsdk',
+                'model': '/absolute_path1',
+                'weights': '/absolute_path1',
+                'adapter': 'classification',
+                'device': 'HETERO:CPU,GPU'
+            },
+            {
+                'framework': 'caffe',
+                'model': '/absolute_path2',
+                'weights': '/absolute_path2',
+                'adapter': 'classification',
+                'device': 'GPU'
+            }
+        ]
+        config = {'models': [{'name': 'name', 'launchers': config_launchers}]}
+        self.arguments.target_devices = ['GPU', 'CPU']
+
+        ConfigReader._filter_launchers(config, self.arguments)
+
+        launchers = config['models'][0]['launchers']
+        assert launchers == [config_launchers[0], config_launchers[2]]
+
+    def test_both_launchers_are_filtered_by_other_devices(self):
+        config_launchers = [
+            {
+                'framework': 'dlsdk',
+                'model': '/absolute_path1',
+                'weights': '/absolute_path1',
+                'adapter': 'classification',
+                'device': 'CPU'
+            },
+            {
+                'framework': 'caffe',
+                'model': '/absolute_path2',
+                'weights': '/absolute_path2',
+                'adapter': 'classification',
+                'device': 'CPU'
+            }
+        ]
+        config = {'models': [{'name': 'name', 'launchers': config_launchers}]}
+        self.arguments.target_devices = ['FPGA', 'MYRIAD']
+
+        with pytest.warns(Warning):
+            ConfigReader._filter_launchers(config, self.arguments)
+
+        launchers = config['models'][0]['launchers']
+        assert len(launchers) == 0
+
+    def test_both_launchers_are_not_filtered_by_same_devices(self):
+        config_launchers = [
+            {
+                'framework': 'dlsdk',
+                'model': '/absolute_path1',
+                'weights': '/absolute_path1',
+                'adapter': 'classification',
+                'device': 'CPU'
+            },
+            {
+                'framework': 'caffe',
+                'model': '/absolute_path2',
+                'weights': '/absolute_path2',
+                'adapter': 'classification',
+                'device': 'GPU'
+            }
+        ]
+        config = {'models': [{'name': 'name', 'launchers': config_launchers}]}
+        self.arguments.target_devices = ['GPU', 'CPU']
+
+        ConfigReader._filter_launchers(config, self.arguments)
+
+        launchers = config['models'][0]['launchers']
+        assert launchers == config_launchers
+
+    def test_launcher_is_not_filtered_by_device_with_tail(self):
+        config_launchers = [
+            {
+                'framework': 'dlsdk',
+                'model': '/absolute_path1',
+                'weights': '/absolute_path1',
+                'adapter': 'classification',
+                'device': 'CPU'
+            },
+            {
+                'framework': 'caffe',
+                'model': '/absolute_path2',
+                'weights': '/absolute_path2',
+                'adapter': 'classification',
+                'device': 'GPU'
+            }
+        ]
+        config = {'models': [{'name': 'name', 'launchers': config_launchers}]}
+        self.arguments.target_devices = ['CPU', 'GPUunexepectedtail']
+
+        ConfigReader._filter_launchers(config, self.arguments)
+
+        launchers = config['models'][0]['launchers']
+        assert len(launchers) == 1
+        assert launchers[0] == config_launchers[0]
 
     def get_global_launcher(self, framework):
         for launcher in self.global_launchers:

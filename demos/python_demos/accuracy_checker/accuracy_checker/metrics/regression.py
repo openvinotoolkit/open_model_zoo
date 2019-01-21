@@ -1,25 +1,28 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
+
 import warnings
+import math
 import numpy as np
 
 from ..representation import (RegressionAnnotation, RegressionPrediction,
-                              PointRegressionAnnotation, PointRegressionPrediction)
+                              FacialLandmarksAnnotation, FacialLandmarksPrediction,
+                              SuperResolutionAnnotation, SuperResolutionPrediction)
 from .metric import PerImageEvaluationMetric, BaseMetricConfig
-from ..config import BaseField, NumberField, BoolField, ConfigError, StringField
+from ..config import BaseField, NumberField, BoolField, ConfigError
 from ..utils import string_to_tuple, finalize_metric_result
 
 
@@ -37,7 +40,6 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         self.meta['postfix'] = ' '
         self.meta['calculate_mean'] = False
         self.magnitude = []
-
 
     def update(self, annotation, prediction):
         self.magnitude.append(self.value_differ(annotation.value, prediction.value))
@@ -63,7 +65,9 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
         self.value_differ = value_differ
 
     def validate_config(self):
-        validator = BaseIntervalRegressionMetricConfig('regression_on_intervals_config')
+        validator = BaseIntervalRegressionMetricConfig(
+            'regression_on_intervals_config',
+            on_extra_argument=BaseIntervalRegressionMetricConfig.ERROR_ON_EXTRA_ARGUMENT)
         validator.validate(self.config)
 
     def configure(self):
@@ -170,87 +174,86 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
 
         return res
 
-class BasePointRegressionMetricConfig(BaseMetricConfig):
-    scaling_distance = StringField(optional=True)
 
-
-class PointRegression(PerImageEvaluationMetric):
-    annotation_types = (PointRegressionAnnotation, )
-    prediction_types = (PointRegressionPrediction, )
-
-    def __init__(self, value_differ, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.value_differ = value_differ
-
-    def validate_config(self):
-        config_validator = BasePointRegressionMetricConfig('point_regression_metric')
-        config_validator.validate(self.config)
+class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
+    __provider__ = 'per_point_normed_error'
+    annotation_types = (FacialLandmarksAnnotation, )
+    prediction_types = (FacialLandmarksPrediction, )
 
     def configure(self):
         self.meta['scale'] = 1
         self.meta['postfix'] = ' '
         self.meta['calculate_mean'] = True
+        self.meta['data_format'] = '{:.4f}'
         self.magnitude = []
-        self.distance_points = None
-        distance_points = self.config.get('scaling_distance')
-        if distance_points is not None:
-            distance_points = string_to_tuple(distance_points, int)
-            if len(distance_points) != 2:
-                raise ConfigError('expected index of coordinates 2 points as scaling distance points')
-            self.distance_points = distance_points
 
     def update(self, annotation, prediction):
-        self.magnitude.append(self.value_differ(annotation.x_values, annotation.y_values,
-                                                prediction.x_values, prediction.y_values))
-
-    def evaluate(self, annotations, predictions):
-        return np.mean(self.magnitude)
-
-
-class PerPointRegression(PointRegression):
-    __provider__ = 'per_point_regression'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(point_regression_differ, *args, **kwargs)
-
-    def update(self, annotation, prediction):
-        result = self.value_differ(annotation.x_values, annotation.y_values, prediction.x_values, prediction.y_values)
-        if self.distance_points is not None:
-            scale_distance = calculate_distance(annotation.x_values, annotation.y_values, self.distance_points)
-            result /= scale_distance
+        result = point_regression_differ(
+            annotation.x_values, annotation.y_values, prediction.x_values, prediction.y_values
+        )
+        result /= np.maximum(annotation.interocular_distance, np.finfo(np.float64).eps)
         self.magnitude.append(result)
 
     def evaluate(self, annotations, predictions):
         num_points = np.shape(self.magnitude)[1]
-        point_result_name_pattern = 'point_{}_rmse'
+        point_result_name_pattern = 'point_{}_normed_error'
         self.meta['names'] = [point_result_name_pattern.format(point_id) for point_id in range(num_points)]
         per_point_rmse = np.mean(self.magnitude, axis=1)
         per_point_rmse, self.meta['names'] = finalize_metric_result(per_point_rmse, self.meta['names'])
         return per_point_rmse
 
 
-class AveragePointError(PointRegression):
-    __provider__ = 'average_point_error'
+class NormedErrorMetricConfig(BaseMetricConfig):
+    calculate_std = BoolField(optional=True)
+    percentile = NumberField(optional=True, floats=False, min_value=0, max_value=100)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(point_regression_differ, *args, **kwargs)
+
+class FacialLandmarksNormedError(PerImageEvaluationMetric):
+    __provider__ = 'normed_error'
+    annotation_types = (FacialLandmarksAnnotation, )
+    prediction_types = (FacialLandmarksPrediction, )
+
+    def validate_config(self):
+        config_validator = NormedErrorMetricConfig(
+            'normed_error_config', NormedErrorMetricConfig.ERROR_ON_EXTRA_ARGUMENT
+        )
+        config_validator.validate(self.config)
+
+    def configure(self):
+        self.calculate_std = self.config.get('calculate_std', False)
+        self.percentile = self.config.get('percentile')
+        self.meta['calculate_mean'] = False if self.calculate_std or self.percentile else True
+        self.meta['names'] = ['mean']
+        self.meta['scale'] = 1
+        self.meta['postfix'] = ' '
+        self.meta['data_format'] = '{:.4f}'
+        self.magnitude = []
 
     def update(self, annotation, prediction):
-        per_point_result = self.value_differ(annotation.x_values, annotation.y_values,
-                                             prediction.x_values, prediction.y_values)
+        per_point_result = point_regression_differ(annotation.x_values, annotation.y_values,
+                                                   prediction.x_values, prediction.y_values)
         avg_result = np.sum(per_point_result) / len(per_point_result)
-        if self.distance_points is not None:
-            scale_distance = calculate_distance(annotation.x_values, annotation.y_values, self.distance_points)
-            avg_result /= scale_distance
+        avg_result /= np.maximum(annotation.interocular_distance, np.finfo(np.float64).eps)
         self.magnitude.append(avg_result)
 
     def evaluate(self, annotations, predictions):
-        return np.mean(self.magnitude)
+        result = [np.mean(self.magnitude)]
+        if self.calculate_std:
+            result.append(np.std(self.magnitude))
+            self.meta['names'].append('std')
+        if self.percentile:
+            sorted_magnitude = np.sort(self.magnitude)
+            index = len(self.magnitude) / 100 * self.percentile
+            result.append(sorted_magnitude[int(index)])
+            self.meta['names'].append('{}th percentile'.format(self.percentile))
+        return result
+
 
 def calculate_distance(x_coords, y_coords, selected_points):
     first_point = [x_coords[selected_points[0]], y_coords[selected_points[0]]]
     second_point = [x_coords[selected_points[1]], y_coords[selected_points[1]]]
     return np.linalg.norm(np.subtract(first_point, second_point))
+
 
 def mae_differ(annotation_val, prediction_val):
     return np.abs(annotation_val - prediction_val)
@@ -275,3 +278,51 @@ def point_regression_differ(annotation_val_x, annotation_val_y, prediction_val_x
     loss = np.subtract(annotation_points, prediction_points)
     per_point_error = np.linalg.norm(loss, 2, axis=1)
     return per_point_error
+
+
+class PeakSignaltoNoiseRatio(BaseRegressionMetric):
+    __provider__ = 'psnr'
+
+    annotation_types = (SuperResolutionAnnotation, )
+    prediction_types = (SuperResolutionPrediction, )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(self._psnr_differ, *args, **kwargs)
+
+    def validate_config(self):
+        class _PSNRConfig(BaseMetricConfig):
+            scale_border = NumberField(optional=True, min_value=0)
+
+        config_validator = _PSNRConfig('psnr', on_extra_argument=_PSNRConfig.ERROR_ON_EXTRA_ARGUMENT)
+        config_validator.validate(self.config)
+
+    def configure(self):
+        super().configure()
+        self.scale_border = self.config.get('scale_border', 4)
+
+    def _psnr_differ(self, annotation_image, prediction_image):
+        prediction = np.asarray(prediction_image).astype(np.float)
+        ground_truth = np.asarray(annotation_image).astype(np.float)
+
+        height, width = prediction.shape[:2]
+        prediction = prediction[
+            self.scale_border:height - self.scale_border,
+            self.scale_border:width - self.scale_border
+        ]
+        ground_truth = ground_truth[
+            self.scale_border:height - self.scale_border,
+            self.scale_border:width - self.scale_border
+        ]
+        image_difference = (prediction - ground_truth) / 255.  # rgb color space
+
+        r_channel_diff = image_difference[:, :, 0]
+        g_channel_diff = image_difference[:, :, 1]
+        b_channel_diff = image_difference[:, :, 2]
+
+        channels_diff = (r_channel_diff * 65.738 + g_channel_diff * 129.057 + b_channel_diff * 25.064) / 256
+
+        mse = np.mean(channels_diff ** 2)
+        if mse == 0:
+            return np.Infinity
+
+        return -10 * math.log10(mse)

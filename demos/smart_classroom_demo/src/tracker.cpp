@@ -1,18 +1,6 @@
-/*
-// Copyright (c) 2018 Intel Corporation
+// Copyright (C) 2018 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-*/
 
 #include "tracker.hpp"
 #include <unordered_map>
@@ -23,8 +11,9 @@
 #include <vector>
 #include <tuple>
 #include <set>
+#include "logger.hpp"
 
-#define UNKNOWN_LABEL_IDX -1
+const int TrackedObject::UNKNOWN_LABEL_IDX = -1;
 
 class KuhnMunkres::Impl {
 public:
@@ -216,12 +205,13 @@ cv::Point Center(const cv::Rect &rect) {
 }
 
 TrackerParams::TrackerParams()
-    : min_track_duration(1000),
+    : min_track_duration(25),
       forget_delay(150),
       affinity_thr(0.85),
       shape_affinity_w(0.5),
       motion_affinity_w(0.2),
       min_det_conf(0.0),
+      averaging_window_size(1),
       bbox_aspect_ratios_range(0.666, 5.0),
       bbox_heights_range(1, 1280),
       drop_forgotten_tracks(true),
@@ -312,7 +302,7 @@ void Tracker::UpdateLostTracks(const std::set<size_t> &track_ids) {
 }
 
 void Tracker::Process(const cv::Mat &frame, const TrackedObjects &detections,
-                      uint64_t timestamp) {
+                      int frame_idx) {
     if (frame_size_ == cv::Size()) {
         frame_size_ = frame.size();
     } else {
@@ -321,7 +311,7 @@ void Tracker::Process(const cv::Mat &frame, const TrackedObjects &detections,
 
     FilterDetectionsAndStore(detections);
     for (auto &obj : detections_) {
-        obj.timestamp = timestamp;
+        obj.frame_idx = frame_idx;
     }
 
     auto active_tracks = active_track_ids_;
@@ -397,8 +387,8 @@ void Tracker::DropForgottenTrack(size_t track_id) {
 }
 
 float Tracker::ShapeAffinity(const cv::Rect &trk, const cv::Rect &det) {
-    float w_dist = fabs(trk.width - det.width) / (trk.width + det.width);
-    float h_dist = fabs(trk.height - det.height) / (trk.height + det.height);
+    float w_dist = std::fabs(trk.width - det.width) / (trk.width + det.width);
+    float h_dist = std::fabs(trk.height - det.height) / (trk.height + det.height);
     return exp(-params_.shape_affinity_w * (w_dist + h_dist));
 }
 
@@ -486,8 +476,8 @@ bool Tracker::IsTrackValid(size_t id) const {
     if (objects.empty()) {
         return false;
     }
-    int64_t duration_ms = objects.back().timestamp - track.first_object.timestamp;
-    if (duration_ms < static_cast<int64_t>(params_.min_track_duration))
+    int duration_frames = objects.back().frame_idx - track.first_object.frame_idx;
+    if (duration_frames < params_.min_track_duration)
         return false;
     return true;
 }
@@ -530,13 +520,12 @@ TrackedObjects Tracker::TrackedDetections() const {
 TrackedObjects Tracker::TrackedDetectionsWithLabels() const {
     TrackedObjects detections;
     for (size_t idx : active_track_ids()) {
-        auto track = tracks().at(idx);
+        const auto& track = tracks().at(idx);
         if (IsTrackValid(idx) && !track.lost) {
             TrackedObject object = track.objects.back();
             int counter = 1;
-            const int averaging_window_size = 5;
-            int start = track.objects.size() >= averaging_window_size ?
-                        track.objects.size() - averaging_window_size : 0;
+            int start = track.objects.size() >= params_.averaging_window_size ?
+                        track.objects.size() - params_.averaging_window_size : 0;
 
             for (int i = start; i < track.objects.size() - 1; i++) {
                 object.rect.width += track.objects[i].rect.width;
@@ -551,19 +540,22 @@ TrackedObjects Tracker::TrackedDetectionsWithLabels() const {
             object.rect.y /= counter;
 
             object.label = LabelWithMaxFrequencyInTrack(track);
+
             detections.push_back(object);
         }
     }
     return detections;
 }
 
-int Tracker::LabelWithMaxFrequencyInTrack(const Track &track) const {
+int LabelWithMaxFrequencyInTrack(const Track &track) {
     std::unordered_map<int, int> frequencies;
     int max_frequent_count = 0;
-    int max_frequent_id = -1;
-    for (const auto detection : track.objects) {
+    int max_frequent_id = TrackedObject::UNKNOWN_LABEL_IDX;
+    for (const auto & detection : track.objects) {
+        if (detection.label == TrackedObject::UNKNOWN_LABEL_IDX)
+            continue;
         int count = ++frequencies[detection.label];
-        if (count > max_frequent_count && detection.label != UNKNOWN_LABEL_IDX) {
+        if (count > max_frequent_count) {
             max_frequent_count = count;
             max_frequent_id = detection.label;
         }
@@ -571,6 +563,36 @@ int Tracker::LabelWithMaxFrequencyInTrack(const Track &track) const {
     return max_frequent_id;
 }
 
+std::vector<Track> UpdateTrackLabelsToBestAndFilterOutUnknowns(const std::vector<Track>& tracks) {
+    std::vector<Track> new_tracks;
+    for (auto& track : tracks) {
+        int best_label = LabelWithMaxFrequencyInTrack(track);
+        if (best_label == TrackedObject::UNKNOWN_LABEL_IDX)
+            continue;
+
+        Track new_track = track;
+
+        for (auto& obj : new_track.objects) {
+            obj.label = best_label;
+        }
+        new_track.first_object.label = best_label;
+
+        new_tracks.emplace_back(std::move(new_track));
+    }
+    return new_tracks;
+}
+
 const std::unordered_map<size_t, Track> &Tracker::tracks() const {
     return tracks_;
+}
+std::vector<Track> Tracker::vector_tracks() const {
+    std::set<size_t> keys;
+    for (auto& cur_pair : tracks()) {
+        keys.insert(cur_pair.first);
+    }
+    std::vector<Track> vec_tracks;
+    for (size_t k : keys) {
+        vec_tracks.push_back(tracks().at(k));
+    }
+    return vec_tracks;
 }

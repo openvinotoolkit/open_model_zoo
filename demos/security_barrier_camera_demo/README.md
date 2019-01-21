@@ -8,7 +8,7 @@ reports general vehicle attributes, for example, vehicle type (car/van/bus/track
 * `license-plate-recognition-barrier-0001`, which is executed on top of the results from the first network
 and reports a string per recognized license plate
 
-For more details on the topologies, please refer to the descriptions in the `deployment_tools/intel_models` folder of the OpenVINO&trade; toolkit installation directory.
+For more details on the topologies, please refer to the descriptions in the `open_model_zoo/intel_models` folder.
 
 Other demo objectives are:
 * Video/Camera as inputs, via OpenCV\*
@@ -58,23 +58,24 @@ Options:
 
 Running the application with an empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public models or a set of pre-trained and optimized models delivered with the package:
+To run the demo, you can use public models or a set of pre-trained and optimized models:
 
-* `<INSTALL_DIR>/deployment_tools/intel_models/vehicle-license-plate-detection-barrier-0106`
-* `<INSTALL_DIR>/deployment_tools/intel_models/vehicle-attributes-recognition-barrier-0039`
-* `<INSTALL_DIR>/deployment_tools/intel_models/license-plate-recognition-barrier-0001`
+* `open_model_zoo/intel_models/vehicle-license-plate-detection-barrier-0106`
+* `open_model_zoo/intel_models/vehicle-attributes-recognition-barrier-0039`
+* `open_model_zoo/intel_models/license-plate-recognition-barrier-0001`
 
-For example, to do inference on a GPU with the OpenVINO toolkit pre-trained models, run the following command:
+For example, to do inference on a GPU with the pre-trained models, run the following command:
 
 ```sh
 ./security_barrier_camera_demo -i <path_to_video>/inputVideo.mp4 -m vehicle-license-plate-detection-barrier-0106.xml -m_va vehicle-attributes-recognition-barrier-0039.xml -m_lpr license-plate-recognition-barrier-0001.xml -d GPU
 ```
 
-To do inference for two video inputs using two asynchronous infer request on FPGA with the OpenVINO toolkit pre-trained models, run the following command:
+To do inference for two video inputs using two asynchronous infer request on FPGA with the pre-trained models, run the following command:
 ```sh
 ./security_barrier_camera_demo -i <path_to_video>/inputVideo_0.mp4 <path_to_video>/inputVideo_1.mp4 -m vehicle-license-plate-detection-barrier-0106.xml -m_va vehicle-attributes-recognition-barrier-0039.xml -m_lpr license-plate-recognition-barrier-0001.xml -d HETERO:FPGA,CPU -d_va HETERO:FPGA,CPU -d_lpr HETERO:FPGA,CPU -nireq 2
 ```
-**NOTE**: Public models must be first converted to the Inference Engine format (`.xml` + `.bin`) using the [Model Optimizer](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer) tool.
+
+> **NOTE**: Public models must be first converted to the Inference Engine format (`.xml` + `.bin`) using the [Model Optimizer tool](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
 
 
 ### Optimization Hints for Heterogeneous Scenarios with FPGA
@@ -88,4 +89,4 @@ To do inference for two video inputs using two asynchronous infer request on FPG
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
 
 ## See Also
-* [Using Inference Engine Samples](../Readme.md)
+* [Using Inference Engine Demos](../Readme.md)

@@ -1,29 +1,29 @@
 """
- Copyright (c) 2018 Intel Corporation
+Copyright (c) 2018 Intel Corporation
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
-import warnings
+
 from pathlib import Path
 import os
 import numpy as np
 
-from ..config import ConfigError, PathField, StringField, DictField, NumberField, BoolField
+from ..config import ConfigError, PathField, StringField, DictField, ListField
 from ..logging import warning
-from ..utils import contains_all, parse_inputs, check_user_inputs, reshape_user_inputs
+from ..utils import contains_all, parse_inputs, check_user_inputs, reshape_user_inputs, extract_image_representations
 from .launcher import Launcher, LauncherConfig
-from .model_conversion import convert_model, find_dlsdk_ir
-
+from .model_conversion import convert_model
+from ..logging import print_info
 try:
     import openvino.inference_engine as ie
 except ImportError:
@@ -51,15 +51,16 @@ class DLSDKLauncherConfig(LauncherConfig):
     device = StringField(regex=DEVICE_REGEX)
     cpu_extensions = PathField(optional=True)
     gpu_extensions = PathField(optional=True)
-    bitstream = StringField(optional=True)
-    batch = NumberField(floats=False, min_value=1, optional=True)
-    output_name = StringField(optional=True)
+    bitstream = PathField(optional=True)
     mo_params = DictField(optional=True)
-    use_cached_model = BoolField(optional=True)
+    mo_flags = ListField(optional=True)
+    converted_model_dir = PathField(optional=True)
+    outputs = ListField(optional=True)
 
     _converted_models = PathField(optional=True)
     _models_prefix = PathField(optional=True)
     _model_optimizer = PathField(optional=True, allow_none=True)
+    _tf_custom_config_dir = PathField(optional=True, allow_none=True)
 
     def __init__(self, config_uri, **kwargs):
         super().__init__(config_uri, **kwargs)
@@ -120,21 +121,25 @@ class DLSDKLauncher(Launcher):
         dlsdk_launcher_config.validate(self._config)
 
         self._device = self._config['device'].upper()
+        self._prepare_bitstream_firmware(self._config)
+        self.plugin = ie.IEPlugin(self._device)
+        print_info('Loaded {} plugin version: {}'.format(self.plugin.device, self.plugin.version))
 
         if dlsdk_launcher_config.need_conversion:
-            use_cache = self._config.get('use_cached_model', False)
-            self._convert_model(self._config, dlsdk_launcher_config.framework, use_cache)
+            self._convert_model(self._config, dlsdk_launcher_config.framework)
         else:
             self._model = self._config['model']
             self._weights = self._config['weights']
 
-        self._prepare_bitstream_firmware(self._config)
-        self.plugin = ie.IEPlugin(self._device)
         if self._config.get('cpu_extensions') and 'CPU' in self._device:
-            self.plugin.add_cpu_extension(self._config.get('cpu_extensions'))
+            self.plugin.add_cpu_extension(str(self._config.get('cpu_extensions')))
         if self._config.get('gpu_extensions') and 'GPU' in self._device:
-            self.plugin.set_config('CONFIG_FILE', self._config.get('gpu_extensions'))
-        self.network = ie.IENetwork.from_ir(model=self._model, weights=self._weights)
+            self.plugin.set_config('CONFIG_FILE', str(self._config.get('gpu_extensions')))
+        self.network = ie.IENetwork.from_ir(model=str(self._model), weights=str(self._weights))
+        self.original_outputs = self.network.outputs
+        outputs = self._config.get('outputs')
+        if outputs:
+            self.network.add_outputs(outputs)
         self.exec_network = self.plugin.load(network=self.network)
         self._config_inputs = parse_inputs(self._config.get('inputs', []))
         check_user_inputs(self.network.inputs.keys(), self._config_inputs)
@@ -160,23 +165,27 @@ class DLSDKLauncher(Launcher):
     def batch(self):
         return self._batch
 
-    def predict(self, identifiers, data, *args, **kwargs):
+    def predict(self, identifiers, data_representation, *args, **kwargs):
         """
         Args:
             identifiers: list of input data identifiers
-            data: input data
+            data_representation: list of input data representations, which contain preprocessed data and its metadata
         Returns:
             output of model converted to appropriate representation
         """
+        data, metadata = extract_image_representations(data_representation)
         data = np.transpose(data, [0, 3, 1, 2])
         input_shape = self.network.inputs[self._image_input_blob].shape
         if data.shape[0] != self._batch:
             input_shape[0] = data.shape[0]
         res = self.exec_network.infer({self._image_input_blob: data.reshape(input_shape), **self._config_inputs})
+        raw_outputs_callback = kwargs.get('output_callback')
+        if raw_outputs_callback:
+            raw_outputs_callback(res)
 
         if self.adapter is not None:
-            self.adapter.output_blob = self.adapter.output_blob or next(iter(res))
-            return self.adapter(res, identifiers)
+            self.adapter.output_blob = self.adapter.output_blob or next(iter(self.original_outputs))
+            return self.adapter(res, identifiers, metadata)
         return res
 
     def _is_fpga(self):
@@ -190,7 +199,7 @@ class DLSDKLauncher(Launcher):
         if not self._is_fpga():
             return
 
-        compiler_mode = os.environ.get('CL_COMPILER_MODE_INTELFPGA')
+        compiler_mode = os.environ.get('CL_CONTEXT_COMPILER_MODE_INTELFPGA')
         if compiler_mode == '3':
             return
 
@@ -198,32 +207,27 @@ class DLSDKLauncher(Launcher):
 
         bitstream = config.get('bitstream')
         if bitstream:
-            os.environ[aocx_variable] = bitstream
+            os.environ[aocx_variable] = str(bitstream)
 
         if not os.environ.get(aocx_variable):
             warning('Warning: {} has not been set'.format(aocx_variable))
 
-    def _convert_model(self, config, framework='caffe', use_cache=False):
-        converted_models = config['_converted_models'].absolute()  # type: Path
+    def _convert_model(self, config, framework='caffe'):
+        converted_models = config['_converted_models'].resolve()  # type: Path
         if not converted_models.is_dir():
             raise FileNotFoundError("Directory for MO converted models not found.")
 
+        mo_params = config.get('mo_params', {})
+        mo_flags = config.get('mo_flags', [])
         output_dir = self._replicate_model_directory(
             (Path(config.get(framework + '_model') if config.get(framework + '_model') is not None
                   else config.get(framework + '_weights'))),
             Path(config['_models_prefix']),
-            converted_models
+            converted_models,
+            config.get('converted_model_dir'),
+            mo_params.get('output_dir')
         )
-        mo_params = config.get('mo_params')
 
-        if use_cache:
-            model_file, bin_file = find_dlsdk_ir(output_dir.as_posix())
-            if bin_file and model_file:
-                if mo_params is not None:
-                    warnings.warn('Model from cache found. '
-                                  'Additional model optimizer parameters specified as mo_params will be ignored.')
-                self._model, self._weights = model_file, bin_file
-                return
         if not output_dir.exists():
             output_dir.mkdir(parents=True)
 
@@ -238,14 +242,28 @@ class DLSDKLauncher(Launcher):
         weights_for_conversion = Path(weights_for_conversion) if weights_for_conversion is not None else None
         topology_name = (model_for_conversion.name.split('.')[0] if model_for_conversion is not None
                          else weights_for_conversion.name.split('.')[0])
-        self._model, self._weights = convert_model(topology_name, output_dir, model_for_conversion,
-                                                   weights_for_conversion, framework, mo_search_paths, mo_params)
+        tf_config_dir = config.get('_tf_custom_config_dir')
+        self._model, self._weights = convert_model(
+            topology_name, output_dir, model_for_conversion,
+            weights_for_conversion, framework,
+            mo_search_paths, mo_params, mo_flags, tf_config_dir
+        )
 
     @staticmethod
-    def _replicate_model_directory(source_path: Path, prefix: Path, destination_path: Path) -> Path:
+    def _replicate_model_directory(source_path: Path, prefix: Path, destination_path: Path,
+                                   postfix=None, mo_output=None) -> Path:
+        if postfix is not None and mo_output is not None:
+            raise ConfigError(
+                'Provided several paths for storage output model. '
+                'Please, use only one from these approaches: '
+                'specify converted_model_dir parameter or set output_dir in mo_params'
+            )
+        if mo_output is not None:
+            return mo_output
         model_dir = source_path.parent
-        suffix = model_dir.parts[len(prefix.parts):]
+        suffix = Path(postfix).parts if postfix else model_dir.parts[len(prefix.parts):]
         output_dir = destination_path.joinpath(*suffix)
+
         return output_dir
 
     def release(self):

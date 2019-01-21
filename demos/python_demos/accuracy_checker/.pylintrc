@@ -19,7 +19,9 @@ extension-pkg-whitelist=inference_engine,cv2,numpy
 ignored-modules = numpy,cv2,inference_engine,caffe
 load-plugins = pylint_checkers
 ignored-classes = pathlib.PurePath
-bad-functions = print
 
 [SIMILARITIES]
 ignore-imports = yes
+
+[BASIC]
+bad-functions=print,as_posix,absolute
