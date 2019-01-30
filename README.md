@@ -1,4 +1,5 @@
 # [OpenVINO™ Toolkit](https://01.org/openvinotoolkit) - Open Model Zoo repository
+[![Build Status](http://134.191.240.124/buildStatus/icon?job=omz/2018/trigger)](http://134.191.240.124/job/omz/job/2018/job/trigger/)
 [![Stable release](https://img.shields.io/badge/version-2018.R5-green.svg)](https://github.com/opencv/open_model_zoo/releases/tag/2018_R5)
 [![Apache License Version 2.0](https://img.shields.io/badge/license-Apache_2.0-green.svg)](LICENSE)
 
