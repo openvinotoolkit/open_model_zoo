@@ -51,9 +51,12 @@ def build_argparser():
     general.add_argument('-ch', '--crop_height', default=0, type=int,
         help="(optional) Crop the input stream to this height")
 
-    faces = parser.add_argument_group('Faces database')
-    faces.add_argument('-fg', metavar="PATH", required=True,
+    gallery = parser.add_argument_group('Faces database')
+    gallery.add_argument('-fg', metavar="PATH", required=True,
         help="Path to the face images directory")
+    gallery.add_argument('--run_detector', action='store_true',
+        help="(optional) Use Face Detection model to find faces" \
+            " on the face images, otherwise use full images.")
 
     models = parser.add_argument_group('Models')
     models.add_argument('-m_fd', metavar="PATH", default="", required=True,
@@ -461,7 +464,7 @@ class FacesDatabase:
             self.descriptor = descriptor
 
     def __init__(self, path,
-            face_detector, face_identifier, landmarks_detector):
+            face_identifier, landmarks_detector, face_detector=None):
         path = osp.abspath(path)
         paths = []
         if osp.isdir(path):
@@ -483,19 +486,26 @@ class FacesDatabase:
             image = cv2.imread(path, flags=cv2.IMREAD_COLOR)
 
             assert len(image.shape) == 3, \
-                "Expected input image in (H, W, C) format"
+                "Expected an input image in (H, W, C) format"
             assert image.shape[2] in [3, 4], \
                 "Expected BGR or BGRA input"
-            n, c, h, w = face_detector.get_input_shape()
-            image = cv2.resize(image, (w, h))
-            image = image.transpose((2, 0, 1)) # HWC to CHW
-            image = image.reshape((n, c, h, w))
 
-            face_detector.start_async(image)
-            rois = face_detector.get_roi_proposals(image)
-            if len(rois) < 1:
-                log.warn("Not found faces on the image '%s'" % (path))
-                continue
+            if image.shape[0] == 4: # assume BGRA
+                image = image[:, :, :3]
+            image = image.transpose((2, 0, 1)) # HWC to CHW
+            image = np.expand_dims(image, axis=0)
+
+            if face_detector:
+                face_detector.start_async(image)
+                rois = face_detector.get_roi_proposals(image)
+                if len(rois) < 1:
+                    log.warning("Not found faces on the image '%s'" % (path))
+
+                    w, h = image.shape[-1], image.shape[-2]
+                    rois = [ FaceDetector.Result([0, 0, 0, 0, 0, w, h]) ]
+            else:
+                w, h = image.shape[-1], image.shape[-2]
+                rois = [ FaceDetector.Result([0, 0, 0, 0, 0, w, h]) ]
 
             for i, roi in enumerate(rois):
                 r = [ roi ]
@@ -714,8 +724,9 @@ class FrameProcessor:
         log.info("Models are loaded")
 
         log.info("Building faces database using images from '%s'" % (args.fg))
-        faces_database = FacesDatabase(args.fg, self.face_detector,
-            self.face_identifier, self.landmarks_detector)
+        faces_database = FacesDatabase(args.fg, self.face_identifier,
+            self.landmarks_detector,
+            self.face_detector if args.run_detector else None)
         self.face_identifier.set_faces_database(faces_database)
         log.info("Database is built, registered %s identities" % \
             (len(faces_database)))
@@ -739,19 +750,15 @@ class FrameProcessor:
         assert frame.shape[2] in [3, 4], \
             "Expected BGR or BGRA input"
 
+        if frame.shape[0] == 4: # assume BGRA
+            frame = frame[:, :, :3]
+        frame = frame.transpose((2, 0, 1)) # HWC to CHW
+        frame = np.expand_dims(frame, axis=0)
+
         self.face_detector.clear()
         self.head_pose_estimator.clear()
         self.landmarks_detector.clear()
         self.face_identifier.clear()
-
-        input_size = (frame.shape[1], frame.shape[0])
-
-        n, c, h, w = self.face_detector.get_input_shape()
-        frame = cv2.resize(frame, (w, h))
-        frame = frame.transpose((2, 0, 1)) # HWC to CHW
-        if frame.shape[0] == 4: # assume BGRA
-            frame = frame[:c]
-        frame = frame.reshape((n, c, h, w))
 
         self.face_detector.start_async(frame)
         rois = self.face_detector.get_roi_proposals(frame)
@@ -770,16 +777,9 @@ class FrameProcessor:
         face_identities = self.face_identifier.get_matches()
 
         outputs = [rois, head_poses, landmarks, face_identities]
-        outputs = self.rescale_detections(outputs, (w, h), input_size)
 
         return outputs
 
-    def rescale_detections(self, detections, current_size, target_size):
-        scale = np.array(target_size) / np.array(current_size)
-        for roi, head_pose, landmarks, face_id in zip(*detections):
-            roi.position *= scale
-            roi.size *= scale
-        return detections
 
     def get_performance_stats(self):
         stats = {
