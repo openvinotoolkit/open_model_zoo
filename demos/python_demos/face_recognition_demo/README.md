@@ -162,7 +162,7 @@ Windows (`cmd`, `powershell`) (assuming OpenVINO installed in `C:/Intel/computer
 
 ``` powershell
 # Set up the environment
-C:/Intel/computer_vision_sdk/bin/setupvars.bat
+call C:/Intel/computer_vision_sdk/bin/setupvars.bat
 
 python ./face_recognition_demo.py ^
 -m_fd C:/Intel/computer_vision_sdk/deployment_tools/intel_models/face-detection-retail-0004/FP32/face-detection-retail-0004.xml ^

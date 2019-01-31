@@ -12,6 +12,7 @@ directory in the Inference Engine installation directory:
  - [Human Pose Estimation Demo](./human_pose_estimation_demo/README.md) - Human pose estimation demo. *NEW MODELS SHOWCASE, below*.
  - [Image Segmentation Demo](./segmentation_demo/README.md) - Inference of image segmentation networks like FCN8 (the demo supports only images as inputs).
  - [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md) - Face Detection coupled with Age/Gender, Head-Pose, Emotion, and Facial Landmarks detectors. Supports video and camera inputs.  *NEW MODELS SHOWCASE, below*.
+ - [Interactive Face Recognition Demo (Python)](./python_demos/face_recognition_demo/README.md) - Face Detection coupled with Head-Pose, Facial Landmarks and Face Recognition detectors. Supports video and camera inputs.
  - [Mask R-CNN Demo for TensorFlow* Object Detection API models](./mask_rcnn_demo/README.md) - Inference of semantic segmentation networks created with TensorFlow\* Object Detection API.
  - [Multi-Channel Face Detection Demo](./multichannel_face_detection/README.md) - Simultaneous Multi Camera Face Detection demo.
  - [Object Detection Demo](./object_detection_demo/README.md) - Inference of object detection networks like Faster R-CNN (the demo supports only images as inputs).
@@ -29,14 +30,14 @@ directory in the Inference Engine installation directory:
 
 (!) Important Note: Inference Engine MYRIAD and FPGA plugins are available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
 
-The product includes several pre-trained  [models] (open_model_zoo/intel_models/index.html).
+The product includes several pre-trained [models](../intel_models/index.md).
 The table below shows the correlation between models and demos/plugins (_the plugins names are exactly as they are passed to the demos with `-d` option_).
 
 | Model                                            | Demos supported on the model                                                                                                                | CPU          | GPU          |HETERO:FPGA,CPU | MYRIAD     |
 |------------------------------------------------- |---------------------------------------------------------------------------------------------------                                          |------------- |------------- |--------------- |----------- |
-|   face-detection-adas-0001                       | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)                                                              | Supported    | Supported    | Supported      | Supported  |
+|   face-detection-adas-0001                       | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)<br>[Interactive Face Recognition Demo](./python_demos/face_recognition_demo/README.md)                                                              | Supported    | Supported    | Supported      | Supported  |
 |   age-gender-recognition-retail-0013             | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)                                                              | Supported    | Supported    | Supported      | Supported  |
-|   head-pose-estimation-adas-0001                 | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)                                                              | Supported    | Supported    | Supported      | Supported  |
+|   head-pose-estimation-adas-0001                 | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)<br>[Interactive Face Recognition Demo](./python_demos/face_recognition_demo/README.md)                                                              | Supported    | Supported    | Supported      | Supported  |
 |   emotions-recognition-retail-0003               | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)                                                              | Supported    | Supported    | Supported      | Supported  |
 |   facial-landmarks-35-adas-0001                  | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)                                                              | Supported    | Supported    | Supported      |            |
 |   vehicle-license-plate-detection-barrier-0106   | [Security Barrier Camera Demo](./security_barrier_camera_demo/README.md)                                                                    | Supported    | Supported    | Supported      | Supported  |
@@ -51,14 +52,14 @@ The table below shows the correlation between models and demos/plugins (_the plu
 |   road-segmentation-adas-0001                    | [Image Segmentation Demo](./segmentation_demo/README.md)                                                                                    | Supported    | Supported    |                |            |
 |   semantic-segmentation-adas-0001                | [Image Segmentation Demo](./segmentation_demo/README.md)                                                                                    | Supported    | Supported    |                |            |
 |   person-detection-retail-0013                   | any demo that supports SSD\*-based models, above<br>[Pedestrian Tracker Demo](./pedestrian_tracker_demo/README.md)                          | Supported    | Supported    | Supported      | Supported  |
-|   face-detection-retail-0004                     | any demo that supports SSD\*-based models, above                                                                                            | Supported    | Supported    | Supported      | Supported  |
+|   face-detection-retail-0004                     | any demo that supports SSD\*-based models, above<br>[Interactive Face Recognition Demo](./python_demos/face_recognition_demo/README.md)                                                                                            | Supported    | Supported    | Supported      | Supported  |
 |   face-person-detection-retail-0002              | any demo that supports SSD\*-based models, above                                                                                            | Supported    | Supported    | Supported      | Supported  |
 |   pedestrian-detection-adas-0002                 | any demo that supports SSD\*-based models, above                                                                                            | Supported    | Supported    | Supported      |            |
 |   vehicle-detection-adas-0002                    | any demo that supports SSD\*-based models, above                                                                                            | Supported    | Supported    | Supported      | Supported  |
 |   pedestrian-and-vehicle-detector-adas-0001      | any demo that supports SSD\*-based models, above                                                                                            | Supported    | Supported    | Supported      |            |
 |   person-detection-action-recognition-0003       | [Smart Classroom Demo](./smart_classroom_demo/README.md)                                                                                    | Supported    | Supported    | Supported      |            |
-|   landmarks-regression-retail-0009               | [Smart Classroom Demo](./smart_classroom_demo/README.md)                                                                                    | Supported    | Supported    | Supported      |            |
-|   face-reidentification-retail-0095              | [Smart Classroom Demo](./smart_classroom_demo/README.md)                                                                                    | Supported    | Supported    |                |            |
+|   landmarks-regression-retail-0009               | [Smart Classroom Demo](./smart_classroom_demo/README.md)<br>[Interactive Face Recognition Demo](./python_demos/face_recognition_demo/README.md)                                                                                    | Supported    | Supported    | Supported      |            |
+|   face-reidentification-retail-0095              | [Smart Classroom Demo](./smart_classroom_demo/README.md)<br>[Interactive Face Recognition Demo](./python_demos/face_recognition_demo/README.md)                                                                                    | Supported    | Supported    |                |            |
 |   human-pose-estimation-0001                     | [Human Pose Estimation Demo](./human_pose_estimation_demo/README.md)                                                                        | Supported    | Supported    | Supported      |            |
 |   single-image-super-resolution-0063             | [Super Resolution Demo](./super_resolution_demo/README.md)                                                                                  | Supported    |              |                |            |
 |   single-image-super-resolution-1011             | [Super Resolution Demo](./super_resolution_demo/README.md)                                                                                  | Supported    |              |                |            |
@@ -85,7 +86,7 @@ The officially supported Linux build environment is the following:
 * Ubuntu* 16.04 LTS 64-bit or CentOS* 7.4 64-bit
 * GCC* 5.4.0 (for Ubuntu* 16.04) or GCC* 4.8.5 (for CentOS* 7.4)
 * CMake* version 2.8 or higher.
-* OpenCV 3.3 or later (required for some demos)
+* OpenCV 3.3 or later
 
 <br>You can build the demo applications using the _CMake_ file in the `demos` directory.
 
@@ -135,7 +136,7 @@ source <INSTALL_DIR>/deployment_tools/bin/setupvars.sh
 ```
 on Linux or
 ```
-source <INSTALL_DIR>/deployment_tools/bin/setupvars.bat
+<INSTALL_DIR>/deployment_tools/bin/setupvars.bat
 ```
 to source required environment on Windows.
 <br>If you are using _Inference Engine_ binaries from the _dldt_ repository then you need to configure `LD_LIBRARY_PATH` variable (or `PATH` on Windows) manually.
