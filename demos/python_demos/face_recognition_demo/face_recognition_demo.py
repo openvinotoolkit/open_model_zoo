@@ -742,7 +742,7 @@ class FrameProcessor:
             "Model description is not found at '%s'" % (model_description_path)
         assert osp.isfile(model_weights_path), \
             "Model weights are not found at '%s'" % (model_weights_path)
-        model = IENetwork.from_ir(model_description_path, model_weights_path)
+        model = IENetwork(model_description_path, model_weights_path)
         log.info("Model is loaded")
         return model
 
@@ -821,6 +821,19 @@ class Visualizer:
         self.fps = 1.0 / self.frame_time
         self.frame_start_time = now
 
+    def draw_text_with_background(self, frame, text, origin,
+            font=cv2.FONT_HERSHEY_SIMPLEX, scale=1.0,
+            color=(0, 0, 0), thickness=1, bgcolor=(255, 255, 255)):
+        text_size, baseline = cv2.getTextSize(text, font, scale, thickness)
+        cv2.rectangle(frame,
+            tuple((origin + (0, baseline)).astype(int)),
+            tuple((origin + (text_size[0], -text_size[1])).astype(int)),
+            bgcolor, cv2.FILLED)
+        cv2.putText(frame, text,
+            tuple(origin.astype(int)),
+            font, scale, color, thickness)
+        return text_size, baseline
+
     def draw_detection_roi(self, frame, roi, identity):
         label = self.frame_processor \
             .face_identifier.get_identity_label(identity.id)
@@ -828,16 +841,17 @@ class Visualizer:
         # Draw face ROI border
         cv2.rectangle(frame,
             tuple(roi.position), tuple(roi.position + roi.size),
-            (255, 255, 255), 2)
+            (0, 220, 0), 2)
 
         # Draw identity label
         text_scale = 0.5
         font = cv2.FONT_HERSHEY_SIMPLEX
         text_size = cv2.getTextSize("H1", font, text_scale, 1)
         line_height = np.array([0, text_size[0][1]])
-        cv2.putText(frame, '%s %.2f%%' % (label, 100.0 * (1 - identity.distance)),
-            tuple((roi.position - line_height * 0.5).astype(int)),
-            font, text_scale, (200, 200, 200))
+        self.draw_text_with_background(frame,
+            '%s %.2f%%' % (label, 100.0 * (1 - identity.distance)),
+            roi.position - line_height * 0.5,
+            font, scale=text_scale)
 
     def draw_detection_keypoints(self, frame, roi, landmarks):
         keypoints = [ landmarks.left_eye,
@@ -930,12 +944,12 @@ class Visualizer:
         color = (10, 160, 10)
         font = cv2.FONT_HERSHEY_SIMPLEX
         text_scale = 0.5
-        text_size = cv2.getTextSize("H1", font, text_scale, 1)
-        line_height = np.array([0, text_size[0][1]]) * 1.5
-        cv2.putText(frame, "Frame time: %.3fs" % (self.frame_time),
-            tuple(origin.astype(int)), font, text_scale, color)
-        cv2.putText(frame, "FPS: %.1f" % (self.fps),
-            tuple((origin + line_height).astype(int)), font, text_scale, color)
+        text_size, _ = self.draw_text_with_background(frame,
+            "Frame time: %.3fs" % (self.frame_time),
+            origin, font, text_scale, color)
+        self.draw_text_with_background(frame,
+            "FPS: %.1f" % (self.fps),
+            (origin + (0, text_size[1] * 1.5)), font, text_scale, color)
 
         log.debug('Frame: %s/%s, detections: %s, ' \
                 'frame time: %.3fs, fps: %.1f' % \
