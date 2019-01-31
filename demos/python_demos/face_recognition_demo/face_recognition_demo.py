@@ -542,11 +542,11 @@ class FaceIdentifier(Module):
     # Taken from the description of the model:
     # intel_models/face-reidentification-retail-0095
     REFERENCE_LANDMARKS = {
-        "left_eye": (0.31556875, 0.46157410),
-        "right_eye": (0.68262292, 0.46157410),
-        "nose_tip": (0.50026249, 0.64050535),
-        "left_lip_corner": (0.34947187, 0.82469196),
-        "right_lip_corner": (0.65343645, 0.82469196)
+        "left_eye": (30.2946 / 96, 51.6963 / 112),
+        "right_eye": (65.5318 / 96, 51.5014 / 112),
+        "nose_tip": (48.0252 / 96, 71.7366 / 112),
+        "left_lip_corner": (33.5493 / 96, 92.3655 / 112),
+        "right_lip_corner": (62.7299 / 96, 92.2041 / 112)
     }
 
     UNKNOWN_ID = -1
@@ -626,8 +626,9 @@ class FaceIdentifier(Module):
 
     def _normalize(self, array, axis):
         mean = array.mean(axis=axis)
-        std = array.std(axis=axis)
-        array[:] = (array - mean) / std
+        array -= mean
+        std = array.std()
+        array /= std
         return mean, std
 
     def _get_transform(self, src, dst):
@@ -641,7 +642,7 @@ class FaceIdentifier(Module):
 
         transform = np.empty((2, 3))
         transform[:, 0:2] = r * (dst_col_std / src_col_std)
-        transform[:,   2] = dst_col_std.T - \
+        transform[:,   2] = dst_col_mean.T - \
             np.matmul(transform[:, 0:2], src_col_mean.T)
         return transform
 
@@ -661,7 +662,7 @@ class FaceIdentifier(Module):
                 self.REFERENCE_LANDMARKS["nose_tip"],
                 self.REFERENCE_LANDMARKS["left_lip_corner"],
                 self.REFERENCE_LANDMARKS["right_lip_corner"],
-            ]) * scale
+            ], dtype=np.float64) * scale
 
             landmarks = np.array([
                 image_landmarks.left_eye,
@@ -669,12 +670,12 @@ class FaceIdentifier(Module):
                 image_landmarks.nose_tip,
                 image_landmarks.left_lip_corner,
                 image_landmarks.right_lip_corner,
-            ]) * scale
+            ], dtype=np.float64) * scale
 
             transform = self._get_transform(desired_landmarks, landmarks)
             img = image.transpose((1, 2, 0))
             cv2.warpAffine(img, transform, tuple(scale), img,
-                cv2.WARP_INVERSE_MAP)
+                flags=cv2.WARP_INVERSE_MAP)
             image[:] = img.transpose((2, 0, 1))
 
 
