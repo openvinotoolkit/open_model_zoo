@@ -35,11 +35,13 @@ visualized and displayed on the screen or written to the output file.
 
 ### Creating a gallery for face recognition
 
-In order to recognize faces the application needs a face database, or a gallery.
+To recognize faces the application uses a face database, or a gallery.
 The gallery is a folder with images of persons. Each image in the gallery can
-be of arbitrary size and should contain a frontally-oriented face with
-decent quality. To obtain better results use images of square shapes and do not
-use tight crops of faces.
+be of arbitrary size and should contain one or more frontally-oriented faces
+with decent quality. The application can use face detector during the gallery
+build, this is controlled by "--run_detector" flag. This allows gallery images
+to contain more than one face image and not to be tightly cropped.
+
 Image file name is used as a person name during the visualization.
 Use the following name convention: `person_N_name.png` or `person_N_name.jpg`.
 
@@ -66,9 +68,10 @@ any arguments yields the following message:
 ``` sh
 ./face_recognition_demo.py -h
 
-usage: face_recognition_demo.py [-h] [-i PATH] [-o PATH] [-no_show]
+usage: face_recognition_demo.py [-h] [-i PATH] [-o PATH] [-no_show] [-tl]
                                 [-cw CROP_WIDTH] [-ch CROP_HEIGHT] -fg PATH
-                                -m_fd PATH -m_lm PATH -m_reid PATH -m_hp PATH
+                                [--run_detector] -m_fd PATH -m_lm PATH -m_reid
+                                PATH -m_hp PATH
                                 [-d_fd {CPU,GPU,FPGA,MYRIAD,HETERO}]
                                 [-d_lm {CPU,GPU,FPGA,MYRIAD,HETERO}]
                                 [-d_reid {CPU,GPU,FPGA,MYRIAD,HETERO}]
@@ -86,6 +89,7 @@ General:
   -o PATH, --output PATH
                         (optional) Path to save the output video to
   -no_show              (optional) Do not display output
+  -tl, --timelapse      (optional) Auto-pause after each frame
   -cw CROP_WIDTH, --crop_width CROP_WIDTH
                         (optional) Crop the input stream to this width
   -ch CROP_HEIGHT, --crop_height CROP_HEIGHT
@@ -93,6 +97,8 @@ General:
 
 Faces database:
   -fg PATH              Path to the face images directory
+  --run_detector        (optional) Use Face Detection model to find faces on
+                        the face images, otherwise use full images.
 
 Models:
   -m_fd PATH            Path to the Face Detection Adas or Retail model XML
@@ -129,9 +135,9 @@ Inference options:
   -t_fd [0..1]          (optional) Probability threshold for face
                         detections(default: 0.6)
   -t_id [0..1]          (optional) Cosine distance threshold between two
-                        vectors for face identification(default: 0.3)
-  -exp_r_fd NUMBER      (optional) Scaling ratio for bbox passed to face
-                        recognition(default: 1.15)
+                        vectors for face identification (default: 0.3)
+  -exp_r_fd NUMBER      (optional) Scaling ratio for bboxes passed to face
+                        recognition (default: 1.15)
 ```
 
 Example of a valid command line to run the application:
