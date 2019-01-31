@@ -46,6 +46,8 @@ def build_argparser():
         help="(optional) Path to save the output video to")
     general.add_argument('-no_show', action='store_true',
         help="(optional) Do not display output")
+    general.add_argument('-tl', '--timelapse', action='store_true',
+        help="(optional) Auto-pause after each frame")
     general.add_argument('-cw', '--crop_width', default=0, type=int,
         help="(optional) Crop the input stream to this width")
     general.add_argument('-ch', '--crop_height', default=0, type=int,
@@ -101,10 +103,10 @@ def build_argparser():
             "(default: %(default)s)")
     infer.add_argument('-t_id', metavar='[0..1]', type=float, default=0.3,
         help="(optional) Cosine distance threshold between two vectors " \
-            "for face identification" \
+            "for face identification " \
             "(default: %(default)s)")
     infer.add_argument('-exp_r_fd', metavar='NUMBER', type=float, default=1.15,
-        help="(optional) Scaling ratio for bbox passed to face recognition" \
+        help="(optional) Scaling ratio for bboxes passed to face recognition " \
             "(default: %(default)s)")
 
     return parser
@@ -190,7 +192,7 @@ class Module(object):
         self.clear()
 
         if self.max_requests <= self.active_requests:
-            log.warn("Processing request rejected - too much requests")
+            log.warning("Processing request rejected - too many requests")
             return False
 
         self.device_model.start_async(self.active_requests, input)
@@ -763,9 +765,9 @@ class FrameProcessor:
         self.face_detector.start_async(frame)
         rois = self.face_detector.get_roi_proposals(frame)
         if self.QUEUE_SIZE < len(rois):
-            log.warn("Too much faces for processing, dropping all " \
-                     "the redundant. Will be processed only %s of total %s." % \
-                     (self.QUEUE_SIZE, len(rois))
+            log.warning("Too many faces for processing." \
+                    " Will be processed only %s of %s." % \
+                    (self.QUEUE_SIZE, len(rois))
                 )
             rois = rois[:self.QUEUE_SIZE]
         self.head_pose_estimator.start_async(frame, rois)
@@ -801,7 +803,6 @@ class Visualizer:
     def __init__(self, args):
         self.frame_processor = FrameProcessor(args)
         self.display = not args.no_show
-        self.verbose = args.verbose
         self.print_perf_stats = args.perf_stats
 
         self.frame_time = 0
@@ -811,6 +812,8 @@ class Visualizer:
         self.input_crop = None
         if args.crop_width and args.crop_height:
             self.input_crop = np.array((args.crop_width, args.crop_height))
+
+        self.frame_timeout = 0 if args.timelapse else 1
 
     def update_fps(self):
         now = time.time()
@@ -934,13 +937,12 @@ class Visualizer:
         cv2.putText(frame, "FPS: %.1f" % (self.fps),
             tuple((origin + line_height).astype(int)), font, text_scale, color)
 
-        if self.verbose:
-            log.info('Frame: %s/%s, detections: %s, ' \
-                     'frame time: %.3fs, fps: %.1f' % \
-                (int(self.input_stream.get(cv2.CAP_PROP_POS_FRAMES)),
-                 int(self.input_stream.get(cv2.CAP_PROP_FRAME_COUNT)),
-                 len(detections[3]), self.frame_time, self.fps
-                ))
+        log.debug('Frame: %s/%s, detections: %s, ' \
+                'frame time: %.3fs, fps: %.1f' % \
+            (int(self.input_stream.get(cv2.CAP_PROP_POS_FRAMES)),
+                int(self.input_stream.get(cv2.CAP_PROP_FRAME_COUNT)),
+                len(detections[3]), self.frame_time, self.fps
+            ))
 
         if self.print_perf_stats:
             log.info('Performance stats:')
@@ -959,6 +961,9 @@ class Visualizer:
             tuple(origin.astype(int)), font, text_scale, color, thickness)
 
         cv2.imshow('Face recognition demo', frame)
+
+    def should_stop_display(self):
+        return cv2.waitKey(self.frame_timeout) & 0xFF == self.BREAK_KEY
 
     def process(self, input_stream, output_stream):
         self.input_stream = input_stream
@@ -980,7 +985,7 @@ class Visualizer:
                 output_stream.write(frame)
             if self.display:
                 self.display_interactive_window(frame)
-                if cv2.waitKey(1) & 0xFF == self.BREAK_KEY:
+                if self.should_stop_display():
                     break
 
             self.update_fps()
@@ -1029,19 +1034,20 @@ def open_output_stream(path, fps, frame_size):
     output_stream = None
     if path != "":
         if not path.endswith('.avi'):
-            log.warn("Output file extension is not 'avi'. " \
-                     "Some issues with output can occur, check logs.")
+            log.warning("Output file extension is not 'avi'. " \
+                    "Some issues with output can occur, check logs.")
         log.info("Writing output to '%s'" % (path))
         output_stream = cv2.VideoWriter(path,
             cv2.VideoWriter.fourcc(*'MJPG'), fps, frame_size)
     return output_stream
 
 def main():
-    log.basicConfig(format="[ %(levelname)s ] %(asctime)-15s %(message)s",
-        level=log.INFO, stream=sys.stdout)
-
     args = build_argparser().parse_args()
-    log.info(str(args))
+
+    log.basicConfig(format="[ %(levelname)s ] %(asctime)-15s %(message)s",
+        level=log.INFO if not args.verbose else log.DEBUG, stream=sys.stdout)
+
+    log.debug(str(args))
 
     visualizer = Visualizer(args)
     visualizer.run(args)
