@@ -848,8 +848,10 @@ class Visualizer:
         font = cv2.FONT_HERSHEY_SIMPLEX
         text_size = cv2.getTextSize("H1", font, text_scale, 1)
         line_height = np.array([0, text_size[0][1]])
-        self.draw_text_with_background(frame,
-            '%s %.2f%%' % (label, 100.0 * (1 - identity.distance)),
+        text = label
+        if identity.id != FaceIdentifier.UNKNOWN_ID:
+            text += ' %.2f%%' % (100.0 * (1 - identity.distance))
+        self.draw_text_with_background(frame, text,
             roi.position - line_height * 0.5,
             font, scale=text_scale)
 
