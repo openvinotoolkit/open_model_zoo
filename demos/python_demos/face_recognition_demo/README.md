@@ -40,7 +40,9 @@ The gallery is a folder with images of persons. Each image in the gallery can
 be of arbitrary size and should contain one or more frontally-oriented faces
 with decent quality. The application can use face detector during the gallery
 build, this is controlled by "--run_detector" flag. This allows gallery images
-to contain more than one face image and not to be tightly cropped.
+to contain more than one face image and not to be tightly cropped. However, the
+resulting gallery needs to be checked more thoroughly, since a face detector can
+fail and produce poor crops.
 
 Image file name is used as a person name during the visualization.
 Use the following name convention: `person_N_name.png` or `person_N_name.jpg`.
