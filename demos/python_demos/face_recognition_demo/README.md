@@ -12,8 +12,6 @@ pretrained models can be found in this repository:
 * `intel_models/face-detection-retail-0004` and
   `intel_models/face-detection-adas-0001`,
     which are used to detect faces and predict their bounding boxes;
-* `intel_models/head-pose-estimation-adas-0001`,
-    which is used to predict head direction;
 * `intel_models/landmarks-regression-retail-0009`,
     which is used to predict face keypoints;
 * `intel_models/face-reidentification-retail-0095`,
@@ -24,11 +22,11 @@ pretrained models can be found in this repository:
 The application is invoked from command line. It reads the specified input
 video stream frame-by-frame, be it a camera device or a video file,
 and performs independent analysis of each frame. In order to make predictions
-the application deploys 4 models on the specified devices using OpenVINO
-library and runs them in asynchronous manner. The first model to be used
-is the face detection model, which is followed by two independent models
-for head pose prediction and face keypoints prediction. The last step in
-frame processing is done by face recognition model, which uses keypoints
+the application deploys 3 models on the specified devices using OpenVINO
+library and runs them in asynchronous manner. An input frame is processed by
+the face detection model to predict face bounding boxes. Then, face keypoints
+are predicted by the corresponding model. The final step in frame processing
+is done by the face recognition model, which uses keypoints found
 to align the faces and the face gallery to match faces found on a video
 frame with the ones in the gallery. Then, the processing results are
 visualized and displayed on the screen or written to the output file.
@@ -68,15 +66,13 @@ any arguments yields the following message:
 ``` sh
 ./face_recognition_demo.py -h
 
-usage: face_recognition_demo.py [-h] [-i PATH] [-o PATH] [-no_show] [-tl]
+usage: face_recognition_demo.py [-h] [-i PATH] [-o PATH] [--no_show] [-tl]
                                 [-cw CROP_WIDTH] [-ch CROP_HEIGHT] -fg PATH
                                 [--run_detector] -m_fd PATH -m_lm PATH -m_reid
-                                PATH -m_hp PATH
-                                [-d_fd {CPU,GPU,FPGA,MYRIAD,HETERO}]
+                                PATH [-d_fd {CPU,GPU,FPGA,MYRIAD,HETERO}]
                                 [-d_lm {CPU,GPU,FPGA,MYRIAD,HETERO}]
                                 [-d_reid {CPU,GPU,FPGA,MYRIAD,HETERO}]
-                                [-d_hp {CPU,GPU,FPGA,MYRIAD,HETERO}] [-l PATH]
-                                [-c PATH] [-v] [-pc] [-t_fd [0..1]]
+                                [-l PATH] [-c PATH] [-v] [-pc] [-t_fd [0..1]]
                                 [-t_id [0..1]] [-exp_r_fd NUMBER]
 
 optional arguments:
@@ -88,12 +84,16 @@ General:
                         camera, default)
   -o PATH, --output PATH
                         (optional) Path to save the output video to
-  -no_show              (optional) Do not display output
+  --no_show             (optional) Do not display output
   -tl, --timelapse      (optional) Auto-pause after each frame
   -cw CROP_WIDTH, --crop_width CROP_WIDTH
                         (optional) Crop the input stream to this width
+                        (default: no crop). Both -cw and -ch parameters should
+                        be specified to use crop.
   -ch CROP_HEIGHT, --crop_height CROP_HEIGHT
                         (optional) Crop the input stream to this height
+                        (default: no crop). Both -cw and -ch parameters should
+                        be specified to use crop.
 
 Faces database:
   -fg PATH              Path to the face images directory
@@ -101,27 +101,20 @@ Faces database:
                         the face images, otherwise use full images.
 
 Models:
-  -m_fd PATH            Path to the Face Detection Adas or Retail model XML
-                        file
-  -m_lm PATH            Path to the Facial Landmarks Regression Retail model
-                        XML file
-  -m_reid PATH          Path to the Face Reidentification Retail model XML
-                        file
-  -m_hp PATH            Path to the Head Pose Estimation Retail model XML file
+  -m_fd PATH            Path to the Face Detection model XML file
+  -m_lm PATH            Path to the Facial Landmarks Regression model XML file
+  -m_reid PATH          Path to the Face Reidentification model XML file
 
 Inference options:
   -d_fd {CPU,GPU,FPGA,MYRIAD,HETERO}
-                        (optional) Target device for the Face Detection Retail
-                        model (default: CPU)
+                        (optional) Target device for the Face Detection model
+                        (default: CPU)
   -d_lm {CPU,GPU,FPGA,MYRIAD,HETERO}
                         (optional) Target device for the Facial Landmarks
-                        Regression Retail model (default: CPU)
+                        Regression model (default: CPU)
   -d_reid {CPU,GPU,FPGA,MYRIAD,HETERO}
                         (optional) Target device for the Face Reidentification
-                        Retail model (default: CPU)
-  -d_hp {CPU,GPU,FPGA,MYRIAD,HETERO}
-                        (optional) Target device for the Head Pose Estimation
-                        Retail model (default: CPU)
+                        model (default: CPU)
   -l PATH, --cpu_lib PATH
                         (optional) For MKLDNN (CPU)-targeted custom layers, if
                         any. Path to a shared library with custom layers
@@ -150,7 +143,6 @@ source /opt/intel/computer_vision_sdk/bin/setupvars.sh
 
 ./face_recognition_demo.py \
 -m_fd /opt/intel/computer_vision_sdk/deployment_tools/intel_models/face-detection-retail-0004/FP32/face-detection-retail-0004.xml \
--m_hp /opt/intel/computer_vision_sdk/deployment_tools/intel_models/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml \
 -m_lm /opt/intel/computer_vision_sdk/deployment_tools/intel_models/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml \
 -m_reid /opt/intel/computer_vision_sdk/deployment_tools/intel_models/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml \
 -l /opt/intel/computer_vision_sdk/deployment_tools/inference_engine/lib/ubuntu_16.04/intel64/libcpu_extension_sse4.so \
@@ -166,7 +158,6 @@ call C:/Intel/computer_vision_sdk/bin/setupvars.bat
 
 python ./face_recognition_demo.py ^
 -m_fd C:/Intel/computer_vision_sdk/deployment_tools/intel_models/face-detection-retail-0004/FP32/face-detection-retail-0004.xml ^
--m_hp C:/Intel/computer_vision_sdk/deployment_tools/intel_models/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml ^
 -m_lm C:/Intel/computer_vision_sdk/deployment_tools/intel_models/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml ^
 -m_reid C:/Intel/computer_vision_sdk/deployment_tools/intel_models/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml ^
 -l C:/Intel/computer_vision_sdk/inference_engine/bin/intel64/Release/cpu_extension_avx2.dll ^

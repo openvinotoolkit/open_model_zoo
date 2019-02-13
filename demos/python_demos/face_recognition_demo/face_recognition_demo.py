@@ -44,14 +44,18 @@ def build_argparser():
             "('cam' for the camera, default)")
     general.add_argument('-o', '--output', metavar="PATH", default="",
         help="(optional) Path to save the output video to")
-    general.add_argument('-no_show', action='store_true',
+    general.add_argument('--no_show', action='store_true',
         help="(optional) Do not display output")
     general.add_argument('-tl', '--timelapse', action='store_true',
         help="(optional) Auto-pause after each frame")
     general.add_argument('-cw', '--crop_width', default=0, type=int,
-        help="(optional) Crop the input stream to this width")
+        help="(optional) Crop the input stream to this width " \
+            "(default: no crop). Both -cw and -ch parameters " \
+            "should be specified to use crop.")
     general.add_argument('-ch', '--crop_height', default=0, type=int,
-        help="(optional) Crop the input stream to this height")
+        help="(optional) Crop the input stream to this height " \
+            "(default: no crop). Both -cw and -ch parameters " \
+            "should be specified to use crop.")
 
     gallery = parser.add_argument_group('Faces database')
     gallery.add_argument('-fg', metavar="PATH", required=True,
@@ -62,35 +66,25 @@ def build_argparser():
 
     models = parser.add_argument_group('Models')
     models.add_argument('-m_fd', metavar="PATH", default="", required=True,
-        help="Path to the Face Detection Adas or Retail model XML file")
+        help="Path to the Face Detection model XML file")
     models.add_argument('-m_lm', metavar="PATH", default="", required=True,
-        help="Path to the Facial Landmarks Regression Retail model XML file")
+        help="Path to the Facial Landmarks Regression model XML file")
     models.add_argument('-m_reid', metavar="PATH", default="", required=True,
-        help="Path to the Face Reidentification Retail model XML file")
-    models.add_argument('-m_hp', metavar="PATH", default="", required=True,
-        help="Path to the Head Pose Estimation Retail model XML file")
+        help="Path to the Face Reidentification model XML file")
 
     infer = parser.add_argument_group('Inference options')
     infer.add_argument('-d_fd', default='CPU', choices=DEVICE_KINDS,
         help="(optional) Target device for the " \
-            "Face Detection Retail model " \
-            "(default: %(default)s)")
+            "Face Detection model (default: %(default)s)")
     infer.add_argument('-d_lm', default='CPU', choices=DEVICE_KINDS,
         help="(optional) Target device for the " \
-            "Facial Landmarks Regression Retail model " \
-            "(default: %(default)s)")
+            "Facial Landmarks Regression model (default: %(default)s)")
     infer.add_argument('-d_reid', default='CPU', choices=DEVICE_KINDS,
         help="(optional) Target device for the " \
-            "Face Reidentification Retail model " \
-            "(default: %(default)s)")
-    infer.add_argument('-d_hp', default='CPU', choices=DEVICE_KINDS,
-        help="(optional) Target device for the " \
-            "Head Pose Estimation Retail model " \
-            "(default: %(default)s)")
+            "Face Reidentification model (default: %(default)s)")
     infer.add_argument('-l', '--cpu_lib', metavar="PATH", default="",
         help="(optional) For MKLDNN (CPU)-targeted custom layers, if any. " \
-            "Path to a shared library with custom layers " \
-            "implementations")
+            "Path to a shared library with custom layers implementations")
     infer.add_argument('-c', '--gpu_lib', metavar="PATH", default="",
         help="(optional) For clDNN (GPU)-targeted custom layers, if any. " \
             "Path to the XML file with descriptions of the kernels")
@@ -103,8 +97,7 @@ def build_argparser():
             "(default: %(default)s)")
     infer.add_argument('-t_id', metavar='[0..1]', type=float, default=0.3,
         help="(optional) Cosine distance threshold between two vectors " \
-            "for face identification " \
-            "(default: %(default)s)")
+            "for face identification (default: %(default)s)")
     infer.add_argument('-exp_r_fd', metavar='NUMBER', type=float, default=1.15,
         help="(optional) Scaling ratio for bboxes passed to face recognition " \
             "(default: %(default)s)")
@@ -145,8 +138,8 @@ class InferenceContext:
                                     if l not in supported_layers]
             if len(not_supported_layers) != 0:
                 log.error("The following layers are not supported " \
-                    "by the plugin for the specified device {}:\n {}". \
-                    format(plugin.device, ', '.join(not_supported_layers)))
+                    "by the plugin for the specified device {}:\n {}" \
+                    .format(plugin.device, ', '.join(not_supported_layers)))
                 log.error("Please try to specify cpu extensions " \
                     "library path in the command line parameters using " \
                     "the '-l' parameter")
@@ -241,10 +234,6 @@ class Module(object):
 
 
 class FaceDetector(Module):
-    RETAIL_INPUT_SHAPE = [1, 3, 300, 300]
-    ADAS_INPUT_SHAPE = [1, 3, 384, 672]
-
-
     class Result:
         OUTPUT_SIZE = 7
 
@@ -265,12 +254,6 @@ class FaceDetector(Module):
         self.input_shape = model.inputs[self.input_blob].shape
         self.output_shape = model.outputs[self.output_blob].shape
 
-        assert np.array_equal(self.ADAS_INPUT_SHAPE, self.input_shape) or \
-               np.array_equal(self.RETAIL_INPUT_SHAPE, self.input_shape), \
-            "Expected model input shape %s, but got %s" % \
-            (" or ".join([self.ADAS_INPUT_SHAPE, self.RETAIL_INPUT_SHAPE]),
-             self.input_shape)
-
         assert len(self.output_shape) == 4 and \
                self.output_shape[3] == self.Result.OUTPUT_SIZE, \
             "Expected model output shape with %s outputs" % \
@@ -282,9 +265,6 @@ class FaceDetector(Module):
 
         assert 0.0 < roi_scale_factor, "Expected positive ROI scale factor"
         self.roi_scale_factor = roi_scale_factor
-
-    def get_input_shape(self):
-        return self.input_shape
 
     def preprocess(self, frame):
         assert len(frame.shape) == 4, "Frame shape should be [1, c, h, w]"
@@ -340,66 +320,6 @@ class FaceDetector(Module):
         return result
 
 
-class HeadPoseEstimator(Module):
-    OUTPUT_PITCH = 'angle_p_fc'
-    OUTPUT_YAW = 'angle_y_fc'
-    OUTPUT_ROLL = 'angle_r_fc'
-
-    class Result:
-        def __init__(self, pitch, yaw, roll):
-            self.pitch = pitch
-            self.yaw = yaw
-            self.roll = roll
-
-    def __init__(self, model):
-        super(HeadPoseEstimator, self).__init__(model)
-
-        assert len(model.inputs) == 1, "Expected 1 input blob"
-        assert len(model.outputs) == 3, "Expected 3 output blobs"
-        self.input_blob = next(iter(model.inputs))
-        self.input_shape = model.inputs[self.input_blob].shape
-
-        assert np.array_equal([1, 3, 60, 60], self.input_shape), \
-            "Expected model input shape %s, but got %s" % \
-            ([1, 3, 60, 60], self.input_shape)
-
-        assert np.array_equal([1, 1], model.outputs[self.OUTPUT_PITCH].shape), \
-            "Expected '%s' blob output shape %s, got %s" % \
-            (self.OUTPUT_PITCH, [1, 1], model.outputs[self.OUTPUT_PITCH].shape)
-        assert np.array_equal([1, 1], model.outputs[self.OUTPUT_YAW].shape), \
-            "Expected '%s' blob output shape %s, got %s" % \
-            (self.OUTPUT_YAW, [1, 1], model.outputs[self.OUTPUT_YAW].shape)
-        assert np.array_equal([1, 1], model.outputs[self.OUTPUT_ROLL].shape), \
-            "Expected '%s' blob output shape %s, got %s" % \
-            (self.OUTPUT_ROLL, [1, 1], model.outputs[self.OUTPUT_ROLL].shape)
-
-    def preprocess(self, frame, rois):
-        assert len(frame.shape) == 4, "Frame shape should be [1, c, h, w]"
-        inputs = cut_rois(frame, rois)
-        inputs = [self._resize(input, self.input_shape) for input in inputs]
-        return inputs
-
-    def enqueue(self, input):
-        return super(HeadPoseEstimator, self).enqueue({self.input_blob: input})
-
-    def start_async(self, frame, rois):
-        inputs = self.preprocess(frame, rois)
-        for input in inputs:
-            self.enqueue(input)
-
-    def get_head_poses(self):
-        outputs = self.get_outputs()
-
-        results = []
-        for output in outputs:
-            pitch = output[self.OUTPUT_PITCH][0][0]
-            yaw = output[self.OUTPUT_YAW][0][0]
-            roll = output[self.OUTPUT_ROLL][0][0]
-            results.append(self.Result(pitch, yaw, roll))
-
-        return results
-
-
 class LandmarksDetector(Module):
     POINTS_NUMBER = 5
 
@@ -425,10 +345,6 @@ class LandmarksDetector(Module):
         self.input_blob = next(iter(model.inputs))
         self.output_blob = next(iter(model.outputs))
         self.input_shape = model.inputs[self.input_blob].shape
-
-        assert np.array_equal([1, 3, 48, 48], self.input_shape), \
-            "Expected model input shape %s, but got %s" % \
-            ([1, 3, 48, 48], self.input_shape)
 
         assert np.array_equal([1, self.POINTS_NUMBER * 2, 1, 1],
                 model.outputs[self.output_blob].shape), \
@@ -579,10 +495,6 @@ class FaceIdentifier(Module):
         self.output_blob = next(iter(model.outputs))
         self.input_shape = model.inputs[self.input_blob].shape
 
-        assert np.array_equal([1, 3, 128, 128], self.input_shape), \
-            "Expected model input shape %s, but got %s" % \
-            ([1, 3, 128, 128], self.input_shape)
-
         assert len(model.outputs[self.output_blob].shape) == 4, \
             "Expected model output shape [1, n, 1, 1], got %s" % \
             (model.outputs[self.output_blob].shape)
@@ -590,9 +502,6 @@ class FaceIdentifier(Module):
         self.faces_database = None
 
         self.match_threshold = match_threshold
-
-    def get_input_shape(self):
-        return self.input_shape
 
     def set_faces_database(self, database):
         self.faces_database = database
@@ -695,7 +604,7 @@ class FrameProcessor:
     QUEUE_SIZE = 16
 
     def __init__(self, args):
-        used_devices = set([args.d_fd, args.d_hp, args.d_lm, args.d_reid])
+        used_devices = set([args.d_fd, args.d_lm, args.d_reid])
         self.context = InferenceContext()
         context = self.context
         context.load_plugins(used_devices, args.cpu_lib, args.gpu_lib)
@@ -705,20 +614,16 @@ class FrameProcessor:
 
         log.info("Loading models")
         face_detector_net = self.load_model(args.m_fd)
-        head_pose_net = self.load_model(args.m_hp)
         landmarks_net = self.load_model(args.m_lm)
         face_reid_net = self.load_model(args.m_reid)
 
         self.face_detector = FaceDetector(face_detector_net,
             confidence_threshold=args.t_fd, roi_scale_factor=args.exp_r_fd)
-        self.head_pose_estimator = HeadPoseEstimator(head_pose_net)
         self.landmarks_detector = LandmarksDetector(landmarks_net)
         self.face_identifier = FaceIdentifier(face_reid_net,
             match_threshold=args.t_id)
 
         self.face_detector.deploy(args.d_fd, context)
-        self.head_pose_estimator.deploy(args.d_hp, context,
-            queue_size=self.QUEUE_SIZE)
         self.landmarks_detector.deploy(args.d_lm, context,
             queue_size=self.QUEUE_SIZE)
         self.face_identifier.deploy(args.d_reid, context,
@@ -758,7 +663,6 @@ class FrameProcessor:
         frame = np.expand_dims(frame, axis=0)
 
         self.face_detector.clear()
-        self.head_pose_estimator.clear()
         self.landmarks_detector.clear()
         self.face_identifier.clear()
 
@@ -770,15 +674,13 @@ class FrameProcessor:
                     (self.QUEUE_SIZE, len(rois))
                 )
             rois = rois[:self.QUEUE_SIZE]
-        self.head_pose_estimator.start_async(frame, rois)
         self.landmarks_detector.start_async(frame, rois)
-        head_poses = self.head_pose_estimator.get_head_poses()
         landmarks = self.landmarks_detector.get_landmarks()
 
         self.face_identifier.start_async(frame, rois, landmarks)
         face_identities = self.face_identifier.get_matches()
 
-        outputs = [rois, head_poses, landmarks, face_identities]
+        outputs = [rois, landmarks, face_identities]
 
         return outputs
 
@@ -786,7 +688,6 @@ class FrameProcessor:
     def get_performance_stats(self):
         stats = {
             'face_detector': self.face_detector.get_performance_stats(),
-            'head_pose': self.head_pose_estimator.get_performance_stats(),
             'landmarks': self.landmarks_detector.get_performance_stats(),
             'face_identifier': self.face_identifier.get_performance_stats(),
         }
@@ -867,79 +768,10 @@ class Visualizer:
             center = roi.position + roi.size * point
             cv2.circle(frame, tuple(center.astype(int)), 2, (0, 255, 255), 2)
 
-    def build_camera_matrix(self, center_x, center_y, focal_distance):
-        camera_matrix = np.matrix(np.zeros((3, 3)))
-        camera_matrix[0, 0] = focal_distance
-        camera_matrix[0, 2] = center_x
-        camera_matrix[1, 1] = focal_distance
-        camera_matrix[1, 2] = center_y
-        camera_matrix[2, 2] = 1
-        return camera_matrix
-
-    def build_rotation_matrix(self, pitch, yaw, roll):
-        from math import sin, cos
-
-        rotation_x = np.matrix([[1,                     0,            0],
-                                [0,            cos(pitch),  -sin(pitch)],
-                                [0,            sin(pitch),   cos(pitch)]])
-
-        rotation_y = np.matrix([[cos(yaw),              0,    -sin(yaw)],
-                                [0,                     1,            0],
-                                [sin(yaw),              0,     cos(yaw)]])
-
-        rotation_z = np.matrix([[cos(roll),    -sin(roll),            0],
-                                [sin(roll),     cos(roll),            0],
-                                [0,                     0,            1]])
-
-        return rotation_z * rotation_y * rotation_x
-
-    def draw_axes(self, frame, angles, center, focal_distance, scale=1.0):
-        from math import radians
-        pitch = radians(angles.pitch)
-        yaw = radians(angles.yaw)
-        roll = radians(angles.roll)
-
-        r = self.build_rotation_matrix(pitch, yaw, roll)
-
-        camera_matrix = self.build_camera_matrix(
-            frame.shape[-1] / 2, frame.shape[-2] / 2, focal_distance)
-
-        origin = np.matrix([0, 0, camera_matrix[0, 0]]).T
-
-        x_axis =  r * np.matrix([1 * scale,          0,          0]).T + origin
-        y_axis =  r * np.matrix([0,         -1 * scale,          0]).T + origin
-        z_axis =  r * np.matrix([0,                  0, -1 * scale]).T + origin
-        z_axis1 = r * np.matrix([0,                  0,  1 * scale]).T + origin
-
-        def make_point(center, axis, distance):
-            return center + \
-                axis[0:2] / axis[2] * np.diag(camera_matrix)[0:2] * distance
-
-        distance = 20
-        cv2.line(frame,
-            tuple(center.astype(int)),
-            tuple(make_point(center, x_axis.A1, distance).astype(int)),
-            (0, 0, 255), 2)
-
-        cv2.line(frame,
-            tuple(center.astype(int)),
-            tuple(make_point(center, y_axis.A1, distance).astype(int)),
-            (0, 255, 0), 2)
-
-        p1 = make_point(center, z_axis1.A1, distance).astype(int)
-        p2 = make_point(center, z_axis.A1, distance).astype(int)
-        cv2.line(frame, tuple(p1), tuple(p2), (255, 0, 0), 2)
-        cv2.circle(frame, tuple(p2), 2, (255, 0, 0), 2)
-
-    def draw_detection_direction(self, frame, roi, pose):
-        self.draw_axes(frame, pose, roi.position + roi.size * 0.5,
-            focal_distance=self.DEFAULT_CAMERA_FOCAL_DISTANCE)
-
     def draw_detections(self, frame, detections):
-        for roi, head_pose, landmarks, identity in zip(*detections):
+        for roi, landmarks, identity in zip(*detections):
             self.draw_detection_roi(frame, roi, identity)
             self.draw_detection_keypoints(frame, roi, landmarks)
-            self.draw_detection_direction(frame, roi, head_pose)
 
     def draw_status(self, frame, detections):
         origin = np.array([10, 10])
@@ -957,7 +789,7 @@ class Visualizer:
                 'frame time: %.3fs, fps: %.1f' % \
             (int(self.input_stream.get(cv2.CAP_PROP_POS_FRAMES)),
                 int(self.input_stream.get(cv2.CAP_PROP_FRAME_COUNT)),
-                len(detections[3]), self.frame_time, self.fps
+                len(detections[-1]), self.frame_time, self.fps
             ))
 
         if self.print_perf_stats:
