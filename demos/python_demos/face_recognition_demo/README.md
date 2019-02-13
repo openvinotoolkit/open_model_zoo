@@ -4,10 +4,10 @@ This example demonstrates an approach to create interactive applications
 for video processing. It shows the basic architecture for building model
 pipelines supporting model placement on different devices and simultaneous
 parallel or sequential execution using OpenVINO library in Python.
-In particular, this demo uses 4 models to build a pipeline able to detect
-faces on videos, detect face direction and its keypoints (aka "landmarks"),
-and recognize persons using provided face database (gallery). The corresponding
-pretrained models can be found in this repository:
+In particular, this demo uses 3 models to build a pipeline able to detect
+faces on videos, their keypoints (aka "landmarks"),
+and recognize persons using the provided faces database (the gallery).
+The corresponding pretrained models can be found in this repository:
 
 * `intel_models/face-detection-retail-0004` and
   `intel_models/face-detection-adas-0001`,
@@ -37,7 +37,7 @@ To recognize faces the application uses a face database, or a gallery.
 The gallery is a folder with images of persons. Each image in the gallery can
 be of arbitrary size and should contain one or more frontally-oriented faces
 with decent quality. The application can use face detector during the gallery
-build, this is controlled by "--run_detector" flag. This allows gallery images
+build, this is controlled by `--run_detector` flag. This allows gallery images
 to contain more than one face image and not to be tightly cropped. However, the
 resulting gallery needs to be checked more thoroughly, since a face detector can
 fail and produce poor crops.
@@ -177,4 +177,4 @@ The demo uses OpenCV window to display the resulting video frame and detections.
 If specified, it also writes output to a file. It outputs logs to the terminal.
 
 ## See also
-* [Using Inference Engine Demos](../Readme.md)
+* [Using Inference Engine Demos](../../Readme.md)
