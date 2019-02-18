@@ -613,7 +613,7 @@ std::string EmotionsDetection::operator[] (int idx) const {
     }
 
     auto emotionsValues = emotionsBlob->buffer().as<float *>();
-    auto outputIdxPos = emotionsValues + idx;
+    auto outputIdxPos = emotionsValues + idx * numOfChannels;
 
     /* identify an index of the most probable emotion in output array
            for idx image to return appropriate emotion name */
