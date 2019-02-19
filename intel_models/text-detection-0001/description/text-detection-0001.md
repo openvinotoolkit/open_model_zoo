@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Text detector based on [PixelNet](https://arxiv.org/pdf/1801.01315.pdf) architecture with [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf) as a backbone for indoor/outdoor scenes.
+Text detector based on [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) architecture with [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf) as a backbone for indoor/outdoor scenes.
 
 ## Example
 
@@ -34,9 +34,9 @@ Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/be
 
 ## Outputs
 
-1. The net outputs two blobs. Refer to [PixelNet](https://arxiv.org/pdf/1801.01315.pdf) for details.
+1. The net outputs two blobs. Refer to [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) and demos for details.
     - [1x2x192x320] - logits related to text/no-text classification for each pixel.
-    - [1x8x192x320] - logits related to linkage between pixels and their neighbors.
+    - [1x16x192x320] - logits related to linkage between pixels and their neighbors.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
