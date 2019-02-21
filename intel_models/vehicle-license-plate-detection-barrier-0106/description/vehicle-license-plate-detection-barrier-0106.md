@@ -13,15 +13,15 @@ the "Barrier" use case.
 
 | Metric                          | Value                                      |
 |---------------------------------|--------------------------------------------|
-| Mean Average Precision (mAP)    | 98.62                                      |
-| AP vehicles                     | 98.03                                      |
-| AP plates                       | 99.21                                      |
+| Mean Average Precision (mAP)    | 98.62%                                     |
+| AP vehicles                     | 98.03%                                     |
+| AP plates                       | 99.21%                                     |
 | Car pose                        | Front facing cars                          |
 | Min plate width                 | 96 pixels                                  |
 | Max objects to detect           | 200                                        |
 | GFlops                          | 0.349                                      |
 | MParams                         | 0.634                                      |
-| Source framework                | TensorFlow*                                 |
+| Source framework                | TensorFlow*                                |
 
 Average Precision (AP) is defined as an area under the
 [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)

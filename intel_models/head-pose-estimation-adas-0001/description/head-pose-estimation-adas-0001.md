@@ -2,8 +2,8 @@
 
 ## Use Case and High-Level Description
 
-Head pose estimation network based on trimmed SqueezeNet_v1.1. Angle regression
-layers are convolutions (width: 128) + ReLU + batch norm + fully connected with
+Head pose estimation network based on simple, handmade CNN architecture. Angle regression
+layers are convolutions + ReLU + batch norm + fully connected with
 one output.
 
 ## Validation Dataset

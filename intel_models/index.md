@@ -19,7 +19,7 @@ network to detect objects of the same type better.
 | [face-detection-adas-0001](./face-detection-adas-0001/description/face-detection-adas-0001.md)                               | 2.835                | 1.053      | X     |         |          |       |                |
 | [face-detection-retail-0004](./face-detection-retail-0004/description/face-detection-retail-0004.md)                                                        | 1.067                | 0.588      | X     |         |          |       |                |
 | [face-person-detection-retail-0002](./face-person-detection-retail-0002/description/face-person-detection-retail-0002.md)                              | 2.757                | 0.791      | X     | X       |          |       |                |
-| [person-detection-retail-0002](./person-detection-retail-0002/description/person-detection-retail-0002.md)                                 | 12.427               | 3.244      |       | X       |          |       |                |
+| [person-detection-retail-0002](./person-detection-retail-0002/description/person-detection-retail-0002.md)                                 | 12.424               | 3.244      |       | X       |          |       |                |
 | [person-detection-retail-0013](./person-detection-retail-0013/description/person-detection-retail-0013.md)                                                      | 2.300                | 0.723      |       | X       |          |       |                |
 | [person-detection-action-recognition-0004](./person-detection-action-recognition-0004/description/person-detection-action-recognition-0004.md)                              | 7.140                | 1.951      |       | X       |          |       |                |
 | [pedestrian-detection-adas-0002](./pedestrian-detection-adas-0002/description/pedestrian-detection-adas-0002.md)                                   | 2.836                | 1.165      |       | X       |          |       |                |
@@ -117,7 +117,7 @@ Deep Learning models for text detection in various applications
 
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
-| [text-detection-0001](./text-detection-0001/description/text-detection-0001.md)                              | 51.256               | 6.747      |
+| [text-detection-0002](./text-detection-0002/description/text-detection-0002.md)                              | 51.256               | 6.747      |
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

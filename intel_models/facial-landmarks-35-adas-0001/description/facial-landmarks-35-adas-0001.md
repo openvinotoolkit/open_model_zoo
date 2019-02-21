@@ -57,7 +57,7 @@ where N is the number of landmarks, _p_-hat and _p_ are, correspondingly, the pr
 
 | Dataset | Mean NE | 90<sup>th</sup> [Percentile](https://en.wikipedia.org/wiki/Percentile) NE | [Standard deviation](https://en.wikipedia.org/wiki/Standard_deviation) of NE |
 | - | - | - | - |
-| Internal dataset | 10.6% | 14.3% | 3.8% |
+| Internal dataset | 0.106 | 0.143 | 0.038 |
 
 
 ## Performance

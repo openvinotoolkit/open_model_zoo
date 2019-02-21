@@ -12,8 +12,8 @@ This is a person reidentification model for a general scenario. It uses a whole 
 
 | Metric                            | Value                                     |
 |-----------------------------------|-------------------------------------------|
-| Market-1501 rank@1 accuracy       | 92.37                                     |
-| Market-1501 mAP                   | 82.53                                     |
+| Market-1501 rank@1 accuracy       | 0.9237                                    |
+| Market-1501 mAP                   | 0.8253                                    |
 | Pose coverage                     | Standing upright, parallel to image plane |
 | Support of occluded pedestrians   | YES                                       |
 | Occlusion coverage                | <50%                                      |
@@ -44,4 +44,3 @@ Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/be
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
-

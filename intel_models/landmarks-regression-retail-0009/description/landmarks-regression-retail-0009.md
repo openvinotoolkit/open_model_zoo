@@ -36,7 +36,7 @@ Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/be
     - H - image height
     - W - image width
 
-   The expected color order is RGB.
+   The expected color order is BGR.
 
 ## Outputs
 

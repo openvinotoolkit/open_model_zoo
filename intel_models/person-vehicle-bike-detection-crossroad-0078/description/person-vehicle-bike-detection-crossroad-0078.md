@@ -62,7 +62,7 @@ Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/be
 1. The net outputs a blob with shape: [1, 1, N, 7], where N is the number of detected
    bounding boxes. For each detection, the description has the format:
    [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
-   
+
     - `image_id` - ID of the image in the batch
     - `label` - predicted class ID
     - `conf` - confidence for the predicted class
