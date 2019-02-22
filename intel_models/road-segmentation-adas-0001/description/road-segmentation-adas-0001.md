@@ -23,11 +23,11 @@ that was converted for four class classification task are:
 
 | Label    |       IOU |       ACC |
 |----------|-----------|-----------|
-| **mean** | **84.4%** | **90.1%** |
-| BG       |     98.6% |     99.4% |
-| road     |     95.4% |     97.4% |
-| curbs    |     72.7% |     83.1% |
-| marks    |     70.8% |     80.6% |
+| **mean** | **0.844** | **0.901** |
+| BG       |     0.986 |     0.994 |
+| road     |     0.954 |     0.974 |
+| curbs    |     0.727 |     0.831 |
+| marks    |     0.708 |     0.806 |
 
 - `IOU=TP/(TP+FN+FP)`
 - `ACC=TP/GT`

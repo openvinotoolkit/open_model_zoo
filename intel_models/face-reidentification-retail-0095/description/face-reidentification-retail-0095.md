@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a lightweight net for face re-identification. It is based on modified Mobilenet V2 backbone that consists of 3x3 inverted residual blocks with squeeze-excitation attention modules. Instead of the ReLU6 activations in the original Mobilnet V2 PReLU ones are used. After the backbone goes global depthwise pooling and 1x1 convolution to create the final embedding vector. The model produces feature vectors which should be close in cosine distance for similar faces and far for different faces.
+This is a lightweight network for the face re-identification scenario. It is based on MobileNet V2 backbone, which consists of 3x3 inverted residual blocks with squeeze-excitation attention modules. Instead of the ReLU6 activations used in the original MobileNet V2, this network uses PReLU ones. After the backbone, the network applies global depthwise pooling and then uses 1x1 convolution to create the final embedding vector. The model produces feature vectors which should be close in cosine distance for similar faces and far for different faces.
 
 ## Example
 
@@ -16,7 +16,7 @@ This is a lightweight net for face re-identification. It is based on modified Mo
 | Face location requirements      | Tight aligned crop                        |
 | GFlops                          | 0.588                                     |
 | MParams                         | 1.107                                     |
-| Source framework                | Pytorch*                                  |
+| Source framework                | PyTorch*                                  |
 
 LFW metric is the accuracy in the pairwise reidentification test. See the full [benchmark description](http://vis-www.cs.umass.edu/lfw/) for details.
 

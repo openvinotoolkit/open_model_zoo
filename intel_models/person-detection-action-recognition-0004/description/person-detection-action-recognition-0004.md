@@ -1,4 +1,4 @@
-# person-detection-action-recognition-classroom-0004
+# person-detection-action-recognition-0004
 
 ## Use Case and High-Level Description
 

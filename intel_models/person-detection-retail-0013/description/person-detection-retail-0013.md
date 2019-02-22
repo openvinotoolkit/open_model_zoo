@@ -15,7 +15,7 @@ feature map has 12 clustered prior boxes.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| AP (Datatang)                   | 88.62%                                    |
+| AP                              | 88.62%                                    |
 | Pose coverage                   | Standing upright, parallel to image plane |
 | Support of occluded pedestrians | YES                                       |
 | Occlusion coverage              | <50%                                      |
