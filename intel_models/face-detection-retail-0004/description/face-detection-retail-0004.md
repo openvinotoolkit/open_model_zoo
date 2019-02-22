@@ -1,0 +1,57 @@
+# face-detection-retail-0004
+
+## Use Case and High-Level Description
+
+Face detector based on SqueezeNet light (half-channels) as a backbone with a
+single SSD for indoor/outdoor scenes shot by a front-facing camera. The backbone
+consists of fire modules to reduce the number of computations. The single SSD
+head from 1/16 scale feature map has nine clustered prior boxes.
+
+## Example
+
+![](./face-detection-retail-0001.png)
+
+## Specification
+
+| Metric                                                        | Value                   |
+|---------------------------------------------------------------|-------------------------|
+| AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 83.00%                  |
+| GFlops                                                        | 1.067                   |
+| MParams                                                       | 0.588                   |
+| Source framework                                              | Caffe*                  |
+
+Average Precision (AP) is defined as an area under the
+[precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
+curve. All numbers were evaluated by taking into account only faces bigger than
+60 x 60 pixels.
+
+## Performance
+Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
+
+## Inputs
+
+1. name: "input" , shape: [1x3x300x300] - An input image in the format [BxCxHxW],
+   where:
+
+    - B - batch size
+    - C - number of channels
+    - H - image height
+    - W - image width
+
+   Expected color order - BGR.
+
+## Outputs
+
+1. The net outputs a blob with shape: [1, 1, N, 7], where N is the number of detected
+   bounding boxes. For each detection, the description has the format:
+   [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
+   where:
+
+    - `image_id` - ID of the image in the batch
+    - `label` - predicted class ID
+    - `conf` - confidence for the predicted class
+    - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
+    - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner.
+
+## Legal Information
+[*] Other names and brands may be claimed as the property of others.

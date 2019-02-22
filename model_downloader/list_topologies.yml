@@ -1,0 +1,948 @@
+# Copyright (c) 2018 Intel Corporation
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#      http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+topologies:
+#
+# PUBLIC TOPOLOGIES
+#
+  - name: "densenet-121"
+    description: "DenseNet-121 (https://github.com/shicai/DenseNet-Caffe). The following Caffe patch must be used to be able to convert this model: https://github.com/BVLC/caffe/pull/3057/files"
+    model: https://raw.githubusercontent.com/shicai/DenseNet-Caffe/a68651c0b91d8dcb7c0ecd39d1fc76da523baf8a/DenseNet_121.prototxt
+    model_hash: baeed2a423794c2c8dc1a80ad96e961112224fa1d319d535735ba93a2b535170
+    weights: https://drive.google.com/uc?id=0B7ubpZO7HnlCcHlfNmJkU2VPelE&export=download
+    weights_hash: c6a6ec988d76c468c3f67501a23a39ec7bf6ebe6729fd99496a15d0e845478b2
+    output: "classification/densenet/121/caffe/"
+    weights_google_drive_id: 0B7ubpZO7HnlCcHlfNmJkU2VPelE
+    weights_size: 32303870
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --mean_values data[103.94,116.78,123.68] --scale_values data[58.8235294117647] --output fc6 --input_model <densenet-121.caffemodel> --input_proto <densenet-121.prototxt>"
+    framework: caffe
+    license: https://github.com/liuzhuang13/DenseNet/blob/master/LICENSE
+  - name: "densenet-161"
+    description: "DenseNet-161 (https://github.com/shicai/DenseNet-Caffe). The following Caffe patch must be used to be able to convert this model: https://github.com/BVLC/caffe/pull/3057/files"
+    model: https://raw.githubusercontent.com/shicai/DenseNet-Caffe/a68651c0b91d8dcb7c0ecd39d1fc76da523baf8a/DenseNet_161.prototxt
+    model_hash: a193e029d66112b077ed29e8b8d36d0bae0593a7f3c64125a433937b5f035b69
+    weights: https://drive.google.com/uc?export=download&confirm=qlti&id=0B7ubpZO7HnlCa0phRGJIRERoTXM
+    weights_hash: e124d9a8f2284f4ab160569139217f709f21be6fc132c865b6a55cb8cae7d6b5
+    output: "classification/densenet/161/caffe"
+    weights_google_drive_id: 0B7ubpZO7HnlCa0phRGJIRERoTXM
+    weights_size: 115676075
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --mean_values data[103.94,116.78,123.68] --scale_values data[58.8235294117647] --output fc6 --input_model <densenet-161.caffemodel> --input_proto <densenet-161.prototxt>"
+    framework: caffe
+    license: https://github.com/liuzhuang13/DenseNet/blob/master/LICENSE
+  - name: "densenet-169"
+    description: "DenseNet-169 (https://github.com/shicai/DenseNet-Caffe). The following Caffe patch must be used to be able to convert this model: https://github.com/BVLC/caffe/pull/3057/files"
+    model: https://raw.githubusercontent.com/shicai/DenseNet-Caffe/a68651c0b91d8dcb7c0ecd39d1fc76da523baf8a/DenseNet_169.prototxt
+    model_hash: dfb577c17d67327be70dba8f2810dbeec4f7edb836779c8055ec8f408b0a2cbc
+    weights: https://drive.google.com/uc?id=0B7ubpZO7HnlCRWVVdUJjVVAyQXc&export=download
+    weights_hash: 8d45f2ab15f6329e2f80004692c58129cc4875ffe43ddf59433ebc2216189f15
+    output: "classification/densenet/169/caffe"
+    weights_google_drive_id: 0B7ubpZO7HnlCRWVVdUJjVVAyQXc
+    weights_size: 57307526
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --mean_values data[103.94,116.78,123.68] --scale_values data[58.8235294117647] --output fc6 --input_model <densenet-169.caffemodel> --input_proto <densenet-169.prototxt>"
+    framework: caffe
+    license: https://github.com/liuzhuang13/DenseNet/blob/master/LICENSE
+  - name: "densenet-201"
+    description: "DenseNet-201 (https://github.com/shicai/DenseNet-Caffe). The following Caffe patch must be used to be able to convert this model: https://github.com/BVLC/caffe/pull/3057/files"
+    model: https://raw.githubusercontent.com/shicai/DenseNet-Caffe/a68651c0b91d8dcb7c0ecd39d1fc76da523baf8a/DenseNet_201.prototxt
+    model_hash: 8edf61f867491315bc3780a41f74392c2a31042d20932eb145424a2dc8c6f8f7
+    weights: https://drive.google.com/uc?export=download&confirm=JWFY&id=0B7ubpZO7HnlCV3pud2oyR3lNMWs
+    weights_hash: ba464965293d4dd5557085d57ec810bf353de362dd90e1b8293e6f0707978e4a
+    output: "classification/densenet/201/caffe"
+    weights_google_drive_id: 0B7ubpZO7HnlCV3pud2oyR3lNMWs
+    weights_size: 81062969
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --mean_values data[103.94,116.78,123.68] --scale_values data[58.8235294117647] --output fc6 --input_model <densenet-201.caffemodel> --input_proto <densenet-201.prototxt>"
+    framework: caffe
+    license: https://github.com/liuzhuang13/DenseNet/blob/master/LICENSE
+  - name: "squeezenet1.0"
+    description: "SqueezeNet v1.0 (https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.0)"
+    model: https://raw.githubusercontent.com/DeepScale/SqueezeNet/a47b6f13d30985279789d08053d37013d67d131b/SqueezeNet_v1.0/deploy.prototxt
+    model_hash: 6e4ecef2a27347e226a5ef8be31d6d1b9d19f5a40afa1986ec259fd5fa3bd91c
+    weights: https://github.com/DeepScale/SqueezeNet/raw/a47b6f13d30985279789d08053d37013d67d131b/SqueezeNet_v1.0/squeezenet_v1.0.caffemodel
+    weights_hash: 9ff8035aada1f9ffa880b35252680d971434b141ec9fbacbe88309f0f9a675ce
+    output: "classification/squeezenet/1.0/caffe"
+    old_dims: [10,3,227,227]
+    new_dims: [1,3,227,227]
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,227,227] --input data --mean_values data[104.0,117.0,123.0] --output prob --input_model <squeezenet1.0.caffemodel> --input_proto <squeezenet1.0.prototxt>"
+    framework: caffe
+    license: https://github.com/DeepScale/SqueezeNet/blob/master/LICENSE
+  - name: "squeezenet1.1"
+    description: "SqueezeNet v1.1 (https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.1)"
+    model: https://raw.githubusercontent.com/DeepScale/SqueezeNet/a47b6f13d30985279789d08053d37013d67d131b/SqueezeNet_v1.1/deploy.prototxt
+    model_hash: d041bfb2ab4b32fda4ff6c6966684132f2924e329916aa5bfe9285c6b23e3d1c
+    weights: https://github.com/DeepScale/SqueezeNet/raw/a47b6f13d30985279789d08053d37013d67d131b/SqueezeNet_v1.1/squeezenet_v1.1.caffemodel
+    weights_hash: 72b912ace512e8621f8ff168a7d72af55910d3c7c9445af8dfbff4c2ee960142
+    output: "classification/squeezenet/1.1/caffe"
+    old_dims: [10,3,227,227]
+    new_dims: [1,3,227,227]
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,227,227] --input data --mean_values data[104.0,117.0,123.0] --output prob --input_model <squeezenet1.1.caffemodel> --input_proto <squeezenet1.1.prototxt>"
+    framework: caffe
+    license: https://github.com/DeepScale/SqueezeNet/blob/master/LICENSE
+  - name: "mtcnn-p"
+    description: "MTCNN-Proposal Network (https://github.com/DuinoDu/mtcnn/tree/master/model https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf)"
+    model: https://raw.githubusercontent.com/DuinoDu/mtcnn/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det1.prototxt
+    model_hash: adc1756d8515d3ca3a6a186c0fadab66fcae04bd8d3c6388e2fe8797a626dde4
+    weights: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det1.caffemodel
+    weights_hash: d6085e7f48ba7e6b6f1b58964595f6bce5b97bcc4866751f7b4bdc98f920c096
+    output: "object_detection/common/mtcnn/p/caffe"
+    old_dims: [1,3,12,12]
+    new_dims: [1,3,720,1280]
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,720,1280] --input data --output prob1 --input_model <mtcnn-p.caffemodel> --input_proto <mtcnn-p.prototxt>"
+    framework: caffe
+    license: https://github.com/DuinoDu/mtcnn/blob/master/LICENSE
+  - name: "mtcnn-r"
+    description: "MTCNN-Refine Network (https://github.com/DuinoDu/mtcnn/tree/master/model https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf)"
+    model: https://raw.githubusercontent.com/DuinoDu/mtcnn/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det2.prototxt
+    model_hash: 077686e89e606354f425366afdb2018777d93c6450b50e2c12301f8a97f6bb47
+    weights: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det2.caffemodel
+    weights_hash: 39b20f7a57bb8176cc9466cea4dfd52da6a6f876de60c7ab222a309f2d0ca08c
+    output: "object_detection/common/mtcnn/r/caffe"
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,24,24] --input data --output prob1 --input_model <mtcnn-r.caffemodel> --input_proto <mtcnn-r.prototxt>"
+    framework: caffe
+    license: https://github.com/DuinoDu/mtcnn/blob/master/LICENSE
+  - name: "mtcnn-o"
+    description: "MTCNN-Output Network (https://github.com/DuinoDu/mtcnn/tree/master/model https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf)"
+    model: https://raw.githubusercontent.com/DuinoDu/mtcnn/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det3.prototxt
+    model_hash: a8385a3aad241acf5902b79466f9a359ea9f03a3b6dcbe1e1efa050908cf7d04
+    weights: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det3.caffemodel
+    weights_hash: 9d6098829a4d6d318f37cec42142465637fafe4c673f2e93b69495bf7ca23d2d
+    output: "object_detection/common/mtcnn/o/caffe"
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,48,48] --input data --output prob1 --input_model <mtcnn-o.caffemodel> --input_proto <mtcnn-o.prototxt>"
+    framework: caffe
+    license: https://github.com/DuinoDu/mtcnn/blob/master/LICENSE
+  - name: "mobilenet-ssd"
+    description: "Common object detection architecture (https://github.com/chuanqi305/MobileNet-SSD)"
+    model: https://raw.githubusercontent.com/chuanqi305/MobileNet-SSD/ba00fc987b3eb0ba87bb99e89bf0298a2fd10765/MobileNetSSD_deploy.prototxt
+    model_hash: e781559c4f5beaec2a486ccd952af5b6fa408e9498761bf5f4fb80b4e9f0d25e
+    weights: https://drive.google.com/uc?id=0B3gersZ2cHIxRm5PMWRoTkdHdHc&export=download
+    weights_hash: 761c86fbae3d8361dd454f7c740a964f62975ed32f4324b8b85994edec30f6af
+    output: "object_detection/common/mobilenet-ssd/caffe"
+    weights_google_drive_id: 0B3gersZ2cHIxRm5PMWRoTkdHdHc
+    weights_size: 23147564
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,300,300] --input data --mean_values data[127.5,127.5,127.5] --scale_values data[127.50223128904757] --output detection_out --input_model <mobilenet-ssd.caffemodel> --input_proto <mobilenet-ssd.prototxt>"
+    framework: caffe
+    license: https://github.com/tensorflow/models/blob/master/LICENSE
+  - name: "vgg19"
+    description: "VGG Net-E (https://arxiv.org/pdf/1409.1556.pdf)"
+    model: https://gist.githubusercontent.com/ksimonyan/3785162f95cd2d5fee77/raw/f02f8769e64494bcd3d7e97d5d747ac275825721/VGG_ILSVRC_19_layers_deploy.prototxt
+    model_hash: e7c9da46d837dd91049ddab46a57933a488e3d8a42162cdef51ab1edeff99725
+    weights: http://www.robots.ox.ac.uk/~vgg/software/very_deep/caffe/VGG_ILSVRC_19_layers.caffemodel
+    weights_hash: 31b4c627c40c6ee151325f079b7ac557fddbd1f79af932888796127a4f4f6954
+    output: "classification/vgg/19/caffe"
+    old_dims: [10,3,224,224]
+    new_dims: [1,3,224,224]
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --mean_values data[103.939,116.779,123.68] --output prob --input_model <vgg19.caffemodel> --input_proto <vgg19.prototxt>"
+    framework: caffe
+    license: https://github.com/keras-team/keras/blob/master/LICENSE
+  - name: "vgg16"
+    description: "VGG Net-D (https://arxiv.org/pdf/1409.1556.pdf)"
+    model: https://gist.githubusercontent.com/ksimonyan/211839e770f7b538e2d8/raw/0067c9b32f60362c74f4c445a080beed06b07eb3/VGG_ILSVRC_16_layers_deploy.prototxt
+    model_hash: 9fdb04e3f5b9224af473e82441b05b76368dfa6dc841e80655303823e9770962
+    weights: http://www.robots.ox.ac.uk/~vgg/software/very_deep/caffe/VGG_ILSVRC_16_layers.caffemodel
+    weights_hash: a6196bc498e45ea4cb2637114ae8db9410cf1556fd60a55ae93272371beba197
+    output: "classification/vgg/16/caffe"
+    old_dims: [10,3,224,224]
+    new_dims: [1,3,224,224]
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --mean_values data[103.939,116.779,123.68] --output prob --input_model <vgg16.caffemodel> --input_proto <vgg16.prototxt>"
+    framework: caffe
+    license: https://github.com/keras-team/keras/blob/master/LICENSE
+  - name: "ssd512"
+    description: "SSD-512 (https://arxiv.org/pdf/1512.02325.pdf)"
+    model_hash: e8a18363aeb8a74a90fda6d6c8596994aca018061765b2aa38f8e0a580ca4c70
+    weights_hash: 60670be0b28cbde887c99d01c8aa5b10c9e1b7ae6e572da0901aa632da678b3b
+    output: "object_detection/common/ssd/512/caffe"
+    tar: https://drive.google.com/uc?export=download&confirm=MPr8&id=0BzKzrI_SkD1_MjFjNTlnempHNWs
+    tar_google_drive_id: 0BzKzrI_SkD1_MjFjNTlnempHNWs
+    model_path_prefix: "models/VGGNet/VOC0712Plus/SSD_512x512/deploy.prototxt"
+    weights_path_prefix: "models/VGGNet/VOC0712Plus/SSD_512x512/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel"
+    delete_output_param: True
+    tar_size: 100991061
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,512,512] --input data --mean_values data[104.0,117.0,123.0] --output detection_out --input_model <ssd512.caffemodel> --input_proto <ssd512.prototxt>"
+    framework: caffe
+    license: https://github.com/weiliu89/caffe/blob/ssd/LICENSE
+  - name: "ssd300"
+    description: "SSD-300 (https://arxiv.org/pdf/1512.02325.pdf)"
+    model_hash: 0366cd7cb909aebe499bc23d34e1aaf5c81ff2e32c438ba87db2845c4edf1309
+    weights_hash: 08cab67129496a99c3ef6ca9ae52a955e8ec770075a9d7e15ac8bf0b14c02ef1
+    output: "object_detection/common/ssd/300/caffe"
+    tar: https://drive.google.com/uc?export=download&confirm=YQb1&id=0BzKzrI_SkD1_TkFPTEQ1Z091SUE
+    tar_google_drive_id: 0BzKzrI_SkD1_TkFPTEQ1Z091SUE
+    model_path_prefix: "models/VGGNet/VOC0712Plus/SSD_300x300_ft/deploy.prototxt"
+    weights_path_prefix: "models/VGGNet/VOC0712Plus/SSD_300x300_ft/VGG_VOC0712Plus_SSD_300x300_ft_iter_160000.caffemodel"
+    delete_output_param: True
+    tar_size: 97789219
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,300,300] --input data --mean_values data[104.0,117.0,123.0] --output detection_out --input_model <ssd300.caffemodel> --input_proto <ssd300.prototxt>"
+    framework: caffe
+    license: https://github.com/weiliu89/caffe/blob/ssd/LICENSE
+  - name: "inception-resnet-v2"
+    description: "Inception-ResNet V2 architecture (https://arxiv.org/pdf/1602.07261.pdf)"
+    model: https://drive.google.com/drive/folders/0B9mkjlmP0d7zc3A4NWlQQzdoM28
+    model_hash: 8d53ee1f4112716e3e53d65ddc1936eeb6ca8f26d49cdb1129aba3bb78bdc209
+    weights: https://drive.google.com/drive/folders/0B9mkjlmP0d7zc3A4NWlQQzdoM28
+    weights_hash: 1027d403ba8bf6211ca0d25f4b9ec6d4357d1407a812835b741004d5ad308b92
+    output: "classification/inception-resnet/v2/caffe"
+    weights_google_drive_id: 0B9mkjlmP0d7zNmY5eXZhLUhzQVE
+    model_google_drive_id: 0B9mkjlmP0d7zUXhsMmI4cWR6MmM
+    weights_size: 223511172
+    model_size: 192362
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,299,299] --input data --output prob --input_model <inception-resnet-v2.caffemodel> --input_proto <inception-resnet-v2.prototxt>"
+    framework: caffe
+    license: https://github.com/soeaver/caffe-model/blob/master/LICENSE
+  - name: "dilation"
+    description: "Multi-Scale Context Aggregation by Dilated Convolutions (https://arxiv.org/pdf/1511.07122.pdf)"
+    model: https://raw.githubusercontent.com/fyu/dilation/0f105742e8c2202af12feb54374781ba55c3e112/models/dilation10_cityscapes_deploy.prototxt
+    weights: http://dl.yf.io/dilation/models/dilation10_cityscapes.caffemodel
+    model_hash: 7b1adfc35901b5626504b44fbf3567bcf81926b9482b031925012e8fbef8f219
+    weights_hash: ec6cec2bfa0f1b199f11e73f0e030ae29326bc5648f3ddf9127feb3367b68b92
+    output: "semantic_segmentation/dilation/cityscapes/caffe"
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,1396,1396] --input data --mean_values data[72.39,82.91,73.16] --output prob --input_model <dilation.caffemodel> --input_proto <dilation.prototxt>"
+    framework: caffe
+    license: https://github.com/fyu/dilation/blob/master/LICENSE
+  - name: "googlenet-v1"
+    description: "GoogleNet v1 (Inception v1) (https://arxiv.org/pdf/1409.4842.pdf)"
+    model: https://raw.githubusercontent.com/BVLC/caffe/88c96189bcbf3853b93e2b65c7b5e4948f9d5f67/models/bvlc_googlenet/deploy.prototxt
+    model_hash: fa36cd4112a3240a29600a5aa35333f31bec33daa1a6085b0af308a9f50f0c50
+    weights: http://dl.caffe.berkeleyvision.org/bvlc_googlenet.caffemodel
+    weights_hash: 6f7101e3a2183738a7125a0c5021ba82a1feb4228c5ca0924d991b6daf6f6fad
+    output: "classification/googlenet/v1/caffe"
+    old_dims: [10,3,224,224]
+    new_dims: [1,3,224,224]
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --mean_values data[104.0,117.0,123.0] --output prob --input_model <googlenet-v1.caffemodel> --input_proto <googlenet-v1.prototxt>"
+    framework: caffe
+    license: https://github.com/BVLC/caffe/blob/master/LICENSE
+  - name: "googlenet-v2"
+    description: "GoogleNet v2 (Inception v2) (https://arxiv.org/pdf/1502.03167.pdf)"
+    model: https://raw.githubusercontent.com/lim0606/caffe-googlenet-bn/d19caf526b7d8cad873ff91ba4cea602eadd58b3/deploy.prototxt
+    model_hash: 18c77f01cca83c4cee973bfd8739968210dd6a1e5af1b857faaec230c5aa7d5a
+    weights: https://github.com/lim0606/caffe-googlenet-bn/raw/d19caf526b7d8cad873ff91ba4cea602eadd58b3/snapshots/googlenet_bn_stepsize_6400_iter_1200000.caffemodel
+    weights_hash: c6581a8e60e5ae8962183ff019986fc9dfacc5e5bd5247d76a0ff7fae8e0409a
+    output: "classification/googlenet/v2/caffe"
+    old_dims: [10,3,224,224]
+    new_dims: [1,3,224,224]
+    layers_to_layer: True
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --mean_values data[104.0,117.0,123.0] --output prob --input_model <googlenet-v2.caffemodel> --input_proto <googlenet-v2.prototxt>"
+    framework: caffe
+    license: https://github.com/lim0606/caffe-googlenet-bn/blob/master/README.md
+  - name: "googlenet-v4"
+    description: "GoogleNet v4 (Inception v4)"
+    model: https://drive.google.com/drive/folders/0B9mkjlmP0d7zUEJ3aEJ2b3J0RFU
+    model_hash: 2213d8729839cd015c4b0335d91da1cf4a034627fadedcdb5bf8ac347c4896d9
+    weights: https://drive.google.com/drive/folders/0B9mkjlmP0d7zUEJ3aEJ2b3J0RFU
+    weights_hash: 6ff248c1215a9fc14ac7ccd44b03da35e41e50bde054ba201bd9c737522996c3
+    output: "classification/googlenet/v4/caffe"
+    weights_google_drive_id: 0B9mkjlmP0d7zeG1HREVMR2F3WmM
+    model_google_drive_id: 0B9mkjlmP0d7zWEJsRl9zeTQ1NzA
+    weights_size: 170777072
+    model_size: 86534
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,299,299] --input data --mean_values data[128.0,128.0,128.0] --scale_values data[128.0] --output prob --input_model <googlenet-v4.caffemodel> --input_proto <googlenet-v4.prototxt>"
+    framework: caffe
+    license: https://github.com/soeaver/caffe-model/blob/master/LICENSE
+  - name: "alexnet"
+    description: "AlexNet (http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)"
+    model: https://raw.githubusercontent.com/BVLC/caffe/88c96189bcbf3853b93e2b65c7b5e4948f9d5f67/models/bvlc_alexnet/deploy.prototxt
+    model_hash: b564ba76416b4ac1e062c6621cbd80d9c19304ba152d9d791c75870f3182c4fa
+    weights: http://dl.caffe.berkeleyvision.org/bvlc_alexnet.caffemodel
+    weights_hash: 4bff209a9837298157915ef50a4831a59636a6ca1a6b8ebacd990c3a5f3053e0
+    output: "classification/alexnet/caffe"
+    old_dims: [10,3,227,227]
+    new_dims: [1,3,227,227]
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,227,227] --input data --mean_values data[104.0,117.0,123.0] --output prob --input_model <alexnet.caffemodel> --input_proto <alexnet.prototxt>"
+    framework: caffe
+    license: https://github.com/BVLC/caffe/blob/master/models/bvlc_alexnet/readme.md
+  - name: "ssd_mobilenet_v2_coco"
+    description: "MobileNetV2 object detection architecture (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
+    model_hash: 2a8d8a89d695842e60d8c6d144181100555563e21acf2fa1e8f561fec5c3c6ad
+    tar: http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_coco_2018_03_29.tar.gz
+    output: "object_detection/common/ssd_mobilenet_v2_coco/tf"
+    model_path_prefix: "ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph.pb"
+    model_optimizer_args: "--framework tf --data_type FP32 --reverse_input_channels --input_shape [1,300,300,3] --input image_tensor --tensorflow_use_custom_operations_config ./extensions/front/tf/ssd_v2_support.json --tensorflow_object_detection_api_pipeline_config ./pipeline.config --output detection_classes,detection_scores,detection_boxes,num_detections --input_model <ssd_mobilenet_v2_coco.pb>"
+    framework: tf
+    license: https://github.com/tensorflow/models/blob/master/LICENSE
+  - name: "resnet-50"
+    description: "ResNet-50 (https://arxiv.org/pdf/1512.03385.pdf)"
+    model: https://onedrive.live.com/download?cid=4006CBB8476FF777&resid=4006CBB8476FF777%2117891&authkey=AAFW2-FVoxeVRck
+    model_hash: 2f8fb64f68c6bcda94eb2640f80aed94efb91664122e72a6b7587012cc57dedc
+    weights: https://onedrive.live.com/download?cid=4006CBB8476FF777&resid=4006CBB8476FF777%2117895&authkey=AAFW2-FVoxeVRck
+    weights_hash: 44ee2b08816cede2b7aaa047888df07dcab52f73399aa1c8bef05a17bfdd4888
+    output: "classification/resnet/v1/50/caffe/"
+    weights_size: 102462397
+    model_size: 32500
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --output prob --input_model <resnet-50.caffemodel> --input_proto <resnet-50.prototxt>"
+    framework: caffe
+    license: https://github.com/KaimingHe/deep-residual-networks/blob/master/LICENSE
+  - name: "resnet-101"
+    description: "ResNet-101 (https://arxiv.org/pdf/1512.03385.pdf)"
+    model: https://onedrive.live.com/download?cid=4006CBB8476FF777&resid=4006CBB8476FF777%2117892&authkey=AAFW2-FVoxeVRck
+    model_hash: 5df4375748076544e6cc4bfde7885e633312b5ed529d65cc2ff6573a819ea972
+    weights: https://onedrive.live.com/download?cid=4006CBB8476FF777&resid=4006CBB8476FF777%2117896&authkey=AAFW2-FVoxeVRck
+    weights_hash: 2847d93346d7928ec1f257f49f60ea53e9075c15265c494469610e67ffb7f2e2
+    output: "classification/resnet/v1/101/caffe/"
+    weights_size: 178662602
+    model_size: 65439
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --output prob --input_model <resnet-101.caffemodel> --input_proto <resnet-101.prototxt>"
+    framework: caffe
+    license: https://github.com/KaimingHe/deep-residual-networks/blob/master/LICENSE
+  - name: "resnet-152"
+    description: "ResNet-152 (https://arxiv.org/pdf/1512.03385.pdf)"
+    model: https://onedrive.live.com/download?cid=4006CBB8476FF777&resid=4006CBB8476FF777%2117893&authkey=AAFW2-FVoxeVRck
+    model_hash: 9e0fc0df6ac038048a87c63d56fd534471b6b4f39d55651beaf201763e028489
+    weights: https://onedrive.live.com/download?cid=4006CBB8476FF777&resid=4006CBB8476FF777%2117897&authkey=AAFW2-FVoxeVRck
+    weights_hash: 6253c4c4132c0b25c112b166629aa57dcaeec044a4c68ac9f003b6c801329d55
+    output: "classification/resnet/v1/152/caffe/"
+    weights_size: 241444171
+    model_size: 98034
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --output prob --input_model <resnet-152.caffemodel> --input_proto <resnet-152.prototxt>"
+    framework: caffe
+    license: https://github.com/KaimingHe/deep-residual-networks/blob/master/LICENSE
+  - name: "googlenet-v3"
+    description: "GoogleNet v3 (Inception v3) (https://arxiv.org/pdf/1512.00567.pdf)"
+    model_hash: f5ce67052687aba5bc35250b51e8d0f127d3fd140eac67b47c07d012d20d55a3
+    tar: https://storage.googleapis.com/download.tensorflow.org/models/inception_v3_2016_08_28_frozen.pb.tar.gz
+    output: "classification/googlenet/v3/tf/"
+    model_path_prefix: "inception_v3_2016_08_28_frozen.pb"
+    model_optimizer_args: "--framework tf --data_type FP32 --reverse_input_channels --input_shape [1,299,299,3] --input input --mean_values input[127.5,127.5,127.5] --scale_values input[127.50000414375013] --output InceptionV3/Predictions/Softmax --input_model <googlenet-v3.pb>"
+    framework: tf
+    license: https://github.com/tensorflow/models/blob/master/LICENSE
+  - name: "se-inception"
+    description: "BN-Inception with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
+    model: https://raw.githubusercontent.com/hujie-frank/SENet/369374b0678907a0e45c6f267256c7c34203177e/models/SE-BN-Inception.prototxt
+    model_hash: 57813dfc27113ce1bc714b069d574f80643ad58480e6f35bdf1dec690075c6b3
+    weights: https://drive.google.com/file/u/1/d/0BwHV3BlNKkWlTWRRbDZYbVB2WWc/view
+    weights_hash: 0660aa2b867f7353794d3ac02081d9178ac0709e8d8d75c29290dba4bc10ce03
+    output: "classification/se-networks/se-inception/caffe/"
+    weights_google_drive_id: 0BwHV3BlNKkWlTWRRbDZYbVB2WWc
+    weights_size: 47855246
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --mean_values data[104.0,117.0,123.0] --output prob --input_model <se-inception.caffemodel> --input_proto <se-inception.prototxt>"
+    framework: caffe
+    license: https://github.com/hujie-frank/SENet/blob/master/LICENSE
+  - name: "se-resnet-101"
+    description: "ResNet-101 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
+    model: https://raw.githubusercontent.com/hujie-frank/SENet/369374b0678907a0e45c6f267256c7c34203177e/models/SE-ResNet-101.prototxt
+    model_hash: c97375db60ad04e1196966c7149bd5cc98fbb9a34bdde511c26c922ba791903d
+    weights: https://drive.google.com/file/d/0BwHV3BlNKkWlTEg4YmcwQ0FoZFU/view
+    weights_hash: 09777ce1202087954ee34ae2566cf611d03d2d8195ced0fe51b612ebf951d729
+    output: "classification/se-networks/se-resnet-101/caffe/"
+    weights_google_drive_id: 0BwHV3BlNKkWlTEg4YmcwQ0FoZFU
+    weights_size: 197806200
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --mean_values data[104.0,117.0,123.0] --output prob --input_model <se-resnet-101.caffemodel> --input_proto <se-resnet-101.prototxt>"
+    framework: caffe
+    license: https://github.com/hujie-frank/SENet/blob/master/LICENSE
+  - name: "se-resnet-152"
+    description: "ResNet-152 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
+    model: https://raw.githubusercontent.com/hujie-frank/SENet/369374b0678907a0e45c6f267256c7c34203177e/models/SE-ResNet-152.prototxt
+    model_hash: 9cfe789f971c3418e50e435f494d6479a5a0f263a07bf9c13e434a0e5919b2f2
+    weights: https://drive.google.com/file/d/0BwHV3BlNKkWlcFE0Q2NTcWl3WUE/view
+    weights_hash: bbe7fc5b5068b7cd4b12ce1bb78f61bd3f48238a372e70ab9c0724afa778e5d1
+    output: "classification/se-networks/se-resnet-152/caffe/"
+    weights_google_drive_id: 0BwHV3BlNKkWlcFE0Q2NTcWl3WUE
+    weights_size: 268009578
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --mean_values data[104.0,117.0,123.0] --output prob --input_model <se-resnet-152.caffemodel> --input_proto <se-resnet-152.prototxt>"
+    framework: caffe
+    license: https://github.com/hujie-frank/SENet/blob/master/LICENSE
+  - name: "se-resnet-50"
+    description: "ResNet-50 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
+    model: https://raw.githubusercontent.com/hujie-frank/SENet/369374b0678907a0e45c6f267256c7c34203177e/models/SE-ResNet-50.prototxt
+    model_hash: eebbe3c64201f34492caf501498f6031152edbd4a44ed106de69441060ff117c
+    weights: https://drive.google.com/file/d/0BwHV3BlNKkWlS2QwZHFzM3RjNzg/view
+    weights_hash: 72880fde3bd29b324bb302c80f49a098b8970597494c56525fd410a8d2ed5993
+    output: "classification/se-networks/se-resnet-50/caffe"
+    weights_google_drive_id: 0BwHV3BlNKkWlS2QwZHFzM3RjNzg
+    weights_size: 112602669
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --mean_values data[104.0,117.0,123.0] --output prob --input_model <se-resnet-50.caffemodel> --input_proto <se-resnet-50.prototxt>"
+    framework: caffe
+    license: https://github.com/hujie-frank/SENet/blob/master/LICENSE
+  - name: "se-resnext-50"
+    description: "ResNeXt-50 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
+    model: https://raw.githubusercontent.com/hujie-frank/SENet/369374b0678907a0e45c6f267256c7c34203177e/models/SE-ResNeXt-50.prototxt
+    model_hash: a44865802483b8e20fcc712540c4995ef27c3dc809d9235f5882a13ef5c16e67
+    weights: https://drive.google.com/file/d/0BwHV3BlNKkWlQ2Z0Q204V1RITjA/view
+    weights_hash: f12c6b53c2dcd0f38f388d3d5f98cbfc039357e84842e661f28a49719dd52219
+    output: "classification/se-networks/se-resnext-50/caffe/"
+    weights_google_drive_id: 0BwHV3BlNKkWlQ2Z0Q204V1RITjA
+    weights_size: 110550637
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --mean_values data[104.0,117.0,123.0] --output prob --input_model <se-resnext-50.caffemodel> --input_proto <se-resnext-50.prototxt>"
+    framework: caffe
+    license: https://github.com/hujie-frank/SENet/blob/master/LICENSE
+  - name: "se-resnext-101"
+    description: "ResNeXt-101 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
+    model: https://raw.githubusercontent.com/hujie-frank/SENet/369374b0678907a0e45c6f267256c7c34203177e/models/SE-ResNeXt-101.prototxt
+    model_hash: 8a23f1488f5dad2bc4e11b3e7733bc95783301d8c426677989fb11eb7ea2de8b
+    weights: https://drive.google.com/file/d/0BwHV3BlNKkWleklsNzBiZlprblk/view
+    weights_hash: 78dc95c9b768fdb32a0a3981a686edaf655df82973b051d818bae523c9a93c90
+    output: "classification/se-networks/se-resnext-101/caffe"
+    weights_google_drive_id: 0BwHV3BlNKkWleklsNzBiZlprblk
+    weights_size: 196447403
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,224,224] --input data --mean_values data[104.0,117.0,123.0] --output prob --input_model <se-resnext-101.caffemodel> --input_proto <se-resnext-101.prototxt>"
+    framework: caffe
+    license: https://github.com/hujie-frank/SENet/blob/master/LICENSE
+  - name: "Sphereface"
+    description: "Deep face recognition under open-set protocol (https://arxiv.org/pdf/1704.08063.pdf)"
+    model: https://raw.githubusercontent.com/wy1iu/sphereface/7f9acb157c78a99dbefd041fce9f188400bbb4e5/train/code/sphereface_deploy.prototxt
+    model_hash: 7cf5808fd0561db20daae862b83677b7437e788420fae68ab8d97c935e67d82c
+    weights: https://drive.google.com/file/d/0B_geeR2lTMegb2F6dmlmOXhWaVk/edit
+    weights_hash: 092d8fb00291d80ed7e43f7c9323693581cd75e734be3c52764525043288a20d
+    output: "face_recognition/sphereface/caffe/"
+    weights_google_drive_id: 0B_geeR2lTMegb2F6dmlmOXhWaVk
+    weights_size: 90688218
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,112,96] --input data --mean_values data[127.5,127.5,127.5] --scale_values data[128.0] --output fc5 --input_model <Sphereface.caffemodel> --input_proto <Sphereface.prototxt>"
+    framework: caffe
+    license: https://github.com/wy1iu/sphereface/blob/master/LICENSE
+  - name: "license-plate-recognition-barrier-0007"
+    description: "TensorFlow LPRNet"
+    model_hash: 98351254d40af43bee2378cb841f5b1e5d2919bdf3fc5099abd8e9f4ef4b9ea5
+    tar: https://download.01.org/openvinotoolkit/training_toolbox_tensorflow/models/lpr/chinese_lp/license-plate-recognition-barrier-0007.tar.gz
+    output: "optical_character_recognition/license_plate_recognition/tf/"
+    model_path_prefix: "license-plate-recognition-barrier-0007/model/model.frozen.pb"
+    model_optimizer_args: "--framework tf --data_type FP32 --reverse_input_channels --input_shape [1,24,94,3] --input input --scale_values input[254.99997577500233] --output d_predictions --input_model <license-plate-recognition-barrier-0007.frozen>"
+    framework: tf
+    license: https://github.com/opencv/training_toolbox_tensorflow/blob/develop/LICENSE
+  - name: "age-gender-recognition-retail-0013"
+    description: "Age & gender classification."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.xml
+    model_hash: 9fb04b4794345e4efc19b7d0f11744f1195e06fdc891e30c87c3caaf92a0ea55
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.bin
+    weights_hash: 4dab79cfedebd628f3327367a91c9736a32fbf9cc733cbbf1629d16910d4ace7
+    output: "Retail/object_attributes/age_gender/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "age-gender-recognition-retail-0013-fp16"
+    description: "Age & gender classification."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.xml
+    model_hash: 4e5a1ac7f490684339ad5ba63f5e383cbe9ffde668026038213ba689f26033d7
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin
+    weights_hash: 401101e0a01b3d68add39deae833bcf9f54238d37dd13e3fb1534aa8fbe4719d
+    output: "Retail/object_attributes/age_gender/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "emotions-recognition-retail-0003"
+    description: "Recognizes 5 emotions for a face."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
+    model_hash: 62cedde5671b6c6b8cf7ae7725bfa487b6aab70699f6f2d1835c4c541f944de9
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
+    weights_hash: bcb9b1a910fa3cd18a638bb1dbb0597c4ef7a080d1b83008c8e8c2c3c42b99dd
+    output: "Retail/object_attributes/emotions_recognition/0003/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "emotions-recognition-retail-0003-fp16"
+    description: "Recognizes 5 emotions for a face."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
+    model_hash: d43f58e891dc6710d38cd1d073aebe0e8e02498775b8f02c7c3ec54c3002da78
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
+    weights_hash: e62fb4b819b3b3ad8aafcd308d4353db2f164a1a31d78de6cf5970837aeb6f7b
+    output: "Retail/object_attributes/emotions_recognition/0003/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "face-detection-adas-0001"
+    description: "Face Detection (MobileNet with reduced channels + SSD with weights sharing)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-detection-adas-0001/FP32/face-detection-adas-0001.xml
+    model_hash: 971663295a50e1afe298f99815f47d4d7fe195cbc83ed24452b10b50f89791b2
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-detection-adas-0001/FP32/face-detection-adas-0001.bin
+    weights_hash: b2681ed6f23fb4337d76bade4a24517ae22bce8320eb82c55d8df8f42d7d299e
+    output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "face-detection-adas-0001-fp16"
+    description: "Face Detection (MobileNet with reduced channels + SSD with weights sharing)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-detection-adas-0001/FP16/face-detection-adas-0001.xml
+    model_hash: f0a358c2c09a1e311cec6a968b37ad6a4f333aad2654ee2d168ab92242dbfb2a
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-detection-adas-0001/FP16/face-detection-adas-0001.bin
+    weights_hash: 7f5e1aea0f4397700e00d90c2f94c5f6cc1ccce2c984aa487548768b65da26aa
+    output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "face-detection-retail-0004"
+    description: "Face Detection (SqNet1.0modif+single scale) without BatchNormalization trained with negatives."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-detection-retail-0004/FP32/face-detection-retail-0004.xml
+    model_hash: 025a3be617067118bec7e76bc84fe1d48ca630ab3c0faeb54e86c22327d340bc
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-detection-retail-0004/FP32/face-detection-retail-0004.bin
+    weights_hash: dbe22678ee9b9402a5010fa507dcbe83739d891f3538235039b2c7f5d0f90d75
+    output: "Retail/object_detection/face/sqnet1.0modif-ssd/0004/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "face-detection-retail-0004-fp16"
+    description: "Face Detection (SqNet1.0modif+single scale) without BatchNormalization trained with negatives."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-detection-retail-0004/FP16/face-detection-retail-0004.xml
+    model_hash: 0fe55cd353d72aad94812e657f1f6e2e538842cd23d42c53761bb337fafbaa2e
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-detection-retail-0004/FP16/face-detection-retail-0004.bin
+    weights_hash: 88cc5a150564bc4d3c1616d2d7a18f171fc7e00b60ac3551f908527642d14b4e
+    output: "Retail/object_detection/face/sqnet1.0modif-ssd/0004/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "face-person-detection-retail-0002"
+    description: "Simultaneous detection of Pedestrians and Faces (RMNet with lrelu + SSSSD)."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-person-detection-retail-0002/FP32/face-person-detection-retail-0002.xml
+    model_hash: de2f9c91afcd2af91af58633d9bae9765654bc0c68d58b7b88d4cef6db703c68
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-person-detection-retail-0002/FP32/face-person-detection-retail-0002.bin
+    weights_hash: a1afb3fb46122289bd8ea64fa5f78569ed312c00899f24d01a42ae1f76f0811d
+    output: "Retail/object_detection/face_pedestrian/rmnet-ssssd-2heads/0002/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "face-person-detection-retail-0002-fp16"
+    description: "Simultaneous detection of Pedestrians and Faces (RMNet with lrelu + SSSSD)."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-person-detection-retail-0002/FP16/face-person-detection-retail-0002.xml
+    model_hash: be8ea94bc0fcc1d382e44b3054915152a2e6cfed12f91fe51a3f5961ae6b68d3
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-person-detection-retail-0002/FP16/face-person-detection-retail-0002.bin
+    weights_hash: f072f713b4033039eb1450318bef305d0cb74164d9019f1594161d5918802a85
+    output: "Retail/object_detection/face_pedestrian/rmnet-ssssd-2heads/0002/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "face-reidentification-retail-0095"
+    description: "Single embedding-based face verification model"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
+    model_hash: fac93e0b5440662b094800b8e05ea8360f1c6cc027cc3454944b5463a77c69b9
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
+    weights_hash: 03836a6a1d03828322491b0608a579b1c47e5097d355c489b5b8aaf5fce1ef48
+    output: "Retail/object_reidentification/face/mobilenet_based/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "face-reidentification-retail-0095-fp16"
+    description: "Single embedding-based face verification model"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
+    model_hash: a91d762ff3fd594a2d915487a82b78d825d32279290ff42c13bd243507fc28be
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
+    weights_hash: 3289078133e40e4263f682ded2a26a500905abb0fd7b943f41ca8037a4f3fe21
+    output: "Retail/object_reidentification/face/mobilenet_based/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "facial-landmarks-35-adas-0001"
+    description: "Custom-architecture convolutional neural network for 35 facial landmarks estimation."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/facial-landmarks-35-adas-0001/FP32/facial-landmarks-35-adas-0001.xml
+    model_hash: 7b2534b5abb15c59748aa5e7cbb610b4aa742c5e94e81264089429805f01e8a6
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/facial-landmarks-35-adas-0001/FP32/facial-landmarks-35-adas-0001.bin
+    weights_hash: 56b45e4b9259be4f48ee85fb21b1150908457743419184f8ea5e8a5554cbf642
+    output: "Transportation/object_attributes/facial_landmarks/custom-35-facial-landmarks/dldt"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "facial-landmarks-35-adas-0001-fp16"
+    description: "Custom-architecture convolutional neural network for 35 facial landmarks estimation."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/facial-landmarks-35-adas-0001/FP16/facial-landmarks-35-adas-0001.xml
+    model_hash: 2266b4a96c5ac8bd45f968f41da27a41b57f2a009a5f91de8ac46f06ec2583d1
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/facial-landmarks-35-adas-0001/FP16/facial-landmarks-35-adas-0001.bin
+    weights_hash: 9c68413917f7197f6bbc0fe9ece46b845b594e91f01bc97bf47522ad8e9264ea
+    output: "Transportation/object_attributes/facial_landmarks/custom-35-facial-landmarks/dldt"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "head-pose-estimation-adas-0001"
+    description: "Vanilla CNN trained from scratch yaw + pitch + roll + landmarks"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
+    model_hash: 7573383b77912a1f05dcb20f7f4024fba173cd145d1e3dba07256758d28c91d8
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
+    weights_hash: e4047e643bd39d97288dc5d22abe8ead850e05ac1bc44605443bbb2abfc2e246
+    output: "Transportation/object_attributes/headpose/vanilla_cnn/dldt"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "head-pose-estimation-adas-0001-fp16"
+    description: "Vanilla CNN trained from scratch yaw + pitch + roll + landmarks"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
+    model_hash: 5a1cd5051e9669e260012cbc1da13bc300ec36f097067f06072223b852c4b534
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
+    weights_hash: 535a6af806999e22cca5e4071e55841a694a6b60370a6f8fb3b9d0cda5f81c41
+    output: "Transportation/object_attributes/headpose/vanilla_cnn/dldt"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "human-pose-estimation-0001"
+    description: "2D human pose estimation with tuned mobilenet backbone (based on OpenPose)."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/human-pose-estimation-0001/FP32/human-pose-estimation-0001.xml
+    model_hash: cd5030abd80a6e0e0f8e9e3b7ec814b2eb1dc33540726b6c0a549540a5bc791a
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/human-pose-estimation-0001/FP32/human-pose-estimation-0001.bin
+    weights_hash: 9790da47abf072c509ff843695a7b9b96283729731ba4d711fb50201f376b2fc
+    output: "Transportation/human_pose_estimation/mobilenet-v1/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "human-pose-estimation-0001-fp16"
+    description: "2D human pose estimation with tuned mobilenet backbone (based on OpenPose)."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/human-pose-estimation-0001/FP16/human-pose-estimation-0001.xml
+    model_hash: e658eaacc8474c912914d0447595e01a8a7ec15bcafb11a51a64e18ce2c66a94
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/human-pose-estimation-0001/FP16/human-pose-estimation-0001.bin
+    weights_hash: 48c607a55b22b540c38b6ed295eba211aaa6cd4acd47776f0a1259829cb51196
+    output: "Transportation/human_pose_estimation/mobilenet-v1/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "landmarks-regression-retail-0009"
+    description: "Landmark's detection."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
+    model_hash: 37e122e176e10ce2bfb967defb3656f0baeb74260ec2ebe1ecac6145489daa1e
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
+    weights_hash: 46795837d35e8199b7c5b57e1f76297827bf516a150c0d5643197d8c325f1dbc
+    output: "Retail/object_attributes/landmarks_regression/0009/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "landmarks-regression-retail-0009-fp16"
+    description: "Landmark's detection."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
+    model_hash: 4d1dc7c54e207a3f6dc22a9d8a37bea0a8783a3514e5a6beba712cf3503e64ea
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
+    weights_hash: 5d74c26cbb836b3de358ab05d4cbd92c4eb713dc74484cff9de82b2deb3d8527
+    output: "Retail/object_attributes/landmarks_regression/0009/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "license-plate-recognition-barrier-0001"
+    description: "Chinese license plate recognition"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.xml
+    model_hash: d11fe5d8f3aa2f42fb1bbaae412acc719703e84d2d47a2e4547bccdf9c376a74
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.bin
+    weights_hash: 60f6ad18d05373e3a82030aca3b37606afa39f6a5d72f636bf91f15cd020b885
+    output: "Security/optical_character_recognition/license_plate/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "license-plate-recognition-barrier-0001-fp16"
+    description: "Chinese license plate recognition"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.xml
+    model_hash: b66432554a6d8321fe469c2404116675cd6d636b31616e93fbd0a836daf1f010
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.bin
+    weights_hash: 4982af6c19dca69dbb95167e2ba78026726c8e1b6554d148e94c0fbee8b83d27
+    output: "Security/optical_character_recognition/license_plate/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "pedestrian-and-vehicle-detector-adas-0001"
+    description: "Pedestrian and Vehicle detector based on ssd + mobilenet with reduced channels number."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.xml
+    model_hash: b14699bf3c01d097c21d5ad355d317bb72f77c599e9f1ed19335ea23529059c6
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.bin
+    weights_hash: 4d580c8de7e51be7308927ffa6d1c79a64ca44ba47dce4742a6e9da3ac2fb675
+    output: "Transportation/object_detection/pedestrian-and-vehicle/mobilenet-reduced-ssd/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "pedestrian-and-vehicle-detector-adas-0001-fp16"
+    description: "Pedestrian and Vehicle detector based on ssd + mobilenet with reduced channels number."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.xml
+    model_hash: 254e56b0fc0c0f13d50399f994e23d4d1b680ce4d1c44a540e35991c5da2bc9e
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.bin
+    weights_hash: 743205b4d2f9d8650dfb7d89023154ce2ddcc803fc3a8fece480d69e1150bbf2
+    output: "Transportation/object_detection/pedestrian-and-vehicle/mobilenet-reduced-ssd/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "pedestrian-detection-adas-0002"
+    description: "Pedestrian detector based on ssd + mobilenet with reduced channels number."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.xml
+    model_hash: dcb9c7698608a45c1847fbb260592ef4b0c395c5de32ebefaa39c40e112cf3c8
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.bin
+    weights_hash: 74c8cb42a37448e808f16e1e0da9994c593271b5148b8b21e09d358d9d17eac1
+    output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "pedestrian-detection-adas-0002-fp16"
+    description: "Pedestrian detector based on ssd + mobilenet with reduced channels number."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.xml
+    model_hash: 6e27c5b5c60fb64389b0cccf2bc9312c994975ffb62715f019b2a09ea11ac71e
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.bin
+    weights_hash: 3a993502380b550b2dd01b8f54727b1b2531261e72955e1b422a17ff3c7d389b
+    output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-attributes-recognition-crossroad-0200"
+    description: "Pedestrian attributes recognition based on a PVANet with hyperfeatures backbone + classification head"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-attributes-recognition-crossroad-0200/FP32/person-attributes-recognition-crossroad-0200.xml
+    model_hash: 4ed375fc0e2549bfee3e8fefaa3302e8b72e9c02a95dfb3020bfd1a00177cf25
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-attributes-recognition-crossroad-0200/FP32/person-attributes-recognition-crossroad-0200.bin
+    weights_hash: 590da886e154270d3662f64f68ed6624a13b6960680cf2cae39a520e1054a7a0
+    output: "Security/object_attributes/pedestrian/person-attributes-recognition-crossroad-0200/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-attributes-recognition-crossroad-0200-fp16"
+    description: "Pedestrian attributes recognition based on a PVANet with hyperfeatures backbone + classification head"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-attributes-recognition-crossroad-0200/FP16/person-attributes-recognition-crossroad-0200.xml
+    model_hash: 7bba2448b8e7db94d2925de9d18cc02aaf036ab76988c39e94a0e470ed8e26c6
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-attributes-recognition-crossroad-0200/FP16/person-attributes-recognition-crossroad-0200.bin
+    weights_hash: e9299969225ffb5765afcea8f5f89f8252b353e049f541049dd41abd4d6bc3ba
+    output: "Security/object_attributes/pedestrian/person-attributes-recognition-crossroad-0200/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-detection-action-recognition-0004"
+    description: "Action detection (SSD-based) model."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-detection-action-recognition-0004/FP32/person-detection-action-recognition-0004.xml
+    model_hash: 72415b1a5f0adf2ac97c78182ad7bf843cc91a9b605491e8a4a727344ee82d1c
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-detection-action-recognition-0004/FP32/person-detection-action-recognition-0004.bin
+    weights_hash: 7101723d6e0346bb22d392a6a813c6cf516fafac2ea338438a4b7fce51e792ce
+    output: "Retail/action_detection/pedestrian/rmnet_ssd/0165/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-detection-action-recognition-0004-fp16"
+    description: "Action detection (SSD-based) model."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-detection-action-recognition-0004/FP16/person-detection-action-recognition-0004.xml
+    model_hash: f8b8e34277af7c850eaf69d39d46232d007dcdfac50534120dd9577ad7989953
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-detection-action-recognition-0004/FP16/person-detection-action-recognition-0004.bin
+    weights_hash: 01ce41020429720a7fff7c2bd08e0ff3e000e68caa03810fa0d47a23d475aa52
+    output: "Retail/action_detection/pedestrian/rmnet_ssd/0165/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-detection-retail-0002"
+    description: "Person detection (HyperNet+RFCN)."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-detection-retail-0002/FP32/person-detection-retail-0002.xml
+    model_hash: 10cba4f7b3b8d01b646bd1545a5e3c281947e488ede0263fecbbf4a82d90a837
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-detection-retail-0002/FP32/person-detection-retail-0002.bin
+    weights_hash: e86c8bf1d6a431ea9445681cfd44180827c69566a736ce5d1ae1678eb9ee9ff8
+    output: "Retail/object_detection/pedestrian/hypernet-rfcn/0026/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-detection-retail-0002-fp16"
+    description: "Person detection (HyperNet+RFCN+DetectionOutput)."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-detection-retail-0002/FP16/person-detection-retail-0002.xml
+    model_hash: 0d917955f82a1a699d159f54b127abb4bf3f56ea3ab8386cab19bf417baab467
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-detection-retail-0002/FP16/person-detection-retail-0002.bin
+    weights_hash: 48b55e7e908db3496bfda8689b2ed6ce013a8bdd3157e858ed27ae7b0b8783a3
+    output: "Retail/object_detection/pedestrian/hypernet-rfcn/0026/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-detection-retail-0013"
+    description: "Pedestrian detection (RMNet with lrelu + SSD)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-detection-retail-0013/FP32/person-detection-retail-0013.xml
+    model_hash: 974814ee4bdd330ef818534da0ddb5ee538d5bb1b29dcae88f025e4442e1659d
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-detection-retail-0013/FP32/person-detection-retail-0013.bin
+    weights_hash: 7a1f5d5ea170366974f192b0bac4a2c64a78bdb1e608f5859556d20a1f45d0aa
+    output: "Retail/object_detection/pedestrian/rmnet_ssd/0013/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-detection-retail-0013-fp16"
+    description: "Pedestrian detection (RMNet with lrelu + SSD)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-detection-retail-0013/FP16/person-detection-retail-0013.xml
+    model_hash: 147ea4a312dbdd9ca066190bbb899a0c5c524ba70086e56512c581334e1d3849
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-detection-retail-0013/FP16/person-detection-retail-0013.bin
+    weights_hash: fb8f027f2b1afec4c96e8883398b8f93e1d704838b463a9d0c2cfbb6a5448aed
+    output: "Retail/object_detection/pedestrian/rmnet_ssd/0013/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-reidentification-retail-0031"
+    description: "Single embedding-based person reidentification model (fastest person ReID model)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-reidentification-retail-0031/FP32/person-reidentification-retail-0031.xml
+    model_hash: 0f02a330d480124f9681689221c437b5b1d230ee8e995b0547bc4cc85e5ba249
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-reidentification-retail-0031/FP32/person-reidentification-retail-0031.bin
+    weights_hash: 8b9d349d330909815d2e75b57654c4cd6c27eb37c87d3280dfeaae03d166a4f4
+    output: "Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-reidentification-retail-0031-fp16"
+    description: "Single embedding-based person reidentification model (fastest person ReID model)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.xml
+    model_hash: c37a5a5ecf3b1a2a3429ffc26bbaf7bdd79dd59cbb8df41cba1761e92e63fd3d
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.bin
+    weights_hash: 833c136bcce82bcba6de6289fc21ee24f24d4597e52c41717c2602ee275b2f7d
+    output: "Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-reidentification-retail-0076"
+    description: "Single embedding-based person reidentification model (most accurate person ReID model)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-reidentification-retail-0076/FP32/person-reidentification-retail-0076.xml
+    model_hash: 4d3dccdd6c021dd3cf99c8147872615a5d039e1805fa956468b144ef46653a6b
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-reidentification-retail-0076/FP32/person-reidentification-retail-0076.bin
+    weights_hash: acd718a8e6bd0c9e52605ecfe3f5a7ba87280976315bccc94e9302bbe520d898
+    output: "Retail/object_reidentification/pedestrian/rmnet_based/0076/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-reidentification-retail-0076-fp16"
+    description: "Single embedding-based person reidentification model (most accurate person ReID model)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-reidentification-retail-0076/FP16/person-reidentification-retail-0076.xml
+    model_hash: 2dfe1b2929a21061f316510cec86b0952bc728c93a2b88a188f663ffe39d8eef
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-reidentification-retail-0076/FP16/person-reidentification-retail-0076.bin
+    weights_hash: c8a127cb2b8ff5f26b1d248de5a07b79c916103ee39bec0825fb990e4b043fd6
+    output: "Retail/object_reidentification/pedestrian/rmnet_based/0076/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-reidentification-retail-0079"
+    description: "Single embedding-based person reidentification model (the model is trade-off between performance and accuracy)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-reidentification-retail-0079/FP32/person-reidentification-retail-0079.xml
+    model_hash: 380ab1da1e23215c55bcd54778e1b8c925281e271bb64cc287eb571e780a863c
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-reidentification-retail-0079/FP32/person-reidentification-retail-0079.bin
+    weights_hash: e341d80b568d939dc121d2c4785d1f8bc90df477cd1754d0b286b2e24b7b33e4
+    output: "Retail/object_reidentification/pedestrian/rmnet_based/0079/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-reidentification-retail-0079-fp16"
+    description: "Single embedding-based person reidentification model (the model is trade-off between performance and accuracy)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-reidentification-retail-0079/FP16/person-reidentification-retail-0079.xml
+    model_hash: c5757ecc5d585dd16609059a50c7937ea46a670b6559034e518138eef3dd26cb
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-reidentification-retail-0079/FP16/person-reidentification-retail-0079.bin
+    weights_hash: 95c426b1d7e8f06f417172f5b1058bd906c769c8c10b3846f8b3adc826390d93
+    output: "Retail/object_reidentification/pedestrian/rmnet_based/0079/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-vehicle-bike-detection-crossroad-0078"
+    description: "Multiclass (person, vehicle, non-vehicle) detector based on SSD detection architecture, RMNet backbone and learnable image downscale block"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-vehicle-bike-detection-crossroad-0078/FP32/person-vehicle-bike-detection-crossroad-0078.xml
+    model_hash: efacb99a5407a03c9ba768314c3c3a52ed27bfa199633a269200f86712a576a6
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-vehicle-bike-detection-crossroad-0078/FP32/person-vehicle-bike-detection-crossroad-0078.bin
+    weights_hash: 34cb7d20e3eaf5dba8a39c93f8c0031b4b7779b059cff933d8137072b5927bff
+    output: "Security/object_detection/crossroad/0078/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "person-vehicle-bike-detection-crossroad-0078-fp16"
+    description: "Multiclass (person, vehicle, non-vehicle) detector based on SSD detection architecture, RMNet backbone and learnable image downscale block"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-vehicle-bike-detection-crossroad-0078/FP16/person-vehicle-bike-detection-crossroad-0078.xml
+    model_hash: 48d2f821c85f5a6e1f1f587cd2b3dd4f5d7dc8ae9f9995e1c5b73dcd135f9913
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/person-vehicle-bike-detection-crossroad-0078/FP16/person-vehicle-bike-detection-crossroad-0078.bin
+    weights_hash: 726f5c8c520fd05ce40917c667962e4c63d79343fea215d2a0acd3600e8ae7cb
+    output: "Security/object_detection/crossroad/0078/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "road-segmentation-adas-0001"
+    description: "Multiclass (BG, road, curbs, marks) segmentation based on ENET, using depthwise convolutions and without ELU operations and without concatenation"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.xml
+    model_hash: c85397d15ca6de973537e202fb270ddabba495a56d0d777f64997176d5c9b657
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.bin
+    weights_hash: e4ec8fa66deb6904b5b6faa109fa699098cc1f947bf5216c6e31595ec397c569
+    output: "Transportation/segmentation/curbs/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "road-segmentation-adas-0001-fp16"
+    description: "Multiclass (BG, road, curbs, marks) segmentation based on ENET, using depthwise convolutions and without ELU operations and without concatenation"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.xml
+    model_hash: 74add1ba7b6f4260bba5a75004fdd028cb1c235dd98c25907049b505f4f15f48
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.bin
+    weights_hash: 292b8c8789d66f102ffb9b87104b39488bfa55293ef97e7d6a50439762cdd884
+    output: "Transportation/segmentation/curbs/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "semantic-segmentation-adas-0001"
+    description: "Multiclass (road, sidewalk, building, wall, fence, pole, traffic light, traffic sign, vegetation, terrain, sky, person, rider, car, truck, bus, train, motorcycle, bicycle, ego-vehicle) segmentation based on ICNet"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.xml
+    model_hash: db4985ad5a041775ef399b62bbc20ff5b51315a97776dad4bfef2bc4274be786
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.bin
+    weights_hash: 5a616b105fa42f574e4d23cfc227c10b8bdcc0ba0e66864d7aa4b8a269b7cc76
+    output: "Transportation/segmentation/semantic_segmentation/icnet_icv/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "semantic-segmentation-adas-0001-fp16"
+    description: "Multiclass (road, sidewalk, building, wall, fence, pole, traffic light, traffic sign, vegetation, terrain, sky, person, rider, car, truck, bus, train, motorcycle, bicycle, ego-vehicle) segmentation based on ICNet"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.xml
+    model_hash: 71968553c1ada14e445512bc0043993273535a51679775544e8d75ade3dba991
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.bin
+    weights_hash: 8c39dcb0d3569003264165eda163833eef2d0803121147ab06f46697e4f8b4c4
+    output: "Transportation/segmentation/semantic_segmentation/icnet_icv/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "single-image-super-resolution-0063"
+    description: "Super resolution model based on SRResNet architecture (see https://arxiv.org/pdf/1609.04802.pdf)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/single-image-super-resolution-0063/FP32/single-image-super-resolution-0063.xml
+    model_hash: 9e4b64b7c552fcd2c593af2e04cab7f44b5c26a6f0f06a5a681729af5f09d0a9
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/single-image-super-resolution-0063/FP32/single-image-super-resolution-0063.bin
+    weights_hash: f6264180468be90f567d98aa49d8eca70498c07d39b6f7b36a4433608737201e
+    output: "Security/super_resolution/srresnet/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "single-image-super-resolution-0063-fp16"
+    description: "Super resolution model based on SRResNet architecture (see https://arxiv.org/pdf/1609.04802.pdf)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/single-image-super-resolution-0063/FP16/single-image-super-resolution-0063.xml
+    model_hash: 47e1f99b81a3b6b3848a7390fc9bb2d3b0c7b6acf9e97f7f6f5d049179a4d673
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/single-image-super-resolution-0063/FP16/single-image-super-resolution-0063.bin
+    weights_hash: 82abf3743f2847c39063e73d39943322919b752482a8486a2df59e5540a66b30
+    output: "Security/super_resolution/srresnet/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "single-image-super-resolution-1011"
+    description: "Super resolution model based on SRResNet architecture (see https://arxiv.org/pdf/1609.04802.pdf)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/single-image-super-resolution-1011/FP32/single-image-super-resolution-1011.xml
+    model_hash: 891b0aed7536cc2a2d3879685dab0f5f1f8c9fd3097da18861d1fb4654e46948
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/single-image-super-resolution-1011/FP32/single-image-super-resolution-1011.bin
+    weights_hash: 17396c2f286cc3c96617c94fde03ecdb41ff8046958c0b161cc8d490a4d5d83c
+    output: "Security/super_resolution/srresnet/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "single-image-super-resolution-1011-fp16"
+    description: "Super resolution model based on SRResNet architecture (see https://arxiv.org/pdf/1609.04802.pdf)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/single-image-super-resolution-1011/FP16/single-image-super-resolution-1011.xml
+    model_hash: 09f485031635f182e00d7f59142773e69a9e2f5e951098079ad2112979e68499
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/single-image-super-resolution-1011/FP16/single-image-super-resolution-1011.bin
+    weights_hash: 77bca94f165bd2cfc2a2277037c67ac9dd5e2d94df744e4f44ef2dbd16a13042
+    output: "Security/super_resolution/srresnet/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "single-image-super-resolution-1021"
+    description: "Super resolution model based on SRResNet architecture (see https://arxiv.org/pdf/1609.04802.pdf)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/single-image-super-resolution-1021/FP32/single-image-super-resolution-1021.xml
+    model_hash: 51e501ac4ea776b989f7c0d591beaefb49f7bea966cc1ea6e8fdd3a592616147
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/single-image-super-resolution-1021/FP32/single-image-super-resolution-1021.bin
+    weights_hash: 33a1bfedd20add980786dd144d92347e62d95d41bdc7565cbcdaa4e9d21c6bf9
+    output: "Security/super_resolution/srresnet/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "single-image-super-resolution-1021-fp16"
+    description: "Super resolution model based on SRResNet architecture (see https://arxiv.org/pdf/1609.04802.pdf)"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/single-image-super-resolution-1021/FP16/single-image-super-resolution-1021.xml
+    model_hash: b43d38d5b591a016830ac6cf0f03ee35fe9d0ae83f6cb04c04e7abec5bea51b0
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/single-image-super-resolution-1021/FP16/single-image-super-resolution-1021.bin
+    weights_hash: 753b8a6f39e6878d13ffddace1f8dc6fcbb15d183770adec2cadb137ed16976d
+    output: "Security/super_resolution/srresnet/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "text-detection-0001"
+    description: "Detects oriented text."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/text-detection-0001/FP32/text-detection-0001.xml
+    model_hash: 965d0179ef199123a50cb5f091c80ac1f74102d047fac9aca19bdbddf5e3da03
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/text-detection-0001/FP32/text-detection-0001.bin
+    weights_hash: bd7c76070e03bdbdc81cfac6bb4e439daa6365e997fb7dec51fe633d1b9634a7
+    output: "Retail/object_detection/text/pixel_link_mobilenet_v2/0001/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "text-detection-0001-fp16"
+    description: "Detects oriented text."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/text-detection-0001/FP16/text-detection-0001.xml
+    model_hash: 869625d1f87c5ea87464661a77bafd4048c6222d9f0491df7063842539d454fc
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/text-detection-0001/FP16/text-detection-0001.bin
+    weights_hash: 881ca36c904509e30c7a69f7d11cf6edc5d50aa6ff37fad535b4a4da13b4285e
+    output: "Retail/object_detection/text/pixel_link_mobilenet_v2/0001/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "vehicle-attributes-recognition-barrier-0039"
+    description: "Vehicle attributes recognition with modified ResNet10 backbone"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.xml
+    model_hash: 327cc6a16ffebe0cb9f9606e04f01cf225eeca19e401f2ecc53cd65fb78e3475
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.bin
+    weights_hash: 8195ea60216d9aefdab41e3129900aa847f4f0d3d003ce93aa15ecba0ca18e91
+    output: "Security/object_attributes/vehicle/resnet10_update_1/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "vehicle-attributes-recognition-barrier-0039-fp16"
+    description: "Vehicle attributes recognition with modified ResNet10 backbone"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.xml
+    model_hash: 043ad3250e9060295e3693e8811d7277c8f7d4f3c3852044fbc1e7aa6f084687
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.bin
+    weights_hash: be8b61e337a23ffa57d1742f92d2317560303652f330fef0cbe918161bfcaf50
+    output: "Security/object_attributes/vehicle/resnet10_update_1/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "vehicle-detection-adas-0002"
+    description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.xml
+    model_hash: ebf79c1cc1ac4b772e588ff3067ff2a4c2986ea05c8ba5e5f58de5976956e987
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.bin
+    weights_hash: 510aba5c6d68456d3718c4192b28e58df257320519c752d8d9f8f201fac29120
+    output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "vehicle-detection-adas-0002-fp16"
+    description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head."
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.xml
+    model_hash: a18134c2d0a7acd51e846ea3afa086aca06f28b033d644797574749fb32db012
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.bin
+    weights_hash: f892f90f87e11424a840850deab0ab4bd0d1b1d89a290f399c532a3316752cb5
+    output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "vehicle-license-plate-detection-barrier-0106"
+    description: "Multiclass (vehicle, license plates) detector based on MobileNetV2+SSD"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.xml
+    model_hash: 29417e241e7f4131cdc5786480be872fcc2ec47515bc9077602390265344293a
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.bin
+    weights_hash: 16de87bdb2158504c84edf632b01c6791d2d4b15e277722e566fe45e16646ab5
+    output: "Security/object_detection/barrier/0106/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE
+  - name: "vehicle-license-plate-detection-barrier-0106-fp16"
+    description: "Multiclass (vehicle, license plates) detector based on MobileNetV2+SSD"
+    model: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.xml
+    model_hash: 1be8ac890250e31c3d1a6fafe0b010fdf6f33b7ca2573b8a80e12656ab68958d
+    weights: https://download.01.org/openvinotoolkit/2018_R5/open_model_zoo/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.bin
+    weights_hash: ea529b73b2104ff63757f767d148d059230d601c4e27ae9d8d395dc983621e14
+    output: "Security/object_detection/barrier/0106/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/2018/LICENSE

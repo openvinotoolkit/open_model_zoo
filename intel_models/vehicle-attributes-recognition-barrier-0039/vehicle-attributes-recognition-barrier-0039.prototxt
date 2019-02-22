@@ -1,0 +1,591 @@
+input: "input"
+input_dim: 1
+input_dim: 3
+input_dim: 72
+input_dim: 72
+
+layer {
+  name: "BatchNorm1"
+  type: "BatchNorm"
+  bottom: "input"
+  top: "input"
+  batch_norm_param {
+    #use_global_stats: true
+    moving_average_fraction: 0.9
+  }
+}
+layer {
+  name: "Scale1"
+  type: "Scale"
+  bottom: "input"
+  top: "input"
+  param {
+    lr_mult: 1.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 2.0
+    decay_mult: 1.0
+  }
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "Convolution1"
+  type: "Convolution"
+  bottom: "input"
+  top: "Convolution1"
+  param {
+    name: "Convolution1_w"
+    lr_mult: 1.0
+  }
+  param {
+    name: "Convolution1_b"
+    lr_mult: 2.0
+  }
+  convolution_param {
+    num_output: 64
+    kernel_size: 7
+    stride: 2
+    pad: 3
+    weight_filler {
+      type: "msra"
+      variance_norm: AVERAGE
+    }
+  }
+}
+# 118.816768 M = 112 * 112 * 7 * 7 * 3 * 64
+# 224 224 3 -> 112 112 64
+# memory: 147.0k + 784.0k = 931.0k
+layer {
+  name: "BatchNorm2"
+  type: "BatchNorm"
+  bottom: "Convolution1"
+  top: "Convolution1"
+  batch_norm_param {
+    #use_global_stats: true
+    moving_average_fraction: 0.9
+  }
+}
+layer {
+  name: "Scale2"
+  type: "Scale"
+  bottom: "Convolution1"
+  top: "Convolution1"
+  param {
+    lr_mult: 1.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 2.0
+    decay_mult: 1.0
+  }
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "ReLU1"
+  type: "ReLU"
+  bottom: "Convolution1"
+  top: "Convolution1"
+}
+layer {
+  name: "Pooling1"
+  type: "Pooling"
+  bottom: "Convolution1"
+  top: "Pooling1"
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+  }
+}
+# 55 55
+layer {
+  name: "Convolution2"
+  type: "Convolution"
+  bottom: "Pooling1"
+  top: "Convolution2"
+  param {
+    name: "Convolution2_w"
+    lr_mult: 1.0
+  }
+  convolution_param {
+    num_output: 64
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    bias_term: false
+    weight_filler {
+      type: "msra"
+      variance_norm: AVERAGE
+    }
+  }
+}
+# 111.5136 M = 55 * 55 * 3 * 3 * 64 * 64
+# 55 55 64 -> 55 55 64
+# memory: 189.0625k + 189.0625k = 378.125k
+layer {
+  name: "BatchNorm3"
+  type: "BatchNorm"
+  bottom: "Convolution2"
+  top: "Convolution2"
+  batch_norm_param {
+    #use_global_stats: true
+    moving_average_fraction: 0.9
+  }
+}
+layer {
+  name: "Scale3"
+  type: "Scale"
+  bottom: "Convolution2"
+  top: "Convolution2"
+  param {
+    lr_mult: 1.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 2.0
+    decay_mult: 1.0
+  }
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "ReLU2"
+  type: "ReLU"
+  bottom: "Convolution2"
+  top: "Convolution2"
+}
+layer {
+  name: "Convolution3"
+  type: "Convolution"
+  bottom: "Convolution2"
+  top: "Convolution3"
+  param {
+    name: "Convolution3_w"
+    lr_mult: 1.0
+  }
+  convolution_param {
+    num_output: 64
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    bias_term: false
+    weight_filler {
+      type: "msra"
+      variance_norm: AVERAGE
+    }
+  }
+}
+# 111.5136 M = 55 * 55 * 3 * 3 * 64 * 64
+# 55 55 64 -> 55 55 64
+# memory: 189.0625k + 189.0625k = 378.125k
+layer {
+  name: "Eltwise1"
+  type: "Eltwise"
+  bottom: "Convolution3"
+  bottom: "Pooling1"
+  top: "Eltwise1"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "BatchNorm4"
+  type: "BatchNorm"
+  bottom: "Eltwise1"
+  top: "Eltwise1"
+  batch_norm_param {
+    #use_global_stats: true
+    moving_average_fraction: 0.9
+  }
+}
+layer {
+  name: "Scale4"
+  type: "Scale"
+  bottom: "Eltwise1"
+  top: "Eltwise1"
+  param {
+    lr_mult: 1.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 2.0
+    decay_mult: 1.0
+  }
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "ReLU3"
+  type: "ReLU"
+  bottom: "Eltwise1"
+  top: "Eltwise1"
+}
+layer {
+  name: "Convolution4"
+  type: "Convolution"
+  bottom: "Eltwise1"
+  top: "Convolution4"
+  param {
+    name: "Convolution4_w"
+    lr_mult: 1.0
+  }
+  convolution_param {
+    num_output: 128
+    kernel_size: 3
+    stride: 2
+    pad: 1
+    bias_term: false
+    weight_filler {
+      type: "msra"
+      variance_norm: AVERAGE
+    }
+  }
+}
+# 57.802752 M = 28 * 28 * 3 * 3 * 64 * 128
+# 55 55 64 -> 28 28 128
+# memory: 189.0625k + 98.0k = 287.0625k
+layer {
+  name: "BatchNorm5"
+  type: "BatchNorm"
+  bottom: "Convolution4"
+  top: "Convolution4"
+  batch_norm_param {
+    #use_global_stats: true
+    moving_average_fraction: 0.9
+  }
+}
+layer {
+  name: "Scale5"
+  type: "Scale"
+  bottom: "Convolution4"
+  top: "Convolution4"
+  param {
+    lr_mult: 1.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 2.0
+    decay_mult: 1.0
+  }
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "ReLU4"
+  type: "ReLU"
+  bottom: "Convolution4"
+  top: "Convolution4"
+}
+layer {
+  name: "Convolution5"
+  type: "Convolution"
+  bottom: "Convolution4"
+  top: "Convolution5"
+  param {
+    name: "Convolution5_w"
+    lr_mult: 1.0
+  }
+  convolution_param {
+    num_output: 128
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    bias_term: false
+    weight_filler {
+      type: "msra"
+      variance_norm: AVERAGE
+    }
+  }
+}
+# 115.605504 M = 28 * 28 * 3 * 3 * 128 * 128
+# 28 28 128 -> 28 28 128
+# memory: 98.0k + 98.0k = 196.0k
+layer {
+  name: "Convolution6"
+  type: "Convolution"
+  bottom: "Eltwise1"
+  top: "Convolution6"
+  param {
+    name: "Convolution6_w"
+    lr_mult: 1.0
+  }
+  convolution_param {
+    num_output: 128
+    kernel_size: 1
+    stride: 2
+    pad: 0
+    bias_term: false
+    weight_filler {
+      type: "msra"
+      variance_norm: AVERAGE
+    }
+  }
+}
+# 6.422528 M = 28 * 28 * 1 * 1 * 64 * 128
+# 55 55 64 -> 28 28 128
+# memory: 189.0625k + 98.0k = 287.0625k
+layer {
+  name: "Eltwise2"
+  type: "Eltwise"
+  bottom: "Convolution5"
+  bottom: "Convolution6"
+  top: "Eltwise2"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "BatchNorm6"
+  type: "BatchNorm"
+  bottom: "Eltwise2"
+  top: "Eltwise2"
+  batch_norm_param {
+    #use_global_stats: true
+    moving_average_fraction: 0.9
+  }
+}
+layer {
+  name: "Scale6"
+  type: "Scale"
+  bottom: "Eltwise2"
+  top: "Eltwise2"
+  param {
+    lr_mult: 1.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 2.0
+    decay_mult: 1.0
+  }
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "ReLU5"
+  type: "ReLU"
+  bottom: "Eltwise2"
+  top: "Eltwise2"
+}
+layer {
+  name: "Convolution7_"
+  type: "Convolution"
+  bottom: "Eltwise2"
+  top: "Convolution7_"
+  param {
+    name: "Convolution7_w_"
+    lr_mult: 1.0
+  }
+  convolution_param {
+    num_output: 128
+    kernel_size: 3
+    stride: 2
+    pad: 1
+    bias_term: false
+    weight_filler {
+      type: "msra"
+      variance_norm: AVERAGE
+    }
+  }
+}
+# 57.802752 M = 14 * 14 * 3 * 3 * 128 * 256
+# 28 28 128 -> 14 14 256
+# memory: 98.0k + 49.0k = 147.0k
+layer {
+  name: "BatchNorm7_"
+  type: "BatchNorm"
+  bottom: "Convolution7_"
+  top: "Convolution7_"
+  batch_norm_param {
+    #use_global_stats: true
+    moving_average_fraction: 0.9
+  }
+}
+layer {
+  name: "Scale7_"
+  type: "Scale"
+  bottom: "Convolution7_"
+  top: "Convolution7_"
+  param {
+    lr_mult: 1.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 2.0
+    decay_mult: 1.0
+  }
+  scale_param {
+    bias_term: true
+  }
+}
+layer {
+  name: "ReLU6_"
+  type: "ReLU"
+  bottom: "Convolution7_"
+  top: "Convolution7_"
+}
+layer {
+  name: "Convolution8_"
+  type: "Convolution"
+  bottom: "Convolution7_"
+  top: "Convolution8_"
+  param {
+    name: "Convolution8_w_"
+    lr_mult: 1.0
+  }
+  convolution_param {
+    num_output: 128
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    bias_term: false
+    weight_filler {
+      type: "msra"
+      variance_norm: AVERAGE
+    }
+  }
+}
+# 115.605504 M = 14 * 14 * 3 * 3 * 256 * 256
+# 14 14 256 -> 14 14 256
+# memory: 49.0k + 49.0k = 98.0k
+layer {
+  name: "Convolution9_"
+  type: "Convolution"
+  bottom: "Eltwise2"
+  top: "Convolution9_"
+  param {
+    name: "Convolution9_w_"
+    lr_mult: 1.0
+  }
+  convolution_param {
+    num_output: 128
+    kernel_size: 1
+    stride: 2
+    pad: 0
+    bias_term: false
+    weight_filler {
+      type: "msra"
+      variance_norm: AVERAGE
+    }
+  }
+}
+# 6.422528 M = 14 * 14 * 1 * 1 * 128 * 256
+# 28 28 128 -> 14 14 256
+# memory: 98.0k + 49.0k = 147.0k
+layer {
+  name: "Eltwise3"
+  type: "Eltwise"
+  bottom: "Convolution8_"
+  bottom: "Convolution9_"
+  top: "Eltwise3"
+  eltwise_param {
+    operation: SUM
+  }
+}
+
+################## Colors #####################
+layer {
+  name: "conv_color"
+  type: "Convolution"
+  bottom: "Eltwise3"
+  top: "conv_color"
+  convolution_param {
+    num_output: 7
+    kernel_size: 1
+    weight_filler {
+      type: "gaussian"
+      mean: 0.0
+      std: 0.01
+    }
+  }
+}
+layer {
+  name: "relu_conv_color"
+  type: "ReLU"
+  bottom: "conv_color"
+  top: "conv_color"
+}
+layer {
+  name: "pool_color"
+  type: "Pooling"
+  bottom: "conv_color"
+  top: "pool_color"
+  pooling_param {
+    pool: AVE
+    global_pooling: true
+  }
+}
+layer {
+  name: "color"
+  type: "Softmax"
+  bottom: "pool_color"
+  top: "color"
+  loss_param {
+    ignore_label: -1
+  #  class_weighting: 1
+  #  class_weighting: 1
+  #  class_weighting: 3
+  #  class_weighting: 1.5
+  #  class_weighting: 4
+  #  class_weighting: 2
+  #  class_weighting: 1
+  }
+}
+
+################# Types ################
+layer {
+  name: "conv_type"
+  type: "Convolution"
+  bottom: "Eltwise3"
+  top: "conv_type"
+  convolution_param {
+    num_output: 4
+    kernel_size: 1
+    weight_filler {
+      type: "gaussian"
+      mean: 0.0
+      std: 0.01
+    }
+  }
+}
+layer {
+  name: "relu_conv_type"
+  type: "ReLU"
+  bottom: "conv_type"
+  top: "conv_type"
+}
+layer {
+  name: "pool_type"
+  type: "Pooling"
+  bottom: "conv_type"
+  top: "pool_type"
+  pooling_param {
+    pool: AVE
+    global_pooling: true
+  }
+}
+
+layer {
+  name: "type"
+  type: "Softmax"
+  bottom: "pool_type"
+  top: "type"
+  loss_param {
+    ignore_label: -1
+   # class_weighting: 1
+   # class_weighting: 3
+   # class_weighting: 1.3
+   # class_weighting: 1.3
+  }
+}
+
+
+

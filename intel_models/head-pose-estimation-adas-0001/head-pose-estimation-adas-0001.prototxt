@@ -1,0 +1,616 @@
+input: "data"
+input_dim: 1
+input_dim: 3
+input_dim: 60
+input_dim: 60
+
+############################ Network ##################################
+
+layer {
+  name: "bn/data"
+  type: "BatchNorm"
+  bottom: "data"
+  top: "data"
+}
+
+layer {
+  name: "Scale1"
+  type: "Scale"
+  bottom: "data"
+  top: "data"
+  param {
+    lr_mult: 1.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 2.0
+    decay_mult: 1.0
+  }
+  scale_param {
+    bias_term: true
+  }
+}
+
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  convolution_param {
+    num_output: 32
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 1.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+layer {
+  name: "drop1"
+  type: "Dropout"
+  bottom: "conv1"
+  top: "conv1"
+  dropout_param {
+    dropout_ratio: 0.2
+  }
+}
+
+layer {
+  name: "relu_conv1"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+layer {
+  name: "bn1"
+  type: "BatchNorm"
+  bottom: "conv1"
+  top: "bn1"
+}
+layer {
+  name: "pool1"
+  type: "Convolution"
+  bottom: "bn1"
+  top: "pool1"
+    convolution_param {
+    num_output: 16
+    kernel_size: 3
+    stride: 2
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 1.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+
+layer {
+  name: "conv2"
+  type: "Convolution"
+  bottom: "pool1"
+  top: "conv2"
+  convolution_param {
+    num_output: 64
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 1.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+layer {
+  name: "drop2"
+  type: "Dropout"
+  bottom: "conv2"
+  top: "conv2"
+  dropout_param {
+    dropout_ratio: 0.2
+  }
+}
+
+layer {
+  name: "relu_conv2"
+  type: "ReLU"
+  bottom: "conv2"
+  top: "conv2"
+}
+layer {
+  name: "bn2"
+  type: "BatchNorm"
+  bottom: "conv2"
+  top: "bn2"
+}
+
+layer {
+  name: "pool2"
+  type: "Pooling"
+  bottom: "bn2"
+  top: "pool2"
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+  }
+}
+
+layer {
+  name: "conv3"
+  type: "Convolution"
+  bottom: "pool2"
+  top: "conv3"
+  convolution_param {
+    num_output: 128
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 1.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+layer {
+  name: "drop3"
+  type: "Dropout"
+  bottom: "conv3"
+  top: "conv3"
+  dropout_param {
+    dropout_ratio: 0.2
+  }
+}
+
+layer {
+  name: "relu_conv3"
+  type: "ReLU"
+  bottom: "conv3"
+  top: "conv3"
+}
+layer {
+  name: "bn3"
+  type: "BatchNorm"
+  bottom: "conv3"
+  top: "bn3"
+}
+layer {
+  name: "pool3"
+  type: "Convolution"
+  bottom: "bn3"
+  top: "pool3"
+    convolution_param {
+    num_output: 64
+    kernel_size: 3
+    stride: 2
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 1.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+layer {
+  name: "conv4"
+  type: "Convolution"
+  bottom: "pool3"
+  top: "conv4"
+  convolution_param {
+    num_output: 128
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 1.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+layer {
+  name: "drop4"
+  type: "Dropout"
+  bottom: "conv4"
+  top: "conv4"
+  dropout_param {
+    dropout_ratio: 0.2
+  }
+}
+
+layer {
+  name: "relu_conv4"
+  type: "ReLU"
+  bottom: "conv4"
+  top: "conv4"
+}
+layer {
+  name: "bn4"
+  type: "BatchNorm"
+  bottom: "conv4"
+  top: "bn4"
+}
+
+layer {
+  name: "pool4"
+  type: "Pooling"
+  bottom: "bn4"
+  top: "pool4"
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+  }
+}
+
+layer {
+  name: "conv5"
+  type: "Convolution"
+  bottom: "pool4"
+  top: "conv5"
+  convolution_param {
+    num_output: 256
+    kernel_size: 3
+    stride: 1
+    pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+  
+  param {
+    lr_mult: 1.0    #learning rate of weights
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2.0    #learning rate of bias
+    decay_mult: 0
+  }
+}
+
+layer {
+  name: "drop5"
+  type: "Dropout"
+  bottom: "conv5"
+  top: "conv5"
+  dropout_param {
+    dropout_ratio: 0.2
+  }
+}
+
+layer {
+  name: "relu_conv5"
+  type: "ReLU"
+  bottom: "conv5"
+  top: "conv5"
+}
+layer {
+  name: "bn5"
+  type: "BatchNorm"
+  bottom: "conv5"
+  top: "bn5"
+}
+
+
+layer {
+  name: "conv_fm"
+  type: "Convolution"
+  bottom: "bn5"
+  top: "conv_fm"
+  convolution_param {
+    num_output: 512
+    kernel_size: 3
+    #stride: 2
+    #pad: 1
+    weight_filler {
+      type: "xavier"
+    }
+  }
+}
+
+layer {
+  name: "drop_fm"
+  type: "Dropout"
+  bottom: "conv_fm"
+  top: "conv_fm"
+  dropout_param {
+    dropout_ratio: 0.3
+  }
+}
+
+########################## angle ################################
+layer {
+  name: "angle_y"
+  type: "Convolution"
+  bottom: "conv_fm"
+  top: "angle_y"
+  param {
+    lr_mult: 1.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 2.0
+    decay_mult: 0.0
+  }
+  convolution_param {
+    num_output: 128
+    kernel_size: 1
+    weight_filler {
+      type: "xavier"
+      std: 0.3
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.0
+    }
+  }
+}
+
+
+layer {
+  name: "relu_y_1"
+  type: "ReLU"
+  bottom: "angle_y"
+  top: "angle_y"
+}
+
+layer {
+  name: "bn_y"
+  type: "BatchNorm"
+  bottom: "angle_y"
+  top: "angle_y"
+}
+
+layer {
+  name: "drop_angle_y"
+  type: "Dropout"
+  bottom: "angle_y"
+  top: "angle_y"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+
+layer {
+  name: "angle_y_fc"
+  type: "InnerProduct"
+  bottom: "angle_y"
+  top: "fc_y"
+  
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  
+  inner_product_param {
+    num_output: 1
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+####
+
+layer {
+  name: "angle_p"
+  type: "Convolution"
+  bottom: "conv_fm"
+  top: "angle_p"
+  param {
+    lr_mult: 1.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 2.0
+    decay_mult: 0.0
+  }
+  convolution_param {
+    num_output: 128
+    kernel_size: 1
+    weight_filler {
+      type: "xavier"
+      std: 0.3
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.0
+    }
+  }
+}
+
+
+layer {
+  name: "relu_p_1"
+  type: "ReLU"
+  bottom: "angle_p"
+  top: "angle_p"
+}
+
+layer {
+  name: "bn_p"
+  type: "BatchNorm"
+  bottom: "angle_p"
+  top: "angle_p"
+}
+
+layer {
+  name: "drop_angle_p"
+  type: "Dropout"
+  bottom: "angle_p"
+  top: "angle_p"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+
+layer {
+  name: "angle_p_fc"
+  type: "InnerProduct"
+  bottom: "angle_p"
+  top: "fc_p"
+  
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  
+  inner_product_param {
+    num_output: 1
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
+
+####
+
+layer {
+  name: "angle_r"
+  type: "Convolution"
+  bottom: "conv_fm"
+  top: "angle_r"
+  param {
+    lr_mult: 1.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 2.0
+    decay_mult: 0.0
+  }
+  convolution_param {
+    num_output: 128
+    kernel_size: 1
+    weight_filler {
+      type: "xavier"
+      std: 0.3
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.0
+    }
+  }
+}
+
+layer {
+  name: "bn_r"
+  type: "BatchNorm"
+  bottom: "angle_r"
+  top: "angle_r"
+}
+
+layer {
+  name: "relu_r_1"
+  type: "ReLU"
+  bottom: "angle_r"
+  top: "angle_r"
+}
+
+layer {
+  name: "drop_angle_r"
+  type: "Dropout"
+  bottom: "angle_r"
+  top: "angle_r"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+
+layer {
+  name: "angle_r_fc"
+  type: "InnerProduct"
+  bottom: "angle_r"
+  top: "fc_r"
+  
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  
+  inner_product_param {
+    num_output: 1
+    weight_filler {
+      type: "xavier"
+      std: 0.08
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.1
+    }
+  }
+}
