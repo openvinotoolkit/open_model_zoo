@@ -22,17 +22,23 @@ Usage
    ./downloader.py -h
 
 
-      usage: downloader.py [-h] [-c CONFIG] [--name NAME] [--print_all]
-                           [-o OUTPUT_DIR]
+      usage: downloader.py [-h] [-c CONFIG.YML] [--name PAT[,PAT...]]
+                           [--list FILE.LST] [--all] [--print_all] [-o DIR]
+                           [--cache_dir DIR]
 
       optional arguments:
         -h, --help            show this help message and exit
-        -c CONFIG, --config CONFIG
+        -c CONFIG.YML, --config CONFIG.YML
                               path to YML configuration file
-        --name NAME           name of topology for downloading
+        --name PAT[,PAT...]   download only topologies whose names match at least
+                              one of the specified patterns
+        --list FILE.LST       download only topologies whose names match at least
+                              one of the patterns in the specified file
+        --all                 download all topologies from the configuration file
         --print_all           print all available topologies
-        -o OUTPUT_DIR, --output_dir OUTPUT_DIR
+        -o DIR, --output_dir DIR
                               path where to save topologies
+        --cache_dir DIR       directory to use as a cache for downloaded files
 
       list_topologies.yml - default configuration file
    ```
@@ -40,12 +46,12 @@ Usage
 *  Run the script with the default configuration file:
 
    ```sh
-   ./downloader.py
+   ./downloader.py --all
    ```   
    or with a custom configuration file:
    
    ```sh   
-   ./downloader.py -c <path_to_configuration_file>
+   ./downloader.py --all -c <path_to_configuration_file>
    ```
 
 *  Run the script with the `--print_all` option to see the available topologies:
@@ -78,6 +84,21 @@ Usage
    resnet-101
    resnet-152
    googlenet-v3
+   se-inception
+   se-resnet-101
+   se-resnet-152
+   se-resnet-50
+   se-resnext-50
+   se-resnext-101
+   Sphereface
+   license-plate-recognition-barrier-0007
+   mobilenet-v1-1.0-224
+   mobilenet-v2
+   faster_rcnn_inception_v2_coco
+   deeplabv3
+   ctpn
+   ssd_mobilenet_v1_coco
+   faster_rcnn_resnet101_coco
    age-gender-recognition-retail-0013
    age-gender-recognition-retail-0013-fp16
    emotions-recognition-retail-0003
@@ -134,13 +155,30 @@ Usage
    vehicle-license-plate-detection-barrier-0106-fp16
    ```
 
-*  Download only one topology (mtcnn-p in the following code example):
-   
+*  Download only some topologies (mtcnn-p and all topologies starting with "densenet-" in the following code example):
+
    ```sh
-   ./downloader.py --name mtcnn-p
+   ./downloader.py --name 'mtcnn-p,densenet-*'
    ```
 
-Expected free space to download all the topologies with the default configuration file is around 4.3 GB.
+   The argument to `--name` must be a comma-separated list of patterns, which may contain shell-style wildcards.
+   See https://docs.python.org/3/library/fnmatch.html for a full description of the pattern syntax.
+
+   Alternatively, you can get the list of patterns from a file:
+
+   ```sh
+   ./downloader.py --list my.lst
+   ```
+
+   The specified file must list one pattern per line. Blank lines and comments starting with `#` will be ignored.
+   For example:
+
+   ```
+   mtcnn-p
+   densenet-* # get all DenseNet variants
+   ```
+
+Expected free space to download all the topologies with the default configuration file is around 7.09 GB.
 
 __________
 
