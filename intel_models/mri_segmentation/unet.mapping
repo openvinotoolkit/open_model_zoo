@@ -1,0 +1,207 @@
+<?xml version="1.0" ?>
+<mapping>
+	<map>
+		<framework name="encodeDa/Relu" out_port_id="0"/>
+		<IR id="17" name="encodeDa/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="encodeCa/Relu" out_port_id="0"/>
+		<IR id="12" name="encodeCa/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="decodeAa/Relu" out_port_id="0"/>
+		<IR id="40" name="decodeAa/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="encodeAa/BiasAdd" out_port_id="0"/>
+		<IR id="1" name="encodeAa/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="convOutb/BiasAdd" out_port_id="0"/>
+		<IR id="47" name="convOutb/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="encodeEb/Relu" out_port_id="0"/>
+		<IR id="24" name="encodeEb/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="encodeCa/BiasAdd" out_port_id="0"/>
+		<IR id="11" name="encodeCa/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="decodeCb/BiasAdd" out_port_id="0"/>
+		<IR id="29" name="decodeCb/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="transconvB/BiasAdd" out_port_id="0"/>
+		<IR id="37" name="transconvB/conv2d_transpose" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="poolA/MaxPool" out_port_id="0"/>
+		<IR id="5" name="poolA/MaxPool" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="convOuta/BiasAdd" out_port_id="0"/>
+		<IR id="45" name="convOuta/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="concatA/concat" out_port_id="0"/>
+		<IR id="44" name="concatA/concat" out_port_id="2"/>
+	</map>
+	<map>
+		<framework name="encodeDb/BiasAdd" out_port_id="0"/>
+		<IR id="18" name="encodeDb/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="convOuta/Relu" out_port_id="0"/>
+		<IR id="46" name="convOuta/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="decodeBb/Relu" out_port_id="0"/>
+		<IR id="36" name="decodeBb/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="encodeDb/Relu" out_port_id="0"/>
+		<IR id="19" name="encodeDb/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="poolB/MaxPool" out_port_id="0"/>
+		<IR id="10" name="poolB/MaxPool" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="poolC/MaxPool" out_port_id="0"/>
+		<IR id="15" name="poolC/MaxPool" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="encodeBa/Relu" out_port_id="0"/>
+		<IR id="7" name="encodeBa/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="encodeAb/BiasAdd" out_port_id="0"/>
+		<IR id="3" name="encodeAb/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="encodeAb/Relu" out_port_id="0"/>
+		<IR id="4" name="encodeAb/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="decodeAb/Relu" out_port_id="0"/>
+		<IR id="42" name="decodeAb/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="decodeCa/BiasAdd" out_port_id="0"/>
+		<IR id="27" name="decodeCa/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="encodeEb/BiasAdd" out_port_id="0"/>
+		<IR id="23" name="encodeEb/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="encodeBb/Relu" out_port_id="0"/>
+		<IR id="9" name="encodeBb/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="concatB/concat" out_port_id="0"/>
+		<IR id="38" name="concatB/concat" out_port_id="2"/>
+	</map>
+	<map>
+		<framework name="concatD/concat" out_port_id="0"/>
+		<IR id="26" name="concatD/concat" out_port_id="2"/>
+	</map>
+	<map>
+		<framework name="transconvC/BiasAdd" out_port_id="0"/>
+		<IR id="31" name="transconvC/conv2d_transpose" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="decodeCa/Relu" out_port_id="0"/>
+		<IR id="28" name="decodeCa/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="encodeAa/Relu" out_port_id="0"/>
+		<IR id="2" name="encodeAa/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="PredictionMask/BiasAdd" out_port_id="0"/>
+		<IR id="49" name="PredictionMask/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="encodeEa/BiasAdd" out_port_id="0"/>
+		<IR id="21" name="encodeEa/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="encodeCb/Relu" out_port_id="0"/>
+		<IR id="14" name="encodeCb/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="decodeAb/BiasAdd" out_port_id="0"/>
+		<IR id="41" name="decodeAb/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="encodeBa/BiasAdd" out_port_id="0"/>
+		<IR id="6" name="encodeBa/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="decodeCb/Relu" out_port_id="0"/>
+		<IR id="30" name="decodeCb/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="concatC/concat" out_port_id="0"/>
+		<IR id="32" name="concatC/concat" out_port_id="2"/>
+	</map>
+	<map>
+		<framework name="encodeDa/BiasAdd" out_port_id="0"/>
+		<IR id="16" name="encodeDa/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="decodeBb/BiasAdd" out_port_id="0"/>
+		<IR id="35" name="decodeBb/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="PredictionMask/Sigmoid" out_port_id="0"/>
+		<IR id="50" name="PredictionMask/Sigmoid" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="transconvE/BiasAdd" out_port_id="0"/>
+		<IR id="25" name="transconvE/conv2d_transpose" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="decodeAa/BiasAdd" out_port_id="0"/>
+		<IR id="39" name="decodeAa/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="poolD/MaxPool" out_port_id="0"/>
+		<IR id="20" name="poolD/MaxPool" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="encodeCb/BiasAdd" out_port_id="0"/>
+		<IR id="13" name="encodeCb/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="encodeBb/BiasAdd" out_port_id="0"/>
+		<IR id="8" name="encodeBb/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="decodeBa/Relu" out_port_id="0"/>
+		<IR id="34" name="decodeBa/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="MRImages" out_port_id="0"/>
+		<IR id="0" name="MRImages" out_port_id="0"/>
+	</map>
+	<map>
+		<framework name="convOutb/Relu" out_port_id="0"/>
+		<IR id="48" name="convOutb/Relu" out_port_id="1"/>
+	</map>
+	<map>
+		<framework name="transconvA/BiasAdd" out_port_id="0"/>
+		<IR id="43" name="transconvA/conv2d_transpose" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="decodeBa/BiasAdd" out_port_id="0"/>
+		<IR id="33" name="decodeBa/convolution" out_port_id="3"/>
+	</map>
+	<map>
+		<framework name="encodeEa/Relu" out_port_id="0"/>
+		<IR id="22" name="encodeEa/Relu" out_port_id="1"/>
+	</map>
+</mapping>

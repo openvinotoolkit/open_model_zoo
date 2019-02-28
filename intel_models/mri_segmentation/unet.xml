@@ -1,0 +1,1146 @@
+<?xml version="1.0" ?>
+<net batch="1" name="saved_model" version="4">
+	<layers>
+		<layer id="0" name="MRImages" precision="FP32" type="Input">
+			<output>
+				<port id="0">
+					<dim>1</dim>
+					<dim>4</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="1" name="encodeAa/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="32" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>4</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="0" size="4608"/>
+				<biases offset="4608" size="128"/>
+			</blobs>
+		</layer>
+		<layer id="2" name="encodeAa/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="3" name="encodeAb/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="32" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="4736" size="36864"/>
+				<biases offset="41600" size="128"/>
+			</blobs>
+		</layer>
+		<layer id="4" name="encodeAb/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="5" name="poolA/MaxPool" precision="FP32" type="Pooling">
+			<data auto_pad="valid" exclude-pad="true" kernel="2,2" pads_begin="0,0" pads_end="0,0" pool-method="max" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="6" name="encodeBa/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="64" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="41728" size="73728"/>
+				<biases offset="115456" size="256"/>
+			</blobs>
+		</layer>
+		<layer id="7" name="encodeBa/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="8" name="encodeBb/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="64" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="115712" size="147456"/>
+				<biases offset="263168" size="256"/>
+			</blobs>
+		</layer>
+		<layer id="9" name="encodeBb/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="10" name="poolB/MaxPool" precision="FP32" type="Pooling">
+			<data auto_pad="valid" exclude-pad="true" kernel="2,2" pads_begin="0,0" pads_end="0,0" pool-method="max" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="11" name="encodeCa/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="128" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="263424" size="294912"/>
+				<biases offset="558336" size="512"/>
+			</blobs>
+		</layer>
+		<layer id="12" name="encodeCa/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="13" name="encodeCb/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="128" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="558848" size="589824"/>
+				<biases offset="1148672" size="512"/>
+			</blobs>
+		</layer>
+		<layer id="14" name="encodeCb/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="15" name="poolC/MaxPool" precision="FP32" type="Pooling">
+			<data auto_pad="valid" exclude-pad="true" kernel="2,2" pads_begin="0,0" pads_end="0,0" pool-method="max" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="16" name="encodeDa/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="256" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1149184" size="1179648"/>
+				<biases offset="2328832" size="1024"/>
+			</blobs>
+		</layer>
+		<layer id="17" name="encodeDa/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="18" name="encodeDb/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="256" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="2329856" size="2359296"/>
+				<biases offset="4689152" size="1024"/>
+			</blobs>
+		</layer>
+		<layer id="19" name="encodeDb/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="20" name="poolD/MaxPool" precision="FP32" type="Pooling">
+			<data auto_pad="valid" exclude-pad="true" kernel="2,2" pads_begin="0,0" pads_end="0,0" pool-method="max" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>9</dim>
+					<dim>9</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="21" name="encodeEa/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="512" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>9</dim>
+					<dim>9</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>512</dim>
+					<dim>9</dim>
+					<dim>9</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="4690176" size="4718592"/>
+				<biases offset="9408768" size="2048"/>
+			</blobs>
+		</layer>
+		<layer id="22" name="encodeEa/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>512</dim>
+					<dim>9</dim>
+					<dim>9</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>512</dim>
+					<dim>9</dim>
+					<dim>9</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="23" name="encodeEb/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="512" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>512</dim>
+					<dim>9</dim>
+					<dim>9</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>512</dim>
+					<dim>9</dim>
+					<dim>9</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="9410816" size="9437184"/>
+				<biases offset="18848000" size="2048"/>
+			</blobs>
+		</layer>
+		<layer id="24" name="encodeEb/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>512</dim>
+					<dim>9</dim>
+					<dim>9</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>512</dim>
+					<dim>9</dim>
+					<dim>9</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="25" name="transconvE/conv2d_transpose" precision="FP32" type="Deconvolution">
+			<data auto_pad="same_upper" kernel="2,2" output="256" pads_begin="0,0" pads_end="0,0" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>512</dim>
+					<dim>9</dim>
+					<dim>9</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="18850048" size="2097152"/>
+				<biases offset="20947200" size="1024"/>
+			</blobs>
+		</layer>
+		<layer id="26" name="concatD/concat" precision="FP32" type="Concat">
+			<data axis="1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>512</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="27" name="decodeCa/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="256" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>512</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="20948224" size="4718592"/>
+				<biases offset="25666816" size="1024"/>
+			</blobs>
+		</layer>
+		<layer id="28" name="decodeCa/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="29" name="decodeCb/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="256" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="25667840" size="2359296"/>
+				<biases offset="28027136" size="1024"/>
+			</blobs>
+		</layer>
+		<layer id="30" name="decodeCb/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="31" name="transconvC/conv2d_transpose" precision="FP32" type="Deconvolution">
+			<data auto_pad="same_upper" kernel="2,2" output="128" pads_begin="0,0" pads_end="0,0" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>18</dim>
+					<dim>18</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="28028160" size="524288"/>
+				<biases offset="28552448" size="512"/>
+			</blobs>
+		</layer>
+		<layer id="32" name="concatC/concat" precision="FP32" type="Concat">
+			<data axis="1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="33" name="decodeBa/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="128" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="28552960" size="1179648"/>
+				<biases offset="29732608" size="512"/>
+			</blobs>
+		</layer>
+		<layer id="34" name="decodeBa/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="35" name="decodeBb/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="128" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="29733120" size="589824"/>
+				<biases offset="30322944" size="512"/>
+			</blobs>
+		</layer>
+		<layer id="36" name="decodeBb/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="37" name="transconvB/conv2d_transpose" precision="FP32" type="Deconvolution">
+			<data auto_pad="same_upper" kernel="2,2" output="64" pads_begin="0,0" pads_end="0,0" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>36</dim>
+					<dim>36</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="30323456" size="131072"/>
+				<biases offset="30454528" size="256"/>
+			</blobs>
+		</layer>
+		<layer id="38" name="concatB/concat" precision="FP32" type="Concat">
+			<data axis="1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="39" name="decodeAa/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="64" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="30454784" size="294912"/>
+				<biases offset="30749696" size="256"/>
+			</blobs>
+		</layer>
+		<layer id="40" name="decodeAa/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="41" name="decodeAb/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="64" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="30749952" size="147456"/>
+				<biases offset="30897408" size="256"/>
+			</blobs>
+		</layer>
+		<layer id="42" name="decodeAb/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="43" name="transconvA/conv2d_transpose" precision="FP32" type="Deconvolution">
+			<data auto_pad="same_upper" kernel="2,2" output="32" pads_begin="0,0" pads_end="0,0" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>72</dim>
+					<dim>72</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="30897664" size="32768"/>
+				<biases offset="30930432" size="128"/>
+			</blobs>
+		</layer>
+		<layer id="44" name="concatA/concat" precision="FP32" type="Concat">
+			<data axis="1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="45" name="convOuta/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="32" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="30930560" size="73728"/>
+				<biases offset="31004288" size="128"/>
+			</blobs>
+		</layer>
+		<layer id="46" name="convOuta/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="47" name="convOutb/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="same_upper" dilations="1,1" group="1" kernel="3,3" output="32" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="31004416" size="36864"/>
+				<biases offset="31041280" size="128"/>
+			</blobs>
+		</layer>
+		<layer id="48" name="convOutb/Relu" precision="FP32" type="ReLU">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="49" name="PredictionMask/convolution" precision="FP32" type="Convolution">
+			<data auto_pad="valid" dilations="1,1" group="1" kernel="1,1" output="1" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>1</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="31041408" size="128"/>
+				<biases offset="31041536" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="50" name="PredictionMask/Sigmoid" precision="FP32" type="Activation">
+			<data type="sigmoid"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>1</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>1</dim>
+					<dim>144</dim>
+					<dim>144</dim>
+				</port>
+			</output>
+		</layer>
+	</layers>
+	<edges>
+		<edge from-layer="0" from-port="0" to-layer="1" to-port="0"/>
+		<edge from-layer="1" from-port="3" to-layer="2" to-port="0"/>
+		<edge from-layer="2" from-port="1" to-layer="3" to-port="0"/>
+		<edge from-layer="3" from-port="3" to-layer="4" to-port="0"/>
+		<edge from-layer="4" from-port="1" to-layer="5" to-port="0"/>
+		<edge from-layer="5" from-port="1" to-layer="6" to-port="0"/>
+		<edge from-layer="6" from-port="3" to-layer="7" to-port="0"/>
+		<edge from-layer="7" from-port="1" to-layer="8" to-port="0"/>
+		<edge from-layer="8" from-port="3" to-layer="9" to-port="0"/>
+		<edge from-layer="9" from-port="1" to-layer="10" to-port="0"/>
+		<edge from-layer="10" from-port="1" to-layer="11" to-port="0"/>
+		<edge from-layer="11" from-port="3" to-layer="12" to-port="0"/>
+		<edge from-layer="12" from-port="1" to-layer="13" to-port="0"/>
+		<edge from-layer="13" from-port="3" to-layer="14" to-port="0"/>
+		<edge from-layer="14" from-port="1" to-layer="15" to-port="0"/>
+		<edge from-layer="15" from-port="1" to-layer="16" to-port="0"/>
+		<edge from-layer="16" from-port="3" to-layer="17" to-port="0"/>
+		<edge from-layer="17" from-port="1" to-layer="18" to-port="0"/>
+		<edge from-layer="18" from-port="3" to-layer="19" to-port="0"/>
+		<edge from-layer="19" from-port="1" to-layer="20" to-port="0"/>
+		<edge from-layer="20" from-port="1" to-layer="21" to-port="0"/>
+		<edge from-layer="21" from-port="3" to-layer="22" to-port="0"/>
+		<edge from-layer="22" from-port="1" to-layer="23" to-port="0"/>
+		<edge from-layer="23" from-port="3" to-layer="24" to-port="0"/>
+		<edge from-layer="24" from-port="1" to-layer="25" to-port="0"/>
+		<edge from-layer="25" from-port="3" to-layer="26" to-port="0"/>
+		<edge from-layer="19" from-port="1" to-layer="26" to-port="1"/>
+		<edge from-layer="26" from-port="2" to-layer="27" to-port="0"/>
+		<edge from-layer="27" from-port="3" to-layer="28" to-port="0"/>
+		<edge from-layer="28" from-port="1" to-layer="29" to-port="0"/>
+		<edge from-layer="29" from-port="3" to-layer="30" to-port="0"/>
+		<edge from-layer="30" from-port="1" to-layer="31" to-port="0"/>
+		<edge from-layer="31" from-port="3" to-layer="32" to-port="0"/>
+		<edge from-layer="14" from-port="1" to-layer="32" to-port="1"/>
+		<edge from-layer="32" from-port="2" to-layer="33" to-port="0"/>
+		<edge from-layer="33" from-port="3" to-layer="34" to-port="0"/>
+		<edge from-layer="34" from-port="1" to-layer="35" to-port="0"/>
+		<edge from-layer="35" from-port="3" to-layer="36" to-port="0"/>
+		<edge from-layer="36" from-port="1" to-layer="37" to-port="0"/>
+		<edge from-layer="37" from-port="3" to-layer="38" to-port="0"/>
+		<edge from-layer="9" from-port="1" to-layer="38" to-port="1"/>
+		<edge from-layer="38" from-port="2" to-layer="39" to-port="0"/>
+		<edge from-layer="39" from-port="3" to-layer="40" to-port="0"/>
+		<edge from-layer="40" from-port="1" to-layer="41" to-port="0"/>
+		<edge from-layer="41" from-port="3" to-layer="42" to-port="0"/>
+		<edge from-layer="42" from-port="1" to-layer="43" to-port="0"/>
+		<edge from-layer="43" from-port="3" to-layer="44" to-port="0"/>
+		<edge from-layer="4" from-port="1" to-layer="44" to-port="1"/>
+		<edge from-layer="44" from-port="2" to-layer="45" to-port="0"/>
+		<edge from-layer="45" from-port="3" to-layer="46" to-port="0"/>
+		<edge from-layer="46" from-port="1" to-layer="47" to-port="0"/>
+		<edge from-layer="47" from-port="3" to-layer="48" to-port="0"/>
+		<edge from-layer="48" from-port="1" to-layer="49" to-port="0"/>
+		<edge from-layer="49" from-port="3" to-layer="50" to-port="0"/>
+	</edges>
+	<meta_data>
+		<MO_version value="1.5.12.49d067a0"/>
+		<cli_parameters>
+			<data_type value="DIR"/>
+			<disable_fusing value="False"/>
+			<disable_gfusing value="False"/>
+			<disable_nhwc_to_nchw value="False"/>
+			<disable_resnet_optimization value="False"/>
+			<extensions value="DIR"/>
+			<framework value="tf"/>
+			<generate_deprecated_IR_V2 value="False"/>
+			<input_model value="DIR/saved_model_frozen.pb"/>
+			<input_model_is_text value="False"/>
+			<input_shape value="[1,144,144,4]"/>
+			<log_level value="ERROR"/>
+			<mean_values value="()"/>
+			<model_name value="saved_model"/>
+			<move_to_preprocess value="False"/>
+			<offload_unsupported_operations_to_tf value="False"/>
+			<output_dir value="DIR"/>
+			<reverse_input_channels value="False"/>
+			<scale_values value="()"/>
+			<silent value="False"/>
+			<version value="False"/>
+			<unset unset_cli_parameters="batch, finegrain_fusing, freeze_placeholder_with_value, input, input_checkpoint, input_meta_graph, output, saved_model_dir, saved_model_tags, scale, tensorboard_logdir, tensorflow_custom_layer_libraries, tensorflow_custom_operations_config_update, tensorflow_object_detection_api_pipeline_config, tensorflow_operation_patterns, tensorflow_subgraph_patterns, tensorflow_use_custom_operations_config"/>
+		</cli_parameters>
+	</meta_data>
+</net>
