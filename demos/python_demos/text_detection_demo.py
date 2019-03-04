@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 """
 Created on 2019-02-18
 
@@ -27,7 +28,7 @@ import sys
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", required=True, dest="image_path", help="path to input image")
-ap.add_argument("-m", required=True, dest="model_path", help="path to dir with model")
+ap.add_argument("-m", required=True, dest="model_path", help="path to model's XML file")
 args = ap.parse_args()
 
 class PixelLinkDecoder():
@@ -243,7 +244,11 @@ class PixelLinkDecoder():
 
 
 def main():
-    td = cv2.dnn.readNet(args.model_path + '/text-detection-0001.xml', args.model_path + '/text-detection-0001.bin')
+    if args.model_path.endswith('.xml'):
+        td = cv2.dnn.readNet(args.model_path, args.model_path[:-3] + 'bin')
+    else:
+        print("Not valid model's XML file name (should be something liike 'foo.xml')")
+        sys.exit()
     img = cv2.imread(args.image_path)
     blob = cv2.dnn.blobFromImage(img, 1, (1280,768))
     td.setInput(blob)
