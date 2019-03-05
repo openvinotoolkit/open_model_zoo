@@ -1,25 +1,15 @@
 #!/usr/bin/python3
 """
-Created on 2019-02-18
-
-by Borys Kabakov(banderlog)
-
-_softmax() and _logsumexp() are from scipy.special package
-
-_order_points from:
-    https://www.pyimagesearch.com/2014/08/25/4-point-opencv-getperspective-transform-example/
-
-Few lines of code are from:
-    https://github.com/opconty/pixellink_keras/blob/master/pixellink_eval.py
-
-Part of code is from original GitHub repo:
-    https://github.com/ZJULearning/pixel_link/blob/master/pixel_link_decode.pyx
-
-text-detection-0001 description:
-    https://github.com/opencv/open_model_zoo/blob/2018/intel_models/text-detection-0001/description/text-detection-0001.md
-    
-DEMO USAGE EXAMPLE:
-  python3 ./text_detection_demo.py -m ../ -i ../tmp.jpg
+Copyright (c) 2019 Borys Kabakov
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 import cv2
 import numpy as np
