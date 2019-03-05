@@ -21,6 +21,7 @@ ap.add_argument("-i", required=True, dest="image_path", help="path to input imag
 ap.add_argument("-m", required=True, dest="model_path", help="path to model's XML file")
 args = ap.parse_args()
 
+
 class PixelLinkDecoder():
     """ Decoder for Intel's version of PixelLink "text-detection-0001".
         You will need OpenCV compiled with Inference Engine to use this.
@@ -41,7 +42,7 @@ class PixelLinkDecoder():
         pass
 
     def load(self, image, pixel_scores, link_scores,
-             pixel_conf_threshold=None, link_conf_threshold=None, four_neighbours=False):
+             pixel_conf_threshold=0.8, link_conf_threshold=0.8, four_neighbours=False):
         self.image_shape = image.shape[0:2]
         self.pixel_scores = self._set_pixel_scores(pixel_scores)
         self.link_scores = self._set_link_scores(link_scores)
@@ -51,16 +52,8 @@ class PixelLinkDecoder():
         else:
             self._get_neighbours = self._get_neighbours_8
 
-        if pixel_conf_threshold is None:
-            self.pixel_conf_threshold = 0.75
-        else:
-            self.pixel_conf_threshold = pixel_conf_threshold
-
-        if link_conf_threshold is None:
-            self.link_conf_threshold = 0.9
-        else:
-            self.link_conf_threshold = link_conf_threshold
-
+        self.pixel_conf_threshold = pixel_conf_threshold
+        self.link_conf_threshold = link_conf_threshold
         self.pixel_mask = self.pixel_scores >= self.pixel_conf_threshold
         self.link_mask = self.link_scores >= self.link_conf_threshold
         self.points = list(zip(*np.where(self.pixel_mask)))
@@ -112,13 +105,13 @@ class PixelLinkDecoder():
 
     def _set_pixel_scores(self, pixel_scores):
         "get softmaxed properly shaped pixel scores"
-        tmp = np.transpose(pixel_scores, (0,2,3,1))
+        tmp = np.transpose(pixel_scores, (0, 2, 3, 1))
         return self._softmax(tmp, axis=-1)[0, :, :, 1]
 
     def _set_link_scores(self, link_scores):
         "get softmaxed properly shaped links scores"
-        tmp = np.transpose(link_scores, (0,2,3,1))
-        tmp_reshaped = tmp.reshape(tmp.shape[:-1]+(8, 2))
+        tmp = np.transpose(link_scores, (0, 2, 3, 1))
+        tmp_reshaped = tmp.reshape(tmp.shape[:-1] + (8, 2))
         return self._softmax(tmp_reshaped, axis=-1)[0, :, :, :, 1]
 
     def _find_root(self, point):
@@ -186,7 +179,7 @@ class PixelLinkDecoder():
             rect, w, h = self._min_area_rect(cnt)
             if min(w, h) < min_height:
                 continue
-            if w*h < min_area:
+            if w * h < min_area:
                 continue
             self.bboxes.append(self._order_points(rect))
 
@@ -202,10 +195,10 @@ class PixelLinkDecoder():
             Order: TL, TR, BR, BL
         """
         tmp = np.zeros_like(rect)
-        sums = rect.sum(axis = 1)
+        sums = rect.sum(axis=1)
         tmp[0] = rect[np.argmin(sums)]
         tmp[2] = rect[np.argmax(sums)]
-        diff = np.diff(rect, axis = 1)
+        diff = np.diff(rect, axis=1)
         tmp[1] = rect[np.argmin(diff)]
         tmp[3] = rect[np.argmax(diff)]
         return tmp
@@ -226,7 +219,7 @@ class PixelLinkDecoder():
     def plot_result(self, image):
         img_tmp = image.copy()
         for box in self.bboxes:
-            cv2.drawContours(img_tmp, [box], 0, (0,0,255), 2)
+            cv2.drawContours(img_tmp, [box], 0, (0, 0, 255), 2)
         cv2.imshow('Detected text', img_tmp)
         cv2.waitKey(0)
         if cv2.waitKey():
@@ -240,13 +233,14 @@ def main():
         print("Not valid model's XML file name (should be something liike 'foo.xml')")
         sys.exit()
     img = cv2.imread(args.image_path)
-    blob = cv2.dnn.blobFromImage(img, 1, (1280,768))
+    blob = cv2.dnn.blobFromImage(img, 1, (1280, 768))
     td.setInput(blob)
     a, b = td.forward(td.getUnconnectedOutLayersNames())
     dcd = PixelLinkDecoder()
     dcd.load(img, a, b)
     dcd.decode()  # results are in dcd.bboxes
     dcd.plot_result(img)
+
 
 if __name__ == '__main__':
     sys.exit(main() or 0)
