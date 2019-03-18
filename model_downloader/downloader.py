@@ -42,6 +42,8 @@ FRAMEWORKS = {
     'tf': Framework('.prototxt', '.frozen.pb'),
 }
 
+DOWNLOAD_TIMEOUT = 5 * 60
+
 failed_topologies = set()
 
 def process_download(chunk_iterable, size, file):
@@ -67,7 +69,7 @@ def process_download(chunk_iterable, size, file):
         print()
 
 def start_download_generic(session, url, total_size=None):
-    response = session.get(url, stream = True)
+    response = session.get(url, stream=True, timeout=DOWNLOAD_TIMEOUT)
     response.raise_for_status()
 
     if total_size is None:
@@ -81,13 +83,13 @@ def start_download_google_drive(session, id, total_size):
     chunk_size = 32768
 
     URL = 'https://docs.google.com/uc?export=download'
-    response = session.get(URL, params = { 'id' : id }, stream = True)
+    response = session.get(URL, params={'id' : id}, stream=True, timeout=DOWNLOAD_TIMEOUT)
     response.raise_for_status()
 
     token = get_confirm_token(response)
     if token:
         params = { 'id' : id, 'confirm' : token }
-        response = session.get(URL, params = params, stream = True)
+        response = session.get(URL, params=params, stream=True, timeout=DOWNLOAD_TIMEOUT)
 
     return response.iter_content(chunk_size=32768), total_size
 
