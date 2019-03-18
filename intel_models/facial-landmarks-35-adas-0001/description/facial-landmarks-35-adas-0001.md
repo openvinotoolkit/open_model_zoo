@@ -74,7 +74,7 @@ Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/be
 
 with the name `data` and the shape [1x3x60x60].
 
-The blob is constructed from a 60x60 pixel BGR image with subtracted mean of (120, 110, 104) and scale factor of 0.0039.
+Expected color order is BGR.
 
 
 ## Outputs
