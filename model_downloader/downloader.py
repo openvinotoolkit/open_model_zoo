@@ -91,21 +91,30 @@ def start_download_google_drive(session, id, total_size):
 
     return response.iter_content(chunk_size=32768), total_size
 
-def try_download(name, file, start_download):
-    try:
-        chunk_iterable, size = start_download()
-        process_download(chunk_iterable, size, file)
-        return True
-    except requests.exceptions.HTTPError as e:
-        print(e)
-    except requests.exceptions.ConnectionError as e:
-        print("Error Connecting:", e)
-    except requests.exceptions.Timeout as e:
-        print("Timeout Error:", e)
-    except requests.exceptions.TooManyRedirects as e:
-        print("Redirects Error: requests exceeds maximum number of redirects", e)
-    except requests.exceptions.RequestException as e:
-        print(e)
+def try_download(name, file, num_attempts, start_download):
+    for attempt in range(num_attempts):
+        if attempt != 0:
+            retry_delay = 10
+            print("Will retry in {} seconds...".format(retry_delay))
+            time.sleep(retry_delay)
+
+        try:
+            chunk_iterable, size = start_download()
+            file.seek(0)
+            file.truncate()
+            process_download(chunk_iterable, size, file)
+            return True
+        except requests.exceptions.HTTPError as e:
+            print(e)
+        except requests.exceptions.ConnectionError as e:
+            print("Error Connecting:", e)
+        except requests.exceptions.Timeout as e:
+            print("Timeout Error:", e)
+        except requests.exceptions.TooManyRedirects as e:
+            print("Redirects Error: requests exceeds maximum number of redirects", e)
+        except requests.exceptions.RequestException as e:
+            print(e)
+
     failed_topologies.add(name)
     return False
 
@@ -164,7 +173,7 @@ class DirCache:
         hash_path.parent.mkdir(parents=True, exist_ok=True)
         staging_path.replace(self._hash_path(hash))
 
-def try_download_simple(name, destination, expected_hash, cache, start_download):
+def try_download_simple(name, destination, expected_hash, cache, num_attempts, start_download):
     if cache.has(expected_hash):
         print('========= Retrieving {} from the cache'.format(destination))
         cache.get(expected_hash, destination)
@@ -174,14 +183,14 @@ def try_download_simple(name, destination, expected_hash, cache, start_download)
     print('========= Downloading {}'.format(destination))
 
     with destination.open('w+b') as f:
-        if try_download(name, f, start_download):
+        if try_download(name, f, num_attempts, start_download):
             f.seek(0)
             if verify_hash(f, expected_hash, destination, name):
                 cache.put(expected_hash, destination)
 
     print('')
 
-def try_download_tar(name, members, cache, start_download):
+def try_download_tar(name, members, cache, num_attempts, start_download):
     if all(cache.has(member.expected_hash) for member in members):
         for member in members:
             print('========= Retrieving {} from the cache'.format(member.destination))
@@ -193,7 +202,7 @@ def try_download_tar(name, members, cache, start_download):
         print('========= Downloading {}'.format(member.destination))
 
     with tempfile.TemporaryFile() as f:
-        if try_download(name, f, start_download):
+        if try_download(name, f, num_attempts, start_download):
             f.seek(0)
             tar = tarfile.open(fileobj=f, mode='r:*')
             for member in members:
@@ -260,6 +269,15 @@ class DownloaderArgumentParser(argparse.ArgumentParser):
         self.print_help()
         sys.exit(2)
 
+def positive_int_arg(value_str):
+    try:
+        value = int(value_str)
+        if value > 0: return value
+    except ValueError:
+        pass
+
+    raise argparse.ArgumentTypeError('must be a positive integer (got {!r})'.format(value_str))
+
 parser = DownloaderArgumentParser(epilog = 'list_topologies.yml - default configuration file')
 parser.add_argument('-c', '--config', type = Path, metavar = 'CONFIG.YML',
     default = Path(__file__).resolve().parent / 'list_topologies.yml', help = 'path to YML configuration file')
@@ -273,6 +291,8 @@ parser.add_argument('-o', '--output_dir', type = Path, metavar = 'DIR',
     default = Path.cwd(), help = 'path where to save topologies')
 parser.add_argument('--cache_dir', type = Path, metavar = 'DIR',
     help = 'directory to use as a cache for downloaded files')
+parser.add_argument('--num_attempts', type = positive_int_arg, metavar = 'N', default = 1,
+    help = 'attempt each download up to N times')
 
 args = parser.parse_args()
 path_to_config = args.config
@@ -345,17 +365,17 @@ with requests.Session() as session:
         weights_destination = output / (top['name'] + framework.weights_extension)
 
         if {'model_google_drive_id', 'model_size'} <= top.keys():
-            try_download_simple(top['name'], model_destination, top['model_hash'], cache,
+            try_download_simple(top['name'], model_destination, top['model_hash'], cache, args.num_attempts,
                 lambda: start_download_google_drive(session, top['model_google_drive_id'], top['model_size']))
         elif 'model' in top:
-            try_download_simple(top['name'], model_destination, top['model_hash'], cache,
+            try_download_simple(top['name'], model_destination, top['model_hash'], cache, args.num_attempts,
                 lambda: start_download_generic(session, top['model'], top.get('model_size')))
 
         if {'weights_google_drive_id', 'weights_size'} <= top.keys():
-            try_download_simple(top['name'], weights_destination, top['weights_hash'], cache,
+            try_download_simple(top['name'], weights_destination, top['weights_hash'], cache, args.num_attempts,
                 lambda: start_download_google_drive(session, top['weights_google_drive_id'], top['weights_size']))
         elif 'weights' in top:
-            try_download_simple(top['name'], weights_destination, top['weights_hash'], cache,
+            try_download_simple(top['name'], weights_destination, top['weights_hash'], cache, args.num_attempts,
                 lambda: start_download_generic(session, top['weights'], top.get('weights_size')))
 
         members = []
@@ -367,10 +387,10 @@ with requests.Session() as session:
             members.append(MemberRequest(top['model_path_prefix'], weights_destination, top['model_hash']))
 
         if {'tar_google_drive_id', 'tar_size'} <= top.keys():
-            try_download_tar(top['name'], members, cache,
+            try_download_tar(top['name'], members, cache, args.num_attempts,
                 lambda: start_download_google_drive(session, top['tar_google_drive_id'], top['tar_size']))
         elif 'tar' in top:
-            try_download_tar(top['name'], members, cache,
+            try_download_tar(top['name'], members, cache, args.num_attempts,
                 lambda: start_download_generic(session, top['tar'], top.get('tar_size')))
 
         if top['name'] in failed_topologies:
