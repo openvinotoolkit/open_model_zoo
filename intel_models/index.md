@@ -17,14 +17,18 @@ network to detect objects of the same type better.
 | Model Name                                                                                                                                                                          | Complexity (GFLOPs)  | Size (Mp)  | Face  | Person  | Vehicle  | Bike  | License plate  |
 |------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |--------------------- |----------- |------ |-------- |--------- |------ |--------------- |
 | [face-detection-adas-0001](./face-detection-adas-0001/description/face-detection-adas-0001.md)                               | 2.835                | 1.053      | X     |         |          |       |                |
+| [face-detection-adas-binary-0001](./face-detection-adas-binary-0001/description/face-detection-adas-binary-0001.md)             | 0.819                | 1.053      | X     |         |          |       |                |
 | [face-detection-retail-0004](./face-detection-retail-0004/description/face-detection-retail-0004.md)                                                        | 1.067                | 0.588      | X     |         |          |       |                |
 | [face-person-detection-retail-0002](./face-person-detection-retail-0002/description/face-person-detection-retail-0002.md)                              | 2.757                | 0.791      | X     | X       |          |       |                |
 | [person-detection-retail-0002](./person-detection-retail-0002/description/person-detection-retail-0002.md)                                 | 12.424               | 3.244      |       | X       |          |       |                |
 | [person-detection-retail-0013](./person-detection-retail-0013/description/person-detection-retail-0013.md)                                                      | 2.300                | 0.723      |       | X       |          |       |                |
-| [person-detection-action-recognition-0004](./person-detection-action-recognition-0004/description/person-detection-action-recognition-0004.md)                              | 7.140                | 1.951      |       | X       |          |       |                |
+| [person-detection-action-recognition-0005](./person-detection-action-recognition-0005/description/person-detection-action-recognition-0005.md)                          | 7.140                | 1.951      |       | X       |          |       |                |
+| [person-detection-action-recognition-teacher-0002](./person-detection-action-recognition-teacher-0002/description/person-detection-action-recognition-teacher-0002.md)             | 7.140                | 1.951      |       | X       |          |       |                |
 | [pedestrian-detection-adas-0002](./pedestrian-detection-adas-0002/description/pedestrian-detection-adas-0002.md)                                   | 2.836                | 1.165      |       | X       |          |       |                |
+| [pedestrian-detection-adas-binary-0001](./pedestrian-detection-adas-binary-0001/description/pedestrian-detection-adas-binary-0001.md)                 | 0.945                | 1.165      |       | X       |          |       |                |
 | [pedestrian-and-vehicle-detector-adas-0001](./pedestrian-and-vehicle-detector-adas-0001/description/pedestrian-and-vehicle-detector-adas-0001.md) | 3.974                | 1.650      |       | X       | X        |       |                |
 | [vehicle-detection-adas-0002](./vehicle-detection-adas-0002/description/vehicle-detection-adas-0002.md)                                            | 2.798                | 1.079      |       |         | X        |       |                |
+| [vehicle-detection-adas-binary-0001](./vehicle-detection-adas-binary-0001/description/vehicle-detection-adas-binary-0001.md)                          | 0.942                | 1.079      |       |         | X        |       |                |
 | [person-vehicle-bike-detection-crossroad-0078](./person-vehicle-bike-detection-crossroad-0078/description/person-vehicle-bike-detection-crossroad-0078.md)                               | 3.964                | 1.178      |       | X       | X        | X     |                |
 | [vehicle-license-plate-detection-barrier-0106](./vehicle-license-plate-detection-barrier-0106/description/vehicle-license-plate-detection-barrier-0106.md)                                    | 0.349                | 0.634      |       |         | X        |       | X              |
 
@@ -37,13 +41,14 @@ Age/Gender recognition after Face Detection).
 | Model Name                                                                                                                                                                                      | Complexity (GFLOPs)  | Size (Mp)  |
 |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [age-gender-recognition-retail-0013](./age-gender-recognition-retail-0013/description/age-gender-recognition-retail-0013.md)                                                                    | 0.094                | 2.138      |
-| [head-pose-estimation-adas-0001](./head-pose-estimation-adas-0001/description/head-pose-estimation-adas-0001.md)                                                                | 0.105                | 1.911      |
+| [head-pose-estimation-adas-0001](./head-pose-estimation-adas-0001/description/head-pose-estimation-adas-0001.md)                                                           | 0.105                | 1.911      |
 | [license-plate-recognition-barrier-0001](./license-plate-recognition-barrier-0001/description/license-plate-recognition-barrier-0001.md)                                           | 0.328                | 1.218      |
 | [vehicle-attributes-recognition-barrier-0039](./vehicle-attributes-recognition-barrier-0039/description/vehicle-attributes-recognition-barrier-0039.md)                                 | 0.126                | 0.626      |
 | [emotions-recognition-retail-0003](./emotions-recognition-retail-0003/description/emotions-recognition-retail-0003.md)                                                         | 0.126                | 2.483      |
 | [landmarks-regression-retail-0009](./landmarks-regression-retail-0009/description/landmarks-regression-retail-0009.md)                                                          | 0.021                | 0.191      |
-| [facial-landmarks-35-adas-0001](./facial-landmarks-35-adas-0001/description/facial-landmarks-35-adas-0001.md)                                     | 0.042                | 4.595      |
-| [person-attributes-recognition-crossroad-0200](./person-attributes-recognition-crossroad-0200/description/person-attributes-recognition-crossroad-0200.md)  | 0.174                | 0.735      |
+| [facial-landmarks-35-adas-0002](./facial-landmarks-35-adas-0002/description/facial-landmarks-35-adas-0002.md)                                     | 0.042                | 4.595      |
+| [person-attributes-recognition-crossroad-0230](./person-attributes-recognition-crossroad-0230/description/person-attributes-recognition-crossroad-0230.md)  | 0.174                | 0.735      |
+| [gaze-estimation-adas-0002](./gaze-estimation-adas-0002/description/gaze-estimation-adas-0002.md)                                                                 | 0.139                | 1.882      |
 
 ## Reidentification Models
 
@@ -85,6 +90,19 @@ detect areas with complex shape (for example, free space on the road).
 | [road-segmentation-adas-0001](./road-segmentation-adas-0001/description/road-segmentation-adas-0001.md)                          | 4.770                | 0.184      |
 | [semantic-segmentation-adas-0001](./semantic-segmentation-adas-0001/description/semantic-segmentation-adas-0001.md) | 58.572               | 6.686      |
 
+
+## Instance Segmentation Models
+
+Instance segmentation is an extension of object detection and semantic
+segmentation problems. Instead of predicting a bounding box around each object
+instance instance segmentation model outputs pixel-wise masks for all instances.
+
+| Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
+|------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [instance-segmentation-security-0033](./instance-segmentation-security-0033/description/instance-segmentation-security-0033.md)                | 354.274              | 143.444    |
+| [instance-segmentation-security-0049](./instance-segmentation-security-0049/description/instance-segmentation-security-0049.md)                | 56.433               | 44.920     |
+
+
 ## Human Pose Estimation Models
 
 Human pose estimation task is to predict a pose: body skeleton, which consists
@@ -107,9 +125,8 @@ increase the quality of the output.
 
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
-| [single-image-super-resolution-0063](./single-image-super-resolution-0063/description/single-image-super-resolution-0063.md)                | 39.713               | 0.363      |
-| [single-image-super-resolution-1011](./single-image-super-resolution-1011/description/single-image-super-resolution-1011.md)                | 11.654               | 0.030      |
-| [single-image-super-resolution-1021](./single-image-super-resolution-1021/description/single-image-super-resolution-1021.md)                | 16.062               | 0.030      |
+| [single-image-super-resolution-1032](./single-image-super-resolution-1032/description/single-image-super-resolution-1032.md)                | 11.654               | 0.030      |
+| [single-image-super-resolution-1033](./single-image-super-resolution-1033/description/single-image-super-resolution-1033.md)                | 16.062               | 0.030      |
 
 ## Text Detection
 
@@ -118,6 +135,29 @@ Deep Learning models for text detection in various applications
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [text-detection-0002](./text-detection-0002/description/text-detection-0002.md)                              | 51.256               | 6.747      |
+
+## Text Recognition
+
+Deep Learning models for text recognition in various applications
+
+| Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
+|------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [text-recognition-0012](./text-recognition-0012/description/text-recognition-0012.md)                            | 1.485                | 5.568      |
+
+## Action Recognition Models
+
+Action Recognition models predict action that is being performed on a short video clip
+(tensor formed by stacking sampled frames from input video). Some models (for example `driver-action-recognition-adas-0002` may use precomputed high-level spatial
+or spatio-temporal) features (embeddings) from individual clip fragments and then aggregate them in a temporal model
+to predict a vector with classification scores. Models that compute embeddings are called *encoder*, while models
+that predict an actual labels are called *decoder*.
+
+| Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
+|------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [driver-action-recognition-adas-0002-encoder](./driver-action-recognition-adas-0002-encoder/description/driver-action-recognition-adas-0002-encoder.md)                          | 0.676                | 2.863      |
+| [driver-action-recognition-adas-0002-decoder](./driver-action-recognition-adas-0002-decoder/description/driver-action-recognition-adas-0002-decoder.md) | 0.147                | 4.205      |
+| [action-recognition-0001-encoder](./action-recognition-0001-encoder/description/action-recognition-0001-encoder.md)                          | 7.340                | 21.276     |
+| [action-recognition-0001-decoder](./action-recognition-0001-decoder/description/action-recognition-0001-decoder.md) | 0.147                | 4.405      |
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

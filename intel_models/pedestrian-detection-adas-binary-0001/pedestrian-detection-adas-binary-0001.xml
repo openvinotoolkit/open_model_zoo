@@ -1,0 +1,4433 @@
+<?xml version="1.0" ?>
+<net batch="1" name="pytorch" version="4">
+	<layers>
+		<layer id="0" name="data" precision="FP32" type="Input">
+			<output>
+				<port id="0">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>384</dim>
+					<dim>672</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="1" name="Mul1_/Fused_Mul_/FusedScaleShift_" precision="FP32" type="ScaleShift">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>384</dim>
+					<dim>672</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>384</dim>
+					<dim>672</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="0" size="12"/>
+				<biases offset="12" size="12"/>
+			</blobs>
+		</layer>
+		<layer id="2" name="L0000_Conv2d-back_bone_seq.conv1_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="32" pads_begin="1,1" pads_end="1,1" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>384</dim>
+					<dim>672</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>192</dim>
+					<dim>336</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="24" size="3456"/>
+				<biases offset="3480" size="128"/>
+			</blobs>
+		</layer>
+		<layer id="3" name="L0001_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>192</dim>
+					<dim>336</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>192</dim>
+					<dim>336</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="4" name="L0002_Conv2d-back_bone_seq.conv2_1_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="32" kernel="3,3" output="32" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>192</dim>
+					<dim>336</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>192</dim>
+					<dim>336</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="3608" size="1152"/>
+				<biases offset="4760" size="128"/>
+			</blobs>
+		</layer>
+		<layer id="5" name="L0003_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>192</dim>
+					<dim>336</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>192</dim>
+					<dim>336</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="6" name="L0004_Conv2d-back_bone_seq.conv2_1_sep_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="1,1" output="56" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>32</dim>
+					<dim>192</dim>
+					<dim>336</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>56</dim>
+					<dim>192</dim>
+					<dim>336</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="4888" size="7168"/>
+				<biases offset="12056" size="224"/>
+			</blobs>
+		</layer>
+		<layer id="7" name="L0005_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>56</dim>
+					<dim>192</dim>
+					<dim>336</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>56</dim>
+					<dim>192</dim>
+					<dim>336</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="8" name="L0006_Conv2d-back_bone_seq.conv2_2_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="56" kernel="3,3" output="56" pads_begin="1,1" pads_end="1,1" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>56</dim>
+					<dim>192</dim>
+					<dim>336</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>56</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="12280" size="2016"/>
+				<biases offset="14296" size="224"/>
+			</blobs>
+		</layer>
+		<layer id="9" name="Copy_L0008_ActivationBin-back_bone_seq.conv2_2_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data__const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="10" name="Copy_L0008_ActivationBin-back_bone_seq.conv2_2_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data_1114_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="11" name="754_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="12" name="756_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14524" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="13" name="L0008_ActivationBin-back_bone_seq.conv2_2_sep_relubin_bin_conv_BIN01/Quantize_" precision="FP32" type="Quantize">
+			<data levels="2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>56</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+				<port id="2">
+					<dim>1</dim>
+				</port>
+				<port id="3">
+					<dim>1</dim>
+				</port>
+				<port id="4">
+					<dim>1</dim>
+				</port>
+			</input>
+			<output>
+				<port id="5">
+					<dim>1</dim>
+					<dim>56</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="14" name="L0009_Conv2d-back_bone_seq.conv2_2_sep-BIN" precision="FP32" type="BinaryConvolution">
+			<data dilations="1,1" group="1" input="56" kernel="1,1" mode="xnor-popcount" output="112" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>56</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>112</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="14528" size="784"/>
+			</blobs>
+		</layer>
+		<layer id="15" name="L0009_Conv2d-back_bone_seq.conv2_2_sep-BINMul/After/Fused_Mul_/FusedScaleShift_" precision="FP32" type="ScaleShift">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>112</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>112</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="15312" size="448"/>
+				<biases offset="15760" size="448"/>
+			</blobs>
+		</layer>
+		<layer id="16" name="L0010_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>112</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>112</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="17" name="L0011_Conv2d-back_bone_seq.conv3_1_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="112" kernel="3,3" output="112" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>112</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>112</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="16208" size="4032"/>
+				<biases offset="20240" size="448"/>
+			</blobs>
+		</layer>
+		<layer id="18" name="Copy_L0013_ActivationBin-back_bone_seq.conv3_1_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data__const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="19" name="Copy_L0013_ActivationBin-back_bone_seq.conv3_1_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data_1108_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="20" name="698_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="21" name="700_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14524" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="22" name="L0013_ActivationBin-back_bone_seq.conv3_1_sep_relubin_bin_conv_BIN01/Quantize_" precision="FP32" type="Quantize">
+			<data levels="2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>112</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+				<port id="2">
+					<dim>1</dim>
+				</port>
+				<port id="3">
+					<dim>1</dim>
+				</port>
+				<port id="4">
+					<dim>1</dim>
+				</port>
+			</input>
+			<output>
+				<port id="5">
+					<dim>1</dim>
+					<dim>112</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="23" name="L0014_Conv2d-back_bone_seq.conv3_1_sep-BIN" precision="FP32" type="BinaryConvolution">
+			<data dilations="1,1" group="1" input="112" kernel="1,1" mode="xnor-popcount" output="96" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>112</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="20688" size="1344"/>
+			</blobs>
+		</layer>
+		<layer id="24" name="L0014_Conv2d-back_bone_seq.conv3_1_sep-BINMul/After/Fused_Mul_/FusedScaleShift_" precision="FP32" type="ScaleShift">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="22032" size="384"/>
+				<biases offset="22416" size="384"/>
+			</blobs>
+		</layer>
+		<layer id="25" name="L0015_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="26" name="L0016_Conv2d-back_bone_seq.conv3_2_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="96" kernel="3,3" output="96" pads_begin="1,1" pads_end="1,1" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>96</dim>
+					<dim>168</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="22800" size="3456"/>
+				<biases offset="26256" size="384"/>
+			</blobs>
+		</layer>
+		<layer id="27" name="Copy_L0018_ActivationBin-back_bone_seq.conv3_2_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data__const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="28" name="Copy_L0018_ActivationBin-back_bone_seq.conv3_2_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data_1124_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="29" name="722_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="30" name="724_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14524" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="31" name="L0018_ActivationBin-back_bone_seq.conv3_2_sep_relubin_bin_conv_BIN01/Quantize_" precision="FP32" type="Quantize">
+			<data levels="2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+				<port id="2">
+					<dim>1</dim>
+				</port>
+				<port id="3">
+					<dim>1</dim>
+				</port>
+				<port id="4">
+					<dim>1</dim>
+				</port>
+			</input>
+			<output>
+				<port id="5">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="32" name="L0019_Conv2d-back_bone_seq.conv3_2_sep-BIN" precision="FP32" type="BinaryConvolution">
+			<data dilations="1,1" group="1" input="96" kernel="1,1" mode="xnor-popcount" output="232" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>232</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="26640" size="2784"/>
+			</blobs>
+		</layer>
+		<layer id="33" name="L0019_Conv2d-back_bone_seq.conv3_2_sep-BINMul/After/Fused_Mul_/FusedScaleShift_" precision="FP32" type="ScaleShift">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>232</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>232</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="29424" size="928"/>
+				<biases offset="30352" size="928"/>
+			</blobs>
+		</layer>
+		<layer id="34" name="L0020_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>232</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>232</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="35" name="L0021_Conv2d-back_bone_seq.conv4_1_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="232" kernel="3,3" output="232" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>232</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>232</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="31280" size="8352"/>
+				<biases offset="39632" size="928"/>
+			</blobs>
+		</layer>
+		<layer id="36" name="Copy_L0023_ActivationBin-back_bone_seq.conv4_1_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data__const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="37" name="Copy_L0023_ActivationBin-back_bone_seq.conv4_1_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data_1112_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="38" name="674_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="39" name="676_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14524" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="40" name="L0023_ActivationBin-back_bone_seq.conv4_1_sep_relubin_bin_conv_BIN01/Quantize_" precision="FP32" type="Quantize">
+			<data levels="2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>232</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+				<port id="2">
+					<dim>1</dim>
+				</port>
+				<port id="3">
+					<dim>1</dim>
+				</port>
+				<port id="4">
+					<dim>1</dim>
+				</port>
+			</input>
+			<output>
+				<port id="5">
+					<dim>1</dim>
+					<dim>232</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="41" name="L0024_Conv2d-back_bone_seq.conv4_1_sep-BIN" precision="FP32" type="BinaryConvolution">
+			<data dilations="1,1" group="1" input="232" kernel="1,1" mode="xnor-popcount" output="208" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>232</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>208</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="40560" size="6032"/>
+			</blobs>
+		</layer>
+		<layer id="42" name="L0024_Conv2d-back_bone_seq.conv4_1_sep-BINMul/After/Fused_Mul_/FusedScaleShift_" precision="FP32" type="ScaleShift">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>208</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>208</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="46592" size="832"/>
+				<biases offset="47424" size="832"/>
+			</blobs>
+		</layer>
+		<layer id="43" name="L0025_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>208</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>208</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="44" name="L0026_Conv2d-back_bone_seq.conv4_2_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="208" kernel="3,3" output="208" pads_begin="1,1" pads_end="1,1" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>208</dim>
+					<dim>48</dim>
+					<dim>84</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>208</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="48256" size="7488"/>
+				<biases offset="55744" size="832"/>
+			</blobs>
+		</layer>
+		<layer id="45" name="Copy_L0028_ActivationBin-back_bone_seq.conv4_2_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data__const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="46" name="Copy_L0028_ActivationBin-back_bone_seq.conv4_2_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data_1118_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="47" name="730_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="48" name="732_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14524" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="49" name="L0028_ActivationBin-back_bone_seq.conv4_2_sep_relubin_bin_conv_BIN01/Quantize_" precision="FP32" type="Quantize">
+			<data levels="2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>208</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+				<port id="2">
+					<dim>1</dim>
+				</port>
+				<port id="3">
+					<dim>1</dim>
+				</port>
+				<port id="4">
+					<dim>1</dim>
+				</port>
+			</input>
+			<output>
+				<port id="5">
+					<dim>1</dim>
+					<dim>208</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="50" name="L0029_Conv2d-back_bone_seq.conv4_2_sep-BIN" precision="FP32" type="BinaryConvolution">
+			<data dilations="1,1" group="1" input="208" kernel="1,1" mode="xnor-popcount" output="352" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>208</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>352</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="56576" size="9152"/>
+			</blobs>
+		</layer>
+		<layer id="51" name="L0029_Conv2d-back_bone_seq.conv4_2_sep-BINMul/After/Fused_Mul_/FusedScaleShift_" precision="FP32" type="ScaleShift">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>352</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>352</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="65728" size="1408"/>
+				<biases offset="67136" size="1408"/>
+			</blobs>
+		</layer>
+		<layer id="52" name="L0030_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>352</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>352</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="53" name="L0031_Conv2d-back_bone_seq.conv5_1_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="352" kernel="3,3" output="352" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>352</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>352</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="68544" size="12672"/>
+				<biases offset="81216" size="1408"/>
+			</blobs>
+		</layer>
+		<layer id="54" name="Copy_L0033_ActivationBin-back_bone_seq.conv5_1_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data__const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="55" name="Copy_L0033_ActivationBin-back_bone_seq.conv5_1_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data_1110_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="56" name="706_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="57" name="708_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14524" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="58" name="L0033_ActivationBin-back_bone_seq.conv5_1_sep_relubin_bin_conv_BIN01/Quantize_" precision="FP32" type="Quantize">
+			<data levels="2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>352</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+				<port id="2">
+					<dim>1</dim>
+				</port>
+				<port id="3">
+					<dim>1</dim>
+				</port>
+				<port id="4">
+					<dim>1</dim>
+				</port>
+			</input>
+			<output>
+				<port id="5">
+					<dim>1</dim>
+					<dim>352</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="59" name="L0034_Conv2d-back_bone_seq.conv5_1_sep-BIN" precision="FP32" type="BinaryConvolution">
+			<data dilations="1,1" group="1" input="352" kernel="1,1" mode="xnor-popcount" output="320" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>352</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>320</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="82624" size="14080"/>
+			</blobs>
+		</layer>
+		<layer id="60" name="L0034_Conv2d-back_bone_seq.conv5_1_sep-BINMul/After/Fused_Mul_/FusedScaleShift_" precision="FP32" type="ScaleShift">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>320</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>320</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="96704" size="1280"/>
+				<biases offset="97984" size="1280"/>
+			</blobs>
+		</layer>
+		<layer id="61" name="L0035_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>320</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>320</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="62" name="L0036_Conv2d-back_bone_seq.conv5_2_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="320" kernel="3,3" output="320" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>320</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>320</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="99264" size="11520"/>
+				<biases offset="110784" size="1280"/>
+			</blobs>
+		</layer>
+		<layer id="63" name="Copy_L0038_ActivationBin-back_bone_seq.conv5_2_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data__const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="64" name="Copy_L0038_ActivationBin-back_bone_seq.conv5_2_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data_1116_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="65" name="714_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="66" name="716_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14524" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="67" name="L0038_ActivationBin-back_bone_seq.conv5_2_sep_relubin_bin_conv_BIN01/Quantize_" precision="FP32" type="Quantize">
+			<data levels="2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>320</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+				<port id="2">
+					<dim>1</dim>
+				</port>
+				<port id="3">
+					<dim>1</dim>
+				</port>
+				<port id="4">
+					<dim>1</dim>
+				</port>
+			</input>
+			<output>
+				<port id="5">
+					<dim>1</dim>
+					<dim>320</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="68" name="L0039_Conv2d-back_bone_seq.conv5_2_sep-BIN" precision="FP32" type="BinaryConvolution">
+			<data dilations="1,1" group="1" input="320" kernel="1,1" mode="xnor-popcount" output="296" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>320</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>296</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="112064" size="11840"/>
+			</blobs>
+		</layer>
+		<layer id="69" name="L0039_Conv2d-back_bone_seq.conv5_2_sep-BINMul/After/Fused_Mul_/FusedScaleShift_" precision="FP32" type="ScaleShift">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>296</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>296</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="123904" size="1184"/>
+				<biases offset="125088" size="1184"/>
+			</blobs>
+		</layer>
+		<layer id="70" name="L0040_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>296</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>296</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="71" name="L0041_Conv2d-back_bone_seq.conv5_3_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="296" kernel="3,3" output="296" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>296</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>296</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="126272" size="10656"/>
+				<biases offset="136928" size="1184"/>
+			</blobs>
+		</layer>
+		<layer id="72" name="Copy_L0043_ActivationBin-back_bone_seq.conv5_3_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data__const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="73" name="Copy_L0043_ActivationBin-back_bone_seq.conv5_3_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data_1106_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="74" name="738_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="75" name="740_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14524" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="76" name="L0043_ActivationBin-back_bone_seq.conv5_3_sep_relubin_bin_conv_BIN01/Quantize_" precision="FP32" type="Quantize">
+			<data levels="2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>296</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+				<port id="2">
+					<dim>1</dim>
+				</port>
+				<port id="3">
+					<dim>1</dim>
+				</port>
+				<port id="4">
+					<dim>1</dim>
+				</port>
+			</input>
+			<output>
+				<port id="5">
+					<dim>1</dim>
+					<dim>296</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="77" name="L0044_Conv2d-back_bone_seq.conv5_3_sep-BIN" precision="FP32" type="BinaryConvolution">
+			<data dilations="1,1" group="1" input="296" kernel="1,1" mode="xnor-popcount" output="248" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>296</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>248</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="138112" size="9176"/>
+			</blobs>
+		</layer>
+		<layer id="78" name="L0044_Conv2d-back_bone_seq.conv5_3_sep-BINMul/After/Fused_Mul_/FusedScaleShift_" precision="FP32" type="ScaleShift">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>248</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>248</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="147288" size="992"/>
+				<biases offset="148280" size="992"/>
+			</blobs>
+		</layer>
+		<layer id="79" name="L0045_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>248</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>248</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="80" name="L0046_Conv2d-back_bone_seq.conv5_4_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="248" kernel="3,3" output="248" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>248</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>248</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="149272" size="8928"/>
+				<biases offset="158200" size="992"/>
+			</blobs>
+		</layer>
+		<layer id="81" name="Copy_L0048_ActivationBin-back_bone_seq.conv5_4_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data__const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="82" name="Copy_L0048_ActivationBin-back_bone_seq.conv5_4_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data_1122_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="83" name="690_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="84" name="692_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14524" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="85" name="L0048_ActivationBin-back_bone_seq.conv5_4_sep_relubin_bin_conv_BIN01/Quantize_" precision="FP32" type="Quantize">
+			<data levels="2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>248</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+				<port id="2">
+					<dim>1</dim>
+				</port>
+				<port id="3">
+					<dim>1</dim>
+				</port>
+				<port id="4">
+					<dim>1</dim>
+				</port>
+			</input>
+			<output>
+				<port id="5">
+					<dim>1</dim>
+					<dim>248</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="86" name="L0049_Conv2d-back_bone_seq.conv5_4_sep-BIN" precision="FP32" type="BinaryConvolution">
+			<data dilations="1,1" group="1" input="248" kernel="1,1" mode="xnor-popcount" output="272" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>248</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>272</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="159192" size="8432"/>
+			</blobs>
+		</layer>
+		<layer id="87" name="L0049_Conv2d-back_bone_seq.conv5_4_sep-BINMul/After/Fused_Mul_/FusedScaleShift_" precision="FP32" type="ScaleShift">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>272</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>272</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="167624" size="1088"/>
+				<biases offset="168712" size="1088"/>
+			</blobs>
+		</layer>
+		<layer id="88" name="L0050_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>272</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>272</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="89" name="L0051_Conv2d-back_bone_seq.conv5_5_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="272" kernel="3,3" output="272" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>272</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>272</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="169800" size="9792"/>
+				<biases offset="179592" size="1088"/>
+			</blobs>
+		</layer>
+		<layer id="90" name="Copy_L0053_ActivationBin-back_bone_seq.conv5_5_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data__const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="91" name="Copy_L0053_ActivationBin-back_bone_seq.conv5_5_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data_1120_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="92" name="746_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="93" name="748_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14524" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="94" name="L0053_ActivationBin-back_bone_seq.conv5_5_sep_relubin_bin_conv_BIN01/Quantize_" precision="FP32" type="Quantize">
+			<data levels="2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>272</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+				<port id="2">
+					<dim>1</dim>
+				</port>
+				<port id="3">
+					<dim>1</dim>
+				</port>
+				<port id="4">
+					<dim>1</dim>
+				</port>
+			</input>
+			<output>
+				<port id="5">
+					<dim>1</dim>
+					<dim>272</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="95" name="L0054_Conv2d-back_bone_seq.conv5_5_sep-BIN" precision="FP32" type="BinaryConvolution">
+			<data dilations="1,1" group="1" input="272" kernel="1,1" mode="xnor-popcount" output="176" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>272</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>176</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="180680" size="5984"/>
+			</blobs>
+		</layer>
+		<layer id="96" name="L0054_Conv2d-back_bone_seq.conv5_5_sep-BINMul/After/Fused_Mul_/FusedScaleShift_" precision="FP32" type="ScaleShift">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>176</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>176</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="186664" size="704"/>
+				<biases offset="187368" size="704"/>
+			</blobs>
+		</layer>
+		<layer id="97" name="L0055_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>176</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>176</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="98" name="L0056_Conv2d-loc_seq.conv4_3_0_norm_mbox_loc" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="16" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>176</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>16</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="188072" size="101376"/>
+				<biases offset="289448" size="64"/>
+			</blobs>
+		</layer>
+		<layer id="99" name="conv4_3_0_norm_mbox_loc_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>16</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+					<dim>16</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="100" name="conv4_3_0_norm_mbox_loc_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+					<dim>16</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>16128</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="101" name="L0057_Conv2d-loc_seq.conv4_3_norm_mbox_loc" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="16" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>176</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>16</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="289512" size="101376"/>
+				<biases offset="390888" size="64"/>
+			</blobs>
+		</layer>
+		<layer id="102" name="conv4_3_norm_mbox_loc_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>16</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+					<dim>16</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="103" name="conv4_3_norm_mbox_loc_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+					<dim>16</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>16128</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="104" name="L0058_Conv2d-back_bone_seq.conv5_6_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="176" kernel="3,3" output="176" pads_begin="1,1" pads_end="1,1" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>176</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>176</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="390952" size="6336"/>
+				<biases offset="397288" size="704"/>
+			</blobs>
+		</layer>
+		<layer id="105" name="Copy_L0060_ActivationBin-back_bone_seq.conv5_6_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data__const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="106" name="Copy_L0060_ActivationBin-back_bone_seq.conv5_6_sep_relubin_bin_conv_BIN01/Input_1/Output_0/Data_1126_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="107" name="682_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14520" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="108" name="684_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="14524" size="4"/>
+			</blobs>
+		</layer>
+		<layer id="109" name="L0060_ActivationBin-back_bone_seq.conv5_6_sep_relubin_bin_conv_BIN01/Quantize_" precision="FP32" type="Quantize">
+			<data levels="2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>176</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+				</port>
+				<port id="2">
+					<dim>1</dim>
+				</port>
+				<port id="3">
+					<dim>1</dim>
+				</port>
+				<port id="4">
+					<dim>1</dim>
+				</port>
+			</input>
+			<output>
+				<port id="5">
+					<dim>1</dim>
+					<dim>176</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="110" name="L0061_Conv2d-back_bone_seq.conv5_6_sep-BIN" precision="FP32" type="BinaryConvolution">
+			<data dilations="1,1" group="1" input="176" kernel="1,1" mode="xnor-popcount" output="256" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>176</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="397992" size="5632"/>
+			</blobs>
+		</layer>
+		<layer id="111" name="L0061_Conv2d-back_bone_seq.conv5_6_sep-BINMul/After/Fused_Mul_/FusedScaleShift_" precision="FP32" type="ScaleShift">
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="403624" size="1024"/>
+				<biases offset="404648" size="1024"/>
+			</blobs>
+		</layer>
+		<layer id="112" name="L0062_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="113" name="L0063_Conv2d-back_bone_seq.conv6_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="256" kernel="3,3" output="256" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="405672" size="9216"/>
+				<biases offset="414888" size="1024"/>
+			</blobs>
+		</layer>
+		<layer id="114" name="L0064_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="115" name="L0065_Conv2d-back_bone_seq.conv6_sep_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="1,1" output="96" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>256</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="415912" size="98304"/>
+				<biases offset="514216" size="384"/>
+			</blobs>
+		</layer>
+		<layer id="116" name="L0066_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="117" name="L0067_Conv2d-loc_seq.fc7_0_mbox_loc" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="24" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="514600" size="82944"/>
+				<biases offset="597544" size="96"/>
+			</blobs>
+		</layer>
+		<layer id="118" name="fc7_0_mbox_loc_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+					<dim>24</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="119" name="fc7_0_mbox_loc_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+					<dim>24</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>6048</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="120" name="L0068_Conv2d-loc_seq.fc7_mbox_loc" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="24" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="597640" size="82944"/>
+				<biases offset="680584" size="96"/>
+			</blobs>
+		</layer>
+		<layer id="121" name="fc7_mbox_loc_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+					<dim>24</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="122" name="fc7_mbox_loc_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+					<dim>24</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>6048</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="123" name="L0069_Conv2d-back_bone_seq.conv6_1_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="1,1" output="96" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="680680" size="36864"/>
+				<biases offset="717544" size="384"/>
+			</blobs>
+		</layer>
+		<layer id="124" name="L0070_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="125" name="L0071_Conv2d-back_bone_seq.conv6_2_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="96" kernel="3,3" output="96" pads_begin="1,1" pads_end="1,1" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="717928" size="3456"/>
+				<biases offset="721384" size="384"/>
+			</blobs>
+		</layer>
+		<layer id="126" name="L0072_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="127" name="L0073_Conv2d-back_bone_seq.conv6_2_new_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="1,1" output="120" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="721768" size="46080"/>
+				<biases offset="767848" size="480"/>
+			</blobs>
+		</layer>
+		<layer id="128" name="L0074_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="129" name="L0075_Conv2d-loc_seq.conv6_2_mbox_loc" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="24" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="768328" size="103680"/>
+				<biases offset="872008" size="96"/>
+			</blobs>
+		</layer>
+		<layer id="130" name="conv6_2_mbox_loc_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+					<dim>24</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="131" name="conv6_2_mbox_loc_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+					<dim>24</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>1584</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="132" name="L0076_Conv2d-loc_seq.conv6_2_mbox_loc_bigpriors" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="24" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="872104" size="103680"/>
+				<biases offset="975784" size="96"/>
+			</blobs>
+		</layer>
+		<layer id="133" name="conv6_2_mbox_loc_perm_bigpriors" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+					<dim>24</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="134" name="conv6_2_mbox_loc_flat_bigpriors" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+					<dim>24</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>1584</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="135" name="L0077_Conv2d-back_bone_seq.conv7_1_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="1,1" output="120" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="975880" size="57600"/>
+				<biases offset="1033480" size="480"/>
+			</blobs>
+		</layer>
+		<layer id="136" name="L0078_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="137" name="L0079_Conv2d-back_bone_seq.conv7_2_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="120" kernel="3,3" output="120" pads_begin="1,1" pads_end="1,1" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1033960" size="4320"/>
+				<biases offset="1038280" size="480"/>
+			</blobs>
+		</layer>
+		<layer id="138" name="L0080_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="139" name="L0081_Conv2d-back_bone_seq.conv7_2_new_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="1,1" output="144" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>144</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1038760" size="69120"/>
+				<biases offset="1107880" size="576"/>
+			</blobs>
+		</layer>
+		<layer id="140" name="L0082_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>144</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>144</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="141" name="L0083_Conv2d-loc_seq.conv7_2_mbox_loc" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="24" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>144</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1108456" size="124416"/>
+				<biases offset="1232872" size="96"/>
+			</blobs>
+		</layer>
+		<layer id="142" name="conv7_2_mbox_loc_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+					<dim>24</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="143" name="conv7_2_mbox_loc_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+					<dim>24</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>432</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="144" name="L0084_Conv2d-loc_seq.conv7_2_mbox_loc_bigpriors" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="24" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>144</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1232968" size="124416"/>
+				<biases offset="1357384" size="96"/>
+			</blobs>
+		</layer>
+		<layer id="145" name="conv7_2_mbox_loc_perm_bigpriors" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+					<dim>24</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="146" name="conv7_2_mbox_loc_flat_bigpriors" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+					<dim>24</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>432</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="147" name="L0085_Conv2d-back_bone_seq.conv8_1_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="1,1" output="120" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>144</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1357480" size="69120"/>
+				<biases offset="1426600" size="480"/>
+			</blobs>
+		</layer>
+		<layer id="148" name="L0086_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="149" name="L0087_Conv2d-back_bone_seq.conv8_2_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="120" kernel="3,3" output="120" pads_begin="1,1" pads_end="1,1" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1427080" size="4320"/>
+				<biases offset="1431400" size="480"/>
+			</blobs>
+		</layer>
+		<layer id="150" name="L0088_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="151" name="L0089_Conv2d-back_bone_seq.conv8_2_new_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="1,1" output="216" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>216</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1431880" size="103680"/>
+				<biases offset="1535560" size="864"/>
+			</blobs>
+		</layer>
+		<layer id="152" name="L0090_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>216</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>216</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="153" name="L0091_Conv2d-loc_seq.conv8_2_mbox_loc" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="16" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>216</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>16</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1536424" size="124416"/>
+				<biases offset="1660840" size="64"/>
+			</blobs>
+		</layer>
+		<layer id="154" name="conv8_2_mbox_loc_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>16</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+					<dim>16</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="155" name="conv8_2_mbox_loc_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+					<dim>16</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>96</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="156" name="L0092_Conv2d-back_bone_seq.conv9_1_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="1,1" output="64" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>216</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1660904" size="55296"/>
+				<biases offset="1716200" size="256"/>
+			</blobs>
+		</layer>
+		<layer id="157" name="L0093_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="158" name="L0094_Conv2d-back_bone_seq.conv9_2_dw_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="64" kernel="3,3" output="64" pads_begin="1,1" pads_end="1,1" strides="2,2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1716456" size="2304"/>
+				<biases offset="1718760" size="256"/>
+			</blobs>
+		</layer>
+		<layer id="159" name="L0095_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="160" name="L0096_Conv2d-back_bone_seq.conv9_2_new_BN" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="1,1" output="128" pads_begin="0,0" pads_end="0,0" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>64</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1719016" size="32768"/>
+				<biases offset="1751784" size="512"/>
+			</blobs>
+		</layer>
+		<layer id="161" name="L0097_ReLU-back_bone_seq.conv1_relu" precision="FP32" type="ReLU">
+			<data negative_slope="0.0"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="162" name="L0098_Conv2d-loc_seq.conv9_2_mbox_loc" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="16" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>16</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1752296" size="73728"/>
+				<biases offset="1826024" size="64"/>
+			</blobs>
+		</layer>
+		<layer id="163" name="conv9_2_mbox_loc_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>16</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>16</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="164" name="conv9_2_mbox_loc_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>16</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>32</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="165" name="mbox_loc" precision="FP32" type="Concat">
+			<data axis="1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>16128</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>16128</dim>
+				</port>
+				<port id="2">
+					<dim>1</dim>
+					<dim>6048</dim>
+				</port>
+				<port id="3">
+					<dim>1</dim>
+					<dim>6048</dim>
+				</port>
+				<port id="4">
+					<dim>1</dim>
+					<dim>1584</dim>
+				</port>
+				<port id="5">
+					<dim>1</dim>
+					<dim>1584</dim>
+				</port>
+				<port id="6">
+					<dim>1</dim>
+					<dim>432</dim>
+				</port>
+				<port id="7">
+					<dim>1</dim>
+					<dim>432</dim>
+				</port>
+				<port id="8">
+					<dim>1</dim>
+					<dim>96</dim>
+				</port>
+				<port id="9">
+					<dim>1</dim>
+					<dim>32</dim>
+				</port>
+			</input>
+			<output>
+				<port id="10">
+					<dim>1</dim>
+					<dim>48512</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="166" name="L0099_Conv2d-conf_seq.conv4_3_0_norm_mbox_conf.conv4_3_0_norm_mbox_conf" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="8" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>176</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>8</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1826088" size="50688"/>
+				<biases offset="1876776" size="32"/>
+			</blobs>
+		</layer>
+		<layer id="167" name="conv4_3_0_norm_mbox_conf_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>8</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+					<dim>8</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="168" name="conv4_3_0_norm_mbox_conf_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+					<dim>8</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>8064</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="169" name="L0100_Conv2d-conf_seq.conv4_3_norm_mbox_conf.conv4_3_norm_mbox_conf" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="8" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>176</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>8</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1876808" size="50688"/>
+				<biases offset="1927496" size="32"/>
+			</blobs>
+		</layer>
+		<layer id="170" name="conv4_3_norm_mbox_conf_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>8</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+					<dim>8</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="171" name="conv4_3_norm_mbox_conf_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+					<dim>8</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>8064</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="172" name="L0101_Conv2d-conf_seq.fc7_0_mbox_conf.fc7_0_mbox_conf" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="12" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1927528" size="41472"/>
+				<biases offset="1969000" size="48"/>
+			</blobs>
+		</layer>
+		<layer id="173" name="fc7_0_mbox_conf_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+					<dim>12</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="174" name="fc7_0_mbox_conf_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+					<dim>12</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3024</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="175" name="L0102_Conv2d-conf_seq.fc7_mbox_conf.fc7_mbox_conf" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="12" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>96</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="1969048" size="41472"/>
+				<biases offset="2010520" size="48"/>
+			</blobs>
+		</layer>
+		<layer id="176" name="fc7_mbox_conf_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+					<dim>12</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="177" name="fc7_mbox_conf_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+					<dim>12</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3024</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="178" name="L0103_Conv2d-conf_seq.conv6_2_mbox_conf.conv6_2_mbox_conf" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="12" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="2010568" size="51840"/>
+				<biases offset="2062408" size="48"/>
+			</blobs>
+		</layer>
+		<layer id="179" name="conv6_2_mbox_conf_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+					<dim>12</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="180" name="conv6_2_mbox_conf_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+					<dim>12</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>792</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="181" name="L0104_Conv2d-conf_seq.conv6_2_mbox_conf_bigpriors.conv6_2_mbox_conf_bigpriors" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="12" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>120</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="2062456" size="51840"/>
+				<biases offset="2114296" size="48"/>
+			</blobs>
+		</layer>
+		<layer id="182" name="conv6_2_mbox_conf_perm_bigpriors" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+					<dim>12</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="183" name="conv6_2_mbox_conf_flat_bigpriors" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+					<dim>12</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>792</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="184" name="L0105_Conv2d-conf_seq.conv7_2_mbox_conf.conv7_2_mbox_conf" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="12" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>144</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="2114344" size="62208"/>
+				<biases offset="2176552" size="48"/>
+			</blobs>
+		</layer>
+		<layer id="185" name="conv7_2_mbox_conf_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+					<dim>12</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="186" name="conv7_2_mbox_conf_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+					<dim>12</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>216</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="187" name="L0106_Conv2d-conf_seq.conv7_2_mbox_conf_bigpriors.conv7_2_mbox_conf_bigpriors" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="12" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>144</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="2176600" size="62208"/>
+				<biases offset="2238808" size="48"/>
+			</blobs>
+		</layer>
+		<layer id="188" name="conv7_2_mbox_conf_perm_bigpriors" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+					<dim>12</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="189" name="conv7_2_mbox_conf_flat_bigpriors" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+					<dim>12</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>216</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="190" name="L0107_Conv2d-conf_seq.conv8_2_mbox_conf.conv8_2_mbox_conf" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="8" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>216</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>8</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="2238856" size="62208"/>
+				<biases offset="2301064" size="32"/>
+			</blobs>
+		</layer>
+		<layer id="191" name="conv8_2_mbox_conf_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>8</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+					<dim>8</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="192" name="conv8_2_mbox_conf_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+					<dim>8</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>48</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="193" name="L0108_Conv2d-conf_seq.conv9_2_mbox_conf.conv9_2_mbox_conf" precision="FP32" type="Convolution">
+			<data dilations="1,1" group="1" kernel="3,3" output="8" pads_begin="1,1" pads_end="1,1" strides="1,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>128</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>8</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+				</port>
+			</output>
+			<blobs>
+				<weights offset="2301096" size="36864"/>
+				<biases offset="2337960" size="32"/>
+			</blobs>
+		</layer>
+		<layer id="194" name="conv9_2_mbox_conf_perm" precision="FP32" type="Permute">
+			<data order="0,2,3,1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>8</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>8</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="195" name="conv9_2_mbox_conf_flat" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>8</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>16</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="196" name="mbox_conf" precision="FP32" type="Concat">
+			<data axis="1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>8064</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>8064</dim>
+				</port>
+				<port id="2">
+					<dim>1</dim>
+					<dim>3024</dim>
+				</port>
+				<port id="3">
+					<dim>1</dim>
+					<dim>3024</dim>
+				</port>
+				<port id="4">
+					<dim>1</dim>
+					<dim>792</dim>
+				</port>
+				<port id="5">
+					<dim>1</dim>
+					<dim>792</dim>
+				</port>
+				<port id="6">
+					<dim>1</dim>
+					<dim>216</dim>
+				</port>
+				<port id="7">
+					<dim>1</dim>
+					<dim>216</dim>
+				</port>
+				<port id="8">
+					<dim>1</dim>
+					<dim>48</dim>
+				</port>
+				<port id="9">
+					<dim>1</dim>
+					<dim>16</dim>
+				</port>
+			</input>
+			<output>
+				<port id="10">
+					<dim>1</dim>
+					<dim>24256</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="197" name="mbox_conf_reshape/DimData_const" precision="FP32" type="Const">
+			<output>
+				<port id="1">
+					<dim>3</dim>
+				</port>
+			</output>
+			<blobs>
+				<custom offset="2337992" size="12"/>
+			</blobs>
+		</layer>
+		<layer id="198" name="mbox_conf_reshape" precision="FP32" type="Reshape">
+			<data axis="0" num_axes="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>24256</dim>
+				</port>
+				<port id="1">
+					<dim>3</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>12128</dim>
+					<dim>2</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="199" name="mbox_conf_softmax" precision="FP32" type="SoftMax">
+			<data axis="2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12128</dim>
+					<dim>2</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>12128</dim>
+					<dim>2</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="200" name="mbox_conf_flatten" precision="FP32" type="Flatten">
+			<data axis="1" end_axis="-1"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12128</dim>
+					<dim>2</dim>
+				</port>
+			</input>
+			<output>
+				<port id="1">
+					<dim>1</dim>
+					<dim>24256</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="201" name="conv4_3_0_norm_mbox_priorbox" precision="FP32" type="PriorBox">
+			<data aspect_ratio="2.0" clip="0" flip="1" max_size="38.4000015259" min_size="16.0" offset="0.5" step="16.0" variance="0.10000000149011612,0.10000000149011612,0.20000000298023224,0.20000000298023224"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>8</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>384</dim>
+					<dim>672</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>16128</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="202" name="conv4_3_norm_mbox_priorbox" precision="FP32" type="PriorBox">
+			<data aspect_ratio="2.0" clip="0" flip="1" max_size="76.8000030518" min_size="38.4000015259" offset="0.5" step="16.0" variance="0.10000000149011612,0.10000000149011612,0.20000000298023224,0.20000000298023224"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>8</dim>
+					<dim>24</dim>
+					<dim>42</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>384</dim>
+					<dim>672</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>16128</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="203" name="fc7_0_mbox_priorbox" precision="FP32" type="PriorBox">
+			<data aspect_ratio="2.0,3.0" clip="0" flip="1" max_size="124.800003052" min_size="76.8000030518" offset="0.5" step="32.0" variance="0.10000000149011612,0.10000000149011612,0.20000000298023224,0.20000000298023224"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>384</dim>
+					<dim>672</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>6048</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="204" name="fc7_mbox_priorbox" precision="FP32" type="PriorBox">
+			<data aspect_ratio="2.0,3.0" clip="0" flip="1" max_size="172.800003052" min_size="124.800003052" offset="0.5" step="32.0" variance="0.10000000149011612,0.10000000149011612,0.20000000298023224,0.20000000298023224"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>12</dim>
+					<dim>21</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>384</dim>
+					<dim>672</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>6048</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="205" name="conv6_2_mbox_priorbox" precision="FP32" type="PriorBox">
+			<data aspect_ratio="2.0,3.0" clip="0" flip="1" max_size="201.600006104" min_size="172.800003052" offset="0.5" step="64.0" variance="0.10000000149011612,0.10000000149011612,0.20000000298023224,0.20000000298023224"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>384</dim>
+					<dim>672</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>1584</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="206" name="conv6_2_mbox_priorbox_bigpriors" precision="FP32" type="PriorBox">
+			<data aspect_ratio="2.0,3.0" clip="0" flip="1" max_size="230.399993896" min_size="201.600006104" offset="0.5" step="64.0" variance="0.10000000149011612,0.10000000149011612,0.20000000298023224,0.20000000298023224"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>6</dim>
+					<dim>11</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>384</dim>
+					<dim>672</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>1584</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="207" name="conv7_2_mbox_priorbox" precision="FP32" type="PriorBox">
+			<data aspect_ratio="2.0,3.0" clip="0" flip="1" max_size="259.200012207" min_size="230.399993896" offset="0.5" step="128.0" variance="0.10000000149011612,0.10000000149011612,0.20000000298023224,0.20000000298023224"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>384</dim>
+					<dim>672</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>432</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="208" name="conv7_2_mbox_priorbox_bigpriors" precision="FP32" type="PriorBox">
+			<data aspect_ratio="2.0,3.0" clip="0" flip="1" max_size="288.0" min_size="259.200012207" offset="0.5" step="128.0" variance="0.10000000149011612,0.10000000149011612,0.20000000298023224,0.20000000298023224"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>12</dim>
+					<dim>3</dim>
+					<dim>6</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>384</dim>
+					<dim>672</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>432</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="209" name="conv8_2_mbox_priorbox" precision="FP32" type="PriorBox">
+			<data aspect_ratio="2.0" clip="0" flip="1" max_size="345.600006104" min_size="288.0" offset="0.5" variance="0.10000000149011612,0.10000000149011612,0.20000000298023224,0.20000000298023224"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>8</dim>
+					<dim>2</dim>
+					<dim>3</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>384</dim>
+					<dim>672</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>96</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="210" name="conv9_2_mbox_priorbox" precision="FP32" type="PriorBox">
+			<data aspect_ratio="2.0" clip="0" flip="1" max_size="403.200012207" min_size="345.600006104" offset="0.5" variance="0.10000000149011612,0.10000000149011612,0.20000000298023224,0.20000000298023224"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>8</dim>
+					<dim>1</dim>
+					<dim>2</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>384</dim>
+					<dim>672</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>32</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="211" name="mbox_priorbox" precision="FP32" type="Concat">
+			<data axis="2"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>16128</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>16128</dim>
+				</port>
+				<port id="2">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>6048</dim>
+				</port>
+				<port id="3">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>6048</dim>
+				</port>
+				<port id="4">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>1584</dim>
+				</port>
+				<port id="5">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>1584</dim>
+				</port>
+				<port id="6">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>432</dim>
+				</port>
+				<port id="7">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>432</dim>
+				</port>
+				<port id="8">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>96</dim>
+				</port>
+				<port id="9">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>32</dim>
+				</port>
+			</input>
+			<output>
+				<port id="10">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>48512</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="212" name="detection_out" precision="FP32" type="DetectionOutput">
+			<data background_label_id="0" code_type="caffe.PriorBoxParameter.CENTER_SIZE" confidence_threshold="0.009999999776482582" eta="1.0" input_height="1" input_width="1" keep_top_k="200" nms_threshold="0.44999998807907104" normalized="1" num_classes="2" share_location="1" top_k="400" variance_encoded_in_target="0" visualize="False"/>
+			<input>
+				<port id="0">
+					<dim>1</dim>
+					<dim>48512</dim>
+				</port>
+				<port id="1">
+					<dim>1</dim>
+					<dim>24256</dim>
+				</port>
+				<port id="2">
+					<dim>1</dim>
+					<dim>2</dim>
+					<dim>48512</dim>
+				</port>
+			</input>
+			<output>
+				<port id="3">
+					<dim>1</dim>
+					<dim>1</dim>
+					<dim>200</dim>
+					<dim>7</dim>
+				</port>
+			</output>
+		</layer>
+	</layers>
+	<edges>
+		<edge from-layer="0" from-port="0" to-layer="1" to-port="0"/>
+		<edge from-layer="1" from-port="3" to-layer="2" to-port="0"/>
+		<edge from-layer="2" from-port="3" to-layer="3" to-port="0"/>
+		<edge from-layer="3" from-port="1" to-layer="4" to-port="0"/>
+		<edge from-layer="4" from-port="3" to-layer="5" to-port="0"/>
+		<edge from-layer="5" from-port="1" to-layer="6" to-port="0"/>
+		<edge from-layer="6" from-port="3" to-layer="7" to-port="0"/>
+		<edge from-layer="7" from-port="1" to-layer="8" to-port="0"/>
+		<edge from-layer="8" from-port="3" to-layer="13" to-port="0"/>
+		<edge from-layer="9" from-port="1" to-layer="13" to-port="1"/>
+		<edge from-layer="10" from-port="1" to-layer="13" to-port="2"/>
+		<edge from-layer="11" from-port="1" to-layer="13" to-port="3"/>
+		<edge from-layer="12" from-port="1" to-layer="13" to-port="4"/>
+		<edge from-layer="13" from-port="5" to-layer="14" to-port="0"/>
+		<edge from-layer="14" from-port="2" to-layer="15" to-port="0"/>
+		<edge from-layer="15" from-port="3" to-layer="16" to-port="0"/>
+		<edge from-layer="16" from-port="1" to-layer="17" to-port="0"/>
+		<edge from-layer="17" from-port="3" to-layer="22" to-port="0"/>
+		<edge from-layer="18" from-port="1" to-layer="22" to-port="1"/>
+		<edge from-layer="19" from-port="1" to-layer="22" to-port="2"/>
+		<edge from-layer="20" from-port="1" to-layer="22" to-port="3"/>
+		<edge from-layer="21" from-port="1" to-layer="22" to-port="4"/>
+		<edge from-layer="22" from-port="5" to-layer="23" to-port="0"/>
+		<edge from-layer="23" from-port="2" to-layer="24" to-port="0"/>
+		<edge from-layer="24" from-port="3" to-layer="25" to-port="0"/>
+		<edge from-layer="25" from-port="1" to-layer="26" to-port="0"/>
+		<edge from-layer="26" from-port="3" to-layer="31" to-port="0"/>
+		<edge from-layer="27" from-port="1" to-layer="31" to-port="1"/>
+		<edge from-layer="28" from-port="1" to-layer="31" to-port="2"/>
+		<edge from-layer="29" from-port="1" to-layer="31" to-port="3"/>
+		<edge from-layer="30" from-port="1" to-layer="31" to-port="4"/>
+		<edge from-layer="31" from-port="5" to-layer="32" to-port="0"/>
+		<edge from-layer="32" from-port="2" to-layer="33" to-port="0"/>
+		<edge from-layer="33" from-port="3" to-layer="34" to-port="0"/>
+		<edge from-layer="34" from-port="1" to-layer="35" to-port="0"/>
+		<edge from-layer="35" from-port="3" to-layer="40" to-port="0"/>
+		<edge from-layer="36" from-port="1" to-layer="40" to-port="1"/>
+		<edge from-layer="37" from-port="1" to-layer="40" to-port="2"/>
+		<edge from-layer="38" from-port="1" to-layer="40" to-port="3"/>
+		<edge from-layer="39" from-port="1" to-layer="40" to-port="4"/>
+		<edge from-layer="40" from-port="5" to-layer="41" to-port="0"/>
+		<edge from-layer="41" from-port="2" to-layer="42" to-port="0"/>
+		<edge from-layer="42" from-port="3" to-layer="43" to-port="0"/>
+		<edge from-layer="43" from-port="1" to-layer="44" to-port="0"/>
+		<edge from-layer="44" from-port="3" to-layer="49" to-port="0"/>
+		<edge from-layer="45" from-port="1" to-layer="49" to-port="1"/>
+		<edge from-layer="46" from-port="1" to-layer="49" to-port="2"/>
+		<edge from-layer="47" from-port="1" to-layer="49" to-port="3"/>
+		<edge from-layer="48" from-port="1" to-layer="49" to-port="4"/>
+		<edge from-layer="49" from-port="5" to-layer="50" to-port="0"/>
+		<edge from-layer="50" from-port="2" to-layer="51" to-port="0"/>
+		<edge from-layer="51" from-port="3" to-layer="52" to-port="0"/>
+		<edge from-layer="52" from-port="1" to-layer="53" to-port="0"/>
+		<edge from-layer="53" from-port="3" to-layer="58" to-port="0"/>
+		<edge from-layer="54" from-port="1" to-layer="58" to-port="1"/>
+		<edge from-layer="55" from-port="1" to-layer="58" to-port="2"/>
+		<edge from-layer="56" from-port="1" to-layer="58" to-port="3"/>
+		<edge from-layer="57" from-port="1" to-layer="58" to-port="4"/>
+		<edge from-layer="58" from-port="5" to-layer="59" to-port="0"/>
+		<edge from-layer="59" from-port="2" to-layer="60" to-port="0"/>
+		<edge from-layer="60" from-port="3" to-layer="61" to-port="0"/>
+		<edge from-layer="61" from-port="1" to-layer="62" to-port="0"/>
+		<edge from-layer="62" from-port="3" to-layer="67" to-port="0"/>
+		<edge from-layer="63" from-port="1" to-layer="67" to-port="1"/>
+		<edge from-layer="64" from-port="1" to-layer="67" to-port="2"/>
+		<edge from-layer="65" from-port="1" to-layer="67" to-port="3"/>
+		<edge from-layer="66" from-port="1" to-layer="67" to-port="4"/>
+		<edge from-layer="67" from-port="5" to-layer="68" to-port="0"/>
+		<edge from-layer="68" from-port="2" to-layer="69" to-port="0"/>
+		<edge from-layer="69" from-port="3" to-layer="70" to-port="0"/>
+		<edge from-layer="70" from-port="1" to-layer="71" to-port="0"/>
+		<edge from-layer="71" from-port="3" to-layer="76" to-port="0"/>
+		<edge from-layer="72" from-port="1" to-layer="76" to-port="1"/>
+		<edge from-layer="73" from-port="1" to-layer="76" to-port="2"/>
+		<edge from-layer="74" from-port="1" to-layer="76" to-port="3"/>
+		<edge from-layer="75" from-port="1" to-layer="76" to-port="4"/>
+		<edge from-layer="76" from-port="5" to-layer="77" to-port="0"/>
+		<edge from-layer="77" from-port="2" to-layer="78" to-port="0"/>
+		<edge from-layer="78" from-port="3" to-layer="79" to-port="0"/>
+		<edge from-layer="79" from-port="1" to-layer="80" to-port="0"/>
+		<edge from-layer="80" from-port="3" to-layer="85" to-port="0"/>
+		<edge from-layer="81" from-port="1" to-layer="85" to-port="1"/>
+		<edge from-layer="82" from-port="1" to-layer="85" to-port="2"/>
+		<edge from-layer="83" from-port="1" to-layer="85" to-port="3"/>
+		<edge from-layer="84" from-port="1" to-layer="85" to-port="4"/>
+		<edge from-layer="85" from-port="5" to-layer="86" to-port="0"/>
+		<edge from-layer="86" from-port="2" to-layer="87" to-port="0"/>
+		<edge from-layer="87" from-port="3" to-layer="88" to-port="0"/>
+		<edge from-layer="88" from-port="1" to-layer="89" to-port="0"/>
+		<edge from-layer="89" from-port="3" to-layer="94" to-port="0"/>
+		<edge from-layer="90" from-port="1" to-layer="94" to-port="1"/>
+		<edge from-layer="91" from-port="1" to-layer="94" to-port="2"/>
+		<edge from-layer="92" from-port="1" to-layer="94" to-port="3"/>
+		<edge from-layer="93" from-port="1" to-layer="94" to-port="4"/>
+		<edge from-layer="94" from-port="5" to-layer="95" to-port="0"/>
+		<edge from-layer="95" from-port="2" to-layer="96" to-port="0"/>
+		<edge from-layer="96" from-port="3" to-layer="97" to-port="0"/>
+		<edge from-layer="97" from-port="1" to-layer="98" to-port="0"/>
+		<edge from-layer="98" from-port="3" to-layer="99" to-port="0"/>
+		<edge from-layer="99" from-port="1" to-layer="100" to-port="0"/>
+		<edge from-layer="97" from-port="1" to-layer="101" to-port="0"/>
+		<edge from-layer="101" from-port="3" to-layer="102" to-port="0"/>
+		<edge from-layer="102" from-port="1" to-layer="103" to-port="0"/>
+		<edge from-layer="97" from-port="1" to-layer="104" to-port="0"/>
+		<edge from-layer="104" from-port="3" to-layer="109" to-port="0"/>
+		<edge from-layer="105" from-port="1" to-layer="109" to-port="1"/>
+		<edge from-layer="106" from-port="1" to-layer="109" to-port="2"/>
+		<edge from-layer="107" from-port="1" to-layer="109" to-port="3"/>
+		<edge from-layer="108" from-port="1" to-layer="109" to-port="4"/>
+		<edge from-layer="109" from-port="5" to-layer="110" to-port="0"/>
+		<edge from-layer="110" from-port="2" to-layer="111" to-port="0"/>
+		<edge from-layer="111" from-port="3" to-layer="112" to-port="0"/>
+		<edge from-layer="112" from-port="1" to-layer="113" to-port="0"/>
+		<edge from-layer="113" from-port="3" to-layer="114" to-port="0"/>
+		<edge from-layer="114" from-port="1" to-layer="115" to-port="0"/>
+		<edge from-layer="115" from-port="3" to-layer="116" to-port="0"/>
+		<edge from-layer="116" from-port="1" to-layer="117" to-port="0"/>
+		<edge from-layer="117" from-port="3" to-layer="118" to-port="0"/>
+		<edge from-layer="118" from-port="1" to-layer="119" to-port="0"/>
+		<edge from-layer="116" from-port="1" to-layer="120" to-port="0"/>
+		<edge from-layer="120" from-port="3" to-layer="121" to-port="0"/>
+		<edge from-layer="121" from-port="1" to-layer="122" to-port="0"/>
+		<edge from-layer="116" from-port="1" to-layer="123" to-port="0"/>
+		<edge from-layer="123" from-port="3" to-layer="124" to-port="0"/>
+		<edge from-layer="124" from-port="1" to-layer="125" to-port="0"/>
+		<edge from-layer="125" from-port="3" to-layer="126" to-port="0"/>
+		<edge from-layer="126" from-port="1" to-layer="127" to-port="0"/>
+		<edge from-layer="127" from-port="3" to-layer="128" to-port="0"/>
+		<edge from-layer="128" from-port="1" to-layer="129" to-port="0"/>
+		<edge from-layer="129" from-port="3" to-layer="130" to-port="0"/>
+		<edge from-layer="130" from-port="1" to-layer="131" to-port="0"/>
+		<edge from-layer="128" from-port="1" to-layer="132" to-port="0"/>
+		<edge from-layer="132" from-port="3" to-layer="133" to-port="0"/>
+		<edge from-layer="133" from-port="1" to-layer="134" to-port="0"/>
+		<edge from-layer="128" from-port="1" to-layer="135" to-port="0"/>
+		<edge from-layer="135" from-port="3" to-layer="136" to-port="0"/>
+		<edge from-layer="136" from-port="1" to-layer="137" to-port="0"/>
+		<edge from-layer="137" from-port="3" to-layer="138" to-port="0"/>
+		<edge from-layer="138" from-port="1" to-layer="139" to-port="0"/>
+		<edge from-layer="139" from-port="3" to-layer="140" to-port="0"/>
+		<edge from-layer="140" from-port="1" to-layer="141" to-port="0"/>
+		<edge from-layer="141" from-port="3" to-layer="142" to-port="0"/>
+		<edge from-layer="142" from-port="1" to-layer="143" to-port="0"/>
+		<edge from-layer="140" from-port="1" to-layer="144" to-port="0"/>
+		<edge from-layer="144" from-port="3" to-layer="145" to-port="0"/>
+		<edge from-layer="145" from-port="1" to-layer="146" to-port="0"/>
+		<edge from-layer="140" from-port="1" to-layer="147" to-port="0"/>
+		<edge from-layer="147" from-port="3" to-layer="148" to-port="0"/>
+		<edge from-layer="148" from-port="1" to-layer="149" to-port="0"/>
+		<edge from-layer="149" from-port="3" to-layer="150" to-port="0"/>
+		<edge from-layer="150" from-port="1" to-layer="151" to-port="0"/>
+		<edge from-layer="151" from-port="3" to-layer="152" to-port="0"/>
+		<edge from-layer="152" from-port="1" to-layer="153" to-port="0"/>
+		<edge from-layer="153" from-port="3" to-layer="154" to-port="0"/>
+		<edge from-layer="154" from-port="1" to-layer="155" to-port="0"/>
+		<edge from-layer="152" from-port="1" to-layer="156" to-port="0"/>
+		<edge from-layer="156" from-port="3" to-layer="157" to-port="0"/>
+		<edge from-layer="157" from-port="1" to-layer="158" to-port="0"/>
+		<edge from-layer="158" from-port="3" to-layer="159" to-port="0"/>
+		<edge from-layer="159" from-port="1" to-layer="160" to-port="0"/>
+		<edge from-layer="160" from-port="3" to-layer="161" to-port="0"/>
+		<edge from-layer="161" from-port="1" to-layer="162" to-port="0"/>
+		<edge from-layer="162" from-port="3" to-layer="163" to-port="0"/>
+		<edge from-layer="163" from-port="1" to-layer="164" to-port="0"/>
+		<edge from-layer="100" from-port="1" to-layer="165" to-port="0"/>
+		<edge from-layer="103" from-port="1" to-layer="165" to-port="1"/>
+		<edge from-layer="119" from-port="1" to-layer="165" to-port="2"/>
+		<edge from-layer="122" from-port="1" to-layer="165" to-port="3"/>
+		<edge from-layer="131" from-port="1" to-layer="165" to-port="4"/>
+		<edge from-layer="134" from-port="1" to-layer="165" to-port="5"/>
+		<edge from-layer="143" from-port="1" to-layer="165" to-port="6"/>
+		<edge from-layer="146" from-port="1" to-layer="165" to-port="7"/>
+		<edge from-layer="155" from-port="1" to-layer="165" to-port="8"/>
+		<edge from-layer="164" from-port="1" to-layer="165" to-port="9"/>
+		<edge from-layer="97" from-port="1" to-layer="166" to-port="0"/>
+		<edge from-layer="166" from-port="3" to-layer="167" to-port="0"/>
+		<edge from-layer="167" from-port="1" to-layer="168" to-port="0"/>
+		<edge from-layer="97" from-port="1" to-layer="169" to-port="0"/>
+		<edge from-layer="169" from-port="3" to-layer="170" to-port="0"/>
+		<edge from-layer="170" from-port="1" to-layer="171" to-port="0"/>
+		<edge from-layer="116" from-port="1" to-layer="172" to-port="0"/>
+		<edge from-layer="172" from-port="3" to-layer="173" to-port="0"/>
+		<edge from-layer="173" from-port="1" to-layer="174" to-port="0"/>
+		<edge from-layer="116" from-port="1" to-layer="175" to-port="0"/>
+		<edge from-layer="175" from-port="3" to-layer="176" to-port="0"/>
+		<edge from-layer="176" from-port="1" to-layer="177" to-port="0"/>
+		<edge from-layer="128" from-port="1" to-layer="178" to-port="0"/>
+		<edge from-layer="178" from-port="3" to-layer="179" to-port="0"/>
+		<edge from-layer="179" from-port="1" to-layer="180" to-port="0"/>
+		<edge from-layer="128" from-port="1" to-layer="181" to-port="0"/>
+		<edge from-layer="181" from-port="3" to-layer="182" to-port="0"/>
+		<edge from-layer="182" from-port="1" to-layer="183" to-port="0"/>
+		<edge from-layer="140" from-port="1" to-layer="184" to-port="0"/>
+		<edge from-layer="184" from-port="3" to-layer="185" to-port="0"/>
+		<edge from-layer="185" from-port="1" to-layer="186" to-port="0"/>
+		<edge from-layer="140" from-port="1" to-layer="187" to-port="0"/>
+		<edge from-layer="187" from-port="3" to-layer="188" to-port="0"/>
+		<edge from-layer="188" from-port="1" to-layer="189" to-port="0"/>
+		<edge from-layer="152" from-port="1" to-layer="190" to-port="0"/>
+		<edge from-layer="190" from-port="3" to-layer="191" to-port="0"/>
+		<edge from-layer="191" from-port="1" to-layer="192" to-port="0"/>
+		<edge from-layer="161" from-port="1" to-layer="193" to-port="0"/>
+		<edge from-layer="193" from-port="3" to-layer="194" to-port="0"/>
+		<edge from-layer="194" from-port="1" to-layer="195" to-port="0"/>
+		<edge from-layer="168" from-port="1" to-layer="196" to-port="0"/>
+		<edge from-layer="171" from-port="1" to-layer="196" to-port="1"/>
+		<edge from-layer="174" from-port="1" to-layer="196" to-port="2"/>
+		<edge from-layer="177" from-port="1" to-layer="196" to-port="3"/>
+		<edge from-layer="180" from-port="1" to-layer="196" to-port="4"/>
+		<edge from-layer="183" from-port="1" to-layer="196" to-port="5"/>
+		<edge from-layer="186" from-port="1" to-layer="196" to-port="6"/>
+		<edge from-layer="189" from-port="1" to-layer="196" to-port="7"/>
+		<edge from-layer="192" from-port="1" to-layer="196" to-port="8"/>
+		<edge from-layer="195" from-port="1" to-layer="196" to-port="9"/>
+		<edge from-layer="196" from-port="10" to-layer="198" to-port="0"/>
+		<edge from-layer="197" from-port="1" to-layer="198" to-port="1"/>
+		<edge from-layer="198" from-port="2" to-layer="199" to-port="0"/>
+		<edge from-layer="199" from-port="1" to-layer="200" to-port="0"/>
+		<edge from-layer="166" from-port="3" to-layer="201" to-port="0"/>
+		<edge from-layer="1" from-port="3" to-layer="201" to-port="1"/>
+		<edge from-layer="169" from-port="3" to-layer="202" to-port="0"/>
+		<edge from-layer="1" from-port="3" to-layer="202" to-port="1"/>
+		<edge from-layer="172" from-port="3" to-layer="203" to-port="0"/>
+		<edge from-layer="1" from-port="3" to-layer="203" to-port="1"/>
+		<edge from-layer="175" from-port="3" to-layer="204" to-port="0"/>
+		<edge from-layer="1" from-port="3" to-layer="204" to-port="1"/>
+		<edge from-layer="178" from-port="3" to-layer="205" to-port="0"/>
+		<edge from-layer="1" from-port="3" to-layer="205" to-port="1"/>
+		<edge from-layer="181" from-port="3" to-layer="206" to-port="0"/>
+		<edge from-layer="1" from-port="3" to-layer="206" to-port="1"/>
+		<edge from-layer="184" from-port="3" to-layer="207" to-port="0"/>
+		<edge from-layer="1" from-port="3" to-layer="207" to-port="1"/>
+		<edge from-layer="187" from-port="3" to-layer="208" to-port="0"/>
+		<edge from-layer="1" from-port="3" to-layer="208" to-port="1"/>
+		<edge from-layer="190" from-port="3" to-layer="209" to-port="0"/>
+		<edge from-layer="1" from-port="3" to-layer="209" to-port="1"/>
+		<edge from-layer="193" from-port="3" to-layer="210" to-port="0"/>
+		<edge from-layer="1" from-port="3" to-layer="210" to-port="1"/>
+		<edge from-layer="201" from-port="2" to-layer="211" to-port="0"/>
+		<edge from-layer="202" from-port="2" to-layer="211" to-port="1"/>
+		<edge from-layer="203" from-port="2" to-layer="211" to-port="2"/>
+		<edge from-layer="204" from-port="2" to-layer="211" to-port="3"/>
+		<edge from-layer="205" from-port="2" to-layer="211" to-port="4"/>
+		<edge from-layer="206" from-port="2" to-layer="211" to-port="5"/>
+		<edge from-layer="207" from-port="2" to-layer="211" to-port="6"/>
+		<edge from-layer="208" from-port="2" to-layer="211" to-port="7"/>
+		<edge from-layer="209" from-port="2" to-layer="211" to-port="8"/>
+		<edge from-layer="210" from-port="2" to-layer="211" to-port="9"/>
+		<edge from-layer="165" from-port="10" to-layer="212" to-port="0"/>
+		<edge from-layer="200" from-port="1" to-layer="212" to-port="1"/>
+		<edge from-layer="211" from-port="10" to-layer="212" to-port="2"/>
+	</edges>
+	<meta_data>
+		<MO_version value="unknown version"/>
+		<cli_parameters>
+			<data_type value="float"/>
+			<disable_fusing value="False"/>
+			<disable_gfusing value="False"/>
+			<disable_omitting_optional value="False"/>
+			<disable_resnet_optimization value="False"/>
+			<enable_concat_optimization value="False"/>
+			<enable_flattening_nested_params value="False"/>
+			<extensions value="DIR"/>
+			<framework value="caffe"/>
+			<generate_deprecated_IR_V2 value="False"/>
+			<input_model value="DIR/detection_1100__caffe_withhead_nobinparam.caffemodel"/>
+			<input_proto value="DIR/detection_1100__caffe_withhead_nobinparam.prototxt"/>
+			<k value="DIR/CustomLayersMapping.xml"/>
+			<keep_shape_ops value="False"/>
+			<log_level value="ERROR"/>
+			<mean_scale_values value="[(array([ 104.,  117.,  123.]), None)]"/>
+			<mean_values value="[104,117,123]"/>
+			<move_to_preprocess value="False"/>
+			<output_dir value="DIR"/>
+			<reverse_input_channels value="False"/>
+			<scale value="58.823529412"/>
+			<scale_values value="()"/>
+			<silent value="False"/>
+			<version value="False"/>
+			<unset unset_cli_parameters="batch, finegrain_fusing, freeze_placeholder_with_value, input, input_shape, mean_file, mean_file_offsets, model_name, output, placeholder_shapes"/>
+		</cli_parameters>
+	</meta_data>
+</net>
