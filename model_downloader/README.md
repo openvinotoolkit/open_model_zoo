@@ -24,7 +24,7 @@ Usage
 
       usage: downloader.py [-h] [-c CONFIG.YML] [--name PAT[,PAT...]]
                            [--list FILE.LST] [--all] [--print_all] [-o DIR]
-                           [--cache_dir DIR]
+                           [--cache_dir DIR] [--num_attempts N]
 
       optional arguments:
         -h, --help            show this help message and exit
@@ -39,6 +39,7 @@ Usage
         -o DIR, --output_dir DIR
                               path where to save topologies
         --cache_dir DIR       directory to use as a cache for downloaded files
+        --num_attempts N      attempt each download up to N times
 
       list_topologies.yml - default configuration file
    ```
