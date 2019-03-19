@@ -300,7 +300,7 @@ cache = NullCache() if args.cache_dir is None else DirCache(args.cache_dir)
 
 with path_to_config.open() as stream:
     try:
-        c_new = yaml.load(stream)
+        c_new = yaml.safe_load(stream)
     except yaml.YAMLError as exc:
         print(exc)
         sys.exit('Cannot parse the YML, please check the configuration file')
