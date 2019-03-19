@@ -100,6 +100,7 @@ Usage
    ctpn
    ssd_mobilenet_v1_coco
    faster_rcnn_resnet101_coco
+   mobilenet-v2-1.4-224
    age-gender-recognition-retail-0013
    age-gender-recognition-retail-0013-fp16
    emotions-recognition-retail-0003
@@ -110,10 +111,10 @@ Usage
    face-detection-retail-0004-fp16
    face-person-detection-retail-0002
    face-person-detection-retail-0002-fp16
-   face-reidentification-retail-0071
-   face-reidentification-retail-0071-fp16
-   facial-landmarks-35-adas-0001
-   facial-landmarks-35-adas-0001-fp16
+   face-reidentification-retail-0095
+   face-reidentification-retail-0095-fp16
+   facial-landmarks-35-adas-0002
+   facial-landmarks-35-adas-0002-fp16
    head-pose-estimation-adas-0001
    head-pose-estimation-adas-0001-fp16
    human-pose-estimation-0001
@@ -126,12 +127,12 @@ Usage
    pedestrian-and-vehicle-detector-adas-0001-fp16
    pedestrian-detection-adas-0002
    pedestrian-detection-adas-0002-fp16
-   person-attributes-recognition-crossroad-0031
-   person-attributes-recognition-crossroad-0031-fp16
-   person-detection-action-recognition-0003
-   person-detection-action-recognition-0003-fp16
-   person-detection-retail-0001
-   person-detection-retail-0001-fp16
+   person-attributes-recognition-crossroad-0230
+   person-attributes-recognition-crossroad-0230-fp16
+   person-detection-action-recognition-0005
+   person-detection-action-recognition-0005-fp16
+   person-detection-retail-0002
+   person-detection-retail-0002-fp16
    person-detection-retail-0013
    person-detection-retail-0013-fp16
    person-reidentification-retail-0031
@@ -146,14 +147,39 @@ Usage
    road-segmentation-adas-0001-fp16
    semantic-segmentation-adas-0001
    semantic-segmentation-adas-0001-fp16
-   single-image-super-resolution-0034
-   single-image-super-resolution-0034-fp16
+   single-image-super-resolution-1033
+   single-image-super-resolution-1033-fp16
+   text-detection-0002
+   text-detection-0002-fp16
    vehicle-attributes-recognition-barrier-0039
    vehicle-attributes-recognition-barrier-0039-fp16
    vehicle-detection-adas-0002
    vehicle-detection-adas-0002-fp16
    vehicle-license-plate-detection-barrier-0106
    vehicle-license-plate-detection-barrier-0106-fp16
+   face-detection-adas-binary-0001
+   single-image-super-resolution-1032
+   single-image-super-resolution-1032-fp16
+   action-recognition-0001-encoder
+   action-recognition-0001-encoder-fp16
+   instance-segmentation-security-0049
+   instance-segmentation-security-0049-fp16
+   vehicle-detection-adas-binary-0001 
+   driver-action-recognition-adas-0002-decoder
+   driver-action-recognition-adas-0002-decoder-fp16
+   pedestrian-detection-adas-binary-0001
+   person-detection-action-recognition-teacher-0002
+   person-detection-action-recognition-teacher-0002-fp16
+   instance-segmentation-security-0033
+   instance-segmentation-security-0033-fp16
+   action-recognition-0001-decoder
+   action-recognition-0001-decoder-fp16
+   text-recognition-0012
+   text-recognition-0012-fp16
+   driver-action-recognition-adas-0002-encoder
+   driver-action-recognition-adas-0002-encoder-fp16
+   gaze-estimation-adas-0002
+   gaze-estimation-adas-0002-fp16
    ```
 
 *  Download only some topologies (mtcnn-p and all topologies starting with "densenet-" in the following code example):
@@ -179,7 +205,7 @@ Usage
    densenet-* # get all DenseNet variants
    ```
 
-Expected free space to download all the topologies with the default configuration file is around 7.09 GB.
+Expected free space to download all the topologies with the default configuration file is around 7.5 GB.
 
 __________
 

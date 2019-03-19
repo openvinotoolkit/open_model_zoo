@@ -752,18 +752,18 @@ topologies:
   - name: "person-detection-retail-0002"
     description: "Person detection (HyperNet+RFCN)."
     model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin/person-detection-retail-0002/FP32/person-detection-retail-0002.xml
-    model_hash: 10cba4f7b3b8d01b646bd1545a5e3c281947e488ede0263fecbbf4a82d90a837
+    model_hash: f8272cd3e3b869bebe47dc0f93f02c4143d057dc1ca1b5928771a535bebfe244
     weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin/person-detection-retail-0002/FP32/person-detection-retail-0002.bin
-    weights_hash: e86c8bf1d6a431ea9445681cfd44180827c69566a736ce5d1ae1678eb9ee9ff8
+    weights_hash: c510c14c7d41c20782e288f60a955faf4a0fcc7cb6d92a7db6c0013431e01673
     output: "Retail/object_detection/pedestrian/hypernet-rfcn/0026/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-detection-retail-0002-fp16"
     description: "Person detection (HyperNet+RFCN+DetectionOutput)."
     model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin/person-detection-retail-0002/FP16/person-detection-retail-0002.xml
-    model_hash: 0d917955f82a1a699d159f54b127abb4bf3f56ea3ab8386cab19bf417baab467
+    model_hash: 83b78e7da66110c57229feb9d19f69aecb4c58d4db217ec1251ee035ece429e3
     weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin/person-detection-retail-0002/FP16/person-detection-retail-0002.bin
-    weights_hash: 48b55e7e908db3496bfda8689b2ed6ce013a8bdd3157e858ed27ae7b0b8783a3
+    weights_hash: f14c44ebfec32e7aede4ebc1435e46e7ee8191f7c9c7bdc728c96560e6d45834
     output: "Retail/object_detection/pedestrian/hypernet-rfcn/0026/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
@@ -968,18 +968,18 @@ topologies:
   - name: "vehicle-license-plate-detection-barrier-0106"
     description: "Multiclass (vehicle, license plates) detector based on MobileNetV2+SSD"
     model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.xml
-    model_hash: 200c6cb5ada8175d53a080a648e98d7b5aa0dce6a113baaf279fe325ff645eea
+    model_hash: 537d3a3bfbc72ce4913cf6c3ead3bd4430456b3a34ba6facc3437c7280d767d2
     weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.bin
-    weights_hash: 8899c10509ad8dfd029c845bcc409976a56c46f73f3354044f243f0bba9c6b97
+    weights_hash: abf00b35146445fd6d11afb467d48558dbeba0cc11d87968171d20373d4cc613
     output: "Security/object_detection/barrier/0106/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "vehicle-license-plate-detection-barrier-0106-fp16"
     description: "Multiclass (vehicle, license plates) detector based on MobileNetV2+SSD"
     model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.xml
-    model_hash: 537d3a3bfbc72ce4913cf6c3ead3bd4430456b3a34ba6facc3437c7280d767d2
+    model_hash: 200c6cb5ada8175d53a080a648e98d7b5aa0dce6a113baaf279fe325ff645eea
     weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.bin
-    weights_hash: abf00b35146445fd6d11afb467d48558dbeba0cc11d87968171d20373d4cc613
+    weights_hash: 8899c10509ad8dfd029c845bcc409976a56c46f73f3354044f243f0bba9c6b97
     output: "Security/object_detection/barrier/0106/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
