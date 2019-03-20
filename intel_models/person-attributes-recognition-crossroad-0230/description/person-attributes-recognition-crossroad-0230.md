@@ -32,7 +32,7 @@ This model presents a person attributes classification algorithm analysis scenar
 | `has_bag`         | 0.66  |
 | `has_backpack`    | 0.77  |
 | `has_hat`         | 0.64  |
-| `has_longsleeves` | 0.22  |
+| `has_longsleeves` | 0.21  |
 | `has_longpants`   | 0.83  |
 | `has_longhair`    | 0.83  |
 | `has_coat_jacket` |  NA   |
