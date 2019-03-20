@@ -1190,4 +1190,13 @@ topologies:
     output: "Transportation/object_attributes/gaze/custom-architecture/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+  - name: "resnet50-binary-0001"
+    description: "ResNet-50 Binary"
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin/resnet50-binary-0001/resnet50-binary-0001.xml
+    model_hash: 1a7e41ab273f9e7b064e60e889ba2f13ce1b07cb4610096bd3abef33a93bf992
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin/resnet50-binary-0001/resnet50-binary-0001.bin
+    weights_hash: e843a458ae786f860698919709fb0852ef8138d4461ce8c744f96fe29ef0d580
+    output: "PublicCompressed/classification/resnet50_binary/dldt/"
+    framework: dldt
+    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
 
