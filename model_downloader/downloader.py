@@ -24,6 +24,7 @@ import re
 import requests
 import shlex
 import shutil
+import ssl
 import sys
 import tarfile
 import tempfile
@@ -106,15 +107,13 @@ def try_download(name, file, num_attempts, start_download):
             file.truncate()
             process_download(chunk_iterable, size, file)
             return True
-        except requests.exceptions.HTTPError as e:
-            print(e)
         except requests.exceptions.ConnectionError as e:
             print("Error Connecting:", e)
         except requests.exceptions.Timeout as e:
             print("Timeout Error:", e)
         except requests.exceptions.TooManyRedirects as e:
             print("Redirects Error: requests exceeds maximum number of redirects", e)
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException, ssl.SSLError) as e:
             print(e)
 
     failed_topologies.add(name)
