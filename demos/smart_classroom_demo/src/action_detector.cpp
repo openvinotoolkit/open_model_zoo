@@ -1,10 +1,12 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include "action_detector.hpp"
+#include <algorithm>
 #include <utility>
 #include <vector>
+#include <limits>
 #include <opencv2/imgproc/imgproc.hpp>
 
 using namespace InferenceEngine;
@@ -193,13 +195,29 @@ void ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat& main_conf
         const int achor_id = p % num_anchors;
         const float* anchor_conf_data = action_conf_data[achor_id];
         const int action_conf_start_idx = p / num_anchors * config_.num_action_classes;
-        int action_label = 0;
-        float action_conf = anchor_conf_data[action_conf_start_idx];
-        for (int c = 1; c < config_.num_action_classes; ++c) {
-            if (anchor_conf_data[action_conf_start_idx + c] > action_conf) {
-                action_conf = anchor_conf_data[action_conf_start_idx + c];
+        int action_label = -1;
+        float action_max_exp_value = 0.f;
+        float action_sum_exp_values = 0.f;
+        for (int c = 0; c < config_.num_action_classes; ++c) {
+            float action_exp_value =
+                std::exp(config_.action_scale * anchor_conf_data[action_conf_start_idx + c]);
+            action_sum_exp_values += action_exp_value;
+            if (action_exp_value > action_max_exp_value) {
+                action_max_exp_value = action_exp_value;
                 action_label = c;
             }
+        }
+
+        if (std::fabs(action_sum_exp_values) < std::numeric_limits<float>::epsilon()) {
+            throw "action_sum_exp_values can't be equal to 0";
+        }
+        /** Estimate the action confidence **/
+        float action_conf = action_max_exp_value / action_sum_exp_values;
+
+        /** Skip low-confidence actions **/
+        if (action_label < 0 || action_conf < config_.action_confidence_threshold) {
+            action_label = config_.default_action_id;
+            action_conf = 0.f;
         }
 
         /** Parse bbox from the SSD Detection output **/
@@ -218,33 +236,9 @@ void ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat& main_conf
 
     /** Merge most overlapped detections **/
     std::vector<int> out_det_indices;
-    NonMaxSuppression(valid_detections, config_.nms_threshold, config_.nms_top_k,
-                      &out_det_indices);
-
-    /** Select keep_top_k detections with highest detection confidence if possible **/
-    const int num_detections = out_det_indices.size();
-    if (config_.keep_top_k > INVALID_TOP_K_IDX
-            && num_detections > config_.keep_top_k) {
-        /** Store input bbox scores with idx **/
-        std::vector<std::pair<float, int> > indexed_scores;
-        for (int i = 0; i < num_detections; ++i) {
-            const int idx = out_det_indices[i];
-            indexed_scores.emplace_back(valid_detections[idx].detection_conf, idx);
-        }
-        /** Sort indexed scores in descending order **/
-        std::stable_sort(indexed_scores.begin(), indexed_scores.end(),
-                         SortScorePairDescend<int>);
-        /** Select top_k scores **/
-        indexed_scores.resize(config_.keep_top_k);
-
-        /** Store the selected indices **/
-        std::vector<int> selected_indices;
-        for (size_t i = 0; i < indexed_scores.size(); ++i) {
-            selected_indices.push_back(indexed_scores[i].second);
-        }
-
-        out_det_indices.swap(selected_indices);
-    }
+    SoftNonMaxSuppression(valid_detections, config_.nms_sigma, config_.keep_top_k,
+                          config_.detection_confidence_threshold,
+                          &out_det_indices);
 
     detections->clear();
     for (size_t i = 0; i < out_det_indices.size(); ++i) {
@@ -252,31 +246,40 @@ void ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat& main_conf
     }
 }
 
-void ActionDetection::NonMaxSuppression(
-        const DetectedActions& detections,
-        const float overlap_threshold, const int top_k,
+void ActionDetection::SoftNonMaxSuppression(const DetectedActions& detections,
+        const float sigma, const int top_k, const float min_det_conf,
         std::vector<int>* out_indices) const {
-    /** Store input bbox scores with idx **/
-    std::vector<std::pair<float, int> > indexed_scores;
+    /** Store input bbox scores **/
+    std::vector<float> scores(detections.size());
     for (size_t i = 0; i < detections.size(); ++i) {
-        indexed_scores.emplace_back(detections[i].detection_conf, i);
-    }
-    /** Sort indexed scores in descending order **/
-    std::stable_sort(indexed_scores.begin(), indexed_scores.end(),
-                     SortScorePairDescend<int>);
-    /** Select top_k scores if possible **/
-    if (top_k > INVALID_TOP_K_IDX
-            && top_k < static_cast<int>(indexed_scores.size())) {
-        indexed_scores.resize(top_k);
+        scores[i] = detections[i].detection_conf;
     }
 
-    /** Carry out Non-Maximum Suppression algorithm **/
+    /** Estimate maximum number of algorithm iterations **/
+    size_t max_num_steps = top_k > INVALID_TOP_K_IDX
+                               ? std::min(static_cast<size_t>(top_k), scores.size())
+                               : scores.size();
+
+    /** Carry out Soft Non-Maximum Suppression algorithm **/
     out_indices->clear();
-    for (const auto& item : indexed_scores) {
-        const int& anchor_idx = item.second;
+    for (size_t step = 0; step < max_num_steps; ++step) {
+        auto best_score_itr = std::max_element(scores.begin(), scores.end());
+        if (*best_score_itr < min_det_conf) {
+            break;
+        }
 
-        bool keep_idx = true;
-        for (int reference_idx : *out_indices) {
+        /** Add current bbox to output list **/
+        const int anchor_idx = std::distance(scores.begin(), best_score_itr);
+        out_indices->emplace_back(anchor_idx);
+        *best_score_itr = 0.f;
+
+        /** Update scores of the rest bboxes **/
+        for (size_t reference_idx = 0; reference_idx < scores.size(); ++reference_idx) {
+            /** Skip updating step for the low-confidence bbox **/
+            if (scores[reference_idx] < min_det_conf) {
+                continue;
+            }
+
             /** Calculate the Intersection over Union metric between two bboxes**/
             const auto& rect1 = detections[anchor_idx].rect;
             const auto& rect2 = detections[reference_idx].rect;
@@ -287,16 +290,8 @@ void ActionDetection::NonMaxSuppression(
                 overlap = intersection_area / (rect1.area() + rect2.area() - intersection_area);
             }
 
-            /** Remove overlapped bbox with lowest confidence **/
-            if (overlap > overlap_threshold) {
-                keep_idx = false;
-                break;
-            }
-        }
-
-        /** Store output bbox **/
-        if (keep_idx) {
-            out_indices->emplace_back(anchor_idx);
+            /** Scale bbox score using the exponential rule **/
+            scores[reference_idx] *= std::exp(-overlap * overlap / sigma);
         }
     }
 }

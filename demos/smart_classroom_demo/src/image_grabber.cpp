@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -17,6 +17,7 @@ ImageGrabber::ImageGrabber(const std::string& fname) {
     cap_frame_index = -1;
     current_video_idx = 0;
     videos.push_back(fname);
+    current_frame_idx = 0;
 }
 
 std::string ImageGrabber::GetVideoPath() const {

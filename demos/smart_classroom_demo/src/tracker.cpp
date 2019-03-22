@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -38,10 +38,10 @@ public:
 
         Run();
 
-        std::vector<size_t> results(marked_.rows, -1);
-        for (int i = 0; i < marked_.rows; i++) {
+        std::vector<size_t> results(dissimilarity_matrix.rows, -1);
+        for (int i = 0; i < dissimilarity_matrix.rows; i++) {
             const auto ptr = marked_.ptr<char>(i);
-            for (int j = 0; j < marked_.cols; j++) {
+            for (int j = 0; j < dissimilarity_matrix.cols; j++) {
                 if (ptr[j] == kStar) {
                     results[i] = j;
                 }
@@ -211,11 +211,12 @@ TrackerParams::TrackerParams()
       shape_affinity_w(0.5),
       motion_affinity_w(0.2),
       min_det_conf(0.0),
-      averaging_window_size(1),
       bbox_aspect_ratios_range(0.666, 5.0),
       bbox_heights_range(1, 1280),
       drop_forgotten_tracks(true),
-      max_num_objects_in_track(300) {}
+      max_num_objects_in_track(300),
+      averaging_window_size_for_rects(1),
+      averaging_window_size_for_labels(1) {}
 
 bool IsInRange(float x, const cv::Vec2f &v) { return v[0] <= x && x <= v[1]; }
 bool IsInRange(float x, float a, float b) { return a <= x && x <= b; }
@@ -226,7 +227,7 @@ void Tracker::FilterDetectionsAndStore(const TrackedObjects &detections) {
         float aspect_ratio = static_cast<float>(det.rect.height) / det.rect.width;
         if (det.confidence > params_.min_det_conf &&
                 IsInRange(aspect_ratio, params_.bbox_aspect_ratios_range) &&
-                IsInRange(det.rect.height, params_.bbox_heights_range)) {
+                IsInRange(static_cast<float>(det.rect.height), params_.bbox_heights_range)) {
             detections_.emplace_back(det);
         }
     }
@@ -387,8 +388,8 @@ void Tracker::DropForgottenTrack(size_t track_id) {
 }
 
 float Tracker::ShapeAffinity(const cv::Rect &trk, const cv::Rect &det) {
-    float w_dist = std::fabs(trk.width - det.width) / (trk.width + det.width);
-    float h_dist = std::fabs(trk.height - det.height) / (trk.height + det.height);
+    float w_dist = static_cast<float>(std::fabs(trk.width - det.width)) / static_cast<float>(trk.width + det.width);
+    float h_dist = static_cast<float>(std::fabs(trk.height - det.height)) / static_cast<float>(trk.height + det.height);
     return exp(-params_.shape_affinity_w * (w_dist + h_dist));
 }
 
@@ -460,14 +461,14 @@ void Tracker::AppendToTrack(size_t track_id, const TrackedObject &detection) {
 }
 
 float Tracker::Distance(const TrackedObject &obj1, const TrackedObject &obj2) {
-    const float eps = 1e-6;
+    const float eps = 1e-6f;
     float shp_aff = ShapeAffinity(obj1.rect, obj2.rect);
     if (shp_aff < eps) return 1.0;
 
     float mot_aff = MotionAffinity(obj1.rect, obj2.rect);
     if (mot_aff < eps) return 1.0;
 
-    return 1.0 - shp_aff * mot_aff;
+    return 1.0f - shp_aff * mot_aff;
 }
 
 bool Tracker::IsTrackValid(size_t id) const {
@@ -476,7 +477,7 @@ bool Tracker::IsTrackValid(size_t id) const {
     if (objects.empty()) {
         return false;
     }
-    int duration_frames = objects.back().frame_idx - track.first_object.frame_idx;
+    size_t duration_frames = objects.back().frame_idx - track.first_object.frame_idx;
     if (duration_frames < params_.min_track_duration)
         return false;
     return true;
@@ -524,10 +525,10 @@ TrackedObjects Tracker::TrackedDetectionsWithLabels() const {
         if (IsTrackValid(idx) && !track.lost) {
             TrackedObject object = track.objects.back();
             int counter = 1;
-            int start = track.objects.size() >= params_.averaging_window_size ?
-                        track.objects.size() - params_.averaging_window_size : 0;
+            size_t start = static_cast<int>(track.objects.size()) >= params_.averaging_window_size_for_rects ?
+                        track.objects.size() - params_.averaging_window_size_for_rects : 0;
 
-            for (int i = start; i < track.objects.size() - 1; i++) {
+            for (size_t i = start; i < track.objects.size() - 1; i++) {
                 object.rect.width += track.objects[i].rect.width;
                 object.rect.height += track.objects[i].rect.height;
                 object.rect.x += track.objects[i].rect.x;
@@ -539,7 +540,8 @@ TrackedObjects Tracker::TrackedDetectionsWithLabels() const {
             object.rect.x /= counter;
             object.rect.y /= counter;
 
-            object.label = LabelWithMaxFrequencyInTrack(track);
+            object.label = LabelWithMaxFrequencyInTrack(track, params_.averaging_window_size_for_labels);
+            object.object_id = idx;
 
             detections.push_back(object);
         }
@@ -547,11 +549,16 @@ TrackedObjects Tracker::TrackedDetectionsWithLabels() const {
     return detections;
 }
 
-int LabelWithMaxFrequencyInTrack(const Track &track) {
+int LabelWithMaxFrequencyInTrack(const Track &track, int window_size) {
     std::unordered_map<int, int> frequencies;
     int max_frequent_count = 0;
     int max_frequent_id = TrackedObject::UNKNOWN_LABEL_IDX;
-    for (const auto & detection : track.objects) {
+
+    int start = static_cast<int>(track.objects.size()) >= window_size ?
+        static_cast<int>(track.objects.size()) - window_size : 0;
+
+    for (size_t i = start; i < track.objects.size(); i++) {
+        const auto & detection = track.objects[i];
         if (detection.label == TrackedObject::UNKNOWN_LABEL_IDX)
             continue;
         int count = ++frequencies[detection.label];
@@ -566,7 +573,7 @@ int LabelWithMaxFrequencyInTrack(const Track &track) {
 std::vector<Track> UpdateTrackLabelsToBestAndFilterOutUnknowns(const std::vector<Track>& tracks) {
     std::vector<Track> new_tracks;
     for (auto& track : tracks) {
-        int best_label = LabelWithMaxFrequencyInTrack(track);
+        int best_label = LabelWithMaxFrequencyInTrack(track, std::numeric_limits<int>::max());
         if (best_label == TrackedObject::UNKNOWN_LABEL_IDX)
             continue;
 
@@ -585,6 +592,7 @@ std::vector<Track> UpdateTrackLabelsToBestAndFilterOutUnknowns(const std::vector
 const std::unordered_map<size_t, Track> &Tracker::tracks() const {
     return tracks_;
 }
+
 std::vector<Track> Tracker::vector_tracks() const {
     std::set<size_t> keys;
     for (auto& cur_pair : tracks()) {

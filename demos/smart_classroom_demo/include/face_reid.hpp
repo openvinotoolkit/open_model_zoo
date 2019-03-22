@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -24,7 +24,7 @@ struct GalleryObject {
 
 class EmbeddingsGallery {
 public:
-    static const std::string unknown_label;
+    static const char unknown_label[];
     static const int unknown_id;
     EmbeddingsGallery(const std::string& ids_list, double threshold,
                       const VectorCNN& landmarks_det,
@@ -33,6 +33,7 @@ public:
     std::vector<int> GetIDsByEmbeddings(const std::vector<cv::Mat>& embeddings) const;
     std::string GetLabelByID(int id) const;
     std::vector<std::string> GetIDToLabelMap() const;
+    bool LabelExists(const std::string& label) const;
 
 private:
     std::vector<int> idx_to_id;
