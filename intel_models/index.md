@@ -159,5 +159,13 @@ that predict an actual labels are called *decoder*.
 | [action-recognition-0001-encoder](./action-recognition-0001-encoder/description/action-recognition-0001-encoder.md)                          | 7.340                | 21.276     |
 | [action-recognition-0001-decoder](./action-recognition-0001-decoder/description/action-recognition-0001-decoder.md) | 0.147                | 4.405      |
 
+## Compressed models
+
+Deep Learning compressed models
+
+| Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
+|------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [resnet50-binary-0001](./resnet50-binary-0001/description/resnet50-binary-0001.md)                                      | 1.002                | 7.446      |
+
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

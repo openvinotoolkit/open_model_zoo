@@ -18,7 +18,7 @@ This model presents a person attributes classification algorithm analysis scenar
 | Pedestrian pose       | Standing person                                                                                      |
 | Occlusion coverage    | <20%                                                                                                 |
 | Min object width      | 80 pixels                                                                                            |
-| Supported attributes  | gender, has_bag, has_backpack, has hat, has longsleeves, has longpants, has longhair, has coat_jacket|
+| Supported attributes  | is_male, has_bag, has_backpack, has hat, has longsleeves, has longpants, has longhair, has coat_jacket|
 | GFlops                | 0.174                                                                                                |
 | MParams               | 0.735                                                                                                |
 | Source framework      | Pytorch*                                                                                             |
