@@ -24,14 +24,14 @@ Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/be
 
 ## Inputs
 
-A blob with a RGB image in the format: [B, C=3, H=224, W=224], where:
+A blob with a BGR image in the format: [B, C=3, H=224, W=224], where:
 
 - B – batch size
 - C – number of channels
 - H – image height
 - W – image width
 
-It is supposed that input is RGB in 0..255 range
+It is supposed that input is BGR in 0..255 range
 
 ## Outputs
 
