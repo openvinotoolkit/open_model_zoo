@@ -24,6 +24,7 @@ import re
 import requests
 import shlex
 import shutil
+import ssl
 import sys
 import tarfile
 import tempfile
@@ -41,6 +42,8 @@ FRAMEWORKS = {
     'mxnet': Framework('.json', '.params'),
     'tf': Framework('.prototxt', '.frozen.pb'),
 }
+
+DOWNLOAD_TIMEOUT = 5 * 60
 
 failed_topologies = set()
 
@@ -67,7 +70,7 @@ def process_download(chunk_iterable, size, file):
         print()
 
 def start_download_generic(session, url, total_size=None):
-    response = session.get(url, stream = True)
+    response = session.get(url, stream=True, timeout=DOWNLOAD_TIMEOUT)
     response.raise_for_status()
 
     if total_size is None:
@@ -81,13 +84,13 @@ def start_download_google_drive(session, id, total_size):
     chunk_size = 32768
 
     URL = 'https://docs.google.com/uc?export=download'
-    response = session.get(URL, params = { 'id' : id }, stream = True)
+    response = session.get(URL, params={'id' : id}, stream=True, timeout=DOWNLOAD_TIMEOUT)
     response.raise_for_status()
 
     token = get_confirm_token(response)
     if token:
         params = { 'id' : id, 'confirm' : token }
-        response = session.get(URL, params = params, stream = True)
+        response = session.get(URL, params=params, stream=True, timeout=DOWNLOAD_TIMEOUT)
 
     return response.iter_content(chunk_size=32768), total_size
 
@@ -104,15 +107,13 @@ def try_download(name, file, num_attempts, start_download):
             file.truncate()
             process_download(chunk_iterable, size, file)
             return True
-        except requests.exceptions.HTTPError as e:
-            print(e)
         except requests.exceptions.ConnectionError as e:
             print("Error Connecting:", e)
         except requests.exceptions.Timeout as e:
             print("Timeout Error:", e)
         except requests.exceptions.TooManyRedirects as e:
             print("Redirects Error: requests exceeds maximum number of redirects", e)
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException, ssl.SSLError) as e:
             print(e)
 
     failed_topologies.add(name)
