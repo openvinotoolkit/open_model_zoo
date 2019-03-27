@@ -278,9 +278,17 @@ def main():
 
         # Save the predictions to array
         predictions[idx:(idx+batch_size),] = res[out_blob]
-
+    
     if idx != (len(img_indicies)-1):  # Partial batch left in data
-        log.info("Partial batch left over in dataset.")
+        
+        # Fill remaining batch with zeros to get complete batch
+        input_array = np.zeros_like(input_data[:batch_size, :nchannels]) # Array of zeros size of batch, channels
+        input_array[(len(img_indicies)-idx), :nchannels] = input_data[idx:len(img_indicies), :nchannels]
+        
+        res = exec_net.infer(inputs={input_blob: input_array})
+
+        # Save the predictions to array
+        predictions[idx:(idx+batch_size),] = res[out_blob]
 
     """
     Evaluate model with Dice metric
