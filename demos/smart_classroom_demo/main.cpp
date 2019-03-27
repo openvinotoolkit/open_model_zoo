@@ -546,6 +546,16 @@ int main(int argc, char* argv[]) {
         face_config.increase_scale_y = static_cast<float>(FLAGS_exp_r_fd);
         detection::FaceDetection face_detector(face_config);
 
+        // Load face detector for face database registration
+        detection::DetectorConfig face_registration_det_config(fd_model_path, fd_weights_path);
+        face_registration_det_config.plugin = plugins_for_devices[FLAGS_d_fd];
+        face_registration_det_config.enabled = !fd_model_path.empty();
+        face_registration_det_config.is_async = false;
+        face_registration_det_config.confidence_threshold = static_cast<float>(FLAGS_t_reg_fd);
+        face_registration_det_config.increase_scale_x = static_cast<float>(FLAGS_exp_r_fd);
+        face_registration_det_config.increase_scale_y = static_cast<float>(FLAGS_exp_r_fd);
+        detection::FaceDetection face_detector_for_registration(face_registration_det_config);
+
         // Load face reid
         CnnConfig reid_config(fr_model_path, fr_weights_path);
         reid_config.max_batch_size = 16;
@@ -561,7 +571,8 @@ int main(int argc, char* argv[]) {
         VectorCNN landmarks_detector(landmarks_config);
 
         // Create face gallery
-        EmbeddingsGallery face_gallery(FLAGS_fg, FLAGS_t_reid, landmarks_detector, face_reid);
+        EmbeddingsGallery face_gallery(FLAGS_fg, FLAGS_t_reid, FLAGS_min_size_fr, FLAGS_crop_gallery,
+                                       face_detector_for_registration, landmarks_detector, face_reid);
 
         if (!reid_config.enabled) {
             slog::warn << "Face recognition models are disabled!"  << slog::endl;
@@ -636,7 +647,7 @@ int main(int argc, char* argv[]) {
             face_detector.enqueue(frame);
             face_detector.submitRequest();
         }
-        
+
         prev_frame = frame.clone();
 
         bool is_last_frame = false;
