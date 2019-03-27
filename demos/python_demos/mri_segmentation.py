@@ -128,11 +128,8 @@ def load_model(fp16=False):
     """
     log.info("Loading U-Net model to the plugin")
 
-    if fp16:  # Floating point 16 is for Myriad X
-        model_xml = "../../intel_models/mri_segmentation/unet.xml"
-    else:     # FP32 for most devices
-        model_xml = "../../intel_models/mri_segmentation/unet.xml"
-
+    model_xml = "../../intel_models/mri_segmentation/unet.xml"
+   
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
 
     return model_xml, model_bin
@@ -153,8 +150,8 @@ def print_stats(exec_net, input_data, n_channels, batch_size, input_blob, out_bl
         infer_time.append((time() - t0) * 1000)
 
     average_inference = np.average(np.asarray(infer_time))
-    log.info("Average running time of one batch: {:.5f} ms".format(average_inference))
-    log.info("Images per second = {:.3f}".format(batch_size * 1000.0 / average_inference))
+    log.info("Mean running time of one batch: {:.5f} ms".format(average_inference))
+    log.info("Mean slices per second = {:.3f}".format(batch_size * 1000.0 / average_inference))
 
     perf_counts = exec_net.requests[0].get_perf_counts()
     log.info("Performance counters:")
@@ -216,8 +213,7 @@ def main():
 
     log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
     net = IENetwork(model=model_xml, weights=model_bin)
-    #net = IENetwork.from_ir(model=model_xml, weights=model_bin) # Old API
-
+    
     """
     This code checks to see if all of the graphs in the IR are
     compatible with OpenVINO. If not, then you'll need to probably
