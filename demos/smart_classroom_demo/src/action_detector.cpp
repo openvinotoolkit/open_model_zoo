@@ -38,8 +38,8 @@ void ActionDetection::enqueue(const cv::Mat &frame) {
         request = net_.CreateInferRequestPtr();
     }
 
-    width_ = frame.cols;
-    height_ = frame.rows;
+    width_ = static_cast<float>(frame.cols);
+    height_ = static_cast<float>(frame.rows);
 
     Blob::Ptr inputBlob = request->GetBlob(input_name_);
 
@@ -113,7 +113,7 @@ void ActionDetection::fetchResults() {
 
     /** Parse detections **/
     GetDetections(loc_out, main_conf_out, priorbox_out, add_conf_out,
-                  cv::Size(width_, height_), &results);
+                  cv::Size(static_cast<int>(width_), static_cast<int>(height_)), &results);
 }
 
 inline ActionDetection::NormalizedBBox
@@ -133,8 +133,8 @@ cv::Rect ActionDetection::ConvertToRect(
     /** Convert prior bbox to CV_Rect **/
     const float prior_width = prior_bbox.xmax - prior_bbox.xmin;
     const float prior_height = prior_bbox.ymax - prior_bbox.ymin;
-    const float prior_center_x = (prior_bbox.xmin + prior_bbox.xmax) / 2.;
-    const float prior_center_y = (prior_bbox.ymin + prior_bbox.ymax) / 2.;
+    const float prior_center_x = (prior_bbox.xmin + prior_bbox.xmax) / 2.0f;
+    const float prior_center_y = (prior_bbox.ymin + prior_bbox.ymax) / 2.0f;
 
     /** Decode bbox coordinates from the SSD format **/
     const float decoded_bbox_center_x =
@@ -142,22 +142,22 @@ cv::Rect ActionDetection::ConvertToRect(
     const float decoded_bbox_center_y =
             variances.ymin * encoded_bbox.ymin * prior_height + prior_center_y;
     const float decoded_bbox_width =
-            exp(variances.xmax * encoded_bbox.xmax) * prior_width;
+            static_cast<float>(exp(static_cast<float>(variances.xmax * encoded_bbox.xmax))) * prior_width;
     const float decoded_bbox_height =
-            exp(variances.ymax * encoded_bbox.ymax) * prior_height;
+            static_cast<float>(exp(static_cast<float>(variances.ymax * encoded_bbox.ymax))) * prior_height;
 
     /** Create decoded bbox **/
     NormalizedBBox decoded_bbox;
-    decoded_bbox.xmin = decoded_bbox_center_x - decoded_bbox_width / 2.;
-    decoded_bbox.ymin = decoded_bbox_center_y - decoded_bbox_height / 2.;
-    decoded_bbox.xmax = decoded_bbox_center_x + decoded_bbox_width / 2.;
-    decoded_bbox.ymax = decoded_bbox_center_y + decoded_bbox_height / 2.;
+    decoded_bbox.xmin = decoded_bbox_center_x - decoded_bbox_width / 2.0f;
+    decoded_bbox.ymin = decoded_bbox_center_y - decoded_bbox_height / 2.0f;
+    decoded_bbox.xmax = decoded_bbox_center_x + decoded_bbox_width / 2.0f;
+    decoded_bbox.ymax = decoded_bbox_center_y + decoded_bbox_height / 2.0f;
 
     /** Convert decoded bbox to CV_Rect **/
-    return cv::Rect(decoded_bbox.xmin * frame_size.width,
-                    decoded_bbox.ymin * frame_size.height,
-                    (decoded_bbox.xmax - decoded_bbox.xmin) * frame_size.width,
-                    (decoded_bbox.ymax - decoded_bbox.ymin) * frame_size.height);
+    return cv::Rect(static_cast<int>(decoded_bbox.xmin * frame_size.width),
+                    static_cast<int>(decoded_bbox.ymin * frame_size.height),
+                    static_cast<int>((decoded_bbox.xmax - decoded_bbox.xmin) * frame_size.width),
+                    static_cast<int>((decoded_bbox.ymax - decoded_bbox.ymin) * frame_size.height));
 }
 
 void ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat& main_conf,
@@ -209,7 +209,7 @@ void ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat& main_conf
         }
 
         if (std::fabs(action_sum_exp_values) < std::numeric_limits<float>::epsilon()) {
-            throw "action_sum_exp_values can't be equal to 0";
+            throw std::logic_error("action_sum_exp_values can't be equal to 0");
         }
         /** Estimate the action confidence **/
         float action_conf = action_max_exp_value / action_sum_exp_values;
@@ -269,7 +269,7 @@ void ActionDetection::SoftNonMaxSuppression(const DetectedActions& detections,
         }
 
         /** Add current bbox to output list **/
-        const int anchor_idx = std::distance(scores.begin(), best_score_itr);
+        const int anchor_idx = static_cast<int>(std::distance(scores.begin(), best_score_itr));
         out_indices->emplace_back(anchor_idx);
         *best_score_itr = 0.f;
 
@@ -285,9 +285,9 @@ void ActionDetection::SoftNonMaxSuppression(const DetectedActions& detections,
             const auto& rect2 = detections[reference_idx].rect;
             const auto intersection = rect1 & rect2;
             float overlap = 0.f;
-            if (intersection.width > 0.f && intersection.height > 0.f) {
-                const float intersection_area = intersection.area();
-                overlap = intersection_area / (rect1.area() + rect2.area() - intersection_area);
+            if (intersection.width > 0 && intersection.height > 0) {
+                const int intersection_area = intersection.area();
+                overlap = static_cast<float>(intersection_area) / static_cast<float>(rect1.area() + rect2.area() - intersection_area);
             }
 
             /** Scale bbox score using the exponential rule **/

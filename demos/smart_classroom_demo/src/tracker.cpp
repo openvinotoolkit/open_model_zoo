@@ -201,17 +201,18 @@ std::vector<size_t> KuhnMunkres::Solve(const cv::Mat &dissimilarity_matrix) {
 }
 
 cv::Point Center(const cv::Rect &rect) {
-    return cv::Point(rect.x + rect.width * .5, rect.y + rect.height * .5);
+    return cv::Point(static_cast<int>(rect.x + rect.width * 0.5),
+                     static_cast<int>(rect.y + rect.height * 0.5));
 }
 
 TrackerParams::TrackerParams()
     : min_track_duration(25),
       forget_delay(150),
-      affinity_thr(0.85),
-      shape_affinity_w(0.5),
-      motion_affinity_w(0.2),
-      min_det_conf(0.0),
-      bbox_aspect_ratios_range(0.666, 5.0),
+      affinity_thr(0.85f),
+      shape_affinity_w(0.5f),
+      motion_affinity_w(0.2f),
+      min_det_conf(0.0f),
+      bbox_aspect_ratios_range(0.666f, 5.0f),
       bbox_heights_range(1, 1280),
       drop_forgotten_tracks(true),
       max_num_objects_in_track(300),
