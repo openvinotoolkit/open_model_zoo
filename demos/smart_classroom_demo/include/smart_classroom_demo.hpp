@@ -118,6 +118,15 @@ static const char target_action_name_message[] = "Optional. Target action name."
 static const char target_actions_num_message[] = "Optional. Number of first K students. If this parameter is positive,"\
 "the demo detects first K persons with the action, pointed by the parameter 'top_id'";
 
+/// @brief Message crop gallery
+static const char crop_gallery_message[] = "Optional. Crop images during faces gallery creation.";
+
+/// @brief Message for probability threshold argument for face detections during database registration.
+static const char face_threshold_registration_output_message[] = "Optional. Probability threshold for face detections during database registration.";
+
+/// @brief Message for minumum input size for faces database registration.
+static const char min_size_fr_reg_output_message[] = "Optional. Minimum input size for faces during database registration.";
+
 /// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
@@ -248,6 +257,18 @@ DEFINE_string(top_id, "raising_hand", target_action_name_message);
 /// It is an optional parameter
 DEFINE_int32(a_top, -1, target_actions_num_message);
 
+/// @brief Flag to enable image cropping during database creation<br>
+/// It is an optional parameter
+DEFINE_bool(crop_gallery, false, crop_gallery_message);
+
+/// @brief Define probability threshold for face detections during registration<br>
+/// It is an optional parameter
+DEFINE_double(t_reg_fd, 0.9, face_threshold_registration_output_message);
+
+/// @brief Minimum input image width & heigh for sucessful face registration<br>
+/// It is an optional parameter
+DEFINE_int32(min_size_fr, 128, min_size_fr_reg_output_message);
+
 /**
 * @brief This function show a help message
 */
@@ -291,4 +312,7 @@ static void showUsage() {
     std::cout << "    -teacher_ac                    " << teacher_actions_message << std::endl;
     std::cout << "    -a_id                          " << target_action_name_message << std::endl;
     std::cout << "    -a_top                         " << target_actions_num_message << std::endl;
+    std::cout << "    -crop_gallery                  " << crop_gallery_message << std::endl;
+    std::cout << "    -t_reg_fd                      " << face_threshold_registration_output_message << std::endl;
+    std::cout << "    -min_size_fr                   " << min_size_fr_reg_output_message << std::endl;
 }

@@ -48,8 +48,41 @@ namespace {
 const char EmbeddingsGallery::unknown_label[] = "Unknown";
 const int EmbeddingsGallery::unknown_id = TrackedObject::UNKNOWN_LABEL_IDX;
 
+RegistrationStatus EmbeddingsGallery::RegisterIdentity(const std::string& identity_label,
+                                                       const cv::Mat& image,
+                                                       int min_size_fr, bool crop_gallery,
+                                                       detection::FaceDetection& detector,
+                                                       const VectorCNN& landmarks_det,
+                                                       const VectorCNN& image_reid,
+                                                       cv::Mat& embedding) {
+    cv::Mat target = image;
+    if (crop_gallery) {
+      detector.enqueue(image);
+      detector.submitRequest();
+      detector.wait();
+      detector.fetchResults();
+      detection::DetectedObjects faces = detector.results;
+      if (faces.size() == 0) {
+        return RegistrationStatus::FAILURE_NOT_DETECTED;
+      }
+      cv::Mat face_roi = image(faces[0].rect);
+      target = face_roi;
+    }
+    if ((target.rows < min_size_fr) && (target.cols < min_size_fr)) {
+      return RegistrationStatus::FAILURE_LOW_QUALITY;
+    }
+    cv::Mat landmarks;
+    landmarks_det.Compute(target, &landmarks, cv::Size(2, 5));
+    std::vector<cv::Mat> images = {target};
+    std::vector<cv::Mat> landmarks_vec = {landmarks};
+    AlignFaces(&images, &landmarks_vec);
+    image_reid.Compute(images[0], &embedding);
+    return RegistrationStatus::SUCCESS;
+}
+
 EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
-                                     double threshold,
+                                     double threshold, int min_size_fr,
+                                     bool crop_gallery, detection::FaceDetection& detector,
                                      const VectorCNN& landmarks_det,
                                      const VectorCNN& image_reid)
     : reid_threshold(threshold) {
@@ -70,7 +103,6 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
         std::string label = item.name();
         std::vector<cv::Mat> embeddings;
         CV_Assert(item.size() == 1);
-
         for (size_t i = 0; i < item.size(); i++) {
             std::string path;
             if (file_exists(item[i].string())) {
@@ -78,21 +110,18 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
             } else {
                 path = folder_name(ids_list) + separator() + item[i].string();
             }
-
             cv::Mat image = cv::imread(path);
             CV_Assert(!image.empty());
-            cv::Mat emb, landmarks;
-            landmarks_det.Compute(image, &landmarks, cv::Size(2, 5));
-            std::vector<cv::Mat> images = {image};
-            std::vector<cv::Mat> landmarks_vec = {landmarks};
-            AlignFaces(&images, &landmarks_vec);
-            image_reid.Compute(images[0], &emb);
-            embeddings.push_back(emb);
-            idx_to_id.push_back(id);
-            total_images++;
+            cv::Mat emb;
+            RegistrationStatus status = RegisterIdentity(label, image, min_size_fr, crop_gallery,  detector, landmarks_det, image_reid, emb);
+            if (status == RegistrationStatus::SUCCESS) {
+              embeddings.push_back(emb);
+              idx_to_id.push_back(id);
+              total_images++;
+              identities.emplace_back(embeddings, label, id);
+              ++id;
+            }
         }
-        identities.emplace_back(embeddings, label, id);
-        ++id;
     }
 }
 
