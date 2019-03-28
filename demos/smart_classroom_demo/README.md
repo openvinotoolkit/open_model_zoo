@@ -70,8 +70,11 @@ Options:
     -student_ac                    Optional. List of student actions separated by a comma.
     -teacher_ac                    Optional. List of teacher actions separated by a comma.
     -a_id                          Optional. Target action name.
-    -a_top                         Optional. Number of first K students. If this parameter is positive, the demo detects first K persons
-                                             with the action, pointed by the parameter "a_id"
+    -a_top                         Optional. Number of first K students. If this parameter is positive, the demo detects first K persons with the action, pointed by the parameter "a_id"
+    -crop_gallery                  Optional. Crop images during faces gallery creation.
+    -t_reg_fd                      Optional. Probability threshold for face detections during database registration.
+    -min_size_fr                   Optional. Minimum input size for faces during database registration.
+    -al                            Optional. Output file name to save per-person action detections in.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
@@ -83,7 +86,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 Example of a valid command line to run the application with pre-trained models for recognizing students actions:
 ```sh
 ./smart_classroom_demo -m_act <path_to_model>/person-detection-action-recognition-0005.xml \
-                       -m_fd <path_to_model>/face-reidentification-retail-0095.xml \
+                       -m_fd <path_to_model>/face-detection-adas-0001.xml \
                        -m_reid <path_to_model>/face-reidentification-retail-0095.xml \
                        -m_lm <path_to_model>/landmarks-regression-retail-0009.xml \
                        -fg <path_to_faces_gallery.json> \
@@ -94,7 +97,7 @@ Example of a valid command line to run the application with pre-trained models f
 Example of a valid command line to run the application for recognizing actions of a teacher:
 ```sh
 ./smart_classroom_demo -m_act <path_to_model>/person-detection-action-recognition-teacher-0002.xml \
-                       -m_fd <path_to_model>/face-reidentification-retail-0095.xml \
+                       -m_fd <path_to_model>/face-detection-adas-0001.xml \
                        -m_reid <path_to_model>/face-reidentification-retail-0095.xml \
                        -m_lm <path_to_model>/landmarks-regression-retail-0009.xml \
                        -fg <path to faces_gallery.json> \

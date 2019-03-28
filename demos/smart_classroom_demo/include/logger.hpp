@@ -21,19 +21,21 @@
 class DetectionsLogger {
 private:
     bool write_logs_;
-    std::ofstream act_log_stream_;
+    std::ofstream act_stat_log_stream_;
+    cv::FileStorage act_det_log_stream_;
     std::ostream& log_stream_;
 
-
-
 public:
-    explicit DetectionsLogger(std::ostream& stream, bool enabled, const std::string& act_log_file);
+    explicit DetectionsLogger(std::ostream& stream, bool enabled,
+                              const std::string& act_stat_log_file,
+                              const std::string& act_det_log_file);
 
     ~DetectionsLogger();
     void CreateNextFrameRecord(const std::string& path, const int frame_idx,
                                const size_t width, const size_t height);
     void AddFaceToFrame(const cv::Rect& rect, const std::string& id, const std::string& action);
     void AddPersonToFrame(const cv::Rect& rect, const std::string& action, const std::string& id);
+    void AddDetectionToFrame(const TrackedObject& object, const int frame_idx);
     void FinalizeFrameRecord();
     void DumpDetections(const std::string& video_path,
                         const cv::Size frame_size,
