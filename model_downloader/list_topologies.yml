@@ -481,819 +481,819 @@ topologies:
     license: https://github.com/tensorflow/models/blob/master/LICENSE
   - name: "age-gender-recognition-retail-0013"
     description: "Age & gender classification."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.xml
-    model_hash: dd41f96137b78d7bd93a3c89c0b87a131be3de37b69eb38b517560285bb5fa8f
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.xml
+    model_hash: 55a475dd7ad2853cd979ea4c327b80072ac89b8e1acd349d3bd814ff647a4319
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.bin
     weights_hash: 4dab79cfedebd628f3327367a91c9736a32fbf9cc733cbbf1629d16910d4ace7
     output: "Retail/object_attributes/age_gender/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "age-gender-recognition-retail-0013-fp16"
     description: "Age & gender classification."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.xml
-    model_hash: 676b293fff19d298357758c24bcb9a546299eb9bbd49c7ada166e1eaee9e7175
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.xml
+    model_hash: ac547466b19bce20fb30bdc60beaeda16c05a02ef51f8607d0db33e99adf1184
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin
     weights_hash: 401101e0a01b3d68add39deae833bcf9f54238d37dd13e3fb1534aa8fbe4719d
     output: "Retail/object_attributes/age_gender/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "age-gender-recognition-retail-0013-int8"
     description: "Age & gender classification."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/age-gender-recognition-retail-0013/INT8/age-gender-recognition-retail-0013.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/age-gender-recognition-retail-0013/INT8/age-gender-recognition-retail-0013.xml
     model_hash: 8dbf95514625da24305e7eee49b0e6f5a61fd67f357a1ef28d672bf577247bdb
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/age-gender-recognition-retail-0013/INT8/age-gender-recognition-retail-0013.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/age-gender-recognition-retail-0013/INT8/age-gender-recognition-retail-0013.bin
     weights_hash: 48739e17cbf953b0dca82b2a763c665012291ac21e89d653de9e5b0aa707a61a
     output: "Retail/object_attributes/age_gender/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "emotions-recognition-retail-0003"
     description: "Recognizes 5 emotions for a face."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
-    model_hash: d832f9553df2aa236c9bf64965cc57db5089444354467af0120f46b6411c1ace
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
+    model_hash: e07cc3600a664ac9df0b1923016c05690a3e311e955845ad221cb4e750615394
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
     weights_hash: bcb9b1a910fa3cd18a638bb1dbb0597c4ef7a080d1b83008c8e8c2c3c42b99dd
     output: "Retail/object_attributes/emotions_recognition/0003/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "emotions-recognition-retail-0003-fp16"
     description: "Recognizes 5 emotions for a face."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
-    model_hash: 090c1a24048756accac3df07cd4419d3d4f6ae8a309cb563b02376bc41c6fd33
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
+    model_hash: 079c399b03415c70096820e3bdb4c8e1bf74784511b71be7c227197949fb5f0f
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
     weights_hash: e62fb4b819b3b3ad8aafcd308d4353db2f164a1a31d78de6cf5970837aeb6f7b
     output: "Retail/object_attributes/emotions_recognition/0003/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "emotions-recognition-retail-0003-int8"
     description: "Recognizes 5 emotions for a face."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/emotions-recognition-retail-0003/INT8/emotions-recognition-retail-0003.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/emotions-recognition-retail-0003/INT8/emotions-recognition-retail-0003.xml
     model_hash: c19bc1dca7094901e7c5a72a66f9c525347f9d5fc5895fad749b989357f56fe2
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/emotions-recognition-retail-0003/INT8/emotions-recognition-retail-0003.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/emotions-recognition-retail-0003/INT8/emotions-recognition-retail-0003.bin
     weights_hash: 61203cb3b7318101637b444c12c9e050cb3447f682c44bc343e8926f9bfe6130
     output: "Retail/object_attributes/emotions_recognition/0003/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "face-detection-adas-0001"
     description: "Face Detection (MobileNet with reduced channels + SSD with weights sharing)"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-detection-adas-0001/FP32/face-detection-adas-0001.xml
-    model_hash: 0d67b17e2949ecdddedfc06a84efcd313a0a87977af801daf663e45676f32c69
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-detection-adas-0001/FP32/face-detection-adas-0001.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-adas-0001/FP32/face-detection-adas-0001.xml
+    model_hash: 4c46152ca5b2dbaec38a96ab610336f5ed84d750bafbc605cb0aa44a707830f1
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-adas-0001/FP32/face-detection-adas-0001.bin
     weights_hash: 044fbca5222245ea8623eee4dd9475112a562f3b644f47e136f87660f5da4958
     output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "face-detection-adas-0001-fp16"
     description: "Face Detection (MobileNet with reduced channels + SSD with weights sharing)"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-detection-adas-0001/FP16/face-detection-adas-0001.xml
-    model_hash: 190814855224a78977e72f11ca54756be0ddb9465524f072b14c507dc79e5822
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-detection-adas-0001/FP16/face-detection-adas-0001.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-adas-0001/FP16/face-detection-adas-0001.xml
+    model_hash: adff16294b031c74b7b6bea343678d7b047f49d63d91360c8eaf561772a18b7a
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-adas-0001/FP16/face-detection-adas-0001.bin
     weights_hash: a2486566011e77bfa3180c437911c71f164a9f0a8039498ed1ef7237f612559f
     output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "face-detection-retail-0004"
     description: "Face Detection (SqNet1.0modif+single scale) without BatchNormalization trained with negatives."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-detection-retail-0004/FP32/face-detection-retail-0004.xml
-    model_hash: 651fc4016a688edb19aacddd96f420cef399756fa68bfc727c971cca1a1c97f7
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-detection-retail-0004/FP32/face-detection-retail-0004.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-retail-0004/FP32/face-detection-retail-0004.xml
+    model_hash: f3e74c6e0e0d119623907d3ef95ceca6d06a50f8d98d2a8f5f5b5c1b5177c372
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-retail-0004/FP32/face-detection-retail-0004.bin
     weights_hash: 6bca00dde8f950df941b02e70e4152c701b9e8cbffed50432eab3d797d1e080c
     output: "Retail/object_detection/face/sqnet1.0modif-ssd/0004/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "face-detection-retail-0004-fp16"
     description: "Face Detection (SqNet1.0modif+single scale) without BatchNormalization trained with negatives."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-detection-retail-0004/FP16/face-detection-retail-0004.xml
-    model_hash: 73abc112ff474d867c3eb10fa652196048f72dc1478098190976084a47a8c2c2
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-detection-retail-0004/FP16/face-detection-retail-0004.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-retail-0004/FP16/face-detection-retail-0004.xml
+    model_hash: 2e93db782f42c63740e43d5f0a4327e85d6e811d1123abf41eeb4ee41d602f24
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-retail-0004/FP16/face-detection-retail-0004.bin
     weights_hash: 5c33fe026afe0a7b0c88603b4f826b7e319fa42740d576bf14aafd0b7cbb44d2
     output: "Retail/object_detection/face/sqnet1.0modif-ssd/0004/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "face-detection-retail-0004-int8"
     description: "Face Detection (SqNet1.0modif+single scale) without BatchNormalization trained with negatives."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-detection-retail-0004/INT8/face-detection-retail-0004.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-retail-0004/INT8/face-detection-retail-0004.xml
     model_hash: ba1a7c1c72156ecfef2eff7594ee22515cd88393242f78f72fb07fbcc0a0fee7
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-detection-retail-0004/INT8/face-detection-retail-0004.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-retail-0004/INT8/face-detection-retail-0004.bin
     weights_hash: 9abed3810ba767675751f9ebaf6c7b4915535a6d1af3b0254c85e4237e01b8c2
     output: "Retail/object_detection/face/sqnet1.0modif-ssd/0004/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "face-person-detection-retail-0002"
     description: "Simultaneous detection of Pedestrians and Faces (RMNet with lrelu + SSSSD)."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-person-detection-retail-0002/FP32/face-person-detection-retail-0002.xml
-    model_hash: a8a58758e0aa47568fa89032e3d9a8545b168f44fe5e8f4bf93ede55e4dad9e2
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-person-detection-retail-0002/FP32/face-person-detection-retail-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-person-detection-retail-0002/FP32/face-person-detection-retail-0002.xml
+    model_hash: 52b8ebbf835046de3d894075f2d16a5e4037ea984f547d08a91d35fce496a166
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-person-detection-retail-0002/FP32/face-person-detection-retail-0002.bin
     weights_hash: 1800bb993c31dafeb8670f0b3a6f67d456881096a25e246471b5e2924262cfff
     output: "Retail/object_detection/face_pedestrian/rmnet-ssssd-2heads/0002/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "face-person-detection-retail-0002-fp16"
     description: "Simultaneous detection of Pedestrians and Faces (RMNet with lrelu + SSSSD)."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-person-detection-retail-0002/FP16/face-person-detection-retail-0002.xml
-    model_hash: 0a6eec89701e13d275f54daa4a30ccb1772129e77cadeb2340ce7d51d665dc1f
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-person-detection-retail-0002/FP16/face-person-detection-retail-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-person-detection-retail-0002/FP16/face-person-detection-retail-0002.xml
+    model_hash: 221b1e6b5c459267f4ee2c3141030fdb333007c7a39da8ef73c984700cc05147
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-person-detection-retail-0002/FP16/face-person-detection-retail-0002.bin
     weights_hash: 4adffe5bf9c964ef2219b5271a7e4ceab332d6fd6c0a753cde2daa1ee5a2ce76
     output: "Retail/object_detection/face_pedestrian/rmnet-ssssd-2heads/0002/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "face-reidentification-retail-0095"
     description: "Single embedding-based face verification model"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
-    model_hash: 9c95178204106c9af7b44b704488bf804cde94a9d9161b0681239d506e589735
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
+    model_hash: f1e7c39b85827637a4b8c4371028463d887a0c3ce8ec2af0eebfe989595c9281
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
     weights_hash: 03836a6a1d03828322491b0608a579b1c47e5097d355c489b5b8aaf5fce1ef48
     output: "Retail/object_reidentification/face/mobilenet_based/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "face-reidentification-retail-0095-fp16"
     description: "Single embedding-based face verification model"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
-    model_hash: 78536d77827c1ba6b3d4f27ea6cda2524319e8a53d2fc48307d6375a0dc2f2e0
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
+    model_hash: b10950f0dce1a0fe71faf91bbd8a59dcb36eb1b2fcc1b6556a80a063dc0bb471
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
     weights_hash: 3289078133e40e4263f682ded2a26a500905abb0fd7b943f41ca8037a4f3fe21
     output: "Retail/object_reidentification/face/mobilenet_based/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "facial-landmarks-35-adas-0002"
     description: "Custom-architecture convolutional neural network for 35 facial landmarks estimation."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml
-    model_hash: 23a60b2942a6eef36405136049a309d943c4dbca9709022dbac46f57f92d4277
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml
+    model_hash: 03c256f2680d039b5addb2f2cb1099c2f936ad47bc81a9a03d0bace3ed089ad9
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
     weights_hash: 232b1a25de480227f36428fdb11a7a1f623acf37eb4232ced5fabac9b7dd2ad7
     output: "Transportation/object_attributes/facial_landmarks/custom-35-facial-landmarks/dldt"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "facial-landmarks-35-adas-0002-fp16"
     description: "Custom-architecture convolutional neural network for 35 facial landmarks estimation."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.xml
-    model_hash: 2aa62d18ae05ab751a4102e277dcf7b68afb2436c2f446a25a6a7f3a76d5b976
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.xml
+    model_hash: cbc2dee9627a375792bca7872cb6211530eb30b8b9c729da0f19481efd1090c1
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
     weights_hash: b8945ba897072289c8cb44357bd211e728ecd1c093c1d4777b79d118a19ab58a
     output: "Transportation/object_attributes/facial_landmarks/custom-35-facial-landmarks/dldt"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "facial-landmarks-35-adas-0002-int8"
     description: "Custom-architecture convolutional neural network for 35 facial landmarks estimation."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/facial-landmarks-35-adas-0002/INT8/facial-landmarks-35-adas-0002.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/facial-landmarks-35-adas-0002/INT8/facial-landmarks-35-adas-0002.xml
     model_hash: 4682d913c880ad96aa23c5c20cf2987b48507e21b9992dd806de99208b0efe6d
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/facial-landmarks-35-adas-0002/INT8/facial-landmarks-35-adas-0002.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/facial-landmarks-35-adas-0002/INT8/facial-landmarks-35-adas-0002.bin
     weights_hash: 1b91e15499023ac3c9210accf2bd73c8dfd58517936e518cbd388ac5a32cd371
     output: "Transportation/object_attributes/facial_landmarks/custom-35-facial-landmarks/dldt"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "head-pose-estimation-adas-0001"
     description: "Vanilla CNN trained from scratch yaw + pitch + roll + landmarks"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
-    model_hash: 4d774e0a58a7314638ef8cce3b86ef431677af4f79b1ca5c82eed7d3c02e5bd2
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
+    model_hash: 94f687da24f7875250fe4e7eb54b2f6999c31bbf371fa4f935aceeec84368eab
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
     weights_hash: e4047e643bd39d97288dc5d22abe8ead850e05ac1bc44605443bbb2abfc2e246
     output: "Transportation/object_attributes/headpose/vanilla_cnn/dldt"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "head-pose-estimation-adas-0001-fp16"
     description: "Vanilla CNN trained from scratch yaw + pitch + roll + landmarks"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
-    model_hash: 5aafcfb629492d60ce8a27b923d14d69ea3aa4fbeae7f1ecca6ba706b1f4295a
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
+    model_hash: 83c7c8d22d2ec88feabf5f1c95938b60122ea5d9d238f7a6a10dabd05ad72e59
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
     weights_hash: 535a6af806999e22cca5e4071e55841a694a6b60370a6f8fb3b9d0cda5f81c41
     output: "Transportation/object_attributes/headpose/vanilla_cnn/dldt"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "head-pose-estimation-adas-0001-int8"
     description: "Vanilla CNN trained from scratch yaw + pitch + roll + landmarks"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/head-pose-estimation-adas-0001/INT8/head-pose-estimation-adas-0001.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/head-pose-estimation-adas-0001/INT8/head-pose-estimation-adas-0001.xml
     model_hash: e8dc324d0a64026ef09aa6d882c92910a8441cb42d8c8d8534f4dca73cdc65fb
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/head-pose-estimation-adas-0001/INT8/head-pose-estimation-adas-0001.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/head-pose-estimation-adas-0001/INT8/head-pose-estimation-adas-0001.bin
     weights_hash: abc0fb7f08e782301c4ffccf9fc5ce626e608a1e7f9c179baf6513519fa38416
     output: "Transportation/object_attributes/headpose/vanilla_cnn/dldt"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "human-pose-estimation-0001"
     description: "2D human pose estimation with tuned mobilenet backbone (based on OpenPose)."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/human-pose-estimation-0001/FP32/human-pose-estimation-0001.xml
-    model_hash: 1f3422308ac6683d572b0a59d8ae188b5be22e4d6cf417e3bcccdf036bb008d4
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/human-pose-estimation-0001/FP32/human-pose-estimation-0001.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/human-pose-estimation-0001/FP32/human-pose-estimation-0001.xml
+    model_hash: ed4ff2470259d488adec84e000499252489683eb1e0dff1d97eb5ac7aa060a3d
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/human-pose-estimation-0001/FP32/human-pose-estimation-0001.bin
     weights_hash: 9790da47abf072c509ff843695a7b9b96283729731ba4d711fb50201f376b2fc
     output: "Transportation/human_pose_estimation/mobilenet-v1/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "human-pose-estimation-0001-fp16"
     description: "2D human pose estimation with tuned mobilenet backbone (based on OpenPose)."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/human-pose-estimation-0001/FP16/human-pose-estimation-0001.xml
-    model_hash: 14c2c9fed54d6161cd117380728fb7b7c6f33210bf020721b36dab3f74f3d016
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/human-pose-estimation-0001/FP16/human-pose-estimation-0001.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/human-pose-estimation-0001/FP16/human-pose-estimation-0001.xml
+    model_hash: 2f76f2248398698b11e538cbb1d1ad59538a9a3ca20541ad3257c6a43ecd577c
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/human-pose-estimation-0001/FP16/human-pose-estimation-0001.bin
     weights_hash: 48c607a55b22b540c38b6ed295eba211aaa6cd4acd47776f0a1259829cb51196
     output: "Transportation/human_pose_estimation/mobilenet-v1/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "human-pose-estimation-0001-int8"
     description: "2D human pose estimation with tuned mobilenet backbone (based on OpenPose)."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/human-pose-estimation-0001/INT8/human-pose-estimation-0001.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/human-pose-estimation-0001/INT8/human-pose-estimation-0001.xml
     model_hash: a77eb5ad3423d41b5f26acf01c8549db892cbb32f903342d6c1dc7640e1902c4
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/human-pose-estimation-0001/INT8/human-pose-estimation-0001.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/human-pose-estimation-0001/INT8/human-pose-estimation-0001.bin
     weights_hash: 0d252f0fd98c598fb38eaa907fa8b3d15cf2d420d743649b4b6c5dbdbbe5f1ac
     output: "Transportation/human_pose_estimation/mobilenet-v1/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "landmarks-regression-retail-0009"
     description: "Landmark's detection."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
-    model_hash: 44c13c5f2669eee2fcd0efa9829b6534d23ad64efc224b62a983bf9be07348e4
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
+    model_hash: 038a9632343799456693fb4e17094d11e74b17e41a60874a2bc6f3afe7147117
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
     weights_hash: 46795837d35e8199b7c5b57e1f76297827bf516a150c0d5643197d8c325f1dbc
     output: "Retail/object_attributes/landmarks_regression/0009/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "landmarks-regression-retail-0009-fp16"
     description: "Landmark's detection."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
-    model_hash: 8df677c39fac923b1d7528c6a0fd808e8877473a40671124d8722d8e517e1eef
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
+    model_hash: 89a28fffa757b78d410761a8ca18412e7b3568c335beb65409f1dc57e22b49ef
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
     weights_hash: 5d74c26cbb836b3de358ab05d4cbd92c4eb713dc74484cff9de82b2deb3d8527
     output: "Retail/object_attributes/landmarks_regression/0009/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "license-plate-recognition-barrier-0001"
     description: "Chinese license plate recognition"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.xml
-    model_hash: 787c76d6579b997f9f9205466c838857597218d7fd25b2f2b8246ba98120183c
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.xml
+    model_hash: eb7ec4c0a12a123eff5dee7f81e19c9c9a2a2fc00710ac4f1f1e022e55d05916
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.bin
     weights_hash: 16f07102e8e936f80d36e77126723b7ca1c4eaf99f0f4b9762d48aeb4e452a90
     output: "Security/optical_character_recognition/license_plate/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "license-plate-recognition-barrier-0001-fp16"
     description: "Chinese license plate recognition"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.xml
-    model_hash: e5d82f7525a665f578f28fa10cdb1b959d39bcc9a25a7823a49923afad5a4549
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.xml
+    model_hash: 7cd0659e90dbb41c471b91d838dd855ccea658ad1d595a7f5ade8a8e13176495
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.bin
     weights_hash: 67f79aa7fe46b35b13a7c083520c2dcc1218b6104292a4a00da46fa8fcaf3fcf
     output: "Security/optical_character_recognition/license_plate/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "pedestrian-and-vehicle-detector-adas-0001"
     description: "Pedestrian and Vehicle detector based on ssd + mobilenet with reduced channels number."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.xml
-    model_hash: b6dcd4dc991b00e7cc5c0f1bd74a7cb6246361d5c9505c3d8c30fe0db5f46350
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.xml
+    model_hash: 6455b1836781e62ccc5d699eeb4e1eb4adf598d7c4e6e1638d066ae08dda7007
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.bin
     weights_hash: 5919c7c49b557b389aa502894d3b2e6c213d36166e554d9a0726d2b06485acc6
     output: "Transportation/object_detection/pedestrian-and-vehicle/mobilenet-reduced-ssd/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "pedestrian-and-vehicle-detector-adas-0001-fp16"
     description: "Pedestrian and Vehicle detector based on ssd + mobilenet with reduced channels number."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.xml
-    model_hash: 2941843c326c9d29f74da1b0467378ae5e603184119d75e753a33777ae1e5429
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.xml
+    model_hash: a9a6cf98fe6dbc033db0b8a7d57bcbe215d69447b28c32cb02dd9a9665e9b356
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.bin
     weights_hash: 8d162bdaf55d289cc8ce792b49d1416eff345ec58097f6231a5ec8dba9d2722e
     output: "Transportation/object_detection/pedestrian-and-vehicle/mobilenet-reduced-ssd/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "pedestrian-detection-adas-0002"
     description: "Pedestrian detector based on ssd + mobilenet with reduced channels number."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.xml
-    model_hash: a3d708e3a2f319b66ba4aa38e0271d02d97aff0b25674dc6da2821c1eac195ea
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.xml
+    model_hash: e9e34656a8435848695cc763dd3ce22889a059f66af3eb04257902c3267def81
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.bin
     weights_hash: cdf00f3882285d646d2e77b43bd2eef05d1ca88de048d352a3339c79b63767ff
     output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "pedestrian-detection-adas-0002-fp16"
     description: "Pedestrian detector based on ssd + mobilenet with reduced channels number."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.xml
-    model_hash: 23c0b72c07e347537a85445fd291b79fa4cfeb13b422c5000e78f1aa93e0430a
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.xml
+    model_hash: be00995bfbd482115bcf4bb4ddc69322f1d92bff6eef064d8575f49f1e9248d2
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.bin
     weights_hash: ebc3f941934f1df17faf9379b4686745c5d2553ffa469c95e1cc950ea1d013c7
     output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "pedestrian-detection-adas-0002-int8"
     description: "Pedestrian detector based on ssd + mobilenet with reduced channels number."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/pedestrian-detection-adas-0002/INT8/pedestrian-detection-adas-0002.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-detection-adas-0002/INT8/pedestrian-detection-adas-0002.xml
     model_hash: e4251d56e11da101e05a7fe273b27971cdc82abc351773bc0b42f58cbdbf0dc2
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/pedestrian-detection-adas-0002/INT8/pedestrian-detection-adas-0002.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-detection-adas-0002/INT8/pedestrian-detection-adas-0002.bin
     weights_hash: 34753fc4edbbf5f0e7aaedf625000ffe74f443bf20b80cb49a7d2bfc45775e19
     output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-attributes-recognition-crossroad-0230"
     description: "Pedestrian attributes recognition based on a PVANet with hyperfeatures backbone + classification head"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.xml
-    model_hash: 4a2375bb52e61f6d2f3c1141bd41dbd10c1657b97d2f0240c843e237a38c36d9
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.xml
+    model_hash: 51c45229fb157dec7e8d1212baa9f6102a101064d08a34b7126257862681d8f5
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.bin
     weights_hash: 1d1c392826e77373d87fd1d7c65ce238c615f729e5524f1dfbc07a3a6c0cf8db
     output: "Security/object_attributes/pedestrian/person-attributes-recognition-crossroad-0230/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-attributes-recognition-crossroad-0230-fp16"
     description: "Pedestrian attributes recognition based on a PVANet with hyperfeatures backbone + classification head"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.xml
-    model_hash: 65e5f42ebd88e13ad0a728af161096991965de2053ee6044a63d9d99b8f47eca
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.xml
+    model_hash: efdfa5dcf47b31bb3193a87fe30704fce315192a30e577d93d14547a1009720b
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.bin
     weights_hash: 033c56ba8e93c03604e78b99f9b7e5ab07fa57cfd1d865cb62fc001744fc6e72
     output: "Security/object_attributes/pedestrian/person-attributes-recognition-crossroad-0230/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-detection-action-recognition-0005"
     description: "Action detection (SSD-based) model."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.xml
-    model_hash: a699e414fd9ce9cf4f9f958bc4f90148e909e533330cc94429fe1c75a8cef466
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.bin
-    weights_hash: a823da4e10c4cdda2a3f40be6436ba25304270266443cc7cecc68b0f31e4f4bc
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.xml
+    model_hash: c707efb36a2e14913d6e942b3a0dd3db7bee248e31ade762e4e245c08620a7b3
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.bin
+    weights_hash: 57a2481289ab817945fc93b18fe4f15f45ae154f974d72f8e92e428a5b86bb5f
     output: "Retail/action_detection/pedestrian/rmnet_ssd/0165/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-detection-action-recognition-0005-fp16"
     description: "Action detection (SSD-based) model."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.xml
-    model_hash: 7bf16d217761209591cf74bf33ed49b10f41aed98de6222b4f0868184203b492
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.bin
-    weights_hash: 6171ff0ac689c20e4d8f87c02e40c93afa090fdedef98609f28c5337ca91b76d
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.xml
+    model_hash: 9ce1b8153650cd7839ebc6898ff0415f7c87e89a2fce7fd4732b68ba7b13aa9f
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.bin
+    weights_hash: e76f97d714c7eae3bd9007e91e0906cb239ae0260a46efde860d95d6da84a6bc
     output: "Retail/action_detection/pedestrian/rmnet_ssd/0165/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-detection-retail-0002"
     description: "Person detection (HyperNet+RFCN)."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-retail-0002/FP32/person-detection-retail-0002.xml
-    model_hash: 188c368ad3cc3511c85b032adf12a9cf04c2e4306df4ec0bb40a48e7134ee7d0
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-retail-0002/FP32/person-detection-retail-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-retail-0002/FP32/person-detection-retail-0002.xml
+    model_hash: 8508ef21930418d13ea39c95a9b1c5d793c6fcf6c65ac8a5919f12b97bc980f1
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-retail-0002/FP32/person-detection-retail-0002.bin
     weights_hash: c510c14c7d41c20782e288f60a955faf4a0fcc7cb6d92a7db6c0013431e01673
     output: "Retail/object_detection/pedestrian/hypernet-rfcn/0026/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-detection-retail-0002-fp16"
     description: "Person detection (HyperNet+RFCN+DetectionOutput)."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-retail-0002/FP16/person-detection-retail-0002.xml
-    model_hash: 0172c57ee66da88f9e37d1f4ea11ece3db54b544a40b6c872f26408a98385a29
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-retail-0002/FP16/person-detection-retail-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-retail-0002/FP16/person-detection-retail-0002.xml
+    model_hash: 3125bc9eb7b4518df5267ea6736a3c6d04cfb5642fa32aab26a5fa967701b5e2
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-retail-0002/FP16/person-detection-retail-0002.bin
     weights_hash: f14c44ebfec32e7aede4ebc1435e46e7ee8191f7c9c7bdc728c96560e6d45834
     output: "Retail/object_detection/pedestrian/hypernet-rfcn/0026/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-detection-retail-0013"
     description: "Pedestrian detection (RMNet with lrelu + SSD)"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-retail-0013/FP32/person-detection-retail-0013.xml
-    model_hash: 10605f7503b01abc95ac2a2184c0c264a216b0ed8b9b8645f179c7cea03a2859
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-retail-0013/FP32/person-detection-retail-0013.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-retail-0013/FP32/person-detection-retail-0013.xml
+    model_hash: 43535cfcda2b0a2b6ff2cc21616a120154239c315d25089b83a475de0ec33abd
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-retail-0013/FP32/person-detection-retail-0013.bin
     weights_hash: 3d2c6572e6b6f845a1f2c23c32de958333f40b4ee6c3448201f00450a5b8c8d3
     output: "Retail/object_detection/pedestrian/rmnet_ssd/0013/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-detection-retail-0013-fp16"
     description: "Pedestrian detection (RMNet with lrelu + SSD)"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-retail-0013/FP16/person-detection-retail-0013.xml
-    model_hash: e6158fe2852f845d4b3898fb7bb4e1c1d8fd4115c634137b35c672fe35adcf48
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-retail-0013/FP16/person-detection-retail-0013.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-retail-0013/FP16/person-detection-retail-0013.xml
+    model_hash: a1c3a7e73a4aec6c75d77d8648ee2961e24678a17494f1c26ef2ec6375e83dea
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-retail-0013/FP16/person-detection-retail-0013.bin
     weights_hash: 5b65ddc561b86e48420f7942cd5762deebc8691d1d11dc7567842a8b4548bf93
     output: "Retail/object_detection/pedestrian/rmnet_ssd/0013/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-reidentification-retail-0031"
     description: "Single embedding-based person reidentification model (fastest person ReID model)"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-reidentification-retail-0031/FP32/person-reidentification-retail-0031.xml
-    model_hash: 8e5bd9d2ba6eea8a5a5262367af3f6ceed17d054c3931477ee483cdb046f25b6
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-reidentification-retail-0031/FP32/person-reidentification-retail-0031.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-reidentification-retail-0031/FP32/person-reidentification-retail-0031.xml
+    model_hash: cd8cd51352b6f5f5d734733c357d7505dc36d7db6e79e61d97a3ad80083aba4a
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-reidentification-retail-0031/FP32/person-reidentification-retail-0031.bin
     weights_hash: 8b9d349d330909815d2e75b57654c4cd6c27eb37c87d3280dfeaae03d166a4f4
     output: "Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-reidentification-retail-0031-fp16"
     description: "Single embedding-based person reidentification model (fastest person ReID model)"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.xml
-    model_hash: 84650dd68a23b4770c9d06bf7c15466be23ff79d91d36f7cbb5b05b218efb6bb
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.xml
+    model_hash: c52a06b1c9332e5c1a87ad5eec35b46ed781f09faefa80bcbd090673273b814a
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.bin
     weights_hash: 833c136bcce82bcba6de6289fc21ee24f24d4597e52c41717c2602ee275b2f7d
     output: "Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-reidentification-retail-0076"
     description: "Single embedding-based person reidentification model (most accurate person ReID model)"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-reidentification-retail-0076/FP32/person-reidentification-retail-0076.xml
-    model_hash: 160bd9bc3150f1ba6cd0faf4a1fe0e66be9da7efe93869b4df57e9246c953313
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-reidentification-retail-0076/FP32/person-reidentification-retail-0076.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-reidentification-retail-0076/FP32/person-reidentification-retail-0076.xml
+    model_hash: e4b27e151741acc4d8c0a3e56aee98f755c18d0f41eadf74ba0e0dac946f5fc4
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-reidentification-retail-0076/FP32/person-reidentification-retail-0076.bin
     weights_hash: acd718a8e6bd0c9e52605ecfe3f5a7ba87280976315bccc94e9302bbe520d898
     output: "Retail/object_reidentification/pedestrian/rmnet_based/0076/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-reidentification-retail-0076-fp16"
     description: "Single embedding-based person reidentification model (most accurate person ReID model)"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-reidentification-retail-0076/FP16/person-reidentification-retail-0076.xml
-    model_hash: 1b8e5124563850b720843409bad2119e68f50b601084d7c31ed8939ee3dad72e
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-reidentification-retail-0076/FP16/person-reidentification-retail-0076.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-reidentification-retail-0076/FP16/person-reidentification-retail-0076.xml
+    model_hash: a655449e4c3e6337d26c5b8b593f64d78e9136ad9d53aab26644d5777c9fe431
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-reidentification-retail-0076/FP16/person-reidentification-retail-0076.bin
     weights_hash: c8a127cb2b8ff5f26b1d248de5a07b79c916103ee39bec0825fb990e4b043fd6
     output: "Retail/object_reidentification/pedestrian/rmnet_based/0076/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-reidentification-retail-0079"
     description: "Single embedding-based person reidentification model (the model is trade-off between performance and accuracy)"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-reidentification-retail-0079/FP32/person-reidentification-retail-0079.xml
-    model_hash: f1efa2c254602b46f0a7ec3240d107d97ad37acdc1c350a68fc9f063822520d0
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-reidentification-retail-0079/FP32/person-reidentification-retail-0079.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-reidentification-retail-0079/FP32/person-reidentification-retail-0079.xml
+    model_hash: 35d8c5e000be3948c6300be17d7271ae37ddc36f9e42acad0f01ad9ad7788bbf
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-reidentification-retail-0079/FP32/person-reidentification-retail-0079.bin
     weights_hash: e341d80b568d939dc121d2c4785d1f8bc90df477cd1754d0b286b2e24b7b33e4
     output: "Retail/object_reidentification/pedestrian/rmnet_based/0079/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-reidentification-retail-0079-fp16"
     description: "Single embedding-based person reidentification model (the model is trade-off between performance and accuracy)"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-reidentification-retail-0079/FP16/person-reidentification-retail-0079.xml
-    model_hash: 84712125f561930c99ace0ceb4f4ea401f52bf4d37ebdfe2994ca3c913df0e96
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-reidentification-retail-0079/FP16/person-reidentification-retail-0079.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-reidentification-retail-0079/FP16/person-reidentification-retail-0079.xml
+    model_hash: c8613a616f22758863aa5495714c771d753b8915080fadeacc038278a0ade0c2
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-reidentification-retail-0079/FP16/person-reidentification-retail-0079.bin
     weights_hash: 95c426b1d7e8f06f417172f5b1058bd906c769c8c10b3846f8b3adc826390d93
     output: "Retail/object_reidentification/pedestrian/rmnet_based/0079/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-vehicle-bike-detection-crossroad-0078"
     description: "Multiclass (person, vehicle, non-vehicle) detector based on SSD detection architecture, RMNet backbone and learnable image downscale block"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-vehicle-bike-detection-crossroad-0078/FP32/person-vehicle-bike-detection-crossroad-0078.xml
-    model_hash: 183f935be63736f3385cbf30764822f7b9a9c70127f61509fad2204982cf3af0
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-vehicle-bike-detection-crossroad-0078/FP32/person-vehicle-bike-detection-crossroad-0078.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-vehicle-bike-detection-crossroad-0078/FP32/person-vehicle-bike-detection-crossroad-0078.xml
+    model_hash: ebfcbeb3bfe53ae55cf4f85e454eff74b1cb3faf9d61045d2b16b3d693c4143a
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-vehicle-bike-detection-crossroad-0078/FP32/person-vehicle-bike-detection-crossroad-0078.bin
     weights_hash: d9969d9fbef7f69f1fe683344746953dd7638b6d9d323dc8aa8a58671dc46ca7
     output: "Security/object_detection/crossroad/0078/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-vehicle-bike-detection-crossroad-0078-fp16"
     description: "Multiclass (person, vehicle, non-vehicle) detector based on SSD detection architecture, RMNet backbone and learnable image downscale block"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-vehicle-bike-detection-crossroad-0078/FP16/person-vehicle-bike-detection-crossroad-0078.xml
-    model_hash: 81680b0508ed3449853ef74261ea474b097389844136e889d0e2b7aa7d1e87a3
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-vehicle-bike-detection-crossroad-0078/FP16/person-vehicle-bike-detection-crossroad-0078.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-vehicle-bike-detection-crossroad-0078/FP16/person-vehicle-bike-detection-crossroad-0078.xml
+    model_hash: 9a7672885ded240fec9e2680ee37c7024f41618a097ce43be2c90b4b615922bf
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-vehicle-bike-detection-crossroad-0078/FP16/person-vehicle-bike-detection-crossroad-0078.bin
     weights_hash: e1f9566a108510b68330080eb85e9a82becd64614c1570afaa5d4bcd1df00eaf
     output: "Security/object_detection/crossroad/0078/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "road-segmentation-adas-0001"
     description: "Multiclass (BG, road, curbs, marks) segmentation based on ENET, using depthwise convolutions and without ELU operations and without concatenation"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.xml
-    model_hash: 07b82716c5113f9db1b8ccf5dd687f17541c0e4d66dea7776f611b7478113a27
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.xml
+    model_hash: cf3eea4fe64e6dfff7b758beaaf86e72ea7ff8c3c271d9da7879a7de8746499b
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.bin
     weights_hash: e4ec8fa66deb6904b5b6faa109fa699098cc1f947bf5216c6e31595ec397c569
     output: "Transportation/segmentation/curbs/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "road-segmentation-adas-0001-fp16"
     description: "Multiclass (BG, road, curbs, marks) segmentation based on ENET, using depthwise convolutions and without ELU operations and without concatenation"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.xml
-    model_hash: e6ae4906f3fcf214d691658fc6894c3d1e6f8c772138f64993c1e94f3495b39a
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.xml
+    model_hash: ad294f6070976ff45130e93dc382058f4b17d487cdd302e89780f7c3b30280dc
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.bin
     weights_hash: 292b8c8789d66f102ffb9b87104b39488bfa55293ef97e7d6a50439762cdd884
     output: "Transportation/segmentation/curbs/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "road-segmentation-adas-0001-int8"
     description: "Multiclass (BG, road, curbs, marks) segmentation based on ENET, using depthwise convolutions and without ELU operations and without concatenation"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/road-segmentation-adas-0001/INT8/road-segmentation-adas-0001.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/road-segmentation-adas-0001/INT8/road-segmentation-adas-0001.xml
     model_hash: 891a58c1b62d343ebb05038010c527ab05b0122bc03c4e7be39be19b30048ae0
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/road-segmentation-adas-0001/INT8/road-segmentation-adas-0001.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/road-segmentation-adas-0001/INT8/road-segmentation-adas-0001.bin
     weights_hash: f300192b35c71717aebefdc24a1b8ba117e21c6c5eb13dc667f3f5c7bb3a722e
     output: "Transportation/segmentation/curbs/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "semantic-segmentation-adas-0001"
     description: "Multiclass (road, sidewalk, building, wall, fence, pole, traffic light, traffic sign, vegetation, terrain, sky, person, rider, car, truck, bus, train, motorcycle, bicycle, ego-vehicle) segmentation based on ICNet"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.xml
-    model_hash: 69ee6f927aa8546ae2297bafaefabc92a35b491de2f45eb1fa652b9ca26bf55d
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.xml
+    model_hash: 4e86d8cab9778dcb85eac3856cfa7b13516ccdc922a47e00a764e159972cca92
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.bin
     weights_hash: 5a616b105fa42f574e4d23cfc227c10b8bdcc0ba0e66864d7aa4b8a269b7cc76
     output: "Transportation/segmentation/semantic_segmentation/icnet_icv/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "semantic-segmentation-adas-0001-fp16"
     description: "Multiclass (road, sidewalk, building, wall, fence, pole, traffic light, traffic sign, vegetation, terrain, sky, person, rider, car, truck, bus, train, motorcycle, bicycle, ego-vehicle) segmentation based on ICNet"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.xml
-    model_hash: 67e6994f8eb104e239fb18f3389dbc11f93614b8624949213f4f7b908e7fe6bc
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.xml
+    model_hash: 10696961209fbdf6106196b4aa8574aa2311031eae568a5e0f1583ab9c6f1d1d
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.bin
     weights_hash: 8c39dcb0d3569003264165eda163833eef2d0803121147ab06f46697e4f8b4c4
     output: "Transportation/segmentation/semantic_segmentation/icnet_icv/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "single-image-super-resolution-1033"
     description: "Super resolution model based on SRResNet architecture (see https://arxiv.org/pdf/1609.04802.pdf)"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.xml
-    model_hash: d2b985f155dd0c823e62ad46d3d248cab482228e341e7a3ed0df001a6a2b9bb8
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.xml
+    model_hash: 20456c7a21f1f28b5e9c30dd2a2fdeb3093469e080d3cb7fbf9373312b095111
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.bin
     weights_hash: eab6008bc5c2773199078402d4ad68072e0d4a7bfc5c6b7bcfe7d8230ea5eb5b
     output: "Security/super_resolution/srresnet/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "single-image-super-resolution-1033-fp16"
     description: "Super resolution model based on SRResNet architecture (see https://arxiv.org/pdf/1609.04802.pdf)"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.xml
-    model_hash: 5f226cb092a9d380c5d29c64132d8c2be1304bbad35220ef8594cb5487c33ff2
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.xml
+    model_hash: aa3bb52fbb0adab3b1868bc4c58d6b2bd2069a99cc52d0516a7774c2b78ab01a
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.bin
     weights_hash: 4288e8ad4e9a8a6829b186aeb7e4112db1c7e971f935c3271c5ce47c7379cfbe
     output: "Security/super_resolution/srresnet/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "text-detection-0002"
     description: "Detects oriented text."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/text-detection-0002/FP32/text-detection-0002.xml
-    model_hash: 71916bbb68961190b79dffae29d574b0fd3898df4830b7d8c6a13a4f027d3809
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/text-detection-0002/FP32/text-detection-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/text-detection-0002/FP32/text-detection-0002.xml
+    model_hash: e1190df16c30bf5a8806812241c86ed5d49c96323cabf47b57c9db4d6211b3b9
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/text-detection-0002/FP32/text-detection-0002.bin
     weights_hash: fd2cdb0d70d816361c156fbc42a3363535009e1a7140494a4fb1acc7acbe4555
     output: "Retail/object_detection/text/pixel_link_mobilenet_v2/0001/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "text-detection-0002-fp16"
     description: "Detects oriented text."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/text-detection-0002/FP16/text-detection-0002.xml
-    model_hash: c6b999847199370f8b07c10fc39f6fbdcfb85bc02a5ce973e8f5abf44c6564ef
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/text-detection-0002/FP16/text-detection-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/text-detection-0002/FP16/text-detection-0002.xml
+    model_hash: 5b264e28db1ababe2afd7b88f982f9d7fafce3f6e8dfcf31352a18ab73adeca9
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/text-detection-0002/FP16/text-detection-0002.bin
     weights_hash: 18508f0fc72bb142d50e00326dfbba63a54143f3cae4f54f8833b2e4d9891b0d
     output: "Retail/object_detection/text/pixel_link_mobilenet_v2/0001/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "vehicle-attributes-recognition-barrier-0039"
     description: "Vehicle attributes recognition with modified ResNet10 backbone"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.xml
-    model_hash: ab4b4928d4678a9a929f63b04fb52b2091bf06ac53d52ee42ef777bb7a0aecf0
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.xml
+    model_hash: d50344fd323f6961976203ca4d80eac93d69d81c79b001044fab8d801f7b1dd4
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.bin
     weights_hash: 8195ea60216d9aefdab41e3129900aa847f4f0d3d003ce93aa15ecba0ca18e91
     output: "Security/object_attributes/vehicle/resnet10_update_1/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "vehicle-attributes-recognition-barrier-0039-fp16"
     description: "Vehicle attributes recognition with modified ResNet10 backbone"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.xml
-    model_hash: e9a5a184aa34bb2af699c9a5f997eac2c18b5421c58d028a8770e65477dc6707
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.xml
+    model_hash: 41f0b80f6727fe4e6e574a5289914d21a6c3210b51b2e0704b220dc05969ea93
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.bin
     weights_hash: be8b61e337a23ffa57d1742f92d2317560303652f330fef0cbe918161bfcaf50
     output: "Security/object_attributes/vehicle/resnet10_update_1/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "vehicle-attributes-recognition-barrier-0039-int8"
     description: "Vehicle attributes recognition with modified ResNet10 backbone"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-attributes-recognition-barrier-0039/INT8/vehicle-attributes-recognition-barrier-0039.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-attributes-recognition-barrier-0039/INT8/vehicle-attributes-recognition-barrier-0039.xml
     model_hash: c870a67a5cc704c8d8a5a5109f8185ea45a0db5b50df1910070a6d61ba1a21dc
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-attributes-recognition-barrier-0039/INT8/vehicle-attributes-recognition-barrier-0039.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-attributes-recognition-barrier-0039/INT8/vehicle-attributes-recognition-barrier-0039.bin
     weights_hash: 4ca9587b866ecc92418b87424ec5becb05f73a9781cd2eab6abeff7a54067590
     output: "Security/object_attributes/vehicle/resnet10_update_1/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "vehicle-detection-adas-0002"
     description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.xml
-    model_hash: 2b30d1e1a16730733ce4f6f34b13206bf69cc5e05043ad9c10a74e441a79ca97
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.xml
+    model_hash: 15c380b8a7b2e1a22b15cc966b615608b2f017388084625ebb7f8c21989278d1
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.bin
     weights_hash: a3046a4d72eb8a382ae3056533f570e3e9b049d463a3b33bfe20bd1dc8f9c0e4
     output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "vehicle-detection-adas-0002-fp16"
     description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.xml
-    model_hash: b35764010c28c57c5070684a953910889c6042dafec3618e4d8298e480456e9d
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.xml
+    model_hash: d31ba2739f3aa953a17b1f645b77045e6116e3f890bd044414125c2965f8b654
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.bin
     weights_hash: 257a2a9c27ca3d3f5b515f982c3af50683ade869be966e57f0f04f2d95073714
     output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "vehicle-detection-adas-0002-int8"
     description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-detection-adas-0002/INT8/vehicle-detection-adas-0002.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-detection-adas-0002/INT8/vehicle-detection-adas-0002.xml
     model_hash: 40f9090d64ec72236e6b95a6f00220e8e5779e05fc4079febb22ad72b9bcd44f
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-detection-adas-0002/INT8/vehicle-detection-adas-0002.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-detection-adas-0002/INT8/vehicle-detection-adas-0002.bin
     weights_hash: d529c1303bf5ab92167a304591cbb82a58655a949f13c56d88dacc89c536be1d
     output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "vehicle-license-plate-detection-barrier-0106"
     description: "Multiclass (vehicle, license plates) detector based on MobileNetV2+SSD"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.xml
-    model_hash: 97aba922ecd753c5fb4dfdeecfcd5ed1cef38cf79de0df8b0885dcfa413fe1a1
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.xml
+    model_hash: 4e4261625a0203131264caf629d97bd8a3ff73254ac90abc8a495d5fdaac3731
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.bin
     weights_hash: abf00b35146445fd6d11afb467d48558dbeba0cc11d87968171d20373d4cc613
     output: "Security/object_detection/barrier/0106/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "vehicle-license-plate-detection-barrier-0106-fp16"
     description: "Multiclass (vehicle, license plates) detector based on MobileNetV2+SSD"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.xml
-    model_hash: 72114f9c51b2b9b263e779abe5037c4492b64c60bd931adb7a528c746621186e
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.xml
+    model_hash: 9ad78ae598376addd0e1fe859790cd07a96f76f1ac198a55aeb80243df8645aa
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.bin
     weights_hash: 8899c10509ad8dfd029c845bcc409976a56c46f73f3354044f243f0bba9c6b97
     output: "Security/object_detection/barrier/0106/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "face-detection-adas-binary-0001"
     description: "Face Detection (MobileNet with reduced channels and binary convolution + SSD with weights sharing)"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-detection-adas-binary-0001/face-detection-adas-binary-0001.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-adas-binary-0001/face-detection-adas-binary-0001.xml
     model_hash: fde8c465a5e3f3425fb567d31b9591ff8be589930c8488639f8feddf7f0301f2
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/face-detection-adas-binary-0001/face-detection-adas-binary-0001.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-adas-binary-0001/face-detection-adas-binary-0001.bin
     weights_hash: 0e0742b61fb924e937a8974da8a2e15cc6afc15630afa3f220676ee7a3a99700
     output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights_binary/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "single-image-super-resolution-1032"
     description: "Super resolution model"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
-    model_hash: 23c9bd0ee23e810ea80309d4508bc3c86f16da3aed637f5701b4163d4d3fbb82
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
+    model_hash: 8283e6a2dd53e54e8db822df4520be22cda8d5e65068fca2d4eaef1ee240a117
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
     weights_hash: 4840a2f6d1793052b5b0cd5f5da4d69315831b044951c413a267ccf923ef7ebd
     output: "Security/super_resolution/srresnet/dldt/1032/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "single-image-super-resolution-1032-fp16"
     description: "Super resolution model"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
-    model_hash: 657216256d0c331c3be6246b8e33233c25ed5a6463049b84bcd5ac1f61407de3
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
+    model_hash: a6e670402d9f2b34ca4721bb89196a5e018daaee0e47de61ac5aedbadaa49529
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
     weights_hash: 3a1b4aeab87229c5f91f16c0d6672f6cc185238674f5a967d7098dccc970e5ce
     output: "Security/super_resolution/srresnet/dldt/1032/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "action-recognition-0001-encoder"
     description: "General-purpose action recognition model for Kinetics-400 dataset based on Video Transformer Network approach. Encoder part"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.xml
-    model_hash: 8d78ecb075d824d4464da1a649aff910abcc64b38b02fe94142ae6b2d7cc9693
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.xml
+    model_hash: 8fb2a76250ea08bd25754450e90b8a3e7b746e6945f56b8a37daf151ae169713
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.bin
     weights_hash: 35e1454bdac521c7b7664db9b26aebda2bba6944e9da225e9884c0241021d92a
     output: "Transportation/action_recognition/resnet34_vtn/kinetics/encoder/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "action-recognition-0001-encoder-fp16"
     description: "General-purpose action recognition model for Kinetics-400 dataset based on Video Transformer Network approach. Encoder part"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.xml
-    model_hash: 399e73e40b04b8c63df67870e7c0055bcafe33820109a94e2d38bbcf3ae858e4
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.xml
+    model_hash: 852ae9a90dce025e0a0d95af94de54c58686bf3032d74c8fd5e32337fe4055fb
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.bin
     weights_hash: f6347d5c4baf60581d0179a90702180798cb5f3d76079e919493d50f81406e14
     output: "Transportation/action_recognition/resnet34_vtn/kinetics/encoder/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "instance-segmentation-security-0049"
     description: "General purpose instance segmentation model. Mask-RCNN with ResNet50 backbone, FPN block and light segmentation head."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/instance-segmentation-security-0049/FP32/instance-segmentation-security-0049.xml
-    model_hash: f2167fb643f61574806752245f66dab3295f3db4022df5f8bc7edbecb8f6494a
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/instance-segmentation-security-0049/FP32/instance-segmentation-security-0049.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/instance-segmentation-security-0049/FP32/instance-segmentation-security-0049.xml
+    model_hash: 27ad8cf4bbdbe5068955624a7e9443efd9b251e0741c88a7a646b410cc053511
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/instance-segmentation-security-0049/FP32/instance-segmentation-security-0049.bin
     weights_hash: 7565934ca333d2c7ae6978d47a22e12f94e96101b3743aa28fd98886362be807
     output: "Security/instance_segmentation/common/0049/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "instance-segmentation-security-0049-fp16"
     description: "General purpose instance segmentation model. Mask-RCNN with ResNet50 backbone, FPN block and light segmentation head."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/instance-segmentation-security-0049/FP16/instance-segmentation-security-0049.xml
-    model_hash: 556931428bb0f39e9bff444aead393d9fdc57c34ef5fd91ba689c6a577dbed40
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/instance-segmentation-security-0049/FP16/instance-segmentation-security-0049.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/instance-segmentation-security-0049/FP16/instance-segmentation-security-0049.xml
+    model_hash: 0723349aec16f7382b0e1778a2765ce87db236ab0de6220cd31775c3f1c05462
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/instance-segmentation-security-0049/FP16/instance-segmentation-security-0049.bin
     weights_hash: 60ebee3bd3da59971499398eaa466dffe0a8230cf7c880b014004a70fefd3473
     output: "Security/instance_segmentation/common/0049/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "vehicle-detection-adas-binary-0001"
     description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head and binary layers."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-detection-adas-binary-0001/vehicle-detection-adas-binary-0001.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-detection-adas-binary-0001/vehicle-detection-adas-binary-0001.xml
     model_hash: c98bf5984895b1309861597ec36181446877407cd985bb490e14461f41312670
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/vehicle-detection-adas-binary-0001/vehicle-detection-adas-binary-0001.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-detection-adas-binary-0001/vehicle-detection-adas-binary-0001.bin
     weights_hash: afdd8a2f175b2f19c07083ff23b2e28105f3d1c7dc06a4b1a1d5c2c42b98294f
     output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd-binary/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "driver-action-recognition-adas-0002-decoder"
     description: "Video Transformer Network for driver action recognition. Decoder part"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
-    model_hash: 368b9fece5cc987178d5532c0ef08181a7f5d834884a2a012fc4fe42c5a1c63a
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
-    weights_hash: 3824d78ce01ef7cfd8562c0b88f956e3f7528a83a90f6061e615b9ae39968e36
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
+    model_hash: d5dcb380d6ba2de2d03b0102cbb329861a00a78e5c956c2407d5179cf6a5527a
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
+    weights_hash: c4c302f54a79364e672e91b7c202275545cff1468ad0a6b226c45baac0082e71
     output: "Transportation/action_recognition/driver_monitoring/mobilenetv2/decoder/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "driver-action-recognition-adas-0002-decoder-fp16"
     description: "Video Transformer Network for driver action recognition. Decoder part"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
-    model_hash: 31dd45a1888426385c723a005a28055f83d2665f6701565c14131aad8f6662c9
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
+    model_hash: 563d8193fd5ee9f250c317e78c0e4807e43ce74f193e6e3425418c13d429d81d
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
     weights_hash: c1389bca10edda0d25e6e1045bef90a8e05a77c0715c0c00f3efcdc887b1b3bf
     output: "Transportation/action_recognition/driver_monitoring/mobilenetv2/decoder/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "pedestrian-detection-adas-binary-0001"
     description: "Pedestrian detector based on ssd + mobilenet with reduced channels number binary layers."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/pedestrian-detection-adas-binary-0001/pedestrian-detection-adas-binary-0001.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-detection-adas-binary-0001/pedestrian-detection-adas-binary-0001.xml
     model_hash: e64e7ce32c87e1c698b50abb8f2cf1d96c7651d45fc20bac09c417e046afa7f4
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/pedestrian-detection-adas-binary-0001/pedestrian-detection-adas-binary-0001.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-detection-adas-binary-0001/pedestrian-detection-adas-binary-0001.bin
     weights_hash: 7c2761ca3859ef55a80d9ed924225df7ba363fcb151e4ec2f7d1061b70bdb374
     output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd-binary/dldt"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-detection-action-recognition-teacher-0002"
     description: "Second generation of action detection (SSD-based) model to use in Smart Classroom for classification teacher's actions."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
-    model_hash: 112fc0e78cbb1561eed67c8d76e917fbf58057c070565f1e65c6c43a1c731fe3
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
+    model_hash: 36a1c329e80fac65e63f3d1c50d99603d54ae3bc9ef242df4233ff0497165b7a
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
     weights_hash: 231e01a33e8ceec66af07a54991c4611ec74a5e5f3070ac9482f4ab242b10d46
     output:  "Retail/action_detection/teacher/rmnet_ssd/0005_cut/dldt"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "person-detection-action-recognition-teacher-0002-fp16"
     description: "Second generation of action detection (SSD-based) model to use in Smart Classroom for classification teacher's actions."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
-    model_hash: 03ba7bcfd8422101be0b518d3e93f9e37ba6ac148011802437c1b1dcdc4fb676
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
+    model_hash: 55c381e11c3632dc2a5be432164ae95520b8bc43e6069435369cdd232025f80b
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
     weights_hash: 22a0d3c984a66ab48ba4857b428dc4433224ff2dbdb0dd57ccb83153ef4d3275
     output:  "Retail/action_detection/teacher/rmnet_ssd/0005_cut/dldt"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "instance-segmentation-security-0033"
     description: "General purpose instance segmentation model. Mask-RCNN with ResNeXt152 backbone and FPN block."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/instance-segmentation-security-0033/FP32/instance-segmentation-security-0033.xml
-    model_hash: f653780603ef60c25c12ce6c58104e743fad1ce94fcc2af98da39dfa8d75d537
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/instance-segmentation-security-0033/FP32/instance-segmentation-security-0033.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/instance-segmentation-security-0033/FP32/instance-segmentation-security-0033.xml
+    model_hash: a6dc3fc768b694ad808a7b4645d200a2c6679a64c9cc34014a4b66b746c06833
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/instance-segmentation-security-0033/FP32/instance-segmentation-security-0033.bin
     weights_hash: 1f496c48b4fc8ebc38f0ffb7ba82d638ff1ad2209ac9f504f7228e85a4d41f11
     output: "Security/instance_segmentation/common/0033/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "instance-segmentation-security-0033-fp16"
     description: "General purpose instance segmentation model. Mask-RCNN with ResNeXt152 backbone and FPN block."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/instance-segmentation-security-0033/FP16/instance-segmentation-security-0033.xml
-    model_hash: f127f1a899c7008b0fdfac8f1adce1ad05ea8fc4a1f807085b52fec4a14946b0
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/instance-segmentation-security-0033/FP16/instance-segmentation-security-0033.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/instance-segmentation-security-0033/FP16/instance-segmentation-security-0033.xml
+    model_hash: 101c72ffc8bfc7c027fab3d56a35891a0aa2acc40fc27cddd958df4525770637
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/instance-segmentation-security-0033/FP16/instance-segmentation-security-0033.bin
     weights_hash: 694b9bc747ffb441dc8749deda3016004fe94fd8d67598d3ded557d28de29887
     output: "Security/instance_segmentation/common/0033/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "action-recognition-0001-decoder"
     description: "General-purpose action recognition model for Kinetics-400 dataset based on Video Transformer Network approach. Decoder part"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.xml
-    model_hash: 695c64c87382c3cdb2bf55b30d661aa719e8d53d6884c23045c26983fc61d1ba
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.bin
-    weights_hash: a840e506f821d927fda6f7dfa597adae29b0d68363727d0b31f56a7c4dfd80b5
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.xml
+    model_hash: 4e23481c313475d2d64260fd0d4062831ca887f0bbb71b07a17e0b8f5c2adf5a
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.bin
+    weights_hash: a90ac3d3df4caef0be3996ff39c17dd98e7d0a17a34fc0a2de6892cc3fa3096f
     output: "Transportation/action_recognition/resnet34_vtn/kinetics/decoder/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "action-recognition-0001-decoder-fp16"
     description: "General-purpose action recognition model for Kinetics-400 dataset based on Video Transformer Network approach. Decoder part"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.xml
-    model_hash: be2f58b04e73cd452c7f5c10fc254c37fd702bbb8eeaa717b645b295ed89ab36
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
-    weights_hash: 4d89f6dc7a26f2e21380b21a3a7eb9799fed752c2181ee61e9a567c05da020c4
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.xml
+    model_hash: bf1b257baad20969c8c464e5e5ef6cf38a0fa279ab5e21b045ff1439e9717e2d
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
+    weights_hash: 4ffa032a282559da0fd6a27dcb69d81dce7237574f1dde9e1c97478e109c96a6
     output: "Transportation/action_recognition/resnet34_vtn/kinetics/decoder/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "text-recognition-0012"
     description: "Recognizes alphanumeric text. Architecture: VGG-like + BiLSTM as an encoder, BiLSTM as a decoder."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/text-recognition-0012/FP32/text-recognition-0012.xml
-    model_hash: 697afe58ef205132bdd1f44ad2ce31135e33bc6a3a7cf7ffd0e3ec0a0cccb39b
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/text-recognition-0012/FP32/text-recognition-0012.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/text-recognition-0012/FP32/text-recognition-0012.xml
+    model_hash: 08cae99daecf36fc7467086bd569d32b0b30273599853af408a1228a25f99e1a
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/text-recognition-0012/FP32/text-recognition-0012.bin
     weights_hash: d057d4536805ce4529876964e8277a21dbcfae4a65a7762417b4c884cb866347
     output: "Retail/text_recognition/bilstm_crnn_bilstm_decoder/0012/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "text-recognition-0012-fp16"
     description: "Recognizes alphanumeric text. Architecture: VGG-like + BiLSTM as an encoder, BiLSTM as a decoder."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/text-recognition-0012/FP16/text-recognition-0012.xml
-    model_hash: d9a0b1c40ede435812a00b42c42b0f0723c5f88b1420a84c91832de6585d45be
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/text-recognition-0012/FP16/text-recognition-0012.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/text-recognition-0012/FP16/text-recognition-0012.xml
+    model_hash: 63ff433d8a9184ed68153d22f10e155148b34f8125c0acf14eedf46786e8133f
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/text-recognition-0012/FP16/text-recognition-0012.bin
     weights_hash: 9f75d14d812695b71212f6fb92feffa42d8a75312d7c58c0fc6af3ff17a6c166
     output: "Retail/text_recognition/bilstm_crnn_bilstm_decoder/0012/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "driver-action-recognition-adas-0002-encoder"
     description: "Video Transformer Network for driver action recognition. Encoder part"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/driver-action-recognition-adas-0002-encoder/FP32/driver-action-recognition-adas-0002-encoder.xml
-    model_hash: 41c593072c282b6960725c8043d7e09f85a95e42340efddd8af1d8e49fea4b4a
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/driver-action-recognition-adas-0002-encoder/FP32/driver-action-recognition-adas-0002-encoder.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/driver-action-recognition-adas-0002-encoder/FP32/driver-action-recognition-adas-0002-encoder.xml
+    model_hash: b8625862f80388a63c3229824be44a75cb1baffdbd4fe00c560e7cdfc03f2b8d
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/driver-action-recognition-adas-0002-encoder/FP32/driver-action-recognition-adas-0002-encoder.bin
     weights_hash: f49782784647b4d84520d83b1260054ed6d6ce4c3da49e92357f64727a147805
     output: "Transportation/action_recognition/driver_monitoring/mobilenetv2/encoder/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "driver-action-recognition-adas-0002-encoder-fp16"
     description: "Video Transformer Network for driver action recognition. Encoder part"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/driver-action-recognition-adas-0002-encoder/FP16/driver-action-recognition-adas-0002-encoder.xml
-    model_hash: c965d6e83522eddb7bd5a0b3b92e17c663abb1c8d975092036a1362163904ac2
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/driver-action-recognition-adas-0002-encoder/FP16/driver-action-recognition-adas-0002-encoder.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/driver-action-recognition-adas-0002-encoder/FP16/driver-action-recognition-adas-0002-encoder.xml
+    model_hash: a20c385b32b426db15eb0554a8428c8239aa3fbc7e63894f332d6ad4af65969c
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/driver-action-recognition-adas-0002-encoder/FP16/driver-action-recognition-adas-0002-encoder.bin
     weights_hash: cc6619627ded268452836220c8f23d228d674c94349778219ab032e611b6983f
     output: "Transportation/action_recognition/driver_monitoring/mobilenetv2/encoder/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "gaze-estimation-adas-0002"
     description: "Gaze estimation for ADAS"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
-    model_hash: f9019a7ed786e57cd3ab7a628e5806f622c411f6118dba0f3864b6ac1a0e6b2b
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
+    model_hash: d2bd52319711714ad21a504cac5cd9efc20e589a229113dee0f489f8d4fac0c3
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
     weights_hash: 9c48f7595d1dbb13dded4371e165401c9acc04c4018e8d3e05148c8a98f88727
     output: "Transportation/object_attributes/gaze/custom-architecture/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "gaze-estimation-adas-0002-fp16"
     description: "Gaze estimation for ADAS"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
-    model_hash: 74097cc22f29e59aa5be7de1c8cdd5c9f4f009b37493fe983614d8c8a28e07ee
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
+    model_hash: bda986536f526f4d972e1f538f72b5531db5820008042f9bd395fe08d3bc3034
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
     weights_hash: f10fae31d4bc925ea1b38f528a0adc7bde4b01badb427597bad0703e7adc947d
     output: "Transportation/object_attributes/gaze/custom-architecture/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "gaze-estimation-adas-0002-int8"
     description: "Gaze estimation for ADAS"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.xml
     model_hash: 6e395d8452e4a74ccd41f2afac867b9137c261a8e514daa7a83e1d8c58818006
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.bin
     weights_hash: 5e9651470495b1b4b31e6d4cdb44b721b0d82aeeea13e24c5cfd9ad0629b4d6c
     output: "Transportation/object_attributes/gaze/custom-architecture/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "resnet50-binary-0001"
     description: "ResNet-50 Binary"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/resnet50-binary-0001/resnet50-binary-0001.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/resnet50-binary-0001/resnet50-binary-0001.xml
     model_hash: 1a7e41ab273f9e7b064e60e889ba2f13ce1b07cb4610096bd3abef33a93bf992
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190328_133445/resnet50-binary-0001/resnet50-binary-0001.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/resnet50-binary-0001/resnet50-binary-0001.bin
     weights_hash: e843a458ae786f860698919709fb0852ef8138d4461ce8c744f96fe29ef0d580
     output: "PublicCompressed/classification/resnet50_binary/dldt/"
     framework: dldt
