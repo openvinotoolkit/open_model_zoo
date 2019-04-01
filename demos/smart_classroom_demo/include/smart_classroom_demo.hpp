@@ -127,6 +127,9 @@ static const char face_threshold_registration_output_message[] = "Optional. Prob
 /// @brief Message for minumum input size for faces database registration.
 static const char min_size_fr_reg_output_message[] = "Optional. Minimum input size for faces during database registration.";
 
+/// @brief Message action statistics output flag
+static const char act_det_output_message[] = "Optional. Output file name to save per-person action detections in.";
+
 /// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
@@ -183,7 +186,7 @@ DEFINE_bool(r, false, raw_output_message);
 
 /// @brief Define probability threshold for person/action detection <br>
 /// It is an optional parameter
-DEFINE_double(t_ad, 0.3, person_threshold_output_message);
+DEFINE_double(t_ad, 0.4, person_threshold_output_message);
 
 /// @brief Define probability threshold for action recognition <br>
 /// It is an optional parameter
@@ -269,6 +272,10 @@ DEFINE_double(t_reg_fd, 0.9, face_threshold_registration_output_message);
 /// It is an optional parameter
 DEFINE_int32(min_size_fr, 128, min_size_fr_reg_output_message);
 
+/// @brief Output file name to save per-person action detections in.
+/// It is an optional parameter
+DEFINE_string(al, "", act_det_output_message);
+
 /**
 * @brief This function show a help message
 */
@@ -315,4 +322,5 @@ static void showUsage() {
     std::cout << "    -crop_gallery                  " << crop_gallery_message << std::endl;
     std::cout << "    -t_reg_fd                      " << face_threshold_registration_output_message << std::endl;
     std::cout << "    -min_size_fr                   " << min_size_fr_reg_output_message << std::endl;
+    std::cout << "    -al                            " << act_det_output_message << std::endl;
 }

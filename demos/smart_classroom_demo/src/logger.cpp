@@ -26,9 +26,17 @@ std::string FrameIdxToString(const std::string& path, int frame_idx) {
 }  // anonymous namespace
 
 DetectionsLogger::DetectionsLogger(std::ostream& stream, bool enabled,
-                                   const std::string& act_log_file) : log_stream_(stream) {
+                                   const std::string& act_stat_log_file,
+                                   const std::string& act_det_log_file)
+    : log_stream_(stream) {
     write_logs_ = enabled;
-    act_log_stream_.open(act_log_file, std::fstream::out);
+    act_stat_log_stream_.open(act_stat_log_file, std::fstream::out);
+
+    if (!act_det_log_file.empty()) {
+        act_det_log_stream_.open(act_det_log_file, cv::FileStorage::WRITE);
+
+        act_det_log_stream_ << "data" << "[";
+    }
 }
 
 void DetectionsLogger::CreateNextFrameRecord(const std::string& path, const int frame_idx,
@@ -58,9 +66,19 @@ void DetectionsLogger::AddPersonToFrame(const cv::Rect& rect, const std::string&
     }
 }
 
+void DetectionsLogger::AddDetectionToFrame(const TrackedObject& object, const int frame_idx) {
+    if (act_det_log_stream_.isOpened()) {
+        act_det_log_stream_ << "{" << "frame_id" << frame_idx
+                            << "det_conf" << object.confidence
+                            << "label" << object.label
+                            << "rect" << object.rect << "}";
+    }
+}
+
 void DetectionsLogger::FinalizeFrameRecord() {
-    if (write_logs_)
+    if (write_logs_) {
         log_stream_ << std::endl;
+    }
 }
 
 void DetectionsLogger::DumpDetections(const std::string& video_path,
@@ -83,11 +101,11 @@ void DetectionsLogger::DumpDetections(const std::string& video_path,
     for (const auto& label : person_id_to_label) {
         face_label_to_action[label] = unknown_label;
     }
-    act_log_stream_ << "frame_idx";
+    act_stat_log_stream_ << "frame_idx";
     for (const auto& label : person_id_to_label) {
-        act_log_stream_ << "," << label;
+        act_stat_log_stream_ << "," << label;
     }
-    act_log_stream_ << std::endl;
+    act_stat_log_stream_ << std::endl;
 
     for (size_t i = 0; i < num_frames; i++)  {
         CreateNextFrameRecord(video_path, i, frame_size.width, frame_size.height);
@@ -107,11 +125,11 @@ void DetectionsLogger::DumpDetections(const std::string& video_path,
             AddFaceToFrame(obj.rect, face_label, action_label);
         }
 
-        act_log_stream_ << FrameIdxToString(video_path, i);
+        act_stat_log_stream_ << FrameIdxToString(video_path, i);
         for (const auto& label : person_id_to_label) {
-            act_log_stream_ << "," << face_label_to_action[label];
+            act_stat_log_stream_ << "," << face_label_to_action[label];
         }
-        act_log_stream_ << std::endl;
+        act_stat_log_stream_ << std::endl;
 
         FinalizeFrameRecord();
     }
@@ -140,4 +158,8 @@ void DetectionsLogger::DumpTracks(const std::map<int, RangeEventsTrack>& obj_id_
     }
 }
 
-DetectionsLogger::~DetectionsLogger() {}
+DetectionsLogger::~DetectionsLogger() {
+    if (act_det_log_stream_.isOpened()) {
+        act_det_log_stream_ << "]";
+    }
+}

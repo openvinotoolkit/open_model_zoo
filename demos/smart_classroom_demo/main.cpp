@@ -660,7 +660,7 @@ int main(int argc, char* argv[]) {
                                          cap.GetFPS(), Visualizer::GetOutputSize(frame.size()));
         }
         Visualizer sc_visualizer(!FLAGS_no_show, vid_writer, num_top_persons);
-        DetectionsLogger logger(std::cout, FLAGS_r, FLAGS_ad);
+        DetectionsLogger logger(std::cout, FLAGS_r, FLAGS_ad, FLAGS_al);
 
         const int smooth_window_size = static_cast<int>(cap.GetFPS() * FLAGS_d_ad);
         const int smooth_min_length = static_cast<int>(cap.GetFPS() * FLAGS_min_ad);
@@ -817,7 +817,6 @@ int main(int argc, char* argv[]) {
                         std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
 
                 work_time_ms += elapsed_ms;
-                work_num_frames += 1;
 
                 std::map<int, int> frame_face_obj_id_to_action;
                 for (size_t j = 0; j < tracked_faces.size(); j++) {
@@ -857,6 +856,7 @@ int main(int argc, char* argv[]) {
                         const auto& text_label = face_config.enabled ? "" : action_label;
                         sc_visualizer.DrawObject(action.rect, text_label, action_color, white_color, true);
                         logger.AddPersonToFrame(action.rect, action_label, "");
+                        logger.AddDetectionToFrame(action, work_num_frames);
                     }
                     face_obj_id_to_action_maps.push_back(frame_face_obj_id_to_action);
                 } else if (teacher_track_id >= 0) {
@@ -872,6 +872,8 @@ int main(int argc, char* argv[]) {
 
                 sc_visualizer.DrawFPS(1e3f / (work_time_ms / static_cast<float>(work_num_frames) + 1e-6f),
                                       red_color);
+
+                ++work_num_frames;
             }
 
             ++total_num_frames;
