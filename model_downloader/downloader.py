@@ -40,7 +40,7 @@ FRAMEWORKS = {
     'caffe': Framework('.prototxt', '.caffemodel'),
     'dldt': Framework('.xml', '.bin'),
     'mxnet': Framework('.json', '.params'),
-    'tf': Framework('.prototxt', '.frozen.pb'),
+    'tf': Framework('.config', '.frozen.pb'),
 }
 
 DOWNLOAD_TIMEOUT = 5 * 60

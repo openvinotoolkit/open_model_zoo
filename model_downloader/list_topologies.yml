@@ -261,11 +261,13 @@ topologies:
     license: https://github.com/BVLC/caffe/blob/master/models/bvlc_alexnet/readme.md
   - name: "ssd_mobilenet_v2_coco"
     description: "MobileNetV2 object detection architecture (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
+    model_hash: 10dd7ebd618a5dd0d7a95081320e64b86358b09a906faafc13a0de793998dbfc
     weights_hash: 2a8d8a89d695842e60d8c6d144181100555563e21acf2fa1e8f561fec5c3c6ad
     tar: http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_coco_2018_03_29.tar.gz
     output: "object_detection/common/ssd_mobilenet_v2_coco/tf"
+    model_path_prefix: "ssd_mobilenet_v2_coco_2018_03_29/pipeline.config"
     weights_path_prefix: "ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph.pb"
-    model_optimizer_args: "--framework tf --data_type FP32 --reverse_input_channels --input_shape [1,300,300,3] --input image_tensor --tensorflow_use_custom_operations_config ./extensions/front/tf/ssd_v2_support.json --tensorflow_object_detection_api_pipeline_config ./pipeline.config --output detection_classes,detection_scores,detection_boxes,num_detections --input_model <ssd_mobilenet_v2_coco.pb>"
+    model_optimizer_args: "--framework tf --data_type FP32 --reverse_input_channels --input_shape [1,300,300,3] --input image_tensor --tensorflow_use_custom_operations_config ./extensions/front/tf/ssd_v2_support.json --tensorflow_object_detection_api_pipeline_config <ssd_mobilenet_v2_coco.config> --output detection_classes,detection_scores,detection_boxes,num_detections --input_model <ssd_mobilenet_v2_coco.pb>"
     framework: tf
     license: https://github.com/tensorflow/models/blob/master/LICENSE
   - name: "resnet-50"
@@ -428,11 +430,13 @@ topologies:
     license: https://raw.githubusercontent.com/shicai/MobileNet-Caffe/26a8b8c0afb6114a07c1c9e4f550e4e0dd8cced1/LICENSE
   - name: "faster_rcnn_inception_v2_coco"
     description: "Faster R-CNN with Inception v2 (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
+    model_hash: 1795389f43c17930b9ab0febf507fea329c37b1c1ce2ff077cfcfcc5d30be340
     weights_hash: fa2cef2ed0543933f132539bd037fa9b66a73d9a33c660cedf68961a880a068f
     tar: http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz
     output: "object_detection/common/faster_rcnn/faster_rcnn_inception_v2_coco/tf/"
+    model_path_prefix: "faster_rcnn_inception_v2_coco_2018_01_28/pipeline.config"
     weights_path_prefix: "faster_rcnn_inception_v2_coco_2018_01_28/frozen_inference_graph.pb"
-    model_optimizer_args: "--framework tf --data_type FP32 --reverse_input_channels --input_shape [1,600,600,3] --input image_tensor --output detection_scores,detection_boxes,num_detections --tensorflow_use_custom_operations_config /opt/intel/cvsdk/deployment_tools/model_optimizer/extensions/front/tf/faster_rcnn_support.json --tensorflow_object_detection_api_pipeline_config /home/sys_icvint/workspace/DL-Benchmark/master/model_optimizer/src/models/public/object_detection/common/faster_rcnn/faster_rcnn_inception_v2_coco/tf/pipeline.config --input_model <faster_rcnn_inception_v2_coco.pb>"
+    model_optimizer_args: "--framework tf --data_type FP32 --reverse_input_channels --input_shape [1,600,600,3] --input image_tensor --output detection_scores,detection_boxes,num_detections --tensorflow_use_custom_operations_config /opt/intel/cvsdk/deployment_tools/model_optimizer/extensions/front/tf/faster_rcnn_support.json --tensorflow_object_detection_api_pipeline_config <faster_rcnn_inception_v2_coco.config> --input_model <faster_rcnn_inception_v2_coco.pb>"
     framework: tf
     license: https://github.com/tensorflow/models/blob/master/LICENSE
   - name: "deeplabv3"
@@ -454,20 +458,24 @@ topologies:
     license: https://github.com/eragonruan/text-detection-ctpn/blob/banjin-dev/LICENSE
   - name: "ssd_mobilenet_v1_coco"
     description: "MobileNetV1 object detection architecture (https://arxiv.org/pdf/1807.03284.pdf) pre-trained on the COCO dataset"
+    model_hash: aec63661e0c561ef6de5c8a9b463cada7c639a8ed1c160b8903cd5d121d078ce
     weights_hash: 0cb4161a6310632814cd25afe11c261cff9a7d55487a813acd54772285b54850
     tar: http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz
     output: "object_detection/common/ssd_mobilenet/ssd_mobilenet_v1_coco/tf/"
+    model_path_prefix: "ssd_mobilenet_v1_coco_2018_01_28/pipeline.config"
     weights_path_prefix: "ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb"
-    model_optimizer_args: "--framework tf --data_type FP32 --reverse_input_channels --input_shape [1,300,300,3] --input image_tensor --output detection_scores,detection_boxes,num_detections --tensorflow_use_custom_operations_config /opt/intel/cvsdk/deployment_tools/model_optimizer/extensions/front/tf/ssd_v2_support.json --tensorflow_object_detection_api_pipeline_config /home/sys_icvint/workspace/DL-Benchmark/master/model_optimizer/src/models/public/object_detection/common/ssd_mobilenet/ssd_mobilenet_v1_coco/tf/pipeline.config --input_model <ssd_mobilenet_v1_coco.pb>"
+    model_optimizer_args: "--framework tf --data_type FP32 --reverse_input_channels --input_shape [1,300,300,3] --input image_tensor --output detection_scores,detection_boxes,num_detections --tensorflow_use_custom_operations_config /opt/intel/cvsdk/deployment_tools/model_optimizer/extensions/front/tf/ssd_v2_support.json --tensorflow_object_detection_api_pipeline_config <ssd_mobilenet_v1_coco.config> --input_model <ssd_mobilenet_v1_coco.pb>"
     framework: tf
     license: https://github.com/tensorflow/models/blob/master/LICENSE
   - name: "faster_rcnn_resnet101_coco"
     description: "Faster R-CNN Resnet-101 (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
+    model_hash: 9147a34bdee5bf2c1e8bfb8fa8945463024e0974ef9dae65b17837e23ee804fe
     weights_hash: cfa9a1483faf30c7d073188a337721a1ed489998262f6adef0cbf6c5b7a72fb5
     tar: http://download.tensorflow.org/models/object_detection/faster_rcnn_resnet101_coco_2018_01_28.tar.gz
     output: "object_detection/common/faster_rcnn/faster_rcnn_resnet101_coco/tf/"
+    model_path_prefix: "faster_rcnn_resnet101_coco_2018_01_28/pipeline.config"
     weights_path_prefix: "faster_rcnn_resnet101_coco_2018_01_28/frozen_inference_graph.pb"
-    model_optimizer_args: "--framework tf --data_type FP32 --reverse_input_channels --input_shape [1,600,600,3] --input image_tensor --output detection_scores,detection_boxes,num_detections --tensorflow_use_custom_operations_config /opt/intel/cvsdk/deployment_tools/model_optimizer/extensions/front/tf/faster_rcnn_support.json --tensorflow_object_detection_api_pipeline_config /home/sys_icvint/workspace/DL-Benchmark/master/model_optimizer/src/models/public/object_detection/common/faster_rcnn/faster_rcnn_resnet101_coco/tf/pipeline.config --input_model <faster_rcnn_resnet101_coco.pb>"
+    model_optimizer_args: "--framework tf --data_type FP32 --reverse_input_channels --input_shape [1,600,600,3] --input image_tensor --output detection_scores,detection_boxes,num_detections --tensorflow_use_custom_operations_config /opt/intel/cvsdk/deployment_tools/model_optimizer/extensions/front/tf/faster_rcnn_support.json --tensorflow_object_detection_api_pipeline_config <faster_rcnn_resnet101_coco.pb> --input_model <faster_rcnn_resnet101_coco.pb>"
     framework: tf
     license: https://github.com/tensorflow/models/blob/master/LICENSE
   - name: "mobilenet-v2-1.4-224"
