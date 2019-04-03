@@ -406,6 +406,16 @@ topologies:
     model_optimizer_args: "--framework tf --data_type FP32 --reverse_input_channels --input_shape [1,24,94,3] --input input --scale_values input[254.99997577500233] --output d_predictions --input_model <license-plate-recognition-barrier-0007.frozen>"
     framework: tf
     license: https://github.com/opencv/training_toolbox_tensorflow/blob/develop/LICENSE
+  - name: "face-detection-retail-0044"
+    description: "Face Detection (SqNet1.0modif+single scale) with BatchNormalization trained with negatives"
+    model: https://raw.githubusercontent.com/opencv/training_toolbox_caffe/63ccbbc328f0c1f414f459c284293b3929b09339/models/face_detection/deploy.prototxt
+    model_hash: 89ea5bb9c293ebabb56b9f6dfb4cfc6c46cd146cdce307a2f5a2755bf904fc79
+    weights: https://github.com/opencv/training_toolbox_caffe/raw/63ccbbc328f0c1f414f459c284293b3929b09339/models/face_detection/face-detection-retail-0044.caffemodel
+    weights_hash: 10f68b73f3b68db89fab151be51fc90a0bc1e2a18a87ac642e88aa9e94d53f8f
+    output: "Retail/object_detection/face/sqnet1.0modif-ssd/0044/caffe/"
+    model_optimizer_args: "--framework caffe --data_type FP32 --input_shape [1,3,300,300] --input data --input_model <face-detection-retail-0044.caffemodel> --input_proto <face-detection-retail-0044.prototxt>"
+    framework: caffe
+    license: https://github.com/opencv/training_toolbox_caffe/blob/develop/LICENSE
   - name: "mobilenet-v1-1.0-224"
     description: "MobileNet V1 architecture with the width multiplier 1.0 and resolution 224 (https://arxiv.org/pdf/1704.04861.pdf)"
     model: https://raw.githubusercontent.com/shicai/MobileNet-Caffe/26a8b8c0afb6114a07c1c9e4f550e4e0dd8cced1/mobilenet_deploy.prototxt
