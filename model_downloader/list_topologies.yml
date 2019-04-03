@@ -497,15 +497,6 @@ topologies:
     output: "Retail/object_attributes/age_gender/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
-  - name: "age-gender-recognition-retail-0013-int8"
-    description: "Age & gender classification."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/age-gender-recognition-retail-0013/INT8/age-gender-recognition-retail-0013.xml
-    model_hash: 8dbf95514625da24305e7eee49b0e6f5a61fd67f357a1ef28d672bf577247bdb
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/age-gender-recognition-retail-0013/INT8/age-gender-recognition-retail-0013.bin
-    weights_hash: 48739e17cbf953b0dca82b2a763c665012291ac21e89d653de9e5b0aa707a61a
-    output: "Retail/object_attributes/age_gender/dldt/"
-    framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "emotions-recognition-retail-0003"
     description: "Recognizes 5 emotions for a face."
     model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
@@ -629,15 +620,6 @@ topologies:
     model_hash: cbc2dee9627a375792bca7872cb6211530eb30b8b9c729da0f19481efd1090c1
     weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
     weights_hash: b8945ba897072289c8cb44357bd211e728ecd1c093c1d4777b79d118a19ab58a
-    output: "Transportation/object_attributes/facial_landmarks/custom-35-facial-landmarks/dldt"
-    framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
-  - name: "facial-landmarks-35-adas-0002-int8"
-    description: "Custom-architecture convolutional neural network for 35 facial landmarks estimation."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/facial-landmarks-35-adas-0002/INT8/facial-landmarks-35-adas-0002.xml
-    model_hash: 4682d913c880ad96aa23c5c20cf2987b48507e21b9992dd806de99208b0efe6d
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/facial-landmarks-35-adas-0002/INT8/facial-landmarks-35-adas-0002.bin
-    weights_hash: 1b91e15499023ac3c9210accf2bd73c8dfd58517936e518cbd388ac5a32cd371
     output: "Transportation/object_attributes/facial_landmarks/custom-35-facial-landmarks/dldt"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
@@ -1075,9 +1057,9 @@ topologies:
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "face-detection-adas-binary-0001"
     description: "Face Detection (MobileNet with reduced channels and binary convolution + SSD with weights sharing)"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-adas-binary-0001/face-detection-adas-binary-0001.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.xml
     model_hash: fde8c465a5e3f3425fb567d31b9591ff8be589930c8488639f8feddf7f0301f2
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-adas-binary-0001/face-detection-adas-binary-0001.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.bin
     weights_hash: 0e0742b61fb924e937a8974da8a2e15cc6afc15630afa3f220676ee7a3a99700
     output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights_binary/dldt/"
     framework: dldt
@@ -1138,9 +1120,9 @@ topologies:
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "vehicle-detection-adas-binary-0001"
     description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head and binary layers."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-detection-adas-binary-0001/vehicle-detection-adas-binary-0001.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.xml
     model_hash: c98bf5984895b1309861597ec36181446877407cd985bb490e14461f41312670
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-detection-adas-binary-0001/vehicle-detection-adas-binary-0001.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.bin
     weights_hash: afdd8a2f175b2f19c07083ff23b2e28105f3d1c7dc06a4b1a1d5c2c42b98294f
     output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd-binary/dldt/"
     framework: dldt
@@ -1165,9 +1147,9 @@ topologies:
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "pedestrian-detection-adas-binary-0001"
     description: "Pedestrian detector based on ssd + mobilenet with reduced channels number binary layers."
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-detection-adas-binary-0001/pedestrian-detection-adas-binary-0001.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.xml
     model_hash: e64e7ce32c87e1c698b50abb8f2cf1d96c7651d45fc20bac09c417e046afa7f4
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-detection-adas-binary-0001/pedestrian-detection-adas-binary-0001.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.bin
     weights_hash: 7c2761ca3859ef55a80d9ed924225df7ba363fcb151e4ec2f7d1061b70bdb374
     output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd-binary/dldt"
     framework: dldt
@@ -1291,9 +1273,9 @@ topologies:
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
   - name: "resnet50-binary-0001"
     description: "ResNet-50 Binary"
-    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/resnet50-binary-0001/resnet50-binary-0001.xml
+    model: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/resnet50-binary-0001/INT1/resnet50-binary-0001.xml
     model_hash: 1a7e41ab273f9e7b064e60e889ba2f13ce1b07cb4610096bd3abef33a93bf992
-    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/resnet50-binary-0001/resnet50-binary-0001.bin
+    weights: https://download.01.org/opencv/2019/open_model_zoo/R1/models_bin_20190329_105530/resnet50-binary-0001/INT1/resnet50-binary-0001.bin
     weights_hash: e843a458ae786f860698919709fb0852ef8138d4461ce8c744f96fe29ef0d580
     output: "PublicCompressed/classification/resnet50_binary/dldt/"
     framework: dldt
