@@ -40,7 +40,7 @@ FRAMEWORKS = {
     'caffe': Framework('.prototxt', '.caffemodel'),
     'dldt': Framework('.xml', '.bin'),
     'mxnet': Framework('.json', '.params'),
-    'tf': Framework('.prototxt', '.frozen.pb'),
+    'tf': Framework('.config', '.frozen.pb'),
 }
 
 DOWNLOAD_TIMEOUT = 5 * 60
@@ -381,11 +381,10 @@ with requests.Session() as session:
 
         members = []
 
-        if {'model_path_prefix', 'weights_path_prefix'} <= top.keys():
+        if 'model_path_prefix' in top:
             members.append(MemberRequest(top['model_path_prefix'], model_destination, top['model_hash']))
+        if 'weights_path_prefix' in top:
             members.append(MemberRequest(top['weights_path_prefix'], weights_destination, top['weights_hash']))
-        elif 'model_path_prefix' in top:
-            members.append(MemberRequest(top['model_path_prefix'], weights_destination, top['model_hash']))
 
         if {'tar_google_drive_id', 'tar_size'} <= top.keys():
             try_download_tar(top['name'], members, cache, args.num_attempts,
