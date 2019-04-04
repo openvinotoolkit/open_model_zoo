@@ -14,10 +14,10 @@ block for feature maps refinement and relatively light segmentation head.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| MS COCO val2017 box AP (max short side 320, max long side 480)   | 30.4     |
-| MS COCO val2017 mask AP (max short side 320, max long side 480)  | 26.8     |
-| MS COCO val2017 box AP (max height 320, max width 480)           | 29.8     |
-| MS COCO val2017 mask AP (max height 320, max width 480)          | 26.3     |
+| MS COCO val2017 box AP (max short side 320, max long side 480)   | 30.4%    |
+| MS COCO val2017 mask AP (max short side 320, max long side 480)  | 26.8%    |
+| MS COCO val2017 box AP (max height 320, max width 480)           | 29.8%    |
+| MS COCO val2017 mask AP (max height 320, max width 480)          | 26.3%    |
 | Max objects to detect           | 100                                       |
 | GFlops                          | 56.433                                    |
 | MParams                         | 44.920                                    |
