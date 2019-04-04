@@ -1,10 +1,8 @@
 # Overview of OpenVINO&trade; Toolkit Pre-Trained Models
 
-OpenVINO&trade; toolkit provides a set of pre-trained models
-that you can use for learning and demo purposes or for developing deep learning
-software. Most recent version is available in the [repo on Github](https://github.com/opencv/open_model_zoo),
-the latest stable snapshot is availabe via [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader).
-Models can also be downloaded manually from https://download.01.org/opencv
+OpenVINO&trade; toolkit distribution includes a set of pre-trained models
+that you can use for learning and demo purposes or for developing a deep learning
+software.
 
 ## Object Detection Models
 

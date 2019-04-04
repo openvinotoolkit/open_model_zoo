@@ -14,10 +14,10 @@ Feature Pyramid Networks block for feature maps refinement.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| MS COCO val2017 box AP (max short side 480, max long side 640)   | 38.9%    |
-| MS COCO val2017 mask AP (max short side 480, max long side 640)  | 34.7%    |
-| MS COCO val2017 box AP (max height 480, max width 640)           | 38.6%    |
-| MS COCO val2017 mask AP (max height 480, max width 640)          | 34.3%    |
+| MS COCO val2017 box AP (max short side 480, max long side 640)   | 38.9     |
+| MS COCO val2017 mask AP (max short side 480, max long side 640)  | 34.7     |
+| MS COCO val2017 box AP (max height 480, max width 640)           | 38.6     |
+| MS COCO val2017 mask AP (max height 480, max width 640)          | 34.3     |
 | Max objects to detect           | 100                                       |
 | GFlops                          | 354.274                                   |
 | MParams                         | 143.444                                   |
