@@ -174,11 +174,30 @@ class DirCache:
         hash_path.parent.mkdir(parents=True, exist_ok=True)
         staging_path.replace(self._hash_path(hash))
 
-def try_download_simple(name, destination, expected_hash, cache, num_attempts, start_download):
-    if cache.has(expected_hash):
-        print('========= Retrieving {} from the cache'.format(destination))
-        cache.get(expected_hash, destination)
+def try_retrieve_from_cache(cache, files):
+    try:
+        if all(cache.has(file[0]) for file in files):
+            for hash, destination in files:
+                print('========= Retrieving {} from the cache'.format(destination))
+                cache.get(hash, destination)
+            print()
+            return True
+    except Exception as e:
+        print(e)
+        print('########## Warning: Cache retrieval failed; falling back to downloading ##########')
         print()
+
+    return False
+
+def try_update_cache(cache, hash, source):
+    try:
+        cache.put(hash, source)
+    except Exception as e:
+        print(e)
+        print('########## Warning: Failed to update the cache ##########')
+
+def try_download_simple(name, destination, expected_hash, cache, num_attempts, start_download):
+    if try_retrieve_from_cache(cache, [[expected_hash, destination]]):
         return
 
     print('========= Downloading {}'.format(destination))
@@ -187,16 +206,12 @@ def try_download_simple(name, destination, expected_hash, cache, num_attempts, s
         if try_download(name, f, num_attempts, start_download):
             f.seek(0)
             if verify_hash(f, expected_hash, destination, name):
-                cache.put(expected_hash, destination)
+                try_update_cache(cache, expected_hash, destination)
 
     print('')
 
 def try_download_tar(name, members, cache, num_attempts, start_download):
-    if all(cache.has(member.expected_hash) for member in members):
-        for member in members:
-            print('========= Retrieving {} from the cache'.format(member.destination))
-            cache.get(member.expected_hash, member.destination)
-        print()
+    if try_retrieve_from_cache(cache, [[member.expected_hash, member.destination] for member in members]):
         return
 
     for member in members:
@@ -226,7 +241,7 @@ def try_download_tar(name, members, cache, num_attempts, start_download):
 
                     destination_file.seek(0)
                     if verify_hash(destination_file, member.expected_hash, member.destination, name):
-                        cache.put(member.expected_hash, member.destination)
+                        try_update_cache(cache, member.expected_hash, member.destination)
                     else:
                         break
 
