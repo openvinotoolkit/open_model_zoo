@@ -607,7 +607,7 @@ int main(int argc, char* argv[]) {
         tracker_action_params.forget_delay = 150;
         tracker_action_params.affinity_thr = 0.9f;
         tracker_action_params.averaging_window_size_for_rects = 5;
-        tracker_action_params.averaging_window_size_for_labels = actions_type == TOP_K ? 5 : 1;
+        tracker_action_params.averaging_window_size_for_labels = actions_type == TOP_K ? FLAGS_ss_t : FLAGS_ss_d;
         tracker_action_params.bbox_heights_range = cv::Vec2f(10, 2160);
         tracker_action_params.drop_forgotten_tracks = false;
         tracker_action_params.max_num_objects_in_track = std::numeric_limits<int>::max();
