@@ -75,8 +75,7 @@ Options:
     -t_reg_fd                      Optional. Probability threshold for face detections during database registration.
     -min_size_fr                   Optional. Minimum input size for faces during database registration.
     -al                            Optional. Output file name to save per-person action detections in.
-    -ss_t                          Optional. Number of frames to smooth actions in Top-K mode.
-    -ss_d                          Optional. Number of frames to smooth actions in student mode.
+    -ss_t                          Optional. Number of frames to smooth actions.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

@@ -130,11 +130,8 @@ static const char min_size_fr_reg_output_message[] = "Optional. Minimum input si
 /// @brief Message action statistics output flag
 static const char act_det_output_message[] = "Optional. Output file name to save per-person action detections in.";
 
-/// @brief Message for number of frames in Top-K mode
-static const char topk_mode_smooth_size_message[] = "Optional. Number of frames to smooth actions in Top-K mode.";
-
-/// @brief Message for number of frames in student mode
-static const char student_mode_smooth_size_message[] = "Optional. Number of frames to smooth actions in student mode.";
+/// @brief Message for number of frames for action tracker
+static const char tracker_smooth_size_message[] = "Optional. Number of frames to smooth actions.";
 
 /// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
@@ -282,13 +279,9 @@ DEFINE_int32(min_size_fr, 128, min_size_fr_reg_output_message);
 /// It is an optional parameter
 DEFINE_string(al, "", act_det_output_message);
 
-/// @brief Number of frames to smooth actions in Top-K mode<br>
+/// @brief Number of frames to smooth actions<br>
 /// It is an optional parameter
-DEFINE_int32(ss_t, 5, topk_mode_smooth_size_message);
-
-/// @brief Number of frames to smooth actions in default mode<br>
-/// It is an optional parameter
-DEFINE_int32(ss_d, 1, student_mode_smooth_size_message);
+DEFINE_int32(ss_t, -1, tracker_smooth_size_message);
 
 /**
 * @brief This function show a help message
@@ -337,6 +330,5 @@ static void showUsage() {
     std::cout << "    -t_reg_fd                      " << face_threshold_registration_output_message << std::endl;
     std::cout << "    -min_size_fr                   " << min_size_fr_reg_output_message << std::endl;
     std::cout << "    -al                            " << act_det_output_message << std::endl;
-    std::cout << "    -ss_t                          " << topk_mode_smooth_size_message << std::endl;
-    std::cout << "    -ss_d                          " << student_mode_smooth_size_message << std::endl;
+    std::cout << "    -ss_t                          " << tracker_smooth_size_message << std::endl;
 }
