@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
 
         // --------------------------- 1. Load Plugin for inference engine -------------------------------------
         slog::info << "Loading plugin" << slog::endl;
-        InferencePlugin plugin = PluginDispatcher({FLAGS_pp, "../../../lib/intel64", ""}).getPluginByDevice(FLAGS_d);
+        InferencePlugin plugin = PluginDispatcher({FLAGS_pp}).getPluginByDevice(FLAGS_d);
 
         /** Printing plugin version **/
         printPluginVersion(plugin, std::cout);
@@ -139,8 +139,8 @@ int main(int argc, char *argv[]) {
 
             /** Get size of low resolution input **/
             auto lrInputInfoItem = inputInfo[lrInputBlobName];
-            size_t w = lrInputInfoItem->getTensorDesc().getDims()[3];
-            size_t h = lrInputInfoItem->getTensorDesc().getDims()[2];
+            int w = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[3]);
+            int h = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[2]);
 
             if (w != img.cols || h != img.rows) {
                 slog::warn << "Size of the image " << i << " is not equal to WxH = " << w << "x" << h << slog::endl;
@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
 
         double total = 0.0;
         /** Start inference & calc performance **/
-        for (int iter = 0; iter < FLAGS_ni; ++iter) {
+        for (size_t iter = 0; iter < FLAGS_ni; ++iter) {
             auto t0 = Time::now();
             inferRequest.Infer();
             auto t1 = Time::now();
@@ -257,6 +257,7 @@ int main(int argc, char *argv[]) {
             cv::merge(imgPlanes, resultImg);
 
             if (FLAGS_show) {
+                std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
                 cv::imshow("result", resultImg);
                 cv::waitKey();
             }

@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -22,7 +22,7 @@ static const char help_message[] = "Print a usage message.";
 static const char image_message[] = "Required. Path to an image.";
 
 /// @brief message for plugin_path argument
-static const char plugin_path_message[] = "Path to a plugin folder.";
+static const char plugin_path_message[] = "Optional. Path to a plugin folder.";
 
 /// @brief message for model argument
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";\
@@ -32,25 +32,25 @@ static const char plugin_message[] = "Plugin name. For example MKLDNNPlugin. If 
 "the demo will look for this plugin only";
 
 /// @brief message for assigning cnn calculation to device
-static const char target_device_message[] = "Specify the target device to infer on (CPU, GPU, FPGA, or MYRIAD). "\
+static const char target_device_message[] = "Optional. Specify the target device to infer on (CPU, GPU, FPGA, HDDL or MYRIAD). "\
 "The demo will look for a suitable plugin for the specified device.";
 
 /// @brief message for performance counters
-static const char performance_counter_message[] = "Enable per-layer performance report";
+static const char performance_counter_message[] = "Optional. Enable per-layer performance report";
 
 /// @brief message for iterations count
-static const char iterations_count_message[] = "Number of iterations (default value is 1)";
+static const char iterations_count_message[] = "Optional. Number of iterations. Default value is 1";
 
 /// @brief message for user library argument
-static const char custom_cpu_library_message[] = "Required for MKLDNN (CPU)-targeted custom layers." \
-                                                 "Absolute path to a shared library with the kernels impl.";
+static const char custom_cpu_library_message[] = "Required for CPU custom layers." \
+                                                 "Absolute path to a shared library with the kernels implementations.";
 
 /// @brief message for clDNN custom kernels desc
-static const char custom_cldnn_message[] = "Required for clDNN (GPU)-targeted custom kernels."\
-                                            "Absolute path to the xml file with the kernels desc.";
+static const char custom_cldnn_message[] = "Required for GPU custom kernels."\
+                                            "Absolute path to the xml file with the kernels descriptions.";
 
 /// @brief message for show argument
-static const char show_processed_images[] = "Show processed images. Default value is false.";
+static const char show_processed_images[] = "Optional. Show processed images. Default value is false.";
 
 
 /// @brief Define flag for showing help message <br>
@@ -75,7 +75,7 @@ DEFINE_string(d, "CPU", target_device_message);
 DEFINE_bool(pc, false, performance_counter_message);
 
 /// @brief Iterations count (default 1)
-DEFINE_int32(ni, 1, iterations_count_message);
+DEFINE_uint32(ni, 1, iterations_count_message);
 
 /// @brief Absolute path to CPU library with user layers <br>
 /// It is a required parameter

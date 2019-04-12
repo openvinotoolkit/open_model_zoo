@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -15,10 +15,10 @@
 
 namespace {
     float ComputeReidDistance(const cv::Mat& descr1, const cv::Mat& descr2) {
-        float xy = descr1.dot(descr2);
-        float xx = descr1.dot(descr1);
-        float yy = descr2.dot(descr2);
-        float norm = sqrt(xx * yy) + 1e-6;
+        float xy = static_cast<float>(descr1.dot(descr2));
+        float xx = static_cast<float>(descr1.dot(descr1));
+        float yy = static_cast<float>(descr2.dot(descr2));
+        float norm = sqrt(xx * yy) + 1e-6f;
         return 1.0f - xy / norm;
     }
 
@@ -45,7 +45,7 @@ namespace {
 
 }  // namespace
 
-const std::string EmbeddingsGallery::unknown_label = "Unknown";
+const char EmbeddingsGallery::unknown_label[] = "Unknown";
 const int EmbeddingsGallery::unknown_id = TrackedObject::UNKNOWN_LABEL_IDX;
 
 EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
@@ -54,12 +54,10 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
                                      const VectorCNN& image_reid)
     : reid_threshold(threshold) {
     if (ids_list.empty()) {
-        std::cout << "Warning: face reid gallery is empty!" << "\n";
         return;
     }
 
     if (!landmarks_det.Enabled() || !image_reid.Enabled()) {
-        std::cout << "Warning: face recognition models are disabled!" << "\n";
         return;
     }
 
@@ -71,6 +69,7 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
         cv::FileNode item = *fit;
         std::string label = item.name();
         std::vector<cv::Mat> embeddings;
+        CV_Assert(item.size() == 1);
 
         for (size_t i = 0; i < item.size(); i++) {
             std::string path;
@@ -89,7 +88,7 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
             AlignFaces(&images, &landmarks_vec);
             image_reid.Compute(images[0], &emb);
             embeddings.push_back(emb);
-            idx_to_id.push_back(total_images);
+            idx_to_id.push_back(id);
             total_images++;
         }
         identities.emplace_back(embeddings, label, id);
@@ -142,4 +141,9 @@ std::vector<std::string> EmbeddingsGallery::GetIDToLabelMap() const  {
         map.emplace_back(item.label);
     }
     return map;
+}
+
+bool EmbeddingsGallery::LabelExists(const std::string& label) const {
+    return identities.end() != std::find_if(identities.begin(), identities.end(),
+                                        [label](const GalleryObject& o){return o.label == label;});
 }

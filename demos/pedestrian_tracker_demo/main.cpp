@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -171,6 +171,9 @@ int main_work(int argc, char **argv) {
     if (first_frame > 0)
         video->SetFrameIndex(first_frame);
 
+    if (should_show) {
+        std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+    }
     for (;;) {
         auto pair = video->Read();
         cv::Mat frame = pair.first;
@@ -192,7 +195,7 @@ int main_work(int argc, char **argv) {
         TrackedObjects detections = pedestrian_detector.getResults();
 
         // timestamp in milliseconds
-        uint64_t cur_timestamp = 1000.0 / video_fps * frame_idx;
+        uint64_t cur_timestamp = static_cast<uint64_t >(1000.0 / video_fps * frame_idx);
         tracker->Process(frame, detections, cur_timestamp);
 
         if (should_show) {

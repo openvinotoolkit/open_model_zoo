@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -20,7 +20,10 @@
 static const char help_message[] = "Print a usage message";
 
 /// @brief Message for images argument
-static const char video_message[] = "Optional. Path to a video file. Default value is \"cam\" to work with camera.";
+static const char input_video_message[] = "Required. Path to a video file (specify \"cam\" to work with camera).";
+
+/// @brief Message for images argument
+static const char output_video_message[] = "Optional. Path to an output video file.";
 
 /// @brief message for model argument
 static const char face_detection_model_message[] = "Required. Path to an .xml file with a trained Face Detection model.";
@@ -34,51 +37,55 @@ static const char plugin_message[] = "Plugin name. For example, CPU. If this par
 "the demo will look for this plugin only.";
 
 /// @brief Message for assigning face detection calculation to device
-static const char target_device_message[] = "Target device for Face Detection network (CPU, GPU, FPGA, or MYRIAD). " \
+static const char target_device_message[] = "Optional. Target device for Face Detection network (CPU, GPU, FPGA, HDDL, or MYRIAD). " \
 "The demo will look for a suitable plugin for a specified device.";
 
 /// @brief Message for assigning age/gender calculation to device
-static const char target_device_message_ag[] = "Target device for Age/Gender Recognition network (CPU, GPU, FPGA, or MYRIAD). " \
+static const char target_device_message_ag[] = "Optional. Target device for Age/Gender Recognition network (CPU, GPU, FPGA, HDDL, or MYRIAD). " \
 "The demo will look for a suitable plugin for a specified device.";
 
 /// @brief Message for assigning head pose calculation to device
-static const char target_device_message_hp[] = "Target device for Head Pose Estimation network (CPU, GPU, FPGA, or MYRIAD). " \
+static const char target_device_message_hp[] = "Optional. Target device for Head Pose Estimation network (CPU, GPU, FPGA, HDDL, or MYRIAD). " \
 "The demo will look for a suitable plugin for a specified device.";
 
 /// @brief Message for assigning emotions calculation to device
-static const char target_device_message_em[] = "Target device for Emotions Recognition network (CPU, GPU, FPGA, or MYRIAD). " \
+static const char target_device_message_em[] = "Optional. Target device for Emotions Recognition network (CPU, GPU, FPGA, HDDL, or MYRIAD). " \
 "The demo will look for a suitable plugin for a specified device.";
 
 /// @brief Message for assigning Facial Landmarks Estimation network to device
-static const char target_device_message_lm[] = "Target device for Facial Landmarks Estimation network (CPU, GPU, FPGA, or MYRIAD). " \
+static const char target_device_message_lm[] = "Optional. Target device for Facial Landmarks Estimation network (CPU, GPU, FPGA, HDDL, or MYRIAD). " \
 "The demo will look for a suitable plugin for device specified.";
 
 /// @brief Message for the maximum number of simultaneously processed faces for Age Gender network
-static const char num_batch_ag_message[] = "Number of maximum simultaneously processed faces for Age/Gender Recognition network (default is 16)";
+static const char num_batch_ag_message[] = "Optional. Number of maximum simultaneously processed faces for Age/Gender Recognition network " \
+"(by default, it is 16)";
 
 /// @brief Message for the maximum number of simultaneously processed faces for Head Pose network
-static const char num_batch_hp_message[] = "Number of maximum simultaneously processed faces for Head Pose Estimation network (default is 16)";
+static const char num_batch_hp_message[] = "Optional. Number of maximum simultaneously processed faces for Head Pose Estimation network " \
+"(by default, it is 16)";
 
 /// @brief Message for the maximum number of simultaneously processed faces for Emotions network
-static const char num_batch_em_message[] = "Number of maximum simultaneously processed faces for Emotions Recognition network (default is 16)";
+static const char num_batch_em_message[] = "Optional. Number of maximum simultaneously processed faces for Emotions Recognition network " \
+"(by default, it is 16)";
 
 /// @brief Message for the maximum number of simultaneously processed faces for Facial Landmarks Estimation network
-static const char num_batch_lm_message[] = "Number of maximum simultaneously processed faces for Facial Landmarks Estimation network (default is 16)";
+static const char num_batch_lm_message[] = "Optional. Number of maximum simultaneously processed faces for Facial Landmarks Estimation network " \
+"(by default, it is 16)";
 
 /// @brief Message for dynamic batching support for AgeGender net
-static const char dyn_batch_ag_message[] = "Enable dynamic batch size for Age/Gender Recognition network";
+static const char dyn_batch_ag_message[] = "Optional. Enable dynamic batch size for Age/Gender Recognition network";
 
 /// @brief Message for dynamic batching support for HeadPose net
-static const char dyn_batch_hp_message[] = "Enable dynamic batch size for Head Pose Estimation network";
+static const char dyn_batch_hp_message[] = "Optional. Enable dynamic batch size for Head Pose Estimation network";
 
 /// @brief Message for dynamic batching support for Emotions net
-static const char dyn_batch_em_message[] = "Enable dynamic batch size for Emotions Recognition network";
+static const char dyn_batch_em_message[] = "Optional. Enable dynamic batch size for Emotions Recognition network";
 
 /// @brief Message for dynamic batching support for Facial Landmarks Estimation network
-static const char dyn_batch_lm_message[] = "Enable dynamic batch size for Facial Landmarks Estimation network";
+static const char dyn_batch_lm_message[] = "Optional. Enable dynamic batch size for Facial Landmarks Estimation network";
 
 /// @brief Message for performance counters
-static const char performance_counter_message[] = "Enable per-layer performance report";
+static const char performance_counter_message[] = "Optional. Enable per-layer performance report";
 
 /// @brief Message for GPU custom kernels description
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "\
@@ -89,42 +96,66 @@ static const char custom_cpu_library_message[] = "Required for CPU custom layers
 "Absolute path to a shared library with the kernels implementation.";
 
 /// @brief Message for probability threshold argument
-static const char thresh_output_message[] = "Probability threshold for detections";
+static const char thresh_output_message[] = "Optional. Probability threshold for detections";
+
+/// @brief Message for face enlarge coefficient argument
+static const char bb_enlarge_coef_output_message[] = "Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face";
 
 /// @brief Message raw output flag
-static const char raw_output_message[] = "Output inference results as raw values";
+static const char raw_output_message[] = "Optional. Output inference results as raw values";
 
 /// @brief Message do not wait for keypress after input stream completed
-static const char no_wait_for_keypress_message[] = "Do not wait for key press in the end.";
+static const char no_wait_for_keypress_message[] = "Optional. Do not wait for key press in the end.";
 
 /// @brief Message do not show processed video
-static const char no_show_processed_video[] = "Do not show processed video.";
+static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 
 /// @brief Message for asynchronous mode
-static const char async_message[] = "Enable asynchronous mode";
+static const char async_message[] = "Optional. Enable asynchronous mode";
 
+/// @brief Message for shifting coefficient by dx for detected faces
+static const char dx_coef_output_message[] = "Optional. Coefficient to shift the bounding box around the detected face along the Ox axis";
+
+/// @brief Message for shifting coefficient by dy for detected faces
+static const char dy_coef_output_message[] = "Optional. Coefficient to shift the bounding box around the detected face along the Oy axis";
+
+/// @brief Message for fps argument
+static const char fps_output_message[] = "Optional. Maximum FPS for playing video";
+
+/// @brief Message for looping video argument
+static const char loop_video_output_message[] = "Optional. Enable playing video on a loop";
+
+/// @brief Message for smooth argument
+static const char no_smooth_output_message[] = "Optional. Do not smooth person attributes";
+
+/// @brief Message for smooth argument
+static const char no_show_emotion_bar_message[] = "Optional. Do not show emotion bar";
 
 /// \brief Define flag for showing help message<br>
 DEFINE_bool(h, false, help_message);
 
 /// \brief Define parameter for set image file<br>
 /// It is a required parameter
-DEFINE_string(i, "cam", video_message);
+DEFINE_string(i, "", input_video_message);
+
+/// \brief Define parameter for an output video file<br>
+/// It is an optional parameter
+DEFINE_string(o, "", output_video_message);
 
 /// \brief Define parameter for Face Detection model file<br>
 /// It is a required parameter
 DEFINE_string(m, "", face_detection_model_message);
 
 /// \brief Define parameter for Face Detection  model file<br>
-/// It is a required parameter
+/// It is a optional parameter
 DEFINE_string(m_ag, "", age_gender_model_message);
 
 /// \brief Define parameter for Face Detection  model file<br>
-/// It is a required parameter
+/// It is a optional parameter
 DEFINE_string(m_hp, "", head_pose_model_message);
 
 /// \brief Define parameter for Face Detection model file<br>
-/// It is a required parameter
+/// It is a optional parameter
 DEFINE_string(m_em, "", emotions_model_message);
 
 /// \brief Define parameter for Facial Landmarks Estimation model file<br>
@@ -189,6 +220,10 @@ DEFINE_bool(r, false, raw_output_message);
 /// It is an optional parameter
 DEFINE_double(t, 0.5, thresh_output_message);
 
+/// \brief Define a parameter to enlarge the bounding box around the detected face for more robust operation of face analytics networks<br>
+/// It is an optional parameter
+DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_output_message);
+
 /// \brief Define a flag to disable keypress exit<br>
 /// It is an optional parameter
 DEFINE_bool(no_wait, false, no_wait_for_keypress_message);
@@ -201,6 +236,31 @@ DEFINE_bool(no_show, false, no_show_processed_video);
 /// It is an optional parameter
 DEFINE_bool(async, false, async_message);
 
+/// \brief Define a parameter to shift face bounding box by Ox for more robust operation of face analytics networks<br>
+/// It is an optional parameter
+DEFINE_double(dx_coef, 1, dx_coef_output_message);
+
+/// \brief Define a parameter to shift face bounding box by Oy for more robust operation of face analytics networks<br>
+/// It is an optional parameter
+DEFINE_double(dy_coef, 1, dy_coef_output_message);
+
+/// \brief Define a parameter to play video with defined fps<br>
+/// It is an optional parameter
+DEFINE_double(fps, -1, fps_output_message);
+
+/// \brief Define a flag to loop video<br>
+/// It is an optional parameter
+DEFINE_bool(loop_video, false, loop_video_output_message);
+
+/// \brief Define a flag to disable smoothing person attributes<br>
+/// It is an optional parameter
+DEFINE_bool(no_smooth, false, no_smooth_output_message);
+
+/// \brief Define a flag to disable showing emotion bar<br>
+/// It is an optional parameter
+DEFINE_bool(no_show_emotion_bar, false, no_show_emotion_bar_message);
+
+
 /**
 * \brief This function shows a help message
 */
@@ -211,7 +271,8 @@ static void showUsage() {
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                         " << help_message << std::endl;
-    std::cout << "    -i \"<path>\"                " << video_message << std::endl;
+    std::cout << "    -i \"<path>\"                " << input_video_message << std::endl;
+    std::cout << "    -o \"<path>\"                " << output_video_message << std::endl;
     std::cout << "    -m \"<path>\"                " << face_detection_model_message<< std::endl;
     std::cout << "    -m_ag \"<path>\"             " << age_gender_model_message << std::endl;
     std::cout << "    -m_hp \"<path>\"             " << head_pose_model_message << std::endl;
@@ -239,4 +300,11 @@ static void showUsage() {
     std::cout << "    -pc                        " << performance_counter_message << std::endl;
     std::cout << "    -r                         " << raw_output_message << std::endl;
     std::cout << "    -t                         " << thresh_output_message << std::endl;
+    std::cout << "    -bb_enlarge_coef           " << bb_enlarge_coef_output_message << std::endl;
+    std::cout << "    -dx_coef                   " << dx_coef_output_message << std::endl;
+    std::cout << "    -dy_coef                   " << dy_coef_output_message << std::endl;
+    std::cout << "    -fps                       " << fps_output_message << std::endl;
+    std::cout << "    -loop_video                " << loop_video_output_message << std::endl;
+    std::cout << "    -no_smooth                 " << no_smooth_output_message << std::endl;
+    std::cout << "    -no_show_emotion_bar       " << no_show_emotion_bar_message << std::endl;
 }

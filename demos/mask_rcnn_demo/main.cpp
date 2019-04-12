@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -73,12 +73,11 @@ int main(int argc, char *argv[]) {
         std::vector<std::string> images;
         parseInputFilesArguments(images);
         if (images.empty()) throw std::logic_error("No suitable images were found");
-        if (images.size() > 1) throw std::logic_error("The topology support only one input image");
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------Load plugin for inference engine------------------------------------------------
         slog::info << "Loading plugin" << slog::endl;
-        InferencePlugin plugin = PluginDispatcher({ FLAGS_pp, "../../../lib/intel64" , "" }).getPluginByDevice(FLAGS_d);
+        InferencePlugin plugin = PluginDispatcher({ FLAGS_pp }).getPluginByDevice(FLAGS_d);
 
         /** Loading default extensions **/
         if (FLAGS_d.find("CPU") != std::string::npos) {
@@ -132,35 +131,60 @@ int main(int argc, char *argv[]) {
 
         /** Taking information about all topology inputs **/
         InputsDataMap inputInfo(network.getInputsInfo());
-        /** Stores all input blobs data **/
-        InferenceEngine::BlobMap inputBlobs;
 
-        if (inputInfo.size() != 1) throw std::logic_error("Demo supports topologies only with 1 input");
-        auto inputInfoItem = *inputInfo.begin();
+        std::string imageInputName;
+
+        for (const auto & inputInfoItem : inputInfo) {
+            if (inputInfoItem.second->getDims().size() == 4) {  // first input contains images
+                imageInputName = inputInfoItem.first;
+                inputInfoItem.second->setPrecision(Precision::U8);
+            } else if (inputInfoItem.second->getDims().size() == 2) {  // second input contains image info
+                inputInfoItem.second->setPrecision(Precision::FP32);
+            } else {
+                throw std::logic_error("Unsupported input shape with size = " + std::to_string(inputInfoItem.second->getDims().size()));
+            }
+        }
+
+        /** network dimensions for image input **/
+        size_t netBatchSize = inputInfo[imageInputName]->getDims()[3];
+        size_t netInputChannels = inputInfo[imageInputName]->getDims()[2];
+        size_t netInputHeight = inputInfo[imageInputName]->getDims()[1];
+        size_t netInputWidth = inputInfo[imageInputName]->getDims()[0];
+
+        slog::info << "Network batch size is " << netBatchSize << slog::endl;
 
         /** Collect images data ptrs **/
         std::vector<std::shared_ptr<unsigned char>> imagesData;
         std::vector<cv::Mat> images_cv;
-        for (auto & i : images) {
-            images_cv.push_back(cv::imread(i, cv::IMREAD_COLOR));
-            FormatReader::ReaderPtr reader(i.c_str());
+
+        if (netBatchSize > images.size()) {
+            slog::warn << "Network batch size is greater than number of images (" << images.size() <<
+                       "), some input files will be duplicated" << slog::endl;
+        } else if (netBatchSize < images.size()) {
+            slog::warn << "Network batch size is less than number of images (" << images.size() <<
+                       "), some input files will be ignored" << slog::endl;
+        }
+
+        for (size_t i = 0, inputIndex = 0; i < netBatchSize; i++, inputIndex++) {
+            if (inputIndex >= images.size()) {
+                inputIndex = 0;
+            }
+            slog::info << "Prepare image " << images[inputIndex] << slog::endl;
+
+            images_cv.push_back(cv::imread(images[inputIndex], cv::IMREAD_COLOR));
+
+            FormatReader::ReaderPtr reader(images[inputIndex].c_str());
             if (reader.get() == nullptr) {
-                slog::warn << "Image " + i + " cannot be read!" << slog::endl;
+                slog::warn << "Image " + images[inputIndex] + " cannot be read!" << slog::endl;
                 continue;
             }
             /** Getting image data **/
-            std::shared_ptr<unsigned char> data(reader->getData(inputInfoItem.second->getDims()[0], inputInfoItem.second->getDims()[1]));
-            if (data.get() != nullptr) {
+            std::shared_ptr<unsigned char> data(reader->getData(netInputWidth, netInputHeight));
+            if (data != nullptr) {
                 imagesData.push_back(data);
             }
         }
         if (imagesData.empty()) throw std::logic_error("Valid input images were not found!");
-
-        /** Setting batch size to 1 since it is the only supported batch **/
-        network.setBatchSize(1);
-        slog::info << "Batch size is " << std::to_string(networkReader.getNetwork().getBatchSize()) << slog::endl;
-
-        inputInfoItem.second->setPrecision(Precision::U8);
 
         // -----------------------------------------------------------------------------------------------------
 
@@ -171,6 +195,7 @@ int main(int argc, char *argv[]) {
         for (auto & item : outputInfo) {
             item.second->setPrecision(Precision::FP32);
         }
+
         // -----------------------------------------------------------------------------------------------------
 
         // -------------------------Load model to the plugin-------------------------------------------------
@@ -182,30 +207,40 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // -------------------------------Set input data----------------------------------------------------
+        slog::info << "Setting input data to the blobs" << slog::endl;
+
         /** Iterate over all the input blobs **/
-        /** Iterating over all input blobs **/
-        for (const auto & item : inputInfo) {
-            /** Creating input blob **/
-            Blob::Ptr input = infer_request.GetBlob(item.first);
+        for (const auto & inputInfoItem : inputInfo) {
+            Blob::Ptr input = infer_request.GetBlob(inputInfoItem.first);
 
-            /** Fill input tensor with images. First b channel, then g and r channels **/
-            size_t num_channels = input->dims()[2];
-            size_t image_size = input->dims()[1] * input->dims()[0];
+            /** Fill first input tensor with images. First b channel, then g and r channels **/
+            if (inputInfoItem.second->getDims().size() == 4) {
+                auto data = input->buffer().as<PrecisionTrait<Precision::U8>::value_type *>();
+                size_t image_size = netInputHeight * netInputWidth;
 
-            auto data = input->buffer().as<PrecisionTrait<Precision::U8>::value_type*>();
-
-            /** Iterate over all input images **/
-            for (size_t image_id = 0; image_id < imagesData.size(); ++image_id) {
-                /** Iterate over all pixel in image (b,g,r) **/
-                for (size_t pid = 0; pid < image_size; pid++) {
-                    /** Iterate over all channels **/
-                    for (size_t ch = 0; ch < num_channels; ++ch) {
-                        /**          [images stride + channels stride + pixel id ] all in bytes            **/
-                        data[image_id * image_size * num_channels + ch * image_size + pid] = imagesData.at(image_id).get()[pid*num_channels + ch];
+                /** Iterate over all input images **/
+                for (size_t image_id = 0; image_id < imagesData.size(); ++image_id) {
+                    /** Iterate over all pixels in image (b,g,r) **/
+                    for (size_t pid = 0; pid < image_size; pid++) {
+                        /** Iterate over all channels **/
+                        for (size_t ch = 0; ch < netInputChannels; ++ch) {
+                            /**          [images stride + channels stride + pixel id ] all in bytes            **/
+                            data[image_id * image_size * netInputChannels + ch * image_size + pid] = imagesData.at(
+                                    image_id).get()[pid * netInputChannels + ch];
+                        }
                     }
                 }
             }
+
+            /** Fill second input tensor with image info **/
+            if (inputInfoItem.second->getDims().size() == 2) {
+                auto data = input->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+                data[0] = static_cast<float>(netInputHeight);  // height
+                data[1] = static_cast<float>(netInputWidth);  // width
+                data[2] = 1;
+            }
         }
+
         // -----------------------------------------------------------------------------------------------------
 
 
@@ -218,7 +253,7 @@ int main(int argc, char *argv[]) {
 
         double total = 0.0;
         /** Start inference & calc performance **/
-        for (int iter = 0; iter < FLAGS_ni; ++iter) {
+        for (size_t iter = 0; iter < FLAGS_ni; ++iter) {
             auto t0 = Time::now();
             infer_request.Infer();
             auto t1 = Time::now();
@@ -244,8 +279,8 @@ int main(int argc, char *argv[]) {
         const auto masks_blob = infer_request.GetBlob(FLAGS_masks_name.c_str());
         const auto masks_data = masks_blob->buffer().as<float*>();
 
-        const float PROBABILITY_THRESHOLD = 0.2;
-        const float MASK_THRESHOLD = 0.5;  // threshold used to determine whever mask pixel corresponds to object or to background
+        const float PROBABILITY_THRESHOLD = 0.2f;
+        const float MASK_THRESHOLD = 0.5f;  // threshold used to determine whether mask pixel corresponds to object or to background
         size_t BOX_DESCRIPTION_SIZE = do_blob->dims().at(0);  // amount of elements in each detected box description (batch, label, prob, x1, y1, x2, y2)
         size_t BOXES = masks_blob->dims().at(3);
         size_t C = masks_blob->dims().at(2);
@@ -278,40 +313,46 @@ int main(int argc, char *argv[]) {
             {0,   74,  111},
             {81,  0,   81}
         };
-        std::map<int, int> class_color;
+        std::map<size_t, size_t> class_color;
 
-        cv::Mat output_image = images_cv[0].clone();
+        std::vector<cv::Mat> output_images;
+        for (const auto &img : images_cv) {
+            output_images.push_back(img.clone());
+        }
+
         /** Iterating over all boxes **/
         for (size_t box = 0; box < BOXES; ++box) {
             float* box_info = do_data + box * BOX_DESCRIPTION_SIZE;
-            float batch = box_info[0];
+            auto batch = static_cast<int>(box_info[0]);
             if (batch < 0)
                 break;
+            if (batch >= static_cast<int>(netBatchSize))
+                throw std::logic_error("Invalid batch ID within detection output box");
             float prob = box_info[2];
-            float x1 = std::min(std::max(0.0f, box_info[3] * images_cv[0].size().width), static_cast<float>(images_cv[0].size().width));
-            float y1 = std::min(std::max(0.0f, box_info[4] * images_cv[0].size().height), static_cast<float>(images_cv[0].size().height));
-            float x2 = std::min(std::max(0.0f, box_info[5] * images_cv[0].size().width), static_cast<float>(images_cv[0].size().width));
-            float y2 = std::min(std::max(0.0f, box_info[6] * images_cv[0].size().height), static_cast<float>(images_cv[0].size().height));
-            int box_width = std::min(static_cast<int>(std::max(0.0f, x2 - x1)), images_cv[0].size().width);
-            int box_height = std::min(static_cast<int>(std::max(0.0f, y2 - y1)), images_cv[0].size().height);
-            int class_id = static_cast<int>(box_info[1] + 1e-6f);
+            float x1 = std::min(std::max(0.0f, box_info[3] * images_cv[batch].size().width), static_cast<float>(images_cv[batch].size().width));
+            float y1 = std::min(std::max(0.0f, box_info[4] * images_cv[batch].size().height), static_cast<float>(images_cv[batch].size().height));
+            float x2 = std::min(std::max(0.0f, box_info[5] * images_cv[batch].size().width), static_cast<float>(images_cv[batch].size().width));
+            float y2 = std::min(std::max(0.0f, box_info[6] * images_cv[batch].size().height), static_cast<float>(images_cv[batch].size().height));
+            int box_width = std::min(static_cast<int>(std::max(0.0f, x2 - x1)), images_cv[batch].size().width);
+            int box_height = std::min(static_cast<int>(std::max(0.0f, y2 - y1)), images_cv[batch].size().height);
+            auto class_id = static_cast<size_t>(box_info[1] + 1e-6f);
             if (prob > PROBABILITY_THRESHOLD) {
                 if (class_color.find(class_id) == class_color.end())
                     class_color[class_id] = class_color.size();
                 auto& color = colors[class_color[class_id]];
                 float* mask_arr = masks_data + box_stride * box + H * W * (class_id - 1);
-                slog::info << "Detected class " << class_id << " with probability " << prob << ": [" << x1
-                           << ", " << y1 << "], [" << x2 << ", " << y2 << "]" << slog::endl;
+                slog::info << "Detected class " << class_id << " with probability " << prob << " from batch " << batch
+                           << ": [" << x1 << ", " << y1 << "], [" << x2 << ", " << y2 << "]" << slog::endl;
                 cv::Mat mask_mat(H, W, CV_32FC1, mask_arr);
 
                 cv::Rect roi = cv::Rect(static_cast<int>(x1), static_cast<int>(y1), box_width, box_height);
-                cv::Mat roi_input_img = output_image(roi);
+                cv::Mat roi_input_img = output_images[batch](roi);
                 const float alpha = 0.7f;
 
                 cv::Mat resized_mask_mat(box_height, box_width, CV_32FC1);
                 cv::resize(mask_mat, resized_mask_mat, cv::Size(box_width, box_height));
 
-                cv::Mat uchar_resized_mask(box_height, box_width, images_cv[0].type());
+                cv::Mat uchar_resized_mask(box_height, box_width, images_cv[batch].type());
 
                 for (int h = 0; h < resized_mask_mat.size().height; ++h)
                     for (int w = 0; w < resized_mask_mat.size().width; ++w)
@@ -320,11 +361,14 @@ int main(int argc, char *argv[]) {
                                                                             255 * color[ch]: roi_input_img.at<cv::Vec3b>(h, w)[ch];
 
                 cv::addWeighted(uchar_resized_mask, alpha, roi_input_img, 1.0f - alpha, 0.0f, roi_input_img);
-                cv::rectangle(output_image, roi, cv::Scalar(0, 0, 1), 1);
+                cv::rectangle(output_images[batch], roi, cv::Scalar(0, 0, 1), 1);
             }
         }
-        cv::imwrite("out.png", output_image);
-        slog::info << "Image out.png created!" << slog::endl;
+        for (size_t i = 0; i < output_images.size(); i++) {
+            std::string imgName = "out" + std::to_string(i) + ".png";
+            cv::imwrite(imgName, output_images[i]);
+            slog::info << "Image " << imgName << " created!" << slog::endl;
+        }
         // -----------------------------------------------------------------------------------------------------
     }
     catch (const std::exception& error) {

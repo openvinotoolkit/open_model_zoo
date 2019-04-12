@@ -1,12 +1,18 @@
-# Copyright (C) 2018 Intel Corporation
+# Copyright (C) 2018-2019 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
 
-cmake_minimum_required(VERSION 2.8)
-
 set (TARGET_NAME "text_detection_demo")
 
-set(SRC main.cpp)
+set(SRC include/image_grabber.hpp
+        include/cnn.hpp
+        include/text_detection.hpp
+        include/text_recognition.hpp
+        src/image_grabber.cpp
+        src/cnn.cpp
+        src/text_detection.cpp
+        src/text_recognition.cpp
+        main.cpp)
 
 # Find OpenCV components if exist
 find_package(OpenCV COMPONENTS highgui QUIET)
@@ -28,7 +34,7 @@ add_dependencies(${TARGET_NAME} gflags)
 
 set_target_properties(${TARGET_NAME} PROPERTIES "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS} -fPIE"
 COMPILE_PDB_NAME ${TARGET_NAME})
-
+target_include_directories(${TARGET_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")
 target_link_libraries(${TARGET_NAME} IE::ie_cpu_extension ${InferenceEngine_LIBRARIES} ${OpenCV_LIBRARIES} gflags)
 
 if(UNIX)

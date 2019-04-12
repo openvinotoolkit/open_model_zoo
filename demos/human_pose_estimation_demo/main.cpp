@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -65,10 +65,14 @@ int main(int argc, char* argv[]) {
             throw std::logic_error("Failed to get frame from cv::VideoCapture");
         }
         estimator.estimate(image);  // Do not measure network reshape, if it happened
+        if (!FLAGS_no_show) {
+            std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+        }
+
         do {
-            double t1 = cv::getTickCount();
+            double t1 = static_cast<double>(cv::getTickCount());
             std::vector<HumanPose> poses = estimator.estimate(image);
-            double t2 = cv::getTickCount();
+            double t2 = static_cast<double>(cv::getTickCount());
             if (inferenceTime == 0) {
                 inferenceTime = (t2 - t1) / cv::getTickFrequency() * 1000;
             } else {

@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -77,7 +77,7 @@ LoadPluginForDevices(const std::vector<std::string>& devices,
             continue;
         }
         std::cout << "Loading plugin " << device << std::endl;
-        InferencePlugin plugin = PluginDispatcher({"../../../lib/intel64", ""}).getPluginByDevice(device);
+        InferencePlugin plugin = PluginDispatcher().getPluginByDevice(device);
         printPluginVersion(plugin, std::cout);
         /** Load extensions for the CPU plugin **/
         if ((device.find("CPU") != std::string::npos)) {
@@ -92,7 +92,9 @@ LoadPluginForDevices(const std::vector<std::string>& devices,
             plugin.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE,
                              custom_cldnn_kernels}});
         }
-        plugin.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}});
+        if (device.find("CPU") != std::string::npos || device.find("GPU") != std::string::npos) {
+            plugin.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}});
+        }
         if (should_use_perf_counter)
             plugin.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
         plugins_for_devices[device] = plugin;

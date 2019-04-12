@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -29,19 +29,19 @@ static const char face_reid_model_message[] = "Required. Path to the Face Reiden
 
 /// @brief Message for assigning Person/Action detection inference to device
 static const char target_device_message_action_detection[] = "Optional. Specify the target device for Person/Action Detection Retail "\
-                                            "(CPU, GPU, FPGA, MYRIAD, or HETERO). ";
+                                            "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO). ";
 
 /// @brief Message for assigning Face Detection inference to device
 static const char target_device_message_face_detection[] = "Optional. Specify the target device for Face Detection Retail "\
-                                                           "(CPU, GPU, FPGA, MYRIAD, or HETERO).";
+                                                           "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO).";
 
 /// @brief Message for assigning Landmarks Regression retail inference to device
 static const char target_device_message_landmarks_regression[] = "Optional. Specify the target device for Landmarks Regression Retail "\
-                                                        "(CPU, GPU, FPGA, MYRIAD, or HETERO). ";
+                                                        "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO). ";
 
 /// @brief Message for assigning Face Reidentification retail inference to device
 static const char target_device_message_face_reid[] = "Optional. Specify the target device for Face Reidentification Retail "\
-                                                        "(CPU, GPU, FPGA, MYRIAD, or HETERO). ";
+                                                        "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO). ";
 
 /// @brief Message for performance counters
 static const char performance_counter_message[] = "Optional. Enables per-layer performance statistics.";
@@ -57,8 +57,11 @@ static const char custom_cpu_library_message[] = "Optional. For CPU custom layer
 /// @brief Message for probability threshold argument for face detections
 static const char face_threshold_output_message[] = "Optional. Probability threshold for face detections.";
 
-/// @brief Message for probability threshold argument for persons/actions detections
-static const char person_threshold_output_message[] = "Optional. Probability threshold for persons/actions detections.";
+/// @brief Message for probability threshold argument for person/action detection
+static const char person_threshold_output_message[] = "Optional. Probability threshold for person/action detection.";
+
+// @brief Message for probability threshold argument for action recognition
+static const char action_threshold_output_message[] = "Optional. Probability threshold for action recognition.";
 
 /// @brief Message for cosine distance threshold for face reidentification
 static const char threshold_output_message_face_reid[] = "Optional. Cosine distance threshold between two vectors for face reidentification.";
@@ -89,6 +92,21 @@ static const char expand_ratio_output_message[] = "Optional. Expand ratio for bb
 
 /// @brief Message last frame number to handle
 static const char last_frame_message[] = "Optional. Last frame number to handle in demo. If negative, handle all input video.";
+
+/// @brief Message teacher id
+static const char teacher_id_message[] = "Optional. ID of a teacher. You must also set a faces gallery parameter (-fg) to use it.";
+
+/// @brief Message min action duration
+static const char min_action_duration_message[] = "Optional. Minimum action duration in seconds.";
+
+/// @brief Message same action time delta
+static const char same_action_time_delta_message[] = "Optional. Maximum time difference between actions in seconds.";
+
+/// @brief Message student actions
+static const char student_actions_message[] = "Optional. List of student actions separated by a comma.";
+
+/// @brief Message teacher actions
+static const char teacher_actions_message[] = "Optional. List of teacher actions separated by a comma.";
 
 /// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
@@ -144,9 +162,13 @@ DEFINE_string(ad, "", act_stat_output_message);
 /// It is an optional parameter
 DEFINE_bool(r, false, raw_output_message);
 
-/// @brief Define probability threshold for person/action detections <br>
+/// @brief Define probability threshold for person/action detection <br>
 /// It is an optional parameter
-DEFINE_double(t_act, 0.65, person_threshold_output_message);
+DEFINE_double(t_ad, 0.3, person_threshold_output_message);
+
+/// @brief Define probability threshold for action recognition <br>
+/// It is an optional parameter
+DEFINE_double(t_ar, 0.75, action_threshold_output_message);
 
 /// @brief Define probability threshold for face detections <br>
 /// It is an optional parameter
@@ -184,6 +206,26 @@ DEFINE_double(exp_r_fd, 1.15, face_threshold_output_message);
 /// It is an optional parameter
 DEFINE_int32(last_frame, -1, last_frame_message);
 
+/// @brief Label of teacher<br>
+/// It is an optional parameter
+DEFINE_string(teacher_id, "", teacher_id_message);
+
+/// @brief Min action duration<br>
+/// It is an optional parameter
+DEFINE_double(min_ad, 1.0, min_action_duration_message);
+
+/// @brief Same action time delta<br>
+/// It is an optional parameter
+DEFINE_double(d_ad, 1.0, same_action_time_delta_message);
+
+/// @brief Labels of student actions<br>
+/// It is an optional parameter
+DEFINE_string(student_ac, "sitting,standing,raising_hand", student_actions_message);
+
+/// @brief Labels of teacher actions<br>
+/// It is an optional parameter
+DEFINE_string(teacher_ac, "standing,writing,demonstrating", teacher_actions_message);
+
 /**
 * @brief This function show a help message
 */
@@ -209,13 +251,19 @@ static void showUsage() {
     std::cout << "    -pc                            " << performance_counter_message << std::endl;
     std::cout << "    -r                             " << raw_output_message << std::endl;
     std::cout << "    -ad                            " << act_stat_output_message << std::endl;
-    std::cout << "    -t_act                         " << person_threshold_output_message << std::endl;
+    std::cout << "    -t_ad                          " << person_threshold_output_message << std::endl;
+    std::cout << "    -t_ar                          " << action_threshold_output_message << std::endl;
     std::cout << "    -t_fd                          " << face_threshold_output_message << std::endl;
     std::cout << "    -inh_fd                        " << input_image_height_output_message << std::endl;
     std::cout << "    -inw_fd                        " << input_image_width_output_message << std::endl;
     std::cout << "    -exp_r_fd                      " << expand_ratio_output_message << std::endl;
     std::cout << "    -t_reid                        " << threshold_output_message_face_reid << std::endl;
     std::cout << "    -fg                            " << reid_gallery_path_message << std::endl;
+    std::cout << "    -teacher_id                    " << teacher_id_message << std::endl;
     std::cout << "    -no_show                       " << no_show_processed_video << std::endl;
     std::cout << "    -last_frame                    " << last_frame_message << std::endl;
+    std::cout << "    -min_ad                        " << min_action_duration_message << std::endl;
+    std::cout << "    -d_ad                          " << same_action_time_delta_message << std::endl;
+    std::cout << "    -student_ac                    " << student_actions_message << std::endl;
+    std::cout << "    -teacher_ac                    " << teacher_actions_message << std::endl;
 }

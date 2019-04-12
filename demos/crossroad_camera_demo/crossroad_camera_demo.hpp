@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -28,15 +28,15 @@ static const char person_reid_model_message[] = "Optional. Path to the Person Re
 
 /// @brief message for assigning Person/Vehicle/Bike detection inference to device
 static const char target_device_message[] = "Optional. Specify the target device for Person/Vehicle/Bike Detection "\
-                                            "(CPU, GPU, FPGA, MYRIAD, or HETERO). ";
+                                            "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO). ";
 
 /// @brief message for assigning Person attributes recognition inference to device
 static const char target_device_message_person_attribs[] = "Optional. Specify the target device for Person Attributes Recognition "\
-                                                           "(CPU, GPU, FPGA, MYRIAD, or HETERO).";
+                                                           "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO).";
 
 /// @brief message for assigning Person Reidentification retail inference to device
 static const char target_device_message_person_reid[] = "Optional. Specify the target device for Person Reidentification Retail "\
-                                                        "(CPU, GPU, FPGA, MYRIAD, or HETERO). ";
+                                                        "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO). ";
 
 /// @brief message for performance counters
 static const char performance_counter_message[] = "Optional. Enables per-layer performance statistics.";

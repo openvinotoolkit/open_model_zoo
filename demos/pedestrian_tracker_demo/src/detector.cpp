@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -68,8 +68,8 @@ void ObjectDetector::enqueue(const cv::Mat &frame) {
         request = net_.CreateInferRequestPtr();
     }
 
-    width_ = frame.cols;
-    height_ = frame.rows;
+    width_ = static_cast<float>(frame.cols);
+    height_ = static_cast<float>(frame.rows);
 
     Blob::Ptr inputBlob = request->GetBlob(input_name_);
 
@@ -177,13 +177,15 @@ void ObjectDetector::fetchResults() {
 
         TrackedObject object;
         object.confidence = score;
-        object.rect = cv::Rect(cv::Point(round(x0), round(y0)),
-                               cv::Point(round(x1), round(y1)));
+        object.rect = cv::Rect(cv::Point(static_cast<int>(round(static_cast<double>(x0))),
+                                         static_cast<int>(round(static_cast<double>(y0)))),
+                               cv::Point(static_cast<int>(round(static_cast<double>(x1))),
+                                         static_cast<int>(round(static_cast<double>(y1)))));
 
         object.rect = TruncateToValidRect(IncreaseRect(object.rect,
                                                        config_.increase_scale_x,
                                                        config_.increase_scale_y),
-                                          cv::Size(width_, height_));
+                                          cv::Size(static_cast<int>(width_), static_cast<int>(height_)));
         object.frame_idx = frame_idx_;
 
         if (object.confidence > config_.confidence_threshold && object.rect.area() > 0) {

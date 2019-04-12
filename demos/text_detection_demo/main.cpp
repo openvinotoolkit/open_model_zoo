@@ -1,13 +1,16 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #include <algorithm>
 #include <cstdlib>
 #include <iomanip>
+#include <limits>
+#include <map>
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <gflags/gflags.h>
@@ -19,17 +22,21 @@
 #include <samples/common.hpp>
 #include <samples/slog.hpp>
 
+#include "cnn.hpp"
+#include "image_grabber.hpp"
+#include "text_detection.hpp"
+#include "text_recognition.hpp"
+
 #include "text_detection_demo.hpp"
 
 using namespace InferenceEngine;
 
-std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs, const cv::Size& image_size);
 
-std::vector<float> transpose4d(const std::vector<float>& data, const std::vector<int> &shape,
-                               const std::vector<int> &axes);
-
-std::vector<cv::Point> pointsFromRotatedRect(const cv::RotatedRect &rect,
-                                             const cv::Size& image_size);
+std::vector<cv::Point2f> floatPointsFromRotatedRect(const cv::RotatedRect &rect);
+std::vector<cv::Point> boundedIntPointsFromRotatedRect(const cv::RotatedRect &rect, const cv::Size& image_size);
+cv::Point topLeftPoint(const std::vector<cv::Point2f> & points, int *idx);
+cv::Mat cropImage(const cv::Mat &image, const std::vector<cv::Point2f> &points, const cv::Size& target_size, int top_left_point_idx);
+void setLabel(cv::Mat& im, const std::string label, const cv::Point & p);
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ------------------------- Parsing and validating input arguments --------------------------------------
@@ -43,11 +50,15 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
     }
-    if (FLAGS_m.empty()) {
-        throw std::logic_error("Parameter -m is not set");
+    if (FLAGS_m_td.empty() && FLAGS_m_tr.empty()) {
+        throw std::logic_error("Neither parameter -m_td nor -m_tr is not set");
     }
 
     return true;
+}
+
+int clip(int x, int max_val) {
+    return std::min(std::max(x, 0), max_val);
 }
 
 int main(int argc, char *argv[]) {
@@ -60,138 +71,199 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
+        double text_detection_postproc_time = 0;
+        double text_recognition_postproc_time = 0;
+        double text_crop_time = 0;
+        double avg_time = 0;
+        const double avg_time_decay = 0.8;
+
+        const char kPadSymbol = '#';
+        std::string kAlphabet = std::string("0123456789abcdefghijklmnopqrstuvwxyz") + kPadSymbol;
+
+        const double min_text_recognition_confidence = FLAGS_thr;
+
+        std::map<std::string, InferencePlugin> plugins_for_devices;
+        std::vector<std::string> devices = {FLAGS_d_td, FLAGS_d_tr};
+
+        float cls_conf_threshold = static_cast<float>(FLAGS_cls_pixel_thr);
+        float link_conf_threshold = static_cast<float>(FLAGS_link_pixel_thr);
+
+        for (const auto &device : devices) {
+            if (plugins_for_devices.find(device) != plugins_for_devices.end()) {
+                continue;
+            }
+            InferencePlugin plugin = PluginDispatcher().getPluginByDevice(device);
+            /** Load extensions for the CPU plugin **/
+            if ((device.find("CPU") != std::string::npos)) {
+                plugin.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>());
+
+                if (!FLAGS_l.empty()) {
+                    // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
+                    auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
+                    plugin.AddExtension(extension_ptr);
+                    slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
+                }
+            } else if (!FLAGS_c.empty()) {
+                // Load Extensions for other plugins not CPU
+                plugin.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}});
+            }
+            plugins_for_devices[device] = plugin;
+        }
+
         auto image_path = FLAGS_i;
-        auto model_path = FLAGS_m;
+        auto text_detection_model_path = FLAGS_m_td;
+        auto text_recognition_model_path = FLAGS_m_tr;
         auto extension_path = FLAGS_l;
 
-        // ---------------------------------------------------------------------------------------------------
+        Cnn text_detection, text_recognition;
 
-        // --------------------------- 1. Loading a plugin for the Inference Engine --------------------------
-        InferencePlugin plugin = PluginDispatcher({"../../../lib/intel64", ""}).getPluginByDevice(FLAGS_d);
+        if (!FLAGS_m_td.empty())
+            text_detection.Init(FLAGS_m_td, &plugins_for_devices[FLAGS_d_td], cv::Size(FLAGS_w_td, FLAGS_h_td));
 
-        /*If CPU device is specified, load default library with extensions that comes with the product*/
-        if (FLAGS_d.find("CPU") != std::string::npos) {
-            /**
-            * cpu_extensions library is compiled from "extension" folder containing
-            * custom CPU plugin layer implementations. These layers are not supported
-            * by mkldnn, but they can be useful for inferencing custom topologies.
-            **/
-            plugin.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>());
-        }
+        if (!FLAGS_m_tr.empty())
+            text_recognition.Init(FLAGS_m_tr, &plugins_for_devices[FLAGS_d_tr]);
 
-        if (!FLAGS_l.empty()) {
-            // CPU extensions are loaded as a shared library and passed as a pointer to base extension
-            IExtensionPtr extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
-            plugin.AddExtension(extension_ptr);
-            slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
-        }
+        std::unique_ptr<Grabber> grabber = Grabber::make_grabber(FLAGS_dt, FLAGS_i);
 
-        if (!FLAGS_c.empty()) {
-            // GPU extensions are loaded from an .xml description and OpenCL kernel files
-            plugin.SetConfig({ { PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } });
-            slog::info << "GPU Extension loaded: " << FLAGS_c << slog::endl;
-        }
+        cv::Mat image;
+        grabber->GrabNextImage(&image);
 
-        // ---------------------------------------------------------------------------------------------------
+        while (!image.empty()) {
+            cv::Mat demo_image = image.clone();
+            cv::Size orig_image_size = image.size();
 
-        // --------------------------- 2. Reading IR generated by the Model Optimizer (.xml and .bin files) --
-        CNNNetReader network_reader;
-        network_reader.ReadNetwork(model_path);
-        network_reader.ReadWeights(fileNameNoExt(model_path) + ".bin");
-        network_reader.getNetwork().setBatchSize(1);
-        CNNNetwork network = network_reader.getNetwork();
-        // ---------------------------------------------------------------------------------------------------
-
-        // --------------------------- 3. Configuring input and output ---------------------------------------
-        // --------------------------- Preparing input blobs -------------------------------------------------
-        InputInfo::Ptr input_info = network.getInputsInfo().begin()->second;
-        std::string input_name = network.getInputsInfo().begin()->first;
-
-        input_info->setLayout(Layout::NCHW);
-        input_info->setPrecision(Precision::FP32);
-
-        // --------------------------- Preparing output blobs ------------------------------------------------
-
-        std::vector<std::string> output_names;
-        OutputsDataMap outputInfo(network.getOutputsInfo());
-        for (auto output : outputInfo) {
-            output_names.emplace_back(output.first);
-        }
-
-        // ---------------------------------------------------------------------------------------------------
-
-        // --------------------------- 4. Loading model to the plugin ----------------------------------------
-        ExecutableNetwork executable_network = plugin.LoadNetwork(network, {});
-        // ---------------------------------------------------------------------------------------------------
-
-        // --------------------------- 5. Creating infer request ---------------------------------------------
-        InferRequest infer_request = executable_network.CreateInferRequest();
-        // ---------------------------------------------------------------------------------------------------
-
-        // --------------------------- 6. Preparing input ----------------------------------------------------
-
-        cv::Mat image = cv::imread(image_path, cv::IMREAD_COLOR);
-
-        cv::Mat original_image = image.clone();
-        cv::Size orig_image_size = image.size();
-
-
-        /* Resize manually and copy data from the image to the input blob */
-        Blob::Ptr input = infer_request.GetBlob(input_name);
-        float* input_data = input->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
-
-        image.convertTo(image, CV_32F);
-
-        cv::resize(image, image, cv::Size(input_info->getTensorDesc().getDims()[3],
-                   input_info->getTensorDesc().getDims()[2]));
-
-        size_t channels_number = input->getTensorDesc().getDims()[1];
-        size_t image_size = input->getTensorDesc().getDims()[3] * input->getTensorDesc().getDims()[2];
-
-        for (size_t pid = 0; pid < image_size; ++pid) {
-            for (size_t ch = 0; ch < channels_number; ++ch) {
-                input_data[ch * image_size + pid] = image.at<cv::Vec3f>(pid)[ch];
+            std::chrono::steady_clock::time_point begin_frame = std::chrono::steady_clock::now();
+            std::vector<cv::RotatedRect> rects;
+            if (text_detection.is_initialized()) {
+                auto blobs = text_detection.Infer(image);
+                std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+                rects = postProcess(blobs, orig_image_size, cls_conf_threshold, link_conf_threshold);
+                std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+                text_detection_postproc_time += std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+            } else {
+                rects.emplace_back(cv::Point2f(0.0f, 0.0f), cv::Size2f(0.0f, 0.0f), 0.0f);
             }
-        }
-        // ---------------------------------------------------------------------------------------------------
 
-        // --------------------------- 7. Doing inference ----------------------------------------------------
-        /* Running the request synchronously */
-        infer_request.Infer();
-        // ---------------------------------------------------------------------------------------------------
+            if (FLAGS_max_rect_num >= 0 && static_cast<int>(rects.size()) > FLAGS_max_rect_num) {
+                std::sort(rects.begin(), rects.end(), [](const cv::RotatedRect & a, const cv::RotatedRect & b) {
+                    return a.size.area() > b.size.area();
+                });
+                rects.resize(FLAGS_max_rect_num);
+            }
 
-        // --------------------------- 8. Processing output --------------------------------------------------
+            int num_found = text_recognition.is_initialized() ? 0 : static_cast<int>(rects.size());
 
-        InferenceEngine::BlobMap blobs;
-        for (const auto &output_name : output_names) {
-            blobs[output_name] = infer_request.GetBlob(output_name);
-        }
+            for (const auto &rect : rects) {
+                cv::Mat cropped_text;
+                std::vector<cv::Point2f> points;
+                int top_left_point_idx = -1;
 
-        // ---------------------------------------------------------------------------------------------------
-
-        // --------------------------- 9. Post-processing output ---------------------------------------------
-        auto rects = postProcess(blobs, orig_image_size);
-        for (const auto &rect : rects) {
-            auto points = pointsFromRotatedRect(rect, orig_image_size);
-            if (FLAGS_r) {
-                for (size_t i = 0; i < points.size(); i++) {
-                    std::cout << points[i].x << ", " << points[i].y;
-                    if (i != points.size() - 1)
-                        std::cout << ", ";
+                if (rect.size != cv::Size2f(0, 0) && text_detection.is_initialized()) {
+                    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+                    points = floatPointsFromRotatedRect(rect);
+                    topLeftPoint(points, &top_left_point_idx);
+                    cropped_text = cropImage(image, points, text_recognition.input_size(), top_left_point_idx);
+                    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+                    text_crop_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+                } else {
+                    cropped_text = image;
                 }
-                std::cout << std::endl;
+
+                std::string res = "";
+                double conf = 1.0;
+                if (text_recognition.is_initialized()) {
+                    auto blobs = text_recognition.Infer(cropped_text);
+                    auto output_shape = blobs.begin()->second->getTensorDesc().getDims();
+                    if (output_shape[2] != kAlphabet.length())
+                        throw std::runtime_error("The text recognition model does not correspond to alphabet.");
+
+                    float *ouput_data_pointer = blobs.begin()->second->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+                    std::vector<float> output_data(ouput_data_pointer, ouput_data_pointer + output_shape[0] * output_shape[2]);
+
+                    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+                    res = CTCGreedyDecoder(output_data, kAlphabet, kPadSymbol, &conf);
+                    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+                    text_recognition_postproc_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+
+                    res = conf >= min_text_recognition_confidence ? res : "";
+                    num_found += !res.empty() ? 1 : 0;
+                }
+
+                if (FLAGS_r) {
+                    for (size_t i = 0; i < points.size(); i++) {
+                        std::cout << clip(static_cast<int>(points[i].x), image.cols - 1) << "," <<
+                                     clip(static_cast<int>(points[i].y), image.rows - 1);
+                        if (i != points.size() - 1)
+                            std::cout << ",";
+                    }
+
+                    if (text_recognition.is_initialized()) {
+                        std::cout << "," << res;
+                    }
+
+                    std::cout << std::endl;
+                }
+
+                if (!FLAGS_no_show && (!res.empty() || !text_recognition.is_initialized())) {
+                    for (size_t i = 0; i < points.size() ; i++) {
+                        cv::line(demo_image, points[i], points[(i+1) % points.size()], cv::Scalar(50, 205, 50), 2);
+                    }
+
+                    if (!points.empty() && !res.empty()) {
+                        setLabel(demo_image, res, points[top_left_point_idx]);
+                    }
+                }
             }
+
+            std::chrono::steady_clock::time_point end_frame = std::chrono::steady_clock::now();
+
+            if (avg_time == 0) {
+                avg_time = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(end_frame - begin_frame).count());
+            } else {
+                auto cur_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_frame - begin_frame).count();
+                avg_time = avg_time * avg_time_decay + (1.0 - avg_time_decay) * cur_time;
+            }
+            int fps = static_cast<int>(1000 / avg_time);
 
             if (!FLAGS_no_show) {
-                for (size_t i = 0; i < 4; i++) {
-                    cv::line(original_image, points[i], points[(i+1) % 4], cv::Scalar(0, 255, 0), 3);
-                }
+                std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+                cv::putText(demo_image, "fps: " + std::to_string(fps) + " found: " + std::to_string(num_found),
+                            cv::Point(50, 50), cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255), 1);
+                cv::imshow("Press any key to exit", demo_image);
+                char k = cv::waitKey(3);
+                if (k == 27) break;
             }
+
+            grabber->GrabNextImage(&image);
         }
 
-        if (!FLAGS_no_show) {
-            cv::imshow("Press any key to exit", original_image);
-            cv::waitKey(0);
+        if (text_detection.ncalls() && !FLAGS_r) {
+          std::cout << "text detection model inference (ms) (fps): "
+                    << text_detection.time_elapsed() / text_detection.ncalls() << " "
+                    << text_detection.ncalls() * 1000 / text_detection.time_elapsed() << std::endl;
+        if (std::fabs(text_detection_postproc_time) < std::numeric_limits<double>::epsilon()) {
+            throw std::logic_error("text_detection_postproc_time can't be equal to zero");
+        }
+          std::cout << "text detection postprocessing (ms) (fps): "
+                    << text_detection_postproc_time / text_detection.ncalls() << " "
+                    << text_detection.ncalls() * 1000 / text_detection_postproc_time << std::endl << std::endl;
+        }
+
+        if (text_recognition.ncalls() && !FLAGS_r) {
+          std::cout << "text recognition model inference (ms) (fps): "
+                    << text_recognition.time_elapsed() / text_recognition.ncalls() << " "
+                    << text_recognition.ncalls() * 1000 / text_recognition.time_elapsed() << std::endl;
+          if (std::fabs(text_recognition_postproc_time) < std::numeric_limits<double>::epsilon()) {
+              throw std::logic_error("text_recognition_postproc_time can't be equal to zero");
+          }
+          std::cout << "text recognition postprocessing (ms) (fps): "
+                    << text_recognition_postproc_time / text_recognition.ncalls() / 1000 << " "
+                    << text_recognition.ncalls() * 1000000 / text_recognition_postproc_time << std::endl << std::endl;
+          if (std::fabs(text_crop_time) < std::numeric_limits<double>::epsilon()) {
+              throw std::logic_error("text_crop_time can't be equal to zero");
+          }
+          std::cout << "text crop (ms) (fps): " << text_crop_time / text_recognition.ncalls() / 1000 << " "
+                    << text_recognition.ncalls() * 1000000 / text_crop_time << std::endl << std::endl;
         }
 
         // ---------------------------------------------------------------------------------------------------
@@ -202,231 +274,77 @@ int main(int argc, char *argv[]) {
     return EXIT_SUCCESS;
 }
 
-
-void softmax(std::vector<float>* data) {
-    auto &rdata = *data;
-    for (size_t i = 0 ; i < rdata.size(); i+=2) {
-       float m = std::max(rdata[i], rdata[i+1]);
-       rdata[i] = std::exp(rdata[i] - m);
-       rdata[i + 1] = std::exp(rdata[i + 1] - m);
-       float s = rdata[i] + rdata[i + 1];
-       rdata[i] /= s;
-       rdata[i + 1] /= s;
-    }
-}
-
-std::vector<float> transpose4d(const std::vector<float>& data, const std::vector<size_t> &shape,
-                               const std::vector<size_t> &axes) {
-    if (shape.size() != axes.size())
-        throw std::runtime_error("Shape and axes must have the same dimension.");
-
-    for (size_t a : axes) {
-        if (a >= shape.size())
-            throw std::runtime_error("Axis must be less than dimension of shape.");
-    }
-
-    size_t total_size = shape[0] * shape[1] * shape[2] * shape[3];
-
-    std::vector<size_t> steps{shape[axes[1]] * shape[axes[2]] * shape[axes[3]],
-                shape[axes[2]] * shape[axes[3]], shape[axes[3]], 1};
-
-    size_t source_data_idx = 0;
-    std::vector<float> new_data(total_size, 0);
-
-    std::vector<size_t> ids(shape.size());
-    for (ids[0] = 0; ids[0] < shape[0]; ids[0]++) {
-        for (ids[1] = 0; ids[1] < shape[1]; ids[1]++) {
-            for (ids[2] = 0; ids[2] < shape[2]; ids[2]++) {
-                for (ids[3]= 0; ids[3] < shape[3]; ids[3]++) {
-                    size_t new_data_idx = ids[axes[0]] * steps[0] + ids[axes[1]] * steps[1] +
-                            ids[axes[2]] * steps[2] + ids[axes[3]] * steps[3];
-                    new_data[new_data_idx] = data[source_data_idx++];
-                }
-            }
-        }
-    }
-    return new_data;
-}
-
-
-std::vector<size_t> ieSizeToVector(const SizeVector& ie_output_dims) {
-    std::vector<size_t> blob_sizes(ie_output_dims.size(), 0);
-    for (size_t i = 0; i < blob_sizes.size(); ++i) {
-        blob_sizes[i] = ie_output_dims[i];
-    }
-    return blob_sizes;
-}
-
-std::vector<float> sliceAndGetSecondChannel(const std::vector<float> &data) {
-    std::vector<float> new_data(data.size() / 2, 0);
-    for (size_t i = 0; i < data.size() / 2; i++) {
-      new_data[i] = data[2 * i + 1];
-    }
-    return new_data;
-}
-
-std::vector<cv::RotatedRect> maskToBoxes(const cv::Mat &mask, float min_area, float min_height,
-                                         cv::Size image_size) {
-    std::vector<cv::RotatedRect> bboxes;
-    double min_val;
-    double max_val;
-    cv::minMaxLoc(mask, &min_val, &max_val);
-    int max_bbox_idx = static_cast<int>(max_val);
-    cv::Mat resized_mask;
-    cv::resize(mask, resized_mask, image_size, 0, 0, cv::INTER_NEAREST);
-
-    for (int i = 1; i <= max_bbox_idx; i++) {
-        cv::Mat bbox_mask = resized_mask == i;
-        std::vector<std::vector<cv::Point>> contours;
-
-        cv::findContours(bbox_mask, contours, cv::RETR_CCOMP, cv::CHAIN_APPROX_SIMPLE);
-        if (contours.empty())
-            continue;
-        cv::RotatedRect r = cv::minAreaRect(contours[0]);
-        if (std::min(r.size.width, r.size.height) < min_height)
-            continue;
-        if (r.size.area() < min_area)
-            continue;
-        bboxes.emplace_back(r);
-    }
-
-    return bboxes;
-  }
-
-
-int findRoot(int point, std::unordered_map<int, int> *group_mask) {
-    int root = point;
-    bool update_parent = false;
-    while (group_mask->at(root) != -1) {
-        root = group_mask->at(root);
-        update_parent = true;
-    }
-    if (update_parent) {
-       (*group_mask)[point] = root;
-    }
-    return root;
-}
-
-void join(int p1, int p2, std::unordered_map<int, int> *group_mask) {
-    int root1 = findRoot(p1, group_mask);
-    int root2 = findRoot(p2, group_mask);
-    if (root1 != root2) {
-        (*group_mask)[root1] = root2;
-    }
-}
-
-cv::Mat get_all(const std::vector<cv::Point> &points, int w, int h,
-                std::unordered_map<int, int> *group_mask) {
-    std::unordered_map<int, int> root_map;
-
-    cv::Mat mask(h, w, CV_32S, cv::Scalar(0));
-    for (const auto &point : points) {
-        int point_root = findRoot(point.x + point.y * w, group_mask);
-        if (root_map.find(point_root) == root_map.end()) {
-            root_map.emplace(point_root, static_cast<int>(root_map.size() + 1));
-        }
-        mask.at<int>(point.x + point.y * w) = root_map[point_root];
-    }
-
-    return mask;
-}
-
-cv::Mat decodeImageByJoin(const std::vector<float> &cls_data, const std::vector<int> & cls_data_shape,
-                          const std::vector<float> &link_data, const std::vector<int> & link_data_shape) {
-    const float kClsConfThreshold = 0.8f;
-    const float kLinkConfThreshold = 0.8f;
-
-    int h = cls_data_shape[1];
-    int w = cls_data_shape[2];
-
-    std::vector<uchar> pixel_mask(h * w, 0);
-    std::unordered_map<int, int> group_mask;
-    std::vector<cv::Point> points;
-    for (size_t i = 0; i < pixel_mask.size(); i++) {
-        pixel_mask[i] = cls_data[i] >= kClsConfThreshold;
-        if (pixel_mask[i]) {
-            points.emplace_back(i % w, i / w);
-            group_mask[i] = -1;
-        }
-    }
-
-    std::vector<uchar> link_mask(link_data.size(), 0);
-    for (size_t i = 0; i < link_mask.size(); i++) {
-        link_mask[i] = link_data[i] >= kLinkConfThreshold;
-    }
-
-    int neighbours = link_data_shape[3];
-    for (const auto &point : points) {
-        int neighbour = 0;
-        for (int ny = point.y - 1; ny <= point.y + 1; ny++) {
-            for (int nx = point.x - 1; nx <= point.x + 1; nx++) {
-                if (nx == point.x && ny == point.y)
-                    continue;
-                if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-                    uchar pixel_value = pixel_mask[static_cast<size_t>(ny * w + nx)];
-                    uchar link_value = link_mask[static_cast<size_t>(point.y * w * neighbours +
-                                                                     point.x * neighbours + neighbour)];
-                    if (pixel_value && link_value) {
-                        join(point.x + point.y * w, nx + ny * w, &group_mask);
-                    }
-                }
-                neighbour++;
-            }
-        }
-    }
-
-    return get_all(points, w, h, &group_mask);
-}
-
-std::vector<cv::Point> pointsFromRotatedRect(const cv::RotatedRect &rect, const cv::Size& image_size) {
+std::vector<cv::Point2f> floatPointsFromRotatedRect(const cv::RotatedRect &rect) {
     cv::Point2f vertices[4];
     rect.points(vertices);
 
-    std::vector<cv::Point> points;
+    std::vector<cv::Point2f> points;
     for (int i = 0; i < 4; i++) {
-        int x = std::min(std::max(0, static_cast<int>(vertices[i].x)), image_size.width - 1);
-        int y = std::min(std::max(0, static_cast<int>(vertices[i].y)), image_size.height - 1);
-        points.emplace_back(x, y);
+        points.emplace_back(vertices[i].x, vertices[i].y);
     }
     return points;
 }
 
-std::vector<cv::RotatedRect> postProcess(const InferenceEngine::BlobMap &blobs, const cv::Size& image_size) {
-    const std::string kLocOutputName = "pixel_link/add_2";
-    const std::string kClsOutputName = "pixel_cls/add_2";
-    const int kMinArea = 300;
-    const int kMinHeight = 10;
+cv::Point topLeftPoint(const std::vector<cv::Point2f> & points, int *idx) {
+    cv::Point2f most_left(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+    cv::Point2f almost_most_left(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
 
-    auto link_shape = blobs.at(kLocOutputName)->getTensorDesc().getDims();
-    size_t link_data_size = link_shape[0] * link_shape[1] * link_shape[2] * link_shape[3];
-    float *link_data_pointer =
-            blobs.at(kLocOutputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
-    std::vector<float> link_data(link_data_pointer, link_data_pointer + link_data_size);
-    link_data = transpose4d(link_data, ieSizeToVector(link_shape), {0, 2, 3, 1});
-    softmax(&link_data);
-    link_data = sliceAndGetSecondChannel(link_data);
-    std::vector<int> new_link_data_shape(4);
-    new_link_data_shape[0] = static_cast<int>(link_shape[0]);
-    new_link_data_shape[1] = static_cast<int>(link_shape[2]);
-    new_link_data_shape[2] = static_cast<int>(link_shape[3]);
-    new_link_data_shape[3] = static_cast<int>(link_shape[1]) / 2;
+    int most_left_idx = -1;
+    int almost_most_left_idx = -1;
 
-    auto cls_shape = blobs.at(kClsOutputName)->getTensorDesc().getDims();
-    size_t cls_data_size = cls_shape[0] * cls_shape[1] * cls_shape[2] * cls_shape[3];
-    float *cls_data_pointer =
-            blobs.at(kClsOutputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
-    std::vector<float> cls_data(cls_data_pointer, cls_data_pointer + cls_data_size);
-    cls_data = transpose4d(cls_data, ieSizeToVector(cls_shape), {0, 2, 3, 1});
-    softmax(&cls_data);
-    cls_data = sliceAndGetSecondChannel(cls_data);
-    std::vector<int> new_cls_data_shape(4);
-    new_cls_data_shape[0] = static_cast<int>(cls_shape[0]);
-    new_cls_data_shape[1] = static_cast<int>(cls_shape[2]);
-    new_cls_data_shape[2] = static_cast<int>(cls_shape[3]);
-    new_cls_data_shape[3] = static_cast<int>(cls_shape[1]) / 2;
+    for (size_t i = 0; i < points.size() ; i++) {
+        if (most_left.x > points[i].x) {
+            if (most_left.x != std::numeric_limits<float>::max()) {
+                almost_most_left = most_left;
+                almost_most_left_idx = most_left_idx;
+            }
+            most_left = points[i];
+            most_left_idx = i;
+        }
+        if (almost_most_left.x > points[i].x && points[i] != most_left) {
+            almost_most_left = points[i];
+            almost_most_left_idx = i;
+        }
+    }
 
-    cv::Mat mask = decodeImageByJoin(cls_data, new_cls_data_shape, link_data, new_link_data_shape);
-    std::vector<cv::RotatedRect> rects = maskToBoxes(mask, kMinArea, kMinHeight, image_size);
+    if (almost_most_left.y < most_left.y) {
+        most_left = almost_most_left;
+        most_left_idx = almost_most_left_idx;
+    }
 
-    return rects;
+    *idx = most_left_idx;
+    return most_left;
+}
+
+cv::Mat cropImage(const cv::Mat &image, const std::vector<cv::Point2f> &points, const cv::Size& target_size, int top_left_point_idx) {
+    cv::Point2f point0 = points[top_left_point_idx];
+    cv::Point2f point1 = points[(top_left_point_idx + 1) % 4];
+    cv::Point2f point2 = points[(top_left_point_idx + 2) % 4];
+
+    cv::Mat crop(target_size, CV_8UC3, cv::Scalar(0));
+
+    std::vector<cv::Point2f> from{point0, point1, point2};
+    std::vector<cv::Point2f> to{cv::Point2f(0.0f, 0.0f), cv::Point2f(static_cast<float>(target_size.width-1), 0.0f),
+                                cv::Point2f(static_cast<float>(target_size.width-1), static_cast<float>(target_size.height-1))};
+
+    cv::Mat M = cv::getAffineTransform(from, to);
+
+    cv::warpAffine(image, crop, M, crop.size());
+
+    return crop;
+}
+
+void setLabel(cv::Mat& im, const std::string label, const cv::Point & p) {
+    int fontface = cv::FONT_HERSHEY_SIMPLEX;
+    double scale = 0.7;
+    int thickness = 1;
+    int baseline = 0;
+
+    cv::Size text_size = cv::getTextSize(label, fontface, scale, thickness, &baseline);
+    auto text_position = p;
+    text_position.x = std::max(0, p.x);
+    text_position.y = std::max(text_size.height, p.y);
+
+    cv::rectangle(im, text_position + cv::Point(0, baseline), text_position + cv::Point(text_size.width, -text_size.height), CV_RGB(50, 205, 50), cv::FILLED);
+    cv::putText(im, label, text_position, fontface, scale, CV_RGB(255, 255, 255), thickness, 8);
 }

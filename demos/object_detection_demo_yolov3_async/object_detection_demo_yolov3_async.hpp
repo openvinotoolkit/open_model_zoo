@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -33,11 +33,11 @@ static const char target_device_message[] = "Optional. Specify a target device t
 static const char performance_counter_message[] = "Optional. Enable per-layer performance report.";
 
 /// @brief Message for clDNN custom kernels desc
-static const char custom_cldnn_message[] = "Optional. Required for GPU custom kernels."\
+static const char custom_cldnn_message[] = "Optional. Required for GPU custom kernels. "\
 "Absolute path to the .xml file with the kernels description.";
 
 /// @brief Message for user library argument
-static const char custom_cpu_library_message[] = "Optional. Required for CPU custom layers." \
+static const char custom_cpu_library_message[] = "Optional. Required for CPU custom layers. " \
 "Absolute path to a shared library with the layers implementation.";
 
 /// @brief Message for probability threshold argument

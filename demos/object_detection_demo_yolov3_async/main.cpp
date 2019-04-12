@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -83,8 +83,11 @@ struct DetectionObject {
         this->confidence = confidence;
     }
 
-    bool operator<(const DetectionObject &s2) const {
+    bool operator <(const DetectionObject &s2) const {
         return this->confidence < s2.confidence;
+    }
+    bool operator >(const DetectionObject &s2) const {
+        return this->confidence > s2.confidence;
     }
 };
 
@@ -200,7 +203,7 @@ int main(int argc, char *argv[]) {
 
         // --------------------------- 1. Load Plugin for inference engine -------------------------------------
         slog::info << "Loading plugin" << slog::endl;
-        InferencePlugin plugin = PluginDispatcher({"../../../lib/intel64", ""}).getPluginByDevice(FLAGS_d);
+        InferencePlugin plugin = PluginDispatcher().getPluginByDevice(FLAGS_d);
         printPluginVersion(plugin, std::cout);
 
         /**Loading extensions to the plugin **/
@@ -302,6 +305,7 @@ int main(int argc, char *argv[]) {
         auto wallclock = std::chrono::high_resolution_clock::now();
         double ocv_decode_time = 0, ocv_render_time = 0;
 
+        std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
         while (true) {
             auto t0 = std::chrono::high_resolution_clock::now();
             // Here is the first asynchronous point:
@@ -381,11 +385,11 @@ int main(int argc, char *argv[]) {
                     ParseYOLOV3Output(layer, blob, resized_im_h, resized_im_w, height, width, FLAGS_t, objects);
                 }
                 // Filtering overlapping boxes
-                std::sort(objects.begin(), objects.end());
-                for (int i = 0; i < objects.size(); ++i) {
+                std::sort(objects.begin(), objects.end(), std::greater<DetectionObject>());
+                for (size_t i = 0; i < objects.size(); ++i) {
                     if (objects[i].confidence == 0)
                         continue;
-                    for (int j = i + 1; j < objects.size(); ++j)
+                    for (size_t j = i + 1; j < objects.size(); ++j)
                         if (IntersectionOverUnion(objects[i], objects[j]) >= FLAGS_iou_t)
                             objects[j].confidence = 0;
                 }
@@ -405,11 +409,12 @@ int main(int argc, char *argv[]) {
                         std::ostringstream conf;
                         conf << ":" << std::fixed << std::setprecision(3) << confidence;
                         cv::putText(frame,
-                                (label < labels.size() ? labels[label] : std::string("label #") + std::to_string(label))
-                                    + conf.str(),
-                                    cv::Point2f(object.xmin, object.ymin - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
+                                (label < static_cast<int>(labels.size()) ?
+                                        labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
+                                    cv::Point2f(static_cast<float>(object.xmin), static_cast<float>(object.ymin - 5)), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
                                     cv::Scalar(0, 0, 255));
-                        cv::rectangle(frame, cv::Point2f(object.xmin, object.ymin), cv::Point2f(object.xmax, object.ymax), cv::Scalar(0, 0, 255));
+                        cv::rectangle(frame, cv::Point2f(static_cast<float>(object.xmin), static_cast<float>(object.ymin)),
+                                      cv::Point2f(static_cast<float>(object.xmax), static_cast<float>(object.ymax)), cv::Scalar(0, 0, 255));
                     }
                 }
             }
