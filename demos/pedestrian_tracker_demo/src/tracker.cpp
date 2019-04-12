@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -19,7 +19,8 @@
 
 namespace {
 cv::Point Center(const cv::Rect& rect) {
-    return cv::Point(rect.x + rect.width * .5, rect.y + rect.height * .5);
+    return cv::Point(static_cast<int>(rect.x + rect.width * 0.5),
+                     static_cast<int>(rect.y + rect.height * 0.5));
 }
 
 std::vector<cv::Point> Centers(const TrackedObjects &detections) {
@@ -77,17 +78,17 @@ std::vector<cv::Scalar> GenRandomColors(int colors_num) {
 TrackerParams::TrackerParams()
     : min_track_duration(1000),
     forget_delay(150),
-    aff_thr_fast(0.8),
-    aff_thr_strong(0.75),
-    shape_affinity_w(0.5),
-    motion_affinity_w(0.2),
-    time_affinity_w(0.0),
-    min_det_conf(0.65),
-    bbox_aspect_ratios_range(0.666, 5.0),
+    aff_thr_fast(0.8f),
+    aff_thr_strong(0.75f),
+    shape_affinity_w(0.5f),
+    motion_affinity_w(0.2f),
+    time_affinity_w(0.0f),
+    min_det_conf(0.65f),
+    bbox_aspect_ratios_range(0.666f, 5.0f),
     bbox_heights_range(40, 1000),
     predict(25),
-    strong_affinity_thr(0.2805),
-    reid_thr(0.61),
+    strong_affinity_thr(0.2805f),
+    reid_thr(0.61f),
     drop_forgotten_tracks(true),
     max_num_objects_in_track(300) {}
 
@@ -249,7 +250,7 @@ TrackedObjects PedestrianTracker::FilterDetections(
         float aspect_ratio = static_cast<float>(det.rect.height) / det.rect.width;
         if (det.confidence > params_.min_det_conf &&
             IsInRange(aspect_ratio, params_.bbox_aspect_ratios_range) &&
-            IsInRange(det.rect.height, params_.bbox_heights_range)) {
+            IsInRange(static_cast<float>(det.rect.height), params_.bbox_heights_range)) {
             filtered_detections.emplace_back(det);
         }
     }
@@ -281,8 +282,6 @@ void PedestrianTracker::SolveAssignmentProblem(
     for (size_t i = 0; i < detections.size(); i++) {
         unmatched_detections->insert(i);
     }
-
-    constexpr float kMinIOUForPossibleDuplicates = 0.3;
 
     size_t i = 0;
     for (auto id : track_ids) {
@@ -353,8 +352,10 @@ cv::Rect PedestrianTracker::PredictRect(size_t id, size_t k,
     s += 1;
 
     cv::Point c = Center(track.back().rect);
-    return cv::Rect(c.x - width / 2 + d.x * s, c.y - height / 2 + d.y * s, width,
-                    height);
+    return cv::Rect(static_cast<int>(c.x - width / 2 + d.x * s),
+                    static_cast<int>(c.y - height / 2 + d.y * s),
+                    static_cast<int>(width),
+                    static_cast<int>(height));
 }
 
 
@@ -547,9 +548,9 @@ void PedestrianTracker::DropForgottenTrack(size_t track_id) {
 
 float PedestrianTracker::ShapeAffinity(float weight, const cv::Rect &trk,
                                        const cv::Rect &det) {
-    float w_dist = std::fabs(trk.width - det.width) / (trk.width + det.width);
-    float h_dist = std::fabs(trk.height - det.height) / (trk.height + det.height);
-    return exp(-weight * (w_dist + h_dist));
+    float w_dist = static_cast<float>(std::abs(trk.width - det.width) / (trk.width + det.width));
+    float h_dist = static_cast<float>(std::abs(trk.height - det.height) / (trk.height + det.height));
+    return static_cast<float>(exp(static_cast<double>(-weight * (w_dist + h_dist))));
 }
 
 float PedestrianTracker::MotionAffinity(float weight, const cv::Rect &trk,
@@ -558,12 +559,12 @@ float PedestrianTracker::MotionAffinity(float weight, const cv::Rect &trk,
         (det.width * det.width);
     float y_dist = static_cast<float>(trk.y - det.y) * (trk.y - det.y) /
         (det.height * det.height);
-    return exp(-weight * (x_dist + y_dist));
+    return static_cast<float>(exp(static_cast<double>(-weight * (x_dist + y_dist))));
 }
 
 float PedestrianTracker::TimeAffinity(float weight, const float &trk_time,
                                       const float &det_time) {
-    return exp(-weight * std::fabs(trk_time - det_time));
+    return static_cast<float>(exp(static_cast<double>(-weight * std::fabs(trk_time - det_time))));
 }
 
 void PedestrianTracker::ComputeFastDesciptors(
@@ -688,7 +689,7 @@ PedestrianTracker::StrongMatching(
         auto last_det = track.objects.back();
         last_det.rect = track.predicted_rect;
 
-        float affinity = reid_affinity * Affinity(last_det, detection);
+        float affinity = static_cast<float>(reid_affinity) * Affinity(last_det, detection);
 
         if (collect_matches_ && last_det.object_id >= 0 &&
             detection.object_id >= 0) {
@@ -787,19 +788,19 @@ float PedestrianTracker::AffinityFast(const cv::Mat &descriptor1,
                                       const TrackedObject &obj1,
                                       const cv::Mat &descriptor2,
                                       const TrackedObject &obj2) {
-    const float eps = 1e-6;
+    const float eps = 1e-6f;
     float shp_aff = ShapeAffinity(params_.shape_affinity_w, obj1.rect, obj2.rect);
-    if (shp_aff < eps) return 0.0;
+    if (shp_aff < eps) return 0.0f;
 
     float mot_aff =
         MotionAffinity(params_.motion_affinity_w, obj1.rect, obj2.rect);
-    if (mot_aff < eps) return 0.0;
+    if (mot_aff < eps) return 0.0f;
     float time_aff =
-        TimeAffinity(params_.time_affinity_w, obj1.frame_idx, obj2.frame_idx);
+        TimeAffinity(params_.time_affinity_w, static_cast<float>(obj1.frame_idx), static_cast<float>(obj2.frame_idx));
 
-    if (time_aff < eps) return 0.0;
+    if (time_aff < eps) return 0.0f;
 
-    float app_aff = 1.0 - distance_fast_->Compute(descriptor1, descriptor2);
+    float app_aff = 1.0f - distance_fast_->Compute(descriptor1, descriptor2);
 
     return shp_aff * mot_aff * app_aff * time_aff;
 }
@@ -810,7 +811,7 @@ float PedestrianTracker::Affinity(const TrackedObject &obj1,
     float mot_aff =
         MotionAffinity(params_.motion_affinity_w, obj1.rect, obj2.rect);
     float time_aff =
-        TimeAffinity(params_.time_affinity_w, obj1.frame_idx, obj2.frame_idx);
+        TimeAffinity(params_.time_affinity_w, static_cast<float>(obj1.frame_idx), static_cast<float>(obj2.frame_idx));
     return shp_aff * mot_aff * time_aff;
 }
 

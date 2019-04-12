@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -31,7 +31,7 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
       upsampleRatio(4),
       enablePerformanceReport(enablePerformanceReport),
       modelPath(modelPath) {
-    plugin = InferenceEngine::PluginDispatcher({"../../../lib/intel64", ""})
+    plugin = InferenceEngine::PluginDispatcher()
             .getPluginByDevice(targetDeviceName);
     if (enablePerformanceReport) {
         plugin.SetConfig({{InferenceEngine::PluginConfigParams::KEY_PERF_COUNT,
@@ -211,16 +211,16 @@ void HumanPoseEstimator::correctCoordinates(std::vector<HumanPose>& poses,
 }
 
 bool HumanPoseEstimator::inputWidthIsChanged(const cv::Size& imageSize) {
-    double scale = inputLayerSize.height / static_cast<double>(imageSize.height);
-    cv::Size scaledSize(cvRound(imageSize.width * scale),
-                        cvRound(imageSize.height * scale));
+    double scale = static_cast<double>(inputLayerSize.height) / static_cast<double>(imageSize.height);
+    cv::Size scaledSize(static_cast<int>(cvRound(imageSize.width * scale)),
+                        static_cast<int>(cvRound(imageSize.height * scale)));
     cv::Size scaledImageSize(std::max(scaledSize.width, inputLayerSize.height),
                              inputLayerSize.height);
     int minHeight = std::min(scaledImageSize.height, scaledSize.height);
-    scaledImageSize.width = std::ceil(
-                scaledImageSize.width / static_cast<float>(stride)) * stride;
-    pad(0) = std::floor((scaledImageSize.height - minHeight) / 2.0);
-    pad(1) = std::floor((scaledImageSize.width - scaledSize.width) / 2.0);
+    scaledImageSize.width = static_cast<int>(std::ceil(
+                scaledImageSize.width / static_cast<float>(stride))) * stride;
+    pad(0) = static_cast<int>(std::floor((scaledImageSize.height - minHeight) / 2.0));
+    pad(1) = static_cast<int>(std::floor((scaledImageSize.width - scaledSize.width) / 2.0));
     pad(2) = scaledImageSize.height - minHeight - pad(0);
     pad(3) = scaledImageSize.width - scaledSize.width - pad(1);
     if (scaledSize.width == (inputLayerSize.width - pad(1) - pad(3))) {

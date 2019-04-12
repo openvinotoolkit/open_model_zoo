@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -121,7 +121,7 @@ protected:
 
 public:
     explicit BaseCnnDetection(bool enabled = true, bool isAsync = false) :
-                              enabledFlag(enabled), isAsync(isAsync) {}
+                              isAsync(isAsync), enabledFlag(enabled) {}
 
     virtual ~BaseCnnDetection() {}
 

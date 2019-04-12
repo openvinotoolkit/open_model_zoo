@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -50,12 +50,16 @@ struct ActionDetectorConfig : public CnnConfig {
     std::string action_conf_blob_name_prefix{"out/anchor"};
     /** @brief Name of output blob with priorbox info */
     std::string priorbox_blob_name{"mbox/priorbox"};
-    /** @brief BBox overlap threshold for NMS algorithm */
-    float nms_threshold = 0.45f;
-    /** @brief Number of top-score bboxes for NMS algorithm */
-    int nms_top_k = 400;
+    /** @brief Scale paramter for Soft-NMS algorithm */
+    float nms_sigma = 0.6f;
     /** @brief Threshold for detected objects */
-    float detection_confidence_threshold = 0.65;
+    float detection_confidence_threshold = 0.4f;
+    /** @brief Threshold for recognized actions */
+    float action_confidence_threshold = 0.75f;
+    /** @brief Scale of action logits */
+    float action_scale = 3.0;
+    /** @brief Default action class label */
+    int default_action_id = 0;
     /** @brief Number of top-score bboxes in output */
     int keep_top_k = 200;
     /** @brief Number of SSD anchors */
@@ -138,15 +142,17 @@ private:
                            const cv::Size& frame_size) const;
 
      /**
-    * @brief Carry out Non-Maximum Suppression algorithm under detected actions
+    * @brief Carry out Soft Non-Maximum Suppression algorithm under detected actions
     *
     * @param detections Detected actions
-    * @param overlap_threshold Threshold to merge pair of bboxes
+    * @param sigma Scale paramter
     * @param top_k Number of top-score bboxes
+    * @param min_det_conf Minimum detection confidence
     * @param out_indices Out indices of valid detections
     */
-    void NonMaxSuppression(const DetectedActions& detections,
-                           const float overlap_threshold,
-                           const int top_k,
-                           std::vector<int>* out_indices) const;
+    void SoftNonMaxSuppression(const DetectedActions& detections,
+                               const float sigma,
+                               const int top_k,
+                               const float min_det_conf,
+                               std::vector<int>* out_indices) const;
 };

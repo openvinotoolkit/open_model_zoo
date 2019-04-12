@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -22,12 +22,12 @@ struct TrackedObject {
     int label;  // either id of a label, or UNKNOWN_LABEL_IDX
     static const int UNKNOWN_LABEL_IDX;  // the value (-1) for unknown label
 
-    int frame_idx;      ///< Frame index where object was detected (-1 if N/A).
+    size_t frame_idx;      ///< Frame index where object was detected (-1 if N/A).
 
     TrackedObject(const cv::Rect &rect = cv::Rect(), float conf = -1.0f,
                   int label = -1, int object_id = -1)
         : rect(rect),  confidence(conf),
-          label(label), object_id(object_id),
+          object_id(object_id), label(label),
           frame_idx(-1) {}
 };
 
@@ -88,7 +88,8 @@ struct TrackerParams {
     /// restricted by this parameter. If it is negative or zero, the max number of
     /// objects in track is not restricted.
 
-    int averaging_window_size;  ///< The number of objects in track for averaging predictions.
+    int averaging_window_size_for_rects;  ///< The number of objects in track for averaging rects of predictions.
+    int averaging_window_size_for_labels;  ///< The number of objects in track for averaging labels of predictions.
 
     std::string objects_type;  ///< The type of boxes which will be grabbed from
     /// detector. Boxes with other types are ignored.
@@ -337,5 +338,5 @@ private:
     cv::Size frame_size_;
 };
 
-int LabelWithMaxFrequencyInTrack(const Track &track);
+int LabelWithMaxFrequencyInTrack(const Track &track, int window_size);
 std::vector<Track> UpdateTrackLabelsToBestAndFilterOutUnknowns(const std::vector<Track>& tracks);

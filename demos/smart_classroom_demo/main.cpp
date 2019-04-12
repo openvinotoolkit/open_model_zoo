@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -15,8 +15,10 @@
 #include <deque>
 #include <map>
 #include <algorithm>
+#include <utility>
 #include <ie_iextension.h>
 
+#include "actions.hpp"
 #include "action_detector.hpp"
 #include "cnn.hpp"
 #include "detector.hpp"
@@ -41,7 +43,12 @@ private:
     std::string const window_name_ = "Smart classroom demo";
 
 public:
-    Visualizer(bool enabled, cv::VideoWriter& writer) : enabled_(enabled), writer_(writer) {}
+    Visualizer(bool enabled, cv::VideoWriter& writer) : enabled_(enabled), writer_(writer),
+                                                        rect_scale_x_(0), rect_scale_y_(0) {
+        if (enabled_) {
+            cv::namedWindow(window_name_);
+        }
+    }
 
     static cv::Size GetOutputSize(const cv::Size& input_size) {
         if (input_size.width > max_input_width_) {
@@ -111,16 +118,130 @@ public:
     }
 
     void Finalize() const {
-        cv::destroyWindow(window_name_);
+        if (enabled_)
+            cv::destroyWindow(window_name_);
         if (writer_.isOpened())
             writer_.release();
     }
 };
 
-const std::vector<std::string> actions_map = {"sitting", "standing", "raising_hand"};
-const int default_action_index = 0;  //  sitting
+const int default_action_index = -1;  // Unknown action class
 
-std::string GetActionTextLabel(const unsigned label) {
+void ConvertActionMapsToFrameEventTracks(const std::vector<std::map<int, int>>& obj_id_to_action_maps,
+                                         int default_action,
+                                         std::map<int, FrameEventsTrack>* obj_id_to_actions_track) {
+    for (size_t frame_id = 0; frame_id < obj_id_to_action_maps.size(); ++frame_id) {
+        for (const auto& tup : obj_id_to_action_maps[frame_id]) {
+            if (tup.second != default_action) {
+                (*obj_id_to_actions_track)[tup.first].emplace_back(frame_id, tup.second);
+            }
+        }
+    }
+}
+
+void SmoothTracks(const std::map<int, FrameEventsTrack>& obj_id_to_actions_track,
+                  int start_frame, int end_frame, int window_size, int min_length, int default_action,
+                  std::map<int, RangeEventsTrack>* obj_id_to_events) {
+    // Iterate over face tracks
+    for (const auto& tup : obj_id_to_actions_track) {
+        const auto& frame_events = tup.second;
+        if (frame_events.empty()) {
+            continue;
+        }
+
+        RangeEventsTrack range_events;
+
+
+        // Merge neighbouring events and filter short ones
+        range_events.emplace_back(frame_events.front().frame_id,
+                                  frame_events.front().frame_id + 1,
+                                  frame_events.front().action);
+
+        for (size_t frame_id = 1; frame_id < frame_events.size(); ++frame_id) {
+            const auto& last_range_event = range_events.back();
+            const auto& cur_frame_event = frame_events[frame_id];
+
+            if (last_range_event.end_frame_id + window_size - 1 >= cur_frame_event.frame_id &&
+                last_range_event.action == cur_frame_event.action) {
+                range_events.back().end_frame_id = cur_frame_event.frame_id + 1;
+            } else {
+                if (range_events.back().end_frame_id - range_events.back().begin_frame_id < min_length) {
+                    range_events.pop_back();
+                }
+
+                range_events.emplace_back(cur_frame_event.frame_id,
+                                          cur_frame_event.frame_id + 1,
+                                          cur_frame_event.action);
+            }
+        }
+        if (range_events.back().end_frame_id - range_events.back().begin_frame_id < min_length) {
+            range_events.pop_back();
+        }
+
+        // Extrapolate track
+        if (range_events.empty()) {
+            range_events.emplace_back(start_frame, end_frame, default_action);
+        } else {
+            range_events.front().begin_frame_id = start_frame;
+            range_events.back().end_frame_id = end_frame;
+        }
+
+        // Interpolate track
+        for (size_t event_id = 1; event_id < range_events.size(); ++event_id) {
+            auto& last_event = range_events[event_id - 1];
+            auto& cur_event = range_events[event_id];
+
+            int middle_point = static_cast<int>(0.5f * (cur_event.begin_frame_id + last_event.end_frame_id));
+
+            cur_event.begin_frame_id = middle_point;
+            last_event.end_frame_id = middle_point;
+        }
+
+        // Merge consecutive events
+        auto& final_events = (*obj_id_to_events)[tup.first];
+        final_events.push_back(range_events.front());
+        for (size_t event_id = 1; event_id < range_events.size(); ++event_id) {
+            const auto& cur_event = range_events[event_id];
+
+            if (final_events.back().action == cur_event.action) {
+                final_events.back().end_frame_id = cur_event.end_frame_id;
+            } else {
+                final_events.push_back(cur_event);
+            }
+        }
+    }
+}
+
+void ConvertRangeEventsTracksToActionMaps(int num_frames,
+                                          const std::map<int, RangeEventsTrack>& obj_id_to_events,
+                                          std::vector<std::map<int, int>>* obj_id_to_action_maps) {
+    obj_id_to_action_maps->resize(num_frames);
+
+    for (const auto& tup : obj_id_to_events) {
+        const int obj_id = tup.first;
+        const auto& events = tup.second;
+
+        for (const auto& event : events) {
+            for (int frame_id = event.begin_frame_id; frame_id < event.end_frame_id; ++frame_id) {
+                (*obj_id_to_action_maps)[frame_id].emplace(obj_id, event.action);
+            }
+        }
+    }
+}
+
+std::vector<std::string> ParseActionLabels(const std::string& in_str) {
+    std::vector<std::string> labels;
+    std::string label;
+    std::istringstream stream_to_split(in_str);
+
+    while (std::getline(stream_to_split, label, ',')) {
+      labels.push_back(label);
+    }
+
+    return labels;
+}
+
+std::string GetActionTextLabel(const unsigned label, const std::vector<std::string>& actions_map) {
     if (label < actions_map.size()) {
         return actions_map[label];
     }
@@ -129,7 +250,7 @@ std::string GetActionTextLabel(const unsigned label) {
 
 cv::Scalar GetActionTextColor(const unsigned label) {
     static std::vector<cv::Scalar> actions_map = {
-        cv::Scalar(0, 255, 0), cv::Scalar(255, 0, 0), cv::Scalar(0, 0, 255)};
+        cv::Scalar(0, 255, 0), cv::Scalar(255, 0, 0), cv::Scalar(0, 0, 255), cv::Scalar(0, 255, 255)};
     if (label < actions_map.size()) {
         return actions_map[label];
     }
@@ -140,26 +261,26 @@ float CalculateIoM(const cv::Rect& rect1, const cv::Rect& rect2) {
   int area1 = rect1.area();
   int area2 = rect2.area();
 
-  float area_min = std::min(area1, area2);
-  float area_intersect = (rect1 & rect2).area();
+  float area_min = static_cast<float>(std::min(area1, area2));
+  float area_intersect = static_cast<float>((rect1 & rect2).area());
 
   return area_intersect / area_min;
 }
 
 cv::Rect DecreaseRectByRelBorders(const cv::Rect& r) {
-    float w = r.width;
-    float h = r.height;
+    float w = static_cast<float>(r.width);
+    float h = static_cast<float>(r.height);
 
-    float left = std::ceil(w * 0);
-    float top = std::ceil(h * 0);
-    float right = std::ceil(w * 0);
-    float bottom = std::ceil(h * .7);
+    float left = std::ceil(w * 0.0f);
+    float top = std::ceil(h * 0.0f);
+    float right = std::ceil(w * 0.0f);
+    float bottom = std::ceil(h * .7f);
 
     cv::Rect res;
-    res.x = r.x + left;
-    res.y = r.y + top;
-    res.width = r.width - left - right;
-    res.height = r.height - top - bottom;
+    res.x = r.x + static_cast<int>(left);
+    res.y = r.y + static_cast<int>(top);
+    res.width = static_cast<int>(r.width - left - right);
+    res.height = static_cast<int>(r.height - top - bottom);
     return res;
 }
 
@@ -238,6 +359,12 @@ int main(int argc, char* argv[]) {
         auto fr_weights_path = fileNameNoExt(FLAGS_m_reid) + ".bin";
         auto lm_model_path = FLAGS_m_lm;
         auto lm_weights_path = fileNameNoExt(FLAGS_m_lm) + ".bin";
+        auto teacher_id = FLAGS_teacher_id;
+
+        const auto actions_type = FLAGS_teacher_id == "" ? STUDENT : TEACHER;
+        const auto actions_map = actions_type == STUDENT
+                                     ? ParseActionLabels(FLAGS_student_ac)
+                                     : ParseActionLabels(FLAGS_teacher_ac);
 
         slog::info << "Reading video '" << video_path << "'" << slog::endl;
         ImageGrabber cap(video_path);
@@ -255,7 +382,7 @@ int main(int argc, char* argv[]) {
                 continue;
             }
             slog::info << "Loading plugin " << device << slog::endl;
-            InferencePlugin plugin = PluginDispatcher({"../../../lib/intel64", ""}).getPluginByDevice(device);
+            InferencePlugin plugin = PluginDispatcher().getPluginByDevice(device);
             printPluginVersion(plugin, std::cout);
             /** Load extensions for the CPU plugin **/
             if ((device.find("CPU") != std::string::npos)) {
@@ -271,7 +398,9 @@ int main(int argc, char* argv[]) {
                 // Load Extensions for other plugins not CPU
                 plugin.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}});
             }
-            plugin.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}});
+            if (device.find("CPU") != std::string::npos || device.find("GPU") != std::string::npos) {
+                plugin.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}});
+            }
             if (FLAGS_pc)
                 plugin.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
             plugins_for_devices[device] = plugin;
@@ -282,7 +411,9 @@ int main(int argc, char* argv[]) {
         action_config.plugin = plugins_for_devices[FLAGS_d_act];
         action_config.is_async = true;
         action_config.enabled = !ad_model_path.empty();
-        action_config.detection_confidence_threshold = FLAGS_t_act;
+        action_config.detection_confidence_threshold = static_cast<float>(FLAGS_t_ad);
+        action_config.action_confidence_threshold = static_cast<float>(FLAGS_t_ar);
+        action_config.num_action_classes = actions_map.size();
         ActionDetection action_detector(action_config);
 
         // Load face detector
@@ -290,11 +421,11 @@ int main(int argc, char* argv[]) {
         face_config.plugin = plugins_for_devices[FLAGS_d_fd];
         face_config.is_async = true;
         face_config.enabled = !fd_model_path.empty();
-        face_config.confidence_threshold = FLAGS_t_fd;
+        face_config.confidence_threshold = static_cast<float>(FLAGS_t_fd);
         face_config.input_h = FLAGS_inh_fd;
         face_config.input_w = FLAGS_inw_fd;
-        face_config.increase_scale_x = FLAGS_exp_r_fd;
-        face_config.increase_scale_y = FLAGS_exp_r_fd;
+        face_config.increase_scale_x = static_cast<float>(FLAGS_exp_r_fd);
+        face_config.increase_scale_y = static_cast<float>(FLAGS_exp_r_fd);
         detection::FaceDetection face_detector(face_config);
 
         // Load face reid
@@ -314,12 +445,26 @@ int main(int argc, char* argv[]) {
         // Create face gallery
         EmbeddingsGallery face_gallery(FLAGS_fg, FLAGS_t_reid, landmarks_detector, face_reid);
 
+        if (!reid_config.enabled) {
+            slog::warn << "Face recognition models are disabled!"  << slog::endl;
+        } else if (!face_gallery.size()) {
+            slog::warn << "Face reid gallery is empty!"  << slog::endl;
+        } else {
+            slog::info << "Face reid gallery size: " << face_gallery.size() << slog::endl;
+        }
+
+        if (actions_type == TEACHER && !face_gallery.LabelExists(teacher_id)) {
+            slog::err << "Teacher id does not exist in the gallery!"  << slog::endl;
+            return 1;
+        }
+
         // Create tracker for reid
         TrackerParams tracker_reid_params;
         tracker_reid_params.min_track_duration = 1;
         tracker_reid_params.forget_delay = 150;
-        tracker_reid_params.affinity_thr = 0.8;
-        tracker_reid_params.averaging_window_size = 1;
+        tracker_reid_params.affinity_thr = 0.8f;
+        tracker_reid_params.averaging_window_size_for_rects = 1;
+        tracker_reid_params.averaging_window_size_for_labels = std::numeric_limits<int>::max();
         tracker_reid_params.bbox_heights_range = cv::Vec2f(10, 1080);
         tracker_reid_params.drop_forgotten_tracks = false;
         tracker_reid_params.max_num_objects_in_track = std::numeric_limits<int>::max();
@@ -331,9 +476,10 @@ int main(int argc, char* argv[]) {
         TrackerParams tracker_action_params;
         tracker_action_params.min_track_duration = 8;
         tracker_action_params.forget_delay = 150;
-        tracker_action_params.affinity_thr = 0.95;
-        tracker_action_params.averaging_window_size = 5;
-        tracker_action_params.bbox_heights_range = cv::Vec2f(10, 1080);
+        tracker_action_params.affinity_thr = 0.9f;
+        tracker_action_params.averaging_window_size_for_rects = 5;
+        tracker_action_params.averaging_window_size_for_labels = 1;
+        tracker_action_params.bbox_heights_range = cv::Vec2f(10, 2160);
         tracker_action_params.drop_forgotten_tracks = false;
         tracker_action_params.max_num_objects_in_track = std::numeric_limits<int>::max();
         tracker_action_params.objects_type = "action";
@@ -351,6 +497,8 @@ int main(int argc, char* argv[]) {
         const cv::Scalar white_color(255, 255, 255);
         std::vector<std::map<int, int>> face_obj_id_to_action_maps;
 
+        int teacher_track_id = -1;
+
         if (cap.GrabNext()) {
             cap.Retrieve(frame);
         } else {
@@ -366,13 +514,23 @@ int main(int argc, char* argv[]) {
 
         bool is_last_frame = false;
         auto prev_frame_path = cap.GetVideoPath();
-        int prev_fame_idx = cap.GetFrameIndex();
 
-        cv::VideoWriter vid_writer(FLAGS_out_v, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
-                                   cap.GetFPS(), Visualizer::GetOutputSize(frame.size()));
+        cv::VideoWriter vid_writer;
+        if (!FLAGS_out_v.empty()) {
+            vid_writer = cv::VideoWriter(FLAGS_out_v, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
+                                         cap.GetFPS(), Visualizer::GetOutputSize(frame.size()));
+        }
         Visualizer sc_visualizer(!FLAGS_no_show, vid_writer);
+        DetectionsLogger logger(std::cout, FLAGS_r, FLAGS_ad);
 
+        const int smooth_window_size = static_cast<int>(cap.GetFPS() * FLAGS_d_ad);
+        const int smooth_min_length = static_cast<int>(cap.GetFPS() * FLAGS_min_ad);
+
+        if (!FLAGS_no_show) {
+            std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+        }
         while (!is_last_frame) {
+            logger.CreateNextFrameRecord(cap.GetVideoPath(), num_frames, prev_frame.cols, prev_frame.rows);
             auto started = std::chrono::high_resolution_clock::now();
 
             is_last_frame = !cap.GrabNext();
@@ -390,7 +548,6 @@ int main(int argc, char* argv[]) {
 
             if (!is_last_frame) {
                 prev_frame_path = cap.GetVideoPath();
-                prev_fame_idx = cap.GetFrameIndex();
                 face_detector.enqueue(frame);
                 face_detector.submitRequest();
                 action_detector.enqueue(frame);
@@ -444,24 +601,56 @@ int main(int argc, char* argv[]) {
                     action_ind = tracked_actions[person_ind].label;
                 }
 
-                label_to_draw += "[" + GetActionTextLabel(action_ind) + "]";
-                frame_face_obj_id_to_action[face.object_id] = action_ind;
+                if (actions_type == STUDENT) {
+                    if (action_ind != default_action_index) {
+                        label_to_draw += "[" + GetActionTextLabel(action_ind, actions_map) + "]";
+                    }
+                    frame_face_obj_id_to_action[face.object_id] = action_ind;
+                    sc_visualizer.DrawObject(face.rect, label_to_draw, red_color, white_color, true);
+                    logger.AddFaceToFrame(face.rect, face_gallery.GetLabelByID(face.label), "");
+                }
 
-                sc_visualizer.DrawObject(face.rect, label_to_draw, red_color, white_color, true);
+                if ((actions_type == TEACHER) && (person_ind >= 0)) {
+                    if (face_gallery.GetLabelByID(face.label) == teacher_id) {
+                        teacher_track_id = tracked_actions[person_ind].object_id;
+                    } else if (teacher_track_id == tracked_actions[person_ind].object_id) {
+                        teacher_track_id = -1;
+                    }
+                }
             }
-            face_obj_id_to_action_maps.push_back(frame_face_obj_id_to_action);
 
-            sc_visualizer.DrawFPS(1e3f / (total_time_ms / static_cast<float>(num_frames) + 1e-6));
+            if (actions_type == STUDENT) {
+                for (const auto& action : tracked_actions) {
+                    const auto& action_label = GetActionTextLabel(action.label, actions_map);
+                    const auto& action_color = GetActionTextColor(action.label);
+                    const auto& text_label = face_config.enabled ? "" : action_label;
+                    sc_visualizer.DrawObject(action.rect, text_label, action_color, white_color, true);
+                    logger.AddPersonToFrame(action.rect, action_label, "");
+                }
+                face_obj_id_to_action_maps.push_back(frame_face_obj_id_to_action);
+            } else if (teacher_track_id >= 0) {
+                auto res_find = std::find_if(tracked_actions.begin(), tracked_actions.end(),
+                             [teacher_track_id](const TrackedObject& o){ return o.object_id == teacher_track_id; });
+                if (res_find != tracked_actions.end()) {
+                    const auto& track_action = *res_find;
+                    const auto& action_label = GetActionTextLabel(track_action.label, actions_map);
+                    sc_visualizer.DrawObject(track_action.rect, action_label, red_color, white_color, true);
+                    logger.AddPersonToFrame(track_action.rect, action_label, teacher_id);
+                }
+            }
+
+            sc_visualizer.DrawFPS(1e3f / (total_time_ms / static_cast<float>(num_frames) + 1e-6f));
             sc_visualizer.Show();
 
             char key = cv::waitKey(1);
             if (key == ESC_KEY) {
                 break;
             }
-            if (FLAGS_last_frame >= 0 && num_frames > FLAGS_last_frame) {
+            if (FLAGS_last_frame >= 0 && num_frames > static_cast<size_t>(FLAGS_last_frame)) {
                 break;
             }
             prev_frame = frame.clone();
+            logger.FinalizeFrameRecord();
         }
         sc_visualizer.Finalize();
 
@@ -478,18 +667,42 @@ int main(int argc, char* argv[]) {
             landmarks_detector.PrintPerformanceCounts();
         }
 
-        auto face_tracks = tracker_reid.vector_tracks();
+        if (actions_type == STUDENT) {
+            auto face_tracks = tracker_reid.vector_tracks();
 
-        // correct labels for track
-        std::vector<Track> new_face_tracks = UpdateTrackLabelsToBestAndFilterOutUnknowns(face_tracks);
-        std::map<int, int> face_track_id_to_label = GetMapFaceTrackIdToLabel(new_face_tracks);
+            // correct labels for track
+            std::vector<Track> new_face_tracks = UpdateTrackLabelsToBestAndFilterOutUnknowns(face_tracks);
+            std::map<int, int> face_track_id_to_label = GetMapFaceTrackIdToLabel(new_face_tracks);
 
-        DetectionsLogger logger(std::cout, FLAGS_r, FLAGS_ad);
-        logger.DumpDetections(cap.GetVideoPath(), frame.size(), num_frames,
-                              new_face_tracks,
-                              face_track_id_to_label,
-                              actions_map, face_gallery.GetIDToLabelMap(),
-                              face_obj_id_to_action_maps);
+            if (reid_config.enabled && face_gallery.size() > 0) {
+                std::map<int, FrameEventsTrack> face_obj_id_to_actions_track;
+                ConvertActionMapsToFrameEventTracks(face_obj_id_to_action_maps, default_action_index,
+                                                    &face_obj_id_to_actions_track);
+
+                const int start_frame = 0;
+                const int end_frame = face_obj_id_to_action_maps.size();
+                std::map<int, RangeEventsTrack> face_obj_id_to_events;
+                SmoothTracks(face_obj_id_to_actions_track, start_frame, end_frame,
+                             smooth_window_size, smooth_min_length, default_action_index,
+                             &face_obj_id_to_events);
+
+                slog::info << "Final ID->events mapping" << slog::endl;
+                logger.DumpTracks(face_obj_id_to_events,
+                                  actions_map, face_track_id_to_label,
+                                  face_gallery.GetIDToLabelMap());
+
+                std::vector<std::map<int, int>> face_obj_id_to_smoothed_action_maps;
+                ConvertRangeEventsTracksToActionMaps(end_frame, face_obj_id_to_events,
+                                                     &face_obj_id_to_smoothed_action_maps);
+
+                slog::info << "Final per-frame ID->action mapping" << slog::endl;
+                logger.DumpDetections(cap.GetVideoPath(), frame.size(), num_frames,
+                                      new_face_tracks,
+                                      face_track_id_to_label,
+                                      actions_map, face_gallery.GetIDToLabelMap(),
+                                      face_obj_id_to_smoothed_action_maps);
+            }
+        }
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

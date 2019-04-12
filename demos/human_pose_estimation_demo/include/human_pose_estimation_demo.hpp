@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -18,7 +18,7 @@ static const char human_pose_estimation_model_message[] = "Required. Path to the
 
 /// @brief Message for assigning Human Pose Estimation inference to device
 static const char target_device_message[] = "Optional. Specify the target device for Human Pose Estimation "\
-                                            "(CPU, GPU, FPGA or MYRIAD is acceptable). Default value is \"CPU\".";
+                                            "(CPU, GPU, FPGA, HDDL or MYRIAD is acceptable). Default value is \"CPU\".";
 
 /// @brief Message for performance counter
 static const char performance_counter_message[] = "Optional. Enable per-layer performance report.";

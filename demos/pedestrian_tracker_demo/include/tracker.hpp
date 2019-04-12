@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -18,8 +18,6 @@
 #include "utils.hpp"
 #include "descriptor.hpp"
 #include "distance.hpp"
-
-
 
 ///
 /// \brief The TrackerParams struct stores parameters of PedestrianTracker
@@ -482,7 +480,7 @@ private:
     struct pair_hash {
         std::size_t operator()(const std::pair<size_t, size_t> &p) const {
             PT_CHECK(p.first < 1e6 && p.second < 1e6);
-            return p.first * 1e6 + p.second;
+            return static_cast<size_t>(p.first * 1e6 + p.second);
         }
     };
 

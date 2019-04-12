@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
 
         // --------------------------- 1. Load Plugin for inference engine -------------------------------------
         slog::info << "Loading plugin" << slog::endl;
-        InferencePlugin plugin = PluginDispatcher({"../../../lib/intel64", ""}).getPluginByDevice(FLAGS_d);
+        InferencePlugin plugin = PluginDispatcher().getPluginByDevice(FLAGS_d);
         printPluginVersion(plugin, std::cout);
 
         /** Load extensions for the plugin **/
@@ -169,8 +169,8 @@ int main(int argc, char *argv[]) {
         DataPtr& output = outputInfo.begin()->second;
         auto outputName = outputInfo.begin()->first;
         const int num_classes = netReader.getNetwork().getLayerByName(outputName.c_str())->GetParamAsInt("num_classes");
-        if (labels.size() != num_classes) {
-            if (labels.size() == (num_classes - 1))  // if network assumes default "background" class, having no label
+        if (static_cast<int>(labels.size()) != num_classes) {
+            if (static_cast<int>(labels.size()) == (num_classes - 1))  // if network assumes default "background" class, having no label
                 labels.insert(labels.begin(), "fake");
             else
                 labels.clear();
@@ -210,6 +210,7 @@ int main(int argc, char *argv[]) {
         auto wallclock = std::chrono::high_resolution_clock::now();
         double ocv_decode_time = 0, ocv_render_time = 0;
 
+        std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
         while (true) {
             auto t0 = std::chrono::high_resolution_clock::now();
             // Here is the first asynchronous point:
@@ -282,17 +283,18 @@ int main(int argc, char *argv[]) {
                 const float *detections = async_infer_request_curr->GetBlob(outputName)->buffer().as<PrecisionTrait<Precision::FP32>::value_type*>();
                 for (int i = 0; i < maxProposalCount; i++) {
                     float image_id = detections[i * objectSize + 0];
-                    int label = static_cast<int>(detections[i * objectSize + 1]);
+                    if (image_id < 0) {
+                        std::cout << "Only " << i << " proposals found" << std::endl;
+                        break;
+                    }
+
                     float confidence = detections[i * objectSize + 2];
+                    auto label = static_cast<int>(detections[i * objectSize + 1]);
                     float xmin = detections[i * objectSize + 3] * width;
                     float ymin = detections[i * objectSize + 4] * height;
                     float xmax = detections[i * objectSize + 5] * width;
                     float ymax = detections[i * objectSize + 6] * height;
 
-                    if (image_id < 0) {
-                        std::cout << "Only " << i << " proposals found" << std::endl;
-                        break;
-                    }
                     if (FLAGS_r) {
                         std::cout << "[" << i << "," << label << "] element, prob = " << confidence <<
                                   "    (" << xmin << "," << ymin << ")-(" << xmax << "," << ymax << ")"
@@ -304,8 +306,8 @@ int main(int argc, char *argv[]) {
                         std::ostringstream conf;
                         conf << ":" << std::fixed << std::setprecision(3) << confidence;
                         cv::putText(curr_frame,
-                                    (label < labels.size() ? labels[label] : std::string("label #") + std::to_string(label))
-                                    + conf.str(),
+                                    (static_cast<size_t>(label) < labels.size() ?
+                                    labels[label] : std::string("label #") + std::to_string(label)) + conf.str(),
                                     cv::Point2f(xmin, ymin - 5), cv::FONT_HERSHEY_COMPLEX_SMALL, 1,
                                     cv::Scalar(0, 0, 255));
                         cv::rectangle(curr_frame, cv::Point2f(xmin, ymin), cv::Point2f(xmax, ymax), cv::Scalar(0, 0, 255));

@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -85,7 +85,7 @@ public:
             if (_num_priors * _num_loc_classes * 4 != loc_size)
                 THROW_IE_EXCEPTION << "Number of priors must match number of location predictions.";
 
-            if (_num_priors * _num_classes != conf_size)
+            if (_num_priors * _num_classes != static_cast<int>(conf_size))
                 THROW_IE_EXCEPTION << "Number of priors must match number of confidence predictions.";
 
             _num = static_cast<int>(conf_size);
@@ -142,7 +142,6 @@ public:
         const float *prior_data  = inputs[idx_priors]->buffer();
 
         auto conf_dims = inputs[idx_confidence]->getTensorDesc().getDims();
-        uint32_t conf_size = conf_dims[0]*conf_dims[1];
 
         const int N = 1;  // TODO: Support batch
 
@@ -239,7 +238,7 @@ public:
                 // Store the new indices.
                 memset(detections_data + n*_num_classes, 0, _num_classes * sizeof(int));
 
-                for (int j = 0; j < conf_index_class_map.size(); ++j) {
+                for (size_t j = 0; j < conf_index_class_map.size(); ++j) {
                     int label = conf_index_class_map[j].second.first;
                     int idx = conf_index_class_map[j].second.second;
                     int *pindices = indices_data + n * _num_classes * _num_priors + label * _num_priors;
@@ -272,8 +271,8 @@ public:
                 for (int i = 0; i < detections_data[n*_num_classes + c]; ++i) {
                     int idx = pindices[c*_num_priors + i];
 
-                    dst_data[count * DETECTION_SIZE + 0] = n;
-                    dst_data[count * DETECTION_SIZE + 1] = c;
+                    dst_data[count * DETECTION_SIZE + 0] = static_cast<float>(n);
+                    dst_data[count * DETECTION_SIZE + 1] = static_cast<float>(c);
                     dst_data[count * DETECTION_SIZE + 2] = pconf[c*_num_priors + idx];
 
                     float xmin = _share_location ? pboxes[idx*4 + 0] :

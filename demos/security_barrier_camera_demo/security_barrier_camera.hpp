@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -29,15 +29,15 @@ static const char lpr_model_message[] = "Optional. Path to the License Plate Rec
 
 /// @brief message for assigning vehicle detection inference to device
 static const char target_device_message[] = "Optional. Specify the target device for Vehicle Detection "\
-                                            "(CPU, GPU, FPGA, MYRIAD, or HETERO).";
+                                            "(CPU, GPU, FPGA, MYRIAD, HDDL or HETERO).";
 
 /// @brief message for assigning vehicle attributes to device
 static const char target_device_message_vehicle_attribs[] = "Optional. Specify the target device for Vehicle Attributes "\
-                                                            "(CPU, GPU, FPGA, MYRIAD, or HETERO).";
+                                                            "(CPU, GPU, FPGA, MYRIAD, HDDL or HETERO).";
 
 /// @brief message for assigning LPR inference to device
 static const char target_device_message_lpr[] = "Optional. Specify the target device for License Plate Recognition "\
-                                                "(CPU, GPU, FPGA, MYRIAD, or HETERO).";
+                                                "(CPU, GPU, FPGA, MYRIAD, HDDL or HETERO).";
 
 /// @brief message for performance counters
 static const char performance_counter_message[] = "Optional. Enable per-layer performance statistics.";
@@ -68,6 +68,17 @@ static const char ninfer_request_message[] = "Optional. Number of infer request 
 /// @brief message for number of camera inputs
 static const char num_cameras[] = "Optional. Number of processed cameras (default value is 1) if the input (-i) is specified as camera.";
 
+/// @brief message for FPGA device IDs
+static const char fpga_device_ids_message[] = "Optional. Specify FPGA device IDs (0,1,n).";
+
+/// @brief Message for looping video argument
+static const char loop_video_output_message[] = "Optional. Enable playing video on a loop.";
+
+/// @brief Message for looping video argument
+static const char ninputs_message[] = "Optional. Specify the number of inputs to be processed.";
+
+/// @brief Message for display resolution argument
+static const char display_resolution_message[] = "Optional. Specify the maximum output window resolution.";
 
 /// \brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
@@ -126,11 +137,26 @@ DEFINE_bool(auto_resize, false, input_resizable_message);
 
 /// @brief Number of infer requests
 /// It is an optional parameter
-DEFINE_int32(nireq, 1, ninfer_request_message);
+DEFINE_uint32(nireq, 1, ninfer_request_message);
 
 /// \brief Flag to specify number of expected input channels<br>
 /// It is an optional parameter
 DEFINE_uint32(nc, 1, num_cameras);
+
+/// \brief Flag to specify FPGA device IDs
+DEFINE_string(fpga_device_ids, "", fpga_device_ids_message);
+
+/// \brief Define a flag to loop video<br>
+/// It is an optional parameter
+DEFINE_bool(loop_video, false, loop_video_output_message);
+
+/// \brief Flag to specify the number of inputs to be processed<br>
+/// It is an optional parameter
+DEFINE_int32(ni, -1, ninputs_message);
+
+/// \brief Flag to specify the maximum output window resolution<br>
+/// It is an optional parameter
+DEFINE_string(display_resolution, "1920x1080", display_resolution_message);
 
 /**
 * \brief This function show a help message
@@ -158,4 +184,8 @@ static void showUsage() {
     std::cout << "    -auto_resize               " << input_resizable_message << std::endl;
     std::cout << "    -nireq                     " << ninfer_request_message << std::endl;
     std::cout << "    -nc                        " << num_cameras << std::endl;
+    std::cout << "    -fpga_device_ids           " << fpga_device_ids_message << std::endl;
+    std::cout << "    -loop_video                " << loop_video_output_message << std::endl;
+    std::cout << "    -ni                        " << ninputs_message << std::endl;
+    std::cout << "    -display_resolution        " << display_resolution_message << std::endl;
 }
