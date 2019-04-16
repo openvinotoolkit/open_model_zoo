@@ -412,7 +412,8 @@ topologies:
       - --mean_values=data[128.0,128.0,128.0]
       - --scale_values=data[128.0]
       - --output=prob
-      - --input_model=$dl_dir/inception-resnet-v2.prototxt
+      - --input_model=$dl_dir/inception-resnet-v2.caffemodel
+      - --input_proto=$dl_dir/inception-resnet-v2.prototxt
     framework: caffe
     license: https://github.com/soeaver/caffe-model/blob/master/LICENSE
 
@@ -1041,7 +1042,7 @@ topologies:
       - --input=image_tensor
       - --output=detection_scores,detection_boxes,num_detections
       - --tensorflow_use_custom_operations_config=$mo_dir/extensions/front/tf/faster_rcnn_support.json
-      - --tensorflow_object_detection_api_pipeline_config=$dl_dir/faster_rcnn_resnet101_coco_2018_01_28/frozen_inference_graph.pb
+      - --tensorflow_object_detection_api_pipeline_config=$dl_dir/faster_rcnn_resnet101_coco_2018_01_28/pipeline.config
       - --input_model=$dl_dir/faster_rcnn_resnet101_coco_2018_01_28/frozen_inference_graph.pb
     framework: tf
     license: https://github.com/tensorflow/models/blob/master/LICENSE
