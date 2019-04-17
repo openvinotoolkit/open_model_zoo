@@ -25,12 +25,12 @@ import shlex
 import shutil
 import ssl
 import sys
-import tarfile
 import tempfile
 import time
-import yaml
 
 from pathlib import Path
+
+import common
 
 DOWNLOAD_TIMEOUT = 5 * 60
 
@@ -205,16 +205,8 @@ def get_confirm_token(response):
             return value
     return None
 
-def validate_postproc_path(path_str, top_name):
-    path = Path(path_str)
-
-    if path.anchor or '..' in path.parts:
-        sys.exit('Invalid path of file to post-process for topology "{}"'.format(top_name))
-
-    return path
-
 def postprocess_regex_replace(postproc, top_name, output_dir):
-    postproc_file = output_dir / validate_postproc_path(postproc['file'], top_name)
+    postproc_file = output_dir / postproc.file
 
     print('========= Replacing text in {} ========='.format(postproc_file))
 
@@ -224,27 +216,24 @@ def postprocess_regex_replace(postproc, top_name, output_dir):
     if not orig_file.exists():
         postproc_file.replace(orig_file)
 
-    expected_num_replacements = postproc.get('count', 0)
-
-    postproc_file_text, num_replacements = re.subn(
-        postproc['pattern'], postproc['replacement'], postproc_file_text,
-        count=expected_num_replacements)
+    postproc_file_text, num_replacements = postproc.pattern.subn(
+        postproc.replacement, postproc_file_text, count=postproc.count)
 
     if num_replacements == 0:
         sys.exit('Invalid pattern: no occurrences found')
 
-    if expected_num_replacements != 0 and num_replacements != expected_num_replacements:
+    if postproc.count != 0 and num_replacements != postproc.count:
         sys.exit('Invalid pattern: expected at least {} occurrences, but only {} found'.format(
-            expected_num_replacements, num_replacements))
+            postproc.count, num_replacements))
 
     postproc_file.write_text(postproc_file_text)
 
 def postprocess_unpack_archive(postproc, top_name, output_dir):
-    postproc_file = output_dir / validate_postproc_path(postproc['file'], top_name)
+    postproc_file = output_dir / postproc.file
 
     print('========= Unpacking {} ========='.format(postproc_file))
 
-    shutil.unpack_archive(str(postproc_file), str(output_dir), postproc['format'])
+    shutil.unpack_archive(str(postproc_file), str(output_dir), postproc.format)
 
 class DownloaderArgumentParser(argparse.ArgumentParser):
     def error(self, message):
@@ -278,26 +267,20 @@ parser.add_argument('--num_attempts', type = positive_int_arg, metavar = 'N', de
     help = 'attempt each download up to N times')
 
 args = parser.parse_args()
-path_to_config = args.config
 cache = NullCache() if args.cache_dir is None else DirCache(args.cache_dir)
 
-with path_to_config.open() as stream:
-    try:
-        c_new = yaml.safe_load(stream)
-    except yaml.YAMLError as exc:
-        print(exc)
-        sys.exit('Cannot parse the YML, please check the configuration file')
+all_topologies = common.load_topologies(args.config)
 
 if args.print_all:
-    for top in c_new['topologies']:
-        print(top['name'])
+    for top in all_topologies:
+        print(top.name)
     sys.exit()
 
 if sum([args.all, args.name is not None, args.list is not None]) > 1:
     parser.error('Please choose either "--all", "--name" or "--list"')
 
 if args.all:
-    topologies = c_new['topologies']
+    topologies = all_topologies
 elif args.name is not None or args.list is not None:
     if args.name is not None:
         patterns = args.name.split(',')
@@ -314,8 +297,8 @@ elif args.name is not None or args.list is not None:
 
     topologies = []
     for pattern in patterns:
-        matching_topologies = [top for top in c_new['topologies']
-            if fnmatch.fnmatchcase(top['name'], pattern)]
+        matching_topologies = [top for top in all_topologies
+            if fnmatch.fnmatchcase(top.name, pattern)]
 
         if not matching_topologies:
             sys.exit('No matching topologies: "{}"'.format(pattern))
@@ -327,8 +310,8 @@ else:
     print('')
     print('========== All available topologies ==========')
     print('')
-    for top in c_new['topologies']:
-        print(top['name'])
+    for top in all_topologies:
+        print(top.name)
     sys.exit(2)
 
 print('')
@@ -336,36 +319,24 @@ print('###############|| Downloading topologies ||###############')
 print('')
 with requests.Session() as session:
     for top in topologies:
-        output = args.output_dir / top['output']
+        output = args.output_dir / top.subdir
         output.mkdir(parents=True, exist_ok=True)
 
-        top_file_names = set()
+        for top_file in top.files:
+            destination = output / top_file.name
 
-        for top_file in top['files']:
-            top_file_name = Path(top_file['name'])
-
-            if len(top_file_name.parts) != 1 or top_file_name.anchor:
-                sys.exit('Invalid file name "{}" for topology "{}"'.format(top_file['name'], top['name']))
-
-            if top_file_name in top_file_names:
-                sys.exit('Duplicate file name "{}" for topology "{}"'.format(top_file['name'], top['name']))
-            top_file_names.add(top_file_name)
-
-            destination = output / top_file_name
-
-            if isinstance(top_file['source'], str):
+            if isinstance(top_file.source, common.FileSourceHttp):
                 start_download = lambda: start_download_generic(
-                    session, top_file['source'], top_file.get('size'))
-            elif top_file['source']['$type'] == 'google_drive':
+                    session, top_file.source.url, top_file.size)
+            elif isinstance(top_file.source, common.FileSourceGoogleDrive):
                 start_download = lambda: start_download_google_drive(
-                    session, top_file['source']['id'], top_file['size'])
+                    session, top_file.source.id, top_file.size)
             else:
-                sys.exit('Unknown source type "{}" for file "{}" of topology "{}"'.format(
-                    top_file['source']['$type'], top_file_name, top['name']))
+                assert False, "Unreachable code"
 
-            try_retrieve(top['name'], destination, top_file['sha256'], cache, args.num_attempts, start_download)
+            try_retrieve(top.name, destination, top_file.sha256, cache, args.num_attempts, start_download)
 
-            if top['name'] in failed_topologies:
+            if top.name in failed_topologies:
                 shutil.rmtree(str(output))
                 break
 
@@ -373,15 +344,15 @@ print('')
 print('###############|| Post processing ||###############')
 print('')
 for top in topologies:
-    output = args.output_dir / top['output']
+    output = args.output_dir / top.subdir
 
-    for postproc in top.get('postprocessing', []):
-        if postproc['$type'] == 'regex_replace':
-            postprocess_regex_replace(postproc, top['name'], output)
-        elif postproc['$type'] == 'unpack_archive':
-            postprocess_unpack_archive(postproc, top['name'], output)
+    for postproc in top.postprocessing:
+        if isinstance(postproc, common.PostprocRegexReplace):
+            postprocess_regex_replace(postproc, top.name, output)
+        elif isinstance(postproc, common.PostprocUnpackArchive):
+            postprocess_unpack_archive(postproc, top.name, output)
         else:
-            sys.exit('Unknown post-processing type "{}" for topology "{}"'.format(postproc['$type'], top['name']))
+            assert False, "Unreachable code"
 
 if failed_topologies:
     print('FAILED:')
