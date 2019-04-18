@@ -26,7 +26,6 @@ Average Precision (AP) is defined as an area under the [precision/recall](https:
 curve.
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 
