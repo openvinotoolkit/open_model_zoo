@@ -32,7 +32,6 @@ one output.
 | roll  |  4.6 ± 5.6                                                                                                                                            |
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

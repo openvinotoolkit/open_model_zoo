@@ -25,7 +25,6 @@ The cumulative matching curve (CMC) at rank-1 is accuracy denoting the possibili
 Mean Average Precision (mAP) is the mean across all queries’ Average Precision (AP) and AP is defined as an area under the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall) curve.
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

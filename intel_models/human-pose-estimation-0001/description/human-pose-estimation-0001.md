@@ -22,7 +22,6 @@ Average Precision metric described in [COCO Keypoint Evaluation site](http://coc
 Tested on a COCO validation subset from the original paper: Cao et al. ["Realtime Multi-Person 2D Pose Estimation using Part Affinity Fields"](https://arxiv.org/pdf/1611.08050.pdf).
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

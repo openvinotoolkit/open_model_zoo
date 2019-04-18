@@ -31,7 +31,6 @@ Super resolution:
 For reference, PSNR for bicubic upsampling on test dataset is 26.79 dB.
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 
@@ -48,8 +47,8 @@ Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/be
     - C - number of channels
     - H - image height
     - W - image width.
-    
-    
+
+
   Expected color order is BGR.
 
 ## Outputs

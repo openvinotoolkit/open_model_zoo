@@ -37,7 +37,6 @@ that was converted for four class classification task are:
 - `GT` - number of ground truth pixels for given class
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

@@ -26,7 +26,6 @@ Average Precision (AP) metric is described in: Mark Everingham et al.
 Tested on challenging internal datasets with 1001 pedestrian and 12585 vehicles to detect.
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

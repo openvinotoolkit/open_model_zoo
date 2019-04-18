@@ -44,7 +44,6 @@ Similarly, training dataset has 160,297 images with:
 | Bike           | 55,692                   |
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

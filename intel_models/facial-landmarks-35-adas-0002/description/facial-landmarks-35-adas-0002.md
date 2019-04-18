@@ -61,7 +61,6 @@ where N is the number of landmarks, _p_-hat and _p_ are, correspondingly, the pr
 
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

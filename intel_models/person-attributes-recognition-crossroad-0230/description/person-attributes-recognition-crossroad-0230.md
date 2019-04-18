@@ -1,7 +1,7 @@
 # person-attributes-recognition-crossroad-0230
 
 ## Use Case and High-Level Description
-This model presents a person attributes classification algorithm analysis scenario. It produces probability of person attributions existing on the sample and a position of two point on sample, whiches can be used for color prob (like, color picker in graphical editors) 
+This model presents a person attributes classification algorithm analysis scenario. It produces probability of person attributions existing on the sample and a position of two point on sample, whiches can be used for color prob (like, color picker in graphical editors)
 
 ## Examples
 
@@ -38,8 +38,6 @@ This model presents a person attributes classification algorithm analysis scenar
 | `has_coat_jacket` |  NA   |
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
-
 
 ## Inputs
 
@@ -58,7 +56,7 @@ Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/be
 1.  The net outputs a blob named 453 with shape: [1, 8, 1, 1] across eight attributes:
     [`is_male`, `has_bag`, `has_backpack`, `has_hat`, `has_longsleeves`, `has_longpants`, `has_longhair`,
      `has_coat_jacket`]. Value > 0.5 means that an attribute is present.
-2.  The net outputs a blob named 456 with shape: [1, 2, 1, 1]. It is location of point with top color. 
+2.  The net outputs a blob named 456 with shape: [1, 2, 1, 1]. It is location of point with top color.
 3.  The net outputs a blob named 459 with shape: [1, 2, 1, 1]. It is location of point with bottom color.
 
 

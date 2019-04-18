@@ -27,7 +27,6 @@ Average Precision (AP) is defined as an area under the
 curve. Validation dataset consists of ~50K of images from ~100 different scenes.
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

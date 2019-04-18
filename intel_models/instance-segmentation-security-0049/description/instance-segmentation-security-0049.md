@@ -28,7 +28,6 @@ Average Precision (AP) is defined and measured according to standard
 
 ## Performance
 
-
 ## Inputs
 
 1.	name: `im_data` , shape: [1x3x320x480] - An input image in the format

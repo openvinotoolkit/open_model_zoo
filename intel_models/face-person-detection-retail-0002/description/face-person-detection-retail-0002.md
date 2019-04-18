@@ -29,7 +29,6 @@ the [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 curve.
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

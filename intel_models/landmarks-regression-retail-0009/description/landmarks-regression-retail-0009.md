@@ -25,7 +25,6 @@ Normed Error (NE) for i<sup>th</sup> sample has the following form:
 where N is the number of landmarks, _p_-hat and _p_ are, correspondingly, the prediction and ground truth vectors of k<sup>th</sup> landmark of i<sup>th</sup> sample, and d<sub>i</sub> is the interocular distance for i<sup>th</sup> sample.
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

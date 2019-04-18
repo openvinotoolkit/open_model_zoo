@@ -71,7 +71,6 @@ The quality metrics calculated on 2000 images:
   - `FP` - number of false positive pixels for given class
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

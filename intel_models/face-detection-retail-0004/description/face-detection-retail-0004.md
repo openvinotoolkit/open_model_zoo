@@ -26,7 +26,6 @@ curve. All numbers were evaluated by taking into account only faces bigger than
 60 x 60 pixels.
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

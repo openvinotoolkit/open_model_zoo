@@ -28,7 +28,6 @@ Average Precision (AP) is defined as an area under the
 curve. Validation dataset is [BIT-Vehicle](http://iitlab.bit.edu.cn/mcislab/vehicledb/).
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

@@ -18,7 +18,6 @@ Text detector based on [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) archite
 | Source framework                                              | TensorFlow              |
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 
