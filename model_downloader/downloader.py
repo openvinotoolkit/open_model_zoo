@@ -253,31 +253,36 @@ def get_confirm_token(response):
             return value
     return None
 
-def delete_param(model):
-    tmpfile = args.output_dir / 'tmp.txt'
-    with model.open('r') as input_file, tmpfile.open('w') as output_file:
-        data=input_file.read()
-        updated_data = re.sub(' +save_output_param \{.*\n.*\n +\}\n', '', data, count=1)
-        output_file.write(updated_data)
-    tmpfile.replace(model)
+def postprocess_regex_replace(postproc, top_name, output_dir):
+    postproc_file = Path(postproc['file'])
 
-def layers_to_layer(model):
-    tmpfile = args.output_dir / 'tmp.txt'
-    with model.open('r') as input_file, tmpfile.open('w') as output_file:
-        data=input_file.read()
-        updated_data = data.replace('layers {', 'layer {')
-        output_file.write(updated_data)
-    tmpfile.replace(model)
+    if postproc_file.anchor or '..' in postproc_file.parts:
+        sys.exit('Invalid path of file to post-process for topology "{}"'.format(top_name))
 
-def change_dim(model, old_dim, new_dim):
-    new = 'dim: ' + str(new_dim)
-    old = 'dim: ' + str(old_dim)
-    tmpfile = args.output_dir / 'tmp.txt'
-    with model.open('r') as input_file, tmpfile.open('w') as output_file:
-        data=input_file.read()
-        data = data.replace(old, new, 1)
-        output_file.write(data)
-    tmpfile.replace(model)
+    postproc_file = output_dir / postproc_file
+
+    print('========= Replacing text in {} ========='.format(postproc_file))
+
+    postproc_file_text = postproc_file.read_text()
+
+    orig_file = postproc_file.with_name(postproc_file.name + '.orig')
+    if not orig_file.exists():
+        postproc_file.replace(orig_file)
+
+    expected_num_replacements = postproc.get('count', 0)
+
+    postproc_file_text, num_replacements = re.subn(
+        postproc['pattern'], postproc['replacement'], postproc_file_text,
+        count=expected_num_replacements)
+
+    if num_replacements == 0:
+        sys.exit('Invalid pattern: no occurrences found')
+
+    if expected_num_replacements != 0 and num_replacements != expected_num_replacements:
+        sys.exit('Invalid pattern: expected at least {} occurrences, but only {} found'.format(
+            expected_num_replacements, num_replacements))
+
+    postproc_file.write_text(postproc_file_text)
 
 class DownloaderArgumentParser(argparse.ArgumentParser):
     def error(self, message):
@@ -415,26 +420,13 @@ print('')
 print('###############|| Post processing ||###############')
 print('')
 for top in topologies:
-    framework = FRAMEWORKS[top['framework']]
-
-    model_name = top['name'] + framework.model_extension
-    weights_name = top['name'] + framework.weights_extension
     output = args.output_dir / top['output']
-    path_to_model = output / model_name
-    path_to_weights = output / weights_name
-    if 'delete_output_param' in top:
-        if path_to_model.exists():
-            print('========= Deleting "save_output_param" from %s =========' % (model_name))
-            delete_param(path_to_model)
-    if {'old_dims', 'new_dims'} <= top.keys():
-        if path_to_model.exists():
-            print('========= Changing input dimensions in %s =========' % (model_name))
-            for j in range(len(top['old_dims'])):
-                change_dim(path_to_model, top['old_dims'][j], top['new_dims'][j])
-    if 'layers_to_layer' in top:
-        if path_to_model.exists():
-            print('========= Moving to new Caffe layer presentation %s =========' % (model_name))
-            layers_to_layer(path_to_model)
+
+    for postproc in top.get('postprocessing', []):
+        if postproc['$type'] == 'regex_replace':
+            postprocess_regex_replace(postproc, top['name'], output)
+        else:
+            sys.exit('Unknown post-processing type "{}" for topology "{}"'.format(postproc['$type'], top['name']))
 
 if failed_topologies:
     print('FAILED:')
