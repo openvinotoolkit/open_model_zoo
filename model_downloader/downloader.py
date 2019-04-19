@@ -17,7 +17,6 @@
 """
 
 import argparse
-import collections
 import fnmatch
 import hashlib
 import re
@@ -32,16 +31,6 @@ import time
 import yaml
 
 from pathlib import Path
-
-Framework = collections.namedtuple('Framework', ['model_extension', 'weights_extension'])
-MemberRequest = collections.namedtuple('MemberRequest', ['path', 'destination', 'expected_hash'])
-
-FRAMEWORKS = {
-    'caffe': Framework('.prototxt', '.caffemodel'),
-    'dldt': Framework('.xml', '.bin'),
-    'mxnet': Framework('.json', '.params'),
-    'tf': Framework('.config', '.frozen.pb'),
-}
 
 DOWNLOAD_TIMEOUT = 5 * 60
 
@@ -196,7 +185,7 @@ def try_update_cache(cache, hash, source):
         print(e)
         print('########## Warning: Failed to update the cache ##########')
 
-def try_download_simple(name, destination, expected_hash, cache, num_attempts, start_download):
+def try_retrieve(name, destination, expected_hash, cache, num_attempts, start_download):
     if try_retrieve_from_cache(cache, [[expected_hash, destination]]):
         return
 
@@ -210,56 +199,22 @@ def try_download_simple(name, destination, expected_hash, cache, num_attempts, s
 
     print('')
 
-def try_download_tar(name, members, cache, num_attempts, start_download):
-    if try_retrieve_from_cache(cache, [[member.expected_hash, member.destination] for member in members]):
-        return
-
-    for member in members:
-        print('========= Downloading {}'.format(member.destination))
-
-    with tempfile.TemporaryFile() as f:
-        if try_download(name, f, num_attempts, start_download):
-            f.seek(0)
-            tar = tarfile.open(fileobj=f, mode='r:*')
-            for member in members:
-                try:
-                    member_info = tar.getmember(member.path)
-                except KeyError:
-                    print('########## Error: Archive missing required member "{}" ##########'.format(member.path))
-                    print()
-                    failed_topologies.add(name)
-                    return
-
-                if not member_info.isfile():
-                    print('########## Error: Archive member "{}" is not a regular file ##########'.format(member.path))
-                    print()
-                    failed_topologies.add(name)
-                    return
-
-                with tar.extractfile(member_info) as member_file, member.destination.open('w+b') as destination_file:
-                    shutil.copyfileobj(member_file, destination_file)
-
-                    destination_file.seek(0)
-                    if verify_hash(destination_file, member.expected_hash, member.destination, name):
-                        try_update_cache(cache, member.expected_hash, member.destination)
-                    else:
-                        break
-
-    print('')
-
 def get_confirm_token(response):
     for key, value in response.cookies.items():
         if key.startswith('download_warning'):
             return value
     return None
 
-def postprocess_regex_replace(postproc, top_name, output_dir):
-    postproc_file = Path(postproc['file'])
+def validate_postproc_path(path_str, top_name):
+    path = Path(path_str)
 
-    if postproc_file.anchor or '..' in postproc_file.parts:
+    if path.anchor or '..' in path.parts:
         sys.exit('Invalid path of file to post-process for topology "{}"'.format(top_name))
 
-    postproc_file = output_dir / postproc_file
+    return path
+
+def postprocess_regex_replace(postproc, top_name, output_dir):
+    postproc_file = output_dir / validate_postproc_path(postproc['file'], top_name)
 
     print('========= Replacing text in {} ========='.format(postproc_file))
 
@@ -283,6 +238,13 @@ def postprocess_regex_replace(postproc, top_name, output_dir):
             expected_num_replacements, num_replacements))
 
     postproc_file.write_text(postproc_file_text)
+
+def postprocess_unpack_archive(postproc, top_name, output_dir):
+    postproc_file = output_dir / validate_postproc_path(postproc['file'], top_name)
+
+    print('========= Unpacking {} ========='.format(postproc_file))
+
+    shutil.unpack_archive(str(postproc_file), str(output_dir), postproc['format'])
 
 class DownloaderArgumentParser(argparse.ArgumentParser):
     def error(self, message):
@@ -374,47 +336,38 @@ print('###############|| Downloading topologies ||###############')
 print('')
 with requests.Session() as session:
     for top in topologies:
-        try:
-            framework = FRAMEWORKS[top['framework']]
-        except KeyError:
-            sys.exit('Unknown framework "{}" for topology "{}"'.format(top['framework'], top['name']))
-
         output = args.output_dir / top['output']
         output.mkdir(parents=True, exist_ok=True)
 
-        model_destination = output / (top['name'] + framework.model_extension)
-        weights_destination = output / (top['name'] + framework.weights_extension)
+        top_file_names = set()
 
-        if {'model_google_drive_id', 'model_size'} <= top.keys():
-            try_download_simple(top['name'], model_destination, top['model_hash'], cache, args.num_attempts,
-                lambda: start_download_google_drive(session, top['model_google_drive_id'], top['model_size']))
-        elif 'model' in top:
-            try_download_simple(top['name'], model_destination, top['model_hash'], cache, args.num_attempts,
-                lambda: start_download_generic(session, top['model'], top.get('model_size')))
+        for top_file in top['files']:
+            top_file_name = Path(top_file['name'])
 
-        if {'weights_google_drive_id', 'weights_size'} <= top.keys():
-            try_download_simple(top['name'], weights_destination, top['weights_hash'], cache, args.num_attempts,
-                lambda: start_download_google_drive(session, top['weights_google_drive_id'], top['weights_size']))
-        elif 'weights' in top:
-            try_download_simple(top['name'], weights_destination, top['weights_hash'], cache, args.num_attempts,
-                lambda: start_download_generic(session, top['weights'], top.get('weights_size')))
+            if len(top_file_name.parts) != 1 or top_file_name.anchor:
+                sys.exit('Invalid file name "{}" for topology "{}"'.format(top_file['name'], top['name']))
 
-        members = []
+            if top_file_name in top_file_names:
+                sys.exit('Duplicate file name "{}" for topology "{}"'.format(top_file['name'], top['name']))
+            top_file_names.add(top_file_name)
 
-        if 'model_path_prefix' in top:
-            members.append(MemberRequest(top['model_path_prefix'], model_destination, top['model_hash']))
-        if 'weights_path_prefix' in top:
-            members.append(MemberRequest(top['weights_path_prefix'], weights_destination, top['weights_hash']))
+            destination = output / top_file_name
 
-        if {'tar_google_drive_id', 'tar_size'} <= top.keys():
-            try_download_tar(top['name'], members, cache, args.num_attempts,
-                lambda: start_download_google_drive(session, top['tar_google_drive_id'], top['tar_size']))
-        elif 'tar' in top:
-            try_download_tar(top['name'], members, cache, args.num_attempts,
-                lambda: start_download_generic(session, top['tar'], top.get('tar_size')))
+            if isinstance(top_file['source'], str):
+                start_download = lambda: start_download_generic(
+                    session, top_file['source'], top_file.get('size'))
+            elif top_file['source']['$type'] == 'google_drive':
+                start_download = lambda: start_download_google_drive(
+                    session, top_file['source']['id'], top_file['size'])
+            else:
+                sys.exit('Unknown source type "{}" for file "{}" of topology "{}"'.format(
+                    top_file['source']['$type'], top_file_name, top['name']))
 
-        if top['name'] in failed_topologies:
-            shutil.rmtree(str(output))
+            try_retrieve(top['name'], destination, top_file['sha256'], cache, args.num_attempts, start_download)
+
+            if top['name'] in failed_topologies:
+                shutil.rmtree(str(output))
+                break
 
 print('')
 print('###############|| Post processing ||###############')
@@ -425,6 +378,8 @@ for top in topologies:
     for postproc in top.get('postprocessing', []):
         if postproc['$type'] == 'regex_replace':
             postprocess_regex_replace(postproc, top['name'], output)
+        elif postproc['$type'] == 'unpack_archive':
+            postprocess_unpack_archive(postproc, top['name'], output)
         else:
             sys.exit('Unknown post-processing type "{}" for topology "{}"'.format(postproc['$type'], top['name']))
 
