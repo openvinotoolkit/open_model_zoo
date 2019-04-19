@@ -44,6 +44,12 @@ def main():
         default=Path(__file__).resolve().parent / 'list_topologies.yml', help='topology configuration file')
     parser.add_argument('-d', '--download_root', type=Path, metavar='DIR',
         default=Path.cwd(), help='root directory with downloaded topology files')
+    parser.add_argument('--name', metavar='PAT[,PAT...]',
+        help='convert only topologies whose names match at least one of the specified patterns')
+    parser.add_argument('--list', type=Path, metavar='FILE.LST',
+        help='convert only topologies whose names match at least one of the patterns in the specified file')
+    parser.add_argument('--all', action='store_true', help='convert all topologies from the configuration file')
+    parser.add_argument('--print_all', action='store_true', help='print all available topologies')
     parser.add_argument('-p', '--python', type=Path, metavar='PYTHON', default=sys.executable,
         help='Python executable to run Model Optimizer with')
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
@@ -60,11 +66,11 @@ def main():
             sys.exit('Unable to locate Model Optimizer. '
                 + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
 
-    all_topologies = common.load_topologies(args.config)
+    topologies = common.load_topologies_from_args(parser, args)
 
     failed_topologies = set()
 
-    for top in all_topologies:
+    for top in topologies:
         if top.mo_args is None:
             print('========= Skipping {} (no conversion defined)'.format(top.name))
             print()
