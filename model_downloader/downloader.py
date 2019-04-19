@@ -17,7 +17,6 @@
 """
 
 import argparse
-import fnmatch
 import hashlib
 import re
 import requests
@@ -268,51 +267,7 @@ parser.add_argument('--num_attempts', type = positive_int_arg, metavar = 'N', de
 
 args = parser.parse_args()
 cache = NullCache() if args.cache_dir is None else DirCache(args.cache_dir)
-
-all_topologies = common.load_topologies(args.config)
-
-if args.print_all:
-    for top in all_topologies:
-        print(top.name)
-    sys.exit()
-
-if sum([args.all, args.name is not None, args.list is not None]) > 1:
-    parser.error('Please choose either "--all", "--name" or "--list"')
-
-if args.all:
-    topologies = all_topologies
-elif args.name is not None or args.list is not None:
-    if args.name is not None:
-        patterns = args.name.split(',')
-    else:
-        patterns = []
-        with args.list.open() as list_file:
-            for list_line in list_file:
-                tokens = shlex.split(list_line, comments=True)
-                if not tokens: continue
-
-                patterns.append(tokens[0])
-                # For now, ignore any other tokens in the line.
-                # We might use them as additional parameters later.
-
-    topologies = []
-    for pattern in patterns:
-        matching_topologies = [top for top in all_topologies
-            if fnmatch.fnmatchcase(top.name, pattern)]
-
-        if not matching_topologies:
-            sys.exit('No matching topologies: "{}"'.format(pattern))
-
-        topologies.extend(matching_topologies)
-else:
-    print('Please choose either "--all", "--name" or "--list"', file = sys.stderr)
-    parser.print_help()
-    print('')
-    print('========== All available topologies ==========')
-    print('')
-    for top in all_topologies:
-        print(top.name)
-    sys.exit(2)
+topologies = common.load_topologies_from_args(parser, args)
 
 print('')
 print('###############|| Downloading topologies ||###############')

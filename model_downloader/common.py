@@ -13,7 +13,10 @@
 # limitations under the License.
 
 import contextlib
+import fnmatch
 import re
+import shlex
+import sys
 
 from pathlib import Path
 
@@ -201,3 +204,48 @@ def load_topologies(config):
             return topologies
         except DeserializationError as exc:
             raise RuntimeError('In config "{}": {}'.format(config, exc)) from exc
+
+# requires the --print_all, --all, --name and --list arguments to be in `args`
+def load_topologies_from_args(parser, args):
+    if args.print_all:
+        for top in load_topologies(args.config):
+            print(top.name)
+        sys.exit()
+
+    filter_args_count = sum([args.all, args.name is not None, args.list is not None])
+
+    if filter_args_count > 1:
+        parser.error('at most one of "--all", "--name" or "--list" can be specified')
+
+    if filter_args_count == 0:
+        parser.error('one of "--print_all", "--all", "--name" or "--list" must be specified')
+
+    all_topologies = load_topologies(args.config)
+
+    if args.all:
+        return all_topologies
+    elif args.name is not None or args.list is not None:
+        if args.name is not None:
+            patterns = args.name.split(',')
+        else:
+            patterns = []
+            with args.list.open() as list_file:
+                for list_line in list_file:
+                    tokens = shlex.split(list_line, comments=True)
+                    if not tokens: continue
+
+                    patterns.append(tokens[0])
+                    # For now, ignore any other tokens in the line.
+                    # We might use them as additional parameters later.
+
+        topologies = []
+        for pattern in patterns:
+            matching_topologies = [top for top in all_topologies
+                if fnmatch.fnmatchcase(top.name, pattern)]
+
+            if not matching_topologies:
+                sys.exit('No matching topologies: "{}"'.format(pattern))
+
+            topologies.extend(matching_topologies)
+
+        return topologies
