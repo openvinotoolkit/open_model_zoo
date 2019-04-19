@@ -4,7 +4,7 @@
 
 This is a classical classification network for 1000 classes trained on ImageNet.
 The difference is that most convolutional layers were replaced by binary once that can be implemented as XNOR+POPCOUN operations.
-Only input, final and shortcut layers were kept as FP32, all the rest convolutional layers are replaced by BinaryConvolution layers. 
+Only input, final and shortcut layers were kept as FP32, all the rest convolutional layers are replaced by BinaryConvolution layers.
 
 
 ## Specification
@@ -20,7 +20,6 @@ Only input, final and shortcut layers were kept as FP32, all the rest convolutio
 The quality metrics calculated on ImageNet validation dataset is 70.69% accuracy
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

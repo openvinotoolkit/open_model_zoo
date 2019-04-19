@@ -25,7 +25,6 @@ Average Precision metric described in: Mark Everingham et al.
 Tested on an internal dataset with 1001 pedestrian to detect.
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

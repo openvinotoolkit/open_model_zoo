@@ -27,7 +27,6 @@ Average Precision metric described in: Mark Everingham et al.
 Tested on a challenging internal dataset with 3000 images and 12585 vehicles to detect.
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

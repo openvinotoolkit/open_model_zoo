@@ -31,7 +31,6 @@ curve. Numbers are on
 [Wider Face](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/) validation subset.
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

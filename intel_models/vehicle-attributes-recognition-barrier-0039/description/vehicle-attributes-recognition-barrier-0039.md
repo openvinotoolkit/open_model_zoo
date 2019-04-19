@@ -26,7 +26,6 @@ This model presents a vehicle attributes classification algorithm for a traffic 
 ![](./vehicle-attributes-recognition-barrier-0039-2.png)
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

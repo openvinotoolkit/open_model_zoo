@@ -35,7 +35,6 @@ only the images containing five aforementioned emotions is chosen. The total amo
 | Accuracy        |     70.20% |
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 

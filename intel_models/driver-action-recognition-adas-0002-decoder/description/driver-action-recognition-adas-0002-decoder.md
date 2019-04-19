@@ -4,7 +4,7 @@
 
 This is an action recognition model for the driver monitoring use case. The model uses Video Transformer approach with MobileNetv2 encoder. It is able to recognize the following actions: drinking, doing hair or making up, operating the radio, reaching behind, safe driving, talking on the phone, texting.
 
-This model is only decoder part of the whole pipeline. It accepts stack of frame embeddings, computed by driver-action-recognition-adas-0002-encoder, and produces prediction on input video. Video frames should be sampled to cover ~1 second fragment (i.e. skip every second frame in 30 fps video). 
+This model is only decoder part of the whole pipeline. It accepts stack of frame embeddings, computed by driver-action-recognition-adas-0002-encoder, and produces prediction on input video. Video frames should be sampled to cover ~1 second fragment (i.e. skip every second frame in 30 fps video).
 
 ## Example
 
@@ -20,7 +20,6 @@ This model is only decoder part of the whole pipeline. It accepts stack of frame
 
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 
@@ -28,7 +27,7 @@ Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/be
    where:
     - B - batch size.
     - T - Duration of input clip.
-    - C - dimension of embedding. 
+    - C - dimension of embedding.
 
 ## Outputs
 

@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 Fully convolutional network for simultaneous Age/Gender recognition. The network
-is able to recognize age of people in [18, 75] years old range, it is not 
+is able to recognize age of people in [18, 75] years old range, it is not
 applicable for children since their faces were not in the training set.
 
 ## Validation Dataset - Internal
@@ -37,7 +37,6 @@ applicable for children since their faces were not in the training set.
 | Gender accuracy |     95.80% |
 
 ## Performance
-Link to [performance table](https://software.intel.com/en-us/openvino-toolkit/benchmarks)
 
 ## Inputs
 
