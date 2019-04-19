@@ -31,8 +31,6 @@ from pathlib import Path
 
 import common
 
-DOWNLOAD_TIMEOUT = 5 * 60
-
 failed_topologies = set()
 
 def process_download(chunk_iterable, size, file):
@@ -56,31 +54,6 @@ def process_download(chunk_iterable, size, file):
                 file.write(chunk)
     finally:
         print()
-
-def start_download_generic(session, url, total_size=None):
-    response = session.get(url, stream=True, timeout=DOWNLOAD_TIMEOUT)
-    response.raise_for_status()
-
-    if total_size is None:
-        size = int(response.headers.get('content-length', 0))
-    else:
-        size = total_size
-
-    return response.iter_content(chunk_size=8192), size
-
-def start_download_google_drive(session, id, total_size):
-    chunk_size = 32768
-
-    URL = 'https://docs.google.com/uc?export=download'
-    response = session.get(URL, params={'id' : id}, stream=True, timeout=DOWNLOAD_TIMEOUT)
-    response.raise_for_status()
-
-    token = get_confirm_token(response)
-    if token:
-        params = { 'id' : id, 'confirm' : token }
-        response = session.get(URL, params=params, stream=True, timeout=DOWNLOAD_TIMEOUT)
-
-    return response.iter_content(chunk_size=32768), total_size
 
 def try_download(name, file, num_attempts, start_download):
     for attempt in range(num_attempts):
@@ -198,42 +171,6 @@ def try_retrieve(name, destination, expected_hash, cache, num_attempts, start_do
 
     print('')
 
-def get_confirm_token(response):
-    for key, value in response.cookies.items():
-        if key.startswith('download_warning'):
-            return value
-    return None
-
-def postprocess_regex_replace(postproc, top_name, output_dir):
-    postproc_file = output_dir / postproc.file
-
-    print('========= Replacing text in {} ========='.format(postproc_file))
-
-    postproc_file_text = postproc_file.read_text()
-
-    orig_file = postproc_file.with_name(postproc_file.name + '.orig')
-    if not orig_file.exists():
-        postproc_file.replace(orig_file)
-
-    postproc_file_text, num_replacements = postproc.pattern.subn(
-        postproc.replacement, postproc_file_text, count=postproc.count)
-
-    if num_replacements == 0:
-        sys.exit('Invalid pattern: no occurrences found')
-
-    if postproc.count != 0 and num_replacements != postproc.count:
-        sys.exit('Invalid pattern: expected at least {} occurrences, but only {} found'.format(
-            postproc.count, num_replacements))
-
-    postproc_file.write_text(postproc_file_text)
-
-def postprocess_unpack_archive(postproc, top_name, output_dir):
-    postproc_file = output_dir / postproc.file
-
-    print('========= Unpacking {} ========='.format(postproc_file))
-
-    shutil.unpack_archive(str(postproc_file), str(output_dir), postproc.format)
-
 class DownloaderArgumentParser(argparse.ArgumentParser):
     def error(self, message):
         sys.stderr.write('error: %s\n' % message)
@@ -280,16 +217,8 @@ with requests.Session() as session:
         for top_file in top.files:
             destination = output / top_file.name
 
-            if isinstance(top_file.source, common.FileSourceHttp):
-                start_download = lambda: start_download_generic(
-                    session, top_file.source.url, top_file.size)
-            elif isinstance(top_file.source, common.FileSourceGoogleDrive):
-                start_download = lambda: start_download_google_drive(
-                    session, top_file.source.id, top_file.size)
-            else:
-                assert False, "Unreachable code"
-
-            try_retrieve(top.name, destination, top_file.sha256, cache, args.num_attempts, start_download)
+            try_retrieve(top.name, destination, top_file.sha256, cache, args.num_attempts,
+                lambda: top_file.source.start_download(session, top_file.size))
 
             if top.name in failed_topologies:
                 shutil.rmtree(str(output))
@@ -302,12 +231,7 @@ for top in topologies:
     output = args.output_dir / top.subdir
 
     for postproc in top.postprocessing:
-        if isinstance(postproc, common.PostprocRegexReplace):
-            postprocess_regex_replace(postproc, top.name, output)
-        elif isinstance(postproc, common.PostprocUnpackArchive):
-            postprocess_unpack_archive(postproc, top.name, output)
-        else:
-            assert False, "Unreachable code"
+        postproc.apply(output)
 
 if failed_topologies:
     print('FAILED:')

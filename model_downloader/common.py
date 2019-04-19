@@ -16,11 +16,14 @@ import contextlib
 import fnmatch
 import re
 import shlex
+import shutil
 import sys
 
 from pathlib import Path
 
 import yaml
+
+DOWNLOAD_TIMEOUT = 5 * 60
 
 class DeserializationError(Exception):
     pass
@@ -76,6 +79,17 @@ class FileSourceHttp(FileSource):
     def deserialize(cls, source):
         return FileSourceHttp(validate_string('"url"', source['url']))
 
+    def start_download(self, session, total_size=None):
+        response = session.get(self.url, stream=True, timeout=DOWNLOAD_TIMEOUT)
+        response.raise_for_status()
+
+        if total_size is None:
+            size = int(response.headers.get('content-length', 0))
+        else:
+            size = total_size
+
+        return response.iter_content(chunk_size=8192), size
+
 FileSource.types['http'] = FileSourceHttp
 
 class FileSourceGoogleDrive(FileSource):
@@ -85,6 +99,19 @@ class FileSourceGoogleDrive(FileSource):
     @classmethod
     def deserialize(cls, source):
         return FileSourceGoogleDrive(validate_string('"id"', source['id']))
+
+    def start_download(self, session, total_size):
+        URL = 'https://docs.google.com/uc?export=download'
+        response = session.get(URL, params={'id' : self.id}, stream=True, timeout=DOWNLOAD_TIMEOUT)
+        response.raise_for_status()
+
+        for key, value in response.cookies.items():
+            if key.startswith('download_warning'):
+                params = {'id': self.id, 'confirm': value}
+                response = session.get(URL, params=params, stream=True, timeout=DOWNLOAD_TIMEOUT)
+                response.raise_for_status()
+
+        return response.iter_content(chunk_size=32768), total_size
 
 FileSource.types['google_drive'] = FileSourceGoogleDrive
 
@@ -137,6 +164,29 @@ class PostprocRegexReplace(Postproc):
             validate_nonnegative_int('"count"', postproc.get('count', 0)),
         )
 
+    def apply(self, output_dir):
+        postproc_file = output_dir / self.file
+
+        print('========= Replacing text in {} ========='.format(postproc_file))
+
+        postproc_file_text = postproc_file.read_text()
+
+        orig_file = postproc_file.with_name(postproc_file.name + '.orig')
+        if not orig_file.exists():
+            postproc_file.replace(orig_file)
+
+        postproc_file_text, num_replacements = self.pattern.subn(
+            self.replacement, postproc_file_text, count=self.count)
+
+        if num_replacements == 0:
+            raise RuntimeError('Invalid pattern: no occurrences found')
+
+        if self.count != 0 and num_replacements != self.count:
+            raise RuntimeError('Invalid pattern: expected at least {} occurrences, but only {} found'.format(
+                self.count, num_replacements))
+
+        postproc_file.write_text(postproc_file_text)
+
 Postproc.types['regex_replace'] = PostprocRegexReplace
 
 class PostprocUnpackArchive(Postproc):
@@ -150,6 +200,13 @@ class PostprocUnpackArchive(Postproc):
             validate_relative_path('"file"', postproc['file']),
             validate_string('"format"', postproc['format']),
         )
+
+    def apply(self, output_dir):
+        postproc_file = output_dir / self.file
+
+        print('========= Unpacking {} ========='.format(postproc_file))
+
+        shutil.unpack_archive(str(postproc_file), str(output_dir), self.format)
 
 Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
