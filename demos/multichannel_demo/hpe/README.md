@@ -1,6 +1,6 @@
-# Multi-Channel Face Detection Demo
+# Multi-Channel Human Pose Estimation C++ Demo
 
-This demo provides an inference pipeline for multi-channel human pose estimation. The demo uses Human Pose Estimation network. The corresponding pre-trained model delivered with the product is `human-pose-estimation-0001/`.
+This demo provides an inference pipeline for Multi-Channel Human Pose Estimation. The demo uses Human Pose Estimation network. The corresponding pre-trained model delivered with the product is `human-pose-estimation-0001/`.
 
 For details on the models, please refer to [pre-trained models](https://github.com/opencv/open_model_zoo/tree/2019/intel_models/index.md).
 
@@ -12,7 +12,9 @@ Other demo objectives are:
 
 ## How It Works
 
-> **NOTE**: Running the demo requires using at least one web camera attached to your machine.
+> **NOTES**:
+> * Running the demo requires using at least one web camera attached to your machine.
+> * By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 On the start-up, the application reads command line parameters and loads the specified networks. The Face Detection network is required.
 
@@ -47,6 +49,10 @@ Options:
 
 ```
 
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2018/model_downloader) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+
+> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
+
 For example, to run the demo with the pre-trained face detection model on FPGA with fallback on CPU, with one single camera, use the following command:
 ```sh
 ./multi-channel-human-pose-estimation-demo -m human-pose-estimation-0001.xml
@@ -70,4 +76,4 @@ The demo uses OpenCV to display the resulting bunch of frames with detections re
 On the top of the screen, the demo reports throughput (in frames per second). If needed, it also reports more detailed statistics (use `-show_stats` option while running the demo to enable it).
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/Readme.md)
+* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/README.md)

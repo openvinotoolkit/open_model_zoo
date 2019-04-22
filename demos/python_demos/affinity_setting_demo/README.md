@@ -12,7 +12,7 @@ Upon the start-up, the demo reads command-line parameters and loads a network an
 
 Run the application with the `-h` or `--help` option to see the usage message:
 ```
-    python3 affinity_setting_demo.py -h
+python3 affinity_setting_demo.py -h
 ```
 The command yields the following usage message:
 ```
@@ -50,14 +50,14 @@ To run the demo, you can use public or pre-trained models. You can download the 
 For example, to do inference on image using a trained network, run the following command:
 
 ```
-    python3 affinity_setting_demo.py -i <path_to_image>/inputImage.tiff -m <path_to_model>/multiple-output.xml -d CPU -o <path_to_output>
+python3 affinity_setting_demo.py -i <path_to_image>/inputImage.tiff -m <path_to_model>/multiple-output.xml -d CPU -o <path_to_output>
 ```
      
 ## Demo Output
 The demo outputs a multipage TIFF image and a NIFTI archive.
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/Readme.md)
+* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2019/model_downloader)
 

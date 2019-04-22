@@ -103,6 +103,6 @@ The demo uses OpenCV to display the resulting frame with detections (rendered as
 The demo reports total image throughput which includes frame decoding time, inference time, time to render bounding boxes and labels, and time to display the results.
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/Readme.md)
+* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2019/model_downloader)

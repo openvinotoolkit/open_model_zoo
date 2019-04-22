@@ -52,6 +52,6 @@ You can use the following command to do inference on CPU on an image using a tra
 The application outputs are a segmented image (`out.bmp`).
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/Readme.md)
+* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2019/model_downloader)

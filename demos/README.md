@@ -30,55 +30,55 @@ To run the demo applications, you can use images and videos from the media files
 
 ## Demos that Support Pre-Trained Models
 
-(!) Important Note: Inference Engine MYRIAD and FPGA plugins are available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
+> **NOTE:** Inference Engine MYRIAD and FPGA plugins are available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
 
 You can download the [pre-trained models](https://github.com/opencv/open_model_zoo/tree/2019/intel_models/index.md) using the OpenVINO [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2019/model_downloader) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
 The table below shows the correlation between models, demos, and supported plugins. The plugins names are exactly as they are passed to the demos with `-d` option. The correlation between the plugins and supported devices see in the [Supported Devices](https://docs.openvinotoolkit.org/2019_R1/_docs_IE_DG_supported_plugins_Supported_Devices.html) section.
 
 > **NOTE:** **MYRIAD** below stands for Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ Vision Processing Units.
 
-| Model                                            | Demos supported on the model                                                                                                             | CPU       | GPU       | MYRIAD    | HETERO:FPGA,CPU |
-|--------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|-----------|-----------|-----------|-----------------|
-| action-recognition-0001-decoder                  | [Action Recognition Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/python_demos/action_recognition/README.md)            | Supported | Supported |           |                 |
-| action-recognition-0001-encoder                  | [Action Recognition Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/python_demos/action_recognition/README.md)            | Supported | Supported |           |                 |
-| driver-action-recognition-adas-0002-decoder      | [Action Recognition Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/python_demos/action_recognition/README.md)            | Supported | Supported |           |                 |
-| driver-action-recognition-adas-0002-encoder      | [Action Recognition Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/python_demos/action_recognition/README.md)            | Supported | Supported |           | Supported       |
-| person-attributes-recognition-crossroad-0230     | [Crossroad Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/crossroad_camera_demo/README.md)                        | Supported | Supported |           | Supported       |
-| person-reidentification-retail-0031              | [Crossroad Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/crossroad_camera_demo/README.md)                        | Supported | Supported | Supported | Supported       |
-| person-reidentification-retail-0076              | [Crossroad Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/crossroad_camera_demo/README.md)                        | Supported | Supported | Supported | Supported       |
-| person-reidentification-retail-0079              | [Crossroad Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/crossroad_camera_demo/README.md)                        | Supported | Supported | Supported | Supported       |
-| person-vehicle-bike-detection-crossroad-0078     | [Crossroad Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/crossroad_camera_demo/README.md)                        | Supported | Supported | Supported | Supported       |
-| human-pose-estimation-adas-0001                  | [Human Pose Estimation Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/human_pose_estimation_demo/README.md)              | Supported | Supported |           | Supported       |
-| semantic-segmentation-adas-0001                  | [Image Segmentation Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/segmentation_demo/README.md)                          | Supported | Supported |           | Supported       |
-| instance-segmentation-security-0033              | [Instance Segmentation Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/python_demos/instance_segmentation_demo/README.md) | Supported | Supported |           | Supported       |
-| instance-segmentation-security-0049              | [Instance Segmentation Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/python_demos/instance_segmentation_demo/README.md) | Supported | Supported |           | Supported       |
-| age-gender-recognition-retail-0013               | [Interactive Face Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/interactive_face_detection_demo/README.md)    | Supported | Supported | Supported | Supported       |
-| emotions-recognition-retail-0003                 | [Interactive Face Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/interactive_face_detection_demo/README.md)    | Supported | Supported | Supported | Supported       |
-| face-detection-adas-0001                         | [Interactive Face Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/interactive_face_detection_demo/README.md)    | Supported | Supported | Supported | Supported       |
-| face-detection-adas-binary-0001                  | [Interactive Face Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/interactive_face_detection_demo/README.md)    | Supported | Supported |           |                 |
-| face-detection-retail-0004                       | [Interactive Face Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/interactive_face_detection_demo/README.md)    | Supported | Supported | Supported | Supported       |
-| facial-landmarks-35-adas-0002                    | [Interactive Face Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/interactive_face_detection_demo/README.md)    | Supported | Supported |           | Supported       |
-| head-pose-estimation-adas-0001                   | [Interactive Face Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/interactive_face_detection_demo/README.md)    | Supported | Supported | Supported | Supported       |
-| license-plate-recognition-barrier-0001           | [Security Barrier Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/security_barrier_camera_demo/README.md)          | Supported | Supported | Supported | Supported       |
-| vehicle-attributes-recognition-barrier-0039      | [Security Barrier Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/security_barrier_camera_demo/README.md)          | Supported | Supported | Supported | Supported       |
-| vehicle-license-plate-detection-barrier-0106     | [Security Barrier Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/security_barrier_camera_demo/README.md)          | Supported | Supported | Supported | Supported       |
-| face-reidentification-retail-0095                | [Smart Classroom Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/smart_classroom_demo/README.md)                          | Supported | Supported | Supported | Supported       |
-| landmarks-regression-retail-0009                 | [Smart Classroom Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/smart_classroom_demo/README.md)                          | Supported | Supported | Supported | Supported       |
-| person-detection-action-recognition-0005         | [Smart Classroom Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/smart_classroom_demo/README.md)                          | Supported | Supported |           | Supported       |
-| person-detection-action-recognition-teacher-0002 | [Smart Classroom Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/smart_classroom_demo/README.md)                          | Supported | Supported |           | Supported       |
-| single-image-super-resolution-1032               | [Super Resolution Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/super_resolution_demo/README.md)                        | Supported | Supported |           | Supported       |
-| single-image-super-resolution-1033               | [Super Resolution Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/super_resolution_demo/README.md)                        | Supported | Supported |           | Supported       |
-| text-detection-0002                              | [Text Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/text_detection_demo/README.md)                            | Supported | Supported |           | Supported       |
-| text-recognition-0012                            | [Text Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/text_detection_demo/README.md)                            | Supported | Supported |           |                 |
-| face-person-detection-retail-0002                | any demo that supports SSD\*-based models, above                                                                                         | Supported | Supported | Supported | Supported       |
-| pedestrian-and-vehicle-detector-adas-0001        | any demo that supports SSD\*-based models, above                                                                                         | Supported | Supported | Supported | Supported       |
-| pedestrian-detection-adas-0002                   | any demo that supports SSD\*-based models, above                                                                                         | Supported | Supported | Supported | Supported       |
-| pedestrian-detection-adas-binary-0001            | any demo that supports SSD\*-based models, above                                                                                         | Supported | Supported |           |                 |
-| person-detection-retail-0002                     | any demo that supports SSD\*-based models, above                                                                                         | Supported | Supported | Supported | Supported       |
-| person-detection-retail-0013                     | any demo that supports SSD\*-based models, above                                                                                         | Supported | Supported | Supported | Supported       |
-| road-segmentation-adas-0001                      | any demo that supports SSD\*-based models, above                                                                                         | Supported | Supported | Supported | Supported       |
-| vehicle-detection-adas-binary-0001               | any demo that supports SSD\*-based models, above                                                                                         | Supported | Supported |           |                 |
-| vehicle-detection-adas-0002                      | any demo that supports SSD\*-based models, above                                                                                         | Supported | Supported | Supported | Supported       |
+| Model                                            | Demos supported on the model                                                                                 | CPU       | GPU       | MYRIAD/HDDL | HETERO:FPGA,CPU |
+|--------------------------------------------------|----------------------------------------------------------------------------------------------------------------|-----------|-----------|-------------|-----------------|
+| action-recognition-0001-decoder                  | [Action Recognition Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
+| action-recognition-0001-encoder                  | [Action Recognition Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
+| driver-action-recognition-adas-0002-decoder      | [Action Recognition Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
+| driver-action-recognition-adas-0002-encoder      | [Action Recognition Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/python_demos/action_recognition/README.md)            | Supported | Supported |             | Supported       |
+| person-attributes-recognition-crossroad-0230     | [Crossroad Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/crossroad_camera_demo/README.md)                            | Supported | Supported |             | Supported       |
+| person-reidentification-retail-0031              | [Crossroad Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
+| person-reidentification-retail-0076              | [Crossroad Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
+| person-reidentification-retail-0079              | [Crossroad Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
+| person-vehicle-bike-detection-crossroad-0078     | [Crossroad Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
+| human-pose-estimation-adas-0001                  | [Human Pose Estimation Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/human_pose_estimation_demo/README.md)                  | Supported | Supported |             | Supported       |
+| semantic-segmentation-adas-0001                  | [Image Segmentation Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/segmentation_demo/README.md)                              | Supported | Supported |             | Supported       |
+| instance-segmentation-security-0033              | [Instance Segmentation Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/python_demos/instance_segmentation_demo/README.md) | Supported | Supported |             | Supported       |
+| instance-segmentation-security-0049              | [Instance Segmentation Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/python_demos/instance_segmentation_demo/README.md) | Supported | Supported |             | Supported       |
+| age-gender-recognition-retail-0013               | [Interactive Face Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
+| emotions-recognition-retail-0003                 | [Interactive Face Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
+| face-detection-adas-0001                         | [Interactive Face Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
+| face-detection-adas-binary-0001                  | [Interactive Face Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/interactive_face_detection_demo/README.md)        | Supported | Supported |             |                 |
+| face-detection-retail-0004                       | [Interactive Face Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
+| facial-landmarks-35-adas-0002                    | [Interactive Face Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/interactive_face_detection_demo/README.md)        | Supported | Supported |             | Supported       |
+| head-pose-estimation-adas-0001                   | [Interactive Face Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
+| license-plate-recognition-barrier-0001           | [Security Barrier Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/security_barrier_camera_demo/README.md)              | Supported | Supported | Supported   | Supported       |
+| vehicle-attributes-recognition-barrier-0039      | [Security Barrier Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/security_barrier_camera_demo/README.md)              | Supported | Supported | Supported   | Supported       |
+| vehicle-license-plate-detection-barrier-0106     | [Security Barrier Camera Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/security_barrier_camera_demo/README.md)              | Supported | Supported | Supported   | Supported       |
+| face-reidentification-retail-0095                | [Smart Classroom Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/smart_classroom_demo/README.md)                              | Supported | Supported | Supported   | Supported       |
+| landmarks-regression-retail-0009                 | [Smart Classroom Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/smart_classroom_demo/README.md)                              | Supported | Supported | Supported   | Supported       |
+| person-detection-action-recognition-0005         | [Smart Classroom Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/smart_classroom_demo/README.md)                              | Supported | Supported |             | Supported       |
+| person-detection-action-recognition-teacher-0002 | [Smart Classroom Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/smart_classroom_demo/README.md)                              | Supported | Supported |             | Supported       |
+| single-image-super-resolution-1032               | [Super Resolution Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/super_resolution_demo/README.md)                            | Supported | Supported |             | Supported       |
+| single-image-super-resolution-1033               | [Super Resolution Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/super_resolution_demo/README.md)                            | Supported | Supported |             | Supported       |
+| text-detection-0002                              | [Text Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/text_detection_demo/README.md)                                | Supported | Supported |             | Supported       |
+| text-recognition-0012                            | [Text Detection Demo](https://github.com/opencv/open_model_zoo/tree/2019/demos/text_detection_demo/README.md)                                | Supported | Supported |             |                 |
+| face-person-detection-retail-0002                | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
+| pedestrian-and-vehicle-detector-adas-0001        | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
+| pedestrian-detection-adas-0002                   | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
+| pedestrian-detection-adas-binary-0001            | any demo that supports SSD\*-based models, above                                                               | Supported | Supported |             |                 |
+| person-detection-retail-0002                     | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
+| person-detection-retail-0013                     | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
+| road-segmentation-adas-0001                      | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
+| vehicle-detection-adas-binary-0001               | any demo that supports SSD\*-based models, above                                                               | Supported | Supported |             |                 |
+| vehicle-detection-adas-0002                      | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
 
 
 Notice that the FPGA support comes through a [heterogeneous execution](https://docs.openvinotoolkit.org/2019_R1/_docs_IE_DG_supported_plugins_HETERO.html), for example, when the post-processing is happening on the CPU.
@@ -90,9 +90,10 @@ Please run the following command before the demos build (assuming that the binar
 ```sh
 source <INSTALL_DIR>/deployment_tools/bin/setupvars.sh
 ```
-Also, you can build demos using IE binaries built on your own from the [dldt](https://github.com/opencv/dldt/tree/2019) repo. In this case please
-set `InferenceEngine_DIR` to a CMake folder you built the dldt project from, for example `<dldt_repo>/inference-engine/build`. Please also set
-the `OpenCV_DIR` variable pointing to the required OpenCV package. The same OpenCV version should be used both for the inference engine and demos build.
+You can also build demos manually using Inference Engine binaries from the
+[dldt](https://github.com/opencv/dldt/tree/2019) repo. In this case please set `InferenceEngine_DIR` to a CMake folder you built the dldt project from, for example `<dldt_repo>/inference-engine/build`.
+Please also set the `OpenCV_DIR` variable pointing to the required OpenCV package. The same OpenCV
+version should be used both for the inference engine and demos build.
 Please refer to the Inference Engine [build instructions](https://github.com/opencv/dldt/tree/2019/inference-engine/README.md)
 for details. Please also add path to built Inference Engine libraries to `LD_LIBRARY_PATH` (Linux*) or `PATH` (Windows*) variable before building the demos.
 
@@ -104,7 +105,13 @@ The officially supported Linux* build environment is the following:
 * GCC* 5.4.0 (for Ubuntu* 16.04) or GCC* 4.8.5 (for CentOS* 7.4)
 * CMake* version 2.8 or higher.
 
-Use the following steps to build demo application on Linux:
+To build the demo applications for Linux, go to the directory with the `build_demos.sh` script and
+run it:
+```sh
+build_demos.sh
+```
+
+You can also build the demo applications manually:
 
 1. Navigate to a directory that you have write access to and create a demos build directory. This example uses a directory named `build`:
 ```sh
@@ -136,39 +143,42 @@ for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
 
 The recommended Windows* build environment is the following:
 * Microsoft Windows* 10
-* Microsoft* Visual Studio* 2015 including Microsoft Visual Studio 2015 Community or Microsoft Visual Studio 2017
-* CMake* version 2.8 or later
+* Microsoft Visual Studio* 2015, 2017, or 2019
+* CMake* version 2.8 or higher
 
-To build the demo applications for Windows, run the `build_demos_msvc2015.bat` or `build_demos_msvc2017.bat` batch files.
-These files create and build solutions for demos source code using 2015 or 2017 versions of Microsoft Visual Studio respectively.
+> **NOTE**: If you want to use Microsoft Visual Studio 2019, you are required to install CMake 3.14.
 
-The demo applications binaries will be stored in folder:
+To build the demo applications for Windows, go to the directory with the `build_demos_msvc.bat`
+batch file and run it:
+```sh
+build_demos_msvc.bat
+```
 
-* For the Microsoft Visual Studio 2017: `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build_2017\intel64\Release`
+By default, the script automatically detects the highest Microsoft Visual Studio version installed on the machine and uses it to create and build
+a solution for a demo code. Optionally, you can also specify the preffered Microsoft Visual Studio version to be used by the script. Supported
+versions are: `VS2015`, `VS2017`, `VS2019`. For example, to build the demos using the Microsoft Visual Studio 2017, use the following command:
+```sh
+build_demos_msvc.bat VS2017
+``` 
 
-* For the Microsoft Visual Studio 2015: `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build_2015\intel64\Release`
+The demo applications binaries are in the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build_build\intel64\Release` directory.
 
 You can also build a generated solution by yourself, for example, if you want to
 build binaries in Debug configuration. Run the appropriate version of the
-Microsoft Visual Studio and open the generated solution file from the following
-folders:
-
-* For the Microsoft Visual Studio 2017: `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build_2017\Demos.sln`
-
-* For the Microsoft Visual Studio 2015: `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build_2015\Demos.sln`
+Microsoft Visual Studio and open the generated solution file from the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build\Demos.sln`
+directory. 
 
 ## Get Ready for Running the Demo Applications
 
 ### Get Ready for Running the Demo Applications on Linux*
 
-Before running compiled binary files, make sure your application can find the
-Inference Engine and OpenCV libraries.
-if you used a [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution to build demos,
+Before running compiled binary files, make sure your application can find the Inference Engine and OpenCV libraries.
+If you use a [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution to build demos,
 run the `setupvars` script to set all necessary environment variables:
 ```sh
 source <INSTALL_DIR>/bin/setupvars.sh
 ```
-If you used own Inference Engine and OpenCV binaries to build the demos please make sure they are added
+If you use your own Inference Engine and OpenCV binaries to build the demos please make sure you have added them
 to the `LD_LIBRARY_PATH` environment variable.
 
 **(Optional)**: The OpenVINO environment variables are removed when you close the
@@ -184,7 +194,7 @@ vi <user_home_directory>/.bashrc
 source <INSTALL_DIR>/bin/setupvars.sh
 ```
 
-3. Save and close the file: press the **Esc** key and type `:wq`.
+3. Save and close the file: press the **Esc** key, type `:wq` and press the **Enter** key.
 4. To test your change, open a new terminal. You will see `[setupvars.sh] OpenVINO environment initialized`.
 
 You are ready to run the demo applications. To learn about how to run a particular
@@ -193,14 +203,13 @@ list above.
 
 ### Get Ready for Running the Demo Applications on Windows*
 
-Before running compiled binary files, make sure your application can find the
-Inference Engine and OpenCV libraries.
-if you used a [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution to build demos,
+Before running compiled binary files, make sure your application can find the Inference Engine and OpenCV libraries.
+If you use a [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution to build demos,
 run the `setupvars` script to set all necessary environment variables:
 ```sh
 <INSTALL_DIR>\bin\setupvars.bat
 ```
-If you used own Inference Engine and OpenCV binaries to build the demos please make sure they are added
+If you use your own Inference Engine and OpenCV binaries to build the demos please make sure you have added
 to the `PATH` environment variable.
 
 To debug or run the demos on Windows in Microsoft Visual Studio, make sure you

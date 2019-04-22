@@ -1,6 +1,6 @@
 # Dynamic Batch Python* Demo
 
-This topic demonstrates how to run the 3D Segmentation Demo, which demostrates how to set batch size dynamicly for certain infer request and check inference time difference.
+This topic demonstrates how to run the Dynamic Batch Demo, which demonstrates how to set batch size dynamically for certain infer request and check inference time difference.
 
 ## How It Works
 
@@ -55,14 +55,14 @@ To run the demo, you can use public or pre-trained models. You can download the 
 For example, to do inference on images using a trained network with multiple outputs on CPU device with supported dynamic batch setting, run the following command:
 
 ```
-    python3 dynamic_batch_demo.py -i <path_to_images> -m <path_to_model> -d CPU -mb <max_batch_size>
+python3 dynamic_batch_demo.py -i <path_to_images> -m <path_to_model> -d CPU -mb <max_batch_size>
 ```
      
 ## Demo Output
 The demo outputs a DOT file with a dumped graph.
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/Readme.md)
+* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2019/model_downloader)
 * [Dynamic Batching](https://docs.openvinotoolkit.org/2019_R1/_docs_IE_DG_DynamicBatching.html)

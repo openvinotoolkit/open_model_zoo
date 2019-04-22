@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright (C) 2018-2019 Intel Corporation
 #
@@ -28,23 +28,8 @@ trap 'error ${LINENO}' ERR
 DEMOS_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [[ -z "${InferenceEngine_DIR}" ]]; then
-    printf "\nInferenceEngine_DIR environment variable is not set. Trying to find setupvars.sh to set it. \n"
-
-    setvars_path=$DEMOS_PATH/../..
-    if [ -e "$setvars_path/inference_engine/bin/setvars.sh" ]; then # for Intel Deep Learning Deployment Toolkit package
-        setvars_path="$setvars_path/inference_engine/bin/setvars.sh"
-    elif [ -e "$setvars_path/../bin/setupvars.sh" ]; then # for OpenVINO package
-        setvars_path="$setvars_path/../bin/setupvars.sh"
-    elif [ -e "$setvars_path/../setupvars.sh" ]; then
-        setvars_path="$setvars_path/../setupvars.sh"
-    else
-        printf "Error: setupvars.sh is not found in hardcoded paths. \n\n"
-        exit 1
-    fi
-    if ! source $setvars_path ; then
-        printf "Unable to run ./setupvars.sh. Please check its presence. \n\n"
-        exit 1
-    fi
+    printf "\nInferenceEngine_DIR environment variable is not set. Please set it to build the demo applications. \n"
+    exit 1
 fi
 
 if ! command -v cmake &>/dev/null; then

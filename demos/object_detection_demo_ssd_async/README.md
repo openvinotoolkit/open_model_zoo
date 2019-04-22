@@ -7,7 +7,7 @@ Specifically, this demo keeps two parallel infer requests and while the current 
 is being captured. This essentially hides the latency of capturing, so that the overall framerate is rather
 determined by the `MAXIMUM(detection time, input capturing time)` and not the `SUM(detection time, input capturing time)`.
 
-> **NOTE:** This topic describes usage of C++ implementation of the Object Detection SSD Demo Async API. For the Python* implementation, refer to [Object Detection SSD Python* Demo, Async API Performance Showcase](https://github.com/opencv/open_model_zoo/tree/2019/demos/object_detection_demo_ssd_async/README.md).
+> **NOTE:** This topic describes usage of C++ implementation of the Object Detection SSD Demo Async API. For the Python* implementation, refer to [Object Detection SSD Python* Demo, Async API Performance Showcase](https://github.com/opencv/open_model_zoo/tree/2019/demos/python_demos/object_detection_demo_ssd_async/README.md).
 
 The technique can be generalized to any available parallel slack, for example, doing inference and simultaneously encoding the resulting
 (previous) frames or running further inference, like some emotion detection on top of the face detection results.
@@ -37,7 +37,7 @@ Engine. Upon getting a frame from the OpenCV VideoCapture it performs inference 
 
 New "Async API" operates with new notion of the "Infer Request" that encapsulates the inputs/outputs and separates *scheduling and waiting for result*,
 next section. And here what makes the performance look different:
-1. In the default ("Sync") mode the frame is captured and then immediately processed, below in pseudo-code:
+* In the default ("Sync") mode the frame is captured and then immediately processed, below in pseudo-code:
 ```cpp
     while(true) {
         capture frame
@@ -47,8 +47,8 @@ next section. And here what makes the performance look different:
         display CURRENT result
     }
 ```
-    So, this is rather reference implementation, where the new Async API is used in the serialized/synch fashion.
-2. In the "true" ASync mode the frame is captured and then immediately processed:
+So, this is rather reference implementation, where the new Async API is used in the serialized/synch fashion.
+* In the "true" ASync mode the frame is captured and then immediately processed:
 ```cpp
     while(true) {
             capture frame
@@ -148,6 +148,6 @@ In the default mode the demo reports
 
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/Readme.md)
+* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2019/model_downloader)
