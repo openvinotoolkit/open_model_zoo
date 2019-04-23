@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -28,11 +28,11 @@ static const char pedestrian_reid_model_message[] = "Required. Path to the Pedes
 
 /// @brief message for assigning Pedestrian detection inference to device
 static const char target_device_detection_message[] = "Optional. Specify the target device for pedestrian detection "\
-                                                       "(CPU, GPU, FPGA, MYRIAD, or HETERO). ";
+                                                       "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO). ";
 
 /// @brief message for assigning Pedestrian Reidentification retail inference to device
 static const char target_device_reid_message[] = "Optional. Specify the target device for pedestrian reidentification "\
-                                                  "(CPU, GPU, FPGA, MYRIAD, or HETERO). ";
+                                                  "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO). ";
 
 /// @brief message for performance counters
 static const char performance_counter_message[] = "Optional. Enable per-layer performance statistics.";

@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -51,6 +51,10 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -m is not set");
     }
 
+    if (FLAGS_display_resolution.find("x") == std::string::npos) {
+        throw std::logic_error("Incorrect format of -displayresolution parameter. Correct format is  \"width x height\". For example \"1920x1080\"");
+    }
+
     return true;
 }
 
@@ -66,7 +70,7 @@ struct BaseInferRequest {
     size_t requestId;
 
     BaseInferRequest(ExecutableNetwork& net, std::string& inputName) :
-        request(net.CreateInferRequestPtr()), inputName(inputName) {
+        request(net.CreateInferRequestPtr()), inputName(inputName), requestId(0) {
         auto lambda = [&] {
                endTime = std::chrono::high_resolution_clock::now();
             };
@@ -186,7 +190,8 @@ struct VehicleDetection : BaseDetection {
         size_t channelId;
     };
 
-    VehicleDetection() : BaseDetection(FLAGS_m, "Vehicle") {}
+    VehicleDetection() : BaseDetection(FLAGS_m, "Vehicle"), maxProposalCount(0), objectSize(0) {
+    }
 
     VehicleDetectionInferRequest::Ptr createInferRequest() {
         if (!enabled())
@@ -265,10 +270,10 @@ struct VehicleDetection : BaseDetection {
                 continue;
             }
 
-            r.location.x = detections[i * objectSize + 3] * srcImageSize.width;
-            r.location.y = detections[i * objectSize + 4] * srcImageSize.height;
-            r.location.width = detections[i * objectSize + 5] * srcImageSize.width - r.location.x;
-            r.location.height = detections[i * objectSize + 6] * srcImageSize.height - r.location.y;
+            r.location.x = static_cast<int>(detections[i * objectSize + 3] * srcImageSize.width);
+            r.location.y = static_cast<int>(detections[i * objectSize + 4] * srcImageSize.height);
+            r.location.width = static_cast<int>(detections[i * objectSize + 5] * srcImageSize.width - r.location.x);
+            r.location.height = static_cast<int>(detections[i * objectSize + 6] * srcImageSize.height - r.location.y);
 
             r.channelId = channelId;
 
@@ -306,7 +311,7 @@ struct VehicleAttribsDetection : BaseDetection {
                 "white", "gray", "yellow", "red", "green", "blue", "black"
         };
         static const std::string types[] = {
-                "car", "van", "truck", "bus"
+                "car", "bus", "truck", "van"
         };
 
         // 7 possible colors for each vehicle and we should select the one with the maximum probability
@@ -385,12 +390,16 @@ struct LPRInferRequest : BaseInferRequest {
 
     void setBlob(const Blob::Ptr &frameBlob) override {
         BaseInferRequest::setBlob(frameBlob);
-        fillSeqBlob();
+        if (!inputSeqName.empty()) {
+            fillSeqBlob();
+        }
     }
 
     void setImage(const cv::Mat &frame) override {
         BaseInferRequest::setImage(frame);
-        fillSeqBlob();
+        if (!inputSeqName.empty()) {
+            fillSeqBlob();
+        }
     }
 
     using Ptr = std::shared_ptr<LPRInferRequest>;
@@ -398,7 +407,7 @@ struct LPRInferRequest : BaseInferRequest {
 
 struct LPRDetection : BaseDetection {
     std::string inputSeqName;
-    const int maxSequenceSizePerPlate = 88;
+    const size_t maxSequenceSizePerPlate = 88;
 
     LPRDetection() : BaseDetection(FLAGS_m_lpr, "License Plate Recognition") {}
 
@@ -428,10 +437,10 @@ struct LPRDetection : BaseDetection {
         // up to 88 items per license plate, ended with "-1"
         const auto data = request->getBlob(outputName)->buffer().as<float*>();
         std::string result;
-        for (int i = 0; i < maxSequenceSizePerPlate; i++) {
+        for (size_t i = 0; i < maxSequenceSizePerPlate; i++) {
             if (data[i] == -1)
                 break;
-            result += items[data[i]];
+            result += items[static_cast<size_t>(data[i])];
         }
 
         return result;
@@ -451,9 +460,18 @@ struct LPRDetection : BaseDetection {
         // ---------------------------Check inputs ------------------------------------------------------
         slog::info << "Checking LPR Network inputs" << slog::endl;
         InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
-        if (inputInfo.size() != 2) {
-            throw std::logic_error("LPR should have 2 inputs");
+        if (inputInfo.size() == 2) {
+            auto sequenceInput = (++inputInfo.begin());
+            inputSeqName = sequenceInput->first;
+            if (sequenceInput->second->getTensorDesc().getDims()[0] != maxSequenceSizePerPlate) {
+                throw std::logic_error("LPR post-processing assumes certain maximum sequences");
+            }
+        } else if (inputInfo.size() == 1) {
+            inputSeqName = "";
+        } else {
+            throw std::logic_error("LPR should have 1 or 2 inputs");
         }
+
         InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
         inputInfoFirst->setInputPrecision(Precision::U8);
         if (FLAGS_auto_resize) {
@@ -463,11 +481,6 @@ struct LPRDetection : BaseDetection {
             inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
         }
         inputName = inputInfo.begin()->first;
-        auto sequenceInput = (++inputInfo.begin());
-        inputSeqName = sequenceInput->first;
-        if (sequenceInput->second->getTensorDesc().getDims()[0] != maxSequenceSizePerPlate) {
-            throw std::logic_error("LPR post-processing assumes certain maximum sequences");
-        }
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Check outputs ------------------------------------------------------
@@ -509,17 +522,14 @@ struct LicensePlateObject {
     int channelId;
 };
 
-const size_t MAX_DISP_WIDTH  = 1920;
-const size_t MAX_DISP_HEIGHT = 1080;
-
 struct GridMat {
     cv::Mat outimg;
     cv::Size cellSize;
     std::vector<cv::Point> points;
+    int width;
+    int height;
 
-    explicit GridMat(std::vector<cv::VideoCapture>& cap, std::vector<cv::Mat>& images) {
-        int nChannels = cap.size() + images.size();
-
+    explicit GridMat(size_t dispWidth, size_t dispHeight, size_t nChannels, std::vector<cv::VideoCapture>& cap, std::vector<cv::Mat>& images) {
         size_t maxWidth = 0;
         size_t maxHeight = 0;
         for (size_t i = 0; i < cap.size(); i++) {
@@ -534,15 +544,21 @@ struct GridMat {
 
         size_t nGridCols = static_cast<size_t>(ceil(sqrt(static_cast<float>(nChannels))));
         size_t nGridRows = (nChannels - 1) / nGridCols + 1;
-        size_t gridMaxWidth = static_cast<size_t>(MAX_DISP_WIDTH/nGridCols);
-        size_t gridMaxHeight = static_cast<size_t>(MAX_DISP_HEIGHT/nGridRows);
+        size_t gridMaxWidth = static_cast<size_t>(dispWidth/nGridCols);
+        size_t gridMaxHeight = static_cast<size_t>(dispHeight/nGridRows);
 
+        if (maxWidth == 0) {
+            throw std::logic_error("Image max width can't be equal to 0");
+        }
+        if (maxHeight == 0) {
+            throw std::logic_error("Image max height can't be equal to 0");
+        }
         float scaleWidth = static_cast<float>(gridMaxWidth) / maxWidth;
         float scaleHeight = static_cast<float>(gridMaxHeight) / maxHeight;
         float scaleFactor = std::min(1.f, std::min(scaleWidth, scaleHeight));
 
-        cellSize.width = maxWidth * scaleFactor;
-        cellSize.height = maxHeight * scaleFactor;
+        cellSize.width = static_cast<int>(maxWidth * scaleFactor);
+        cellSize.height = static_cast<int>(maxHeight * scaleFactor);
 
         for (size_t i = 0; i < nChannels; i++) {
             cv::Point p;
@@ -551,7 +567,9 @@ struct GridMat {
             points.push_back(p);
         }
 
-        outimg.create(cellSize.height * nGridRows, cellSize.width * nGridCols, CV_8UC3);
+        height = cellSize.height * nGridRows;
+        width = cellSize.width * nGridCols;
+        outimg.create(height, width, CV_8UC3);
         outimg.setTo(0);
     }
 
@@ -568,14 +586,7 @@ struct GridMat {
             } else if ((cellSize.width > frames[i].cols) && (cellSize.height > frames[i].rows)) {
                 frames[i].copyTo(cell(cv::Rect(0, 0, frames[i].cols, frames[i].rows)));
             } else {
-                float scaleWidth = static_cast<float>(cellSize.width) / frames[i].cols;
-                float scaleHeight = static_cast<float>(cellSize.height) / frames[i].rows;
-                float scaleFactor = std::min(1.f, std::min(scaleWidth, scaleHeight));
-
-                cv::Size newSize;
-                newSize.width = frames[i].cols * scaleFactor;
-                newSize.height = frames[i].rows * scaleFactor;
-                cv::resize(frames[i], cell(cv::Rect(0, 0, newSize.width, newSize.height)), newSize);
+                cv::resize(frames[i], cell, cellSize);
             }
         }
     }
@@ -584,6 +595,64 @@ struct GridMat {
         return outimg;
     }
 };
+
+struct CallStat {
+    typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
+
+    CallStat():
+        numberOfCalls(0), totalDuration(0.0), lastCallDuration(0.0), smoothedDuration(-1.0) {
+    }
+
+    void setCallDuration(ms value) {
+        lastCallDuration = value.count();
+        numberOfCalls++;
+        totalDuration += lastCallDuration;
+        if (smoothedDuration < 0) {
+            smoothedDuration = lastCallDuration;
+        }
+        double alpha = 0.1;
+        smoothedDuration = smoothedDuration * (1.0 - alpha) + lastCallDuration * alpha;
+    }
+
+    void start() {
+        lastCallStart = std::chrono::high_resolution_clock::now();
+    }
+
+    void finish() {
+        auto t = std::chrono::high_resolution_clock::now();
+        setCallDuration(std::chrono::duration_cast<ms>(t - lastCallStart));
+    }
+
+    double avarageTotalDuration() {
+        return totalDuration / numberOfCalls;
+    }
+
+    size_t numberOfCalls;
+    double totalDuration;
+    double lastCallDuration;
+    double smoothedDuration;
+    std::chrono::time_point<std::chrono::high_resolution_clock> lastCallStart;
+};
+
+void fillROIColor(GridMat& displayImage, cv::Rect roi, cv::Scalar color, double opacity) {
+    if (opacity > 0) {
+        roi = roi & cv::Rect(0, 0, displayImage.width, displayImage.height);
+        cv::Mat textROI = displayImage.getMat()(roi);
+        cv::addWeighted(color, opacity, textROI, 1.0 - opacity , 0.0, textROI);
+    }
+}
+
+void putTextOnImage(GridMat& displayImage, std::string str, cv::Point p,
+                    cv::HersheyFonts font, double fontScale, cv::Scalar color,
+                    int thickness, cv::Scalar bgcolor = cv::Scalar(),
+                    double opacity = 0) {
+    int baseline = 0;
+    cv::Size textSize = cv::getTextSize(str, font, 0.5, 1, &baseline);
+    fillROIColor(displayImage, cv::Rect(cv::Point(p.x, p.y + baseline),
+                                        cv::Point(p.x + textSize.width, p.y - textSize.height)),
+                 bgcolor, opacity);
+    cv::putText(displayImage.getMat(), str, p, font, fontScale, color, thickness);
+}
 
 /** Map {device : plugin} for each topology **/
 std::map<std::string, InferencePlugin> pluginsForNetworks;
@@ -600,6 +669,8 @@ int main(int argc, char *argv[]) {
 
         std::vector<cv::VideoCapture> cap;
         std::vector<cv::Mat> images;
+        std::vector<std::string> videoFiles;
+        std::map<std::string, CallStat> timers;
 
         if (FLAGS_i == "cam") {
             slog::info << "Capturing video streams from the cameras" << slog::endl;
@@ -622,14 +693,15 @@ int main(int argc, char *argv[]) {
             std::vector<std::string> inputFiles;
             parseInputFilesArguments(inputFiles);
 
-            std::vector<std::string> videoFiles;
             for (auto && name : inputFiles) {
+                timers["capture"].start();
                 cv::Mat frame = cv::imread(name, cv::IMREAD_COLOR);
                 if (frame.empty()) {
                     videoFiles.push_back(name);
                 } else {
                     images.push_back(frame);
                 }
+                timers["capture"].finish();
             }
 
             size_t nImageFiles = images.size();
@@ -651,11 +723,17 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        size_t nInputChannels = cap.size() + images.size();
-        slog::info << "Number of input channels:    " << nInputChannels << slog::endl;
+        size_t nInputChannels = (FLAGS_ni >= 0) ? FLAGS_ni : (cap.size() + images.size());
+        slog::info << "Number of input channels: " << nInputChannels << slog::endl;
+
+        size_t dispWidth, dispHeight;
+        size_t found = FLAGS_display_resolution.find("x");
+        dispWidth = std::stoi(FLAGS_display_resolution.substr(0, found));
+        dispHeight = std::stoi(FLAGS_display_resolution.substr(found + 1, FLAGS_display_resolution.length()));
+        slog::info << "Display resolution: " << FLAGS_display_resolution << slog::endl;
 
         /** Create display image **/
-        GridMat displayImage(cap, images);
+        GridMat displayImage(dispWidth, dispHeight, nInputChannels, cap, images);
 
         // -----------------------------------------------------------------------------------------------------
 
@@ -677,7 +755,7 @@ int main(int argc, char *argv[]) {
                 continue;
             }
             slog::info << "Loading plugin " << flag << slog::endl;
-            InferencePlugin plugin = PluginDispatcher({"../../../lib/intel64", ""}).getPluginByDevice(flag);
+            InferencePlugin plugin = PluginDispatcher().getPluginByDevice(flag);
 
             /** Printing plugin version **/
             printPluginVersion(plugin, std::cout);
@@ -692,12 +770,25 @@ int main(int argc, char *argv[]) {
                     plugin.AddExtension(extension_ptr);
                     slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
+
+                if (nInputChannels > 1) {
+                    plugin.SetConfig({{PluginConfigParams::KEY_CPU_THROUGHPUT_STREAMS, PluginConfigParams::CPU_THROUGHPUT_AUTO}});
+                }
             }
 
             if ((flag.find("GPU") != std::string::npos) && !FLAGS_c.empty()) {
                 // Load any user-specified clDNN Extensions
                 plugin.SetConfig({ { PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } });
             }
+
+            if ((flag.find("FPGA") != std::string::npos) && !FLAGS_fpga_device_ids.empty()) {
+                plugin.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_DEVICE_ID, FLAGS_fpga_device_ids } });
+
+                if (FLAGS_fpga_device_ids.find(",") != std::string::npos) {
+                    plugin.SetConfig({ { "DLIA_DEVICE_REQUEST_PROCESSING", "DLIA_SERIAL" } });
+                }
+            }
+
             pluginsForNetworks[flag] = plugin;
         }
 
@@ -728,20 +819,25 @@ int main(int argc, char *argv[]) {
 
         // --------------------------- 4. Do inference ---------------------------------------------------------
         std::vector<cv::Mat> frames(nInputChannels);  // frame images
-        std::vector<Blob::Ptr> frameBlobs(nInputChannels);  // this blobs includes pixel data from each frame
+        std::vector<Blob::Ptr> frameBlobs(nInputChannels);  // blobs include pixel data from each frame
 
         slog::info << "Start inference " << slog::endl;
-        typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
 
         /** Start inference & calc performance **/
-        ms total_inference_time(0);
-        size_t nFrames(0);
-        size_t nImageChannels = images.size();
-        size_t nVideoChannels = cap.size();
+        size_t nImageChannels = std::min(nInputChannels, images.size());
+        size_t nVideoChannels = std::min(nInputChannels - nImageChannels, cap.size());
+        size_t nChannels = nImageChannels + nVideoChannels;
+        size_t nExtChannels = nInputChannels - nChannels;
         bool isVideo = (nImageChannels == 0);
         int pause(isVideo ? 1 :0);
-        auto total_t0 = std::chrono::high_resolution_clock::now();
+        timers["total"].start();
+
+        if (!FLAGS_no_show) {
+            std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+        }
+
         do {
+            timers["capture"].start();
             /** set images **/
             for (size_t i = 0; i < nImageChannels; i++) {
                 frames[i] = images[i];
@@ -759,18 +855,31 @@ int main(int argc, char *argv[]) {
                 }
             }
 
+            /** added extra channels **/
+            for (size_t i = 0; i < nExtChannels; i++) {
+                frames[i + nChannels] = frames[i % nChannels].clone();
+            }
+
             /** stop processing if one of the input channel is empty **/
             if (endOfVideo) {
+                if (FLAGS_loop_video) {
+                    slog::info << "Trying to reopen input video ... " << slog::endl;
+                    for (size_t i = 0; i < videoFiles.size(); i++) {
+                        if (!cap[i].open(videoFiles[i])) {
+                            throw std::logic_error("Cannot reopen input file: " + videoFiles[i]);
+                        }
+                    }
+                    continue;
+                }
                 break;
             }
+            timers["capture"].finish();
 
             /** inference **/
             std::vector<VehicleObject> vehicles;
             std::vector<LicensePlateObject> licensePlates;
             std::vector<VehicleDetection::Result> results;
-            ms VehicleDetectorTime(0), AttribsNetworkTime(0), LPRNetworkTime(0);
-            int VehicleDetectorInferred = 0, AttribsInferred = 0,  LPRInferred = 0;
-            auto inference_t0 = std::chrono::high_resolution_clock::now();
+            timers["inference"].start();
             for (size_t i = 0; i < nInputChannels; i++) {
                 if (availableVDetectionRequests.empty()) {
                     // ----------------------------Get vehicle detection results -------------------------------------------
@@ -780,8 +889,7 @@ int main(int argc, char *argv[]) {
 
                     VehicleDetector.fetchResults(vehicleDetectionRequest, results);
 
-                    VehicleDetectorTime += vehicleDetectionRequest->getTime();
-                    VehicleDetectorInferred++;
+                    timers["vehicle_detector"].setCallDuration(vehicleDetectionRequest->getTime());
 
                     pendingVDetectionRequests.pop();
                     availableVDetectionRequests.push(vehicleDetectionRequest);
@@ -819,8 +927,7 @@ int main(int argc, char *argv[]) {
 
                     VehicleDetector.fetchResults(vehicleDetectionRequest, results);
 
-                    VehicleDetectorTime += vehicleDetectionRequest->getTime();
-                    VehicleDetectorInferred++;
+                    timers["vehicle_detector"].setCallDuration(vehicleDetectionRequest->getTime());
 
                     pendingVDetectionRequests.pop();
                     availableVDetectionRequests.push(vehicleDetectionRequest);
@@ -848,8 +955,7 @@ int main(int argc, char *argv[]) {
 
                                 vehicles.push_back(v);
 
-                                AttribsNetworkTime += VehicleAttribsRequest->getTime();
-                                AttribsInferred++;
+                                timers["attribs"].setCallDuration(VehicleAttribsRequest->getTime());
 
                                 pendingVAttribsRequestes.pop();
                                 availableVAttribsRequestes.push(VehicleAttribsRequest);
@@ -907,8 +1013,7 @@ int main(int argc, char *argv[]) {
 
                                 licensePlates.push_back(lp);
 
-                                LPRNetworkTime += LPRRequest->getTime();
-                                LPRInferred++;
+                                timers["lpr"].setCallDuration(LPRRequest->getTime());
 
                                 pendingLPRRequests.pop();
                                 availableLPRRequests.push(LPRRequest);
@@ -974,8 +1079,7 @@ int main(int argc, char *argv[]) {
 
                 vehicles.push_back(v);
 
-                AttribsNetworkTime += VehicleAttribsRequest->getTime();
-                AttribsInferred++;
+                timers["attribs"].setCallDuration(VehicleAttribsRequest->getTime());
 
                 pendingVAttribsRequestes.pop();
                 availableVAttribsRequestes.push(VehicleAttribsRequest);
@@ -998,57 +1102,80 @@ int main(int argc, char *argv[]) {
 
                 licensePlates.push_back(lp);
 
-                LPRNetworkTime += LPRRequest->getTime();
-                LPRInferred++;
+                timers["lpr"].setCallDuration(LPRRequest->getTime());
 
                 pendingLPRRequests.pop();
                 availableLPRRequests.push(LPRRequest);
                 // -----------------------------------------------------------------------------------------
             }
 
-            auto inference_t1 = std::chrono::high_resolution_clock::now();
-            ms inference = std::chrono::duration_cast<ms>(inference_t1 - inference_t0);
-            total_inference_time += inference;
-            nFrames++;
+            timers["inference"].finish();
 
             // ----------------------------Process outputs-----------------------------------------------------
+            timers["render"].start();
+            int vehicleRectThinkness = 2;
+            int licensePlateRectThinkness = 1;
+            int fontScale = 1;
+            int fontThinkness = 1;
+            int vehicleAttribOffset = 25;
+            int lprOffset = 50;
             for (auto && v : vehicles) {
-                cv::rectangle(frames[v.channelId], v.location, cv::Scalar(0, 255, 0), 4);
+                auto findLP = [&](VehicleObject& vehicle) {
+                    auto itlp = licensePlates.begin();
+                    for (; itlp != licensePlates.end(); itlp++) {
+                        if ((itlp->channelId == vehicle.channelId) &&
+                           ((itlp->location & vehicle.location).area() > 0)) {
+                            return itlp;
+                        }
+                    }
+                    return itlp;
+                };
+
+                auto lp = findLP(v);
+
+                if (lp == licensePlates.end()) {
+                    continue;
+                }
+
+                cv::rectangle(frames[lp->channelId], lp->location, cv::Scalar(0, 255, 0), licensePlateRectThinkness);
+
+                if (!lp->text.empty()) {
+                    int y_position = lp->location.y + lp->location.height - lprOffset;
+                    if (y_position < 0)
+                        y_position = 0;
+
+                    cv::putText(frames[lp->channelId],
+                        lp->text,
+                        cv::Point2f(static_cast<float>(lp->location.x), static_cast<float>(y_position)),
+                        cv::FONT_HERSHEY_COMPLEX_SMALL,
+                        fontScale,
+                        cv::Scalar(0, 0, 255),
+                        fontThinkness);
+
+                    if (FLAGS_r) {
+                        std::cout << "License Plate Recognition results:" << lp->text << std::endl;
+                    }
+                }
+
+                cv::rectangle(frames[v.channelId], v.location, cv::Scalar(0, 255, 0), vehicleRectThinkness);
 
                 if (!v.color.empty() && !v.type.empty()) {
                     cv::putText(frames[v.channelId],
                                 v.color,
-                                cv::Point2f(v.location.x + 5, v.location.y + 25),
+                                cv::Point2f(static_cast<float>(v.location.x + 5), static_cast<float>(v.location.y + vehicleAttribOffset)),
                                 cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                1.3,
+                                fontScale,
                                 cv::Scalar(255, 0, 0),
-                                2);
+                                fontThinkness);
                     cv::putText(frames[v.channelId],
                                 v.type,
-                                cv::Point2f(v.location.x + 5, v.location.y + 50),
+                                cv::Point2f(static_cast<float>(v.location.x + 5), static_cast<float>(v.location.y + 2 * vehicleAttribOffset)),
                                 cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                1.3,
+                                fontScale,
                                 cv::Scalar(255, 0, 0),
-                                2);
+                                fontThinkness);
                     if (FLAGS_r) {
                         std::cout << "Vehicle Attributes results:" << v.color << ";" << v.type << std::endl;
-                    }
-                }
-            }
-
-            for (auto && lp : licensePlates) {
-                cv::rectangle(frames[lp.channelId], lp.location, cv::Scalar(0, 255, 0), 2);
-
-                if (!lp.text.empty()) {
-                    cv::putText(frames[lp.channelId],
-                                lp.text,
-                                cv::Point2f(lp.location.x, lp.location.y + lp.location.height + 30),
-                                cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                1.3,
-                                cv::Scalar(0, 0, 255),
-                                2);
-                    if (FLAGS_r) {
-                        std::cout << "License Plate Recognition results:" << lp.text << std::endl;
                     }
                 }
             }
@@ -1056,64 +1183,36 @@ int main(int argc, char *argv[]) {
             // ----------------------------Fill display images ------------------------------------------------------
             displayImage.fill(frames);
 
-            // ----------------------------Execution statistics -----------------------------------------------------
-            std::ostringstream out;
-            out << "Time for processing " << nInputChannels << ((nInputChannels == 1) ? " stream" : " streams")
-                << " (nireq = " << FLAGS_nireq << ") : "
-                << std::fixed << std::setprecision(2) << inference.count()
-                << " ms ("
-                << 1000.f / inference.count() << " fps)";
-            cv::putText(displayImage.getMat(), out.str(), cv::Point2f(0, 20), cv::FONT_HERSHEY_TRIPLEX, 0.5,
-                        cv::Scalar(255, 0, 0));
+           // ----------------------------Execution statistics -----------------------------------------------------
+            fillROIColor(displayImage, cv::Rect(0, 0, 530, 100), cv::Scalar(255, 0, 0), 0.6);
 
-            if (nInputChannels == 1) {
-                float average_time = VehicleDetectorTime.count() / VehicleDetectorInferred;
-                out.str("");
-                out << "Vehicle detection time (" << FLAGS_d << ") : " << std::fixed << std::setprecision(2)
-                    << average_time
-                    << " ms ("
-                    << 1000.f / average_time << " fps)";
-                cv::putText(displayImage.getMat(), out.str(), cv::Point2f(0, 40), cv::FONT_HERSHEY_TRIPLEX, 0.5,
-                            cv::Scalar(255, 0, 0));
-                if (results.size()) {
-                    if (VehicleAttribs.enabled() && AttribsInferred) {
-                        average_time = AttribsNetworkTime.count() / AttribsInferred;
-                        out.str("");
-                        out << "Vehicle Attribs time (" << FLAGS_d_va << ", averaged over " << AttribsInferred << " detections) : "
-                            << std::fixed << std::setprecision(2) << average_time << " ms " << "(" << 1000.f / average_time << " fps)";
-                        cv::putText(displayImage.getMat(), out.str(), cv::Point2f(0, 60), cv::FONT_HERSHEY_SIMPLEX, 0.5,
-                                    cv::Scalar(255, 0, 0));
-                    }
-                    if (LPR.enabled() && LPRInferred) {
-                        average_time = LPRNetworkTime.count() / LPRInferred;
-                        out.str("");
-                        out << "LPR time (" << FLAGS_d_lpr << ", averaged over " << LPRInferred << " detections) : " << std::fixed
-                            << std::setprecision(2) << average_time << " ms " << "(" << 1000.f / average_time << " fps)";
-                        cv::putText(displayImage.getMat(), out.str(), cv::Point2f(0, 80), cv::FONT_HERSHEY_SIMPLEX, 0.5,
-                                    cv::Scalar(255, 0, 0));
-                    }
-                }
-            } else {
-                out.str("");
-                out << "Vehicle and license plate detection : " << FLAGS_d;
-                cv::putText(displayImage.getMat(), out.str(), cv::Point2f(0, 40), cv::FONT_HERSHEY_TRIPLEX, 0.5,
-                            cv::Scalar(255, 0, 0));
-                if (VehicleAttribs.enabled()) {
-                    out.str("");
-                    out << "Vehicle Attribs classification : " << FLAGS_d_va;
-                    cv::putText(displayImage.getMat(), out.str(), cv::Point2f(0, 60), cv::FONT_HERSHEY_SIMPLEX, 0.5,
-                                cv::Scalar(255, 0, 0));
-                }
-                if (LPR.enabled()) {
-                    out.str("");
-                    out << "LPR : " << FLAGS_d_lpr;
-                    cv::putText(displayImage.getMat(), out.str(), cv::Point2f(0, 80), cv::FONT_HERSHEY_SIMPLEX, 0.5,
-                                cv::Scalar(255, 0, 0));
-                }
+            std::ostringstream out;
+            out << std::fixed << std::setprecision(2)
+                << 1000. / (timers["capture"].smoothedDuration +
+                            std::max(0., timers["render"].smoothedDuration) +
+                            timers["inference"].smoothedDuration) << " fps";
+            putTextOnImage(displayImage, out.str(), cv::Point(5, 35), cv::FONT_HERSHEY_TRIPLEX, 1.1,
+                           cv::Scalar(255, 255, 255), 2);
+
+
+            out.str("");
+            out << "Inference for " << nInputChannels << ((nInputChannels == 1) ? " stream: " : " streams: ")
+                << 1000. / timers["inference"].smoothedDuration << " fps";
+            putTextOnImage(displayImage, out.str(), cv::Point(5, 60), cv::FONT_HERSHEY_TRIPLEX, 0.6,
+                           cv::Scalar(255, 255, 255), 1);
+
+            out.str("");
+            out << "Capture: " << std::fixed << std::setprecision(2)
+                << 1000. / timers["capture"].smoothedDuration << " fps";
+            if (isVideo) {
+                out << "; Render: " << std::max(0., 1000. / timers["render"].smoothedDuration) << " fps";
             }
+            putTextOnImage(displayImage, out.str(), cv::Point(5, 85), cv::FONT_HERSHEY_TRIPLEX, 0.6,
+                           cv::Scalar(255, 255, 255), 1);
 
             if (!FLAGS_no_show) {
                 cv::imshow("Detection results", displayImage.getMat());
+                timers["render"].finish();
 
                 const int key = cv::waitKey(pause);
                 if (key == 27) {
@@ -1123,14 +1222,30 @@ int main(int argc, char *argv[]) {
                 }
             }
         } while (isVideo);
-        // -----------------------------------------------------------------------------------------------------
-        float average_time = total_inference_time.count() /  nFrames;
-        std::cout << std::endl << "Avarage inference time: " << average_time << " ms ("
-                  << 1000.f / average_time << " fps)" << std::endl;
 
-        auto total_t1 = std::chrono::high_resolution_clock::now();
-        ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
-        std::cout << std::endl << "Total execution time: " << total.count() << std::endl << std::endl;
+        timers["total"].finish();
+
+        // -----------------------------------------------------------------------------------------------------
+        if (timers["inference"].numberOfCalls > 0) {
+            std::cout << std::endl << "Average inference time: " << timers["inference"].avarageTotalDuration() << " ms ("
+                      << 1000.f / timers["inference"].avarageTotalDuration() << " fps)" << std::endl;
+
+            if ((nInputChannels == 1) && (timers["vehicle_detector"].numberOfCalls > 0)) {
+                std::cout << std::endl << "Average vehicle detection time: " << timers["vehicle_detector"].avarageTotalDuration() << " ms ("
+                          << 1000.f / timers["vehicle_detector"].avarageTotalDuration() << " fps)" << std::endl;
+
+                if (timers["attribs"].numberOfCalls > 0) {
+                    std::cout << std::endl << "Average vehicle attribs time: " << timers["attribs"].avarageTotalDuration() << " ms ("
+                              << 1000.f / timers["attribs"].avarageTotalDuration() << " fps)" << std::endl;
+                }
+                if (timers["lpr"].numberOfCalls > 0) {
+                    std::cout << std::endl << "Average lpr time: " << timers["lpr"].avarageTotalDuration() << " ms ("
+                              << 1000.f / timers["lpr"].avarageTotalDuration() << " fps)" << std::endl;
+                }
+            }
+        }
+
+        std::cout << std::endl << "Total execution time: " << timers["total"].totalDuration << std::endl << std::endl;
 
         /** Show performace results **/
         if (FLAGS_pc) {

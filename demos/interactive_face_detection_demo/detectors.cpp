@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -31,10 +31,11 @@ using namespace InferenceEngine;
 BaseDetection::BaseDetection(std::string topoName,
                              const std::string &pathToModel,
                              const std::string &deviceForInference,
-                             int maxBatch, bool isBatchDynamic, bool isAsync)
-    : topoName(topoName), pathToModel(pathToModel), deviceForInference(deviceForInference),
+                             int maxBatch, bool isBatchDynamic, bool isAsync,
+                             bool doRawOutputMessages)
+    : plugin(nullptr), topoName(topoName), pathToModel(pathToModel), deviceForInference(deviceForInference),
       maxBatch(maxBatch), isBatchDynamic(isBatchDynamic), isAsync(isAsync),
-      enablingChecked(false), _enabled(false) {
+      enablingChecked(false), _enabled(false), doRawOutputMessages(doRawOutputMessages) {
     if (isAsync) {
         slog::info << "Use async mode for " << topoName << slog::endl;
     }
@@ -84,11 +85,13 @@ void BaseDetection::printPerformanceCounts() {
 FaceDetection::FaceDetection(const std::string &pathToModel,
                              const std::string &deviceForInference,
                              int maxBatch, bool isBatchDynamic, bool isAsync,
-                             double detectionThreshold, bool doRawOutputMessages)
-    : BaseDetection("Face Detection", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync),
-      detectionThreshold(detectionThreshold), doRawOutputMessages(doRawOutputMessages),
-      enquedFrames(0), width(0), height(0), bb_enlarge_coefficient(1.2), resultsFetched(false) {
-}
+                             double detectionThreshold, bool doRawOutputMessages,
+                             float bb_enlarge_coefficient, float bb_dx_coefficient, float bb_dy_coefficient)
+    : BaseDetection("Face Detection", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
+      detectionThreshold(detectionThreshold),
+      maxProposalCount(0), objectSize(0), enquedFrames(0), width(0), height(0),
+      bb_enlarge_coefficient(bb_enlarge_coefficient), bb_dx_coefficient(bb_dx_coefficient),
+      bb_dy_coefficient(bb_dy_coefficient), resultsFetched(false) {}
 
 void FaceDetection::submitRequest() {
     if (!enquedFrames) return;
@@ -105,8 +108,8 @@ void FaceDetection::enqueue(const cv::Mat &frame) {
         request = net.CreateInferRequestPtr();
     }
 
-    width = frame.cols;
-    height = frame.rows;
+    width = static_cast<float>(frame.cols);
+    height = static_cast<float>(frame.rows);
 
     Blob::Ptr  inputBlob = request->GetBlob(input);
 
@@ -166,7 +169,7 @@ CNNNetwork FaceDetection::read()  {
                                output + ") should have num_classes integer attribute");
     }
 
-    const int num_classes = outputLayer->GetParamAsInt("num_classes");
+    const size_t num_classes = outputLayer->GetParamAsUInt("num_classes");
     if (labels.size() != num_classes) {
         if (labels.size() == (num_classes - 1))  // if network assumes default "background" class, which has no label
             labels.insert(labels.begin(), "fake");
@@ -199,18 +202,21 @@ void FaceDetection::fetchResults() {
 
     for (int i = 0; i < maxProposalCount; i++) {
         float image_id = detections[i * objectSize + 0];
+        if (image_id < 0) {
+            break;
+        }
         Result r;
         r.label = static_cast<int>(detections[i * objectSize + 1]);
         r.confidence = detections[i * objectSize + 2];
 
-        if (r.confidence <= detectionThreshold) {
+        if (r.confidence <= detectionThreshold && !doRawOutputMessages) {
             continue;
         }
 
-        r.location.x = detections[i * objectSize + 3] * width;
-        r.location.y = detections[i * objectSize + 4] * height;
-        r.location.width = detections[i * objectSize + 5] * width - r.location.x;
-        r.location.height = detections[i * objectSize + 6] * height - r.location.y;
+        r.location.x = static_cast<int>(detections[i * objectSize + 3] * width);
+        r.location.y = static_cast<int>(detections[i * objectSize + 4] * height);
+        r.location.width = static_cast<int>(detections[i * objectSize + 5] * width - r.location.x);
+        r.location.height = static_cast<int>(detections[i * objectSize + 6] * height - r.location.y);
 
         // Make square and enlarge face bounding box for more robust operation of face analytics networks
         int bb_width = r.location.width;
@@ -221,34 +227,33 @@ void FaceDetection::fetchResults() {
 
         int max_of_sizes = std::max(bb_width, bb_height);
 
-        int bb_new_width = bb_enlarge_coefficient * max_of_sizes;
-        int bb_new_height = bb_enlarge_coefficient * max_of_sizes;
+        int bb_new_width = static_cast<int>(bb_enlarge_coefficient * max_of_sizes);
+        int bb_new_height = static_cast<int>(bb_enlarge_coefficient * max_of_sizes);
 
-        r.location.x = bb_center_x - bb_new_width / 2;
-        r.location.y = bb_center_y - bb_new_height / 2;
+        r.location.x = bb_center_x - static_cast<int>(std::floor(bb_dx_coefficient * bb_new_width / 2));
+        r.location.y = bb_center_y - static_cast<int>(std::floor(bb_dy_coefficient * bb_new_height / 2));
 
         r.location.width = bb_new_width;
         r.location.height = bb_new_height;
 
-        if (image_id < 0) {
-            break;
-        }
         if (doRawOutputMessages) {
             std::cout << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
                          "    (" << r.location.x << "," << r.location.y << ")-(" << r.location.width << ","
                       << r.location.height << ")"
                       << ((r.confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << std::endl;
         }
-
-        results.push_back(r);
+        if (r.confidence > detectionThreshold) {
+            results.push_back(r);
+        }
     }
 }
 
 
 AgeGenderDetection::AgeGenderDetection(const std::string &pathToModel,
                                        const std::string &deviceForInference,
-                                       int maxBatch, bool isBatchDynamic, bool isAsync)
-    : BaseDetection("Age/Gender", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync), enquedFaces(0) {
+                                       int maxBatch, bool isBatchDynamic, bool isAsync, bool doRawOutputMessages)
+    : BaseDetection("Age/Gender", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
+      enquedFaces(0) {
 }
 
 void AgeGenderDetection::submitRequest()  {
@@ -284,8 +289,13 @@ AgeGenderDetection::Result AgeGenderDetection::operator[] (int idx) const {
     Blob::Ptr  genderBlob = request->GetBlob(outputGender);
     Blob::Ptr  ageBlob    = request->GetBlob(outputAge);
 
-    return {ageBlob->buffer().as<float*>()[idx] * 100,
-                genderBlob->buffer().as<float*>()[idx * 2 + 1]};
+    AgeGenderDetection::Result r = {ageBlob->buffer().as<float*>()[idx] * 100,
+                                         genderBlob->buffer().as<float*>()[idx * 2 + 1]};
+    if (doRawOutputMessages) {
+        std::cout << "[" << idx << "] element, male prob = " << r.maleProb << ", age = " << r.age << std::endl;
+    }
+
+    return r;
 }
 
 CNNNetwork AgeGenderDetection::read() {
@@ -371,8 +381,8 @@ CNNNetwork AgeGenderDetection::read() {
 
 HeadPoseDetection::HeadPoseDetection(const std::string &pathToModel,
                                      const std::string &deviceForInference,
-                                     int maxBatch, bool isBatchDynamic, bool isAsync)
-    : BaseDetection("Head Pose", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync),
+                                     int maxBatch, bool isBatchDynamic, bool isAsync, bool doRawOutputMessages)
+    : BaseDetection("Head Pose", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
       outputAngleR("angle_r_fc"), outputAngleP("angle_p_fc"), outputAngleY("angle_y_fc"), enquedFaces(0) {
 }
 
@@ -409,9 +419,17 @@ HeadPoseDetection::Results HeadPoseDetection::operator[] (int idx) const {
     Blob::Ptr  angleP = request->GetBlob(outputAngleP);
     Blob::Ptr  angleY = request->GetBlob(outputAngleY);
 
-    return {angleR->buffer().as<float*>()[idx],
-                angleP->buffer().as<float*>()[idx],
-                angleY->buffer().as<float*>()[idx]};
+    HeadPoseDetection::Results r = {angleR->buffer().as<float*>()[idx],
+                                    angleP->buffer().as<float*>()[idx],
+                                    angleY->buffer().as<float*>()[idx]};
+
+    if (doRawOutputMessages) {
+        std::cout << "[" << idx << "] element, yaw = " << r.angle_y <<
+                     ", pitch = " << r.angle_p <<
+                     ", roll = " << r.angle_r << std::endl;
+    }
+
+    return r;
 }
 
 CNNNetwork HeadPoseDetection::read() {
@@ -482,89 +500,11 @@ CNNNetwork HeadPoseDetection::read() {
     return netReader.getNetwork();
 }
 
-void HeadPoseDetection::buildCameraMatrix(int cx, int cy, float focalLength) {
-    if (!cameraMatrix.empty()) return;
-    cameraMatrix = cv::Mat::zeros(3, 3, CV_32F);
-    cameraMatrix.at<float>(0) = focalLength;
-    cameraMatrix.at<float>(2) = static_cast<float>(cx);
-    cameraMatrix.at<float>(4) = focalLength;
-    cameraMatrix.at<float>(5) = static_cast<float>(cy);
-    cameraMatrix.at<float>(8) = 1;
-}
-
-void HeadPoseDetection::drawAxes(cv::Mat& frame, cv::Point3f cpoint, Results headPose, float scale) {
-    double yaw   = headPose.angle_y;
-    double pitch = headPose.angle_p;
-    double roll  = headPose.angle_r;
-
-    pitch *= CV_PI / 180.0;
-    yaw   *= CV_PI / 180.0;
-    roll  *= CV_PI / 180.0;
-
-    cv::Matx33f        Rx(1,           0,            0,
-                          0,  cos(pitch),  -sin(pitch),
-                          0,  sin(pitch),  cos(pitch));
-    cv::Matx33f Ry(cos(yaw),           0,    -sin(yaw),
-                   0,           1,            0,
-                   sin(yaw),           0,    cos(yaw));
-    cv::Matx33f Rz(cos(roll), -sin(roll),            0,
-                   sin(roll),  cos(roll),            0,
-                   0,           0,            1);
-
-
-    auto r = cv::Mat(Rz*Ry*Rx);
-    buildCameraMatrix(frame.cols / 2, frame.rows / 2, 950.0);
-
-    cv::Mat xAxis(3, 1, CV_32F), yAxis(3, 1, CV_32F), zAxis(3, 1, CV_32F), zAxis1(3, 1, CV_32F);
-
-    xAxis.at<float>(0) = 1 * scale;
-    xAxis.at<float>(1) = 0;
-    xAxis.at<float>(2) = 0;
-
-    yAxis.at<float>(0) = 0;
-    yAxis.at<float>(1) = -1 * scale;
-    yAxis.at<float>(2) = 0;
-
-    zAxis.at<float>(0) = 0;
-    zAxis.at<float>(1) = 0;
-    zAxis.at<float>(2) = -1 * scale;
-
-    zAxis1.at<float>(0) = 0;
-    zAxis1.at<float>(1) = 0;
-    zAxis1.at<float>(2) = 1 * scale;
-
-    cv::Mat o(3, 1, CV_32F, cv::Scalar(0));
-    o.at<float>(2) = cameraMatrix.at<float>(0);
-
-    xAxis = r * xAxis + o;
-    yAxis = r * yAxis + o;
-    zAxis = r * zAxis + o;
-    zAxis1 = r * zAxis1 + o;
-
-    cv::Point p1, p2;
-
-    p2.x = static_cast<int>((xAxis.at<float>(0) / xAxis.at<float>(2) * cameraMatrix.at<float>(0)) + cpoint.x);
-    p2.y = static_cast<int>((xAxis.at<float>(1) / xAxis.at<float>(2) * cameraMatrix.at<float>(4)) + cpoint.y);
-    cv::line(frame, cv::Point(cpoint.x, cpoint.y), p2, cv::Scalar(0, 0, 255), 2);
-
-    p2.x = static_cast<int>((yAxis.at<float>(0) / yAxis.at<float>(2) * cameraMatrix.at<float>(0)) + cpoint.x);
-    p2.y = static_cast<int>((yAxis.at<float>(1) / yAxis.at<float>(2) * cameraMatrix.at<float>(4)) + cpoint.y);
-    cv::line(frame, cv::Point(cpoint.x, cpoint.y), p2, cv::Scalar(0, 255, 0), 2);
-
-    p1.x = static_cast<int>((zAxis1.at<float>(0) / zAxis1.at<float>(2) * cameraMatrix.at<float>(0)) + cpoint.x);
-    p1.y = static_cast<int>((zAxis1.at<float>(1) / zAxis1.at<float>(2) * cameraMatrix.at<float>(4)) + cpoint.y);
-
-    p2.x = static_cast<int>((zAxis.at<float>(0) / zAxis.at<float>(2) * cameraMatrix.at<float>(0)) + cpoint.x);
-    p2.y = static_cast<int>((zAxis.at<float>(1) / zAxis.at<float>(2) * cameraMatrix.at<float>(4)) + cpoint.y);
-    cv::line(frame, p1, p2, cv::Scalar(255, 0, 0), 2);
-    cv::circle(frame, p2, 3, cv::Scalar(255, 0, 0), 2);
-}
-
-
 EmotionsDetection::EmotionsDetection(const std::string &pathToModel,
                                      const std::string &deviceForInference,
-                                     int maxBatch, bool isBatchDynamic, bool isAsync)
-              : BaseDetection("Emotions Recognition", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync), enquedFaces(0) {
+                                     int maxBatch, bool isBatchDynamic, bool isAsync, bool doRawOutputMessages)
+              : BaseDetection("Emotions Recognition", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
+                enquedFaces(0) {
 }
 
 void EmotionsDetection::submitRequest() {
@@ -595,7 +535,7 @@ void EmotionsDetection::enqueue(const cv::Mat &face) {
     enquedFaces++;
 }
 
-std::string EmotionsDetection::operator[] (int idx) const {
+std::map<std::string, float> EmotionsDetection::operator[] (int idx) const {
     // Vector of supported emotions
     static const std::vector<std::string> emotionsVec = {"neutral", "happy", "sad", "surprise", "anger"};
     auto emotionsVecSize = emotionsVec.size();
@@ -604,8 +544,8 @@ std::string EmotionsDetection::operator[] (int idx) const {
 
     /* emotions vector must have the same size as number of channels
      * in model output. Default output format is NCHW, so index 1 is checked */
-    int numOfChannels = emotionsBlob->getTensorDesc().getDims().at(1);
-    if (numOfChannels != emotionsVec.size()) {
+    size_t numOfChannels = emotionsBlob->getTensorDesc().getDims().at(1);
+    if (numOfChannels != emotionsVecSize) {
         throw std::logic_error("Output size (" + std::to_string(numOfChannels) +
                                ") of the Emotions Recognition network is not equal "
                                "to used emotions vector size (" +
@@ -613,12 +553,27 @@ std::string EmotionsDetection::operator[] (int idx) const {
     }
 
     auto emotionsValues = emotionsBlob->buffer().as<float *>();
-    auto outputIdxPos = emotionsValues + idx * numOfChannels;
+    auto outputIdxPos = emotionsValues + idx * emotionsVecSize;
+    std::map<std::string, float> emotions;
 
-    /* identify an index of the most probable emotion in output array
-           for idx image to return appropriate emotion name */
-    int maxProbEmotionIx = std::max_element(outputIdxPos, outputIdxPos + emotionsVecSize) - outputIdxPos;
-    return emotionsVec[maxProbEmotionIx];
+    if (doRawOutputMessages) {
+        std::cout << "[" << idx << "] element, predicted emotions (name = prob):" << std::endl;
+    }
+
+    for (size_t i = 0; i < emotionsVecSize; i++) {
+        emotions[emotionsVec[i]] = outputIdxPos[i];
+
+        if (doRawOutputMessages) {
+            std::cout << emotionsVec[i] << " = " << outputIdxPos[i];
+            if (emotionsVecSize - 1 != i) {
+                std::cout << ", ";
+            } else {
+                std::cout << std::endl;
+            }
+        }
+    }
+
+    return emotions;
 }
 
 CNNNetwork EmotionsDetection::read() {
@@ -690,8 +645,8 @@ CNNNetwork EmotionsDetection::read() {
 
 FacialLandmarksDetection::FacialLandmarksDetection(const std::string &pathToModel,
                                                    const std::string &deviceForInference,
-                                                   int maxBatch, bool isBatchDynamic, bool isAsync)
-    : BaseDetection("Facial Landmarks", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync),
+                                                   int maxBatch, bool isBatchDynamic, bool isAsync, bool doRawOutputMessages)
+    : BaseDetection("Facial Landmarks", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
       outputFacialLandmarksBlobName("align_fc3"), enquedFaces(0) {
 }
 
@@ -730,8 +685,23 @@ std::vector<float> FacialLandmarksDetection::operator[] (int idx) const {
     auto n_lm = landmarksBlob->dims()[0];
     const float *normed_coordinates = request->GetBlob(outputFacialLandmarksBlobName)->buffer().as<float *>();
 
-    for (auto i = 0UL; i < n_lm; ++i)
-        normedLandmarks.push_back(normed_coordinates[i + n_lm * idx]);
+    if (doRawOutputMessages) {
+        std::cout << "[" << idx << "] element, normed facial landmarks coordinates (x, y):" << std::endl;
+    }
+
+    auto begin = n_lm * idx;
+    auto end = begin + n_lm / 2;
+    for (auto i_lm = begin; i_lm < end; ++i_lm) {
+        float normed_x = normed_coordinates[2 * i_lm];
+        float normed_y = normed_coordinates[2 * i_lm + 1];
+
+        if (doRawOutputMessages) {
+            std::cout << normed_x << ", " << normed_y << std::endl;
+        }
+
+        normedLandmarks.push_back(normed_x);
+        normedLandmarks.push_back(normed_y);
+    }
 
     return normedLandmarks;
 }
@@ -781,17 +751,9 @@ CNNNetwork FacialLandmarksDetection::read() {
             throw std::logic_error("Facial Landmarks Estimation network output layer unknown: " + layer->name + ", should be " +
                                    outputFacialLandmarksBlobName);
         }
-        if (layer->type != "FullyConnected") {
-            throw std::logic_error("Facial Landmarks Estimation network output layer (" + layer->name + ") has invalid type: " +
-                                   layer->type + ", should be FullyConnected");
-        }
-        auto fc = dynamic_cast<FullyConnectedLayer*>(layer.get());
-        if (!fc) {
-            throw std::logic_error("Fully connected layer is not valid");
-        }
-        if (fc->_out_num != 70) {
-            throw std::logic_error("Facial Landmarks Estimation network output layer (" + layer->name + ") has invalid out-size=" +
-                                   std::to_string(fc->_out_num) + ", should be 70");
+        const SizeVector outputDims = output.second->getTensorDesc().getDims();
+        if (outputDims[1] != 70) {
+            throw std::logic_error("Facial Landmarks Estimation network output layer should have 70 as a last dimension");
         }
         layerNames[layer->name] = true;
     }
@@ -809,7 +771,10 @@ Load::Load(BaseDetection& detector) : detector(detector) {
 void Load::into(InferencePlugin & plg, bool enable_dynamic_batch) const {
     if (detector.enabled()) {
         std::map<std::string, std::string> config;
-        if (enable_dynamic_batch) {
+        std::string pluginName = plg.GetVersion()->description;
+        bool isPossibleDynBatch = pluginName.find("MKLDNN") != std::string::npos ||
+                                  pluginName.find("clDNN") != std::string::npos;
+        if (enable_dynamic_batch && isPossibleDynBatch) {
             config[PluginConfigParams::KEY_DYN_BATCH_ENABLED] = PluginConfigParams::YES;
         }
         detector.net = plg.LoadNetwork(detector.read(), config);
@@ -834,6 +799,10 @@ double CallStat::getSmoothedDuration() {
 
 double CallStat::getTotalDuration() {
     return _total_duration;
+}
+
+double CallStat::getLastCallDuration() {
+    return _last_call_duration;
 }
 
 void CallStat::calculateDuration() {

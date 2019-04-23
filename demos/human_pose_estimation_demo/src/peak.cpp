@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -211,9 +211,9 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
                             p_count++;
                         }
                     }
-                    suc_ratio = p_count / mid_num;
+                    suc_ratio = static_cast<float>(p_count / mid_num);
                     float ratio = p_count > 0 ? p_sum / p_count : 0.0f;
-                    mid_score = ratio + std::min(height_n / norm_vec - 1, 0.0);
+                    mid_score = ratio + static_cast<float>(std::min(height_n / norm_vec - 1, 0.0));
                 }
                 if (mid_score > 0
                         && suc_ratio > foundMidPointsRatioThreshold) {
@@ -228,8 +228,8 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
                 return (a.score > b.score);
             });
         }
-        int num_limbs = std::min(nJointsA, nJointsB);
-        int cnt = 0;
+        size_t num_limbs = std::min(nJointsA, nJointsB);
+        size_t cnt = 0;
         std::vector<int> occurA(nJointsA, 0);
         std::vector<int> occurB(nJointsB, 0);
         for (size_t row = 0; row < tempJointConnections.size(); row++) {

@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -30,10 +30,10 @@ std::vector<size_t> KuhnMunkres::Solve(const cv::Mat& dissimilarity_matrix) {
 
     Run();
 
-    std::vector<size_t> results(marked_.rows, -1);
-    for (int i = 0; i < marked_.rows; i++) {
+    std::vector<size_t> results(dissimilarity_matrix.rows, -1);
+    for (int i = 0; i < dissimilarity_matrix.rows; i++) {
         const auto ptr = marked_.ptr<char>(i);
-        for (int j = 0; j < marked_.cols; j++) {
+        for (int j = 0; j < dissimilarity_matrix.cols; j++) {
             if (ptr[j] == kStar) {
                 results[i] = j;
             }

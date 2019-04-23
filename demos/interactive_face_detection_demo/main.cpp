@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <iterator>
 #include <map>
+#include <list>
 
 #include <inference_engine.hpp>
 
@@ -28,6 +29,8 @@
 
 #include "interactive_face_detection.hpp"
 #include "detectors.hpp"
+#include "face.hpp"
+#include "visualizer.hpp"
 
 #include <ie_iextension.h>
 #include <ext_list.hpp>
@@ -66,7 +69,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-
 int main(int argc, char *argv[]) {
     try {
         std::cout << "InferenceEngine: " << GetInferenceEngineVersion() << std::endl;
@@ -78,17 +80,23 @@ int main(int argc, char *argv[]) {
 
         slog::info << "Reading input" << slog::endl;
         cv::VideoCapture cap;
-        const bool isCamera = FLAGS_i == "cam";
         if (!(FLAGS_i == "cam" ? cap.open(0) : cap.open(FLAGS_i))) {
             throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);
         }
-        const size_t width  = (size_t) cap.get(cv::CAP_PROP_FRAME_WIDTH);
-        const size_t height = (size_t) cap.get(cv::CAP_PROP_FRAME_HEIGHT);
 
+        Timer timer;
         // read input (video) frame
         cv::Mat frame;
         if (!cap.read(frame)) {
             throw std::logic_error("Failed to get frame from cv::VideoCapture");
+        }
+
+        const size_t width  = static_cast<size_t>(frame.cols);
+        const size_t height = static_cast<size_t>(frame.rows);
+
+        cv::VideoWriter videoWriter;
+        if (!FLAGS_o.empty()) {
+            videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('I', 'Y', 'U', 'V'), 25, cv::Size(width, height));
         }
         // ---------------------------------------------------------------------------------------------------
         // --------------------------- 1. Loading plugin to the Inference Engine -----------------------------
@@ -97,11 +105,12 @@ int main(int argc, char *argv[]) {
             {FLAGS_d, FLAGS_m}, {FLAGS_d_ag, FLAGS_m_ag}, {FLAGS_d_hp, FLAGS_m_hp},
             {FLAGS_d_em, FLAGS_m_em}, {FLAGS_d_lm, FLAGS_m_lm}
         };
-        FaceDetection faceDetector(FLAGS_m, FLAGS_d, 1, false, FLAGS_async, FLAGS_t, FLAGS_r);
-        AgeGenderDetection ageGenderDetector(FLAGS_m_ag, FLAGS_d_ag, FLAGS_n_ag, FLAGS_dyn_ag, FLAGS_async);
-        HeadPoseDetection headPoseDetector(FLAGS_m_hp, FLAGS_d_hp, FLAGS_n_hp, FLAGS_dyn_hp, FLAGS_async);
-        EmotionsDetection emotionsDetector(FLAGS_m_em, FLAGS_d_em, FLAGS_n_em, FLAGS_dyn_em, FLAGS_async);
-        FacialLandmarksDetection facialLandmarksDetector(FLAGS_m_lm, FLAGS_d_lm, FLAGS_n_lm, FLAGS_dyn_lm, FLAGS_async);
+        FaceDetection faceDetector(FLAGS_m, FLAGS_d, 1, false, FLAGS_async, FLAGS_t, FLAGS_r,
+                                   static_cast<float>(FLAGS_bb_enlarge_coef), static_cast<float>(FLAGS_dx_coef), static_cast<float>(FLAGS_dy_coef));
+        AgeGenderDetection ageGenderDetector(FLAGS_m_ag, FLAGS_d_ag, FLAGS_n_ag, FLAGS_dyn_ag, FLAGS_async, FLAGS_r);
+        HeadPoseDetection headPoseDetector(FLAGS_m_hp, FLAGS_d_hp, FLAGS_n_hp, FLAGS_dyn_hp, FLAGS_async, FLAGS_r);
+        EmotionsDetection emotionsDetector(FLAGS_m_em, FLAGS_d_em, FLAGS_n_em, FLAGS_dyn_em, FLAGS_async, FLAGS_r);
+        FacialLandmarksDetection facialLandmarksDetector(FLAGS_m_lm, FLAGS_d_lm, FLAGS_n_lm, FLAGS_dyn_lm, FLAGS_async, FLAGS_r);
 
         for (auto && option : cmdOptions) {
             auto deviceName = option.first;
@@ -115,7 +124,7 @@ int main(int argc, char *argv[]) {
                 continue;
             }
             slog::info << "Loading plugin " << deviceName << slog::endl;
-            InferencePlugin plugin = PluginDispatcher({"../../../lib/intel64", ""}).getPluginByDevice(deviceName);
+            InferencePlugin plugin = PluginDispatcher().getPluginByDevice(deviceName);
 
             /** Printing plugin version **/
             printPluginVersion(plugin, std::cout);
@@ -164,33 +173,45 @@ int main(int argc, char *argv[]) {
         bool isFaceAnalyticsEnabled = ageGenderDetector.enabled() || headPoseDetector.enabled() ||
                                       emotionsDetector.enabled() || facialLandmarksDetector.enabled();
 
-        Timer timer;
-        timer.start("total");
-
         std::ostringstream out;
         size_t framesCounter = 0;
         bool frameReadStatus;
         bool isLastFrame;
+        int delay = 1;
+        double msrate = -1;
         cv::Mat prev_frame, next_frame;
+        std::list<Face::Ptr> faces;
+        size_t id = 0;
+
+        if (FLAGS_fps > 0) {
+            msrate = 1000.f / FLAGS_fps;
+        }
+
+        Visualizer::Ptr visualizer;
+        if (!FLAGS_no_show || !FLAGS_o.empty()) {
+            visualizer = std::make_shared<Visualizer>(cv::Size(width, height));
+            if (!FLAGS_no_show_emotion_bar && emotionsDetector.enabled()) {
+                visualizer->enableEmotionBar(emotionsDetector.emotionsVec);
+            }
+        }
 
         // Detecting all faces on the first frame and reading the next one
-        timer.start("detection");
         faceDetector.enqueue(frame);
         faceDetector.submitRequest();
-        timer.finish("detection");
 
         prev_frame = frame.clone();
 
         // Reading the next frame
-        timer.start("video frame decoding");
         frameReadStatus = cap.read(frame);
-        timer.finish("video frame decoding");
 
+        if (!FLAGS_no_show) {
+            std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+        }
         while (true) {
+            timer.start("total");
             framesCounter++;
             isLastFrame = !frameReadStatus;
 
-            timer.start("detection");
             // Retrieving face detection results for the previous frame
             faceDetector.wait();
             faceDetector.fetchResults();
@@ -201,9 +222,7 @@ int main(int argc, char *argv[]) {
                 faceDetector.enqueue(frame);
                 faceDetector.submitRequest();
             }
-            timer.finish("detection");
 
-            timer.start("data preprocessing");
             // Filling inputs of face analytics networks
             for (auto &&face : prev_detection_results) {
                 if (isFaceAnalyticsEnabled) {
@@ -215,197 +234,134 @@ int main(int argc, char *argv[]) {
                     facialLandmarksDetector.enqueue(face);
                 }
             }
-            timer.finish("data preprocessing");
 
             // Running Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, and Facial Landmarks Estimation networks simultaneously
-            timer.start("face analytics call");
             if (isFaceAnalyticsEnabled) {
                 ageGenderDetector.submitRequest();
                 headPoseDetector.submitRequest();
                 emotionsDetector.submitRequest();
                 facialLandmarksDetector.submitRequest();
             }
-            timer.finish("face analytics call");
 
             // Reading the next frame if the current one is not the last
             if (!isLastFrame) {
-                timer.start("video frame decoding");
                 frameReadStatus = cap.read(next_frame);
-                timer.finish("video frame decoding");
+                if (FLAGS_loop_video && !frameReadStatus) {
+                    if (!(FLAGS_i == "cam" ? cap.open(0) : cap.open(FLAGS_i))) {
+                        throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);
+                    }
+                    frameReadStatus = cap.read(next_frame);
+                }
             }
 
-            timer.start("face analytics wait");
             if (isFaceAnalyticsEnabled) {
                 ageGenderDetector.wait();
                 headPoseDetector.wait();
                 emotionsDetector.wait();
                 facialLandmarksDetector.wait();
             }
-            timer.finish("face analytics wait");
 
-            // Visualizing results
-            if (!FLAGS_no_show) {
-                timer.start("visualization");
-                out.str("");
-                out << "OpenCV cap/render time: " << std::fixed << std::setprecision(2)
-                    << (timer["video frame decoding"].getSmoothedDuration() +
-                       timer["visualization"].getSmoothedDuration())
-                    << " ms";
-                cv::putText(prev_frame, out.str(), cv::Point2f(0, 25), cv::FONT_HERSHEY_TRIPLEX, 0.5,
-                            cv::Scalar(255, 0, 0));
+            //  Postprocessing
+            std::list<Face::Ptr> prev_faces;
 
-                out.str("");
-                out << "Face detection time: " << std::fixed << std::setprecision(2)
-                    << timer["detection"].getSmoothedDuration()
-                    << " ms ("
-                    << 1000.f / (timer["detection"].getSmoothedDuration())
-                    << " fps)";
-                cv::putText(prev_frame, out.str(), cv::Point2f(0, 45), cv::FONT_HERSHEY_TRIPLEX, 0.5,
-                            cv::Scalar(255, 0, 0));
+            if (!FLAGS_no_smooth) {
+                prev_faces.insert(prev_faces.begin(), faces.begin(), faces.end());
+            }
 
-                if (isFaceAnalyticsEnabled) {
-                    out.str("");
-                    out << "Face Analysics Networks "
-                        << "time: " << std::fixed << std::setprecision(2)
-                        << timer["face analytics call"].getSmoothedDuration() +
-                           timer["face analytics wait"].getSmoothedDuration()
-                        << " ms ";
-                    if (!prev_detection_results.empty()) {
-                        out << "("
-                            << 1000.f / (timer["face analytics call"].getSmoothedDuration() +
-                               timer["face analytics wait"].getSmoothedDuration())
-                            << " fps)";
-                    }
-                    cv::putText(prev_frame, out.str(), cv::Point2f(0, 65), cv::FONT_HERSHEY_TRIPLEX, 0.5,
-                                cv::Scalar(255, 0, 0));
-                }
+            faces.clear();
 
-                // For every detected face
-                int i = 0;
-                for (auto &result : prev_detection_results) {
-                    cv::Rect rect = result.location;
+            // For every detected face
+            for (size_t i = 0; i < prev_detection_results.size(); i++) {
+                auto& result = prev_detection_results[i];
+                cv::Rect rect = result.location & cv::Rect(0, 0, width, height);
 
-                    out.str("");
+                Face::Ptr face;
+                if (!FLAGS_no_smooth) {
+                    face = matchFace(rect, prev_faces);
+                    float intensity_mean = calcMean(prev_frame(rect));
 
-                    if (ageGenderDetector.enabled() && i < ageGenderDetector.maxBatch) {
-                        out << (ageGenderDetector[i].maleProb > 0.5 ? "M" : "F");
-                        out << std::fixed << std::setprecision(0) << "," << ageGenderDetector[i].age;
-                        if (FLAGS_r) {
-                            std::cout << "Predicted gender, age = " << out.str() << std::endl;
-                        }
+                    if ((face == nullptr) ||
+                        ((face != nullptr) && ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f))) {
+                        face = std::make_shared<Face>(id++, rect);
                     } else {
-                        out << (result.label < faceDetector.labels.size() ? faceDetector.labels[result.label] :
-                                std::string("label #") + std::to_string(result.label))
-                            << ": " << std::fixed << std::setprecision(3) << result.confidence;
+                        prev_faces.remove(face);
                     }
 
-                    if (emotionsDetector.enabled() && i < emotionsDetector.maxBatch) {
-                        std::string emotion = emotionsDetector[i];
-                        if (FLAGS_r) {
-                            std::cout << "Predicted emotion = " << emotion << std::endl;
-                        }
-                        out << "," << emotion;
-                    }
-
-                    cv::putText(prev_frame,
-                                out.str(),
-                                cv::Point2f(result.location.x, result.location.y - 15),
-                                cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                0.8,
-                                cv::Scalar(0, 0, 255));
-
-                    if (headPoseDetector.enabled() && i < headPoseDetector.maxBatch) {
-                        if (FLAGS_r) {
-                            std::cout << "Head pose results: yaw, pitch, roll = "
-                                      << headPoseDetector[i].angle_y << ";"
-                                      << headPoseDetector[i].angle_p << ";"
-                                      << headPoseDetector[i].angle_r << std::endl;
-                        }
-                        cv::Point3f center(rect.x + rect.width / 2, rect.y + rect.height / 2, 0);
-                        headPoseDetector.drawAxes(prev_frame, center, headPoseDetector[i], 50);
-                    }
-
-                    if (facialLandmarksDetector.enabled() && i < facialLandmarksDetector.maxBatch) {
-                        auto normed_landmarks = facialLandmarksDetector[i];
-                        auto n_lm = normed_landmarks.size();
-                        if (FLAGS_r)
-                            std::cout << "Normed Facial Landmarks coordinates (x, y):" << std::endl;
-                        for (auto i_lm = 0UL; i_lm < n_lm / 2; ++i_lm) {
-                            float normed_x = normed_landmarks[2 * i_lm];
-                            float normed_y = normed_landmarks[2 * i_lm + 1];
-
-                            if (FLAGS_r) {
-                                std::cout << normed_x << ", "
-                                          << normed_y << std::endl;
-                            }
-                            int x_lm = rect.x + rect.width * normed_x;
-                            int y_lm = rect.y + rect.height * normed_y;
-                            // Drawing facial landmarks on the frame
-                            cv::circle(prev_frame, cv::Point(x_lm, y_lm), 1 + static_cast<int>(0.012 * rect.width), cv::Scalar(0, 255, 255), -1);
-                        }
-                    }
-
-                    auto genderColor = (ageGenderDetector.enabled() && (i < ageGenderDetector.maxBatch)) ?
-                                ((ageGenderDetector[i].maleProb < 0.5) ? cv::Scalar(147, 20, 255) : cv::Scalar(255, 0,
-                                                                                                               0))
-                              : cv::Scalar(100, 100, 100);
-                    cv::rectangle(prev_frame, result.location, genderColor, 1);
-                    i++;
+                    face->_intensity_mean = intensity_mean;
+                    face->_location = rect;
+                } else {
+                    face = std::make_shared<Face>(id++, rect);
                 }
 
-                cv::imshow("Detection results", prev_frame);
-                timer.finish("visualization");
-            } else if (FLAGS_r) {
-                // For every detected face
-                for (int i = 0; i < prev_detection_results.size(); i++) {
-                    if (ageGenderDetector.enabled() && i < ageGenderDetector.maxBatch) {
-                        out.str("");
-                        out << (ageGenderDetector[i].maleProb > 0.5 ? "M" : "F");
-                        out << std::fixed << std::setprecision(0) << "," << ageGenderDetector[i].age;
-                        std::cout << "Predicted gender, age = " << out.str() << std::endl;
-                    }
+                face->ageGenderEnable((ageGenderDetector.enabled() &&
+                                       i < ageGenderDetector.maxBatch));
+                if (face->isAgeGenderEnabled()) {
+                    AgeGenderDetection::Result ageGenderResult = ageGenderDetector[i];
+                    face->updateGender(ageGenderResult.maleProb);
+                    face->updateAge(ageGenderResult.age);
+                }
 
-                    if (emotionsDetector.enabled() && i < emotionsDetector.maxBatch) {
-                        std::cout << "Predicted emotion = " << emotionsDetector[i] << std::endl;
-                    }
+                face->emotionsEnable((emotionsDetector.enabled() &&
+                                      i < emotionsDetector.maxBatch));
+                if (face->isEmotionsEnabled()) {
+                    face->updateEmotions(emotionsDetector[i]);
+                }
 
-                    if (headPoseDetector.enabled() && i < headPoseDetector.maxBatch) {
-                        std::cout << "Head pose results: yaw, pitch, roll = "
-                                  << headPoseDetector[i].angle_y << ";"
-                                  << headPoseDetector[i].angle_p << ";"
-                                  << headPoseDetector[i].angle_r << std::endl;
-                    }
+                face->headPoseEnable((headPoseDetector.enabled() &&
+                                      i < headPoseDetector.maxBatch));
+                if (face->isHeadPoseEnabled()) {
+                    face->updateHeadPose(headPoseDetector[i]);
+                }
 
-                    if (facialLandmarksDetector.enabled() && i < facialLandmarksDetector.maxBatch) {
-                        auto normed_landmarks = facialLandmarksDetector[i];
-                        auto n_lm = normed_landmarks.size();
-                        std::cout << "Normed Facial Landmarks coordinates (x, y):" << std::endl;
-                        for (auto i_lm = 0UL; i_lm < n_lm / 2; ++i_lm) {
-                            float normed_x = normed_landmarks[2 * i_lm];
-                            float normed_y = normed_landmarks[2 * i_lm + 1];
-                            std::cout << normed_x << ", "
-                                      << normed_y << std::endl;
-                        }
-                    }
+                face->landmarksEnable((facialLandmarksDetector.enabled() &&
+                                       i < facialLandmarksDetector.maxBatch));
+                if (face->isLandmarksEnabled()) {
+                    face->updateLandmarks(facialLandmarksDetector[i]);
+                }
+
+                faces.push_back(face);
+            }
+
+            //  Visualizing results
+            if (!FLAGS_no_show || !FLAGS_o.empty()) {
+                out.str("");
+                out << "Total image throughput: " << std::fixed << std::setprecision(2)
+                    << 1000.f / (timer["total"].getSmoothedDuration()) << " fps";
+                cv::putText(prev_frame, out.str(), cv::Point2f(10, 45), cv::FONT_HERSHEY_TRIPLEX, 1.2,
+                            cv::Scalar(255, 0, 0), 2);
+
+                // drawing faces
+                visualizer->draw(prev_frame, faces);
+
+                if (!FLAGS_no_show) {
+                    cv::imshow("Detection results", prev_frame);
                 }
             }
 
-            // End of file (or a single frame file like an image). The last frame is displayed to let you check what is shown
-            if (isLastFrame) {
-                timer.finish("total");
-                if (!FLAGS_no_wait) {
-                    std::cout << "No more frames to process. Press any key to exit" << std::endl;
-                    cv::waitKey(0);
-                }
-                break;
-            } else if (!FLAGS_no_show && -1 != cv::waitKey(1)) {
-                timer.finish("total");
-                break;
+            if (!FLAGS_o.empty()) {
+                videoWriter.write(prev_frame);
             }
 
             prev_frame = frame;
             frame = next_frame;
             next_frame = cv::Mat();
+
+            timer.finish("total");
+
+            if (FLAGS_fps > 0) {
+                delay = std::max(1, static_cast<int>(msrate - timer["total"].getLastCallDuration()));
+            }
+
+            // End of file (or a single frame file like an image). The last frame is displayed to let you check what is shown
+            if (isLastFrame) {
+                if (!FLAGS_no_wait) {
+                    std::cout << "No more frames to process. Press any key to exit" << std::endl;
+                    cv::waitKey(0);
+                }
+                break;
+            } else if (!FLAGS_no_show && -1 != cv::waitKey(delay)) {
+                break;
+            }
         }
 
         slog::info << "Number of processed frames: " << framesCounter << slog::endl;
@@ -420,6 +376,16 @@ int main(int argc, char *argv[]) {
             facialLandmarksDetector.printPerformanceCounts();
         }
         // ---------------------------------------------------------------------------------------------------
+
+        if (!FLAGS_o.empty()) {
+            videoWriter.release();
+        }
+
+        // release input video stream
+        cap.release();
+
+        // close windows
+        cv::destroyAllWindows();
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

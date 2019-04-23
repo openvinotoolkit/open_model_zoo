@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 
         // --------------------------- 1. Load Plugin for inference engine -------------------------------------
         slog::info << "Loading plugin" << slog::endl;
-        InferencePlugin plugin = PluginDispatcher({ FLAGS_pp, "../../../lib/intel64" , "" }).getPluginByDevice(FLAGS_d);
+        InferencePlugin plugin = PluginDispatcher({ FLAGS_pp }).getPluginByDevice(FLAGS_d);
 
         /** Loading default extensions **/
         if (FLAGS_d.find("CPU") != std::string::npos) {
@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
 
         double total = 0.0;
         /** Start inference & calc performance **/
-        for (int iter = 0; iter < FLAGS_ni; ++iter) {
+        for (size_t iter = 0; iter < FLAGS_ni; ++iter) {
             auto t0 = Time::now();
             infer_request.Infer();
             auto t1 = Time::now();
@@ -255,7 +255,7 @@ int main(int argc, char *argv[]) {
                 for (size_t h = 0; h < H; ++h) {
                     /* number of channels = 1 means that the output is already ArgMax'ed */
                     if (C == 1) {
-                        outArrayClasses[h][w] = output_data[image_stride * image + W * h + w];
+                        outArrayClasses[h][w] = static_cast<size_t>(output_data[image_stride * image + W * h + w]);
                     } else {
                         /** Iterating over each class probability **/
                         for (size_t ch = 0; ch < C; ++ch) {

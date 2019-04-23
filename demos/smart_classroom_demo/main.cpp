@@ -500,7 +500,7 @@ int main(int argc, char* argv[]) {
                 continue;
             }
             slog::info << "Loading plugin " << device << slog::endl;
-            InferencePlugin plugin = PluginDispatcher({"../../../lib/intel64", ""}).getPluginByDevice(device);
+            InferencePlugin plugin = PluginDispatcher().getPluginByDevice(device);
             printPluginVersion(plugin, std::cout);
             /** Load extensions for the CPU plugin **/
             if ((device.find("CPU") != std::string::npos)) {
@@ -882,7 +882,7 @@ int main(int argc, char* argv[]) {
 
             sc_visualizer.Show();
 
-            if (FLAGS_last_frame >= 0 && work_num_frames > FLAGS_last_frame) {
+            if (FLAGS_last_frame >= 0 && work_num_frames > static_cast<size_t>(FLAGS_last_frame)) {
                 break;
             }
             prev_frame = frame.clone();
