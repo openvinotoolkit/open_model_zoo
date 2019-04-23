@@ -12,11 +12,11 @@ Upon the start-up, the demo reads command-line parameters and loads a network an
 
 Run the application with the `-h` or `--help` option to see the usage message:
 ```
-    python3 3d_segmentation_demo.py -h
+python3 3d_segmentation_demo.py -h
 ```
 The command yields the following usage message:
 ```
-    usage: 3d_segmentation_demo.py [-h] -i PATH_TO_INPUT_DATA -m PATH_TO_MODEL -o
+usage: 3d_segmentation_demo.py [-h] -i PATH_TO_INPUT_DATA -m PATH_TO_MODEL -o
                                PATH_TO_OUTPUT [-d TARGET_DEVICE]
                                [-l PATH_TO_EXTENSION] [-nii]
                                [-nthreads NUMBER_THREADS]
@@ -60,20 +60,20 @@ For example, to do inference on a 3D TIFF image using a trained network with mul
 command:
 
 ```
-    python3 3d_segmentation_demo.py -i <path_to_image>/inputImage.tiff -m <path_to_model>/multiple-output.xml -d CPU -o <path_to_output>
+python3 3d_segmentation_demo.py -i <path_to_image>/inputImage.tiff -m <path_to_model>/multiple-output.xml -d CPU -o <path_to_output>
 ```
      
 For example, to do inference on an 3D NIfTI image using a trained network with multiple outputs on CPU and save 
 output TIFF and NIFTI images, run the following command:
 ```
-    python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/multiple-output.xml -d CPU -o <path_to_output> -nii
+python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/multiple-output.xml -d CPU -o <path_to_output> -nii
 ```
      
 ## Demo Output
 The demo outputs a multipage TIFF image and a NIFTI archive.
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/Readme.md)
+* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2019/model_downloader)
 

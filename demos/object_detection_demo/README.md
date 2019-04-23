@@ -71,7 +71,7 @@ of the detected objects along with the respective confidence values and the coor
 rectangles to the standard output stream.
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/Readme.md)
+* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/README.md)
 * [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2019/model_downloader)
 * [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html)
 * [Converting a Caffe Model](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_prepare_model_convert_model_Convert_Model_From_Caffe.html)
