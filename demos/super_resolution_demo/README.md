@@ -7,7 +7,7 @@ You can use the following pre-trained model with the demo:
 * `single-image-super-resolution-1033`, which is the primary and only model that
   performs super resolution 4x upscale on a 200x200 image
 
-For more information about the pre-trained models, refer to the [Open Model Zoo](https://github.com/opencv/open_model_zoo/tree/2019/intel_models/index.md) repository on GitHub*.
+For more information about the pre-trained models, refer to the [Open Model Zoo](https://github.com/opencv/open_model_zoo/tree/master/intel_models/index.md) repository on GitHub*.
 
 ## How It Works
 
@@ -15,7 +15,7 @@ On the start-up, the application reads command-line parameters and loads the
 specified network. After that, the application reads a 200x200 input image and
 performs 4x upscale using super resolution.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Running
 
@@ -41,9 +41,9 @@ Options:
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2019/model_downloader) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
 
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
+> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 To do inference on CPU using a trained model, run the following command:
 
@@ -57,6 +57,6 @@ The application outputs a reconstructed high-resolution image and saves it in
 the current working directory as `*.bmp` file with `sr` prefix.
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2019/model_downloader)
+* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/master/demos/README.md)
+* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader)

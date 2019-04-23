@@ -15,7 +15,7 @@ For example, if the inference is performed on the FPGA, and the CPU is essential
 in parallel. But if the inference is performed say on the GPU, than it can take little gain to do the (resulting video) encoding
 on the same GPU in parallel, because the device is already busy.
 
-This and other performance implications and tips for the Async API are covered in the [Optimization Guide](https://docs.openvinotoolkit.org/2019_R1/_docs_optimization_guide_dldt_optimization_guide.html)
+This and other performance implications and tips for the Async API are covered in the [Optimization Guide](https://docs.openvinotoolkit.org/latest/_docs_optimization_guide_dldt_optimization_guide.html)
 
 Other demo objectives are:
 * Video as input support via OpenCV
@@ -59,7 +59,7 @@ In this case, the NEXT request is populated in the main (app) thread, while the 
 (this is handled in the dedicated thread, internal to the IE runtime).
 
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ### Async API
 
@@ -96,7 +96,7 @@ that reporting the time between StartAsync and Wait would obviously incorrect.
 That is why in the "ASYNC" mode the inference speed is not reported.
 
 
-For more details on the requests-based Inference Engine API, including the Async execution, refer to [Integrate the Inference Engine New Request API with Your Application](https://docs.openvinotoolkit.org/2019_R1/_docs_IE_DG_Integrate_with_customer_application_new_API.html).
+For more details on the requests-based Inference Engine API, including the Async execution, refer to [Integrate the Inference Engine New Request API with Your Application](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Integrate_with_customer_application_new_API.html).
 
 
 ## Running
@@ -142,9 +142,9 @@ You can use the following command to do inference on GPU with a pre-trained obje
     python3 object_detection_demo_ssd_async.py -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/ssd.xml -d GPU
 ```
 
-To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2019/model_downloader) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
 
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
+> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 The only GUI knob is using **Tab** to switch between the synchronized execution and the true Async mode.
 
@@ -158,6 +158,6 @@ In the default mode the demo reports
 
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2019/model_downloader)
+* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/master/demos/README.md)
+* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader)

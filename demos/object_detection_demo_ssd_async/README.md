@@ -7,7 +7,7 @@ Specifically, this demo keeps two parallel infer requests and while the current 
 is being captured. This essentially hides the latency of capturing, so that the overall framerate is rather
 determined by the `MAXIMUM(detection time, input capturing time)` and not the `SUM(detection time, input capturing time)`.
 
-> **NOTE:** This topic describes usage of C++ implementation of the Object Detection SSD Demo Async API. For the Python* implementation, refer to [Object Detection SSD Python* Demo, Async API Performance Showcase](https://github.com/opencv/open_model_zoo/tree/2019/demos/python_demos/object_detection_demo_ssd_async/README.md).
+> **NOTE:** This topic describes usage of C++ implementation of the Object Detection SSD Demo Async API. For the Python* implementation, refer to [Object Detection SSD Python* Demo, Async API Performance Showcase](https://github.com/opencv/open_model_zoo/tree/master/demos/python_demos/object_detection_demo_ssd_async/README.md).
 
 The technique can be generalized to any available parallel slack, for example, doing inference and simultaneously encoding the resulting
 (previous) frames or running further inference, like some emotion detection on top of the face detection results.
@@ -17,7 +17,7 @@ For example, if the inference is performed on the FPGA, and the CPU is essential
 in parallel. But if the inference is performed say on the GPU, than it can take little gain to do the (resulting video) encoding
 on the same GPU in parallel, because the device is already busy.
 
-This and other performance implications and tips for the Async API are covered in the [Optimization Guide](https://docs.openvinotoolkit.org/2019_R1/_docs_optimization_guide_dldt_optimization_guide.html)
+This and other performance implications and tips for the Async API are covered in the [Optimization Guide](https://docs.openvinotoolkit.org/latest/_docs_optimization_guide_dldt_optimization_guide.html)
 
 Other demo objectives are:
 * Video as input support via OpenCV
@@ -33,7 +33,7 @@ need to pull Inference Engine demos helpers to your app
 On the start-up, the application reads command line parameters and loads a network to the Inference
 Engine. Upon getting a frame from the OpenCV VideoCapture it performs inference and displays the results.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 New "Async API" operates with new notion of the "Infer Request" that encapsulates the inputs/outputs and separates *scheduling and waiting for result*,
 next section. And here what makes the performance look different:
@@ -97,7 +97,7 @@ that reporting the time between StartAsync and Wait would obviously incorrect.
 That is why in the "ASYNC" mode the inference speed is not reported.
 
 
-For more details on the requests-based Inference Engine API, including the Async execution, refer to [Integrate the Inference Engine New Request API with Your Application](https://docs.openvinotoolkit.org/2019_R1/_docs_IE_DG_Integrate_with_customer_application_new_API.html).
+For more details on the requests-based Inference Engine API, including the Async execution, refer to [Integrate the Inference Engine New Request API with Your Application](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Integrate_with_customer_application_new_API.html).
 
 
 ## Running
@@ -127,9 +127,9 @@ Options:
 
 Running the application with the empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2019/model_downloader) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
 
-> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
+> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
 You can use the following command to do inference on GPU with a pre-trained object detection model:
 ```sh
@@ -148,6 +148,6 @@ In the default mode the demo reports
 
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/2019/demos/README.md)
-* [Model Optimizer](https://docs.openvinotoolkit.org/2019_R1/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2019/model_downloader)
+* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/master/demos/README.md)
+* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader)
