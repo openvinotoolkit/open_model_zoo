@@ -20,7 +20,6 @@ SETLOCAL EnableDelayedExpansion
 set "ROOT_DIR=%~dp0"
 
 set "SOLUTION_DIR64=%USERPROFILE%\Documents\Intel\OpenVINO\omz_demos_build"
-if exist "%SOLUTION_DIR64%" rd /s /q "%SOLUTION_DIR64%"
 
 set MSBUILD_BIN=
 set VS_PATH=
