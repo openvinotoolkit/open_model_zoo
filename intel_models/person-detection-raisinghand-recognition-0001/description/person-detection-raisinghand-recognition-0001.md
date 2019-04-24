@@ -12,8 +12,8 @@ This is an action detector for the Smart Classroom scenario. It is based on the 
 
 | Metric                            | Value                                     |
 |-----------------------------------|-------------------------------------------|
-| Detector AP (internal test set 2) | 93.71%                                    |
-| Accuracy (internal test set 2)    | 97.09%                                    |
+| Detector AP (internal test set 2) | 81.50%                                    |
+| Accuracy (internal test set 2)    | 94.93%                                    |
 | Pose coverage                     | Sitting, standing, raising hand           |
 | Support of occluded pedestrians   | YES                                       |
 | Occlusion coverage                | <50%                                      |
