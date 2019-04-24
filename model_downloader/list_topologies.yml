@@ -1980,6 +1980,12 @@ topologies:
           $type: google_drive
           id: 1T2ldCISt5N2TEUfv6ggRB1dw0cucTqT2
     output: "semantic_segmentation/cascaded_unet/brats2018/mxnet"
-    model_optimizer_args: "--framework mxnet --data_type FP32 --input_shape [1,4,128,128,128] --input data_crop --output blockgrad7 --input_model <brain-tumor-segmentation-0001-0000.params>"
+    model_optimizer_args:
+      - --framework=mxnet
+      - --data_type=FP32
+      - --input_shape=[1,4,128,128,128]
+      - --input=data_crop
+      - --output=blockgrad7
+      - --input_model=$dl_dir/brain-tumor-segmentation-0001-0000.params
     framework: mxnet
     license: https://github.com/lachinov/brats2018-graphlabunn/blob/master/LICENSE
