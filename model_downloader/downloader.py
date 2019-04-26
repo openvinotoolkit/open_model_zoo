@@ -228,6 +228,8 @@ print('')
 print('###############|| Post processing ||###############')
 print('')
 for top in topologies:
+    if top.name in failed_topologies: continue
+
     output = args.output_dir / top.subdir
 
     for postproc in top.postprocessing:
