@@ -1097,6 +1097,29 @@ topologies:
     framework: mxnet
     license: https://github.com/lachinov/brats2018-graphlabunn/blob/master/LICENSE
 
+  - name: "ssd-mobilenet-v2-0.35.1.-barrier-256x256-0123"
+    description: "Multiclass (vehicle, license plates) detector based on MobileNetV2+SSD"
+    files:
+      - name: ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
+        sha256: de6744bc72339f29109f595bc51b47383595ffb06ed15a7438f2ae9cb8a2a77c
+        source: https://download.01.org/opencv/openvino_training_extensions/models/ssd_detector/ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
+    output: "object_detection/barrier/tf/0123"
+    postprocessing:
+      - $type: unpack_archive
+        format: gztar
+        file: ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --input_shape=[1,256,256,3]
+      - --scale=127.5
+      - --mean_values=[127.5,127.5,127.5]
+      - --tensorflow_use_custom_operations_config=$dl_dir/model/model.tfmo.json
+      - --output=ssd_heads/concat_reshape_softmax/mbox_loc_final,ssd_heads/concat_reshape_softmax/mbox_conf_final,ssd_heads/concat_reshape_softmax/mbox_priorbox
+      - --input_model=$dl_dir/model/model.pb.frozen
+    framework: tf
+    license: https://github.com/opencv/training_toolbox_tensorflow/blob/develop/LICENSE
+
   - name: "age-gender-recognition-retail-0013"
     description: "Age & gender classification."
     files:
