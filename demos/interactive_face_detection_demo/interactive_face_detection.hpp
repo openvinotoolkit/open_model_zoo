@@ -100,8 +100,22 @@ static const char no_wait_for_keypress_message[] = "Do not wait for key press in
 /// @brief Message do not show processed video
 static const char no_show_processed_video[] = "Do not show processed video.";
 
+/// @brief Message do not show face bounding boxes
+static const char no_show_face_bbox_message[] = "Do not show face bounding boxes on processed video.";
+
+/// @brief Message do not show performance numbers on processed video
+static const char no_show_perf_message[] = "Do not show performance numbers on processed video.";
+
+/// @brief Message face blurring sigma
+static const char blur_faces_sigma_message[] = "Value of sigma parameter in Gaussian blur that is used for face blurring. "\
+"If it is negative then face blurring is disabled. Positive values enable face blurring, sigma equals to 40 seems like a good choice. "\
+"By default it equals to -1 (disabled).";
+
 /// @brief Message for asynchronous mode
-static const char async_message[] = "Enable asynchronous mode";
+static const char async_message[] = "Enable asynchronous mode.";
+
+/// @brief Message for where processed video should be written to
+static const char write_video_message[] = "Where processed video should be written to.";
 
 
 /// \brief Define flag for showing help message<br>
@@ -197,9 +211,25 @@ DEFINE_bool(no_wait, false, no_wait_for_keypress_message);
 /// It is an optional parameter
 DEFINE_bool(no_show, false, no_show_processed_video);
 
+/// \brief Define a flag to disable showing performance<br>
+/// It is an optional parameter
+DEFINE_bool(no_show_perf, false, no_show_perf_message);
+
+/// \brief Define a flag to disable showing face detection bounding boxes<br>
+/// It is an optional parameter
+DEFINE_bool(no_show_face_bbox, false, no_show_face_bbox_message);
+
+/// \brief Define parameter for sigma of Gaussian face blurring<br>
+/// It is an optional parameter
+DEFINE_double(blur_faces_sigma,-1.0, blur_faces_sigma_message);
+
 /// \brief Define a flag to enable aynchronous execution<br>
 /// It is an optional parameter
 DEFINE_bool(async, false, async_message);
+
+/// @brief Define parameter for absolute path where processed video should be written to<br>
+/// It is an optional parameter
+DEFINE_string(write_video, "", write_video_message);
 
 /**
 * \brief This function shows a help message
@@ -207,7 +237,7 @@ DEFINE_bool(async, false, async_message);
 
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "interactive_face_detection [OPTION]" << std::endl;
+    std::cout << "interactive_face_detection_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                         " << help_message << std::endl;
@@ -236,6 +266,10 @@ static void showUsage() {
     std::cout << "    -async                     " << async_message << std::endl;
     std::cout << "    -no_wait                   " << no_wait_for_keypress_message << std::endl;
     std::cout << "    -no_show                   " << no_show_processed_video << std::endl;
+    std::cout << "    -no_show_perf              " << no_show_perf_message << std::endl;
+    std::cout << "    -no_show_face_bbox         " << no_show_face_bbox_message << std::endl;
+    std::cout << "    -blur_faces_sigma          " << blur_faces_sigma_message << std::endl;
+    std::cout << "    -write_video               " << write_video_message << std::endl;
     std::cout << "    -pc                        " << performance_counter_message << std::endl;
     std::cout << "    -r                         " << raw_output_message << std::endl;
     std::cout << "    -t                         " << thresh_output_message << std::endl;

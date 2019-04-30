@@ -40,11 +40,11 @@ InferenceEngine:
     API version ............ <version>
     Build .................. <number>
 
-interactive_face_detection_demo [OPTION]
+interactive_face_detection [OPTION]
 Options:
 
     -h                         Print a usage message
-    -i "<path>"                Required. Path to a video file. Default value is "cam" to work with camera.
+    -i "<path>"                Optional. Path to a video file. Default value is "cam" to work with camera.
     -m "<path>"                Required. Path to an .xml file with a trained Face Detection model.
     -m_ag "<path>"             Optional. Path to an .xml file with a trained Age/Gender Recognition model.
     -m_hp "<path>"             Optional. Path to an .xml file with a trained Head Pose Estimation model.
@@ -57,7 +57,7 @@ Options:
     -d_ag "<device>"           Target device for Age/Gender Recognition network (CPU, GPU, FPGA, or MYRIAD). The demo will look for a suitable plugin for a specified device.
     -d_hp "<device>"           Target device for Head Pose Estimation network (CPU, GPU, FPGA, or MYRIAD). The demo will look for a suitable plugin for a specified device.
     -d_em "<device>"           Target device for Emotions Recognition network (CPU, GPU, FPGA, or MYRIAD). The demo will look for a suitable plugin for a specified device.
-    -d_lm "<device>"           Target device for Facial Landmarks Estimation network (CPU, GPU, FPGA, or MYRIAD). Demo will look for a suitable plugin for device specified.
+    -d_lm "<device>"           Target device for Facial Landmarks Estimation network (CPU, GPU, FPGA, or MYRIAD). The demo will look for a suitable plugin for device specified.
     -n_ag "<num>"              Number of maximum simultaneously processed faces for Age/Gender Recognition network (default is 16)
     -n_hp "<num>"              Number of maximum simultaneously processed faces for Head Pose Estimation network (default is 16)
     -n_em "<num>"              Number of maximum simultaneously processed faces for Emotions Recognition network (default is 16)
@@ -66,9 +66,13 @@ Options:
     -dyn_hp                    Enable dynamic batch size for Head Pose Estimation network
     -dyn_em                    Enable dynamic batch size for Emotions Recognition network
     -dyn_lm                    Enable dynamic batch size for Facial Landmarks Estimation network
-    -async                     Enable asynchronous mode
-    -no_wait                   Do not wait for key press in the end
-    -no_show                   Do not show processed video
+    -async                     Enable asynchronous mode.
+    -no_wait                   Do not wait for key press in the end.
+    -no_show                   Do not show processed video.
+    -no_show_perf              Do not show performance numbers on processed video.
+    -no_show_face_bbox         Do not show face bounding boxes on processed video.
+    -blur_faces_sigma          Value of sigma parameter in Gaussian blur that is used for face blurring. If it is negative then face blurring is disabled. Positive values enable face blurring, sigma equals to 40 seems like a good choice. By default it equals to -1 (disabled).
+    -write_video               Where processed video should be written to.
     -pc                        Enable per-layer performance report
     -r                         Output inference results as raw values
     -t                         Probability threshold for detections
@@ -103,6 +107,15 @@ If Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, or Facial
 
 * **Face Analysis Networks time**: combined inference time of simultaneously executed
 Age/Gender Recognition, Head Pose Estimation, Emotions Recognition, and Facial Landmarks Estimation networks.
+
+
+## Running for faces blurring
+
+One can use the demo as faces blurring application. To blur faces on input video one should run following line to get video with blurred faces. The output video will be written to `<path_to_video>/outputVideo.avi`.
+
+```sh
+./interactive_face_detection_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/face-detection-adas-0001.xml -no_show_face_bbox -no_show_perf -blur_faces_sigma 40 -write_video <path_to_video>/outputVideo.avi
+```
 
 ## See Also
 * [Using Inference Engine Demos](../Readme.md)

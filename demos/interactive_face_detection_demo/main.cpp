@@ -84,6 +84,12 @@ int main(int argc, char *argv[]) {
         }
         const size_t width  = (size_t) cap.get(cv::CAP_PROP_FRAME_WIDTH);
         const size_t height = (size_t) cap.get(cv::CAP_PROP_FRAME_HEIGHT);
+        const float fps = (float) cap.get(cv::CAP_PROP_FPS);
+
+        cv::VideoWriter writer;
+        if (!FLAGS_write_video.empty()) {
+            writer.open(FLAGS_write_video, cv::VideoWriter::fourcc('H', '2', '6', '4'), fps, cv::Size(width, height));
+        }
 
         // read input (video) frame
         cv::Mat frame;
@@ -251,8 +257,9 @@ int main(int argc, char *argv[]) {
                     << (timer["video frame decoding"].getSmoothedDuration() +
                        timer["visualization"].getSmoothedDuration())
                     << " ms";
-                cv::putText(prev_frame, out.str(), cv::Point2f(0, 25), cv::FONT_HERSHEY_TRIPLEX, 0.5,
-                            cv::Scalar(255, 0, 0));
+                if (!FLAGS_no_show_perf)
+                    cv::putText(prev_frame, out.str(), cv::Point2f(0, 25), cv::FONT_HERSHEY_TRIPLEX, 0.5,
+                                cv::Scalar(255, 0, 0));
 
                 out.str("");
                 out << "Face detection time: " << std::fixed << std::setprecision(2)
@@ -260,8 +267,9 @@ int main(int argc, char *argv[]) {
                     << " ms ("
                     << 1000.f / (timer["detection"].getSmoothedDuration())
                     << " fps)";
-                cv::putText(prev_frame, out.str(), cv::Point2f(0, 45), cv::FONT_HERSHEY_TRIPLEX, 0.5,
-                            cv::Scalar(255, 0, 0));
+                if (!FLAGS_no_show_perf)
+                    cv::putText(prev_frame, out.str(), cv::Point2f(0, 45), cv::FONT_HERSHEY_TRIPLEX, 0.5,
+                                cv::Scalar(255, 0, 0));
 
                 if (isFaceAnalyticsEnabled) {
                     out.str("");
@@ -307,12 +315,13 @@ int main(int argc, char *argv[]) {
                         out << "," << emotion;
                     }
 
-                    cv::putText(prev_frame,
-                                out.str(),
-                                cv::Point2f(result.location.x, result.location.y - 15),
-                                cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                0.8,
-                                cv::Scalar(0, 0, 255));
+                    if (!FLAGS_no_show_face_bbox)
+                        cv::putText(prev_frame,
+                                    out.str(),
+                                    cv::Point2f(result.location.x, result.location.y - 15),
+                                    cv::FONT_HERSHEY_COMPLEX_SMALL,
+                                    0.8,
+                                    cv::Scalar(0, 0, 255));
 
                     if (headPoseDetector.enabled() && i < headPoseDetector.maxBatch) {
                         if (FLAGS_r) {
@@ -349,11 +358,33 @@ int main(int argc, char *argv[]) {
                                 ((ageGenderDetector[i].maleProb < 0.5) ? cv::Scalar(147, 20, 255) : cv::Scalar(255, 0,
                                                                                                                0))
                               : cv::Scalar(100, 100, 100);
-                    cv::rectangle(prev_frame, result.location, genderColor, 1);
+                    if (!FLAGS_no_show_face_bbox)
+                        cv::rectangle(prev_frame, result.location, genderColor, 1);
+
+                    if (FLAGS_blur_faces_sigma > 0) {
+                        cv::Rect clipped_rect = result.location;
+                        clipped_rect.x += static_cast<int>(clipped_rect.width * 0.5);
+                        clipped_rect.y += static_cast<int>(clipped_rect.height * 0.5);
+                        clipped_rect.width = static_cast<int>(clipped_rect.width / faceDetector.bb_enlarge_coefficient);
+                        clipped_rect.height = static_cast<int>(clipped_rect.height / faceDetector.bb_enlarge_coefficient);
+                        clipped_rect.x -= static_cast<int>(clipped_rect.width * 0.5);
+                        clipped_rect.y -= static_cast<int>(clipped_rect.height * 0.5);
+                        clipped_rect.x = std::max(0, clipped_rect.x);
+                        clipped_rect.y = std::max(0, clipped_rect.y);
+                        clipped_rect.width = std::min(clipped_rect.width, prev_frame.size().width - clipped_rect.x);
+                        clipped_rect.height = std::min(clipped_rect.height, prev_frame.size().height - clipped_rect.y);
+                        int kernel_size = static_cast<int>(FLAGS_blur_faces_sigma) / 2 * 2 + 1;
+                        cv::GaussianBlur(prev_frame(clipped_rect), prev_frame(clipped_rect),
+                                         cv::Size(kernel_size, kernel_size), FLAGS_blur_faces_sigma);
+                    }
+
                     i++;
                 }
 
                 cv::imshow("Detection results", prev_frame);
+                if (writer.isOpened())
+                    writer.write(prev_frame);
+
                 timer.finish("visualization");
             } else if (FLAGS_r) {
                 // For every detected face
