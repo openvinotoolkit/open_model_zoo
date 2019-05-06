@@ -40,7 +40,7 @@ topologies:
       - --input_model=$dl_dir/densenet-121.caffemodel
       - --input_proto=$dl_dir/densenet-121.prototxt
     framework: caffe
-    license: https://github.com/liuzhuang13/DenseNet/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/liuzhuang13/DenseNet/master/LICENSE
 
   - name: "densenet-161"
     description: "DenseNet-161 (https://github.com/shicai/DenseNet-Caffe). The following Caffe patch must be used to be able to convert this model: https://github.com/BVLC/caffe/pull/3057/files"
@@ -66,7 +66,7 @@ topologies:
       - --input_model=$dl_dir/densenet-161.caffemodel
       - --input_proto=$dl_dir/densenet-161.prototxt
     framework: caffe
-    license: https://github.com/liuzhuang13/DenseNet/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/liuzhuang13/DenseNet/master/LICENSE
 
   - name: "densenet-169"
     description: "DenseNet-169 (https://github.com/shicai/DenseNet-Caffe). The following Caffe patch must be used to be able to convert this model: https://github.com/BVLC/caffe/pull/3057/files"
@@ -92,7 +92,7 @@ topologies:
       - --input_model=$dl_dir/densenet-169.caffemodel
       - --input_proto=$dl_dir/densenet-169.prototxt
     framework: caffe
-    license: https://github.com/liuzhuang13/DenseNet/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/liuzhuang13/DenseNet/master/LICENSE
 
   - name: "densenet-201"
     description: "DenseNet-201 (https://github.com/shicai/DenseNet-Caffe). The following Caffe patch must be used to be able to convert this model: https://github.com/BVLC/caffe/pull/3057/files"
@@ -118,7 +118,7 @@ topologies:
       - --input_model=$dl_dir/densenet-201.caffemodel
       - --input_proto=$dl_dir/densenet-201.prototxt
     framework: caffe
-    license: https://github.com/liuzhuang13/DenseNet/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/liuzhuang13/DenseNet/master/LICENSE
 
   - name: "squeezenet1.0"
     description: "SqueezeNet v1.0 (https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.0)"
@@ -128,7 +128,7 @@ topologies:
         source: https://raw.githubusercontent.com/DeepScale/SqueezeNet/a47b6f13d30985279789d08053d37013d67d131b/SqueezeNet_v1.0/deploy.prototxt
       - name: squeezenet1.0.caffemodel
         sha256: 9ff8035aada1f9ffa880b35252680d971434b141ec9fbacbe88309f0f9a675ce
-        source: https://github.com/DeepScale/SqueezeNet/raw/a47b6f13d30985279789d08053d37013d67d131b/SqueezeNet_v1.0/squeezenet_v1.0.caffemodel
+        source: https://raw.githubusercontent.com/DeepScale/SqueezeNet/raw/a47b6f13d30985279789d08053d37013d67d131b/SqueezeNet_v1.0/squeezenet_v1.0.caffemodel
     output: "classification/squeezenet/1.0/caffe"
     postprocessing:
       - $type: regex_replace
@@ -145,7 +145,7 @@ topologies:
       - --input_model=$dl_dir/squeezenet1.0.caffemodel
       - --input_proto=$dl_dir/squeezenet1.0.prototxt
     framework: caffe
-    license: https://github.com/DeepScale/SqueezeNet/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/DeepScale/SqueezeNet/master/LICENSE
 
   - name: "squeezenet1.1"
     description: "SqueezeNet v1.1 (https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.1)"
@@ -155,7 +155,7 @@ topologies:
         source: https://raw.githubusercontent.com/DeepScale/SqueezeNet/a47b6f13d30985279789d08053d37013d67d131b/SqueezeNet_v1.1/deploy.prototxt
       - name: squeezenet1.1.caffemodel
         sha256: 72b912ace512e8621f8ff168a7d72af55910d3c7c9445af8dfbff4c2ee960142
-        source: https://github.com/DeepScale/SqueezeNet/raw/a47b6f13d30985279789d08053d37013d67d131b/SqueezeNet_v1.1/squeezenet_v1.1.caffemodel
+        source: https://raw.githubusercontent.com/DeepScale/SqueezeNet/raw/a47b6f13d30985279789d08053d37013d67d131b/SqueezeNet_v1.1/squeezenet_v1.1.caffemodel
     output: "classification/squeezenet/1.1/caffe"
     postprocessing:
       - $type: regex_replace
@@ -172,7 +172,7 @@ topologies:
       - --input_model=$dl_dir/squeezenet1.1.caffemodel
       - --input_proto=$dl_dir/squeezenet1.1.prototxt
     framework: caffe
-    license: https://github.com/DeepScale/SqueezeNet/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/DeepScale/SqueezeNet/master/LICENSE
 
   - name: "mtcnn-p"
     description: "MTCNN-Proposal Network (https://github.com/DuinoDu/mtcnn/tree/master/model https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf)"
@@ -182,7 +182,7 @@ topologies:
         source: https://raw.githubusercontent.com/DuinoDu/mtcnn/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det1.prototxt
       - name: mtcnn-p.caffemodel
         sha256: d6085e7f48ba7e6b6f1b58964595f6bce5b97bcc4866751f7b4bdc98f920c096
-        source: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det1.caffemodel
+        source: https://raw.githubusercontent.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det1.caffemodel
     output: "object_detection/common/mtcnn/p/caffe"
     postprocessing:
       - $type: regex_replace
@@ -204,7 +204,7 @@ topologies:
       - --input_model=$dl_dir/mtcnn-p.caffemodel
       - --input_proto=$dl_dir/mtcnn-p.prototxt
     framework: caffe
-    license: https://github.com/DuinoDu/mtcnn/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/DuinoDu/mtcnn/master/LICENSE
 
   - name: "mtcnn-r"
     description: "MTCNN-Refine Network (https://github.com/DuinoDu/mtcnn/tree/master/model https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf)"
@@ -214,7 +214,7 @@ topologies:
         source: https://raw.githubusercontent.com/DuinoDu/mtcnn/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det2.prototxt
       - name: mtcnn-r.caffemodel
         sha256: 39b20f7a57bb8176cc9466cea4dfd52da6a6f876de60c7ab222a309f2d0ca08c
-        source: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det2.caffemodel
+        source: https://raw.githubusercontent.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det2.caffemodel
     output: "object_detection/common/mtcnn/r/caffe"
     model_optimizer_args:
       - --framework=caffe
@@ -225,7 +225,7 @@ topologies:
       - --input_model=$dl_dir/mtcnn-r.caffemodel
       - --input_proto=$dl_dir/mtcnn-r.prototxt
     framework: caffe
-    license: https://github.com/DuinoDu/mtcnn/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/DuinoDu/mtcnn/master/LICENSE
 
   - name: "mtcnn-o"
     description: "MTCNN-Output Network (https://github.com/DuinoDu/mtcnn/tree/master/model https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf)"
@@ -235,7 +235,7 @@ topologies:
         source: https://raw.githubusercontent.com/DuinoDu/mtcnn/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det3.prototxt
       - name: mtcnn-o.caffemodel
         sha256: 9d6098829a4d6d318f37cec42142465637fafe4c673f2e93b69495bf7ca23d2d
-        source: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det3.caffemodel
+        source: https://raw.githubusercontent.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det3.caffemodel
     output: "object_detection/common/mtcnn/o/caffe"
     model_optimizer_args:
       - --framework=caffe
@@ -246,7 +246,7 @@ topologies:
       - --input_model=$dl_dir/mtcnn-o.caffemodel
       - --input_proto=$dl_dir/mtcnn-o.prototxt
     framework: caffe
-    license: https://github.com/DuinoDu/mtcnn/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/DuinoDu/mtcnn/master/LICENSE
 
   - name: "mobilenet-ssd"
     description: "Common object detection architecture (https://github.com/chuanqi305/MobileNet-SSD)"
@@ -272,7 +272,7 @@ topologies:
       - --input_model=$dl_dir/mobilenet-ssd.caffemodel
       - --input_proto=$dl_dir/mobilenet-ssd.prototxt
     framework: caffe
-    license: https://github.com/tensorflow/models/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "vgg19"
     description: "VGG Net-E (https://arxiv.org/pdf/1409.1556.pdf)"
@@ -299,7 +299,7 @@ topologies:
       - --input_model=$dl_dir/vgg19.caffemodel
       - --input_proto=$dl_dir/vgg19.prototxt
     framework: caffe
-    license: https://github.com/keras-team/keras/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/keras-team/keras/master/LICENSE
 
   - name: "vgg16"
     description: "VGG Net-D (https://arxiv.org/pdf/1409.1556.pdf)"
@@ -326,7 +326,7 @@ topologies:
       - --input_model=$dl_dir/vgg16.caffemodel
       - --input_proto=$dl_dir/vgg16.prototxt
     framework: caffe
-    license: https://github.com/keras-team/keras/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/keras-team/keras/master/LICENSE
 
   - name: "ssd512"
     description: "SSD-512 (https://arxiv.org/pdf/1512.02325.pdf)"
@@ -356,7 +356,7 @@ topologies:
       - --input_model=$dl_dir/models/VGGNet/VOC0712Plus/SSD_512x512/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel
       - --input_proto=$dl_dir/models/VGGNet/VOC0712Plus/SSD_512x512/deploy.prototxt
     framework: caffe
-    license: https://github.com/weiliu89/caffe/blob/ssd/LICENSE
+    license: https://raw.githubusercontent.com/weiliu89/caffe/ssd/LICENSE
 
   - name: "ssd300"
     description: "SSD-300 (https://arxiv.org/pdf/1512.02325.pdf)"
@@ -386,7 +386,7 @@ topologies:
       - --input_model=$dl_dir/models/VGGNet/VOC0712Plus/SSD_300x300_ft/VGG_VOC0712Plus_SSD_300x300_ft_iter_160000.caffemodel
       - --input_proto=$dl_dir/models/VGGNet/VOC0712Plus/SSD_300x300_ft/deploy.prototxt
     framework: caffe
-    license: https://github.com/weiliu89/caffe/blob/ssd/LICENSE
+    license: https://raw.githubusercontent.com/weiliu89/caffe/ssd/LICENSE
 
   - name: "inception-resnet-v2"
     description: "Inception-ResNet V2 architecture (https://arxiv.org/pdf/1602.07261.pdf)"
@@ -415,7 +415,7 @@ topologies:
       - --input_model=$dl_dir/inception-resnet-v2.caffemodel
       - --input_proto=$dl_dir/inception-resnet-v2.prototxt
     framework: caffe
-    license: https://github.com/soeaver/caffe-model/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/soeaver/caffe-model/master/LICENSE
 
   - name: "dilation"
     description: "Multi-Scale Context Aggregation by Dilated Convolutions (https://arxiv.org/pdf/1511.07122.pdf)"
@@ -437,7 +437,7 @@ topologies:
       - --input_model=$dl_dir/dilation.caffemodel
       - --input_proto=$dl_dir/dilation.prototxt
     framework: caffe
-    license: https://github.com/fyu/dilation/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/fyu/dilation/master/LICENSE
 
   - name: "googlenet-v1"
     description: "GoogleNet v1 (Inception v1) (https://arxiv.org/pdf/1409.4842.pdf)"
@@ -464,7 +464,7 @@ topologies:
       - --input_model=$dl_dir/googlenet-v1.caffemodel
       - --input_proto=$dl_dir/googlenet-v1.prototxt
     framework: caffe
-    license: https://github.com/BVLC/caffe/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/BVLC/caffe/master/LICENSE
 
   - name: "googlenet-v2"
     description: "GoogleNet v2 (Inception v2) (https://arxiv.org/pdf/1502.03167.pdf)"
@@ -474,7 +474,7 @@ topologies:
         source: https://raw.githubusercontent.com/lim0606/caffe-googlenet-bn/d19caf526b7d8cad873ff91ba4cea602eadd58b3/deploy.prototxt
       - name: googlenet-v2.caffemodel
         sha256: c6581a8e60e5ae8962183ff019986fc9dfacc5e5bd5247d76a0ff7fae8e0409a
-        source: https://github.com/lim0606/caffe-googlenet-bn/raw/d19caf526b7d8cad873ff91ba4cea602eadd58b3/snapshots/googlenet_bn_stepsize_6400_iter_1200000.caffemodel
+        source: https://raw.githubusercontent.com/lim0606/caffe-googlenet-bn/raw/d19caf526b7d8cad873ff91ba4cea602eadd58b3/snapshots/googlenet_bn_stepsize_6400_iter_1200000.caffemodel
     output: "classification/googlenet/v2/caffe"
     postprocessing:
       - $type: regex_replace
@@ -495,7 +495,7 @@ topologies:
       - --input_model=$dl_dir/googlenet-v2.caffemodel
       - --input_proto=$dl_dir/googlenet-v2.prototxt
     framework: caffe
-    license: https://github.com/lim0606/caffe-googlenet-bn/blob/master/README.md
+    license: https://raw.githubusercontent.com/lim0606/caffe-googlenet-bn/master/README.md
 
   - name: "googlenet-v4"
     description: "GoogleNet v4 (Inception v4)"
@@ -524,7 +524,7 @@ topologies:
       - --input_model=$dl_dir/googlenet-v4.caffemodel
       - --input_proto=$dl_dir/googlenet-v4.prototxt
     framework: caffe
-    license: https://github.com/soeaver/caffe-model/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/soeaver/caffe-model/master/LICENSE
 
   - name: "alexnet"
     description: "AlexNet (http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)"
@@ -551,7 +551,7 @@ topologies:
       - --input_model=$dl_dir/alexnet.caffemodel
       - --input_proto=$dl_dir/alexnet.prototxt
     framework: caffe
-    license: https://github.com/BVLC/caffe/blob/master/models/bvlc_alexnet/readme.md
+    license: https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/readme.md
 
   - name: "ssd_mobilenet_v2_coco"
     description: "MobileNetV2 object detection architecture (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
@@ -575,7 +575,7 @@ topologies:
       - --output=detection_classes,detection_scores,detection_boxes,num_detections
       - --input_model=$dl_dir/ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph.pb
     framework: tf
-    license: https://github.com/tensorflow/models/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "resnet-50"
     description: "ResNet-50 (https://arxiv.org/pdf/1512.03385.pdf)"
@@ -598,7 +598,7 @@ topologies:
       - --input_model=$dl_dir/resnet-50.caffemodel
       - --input_proto=$dl_dir/resnet-50.prototxt
     framework: caffe
-    license: https://github.com/KaimingHe/deep-residual-networks/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/KaimingHe/deep-residual-networks/master/LICENSE
 
   - name: "resnet-101"
     description: "ResNet-101 (https://arxiv.org/pdf/1512.03385.pdf)"
@@ -621,7 +621,7 @@ topologies:
       - --input_model=$dl_dir/resnet-101.caffemodel
       - --input_proto=$dl_dir/resnet-101.prototxt
     framework: caffe
-    license: https://github.com/KaimingHe/deep-residual-networks/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/KaimingHe/deep-residual-networks/master/LICENSE
 
   - name: "resnet-152"
     description: "ResNet-152 (https://arxiv.org/pdf/1512.03385.pdf)"
@@ -644,7 +644,7 @@ topologies:
       - --input_model=$dl_dir/resnet-152.caffemodel
       - --input_proto=$dl_dir/resnet-152.prototxt
     framework: caffe
-    license: https://github.com/KaimingHe/deep-residual-networks/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/KaimingHe/deep-residual-networks/master/LICENSE
 
   - name: "googlenet-v3"
     description: "GoogleNet v3 (Inception v3) (https://arxiv.org/pdf/1512.00567.pdf)"
@@ -668,7 +668,7 @@ topologies:
       - --output=InceptionV3/Predictions/Softmax
       - --input_model=$dl_dir/inception_v3_2016_08_28_frozen.pb
     framework: tf
-    license: https://github.com/tensorflow/models/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "se-inception"
     description: "BN-Inception with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
@@ -693,7 +693,7 @@ topologies:
       - --input_model=$dl_dir/se-inception.caffemodel
       - --input_proto=$dl_dir/se-inception.prototxt
     framework: caffe
-    license: https://github.com/hujie-frank/SENet/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/hujie-frank/SENet/master/LICENSE
 
   - name: "se-resnet-101"
     description: "ResNet-101 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
@@ -718,7 +718,7 @@ topologies:
       - --input_model=$dl_dir/se-resnet-101.caffemodel
       - --input_proto=$dl_dir/se-resnet-101.prototxt
     framework: caffe
-    license: https://github.com/hujie-frank/SENet/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/hujie-frank/SENet/master/LICENSE
 
   - name: "se-resnet-152"
     description: "ResNet-152 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
@@ -743,7 +743,7 @@ topologies:
       - --input_model=$dl_dir/se-resnet-152.caffemodel
       - --input_proto=$dl_dir/se-resnet-152.prototxt
     framework: caffe
-    license: https://github.com/hujie-frank/SENet/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/hujie-frank/SENet/master/LICENSE
 
   - name: "se-resnet-50"
     description: "ResNet-50 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
@@ -768,7 +768,7 @@ topologies:
       - --input_model=$dl_dir/se-resnet-50.caffemodel
       - --input_proto=$dl_dir/se-resnet-50.prototxt
     framework: caffe
-    license: https://github.com/hujie-frank/SENet/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/hujie-frank/SENet/master/LICENSE
 
   - name: "se-resnext-50"
     description: "ResNeXt-50 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
@@ -793,7 +793,7 @@ topologies:
       - --input_model=$dl_dir/se-resnext-50.caffemodel
       - --input_proto=$dl_dir/se-resnext-50.prototxt
     framework: caffe
-    license: https://github.com/hujie-frank/SENet/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/hujie-frank/SENet/master/LICENSE
 
   - name: "se-resnext-101"
     description: "ResNeXt-101 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
@@ -818,7 +818,7 @@ topologies:
       - --input_model=$dl_dir/se-resnext-101.caffemodel
       - --input_proto=$dl_dir/se-resnext-101.prototxt
     framework: caffe
-    license: https://github.com/hujie-frank/SENet/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/hujie-frank/SENet/master/LICENSE
 
   - name: "Sphereface"
     description: "Deep face recognition under open-set protocol (https://arxiv.org/pdf/1704.08063.pdf)"
@@ -844,7 +844,7 @@ topologies:
       - --input_model=$dl_dir/Sphereface.caffemodel
       - --input_proto=$dl_dir/Sphereface.prototxt
     framework: caffe
-    license: https://github.com/wy1iu/sphereface/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/wy1iu/sphereface/master/LICENSE
 
   - name: "license-plate-recognition-barrier-0007"
     description: "TensorFlow LPRNet"
@@ -867,7 +867,7 @@ topologies:
       - --output=d_predictions
       - --input_model=$dl_dir/license-plate-recognition-barrier-0007/graph.pb.frozen
     framework: tf
-    license: https://github.com/opencv/training_toolbox_tensorflow/blob/develop/LICENSE
+    license: https://raw.githubusercontent.com/opencv/training_toolbox_tensorflow/develop/LICENSE
 
   - name: "face-detection-retail-0044"
     description: "Face Detection (SqNet1.0modif+single scale) with BatchNormalization trained with negatives"
@@ -877,7 +877,7 @@ topologies:
         source: https://raw.githubusercontent.com/opencv/training_toolbox_caffe/63ccbbc328f0c1f414f459c284293b3929b09339/models/face_detection/deploy.prototxt
       - name: face-detection-retail-0044.caffemodel
         sha256: 10f68b73f3b68db89fab151be51fc90a0bc1e2a18a87ac642e88aa9e94d53f8f
-        source: https://github.com/opencv/training_toolbox_caffe/raw/63ccbbc328f0c1f414f459c284293b3929b09339/models/face_detection/face-detection-retail-0044.caffemodel
+        source: https://raw.githubusercontent.com/opencv/training_toolbox_caffe/raw/63ccbbc328f0c1f414f459c284293b3929b09339/models/face_detection/face-detection-retail-0044.caffemodel
     output: "Retail/object_detection/face/sqnet1.0modif-ssd/0044/caffe/"
     model_optimizer_args:
       - --framework=caffe
@@ -887,7 +887,7 @@ topologies:
       - --input_model=$dl_dir/face-detection-retail-0044.caffemodel
       - --input_proto=$dl_dir/face-detection-retail-0044.prototxt
     framework: caffe
-    license: https://github.com/opencv/training_toolbox_caffe/blob/develop/LICENSE
+    license: https://raw.githubusercontent.com/opencv/training_toolbox_caffe/develop/LICENSE
 
   - name: "mobilenet-v1-1.0-224"
     description: "MobileNet V1 architecture with the width multiplier 1.0 and resolution 224 (https://arxiv.org/pdf/1704.04861.pdf)"
@@ -897,7 +897,7 @@ topologies:
         source: https://raw.githubusercontent.com/shicai/MobileNet-Caffe/26a8b8c0afb6114a07c1c9e4f550e4e0dd8cced1/mobilenet_deploy.prototxt
       - name: mobilenet-v1-1.0-224.caffemodel
         sha256: 8d6edcd3dbd1356f2f19dd220c362c2ba8f44233a9b6c12ca6d0351cb0c446b6
-        source: https://github.com/shicai/MobileNet-Caffe/raw/26a8b8c0afb6114a07c1c9e4f550e4e0dd8cced1/mobilenet.caffemodel
+        source: https://raw.githubusercontent.com/shicai/MobileNet-Caffe/raw/26a8b8c0afb6114a07c1c9e4f550e4e0dd8cced1/mobilenet.caffemodel
     output: "classification/mobilenet/v1/1.0/224/cf/"
     model_optimizer_args:
       - --framework=caffe
@@ -920,7 +920,7 @@ topologies:
         source: https://raw.githubusercontent.com/shicai/MobileNet-Caffe/26a8b8c0afb6114a07c1c9e4f550e4e0dd8cced1/mobilenet_v2_deploy.prototxt
       - name: mobilenet-v2.caffemodel
         sha256: a3124ce7abd258c7f35a2c586576bee8116934fa2a8556e4e528041859dd753f
-        source: https://github.com/shicai/MobileNet-Caffe/raw/26a8b8c0afb6114a07c1c9e4f550e4e0dd8cced1/mobilenet_v2.caffemodel
+        source: https://raw.githubusercontent.com/shicai/MobileNet-Caffe/raw/26a8b8c0afb6114a07c1c9e4f550e4e0dd8cced1/mobilenet_v2.caffemodel
     output: "classification/mobilenet/v2/cf/"
     model_optimizer_args:
       - --framework=caffe
@@ -957,7 +957,7 @@ topologies:
       - --tensorflow_object_detection_api_pipeline_config=$dl_dir/faster_rcnn_inception_v2_coco_2018_01_28/pipeline.config
       - --input_model=$dl_dir/faster_rcnn_inception_v2_coco_2018_01_28/frozen_inference_graph.pb
     framework: tf
-    license: https://github.com/tensorflow/models/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "deeplabv3"
     description: "Rethinking Atrous Convolution for Semantic Image Segmentation (https://arxiv.org/pdf/1706.05587.pdf)"
@@ -978,14 +978,14 @@ topologies:
       - --output=ArgMax
       - --input_model=$dl_dir/deeplabv3_mnv2_pascal_train_aug/frozen_inference_graph.pb
     framework: tf
-    license: https://github.com/tensorflow/models/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "ctpn"
     description: "Detecting Text in Natural Image with Connectionist Text Proposal Network (https://arxiv.org/pdf/1609.03605.pdf)"
     files:
       - name: ctpn.pb
         sha256: 09b3a0cc57eb826dd6b6fa95a03e078ad435b7b5fb0186dad2abdb98a4fdf64a
-        source: https://github.com/eragonruan/text-detection-ctpn/releases/download/untagged-48d74c6337a71b6b5f87/ctpn.pb
+        source: https://raw.githubusercontent.com/eragonruan/text-detection-ctpn/releases/download/untagged-48d74c6337a71b6b5f87/ctpn.pb
     output: "text_detection/ctpn/tf/"
     model_optimizer_args:
       - --framework=tf
@@ -997,7 +997,7 @@ topologies:
       - --output=Reshape_2,rpn_bbox_pred/Reshape_1
       - --input_model=$dl_dir/ctpn.pb
     framework: tf
-    license: https://github.com/eragonruan/text-detection-ctpn/blob/banjin-dev/LICENSE
+    license: https://raw.githubusercontent.com/eragonruan/text-detection-ctpn/banjin-dev/LICENSE
 
   - name: "ssd_mobilenet_v1_coco"
     description: "MobileNetV1 object detection architecture (https://arxiv.org/pdf/1807.03284.pdf) pre-trained on the COCO dataset"
@@ -1021,7 +1021,7 @@ topologies:
       - --tensorflow_object_detection_api_pipeline_config=$dl_dir/ssd_mobilenet_v1_coco_2018_01_28/pipeline.config
       - --input_model=$dl_dir/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb
     framework: tf
-    license: https://github.com/tensorflow/models/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "faster_rcnn_resnet101_coco"
     description: "Faster R-CNN Resnet-101 (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
@@ -1045,7 +1045,7 @@ topologies:
       - --tensorflow_object_detection_api_pipeline_config=$dl_dir/faster_rcnn_resnet101_coco_2018_01_28/pipeline.config
       - --input_model=$dl_dir/faster_rcnn_resnet101_coco_2018_01_28/frozen_inference_graph.pb
     framework: tf
-    license: https://github.com/tensorflow/models/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "mobilenet-v2-1.4-224"
     description: "MobileNet V2 architecture with the width multiplier 1.4 and resolution 224 (https://arxiv.org/abs/1801.04381)"
@@ -1069,7 +1069,7 @@ topologies:
       - --output=MobilenetV2/Predictions/Reshape_1
       - --input_model=$dl_dir/mobilenet_v2_1.4_224_frozen.pb
     framework: "tf"
-    license: https://github.com/tensorflow/models/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "brain-tumor-segmentation-0001"
     description: "Cascaded UNet for brain tumor segmentation (https://arxiv.org/abs/1810.04008)"
@@ -1095,7 +1095,7 @@ topologies:
       - --output=blockgrad7
       - --input_model=$dl_dir/brain-tumor-segmentation-0001-0000.params
     framework: mxnet
-    license: https://github.com/lachinov/brats2018-graphlabunn/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/lachinov/brats2018-graphlabunn/master/LICENSE
 
   - name: "age-gender-recognition-retail-0013"
     description: "Age & gender classification."
@@ -1108,7 +1108,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.bin
     output: "Retail/object_attributes/age_gender/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "age-gender-recognition-retail-0013-fp16"
     description: "Age & gender classification."
@@ -1121,7 +1121,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin
     output: "Retail/object_attributes/age_gender/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "emotions-recognition-retail-0003"
     description: "Recognizes 5 emotions for a face."
@@ -1134,7 +1134,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
     output: "Retail/object_attributes/emotions_recognition/0003/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "emotions-recognition-retail-0003-fp16"
     description: "Recognizes 5 emotions for a face."
@@ -1147,7 +1147,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
     output: "Retail/object_attributes/emotions_recognition/0003/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "emotions-recognition-retail-0003-int8"
     description: "Recognizes 5 emotions for a face."
@@ -1160,7 +1160,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/emotions-recognition-retail-0003/INT8/emotions-recognition-retail-0003.bin
     output: "Retail/object_attributes/emotions_recognition/0003/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-detection-adas-0001"
     description: "Face Detection (MobileNet with reduced channels + SSD with weights sharing)"
@@ -1173,7 +1173,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-0001/FP32/face-detection-adas-0001.bin
     output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-detection-adas-0001-fp16"
     description: "Face Detection (MobileNet with reduced channels + SSD with weights sharing)"
@@ -1186,7 +1186,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-0001/FP16/face-detection-adas-0001.bin
     output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-detection-adas-0001-int8"
     description: "Face Detection (MobileNet with reduced channels + SSD with weights sharing)"
@@ -1199,7 +1199,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-0001/INT8/face-detection-adas-0001.bin
     output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-detection-retail-0004"
     description: "Face Detection (SqNet1.0modif+single scale) without BatchNormalization trained with negatives."
@@ -1212,7 +1212,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-retail-0004/FP32/face-detection-retail-0004.bin
     output: "Retail/object_detection/face/sqnet1.0modif-ssd/0004/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-detection-retail-0004-fp16"
     description: "Face Detection (SqNet1.0modif+single scale) without BatchNormalization trained with negatives."
@@ -1225,7 +1225,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-retail-0004/FP16/face-detection-retail-0004.bin
     output: "Retail/object_detection/face/sqnet1.0modif-ssd/0004/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-detection-retail-0004-int8"
     description: "Face Detection (SqNet1.0modif+single scale) without BatchNormalization trained with negatives."
@@ -1238,7 +1238,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-retail-0004/INT8/face-detection-retail-0004.bin
     output: "Retail/object_detection/face/sqnet1.0modif-ssd/0004/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-person-detection-retail-0002"
     description: "Simultaneous detection of Pedestrians and Faces (RMNet with lrelu + SSSSD)."
@@ -1251,7 +1251,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-person-detection-retail-0002/FP32/face-person-detection-retail-0002.bin
     output: "Retail/object_detection/face_pedestrian/rmnet-ssssd-2heads/0002/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-person-detection-retail-0002-fp16"
     description: "Simultaneous detection of Pedestrians and Faces (RMNet with lrelu + SSSSD)."
@@ -1264,7 +1264,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-person-detection-retail-0002/FP16/face-person-detection-retail-0002.bin
     output: "Retail/object_detection/face_pedestrian/rmnet-ssssd-2heads/0002/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-reidentification-retail-0095"
     description: "Single embedding-based face verification model"
@@ -1277,7 +1277,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
     output: "Retail/object_reidentification/face/mobilenet_based/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-reidentification-retail-0095-fp16"
     description: "Single embedding-based face verification model"
@@ -1290,7 +1290,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
     output: "Retail/object_reidentification/face/mobilenet_based/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "facial-landmarks-35-adas-0002"
     description: "Custom-architecture convolutional neural network for 35 facial landmarks estimation."
@@ -1303,7 +1303,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
     output: "Transportation/object_attributes/facial_landmarks/custom-35-facial-landmarks/dldt"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "facial-landmarks-35-adas-0002-fp16"
     description: "Custom-architecture convolutional neural network for 35 facial landmarks estimation."
@@ -1316,7 +1316,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
     output: "Transportation/object_attributes/facial_landmarks/custom-35-facial-landmarks/dldt"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "head-pose-estimation-adas-0001"
     description: "Vanilla CNN trained from scratch yaw + pitch + roll + landmarks"
@@ -1329,7 +1329,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
     output: "Transportation/object_attributes/headpose/vanilla_cnn/dldt"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "head-pose-estimation-adas-0001-fp16"
     description: "Vanilla CNN trained from scratch yaw + pitch + roll + landmarks"
@@ -1342,7 +1342,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
     output: "Transportation/object_attributes/headpose/vanilla_cnn/dldt"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "head-pose-estimation-adas-0001-int8"
     description: "Vanilla CNN trained from scratch yaw + pitch + roll + landmarks"
@@ -1355,7 +1355,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/head-pose-estimation-adas-0001/INT8/head-pose-estimation-adas-0001.bin
     output: "Transportation/object_attributes/headpose/vanilla_cnn/dldt"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "human-pose-estimation-0001"
     description: "2D human pose estimation with tuned mobilenet backbone (based on OpenPose)."
@@ -1368,7 +1368,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/human-pose-estimation-0001/FP32/human-pose-estimation-0001.bin
     output: "Transportation/human_pose_estimation/mobilenet-v1/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "human-pose-estimation-0001-fp16"
     description: "2D human pose estimation with tuned mobilenet backbone (based on OpenPose)."
@@ -1381,7 +1381,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/human-pose-estimation-0001/FP16/human-pose-estimation-0001.bin
     output: "Transportation/human_pose_estimation/mobilenet-v1/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "human-pose-estimation-0001-int8"
     description: "2D human pose estimation with tuned mobilenet backbone (based on OpenPose)."
@@ -1394,7 +1394,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/human-pose-estimation-0001/INT8/human-pose-estimation-0001.bin
     output: "Transportation/human_pose_estimation/mobilenet-v1/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "landmarks-regression-retail-0009"
     description: "Landmark's detection."
@@ -1407,7 +1407,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
     output: "Retail/object_attributes/landmarks_regression/0009/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "landmarks-regression-retail-0009-fp16"
     description: "Landmark's detection."
@@ -1420,7 +1420,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
     output: "Retail/object_attributes/landmarks_regression/0009/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "license-plate-recognition-barrier-0001"
     description: "Chinese license plate recognition"
@@ -1433,7 +1433,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.bin
     output: "Security/optical_character_recognition/license_plate/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "license-plate-recognition-barrier-0001-fp16"
     description: "Chinese license plate recognition"
@@ -1446,7 +1446,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.bin
     output: "Security/optical_character_recognition/license_plate/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "pedestrian-and-vehicle-detector-adas-0001"
     description: "Pedestrian and Vehicle detector based on ssd + mobilenet with reduced channels number."
@@ -1459,7 +1459,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.bin
     output: "Transportation/object_detection/pedestrian-and-vehicle/mobilenet-reduced-ssd/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "pedestrian-and-vehicle-detector-adas-0001-fp16"
     description: "Pedestrian and Vehicle detector based on ssd + mobilenet with reduced channels number."
@@ -1472,7 +1472,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.bin
     output: "Transportation/object_detection/pedestrian-and-vehicle/mobilenet-reduced-ssd/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "pedestrian-and-vehicle-detector-adas-0001-int8"
     description: "Pedestrian and Vehicle detector based on ssd + mobilenet with reduced channels number."
@@ -1485,7 +1485,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-and-vehicle-detector-adas-0001/INT8/pedestrian-and-vehicle-detector-adas-0001.bin
     output: "Transportation/object_detection/pedestrian-and-vehicle/mobilenet-reduced-ssd/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "pedestrian-detection-adas-0002"
     description: "Pedestrian detector based on ssd + mobilenet with reduced channels number."
@@ -1498,7 +1498,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.bin
     output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "pedestrian-detection-adas-0002-fp16"
     description: "Pedestrian detector based on ssd + mobilenet with reduced channels number."
@@ -1511,7 +1511,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.bin
     output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "pedestrian-detection-adas-0002-int8"
     description: "Pedestrian detector based on ssd + mobilenet with reduced channels number."
@@ -1524,7 +1524,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-0002/INT8/pedestrian-detection-adas-0002.bin
     output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-attributes-recognition-crossroad-0230"
     description: "Pedestrian attributes recognition based on a PVANet with hyperfeatures backbone + classification head"
@@ -1537,7 +1537,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.bin
     output: "Security/object_attributes/pedestrian/person-attributes-recognition-crossroad-0230/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-attributes-recognition-crossroad-0230-fp16"
     description: "Pedestrian attributes recognition based on a PVANet with hyperfeatures backbone + classification head"
@@ -1550,7 +1550,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.bin
     output: "Security/object_attributes/pedestrian/person-attributes-recognition-crossroad-0230/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-action-recognition-0005"
     description: "Action detection (SSD-based) model."
@@ -1563,7 +1563,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.bin
     output: "Retail/action_detection/pedestrian/rmnet_ssd/0165/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-action-recognition-0005-fp16"
     description: "Action detection (SSD-based) model."
@@ -1576,7 +1576,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.bin
     output: "Retail/action_detection/pedestrian/rmnet_ssd/0165/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-retail-0002"
     description: "Person detection (HyperNet+RFCN)."
@@ -1589,7 +1589,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-retail-0002/FP32/person-detection-retail-0002.bin
     output: "Retail/object_detection/pedestrian/hypernet-rfcn/0026/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-retail-0002-fp16"
     description: "Person detection (HyperNet+RFCN+DetectionOutput)."
@@ -1602,7 +1602,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-retail-0002/FP16/person-detection-retail-0002.bin
     output: "Retail/object_detection/pedestrian/hypernet-rfcn/0026/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-retail-0013"
     description: "Pedestrian detection (RMNet with lrelu + SSD)"
@@ -1615,7 +1615,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-retail-0013/FP32/person-detection-retail-0013.bin
     output: "Retail/object_detection/pedestrian/rmnet_ssd/0013/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-retail-0013-fp16"
     description: "Pedestrian detection (RMNet with lrelu + SSD)"
@@ -1628,7 +1628,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-retail-0013/FP16/person-detection-retail-0013.bin
     output: "Retail/object_detection/pedestrian/rmnet_ssd/0013/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-reidentification-retail-0031"
     description: "Single embedding-based person reidentification model (fastest person ReID model)"
@@ -1641,7 +1641,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0031/FP32/person-reidentification-retail-0031.bin
     output: "Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-reidentification-retail-0031-fp16"
     description: "Single embedding-based person reidentification model (fastest person ReID model)"
@@ -1654,7 +1654,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.bin
     output: "Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-reidentification-retail-0076"
     description: "Single embedding-based person reidentification model (most accurate person ReID model)"
@@ -1667,7 +1667,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0076/FP32/person-reidentification-retail-0076.bin
     output: "Retail/object_reidentification/pedestrian/rmnet_based/0076/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-reidentification-retail-0076-fp16"
     description: "Single embedding-based person reidentification model (most accurate person ReID model)"
@@ -1680,7 +1680,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0076/FP16/person-reidentification-retail-0076.bin
     output: "Retail/object_reidentification/pedestrian/rmnet_based/0076/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-reidentification-retail-0079"
     description: "Single embedding-based person reidentification model (the model is trade-off between performance and accuracy)"
@@ -1693,7 +1693,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0079/FP32/person-reidentification-retail-0079.bin
     output: "Retail/object_reidentification/pedestrian/rmnet_based/0079/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-reidentification-retail-0079-fp16"
     description: "Single embedding-based person reidentification model (the model is trade-off between performance and accuracy)"
@@ -1706,7 +1706,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0079/FP16/person-reidentification-retail-0079.bin
     output: "Retail/object_reidentification/pedestrian/rmnet_based/0079/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-vehicle-bike-detection-crossroad-0078"
     description: "Multiclass (person, vehicle, non-vehicle) detector based on SSD detection architecture, RMNet backbone and learnable image downscale block"
@@ -1719,7 +1719,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-vehicle-bike-detection-crossroad-0078/FP32/person-vehicle-bike-detection-crossroad-0078.bin
     output: "Security/object_detection/crossroad/0078/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-vehicle-bike-detection-crossroad-0078-fp16"
     description: "Multiclass (person, vehicle, non-vehicle) detector based on SSD detection architecture, RMNet backbone and learnable image downscale block"
@@ -1732,7 +1732,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-vehicle-bike-detection-crossroad-0078/FP16/person-vehicle-bike-detection-crossroad-0078.bin
     output: "Security/object_detection/crossroad/0078/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "road-segmentation-adas-0001"
     description: "Multiclass (BG, road, curbs, marks) segmentation based on ENET, using depthwise convolutions and without ELU operations and without concatenation"
@@ -1745,7 +1745,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.bin
     output: "Transportation/segmentation/curbs/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "road-segmentation-adas-0001-fp16"
     description: "Multiclass (BG, road, curbs, marks) segmentation based on ENET, using depthwise convolutions and without ELU operations and without concatenation"
@@ -1758,7 +1758,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.bin
     output: "Transportation/segmentation/curbs/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "road-segmentation-adas-0001-int8"
     description: "Multiclass (BG, road, curbs, marks) segmentation based on ENET, using depthwise convolutions and without ELU operations and without concatenation"
@@ -1771,7 +1771,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/road-segmentation-adas-0001/INT8/road-segmentation-adas-0001.bin
     output: "Transportation/segmentation/curbs/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "semantic-segmentation-adas-0001"
     description: "Multiclass (road, sidewalk, building, wall, fence, pole, traffic light, traffic sign, vegetation, terrain, sky, person, rider, car, truck, bus, train, motorcycle, bicycle, ego-vehicle) segmentation based on ICNet"
@@ -1784,7 +1784,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.bin
     output: "Transportation/segmentation/semantic_segmentation/icnet_icv/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "semantic-segmentation-adas-0001-fp16"
     description: "Multiclass (road, sidewalk, building, wall, fence, pole, traffic light, traffic sign, vegetation, terrain, sky, person, rider, car, truck, bus, train, motorcycle, bicycle, ego-vehicle) segmentation based on ICNet"
@@ -1797,7 +1797,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.bin
     output: "Transportation/segmentation/semantic_segmentation/icnet_icv/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "single-image-super-resolution-1033"
     description: "Super resolution model based on SRResNet architecture (see https://arxiv.org/pdf/1609.04802.pdf)"
@@ -1810,7 +1810,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.bin
     output: "Security/super_resolution/srresnet/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "single-image-super-resolution-1033-fp16"
     description: "Super resolution model based on SRResNet architecture (see https://arxiv.org/pdf/1609.04802.pdf)"
@@ -1823,7 +1823,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.bin
     output: "Security/super_resolution/srresnet/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "text-detection-0002"
     description: "Detects oriented text."
@@ -1836,7 +1836,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-detection-0002/FP32/text-detection-0002.bin
     output: "Retail/object_detection/text/pixel_link_mobilenet_v2/0001/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "text-detection-0002-fp16"
     description: "Detects oriented text."
@@ -1849,7 +1849,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-detection-0002/FP16/text-detection-0002.bin
     output: "Retail/object_detection/text/pixel_link_mobilenet_v2/0001/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-attributes-recognition-barrier-0039"
     description: "Vehicle attributes recognition with modified ResNet10 backbone"
@@ -1862,7 +1862,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.bin
     output: "Security/object_attributes/vehicle/resnet10_update_1/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-attributes-recognition-barrier-0039-fp16"
     description: "Vehicle attributes recognition with modified ResNet10 backbone"
@@ -1875,7 +1875,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.bin
     output: "Security/object_attributes/vehicle/resnet10_update_1/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-attributes-recognition-barrier-0039-int8"
     description: "Vehicle attributes recognition with modified ResNet10 backbone"
@@ -1888,7 +1888,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-attributes-recognition-barrier-0039/INT8/vehicle-attributes-recognition-barrier-0039.bin
     output: "Security/object_attributes/vehicle/resnet10_update_1/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-detection-adas-0002"
     description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head."
@@ -1901,7 +1901,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.bin
     output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-detection-adas-0002-fp16"
     description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head."
@@ -1914,7 +1914,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.bin
     output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-detection-adas-0002-int8"
     description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head."
@@ -1927,7 +1927,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-0002/INT8/vehicle-detection-adas-0002.bin
     output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-license-plate-detection-barrier-0106"
     description: "Multiclass (vehicle, license plates) detector based on MobileNetV2+SSD"
@@ -1940,7 +1940,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.bin
     output: "Security/object_detection/barrier/0106/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-license-plate-detection-barrier-0106-fp16"
     description: "Multiclass (vehicle, license plates) detector based on MobileNetV2+SSD"
@@ -1953,7 +1953,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.bin
     output: "Security/object_detection/barrier/0106/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-detection-adas-binary-0001"
     description: "Face Detection (MobileNet with reduced channels and binary convolution + SSD with weights sharing)"
@@ -1966,7 +1966,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.bin
     output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights_binary/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "single-image-super-resolution-1032"
     description: "Super resolution model"
@@ -1979,7 +1979,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
     output: "Security/super_resolution/srresnet/dldt/1032/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "single-image-super-resolution-1032-fp16"
     description: "Super resolution model"
@@ -1992,7 +1992,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
     output: "Security/super_resolution/srresnet/dldt/1032/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "action-recognition-0001-encoder"
     description: "General-purpose action recognition model for Kinetics-400 dataset based on Video Transformer Network approach. Encoder part"
@@ -2005,7 +2005,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.bin
     output: "Transportation/action_recognition/resnet34_vtn/kinetics/encoder/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "action-recognition-0001-encoder-fp16"
     description: "General-purpose action recognition model for Kinetics-400 dataset based on Video Transformer Network approach. Encoder part"
@@ -2018,7 +2018,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.bin
     output: "Transportation/action_recognition/resnet34_vtn/kinetics/encoder/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "instance-segmentation-security-0049"
     description: "General purpose instance segmentation model. Mask-RCNN with ResNet50 backbone, FPN block and light segmentation head."
@@ -2031,7 +2031,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0049/FP32/instance-segmentation-security-0049.bin
     output: "Security/instance_segmentation/common/0049/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "instance-segmentation-security-0049-fp16"
     description: "General purpose instance segmentation model. Mask-RCNN with ResNet50 backbone, FPN block and light segmentation head."
@@ -2044,7 +2044,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0049/FP16/instance-segmentation-security-0049.bin
     output: "Security/instance_segmentation/common/0049/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-detection-adas-binary-0001"
     description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head and binary layers."
@@ -2057,7 +2057,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.bin
     output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd-binary/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "driver-action-recognition-adas-0002-decoder"
     description: "Video Transformer Network for driver action recognition. Decoder part"
@@ -2070,7 +2070,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
     output: "Transportation/action_recognition/driver_monitoring/mobilenetv2/decoder/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "driver-action-recognition-adas-0002-decoder-fp16"
     description: "Video Transformer Network for driver action recognition. Decoder part"
@@ -2083,7 +2083,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
     output: "Transportation/action_recognition/driver_monitoring/mobilenetv2/decoder/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "pedestrian-detection-adas-binary-0001"
     description: "Pedestrian detector based on ssd + mobilenet with reduced channels number binary layers."
@@ -2096,7 +2096,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.bin
     output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd-binary/dldt"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-action-recognition-teacher-0002"
     description: "Second generation of action detection (SSD-based) model to use in Smart Classroom for classification teacher's actions."
@@ -2109,7 +2109,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
     output:  "Retail/action_detection/teacher/rmnet_ssd/0005_cut/dldt"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-action-recognition-teacher-0002-fp16"
     description: "Second generation of action detection (SSD-based) model to use in Smart Classroom for classification teacher's actions."
@@ -2122,7 +2122,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
     output:  "Retail/action_detection/teacher/rmnet_ssd/0005_cut/dldt"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "instance-segmentation-security-0033"
     description: "General purpose instance segmentation model. Mask-RCNN with ResNeXt152 backbone and FPN block."
@@ -2135,7 +2135,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0033/FP32/instance-segmentation-security-0033.bin
     output: "Security/instance_segmentation/common/0033/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "instance-segmentation-security-0033-fp16"
     description: "General purpose instance segmentation model. Mask-RCNN with ResNeXt152 backbone and FPN block."
@@ -2148,7 +2148,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0033/FP16/instance-segmentation-security-0033.bin
     output: "Security/instance_segmentation/common/0033/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "action-recognition-0001-decoder"
     description: "General-purpose action recognition model for Kinetics-400 dataset based on Video Transformer Network approach. Decoder part"
@@ -2161,7 +2161,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.bin
     output: "Transportation/action_recognition/resnet34_vtn/kinetics/decoder/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "action-recognition-0001-decoder-fp16"
     description: "General-purpose action recognition model for Kinetics-400 dataset based on Video Transformer Network approach. Decoder part"
@@ -2174,7 +2174,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
     output: "Transportation/action_recognition/resnet34_vtn/kinetics/decoder/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "text-recognition-0012"
     description: "Recognizes alphanumeric text. Architecture: VGG-like + BiLSTM as an encoder, BiLSTM as a decoder."
@@ -2187,7 +2187,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-recognition-0012/FP32/text-recognition-0012.bin
     output: "Retail/text_recognition/bilstm_crnn_bilstm_decoder/0012/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "text-recognition-0012-fp16"
     description: "Recognizes alphanumeric text. Architecture: VGG-like + BiLSTM as an encoder, BiLSTM as a decoder."
@@ -2200,7 +2200,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-recognition-0012/FP16/text-recognition-0012.bin
     output: "Retail/text_recognition/bilstm_crnn_bilstm_decoder/0012/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "driver-action-recognition-adas-0002-encoder"
     description: "Video Transformer Network for driver action recognition. Encoder part"
@@ -2213,7 +2213,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-encoder/FP32/driver-action-recognition-adas-0002-encoder.bin
     output: "Transportation/action_recognition/driver_monitoring/mobilenetv2/encoder/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "driver-action-recognition-adas-0002-encoder-fp16"
     description: "Video Transformer Network for driver action recognition. Encoder part"
@@ -2226,7 +2226,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-encoder/FP16/driver-action-recognition-adas-0002-encoder.bin
     output: "Transportation/action_recognition/driver_monitoring/mobilenetv2/encoder/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "gaze-estimation-adas-0002"
     description: "Gaze estimation for ADAS"
@@ -2239,7 +2239,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
     output: "Transportation/object_attributes/gaze/custom-architecture/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "gaze-estimation-adas-0002-fp16"
     description: "Gaze estimation for ADAS"
@@ -2252,7 +2252,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
     output: "Transportation/object_attributes/gaze/custom-architecture/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "gaze-estimation-adas-0002-int8"
     description: "Gaze estimation for ADAS"
@@ -2265,7 +2265,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.bin
     output: "Transportation/object_attributes/gaze/custom-architecture/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "resnet50-binary-0001"
     description: "ResNet-50 Binary"
@@ -2278,7 +2278,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/resnet50-binary-0001/INT1/resnet50-binary-0001.bin
     output: "PublicCompressed/classification/resnet50_binary/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-raisinghand-recognition-0001"
     description: "Raising-hand action detection (SSD-based) model to use in Smart Classroom environment."
@@ -2291,7 +2291,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.bin
     output: "Retail/action_detection/pedestrian/rmnet_ssd/0165_cut_2cl/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-raisinghand-recognition-0001-fp16"
     description: "Raising-hand action detection (SSD-based) model to use in Smart Classroom environment."
@@ -2304,7 +2304,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.bin
     output: "Retail/action_detection/pedestrian/rmnet_ssd/0165_cut_2cl/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "handwritten-score-recognition-0001"
     description: "Recognizes school marks (e.g '4' or '3.5'). Alphabet is '0123456789._'. Architecture: VGG-like + BiLSTM as an encoder, BiLSTM as a decoder."
@@ -2317,7 +2317,7 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/handwritten-score-recognition-0001/FP32/handwritten-score-recognition-0001.bin
     output: "Retail/handwritten-score-recognition/0001/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "handwritten-score-recognition-0001-fp16"
     description: "Recognizes school marks (e.g '4' or '3.5'). Alphabet is '0123456789._'. Architecture: VGG-like + BiLSTM as an encoder, BiLSTM as a decoder."
@@ -2330,4 +2330,4 @@ topologies:
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/handwritten-score-recognition-0001/FP16/handwritten-score-recognition-0001.bin
     output: "Retail/handwritten-score-recognition/0001/dldt/"
     framework: dldt
-    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
