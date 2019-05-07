@@ -21,7 +21,7 @@
 #include <samples/common.hpp>
 #include <samples/slog.hpp>
 #include <samples/args_helper.hpp>
-#include "object_detection_demo.h"
+#include "object_detection_demo_faster_rcnn.h"
 #include "detectionoutput.h"
 
 using namespace InferenceEngine;
@@ -56,8 +56,8 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 /**
 * \brief The entry point for the Inference Engine object_detection demo application
-* \file object_detection_demo/main.cpp
-* \example object_detection_demo/main.cpp
+* \file object_detection_demo_faster_rcnn/main.cpp
+* \example object_detection_demo_faster_rcnn/main.cpp
 */
 int main(int argc, char *argv[]) {
     try {

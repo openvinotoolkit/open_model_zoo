@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-set (TARGET_NAME "object_detection_demo")
+set (TARGET_NAME "object_detection_demo_faster_rcnn")
 
 file (GLOB MAIN_SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
