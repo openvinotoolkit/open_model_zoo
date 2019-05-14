@@ -4,7 +4,7 @@ The demo shows an example of using neural networks to detect and recognize print
 
 * `text-detection-0002`, which is a detection network for finding text.
 * `text-recognition-0012`, which is a recognition network for recognizing text.
-* `handwritten-score-recognition-0001`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`.
+* `handwritten-score-recognition-0002`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`.
 
 For more information about the pre-trained models, refer to the [Open Model Zoo](https://github.com/opencv/open_model_zoo/blob/master/intel_models/index.md) repository on GitHub*.
 
