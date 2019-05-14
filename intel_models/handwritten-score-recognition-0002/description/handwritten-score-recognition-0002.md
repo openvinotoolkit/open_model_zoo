@@ -1,4 +1,4 @@
-# handwritten-score-recognition-0001
+# handwritten-score-recognition-0002
 
 ## Use Case and High-Level Description
 
