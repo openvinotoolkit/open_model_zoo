@@ -2331,3 +2331,21 @@ topologies:
     output: "Retail/handwritten-score-recognition/0001/dldt/"
     framework: dldt
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
+
+  - name: "handwritten-score-recognition-0002"
+    description: "Recognizes school marks (e.g '4' or '3.5'). Alphabet is '0123456789._'. Architecture: VGG-like + BiLSTM as an encoder, BiLSTM as a decoder."
+    files:
+      - name: handwritten-score-recognition-0002.tar.gz
+        sha256: ae37be904a13cbaa12431bb52b404b170ae7d7de9e47c55585114d6355c2b2a5
+        source: https://download.01.org/opencv/openvino_training_extensions/models/handwritten_score_recognition/handwritten-score-recognition-0002.tar.gz
+    output: "Retail/handwritten-score-recognition/0002/dldt/"
+    postprocessing:
+      - $type: unpack_archive
+        format: gztar
+        file: handwritten-score-recognition-0002.tar.gz
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --input_model=$dl_dir/handwritten-score-recognition-0002/frozen_graph.pb
+    framework: tf
+    license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
