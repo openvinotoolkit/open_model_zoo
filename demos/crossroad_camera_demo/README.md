@@ -1,14 +1,14 @@
-# Crossroad Camera Demo
+# Crossroad Camera C++ Demo
 
-This demo provides an inference pipeline for persons' detection, recognition and reidentification. The demo uses Person Detection network followed by the Person Attributes Recognition and Person Reidentification Retail networks applied on top of the detection results. The corresponding pre-trained models are delivered with the product:
+This demo provides an inference pipeline for persons' detection, recognition and reidentification. The demo uses Person Detection network followed by the Person Attributes Recognition and Person Reidentification Retail networks applied on top of the detection results. You can use a set of the following pre-trained models with the demo:
 
 * `person-vehicle-bike-detection-crossroad-0078`, which is a primary detection network for finding the persons (and other objects if needed)
-* `person-attributes-recognition-crossroad-0200`, which is executed on top of the results from the first network and
+* `person-attributes-recognition-crossroad-0230`, which is executed on top of the results from the first network and
 reports person attributes like gender, has hat, has long-sleeved clothes
 * `person-reidentification-retail-0079`, which is executed on top of the results from the first network and prints
 a vector of features for each detected person. This vector is used to conclude if it is already detected person or not.
 
-For details on the models, please refer to the descriptions in the `open_model_zoo/intel_models` folder.
+For more information about the pre-trained models, refer to the [Open Model Zoo](https://github.com/opencv/open_model_zoo/tree/master/intel_models/index.md) repository on GitHub*.
 
 Other demo objectives are:
 * Images/Video/Camera as inputs, via OpenCV*
@@ -31,6 +31,8 @@ compared one-by-one with all previously detected persons vectors using cosine si
 is greater than the specified (or default) threshold value, it is concluded that the person was already detected and a known
 REID value is assigned. Otherwise, the vector is added to a global list, and new REID value is assigned.
 
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
@@ -48,12 +50,12 @@ Options:
     -m "<path>"                  Required. Path to the Person/Vehicle/Bike Detection Crossroad model (.xml) file.
     -m_pa "<path>"               Optional. Path to the Person Attributes Recognition Crossroad model (.xml) file.
     -m_reid "<path>"             Optional. Path to the Person Reidentification Retail model (.xml) file.
-      -l "<absolute_path>"       Optional. For MKLDNN (CPU)-targeted custom layers, if any. Absolute path to a shared library with the kernels impl.
+      -l "<absolute_path>"       Optional. For CPU custom layers, if any. Absolute path to a shared library with the kernels impl.
           Or
-      -c "<absolute_path>"       Optional. For clDNN (GPU)-targeted custom kernels, if any. Absolute path to the xml file with the kernels desc.
-    -d "<device>"                Optional. Specify the target device for Person/Vehicle/Bike Detection (CPU, GPU, FPGA, MYRIAD, or HETERO).
-    -d_pa "<device>"             Optional. Specify the target device for Person Attributes Recognition (CPU, GPU, FPGA, MYRIAD, or HETERO).
-    -d_reid "<device>"           Optional. Specify the target device for Person Reidentification Retail (CPU, GPU, FPGA, MYRIAD, or HETERO).
+      -c "<absolute_path>"       Optional. For GPU custom kernels, if any. Absolute path to the xml file with the kernels desc.
+    -d "<device>"                Optional. Specify the target device for Person/Vehicle/Bike Detection (CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO).
+    -d_pa "<device>"             Optional. Specify the target device for Person Attributes Recognition (CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO).
+    -d_reid "<device>"           Optional. Specify the target device for Person Reidentification Retail (CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO).
     -pc                          Optional. Enables per-layer performance statistics.
     -r                           Optional. Output Inference results as raw values.
     -t                           Optional. Probability threshold for person/vehicle/bike crossroad detections.
@@ -64,18 +66,15 @@ Options:
 
 Running the application with an empty list of options yields the usage message given above and an error message.
 
-To run the demo, you can use public models or a set of pre-trained and optimized models:
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
 
-* `open_model_zoo/intel_models/person-vehicle-bike-detection-crossroad-0078`
-* `open_model_zoo/intel_models/person-attributes-recognition-crossroad-0200`
-* `open_model_zoo/intel_models/person-reidentification-retail-0079`
+> **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
-For example, to do inference on a GPU with the pre-trained models, run the following command:
+For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-trained models, run the following command:
 
 ```sh
-./crossroad_camera_demo -i <path_to_video>/inputVideo.mp4 -m person-vehicle-bike-detection-crossroad-0078.xml -m_pa person-attributes-recognition-crossroad-0031.xml -m_reid person-reidentification-retail-0079.xml -d GPU
+./crossroad_camera_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/person-vehicle-bike-detection-crossroad-0078.xml -m_pa <path_to_model>/person-attributes-recognition-crossroad-0230.xml -m_reid <path_to_model>/person-reidentification-retail-0079.xml -d GPU
 ```
-> **NOTE**: Public models should be first converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
 
 ## Demo Output
 
@@ -88,4 +87,6 @@ If Person Attributes Recognition or Person Reidentification Retail are enabled, 
 
 
 ## See Also
-* [Using Inference Engine Demos](../Readme.md)
+* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/master/demos/README.md)
+* [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
+* [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader)

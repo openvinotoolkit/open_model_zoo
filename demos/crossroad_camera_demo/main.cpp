@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -121,8 +121,8 @@ struct BaseDetection {
 struct PersonDetection : BaseDetection{
     int maxProposalCount;
     int objectSize;
-    float width = 0;
-    float height = 0;
+    float width = 0.0f;
+    float height = 0.0f;
     bool resultsFetched = false;
 
     struct Result {
@@ -140,18 +140,18 @@ struct PersonDetection : BaseDetection{
     }
 
     void setRoiBlob(const Blob::Ptr &frameBlob) override {
-        height = frameBlob->getTensorDesc().getDims()[2];
-        width = frameBlob->getTensorDesc().getDims()[3];
+        height = static_cast<float>(frameBlob->getTensorDesc().getDims()[2]);
+        width = static_cast<float>(frameBlob->getTensorDesc().getDims()[3]);
         BaseDetection::setRoiBlob(frameBlob);
     }
 
     void enqueue(const cv::Mat &frame) override {
-        height = frame.rows;
-        width = frame.cols;
+        height = static_cast<float>(frame.rows);
+        width = static_cast<float>(frame.cols);
         BaseDetection::enqueue(frame);
     }
 
-    PersonDetection() : BaseDetection(FLAGS_m, "Person Detection") {}
+    PersonDetection() : BaseDetection(FLAGS_m, "Person Detection"), maxProposalCount(0), objectSize(0) {}
     CNNNetwork read() override {
         std::cout << "[ INFO ] Loading network files for PersonDetection" << std::endl;
         CNNNetReader netReader;
@@ -225,10 +225,10 @@ struct PersonDetection : BaseDetection{
             r.label = static_cast<int>(detections[i * objectSize + 1]);
             r.confidence = detections[i * objectSize + 2];
 
-            r.location.x = detections[i * objectSize + 3] * width;
-            r.location.y = detections[i * objectSize + 4] * height;
-            r.location.width = detections[i * objectSize + 5] * width - r.location.x;
-            r.location.height = detections[i * objectSize + 6] * height - r.location.y;
+            r.location.x = static_cast<int>(detections[i * objectSize + 3] * width);
+            r.location.y = static_cast<int>(detections[i * objectSize + 4] * height);
+            r.location.width = static_cast<int>(detections[i * objectSize + 5] * width - r.location.x);
+            r.location.height = static_cast<int>(detections[i * objectSize + 6] * height - r.location.y);
 
             if (FLAGS_r) {
                 std::cout << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
@@ -276,7 +276,7 @@ struct PersonAttribsDetection : BaseDetection {
         std::map<int, cv::Vec3b, std::greater<int>> max_color;
         std::vector<int> freq(clusterCount);
 
-        for (size_t i = 0; i < labels.rows * labels.cols; ++i) {
+        for (int i = 0; i < labels.rows * labels.cols; ++i) {
             freq[labels.at<int>(i)]++;
         }
 
@@ -295,9 +295,9 @@ struct PersonAttribsDetection : BaseDetection {
         Blob::Ptr attribsBlob = request.GetBlob(outputNameForAttributes);
         Blob::Ptr topColorPointBlob = request.GetBlob(outputNameForTopColorPoint);
         Blob::Ptr bottomColorPointBlob = request.GetBlob(outputNameForBottomColorPoint);
-        int numOfAttrChannels = attribsBlob->getTensorDesc().getDims().at(1);
-        int numOfTCPointChannels = topColorPointBlob->getTensorDesc().getDims().at(1);
-        int numOfBCPointChannels = bottomColorPointBlob->getTensorDesc().getDims().at(1);
+        size_t numOfAttrChannels = attribsBlob->getTensorDesc().getDims().at(1);
+        size_t numOfTCPointChannels = topColorPointBlob->getTensorDesc().getDims().at(1);
+        size_t numOfBCPointChannels = bottomColorPointBlob->getTensorDesc().getDims().at(1);
 
         if (numOfAttrChannels != attributesVec.size()) {
             throw std::logic_error("Output size (" + std::to_string(numOfAttrChannels) + ") of the "
@@ -325,7 +325,7 @@ struct PersonAttribsDetection : BaseDetection {
         returnValue.bottom_color_point.x = outputBCPointValues[0];
         returnValue.bottom_color_point.y = outputBCPointValues[1];
 
-        for (int i = 0; i < attributesVec.size(); i++) {
+        for (size_t i = 0; i < attributesVec.size(); i++) {
             returnValue.attributes_strings.push_back(attributesVec[i]);
             returnValue.attributes_indicators.push_back(outputAttrValues[i] > 0.5);
         }
@@ -390,7 +390,7 @@ struct PersonReIdentification : BaseDetection {
         auto size = globalReIdVec.size();
 
         /* assigned REID is index of the matched vector from the globalReIdVec */
-        for (auto i = 0; i < size; ++i) {
+        for (size_t i = 0; i < size; ++i) {
             cosSim = cosineSimilarity(newReIdVec, globalReIdVec[i]);
             if (FLAGS_r) {
                 std::cout << "cosineSimilarity: " << cosSim << std::endl;
@@ -430,7 +430,7 @@ struct PersonReIdentification : BaseDetection {
 
         T mul, denomA, denomB, A, B;
         mul = denomA = denomB = A = B = 0;
-        for (auto i = 0; i < vecA.size(); ++i) {
+        for (size_t i = 0; i < vecA.size(); ++i) {
             A = vecA[i];
             B = vecB[i];
             mul += A * B;
@@ -539,7 +539,7 @@ int main(int argc, char *argv[]) {
                 continue;
             }
             std::cout << "[ INFO ] Loading plugin " << flag << std::endl;
-            InferencePlugin plugin = PluginDispatcher({"../../../lib/intel64", ""}).getPluginByDevice(flag);
+            InferencePlugin plugin = PluginDispatcher().getPluginByDevice(flag);
 
             /** Printing plugin version **/
             printPluginVersion(plugin, std::cout);
@@ -586,6 +586,10 @@ int main(int argc, char *argv[]) {
         typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
         auto total_t0 = std::chrono::high_resolution_clock::now();
         std::cout << "[ INFO ] Start inference " << std::endl;
+        if (!FLAGS_no_show) {
+            std::cout << "[ INFO ] To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+        }
+
         do {
             // get and enqueue the next frame (in case of video)
             if (isVideo && !cap.read(frame)) {
@@ -649,11 +653,11 @@ int main(int argc, char *argv[]) {
 
                         resPersAttrAndColor = personAttribs.GetPersonAttributes();
 
-                        top_color_p.x = resPersAttrAndColor.top_color_point.x * person.cols;
-                        top_color_p.y = resPersAttrAndColor.top_color_point.y * person.rows;
+                        top_color_p.x = static_cast<int>(resPersAttrAndColor.top_color_point.x) * person.cols;
+                        top_color_p.y = static_cast<int>(resPersAttrAndColor.top_color_point.y) * person.rows;
 
-                        bottom_color_p.x = resPersAttrAndColor.bottom_color_point.x * person.cols;
-                        bottom_color_p.y = resPersAttrAndColor.bottom_color_point.y * person.rows;
+                        bottom_color_p.x = static_cast<int>(resPersAttrAndColor.bottom_color_point.x) * person.cols;
+                        bottom_color_p.y = static_cast<int>(resPersAttrAndColor.bottom_color_point.y) * person.rows;
 
 
                         cv::Rect person_rect(0, 0, person.cols, person.rows);
@@ -725,7 +729,8 @@ int main(int argc, char *argv[]) {
                             }
                             cv::putText(frame,
                                     resPersAttrAndColor.attributes_strings[i],
-                                    cv::Point2f(result.location.x + 5 * result.location.width / 4, result.location.y + 15 + 15 * i),
+                                    cv::Point2f(static_cast<float>(result.location.x + 5 * result.location.width / 4),
+                                                static_cast<float>(result.location.y + 15 + 15 * i)),
                                     cv::FONT_HERSHEY_COMPLEX_SMALL,
                                     0.5,
                                     color);
@@ -744,7 +749,7 @@ int main(int argc, char *argv[]) {
                     if (!resPersReid.empty()) {
                         cv::putText(frame,
                                     resPersReid,
-                                    cv::Point2f(result.location.x, result.location.y + 30),
+                                    cv::Point2f(static_cast<float>(result.location.x), static_cast<float>(result.location.y + 30)),
                                     cv::FONT_HERSHEY_COMPLEX_SMALL,
                                     0.6,
                                     cv::Scalar(255, 255, 255));
@@ -766,7 +771,7 @@ int main(int argc, char *argv[]) {
                         cv::Scalar(255, 0, 0));
             if (personDetection.results.size()) {
                 if (personAttribs.enabled() && personAttribsInferred) {
-                    float average_time = personAttribsNetworkTime.count() / personAttribsInferred;
+                    float average_time = static_cast<float>(personAttribsNetworkTime.count() / personAttribsInferred);
                     out.str("");
                     out << "Person Attributes Recognition time (averaged over " << personAttribsInferred
                         << " detections) :" << std::fixed << std::setprecision(2) << average_time
@@ -778,7 +783,7 @@ int main(int argc, char *argv[]) {
                     }
                 }
                 if (personReId.enabled() && personReIdInferred) {
-                    float average_time = personReIdNetworktime.count() / personReIdInferred;
+                    float average_time = static_cast<float>(personReIdNetworktime.count() / personReIdInferred);
                     out.str("");
                     out << "Person Reidentification time (averaged over " << personReIdInferred
                         << " detections) :" << std::fixed << std::setprecision(2) << average_time

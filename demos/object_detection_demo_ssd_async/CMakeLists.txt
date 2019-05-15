@@ -1,12 +1,11 @@
-# Copyright (C) 2018 Intel Corporation
+# Copyright (C) 2018-2019 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
-cmake_minimum_required(VERSION 2.8)
 
 set(TARGET_NAME "object_detection_demo_ssd_async")
 
 # Find OpenCV components if exist
-find_package(OpenCV COMPONENTS highgui QUIET)
+find_package(OpenCV COMPONENTS highgui videoio imgproc QUIET)
 if(NOT(OpenCV_FOUND))
     message(WARNING "OPENCV is disabled or not found, " ${TARGET_NAME} " skipped")
     return()

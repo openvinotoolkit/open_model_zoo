@@ -1,0 +1,4 @@
+#3d segmentation demo specific requirements
+nibabel
+pillow
+scipy

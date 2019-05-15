@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -30,19 +30,19 @@ static const char plugin_message[] = "Optional. Plugin name. For example MKLDNNP
 "the demo will look for this plugin only.";
 
 /// @brief message for assigning cnn calculation to device
-static const char target_device_message[] = "Optional. Specify the target device to infer on (CPU, GPU, FPGA, or MYRIAD). " \
+static const char target_device_message[] = "Optional. Specify the target device to infer on (CPU, GPU, FPGA, HDDL or MYRIAD). " \
 "The demo will look for a suitable plugin for a specified device.";
 
 /// @brief message for performance counters
 static const char performance_counter_message[] = "Optional. Enables per-layer performance report.";
 
 /// @brief message for clDNN custom kernels desc
-static const char custom_cldnn_message[] = "Optional. Required for clDNN (GPU)-targeted custom kernels. "\
-"Absolute path to the xml file with the kernels desc.";
+static const char custom_cldnn_message[] = "Required for GPU custom kernels. "\
+"Absolute path to the .xml file with the kernels descriptions.";
 
 /// @brief message for user library argument
-static const char custom_cpu_library_message[] = "Optional. Required for MKLDNN (CPU)-targeted custom layers. " \
-"Absolute path to a shared library with the kernels impl.";
+static const char custom_cpu_library_message[] = "Required for CPU custom layers. " \
+"Absolute path to a shared library with the kernels implementations.";
 
 /// @brief message for probability threshold argument
 static const char thresh_output_message[] = "Optional. Probability threshold for detections.";

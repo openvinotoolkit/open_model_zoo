@@ -51,8 +51,8 @@ private:
 
 public:
     Visualizer(bool enabled, cv::VideoWriter& writer, int num_top_persons)
-        : enabled_(enabled), writer_(writer), rect_scale_x_(0), rect_scale_y_(0),
-          num_top_persons_(num_top_persons) {
+        : enabled_(enabled), num_top_persons_(num_top_persons), writer_(writer),
+          rect_scale_x_(0), rect_scale_y_(0) {
         if (!enabled_) {
             return;
         }
@@ -479,7 +479,7 @@ int main(int argc, char* argv[]) {
         const auto top_action_id = actions_type == TOP_K
                                    ? std::distance(actions_map.begin(), find(actions_map.begin(), actions_map.end(), FLAGS_top_id))
                                    : -1;
-        if (actions_type == TOP_K && (top_action_id < 0 || top_action_id >= actions_map.size())) {
+        if (actions_type == TOP_K && (top_action_id < 0 || top_action_id >= static_cast<int>(actions_map.size()))) {
             slog::err << "Cannot find target action: " << FLAGS_top_id << slog::endl;
             return 1;
         }
@@ -500,7 +500,7 @@ int main(int argc, char* argv[]) {
                 continue;
             }
             slog::info << "Loading plugin " << device << slog::endl;
-            InferencePlugin plugin = PluginDispatcher({"../../../lib/intel64", ""}).getPluginByDevice(device);
+            InferencePlugin plugin = PluginDispatcher().getPluginByDevice(device);
             printPluginVersion(plugin, std::cout);
             /** Load extensions for the CPU plugin **/
             if ((device.find("CPU") != std::string::npos)) {
@@ -686,8 +686,8 @@ int main(int argc, char* argv[]) {
             sc_visualizer.SetFrame(prev_frame);
 
             if (actions_type == TOP_K) {
-                if (is_monitoring_enabled && key == SPACE_KEY ||
-                    !is_monitoring_enabled && key != SPACE_KEY) {
+                if ( (is_monitoring_enabled && key == SPACE_KEY) ||
+                     (!is_monitoring_enabled && key != SPACE_KEY) ) {
                     if (key == SPACE_KEY) {
                         action_detector.wait();
                         action_detector.fetchResults();
@@ -706,7 +706,7 @@ int main(int argc, char* argv[]) {
                     wait_time_ms += elapsed_ms;
                     ++wait_num_frames;
 
-                    sc_visualizer.DrawFPS(1e3f / (wait_time_ms / static_cast<float>(wait_num_frames) + 1e-6),
+                    sc_visualizer.DrawFPS(1e3f / (wait_time_ms / static_cast<float>(wait_num_frames) + 1e-6f),
                                           green_color);
                 } else {
                     if (key == SPACE_KEY) {
@@ -734,7 +734,7 @@ int main(int argc, char* argv[]) {
                     tracker_action.Process(prev_frame, tracked_action_objects, total_num_frames);
                     const auto tracked_actions = tracker_action.TrackedDetectionsWithLabels();
 
-                    if (top_k_obj_ids.size() < FLAGS_a_top) {
+                    if (static_cast<int>(top_k_obj_ids.size()) < FLAGS_a_top) {
                         for (const auto& action : tracked_actions) {
                             if (action.label == top_action_id && top_k_obj_ids.count(action.object_id) == 0) {
                                 const int action_id_in_top = top_k_obj_ids.size();
@@ -742,7 +742,7 @@ int main(int argc, char* argv[]) {
 
                                 sc_visualizer.DrawCrop(action.rect, action_id_in_top, red_color);
 
-                                if (top_k_obj_ids.size() >= FLAGS_a_top) {
+                                if (static_cast<int>(top_k_obj_ids.size()) >= FLAGS_a_top) {
                                     break;
                                 }
                             }
@@ -755,7 +755,7 @@ int main(int argc, char* argv[]) {
                     work_time_ms += elapsed_ms;
                     ++work_num_frames;
 
-                    sc_visualizer.DrawFPS(1e3f / (work_time_ms / static_cast<float>(work_num_frames) + 1e-6),
+                    sc_visualizer.DrawFPS(1e3f / (work_time_ms / static_cast<float>(work_num_frames) + 1e-6f),
                                           red_color);
 
                     for (const auto& action : tracked_actions) {
@@ -882,7 +882,7 @@ int main(int argc, char* argv[]) {
 
             sc_visualizer.Show();
 
-            if (FLAGS_last_frame >= 0 && work_num_frames > FLAGS_last_frame) {
+            if (FLAGS_last_frame >= 0 && work_num_frames > static_cast<size_t>(FLAGS_last_frame)) {
                 break;
             }
             prev_frame = frame.clone();
