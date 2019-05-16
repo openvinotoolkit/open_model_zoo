@@ -466,7 +466,7 @@ License terms:
     
 ================================================================================================== 
     
-*googlenet-v1 - GoogleNet v1 - Inception v1 - https://arxiv.org/pdf/1409.4842.pdf
+* googlenet-v1 - GoogleNet v1 - Inception v1 - https://arxiv.org/pdf/1409.4842.pdf
     
 License terms:
 
@@ -511,7 +511,7 @@ License terms:
     
 ================================================================================================== 
     
-*googlenet-v2 - GoogleNet v2 - Inception v2 - https://arxiv.org/pdf/1502.03167.pdf
+* googlenet-v2 - GoogleNet v2 - Inception v2 - https://arxiv.org/pdf/1502.03167.pdf
 
 License terms:
 
@@ -519,7 +519,7 @@ License terms:
     
 ================================================================================================== 
     
-*googlenet-v4 - GoogleNet v4 - Inception v4
+* googlenet-v4 - GoogleNet v4 - Inception v4
 
 License terms:
 
@@ -547,7 +547,7 @@ License terms:
     
 ================================================================================================== 
     
-*alexnet - AlexNet - http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf
+* alexnet - AlexNet - http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf
 
 License terms:
 
@@ -555,7 +555,7 @@ This model is released for unrestricted use.
 
 ==================================================================================================
 
-*ssd_mobilenet_v2_coco - MobileNetV2 object detection architecture - https://arxiv.org/pdf/1801.04381.pdf - pre-trained on the COCO dataset
+* ssd_mobilenet_v2_coco - MobileNetV2 object detection architecture - https://arxiv.org/pdf/1801.04381.pdf - pre-trained on the COCO dataset
 
 License terms:
 
@@ -575,7 +575,7 @@ License terms:
    
 ==================================================================================================
 
-*resnet-50 - ResNet-50 - https://arxiv.org/pdf/1512.03385.pdf
+* resnet-50 - ResNet-50 - https://arxiv.org/pdf/1512.03385.pdf
 
 License terms:
     The MIT License (MIT)
@@ -602,7 +602,7 @@ License terms:
     
 ==================================================================================================
 
-*resnet-101, resnet-152 - https://arxiv.org/pdf/1512.03385.pdf
+* resnet-101, resnet-152 - https://arxiv.org/pdf/1512.03385.pdf
 
 License terms:
 
@@ -630,7 +630,7 @@ License terms:
     
 ==================================================================================================  
 
-*googlenet-v3 - GoogleNet v3 - Inception v3 - https://arxiv.org/pdf/1512.00567.pdf
+* googlenet-v3 - GoogleNet v3 - Inception v3 - https://arxiv.org/pdf/1512.00567.pdf
 
 License terms:
 
@@ -650,7 +650,7 @@ License terms:
     
 ==================================================================================================
  
-*se-inception - BN-Inception with Squeeze-and-Excitation blocks - https://arxiv.org/pdf/1709.01507.pdf
+* se-inception - BN-Inception with Squeeze-and-Excitation blocks - https://arxiv.org/pdf/1709.01507.pdf
  
 License terms:
  
@@ -668,7 +668,7 @@ License terms:
     
 ==================================================================================================
  
-*se-resnet-50, se-resnet-101, se-resnet-152, se-resnext-50, se-resnext-101 - https://arxiv.org/pdf/1709.01507.pdf
+* se-resnet-50, se-resnet-101, se-resnet-152, se-resnext-50, se-resnext-101 - https://arxiv.org/pdf/1709.01507.pdf
  
 License terms:
 
@@ -686,7 +686,7 @@ License terms:
     
 ==================================================================================================
 
-*Sphereface - Deep face recognition under open-set protocol - https://arxiv.org/pdf/1704.08063.pdf
+* Sphereface - Deep face recognition under open-set protocol - https://arxiv.org/pdf/1704.08063.pdf
 
 License terms:
 
@@ -714,7 +714,7 @@ License terms:
     
 ================================================================================================== 
  
-*mobilenet-v1-1.0-224 - obileNet V1 architecture with the width multiplier 1.0 and resolution 224 - https://arxiv.org/pdf/1704.04861.pdf
+* mobilenet-v1-1.0-224 - MobileNet V1 architecture with the width multiplier 1.0 and resolution 224 - https://arxiv.org/pdf/1704.04861.pdf
  
 License terms:
 
@@ -750,7 +750,7 @@ License terms:
     
 ==================================================================================================
 
-*mobilenet-v2 - MobileNet V2 - https://arxiv.org/pdf/1801.04381.pdf
+* mobilenet-v2 - MobileNet V2 - https://arxiv.org/pdf/1801.04381.pdf
 
 License terms:
 
@@ -786,7 +786,7 @@ License terms:
     
 ==================================================================================================
 
-*faster_rcnn_inception_v2_coco - Faster R-CNN with Inception v2 - https://arxiv.org/pdf/1801.04381.pdf pre-trained on the COCO dataset
+* faster_rcnn_inception_v2_coco - Faster R-CNN with Inception v2 - https://arxiv.org/pdf/1801.04381.pdf pre-trained on the COCO dataset
 
 License terms:
 
@@ -806,7 +806,7 @@ License terms:
     
 ==================================================================================================
 
-*deeplabv3 - Rethinking Atrous Convolution for Semantic Image Segmentation - https://arxiv.org/pdf/1706.05587.pdf
+* deeplabv3 - Rethinking Atrous Convolution for Semantic Image Segmentation - https://arxiv.org/pdf/1706.05587.pdf
 
 License terms:
 
@@ -826,7 +826,7 @@ License terms:
     
 ==================================================================================================
 
-*ctpn - Detecting Text in Natural Image with Connectionist Text Proposal Network - https://arxiv.org/pdf/1609.03605.pdf
+* ctpn - Detecting Text in Natural Image with Connectionist Text Proposal Network - https://arxiv.org/pdf/1609.03605.pdf
 
 License terms:
        
@@ -854,7 +854,7 @@ License terms:
   
 ==================================================================================================
 
-*ssd_mobilenet_v1_coco - MobileNetV1 object detection architecture - https://arxiv.org/pdf/1807.03284.pdf - pre-trained on the COCO dataset
+* ssd_mobilenet_v1_coco - MobileNetV1 object detection architecture - https://arxiv.org/pdf/1807.03284.pdf - pre-trained on the COCO dataset
 
 License terms:
 
@@ -874,7 +874,7 @@ License terms:
   
 ==================================================================================================
 
-*faster_rcnn_resnet101_coco - Faster R-CNN Resnet-101 - https://arxiv.org/pdf/1801.04381.pdf - pre-trained on the COCO dataset
+* faster_rcnn_resnet101_coco - Faster R-CNN Resnet-101 - https://arxiv.org/pdf/1801.04381.pdf - pre-trained on the COCO dataset
 
 License terms:
 
@@ -894,7 +894,7 @@ License terms:
   
 ==================================================================================================
 
-*mobilenet-v2-1.4-224 - MobileNet V2 architecture with the width multiplier 1.4 and resolution 224 - https://arxiv.org/abs/1801.04381
+* mobilenet-v2-1.4-224 - MobileNet V2 architecture with the width multiplier 1.4 and resolution 224 - https://arxiv.org/abs/1801.04381
 
 License terms:
 
@@ -914,7 +914,7 @@ License terms:
   
 ==================================================================================================
 
-*brain-tumor-segmentation-0001 - Cascaded UNet for brain tumor segmentation - https://arxiv.org/abs/1810.04008
+* brain-tumor-segmentation-0001 - Cascaded UNet for brain tumor segmentation - https://arxiv.org/abs/1810.04008
 
 License terms:
 
@@ -931,14 +931,3 @@ License terms:
     limitations under the License.
     
 ==================================================================================================
-
-    
-
-
- 
- 
-
-
-
-
-       
