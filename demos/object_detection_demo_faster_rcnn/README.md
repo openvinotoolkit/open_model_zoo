@@ -30,12 +30,12 @@ output image and outputs data to the standard output stream.
 
 Running the application with the `-h` option yields the following usage message:
 ```sh
-./object_detection_demo -h
+./object_detection_demo_faster_rcnn -h
 InferenceEngine:
     API version ............ <version>
     Build .................. <number>
 
-object_detection_demo [OPTION]
+object_detection_demo_faster_rcnn [OPTION]
 Options:
 
     -h                        Print a usage message.
@@ -61,7 +61,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 You can use the following command to do inference on CPU on an image using a trained Faster R-CNN network:
 ```sh
-./object_detection_demo -i <path_to_image>/inputImage.bmp -m <path_to_model>/faster-rcnn.xml -d CPU
+./object_detection_demo_faster_rcnn -i <path_to_image>/inputImage.bmp -m <path_to_model>/faster-rcnn.xml -d CPU
 ```
 
 ## Demo Output

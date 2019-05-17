@@ -105,7 +105,7 @@ DEFINE_bool(p_msg, false, plugin_message);
 */
 static void showUsage() {
     std::cout << std::endl;
-    std::cout << "object_detection_demo [OPTION]" << std::endl;
+    std::cout << "object_detection_demo_faster_rcnn [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
