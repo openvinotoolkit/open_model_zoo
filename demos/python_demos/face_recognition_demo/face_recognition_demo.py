@@ -31,7 +31,6 @@ from openvino.inference_engine import IENetwork, IEPlugin
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cosine
 
-
 DEVICE_KINDS = ['CPU', 'GPU', 'FPGA', 'MYRIAD', 'HETERO']
 
 
@@ -101,6 +100,8 @@ def build_argparser():
     infer.add_argument('-exp_r_fd', metavar='NUMBER', type=float, default=1.15,
         help="(optional) Scaling ratio for bboxes passed to face recognition " \
             "(default: %(default)s)")
+    infer.add_argument('--allow_grow', action='store_true',
+        help="(optional) Allow to grow faces gallery and to dump on disk")
 
     return parser
 
@@ -377,13 +378,14 @@ class FacesDatabase:
     IMAGE_EXTENSIONS = ['.jpg', '.png']
 
     class Identity:
-        def __init__(self, label, descriptor):
+        def __init__(self, label, descriptors):
             self.label = label
-            self.descriptor = descriptor
+            self.descriptors = descriptors
 
     def __init__(self, path,
             face_identifier, landmarks_detector, face_detector=None):
         path = osp.abspath(path)
+        self.fg_path = path
         paths = []
         if osp.isdir(path):
             ext = self.IMAGE_EXTENSIONS
@@ -399,7 +401,7 @@ class FacesDatabase:
             raise Exception("The images database folder has no images")
 
         self.database = []
-        for path in paths:
+        for num, path in enumerate(paths):
             label = osp.splitext(osp.basename(path))[0]
             image = cv2.imread(path, flags=cv2.IMREAD_COLOR)
 
@@ -408,8 +410,7 @@ class FacesDatabase:
             assert image.shape[2] in [3, 4], \
                 "Expected BGR or BGRA input"
 
-            if image.shape[0] == 4: # assume BGRA
-                image = image[:, :, :3]
+            orig_image = image.copy()
             image = image.transpose((2, 0, 1)) # HWC to CHW
             image = np.expand_dims(image, axis=0)
 
@@ -418,9 +419,6 @@ class FacesDatabase:
                 rois = face_detector.get_roi_proposals(image)
                 if len(rois) < 1:
                     log.warning("Not found faces on the image '%s'" % (path))
-
-                    w, h = image.shape[-1], image.shape[-2]
-                    rois = [ FaceDetector.Result([0, 0, 0, 0, 0, w, h]) ]
             else:
                 w, h = image.shape[-1], image.shape[-2]
                 rois = [ FaceDetector.Result([0, 0, 0, 0, 0, w, h]) ]
@@ -433,15 +431,80 @@ class FacesDatabase:
                 face_identifier.start_async(image, r, landmarks)
                 descriptor = face_identifier.get_descriptors()[0]
 
-                self.database.append(
-                    self.Identity("%s-%s" % (label, i), descriptor))
+                if face_detector:
+                    mm = self.check_if_face_exist(descriptor, face_identifier.get_threshold())
+                    if mm < 0:
+                        crop = orig_image[int(roi.position[1]):int(roi.position[1]+roi.size[1]), int(roi.position[0]):int(roi.position[0]+roi.size[0])]
+                        name = self.ask_to_save(crop)
+                        if name:
+                            _ = self.dump_faces(crop, descriptor, name)
+                else:
+                    log.debug("Adding label {} to the gallery.".format(label))
+                    self.add_item(descriptor, label)
+
+    def ask_to_save(self, image):
+        save = False
+        label = None
+        winname = "Unknown face"
+        cv2.namedWindow(winname)
+        cv2.moveWindow(winname, 0, 0)
+        w = int(400 * image.shape[0]/image.shape[1])
+        sz = (400,w)
+        resized = cv2.resize(image, sz, interpolation = cv2.INTER_AREA)
+        font                   = cv2.FONT_HERSHEY_PLAIN
+        bottomLeftCornerOfText = (50,50)
+        fontScale              = 1
+        fontColor              = (255,255,255)
+        lineType               = 1
+        img = cv2.copyMakeBorder(resized, 5, 5, 5, 5, cv2.BORDER_CONSTANT, value=(255,255,255))
+        cv2.putText(img, 'This is an unrecognized image.', (30,50), font, fontScale, fontColor, lineType)
+        cv2.putText(img, 'If you want to store it to the gallery,', (30,80), font, fontScale, fontColor, lineType)
+        cv2.putText(img, 'please, put the name and press "Enter".', (30,110), font, fontScale, fontColor, lineType)
+        cv2.putText(img, 'Otherwise, press "Escape".', (30,140), font, fontScale, fontColor, lineType)
+        cv2.putText(img, 'You can see the name here:', (30,170), font, fontScale, fontColor, lineType)
+        name = ''
+        tmp = 0
+        while(1):
+            cc = img.copy()
+            cv2.putText(cc, name, (30,200), font, fontScale, fontColor, lineType)
+            cv2.imshow(winname, cc)
+
+            k = cv2.waitKey(0)
+            if k == 27: #Esc
+                break
+            if k == 13: #Enter
+                if len(name) > 0:
+                    save = True
+                    break
+                else:
+                    cv2.putText(cc, "Name was not inserted. Please try again.", (30,200), font, fontScale, fontColor, lineType)
+                    cv2.imshow(winname, cc)
+                    k = cv2.waitKey(0)
+                    if k == 27:
+                        break
+                    continue
+            if k == 225: #Shift
+                continue
+            if k == 8: #backspace
+                name = name[:-1]
+                continue
+            else:
+                name += chr(k)
+                continue
+
+        cv2.destroyWindow(winname)
+        label = name if save else None
+        return label
 
     def match_faces(self, descriptors):
         database = self
         distances = np.empty((len(descriptors), len(database)))
         for i, desc in enumerate(descriptors):
             for j, identity in enumerate(database):
-                distances[i][j] = self.cosine_dist(desc, identity.descriptor)
+                dist = []
+                for k, id_desc in enumerate(identity.descriptors):
+                    dist.append(self.cosine_dist(desc, id_desc))
+                distances[i][j] = dist[np.argmin(dist)]
 
         # Find best assignments, prevent repeats, assuming faces can not repeat
         _, assignments = linear_sum_assignment(distances)
@@ -456,6 +519,71 @@ class FacesDatabase:
             matches.append( (id, distance) )
         return matches
 
+    def create_new_label(self, path, id):
+        ppp = "{}{}.jpg".format("face", id)
+        pp = osp.join(path, ppp)
+        if osp.exists(pp):
+            pp = self.create_new_label(path, id+1)
+        return osp.splitext(osp.basename(pp))[0]
+
+    def check_if_face_exist(self, desc, threshold):
+        match = -1
+        for j, identity in enumerate(self.database):
+            dist = []
+            for k, id_desc in enumerate(identity.descriptors):
+                dist.append(self.cosine_dist(desc, id_desc))
+            if dist[np.argmin(dist)] < threshold:
+                match = j
+                break
+        return match
+
+    def check_if_label_exists(self, label):
+        match = -1
+        import re
+        name = re.split(r'-\d+$', label)
+        if not len(name):
+            return -1, label
+        label = name[0].lower()
+
+        for j, identity in enumerate(self.database):
+            if identity.label == label:
+                match = j
+                break
+        return match, label
+
+    def dump_faces(self, image, desc, name):
+        match, label = self.add_item(desc, name)
+        if match < 0:
+            filename = "{}-0.jpg".format(label)
+            match = len(self.database)-1
+        else:
+            filename = "{}-{}.jpg".format(label, len(self.database[match].descriptors)-1)
+        filename = osp.join(self.fg_path, filename)
+
+        log.debug("Dumping image with label {} and path {} on disk.".format(label, filename))
+        if osp.exists(filename):
+            log.warning("File with the same name already exists at {}. So it won't be stored.".format(self.fg_path))
+        cv2.imwrite(filename, image)
+        return match
+
+    def add_item(self, desc, label):
+        match = -1
+        if not label:
+            label = self.create_new_label(self.fg_path, len(self.database))
+            log.warning("Trying to store an item without a label. Assigned label {}.".format(label))
+        else:
+            match, label = self.check_if_label_exists(label)
+
+        if match < 0:
+            self.database.append(self.Identity(label, [desc]))
+            log.debug("Adding label {} to the database".format(label))
+        else:
+            self.database[match].descriptors.append(desc)
+            log.debug("Appending new descriptor for label {}.".format(label))
+
+        log.debug("The database length is {}.".format(len(self.database)))
+        return match, label
+
     def __getitem__(self, idx):
         return self.database[idx]
 
@@ -464,7 +592,6 @@ class FacesDatabase:
 
     def cosine_dist(self, x, y):
         return cosine(x, y) * 0.5
-
 
 class FaceIdentifier(Module):
     # Taken from the description of the model:
@@ -481,9 +608,10 @@ class FaceIdentifier(Module):
     UNKNOWN_ID_LABEL = "Unknown"
 
     class Result:
-        def __init__(self, id, distance):
+        def __init__(self, id, distance, desc):
             self.id = id
             self.distance = distance
+            self.descriptor = desc
 
     def __init__(self, model, match_threshold=0.5):
         super(FaceIdentifier, self).__init__(model)
@@ -495,8 +623,9 @@ class FaceIdentifier(Module):
         self.output_blob = next(iter(model.outputs))
         self.input_shape = model.inputs[self.input_blob].shape
 
-        assert len(model.outputs[self.output_blob].shape) == 4, \
-            "Expected model output shape [1, n, 1, 1], got %s" % \
+        assert len(model.outputs[self.output_blob].shape) == 4 or \
+            len(model.outputs[self.output_blob].shape) == 2, \
+            "Expected model output shape [1, n, 1, 1] or [1, n], got %s" % \
             (model.outputs[self.output_blob].shape)
 
         self.faces_database = None
@@ -526,6 +655,9 @@ class FaceIdentifier(Module):
         for input in inputs:
             self.enqueue(input)
 
+    def get_threshold(self):
+        return self.match_threshold
+
     def get_matches(self):
         descriptors = self.get_descriptors()
 
@@ -534,13 +666,16 @@ class FaceIdentifier(Module):
             matches = self.faces_database.match_faces(descriptors)
 
         results = []
-        for match in matches:
+        unknowns_list = []
+        for num, match in enumerate(matches):
             id = match[0]
             distance = match[1]
             if self.match_threshold < distance:
                 id = self.UNKNOWN_ID
-            results.append(self.Result(id, distance))
-        return results
+                unknowns_list.append(num)
+
+            results.append(self.Result(id, distance, descriptors[num]))
+        return results, unknowns_list
 
     def get_descriptors(self):
         return [out[self.output_blob].flatten() for out in self.get_outputs()]
@@ -599,7 +734,6 @@ class FaceIdentifier(Module):
                 flags=cv2.WARP_INVERSE_MAP)
             image[:] = img.transpose((2, 0, 1))
 
-
 class FrameProcessor:
     QUEUE_SIZE = 16
 
@@ -631,12 +765,14 @@ class FrameProcessor:
         log.info("Models are loaded")
 
         log.info("Building faces database using images from '%s'" % (args.fg))
-        faces_database = FacesDatabase(args.fg, self.face_identifier,
+        self.faces_database = FacesDatabase(args.fg, self.face_identifier,
             self.landmarks_detector,
             self.face_detector if args.run_detector else None)
-        self.face_identifier.set_faces_database(faces_database)
+        self.face_identifier.set_faces_database(self.faces_database)
         log.info("Database is built, registered %s identities" % \
-            (len(faces_database)))
+            (len(self.faces_database)))
+
+        self.allow_grow = args.allow_grow
 
     def load_model(self, model_path):
         model_path = osp.abspath(model_path)
@@ -657,8 +793,7 @@ class FrameProcessor:
         assert frame.shape[2] in [3, 4], \
             "Expected BGR or BGRA input"
 
-        if frame.shape[0] == 4: # assume BGRA
-            frame = frame[:, :, :3]
+        orig_image = frame.copy()
         frame = frame.transpose((2, 0, 1)) # HWC to CHW
         frame = np.expand_dims(frame, axis=0)
 
@@ -678,7 +813,19 @@ class FrameProcessor:
         landmarks = self.landmarks_detector.get_landmarks()
 
         self.face_identifier.start_async(frame, rois, landmarks)
-        face_identities = self.face_identifier.get_matches()
+        face_identities, unknowns = self.face_identifier.get_matches()
+        if self.allow_grow and len(unknowns) > 0:
+            for i in unknowns:
+                # This check is preventing asking to save half-images in the boundary of images
+                if rois[i].position[0] == 0.0 or rois[i].position[1] == 0.0 or \
+                    (rois[i].position[0] + rois[i].size[0] > orig_image.shape[1]) or \
+                    (rois[i].position[1] + rois[i].size[1] > orig_image.shape[0]):
+                    continue
+                crop = orig_image[int(rois[i].position[1]):int(rois[i].position[1]+rois[i].size[1]), int(rois[i].position[0]):int(rois[i].position[0]+rois[i].size[0])]
+                name = self.faces_database.ask_to_save(crop)
+                if name:
+                    id = self.faces_database.dump_faces(crop, face_identities[i].descriptor, name)
+                    face_identities[i].id = id
 
         outputs = [rois, landmarks, face_identities]
 

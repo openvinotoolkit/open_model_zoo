@@ -7,15 +7,13 @@ parallel or sequential execution using OpenVINO library in Python.
 In particular, this demo uses 3 models to build a pipeline able to detect
 faces on videos, their keypoints (aka "landmarks"),
 and recognize persons using the provided faces database (the gallery).
-The corresponding pretrained models can be found in this repository:
+The following pretrained models can be used:
 
-* `intel_models/face-detection-retail-0004` and
-  `intel_models/face-detection-adas-0001`,
-    which are used to detect faces and predict their bounding boxes;
-* `intel_models/landmarks-regression-retail-0009`,
-    which is used to predict face keypoints;
-* `intel_models/face-reidentification-retail-0095`,
-    which is used to recognize persons.
+* `face-detection-retail-0004` and `face-detection-adas-0001`, to detect faces and predict their bounding boxes;
+* `landmarks-regression-retail-0009`, to predict face keypoints;
+* `face-reidentification-retail-0095`, to recognize persons.
+
+For more information about the pre-trained models, refer to the [Open Model Zoo](https://github.com/opencv/open_model_zoo/tree/master/intel_models/index.md) repository on GitHub*.
 
 ### How it works
 
@@ -36,9 +34,19 @@ visualized and displayed on the screen or written to the output file.
 To recognize faces the application uses a face database, or a gallery.
 The gallery is a folder with images of persons. Each image in the gallery can
 be of arbitrary size and should contain one or more frontally-oriented faces
-with decent quality. The application can use face detector during the gallery
-build, this is controlled by `--run_detector` flag. This allows gallery images
-to contain more than one face image and not to be tightly cropped. However, the
+with decent quality. There are allowed multiple images of the same person,
+but the naming should be specific - the names may contain '-{num_of_instance}'
+at the end. For example, there could be images 'Paul-0.jpg', 'Paul-1.jpg' etc.
+and they all will be treated as images of the same person. If a single instance
+for one person is present, the image name can be arbitrary ('Paul.jpg').
+The application can use face detector during the gallery building, that is
+controlled by `--run_detector` flag. This allows gallery images to contain more
+than one face image and not to be tightly cropped. In that mode the user will
+be asked if he wants to add a specific image to the images gallery (and it
+leads to automatic dumping images to the same folder on disk). If it is, then
+the user should specify the name for the image in the open window and press
+'Enter'. If it's not, then press 'Escape'. The user may add multiple images of
+the same person by setting the same name in the open window. However, the
 resulting gallery needs to be checked more thoroughly, since a face detector can
 fail and produce poor crops.
 
@@ -101,6 +109,16 @@ Faces database:
   -fg PATH              Path to the face images directory
   --run_detector        (optional) Use Face Detection model to find faces on
                         the face images, otherwise use full images.
+  --allow_grow          (optional) Flag to allow growing the face database,
+                        in addition allow dumping new faces on disk. In that
+                        case the user will be asked if he wants to add a
+                        specific image to the images gallery (and it leads to
+                        automatic dumping images to the same folder on disk).
+                        If it is, then the user should specify the name for
+                        the image in the open window and press 'Enter'.
+                        If it's not, then press 'Escape'. The user may add
+                        new images for the same person by setting the same
+                        name in the open window.
 
 Models:
   -m_fd PATH            Path to the Face Detection model XML file
@@ -137,32 +155,32 @@ Inference options:
 
 Example of a valid command line to run the application:
 
-Linux (`sh`, `bash`, ...) (assuming OpenVINO installed in `/opt/intel/computer_vision_sdk`):
+Linux (`sh`, `bash`, ...) (assuming OpenVINO installed in `/opt/intel/openvino`):
 
 ``` sh
 # Set up the environment
-source /opt/intel/computer_vision_sdk/bin/setupvars.sh
+source /opt/intel/openvino/bin/setupvars.sh
 
 ./face_recognition_demo.py \
--m_fd /opt/intel/computer_vision_sdk/deployment_tools/intel_models/face-detection-retail-0004/FP32/face-detection-retail-0004.xml \
--m_lm /opt/intel/computer_vision_sdk/deployment_tools/intel_models/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml \
--m_reid /opt/intel/computer_vision_sdk/deployment_tools/intel_models/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml \
--l /opt/intel/computer_vision_sdk/deployment_tools/inference_engine/lib/ubuntu_16.04/intel64/libcpu_extension_sse4.so \
+-m_fd <path_to_model>/face-detection-retail-0004.xml \
+-m_lm <path_to_model>/landmarks-regression-retail-0009.xml \
+-m_reid <path_to_model>/face-reidentification-retail-0095.xml \
+-l <path_to_cpu_extensions>/libcpu_extension_sse4.so \
 --verbose \
 -fg "/home/face_gallery"
 ```
 
-Windows (`cmd`, `powershell`) (assuming OpenVINO installed in `C:/Intel/computer_vision_sdk`):
+Windows (`cmd`, `powershell`) (assuming OpenVINO installed in `C:/Intel/openvino`):
 
 ``` powershell
 # Set up the environment
-call C:/Intel/computer_vision_sdk/bin/setupvars.bat
+call C:/Intel/openvino/bin/setupvars.bat
 
 python ./face_recognition_demo.py ^
--m_fd C:/Intel/computer_vision_sdk/deployment_tools/intel_models/face-detection-retail-0004/FP32/face-detection-retail-0004.xml ^
--m_lm C:/Intel/computer_vision_sdk/deployment_tools/intel_models/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml ^
--m_reid C:/Intel/computer_vision_sdk/deployment_tools/intel_models/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml ^
--l C:/Intel/computer_vision_sdk/inference_engine/bin/intel64/Release/cpu_extension_avx2.dll ^
+-m_fd <path_to_model>/face-detection-retail-0004.xml ^
+-m_lm <path_to_model>/landmarks-regression-retail-0009.xml ^
+-m_reid <path_to_model>/face-reidentification-retail-0095.xml ^
+-l <path_to_cpu_extensions>/cpu_extension_avx2.dll ^
 --verbose ^
 -fg "C:/face_gallery"
 ```
