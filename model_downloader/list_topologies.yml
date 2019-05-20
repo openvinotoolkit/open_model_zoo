@@ -1579,7 +1579,7 @@ topologies:
     license: https://github.com/opencv/open_model_zoo/blob/master/LICENSE
 
   - name: "person-detection-retail-0002"
-    description: "Person detection (HyperNet+RFCN)."
+    description: "Person detection (HyperNet+RFCN+DetectionOutput)."
     files:
       - name: person-detection-retail-0002.xml
         sha256: bfacb328e853120e5fc8c42b7d123e3da64170eaf8ce72ddc067af1a6d74ddc7
