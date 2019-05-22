@@ -1,0 +1,5 @@
+# This file can be used with the --list option of the model downloader.
+action-recognition-????-decoder
+action-recognition-????-encoder
+driver-action-recognition-adas-????-decoder
+driver-action-recognition-adas-????-encoder
