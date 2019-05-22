@@ -1,4 +1,4 @@
-Configuration file for public topologies downloader includes following models:
+Configuration file for the automation tools includes following models:
 
 ==================================================================================================
 

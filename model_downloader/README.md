@@ -1,218 +1,206 @@
-Public Topologies Downloader
-============================
+Model Downloader and other automation tools
+===========================================
 
-The script is designed to download popular public deep learning topologies and prepare models for the Model Optimizer tool.
+This directory contains scripts that automate certain model-related tasks
+based on the included configuration file.
+
+* `downloader.py` (model downloader) downloads model files from online sources
+  and, if necessary, patches them to make them more usable with Model
+  Optimizer;
+
+* `converter.py` (model converter) converts the models that are not in the
+  Inference Engine IR format into that format using Model Optimizer.
 
 Prerequisites
 -------------
 
-1. Install python3 (version 3.5.2 or higher) 
+1. Install python3 (version 3.5.2 or higher)
 2. Install yaml and requests modules with the command
 
 ```sh
 sudo -E pip3 install pyyaml requests
-```   
+```
 
-Usage
------
+For the model converter, you will also need to install the OpenVINO&trade;
+toolkit and the prerequisite libraries for Model Optimizer. See the
+[OpenVINO toolkit documentation](https://docs.openvinotoolkit.org/) for details.
 
-*  Run the script with `-h` key to see the help message:
+Model downloader usage
+----------------------
 
-   ```sh  
-   ./downloader.py -h
+The basic usage is to run the script like this:
 
+```sh
+./downloader.py --all
+```
 
-      usage: downloader.py [-h] [-c CONFIG.YML] [--name PAT[,PAT...]]
-                           [--list FILE.LST] [--all] [--print_all] [-o DIR]
-                           [--cache_dir DIR] [--num_attempts N]
+This will download all models into a directory tree rooted in the current
+directory. To download into a different directory, use the `-o`/`--output_dir`
+option:
 
-      optional arguments:
-        -h, --help            show this help message and exit
-        -c CONFIG.YML, --config CONFIG.YML
-                              path to YML configuration file
-        --name PAT[,PAT...]   download only topologies whose names match at least
-                              one of the specified patterns
-        --list FILE.LST       download only topologies whose names match at least
-                              one of the patterns in the specified file
-        --all                 download all topologies from the configuration file
-        --print_all           print all available topologies
-        -o DIR, --output_dir DIR
-                              path where to save topologies
-        --cache_dir DIR       directory to use as a cache for downloaded files
-        --num_attempts N      attempt each download up to N times
+```sh
+./downloader.py --all --output_dir my/download/directory
+```
 
-      list_topologies.yml - default configuration file
-   ```
+The `--all` option can be replaced with other filter options to download only
+a subset of models. See the "Shared options" section.
 
-*  Run the script with the default configuration file:
+By default, the script will attempt to download each file only once. You can use
+the `--num_attempts` option to change that and increase the robustness of the
+download process:
 
-   ```sh
-   ./downloader.py --all
-   ```   
-   or with a custom configuration file:
-   
-   ```sh   
-   ./downloader.py --all -c <path_to_configuration_file>
-   ```
+```sh
+./downloader.py --all --num_attempts 5 # attempt each download five times
+```
 
-*  Run the script with the `--print_all` option to see the available topologies:
+You can use the `--cache_dir` option to make the script use the specified directory
+as a cache. The script will place a copy of each downloaded file in the cache, or,
+if it is already there, retrieve it from the cache instead of downloading it again.
 
-   ```sh
-   ./downloader.py --print_all
+```sh
+./downloader.py --all --cache_dir my/cache/directory
+```
 
-   densenet-121
-   densenet-161
-   densenet-169
-   densenet-201
-   squeezenet1.0
-   squeezenet1.1
-   mtcnn-p
-   mtcnn-r
-   mtcnn-o
-   mobilenet-ssd
-   vgg19
-   vgg16
-   ssd512
-   ssd300
-   inception-resnet-v2
-   dilation
-   googlenet-v1
-   googlenet-v2
-   googlenet-v4
-   alexnet
-   ssd_mobilenet_v2_coco
-   resnet-50
-   resnet-101
-   resnet-152
-   googlenet-v3
-   se-inception
-   se-resnet-101
-   se-resnet-152
-   se-resnet-50
-   se-resnext-50
-   se-resnext-101
-   Sphereface
-   license-plate-recognition-barrier-0007
-   mobilenet-v1-1.0-224
-   mobilenet-v2
-   faster_rcnn_inception_v2_coco
-   deeplabv3
-   ctpn
-   ssd_mobilenet_v1_coco
-   faster_rcnn_resnet101_coco
-   mobilenet-v2-1.4-224
-   age-gender-recognition-retail-0013
-   age-gender-recognition-retail-0013-fp16
-   emotions-recognition-retail-0003
-   emotions-recognition-retail-0003-fp16
-   face-detection-adas-0001
-   face-detection-adas-0001-fp16
-   face-detection-retail-0004
-   face-detection-retail-0004-fp16
-   face-person-detection-retail-0002
-   face-person-detection-retail-0002-fp16
-   face-reidentification-retail-0095
-   face-reidentification-retail-0095-fp16
-   facial-landmarks-35-adas-0002
-   facial-landmarks-35-adas-0002-fp16
-   head-pose-estimation-adas-0001
-   head-pose-estimation-adas-0001-fp16
-   human-pose-estimation-0001
-   human-pose-estimation-0001-fp16
-   landmarks-regression-retail-0009
-   landmarks-regression-retail-0009-fp16
-   license-plate-recognition-barrier-0001
-   license-plate-recognition-barrier-0001-fp16
-   pedestrian-and-vehicle-detector-adas-0001
-   pedestrian-and-vehicle-detector-adas-0001-fp16
-   pedestrian-detection-adas-0002
-   pedestrian-detection-adas-0002-fp16
-   person-attributes-recognition-crossroad-0230
-   person-attributes-recognition-crossroad-0230-fp16
-   person-detection-action-recognition-0005
-   person-detection-action-recognition-0005-fp16
-   person-detection-retail-0002
-   person-detection-retail-0002-fp16
-   person-detection-retail-0013
-   person-detection-retail-0013-fp16
-   person-reidentification-retail-0031
-   person-reidentification-retail-0031-fp16
-   person-reidentification-retail-0076
-   person-reidentification-retail-0076-fp16
-   person-reidentification-retail-0079
-   person-reidentification-retail-0079-fp16
-   person-vehicle-bike-detection-crossroad-0078
-   person-vehicle-bike-detection-crossroad-0078-fp16
-   road-segmentation-adas-0001
-   road-segmentation-adas-0001-fp16
-   semantic-segmentation-adas-0001
-   semantic-segmentation-adas-0001-fp16
-   single-image-super-resolution-1033
-   single-image-super-resolution-1033-fp16
-   text-detection-0002
-   text-detection-0002-fp16
-   vehicle-attributes-recognition-barrier-0039
-   vehicle-attributes-recognition-barrier-0039-fp16
-   vehicle-detection-adas-0002
-   vehicle-detection-adas-0002-fp16
-   vehicle-license-plate-detection-barrier-0106
-   vehicle-license-plate-detection-barrier-0106-fp16
-   face-detection-adas-binary-0001
-   single-image-super-resolution-1032
-   single-image-super-resolution-1032-fp16
-   action-recognition-0001-encoder
-   action-recognition-0001-encoder-fp16
-   instance-segmentation-security-0049
-   instance-segmentation-security-0049-fp16
-   vehicle-detection-adas-binary-0001 
-   driver-action-recognition-adas-0002-decoder
-   driver-action-recognition-adas-0002-decoder-fp16
-   pedestrian-detection-adas-binary-0001
-   person-detection-action-recognition-teacher-0002
-   person-detection-action-recognition-teacher-0002-fp16
-   instance-segmentation-security-0033
-   instance-segmentation-security-0033-fp16
-   action-recognition-0001-decoder
-   action-recognition-0001-decoder-fp16
-   text-recognition-0012
-   text-recognition-0012-fp16
-   driver-action-recognition-adas-0002-encoder
-   driver-action-recognition-adas-0002-encoder-fp16
-   gaze-estimation-adas-0002
-   gaze-estimation-adas-0002-fp16
-   ```
+The cache format is intended to remain compatible in future Open Model Zoo
+versions, so you can use a cache to avoid redownloading most files when updating
+Open Model Zoo.
 
-*  Download only some topologies (mtcnn-p and all topologies starting with "densenet-" in the following code example):
+See the "Shared options" section for information on other options accepted by
+the script.
 
-   ```sh
-   ./downloader.py --name 'mtcnn-p,densenet-*'
-   ```
+Model converter usage
+---------------------
 
-   The argument to `--name` must be a comma-separated list of patterns, which may contain shell-style wildcards.
-   See https://docs.python.org/3/library/fnmatch.html for a full description of the pattern syntax.
+The basic usage is to run the script like this:
 
-   Alternatively, you can get the list of patterns from a file:
+```sh
+./converter.py --all
+```
 
-   ```sh
-   ./downloader.py --list my.lst
-   ```
+This will convert all models into the Inference Engine IR format. Models that
+were originally in that format are ignored. The conversion results are placed
+side by side with the original models.
 
-   The specified file must list one pattern per line. Blank lines and comments starting with `#` will be ignored.
-   For example:
+The current directory must be the root of a download tree created by the model
+downloader. To specify a different download tree path, use the `-d`/`--download_root`
+option:
 
-   ```
-   mtcnn-p
-   densenet-* # get all DenseNet variants
-   ```
+```sh
+./converter.py --all --download_root my/download/directory
+```
 
-Expected free space to download all the topologies with the default configuration file is around 7.5 GB.
+The `--all` option can be replaced with other filter options to convert only
+a subset of models. See the "Shared options" section.
+
+The script will attempt to locate Model Optimizer using the environment
+variables set by the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
+script. You can override this heuristic with the `--mo` option:
+
+```sh
+./converter.py --all --mo my/openvino/path/model_optimizer/mo.py
+```
+
+By default, the script will run Model Optimizer using the same Python executable
+that was used to run the script itself. To use a different Python executable,
+use the `-p`/`--python` option:
+
+```sh
+./converter.py --all --python my/python
+```
+
+The script can print the conversion commands without actually running them.
+To do this, use the `--dry-run` option:
+
+```sh
+./converter.py --all --dry-run
+```
+
+See the "Shared options" section for information on other options accepted by
+the script.
+
+Shared options
+--------------
+
+The are certain options that both tools accept.
+
+`-h`/`--help` can be used to print a help message:
+
+```sh
+./TOOL.py --help
+```
+
+There are several mutually exclusive filter options that select the models the
+tool will process:
+
+* `--all` selects all models.
+
+  ```sh
+  ./TOOL.py --all
+  ```
+
+* `--name` takes a comma-separated list of patterns and selects models that match
+  at least one of these patterns. The patterns may contain shell-style wildcards.
+
+  ```sh
+  ./TOOL.py --name 'mtcnn-p,densenet-*'
+  ```
+
+  See https://docs.python.org/3/library/fnmatch.html for a full description of
+  the pattern syntax.
+
+* `--list` takes a path to a file that must contain a list of patterns and
+  selects models that match at least one of those patterns.
+
+  ```sh
+  ./TOOL.py --list my.lst
+  ```
+
+  The file must contain one pattern per line. The pattern syntax is the same
+  as for the `--name` option. Blank lines and comments starting with `#` are
+  ignored. For example:
+
+  ```
+  mtcnn-p
+  densenet-* # get all DenseNet variants
+  ```
+
+To see the available models, you can use the `--print_all` option. When this
+option is specified, the tool will print all model names defined in the
+configuration file and exit:
+
+```
+$ ./TOOL.py --print_all
+densenet-121
+densenet-161
+densenet-169
+densenet-201
+squeezenet1.0
+[...]
+```
+
+Either `--print_all` or one of the filter options must be specified.
+
+By default, the tools will get information about the models from the configuration
+file in the automation tool directory. You can use a custom configuration file
+instead with the `-c`/`--config` option:
+
+```sh
+./TOOL.py --all --config my-config.yml
+```
+
+Note, however, that the configuration file format is currently undocumented and
+may change in incompatible ways in future versions.
 
 __________
 
-Copyright &copy; 2018 Intel Corporation
+OpenVINO is a trademark of Intel Corporation or its subsidiaries in the U.S.
+and/or other countries.
+
+
+Copyright &copy; 2018-2019 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.  
+you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
      http://www.apache.org/licenses/LICENSE-2.0
