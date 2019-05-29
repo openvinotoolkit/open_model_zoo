@@ -5,8 +5,6 @@ In this sample we will go through typical steps required to evaluate DL topologi
 
 We will try to evaluate **SampLeNet** topology as an example.
 
-Do not forget to run `git lfs pull`, to download model files.
-
 ### 1. Download and extract dataset
 
 In this sample we will use toy dataset which we refer to as *sample dataset*, which contains 10k images 
@@ -19,7 +17,7 @@ Extract downloaded dataset to sample directory
 
 ```bash
 tar xvf cifar-10-python.tar.gz -C sample
-``` 
+```
 
 ### 2. Evaluate sample topology
 
