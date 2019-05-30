@@ -23,6 +23,11 @@ import numpy as np
 from lxml import etree
 from tqdm import tqdm
 
+try:
+    xrange          # Python 2
+except NameError:
+    xrange = range  # Python 3
+
 BBoxDesc = namedtuple('BBoxDesc', 'id, label, det_conf, xmin, ymin, xmax, ymax')
 MatchDesc = namedtuple('MatchDesc', 'gt, pred')
 Range = namedtuple('Range', 'start, end, label')
