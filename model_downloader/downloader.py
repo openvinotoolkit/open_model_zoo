@@ -158,6 +158,8 @@ def try_update_cache(cache, hash, source):
         print('########## Warning: Failed to update the cache ##########')
 
 def try_retrieve(name, destination, expected_hash, cache, num_attempts, start_download):
+    destination.parent.mkdir(parents=True, exist_ok=True)
+
     if try_retrieve_from_cache(cache, [[expected_hash, destination]]):
         return
 
