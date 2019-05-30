@@ -1243,6 +1243,115 @@ topologies:
     framework: "tf"
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
+  - name: "densenet-121-tf"
+    description: "This is an Tensorflow implementation of DenseNet by G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten with ImageNet pretrained models. The weights are converted from DenseNet-Keras Models."
+    files:
+      - name: tf-densenet121.tar.gz
+        size: 30597420
+        sha256: b31ec840358f1d20e1c6364d05ce463cb0bc0480042e663ad54547189501852d
+        source:
+          $type: google_drive
+          id: 0B_fUSpodN0t0eW1sVk1aeWREaDA
+    output: "classification/densenet/121/tf/"
+    postprocessing:
+      - $type: unpack_archive
+        format: gztar
+        file: tf-densenet121.tar.gz
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --input_shape=[1,224,224,3]
+      - --input=Placeholder
+      - --mean_values=Placeholder[123.68,116.78,103.94]
+      - --scale_values=Placeholder[58.8235294117647]
+      - --output=densenet121/predictions/Reshape_1
+      - --input_meta_graph=$dl_dir/tf-densenet121.ckpt.meta
+      - --input_checkpoint=$dl_dir/tf-densenet121.ckpt.data-00000-of-00001
+    framework: tf
+    license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE
+
+  - name: "densenet-169-tf"
+    description: "This is an Tensorflow implementation of DenseNet by G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten with ImageNet pretrained models. The weights are converted from DenseNet-Keras Models."
+    files:
+      - name: tf-densenet169.tar.gz
+        size: 54307314
+        sha256: 6f20b51077c49cb87df11d181b055a0aec1d27f969b84b4ed8115dd4933fccd4
+        source:
+          $type: google_drive
+          id: 0B_fUSpodN0t0TDB5Ti1PeTZMM2c
+    output: "classification/densenet/169/tf"
+    postprocessing:
+      - $type: unpack_archive
+        format: gztar
+        file: tf-densenet169.tar.gz
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --input_shape=[1,224,224,3]
+      - --input=Placeholder
+      - --mean_values=Placeholder[123.68,116.78,103.94]
+      - --scale_values=Placeholder[58.8235294117647]
+      - --output=densenet169/predictions/Reshape_1
+      - --input_meta_graph=$dl_dir/tf-densenet169.ckpt.meta
+      - --input_checkpoint=$dl_dir/tf-densenet169.ckpt.data-00000-of-00001
+    framework: tf
+    license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE
+
+  - name: "densenet-161-tf"
+    description: "This is an Tensorflow implementation of DenseNet by G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten with ImageNet pretrained models. The weights are converted from from DenseNet-Keras Models."
+    files:
+      - name: tf-densenet161.tar.gz
+        size: 110578586
+        sha256: f4745258b9fe2f234711a70e4192368f169bf0c1956087a210b08270dbe96ca7
+        source:
+          $type: google_drive
+          id: 0B_fUSpodN0t0NmZvTnZZa2plaHc
+    output: "classification/densenet/161/tf"
+    postprocessing:
+      - $type: unpack_archive
+        format: gztar
+        file: tf-densenet161.tar.gz
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --input_shape=[1,224,224,3]
+      - --input=Placeholder
+      - --mean_values=Placeholder[123.68,116.78,103.94]
+      - --scale_values=Placeholder[58.8235294117647]
+      - --output=densenet169/predictions/Reshape_1
+      - --input_meta_graph=$dl_dir/tf-densenet161.ckpt.meta
+      - --input_checkpoint=$dl_dir/tf-densenet161.ckpt.data-00000-of-00001
+    framework: tf
+    license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE
+
+  - name: "facenet-20180408-102900"
+    description: "FaceNet: A Unified Embedding for Face Recognition and Clustering trained on CASIA-WebFace dataset (https://arxiv.org/pdf/1503.03832.pdf)"
+    files:
+      - name: 20180408-102900.zip
+        size: 195479980
+        sha256: 2a32a4d6b797b0e35e065c674dfa2d60e9eb2372aa10728bd0b221abe12490ac
+        source:
+          $type: google_drive
+          id: 1R77HmFADxe87GmoLwzfgMu_HY0IhcyBz
+    output: "face_recognition/facenet/CASIA-WebFace/tf/"
+    postprocessing:
+      - $type: unpack_archive
+        format: zip
+        file: 20180408-102900.zip
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --freeze_placeholder_with_value=phase_train->False
+      - --reverse_input_channels
+      - --input_shape=[1,160,160,3],[1]
+      - --input=image_batch,phase_train
+      - --mean_values=image_batch[127.5,127.5,127.5]
+      - --scale_values=image_batch[128.0]
+      - --output=embeddings
+      - --input_model=$dl_dir/20180408-102900/20180408-102900.pb
+    framework: tf
+    license: https://raw.githubusercontent.com/davidsandberg/facenet/master/LICENSE.md
+
   - name: "age-gender-recognition-retail-0013"
     description: "Age & gender classification."
     files:
