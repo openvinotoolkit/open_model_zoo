@@ -1098,7 +1098,10 @@ topologies:
     license: https://raw.githubusercontent.com/lachinov/brats2018-graphlabunn/master/LICENSE
 
   - name: "age-gender-recognition-retail-0013"
-    description: "Age & gender classification."
+    description: |-
+      Fully convolutional network for simultaneous Age/Gender recognition. The network
+      is able to recognize age of people in [18, 75] years old range, it is not
+      applicable for children since their faces were not in the training set.
     files:
       - name: age-gender-recognition-retail-0013.xml
         sha256: 110126ae5e77bccc694dcfe9064af8c4cff93c0452ae265574f12170de356348
@@ -1111,7 +1114,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "age-gender-recognition-retail-0013-fp16"
-    description: "Age & gender classification."
+    description: |-
+      Fully convolutional network for simultaneous Age/Gender recognition. The network
+      is able to recognize age of people in [18, 75] years old range, it is not
+      applicable for children since their faces were not in the training set.
     files:
       - name: age-gender-recognition-retail-0013-fp16.xml
         sha256: 885c3fbc32f2f42b37f09dd4f6d309c3aa12996737433164b5d1c59816b8b4e1
@@ -1124,7 +1130,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "emotions-recognition-retail-0003"
-    description: "Recognizes 5 emotions for a face."
+    description: "Fully convolutional network for recognition of five emotions ('neutral', 'happy', 'sad', 'surprise', 'anger')."
     files:
       - name: emotions-recognition-retail-0003.xml
         sha256: 946571833aeb9488ea5202f806d5a07e7d2acc25e7cc29206e36e66530a963d9
@@ -1137,7 +1143,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "emotions-recognition-retail-0003-fp16"
-    description: "Recognizes 5 emotions for a face."
+    description: "Fully convolutional network for recognition of five emotions ('neutral', 'happy', 'sad', 'surprise', 'anger')."
     files:
       - name: emotions-recognition-retail-0003-fp16.xml
         sha256: 5450c027ac54c42527ffbe91379c2cbbf7c656a118968411f138445acd508266
@@ -1150,7 +1156,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "emotions-recognition-retail-0003-int8"
-    description: "Recognizes 5 emotions for a face."
+    description: "Fully convolutional network for recognition of five emotions ('neutral', 'happy', 'sad', 'surprise', 'anger')."
     files:
       - name: emotions-recognition-retail-0003-int8.xml
         sha256: 81a2697a0d4c718d00a78bcf2ec9a35470cc6a48f44b66dd7a2d8968e869048b
@@ -1163,7 +1169,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-detection-adas-0001"
-    description: "Face Detection (MobileNet with reduced channels + SSD with weights sharing)"
+    description: |-
+      Face detector for driver monitoring and similar scenarios. The network features
+      a default MobileNet backbone that includes depth-wise convolutions to reduce the
+      amount of computation for the 3x3 convolution block.
     files:
       - name: face-detection-adas-0001.xml
         sha256: 4c46152ca5b2dbaec38a96ab610336f5ed84d750bafbc605cb0aa44a707830f1
@@ -1176,7 +1185,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-detection-adas-0001-fp16"
-    description: "Face Detection (MobileNet with reduced channels + SSD with weights sharing)"
+    description: |-
+      Face detector for driver monitoring and similar scenarios. The network features
+      a default MobileNet backbone that includes depth-wise convolutions to reduce the
+      amount of computation for the 3x3 convolution block.
     files:
       - name: face-detection-adas-0001-fp16.xml
         sha256: b2d7ebc94c56f75ebfabeab7142464bf56c6c809aa1942d58925fcba6b80c314
@@ -1189,7 +1201,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-detection-adas-0001-int8"
-    description: "Face Detection (MobileNet with reduced channels + SSD with weights sharing)"
+    description: |-
+      Face detector for driver monitoring and similar scenarios. The network features
+      a default MobileNet backbone that includes depth-wise convolutions to reduce the
+      amount of computation for the 3x3 convolution block.
     files:
       - name: face-detection-adas-0001-int8.xml
         sha256: 86f664283b69479d1dd48ad7fcb5fb4e255b505cbb13e0df4b512d0718d56d1c
@@ -1202,7 +1217,11 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-detection-retail-0004"
-    description: "Face Detection (SqNet1.0modif+single scale) without BatchNormalization trained with negatives."
+    description: |-
+      Face detector based on SqueezeNet light (half-channels) as a backbone with a
+      single SSD for indoor/outdoor scenes shot by a front-facing camera. The backbone
+      consists of fire modules to reduce the number of computations. The single SSD
+      head from 1/16 scale feature map has nine clustered prior boxes.
     files:
       - name: face-detection-retail-0004.xml
         sha256: f3e74c6e0e0d119623907d3ef95ceca6d06a50f8d98d2a8f5f5b5c1b5177c372
@@ -1215,7 +1234,11 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-detection-retail-0004-fp16"
-    description: "Face Detection (SqNet1.0modif+single scale) without BatchNormalization trained with negatives."
+    description: |-
+      Face detector based on SqueezeNet light (half-channels) as a backbone with a
+      single SSD for indoor/outdoor scenes shot by a front-facing camera. The backbone
+      consists of fire modules to reduce the number of computations. The single SSD
+      head from 1/16 scale feature map has nine clustered prior boxes.
     files:
       - name: face-detection-retail-0004-fp16.xml
         sha256: 2e93db782f42c63740e43d5f0a4327e85d6e811d1123abf41eeb4ee41d602f24
@@ -1228,7 +1251,11 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-detection-retail-0004-int8"
-    description: "Face Detection (SqNet1.0modif+single scale) without BatchNormalization trained with negatives."
+    description: |-
+      Face detector based on SqueezeNet light (half-channels) as a backbone with a
+      single SSD for indoor/outdoor scenes shot by a front-facing camera. The backbone
+      consists of fire modules to reduce the number of computations. The single SSD
+      head from 1/16 scale feature map has nine clustered prior boxes.
     files:
       - name: face-detection-retail-0004-int8.xml
         sha256: ba1a7c1c72156ecfef2eff7594ee22515cd88393242f78f72fb07fbcc0a0fee7
@@ -1241,7 +1268,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-person-detection-retail-0002"
-    description: "Simultaneous detection of Pedestrians and Faces (RMNet with lrelu + SSSSD)."
+    description: "This is a pedestrian detector based on backbone with hyper-feature + R-FCN for the Retail scenario."
     files:
       - name: face-person-detection-retail-0002.xml
         sha256: c0ef457a3ef9fb13011cae262e6351a5b9e033792a06b22c4b1f0c74a9f95584
@@ -1254,7 +1281,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-person-detection-retail-0002-fp16"
-    description: "Simultaneous detection of Pedestrians and Faces (RMNet with lrelu + SSSSD)."
+    description: "This is a pedestrian detector based on backbone with hyper-feature + R-FCN for the Retail scenario."
     files:
       - name: face-person-detection-retail-0002-fp16.xml
         sha256: 6568876cf2852eeb9ace251e4728b23dfc6c1428e6b77c9c3076dad2c1cbe99e
@@ -1267,7 +1294,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-reidentification-retail-0095"
-    description: "Single embedding-based face verification model"
+    description: "This is a lightweight network for the face re-identification scenario. It is based on MobileNet V2 backbone, which consists of 3x3 inverted residual blocks with squeeze-excitation attention modules. Instead of the ReLU6 activations used in the original MobileNet V2, this network uses PReLU ones. After the backbone, the network applies global depthwise pooling and then uses 1x1 convolution to create the final embedding vector. The model produces feature vectors which should be close in cosine distance for similar faces and far for different faces."
     files:
       - name: face-reidentification-retail-0095.xml
         sha256: 6c28a0155e022b04756c31f3992a64237085def07a213563fad1cbede543eb8a
@@ -1280,7 +1307,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-reidentification-retail-0095-fp16"
-    description: "Single embedding-based face verification model"
+    description: "This is a lightweight network for the face re-identification scenario. It is based on MobileNet V2 backbone, which consists of 3x3 inverted residual blocks with squeeze-excitation attention modules. Instead of the ReLU6 activations used in the original MobileNet V2, this network uses PReLU ones. After the backbone, the network applies global depthwise pooling and then uses 1x1 convolution to create the final embedding vector. The model produces feature vectors which should be close in cosine distance for similar faces and far for different faces."
     files:
       - name: face-reidentification-retail-0095-fp16.xml
         sha256: b0d6a49d3d1d623003e78e58aba2b2884237ed0d9d591c0255bb5d5d75c91548
@@ -1293,7 +1320,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "facial-landmarks-35-adas-0002"
-    description: "Custom-architecture convolutional neural network for 35 facial landmarks estimation."
+    description: "This is a custom-architecture convolutional neural network for 35 facial landmarks estimation."
     files:
       - name: facial-landmarks-35-adas-0002.xml
         sha256: d3f7f1e0b84708247424630c7523426a81a9884070e084f2b9cf8f11c07cb4f0
@@ -1306,7 +1333,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "facial-landmarks-35-adas-0002-fp16"
-    description: "Custom-architecture convolutional neural network for 35 facial landmarks estimation."
+    description: "This is a custom-architecture convolutional neural network for 35 facial landmarks estimation."
     files:
       - name: facial-landmarks-35-adas-0002-fp16.xml
         sha256: d9e3e98918d15320aac8f5550f4e9f2a6f33ee5bccd6398f042b59084b71abac
@@ -1319,7 +1346,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "head-pose-estimation-adas-0001"
-    description: "Vanilla CNN trained from scratch yaw + pitch + roll + landmarks"
+    description: |-
+      Head pose estimation network based on simple, handmade CNN architecture. Angle regression
+      layers are convolutions + ReLU + batch norm + fully connected with
+      one output.
     files:
       - name: head-pose-estimation-adas-0001.xml
         sha256: 5cc24273db0aedbf44ee5671135228cea7187fb5bec81be216af74aac3d5e8d9
@@ -1332,7 +1362,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "head-pose-estimation-adas-0001-fp16"
-    description: "Vanilla CNN trained from scratch yaw + pitch + roll + landmarks"
+    description: |-
+      Head pose estimation network based on simple, handmade CNN architecture. Angle regression
+      layers are convolutions + ReLU + batch norm + fully connected with
+      one output.
     files:
       - name: head-pose-estimation-adas-0001-fp16.xml
         sha256: d570c7b43a20428ac41915c6b915860d6a141d0057b0091c22fe014b79ee5ea7
@@ -1345,7 +1378,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "head-pose-estimation-adas-0001-int8"
-    description: "Vanilla CNN trained from scratch yaw + pitch + roll + landmarks"
+    description: |-
+      Head pose estimation network based on simple, handmade CNN architecture. Angle regression
+      layers are convolutions + ReLU + batch norm + fully connected with
+      one output.
     files:
       - name: head-pose-estimation-adas-0001-int8.xml
         sha256: 3d820d5aede971aef3b760328bfe1edd96d395b272622cea816c573003ae2b89
@@ -1358,7 +1394,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "human-pose-estimation-0001"
-    description: "2D human pose estimation with tuned mobilenet backbone (based on OpenPose)."
+    description: "This is a multi-person 2D pose estimation network (based on the OpenPose approach) with tuned MobileNet v1 as a feature extractor. It finds a human pose: body skeleton, which consists of keypoints and connections between them, for every person inside image. The pose may contain up to 18 keypoints: ears, eyes, nose, neck, shoulders, elbows, wrists, hips, knees and ankles."
     files:
       - name: human-pose-estimation-0001.xml
         sha256: 93cb893d1ffc0bb7bb6825bd0cc64f626057da1e16e22ed3835d753f2526e068
@@ -1371,7 +1407,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "human-pose-estimation-0001-fp16"
-    description: "2D human pose estimation with tuned mobilenet backbone (based on OpenPose)."
+    description: "This is a multi-person 2D pose estimation network (based on the OpenPose approach) with tuned MobileNet v1 as a feature extractor. It finds a human pose: body skeleton, which consists of keypoints and connections between them, for every person inside image. The pose may contain up to 18 keypoints: ears, eyes, nose, neck, shoulders, elbows, wrists, hips, knees and ankles."
     files:
       - name: human-pose-estimation-0001-fp16.xml
         sha256: 5dbd78dec8ea4a9283bb78640a3ba2c3878535286471ed7b80bce30070684046
@@ -1384,7 +1420,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "human-pose-estimation-0001-int8"
-    description: "2D human pose estimation with tuned mobilenet backbone (based on OpenPose)."
+    description: "This is a multi-person 2D pose estimation network (based on the OpenPose approach) with tuned MobileNet v1 as a feature extractor. It finds a human pose: body skeleton, which consists of keypoints and connections between them, for every person inside image. The pose may contain up to 18 keypoints: ears, eyes, nose, neck, shoulders, elbows, wrists, hips, knees and ankles."
     files:
       - name: human-pose-estimation-0001-int8.xml
         sha256: a77eb5ad3423d41b5f26acf01c8549db892cbb32f903342d6c1dc7640e1902c4
@@ -1397,7 +1433,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "landmarks-regression-retail-0009"
-    description: "Landmark's detection."
+    description: "This is a lightweight landmarks regressor for the Smart Classroom scenario. It has a classic convolutional design: stacked 3x3 convolutions, batch normalizations, PReLU activations, and poolings. Final regression is done by the global depthwise pooling head and FullyConnected layers. The model predicts five facial landmarks: two eyes, nose, and two lip corners."
     files:
       - name: landmarks-regression-retail-0009.xml
         sha256: db495316e343dc5cdb3edaf6ca5853c4a478c96772eb6da042ccdddeeefd0936
@@ -1410,7 +1446,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "landmarks-regression-retail-0009-fp16"
-    description: "Landmark's detection."
+    description: "This is a lightweight landmarks regressor for the Smart Classroom scenario. It has a classic convolutional design: stacked 3x3 convolutions, batch normalizations, PReLU activations, and poolings. Final regression is done by the global depthwise pooling head and FullyConnected layers. The model predicts five facial landmarks: two eyes, nose, and two lip corners."
     files:
       - name: landmarks-regression-retail-0009-fp16.xml
         sha256: bcf274a704031d24af7fdd7f868f052e346cf96029b6b6e85cdc168beddbe401
@@ -1423,7 +1459,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "license-plate-recognition-barrier-0001"
-    description: "Chinese license plate recognition"
+    description: |-
+      This model uses a small-footprint network trained end-to-end to recognize
+      Chinese license plates in traffic.
     files:
       - name: license-plate-recognition-barrier-0001.xml
         sha256: 19fc9d960f1d18aa0f45c6a3018f5bb3422d2a7ff0db870aaa46a1bc1f13b74a
@@ -1436,7 +1474,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "license-plate-recognition-barrier-0001-fp16"
-    description: "Chinese license plate recognition"
+    description: |-
+      This model uses a small-footprint network trained end-to-end to recognize
+      Chinese license plates in traffic.
     files:
       - name: license-plate-recognition-barrier-0001-fp16.xml
         sha256: e7607025021490c84950f211ef6480547b7a30d0ffd3b72c43ebe0c04de315c8
@@ -1449,7 +1489,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "pedestrian-and-vehicle-detector-adas-0001"
-    description: "Pedestrian and Vehicle detector based on ssd + mobilenet with reduced channels number."
+    description: "Pedestrian and vehicle detection network based on MobileNet v1.0 + SSD."
     files:
       - name: pedestrian-and-vehicle-detector-adas-0001.xml
         sha256: 6455b1836781e62ccc5d699eeb4e1eb4adf598d7c4e6e1638d066ae08dda7007
@@ -1462,7 +1502,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "pedestrian-and-vehicle-detector-adas-0001-fp16"
-    description: "Pedestrian and Vehicle detector based on ssd + mobilenet with reduced channels number."
+    description: "Pedestrian and vehicle detection network based on MobileNet v1.0 + SSD."
     files:
       - name: pedestrian-and-vehicle-detector-adas-0001-fp16.xml
         sha256: a9a6cf98fe6dbc033db0b8a7d57bcbe215d69447b28c32cb02dd9a9665e9b356
@@ -1475,7 +1515,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "pedestrian-and-vehicle-detector-adas-0001-int8"
-    description: "Pedestrian and Vehicle detector based on ssd + mobilenet with reduced channels number."
+    description: "Pedestrian and vehicle detection network based on MobileNet v1.0 + SSD."
     files:
       - name: pedestrian-and-vehicle-detector-adas-0001-int8.xml
         sha256: 166849d75fc273fc3459d67258683153119ebabb95ce7556d5f883b395a73fbc
@@ -1488,7 +1528,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "pedestrian-detection-adas-0002"
-    description: "Pedestrian detector based on ssd + mobilenet with reduced channels number."
+    description: "Pedestrian detection network based on SSD framework with tuned MobileNet v1 as a feature extractor."
     files:
       - name: pedestrian-detection-adas-0002.xml
         sha256: 255b8d15b0f424bda0ad206c0908e6fa46394f9d8f61018f175676af806e8854
@@ -1501,7 +1541,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "pedestrian-detection-adas-0002-fp16"
-    description: "Pedestrian detector based on ssd + mobilenet with reduced channels number."
+    description: "Pedestrian detection network based on SSD framework with tuned MobileNet v1 as a feature extractor."
     files:
       - name: pedestrian-detection-adas-0002-fp16.xml
         sha256: be00995bfbd482115bcf4bb4ddc69322f1d92bff6eef064d8575f49f1e9248d2
@@ -1514,7 +1554,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "pedestrian-detection-adas-0002-int8"
-    description: "Pedestrian detector based on ssd + mobilenet with reduced channels number."
+    description: "Pedestrian detection network based on SSD framework with tuned MobileNet v1 as a feature extractor."
     files:
       - name: pedestrian-detection-adas-0002-int8.xml
         sha256: e4251d56e11da101e05a7fe273b27971cdc82abc351773bc0b42f58cbdbf0dc2
@@ -1527,7 +1567,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-attributes-recognition-crossroad-0230"
-    description: "Pedestrian attributes recognition based on a PVANet with hyperfeatures backbone + classification head"
+    description: "This model presents a person attributes classification algorithm analysis scenario. It produces probability of person attributions existing on the sample and a position of two point on sample, whiches can be used for color prob (like, color picker in graphical editors)"
     files:
       - name: person-attributes-recognition-crossroad-0230.xml
         sha256: 2c5aaf5ded5ad7108b36333c0885e63a6b5200d59fdecc311502f2befc8a7c07
@@ -1540,7 +1580,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-attributes-recognition-crossroad-0230-fp16"
-    description: "Pedestrian attributes recognition based on a PVANet with hyperfeatures backbone + classification head"
+    description: "This model presents a person attributes classification algorithm analysis scenario. It produces probability of person attributions existing on the sample and a position of two point on sample, whiches can be used for color prob (like, color picker in graphical editors)"
     files:
       - name: person-attributes-recognition-crossroad-0230-fp16.xml
         sha256: 0ee68005a9703b32628b2b1d68c4abee815ab4667fcd2478e9517fbac9ca225b
@@ -1553,7 +1593,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-action-recognition-0005"
-    description: "Action detection (SSD-based) model."
+    description: "This is an action detector for the Smart Classroom scenario. It is based on the RMNet backbone that includes depth-wise convolutions to reduce the amount of computations for the 3x3 convolution block. The first SSD head from 1/16 scale feature map has four clustered prior boxes and outputs detected persons (two class detector). The second SSD-based head predicts actions of the detected persons. Possible actions: sitting, standing, raising hand."
     files:
       - name: person-detection-action-recognition-0005.xml
         sha256: d39d16f5f8de90e6f4a2eae51e3ecc44ebd1a78bf4f0bd113d39592166c14f7c
@@ -1566,7 +1606,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-action-recognition-0005-fp16"
-    description: "Action detection (SSD-based) model."
+    description: "This is an action detector for the Smart Classroom scenario. It is based on the RMNet backbone that includes depth-wise convolutions to reduce the amount of computations for the 3x3 convolution block. The first SSD head from 1/16 scale feature map has four clustered prior boxes and outputs detected persons (two class detector). The second SSD-based head predicts actions of the detected persons. Possible actions: sitting, standing, raising hand."
     files:
       - name: person-detection-action-recognition-0005-fp16.xml
         sha256: b33df7fdc11a71eb05c63eb23cdb0fa3935bbfca85e8ac867e1610778e03396e
@@ -1579,7 +1619,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-retail-0002"
-    description: "Person detection (HyperNet+RFCN+DetectionOutput)."
+    description: "This is a pedestrian detector based on backbone with hyper-feature + R-FCN for the Retail scenario."
     files:
       - name: person-detection-retail-0002.xml
         sha256: bfacb328e853120e5fc8c42b7d123e3da64170eaf8ce72ddc067af1a6d74ddc7
@@ -1592,7 +1632,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-retail-0002-fp16"
-    description: "Person detection (HyperNet+RFCN+DetectionOutput)."
+    description: "This is a pedestrian detector based on backbone with hyper-feature + R-FCN for the Retail scenario."
     files:
       - name: person-detection-retail-0002-fp16.xml
         sha256: a209128472a8ce16e37305a13e54587754219ab472247830f813f835b4f5d68a
@@ -1605,7 +1645,11 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-retail-0013"
-    description: "Pedestrian detection (RMNet with lrelu + SSD)"
+    description: |-
+      This is a pedestrian detector for the Retail scenario. It is based on MobileNetV2-like
+      backbone that includes depth-wise convolutions to reduce the amount of
+      computation for the 3x3 convolution block. The single SSD head from 1/16 scale
+      feature map has 12 clustered prior boxes.
     files:
       - name: person-detection-retail-0013.xml
         sha256: 0f6fc8657b45ba7216cada7546ba8bdd489e357578ee017386dad555b34e1ed6
@@ -1618,7 +1662,11 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-retail-0013-fp16"
-    description: "Pedestrian detection (RMNet with lrelu + SSD)"
+    description: |-
+      This is a pedestrian detector for the Retail scenario. It is based on MobileNetV2-like
+      backbone that includes depth-wise convolutions to reduce the amount of
+      computation for the 3x3 convolution block. The single SSD head from 1/16 scale
+      feature map has 12 clustered prior boxes.
     files:
       - name: person-detection-retail-0013-fp16.xml
         sha256: f0a9f7d819dd79a4e03ee77d530ad822035817121abeff547dcacc736f0ce206
@@ -1631,7 +1679,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-reidentification-retail-0031"
-    description: "Single embedding-based person reidentification model (fastest person ReID model)"
+    description: "This is a person reidentification model for a general scenario. It uses a whole body image as an input and outputs an embedding vector to match a pair of images by the Cosine distance. The model is based on RMNet backbone that was developed for fast inference. A single reidentification head from the 1/16 scale feature map outputs the embedding vector of 256 floats."
     files:
       - name: person-reidentification-retail-0031.xml
         sha256: cd8cd51352b6f5f5d734733c357d7505dc36d7db6e79e61d97a3ad80083aba4a
@@ -1644,7 +1692,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-reidentification-retail-0031-fp16"
-    description: "Single embedding-based person reidentification model (fastest person ReID model)"
+    description: "This is a person reidentification model for a general scenario. It uses a whole body image as an input and outputs an embedding vector to match a pair of images by the Cosine distance. The model is based on RMNet backbone that was developed for fast inference. A single reidentification head from the 1/16 scale feature map outputs the embedding vector of 256 floats."
     files:
       - name: person-reidentification-retail-0031-fp16.xml
         sha256: c52a06b1c9332e5c1a87ad5eec35b46ed781f09faefa80bcbd090673273b814a
@@ -1657,7 +1705,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-reidentification-retail-0076"
-    description: "Single embedding-based person reidentification model (most accurate person ReID model)"
+    description: "This is a person reidentification model for a general scenario. It uses a whole body image as an input and outputs an embedding vector to match a pair of images by the Cosine distance. The model is based on RMNet backbone that was developed for fast inference. A single reidentification head from the 1/16 scale feature map outputs the embedding vector of 256 floats. The model is provided without last calibration layer, but can be used in the same way as the original model (with insignificant drop in accuracy)."
     files:
       - name: person-reidentification-retail-0076.xml
         sha256: d8ae8edd22583d518cd7322aee3dd4743e1dbdb7ab2ff4d8af2f782d2e9dfc6c
@@ -1670,7 +1718,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-reidentification-retail-0076-fp16"
-    description: "Single embedding-based person reidentification model (most accurate person ReID model)"
+    description: "This is a person reidentification model for a general scenario. It uses a whole body image as an input and outputs an embedding vector to match a pair of images by the Cosine distance. The model is based on RMNet backbone that was developed for fast inference. A single reidentification head from the 1/16 scale feature map outputs the embedding vector of 256 floats. The model is provided without last calibration layer, but can be used in the same way as the original model (with insignificant drop in accuracy)."
     files:
       - name: person-reidentification-retail-0076-fp16.xml
         sha256: 4ce21984663dfbfece074e951883f9d6cebd320465d913fd0799b693a5dd4521
@@ -1683,7 +1731,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-reidentification-retail-0079"
-    description: "Single embedding-based person reidentification model (the model is trade-off between performance and accuracy)"
+    description: "This is a person reidentification model for a general scenario. It uses a whole body image as an input and outputs an embedding vector to match a pair of images by the Cosine distance. The model is based on RMNet backbone that was developed for fast inference. A single reidentification head from the 1/16 scale feature map outputs the embedding vector of 256 floats. The model is provided without last calibration layer, but can be used in the same way as the original model (with insignificant drop in accuracy)."
     files:
       - name: person-reidentification-retail-0079.xml
         sha256: 82271346ae9487df85583eae591aeb588f1ca0ac48f7b8caf8b001b760aa8d05
@@ -1696,7 +1744,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-reidentification-retail-0079-fp16"
-    description: "Single embedding-based person reidentification model (the model is trade-off between performance and accuracy)"
+    description: "This is a person reidentification model for a general scenario. It uses a whole body image as an input and outputs an embedding vector to match a pair of images by the Cosine distance. The model is based on RMNet backbone that was developed for fast inference. A single reidentification head from the 1/16 scale feature map outputs the embedding vector of 256 floats. The model is provided without last calibration layer, but can be used in the same way as the original model (with insignificant drop in accuracy)."
     files:
       - name: person-reidentification-retail-0079-fp16.xml
         sha256: b8f53174f7f7a02a01540042f4778a414ae1218e48bf5881d128b01f8dae88bd
@@ -1709,7 +1757,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-vehicle-bike-detection-crossroad-0078"
-    description: "Multiclass (person, vehicle, non-vehicle) detector based on SSD detection architecture, RMNet backbone and learnable image downscale block"
+    description: |-
+      Person/Vehicle/Bike detector is based on SSD detection architecture, RMNet backbone, and learnable image downscale block (like person-vehicle-bike-detection-crossroad-0066, but with extra pooling).
+      The model is intended for security surveillance applications and works in a variety of scenes and weather/lighting
+      conditions.
     files:
       - name: person-vehicle-bike-detection-crossroad-0078.xml
         sha256: f2e59c8b24fae359f577caaa58cf4485c5620aedf6b46aba9d83de8d1e4c78d2
@@ -1722,7 +1773,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-vehicle-bike-detection-crossroad-0078-fp16"
-    description: "Multiclass (person, vehicle, non-vehicle) detector based on SSD detection architecture, RMNet backbone and learnable image downscale block"
+    description: |-
+      Person/Vehicle/Bike detector is based on SSD detection architecture, RMNet backbone, and learnable image downscale block (like person-vehicle-bike-detection-crossroad-0066, but with extra pooling).
+      The model is intended for security surveillance applications and works in a variety of scenes and weather/lighting
+      conditions.
     files:
       - name: person-vehicle-bike-detection-crossroad-0078-fp16.xml
         sha256: 6dee99dc7fd212f5fa3b7eaac2eff1567f546435c640a849d016654be4e295b7
@@ -1735,7 +1789,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "road-segmentation-adas-0001"
-    description: "Multiclass (BG, road, curbs, marks) segmentation based on ENET, using depthwise convolutions and without ELU operations and without concatenation"
+    description: "This is a segmentation network to classify each pixel into four classes: BG, road, curb, mark."
     files:
       - name: road-segmentation-adas-0001.xml
         sha256: cf3eea4fe64e6dfff7b758beaaf86e72ea7ff8c3c271d9da7879a7de8746499b
@@ -1748,7 +1802,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "road-segmentation-adas-0001-fp16"
-    description: "Multiclass (BG, road, curbs, marks) segmentation based on ENET, using depthwise convolutions and without ELU operations and without concatenation"
+    description: "This is a segmentation network to classify each pixel into four classes: BG, road, curb, mark."
     files:
       - name: road-segmentation-adas-0001-fp16.xml
         sha256: ad294f6070976ff45130e93dc382058f4b17d487cdd302e89780f7c3b30280dc
@@ -1761,7 +1815,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "road-segmentation-adas-0001-int8"
-    description: "Multiclass (BG, road, curbs, marks) segmentation based on ENET, using depthwise convolutions and without ELU operations and without concatenation"
+    description: "This is a segmentation network to classify each pixel into four classes: BG, road, curb, mark."
     files:
       - name: road-segmentation-adas-0001-int8.xml
         sha256: 891a58c1b62d343ebb05038010c527ab05b0122bc03c4e7be39be19b30048ae0
@@ -1774,7 +1828,28 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "semantic-segmentation-adas-0001"
-    description: "Multiclass (road, sidewalk, building, wall, fence, pole, traffic light, traffic sign, vegetation, terrain, sky, person, rider, car, truck, bus, train, motorcycle, bicycle, ego-vehicle) segmentation based on ICNet"
+    description: |-
+      This is a segmentation network to classify each pixel into 20 classes:
+      - road
+      - sidewalk
+      - building
+      - wall
+      - fence
+      - pole
+      - traffic light
+      - traffic sign
+      - vegetation
+      - terrain
+      - sky
+      - person
+      - rider
+      - car
+      - truck
+      - bus
+      - train
+      - motorcycle
+      - bicycle
+      - ego-vehicle
     files:
       - name: semantic-segmentation-adas-0001.xml
         sha256: 4e86d8cab9778dcb85eac3856cfa7b13516ccdc922a47e00a764e159972cca92
@@ -1787,7 +1862,28 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "semantic-segmentation-adas-0001-fp16"
-    description: "Multiclass (road, sidewalk, building, wall, fence, pole, traffic light, traffic sign, vegetation, terrain, sky, person, rider, car, truck, bus, train, motorcycle, bicycle, ego-vehicle) segmentation based on ICNet"
+    description: |-
+      This is a segmentation network to classify each pixel into 20 classes:
+      - road
+      - sidewalk
+      - building
+      - wall
+      - fence
+      - pole
+      - traffic light
+      - traffic sign
+      - vegetation
+      - terrain
+      - sky
+      - person
+      - rider
+      - car
+      - truck
+      - bus
+      - train
+      - motorcycle
+      - bicycle
+      - ego-vehicle
     files:
       - name: semantic-segmentation-adas-0001-fp16.xml
         sha256: 10696961209fbdf6106196b4aa8574aa2311031eae568a5e0f1583ab9c6f1d1d
@@ -1800,7 +1896,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "single-image-super-resolution-1033"
-    description: "Super resolution model based on SRResNet architecture (see https://arxiv.org/pdf/1609.04802.pdf)"
+    description: |-
+      [An Attention-Based Approach for Single Image Super Resolution](https://arxiv.org/pdf/1807.06779.pdf) but with reduced number of
+      channels and changes in network achitecture. It enhances the resolution of the input image by a factor of 3.
     files:
       - name: single-image-super-resolution-1033.xml
         sha256: 7314cb08b98e6287cb7ed25fa06d969bd7aa4dd605e940953b912e3bf1eeeae2
@@ -1813,7 +1911,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "single-image-super-resolution-1033-fp16"
-    description: "Super resolution model based on SRResNet architecture (see https://arxiv.org/pdf/1609.04802.pdf)"
+    description: |-
+      [An Attention-Based Approach for Single Image Super Resolution](https://arxiv.org/pdf/1807.06779.pdf) but with reduced number of
+      channels and changes in network achitecture. It enhances the resolution of the input image by a factor of 3.
     files:
       - name: single-image-super-resolution-1033-fp16.xml
         sha256: 09548920b37974d6bcbd5ed6d03825da363062dddba86fcc72ab2a56e4bbc0f5
@@ -1826,7 +1926,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "text-detection-0002"
-    description: "Detects oriented text."
+    description: "Text detector based on [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) architecture with [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf) as a backbone for indoor/outdoor scenes."
     files:
       - name: text-detection-0002.xml
         sha256: 0c9bbaa480bbbf6be0bea431494b9478dd61c84c31b3a454784a012b7031a872
@@ -1839,7 +1939,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "text-detection-0002-fp16"
-    description: "Detects oriented text."
+    description: "Text detector based on [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) architecture with [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf) as a backbone for indoor/outdoor scenes."
     files:
       - name: text-detection-0002-fp16.xml
         sha256: 6193001bbef96a6f40fd3f0cc1726669baff9f1a5a6bcaa9d0eb9cda5f9513b4
@@ -1852,7 +1952,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-attributes-recognition-barrier-0039"
-    description: "Vehicle attributes recognition with modified ResNet10 backbone"
+    description: "This model presents a vehicle attributes classification algorithm for a traffic analysis scenario."
     files:
       - name: vehicle-attributes-recognition-barrier-0039.xml
         sha256: 7dc03429bbba0f588d37dfcbe1fe82c149cf624f3e19967c9f88c087f76f8f4c
@@ -1865,7 +1965,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-attributes-recognition-barrier-0039-fp16"
-    description: "Vehicle attributes recognition with modified ResNet10 backbone"
+    description: "This model presents a vehicle attributes classification algorithm for a traffic analysis scenario."
     files:
       - name: vehicle-attributes-recognition-barrier-0039-fp16.xml
         sha256: 4987bda5dfc22429f9bc41f48ae9f8ac075224152551e8d90694657494707955
@@ -1878,7 +1978,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-attributes-recognition-barrier-0039-int8"
-    description: "Vehicle attributes recognition with modified ResNet10 backbone"
+    description: "This model presents a vehicle attributes classification algorithm for a traffic analysis scenario."
     files:
       - name: vehicle-attributes-recognition-barrier-0039-int8.xml
         sha256: 6b78a13e44ad3c7e6247061aec582e311d1d0b336a288bef1aceaa3d5147f0b1
@@ -1891,7 +1991,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-detection-adas-0002"
-    description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head."
+    description: "This is a vehicle detection network based on an SSD framework with tuned MobileNet v1 as a feature extractor."
     files:
       - name: vehicle-detection-adas-0002.xml
         sha256: 79245ea24591f452b60498b9b5930870a4b00caca9f8a0b5e83c0a6d57b507dc
@@ -1904,7 +2004,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-detection-adas-0002-fp16"
-    description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head."
+    description: "This is a vehicle detection network based on an SSD framework with tuned MobileNet v1 as a feature extractor."
     files:
       - name: vehicle-detection-adas-0002-fp16.xml
         sha256: d31ba2739f3aa953a17b1f645b77045e6116e3f890bd044414125c2965f8b654
@@ -1917,7 +2017,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-detection-adas-0002-int8"
-    description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head."
+    description: "This is a vehicle detection network based on an SSD framework with tuned MobileNet v1 as a feature extractor."
     files:
       - name: vehicle-detection-adas-0002-int8.xml
         sha256: 40f9090d64ec72236e6b95a6f00220e8e5779e05fc4079febb22ad72b9bcd44f
@@ -1930,7 +2030,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-license-plate-detection-barrier-0106"
-    description: "Multiclass (vehicle, license plates) detector based on MobileNetV2+SSD"
+    description: |-
+      This is a MobileNetV2 + SSD-based vehicle and (Chinese) license plate detector for
+      the "Barrier" use case.
     files:
       - name: vehicle-license-plate-detection-barrier-0106.xml
         sha256: 0d5fd522c226547b7aaae690d78f786ca5ff7a9ae0433f9a19d7d7cd225381a3
@@ -1943,7 +2045,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-license-plate-detection-barrier-0106-fp16"
-    description: "Multiclass (vehicle, license plates) detector based on MobileNetV2+SSD"
+    description: |-
+      This is a MobileNetV2 + SSD-based vehicle and (Chinese) license plate detector for
+      the "Barrier" use case.
     files:
       - name: vehicle-license-plate-detection-barrier-0106-fp16.xml
         sha256: 9ad78ae598376addd0e1fe859790cd07a96f76f1ac198a55aeb80243df8645aa
@@ -1956,7 +2060,11 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "face-detection-adas-binary-0001"
-    description: "Face Detection (MobileNet with reduced channels and binary convolution + SSD with weights sharing)"
+    description: |-
+      Face detector for driver monitoring and similar scenarios. The network features
+      a pruned MobileNet backbone that includes depth-wise convolutions to reduce the
+      amount of computation for the 3x3 convolution block. Also some 1x1 convolutions
+      are binary that can be implemented using effective binary XNOR+POPCOUNT approach
     files:
       - name: face-detection-adas-binary-0001.xml
         sha256: fde8c465a5e3f3425fb567d31b9591ff8be589930c8488639f8feddf7f0301f2
@@ -1969,7 +2077,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "single-image-super-resolution-1032"
-    description: "Super resolution model"
+    description: |-
+      [An Attention-Based Approach for Single Image Super Resolution](https://arxiv.org/pdf/1807.06779.pdf) but with reduced number of
+      channels and changes in network achitecture. It enhances the resolution of the input image by a factor of 4.
     files:
       - name: single-image-super-resolution-1032.xml
         sha256: cee9c808e3cf9f9c640a01cd445c4bdb518de9202d90fb2d78281456ebecb7a4
@@ -1982,7 +2092,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "single-image-super-resolution-1032-fp16"
-    description: "Super resolution model"
+    description: |-
+      [An Attention-Based Approach for Single Image Super Resolution](https://arxiv.org/pdf/1807.06779.pdf) but with reduced number of
+      channels and changes in network achitecture. It enhances the resolution of the input image by a factor of 4.
     files:
       - name: single-image-super-resolution-1032-fp16.xml
         sha256: a6e670402d9f2b34ca4721bb89196a5e018daaee0e47de61ac5aedbadaa49529
@@ -1995,7 +2107,12 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "action-recognition-0001-encoder"
-    description: "General-purpose action recognition model for Kinetics-400 dataset based on Video Transformer Network approach. Encoder part"
+    description: |-
+      This is an general-purpose action recognition model for Kinetics-400 dataset. The model uses Video Transformer approach with ResNet34 encoder.
+      Please refer to the [kinetics](https://deepmind.com/research/open-source/open-source-datasets/kinetics/) dataset specification to see list of action that are recognised by this model.
+      This model is only encoder part of the whole pipeline. It accepts video frame and produces embedding.
+      Use action-recognition-0001-decoder to produce prediction from embeddings of 16 frames.
+      Video frames should be sampled to cover ~1 second fragment (i.e. skip every second frame in 30 fps video).
     files:
       - name: action-recognition-0001-encoder.xml
         sha256: 88338f18f82dfb2d9843735a9d7352e2fe04ce1053280044aa7993be1770f167
@@ -2008,7 +2125,12 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "action-recognition-0001-encoder-fp16"
-    description: "General-purpose action recognition model for Kinetics-400 dataset based on Video Transformer Network approach. Encoder part"
+    description: |-
+      This is an general-purpose action recognition model for Kinetics-400 dataset. The model uses Video Transformer approach with ResNet34 encoder.
+      Please refer to the [kinetics](https://deepmind.com/research/open-source/open-source-datasets/kinetics/) dataset specification to see list of action that are recognised by this model.
+      This model is only encoder part of the whole pipeline. It accepts video frame and produces embedding.
+      Use action-recognition-0001-decoder to produce prediction from embeddings of 16 frames.
+      Video frames should be sampled to cover ~1 second fragment (i.e. skip every second frame in 30 fps video).
     files:
       - name: action-recognition-0001-encoder-fp16.xml
         sha256: 852ae9a90dce025e0a0d95af94de54c58686bf3032d74c8fd5e32337fe4055fb
@@ -2021,7 +2143,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "instance-segmentation-security-0049"
-    description: "General purpose instance segmentation model. Mask-RCNN with ResNet50 backbone, FPN block and light segmentation head."
+    description: |-
+      This model is an instance segmentation network for 80 classes of objects.
+      It is a Mask-RCNN-like model with ResNet50 backbone, Feature Pyramid Networks
+      block for feature maps refinement and relatively light segmentation head.
     files:
       - name: instance-segmentation-security-0049.xml
         sha256: b059a10f5aec72aada8f322fe02787fca26fab94580814496978854e37d16b06
@@ -2034,7 +2159,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "instance-segmentation-security-0049-fp16"
-    description: "General purpose instance segmentation model. Mask-RCNN with ResNet50 backbone, FPN block and light segmentation head."
+    description: |-
+      This model is an instance segmentation network for 80 classes of objects.
+      It is a Mask-RCNN-like model with ResNet50 backbone, Feature Pyramid Networks
+      block for feature maps refinement and relatively light segmentation head.
     files:
       - name: instance-segmentation-security-0049-fp16.xml
         sha256: 0723349aec16f7382b0e1778a2765ce87db236ab0de6220cd31775c3f1c05462
@@ -2047,7 +2175,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "vehicle-detection-adas-binary-0001"
-    description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head and binary layers."
+    description: |-
+      This is a vehicle detection network based on an SSD framework with tuned MobileNet v1 as a feature extractor and using binary layer for speedup.
+      This detecector was created by binarization the vehicle-detection-adas-0002
     files:
       - name: vehicle-detection-adas-binary-0001.xml
         sha256: c98bf5984895b1309861597ec36181446877407cd985bb490e14461f41312670
@@ -2060,7 +2190,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "driver-action-recognition-adas-0002-decoder"
-    description: "Video Transformer Network for driver action recognition. Decoder part"
+    description: |-
+      This is an action recognition model for the driver monitoring use case. The model uses Video Transformer approach with MobileNetv2 encoder. It is able to recognize the following actions: drinking, doing hair or making up, operating the radio, reaching behind, safe driving, talking on the phone, texting.
+      This model is only decoder part of the whole pipeline. It accepts stack of frame embeddings, computed by driver-action-recognition-adas-0002-encoder, and produces prediction on input video. Video frames should be sampled to cover ~1 second fragment (i.e. skip every second frame in 30 fps video).
     files:
       - name: driver-action-recognition-adas-0002-decoder.xml
         sha256: 90f4d84e8d237647fd2b23f0245bbc63b55fca625dd10fd2778afb51aa99e8d7
@@ -2073,7 +2205,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "driver-action-recognition-adas-0002-decoder-fp16"
-    description: "Video Transformer Network for driver action recognition. Decoder part"
+    description: |-
+      This is an action recognition model for the driver monitoring use case. The model uses Video Transformer approach with MobileNetv2 encoder. It is able to recognize the following actions: drinking, doing hair or making up, operating the radio, reaching behind, safe driving, talking on the phone, texting.
+      This model is only decoder part of the whole pipeline. It accepts stack of frame embeddings, computed by driver-action-recognition-adas-0002-encoder, and produces prediction on input video. Video frames should be sampled to cover ~1 second fragment (i.e. skip every second frame in 30 fps video).
     files:
       - name: driver-action-recognition-adas-0002-decoder-fp16.xml
         sha256: d85192c526c537280d35cf369af98ffe205612088a143f7fcb92eb4c94b38006
@@ -2086,7 +2220,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "pedestrian-detection-adas-binary-0001"
-    description: "Pedestrian detector based on ssd + mobilenet with reduced channels number binary layers."
+    description: |-
+      Pedestrian detection network based on SSD framework with tuned MobileNet v1 as a feature extractor.
+      Some layers of MobileNet v1 are binary and use I1 arithm
     files:
       - name: pedestrian-detection-adas-binary-0001.xml
         sha256: e64e7ce32c87e1c698b50abb8f2cf1d96c7651d45fc20bac09c417e046afa7f4
@@ -2099,7 +2235,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-action-recognition-teacher-0002"
-    description: "Second generation of action detection (SSD-based) model to use in Smart Classroom for classification teacher's actions."
+    description: "This is an action detector for the Smart Classroom scenario. It is based on the RMNet backbone that includes depth-wise convolutions to reduce the amount of computations for the 3x3 convolution block. The first SSD head from 1/16 scale feature map has four clustered prior boxes and outputs detected persons (two class detector). The second SSD-based head predicts actions of the detected persons. Possible actions: standing, writing, demonstrating."
     files:
       - name: person-detection-action-recognition-teacher-0002.xml
         sha256: fa3d9d2d8da10f4c63291a6b89589453849b94edd079fe92a219f15c179cc8a9
@@ -2112,7 +2248,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-action-recognition-teacher-0002-fp16"
-    description: "Second generation of action detection (SSD-based) model to use in Smart Classroom for classification teacher's actions."
+    description: "This is an action detector for the Smart Classroom scenario. It is based on the RMNet backbone that includes depth-wise convolutions to reduce the amount of computations for the 3x3 convolution block. The first SSD head from 1/16 scale feature map has four clustered prior boxes and outputs detected persons (two class detector). The second SSD-based head predicts actions of the detected persons. Possible actions: standing, writing, demonstrating."
     files:
       - name: person-detection-action-recognition-teacher-0002-fp16.xml
         sha256: ad5b89b88ab04c05cb3b9fc5b968a027434719030b76f4538b6c944078338ac4
@@ -2125,7 +2261,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "instance-segmentation-security-0033"
-    description: "General purpose instance segmentation model. Mask-RCNN with ResNeXt152 backbone and FPN block."
+    description: |-
+      This model is an instance segmentation network for 80 classes of objects.
+      It is a Mask-RCNN-like model with ResNeXt152 backbone and
+      Feature Pyramid Networks block for feature maps refinement.
     files:
       - name: instance-segmentation-security-0033.xml
         sha256: 2dc0e866c37247702076b8a225870b58bc48b6adaef972308dce0c78a3372e70
@@ -2138,7 +2277,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "instance-segmentation-security-0033-fp16"
-    description: "General purpose instance segmentation model. Mask-RCNN with ResNeXt152 backbone and FPN block."
+    description: |-
+      This model is an instance segmentation network for 80 classes of objects.
+      It is a Mask-RCNN-like model with ResNeXt152 backbone and
+      Feature Pyramid Networks block for feature maps refinement.
     files:
       - name: instance-segmentation-security-0033-fp16.xml
         sha256: 68c967b026008cf6750c02846d25dec1f072fd43127a5b852998432b4ef034fb
@@ -2151,7 +2293,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "action-recognition-0001-decoder"
-    description: "General-purpose action recognition model for Kinetics-400 dataset based on Video Transformer Network approach. Decoder part"
+    description: |-
+      This is an general-purpose action recognition model for Kinetics-400 dataset. The model uses Video Transformer approach with ResNet34 encoder.
+      Please refer to the [kinetics](https://deepmind.com/research/open-source/open-source-datasets/kinetics/) dataset specification to see list of action that are recognised by this model.
+      This model is only decoder part of the whole pipeline. It accepts stack of frame embeddings, computed by action-recognition-0001-encoder, and produces prediction on input video. Video frames should be sampled to cover ~1 second fragment (i.e. skip every second frame in 30 fps video).
     files:
       - name: action-recognition-0001-decoder.xml
         sha256: eeda01c569bb41af0714fb3714e85d5e532fc3819adb0ad9323b97feddf87b34
@@ -2164,7 +2309,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "action-recognition-0001-decoder-fp16"
-    description: "General-purpose action recognition model for Kinetics-400 dataset based on Video Transformer Network approach. Decoder part"
+    description: |-
+      This is an general-purpose action recognition model for Kinetics-400 dataset. The model uses Video Transformer approach with ResNet34 encoder.
+      Please refer to the [kinetics](https://deepmind.com/research/open-source/open-source-datasets/kinetics/) dataset specification to see list of action that are recognised by this model.
+      This model is only decoder part of the whole pipeline. It accepts stack of frame embeddings, computed by action-recognition-0001-encoder, and produces prediction on input video. Video frames should be sampled to cover ~1 second fragment (i.e. skip every second frame in 30 fps video).
     files:
       - name: action-recognition-0001-decoder-fp16.xml
         sha256: 220f09742e7ee77b44b1cab3491ac792a004ec6eb1551211b29e7c32c85ff0a0
@@ -2177,7 +2325,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "text-recognition-0012"
-    description: "Recognizes alphanumeric text. Architecture: VGG-like + BiLSTM as an encoder, BiLSTM as a decoder."
+    description: |-
+      This is a network for text recognition scenario. It consists of VGG16-like backbone and bidirectional LSTM encoder-decoder.
+      The network is able to recognize case-insensitive alpha-numeric text (36 unique symbols).
     files:
       - name: text-recognition-0012.xml
         sha256: 71158750324de227342acec7b2edca95d5991be2242eaf3a0c54877c32dc9dff
@@ -2190,7 +2340,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "text-recognition-0012-fp16"
-    description: "Recognizes alphanumeric text. Architecture: VGG-like + BiLSTM as an encoder, BiLSTM as a decoder."
+    description: |-
+      This is a network for text recognition scenario. It consists of VGG16-like backbone and bidirectional LSTM encoder-decoder.
+      The network is able to recognize case-insensitive alpha-numeric text (36 unique symbols).
     files:
       - name: text-recognition-0012-fp16.xml
         sha256: 322f6c6902714b81084bc71f560af2a6df69581181549e3d640ddef153c13b9e
@@ -2203,7 +2355,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "driver-action-recognition-adas-0002-encoder"
-    description: "Video Transformer Network for driver action recognition. Encoder part"
+    description: |-
+      This is an action recognition model for the driver monitoring use case. The model uses Video Transformer approach with MobileNetv2 encoder. It is able to recognize the following actions: drinking, doing hair or making up, operating the radio, reaching behind, safe driving, talking on the phone, texting.
+      This model is only encoder part of the whole pipeline. It accepts video frame and produces embedding. Use driver-action-recognition-adas-0002-decoder to produce prediction from embeddings of 16 frames. Video frames should be sampled to cover ~1 second fragment (i.e. skip every second frame in 30 fps video).
     files:
       - name: driver-action-recognition-adas-0002-encoder.xml
         sha256: b8625862f80388a63c3229824be44a75cb1baffdbd4fe00c560e7cdfc03f2b8d
@@ -2216,7 +2370,9 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "driver-action-recognition-adas-0002-encoder-fp16"
-    description: "Video Transformer Network for driver action recognition. Encoder part"
+    description: |-
+      This is an action recognition model for the driver monitoring use case. The model uses Video Transformer approach with MobileNetv2 encoder. It is able to recognize the following actions: drinking, doing hair or making up, operating the radio, reaching behind, safe driving, talking on the phone, texting.
+      This model is only encoder part of the whole pipeline. It accepts video frame and produces embedding. Use driver-action-recognition-adas-0002-decoder to produce prediction from embeddings of 16 frames. Video frames should be sampled to cover ~1 second fragment (i.e. skip every second frame in 30 fps video).
     files:
       - name: driver-action-recognition-adas-0002-encoder-fp16.xml
         sha256: a20c385b32b426db15eb0554a8428c8239aa3fbc7e63894f332d6ad4af65969c
@@ -2229,7 +2385,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "gaze-estimation-adas-0002"
-    description: "Gaze estimation for ADAS"
+    description: "This is a custom VGG-like convolutional neural network for gaze direction estimation."
     files:
       - name: gaze-estimation-adas-0002.xml
         sha256: b4860d52445836f5a1d4bce65e43054ffdbb0c9c9b75973abc93718f70b5baec
@@ -2242,7 +2398,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "gaze-estimation-adas-0002-fp16"
-    description: "Gaze estimation for ADAS"
+    description: "This is a custom VGG-like convolutional neural network for gaze direction estimation."
     files:
       - name: gaze-estimation-adas-0002-fp16.xml
         sha256: 48724b449b8f379f646141411530342078cc738306e78fed3c969d83e8fd58e0
@@ -2255,7 +2411,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "gaze-estimation-adas-0002-int8"
-    description: "Gaze estimation for ADAS"
+    description: "This is a custom VGG-like convolutional neural network for gaze direction estimation."
     files:
       - name: gaze-estimation-adas-0002-int8.xml
         sha256: 580c768b167d78039ccec566e6c5bde3a82d5aee785867423bc867c78ce57247
@@ -2268,7 +2424,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "resnet50-binary-0001"
-    description: "ResNet-50 Binary"
+    description: |-
+      This is a classical classification network for 1000 classes trained on ImageNet.
+      The difference is that most convolutional layers were replaced by binary once that can be implemented as XNOR+POPCOUN operations.
+      Only input, final and shortcut layers were kept as FP32, all the rest convolutional layers are replaced by BinaryConvolution layers.
     files:
       - name: resnet50-binary-0001.xml
         sha256: 1a7e41ab273f9e7b064e60e889ba2f13ce1b07cb4610096bd3abef33a93bf992
@@ -2281,7 +2440,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-raisinghand-recognition-0001"
-    description: "Raising-hand action detection (SSD-based) model to use in Smart Classroom environment."
+    description: "This is an action detector for the Smart Classroom scenario. It is based on the RMNet backbone that includes depth-wise convolutions to reduce the amount of computations for the 3x3 convolution block. The first SSD head from 1/16 scale feature map has four clustered prior boxes and outputs detected persons (two class detector). The second SSD-based head predicts actions of the detected persons. Possible actions: raising hand and other."
     files:
       - name: person-detection-raisinghand-recognition-0001.xml
         sha256: f15dacbaea3954b8c1b97ca48991a31347881504a9fabfc444c0e828c1a285b6
@@ -2294,7 +2453,7 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "person-detection-raisinghand-recognition-0001-fp16"
-    description: "Raising-hand action detection (SSD-based) model to use in Smart Classroom environment."
+    description: "This is an action detector for the Smart Classroom scenario. It is based on the RMNet backbone that includes depth-wise convolutions to reduce the amount of computations for the 3x3 convolution block. The first SSD head from 1/16 scale feature map has four clustered prior boxes and outputs detected persons (two class detector). The second SSD-based head predicts actions of the detected persons. Possible actions: raising hand and other."
     files:
       - name: person-detection-raisinghand-recognition-0001-fp16.xml
         sha256: 0f091550cdc61d709fbe0d6eb0f86b6bfaae771e66c5c579d7b0933b8f6db965
@@ -2307,7 +2466,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "handwritten-score-recognition-0001"
-    description: "Recognizes school marks (e.g '4' or '3.5'). Alphabet is '0123456789._'. Architecture: VGG-like + BiLSTM as an encoder, BiLSTM as a decoder."
+    description: |-
+      This is a network for text recognition scenario. It consists of VGG16-like backbone and bidirectional LSTM encoder-decoder.
+      The network is able to recognize school marks that should have format either `<digit>` or `<digit>.<digit>`
+      (e.g. `4` or `3.5`).
     files:
       - name: handwritten-score-recognition-0001.xml
         sha256: 86d461c1fa55c1bccfdf3b5488847abc72d19ba3ee838a033d7b3886da6da443
@@ -2320,7 +2482,10 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
   - name: "handwritten-score-recognition-0001-fp16"
-    description: "Recognizes school marks (e.g '4' or '3.5'). Alphabet is '0123456789._'. Architecture: VGG-like + BiLSTM as an encoder, BiLSTM as a decoder."
+    description: |-
+      This is a network for text recognition scenario. It consists of VGG16-like backbone and bidirectional LSTM encoder-decoder.
+      The network is able to recognize school marks that should have format either `<digit>` or `<digit>.<digit>`
+      (e.g. `4` or `3.5`).
     files:
       - name: handwritten-score-recognition-0001-fp16.xml
         sha256: d36c5a3396aaaed02d1734ac2d03c8e656ab4e8432147d0473dfdd4dbb890745
