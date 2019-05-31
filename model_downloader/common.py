@@ -211,11 +211,12 @@ class PostprocUnpackArchive(Postproc):
 Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
 class Topology:
-    def __init__(self, name, subdir, files, postprocessing):
+    def __init__(self, name, subdir, files, postprocessing, mo_args):
         self.name = name
         self.subdir = subdir
         self.files = files
         self.postprocessing = postprocessing
+        self.mo_args = mo_args
 
     @classmethod
     def deserialize(cls, top):
@@ -242,7 +243,15 @@ class Topology:
                 with deserialization_context('"postprocessing" #{}'.format(i)):
                     postprocessing.append(Postproc.deserialize(postproc))
 
-            return cls(name, subdir, files, postprocessing)
+            try:
+                mo_args = []
+
+                for i, arg in enumerate(top['model_optimizer_args']):
+                    mo_args.append(validate_string('"model_optimizer_args" #{}'.format(i), arg))
+            except KeyError:
+                mo_args = None
+
+            return cls(name, subdir, files, postprocessing, mo_args)
 
 def load_topologies(config):
     with config.open() as config_file:
