@@ -124,10 +124,7 @@ class TopologyFile:
 
     @classmethod
     def deserialize(cls, file):
-        name = Path(validate_string('"name"', file['name']))
-
-        if len(name.parts) != 1 or name.anchor:
-            raise DeserializationError('Invalid file name "{}"'.format(name))
+        name = validate_relative_path('"name"', file['name'])
 
         with deserialization_context('In file "{}"'):
             size = file.get('size')
