@@ -49,7 +49,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'threshold': BaseField(optional=True, default='.5:.05:.95', description='threshold for metric calculation')
+            'threshold': BaseField(optional=True, default='.50:.05:.95', description='threshold for metric calculation')
         })
 
         return parameters
@@ -168,19 +168,13 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
     @staticmethod
     def _reload_results_to_coco_class(coco, coco_data_to_store):
         with tempfile.NamedTemporaryFile() as ftmp:
-            json_file_to_store = ftmp.name
-            if DEBUG_JSON_TMP_RESULT_FILE_PATH_TO_STORE:
-                json_file_to_store = DEBUG_JSON_TMP_RESULT_FILE_PATH_TO_STORE
+            json_file_to_store = ftmp.name + ".json"
+        with open(json_file_to_store, 'w') as f:
+            json.dump(coco_data_to_store, f, indent=4)
 
-            with open(json_file_to_store, 'w') as f:
-                json.dump(coco_data_to_store, f, indent=4)
+        json_file_to_load = json_file_to_store
+        coco_res = coco.loadRes(json_file_to_load)
 
-            if DEBUG_JSON_TMP_RESULT_FILE_PATH_TO_LOAD:
-                json_file_to_load = DEBUG_JSON_TMP_RESULT_FILE_PATH_TO_LOAD
-            else:
-                json_file_to_load = json_file_to_store
-
-            coco_res = coco.loadRes(json_file_to_load)
         return coco_res
 
     @staticmethod

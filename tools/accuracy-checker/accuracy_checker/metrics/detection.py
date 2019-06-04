@@ -58,7 +58,11 @@ class BaseDetectionMetricMixin(Metric):
             'overlap_method': StringField(choices=['iou', 'ioa'], default='iou'),
             'use_filtered_tp': BoolField(
                 default=False, description="If is True then ignored object are counted during evaluation."
+            ),
+            'label_map': StringField(
+                optional=True, default='label_map', description='label_map field name in dataset_meta'
             )
+
         })
 
         return parameters

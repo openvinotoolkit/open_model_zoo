@@ -59,6 +59,7 @@ class TestMxNetLauncher:
         assert zeros.metadata['input_shape'] == {'data': (1, 3, 32, 32)}
 
 
+@pytest.mark.usefixtures('mock_path_exists')
 class TestMxNetLauncherConfig:
     def test_missed_model_in_create_mxnet_launcher_raises_config_error_exception(self):
         config = {'framework': 'mxnet'}

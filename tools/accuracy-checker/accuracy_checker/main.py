@@ -121,9 +121,16 @@ def build_arguments_parser():
     )
     parser.add_argument(
         '--progress',
-        help='progress reporter',
+        help='progress reporter. You can select bar or print',
         required=False,
         default='bar'
+    )
+    parser.add_argument(
+        '--progress_interval',
+        help='interval for update progress if selected *print* progress.',
+        required=False,
+        type=int,
+        default=1000
     )
     parser.add_argument(
         '-tf', '--target_framework',
@@ -184,10 +191,8 @@ def build_arguments_parser():
 
 def main():
     args = build_arguments_parser().parse_args()
-    progress_reporter = ProgressReporter.provide((
-        args.progress if ':' not in args.progress
-        else args.progress.split(':')[0]
-    ))
+    progress_bar_provider = args.progress if ':' not in args.progress else args.progress.split(':')[0]
+    progress_reporter = ProgressReporter.provide(progress_bar_provider, None, print_interval=args.progress_interval)
     if args.log_file:
         add_file_handler(args.log_file)
 

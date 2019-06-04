@@ -19,14 +19,14 @@ Accuracy Checker supports following set of preprocessors:
       * **TensorFlow**: Bilinear, Area, Bicubic
       `Linear` used as default for OpenCV, `Bilinear` as default for Pillow and TensorFlow. 
   * `aspect_ratio_scale` allows resize with changing or saving image aspect ratio. May be done using one of these ways: 
-    - `width` - rescale width.
-    - `height` - rescale height.
-    - `greater` - rescale greater from image sizes.
+    - `width` - rescale width (height has fixed size, provided as `dst_height` or `size`, width size will be rescaled to save aspect ratio).
+    - `height` - rescale height (width has fixed size, provided as `dst_width` or `size`, height size will be rescales to save aspect ratio).
+    - `greater` - rescale greater from image sizes (smaller dimension has fixed size, greater will be rescaled to save aspect ratio)
     - `fit_to_window` - adaptive resize keeping aspect ratio for fit image into window with fixed size `[dst_height x dst_width]`,
          but trying to make the image as big as possible.
     - `frcnn_keep_aspect_ratio` - adaptive resize keeping aspect ratio for fit image into window with fixed size `[max_size x max_size]`,
          but trying to make the minimal dimension of image to be equal to `min_size` or as close to `min_size` as possible, where    
-         `min_size = min(dst_width, dst_height)`,    
+         `min_size = min(dst_width, dst_height)`,
          `max_size = max(dst_width, dst_height)`.
 * `auto_resize` - automatic resizing image to input layer shape. (supported only for one input layer case, use OpenCV for image resize)
 * `normalization` - changing the range of pixel intensity values.

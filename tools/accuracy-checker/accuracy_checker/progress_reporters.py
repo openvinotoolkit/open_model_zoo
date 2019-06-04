@@ -25,7 +25,7 @@ from .logging import print_info
 class ProgressReporter(ClassProvider):
     __provider_type__ = 'progress_reporter'
 
-    def __init__(self, dataset_size=None):
+    def __init__(self, dataset_size=None, **kwargs):
         self.finished = True
         self.dataset_size = None
         self.start_time = None

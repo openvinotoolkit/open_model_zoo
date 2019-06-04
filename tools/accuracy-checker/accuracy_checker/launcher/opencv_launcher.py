@@ -16,10 +16,11 @@ limitations under the License.
 
 import re
 from collections import OrderedDict
-
+import numpy as np
 import cv2
 
-from ..config import PathField, StringField, ConfigError, BaseField
+from ..config import PathField, StringField, ConfigError, ListInputsField
+from ..logging import print_info
 from .launcher import Launcher, LauncherConfigValidator
 from ..utils import get_or_parse_value
 
@@ -32,8 +33,9 @@ class OpenCVLauncherConfigValidator(LauncherConfigValidator):
         super().validate(entry, field_uri)
         inputs = entry.get('inputs')
         for input_layer in inputs:
-            if not 'shape' in input_layer:
+            if 'shape' not in input_layer:
                 raise ConfigError('input value should have shape field')
+
 
 class OpenCVLauncher(Launcher):
     """
@@ -57,15 +59,16 @@ class OpenCVLauncher(Launcher):
         parameters = super().parameters()
         parameters.update({
             'model': PathField(description="Path to model file."),
-            'weights': PathField(description="Path to weights file.", optional=True, default=''),
+            'weights': PathField(description="Path to weights file.", optional=True, default='', check_exists=False),
             'device': StringField(
                 regex=DEVICE_REGEX, choices=OpenCVLauncher.TARGET_DEVICES.keys(),
                 description="Device name: {}".format(', '.join(OpenCVLauncher.TARGET_DEVICES.keys()))
             ),
             'backend': StringField(
                 regex=BACKEND_REGEX, choices=OpenCVLauncher.OPENCV_BACKENDS.keys(),
+                optional=True, default='IE',
                 description="Backend name: {}".format(', '.join(OpenCVLauncher.OPENCV_BACKENDS.keys()))),
-            'inputs': BaseField(optional=False, description="Inputs.")
+            'inputs': ListInputsField(optional=False, description="Inputs.")
         })
 
         return parameters
@@ -83,10 +86,8 @@ class OpenCVLauncher(Launcher):
 
         match = re.match(BACKEND_REGEX, self.get_value_from_config('backend').lower())
         selected_backend = match.group('backend')
+        print_info('backend: {}'.format(selected_backend))
         backend = OpenCVLauncher.OPENCV_BACKENDS.get(selected_backend)
-
-        if backend is None:
-            raise ConfigError('{} is not supported backend'.format(selected_backend))
 
         self.network.setPreferableBackend(backend)
 
@@ -141,8 +142,7 @@ class OpenCVLauncher(Launcher):
         results = []
         for input_blobs in inputs:
             for blob_name in self._inputs_shapes:
-                self.network.setInput(input_blobs[blob_name], blob_name)
-
+                self.network.setInput(input_blobs[blob_name].astype(np.float32), blob_name)
             list_prediction = self.network.forward(self.output_names)
             dict_result = {
                 output_name: output_value for output_name, output_value in zip(self.output_names, list_prediction)

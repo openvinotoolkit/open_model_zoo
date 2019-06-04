@@ -24,6 +24,7 @@ from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, NumberField, BoolField, ConfigError
 from ..representation import TextDetectionPrediction, CharacterRecognitionPrediction
 
+
 class TextDetectionAdapter(Adapter):
     __provider__ = 'text_detection'
     prediction_types = (TextDetectionPrediction, )
@@ -40,6 +41,22 @@ class TextDetectionAdapter(Adapter):
                 description="Name of layer containing information related to "
                             "text/no-text classification for each pixel."
             ),
+            'pixel_class_confidence_threshold': NumberField(
+                description='confidence threshold for valid segmentation mask',
+                optional=True, default=0.8, value_type=float, min_value=0, max_value=1
+            ),
+            'pixel_link_confidence_threshold': NumberField(
+                description='confidence threshold for valid pixel links',
+                optional=True, default=0.8, value_type=float, min_value=0, max_value=1
+            ),
+            'min_area': NumberField(
+                value_type=int, min_value=0, default=0, optional=True,
+                description='minimal area for valid text prediction'
+            ),
+            'min_height': NumberField(
+                value_type=int, min_value=0, default=0, optional=True,
+                description='minimal height for valid text prediction'
+            )
         })
 
         return parameters
@@ -50,135 +67,187 @@ class TextDetectionAdapter(Adapter):
     def configure(self):
         self.pixel_link_out = self.get_value_from_config('pixel_link_out')
         self.pixel_class_out = self.get_value_from_config('pixel_class_out')
+        self.pixel_link_confidence_threshold = self.get_value_from_config('pixel_link_confidence_threshold')
+        self.pixel_class_confidence_threshold = self.get_value_from_config('pixel_class_confidence_threshold')
+        self.min_area = self.get_value_from_config('min_area')
+        self.min_height = self.get_value_from_config('min_height')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         results = []
         predictions = self._extract_predictions(raw, frame_meta)
+
+        def _input_parameters(input_meta):
+            input_shape = next(iter(input_meta.get('input_shape').values()))
+            original_image_size = input_meta.get('image_size')
+            layout = 'NCHW' if input_shape[1] == original_image_size[2] else 'NHWC'
+
+            return original_image_size, layout
         raw_output = zip(identifiers, frame_meta, predictions[self.pixel_link_out], predictions[self.pixel_class_out])
         for identifier, current_frame_meta, link_data, cls_data in raw_output:
-            link_data = link_data.reshape((1, *link_data.shape))
-            cls_data = cls_data.reshape((1, *cls_data.shape))
-            link_data_shape = link_data.shape
-            new_link_data_shape = (link_data_shape[0], link_data_shape[2], link_data_shape[3], link_data_shape[1] / 2)
-            cls_data_shape = cls_data.shape
-            new_cls_data_shape = (cls_data_shape[0], cls_data_shape[2], cls_data_shape[3], cls_data_shape[1] / 2)
-            link_data = self.softmax(link_data.transpose((0, 2, 3, 1)).reshape(-1))[1::2]
-            cls_data = self.softmax(cls_data.transpose((0, 2, 3, 1)).reshape(-1))[1::2]
-            mask = self.decode_image_by_join(cls_data, new_cls_data_shape, link_data, new_link_data_shape)
-            rects = self.mask_to_boxes(mask, current_frame_meta['image_size'])
-            results.append(TextDetectionPrediction(identifier, rects))
+            image_size, layout = _input_parameters(current_frame_meta)
+            if layout == 'NCHW':
+                link_data = link_data.transpose((1, 2, 0))
+                cls_data = cls_data.transpose((1, 2, 0))
+            new_link_data = link_data.reshape([*link_data.shape[:2], 8, 2])
+            new_link_data = self.softmax(new_link_data)
+            cls_data = self.softmax(cls_data)
+            decoded_rects = self.to_boxes(image_size, cls_data[:, :, 1], new_link_data[:, :, :, 1])
+            results.append(TextDetectionPrediction(identifier, decoded_rects))
 
         return results
 
-    @staticmethod
-    def softmax(data):
-        for i in np.arange(start=0, stop=data.size, step=2, dtype=int):
-            maximum = max(data[i], data[i + 1])
-            data[i] = np.exp(data[i] - maximum)
-            data[i + 1] = np.exp(data[i + 1] - maximum)
-            sum_data = data[i] + data[i + 1]
-            data[i] /= sum_data
-            data[i + 1] /= sum_data
+    def mask_to_bboxes(self, mask, image_shape):
+        """ Converts mask to bounding boxes. """
 
-        return data
+        def rect_to_xys(rect, image_shape):
+            """ Converts rotated rectangle to points. """
 
-    def decode_image_by_join(self, cls_data, cls_data_shape, link_data, link_data_shape):
-        k_cls_conf_threshold = 0.7
-        k_link_conf_threshold = 0.7
-        height = cls_data_shape[1]
-        width = cls_data_shape[2]
-        id_pixel_mask = np.argwhere(cls_data >= k_cls_conf_threshold).reshape(-1)
-        pixel_mask = cls_data >= k_cls_conf_threshold
-        group_mask = {}
-        pixel_mask[id_pixel_mask] = True
-        points = []
-        for i in id_pixel_mask:
-            points.append((i % width, i // width))
-            group_mask[i] = -1
-        link_mask = link_data >= k_link_conf_threshold
-        neighbours = link_data_shape[3]
-        for point in points:
-            neighbour = 0
-            point_x, point_y = point
-            x_neighbours = [point_x - 1, point_x, point_x + 1]
-            y_neighbours = [point_y - 1, point_y, point_y + 1]
-            for neighbour_y in y_neighbours:
-                for neighbour_x in x_neighbours:
-                    if neighbour_x == point_x and neighbour_y == point_y:
-                        continue
+            height, width = image_shape[0:2]
 
-                    if neighbour_x < 0 or neighbour_x >= width or neighbour_y < 0 or neighbour_y >= height:
-                        continue
+            def get_valid_x(x_coord):
+                return np.clip(x_coord, 0, width - 1)
 
-                    pixel_value = np.uint8(pixel_mask[neighbour_y * width + neighbour_x])
-                    link_value = np.uint8(
-                        link_mask[int(point_y * width * neighbours + point_x * neighbours + neighbour)]
-                    )
+            def get_valid_y(y_coord):
+                return np.clip(y_coord, 0, height - 1)
 
-                    if pixel_value and link_value:
-                        group_mask = self.join(point_x + point_y * width, neighbour_x + neighbour_y * width, group_mask)
+            rect = ((rect[0], rect[1]), (rect[2], rect[3]), rect[4])
+            points = cv2.boxPoints(rect)
+            points = points.astype(np.int0)
+            for i_xy, (x_coord, y_coord) in enumerate(points):
+                x_coord = get_valid_x(x_coord)
+                y_coord = get_valid_y(y_coord)
+                points[i_xy, :] = [x_coord, y_coord]
 
-                    neighbour += 1
+            return points
 
-        return self.get_all(points, width, height, group_mask)
+        def min_area_rect(contour):
+            """ Returns minimum area rectangle. """
 
-    def join(self, point1, point2, group_mask):
-        root1 = self.find_root(point1, group_mask)
-        root2 = self.find_root(point2, group_mask)
-        if root1 != root2:
-            group_mask[root1] = root2
+            (center_x, center_y), (width, height), theta = cv2.minAreaRect(contour)
+            return [center_x, center_y, width, height, theta], width * height
 
-        return group_mask
+        image_h, image_w = image_shape[0:2]
 
-    def get_all(self, points, width, height, group_mask):
-        root_map = {}
-        mask = np.zeros((height, width))
-
-        for point in points:
-            point_x, point_y = point
-            point_root = self.find_root(point_x + point_y * width, group_mask)
-            if not root_map.get(point_root):
-                root_map[point_root] = int(len(root_map) + 1)
-            mask[point_y, point_x] = root_map[point_root]
-
-        return mask
-
-    @staticmethod
-    def find_root(point, group_mask):
-        root = point
-        update_parent = False
-        while group_mask[root] != -1:
-            root = group_mask[root]
-            update_parent = True
-
-        if update_parent:
-            group_mask[point] = root
-
-        return root
-
-    @staticmethod
-    def mask_to_boxes(mask, image_size):
-        max_val = np.max(mask).astype(int)
-        resized_mask = cv2.resize(
-            mask.astype(np.float32), (image_size[1], image_size[0]), interpolation=cv2.INTER_NEAREST
-        )
         bboxes = []
-        for i in range(int(max_val + 1)):
-            bbox_mask = resized_mask == i
-            contours_tuple = cv2.findContours(bbox_mask.astype(np.uint8), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-            contours = contours_tuple[1] if len(contours_tuple) > 2 else contours_tuple[0]
-            if not contours:
+        max_bbox_idx = mask.max()
+        mask = cv2.resize(mask, (image_w, image_h), interpolation=cv2.INTER_NEAREST)
+
+        for bbox_idx in range(1, max_bbox_idx + 1):
+            bbox_mask = (mask == bbox_idx).astype(np.uint8)
+            cnts = cv2.findContours(bbox_mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)[-2]
+            if np.size(cnts) == 0:
                 continue
-            rect = cv2.minAreaRect(contours[0])
-            _, hw, _ = rect
-            ignored_height = hw[0] >= image_size[0] - 1
-            ignored_width = hw[1] >= image_size[1] - 1
-            if ignored_height or ignored_width:
+            cnt = cnts[0]
+            rect, rect_area = min_area_rect(cnt)
+
+            box_width, box_height = rect[2:-1]
+            if min(box_width, box_height) < self.min_height:
                 continue
-            box = cv2.boxPoints(rect)
-            bboxes.append(box)
+
+            if rect_area < self.min_area:
+                continue
+
+            xys = rect_to_xys(rect, image_shape)
+            bboxes.append(xys)
 
         return bboxes
+
+    @staticmethod
+    def softmax(logits):
+        """ Returns softmax given logits. """
+
+        max_logits = np.max(logits, axis=-1, keepdims=True)
+        numerator = np.exp(logits - max_logits)
+        denominator = np.sum(numerator, axis=-1, keepdims=True)
+
+        return numerator / denominator
+
+    def to_boxes(self, image_shape, segm_pos_scores, link_pos_scores):
+        """ Returns boxes for each image in batch. """
+
+        mask = self.decode_image(segm_pos_scores, link_pos_scores)
+        mask = np.asarray(mask, np.int32)[...]
+        bboxes = self.mask_to_bboxes(mask, image_shape)
+
+        return bboxes
+
+    def decode_image(self, segm_scores, link_scores):
+        """ Convert softmax scores to mask. """
+
+        segm_mask = segm_scores >= self.pixel_class_confidence_threshold
+        link_mask = link_scores >= self.pixel_link_confidence_threshold
+        points = list(zip(*np.where(segm_mask)))
+        height, width = np.shape(segm_mask)
+        group_mask = dict.fromkeys(points, -1)
+
+        def find_parent(point):
+            return group_mask[point]
+
+        def set_parent(point, parent):
+            group_mask[point] = parent
+
+        def is_root(point):
+            return find_parent(point) == -1
+
+        def find_root(point):
+            root = point
+            update_parent = False
+            while not is_root(root):
+                root = find_parent(root)
+                update_parent = True
+
+            if update_parent:
+                set_parent(point, root)
+
+            return root
+
+        def join(point1, point2):
+            root1 = find_root(point1)
+            root2 = find_root(point2)
+
+            if root1 != root2:
+                set_parent(root1, root2)
+
+        def get_neighbours(x_coord, y_coord):
+            """ Returns 8-point neighbourhood of given point. """
+
+            return [
+                (x_coord - 1, y_coord - 1), (x_coord, y_coord - 1), (x_coord + 1, y_coord - 1),
+                (x_coord - 1, y_coord), (x_coord + 1, y_coord),
+                (x_coord - 1, y_coord + 1), (x_coord, y_coord + 1), (x_coord + 1, y_coord + 1)
+            ]
+
+        def is_valid_coord(x_coord, y_coord, width, height):
+            """ Returns true if given point inside image frame. """
+            return 0 <= x_coord < width and 0 <= y_coord < height
+
+        def get_all():
+            root_map = {}
+
+            def get_index(root):
+                if root not in root_map:
+                    root_map[root] = len(root_map) + 1
+                return root_map[root]
+
+            mask = np.zeros_like(segm_mask, dtype=np.int32)
+            for point in points:
+                point_root = find_root(point)
+                bbox_idx = get_index(point_root)
+                mask[point] = bbox_idx
+            return mask
+
+        for point in points:
+            y_coord, x_coord = point
+            neighbours = get_neighbours(x_coord, y_coord)
+            for n_idx, (neighbour_x, neighbour_y) in enumerate(neighbours):
+                if is_valid_coord(neighbour_x, neighbour_y, width, height):
+                    link_value = link_mask[y_coord, x_coord, n_idx]
+                    segm_value = segm_mask[neighbour_y, neighbour_x]
+                    if link_value and segm_value:
+                        join(point, (neighbour_y, neighbour_x))
+
+        mask = get_all()
+        return mask
 
 
 class LPRAdapter(Adapter):
@@ -208,6 +277,7 @@ class LPRAdapter(Adapter):
 
         return decode_out
 
+
 class BeamSearchDecoder(Adapter):
     __provider__ = 'beam_search_decoder'
     prediction_types = (CharacterRecognitionPrediction, )
@@ -216,12 +286,16 @@ class BeamSearchDecoder(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'beam_size'               : NumberField(optional=True, value_type=int, min_value=1, default=10,
-                                                    description="Size of the beam to use during decoding."),
-            'blank_label'             : NumberField(optional=True, value_type=int, min_value=0,
-                                                    description="Index of the CTC blank label."),
-            'softmaxed_probabilities' : BoolField(optional=True, default=False,
-                                                  description="Indicator that model uses softmax for output layer ")
+            'beam_size': NumberField(
+                optional=True, value_type=int, min_value=1, default=10,
+                description="Size of the beam to use during decoding."
+            ),
+            'blank_label': NumberField(
+                optional=True, value_type=int, min_value=0, description="Index of the CTC blank label."
+            ),
+            'softmaxed_probabilities': BoolField(
+                optional=True, default=False, description="Indicator that model uses softmax for output layer "
+            )
         })
         return parameters
 
