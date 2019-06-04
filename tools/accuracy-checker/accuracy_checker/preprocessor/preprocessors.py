@@ -20,7 +20,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from ..config import BoolField, ConfigValidator, NumberField, StringField, ConfigError
+from ..config import BoolField, ConfigValidator, NumberField, StringField, ConfigError, BaseField
 from ..dependency import ClassProvider
 from ..utils import get_size_from_config, get_or_parse_value, string_to_tuple, get_size_3d_from_config, contains_all
 from ..utils import get_parameter_value_from_config
@@ -378,13 +378,13 @@ class Normalize(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'mean': StringField(
-                optional=True, choices=Normalize.PRECOMPUTED_MEANS.keys(), allow_own_choice=True,
+            'mean': BaseField(
+                optional=True,
                 description="Values which will be subtracted from image channels. You can specify one "
                             "value for all channels or list of comma separated channel-wise values."
             ),
-            'std': StringField(
-                optional=True, choices=Normalize.PRECOMPUTED_STDS.keys(), allow_own_choice=True,
+            'std': BaseField(
+                optional=True,
                 description="Specifies values, on which pixels will be divided. You can specify one value for all "
                             "channels or list of comma separated channel-wise values."
             )

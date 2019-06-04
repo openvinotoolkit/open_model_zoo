@@ -53,14 +53,15 @@ class TextDetectionMetric(PerImageEvaluationMetric):
                             "that prediction polygon is true positive."
             ),
             'ignore_difficult':  BoolField(
-                optional=True, default=False,
+                optional=True, default=True,
                 description="Allows to ignore difficult ground truth text polygons in metric calculation."
             ),
             'area_precision_constrain':  NumberField(
-                min_value=0, max_value=1, optional=True, default=False,
+                min_value=0, max_value=1, optional=True, default=0.5,
                 description="Minimal value for intersection over union that allows to make decision "
                             "that prediction polygon matched with ignored annotation."
             )
+
         })
 
         return parameters
@@ -95,6 +96,7 @@ class TextDetectionMetric(PerImageEvaluationMetric):
 
                     if precision >= self.area_precision_constrain:
                         prediction_difficult_mask[det_id] = True
+                        break
 
         if num_gt > 0 and num_det > 0:
             iou_matrix = np.empty((num_gt, num_det))

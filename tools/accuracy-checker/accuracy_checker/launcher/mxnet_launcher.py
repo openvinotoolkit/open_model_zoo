@@ -47,11 +47,11 @@ class MxNetLauncher(Launcher):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'model'       : PathField(check_exists=True, is_directory=False, description="Path to model."),
-            'device'      : StringField(regex=DEVICE_REGEX, description="Device name."),
-            'batch'       : NumberField(value_type=float, min_value=1, optional=True, description="Batch size."),
-            'output_name' : StringField(optional=True, description="Output name."),
-            'inputs'      : ListInputsField(optional=False, description="Inputs.")
+            'model': PathField(check_exists=True, is_directory=False, description="Path to model."),
+            'device': StringField(regex=DEVICE_REGEX, description="Device name.", optional=True, default='CPU'),
+            'batch': NumberField(value_type=float, min_value=1, optional=True, description="Batch size."),
+            'output_name': StringField(optional=True, description="Output name."),
+            'inputs': ListInputsField(optional=False, description="Inputs.")
         })
         return parameters
 

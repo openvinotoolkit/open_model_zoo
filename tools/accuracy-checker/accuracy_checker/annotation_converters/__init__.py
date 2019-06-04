@@ -32,6 +32,7 @@ from .cityscapes import CityscapesConverter
 from .ncf_converter import MovieLensConverter
 from .brats import BratsConverter, BratsNumpyConverter
 from .cifar10 import Cifar10FormatConverter
+from .mnist import MNISTCSVFormatConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -57,5 +58,6 @@ __all__ = [
     'MovieLensConverter',
     'BratsConverter',
     'BratsNumpyConverter',
-    'Cifar10FormatConverter'
+    'Cifar10FormatConverter',
+    'MNISTCSVFormatConverter'
 ]

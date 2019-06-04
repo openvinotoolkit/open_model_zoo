@@ -57,6 +57,10 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `has_background` - allows to add background label to original labels and convert dataset for 11 classes instead 10 (default value is False).
   * `convert_images` - allows to convert images from pickle file to user specified directory (default value is False).
   * `converted_images_dir` - path to converted images location.
+* `mnist_csv` - convert MNIST dataset for handwritten digit recognition stored in csv format to `ClassificationAnnotation`.
+  * `annotation_file` - path to dataset file in csv format.
+  * `convert_images` - allows to convert images from annotation file to user specified directory (default value is False).
+  * `converted_images_dir` - path to converted images location if enabled `convert_images`.
 * `imagenet` - convert ImageNet dataset for image classification task to `ClassificationAnnotation`.
   * `annotation_file` - path to annotation in txt format.
   * `labels_file` - path to file with word description of labels (synset_words).

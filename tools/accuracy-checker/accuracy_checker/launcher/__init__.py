@@ -55,6 +55,12 @@ except ImportError as import_error:
 
 from .opencv_launcher import OpenCVLauncher
 
+try:
+    from .onnx_launcher import ONNXLauncher
+except ImportError as import_error:
+    ONNXLauncher = unsupported_launcher(
+        'onnx_runtime', "ONNX Runtime isn't installed. Please, install it before using. \n{}".format(import_error.msg)
+    )
 
 __all__ = [
     'create_launcher',
@@ -65,6 +71,7 @@ __all__ = [
     'TFLiteLauncher',
     'DLSDKLauncher',
     'OpenCVLauncher',
+    'ONNXLauncher',
     'DummyLauncher',
     'InputFeeder'
 ]
