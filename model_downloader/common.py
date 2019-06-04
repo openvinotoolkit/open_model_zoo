@@ -124,10 +124,7 @@ class TopologyFile:
 
     @classmethod
     def deserialize(cls, file):
-        name = Path(validate_string('"name"', file['name']))
-
-        if len(name.parts) != 1 or name.anchor:
-            raise DeserializationError('Invalid file name "{}"'.format(name))
+        name = validate_relative_path('"name"', file['name'])
 
         with deserialization_context('In file "{}"'):
             size = file.get('size')
@@ -211,11 +208,12 @@ class PostprocUnpackArchive(Postproc):
 Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
 class Topology:
-    def __init__(self, name, subdir, files, postprocessing):
+    def __init__(self, name, subdir, files, postprocessing, mo_args):
         self.name = name
         self.subdir = subdir
         self.files = files
         self.postprocessing = postprocessing
+        self.mo_args = mo_args
 
     @classmethod
     def deserialize(cls, top):
@@ -242,7 +240,15 @@ class Topology:
                 with deserialization_context('"postprocessing" #{}'.format(i)):
                     postprocessing.append(Postproc.deserialize(postproc))
 
-            return cls(name, subdir, files, postprocessing)
+            try:
+                mo_args = []
+
+                for i, arg in enumerate(top['model_optimizer_args']):
+                    mo_args.append(validate_string('"model_optimizer_args" #{}'.format(i), arg))
+            except KeyError:
+                mo_args = None
+
+            return cls(name, subdir, files, postprocessing, mo_args)
 
 def load_topologies(config):
     with config.open() as config_file:
