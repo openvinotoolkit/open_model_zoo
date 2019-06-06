@@ -1670,10 +1670,10 @@ topologies:
   - name: "face-detection-adas-binary-0001"
     description: "Face Detection (MobileNet with reduced channels and binary convolution + SSD with weights sharing)"
     files:
-      - name: FP32/face-detection-adas-binary-0001.xml
+      - name: INT1/face-detection-adas-binary-0001.xml
         sha256: fde8c465a5e3f3425fb567d31b9591ff8be589930c8488639f8feddf7f0301f2
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.xml
-      - name: FP32/face-detection-adas-binary-0001.bin
+      - name: INT1/face-detection-adas-binary-0001.bin
         sha256: 0e0742b61fb924e937a8974da8a2e15cc6afc15630afa3f220676ee7a3a99700
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.bin
     output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights_binary/dldt/"
@@ -1740,10 +1740,10 @@ topologies:
   - name: "vehicle-detection-adas-binary-0001"
     description: "Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise head and binary layers."
     files:
-      - name: FP32/vehicle-detection-adas-binary-0001.xml
+      - name: INT1/vehicle-detection-adas-binary-0001.xml
         sha256: c98bf5984895b1309861597ec36181446877407cd985bb490e14461f41312670
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.xml
-      - name: FP32/vehicle-detection-adas-binary-0001.bin
+      - name: INT1/vehicle-detection-adas-binary-0001.bin
         sha256: afdd8a2f175b2f19c07083ff23b2e28105f3d1c7dc06a4b1a1d5c2c42b98294f
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.bin
     output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd-binary/dldt/"
@@ -1772,10 +1772,10 @@ topologies:
   - name: "pedestrian-detection-adas-binary-0001"
     description: "Pedestrian detector based on ssd + mobilenet with reduced channels number binary layers."
     files:
-      - name: FP32/pedestrian-detection-adas-binary-0001.xml
+      - name: INT1/pedestrian-detection-adas-binary-0001.xml
         sha256: e64e7ce32c87e1c698b50abb8f2cf1d96c7651d45fc20bac09c417e046afa7f4
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.xml
-      - name: FP32/pedestrian-detection-adas-binary-0001.bin
+      - name: INT1/pedestrian-detection-adas-binary-0001.bin
         sha256: 7c2761ca3859ef55a80d9ed924225df7ba363fcb151e4ec2f7d1061b70bdb374
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.bin
     output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd-binary/dldt"
@@ -1905,10 +1905,10 @@ topologies:
   - name: "resnet50-binary-0001"
     description: "ResNet-50 Binary"
     files:
-      - name: FP32/resnet50-binary-0001.xml
+      - name: INT1/resnet50-binary-0001.xml
         sha256: 1a7e41ab273f9e7b064e60e889ba2f13ce1b07cb4610096bd3abef33a93bf992
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/resnet50-binary-0001/INT1/resnet50-binary-0001.xml
-      - name: FP32/resnet50-binary-0001.bin
+      - name: INT1/resnet50-binary-0001.bin
         sha256: e843a458ae786f860698919709fb0852ef8138d4461ce8c744f96fe29ef0d580
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/resnet50-binary-0001/INT1/resnet50-binary-0001.bin
     output: "PublicCompressed/classification/resnet50_binary/dldt/"
