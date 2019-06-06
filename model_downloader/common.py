@@ -312,3 +312,6 @@ def load_topologies_from_args(parser, args):
             topologies.extend(matching_topologies)
 
         return topologies
+
+def get_default_config_path():
+    return Path(__file__).resolve().parent / 'list_topologies.yml'

@@ -41,7 +41,7 @@ else:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=Path, metavar='CONFIG.YML',
-        default=Path(__file__).resolve().parent / 'list_topologies.yml', help='topology configuration file')
+        default=common.get_default_config_path(), help='topology configuration file')
     parser.add_argument('-d', '--download_root', type=Path, metavar='DIR',
         default=Path.cwd(), help='root directory with downloaded topology files')
     parser.add_argument('--name', metavar='PAT[,PAT...]',
