@@ -25,6 +25,10 @@ import yaml
 
 DOWNLOAD_TIMEOUT = 5 * 60
 
+# make sure to update the documentation if you modify these
+KNOWN_FRAMEWORKS = {'caffe', 'dldt', 'mxnet', 'tf'}
+KNOWN_PRECISIONS = {'FP16', 'FP32', 'INT1', 'INT8'}
+
 class DeserializationError(Exception):
     pass
 
@@ -208,12 +212,17 @@ class PostprocUnpackArchive(Postproc):
 Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
 class Topology:
-    def __init__(self, name, subdir, files, postprocessing, mo_args):
+    def __init__(self, name, subdir, files, postprocessing, mo_args, framework,
+            description, license_url, precisions):
         self.name = name
         self.subdir = subdir
         self.files = files
         self.postprocessing = postprocessing
         self.mo_args = mo_args
+        self.framework = framework
+        self.description = description
+        self.license_url = license_url
+        self.precisions = precisions
 
     @classmethod
     def deserialize(cls, top):
@@ -240,15 +249,37 @@ class Topology:
                 with deserialization_context('"postprocessing" #{}'.format(i)):
                     postprocessing.append(Postproc.deserialize(postproc))
 
-            try:
-                mo_args = []
+            if 'model_optimizer_args' in top:
+                mo_args = [validate_string('"model_optimizer_args" #{}'.format(i), arg)
+                    for i, arg in enumerate(top['model_optimizer_args'])]
 
-                for i, arg in enumerate(top['model_optimizer_args']):
-                    mo_args.append(validate_string('"model_optimizer_args" #{}'.format(i), arg))
-            except KeyError:
+                precisions = {'FP32'}
+            else:
                 mo_args = None
 
-            return cls(name, subdir, files, postprocessing, mo_args)
+                def file_precision(file):
+                    if len(file.name.parts) < 2:
+                        raise DeserializationError('Can\'t derive precision from file name {!r}'.format(file.name))
+                    p = file.name.parts[0]
+                    if p not in KNOWN_PRECISIONS:
+                        raise DeserializationError(
+                            'Unknown precision {!r} derived from file name {!r}, expected one of {!r}'.format(
+                                p, file.name, KNOWN_PRECISIONS))
+                    return p
+
+                precisions = set(map(file_precision, files))
+
+            framework = validate_string('"framework"', top['framework'])
+            if framework not in KNOWN_FRAMEWORKS:
+                raise DeserializationError('"framework": expected one of {!r}, got {!r}'.format(
+                    KNOWN_FRAMEWORKS, framework))
+
+            description = validate_string('"description"', top['description'])
+
+            license_url = validate_string('"license"', top['license'])
+
+            return cls(name, subdir, files, postprocessing, mo_args, framework,
+                description, license_url, precisions)
 
 def load_topologies(config):
     with config.open() as config_file:

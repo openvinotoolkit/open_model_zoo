@@ -11,6 +11,9 @@ based on the included configuration file.
 * `converter.py` (model converter) converts the models that are not in the
   Inference Engine IR format into that format using Model Optimizer.
 
+* `info_dumper.py` (model information dumper) prints information about the models
+  in a stable machine-readable format.
+
 Prerequisites
 -------------
 
@@ -117,6 +120,38 @@ To do this, use the `--dry-run` option:
 
 See the "Shared options" section for information on other options accepted by
 the script.
+
+Model information dumper usage
+------------------------------
+
+The basic usage is to run the script like this:
+
+```sh
+./info_dumper.py --all
+```
+
+This will print to standard output information about all models.
+
+The only options accepted by the script are those described in the "Shared options"
+section.
+
+The script's output is a JSON array, each element of which is a JSON object
+describing a single model. Each such object has the following keys:
+
+* `name`: the identifier of the model, as accepted by the `--name` option.
+
+* `description`: text describing the model. Paragraphs are separated by line feed characters.
+
+* `framework`: a string identifying the framework whose format the model is downloaded in.
+  Current possible values are `dldt` (Inference Engine IR), `caffe`, `mxnet` and `tf` (TensorFlow).
+  Additional possible values might be added in the future.
+
+* `license_url`: an URL for the license that the model is distributed under.
+
+* `precisions`: the list of precisions that the model has IR files for. For models downloaded
+  in a format other than the Inference Engine IR format, these are the precisions that the model
+  converter can produce IR files in. Current possible values are `FP16`, `FP32`, `INT1`, `INT8`;
+  more might be added in the future.
 
 Shared options
 --------------
