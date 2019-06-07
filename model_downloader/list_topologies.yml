@@ -2073,7 +2073,7 @@ topologies:
 
   - name: "single-image-super-resolution-1033"
     description: >-
-      [An Attention-Based Approach for Single Image Super Resolution](https://arxiv.org/pdf/1807.06779.pdf)
+      An Attention-Based Approach for Single Image Super Resolution <https://arxiv.org/pdf/1807.06779.pdf>
       but with reduced number of channels and changes in network achitecture. It enhances
       the resolution of the input image by a factor of 3.
     files:
@@ -2089,7 +2089,7 @@ topologies:
 
   - name: "single-image-super-resolution-1033-fp16"
     description: >-
-      [An Attention-Based Approach for Single Image Super Resolution](https://arxiv.org/pdf/1807.06779.pdf)
+      An Attention-Based Approach for Single Image Super Resolution <https://arxiv.org/pdf/1807.06779.pdf>
       but with reduced number of channels and changes in network achitecture. It enhances
       the resolution of the input image by a factor of 3.
     files:
@@ -2105,8 +2105,8 @@ topologies:
 
   - name: "text-detection-0002"
     description: >-
-      Text detector based on [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) architecture
-      with [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf) as a backbone for indoor/outdoor
+      Text detector based on PixelLink <https://arxiv.org/pdf/1801.01315.pdf> architecture
+      with MobileNetV2 <https://arxiv.org/pdf/1801.04381.pdf> as a backbone for indoor/outdoor
       scenes.
     files:
       - name: text-detection-0002.xml
@@ -2121,8 +2121,8 @@ topologies:
 
   - name: "text-detection-0002-fp16"
     description: >-
-      Text detector based on [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) architecture
-      with [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf) as a backbone for indoor/outdoor
+      Text detector based on PixelLink <https://arxiv.org/pdf/1801.01315.pdf> architecture
+      with MobileNetV2 <https://arxiv.org/pdf/1801.04381.pdf> as a backbone for indoor/outdoor
       scenes.
     files:
       - name: text-detection-0002-fp16.xml
@@ -2274,7 +2274,7 @@ topologies:
 
   - name: "single-image-super-resolution-1032"
     description: >-
-      [An Attention-Based Approach for Single Image Super Resolution](https://arxiv.org/pdf/1807.06779.pdf)
+      An Attention-Based Approach for Single Image Super Resolution <https://arxiv.org/pdf/1807.06779.pdf>
       but with reduced number of channels and changes in network achitecture. It enhances
       the resolution of the input image by a factor of 4.
     files:
@@ -2290,7 +2290,7 @@ topologies:
 
   - name: "single-image-super-resolution-1032-fp16"
     description: >-
-      [An Attention-Based Approach for Single Image Super Resolution](https://arxiv.org/pdf/1807.06779.pdf)
+      An Attention-Based Approach for Single Image Super Resolution <https://arxiv.org/pdf/1807.06779.pdf>
       but with reduced number of channels and changes in network achitecture. It enhances
       the resolution of the input image by a factor of 4.
     files:
@@ -2308,7 +2308,7 @@ topologies:
     description: >-
       This is an general-purpose action recognition model for Kinetics-400 dataset.
       The model uses Video Transformer approach with ResNet34 encoder. Please refer
-      to the [kinetics](https://deepmind.com/research/open-source/open-source-datasets/kinetics/)
+      to the kinetics <https://deepmind.com/research/open-source/open-source-datasets/kinetics/>
       dataset specification to see list of action that are recognised by this model.
 
       This model is only encoder part of the whole pipeline. It accepts video frame
@@ -2330,7 +2330,7 @@ topologies:
     description: >-
       This is an general-purpose action recognition model for Kinetics-400 dataset.
       The model uses Video Transformer approach with ResNet34 encoder. Please refer
-      to the [kinetics](https://deepmind.com/research/open-source/open-source-datasets/kinetics/)
+      to the kinetics <https://deepmind.com/research/open-source/open-source-datasets/kinetics/>
       dataset specification to see list of action that are recognised by this model.
 
       This model is only encoder part of the whole pipeline. It accepts video frame
@@ -2529,7 +2529,7 @@ topologies:
     description: >-
       This is an general-purpose action recognition model for Kinetics-400 dataset.
       The model uses Video Transformer approach with ResNet34 encoder. Please refer
-      to the [kinetics](https://deepmind.com/research/open-source/open-source-datasets/kinetics/)
+      to the kinetics <https://deepmind.com/research/open-source/open-source-datasets/kinetics/>
       dataset specification to see list of action that are recognised by this model.
 
       This model is only decoder part of the whole pipeline. It accepts stack of frame
@@ -2551,7 +2551,7 @@ topologies:
     description: >-
       This is an general-purpose action recognition model for Kinetics-400 dataset.
       The model uses Video Transformer approach with ResNet34 encoder. Please refer
-      to the [kinetics](https://deepmind.com/research/open-source/open-source-datasets/kinetics/)
+      to the kinetics <https://deepmind.com/research/open-source/open-source-datasets/kinetics/>
       dataset specification to see list of action that are recognised by this model.
 
       This model is only decoder part of the whole pipeline. It accepts stack of frame
