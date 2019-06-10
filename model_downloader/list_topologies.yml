@@ -1087,8 +1087,6 @@ topologies:
       - name: FP32/age-gender-recognition-retail-0013.bin
         sha256: 4dab79cfedebd628f3327367a91c9736a32fbf9cc733cbbf1629d16910d4ace7
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.bin
-  - name: "age-gender-recognition-retail-0013-fp16"
-      - name: age-gender-recognition-retail-0013-fp16.xml
       - name: FP16/age-gender-recognition-retail-0013.xml
         sha256: 885c3fbc32f2f42b37f09dd4f6d309c3aa12996737433164b5d1c59816b8b4e1
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.xml
