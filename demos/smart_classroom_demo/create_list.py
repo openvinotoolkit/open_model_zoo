@@ -35,7 +35,7 @@ for file in files_list:
     path = os.path.abspath(file)
 
     if label in labels:
-        objects[label].append(path)
+        raise Exception('An item with the label {} already exists in the gallery!'.format(label))
     else:
         labels.append(label)
         objects[label] = [path]
