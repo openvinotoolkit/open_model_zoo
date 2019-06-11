@@ -1075,6 +1075,283 @@ topologies:
     framework: mxnet
     license: https://raw.githubusercontent.com/lachinov/brats2018-graphlabunn/master/LICENSE
 
+  - name: "mobilenet-v1-1.0-224-tf"
+    description: "MobileNet V1 architecture with the width multiplier 1.0 and resolution 224 (https://arxiv.org/pdf/1704.04861.pdf)"
+    files:
+      - name: mobilenet_v1_1.0_224.tgz
+        sha256: 2fadeabb9968ec6833bee903900dda6e61b3947200535874ce2fe42a8493abc0
+        source: http://download.tensorflow.org/models/mobilenet_v1_2018_08_02/mobilenet_v1_1.0_224.tgz
+    output: "classification/mobilenet/v1/1.0/224/"
+    postprocessing:
+      - $type: unpack_archive
+        format: gztar
+        file: mobilenet_v1_1.0_224.tgz
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --reverse_input_channels
+      - --input_shape=[1,224,224,3]
+      - --input=input
+      - --mean_values=input[127.5,127.5,127.5]
+      - --scale_values=input[127.50000414375013]
+      - --output=MobilenetV1/Predictions/Reshape_1
+      - --input_model=$dl_dir/mobilenet_v1_1.0_224_frozen.pb
+    framework: "tf"
+    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
+
+  - name: "mobilenet-v1-0.50-224"
+    description: "MobileNet V1 architecture with the width multiplier 0.5 and resolution 224 (https://arxiv.org/pdf/1704.04861.pdf)"
+    files:
+      - name: mobilenet_v1_0.5_224.tgz
+        sha256: 98cf7a39552f73920cb99617cfa9b88d5732a87abf9ec14f7cc7f3ade1db0aaa
+        source: http://download.tensorflow.org/models/mobilenet_v1_2018_08_02/mobilenet_v1_0.5_224.tgz
+    output: "classification/mobilenet/v1/0.50/224/"
+    postprocessing:
+      - $type: unpack_archive
+        format: gztar
+        file: mobilenet_v1_0.5_224.tgz
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --reverse_input_channels
+      - --input_shape=[1,224,224,3]
+      - --input=input
+      - --mean_values=input[127.5,127.5,127.5]
+      - --scale_values=input[127.50000414375013]
+      - --output=MobilenetV1/Predictions/Reshape_1
+      - --input_model=$dl_dir/mobilenet_v1_0.5_224_frozen.pb
+    framework: "tf"
+    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
+
+  - name: "mobilenet-v1-0.50-160"
+    description: "MobileNet V1 architecture with the width multiplier 0.5 and resolution 160 (https://arxiv.org/pdf/1704.04861.pdf)"
+    files:
+      - name: mobilenet_v1_0.5_160.tgz
+        sha256: 6bbc9dd7892433e49b4b6ff6af2952183eaa6c1c0cb862868465377a29c77b0d
+        source: http://download.tensorflow.org/models/mobilenet_v1_2018_08_02/mobilenet_v1_0.5_160.tgz
+    output: "classification/mobilenet/v1/0.50/160/"
+    postprocessing:
+      - $type: unpack_archive
+        format: gztar
+        file: mobilenet_v1_0.5_160.tgz
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --reverse_input_channels
+      - --input_shape=[1,160,160,3]
+      - --input=input
+      - --mean_values=input[127.5,127.5,127.5]
+      - --scale_values=input[127.50000414375013]
+      - --output=MobilenetV1/Predictions/Reshape_1
+      - --input_model=$dl_dir/mobilenet_v1_0.5_160_frozen.pb
+    framework: "tf"
+    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
+
+  - name: "mobilenet-v1-0.25-128"
+    description: "MobileNet V1 architecture with the width multiplier 0.25 and resolution 128 (https://arxiv.org/pdf/1704.04861.pdf)"
+    files:
+      - name: mobilenet_v1_0.25_128.tgz
+        sha256: 879ddc3e0857f3611b5cf248e36de2288c7a11ea8c2ed8a8bdded635e6010dfe
+        source: http://download.tensorflow.org/models/mobilenet_v1_2018_08_02/mobilenet_v1_0.25_128.tgz
+    output: "classification/mobilenet/v1/0.25/128/"
+    postprocessing:
+      - $type: unpack_archive
+        format: gztar
+        file: mobilenet_v1_0.25_128.tgz
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --reverse_input_channels
+      - --input_shape=[1,128,128,3]
+      - --input=input
+      - --mean_values=input[127.5,127.5,127.5]
+      - --scale_values=input[127.50000414375013]
+      - --output=MobilenetV1/Predictions/Reshape_1
+      - --input_model=$dl_dir/mobilenet_v1_0.25_128_frozen.pb
+    framework: "tf"
+    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
+
+  - name: "faster_rcnn_resnet50_coco"
+    description: "Faster R-CNN Resnet-50 (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
+    files:
+      - name: faster_rcnn_resnet50_coco_2018_01_28.tar.gz
+        sha256: 0f898f96d6c416de192c516fb6fa773ae9f5ee253eb2ab4015445fbd6eb0ab76
+        source: http://download.tensorflow.org/models/object_detection/faster_rcnn_resnet50_coco_2018_01_28.tar.gz
+    output: "object_detection/common/faster_rcnn/faster_rcnn_resnet50_coco/"
+    postprocessing:
+      - $type: unpack_archive
+        format: gztar
+        file: faster_rcnn_resnet50_coco_2018_01_28.tar.gz
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --reverse_input_channels
+      - --input_shape=[1,600,600,3]
+      - --input=image_tensor
+      - --tensorflow_use_custom_operations_config=$mo_dir/extensions/front/tf/faster_rcnn_support.json
+      - --tensorflow_object_detection_api_pipeline_config=$dl_dir/faster_rcnn_resnet50_coco_2018_01_28/pipeline.config
+      - --output=detection_classes,detection_scores,detection_boxes,num_detections
+      - --input_model=$dl_dir/faster_rcnn_resnet50_coco_2018_01_28/frozen_inference_graph.pb
+    framework: "tf"
+    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
+
+  - name: "faster_rcnn_inception_resnet_v2_atrous_coco"
+    description: "Faster R-CNN with Inception Resnet v2 Atrous version (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
+    files:
+      - name: faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
+        sha256: d615532f464532620d742be6564bddaaaba3e5f9670c245c6309eb7842876c62
+        source: http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
+    output: "object_detection/common/faster_rcnn/faster_rcnn_inception_resnet_v2_atrous_coco/"
+    postprocessing:
+      - $type: unpack_archive
+        format: gztar
+        file: faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --reverse_input_channels
+      - --input_shape=[1,600,600,3]
+      - --input=image_tensor
+      - --tensorflow_use_custom_operations_config=$mo_dir/extensions/front/tf/faster_rcnn_support.json
+      - --tensorflow_object_detection_api_pipeline_config=$dl_dir/faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28/pipeline.config
+      - --output=detection_classes,detection_scores,detection_boxes,num_detections
+      - --input_model=$dl_dir/faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28/frozen_inference_graph.pb
+    framework: "tf"
+    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
+
+  - name: "inception-resnet-v2-tf"
+    description: "Inception-ResNet V2 architecture (https://arxiv.org/pdf/1602.07261.pdf)"
+    files:
+      - name: inception_resnet_v2_2018_04_27.tgz
+        sha256: fb16b93ff2b2bcda0da5cdfd25a8d5b8b74438943dae738db659bad0d3d48ff1
+        source: https://storage.googleapis.com/download.tensorflow.org/models/tflite/model_zoo/upload_20180427/inception_resnet_v2_2018_04_27.tgz
+    output: "classification/inception-resnet/v2/"
+    postprocessing:
+      - $type: unpack_archive
+        format: gztar
+        file: inception_resnet_v2_2018_04_27.tgz
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --reverse_input_channels
+      - --input_shape=[1,299,299,3]
+      - --input=input
+      - --mean_values=input[127.5,127.5,127.5]
+      - --scale_values=input[127.50000414375013]
+      - --output=InceptionResnetV2/AuxLogits/Logits/BiasAdd
+      - --input_model=$dl_dir/inception_resnet_v2.pb
+    framework: "tf"
+    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
+
+  - name: "densenet-121-tf"
+    description: "This is an Tensorflow implementation of DenseNet by G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten with ImageNet pretrained models. The weights are converted from DenseNet-Keras Models."
+    files:
+      - name: tf-densenet121.tar.gz
+        size: 30597420
+        sha256: b31ec840358f1d20e1c6364d05ce463cb0bc0480042e663ad54547189501852d
+        source:
+          $type: google_drive
+          id: 0B_fUSpodN0t0eW1sVk1aeWREaDA
+    output: "classification/densenet/121/tf/"
+    postprocessing:
+      - $type: unpack_archive
+        format: gztar
+        file: tf-densenet121.tar.gz
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --input_shape=[1,224,224,3]
+      - --input=Placeholder
+      - --mean_values=Placeholder[123.68,116.78,103.94]
+      - --scale_values=Placeholder[58.8235294117647]
+      - --output=densenet121/predictions/Reshape_1
+      - --input_meta_graph=$dl_dir/tf-densenet121.ckpt.meta
+      - --input_checkpoint=$dl_dir/tf-densenet121.ckpt.data-00000-of-00001
+    framework: tf
+    license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE
+
+  - name: "densenet-169-tf"
+    description: "This is an Tensorflow implementation of DenseNet by G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten with ImageNet pretrained models. The weights are converted from DenseNet-Keras Models."
+    files:
+      - name: tf-densenet169.tar.gz
+        size: 54307314
+        sha256: 6f20b51077c49cb87df11d181b055a0aec1d27f969b84b4ed8115dd4933fccd4
+        source:
+          $type: google_drive
+          id: 0B_fUSpodN0t0TDB5Ti1PeTZMM2c
+    output: "classification/densenet/169/tf"
+    postprocessing:
+      - $type: unpack_archive
+        format: gztar
+        file: tf-densenet169.tar.gz
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --input_shape=[1,224,224,3]
+      - --input=Placeholder
+      - --mean_values=Placeholder[123.68,116.78,103.94]
+      - --scale_values=Placeholder[58.8235294117647]
+      - --output=densenet169/predictions/Reshape_1
+      - --input_meta_graph=$dl_dir/tf-densenet169.ckpt.meta
+      - --input_checkpoint=$dl_dir/tf-densenet169.ckpt.data-00000-of-00001
+    framework: tf
+    license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE
+
+  - name: "densenet-161-tf"
+    description: "This is an Tensorflow implementation of DenseNet by G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten with ImageNet pretrained models. The weights are converted from from DenseNet-Keras Models."
+    files:
+      - name: tf-densenet161.tar.gz
+        size: 110578586
+        sha256: f4745258b9fe2f234711a70e4192368f169bf0c1956087a210b08270dbe96ca7
+        source:
+          $type: google_drive
+          id: 0B_fUSpodN0t0NmZvTnZZa2plaHc
+    output: "classification/densenet/161/tf"
+    postprocessing:
+      - $type: unpack_archive
+        format: gztar
+        file: tf-densenet161.tar.gz
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --input_shape=[1,224,224,3]
+      - --input=Placeholder
+      - --mean_values=Placeholder[123.68,116.78,103.94]
+      - --scale_values=Placeholder[58.8235294117647]
+      - --output=densenet169/predictions/Reshape_1
+      - --input_meta_graph=$dl_dir/tf-densenet161.ckpt.meta
+      - --input_checkpoint=$dl_dir/tf-densenet161.ckpt.data-00000-of-00001
+    framework: tf
+    license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE
+
+  - name: "facenet-20180408-102900"
+    description: "FaceNet: A Unified Embedding for Face Recognition and Clustering trained on CASIA-WebFace dataset (https://arxiv.org/pdf/1503.03832.pdf)"
+    files:
+      - name: 20180408-102900.zip
+        size: 195479980
+        sha256: 2a32a4d6b797b0e35e065c674dfa2d60e9eb2372aa10728bd0b221abe12490ac
+        source:
+          $type: google_drive
+          id: 1R77HmFADxe87GmoLwzfgMu_HY0IhcyBz
+    output: "face_recognition/facenet/CASIA-WebFace/tf/"
+    postprocessing:
+      - $type: unpack_archive
+        format: zip
+        file: 20180408-102900.zip
+    model_optimizer_args:
+      - --framework=tf
+      - --data_type=FP32
+      - --freeze_placeholder_with_value=phase_train->False
+      - --reverse_input_channels
+      - --input_shape=[1,160,160,3],[1]
+      - --input=image_batch,phase_train
+      - --mean_values=image_batch[127.5,127.5,127.5]
+      - --scale_values=image_batch[128.0]
+      - --output=embeddings
+      - --input_model=$dl_dir/20180408-102900/20180408-102900.pb
+    framework: tf
+    license: https://raw.githubusercontent.com/davidsandberg/facenet/master/LICENSE.md
+
   - name: "age-gender-recognition-retail-0013"
     description: "Age & gender classification."
     files:
