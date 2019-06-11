@@ -8,7 +8,7 @@ This repository includes optimized deep learning models and a set of demos to ex
 
 ## Repository Components:
 * [Pre-Trained Models](intel_models/index.md)
-* [Model Downloader](model_downloader/README.md) and other automation tools
+* [Model Downloader](tools/downloader/README.md) and other automation tools
 * [Demos](demos/Readme.md) that demonstrate models usage with Deep Learning Deployment Toolkit
 
 ## License
