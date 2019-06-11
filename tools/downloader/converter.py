@@ -42,8 +42,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=Path, metavar='CONFIG.YML',
         default=common.get_default_config_path(), help='topology configuration file')
-    parser.add_argument('-d', '--download_root', type=Path, metavar='DIR',
-        default=Path.cwd(), help='root directory with downloaded topology files')
+    parser.add_argument('-d', '--download_dir', type=Path, metavar='DIR',
+        default=Path.cwd(), help='root of the directory tree with downloaded topology files')
+    parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',
+        help='root of the directory tree to place converted files into')
     parser.add_argument('--name', metavar='PAT[,PAT...]',
         help='convert only topologies whose names match at least one of the specified patterns')
     parser.add_argument('--list', type=Path, metavar='FILE.LST',
@@ -68,6 +70,8 @@ def main():
 
     topologies = common.load_topologies_from_args(parser, args)
 
+    output_dir = args.download_dir if args.output_dir is None else args.output_dir
+
     failed_topologies = set()
 
     for top in topologies:
@@ -76,14 +80,14 @@ def main():
             print()
             continue
 
-        model_dl_dir = args.download_root / top.subdir
-
         expanded_mo_args = [
-            string.Template(arg).substitute(dl_dir=model_dl_dir, mo_dir=mo_path.parent)
+            string.Template(arg).substitute(dl_dir=args.download_dir / top.subdir, mo_dir=mo_path.parent)
             for arg in top.mo_args]
 
+        assert len(top.precisions) == 1 # only one precision per model is supported at the moment
+
         mo_cmd = [str(args.python), '--', str(mo_path),
-            '--output_dir={}'.format(model_dl_dir),
+            '--output_dir={}'.format(output_dir / top.subdir / next(iter(top.precisions))),
             '--model_name={}'.format(top.name),
             *expanded_mo_args]
 

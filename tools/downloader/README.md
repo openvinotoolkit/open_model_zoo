@@ -81,15 +81,21 @@ The basic usage is to run the script like this:
 ```
 
 This will convert all models into the Inference Engine IR format. Models that
-were originally in that format are ignored. The conversion results are placed
-side by side with the original models.
+were originally in that format are ignored.
 
 The current directory must be the root of a download tree created by the model
-downloader. To specify a different download tree path, use the `-d`/`--download_root`
+downloader. To specify a different download tree path, use the `-d`/`--download_dir`
 option:
 
 ```sh
-./converter.py --all --download_root my/download/directory
+./converter.py --all --download_dir my/download/directory
+```
+
+By default, the converted models are placed into the download tree. To place them
+into a different directory tree, use the `-o`/`--output_dir` option:
+
+```sh
+./converter.py --all --output_dir my/output/directory
 ```
 
 The `--all` option can be replaced with other filter options to convert only
