@@ -38,6 +38,15 @@ if platform.system() == 'Windows':
 else:
     quote_arg = shlex.quote
 
+
+def convert_to_onnx(topology, args):
+    print('========= {}Converting {} to ONNX'.format('(DRY RUN) ' if args.dry_run else '', topology.name))
+    pytorch_to_onnx_args = [arg for arg in topology.pytorch_to_onnx_args]
+    cmd = [str(args.python), 'pytorch_to_onnx.py', *pytorch_to_onnx_args]
+    print('Conversion to ONNX command:', ' '.join(map(quote_arg, cmd)))
+    return subprocess.run(cmd).returncode if not args.dry_run else 0
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=Path, metavar='CONFIG.YML',
@@ -80,6 +89,10 @@ def main():
             print()
             continue
 
+        if top.pytorch_to_onnx_args:
+            if convert_to_onnx(top, args) != 0:
+                failed_topologies.add(top.name)
+                continue
         expanded_mo_args = [
             string.Template(arg).substitute(dl_dir=args.download_dir / top.subdirectory, mo_dir=mo_path.parent)
             for arg in top.mo_args]

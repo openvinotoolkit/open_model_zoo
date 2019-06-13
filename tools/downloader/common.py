@@ -232,7 +232,7 @@ Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
 class Topology:
     def __init__(self, name, subdirectory, files, postprocessing, mo_args, framework,
-            description, license_url, precisions, task_type):
+            description, license_url, precisions, task_type, pytorch_to_onnx_args):
         self.name = name
         self.subdirectory = subdirectory
         self.files = files
@@ -243,6 +243,7 @@ class Topology:
         self.license_url = license_url
         self.precisions = precisions
         self.task_type = task_type
+		self.pytorch_to_onnx_args = pytorch_to_onnx_args
 
     @classmethod
     def deserialize(cls, top):
@@ -268,6 +269,12 @@ class Topology:
             for i, postproc in enumerate(top.get('postprocessing', [])):
                 with deserialization_context('"postprocessing" #{}'.format(i)):
                     postprocessing.append(Postproc.deserialize(postproc))
+
+            pytorch_to_onnx_args = None
+            if top.get('pytorch_to_onnx', None):
+                pytorch_to_onnx_args = [validate_string('"pytorch_to_onnx" #{}'.format(i), arg)
+                                        for i, arg in enumerate(top['pytorch_ot_onnx'])]
+
 
             if 'model_optimizer_args' in top:
                 mo_args = [validate_string('"model_optimizer_args" #{}'.format(i), arg)
@@ -298,7 +305,7 @@ class Topology:
             task_type = validate_string_enum('"task_type"', top['task_type'], KNOWN_TASK_TYPES)
 
             return cls(name, subdirectory, files, postprocessing, mo_args, framework,
-                description, license_url, precisions, task_type)
+                description, license_url, precisions, task_type, pytorch_to_onnx_args)
 
 def load_topologies(config):
     with config.open() as config_file:
