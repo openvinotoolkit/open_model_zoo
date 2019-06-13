@@ -1190,7 +1190,7 @@ topologies:
       - --input=image_tensor
       - --tensorflow_use_custom_operations_config=$mo_dir/extensions/front/tf/faster_rcnn_support.json
       - --tensorflow_object_detection_api_pipeline_config=$dl_dir/faster_rcnn_resnet50_coco_2018_01_28/pipeline.config
-      - --output=detection_classes,detection_scores,detection_boxes,num_detections
+      - --output=detection_scores,detection_boxes,num_detections
       - --input_model=$dl_dir/faster_rcnn_resnet50_coco_2018_01_28/frozen_inference_graph.pb
     framework: "tf"
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
@@ -1214,7 +1214,7 @@ topologies:
       - --input=image_tensor
       - --tensorflow_use_custom_operations_config=$mo_dir/extensions/front/tf/faster_rcnn_support.json
       - --tensorflow_object_detection_api_pipeline_config=$dl_dir/faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28/pipeline.config
-      - --output=detection_classes,detection_scores,detection_boxes,num_detections
+      - --output=detection_scores,detection_boxes,num_detections
       - --input_model=$dl_dir/faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28/frozen_inference_graph.pb
     framework: "tf"
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
@@ -1318,7 +1318,7 @@ topologies:
       - --input=Placeholder
       - --mean_values=Placeholder[123.68,116.78,103.94]
       - --scale_values=Placeholder[58.8235294117647]
-      - --output=densenet169/predictions/Reshape_1
+      - --output=densenet161/predictions/Reshape_1
       - --input_meta_graph=$dl_dir/tf-densenet161.ckpt.meta
       - --input_checkpoint=$dl_dir/tf-densenet161.ckpt.data-00000-of-00001
     framework: tf
