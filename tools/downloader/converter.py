@@ -81,13 +81,13 @@ def main():
             continue
 
         expanded_mo_args = [
-            string.Template(arg).substitute(dl_dir=args.download_dir / top.subdir, mo_dir=mo_path.parent)
+            string.Template(arg).substitute(dl_dir=args.download_dir / top.subdirectory, mo_dir=mo_path.parent)
             for arg in top.mo_args]
 
         assert len(top.precisions) == 1 # only one precision per model is supported at the moment
 
         mo_cmd = [str(args.python), '--', str(mo_path),
-            '--output_dir={}'.format(output_dir / top.subdir / next(iter(top.precisions))),
+            '--output_dir={}'.format(output_dir / top.subdirectory / next(iter(top.precisions))),
             '--model_name={}'.format(top.name),
             *expanded_mo_args]
 

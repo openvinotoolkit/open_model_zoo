@@ -30,6 +30,7 @@ def to_info(topology):
         'framework': topology.framework,
         'license_url': topology.license_url,
         'precisions': sorted(topology.precisions),
+        'subdirectory': str(topology.subdirectory),
     }
 
 def main():
