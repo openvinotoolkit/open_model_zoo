@@ -3520,7 +3520,7 @@ topologies:
       - --scale_values=data[58.624,57.12,57.375]
       - --output=prob
       - --input_model=$dl_dir/mobilenet-v2.onnx
-    license: https://github.com/tonylins/pytorch-mobilenet-v2/blob/master/LICENSE
+    license: https://raw.githubusercontent.com/tonylins/pytorch-mobilenet-v2/master/LICENSE
 
   - name: "googlenet-v3-pytorch"
     description: >-
@@ -3558,7 +3558,7 @@ topologies:
       - --scale_values=data[127.5]
       - --output=prob
       - --input_model=$dl_dir/googlenet-v3.onnx
-    license: https://github.com/pytorch/vision/blob/v0.3.0/LICENSE
+    license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE
 
   - name: "resnet-50-pytorch"
     description: >-
@@ -3596,4 +3596,4 @@ topologies:
       - --scale_values=data[58.395,57.12,57.375]
       - --output=prob
       - --input_model=$dl_dir/resnet-v1-50.onnx
-    license: https://github.com/pytorch/vision/blob/v0.3.0/LICENSE
+    license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE
