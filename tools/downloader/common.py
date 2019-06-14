@@ -83,7 +83,7 @@ class FileSourceHttp(FileSource):
     def deserialize(cls, source):
         return FileSourceHttp(validate_string('"url"', source['url']))
 
-    def start_download(self, session, total_size=None):
+    def start_download(self, session, chunk_size, total_size=None):
         response = session.get(self.url, stream=True, timeout=DOWNLOAD_TIMEOUT)
         response.raise_for_status()
 
@@ -92,7 +92,7 @@ class FileSourceHttp(FileSource):
         else:
             size = total_size
 
-        return response.iter_content(chunk_size=8192), size
+        return response.iter_content(chunk_size=chunk_size), size
 
 FileSource.types['http'] = FileSourceHttp
 
@@ -104,7 +104,7 @@ class FileSourceGoogleDrive(FileSource):
     def deserialize(cls, source):
         return FileSourceGoogleDrive(validate_string('"id"', source['id']))
 
-    def start_download(self, session, total_size):
+    def start_download(self, session, chunk_size, total_size):
         URL = 'https://docs.google.com/uc?export=download'
         response = session.get(URL, params={'id' : self.id}, stream=True, timeout=DOWNLOAD_TIMEOUT)
         response.raise_for_status()
@@ -115,7 +115,7 @@ class FileSourceGoogleDrive(FileSource):
                 response = session.get(URL, params=params, stream=True, timeout=DOWNLOAD_TIMEOUT)
                 response.raise_for_status()
 
-        return response.iter_content(chunk_size=32768), total_size
+        return response.iter_content(chunk_size=chunk_size), total_size
 
 FileSource.types['google_drive'] = FileSourceGoogleDrive
 
