@@ -28,6 +28,10 @@ For the model converter, you will also need to install the OpenVINO&trade;
 toolkit and the prerequisite libraries for Model Optimizer. See the
 [OpenVINO toolkit documentation](https://docs.openvinotoolkit.org/) for details.
 
+If you using models from PyTorch framework, you will also need to use intermediate
+conversion to ONNX format. See [this](pytorch_models_conversion.md) for details.
+If you using automatic conversion just install prerequisites for script
+
 Model downloader usage
 ----------------------
 
