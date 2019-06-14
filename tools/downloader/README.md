@@ -17,11 +17,11 @@ based on the included configuration file.
 Prerequisites
 -------------
 
-1. Install python3 (version 3.5.2 or higher)
-2. Install yaml and requests modules with the command
+1. Install Python (version 3.5.2 or higher)
+2. Install the tools' dependencies with the following command:
 
 ```sh
-sudo -E pip3 install pyyaml requests
+python3 -mpip install --user -r ./requirements.in
 ```
 
 For the model converter, you will also need to install the OpenVINO&trade;
