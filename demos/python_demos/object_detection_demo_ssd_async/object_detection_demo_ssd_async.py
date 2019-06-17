@@ -22,6 +22,7 @@ from argparse import ArgumentParser, SUPPRESS
 import cv2
 import time
 import logging as log
+
 from openvino.inference_engine import IENetwork, IEPlugin
 
 
@@ -72,15 +73,28 @@ def main():
             log.error("Please try to specify cpu extensions library path in demo's command line parameters using -l "
                       "or --cpu_extension command line argument")
             sys.exit(1)
-    assert len(net.inputs.keys()) == 1, "Demo supports only single input topologies"
+
+    img_info_input_blob = None
+    feed_dict = {}
+    for blob_name in net.inputs:
+        if len(net.inputs[blob_name].shape) == 4:
+            input_blob = blob_name
+        elif len(net.inputs[blob_name].shape) == 2:
+            img_info_input_blob = blob_name
+        else:
+            raise RuntimeError("Unsupported {}D input layer '{}'. Only 2D and 4D input layers are supported"
+                               .format(len(net.inputs[blob_name].shape), blob_name))
+
     assert len(net.outputs) == 1, "Demo supports only single output topologies"
-    input_blob = next(iter(net.inputs))
+
     out_blob = next(iter(net.outputs))
     log.info("Loading IR to the plugin...")
     exec_net = plugin.load(network=net, num_requests=2)
     # Read and pre-process input image
     n, c, h, w = net.inputs[input_blob].shape
-    del net
+    if img_info_input_blob:
+        feed_dict[img_info_input_blob] = [h, w, 1]
+
     if args.input == 'cam':
         input_stream = 0
     else:
@@ -98,13 +112,13 @@ def main():
     next_request_id = 1
 
     log.info("Starting inference in async mode...")
-    log.info("To switch between sync and async modes press Tab button")
-    log.info("To stop the demo execution press Esc button")
     is_async_mode = True
     render_time = 0
     ret, frame = cap.read()
 
-    print("To close the application, press 'CTRL+C' or any key with focus on the output window")
+    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
+    print("To switch between sync/async modes, press TAB key in the output window")
+
     while cap.isOpened():
         if is_async_mode:
             ret, next_frame = cap.read()
@@ -122,12 +136,14 @@ def main():
             in_frame = cv2.resize(next_frame, (w, h))
             in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
             in_frame = in_frame.reshape((n, c, h, w))
-            exec_net.start_async(request_id=next_request_id, inputs={input_blob: in_frame})
+            feed_dict[input_blob] = in_frame
+            exec_net.start_async(request_id=next_request_id, inputs=feed_dict)
         else:
             in_frame = cv2.resize(frame, (w, h))
             in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
             in_frame = in_frame.reshape((n, c, h, w))
-            exec_net.start_async(request_id=cur_request_id, inputs={input_blob: in_frame})
+            feed_dict[input_blob] = in_frame
+            exec_net.start_async(request_id=cur_request_id, inputs=feed_dict)
         if exec_net.requests[cur_request_id].wait(-1) == 0:
             inf_end = time.time()
             det_time = inf_end - inf_start

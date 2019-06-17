@@ -24,7 +24,7 @@ class ResultRenderer(object):
         self.output_height = output_height
         self.meters = defaultdict(partial(WindowAverageMeter, 16))
         self.postprocessing = [LabelPostprocessing(n_frames=30, history_size=100) for _ in range(number_of_predictions)]
-        print("To close the application, press 'CTRL+C' or any key with focus on the output window")
+        print("To close the application, press 'CTRL+C' here or switch to the output window and press any key")
 
     def update_timers(self, timers):
         self.meters['encoder'].update(timers['encoder'])

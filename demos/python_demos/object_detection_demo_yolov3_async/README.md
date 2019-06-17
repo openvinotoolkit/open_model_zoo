@@ -13,12 +13,12 @@ You can copy and paste this code without pulling Open Model Zoo demos helpers in
     -  Old-style "Sync" way, where the frame captured with OpenCV executes back-to-back with the Detection
     -  Truly "Async" way, where the detection is performed on a current frame, while OpenCV captures the next frame
 
-### How It Works
+## How It Works
 
 On the start-up, the application reads command-line parameters and loads a network to the Inference
 Engine. Upon getting a frame from the OpenCV VideoCapture, it performs inference and displays the results.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Running
 
@@ -79,7 +79,7 @@ To run the demo, you can use public or pre-trained models. You can download the 
 
 The only GUI knob is to use **Tab** to switch between the synchronized execution and the true Async mode.
 
-### Demo Output
+## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).
 In the default mode, the demo reports:

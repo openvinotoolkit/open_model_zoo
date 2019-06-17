@@ -138,7 +138,12 @@ def main():
     # Processing output blob
     log.info("Processing output blob")
     res = res[out_blob]
-    _, _, out_h, out_w = res.shape
+    if len(res.shape) == 3:
+        res = np.expand_dims(res, axis=1)
+    if len(res.shape) == 4:
+        _, _, out_h, out_w = res.shape
+    else:
+        raise Exception("Unexpected output blob shape {}. Only 4D and 3D output blobs are supported".format(res.shape))
     for batch, data in enumerate(res):
         classes_map = np.zeros(shape=(out_h, out_w, 3), dtype=np.int)
         for i in range(out_h):

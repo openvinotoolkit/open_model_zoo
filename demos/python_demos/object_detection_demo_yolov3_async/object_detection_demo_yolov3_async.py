@@ -63,21 +63,24 @@ class YoloV3Params:
     # ------------------------------------------- Extracting layer parameters ------------------------------------------
     # Magic numbers are copied from yolo samples
     def __init__(self, param, side):
-        self.num = 3 if 'num' not in param else len(param['mask'].split(',')) if 'mask' in param else int(param['num'])
+        self.num = 3 if 'num' not in param else int(param['num'])
         self.coords = 4 if 'coords' not in param else int(param['coords'])
         self.classes = 80 if 'classes' not in param else int(param['classes'])
         self.anchors = [10.0, 13.0, 16.0, 30.0, 33.0, 23.0, 30.0, 61.0, 62.0, 45.0, 59.0, 119.0, 116.0, 90.0, 156.0,
                         198.0,
                         373.0, 326.0] if 'anchors' not in param else [float(a) for a in param['anchors'].split(',')]
+
+        if 'mask' in param:
+            mask = [int(idx) for idx in param['mask'].split(',')]
+            self.num = len(mask)
+
+            maskedAnchors = []
+            for idx in mask:
+                maskedAnchors += [self.anchors[idx * 2], self.anchors[idx * 2 + 1]]
+            self.anchors = maskedAnchors
+
         self.side = side
-        if self.side == 13:
-            self.anchor_offset = 2 * 6
-        elif self.side == 26:
-            self.anchor_offset = 2 * 3
-        elif self.side == 52:
-            self.anchor_offset = 2 * 0
-        else:
-            assert False, "Invalid output size. Only 13, 26 and 52 sizes are supported for output spatial dimensions"
+
 
     def log_params(self):
         params_to_print = {'classes': self.classes, 'num': self.num, 'coords': self.coords, 'anchors': self.anchors}
@@ -131,8 +134,8 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
                 h_exp = exp(predictions[box_index + 3 * side_square])
             except OverflowError:
                 continue
-            w = w_exp * params.anchors[params.anchor_offset + 2 * n]
-            h = h_exp * params.anchors[params.anchor_offset + 2 * n + 1]
+            w = w_exp * params.anchors[2 * n]
+            h = h_exp * params.anchors[2 * n + 1]
             for j in range(params.classes):
                 class_index = entry_index(params.side, params.coords, params.classes, n * side_square + i,
                                           params.coords + 1 + j)
@@ -186,7 +189,6 @@ def main():
             sys.exit(1)
 
     assert len(net.inputs.keys()) == 1, "Sample supports only YOLO V3 based single input topologies"
-    assert len(net.outputs) == 3, "Sample supports only YOLO V3 based triple output topologies"
 
     # ---------------------------------------------- 4. Preparing inputs -----------------------------------------------
     log.info("Preparing inputs")
@@ -230,7 +232,9 @@ def main():
     parsing_time = 0
 
     # ----------------------------------------------- 6. Doing inference -----------------------------------------------
-    print("To close the application, press 'CTRL+C' or any key with focus on the output window")
+    log.info("Starting inference...")
+    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
+    print("To switch between sync/async modes, press TAB key in the output window")
     while cap.isOpened():
         # Here is the first asynchronous point: in the Async mode, we capture frame to populate the NEXT infer request
         # in the regular mode, we capture frame to the CURRENT infer request
@@ -274,6 +278,7 @@ def main():
             parsing_time = time() - start_time
 
         # Filtering overlapping boxes with respect to the --iou_threshold CLI parameter
+        objects = sorted(objects, key=lambda obj : obj['confidence'], reverse=True)
         for i in range(len(objects)):
             if objects[i]['confidence'] == 0:
                 continue
@@ -333,10 +338,10 @@ def main():
 
         key = cv2.waitKey(wait_key_code)
 
-        # Tab key
+        # ESC key
         if key == 27:
             break
-        # ESC key
+        # Tab key
         if key == 9:
             exec_net.requests[cur_request_id].wait()
             is_async_mode = not is_async_mode
