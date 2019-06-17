@@ -32,9 +32,8 @@ Options:
     -h                      Print a usage message.
     -i "<path>"             Required. Path to an image.
     -m "<path>"             Required. Path to an .xml file with a trained model.
-    -pp "<path>"            Optional. Path to a plugin folder.
     -d "<device>"           Optional. Specify the target device to infer on (CPU, GPU, FPGA, HDDL or MYRIAD). The demo will look for a suitable plugin for the specified device.
-    -ni "<integer>"         Optional. Number of iterations. Default value is 1
+    -niter "<integer>"      Optional. Number of iterations. Default value is 1
     -pc                     Optional. Enable per-layer performance report
 
 ```

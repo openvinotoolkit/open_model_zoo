@@ -77,7 +77,7 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
         }
 
         input_name_ = inputInfo.begin()->first;
-        net_ = config_.plugin.LoadNetwork(net_reader.getNetwork(), {});
+        net_ = config_.ie.LoadNetwork(net_reader.getNetwork(), config_.deviceName);
     }
 }
 
@@ -202,7 +202,7 @@ void ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat& main_conf
             float action_exp_value =
                 std::exp(config_.action_scale * anchor_conf_data[action_conf_start_idx + c]);
             action_sum_exp_values += action_exp_value;
-            if (c > 0 && action_exp_value > action_max_exp_value) {
+            if (action_exp_value > action_max_exp_value) {
                 action_max_exp_value = action_exp_value;
                 action_label = c;
             }

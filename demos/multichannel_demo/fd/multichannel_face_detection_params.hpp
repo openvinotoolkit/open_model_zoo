@@ -8,14 +8,8 @@
 #include <vector>
 #include <gflags/gflags.h>
 
-#ifdef _WIN32
-#include <os/windows/w_dirent.h>
-#else
-#include <dirent.h>
-#endif
-
 /// @brief message for probability threshold argument
-static const char thresh_output_message[] = "Probability threshold for detections";
+static const char thresh_output_message[] = "Optional. Probability threshold for detections";
 
 /// \brief Flag to output raw scoring results<br>
 /// It is an optional parameter. Ignored for human-pose-estimation

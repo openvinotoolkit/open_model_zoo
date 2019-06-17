@@ -30,7 +30,7 @@ bool ParseAndCheckCommandLine(int argc, char* argv[]) {
         return false;
     }
 
-    std::cout << "[ INFO ] Parsing input parameters" << std::endl;
+    std::cout << "Parsing input parameters" << std::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -65,9 +65,13 @@ int main(int argc, char* argv[]) {
             throw std::logic_error("Failed to get frame from cv::VideoCapture");
         }
         estimator.estimate(image);  // Do not measure network reshape, if it happened
+
+        std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
-            std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+            std::cout << " or switch to the output window and press ESC key" << std::endl;
+            std::cout << "To pause execution, switch to the output window and press 'p' key" << std::endl;
         }
+        std::cout << std::endl;
 
         do {
             double t1 = static_cast<double>(cv::getTickCount());
@@ -123,6 +127,6 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    std::cout << "[ INFO ] Execution successful" << std::endl;
+    std::cout << "Execution successful" << std::endl;
     return EXIT_SUCCESS;
 }

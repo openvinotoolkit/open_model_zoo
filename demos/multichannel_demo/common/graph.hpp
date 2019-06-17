@@ -23,8 +23,8 @@
 #include <cpp/ie_cnn_net_reader.h>
 #include <ie_plugin_config.hpp>
 
+#include <samples/common.hpp>
 #include <samples/slog.hpp>
-#include <samples/ocv_common.hpp>
 #include "perf_timer.hpp"
 #include "input.hpp"
 #include <ext_list.hpp>
@@ -52,7 +52,7 @@ private:
 
     bool printPerfReport;
 
-    InferenceEngine::InferencePlugin plugin;
+    InferenceEngine::Core ie;
     std::queue<InferenceEngine::InferRequest::Ptr> availableRequests;
 
     struct BatchRequestDesc {

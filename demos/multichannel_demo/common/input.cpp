@@ -69,7 +69,7 @@ struct VideoStream {
     using stream_t = unsigned char;
 
     explicit VideoStream(const std::string& filepath)
-        : fd(open(filepath.c_str(), O_RDONLY)), ptr(0, [](void*){}) {
+        : ptr(0, [](void*){}), fd(open(filepath.c_str(), O_RDONLY)) {
         struct stat sb;
         if (!fd.valid())
             throw std::runtime_error(std::string("Cannot open input file: ") + std::string(strerror(errno)));
@@ -165,10 +165,10 @@ public:
                           size_t queueSize_,
                           size_t pollingTimeMSec_,
                           bool realFps_):
-        perfTimer(collectStats_ ? PerfTimer::DefaultIterationsCount : 0),
-        queueSize(queueSize_),
+        parent(p),
         stream(name),
-        parent(p) { }
+        queueSize(queueSize_),
+        perfTimer(collectStats_ ? PerfTimer::DefaultIterationsCount : 0) { }
 
     bool init() { return true; }
 
@@ -178,7 +178,6 @@ public:
             while (!terminate) {
                 {
                     cv::Mat frame;
-                    bool result = false;
                     {
                         is_decoding = true;
                         std::unique_lock<std::mutex> lock(parent.decode_mutex);
@@ -222,7 +221,6 @@ public:
 
     bool read(VideoFrame& frame)  {
         queue_elem_t elem;
-        size_t count = 0;
 
         if (terminate)
             return false;

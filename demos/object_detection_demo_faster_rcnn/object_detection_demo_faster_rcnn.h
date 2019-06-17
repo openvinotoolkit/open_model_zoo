@@ -17,16 +17,13 @@
 #include <format_reader_ptr.h>
 #include <inference_engine.hpp>
 
-#include "../common/samples/common.hpp"
+#include "samples/common.hpp"
 
 /// @brief message for help argument
 static const char help_message[] = "Print a usage message.";
 
 /// @brief message for images argument
 static const char image_message[] = "Required. Path to a .bmp image.";
-
-/// @brief message for plugin_path argument
-static const char plugin_path_message[] = "Optional. Path to a plugin folder.";
 
 /// @brief message for model argument
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
@@ -70,9 +67,6 @@ DEFINE_string(i, "", image_message);
 /// It is a required parameter
 DEFINE_string(m, "", model_message);
 
-/// @brief Define parameter for set path to plugins <br>
-DEFINE_string(pp, "", plugin_path_message);
-
 /// @brief device the target device to infer on <br>
 DEFINE_string(d, "CPU", target_device_message);
 
@@ -88,7 +82,7 @@ DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
 
 /// @brief Iterations count (default 1)
-DEFINE_uint32(ni, 1, iterations_count_message);
+DEFINE_uint32(niter, 1, iterations_count_message);
 
 /// @brief Custom bbox layer name
 DEFINE_string(bbox_name, "bbox_pred", bbox_layer_name_message);
@@ -113,10 +107,9 @@ static void showUsage() {
     std::cout << "    -m \"<path>\"               " << model_message << std::endl;
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
-    std::cout << "    -pp \"<path>\"              " << plugin_path_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -pc                       " << performance_counter_message << std::endl;
-    std::cout << "    -ni \"<integer>\"           " << iterations_count_message << std::endl;
+    std::cout << "    -niter \"<integer>\"        " << iterations_count_message << std::endl;
     std::cout << "    -bbox_name \"<string>\"     " << bbox_layer_name_message << std::endl;
     std::cout << "    -proposal_name \"<string>\" " << proposal_layer_name_message << std::endl;
     std::cout << "    -prob_name \"<string>\"     " << prob_layer_name_message << std::endl;

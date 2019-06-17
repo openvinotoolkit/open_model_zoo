@@ -103,6 +103,7 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
         std::string label = item.name();
         std::vector<cv::Mat> embeddings;
         CV_Assert(item.size() == 1);
+
         for (size_t i = 0; i < item.size(); i++) {
             std::string path;
             if (file_exists(item[i].string())) {
@@ -110,16 +111,17 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
             } else {
                 path = folder_name(ids_list) + separator() + item[i].string();
             }
+
             cv::Mat image = cv::imread(path);
             CV_Assert(!image.empty());
             cv::Mat emb;
             RegistrationStatus status = RegisterIdentity(label, image, min_size_fr, crop_gallery,  detector, landmarks_det, image_reid, emb);
             if (status == RegistrationStatus::SUCCESS) {
-              embeddings.push_back(emb);
-              idx_to_id.push_back(id);
-              total_images++;
-              identities.emplace_back(embeddings, label, id);
-              ++id;
+                embeddings.push_back(emb);
+                idx_to_id.push_back(id);
+                total_images++;
+                identities.emplace_back(embeddings, label, id);
+                ++id;
             }
         }
     }
