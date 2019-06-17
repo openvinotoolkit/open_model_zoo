@@ -213,7 +213,7 @@ print('###############|| Downloading topologies ||###############')
 print('')
 with requests.Session() as session:
     for top in topologies:
-        output = args.output_dir / top.subdir
+        output = args.output_dir / top.subdirectory
         output.mkdir(parents=True, exist_ok=True)
 
         for top_file in top.files:
@@ -232,7 +232,7 @@ print('')
 for top in topologies:
     if top.name in failed_topologies: continue
 
-    output = args.output_dir / top.subdir
+    output = args.output_dir / top.subdirectory
 
     for postproc in top.postprocessing:
         postproc.apply(output)

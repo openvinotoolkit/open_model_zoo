@@ -212,10 +212,10 @@ class PostprocUnpackArchive(Postproc):
 Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
 class Topology:
-    def __init__(self, name, subdir, files, postprocessing, mo_args, framework,
+    def __init__(self, name, subdirectory, files, postprocessing, mo_args, framework,
             description, license_url, precisions):
         self.name = name
-        self.subdir = subdir
+        self.subdirectory = subdirectory
         self.files = files
         self.postprocessing = postprocessing
         self.mo_args = mo_args
@@ -230,7 +230,7 @@ class Topology:
         if not name: raise DeserializationError('"name": must not be empty')
 
         with deserialization_context('In topology "{}"'.format(name)):
-            subdir = validate_relative_path('"output"', top['output'])
+            subdirectory = validate_relative_path('"output"', top['output'])
 
             files = []
             file_names = set()
@@ -278,7 +278,7 @@ class Topology:
 
             license_url = validate_string('"license"', top['license'])
 
-            return cls(name, subdir, files, postprocessing, mo_args, framework,
+            return cls(name, subdirectory, files, postprocessing, mo_args, framework,
                 description, license_url, precisions)
 
 def load_topologies(config):

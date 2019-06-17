@@ -159,6 +159,9 @@ describing a single model. Each such object has the following keys:
   converter can produce IR files in. Current possible values are `FP16`, `FP32`, `INT1`, `INT8`;
   more might be added in the future.
 
+* `subdirectory`: the subdirectory of the output tree into which the downloaded or converted files
+  will be placed by the downloader or the converter, respectively.
+
 Shared options
 --------------
 
