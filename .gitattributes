@@ -1,2 +1,7 @@
 * text=auto
 
+.git* -omz.package
+.editorconfig -omz.package
+/ci/** -omz.package
+/demos/build_demos.sh omz.package=l,m
+/demos/build_demos_msvc.bat omz.package=w
