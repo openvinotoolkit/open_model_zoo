@@ -15,7 +15,7 @@
 topologies:
   - name: "densenet-121"
     description: "DenseNet-121 (https://github.com/shicai/DenseNet-Caffe). The following Caffe patch must be used to be able to convert this model: https://github.com/BVLC/caffe/pull/3057/files"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: densenet-121.prototxt
         sha256: baeed2a423794c2c8dc1a80ad96e961112224fa1d319d535735ba93a2b535170
@@ -42,7 +42,7 @@ topologies:
 
   - name: "densenet-161"
     description: "DenseNet-161 (https://github.com/shicai/DenseNet-Caffe). The following Caffe patch must be used to be able to convert this model: https://github.com/BVLC/caffe/pull/3057/files"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: densenet-161.prototxt
         sha256: a193e029d66112b077ed29e8b8d36d0bae0593a7f3c64125a433937b5f035b69
@@ -69,7 +69,7 @@ topologies:
 
   - name: "densenet-169"
     description: "DenseNet-169 (https://github.com/shicai/DenseNet-Caffe). The following Caffe patch must be used to be able to convert this model: https://github.com/BVLC/caffe/pull/3057/files"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: densenet-169.prototxt
         sha256: dfb577c17d67327be70dba8f2810dbeec4f7edb836779c8055ec8f408b0a2cbc
@@ -96,7 +96,7 @@ topologies:
 
   - name: "densenet-201"
     description: "DenseNet-201 (https://github.com/shicai/DenseNet-Caffe). The following Caffe patch must be used to be able to convert this model: https://github.com/BVLC/caffe/pull/3057/files"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: densenet-201.prototxt
         sha256: 8edf61f867491315bc3780a41f74392c2a31042d20932eb145424a2dc8c6f8f7
@@ -123,7 +123,7 @@ topologies:
 
   - name: "squeezenet1.0"
     description: "SqueezeNet v1.0 (https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.0)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: squeezenet1.0.prototxt
         sha256: 6e4ecef2a27347e226a5ef8be31d6d1b9d19f5a40afa1986ec259fd5fa3bd91c
@@ -151,7 +151,7 @@ topologies:
 
   - name: "squeezenet1.1"
     description: "SqueezeNet v1.1 (https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.1)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: squeezenet1.1.prototxt
         sha256: d041bfb2ab4b32fda4ff6c6966684132f2924e329916aa5bfe9285c6b23e3d1c
@@ -179,7 +179,7 @@ topologies:
 
   - name: "mtcnn-p"
     description: "MTCNN-Proposal Network (https://github.com/DuinoDu/mtcnn/tree/master/model https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf)"
-    type: "detection"
+    task_type: "detection"
     files:
       - name: mtcnn-p.prototxt
         sha256: adc1756d8515d3ca3a6a186c0fadab66fcae04bd8d3c6388e2fe8797a626dde4
@@ -212,7 +212,7 @@ topologies:
 
   - name: "mtcnn-r"
     description: "MTCNN-Refine Network (https://github.com/DuinoDu/mtcnn/tree/master/model https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf)"
-    type: "detection"
+    task_type: "detection"
     files:
       - name: mtcnn-r.prototxt
         sha256: 077686e89e606354f425366afdb2018777d93c6450b50e2c12301f8a97f6bb47
@@ -234,7 +234,7 @@ topologies:
 
   - name: "mtcnn-o"
     description: "MTCNN-Output Network (https://github.com/DuinoDu/mtcnn/tree/master/model https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf)"
-    type: "detection"
+    task_type: "detection"
     files:
       - name: mtcnn-o.prototxt
         sha256: a8385a3aad241acf5902b79466f9a359ea9f03a3b6dcbe1e1efa050908cf7d04
@@ -256,7 +256,7 @@ topologies:
 
   - name: "mobilenet-ssd"
     description: "Common object detection architecture (https://github.com/chuanqi305/MobileNet-SSD)"
-    type: "detection"
+    task_type: "detection"
     files:
       - name: mobilenet-ssd.prototxt
         sha256: e781559c4f5beaec2a486ccd952af5b6fa408e9498761bf5f4fb80b4e9f0d25e
@@ -283,7 +283,7 @@ topologies:
 
   - name: "vgg19"
     description: "VGG Net-E (https://arxiv.org/pdf/1409.1556.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: vgg19.prototxt
         sha256: e7c9da46d837dd91049ddab46a57933a488e3d8a42162cdef51ab1edeff99725
@@ -311,7 +311,7 @@ topologies:
 
   - name: "vgg16"
     description: "VGG Net-D (https://arxiv.org/pdf/1409.1556.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: vgg16.prototxt
         sha256: 9fdb04e3f5b9224af473e82441b05b76368dfa6dc841e80655303823e9770962
@@ -339,7 +339,7 @@ topologies:
 
   - name: "ssd512"
     description: "SSD-512 (https://arxiv.org/pdf/1512.02325.pdf)"
-    type: "detection"
+    task_type: "detection"
     files:
       - name: ssd512.tar.gz
         size: 100991061
@@ -370,7 +370,7 @@ topologies:
 
   - name: "ssd300"
     description: "SSD-300 (https://arxiv.org/pdf/1512.02325.pdf)"
-    type: "detection"
+    task_type: "detection"
     files:
       - name: ssd300.tar.gz
         size: 97789219
@@ -401,7 +401,7 @@ topologies:
 
   - name: "inception-resnet-v2"
     description: "Inception-ResNet V2 architecture (https://arxiv.org/pdf/1602.07261.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: inception-resnet-v2.prototxt
         size: 192362
@@ -431,7 +431,7 @@ topologies:
 
   - name: "googlenet-v1"
     description: "GoogleNet v1 (Inception v1) (https://arxiv.org/pdf/1409.4842.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: googlenet-v1.prototxt
         sha256: fa36cd4112a3240a29600a5aa35333f31bec33daa1a6085b0af308a9f50f0c50
@@ -459,7 +459,7 @@ topologies:
 
   - name: "googlenet-v2"
     description: "GoogleNet v2 (Inception v2) (https://arxiv.org/pdf/1502.03167.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: googlenet-v2.prototxt
         sha256: 18c77f01cca83c4cee973bfd8739968210dd6a1e5af1b857faaec230c5aa7d5a
@@ -491,7 +491,7 @@ topologies:
 
   - name: "googlenet-v4"
     description: "GoogleNet v4 (Inception v4)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: googlenet-v4.prototxt
         size: 86534
@@ -521,7 +521,7 @@ topologies:
 
   - name: "alexnet"
     description: "AlexNet (http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: alexnet.prototxt
         sha256: b564ba76416b4ac1e062c6621cbd80d9c19304ba152d9d791c75870f3182c4fa
@@ -549,7 +549,7 @@ topologies:
 
   - name: "ssd_mobilenet_v2_coco"
     description: "MobileNetV2 object detection architecture (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
-    type: "detection"
+    task_type: "detection"
     files:
       - name: ssd_mobilenet_v2_coco.tar.gz
         sha256: b9380178b2e35333f1a735e39745928488bdabeb9ed20bc6fa07af8172cb5adc
@@ -574,7 +574,7 @@ topologies:
 
   - name: "resnet-50"
     description: "ResNet-50 (https://arxiv.org/pdf/1512.03385.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: resnet-50.prototxt
         size: 32500
@@ -598,7 +598,7 @@ topologies:
 
   - name: "resnet-101"
     description: "ResNet-101 (https://arxiv.org/pdf/1512.03385.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: resnet-101.prototxt
         size: 65439
@@ -622,7 +622,7 @@ topologies:
 
   - name: "resnet-152"
     description: "ResNet-152 (https://arxiv.org/pdf/1512.03385.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: resnet-152.prototxt
         size: 98034
@@ -646,7 +646,7 @@ topologies:
 
   - name: "googlenet-v3"
     description: "GoogleNet v3 (Inception v3) (https://arxiv.org/pdf/1512.00567.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: googlenet-v3.tar.gz
         sha256: 7045b72a954af4dce36346f478610acdccbf149168fa25c78e54e32f0c723d6d
@@ -671,7 +671,7 @@ topologies:
 
   - name: "se-inception"
     description: "BN-Inception with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: se-inception.prototxt
         sha256: 57813dfc27113ce1bc714b069d574f80643ad58480e6f35bdf1dec690075c6b3
@@ -697,7 +697,7 @@ topologies:
 
   - name: "se-resnet-101"
     description: "ResNet-101 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: se-resnet-101.prototxt
         sha256: c97375db60ad04e1196966c7149bd5cc98fbb9a34bdde511c26c922ba791903d
@@ -723,7 +723,7 @@ topologies:
 
   - name: "se-resnet-152"
     description: "ResNet-152 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: se-resnet-152.prototxt
         sha256: 9cfe789f971c3418e50e435f494d6479a5a0f263a07bf9c13e434a0e5919b2f2
@@ -749,7 +749,7 @@ topologies:
 
   - name: "se-resnet-50"
     description: "ResNet-50 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: se-resnet-50.prototxt
         sha256: eebbe3c64201f34492caf501498f6031152edbd4a44ed106de69441060ff117c
@@ -775,7 +775,7 @@ topologies:
 
   - name: "se-resnext-50"
     description: "ResNeXt-50 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: se-resnext-50.prototxt
         sha256: a44865802483b8e20fcc712540c4995ef27c3dc809d9235f5882a13ef5c16e67
@@ -801,7 +801,7 @@ topologies:
 
   - name: "se-resnext-101"
     description: "ResNeXt-101 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: se-resnext-101.prototxt
         sha256: 8a23f1488f5dad2bc4e11b3e7733bc95783301d8c426677989fb11eb7ea2de8b
@@ -827,7 +827,7 @@ topologies:
 
   - name: "Sphereface"
     description: "Deep face recognition under open-set protocol (https://arxiv.org/pdf/1704.08063.pdf)"
-    type: "face_recognition"
+    task_type: "face_recognition"
     files:
       - name: Sphereface.prototxt
         sha256: 7cf5808fd0561db20daae862b83677b7437e788420fae68ab8d97c935e67d82c
@@ -854,7 +854,7 @@ topologies:
 
   - name: "license-plate-recognition-barrier-0007"
     description: "TensorFlow LPRNet"
-    type: "ocr"
+    task_type: "optical_character_recognition"
     files:
       - name: license-plate-recognition-barrier-0007.tar.gz
         sha256: 6c0b8651f0eead6de43e07491fd41809a4a7da141f1b5002dfd8dd207bdb1018
@@ -878,7 +878,7 @@ topologies:
 
   - name: "face-detection-retail-0044"
     description: "Face Detection (SqNet1.0modif+single scale) with BatchNormalization trained with negatives"
-    type: "detection"
+    task_type: "detection"
     files:
       - name: face-detection-retail-0044.prototxt
         sha256: 89ea5bb9c293ebabb56b9f6dfb4cfc6c46cd146cdce307a2f5a2755bf904fc79
@@ -899,7 +899,7 @@ topologies:
 
   - name: "mobilenet-v1-1.0-224"
     description: "MobileNet V1 architecture with the width multiplier 1.0 and resolution 224 (https://arxiv.org/pdf/1704.04861.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: mobilenet-v1-1.0-224.prototxt
         sha256: 8e6a26b8f2c7cf7a066d571660cfd8a1544a5a25399df33ad499f3d733f16729
@@ -923,7 +923,7 @@ topologies:
 
   - name: "mobilenet-v2"
     description: "MobileNet V2 (https://arxiv.org/pdf/1801.04381.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: mobilenet-v2.prototxt
         sha256: 06a0820a5edc6d2c24e83e0b95824d0dae464ced3d5db82f51e461098a03b887
@@ -947,7 +947,7 @@ topologies:
 
   - name: "faster_rcnn_inception_v2_coco"
     description: "Faster R-CNN with Inception v2 (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
-    type: "detection"
+    task_type: "detection"
     files:
       - name: faster_rcnn_inception_v2_coco.tar.gz
         sha256: db3295e9a52d406540e84bdd056edeedbf938782a7bc4af7918aaa5dc30f0df5
@@ -972,7 +972,7 @@ topologies:
 
   - name: "deeplabv3"
     description: "Rethinking Atrous Convolution for Semantic Image Segmentation (https://arxiv.org/pdf/1706.05587.pdf)"
-    type: "semantic_segmentation"
+    task_type: "semantic_segmentation"
     files:
       - name: deeplabv3.tar.gz
         sha256: cd506941e4f88fd053903913761df2e76ea00c01079cecfd35855304a4a5fb48
@@ -994,7 +994,7 @@ topologies:
 
   - name: "ctpn"
     description: "Detecting Text in Natural Image with Connectionist Text Proposal Network (https://arxiv.org/pdf/1609.03605.pdf)"
-    type: "detection"
+    task_type: "detection"
     files:
       - name: ctpn.pb
         sha256: 09b3a0cc57eb826dd6b6fa95a03e078ad435b7b5fb0186dad2abdb98a4fdf64a
@@ -1014,7 +1014,7 @@ topologies:
 
   - name: "ssd_mobilenet_v1_coco"
     description: "MobileNetV1 object detection architecture (https://arxiv.org/pdf/1807.03284.pdf) pre-trained on the COCO dataset"
-    type: "detection"
+    task_type: "detection"
     files:
       - name: ssd_mobilenet_v1_coco.tar.gz
         sha256: 8788f89108519fd1102b8a5c2ac861cf6d86603571b6ce5bbd1c245b7fe005e3
@@ -1039,7 +1039,7 @@ topologies:
 
   - name: "faster_rcnn_resnet101_coco"
     description: "Faster R-CNN Resnet-101 (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
-    type: "detection"
+    task_type: "detection"
     files:
       - name: faster_rcnn_resnet101_coco.tar.gz
         sha256: ef3b36b3bc3c4057362a62e40b89dbdbef3dbb0c91f2f7df43967920d24821e5
@@ -1064,7 +1064,7 @@ topologies:
 
   - name: "mobilenet-v2-1.4-224"
     description: "MobileNet V2 architecture with the width multiplier 1.4 and resolution 224 (https://arxiv.org/abs/1801.04381)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: mobilenet-v2-1.4-224.tar.gz
         sha256: a20d0c8d698502dc6a620528871c97a588885df7737556243a3412b39fce85e0
@@ -1089,7 +1089,7 @@ topologies:
 
   - name: "brain-tumor-segmentation-0001"
     description: "Cascaded UNet for brain tumor segmentation (https://arxiv.org/abs/1810.04008)"
-    type: "semantic_segmentation"
+    task_type: "semantic_segmentation"
     files:
       - name: brain-tumor-segmentation-0001-symbol.json
         size: 100106
@@ -1116,7 +1116,7 @@ topologies:
 
   - name: "mobilenet-v1-1.0-224-tf"
     description: "MobileNet V1 architecture with the width multiplier 1.0 and resolution 224 (https://arxiv.org/pdf/1704.04861.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: mobilenet_v1_1.0_224.tgz
         sha256: 2fadeabb9968ec6833bee903900dda6e61b3947200535874ce2fe42a8493abc0
@@ -1141,7 +1141,7 @@ topologies:
 
   - name: "mobilenet-v1-0.50-224"
     description: "MobileNet V1 architecture with the width multiplier 0.5 and resolution 224 (https://arxiv.org/pdf/1704.04861.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: mobilenet_v1_0.5_224.tgz
         sha256: 98cf7a39552f73920cb99617cfa9b88d5732a87abf9ec14f7cc7f3ade1db0aaa
@@ -1166,7 +1166,7 @@ topologies:
 
   - name: "mobilenet-v1-0.50-160"
     description: "MobileNet V1 architecture with the width multiplier 0.5 and resolution 160 (https://arxiv.org/pdf/1704.04861.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: mobilenet_v1_0.5_160.tgz
         sha256: 6bbc9dd7892433e49b4b6ff6af2952183eaa6c1c0cb862868465377a29c77b0d
@@ -1191,7 +1191,7 @@ topologies:
 
   - name: "mobilenet-v1-0.25-128"
     description: "MobileNet V1 architecture with the width multiplier 0.25 and resolution 128 (https://arxiv.org/pdf/1704.04861.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: mobilenet_v1_0.25_128.tgz
         sha256: 879ddc3e0857f3611b5cf248e36de2288c7a11ea8c2ed8a8bdded635e6010dfe
@@ -1216,7 +1216,7 @@ topologies:
 
   - name: "faster_rcnn_resnet50_coco"
     description: "Faster R-CNN Resnet-50 (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
-    type: "detection"
+    task_type: "detection"
     files:
       - name: faster_rcnn_resnet50_coco_2018_01_28.tar.gz
         sha256: 0f898f96d6c416de192c516fb6fa773ae9f5ee253eb2ab4015445fbd6eb0ab76
@@ -1241,7 +1241,7 @@ topologies:
 
   - name: "faster_rcnn_inception_resnet_v2_atrous_coco"
     description: "Faster R-CNN with Inception Resnet v2 Atrous version (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
-    type: "detection"
+    task_type: "detection"
     files:
       - name: faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
         sha256: d615532f464532620d742be6564bddaaaba3e5f9670c245c6309eb7842876c62
@@ -1266,7 +1266,7 @@ topologies:
 
   - name: "inception-resnet-v2-tf"
     description: "Inception-ResNet V2 architecture (https://arxiv.org/pdf/1602.07261.pdf)"
-    type: "classification"
+    task_type: "classification"
     files:
       - name: inception_resnet_v2_2018_04_27.tgz
         sha256: fb16b93ff2b2bcda0da5cdfd25a8d5b8b74438943dae738db659bad0d3d48ff1
@@ -1291,7 +1291,7 @@ topologies:
 
   - name: "densenet-121-tf"
     description: "This is an Tensorflow implementation of DenseNet by G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten with ImageNet pretrained models. The weights are converted from DenseNet-Keras Models."
-    type: "classification"
+    task_type: "classification"
     files:
       - name: tf-densenet121.tar.gz
         size: 30597420
@@ -1319,7 +1319,7 @@ topologies:
 
   - name: "densenet-169-tf"
     description: "This is an Tensorflow implementation of DenseNet by G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten with ImageNet pretrained models. The weights are converted from DenseNet-Keras Models."
-    type: "classification"
+    task_type: "classification"
     files:
       - name: tf-densenet169.tar.gz
         size: 54307314
@@ -1347,7 +1347,7 @@ topologies:
 
   - name: "densenet-161-tf"
     description: "This is an Tensorflow implementation of DenseNet by G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten with ImageNet pretrained models. The weights are converted from from DenseNet-Keras Models."
-    type: "classification"
+    task_type: "classification"
     files:
       - name: tf-densenet161.tar.gz
         size: 110578586
@@ -1375,7 +1375,7 @@ topologies:
 
   - name: "facenet-20180408-102900"
     description: "FaceNet: A Unified Embedding for Face Recognition and Clustering trained on CASIA-WebFace dataset (https://arxiv.org/pdf/1503.03832.pdf)"
-    type: "face_recognition"
+    task_type: "face_recognition"
     files:
       - name: 20180408-102900.zip
         size: 195479980
@@ -1407,7 +1407,7 @@ topologies:
       Fully convolutional network for simultaneous Age/Gender recognition. The network
       is able to recognize age of people in [18, 75] years old range, it is not applicable
       for children since their faces were not in the training set.
-    type: "object_attributes"
+    task_type: "object_attributes"
     files:
       - name: FP32/age-gender-recognition-retail-0013.xml
         sha256: 110126ae5e77bccc694dcfe9064af8c4cff93c0452ae265574f12170de356348
@@ -1429,7 +1429,7 @@ topologies:
     description: >-
       Fully convolutional network for recognition of five emotions ('neutral', 'happy',
       'sad', 'surprise', 'anger').
-    type: "object_attributes"
+    task_type: "object_attributes"
     files:
       - name: FP32/emotions-recognition-retail-0003.xml
         sha256: 946571833aeb9488ea5202f806d5a07e7d2acc25e7cc29206e36e66530a963d9
@@ -1458,7 +1458,7 @@ topologies:
       Face detector for driver monitoring and similar scenarios. The network features
       a default MobileNet backbone that includes depth-wise convolutions to reduce
       the amount of computation for the 3x3 convolution block.
-    type: "detection"
+    task_type: "detection"
     files:
       - name: FP32/face-detection-adas-0001.xml
         sha256: 4c46152ca5b2dbaec38a96ab610336f5ed84d750bafbc605cb0aa44a707830f1
@@ -1488,7 +1488,7 @@ topologies:
       single SSD for indoor/outdoor scenes shot by a front-facing camera. The backbone
       consists of fire modules to reduce the number of computations. The single SSD
       head from 1/16 scale feature map has nine clustered prior boxes.
-    type: "detection"
+    task_type: "detection"
     files:
       - name: FP32/face-detection-retail-0004.xml
         sha256: f3e74c6e0e0d119623907d3ef95ceca6d06a50f8d98d2a8f5f5b5c1b5177c372
@@ -1518,7 +1518,7 @@ topologies:
       backbone that includes depth-wise convolutions to reduce the amount of computation
       for the 3x3 convolution block. The two SSD heads from 1/8 (for face detection)
       and 1/16 (for person detection) scale feature maps has 9 clustered prior boxes.
-    type: "detection"
+    task_type: "detection"
     files:
       - name: FP32/face-person-detection-retail-0002.xml
         sha256: c0ef457a3ef9fb13011cae262e6351a5b9e033792a06b22c4b1f0c74a9f95584
@@ -1545,7 +1545,7 @@ topologies:
       the network applies global depthwise pooling and then uses 1x1 convolution to
       create the final embedding vector. The model produces feature vectors which
       should be close in cosine distance for similar faces and far for different faces.
-    type: "face_recognition"
+    task_type: "face_recognition"
     files:
       - name: FP32/face-reidentification-retail-0095.xml
         sha256: 6c28a0155e022b04756c31f3992a64237085def07a213563fad1cbede543eb8a
@@ -1567,7 +1567,7 @@ topologies:
     description: >-
       This is a custom-architecture convolutional neural network for 35 facial landmarks
       estimation.
-    type: "object_attributes"
+    task_type: "object_attributes"
     files:
       - name: FP32/facial-landmarks-35-adas-0002.xml
         sha256: d3f7f1e0b84708247424630c7523426a81a9884070e084f2b9cf8f11c07cb4f0
@@ -1590,7 +1590,7 @@ topologies:
       Head pose estimation network based on simple, handmade CNN architecture. Angle
       regression layers are convolutions + ReLU + batch norm + fully connected with
       one output.
-    type: "headpose"
+    task_type: "head_pose_estimation"
     files:
       - name: FP32/head-pose-estimation-adas-0001.xml
         sha256: 5cc24273db0aedbf44ee5671135228cea7187fb5bec81be216af74aac3d5e8d9
@@ -1621,7 +1621,7 @@ topologies:
       skeleton, which consists of keypoints and connections between them, for every
       person inside image. The pose may contain up to 18 keypoints: ears, eyes, nose,
       neck, shoulders, elbows, wrists, hips, knees and ankles.
-    type: "human_pose_estimation"
+    task_type: "human_pose_estimation"
     files:
       - name: FP32/human-pose-estimation-0001.xml
         sha256: 93cb893d1ffc0bb7bb6825bd0cc64f626057da1e16e22ed3835d753f2526e068
@@ -1652,7 +1652,7 @@ topologies:
       PReLU activations, and poolings. Final regression is done by the global depthwise
       pooling head and FullyConnected layers. The model predicts five facial landmarks:
       two eyes, nose, and two lip corners.
-    type: "object_attributes"
+    task_type: "object_attributes"
     files:
       - name: FP32/landmarks-regression-retail-0009.xml
         sha256: db495316e343dc5cdb3edaf6ca5853c4a478c96772eb6da042ccdddeeefd0936
@@ -1674,7 +1674,7 @@ topologies:
     description: >-
       This model uses a small-footprint network trained end-to-end to recognize Chinese
       license plates in traffic.
-    type: "ocr"
+    task_type: "optical_character_recognition"
     files:
       - name: FP32/license-plate-recognition-barrier-0001.xml
         sha256: 19fc9d960f1d18aa0f45c6a3018f5bb3422d2a7ff0db870aaa46a1bc1f13b74a
@@ -1695,7 +1695,7 @@ topologies:
   - name: "pedestrian-and-vehicle-detector-adas-0001"
     description: >-
       Pedestrian and vehicle detection network based on MobileNet v1.0 + SSD.
-    type: "detection"
+    task_type: "detection"
     files:
       - name: FP32/pedestrian-and-vehicle-detector-adas-0001.xml
         sha256: 6455b1836781e62ccc5d699eeb4e1eb4adf598d7c4e6e1638d066ae08dda7007
@@ -1723,7 +1723,7 @@ topologies:
     description: >-
       Pedestrian detection network based on SSD framework with tuned MobileNet v1
       as a feature extractor.
-    type: "detection"
+    task_type: "detection"
     files:
       - name: FP32/pedestrian-detection-adas-0002.xml
         sha256: 255b8d15b0f424bda0ad206c0908e6fa46394f9d8f61018f175676af806e8854
@@ -1753,7 +1753,7 @@ topologies:
       It produces probability of person attributions existing on the sample and a
       position of two point on sample, whiches can be used for color prob (like, color
       picker in graphical editors)
-    type: "object_attributes"
+    task_type: "object_attributes"
     files:
       - name: FP32/person-attributes-recognition-crossroad-0230.xml
         sha256: 2c5aaf5ded5ad7108b36333c0885e63a6b5200d59fdecc311502f2befc8a7c07
@@ -1779,7 +1779,7 @@ topologies:
       scale feature map has four clustered prior boxes and outputs detected persons
       (two class detector). The second SSD-based head predicts actions of the detected
       persons. Possible actions: sitting, standing, raising hand.
-    type: "detection"
+    task_type: "detection"
     files:
       - name: FP32/person-detection-action-recognition-0005.xml
         sha256: d39d16f5f8de90e6f4a2eae51e3ecc44ebd1a78bf4f0bd113d39592166c14f7c
@@ -1799,7 +1799,7 @@ topologies:
 
   - name: "person-detection-retail-0002"
     description: "Person detection (HyperNet+RFCN+DetectionOutput)."
-    type: "detection"
+    task_type: "detection"
     files:
       - name: FP32/person-detection-retail-0002.xml
         sha256: bfacb328e853120e5fc8c42b7d123e3da64170eaf8ce72ddc067af1a6d74ddc7
@@ -1823,7 +1823,7 @@ topologies:
       backbone that includes depth-wise convolutions to reduce the amount of computation
       for the 3x3 convolution block. The single SSD head from 1/16 scale feature map
       has 12 clustered prior boxes.
-    type: "detection"
+    task_type: "detection"
     files:
       - name: FP32/person-detection-retail-0013.xml
         sha256: 0f6fc8657b45ba7216cada7546ba8bdd489e357578ee017386dad555b34e1ed6
@@ -1848,7 +1848,7 @@ topologies:
       by the Cosine distance. The model is based on RMNet backbone that was developed
       for fast inference. A single reidentification head from the 1/16 scale feature
       map outputs the embedding vector of 256 floats.
-    type: "object_attributes"
+    task_type: "object_attributes"
     files:
       - name: FP32/person-reidentification-retail-0031.xml
         sha256: cd8cd51352b6f5f5d734733c357d7505dc36d7db6e79e61d97a3ad80083aba4a
@@ -1875,7 +1875,7 @@ topologies:
       map outputs the embedding vector of 256 floats. The model is provided without
       last calibration layer, but can be used in the same way as the original model
       (with insignificant drop in accuracy).
-    type: "object_attributes"
+    task_type: "object_attributes"
     files:
       - name: FP32/person-reidentification-retail-0076.xml
         sha256: d8ae8edd22583d518cd7322aee3dd4743e1dbdb7ab2ff4d8af2f782d2e9dfc6c
@@ -1902,7 +1902,7 @@ topologies:
       map outputs the embedding vector of 256 floats. The model is provided without
       last calibration layer, but can be used in the same way as the original model
       (with insignificant drop in accuracy).
-    type: "object_attributes"
+    task_type: "object_attributes"
     files:
       - name: FP32/person-reidentification-retail-0079.xml
         sha256: 82271346ae9487df85583eae591aeb588f1ca0ac48f7b8caf8b001b760aa8d05
@@ -1926,7 +1926,7 @@ topologies:
       and learnable image downscale block (like person-vehicle-bike-detection-crossroad-0066,
       but with extra pooling). The model is intended for security surveillance applications
       and works in a variety of scenes and weather/lighting conditions.
-    type: "detection"
+    task_type: "detection"
     files:
       - name: FP32/person-vehicle-bike-detection-crossroad-0078.xml
         sha256: f2e59c8b24fae359f577caaa58cf4485c5620aedf6b46aba9d83de8d1e4c78d2
@@ -1948,7 +1948,7 @@ topologies:
     description: >-
       This is a segmentation network to classify each pixel into four classes: BG,
       road, curb, mark.
-    type: "semantic_segmentation"
+    task_type: "semantic_segmentation"
     files:
       - name: FP32/road-segmentation-adas-0001.xml
         sha256: cf3eea4fe64e6dfff7b758beaaf86e72ea7ff8c3c271d9da7879a7de8746499b
@@ -2015,7 +2015,7 @@ topologies:
       - bicycle
 
       - ego-vehicle
-    type: "semantic_segmentation"
+    task_type: "semantic_segmentation"
     files:
       - name: FP32/semantic-segmentation-adas-0001.xml
         sha256: 4e86d8cab9778dcb85eac3856cfa7b13516ccdc922a47e00a764e159972cca92
@@ -2038,7 +2038,7 @@ topologies:
       An Attention-Based Approach for Single Image Super Resolution <https://arxiv.org/pdf/1807.06779.pdf>
       but with reduced number of channels and changes in network achitecture. It enhances
       the resolution of the input image by a factor of 3.
-    type: "image_processing"
+    task_type: "image_processing"
     files:
       - name: FP32/single-image-super-resolution-1033.xml
         sha256: 7314cb08b98e6287cb7ed25fa06d969bd7aa4dd605e940953b912e3bf1eeeae2
@@ -2061,7 +2061,7 @@ topologies:
       Text detector based on PixelLink <https://arxiv.org/pdf/1801.01315.pdf> architecture
       with MobileNetV2 <https://arxiv.org/pdf/1801.04381.pdf> as a backbone for indoor/outdoor
       scenes.
-    type: "detection"
+    task_type: "detection"
     files:
       - name: FP32/text-detection-0002.xml
         sha256: 0c9bbaa480bbbf6be0bea431494b9478dd61c84c31b3a454784a012b7031a872
@@ -2083,7 +2083,7 @@ topologies:
     description: >-
       This model presents a vehicle attributes classification algorithm for a traffic
       analysis scenario.
-    type: "object_attributes"
+    task_type: "object_attributes"
     files:
       - name: FP32/vehicle-attributes-recognition-barrier-0039.xml
         sha256: 7dc03429bbba0f588d37dfcbe1fe82c149cf624f3e19967c9f88c087f76f8f4c
@@ -2111,7 +2111,7 @@ topologies:
     description: >-
       This is a vehicle detection network based on an SSD framework with tuned MobileNet
       v1 as a feature extractor.
-    type: "detection"
+    task_type: "detection"
     files:
       - name: FP32/vehicle-detection-adas-0002.xml
         sha256: 79245ea24591f452b60498b9b5930870a4b00caca9f8a0b5e83c0a6d57b507dc
@@ -2139,7 +2139,7 @@ topologies:
     description: >-
       This is a MobileNetV2 + SSD-based vehicle and (Chinese) license plate detector
       for the "Barrier" use case.
-    type: "detection"
+    task_type: "detection"
     files:
       - name: FP32/vehicle-license-plate-detection-barrier-0106.xml
         sha256: 0d5fd522c226547b7aaae690d78f786ca5ff7a9ae0433f9a19d7d7cd225381a3
@@ -2163,7 +2163,7 @@ topologies:
       a pruned MobileNet backbone that includes depth-wise convolutions to reduce
       the amount of computation for the 3x3 convolution block. Also some 1x1 convolutions
       are binary that can be implemented using effective binary XNOR+POPCOUNT approach
-    type: "detection"
+    task_type: "detection"
     files:
       - name: INT1/face-detection-adas-binary-0001.xml
         sha256: fde8c465a5e3f3425fb567d31b9591ff8be589930c8488639f8feddf7f0301f2
@@ -2180,7 +2180,7 @@ topologies:
       An Attention-Based Approach for Single Image Super Resolution <https://arxiv.org/pdf/1807.06779.pdf>
       but with reduced number of channels and changes in network achitecture. It enhances
       the resolution of the input image by a factor of 4.
-    type: "image_processing"
+    task_type: "image_processing"
     files:
       - name: FP32/single-image-super-resolution-1032.xml
         sha256: cee9c808e3cf9f9c640a01cd445c4bdb518de9202d90fb2d78281456ebecb7a4
@@ -2209,7 +2209,7 @@ topologies:
       and produces embedding. Use action-recognition-0001-decoder to produce prediction
       from embeddings of 16 frames. Video frames should be sampled to cover ~1 second
       fragment (i.e. skip every second frame in 30 fps video).
-    type: "action_recognition"
+    task_type: "action_recognition"
     files:
       - name: FP32/action-recognition-0001-encoder.xml
         sha256: 88338f18f82dfb2d9843735a9d7352e2fe04ce1053280044aa7993be1770f167
@@ -2232,7 +2232,7 @@ topologies:
       This model is an instance segmentation network for 80 classes of objects. It
       is a Mask-RCNN-like model with ResNet50 backbone, Feature Pyramid Networks block
       for feature maps refinement and relatively light segmentation head.
-    type: "instance_segmentation"
+    task_type: "instance_segmentation"
     files:
       - name: FP32/instance-segmentation-security-0049.xml
         sha256: b059a10f5aec72aada8f322fe02787fca26fab94580814496978854e37d16b06
@@ -2255,7 +2255,7 @@ topologies:
       This is a vehicle detection network based on an SSD framework with tuned MobileNet
       v1 as a feature extractor and using binary layer for speedup. This detecector
       was created by binarization the vehicle-detection-adas-0002
-    type: "detection"
+    task_type: "detection"
     files:
       - name: INT1/vehicle-detection-adas-binary-0001.xml
         sha256: c98bf5984895b1309861597ec36181446877407cd985bb490e14461f41312670
@@ -2278,7 +2278,7 @@ topologies:
       embeddings, computed by driver-action-recognition-adas-0002-encoder, and produces
       prediction on input video. Video frames should be sampled to cover ~1 second
       fragment (i.e. skip every second frame in 30 fps video).
-    type: "action_recognition"
+    task_type: "action_recognition"
     files:
       - name: FP32/driver-action-recognition-adas-0002-decoder.xml
         sha256: 90f4d84e8d237647fd2b23f0245bbc63b55fca625dd10fd2778afb51aa99e8d7
@@ -2300,7 +2300,7 @@ topologies:
     description: >-
       Pedestrian detection network based on SSD framework with tuned MobileNet v1
       as a feature extractor. Some layers of MobileNet v1 are binary and use I1 arithm
-    type: "detection"
+    task_type: "detection"
     files:
       - name: INT1/pedestrian-detection-adas-binary-0001.xml
         sha256: e64e7ce32c87e1c698b50abb8f2cf1d96c7651d45fc20bac09c417e046afa7f4
@@ -2320,7 +2320,7 @@ topologies:
       scale feature map has four clustered prior boxes and outputs detected persons
       (two class detector). The second SSD-based head predicts actions of the detected
       persons. Possible actions: standing, writing, demonstrating.
-    type: "detection"
+    task_type: "detection"
     files:
       - name: FP32/person-detection-action-recognition-teacher-0002.xml
         sha256: fa3d9d2d8da10f4c63291a6b89589453849b94edd079fe92a219f15c179cc8a9
@@ -2343,7 +2343,7 @@ topologies:
       This model is an instance segmentation network for 80 classes of objects. It
       is a Mask-RCNN-like model with ResNeXt152 backbone and Feature Pyramid Networks
       block for feature maps refinement.
-    type: "instance_segmentation"
+    task_type: "instance_segmentation"
     files:
       - name: FP32/instance-segmentation-security-0033.xml
         sha256: 2dc0e866c37247702076b8a225870b58bc48b6adaef972308dce0c78a3372e70
@@ -2372,7 +2372,7 @@ topologies:
       embeddings, computed by action-recognition-0001-encoder, and produces prediction
       on input video. Video frames should be sampled to cover ~1 second fragment (i.e.
       skip every second frame in 30 fps video).
-    type: "action_recognition"
+    task_type: "action_recognition"
     files:
       - name: FP32/action-recognition-0001-decoder.xml
         sha256: eeda01c569bb41af0714fb3714e85d5e532fc3819adb0ad9323b97feddf87b34
@@ -2395,7 +2395,7 @@ topologies:
       This is a network for text recognition scenario. It consists of VGG16-like backbone
       and bidirectional LSTM encoder-decoder. The network is able to recognize case-insensitive
       alpha-numeric text (36 unique symbols).
-    type: "ocr"
+    task_type: "optical_character_recognition"
     files:
       - name: FP32/text-recognition-0012.xml
         sha256: 71158750324de227342acec7b2edca95d5991be2242eaf3a0c54877c32dc9dff
@@ -2424,7 +2424,7 @@ topologies:
       and produces embedding. Use driver-action-recognition-adas-0002-decoder to produce
       prediction from embeddings of 16 frames. Video frames should be sampled to cover
       ~1 second fragment (i.e. skip every second frame in 30 fps video).
-    type: "action_recognition"
+    task_type: "action_recognition"
     files:
       - name: FP32/driver-action-recognition-adas-0002-encoder.xml
         sha256: b8625862f80388a63c3229824be44a75cb1baffdbd4fe00c560e7cdfc03f2b8d
@@ -2445,7 +2445,7 @@ topologies:
   - name: "gaze-estimation-adas-0002"
     description: >-
       This is a custom VGG-like convolutional neural network for gaze direction estimation.
-    type: "object_attributes"
+    task_type: "object_attributes"
     files:
       - name: FP32/gaze-estimation-adas-0002.xml
         sha256: b4860d52445836f5a1d4bce65e43054ffdbb0c9c9b75973abc93718f70b5baec
@@ -2476,7 +2476,7 @@ topologies:
       that can be implemented as XNOR+POPCOUN operations. Only input, final and shortcut
       layers were kept as FP32, all the rest convolutional layers are replaced by
       BinaryConvolution layers.
-    type: "classification"
+    task_type: "classification"
     files:
       - name: INT1/resnet50-binary-0001.xml
         sha256: 1a7e41ab273f9e7b064e60e889ba2f13ce1b07cb4610096bd3abef33a93bf992
@@ -2496,7 +2496,7 @@ topologies:
       scale feature map has four clustered prior boxes and outputs detected persons
       (two class detector). The second SSD-based head predicts actions of the detected
       persons. Possible actions: raising hand and other.
-    type: "detection"
+    task_type: "detection"
     files:
       - name: FP32/person-detection-raisinghand-recognition-0001.xml
         sha256: f15dacbaea3954b8c1b97ca48991a31347881504a9fabfc444c0e828c1a285b6
@@ -2520,7 +2520,7 @@ topologies:
       and bidirectional LSTM encoder-decoder. The network is able to recognize school
       marks that should have format either `<digit>` or `<digit>.<digit>` (e.g. `4`
       or `3.5`).
-    type: "ocr"
+    task_type: "optical_character_recognition"
     files:
       - name: FP32/handwritten-score-recognition-0001.xml
         sha256: 86d461c1fa55c1bccfdf3b5488847abc72d19ba3ee838a033d7b3886da6da443
