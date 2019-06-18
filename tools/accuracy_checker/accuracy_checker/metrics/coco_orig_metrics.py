@@ -22,7 +22,9 @@ from ..representation import (
     DetectionPrediction,
     DetectionAnnotation,
     CoCoInstanceSegmentationAnnotation,
-    CoCocInstanceSegmentationPrediction
+    CoCocInstanceSegmentationPrediction,
+    PoseEstimationAnnotation,
+    PoseEstimationPrediction
 )
 from ..logging import print_info
 from ..config import BaseField
@@ -37,6 +39,48 @@ SHOULD_SHOW_PREDICTIONS = False
 SHOULD_DISPLAY_DEBUG_IMAGES = False
 if SHOULD_DISPLAY_DEBUG_IMAGES:
     import cv2
+def box_to_coco(prediction_data_to_store, pred):
+    x_mins = pred.x_mins.tolist()
+    y_mins = pred.y_mins.tolist()
+    x_maxs = pred.x_maxs.tolist()
+    y_maxs = pred.y_maxs.tolist()
+
+    for data_record, x_min, y_min, x_max, y_max in zip(
+            prediction_data_to_store, x_mins, y_mins, x_maxs, y_maxs
+    ):
+        width = x_max - x_min + 1
+        height = y_max - y_min + 1
+        data_record.update({'bbox': [x_min, y_min, width, height]})
+
+    return prediction_data_to_store
+
+def segm_to_coco(prediction_data_to_store, pred):
+    encoded_masks = pred.mask
+
+    for data_record, segm_mask in zip(prediction_data_to_store, encoded_masks):
+        data_record.update({'segmentation': segm_mask})
+
+    return prediction_data_to_store
+
+
+def keypoints_to_coco(prediction_data_to_store, pred):
+    for data_record, x_val, y_val, vis in zip(
+            prediction_data_to_store, pred.x_values, pred.y_values, pred.visibility
+    ):
+        keypoints = []
+        for x, y, v in zip(x_val, y_val, vis):
+            keypoints.extend([x, y, int(v)])
+        data_record.update({
+            'keypoints': keypoints
+        })
+
+    return prediction_data_to_store
+
+iou_specific_processing = {
+    'bbox': box_to_coco,
+    'segm': segm_to_coco,
+    'keypoints': keypoints_to_coco
+}
 
 
 class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
@@ -93,7 +137,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             assert 'background_label' not in meta
 
         if not use_full_label_map:
-            map_pred_label_id_to_coco_cat_id = {k : coco_cat_name_to_id[v] for k, v in meta['label_map'].items()}
+            map_pred_label_id_to_coco_cat_id = {k: coco_cat_name_to_id[v] for k, v in meta['label_map'].items()}
         else:
             map_pred_label_id_to_coco_cat_id = self.generate_map_pred_label_id_to_coco_cat_id(has_background,
                                                                                               use_full_label_map)
@@ -135,32 +179,10 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
                     'category_id': cur_cat,
                     '_image_name_from_dataset': cur_name,
                 })
-
-            if iou_type == 'bbox':
-                x_mins = pred.x_mins.tolist()
-                y_mins = pred.y_mins.tolist()
-                x_maxs = pred.x_maxs.tolist()
-                y_maxs = pred.y_maxs.tolist()
-
-                assert len(x_mins) == cur_num
-                assert len(y_mins) == cur_num
-                assert len(x_maxs) == cur_num
-                assert len(y_maxs) == cur_num
-
-                for data_record, x_min, y_min, x_max, y_max in zip(
-                        prediction_data_to_store, x_mins, y_mins, x_maxs, y_maxs
-                ):
-                    width = x_max - x_min + 1
-                    height = y_max - y_min + 1
-                    data_record.update({'bbox': [x_min, y_min, width, height]})
-            elif iou_type == 'segm':
-                encoded_masks = pred.mask
-                assert len(encoded_masks) == cur_num
-
-                for data_record, segm_mask in zip(prediction_data_to_store, encoded_masks):
-                    data_record.update({'segmentation': segm_mask})
-            else:
+            iou_specific_converter = iou_specific_processing.get(iou_type)
+            if iou_specific_converter is None:
                 raise ValueError("unknown iou type: '{}'".format(iou_type))
+            prediction_data_to_store = iou_specific_converter(prediction_data_to_store, pred)
             coco_data_to_store.extend(prediction_data_to_store)
 
         return coco_data_to_store
@@ -221,8 +243,11 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         cocoeval.accumulate()
         cocoeval.summarize()
         res = cocoeval.stats.tolist()
-        assert len(res) == 12
-        res = [res[:6], res[6:]]
+        res_len = len(res)
+        middle_index = res_len //2
+        assert res_len == 12 if iou_type != 'keypoints' else 10
+
+        res = [res[:middle_index], res[middle_index:]]
 
         return res
 
@@ -272,8 +297,16 @@ class MSCOCOorigRecall(MSCOCOorigBaseMetric):
 
 
 class MSCOCOorigSegmRecall(MSCOCOorigRecall):
-    __provider__ = 'coco_orig_recall'
-    annotation_types = (CoCoInstanceSegmentationAnnotation,)
-    prediction_types = (CoCocInstanceSegmentationPrediction,)
+    __provider__ = 'coco_orig_segm_recall'
+    annotation_types = (CoCoInstanceSegmentationAnnotation, )
+    prediction_types = (CoCocInstanceSegmentationPrediction, )
 
     iou_type = 'segm'
+
+
+class MSCOCOOrigKeyPointsAveragePrecision(MSCOCOorigAveragePrecision):
+    __provider__ = 'coco_orig_keypoints_precision'
+    annotation_types = (PoseEstimationAnnotation, )
+    prediction_types = (PoseEstimationPrediction, )
+
+    iou_type = 'keypoints'

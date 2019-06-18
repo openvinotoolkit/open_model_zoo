@@ -48,7 +48,9 @@ def build_argparser():
     parser.add_argument("-m", "--meta_name", help="Meta info file name", required=False)
     parser.add_argument("-a", "--annotation_name", help="Annotation file name", required=False)
     parser.add_argument("-ss", "--subsample", help="Dataset subsample size", required=False)
-    parser.add_argument("--subsample_seed", help="Seed for generation dataset subsample", type=int, required=False)
+    parser.add_argument(
+        "--subsample_seed", help="Seed for generation dataset subsample", type=int, required=False, default=666
+    )
     parser.add_argument('--analyze_dataset', required=False, action='store_true')
 
     return parser
@@ -120,7 +122,7 @@ def main():
         else:
             subsample_size = int(args.subsample)
 
-        result = make_subset(result, subsample_size)
+        result = make_subset(result, subsample_size, args.subsample_seed)
 
     if args.analyze_dataset:
         analyze_dataset(result, meta)
