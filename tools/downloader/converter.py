@@ -93,6 +93,7 @@ def main():
             if convert_to_onnx(top, args) != 0:
                 failed_topologies.add(top.name)
                 continue
+
         expanded_mo_args = [
             string.Template(arg).substitute(dl_dir=args.download_dir / top.subdirectory, mo_dir=mo_path.parent)
             for arg in top.mo_args]
