@@ -468,8 +468,8 @@ class Flip(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         image.data = cv2.flip(image.data, self.mode)
-        image.metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('flip',
-                                                                                                {'mode': self.mode}))
+        image.metadata.setdefault(
+            'geometric_operations', []).append(GeometricOperationMetadata('flip', {'mode': self.mode}))
         return image
 
 
@@ -853,13 +853,17 @@ class Tiling(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'margin'     : NumberField(value_type=int, min_value=1, description="Margin for tiled fragment of image."),
-            'size'       : NumberField(value_type=int, optional=True, min_value=1,
-                                       description="Destination size of tiled fragment for both dimentions."),
-            'dst_width'  : NumberField(value_type=int, optional=True, min_value=1,
-                                       description="Destination width of tiled fragment."),
-            'dst_height' : NumberField(value_type=int, optional=True, min_value=1,
-                                       description="Destination height of tiled fragment."),
+            'margin': NumberField(value_type=int, min_value=1, description="Margin for tiled fragment of image."),
+            'size': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Destination size of tiled fragment for both dimentions."
+            ),
+            'dst_width'  : NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination width of tiled fragment."
+            ),
+            'dst_height' : NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination height of tiled fragment."
+            ),
         })
         return parameters
 
@@ -899,15 +903,21 @@ class Crop3D(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'size'       : NumberField(value_type=int, optional=True, min_value=1,
-                                       description="Destination size for 3d crop for all dimentions."),
-            'dst_width'  : NumberField(value_type=int, optional=True, min_value=1,
-                                       description="Destination width for 3d crop."),
-            'dst_height' : NumberField(value_type=int, optional=True, min_value=1,
-                                       description="Destination height for 3d crop."),
-            'dst_volume' : NumberField(value_type=int, optional=True, min_value=1,
-                                       description="Destination volume for 3d crop."),
+            'size': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Destination size for 3d crop for all dimentions."
+            ),
+            'dst_width': NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination width for 3d crop."
+            ),
+            'dst_height': NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination height for 3d crop."
+            ),
+            'dst_volume': NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination volume for 3d crop."
+            )
         })
+
         return parameters
 
     def configure(self):
@@ -973,7 +983,6 @@ class TfConvertImageDType(Preprocessor):
         tf.enable_eager_execution()
         self.converter = tf.image.convert_image_dtype
         self.dtype = tf.float32
-
 
     def process(self, image, annotation_meta=None):
         converted_data = self.converter(image.data, dtype=self.dtype)
