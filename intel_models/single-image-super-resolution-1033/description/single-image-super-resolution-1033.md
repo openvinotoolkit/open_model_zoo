@@ -23,7 +23,7 @@ Super resolution:
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| PSNR                            | 30.46 dB                                  |
+| PSNR                            | 30.97 dB                                  |
 | GFlops                          | 16.062                                    |
 | MParams                         | 0.030                                     |
 | Source framework                | Pytorch*                                  |
