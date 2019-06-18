@@ -32,13 +32,11 @@ from ..utils import get_or_parse_value
 from .metric import FullDatasetEvaluationMetric
 from .coco_metrics import COCO_THRESHOLDS
 
-DEBUG_JSON_TMP_RESULT_FILE_PATH_TO_STORE = None
-DEBUG_JSON_TMP_RESULT_FILE_PATH_TO_LOAD = None
-
 SHOULD_SHOW_PREDICTIONS = False
 SHOULD_DISPLAY_DEBUG_IMAGES = False
 if SHOULD_DISPLAY_DEBUG_IMAGES:
     import cv2
+
 def box_to_coco(prediction_data_to_store, pred):
     x_mins = pred.x_mins.tolist()
     y_mins = pred.y_mins.tolist()

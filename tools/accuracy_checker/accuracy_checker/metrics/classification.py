@@ -21,6 +21,7 @@ from ..config import NumberField, StringField
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
 
+
 class ClassificationAccuracy(PerImageEvaluationMetric):
     """
     Class for evaluating accuracy metric of classification models.
@@ -73,10 +74,12 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'top_k'     : NumberField(value_type=int, min_value=1, optional=True, default=1,
-                                      description="The number of classes with the highest probability, which will be "
-                                      "used to decide if prediction is correct."),
-            'label_map' : StringField(optional=True, default='label_map', description="Label map.")
+            'top_k': NumberField(
+                value_type=int, min_value=1, optional=True, default=1,
+                description="The number of classes with the highest probability,"
+                            " which will be used to decide if prediction is correct."
+            ),
+            'label_map': StringField(optional=True, default='label_map', description="Label map.")
         })
         return parameters
 

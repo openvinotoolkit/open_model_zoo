@@ -22,8 +22,8 @@ from ..utils import read_json, convert_bboxes_xywh_to_x1y1x2y2
 from ..representation import (
     DetectionAnnotation, PoseEstimationAnnotation, CoCoInstanceSegmentationAnnotation, ContainerAnnotation
 )
-from ..representation import DetectionAnnotation, PoseEstimationAnnotation
 from .format_converter import BaseFormatConverter, FileBasedAnnotationConverter
+
 
 def get_image_annotation(image_id, annotations_):
     return list(filter(lambda x: x['image_id'] == image_id, annotations_))

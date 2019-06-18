@@ -180,7 +180,7 @@ class ConfigReader:
                         if 'dataset' in stage and global_config is not None and 'datasets' in global_config:
                             dataset = stage['dataset']
                             stage['dataset'] = ConfigReader._merge_configs_by_identifier(
-                                 global_configs['datasets'], dataset, 'name'
+                                global_configs['datasets'], dataset, 'name'
                             )
                     per_device_pipelines.append(copy_pipeline)
                 pipelines.extend(per_device_pipelines)
