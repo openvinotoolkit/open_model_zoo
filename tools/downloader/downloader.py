@@ -31,6 +31,8 @@ from pathlib import Path
 
 import common
 
+CHUNK_SIZE = 1 << 15 if sys.stdout.isatty() else 1 << 20
+
 failed_topologies = set()
 
 def process_download(chunk_iterable, size, file):
@@ -48,12 +50,15 @@ def process_download(chunk_iterable, size, file):
                         percent = '---'
                     else:
                         percent = str(min(progress_size * 100 // size, 100))
-                    print('\r... %s%%, %d KB, %d KB/s, %d seconds passed' %
+
+                    print('... %s%%, %d KB, %d KB/s, %d seconds passed' %
                             (percent, progress_size / 1024, speed, duration),
-                        end='', flush=True)
+                        end='\r' if sys.stdout.isatty() else '\n', flush=True)
+
                 file.write(chunk)
     finally:
-        print()
+        if sys.stdout.isatty():
+            print()
 
 def try_download(name, file, num_attempts, start_download):
     for attempt in range(num_attempts):
@@ -220,7 +225,7 @@ with requests.Session() as session:
             destination = output / top_file.name
 
             try_retrieve(top.name, destination, top_file.sha256, cache, args.num_attempts,
-                lambda: top_file.source.start_download(session, top_file.size))
+                lambda: top_file.source.start_download(session, CHUNK_SIZE, top_file.size))
 
             if top.name in failed_topologies:
                 shutil.rmtree(str(output))
