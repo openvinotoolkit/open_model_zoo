@@ -31,6 +31,7 @@ def to_info(topology):
         'license_url': topology.license_url,
         'precisions': sorted(topology.precisions),
         'subdirectory': str(topology.subdirectory),
+        'task_type': str(topology.task_type),
     }
 
 def main():
