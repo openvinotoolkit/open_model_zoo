@@ -1,0 +1,37 @@
+models:
+  - name: face-detection-adas-binary-0001
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - INT1
+        device: CPU
+        model:   Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/INT1/face-detection-adas-binary-0001.xml
+        weights: Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/INT1/face-detection-adas-binary-0001.bin
+        adapter: ssd
+        cpu_extensions: AUTO
+
+    datasets:
+      - name: wider
+        data_source: WIDER_val/images
+        annotation_conversion:
+          converter: wider
+          annotation_file: wider_face_split/wider_face_val_bbx_gt.txt
+
+        preprocessing:
+          - type: resize
+            dst_width: 672
+            dst_height: 384
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: filter
+            height_range: 100
+            apply_to: annotation
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False
+            allow_multiple_matches_per_ignored: True
+            use_filtered_tp: True
