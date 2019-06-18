@@ -30,6 +30,7 @@ from ..logging import warning
 GeometricOperationMetadata = namedtuple('GeometricOperationMetadata',
                                         ['type', 'parameters'])
 
+
 class Preprocessor(ClassProvider):
     __provider_type__ = 'preprocessor'
 
@@ -198,11 +199,12 @@ class _TFResizer(_Resizer):
             'BICUBIC': tf.image.ResizeMethod.BICUBIC,
         }
         self.default_interpolation = 'BILINEAR'
+        self._resize = tf.image.resize_images
 
         super().__init__(interpolation)
 
     def resize(self, data, new_height, new_width):
-        resized_data = tf.image.resize_images(data, [new_height, new_width], method=self.interpolation)
+        resized_data = self._resize(data, [new_height, new_width], method=self.interpolation)
         return resized_data.numpy()
 
 
@@ -960,8 +962,8 @@ class Normalize3d(Preprocessor):
 class TfConvertImageDType(Preprocessor):
     __provider__ = 'tf_convert_image_dtype'
 
-    def __init__(self, config, name):
-        super().__init__(config, name)
+    def __init__(self, config, name, input_shapes=None):
+        super().__init__(config, name, input_shapes)
         try:
             import tensorflow as tf
         except ImportError as import_error:
@@ -969,9 +971,12 @@ class TfConvertImageDType(Preprocessor):
                 'tf_convert_image_dtype disabled.Please, install Tensorflow before using. \n{}'.format(import_error.msg)
             )
         tf.enable_eager_execution()
+        self.converter = tf.image.convert_image_dtype
+        self.dtype = tf.float32
+
 
     def process(self, image, annotation_meta=None):
-        converted_data = tf.image.convert_image_dtype(image.data, dtype=tf.float32)
+        converted_data = self.converter(image.data, dtype=self.dtype)
         image.data = converted_data.numpy()
 
         return image

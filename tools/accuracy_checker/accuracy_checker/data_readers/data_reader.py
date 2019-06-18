@@ -288,8 +288,12 @@ class TensorflowImageReader(BaseReader):
 
         tf.enable_eager_execution()
 
-    def read(self, data_id):
-        img_raw = tf.read_file(str(self.data_source / data_id))
-        img_tensor = tf.image.decode_image(img_raw, channels=3)
+        def read_func(path):
+            img_raw = tf.read_file(str(path))
+            img_tensor = tf.image.decode_image(img_raw, channels=3)
+            return img_tensor.numpy()
 
-        return img_tensor.numpy()
+        self.read_realisation = read_func
+
+    def read(self, data_id):
+        return self.read_realisation(self.data_source / data_id)

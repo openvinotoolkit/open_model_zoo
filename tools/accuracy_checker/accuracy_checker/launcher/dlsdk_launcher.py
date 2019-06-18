@@ -518,8 +518,11 @@ class DLSDKLauncher(Launcher):
         return self._align_data_shape(data, layer_name)
 
     def release(self):
-        del self.network
-        del self.exec_network
-        del self.plugin
+        if 'network' in self.__dict__:
+            del self.network
+        if 'exec_network' in self.__dict__:
+            del self.exec_network
+        if 'plugin' in self.__dict__:
+            del self.plugin
         if self._set_variable:
             del os.environ[FPGA_COMPILER_MODE_VAR]
