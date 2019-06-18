@@ -26,7 +26,7 @@ amount of computation for the 3x3 convolution block.
 Average Precision (AP) is defined as an area under the
 [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
 curve. Numbers are on
-[Wider Face](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/) validation subset.
+[Wider Face](http://shuoyang1213.me/WIDERFACE/) validation subset.
 
 ## Performance
 
