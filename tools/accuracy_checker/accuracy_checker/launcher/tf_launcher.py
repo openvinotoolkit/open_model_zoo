@@ -14,7 +14,7 @@ class TFLauncher(Launcher):
             'device': StringField(
                 choices=('cpu', 'gpu'), default='cpu', optional=True, description="Device name: cpu or gpu"),
             'inputs': BaseField(optional=True, description="Inputs."),
-            'outputs_names': ListField(
+            'output_names': ListField(
                 allow_empty=False, optional=True, value_type=StringField(), description="Output names."
             )
         })
@@ -29,7 +29,7 @@ class TFLauncher(Launcher):
 
         self._graph = self._load_graph(str(self.get_value_from_config('model')))
 
-        self._outputs_names = self._get_outputs_names(self._graph, self.get_value_from_config('outputs_names'))
+        self._outputs_names = self._get_outputs_names(self._graph, self.get_value_from_config('output_names'))
 
         self._outputs_tensors = []
         for output in self._outputs_names:

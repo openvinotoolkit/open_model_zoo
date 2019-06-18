@@ -24,6 +24,7 @@ from ..adapters import Adapter
 from ..config import ConfigValidator, StringField
 from ..representation import PoseEstimationPrediction
 
+
 class HumanPoseAdapter(Adapter):
     __provider__ = 'human_pose_estimation'
     prediction_types = (PoseEstimationPrediction, )
@@ -68,13 +69,15 @@ class HumanPoseAdapter(Adapter):
             heatmap_avg = np.zeros((height, width, 19), dtype=np.float32)
             paf_avg = np.zeros((height, width, 38), dtype=np.float32)
             pad = meta.get('padding', [0, 0, 0, 0])
-            heatmap = np.transpose(np.squeeze(heatmap), (1, 2, 0))
+            transpose_order = (1, 2, 0) if heatmap.shape[0] == 19 else (0, 1, 2)
+
+            heatmap = np.transpose(np.squeeze(heatmap), transpose_order)
             heatmap = cv2.resize(heatmap, (0, 0), fx=8, fy=8, interpolation=cv2.INTER_CUBIC)
             heatmap = heatmap[pad[0]:heatmap.shape[0] - pad[2], pad[1]:heatmap.shape[1] - pad[3]:, :]
             heatmap = cv2.resize(heatmap, (width, height), interpolation=cv2.INTER_CUBIC)
             heatmap_avg = heatmap_avg + heatmap
 
-            paf = np.transpose(np.squeeze(paf), (1, 2, 0))
+            paf = np.transpose(np.squeeze(paf), transpose_order)
             paf = cv2.resize(paf, (0, 0), fx=8, fy=8, interpolation=cv2.INTER_CUBIC)
             paf = paf[pad[0]:paf.shape[0] - pad[2], pad[1]:paf.shape[1] - pad[3], :]
             paf = cv2.resize(paf, (width, height), interpolation=cv2.INTER_CUBIC)

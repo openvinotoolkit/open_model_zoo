@@ -42,3 +42,16 @@ class ClassificationPrediction(Classification):
 
     def top_k(self, k):
         return np.argpartition(self.scores, -k)[-k:]
+
+
+class ArgMaxClassificationPrediction(ClassificationPrediction):
+    def __init__(self, identifier='', label=None):
+        super().__init__(identifier)
+        self._label = label
+
+    @property
+    def label(self):
+        return self._label
+
+    def top_k(self, k):
+        return np.full(k, self._label)

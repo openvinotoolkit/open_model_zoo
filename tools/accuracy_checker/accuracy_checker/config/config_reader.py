@@ -148,15 +148,16 @@ class ConfigReader:
 
             models = config.get('models')
             for model in models:
-                for i, launcher_entry in enumerate(model['launchers']):
-                    model['launchers'][i] = ConfigReader._merge_configs_by_identifier(
-                        global_configs['launchers'], launcher_entry, 'framework'
-                    )
-
-                for i, dataset in enumerate(model['datasets']):
-                    model['datasets'][i] = ConfigReader._merge_configs_by_identifier(
-                        global_configs['datasets'], dataset, 'name'
-                    )
+                if 'launchers' in global_configs:
+                    for i, launcher_entry in enumerate(model['launchers']):
+                        model['launchers'][i] = ConfigReader._merge_configs_by_identifier(
+                            global_configs['launchers'], launcher_entry, 'framework'
+                        )
+                if 'datasets' in global_configs:
+                    for i, dataset in enumerate(model['datasets']):
+                        model['datasets'][i] = ConfigReader._merge_configs_by_identifier(
+                            global_configs['datasets'], dataset, 'name'
+                        )
 
             return config
 
@@ -172,6 +173,15 @@ class ConfigReader:
                     for stage in copy_pipeline['stages']:
                         if 'launcher' in stage:
                             stage['launcher'].update(device_info)
+                            if global_config and global_config is not None and 'launchers' in global_config:
+                                stage['launcher'] = ConfigReader._merge_configs_by_identifier(
+                                    global_config['launchers'], stage['launcher'], 'framework'
+                                )
+                        if 'dataset' in stage and global_config is not None and 'datasets' in global_config:
+                            dataset = stage['dataset']
+                            stage['dataset'] = ConfigReader._merge_configs_by_identifier(
+                                 global_configs['datasets'], dataset, 'name'
+                            )
                     per_device_pipelines.append(copy_pipeline)
                 pipelines.extend(per_device_pipelines)
             config['pipelines'] = pipelines
