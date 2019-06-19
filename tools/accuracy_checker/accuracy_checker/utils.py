@@ -243,7 +243,10 @@ def get_supported_representations(container, supported_types):
 
 
 def check_representation_type(representation, representation_types):
-    return isinstance(representation, representation_types)
+    for representation_type in representation_types:
+        if type(representation).__name__ == representation_type.__name__:
+            return True
+    return False
 
 
 def is_single_metric_source(source):
