@@ -31,8 +31,10 @@ struct CnnConfig {
     /** @brief Enabled/disabled status */
     bool enabled{true};
 
-    /** @brief Plugin to use for inference */
-    InferenceEngine::InferencePlugin plugin;
+    /** @brief Inference Engine */
+    InferenceEngine::Core ie;
+    /** @brief Device name */
+    std::string deviceName;
 };
 
 /**

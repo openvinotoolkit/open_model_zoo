@@ -177,11 +177,10 @@ def main():
 
     visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
 
-    log.info('Starting inference...')
-    log.info('To stop the demo execution press Esc button')
     render_time = 0
 
-    print("To close the application, press 'CTRL+C' or any key with focus on the output window")
+    log.info('Starting inference...')
+    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:

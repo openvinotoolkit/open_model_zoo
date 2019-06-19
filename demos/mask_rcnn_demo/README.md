@@ -8,7 +8,7 @@ The demo has a post-processing part that gathers masks arrays corresponding to b
 
 Upon the start-up, the demo application reads command line parameters and loads a network and an image to the Inference Engine plugin. When inference is done, the application creates an output image.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Running
 
@@ -25,12 +25,11 @@ Options:
     -h                                Print a usage message.
     -i "<path>"                       Required. Path to an .bmp image.
     -m "<path>"                       Required. Path to an .xml file with a trained model.
-      -l "<absolute_path>"            Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
+      -l "<absolute_path>"            Required for CPU custom layers. Absolute path to a shared library with the kernels implementations.
           Or
-      -c "<absolute_path>"            Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
-    -pp "<path>"                      Optional. Path to a plugin folder.
-    -d "<device>"                     Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will look for a suitable plugin for a specified device. Default value is CPU
-    -ni "<integer>"                   Optional. Number of iterations. Default value is 1
+      -c "<absolute_path>"            Required for GPU custom kernels. Absolute path to the .xml file with the kernels descriptions.
+    -d "<device>"                     Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will look for a suitable plugin for a specified device (CPU by default)
+    -niter "<integer>"                Optional. Number of iterations. Default value is 1
     -detection_output_name "<string>" Optional. The name of detection output layer. Default value is "detection_output"
     -masks_name "<string>"            Optional. The name of masks layer. Default value is "masks"
     -pc                               Optional. Enables per-layer performance report

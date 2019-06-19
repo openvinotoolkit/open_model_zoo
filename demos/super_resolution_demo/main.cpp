@@ -43,8 +43,8 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         return false;
     }
 
-    if (FLAGS_ni < 1) {
-        throw std::logic_error("Parameter -ni should be more than 0 !!! (default 1)");
+    if (FLAGS_niter < 1) {
+        throw std::logic_error("Parameter -niter should be more than 0 !!! (default 1)");
     }
 
     if (FLAGS_i.empty()) {
@@ -72,12 +72,13 @@ int main(int argc, char *argv[]) {
         if (imageNames.empty()) throw std::logic_error("No suitable images were found");
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 1. Load Plugin for inference engine -------------------------------------
-        slog::info << "Loading plugin" << slog::endl;
-        InferencePlugin plugin = PluginDispatcher({FLAGS_pp}).getPluginByDevice(FLAGS_d);
+        // --------------------------- 1. Load inference engine -------------------------------------
+        slog::info << "Loading Inference Engine" << slog::endl;
+        Core ie;
 
-        /** Printing plugin version **/
-        printPluginVersion(plugin, std::cout);
+        /** Printing device version **/
+        slog::info << "Device info: " << slog::endl;
+        std::cout << ie.GetVersions(FLAGS_d) << std::endl;
 
         /** Loading default extensions **/
         if (FLAGS_d.find("CPU") != std::string::npos) {
@@ -86,18 +87,18 @@ int main(int argc, char *argv[]) {
              * custom MKLDNNPlugin layer implementations. These layers are not supported
              * by mkldnn, but they can be useful for inferring custom topologies.
             **/
-            plugin.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>());
+            ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
         }
 
         if (!FLAGS_l.empty()) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
             IExtensionPtr extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
-            plugin.AddExtension(extension_ptr);
+            ie.AddExtension(extension_ptr, "CPU");
             slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
         }
         if (!FLAGS_c.empty()) {
             // clDNN Extensions are loaded from an .xml description and OpenCL kernel files
-            plugin.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}});
+            ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
             slog::info << "GPU Extension loaded: " << FLAGS_c << slog::endl;
         }
         // -----------------------------------------------------------------------------------------------------
@@ -175,9 +176,9 @@ int main(int argc, char *argv[]) {
         }
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 4. Loading model to the plugin ------------------------------------------
-        slog::info << "Loading model to the plugin" << slog::endl;
-        ExecutableNetwork executableNetwork = plugin.LoadNetwork(network, {});
+        // --------------------------- 4. Loading model to the device ------------------------------------------
+        slog::info << "Loading model to the device" << slog::endl;
+        ExecutableNetwork executableNetwork = ie.LoadNetwork(network, FLAGS_d);
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 5. Create infer request -------------------------------------------------
@@ -208,15 +209,22 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 7. Do inference ---------------------------------------------------------
-        slog::info << "Start inference (" << FLAGS_ni << " iterations)" << slog::endl;
+        slog::info << "Start inference (" << FLAGS_niter << " iterations)" << slog::endl;
 
         typedef std::chrono::high_resolution_clock Time;
         typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
         typedef std::chrono::duration<float> fsec;
 
         double total = 0.0;
+
+        std::cout << "To close the application, press 'CTRL+C' here";
+        if (FLAGS_show) {
+            std::cout << " or switch to the output window and press any key";
+        }
+        std::cout << std::endl;
+
         /** Start inference & calc performance **/
-        for (size_t iter = 0; iter < FLAGS_ni; ++iter) {
+        for (size_t iter = 0; iter < FLAGS_niter; ++iter) {
             auto t0 = Time::now();
             inferRequest.Infer();
             auto t1 = Time::now();
@@ -226,7 +234,7 @@ int main(int argc, char *argv[]) {
         }
 
         /** Show performance results **/
-        std::cout << std::endl << "Average running time of one iteration: " << total / static_cast<double>(FLAGS_ni)
+        std::cout << std::endl << "Average running time of one iteration: " << total / static_cast<double>(FLAGS_niter)
                   << " ms" << std::endl;
 
         if (FLAGS_pc) {
@@ -257,7 +265,6 @@ int main(int argc, char *argv[]) {
             cv::merge(imgPlanes, resultImg);
 
             if (FLAGS_show) {
-                std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
                 cv::imshow("result", resultImg);
                 cv::waitKey();
             }

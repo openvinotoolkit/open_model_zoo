@@ -10,12 +10,6 @@
 #include <gflags/gflags.h>
 #include <iostream>
 
-#ifdef _WIN32
-#include <os/windows/w_dirent.h>
-#else
-#include <dirent.h>
-#endif
-
 /// @brief message for help argument
 static const char help_message[] = "Print a usage message.";
 
@@ -24,10 +18,6 @@ static const char video_message[] = "Required. Path to a video file (specify \"c
 
 /// @brief message for model argument
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
-
-/// @brief message for plugin argument
-static const char plugin_message[] = "Optional. Plugin name. For example MKLDNNPlugin. If this parameter is pointed, " \
-"the demo will look for this plugin only.";
 
 /// @brief message for assigning cnn calculation to device
 static const char target_device_message[] = "Optional. Specify the target device to infer on (CPU, GPU, FPGA, HDDL or MYRIAD). " \

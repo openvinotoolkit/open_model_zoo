@@ -78,7 +78,7 @@ def parse_arguments():
     args.add_argument('-o', '--path_to_output', type=str, required=True,
                         help="Required. Path to a folder where output files will be saved")
     args.add_argument('-d', '--target_device', type=str, required=False, default="CPU",
-                        help="Optional. Specify a target device to infer on: CPU. "
+                        help="Optional. Specify a target device to infer on: CPU, GPU. "
                              "Use \"-d HETERO:<comma separated devices list>\" format to specify HETERO plugin.")
     args.add_argument('-l', '--path_to_extension', type=str, required=False, default=None,
                         help="Required for CPU custom layers. "
@@ -203,13 +203,13 @@ def main():
             plugin.add_cpu_extension(args.path_to_extension)
         if args.number_threads is not None:
             config.update({'CPU_THREADS_NUM': str(args.number_threads)})
-    else:
-        raise AttributeError("Device {} do not support of 3D convolution. Please use CPU or HETERO:*CPU*")
-
-    if 'GPU' in args.target_device:
+    elif 'GPU' in args.target_device:
         if args.path_to_cldnn_config:
             config.update({'CONFIG_FILE': args.path_to_cldnn_config})
             logger.info("GPU extensions is loaded {}".format(args.path_to_cldnn_config))
+    else:
+        raise AttributeError("Device {} do not support of 3D convolution. "
+                             "Please use CPU, GPU or HETERO:*CPU*, HETERO:*GPU*")
 
     plugin.set_config(config)
 
@@ -245,6 +245,9 @@ def main():
 
     n, c, d, h, w = input_info[input_name].shape
     ie_network.batch_size = n
+
+    if not os.path.exists(args.path_to_input_data):
+        raise AttributeError("Path to input data: '{}' does not exist".format(args.path_to_input_data))
 
     is_nifti_data = os.path.isdir(args.path_to_input_data)
 
@@ -299,7 +302,10 @@ def main():
             seg_result[bbox[0]:bbox[1], bbox[2]:bbox[3], bbox[4]:bbox[5]] = \
                 np.argmax(resample_np(data, (channels, x, y, z), 1), axis=0)
         elif channels == 1:
-            seg_result = data.reshape(out_d, out_h, out_w).astype(int)
+            reshaped_data = data.reshape(out_d, out_h, out_w)
+            mask = reshaped_data[:, :, :] > 0.5
+            reshaped_data[mask] = 1
+            seg_result = reshaped_data.astype(int)
         else:
             seg_result = np.argmax(data, axis=0).astype(int)
 

@@ -86,9 +86,11 @@ void ObjectDetector::submitFrame(const cv::Mat &frame, int frame_idx) {
 
 ObjectDetector::ObjectDetector(
     const DetectorConfig& config,
-    const InferenceEngine::InferencePlugin& plugin) :
+    const InferenceEngine::Core & ie,
+    const std::string & deviceName) :
     config_(config),
-    plugin_(plugin) {
+    ie_(ie),
+    deviceName_(deviceName) {
     CNNNetReader net_reader;
     net_reader.ReadNetwork(config.path_to_model);
     net_reader.ReadWeights(config.path_to_weights);
@@ -143,7 +145,7 @@ ObjectDetector::ObjectDetector(
     _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
     input_name_ = inputInfo.begin()->first;
-    net_ = plugin_.LoadNetwork(net_reader.getNetwork(), {});
+    net_ = ie_.LoadNetwork(net_reader.getNetwork(), deviceName_);
 }
 
 void ObjectDetector::wait() {

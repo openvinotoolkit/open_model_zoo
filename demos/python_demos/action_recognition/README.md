@@ -3,8 +3,10 @@ Action Recognition Python* Demo
 
 This is the demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
 The following pre-trained models are delivered with the product:
-* `driver-action-recognition-adas-0002-encoder` + `driver-action-recognition-adas-0002-decoder`, which is a model for driver monitoring scenario. It recognizes actions like safe driving, talking to the phone and others
-* `action-recognition-0001-encoder` + `action-recognition-0001-decoder`, which is a general-purpose action recognition (400 actions) model for Kinetics-400 dataset.
+* `driver-action-recognition-adas-0002-encoder` + `driver-action-recognition-adas-0002-decoder`, which are models for driver monitoring scenario. They recognize actions like safe driving, talking to the phone and others
+* `action-recognition-0001-encoder` + `action-recognition-0001-decoder`, which are general-purpose action recognition (400 actions) models for Kinetics-400 dataset.
+
+For more information about the pre-trained models, refer to https://github.com/opencv/open_model_zoo/blob/master/intel_models/index.md in the Open Model Zoo repository.
 
 How It Works
 ------------
@@ -25,7 +27,7 @@ that uses Inference Engine async API by scheduling infer requests in cyclical or
 You can change the value of `num_requests` in `demo.py` to find an optimal number of parallel working infer requests for your inference accelerators
 (Compute Sticks and GPUs benefit from higher number of infer requests).
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 Running
 -------

@@ -48,7 +48,8 @@ private:
     float minSubsetScore;
     cv::Size inputLayerSize;
     int upsampleRatio;
-    InferenceEngine::InferencePlugin plugin;
+    InferenceEngine::Core ie;
+    std::string targetDeviceName;
     InferenceEngine::CNNNetwork network;
     InferenceEngine::ExecutableNetwork executableNetwork;
     InferenceEngine::InferRequest request;

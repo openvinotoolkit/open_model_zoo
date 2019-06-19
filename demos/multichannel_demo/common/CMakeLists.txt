@@ -24,16 +24,14 @@ file (GLOB MAIN_HEADERS
 source_group("src" FILES ${MAIN_SRC})
 source_group("include" FILES ${MAIN_HEADERS})
 
-link_directories(${LIB_FOLDER})
-
 # Create library file from sources.
 add_library(${TARGET_NAME} STATIC ${MAIN_SRC} ${MAIN_HEADERS})
-
-add_dependencies(${TARGET_NAME} gflags)
 
 set_target_properties(${TARGET_NAME} PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     COMPILE_PDB_NAME ${TARGET_NAME})
+
+target_include_directories(${TARGET_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../../common")
 
 if(MULTICHANNEL_DEMO_USE_TBB)
     find_package(TBB REQUIRED tbb)
@@ -115,5 +113,5 @@ target_include_directories(${TARGET_NAME} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURR
 target_link_libraries(${TARGET_NAME} IE::ie_cpu_extension ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES})
 
 if(UNIX)
-    target_link_libraries( ${TARGET_NAME} ${LIB_DL} pthread)
+    target_link_libraries( ${TARGET_NAME} pthread)
 endif()

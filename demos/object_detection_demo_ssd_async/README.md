@@ -71,9 +71,6 @@ More importantly, you can execute a request asynchronously (in the background) a
 In a mean time your app can continue :
 
 ```cpp
-// load plugin for the device as usual
-  InferencePlugin plugin = PluginDispatcher().getSuitablePlugin(
-                getDeviceFromStr("GPU"));
 // load network
 CNNNetReader network_reader;
 network_reader.ReadNetwork("Model.xml");

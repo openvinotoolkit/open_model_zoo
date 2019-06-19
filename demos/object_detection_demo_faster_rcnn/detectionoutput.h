@@ -43,12 +43,12 @@ public:
             _num_classes = cnnLayer.GetParamAsInt("num_classes");
             _background_label_id = cnnLayer.GetParamAsInt("background_label_id", 0);
             _top_k = cnnLayer.GetParamAsInt("top_k", -1);
-            _variance_encoded_in_target = cnnLayer.GetParamsAsBool("variance_encoded_in_target", false);
+            _variance_encoded_in_target = cnnLayer.GetParamAsBool("variance_encoded_in_target", false);
             _keep_top_k = cnnLayer.GetParamAsInt("keep_top_k", -1);
             _nms_threshold = cnnLayer.GetParamAsFloat("nms_threshold");
             _confidence_threshold = cnnLayer.GetParamAsFloat("confidence_threshold", -FLT_MAX);
-            _share_location = cnnLayer.GetParamsAsBool("share_location", true);
-            _normalized = cnnLayer.GetParamsAsBool("normalized", true);
+            _share_location = cnnLayer.GetParamAsBool("share_location", true);
+            _normalized = cnnLayer.GetParamAsBool("normalized", true);
             _image_height = cnnLayer.GetParamAsInt("input_height", 1);
             _image_width = cnnLayer.GetParamAsInt("input_width", 1);
             _prior_size = _normalized ? 4 : 5;
@@ -63,22 +63,25 @@ public:
             if (!prior_ptr) {
                 THROW_IE_EXCEPTION << "Pointer to the input data of layer " << cnnLayer.name << " is exprired";
             }
-            auto prior_dims = prior_ptr->dims;
-            int priors_size = prior_dims[0]*prior_dims[1];
+            auto prior_dims = prior_ptr->getTensorDesc().getDims();
+            IE_ASSERT(2 <=  prior_dims.size());
+            int priors_size = prior_dims[prior_dims.size() - 2] * prior_dims[prior_dims.size() - 1];
 
             auto loc_ptr = cnnLayer.insData[idx_location].lock();
             if (!loc_ptr) {
                 THROW_IE_EXCEPTION << "Pointer to the input data of layer " << cnnLayer.name << " is exprired";
             }
-            auto loc_dims = loc_ptr->dims;
+            auto loc_dims = loc_ptr->getTensorDesc().getDims();
+            IE_ASSERT(2 <= loc_dims.size());
             int loc_size = loc_dims[loc_dims.size() - 2]*loc_dims[loc_dims.size() - 1];
 
             auto conf_ptr = cnnLayer.insData[idx_confidence].lock();
             if (!conf_ptr) {
                 THROW_IE_EXCEPTION << "Pointer to the input data of layer " << cnnLayer.name << " is exprired";
             }
-            auto conf_dims = conf_ptr->dims;
-            uint32_t conf_size = conf_dims[conf_dims.size() - 2]*conf_dims[conf_dims.size() - 1];
+            auto conf_dims = conf_ptr->getTensorDesc().getDims();
+            IE_ASSERT(2 <= conf_dims.size());
+            uint32_t conf_size = conf_dims[0]*conf_dims[1];
 
             _num_priors = static_cast<int>(priors_size / _prior_size);
 
@@ -140,8 +143,6 @@ public:
         const float *loc_data    = inputs[idx_location]->buffer();
         const float *conf_data   = inputs[idx_confidence]->buffer();
         const float *prior_data  = inputs[idx_priors]->buffer();
-
-        auto conf_dims = inputs[idx_confidence]->getTensorDesc().getDims();
 
         const int N = 1;  // TODO: Support batch
 
@@ -531,4 +532,3 @@ void DetectionOutputPostProcessor::nms(const float* conf_data,
         }
     }
 }
-

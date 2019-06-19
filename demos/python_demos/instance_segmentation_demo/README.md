@@ -27,7 +27,7 @@ The demo workflow is the following:
     * If you specify `--show_boxes` and `--show_scores` arguments, bounding boxes and confidence scores are also shown.
     * If you specify video as a source of images with the `--video` option, the demo shows the same object instance with the same color throughout the whole video using simple tracking. It assumes more or less static scene with instances in two frames being a part of the same track if intersection over union of the masks is greater than the 0.5 threshold.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Running
 
@@ -75,7 +75,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 To run the demo, please provide paths to the model in the IR format, to a file with class labels, and to an input video, image, or folder with images:
 ```bash
-python3 instance_segmentation_demo/main.py -m <path_to_model>maskrcnn_r50_fpn_2x.xml --label instance_segmentation_demo/coco_labels.txt --video 0
+python3 instance_segmentation_demo/main.py -m <path_to_model>/maskrcnn_r50_fpn_2x.xml --label instance_segmentation_demo/coco_labels.txt --video 0
 ```
 
 ## Demo Output

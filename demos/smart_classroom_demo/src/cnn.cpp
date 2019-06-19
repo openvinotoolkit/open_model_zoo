@@ -38,7 +38,7 @@ void CnnDLSDKBase::Load() {
     if (in.size() != 1) {
         THROW_IE_EXCEPTION << "Network should have only one input";
     }
-    in.begin()->second->setInputPrecision(Precision::U8);
+    in.begin()->second->setPrecision(Precision::U8);
     in.begin()->second->setLayout(Layout::NCHW);
     input_blob_name_ = in.begin()->first;
 
@@ -48,7 +48,7 @@ void CnnDLSDKBase::Load() {
         output_blobs_names_.push_back(item.first);
     }
 
-    executable_network_ = config_.plugin.LoadNetwork(net_reader.getNetwork(), {});
+    executable_network_ = config_.ie.LoadNetwork(net_reader.getNetwork(), config_.deviceName);
     infer_request_ = executable_network_.CreateInferRequest();
 }
 

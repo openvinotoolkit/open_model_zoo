@@ -30,9 +30,8 @@ Options:
       -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
           Or
       -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the xml file with the kernel descriptions.
-    -pp "<path>"              Optional. Path to a plugin folder.
     -d "<device>"             Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will look for a suitable plugin for a specified device. Default value is CPU.
-    -ni "<integer>"           Optional. Number of iterations. Default value is 1.
+    -niter "<integer>"        Optional. Number of iterations. Default value is 1.
     -pc                       Optional. Enables per-layer performance report
 ```
 
