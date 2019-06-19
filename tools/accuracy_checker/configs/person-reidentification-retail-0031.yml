@@ -1,0 +1,66 @@
+models:
+  - name: person-reidentification-retail-0031
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        device: CPU
+        model:   Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt/FP32/person-reidentification-retail-0031.xml
+        weights: Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt/FP32/person-reidentification-retail-0031.bin
+        adapter: reid
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        device: CPU
+        model:   Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt/FP16/person-reidentification-retail-0031.xml
+        weights: Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt/FP16/person-reidentification-retail-0031.bin
+        adapter: reid
+
+      - framework: dlsdk
+        tags:
+          - INT8
+        device: CPU
+        model:   Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt/INT8/person-reidentification-retail-0031.xml
+        weights: Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt/INT8/person-reidentification-retail-0031.bin
+        adapter: reid
+
+      - framework: dlsdk
+        tags:
+          - FP32
+        device: GPU
+        model:   Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt/FP32/person-reidentification-retail-0031.xml
+        weights: Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt/FP32/person-reidentification-retail-0031.bin
+        adapter: reid
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        device: GPU
+        model:   Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt/FP16/person-reidentification-retail-0031.xml
+        weights: Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt/FP16/person-reidentification-retail-0031.bin
+        adapter: reid
+
+    datasets:
+      - name: market1501
+        reader: pillow_imread
+        data_source: Market-1501-v15.09.15
+        annoation_conversion:
+          converter: market1501
+          data_dir: Market-1501-v15.09.15
+
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: resize
+            dst_width: 48
+            dst_height: 96
+            use_pil: True
+            interpolation: ANTIALIAS
+
+        metrics:
+          - name: rank@1
+            type: cmc
+            top_k: 1
+
+          - type: reid_map

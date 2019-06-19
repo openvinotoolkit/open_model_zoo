@@ -1,0 +1,60 @@
+models:
+  - name: face-reidentification-retail-0095
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        device: CPU
+        model:   Retail/object_reidentification/face/mobilenet_based/dldt/FP32/face-reidentification-retail-0095.xml
+        weights: Retail/object_reidentification/face/mobilenet_based/dldt/FP32/face-reidentification-retail-0095.bin
+        adapter: reid
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        device: CPU
+        model:   Retail/object_reidentification/face/mobilenet_based/dldt/FP16/face-reidentification-retail-0095.xml
+        weights: Retail/object_reidentification/face/mobilenet_based/dldt/FP16/face-reidentification-retail-0095.bin
+        adapter: reid
+
+      - framework: dlsdk
+        tags:
+          - INT8
+        device: CPU
+        model:   Retail/object_reidentification/face/mobilenet_based/dldt/INT8/face-reidentification-retail-0095.xml
+        weights: Retail/object_reidentification/face/mobilenet_based/dldt/INT8/face-reidentification-retail-0095.bin
+        adapter: reid
+
+      - framework: dlsdk
+        tags:
+          - FP32
+        device: GPU
+        model:   Retail/object_reidentification/face/mobilenet_based/dldt/FP32/face-reidentification-retail-0095.xml
+        weights: Retail/object_reidentification/face/mobilenet_based/dldt/FP32/face-reidentification-retail-0095.bin
+        adapter: reid
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        device: GPU
+        model:   Retail/object_reidentification/face/mobilenet_based/dldt/FP16/face-reidentification-retail-0095.xml
+        weights: Retail/object_reidentification/face/mobilenet_based/dldt/FP16/face-reidentification-retail-0095.bin
+        adapter: reid
+
+    datasets:
+      - name: lfw
+        data_source: LFW/lfw
+        annotation_conversion:
+          converter: face_reid_pairwise
+          pairs_file: LFW/annotation/pairs.txt
+          landmarks_file: LFW/annotation/lfw_landmark.txt
+
+        preprocessing:
+          - type: point_alignment
+            size: 400
+          - type: resize
+            size: 128
+
+        metrics:
+          - type: pairwise_accuracy_subsets
