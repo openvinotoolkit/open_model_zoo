@@ -28,6 +28,19 @@ DOWNLOAD_TIMEOUT = 5 * 60
 # make sure to update the documentation if you modify these
 KNOWN_FRAMEWORKS = {'caffe', 'dldt', 'mxnet', 'tf'}
 KNOWN_PRECISIONS = {'FP16', 'FP32', 'INT1', 'INT8'}
+KNOWN_TASK_TYPES = {
+    'action_recognition',
+    'classification',
+    'detection',
+    'face_recognition',
+    'head_pose_estimation',
+    'human_pose_estimation',
+    'image_processing',
+    'instance_segmentation',
+    'object_attributes',
+    'optical_character_recognition',
+    'semantic_segmentation',
+}
 
 class DeserializationError(Exception):
     pass
@@ -43,6 +56,12 @@ def validate_string(context, value):
     if not isinstance(value, str):
         raise DeserializationError('{}: expected a string, got {!r}'.format(context, value))
     return value
+
+def validate_string_enum(context, value, known_values):
+    str_value = validate_string(context, value)
+    if str_value not in known_values:
+        raise DeserializationError('{}: expected one of {!r}, got {!r}'.format(context, known_values, value))
+    return str_value
 
 def validate_relative_path(context, value):
     path = Path(validate_string(context, value))
@@ -213,7 +232,7 @@ Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
 class Topology:
     def __init__(self, name, subdirectory, files, postprocessing, mo_args, framework,
-            description, license_url, precisions):
+            description, license_url, precisions, task_type):
         self.name = name
         self.subdirectory = subdirectory
         self.files = files
@@ -223,6 +242,7 @@ class Topology:
         self.description = description
         self.license_url = license_url
         self.precisions = precisions
+        self.task_type = task_type
 
     @classmethod
     def deserialize(cls, top):
@@ -269,17 +289,16 @@ class Topology:
 
                 precisions = set(map(file_precision, files))
 
-            framework = validate_string('"framework"', top['framework'])
-            if framework not in KNOWN_FRAMEWORKS:
-                raise DeserializationError('"framework": expected one of {!r}, got {!r}'.format(
-                    KNOWN_FRAMEWORKS, framework))
+            framework = validate_string_enum('"framework"', top['framework'], KNOWN_FRAMEWORKS)
 
             description = validate_string('"description"', top['description'])
 
             license_url = validate_string('"license"', top['license'])
 
+            task_type = validate_string_enum('"task_type"', top['task_type'], KNOWN_TASK_TYPES)
+
             return cls(name, subdirectory, files, postprocessing, mo_args, framework,
-                description, license_url, precisions)
+                description, license_url, precisions, task_type)
 
 def load_topologies(config):
     with config.open() as config_file:

@@ -162,6 +162,23 @@ describing a single model. Each such object has the following keys:
 * `subdirectory`: the subdirectory of the output tree into which the downloaded or converted files
   will be placed by the downloader or the converter, respectively.
 
+* `task_type`: a string identifying the type of task that the model performs. Current possible values
+  are:
+
+  * `action_recognition`
+  * `classification`
+  * `detection`
+  * `face_recognition`
+  * `head_pose_estimation`
+  * `human_pose_estimation`
+  * `image_processing`
+  * `instance_segmentation`
+  * `object_attributes`
+  * `optical_character_recognition`
+  * `semantic_segmentation`
+
+  Additional possible values might be added in the future.
+
 Shared options
 --------------
 
