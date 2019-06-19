@@ -17,7 +17,7 @@ head from 1/16 scale feature map has nine clustered prior boxes.
 | AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 84.52%                  |
 | GFlops                                                        | 0.982                   |
 | MParams                                                       | 1.021                   |
-| Source framework                                              | Pytorch*                |
+| Source framework                                              | PyTorch*                |
 
 Average Precision (AP) is defined as an area under the
 [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
@@ -52,3 +52,4 @@ curve. All numbers were evaluated by taking into account only faces bigger than
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner.
 
 ## Legal Information
+[*] Other names and brands may be claimed as the property of others.
