@@ -22,6 +22,13 @@ the 1000 different classifications matching those in the ImageNet database.
 
 ## Specification
 
+| Metric            | Value         |
+|-------------------|---------------|
+| Type              | Classification|
+| GFLOPs            | 15.561        |
+| MParams           | 28.666        |
+| Source framework  | Caffe         |
+
 ## Accuracy
 
 See [https://github.com/shicai/DenseNet-Caffe]()

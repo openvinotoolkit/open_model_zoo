@@ -12,6 +12,13 @@ The model output for `inception-resnet-v2` is the typical object classifier outp
 
 ## Specification
 
+| Metric            | Value         |
+|-------------------|---------------|
+| Type              | Classification|
+| GFLOPs            | 26.405        |
+| MParams           | 55.813        |
+| Source framework  | Caffe         |
+
 ## Accuracy
 
 ## Performance

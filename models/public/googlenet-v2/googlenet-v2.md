@@ -12,6 +12,13 @@ The model output for `googlenet-v2` is the typical object classifier output for 
 
 ## Specification
 
+| Metric            | Value         |
+|-------------------|---------------|
+| Type              | Classification|
+| GFLOPs            | 4.058         |
+| MParams           | 11.185        |
+| Source framework  | Caffe         |
+
 ## Accuracy
 
 ## Performance

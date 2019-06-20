@@ -12,6 +12,13 @@ The model output is a blob with a vector containing the output face data.
 
 ## Specification
 
+| Metric            | Value         |
+|-------------------|---------------|
+| Type              | Detection     |
+| GFLOPs            | 0.026         |
+| MParams           | 0.389         |
+| Source framework  | Caffe         |
+
 ## Accuracy
 
 ## Performance

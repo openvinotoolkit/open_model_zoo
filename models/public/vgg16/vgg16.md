@@ -12,6 +12,13 @@ The model output for `vgg16` is the typical object classifier output for the 100
 
 ## Specification
 
+| Metric            | Value         |
+|-------------------|---------------|
+| Type              | Classification|
+| GFLOPs            | 30.974        |
+| MParams           | 138.358       |
+| Source framework  | Caffe         |
+
 ## Accuracy
 
 ## Performance

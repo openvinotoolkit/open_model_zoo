@@ -12,6 +12,13 @@ The model output for `squeezenet1.0` is the typical object classifier output for
 
 ## Specification
 
+| Metric            | Value         |
+|-------------------|---------------|
+| Type              | Classification|
+| GFLOPs            | 1.737         |
+| MParams           | 1.248         |
+| Source framework  | Caffe         |
+
 ## Accuracy
 
 ## Performance

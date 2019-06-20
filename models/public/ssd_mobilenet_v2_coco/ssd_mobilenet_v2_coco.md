@@ -12,6 +12,13 @@ The model output is a typical vector containing the tracked object data, as prev
 
 ## Specification
 
+| Metric            | Value         |
+|-------------------|---------------|
+| Type              | Detection     |
+| GFLOPs            | 3.775         |
+| MParams           | 16.818        |
+| Source framework  | Tensorflow    |
+
 ## Accuracy
 
 ## Performance

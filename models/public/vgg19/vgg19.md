@@ -12,6 +12,13 @@ The model output for `vgg19` is the typical object classifier output for the 100
 
 ## Specification
 
+| Metric            | Value         |
+|-------------------|---------------|
+| Type              | Classification|
+| GFLOPs            | 39.3          |
+| MParams           | 143.667       |
+| Source framework  | Caffe         |
+
 ## Accuracy
 
 ## Performance

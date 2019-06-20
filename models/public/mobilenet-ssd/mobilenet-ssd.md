@@ -12,6 +12,13 @@ The model output is a typical vector containing the tracked object data, as prev
 
 ## Specification
 
+| Metric            | Value         |
+|-------------------|---------------|
+| Type              | Detection     |
+| GFLOPs            | 2.316         |
+| MParams           | 5.783         |
+| Source framework  | Caffe         |
+
 ## Accuracy
 
 ## Performance

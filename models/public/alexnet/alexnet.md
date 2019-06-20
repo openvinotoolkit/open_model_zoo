@@ -12,6 +12,13 @@ The model output for "alexnet" is the usual object classifier output for the 100
 
 ## Specification
 
+| Metric            | Value         |
+|-------------------|---------------|
+| Type              | Classification|
+| GFLOPs            | 1.5           |
+| MParams           | 60.965        |
+| Source framework  | Caffe         |
+
 ## Accuracy
 
 ## Performance

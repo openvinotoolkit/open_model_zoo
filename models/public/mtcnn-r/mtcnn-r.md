@@ -12,6 +12,13 @@ The model output is a blob with a vector containing the refined face data. If th
 
 ## Specification
 
+| Metric            | Value         |
+|-------------------|---------------|
+| Type              | Detection     |
+| GFLOPs            | 0.003         |
+| MParams           | 0.1           |
+| Source framework  | Caffe         |
+
 ## Accuracy
 
 ## Performance
