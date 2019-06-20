@@ -49,10 +49,9 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
             ),
             'threshold' : BaseField(
                 optional=True, default='.50:.05:.95',
-                description="Intersection over union threshold. "
-                            "You can specify one value or comma separated range of values. "
-                            "This parameter supports precomputed values for "
-                            "standard COCO thresholds: {}".format(', '.format(COCO_THRESHOLDS)))
+                description="Intersection over union threshold. You can specify one value or comma separated range "
+                            "of values. This parameter supports precomputed values for "
+                            "standard COCO thresholds: {}".format(', '.join(COCO_THRESHOLDS)))
         })
 
         return parameters
