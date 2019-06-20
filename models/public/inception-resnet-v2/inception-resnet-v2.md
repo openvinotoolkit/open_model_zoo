@@ -25,7 +25,14 @@ The model output for `inception-resnet-v2` is the typical object classifier outp
 
 ## Inputs
 
-Name - `data`, shape - `1,3,224,224`
+Name - `data`, shape - `1,3,299,299`, image format is `B,C,H,W` where:
+
+- `B` - batch size
+- `C` - channel
+- `H` - height
+- `W` - width
+
+Channel order is `BGR`
 
 ## Outputs
 

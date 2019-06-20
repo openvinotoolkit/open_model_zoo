@@ -32,6 +32,8 @@ Name - `data`, shape - `1,300,300,3` image format is `B,H,W,C` where:
 - `H` - height
 - `W` - width
 
+Channel order is `BGR`
+
 ## Outputs
 
 1. Name: `detection_classes`

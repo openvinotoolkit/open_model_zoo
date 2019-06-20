@@ -25,7 +25,14 @@ The model output for "alexnet" is the usual object classifier output for the 100
 
 ## Inputs
 
-Name - `data`, shape - `1,3,227,227`
+Name - `data`, shape - `1,3,227,227`, image format is `B,C,H,W` where:
+
+- `B` - batch size
+- `C` - channel
+- `H` - height
+- `W` - width
+
+Channel order is `BGR`
 
 ## Outputs
 

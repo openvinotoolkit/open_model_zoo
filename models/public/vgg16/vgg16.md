@@ -25,7 +25,14 @@ The model output for `vgg16` is the typical object classifier output for the 100
 
 ## Inputs
 
-Name - `data`, shape - `1,3,224,224`
+Name - `data`, shape - `1,3,224,224`, image format is `B,C,H,W` where:
+
+- `B` - batch size
+- `C` - channel
+- `H` - height
+- `W` - width
+
+Channel order is `BGR`
 
 ## Outputs
 
