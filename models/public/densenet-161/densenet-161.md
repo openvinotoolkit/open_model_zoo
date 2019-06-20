@@ -50,6 +50,6 @@ Channel order is `BGR`
 
 Name: `fc6`
 
-## License
+## Legal Information
 
 [https://raw.githubusercontent.com/liuzhuang13/DenseNet/master/LICENSE]()
