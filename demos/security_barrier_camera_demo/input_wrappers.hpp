@@ -34,7 +34,7 @@ private:
 class InputChannel: public std::enable_shared_from_this<InputChannel> {  // note: public inheritance
 public:
     InputChannel(const InputChannel&) = delete;
-    void operator=(const InputChannel&) = delete;
+    InputChannel& operator=(const InputChannel&) = delete;
     static std::shared_ptr<InputChannel> create(const std::shared_ptr<IInputSource>& source) {
         auto tmp = std::shared_ptr<InputChannel>(new InputChannel(source));
         source->addSubscriber(tmp);

@@ -336,8 +336,11 @@ void Drawer::process() {
         out << "Mean overall time per all inputs: " << std::fixed << std::setprecision(2) << std::setw(6);
         const auto t1 = std::chrono::steady_clock::now();
         uint64_t frameCounter = context.frameCounter;
-        const ms meanOverallTimePerAllInputs = std::chrono::duration_cast<ms>((t1 - context.t0)
-                                               * context.readersContext.inputChannels.size()) / frameCounter;
+        ms meanOverallTimePerAllInputs = std::chrono::duration_cast<ms>((t1 - context.t0)
+                                               * context.readersContext.inputChannels.size());
+        if (0 != frameCounter) {
+            meanOverallTimePerAllInputs /= frameCounter;
+        }
         out << meanOverallTimePerAllInputs.count();
         out << "ms /" << std::setw(6) << std::chrono::seconds(1) / meanOverallTimePerAllInputs << "FPS";
 
