@@ -4,7 +4,7 @@
 
 The `ssd_mobilenet_v2_coco` model is a [Single-Shot multibox Detection (SSD)](https://arxiv.org/pdf/1801.04381.pdf) network intended to perform object detection. The differnce bewteen this model and the `mobilenet-ssd` is that there the `mobilenet-ssd` can only detect face, the `ssd_mobilenet_v2_coco` model can detect objects as it has been trained from the Common Objects in COntext (COCO) image dataset. 
 
-The model input is a blob that consists of a single image of "1x3x300x300" in BGR order.
+The model input is a blob that consists of a single image of "1x3x300x300" in RGB order.
 
 The model output is a typical vector containing the tracked object data, as previously described. Note that the "class_id" data is now significant and should be used to determine the classification for any detected object.
 
@@ -24,6 +24,21 @@ The model output is a typical vector containing the tracked object data, as prev
 ## Performance
 
 ## Input
+
+Note that original model expects image in `RGB` format, converted model - in `BGR` format.
+
+### Original model
+
+Image, shape - `1,300,300,3`, format is `B,H,W,C` where:
+
+- `B` - batch size
+- `C` - channel
+- `H` - height
+- `W` - width
+
+Channel order is `RGB`
+
+### Converted model
 
 Image, shape - `1,300,300,3`, format is `B,H,W,C` where:
 
