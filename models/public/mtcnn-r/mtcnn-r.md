@@ -23,11 +23,11 @@ The model output is a blob with a vector containing the refined face data. If th
 
 ## Performance
 
-## Inputs
+## Input
 
 Name - `data`, shape - `1,3,24,24`
 
-## Outputs
+## Output
 
 Name: `prob1`
 

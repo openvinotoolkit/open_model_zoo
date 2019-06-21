@@ -23,11 +23,11 @@ The model output is a blob with a vector containing the output face data.
 
 ## Performance
 
-## Inputs
+## Input
 
 Name - `data`, shape - `1,3,48,48`
 
-## Outputs
+## Output
 
 Name: `prob1`
 

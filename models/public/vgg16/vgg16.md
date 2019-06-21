@@ -23,7 +23,7 @@ The model output for `vgg16` is the typical object classifier output for the 100
 
 ## Performance
 
-## Inputs
+## Input
 
 Name - `data`, shape - `1,3,224,224`, image format is `B,C,H,W` where:
 
@@ -34,7 +34,7 @@ Name - `data`, shape - `1,3,224,224`, image format is `B,C,H,W` where:
 
 Channel order is `BGR`
 
-## Outputs
+## Output
 
 Name: `prob`
 

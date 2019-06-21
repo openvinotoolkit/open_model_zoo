@@ -23,7 +23,7 @@ The model output for `inception-resnet-v2` is the typical object classifier outp
 
 ## Performance
 
-## Inputs
+## Input
 
 Name - `data`, shape - `1,3,299,299`, image format is `B,C,H,W` where:
 
@@ -34,7 +34,7 @@ Name - `data`, shape - `1,3,299,299`, image format is `B,C,H,W` where:
 
 Channel order is `BGR`
 
-## Outputs
+## Output
 
 Name: `prob`
 

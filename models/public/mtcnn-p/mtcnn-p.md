@@ -23,7 +23,7 @@ The model output is a blob with a vector containing the first pass of face data.
 
 ## Performance
 
-## Inputs
+## Input
 
 Name - `data`, shape - `1,3,720,1280`, image format is `B,C,H,W` where:
 
@@ -32,7 +32,7 @@ Name - `data`, shape - `1,3,720,1280`, image format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-## Outputs
+## Output
 
 Name: `prob1`
 

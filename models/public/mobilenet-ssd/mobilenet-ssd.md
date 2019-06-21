@@ -23,7 +23,7 @@ The model output is a typical vector containing the tracked object data, as prev
 
 ## Performance
 
-## Inputs
+## Input
 
 Name - `data`, shape - `1,3,300,300`, image format is `B,C,H,W` where:
 
@@ -34,7 +34,7 @@ Name - `data`, shape - `1,3,300,300`, image format is `B,C,H,W` where:
 
 Channel order is `BGR`
 
-## Outputs
+## Output
 
 Name: `detection_out`
 

@@ -33,7 +33,7 @@ See [https://github.com/shicai/DenseNet-Caffe]()
 
 ## Performance
 
-## Inputs
+## Input
 
 Name - `data`, shape - `1,3,224,224`, image format is `B,C,H,W` where:
 
@@ -44,7 +44,7 @@ Name - `data`, shape - `1,3,224,224`, image format is `B,C,H,W` where:
 
 Channel order is `BGR`
  
-## Outputs
+## Output
 
 Name: `fc6`
 
