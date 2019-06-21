@@ -2,7 +2,8 @@
 
 ## Use Case and High-Level Description
 
-This is an Tensorflow implementation of DenseNet by G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten with ImageNet pretrained models. The weights are converted from DenseNet-Keras Models. For details see [repository](https://github.com/pudae/tensorflow-densenet/), [paper](https://arxiv.org/pdf/1608.06993.pdf)
+This is an Tensorflow version of `densenet-121` model, one of the DenseNet
+group of models designed to perform image classification. The weights were converted from DenseNet-Keras Models. The model have been pretrained on the ImageNet image database For details see [repository](https://github.com/pudae/tensorflow-densenet/), [paper](https://arxiv.org/pdf/1608.06993.pdf)
 
 ## Example
 
