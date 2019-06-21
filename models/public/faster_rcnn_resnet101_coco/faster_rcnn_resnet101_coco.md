@@ -1,8 +1,8 @@
-# faster_rcnn_inception_resnet_v2_atrous_coco
+# faster_rcnn_resnet101_coco
 
 ## Use Case and High-Level Description
 
-Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection. For details see [paper](https://arxiv.org/pdf/1801.04381.pdf).
+Faster R-CNN Resnet-101 model. Used for object detection. For details see [paper](https://arxiv.org/pdf/1801.04381.pdf).
 
 ## Example
 
@@ -11,8 +11,8 @@ Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection.
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
 | Type                            | Object detection                          |
-| GFlops                          | 30.687                                    |
-| MParams                         | 13.307                                    |
+| GFlops                          | 112.052                                   |
+| MParams                         | 48.128                                    |
 | Source framework                | Tensorflow                                |
 
 ## Performance

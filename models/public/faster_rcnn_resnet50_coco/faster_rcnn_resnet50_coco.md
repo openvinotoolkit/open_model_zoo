@@ -41,7 +41,7 @@ Faster R-CNN Resnet-50 model. Used for object detection. For details see [paper]
     - H - image height
     - W - image width
 
-   Expected color order - RGB.
+   Expected color order - BGR.
 
 1. Name: `image_info`, shape: [1x3], in format [BxC],
    where:

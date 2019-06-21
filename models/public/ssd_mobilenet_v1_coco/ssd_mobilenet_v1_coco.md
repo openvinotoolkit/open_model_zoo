@@ -1,19 +1,21 @@
-# faster_rcnn_inception_resnet_v2_atrous_coco
+# ssd_mobilenet_v1_coco
 
 ## Use Case and High-Level Description
 
-Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection. For details see [paper](https://arxiv.org/pdf/1801.04381.pdf).
+The `ssd_mobilenet_v1_coco` model is a [Single-Shot multibox Detection (SSD)](https://arxiv.org/pdf/1801.04381.pdf) network intended to perform object detection. The difference bewteen this model and the `mobilenet-ssd` is that there the `mobilenet-ssd` can only detect face, the `ssd_mobilenet_v1_coco` model can detect objects.
 
 ## Example
 
 ## Specification
 
-| Metric                          | Value                                     |
-|---------------------------------|-------------------------------------------|
-| Type                            | Object detection                          |
-| GFlops                          | 30.687                                    |
-| MParams                         | 13.307                                    |
-| Source framework                | Tensorflow                                |
+| Metric            | Value         |
+|-------------------|---------------|
+| Type              | Detection     |
+| GFLOPs            | 2.494         |
+| MParams           | 6.807         |
+| Source framework  | Tensorflow    |
+
+## Accuracy
 
 ## Performance
 
@@ -21,7 +23,7 @@ Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection.
 
 ### Original model
 
-1. Name: `image_tensor`, shape: [1x600x600x3] - An input image in the format [BxHxWxC],
+1. Name: `image_tensor`, shape: [1x300x300x3] - An input image in the format [BxHxWxC],
    where:
 
     - B - batch size
@@ -33,7 +35,7 @@ Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection.
 
 ### Converted model
 
-1. Name: `image_tensor`, shape: [1x3x600x600] - An input image in the format [BxCxHxW],
+1. Name: `image_tensor`, shape: [1x3x300x300] - An input image in the format [BxCxHxW],
    where:
 
     - B - batch size
@@ -42,12 +44,6 @@ Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection.
     - W - image width
 
    Expected color order - BGR.
-
-1. Name: `image_info`, shape: [1x3], in format [BxC],
-   where:
-
-    - B - batch size
-    - C - vector of 3 values in format [HxWxS], represents information of input image size, where H - image height, W - imahe width, S - image scale factor (usually 1)
 
 ## Output
 
@@ -60,7 +56,7 @@ Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection.
 
 ### Converted model
 
-1. Name: `reshape_do_2d`, shape: [1, 1, N, 7], where N is the number of detected
+1. Name: `DetectionOutput`, shape: [1, 1, N, 7], where N is the number of detected
 bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
     where:
