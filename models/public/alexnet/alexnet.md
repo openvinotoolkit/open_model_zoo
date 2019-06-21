@@ -6,7 +6,7 @@ The `alexnet` model is designed to perform image classification. Just like other
 
 The model input is a blob that consists of a single image of "1x3x227x227" in BGR order.
 
-The model output for "alexnet" is the usual object classifier output for the 1000 different classifications matching those in the ImageNet database.
+The model output for `alexnet` is the usual object classifier output for the 1000 different classifications matching those in the ImageNet database.
 
 ## Example
 
