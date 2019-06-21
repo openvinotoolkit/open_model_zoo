@@ -336,11 +336,8 @@ void Drawer::process() {
         out << "Mean overall time per all inputs: " << std::fixed << std::setprecision(2) << std::setw(6);
         const auto t1 = std::chrono::steady_clock::now();
         uint64_t frameCounter = context.frameCounter;
-        ms meanOverallTimePerAllInputs = std::chrono::duration_cast<ms>((t1 - context.t0)
-                                               * context.readersContext.inputChannels.size());
-        if (0 != frameCounter) {
-            meanOverallTimePerAllInputs /= frameCounter;
-        }
+        const ms meanOverallTimePerAllInputs = std::chrono::duration_cast<ms>((t1 - context.t0)
+                                               * context.readersContext.inputChannels.size()) / frameCounter;
         out << meanOverallTimePerAllInputs.count();
         out << "ms /" << std::setw(6) << std::chrono::seconds(1) / meanOverallTimePerAllInputs << "FPS";
 
@@ -818,13 +815,15 @@ int main(int argc, char* argv[]) {
         }
 
         uint64_t frameCounter = context.frameCounter;
-        const ms meanOverallTimePerAllInputs = std::chrono::duration_cast<ms>((t1 - context.t0)
-            * context.readersContext.inputChannels.size()) / frameCounter;
-        std::cout << "Mean overall time per all inputs: " << std::fixed << std::setprecision(2) << meanOverallTimePerAllInputs.count()
-                  << "ms / " << std::chrono::seconds(1) / meanOverallTimePerAllInputs << "FPS for " << frameCounter << " frames\n";
-        const double detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
-            / (frameCounter * context.nireq) * 100;
-        std::cout << "Detection InferRequests usage: " << detectionsInfersUsage << "%\n";
+        if (0 != frameCounter) {
+            const ms meanOverallTimePerAllInputs = std::chrono::duration_cast<ms>((t1 - context.t0)
+                * context.readersContext.inputChannels.size()) / frameCounter;
+            std::cout << "Mean overall time per all inputs: " << std::fixed << std::setprecision(2) << meanOverallTimePerAllInputs.count()
+                      << "ms / " << std::chrono::seconds(1) / meanOverallTimePerAllInputs << "FPS for " << frameCounter << " frames\n";
+            const double detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
+                / (frameCounter * context.nireq) * 100;
+            std::cout << "Detection InferRequests usage: " << detectionsInfersUsage << "%\n";
+        }
     } catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
         return 1;
