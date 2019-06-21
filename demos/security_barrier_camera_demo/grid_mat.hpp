@@ -22,6 +22,9 @@ public:
             maxWidth = std::max(maxWidth, static_cast<size_t>(sizes[i].width));
             maxHeight = std::max(maxHeight, static_cast<size_t>(sizes[i].height));
         }
+        if (0 == maxWidth || 0 == maxHeight) {
+            throw std::invalid_argument("Input resolution must not be zero.");
+        }
 
         size_t nGridCols = static_cast<size_t>(ceil(sqrt(static_cast<float>(sizes.size()))));
         size_t nGridRows = (sizes.size() - 1) / nGridCols + 1;
