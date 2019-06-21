@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `ssd_mobilenet_v2_coco` model is a [Single-Shot multibox Detection (SSD)](https://arxiv.org/pdf/1801.04381.pdf) network intended to perform object detection. The differnce bewteen this model and the `mobilenet-ssd` is that there the `mobilenet-ssd` can only detect face, the `ssd_mobilenet_v2_coco` model can detect objects as it has been trained from the Common Objects in COntext (COCO) image dataset. 
+The `ssd_mobilenet_v2_coco` model is a [Single-Shot multibox Detection (SSD)](https://arxiv.org/pdf/1801.04381.pdf) network intended to perform object detection. The difference bewteen this model and the `mobilenet-ssd` is that there the `mobilenet-ssd` can only detect face, the `ssd_mobilenet_v2_coco` model can detect objects as it has been trained from the Common Objects in COntext (COCO) image dataset. 
 
 The model input is a blob that consists of a single image of "1x3x300x300" in RGB order.
 
@@ -32,9 +32,9 @@ Note that original model expects image in `RGB` format, converted model - in `BG
 Image, shape - `1,300,300,3`, format is `B,H,W,C` where:
 
 - `B` - batch size
-- `C` - channel
 - `H` - height
 - `W` - width
+- `C` - channel
 
 Channel order is `RGB`
 
@@ -43,15 +43,15 @@ Channel order is `RGB`
 Image, shape - `1,300,300,3`, format is `B,H,W,C` where:
 
 - `B` - batch size
-- `C` - channel
 - `H` - height
 - `W` - width
+- `C` - channel
 
 Channel order is `BGR`
 
 ## Output
 
-**ATTENTION!** After Model Optimizer conversion original output format will be changed. Detailed explanation changes after Model Optimizer conversion you an find in [Model Optimizer development guide](http://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_Object_Detection_API_Models.html)
+**ATTENTION!** After Model Optimizer's conversion original output format will be changed. Detailed explanation of changes after Model Optimizer's conversion you can find in [Model Optimizer development guide](http://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_Object_Detection_API_Models.html)
 
 ### Original model 
 
