@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `inception-resnet-v2` model is one of the [Inception](https://arxiv.org/pdf/1602.07261.pdf) family of models designed to perform image classification.1 Like the other Inception models, the `inception-resnet-v2` model has been pretrained on the ImageNet image database. For details about this family of models, check out the paper.
+The `inception-resnet-v2` model is one of the Inception family of models designed to perform image classification.1 Like the other Inception models. For details about this family of models, check out the [paper](https://arxiv.org/pdf/1602.07261.pdf).
 
 ## Example
 

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Faster R-CNN with Inception Resnet v2 Atrous version pre-trained on the COCO dataset. Used for object detection. For details see [paper](https://arxiv.org/pdf/1801.04381.pdf).
+Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection. For details see [paper](https://arxiv.org/pdf/1801.04381.pdf).
 
 ## Example
 
