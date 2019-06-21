@@ -4,7 +4,7 @@
 
 The `mtcnn-p` model is one of the [mtcnn](https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf) group of models designed to perform face detection. Short for "Multi-task Cascaded Convolutional Neural Network", it is implemented using the Caffe framework. The "p" designation indicates that this model is the "proposal" network intended to find the initial set of faces. For details about this family of models, check out the [repository](https://github.com/DuinoDu/mtcnn).
 
-The model input is an image containing the data to be analyzed.
+The model input is an image containing the data to be analyzed, with mean values [127.5,127.5,127.5] and scale value 0.0078125.
 
 The model output is a blob with a vector containing the first pass of face data. If there are no faces detected, no further processing is needed. Otherwise, you will typically use this output as input to the `mtcnn-r` model.
 
@@ -25,14 +25,14 @@ The model output is a blob with a vector containing the first pass of face data.
 
 ## Input
 
-Image, shape - `1,3,720,1280`, format is `B,C,H,W`, where:
+Image, shape - `1,3,720,1280`, format is `B,C,W,H`, where:
 
 - `B` - batch size
 - `C` - channel
 - `W` - width
 - `H` - height
 
- Expected color order: `RGB`
+Expected color order: `BGR`
 
 ## Output
 

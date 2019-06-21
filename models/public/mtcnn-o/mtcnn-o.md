@@ -4,7 +4,7 @@
 
 The `mtcnn-o` model is the third of the [mtcnn](https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf) group of models designed to perform face detection. Short for "Multi-task Cascaded Convolutional Neural Network", it is implemented using the Caffe framework. The "o" designation indicates that this model is the "output" network intended to take the data returned from the "refine" `mtcnn-r` network, and transform it into the final output data.  For details about this family of models, check out the [repository](https://github.com/DuinoDu/mtcnn).
 
-The model input is a blob with a vector containing the refined face data, as returned by the `mtcnn-r` model.
+The model input is a blob with a vector containing the refined face data, as returned by the `mtcnn-r` model, with mean values [127.5,127.5,127.5] and scale value 0.0078125.
 
 The model output is a blob with a vector containing the output face data.
 
@@ -32,9 +32,7 @@ Image, shape - `1,3,48,48` in `B,C,W,H` format, where
 - `W` - width
 - `H` - height
 
-Expected color order: `RGB`
-
-## 
+Expected color order: `BGR`
 
 ## Output
 

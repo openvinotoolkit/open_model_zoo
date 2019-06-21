@@ -36,11 +36,10 @@ Channel order is `BGR`
 
 ## Output
 
-Object classifier according to ImageNet classes, shape -`1,1000`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
 - `C` - Predicted probabilities for each class in  [0, 1] range
-
 
 ## Legal Information
 

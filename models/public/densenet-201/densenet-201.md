@@ -48,7 +48,7 @@ Channel order is `BGR`
 
 ## Output
 
-Object classifier according to ImageNet classes, shape -`1,1000,1,1` contains predicted
+Object classifier according to ImageNet classes, shape - `1,1000,1,1` contains predicted
 probability for each class in logits format
 
 ## Legal Information
