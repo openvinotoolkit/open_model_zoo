@@ -25,11 +25,17 @@ The model output is a blob with a vector containing the refined face data. If th
 
 ## Input
 
-Name - `data`, shape - `1,3,24,24`
+Image, shape - `1,3,24,24` in `B,C,W,H` format, where
+
+* `B` - input batch size
+* `C` - number of image channels
+* `W` - width
+* `H` - height
 
 ## Output
 
-Name: `prob1`
+1. Name: `prob1` with shape `1,2,B` contains scores across 2 classes (`0 `- no face, `1` - face) for each input in batch. This is necessary for refining face regions from `mtcnn-p`
+2. Name: `conv5-2` contains clarifications for produced by `mtcnn-p` boxes 
 
 ## Legal Information
 

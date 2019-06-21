@@ -25,16 +25,19 @@ The model output is a blob with a vector containing the first pass of face data.
 
 ## Input
 
-Name - `data`, shape - `1,3,720,1280`, image format is `B,C,H,W` where:
+Image, shape - `1,3,720,1280`, format is `B,C,H,W`, where:
 
 - `B` - batch size
 - `C` - channel
-- `H` - height
 - `W` - width
+- `H` - height
+
+ Expected color order: `RGB`
 
 ## Output
 
-Name: `prob1`
+1. Name: `prob1` with shape `1,2,W,H` contains scores across 2 classes (0 - no face, 1 - face) for each pixel that it contains face or not.
+2. Name: `conv4-2` contains regions with detected faces.
 
 ## Legal Information
 

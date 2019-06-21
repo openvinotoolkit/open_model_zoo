@@ -25,11 +25,22 @@ The model output is a blob with a vector containing the output face data.
 
 ## Input
 
-Name - `data`, shape - `1,3,48,48`
+Image, shape - `1,3,48,48` in `B,C,W,H` format, where
+
+- `B` - input batch size
+- `C` - number of image channels
+- `W` - width
+- `H` - height
+
+Expected color order: `RGB`
+
+## 
 
 ## Output
 
-Name: `prob1`
+1. Name: `prob1` with shape `1,2,B` contains scores across 2 classes (`0 `- no face, `1` - face) for each input in batch. This is necessary for final refining face regions after`mtcnn-p` and `mtcnn-r`
+2. Name: `conv6-2` contains final clarifications for produced by `mtcnn-p` boxes and refined by `mtcnn-r`
+3. Name: `conv6-3` contains 5 facial landmarks: `left eye`, `right eye`, `nose`, `left mouth corner`, `right mouth corner` coordinates for each face region
 
 ## Legal Information
 

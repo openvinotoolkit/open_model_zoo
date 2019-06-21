@@ -25,7 +25,7 @@ The model output is a typical vector containing the tracked object data, as prev
 
 ## Input
 
-Name - `data`, shape - `1,3,300,300`, image format is `B,C,H,W` where:
+Image, shape - `1,3,300,300`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
@@ -36,7 +36,16 @@ Channel order is `BGR`
 
 ## Output
 
-Name: `detection_out`
+The net outputs a blob with shape: [1, 1, N, 7], where N is the number of detected
+bounding boxes. For each detection, the description has the format:
+[`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
+where:
+
+- `image_id` - ID of the image in the batch
+- `label` - predicted class ID
+- `conf` - confidence for the predicted class
+- (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates stored in normalized format, in range [0, 1])
+- (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates stored in normalized format, in range [0, 1])
 
 ## Legal Information
 
