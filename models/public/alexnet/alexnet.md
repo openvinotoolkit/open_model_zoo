@@ -25,7 +25,7 @@ The model output for `alexnet` is the usual object classifier output for the 100
 
 ## Input
 
-Name - `data`, shape - `1,3,227,227`, image format is `B,C,H,W` where:
+Image, shape - `1,3,227,227`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
@@ -36,7 +36,10 @@ Channel order is `BGR`
 
 ## Output
 
-Name: `prob`
+Object classifier according to ImageNet classes, shape -`1,1000`, output data format is `B,C` where:
+
+- `B` - batch size
+- `C` - Predicted probabilities for each class in  [0, 1] range
 
 ## Legal Information
 

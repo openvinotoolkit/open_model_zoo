@@ -35,7 +35,7 @@ See [https://github.com/shicai/DenseNet-Caffe]()
 
 ## Input
 
-Name - `data`, shape - `1,3,224,224`, image format is `B,C,H,W` where:
+Image, shape - `1,3,224,224`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
@@ -43,10 +43,11 @@ Name - `data`, shape - `1,3,224,224`, image format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `BGR`
- 
+
 ## Output
 
-Name: `fc6`
+Object classifier according to ImageNet classes, shape -`1,1000,1,1` contains predicted
+probability for each class in logits format
 
 ## Legal Information
 
