@@ -265,8 +265,11 @@ def load_topologies(config):
 # requires the --print_all, --all, --name and --list arguments to be in `args`
 def load_topologies_from_args(parser, args):
     if args.print_all:
+        print_list = []
         for top in load_topologies(args.config):
-            print(top.name)
+            print_list.append(top.name)
+        for p in sorted(print_list):
+            print(p)
         sys.exit()
 
     filter_args_count = sum([args.all, args.name is not None, args.list is not None])
