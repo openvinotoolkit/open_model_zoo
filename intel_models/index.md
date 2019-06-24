@@ -139,7 +139,8 @@ Deep Learning models for text detection in various applications
 
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
-| [text-detection-0002](./text-detection-0002/description/text-detection-0002.md)                                                                | 51.256               | 6.747      |
+| [text-detection-0003](./text-detection-0003/description/text-detection-0003.md)                                                                | 51.256               | 6.747      |
+| [text-detection-0004](./text-detection-0003/description/text-detection-0004.md)                                                                | TBD                  | TBD        |
 
 ## Text Recognition
 

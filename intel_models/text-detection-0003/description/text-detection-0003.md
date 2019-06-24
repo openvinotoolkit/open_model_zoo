@@ -1,18 +1,18 @@
-# text-detection-0002
+# text-detection-0003
 
 ## Use Case and High-Level Description
 
-Text detector based on [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) architecture with [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf) as a backbone for indoor/outdoor scenes.
+Text detector based on [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) architecture with [MobileNetV2-like](https://arxiv.org/pdf/1801.04381.pdf) as a backbone for indoor/outdoor scenes.
 
 ## Example
 
-![](./text-detection-0002.png)
+![](./text-detection-0003.png)
 
 ## Specification
 
 | Metric                                                        | Value                   |
 |---------------------------------------------------------------|-------------------------|
-| F-measure (Harmonic mean of precision and recall on ICDAR2015)| 81.35%                  |
+| F-measure (Harmonic mean of precision and recall on ICDAR2015)| 82.12%                  |
 | GFlops                                                        | 51.256                  |
 | MParams                                                       | 6.747                   |
 | Source framework                                              | TensorFlow              |
