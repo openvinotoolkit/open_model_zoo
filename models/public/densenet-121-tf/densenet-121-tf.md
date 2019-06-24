@@ -30,7 +30,7 @@ group of models designed to perform image classification. The weights were conve
     - W - image width
     - C - number of channels
 
-   Expected color order - BGR.
+   Expected color order - RGB.
    Mean values - [123.68, 116.78, 103.94], scale factor for each channel - 58.8235294
 
 ### Converted model

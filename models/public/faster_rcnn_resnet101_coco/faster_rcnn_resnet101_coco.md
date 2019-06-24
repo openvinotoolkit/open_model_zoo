@@ -47,7 +47,7 @@ Faster R-CNN Resnet-101 model. Used for object detection. For details see [paper
    where:
 
     - B - batch size
-    - C - vector of 3 values in format [HxWxS], represents information of input image size, where H - image height, W - imahe width, S - image scale factor (usually 1)
+    - C - vector of 3 values in format [H,W,S], represents information of input image size, where H - image height, W - imahe width, S - image scale factor (usually 1)
 
 ## Output
 
