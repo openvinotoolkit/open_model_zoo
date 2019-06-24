@@ -169,9 +169,6 @@ int main(int argc, char *argv[]) {
         // --------------------------- 3. Doing inference -----------------------------------------------------
         // Starting inference & calculating performance
         slog::info << "Start inference " << slog::endl;
-        if (!FLAGS_no_show) {
-            std::cout << "Press any key to stop" << std::endl;
-        }
 
         bool isFaceAnalyticsEnabled = ageGenderDetector.enabled() || headPoseDetector.enabled() ||
                                       emotionsDetector.enabled() || facialLandmarksDetector.enabled();
