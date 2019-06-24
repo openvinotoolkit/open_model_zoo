@@ -29,7 +29,8 @@
     - W - image width
     - C - number of channels
 
-   Expected color order - BGR.
+   Expected color order - RGB.
+   Mean values - [127.5, 127.5, 127.5], scale factor for each channel - 127.5
 
 ### Converted model
 

@@ -30,6 +30,7 @@ The `inception-resnet-v2` model is one of the Inception family of models designe
     - C - number of channels
 
    Expected color order - RGB.
+   Mean values - [127.5, 127.5, 127.5], scale factor for each channel - 127.5
 
 ### Converted model
 
