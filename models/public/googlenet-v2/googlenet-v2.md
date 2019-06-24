@@ -45,4 +45,4 @@ Object classifier according to ImageNet classes, shape - `1,1000`, output data f
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/BVLC/caffe/master/LICENSE]()
+[https://raw.githubusercontent.com/lim0606/caffe-googlenet-bn/master/README.md]()
