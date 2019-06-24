@@ -25,18 +25,41 @@ The model output for `squeezenet1.1` is the typical object classifier output for
 
 ## Input
 
-Image, shape - `1,3,227,227`, image format is `B,C,H,W` where:
+### Original model
+
+Image, name - `data`, shape - `1,3,227,227`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
 - `H` - height
 - `W` - width
 
-Channel order is `BGR`
+Channel order is `BGR`.
+Mean values - [104, 117, 123]
+
+### Converted model
+
+Image, name - `data`, shape - `1,3,227,227`, format is `B,C,H,W` where:
+
+- `B` - batch size
+- `C` - channel
+- `H` - height
+- `W` - width
+
+Channel order is `BGR`.
 
 ## Output
 
-Object classifier according to ImageNet classes, shape - `1,1000`, output data format is `B,C` where:
+### Original model
+
+Object classifier according to ImageNet classes, name - `prob`, shape - `1,1000`, output data format is `B,C` where:
+
+- `B` - batch size
+- `C` - Predicted probabilities for each class in  [0, 1] range
+
+### Converted model
+
+Object classifier according to ImageNet classes, name - `prob`, shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
 - `C` - Predicted probabilities for each class in  [0, 1] range
