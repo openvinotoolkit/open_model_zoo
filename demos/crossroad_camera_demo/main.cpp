@@ -274,6 +274,7 @@ struct PersonAttribsDetection : BaseDetection {
         cv::Mat image32f;
         image.convertTo(image32f, CV_32F);
         image32f = image32f.reshape(1, image32f.rows*image32f.cols);
+        clusterCount = std::min(clusterCount, image32f.rows);
         cv::kmeans(image32f, clusterCount, labels, cv::TermCriteria(cv::TermCriteria::EPS+cv::TermCriteria::MAX_ITER, 10, 1.0),
                     10, cv::KMEANS_RANDOM_CENTERS, centers);
         centers.convertTo(centers, CV_8U);
