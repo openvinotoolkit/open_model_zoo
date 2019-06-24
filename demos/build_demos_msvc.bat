@@ -39,9 +39,19 @@ if not "%1" == "" (
    )
 )
 
-if "%InferenceEngine_DIR%"=="" (
-   echo "InferenceEngine_DIR environment variable is not set. Please set it to build the demo applications."
-   goto errorHandling
+if "%INTEL_OPENVINO_DIR%"=="" (
+    if exist "%ROOT_DIR%\..\..\bin\setupvars.bat" (
+        call "%ROOT_DIR%\..\..\bin\setupvars.bat"
+    ) else (
+        if exist "%ROOT_DIR%\..\..\..\bin\setupvars.bat" (
+            call "%ROOT_DIR%\..\..\..\bin\setupvars.bat"
+      ) else (
+         echo Failed to set the environment variables automatically
+         echo To fix, run the following command: ^<INSTALL_DIR^>\bin\setupvars.bat
+         echo where INSTALL_DIR is the OpenVINO installation directory.
+         GOTO errorHandling
+      )
+    )
 ) 
 
 if "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
