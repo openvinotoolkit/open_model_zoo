@@ -32,7 +32,7 @@ Image, shape - `1,3,720,1280`, format is `B,C,W,H`, where:
 - `W` - width
 - `H` - height
 
-Expected color order: `BGR`
+Expected color order: `RGB`
 
 ## Output
 

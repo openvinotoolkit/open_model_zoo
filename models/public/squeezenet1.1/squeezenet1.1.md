@@ -41,6 +41,6 @@ Object classifier according to ImageNet classes, shape - `1,1000`, output data f
 - `B` - batch size
 - `C` - Predicted probabilities for each class in  [0, 1] range
 
-## License
+## Legal Information
 
 [https://raw.githubusercontent.com/DeepScale/SqueezeNet/master/LICENSE]()

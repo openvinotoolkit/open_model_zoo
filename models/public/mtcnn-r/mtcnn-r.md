@@ -32,7 +32,7 @@ Image, shape - `1,3,24,24` in `B,C,W,H` format, where
 * `W` - width
 * `H` - height
 
-Expected color order: `BGR`
+Expected color order: `RGB`
 
 ## Output
 
