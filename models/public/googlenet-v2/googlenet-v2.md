@@ -27,7 +27,21 @@ See [https://github.com/lim0606/caffe-googlenet-bn](https://github.com/lim0606/c
 
 ## Input
 
-Image, shape - `1,3,224,224`, format is `B,C,H,W` where:
+### Original model
+
+Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
+
+- `B` - batch size
+- `C` - channel
+- `H` - height
+- `W` - width
+
+Channel order is `BGR`.
+Mean values - [104.0,117.0,123.0]
+
+### Converted model
+
+Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
@@ -38,7 +52,16 @@ Channel order is `BGR`
 
 ## Output
 
-Object classifier according to ImageNet classes, shape - `1,1000`, output data format is `B,C` where:
+### Original model
+
+Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
+
+- `B` - batch size
+- `C` - Predicted probabilities for each class in  [0, 1] range
+
+### Converted model
+
+Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
 - `C` - Predicted probabilities for each class in  [0, 1] range
