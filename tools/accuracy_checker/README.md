@@ -212,12 +212,7 @@ metrics:
 
 Typical workflow for testing new model include:
 
-1. Convert annotation of your dataset. Use one of the converters from annotation-converters, or write your own if there is no converter for your dataset. You can find detailed instruction how to use converters [here][converters].
-
-```bash
-python3 convert_annotation.py <converter_name> <converter_specific parameters> --output_dir data/annotations
-```
-
+1. Convert annotation of your dataset. Use one of the converters from annotation-converters, or write your own if there is no converter for your dataset. You can find detailed instruction how to use converters in [Annotation Conversion Guide][converters].
 1. Choose one of *adapters* or write your own. Adapter converts raw output produced by framework to high level problem specific representation (e.g. *ClassificationPrediction*, *DetectionPrediction*, etc).
 1. Reproduce preprocessing, metrics and postprocessing from canonical paper.
 1. Create entry in config file and execute.
