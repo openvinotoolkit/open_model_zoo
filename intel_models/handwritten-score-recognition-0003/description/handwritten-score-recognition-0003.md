@@ -1,4 +1,4 @@
-# handwritten-score-recognition-0001
+# handwritten-score-recognition-0003
 
 ## Use Case and High-Level Description
 
@@ -14,7 +14,7 @@ The network is able to recognize school marks that should have format either `<d
 
 | Metric                                         | Value              |
 |------------------------------------------------|--------------------|
-| Accuracy (internal test set)                   | 98.17%             |
+| Accuracy (internal test set)                   | 98.83%             |
 | Text location requirements                     | Tight aligned crop |
 | GFlops                                         | 0.792              |
 | MParams                                        | 5.555              |
