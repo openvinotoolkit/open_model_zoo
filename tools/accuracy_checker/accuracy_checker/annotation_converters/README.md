@@ -40,7 +40,7 @@ Example of usage:
 The command line for annotation conversion looks like:
 
 ```bash
-python3 convert_annotation.py <converter_name> <converter_specific parameters>
+convert_annotation <converter_name> <converter_specific parameters>
 ```
 All converter specific options should have format `--<parameter_name> <parameter_value>`
 You may refer to `-h, --help` to full list of command line options. Some optional arguments are:
