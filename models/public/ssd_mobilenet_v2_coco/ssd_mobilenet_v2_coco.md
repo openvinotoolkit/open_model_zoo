@@ -2,9 +2,9 @@
 
 ## Use Case and High-Level Description
 
-The `ssd_mobilenet_v2_coco` model is a [Single-Shot multibox Detection (SSD)](https://arxiv.org/pdf/1801.04381.pdf) network intended to perform object detection. The difference bewteen this model and the `mobilenet-ssd` is that there the `mobilenet-ssd` can only detect face, the `ssd_mobilenet_v2_coco` model can detect objects as it has been trained from the Common Objects in COntext (COCO) image dataset. 
+The `ssd_mobilenet_v2_coco` model is a [Single-Shot multibox Detection (SSD)](https://arxiv.org/pdf/1801.04381.pdf) network intended to perform object detection. The difference between this model and the `mobilenet-ssd` is that the while `mobilenet-ssd` detects faces only, the `ssd_mobilenet_v2_coco` model detects objects, as it has been trained from the Common Objects in Context (COCO) image dataset.
 
-The model input is a blob that consists of a single image of "1x3x300x300" in RGB order.
+The model input is a blob that consists of a single image of 1x3x300x300 in RGB order.
 
 The model output is a typical vector containing the tracked object data, as previously described. Note that the "class_id" data is now significant and should be used to determine the classification for any detected object.
 
@@ -17,7 +17,7 @@ The model output is a typical vector containing the tracked object data, as prev
 | Type              | Detection     |
 | GFLOPs            | 3.775         |
 | MParams           | 16.818        |
-| Source framework  | Tensorflow    |
+| Source framework  | Tensorflow\*    |
 
 ## Accuracy
 
@@ -69,8 +69,8 @@ The array of detection summary info, name - `detection_out`,  shape - `1, 1, N, 
 - `image_id` - ID of the image in the batch
 - `label` - predicted class ID
 - `conf` - confidence for the predicted class
-- (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates stored in normalized format, in range [0, 1])
-- (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates stored in normalized format, in range [0, 1])
+- (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates are in normalized format, in range [0, 1])
+- (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates are in normalized format, in range [0, 1])
 
 ## Legal Information
 

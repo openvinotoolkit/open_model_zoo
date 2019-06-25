@@ -4,7 +4,7 @@
 
 The `squeezenet1.0` model is one of the [SqueezeNet](https://arxiv.org/pdf/1602.07360) topology models, is designed to perform image classification. The SqueezeNet models have been pre-trained on the ImageNet image database. For details about this family of models, check out the [repository](https://github.com/DeepScale/SqueezeNet).
 
-The model input is a blob that consists of a single image of "1x3x227x227" in BGR order. The BGR mean values need to be subtracted as follows: [104, 117, 123] before passing the image blob into the network.
+The model input is a blob that consists of a single image of 1x3x227x227 in BGR order. The BGR mean values need to be subtracted as follows: [104, 117, 123] before passing the image blob into the network.
 
 The model output for `squeezenet1.0` is the typical object classifier output for the 1000 different classifications matching those in the ImageNet database.
 
@@ -17,7 +17,7 @@ The model output for `squeezenet1.0` is the typical object classifier output for
 | Type              | Classification|
 | GFLOPs            | 1.737         |
 | MParams           | 1.248         |
-| Source framework  | Caffe         |
+| Source framework  | Caffe\*         |
 
 ## Accuracy
 

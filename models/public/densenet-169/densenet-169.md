@@ -8,9 +8,9 @@ the `densenet-121` model is the size and accuracy of the model. The `densenet-16
 is larger at just about 55MB in size vs the `densenet-121` model's roughly 31MB size.
 Originally trained on Torch, the authors converted them into Caffe* format. All
 the DenseNet models have been pretrained on the ImageNet image database. For details
-about this family of models, check out the [repository](https://github.com/shicai/DenseNet-Caffe). 
+about this family of models, check out the [repository](https://github.com/shicai/DenseNet-Caffe).
 
-The model input is a blob that consists of a single image of "1x3x224x224" in BGR
+The model input is a blob that consists of a single image of 1x3x224x224 in BGR
 order. The BGR mean values need to be subtracted as follows: [103.94, 116.78, 123.68]
 before passing the image blob into the network. In addition, values must be divided
 by 0.017.
@@ -27,11 +27,11 @@ the 1000 different classifications matching those in the ImageNet database.
 | Type              | Classification|
 | GFLOPs            | 6.788         |
 | MParams           | 14.139        |
-| Source framework  | Caffe         |
+| Source framework  | Caffe\*         |
 
 ## Accuracy
 
-See [https://github.com/shicai/DenseNet-Caffe]()
+See [https://github.com/shicai/DenseNet-Caffe]().
 
 ## Performance
 

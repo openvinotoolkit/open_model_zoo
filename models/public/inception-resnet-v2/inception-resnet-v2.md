@@ -4,7 +4,7 @@
 
 The `inception-resnet-v2` model is one of the [Inception](https://arxiv.org/pdf/1602.07261.pdf) family of models designed to perform image classification.1 Like the other Inception models, the `inception-resnet-v2` model has been pretrained on the ImageNet image database. For details about this family of models, check out the paper.
 
-The model input is a blob that consists of a single image of "1x3x299x299" in BGR order. The BGR mean values need to be subtracted as follows: [128.0,128.0,128.0] before passing the image blob into the network. In addition, values must be divided by 0.0078125.
+The model input is a blob that consists of a single image of 1x3x299x299 in BGR order. The BGR mean values need to be subtracted as follows: [128.0,128.0,128.0] before passing the image blob into the network. In addition, values must be divided by 0.0078125.
 
 The model output for `inception-resnet-v2` is the typical object classifier output for the 1000 different classifications matching those in the ImageNet database.
 
@@ -17,11 +17,11 @@ The model output for `inception-resnet-v2` is the typical object classifier outp
 | Type              | Classification|
 | GFLOPs            | 26.405        |
 | MParams           | 55.813        |
-| Source framework  | Caffe         |
+| Source framework  | Caffe\*         |
 
 ## Accuracy
 
-See [https://github.com/soeaver/caffe-model](https://github.com/soeaver/caffe-model)
+See [https://github.com/soeaver/caffe-model](https://github.com/soeaver/caffe-model).
 
 ## Performance
 

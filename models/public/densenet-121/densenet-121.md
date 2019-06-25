@@ -4,9 +4,9 @@
 
 The `densenet-121` model is one of the [DenseNet](https://arxiv.org/pdf/1608.06993)
 group of models designed to perform image classification. Originally trained on
-Torch, the authors converted them into Caffe* format. All the DenseNet models have
+Torch, the authors converted them into Caffe\* format. All the DenseNet models have
 been pretrained on the ImageNet image database. For details about this family of
-models, check out the [repository](https://github.com/shicai/DenseNet-Caffe). 
+models, check out the [repository](https://github.com/shicai/DenseNet-Caffe).
 
 The model input is a blob that consists of a single image of 1x3x224x224 in BGR
 order. The BGR mean values need to be subtracted as follows: [103.94, 116.78, 123.68]
@@ -25,7 +25,7 @@ the 1000 different classifications matching those in the ImageNet database.
 | Type              | Classification|
 | GFLOPs            | 5.724         |
 | MParams           | 7.971         |
-| Source framework  | Caffe         |
+| Source framework  | Caffe\*         |
 
 ## Accuracy
 
