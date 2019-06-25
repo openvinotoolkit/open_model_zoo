@@ -175,10 +175,15 @@ void Visualizer::enableEmotionBar(std::vector<std::string> const& emotionNames) 
 
     nxcells = (imgSizePadded.width - 1) / emotionBarSize.width;
     nycells = (imgSizePadded.height - 1) / emotionBarSize.height;
-    drawMap.create(nycells, nxcells, CV_8UC1);
+    if (0 < nxcells && 0 < nycells) {
+        drawMap.create(nycells, nxcells, CV_8UC1);
 
-    xstep = imgSizePadded.width / nxcells;
-    ystep = imgSizePadded.height / nycells;
+        xstep = imgSizePadded.width / nxcells;
+        ystep = imgSizePadded.height / nycells;
+    } else {
+        emotionVisualizer.reset();
+        std::cerr << "Disabling emotion bar due to small frame resolution to draw on\n";
+    }
 }
 
 void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
