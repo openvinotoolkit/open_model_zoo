@@ -52,14 +52,13 @@ Expected color order: `RGB`.
 
 ### Original model
 
-1. Face detection, name - `prob1`, shape `1,2,W,H`, contains scores across 2 classes (0 - no face, 1 - face) for each pixel that it contains face or not.
+1. Face detection, name - `prob1`, shape - `1,2,W,H`, contains scores across two classes (0 - no face, 1 - face) for each pixel whether it contains face or not.
 2. Face location, name - `conv4-2`, contains regions with detected faces.
 
 ### Converted model
 
-1. Face detection, name - `prob1`, shape `1,2,W,H`, contains scores across 2 classes (0 - no face, 1 - face) for each pixel that it contains face or not.
+1. Face detection, name - `prob1`, shape - `1,2,W,H`, contains scores across two classes (0 - no face, 1 - face) for each pixel whether it contains face or not.
 2. Face location, name - `conv4-2`, contains regions with detected faces.
-
 
 ## Legal Information
 

@@ -52,15 +52,15 @@ Expected color order: `RGB`.
 
 ### Original model
 
-1. Face detection, name - `prob1`, shape  - `1,2,B`, contains scores across 2 classes (`0 `- no face, `1` - face) for each input in batch. This is necessary for final refining face regions after`mtcnn-p` and `mtcnn-r`
-2. Face location, name - `conv6-2`, contains final clarifications for produced by `mtcnn-p` boxes and refined by `mtcnn-r`
-3. Control points, name - `conv6-3`, contains 5 facial landmarks: `left eye`, `right eye`, `nose`, `left mouth corner`, `right mouth corner` coordinates for each face region
+1. Face detection, name - `prob1`, shape  - `1,2,B`, contains scores across two classes (`0 `- no face, `1` - face) for each input in batch. This is necessary for final face regions refining after`mtcnn-p` and `mtcnn-r`.
+2. Face location, name - `conv6-2`, contains final clarifications for boxes produced by `mtcnn-p` and refined by `mtcnn-r`.
+3. Control points, name - `conv6-3`, contains five facial landmarks: `left eye`, `right eye`, `nose`, `left mouth corner`, `right mouth corner` coordinates for each face region.
 
 ### Converted model
 
-1. Face detection, name - `prob1`, shape  - `1,2,B`, contains scores across 2 classes (`0 `- no face, `1` - face) for each input in batch. This is necessary for final refining face regions after`mtcnn-p` and `mtcnn-r`
-2. Face location, name - `conv6-2`, contains final clarifications for produced by `mtcnn-p` boxes and refined by `mtcnn-r`
-3. Control points, name - `conv6-3`, contains 5 facial landmarks: `left eye`, `right eye`, `nose`, `left mouth corner`, `right mouth corner` coordinates for each face region
+1. Face detection, name - `prob1`, shape  - `1,2,B`, contains scores across two classes (`0 `- no face, `1` - face) for each input in batch. This is necessary for final face regions refining after`mtcnn-p` and `mtcnn-r`.
+2. Face location, name - `conv6-2`, contains final clarifications for boxes produced by `mtcnn-p` and refined by `mtcnn-r`.
+3. Control points, name - `conv6-3`, contains five facial landmarks: `left eye`, `right eye`, `nose`, `left mouth corner`, `right mouth corner` coordinates for each face region.
 
 ## Legal Information
 

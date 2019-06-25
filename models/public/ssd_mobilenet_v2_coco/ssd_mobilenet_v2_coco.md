@@ -36,7 +36,7 @@ Image, shape - `1,300,300,3`, format is `B,H,W,C` where:
 - `W` - width
 - `C` - channel
 
-Channel order is `RGB`
+Channel order is `RGB`.
 
 ### Converted model
 
@@ -47,23 +47,23 @@ Image, name - `image_tensor`, shape - `1,300,300,3`, format is `B,H,W,C` where:
 - `W` - width
 - `C` - channel
 
-Channel order is `BGR`
+Channel order is `BGR`.
 
 ## Output
 
-**ATTENTION!** After Model Optimizer's conversion original output format will be changed. Detailed explanation of changes after Model Optimizer's conversion you can find in [Model Optimizer development guide](http://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_Object_Detection_API_Models.html)
+> **NOTE** output format changes after Model Optimizer conversion. To find detailed explanation of changes, go to [Model Optimizer development guide](http://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_Object_Detection_API_Models.html)
 
 ### Original model 
 
-1. Classifier, name - `detection_classes`, contains predicted bounding boxes classes in range [1, 91]. The model was trained on MS COCO dataset version with 90 categories of object.
-2. Probability, name - `detection_scores`, contains probability of detected bounding boxes
-3. Detection box, name - `detection_boxes`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]` where (`x_min`, `y_min`)  is coordinates top left corner,  (`x_max`, `y_max`) is coordinates right bottom corner. Coordinates rescaled to input image size.
-4. Detections number, name - `num_detections`, contains the number of predicted detection boxes
+1. Classifier, name - `detection_classes`, contains predicted bounding boxes classes in range [1, 91]. The model was trained on Microsoft\* COCO dataset version with 90 categories of object.
+2. Probability, name - `detection_scores`, contains probability of detected bounding boxes.
+3. Detection box, name - `detection_boxes`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are rescaled to input image size.
+4. Detections number, name - `num_detections`, contains the number of predicted detection boxes.
 
 
 ### Converted model
 
-The array of detection summary info, name - `detection_out`,  shape - `1, 1, N, 7`, where N is the number of detected bounding boxes. For each detection, the description has the format:
+The array of summary detection information, name - `detection_out`,  shape - `1, 1, N, 7`, where N is the number of detected bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
 
 - `image_id` - ID of the image in the batch

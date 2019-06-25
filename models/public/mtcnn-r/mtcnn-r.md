@@ -52,13 +52,13 @@ Expected color order: `RGB`
 
 ### Original model
 
-1. Face detection, name - `prob1`, shape `1,2,B`, contains scores across 2 classes (`0 `- no face, `1` - face) for each input in batch. This is necessary for refining face regions from `mtcnn-p`
-2. Face location, name - `conv5-2`, contains clarifications for produced by `mtcnn-p` boxes 
+1. Face detection, name - `prob1`, shape - `1,2,B`, contains scores across two classes (`0 `- no face, `1` - face) for each input in batch. This is necessary to refine face regions from `mtcnn-p`.
+2. Face location, name - `conv5-2`, contains clarifications for boxes produced by `mtcnn-p`.
 
 ### Converted model
 
-1. Face detection, name - `prob1`, shape `1,2,B`, contains scores across 2 classes (`0 `- no face, `1` - face) for each input in batch. This is necessary for refining face regions from `mtcnn-p`
-2. Face location, name - `conv5-2`, contains clarifications for produced by `mtcnn-p` boxes 
+1. Face detection, name - `prob1`, shape - `1,2,B`, contains scores across two classes (`0 `- no face, `1` - face) for each input in batch. This is necessary to refine face regions from `mtcnn-p`.
+2. Face location, name - `conv5-2`, contains clarifications for boxes produced by `mtcnn-p`.
 
 ## Legal Information
 
