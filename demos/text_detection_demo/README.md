@@ -2,7 +2,8 @@
 
 The demo shows an example of using neural networks to detect and recognize printed text rotated at any angle in various environment. You can use the following pre-trained models with the demo:
 
-* `text-detection-0002`, which is a detection network for finding text.
+* `text-detection-0003`, which is a detection network for finding text.
+* `text-detection-0004`, which is a lightweight detection network for finding text.
 * `text-recognition-0012`, which is a recognition network for recognizing text.
 * `handwritten-score-recognition-0001`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`.
 
