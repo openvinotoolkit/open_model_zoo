@@ -24,7 +24,10 @@ import numpy as np
 from ..utils import finalize_metric_result
 from .overlap import Overlap, IOA
 from ..config import BoolField, NumberField, StringField
-from ..representation import DetectionAnnotation, DetectionPrediction
+from ..representation import (
+    DetectionAnnotation, DetectionPrediction,
+    ActionDetectionPrediction, ActionDetectionAnnotation
+)
 from .metric import Metric, FullDatasetEvaluationMetric
 
 class APIntegralType(enum.Enum):
@@ -130,8 +133,8 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
 
     __provider__ = 'map'
 
-    annotation_types = (DetectionAnnotation, )
-    prediction_types = (DetectionPrediction, )
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
 
     @classmethod
     def parameters(cls):
@@ -180,8 +183,8 @@ class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
 
     __provider__ = 'miss_rate'
 
-    annotation_types = (DetectionAnnotation, )
-    prediction_types = (DetectionPrediction, )
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
 
     @classmethod
     def parameters(cls):
@@ -219,8 +222,8 @@ class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
 
     __provider__ = 'recall'
 
-    annotation_types = (DetectionAnnotation, )
-    prediction_types = (DetectionPrediction, )
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
 
     def evaluate(self, annotations, predictions):
         valid_labels = get_valid_labels(self.labels, self.dataset.metadata.get('background_label'))
@@ -246,8 +249,8 @@ class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
 class DetectionAccuracyMetric(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
     __provider__ = 'detection_accuracy'
 
-    annotation_types = (DetectionAnnotation, )
-    prediction_types = (DetectionPrediction, )
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
 
     @classmethod
     def parameters(cls):

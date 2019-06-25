@@ -20,7 +20,8 @@ from ..utils import is_single_metric_source, get_supported_representations
 from ..presenters import BasePresenter
 from ..config import ConfigValidator, NumberField, StringField
 from ..dependency import ClassProvider
-from ..utils import zipped_transform, get_parameter_value_from_config
+from ..utils import zipped_transform, get_parameter_value_from_config, contains_any
+
 
 class Metric(ClassProvider):
     """
@@ -129,8 +130,15 @@ class Metric(ClassProvider):
 
     def _resolve_representation_containers(self, annotation, prediction):
         def get_resolve_subject(representation, source=None):
-            if not isinstance(representation, ContainerRepresentation):
-                return representation
+            def is_container(representation):
+                if isinstance(representation, ContainerRepresentation):
+                    return True
+                representation_parents = type(representation).__bases__
+                representation_parents_names = [parent.__name__ for parent in representation_parents]
+
+                return contains_any(representation_parents_names, (ContainerRepresentation.__name__, ))
+
+            if not is_container(representation):
 
             if not source:
                 return representation.values()
