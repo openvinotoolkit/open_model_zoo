@@ -15,8 +15,8 @@ in all ROI-wise heads.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| MS COCO val2017 box AP (max short side 800, max long side 1333)   | 45.39%  |
-| MS COCO val2017 mask AP (max short side 800, max long side 1333)  | 40.05%  |
+| MS COCO val2017 box AP (max short side 800, max long side 1333)   | 45.36%  |
+| MS COCO val2017 mask AP (max short side 800, max long side 1333)  | 40.00%  |
 | MS COCO val2017 box AP (max height 800, max width 1333)           | 45.11%  |
 | MS COCO val2017 mask AP (max height 800, max width 1333)          | 39.84%  |
 | Max objects to detect           | 100                                       |
