@@ -1,26 +1,24 @@
-# instance-segmentation-security-0049
+# instance-segmentation-security-0050
 
 ## Use case and High-level description
 
 This model is an instance segmentation network for 80 classes of objects.
-It is a Mask-RCNN-like model with ResNet50 backbone, Feature Pyramid Networks
-block for feature maps refinement and relatively light segmentation head.
+It is a Mask R-CNN with ResNet50 backbone, FPN and Bottom-Up Augmentation blocks
+and light-weight RPN.
 
 ## Example
 
-![](./instance-segmentation-security-0049.png)
+![](./instance-segmentation-security-0050.png)
 
 ## Specification
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| MS COCO val2017 box AP (max short side 320, max long side 480)   | 30.4%    |
-| MS COCO val2017 mask AP (max short side 320, max long side 480)  | 26.8%    |
-| MS COCO val2017 box AP (max height 320, max width 480)           | 29.8%    |
-| MS COCO val2017 mask AP (max height 320, max width 480)          | 26.3%    |
+| MS COCO val2017 box AP          | 31.27%                                    |
+| MS COCO val2017 mask AP         | 27.83%                                    |
 | Max objects to detect           | 100                                       |
-| GFlops                          | 56.433                                    |
-| MParams                         | 44.920                                    |
+| GFlops                          | 46.602                                    |
+| MParams                         | 30.448                                    |
 | Source framework                | PyTorch\*                                 |
 
 Average Precision (AP) is defined and measured according to standard
@@ -30,7 +28,7 @@ Average Precision (AP) is defined and measured according to standard
 
 ## Inputs
 
-1.	name: `im_data` , shape: [1x3x320x480] - An input image in the format
+1.	name: `im_data` , shape: [1x3x480x480] - An input image in the format
     [1xCxHxW]. The expected channel order is BGR.
 1.	name: `im_info`, shape: [1x3] - Image information: processed image height,
     processed image width and processed image scale

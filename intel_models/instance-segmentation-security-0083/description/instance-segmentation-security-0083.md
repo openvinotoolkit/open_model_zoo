@@ -1,25 +1,25 @@
-# instance-segmentation-security-0033
+# instance-segmentation-security-0083
 
 ## Use case and High-level description
 
 This model is an instance segmentation network for 80 classes of objects.
-It is a Mask-RCNN-like model with ResNeXt152 backbone and
+It is a Mask R-CNN model with ResNeXt152 backbone and
 Feature Pyramid Networks block for feature maps refinement.
 
 ## Example
 
-![](./instance-segmentation-security-0033.png)
+![](./instance-segmentation-security-0083.png)
 
 ## Specification
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| MS COCO val2017 box AP (max short side 480, max long side 640)   | 38.9%    |
-| MS COCO val2017 mask AP (max short side 480, max long side 640)  | 34.7%    |
-| MS COCO val2017 box AP (max height 480, max width 640)           | 38.6%    |
-| MS COCO val2017 mask AP (max height 480, max width 640)          | 34.3%    |
+| MS COCO val2017 box AP (max short side 480, max long side 640)    | 40.73%  |
+| MS COCO val2017 mask AP (max short side 480, max long side 640)   | 36.05%  |
+| MS COCO val2017 box AP (max height 480, max width 640)            | 40.16%  |
+| MS COCO val2017 mask AP (max height 480, max width 640)           | 35.56%  |
 | Max objects to detect           | 100                                       |
-| GFlops                          | 354.274                                   |
+| GFlops                          | 365.626                                   |
 | MParams                         | 143.444                                   |
 | Source framework                | PyTorch\*                                 |
 
