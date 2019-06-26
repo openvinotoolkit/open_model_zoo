@@ -13,7 +13,7 @@
 | Type                            | Classification                            |
 | GFlops                          | 0.156                                     |
 | MParams                         | 1.327                                     |
-| Source framework                | Tensorflow                                |
+| Source framework                | Tensorflow\*                              |
 
 ## Performance
 
@@ -21,7 +21,7 @@
 
 ### Original model
 
-1. Name: `input` , shape: [1x160x160x3] - An input image in the format [BxHxWxC],
+Image, name: `input` , shape: [1x160x160x3], format [BxHxWxC],
    where:
 
     - B - batch size
@@ -34,7 +34,7 @@
 
 ### Converted model
 
-1. Name: `input` , shape: [1x3x160x160] - An input image in the format [BxCxHxW],
+Image, name: `input` , shape: [1x3x160x160], format [BxCxHxW],
    where:
 
     - B - batch size
@@ -48,15 +48,16 @@
 
 ### Original model
 
-1. Name: `MobilenetV1/Predictions/Reshape_1`, contains probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format.
+Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `MobilenetV1/Predictions/Reshape_1`.
 
 ### Converted model
 
-1. Name: `MobilenetV1/Predictions/Softmax`, shape: [1,1001] in [BxC] format,
+Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `MobilenetV1/Predictions/Softmax`, shape: [1,1001] in [BxC] format,
     where:
 
     - B - batch size
-    - C - vector of probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format.
+    - C - vector of probabilities.
 
 ## Legal Information
+
 [https://raw.githubusercontent.com/tensorflow/models/master/LICENSE]()

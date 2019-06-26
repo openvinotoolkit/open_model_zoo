@@ -13,7 +13,7 @@ The `inception-resnet-v2` model is one of the Inception family of models designe
 | Type                            | Classification                            |
 | GFlops                          | 22.227                                    |
 | MParams                         | 30.223                                    |
-| Source framework                | Tensorflow                                |
+| Source framework                | Tensorflow\*                              |
 
 ## Performance
 
@@ -21,7 +21,7 @@ The `inception-resnet-v2` model is one of the Inception family of models designe
 
 ### Original model
 
-1. Name: `input` , shape: [1x299x299x3] - An input image in the format [BxHxWxC],
+Image, name: `input` , shape: [1x299x299x3], format [BxHxWxC],
    where:
 
     - B - batch size
@@ -34,7 +34,7 @@ The `inception-resnet-v2` model is one of the Inception family of models designe
 
 ### Converted model
 
-1. Name: `input`, shape: [1x3x299x299] - An input image in the format [BxCxHxW],
+Image, name: `input`, shape: [1x3x299x299], format [BxCxHxW],
    where:
 
     - B - batch size
@@ -48,15 +48,16 @@ The `inception-resnet-v2` model is one of the Inception family of models designe
 
 ### Original model
 
-1. Name: `InceptionResnetV2/AuxLogits/Logits/BiasAdd`, contains probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format.
+Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `InceptionResnetV2/AuxLogits/Logits/BiasAdd`.
 
 ### Converted model
 
-1. Name: `InceptionResnetV2/AuxLogits/Logits/MatMul`, shape: [1,1001] in [BxC] format,
+Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `InceptionResnetV2/AuxLogits/Logits/MatMul`, shape: [1,1001] in [BxC] format,
     where:
 
     - B - batch size
-    - C - vector of probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format.
+    - C - vector of probabilities.
 
 ## Legal Information
+
 [https://raw.githubusercontent.com/tensorflow/models/master/LICENSE]()

@@ -13,7 +13,7 @@ Faster R-CNN Resnet-50 model. Used for object detection. For details see [paper]
 | Type                            | Object detection                          |
 | GFlops                          | 57.203                                    |
 | MParams                         | 29.162                                    |
-| Source framework                | Tensorflow                                |
+| Source framework                | Tensorflow\*                              |
 
 ## Performance
 
@@ -21,7 +21,7 @@ Faster R-CNN Resnet-50 model. Used for object detection. For details see [paper]
 
 ### Original model
 
-1. Name: `image_tensor`, shape: [1x600x600x3] - An input image in the format [BxHxWxC],
+Image, name: `image_tensor`, shape: [1x600x600x3], format [BxHxWxC],
    where:
 
     - B - batch size
@@ -33,7 +33,7 @@ Faster R-CNN Resnet-50 model. Used for object detection. For details see [paper]
 
 ### Converted model
 
-1. Name: `image_tensor`, shape: [1x3x600x600] - An input image in the format [BxCxHxW],
+1. Image, name: `image_tensor`, shape: [1x3x600x600], format [BxCxHxW],
    where:
 
     - B - batch size
@@ -43,24 +43,24 @@ Faster R-CNN Resnet-50 model. Used for object detection. For details see [paper]
 
    Expected color order - BGR.
 
-1. Name: `image_info`, shape: [1x3], in format [BxC],
+2. Information of input image size, name: `image_info`, shape: [1x3], in format [BxC],
    where:
 
     - B - batch size
-    - C - vector of 3 values in format [H,W,S], represents information of input image size, where H - image height, W - imahe width, S - image scale factor (usually 1)
+    - C - vector of 3 values in format [H,W,S], where H - image height, W - imahe width, S - image scale factor (usually 1)
 
 ## Output
 
 ### Original model
 
-1. Name: `detection_classes` contains predicted bounding boxes classes in range [1, 91]. The model was trained on MS COCO dataset version with 90 categories of object.
-2. Name: `detection_scores` probability of detected bounding boxes
-3. Name: `detection_boxes` contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]` where (`x_min`, `y_min`)  is coordinates top left corner,  (`x_max`, `y_max`) is coordinates right bottom corner. Coordinates rescaled to input image size.
-4. Name: `num_detections` contains the number of predicted detection boxes
+1. Classifier, name - `detection_classes`, contains predicted bounding boxes classes in range [1, 91]. The model was trained on Microsoft\* COCO dataset version with 90 categories of object.
+2. Probability, name - `detection_scores`, contains probability of detected bounding boxes.
+3. Detection box, name - `detection_boxes`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are rescaled to input image size.
+4. Detections number, name - `num_detections`, contains the number of predicted detection boxes.
 
 ### Converted model
 
-1. Name: `reshape_do_2d`, shape: [1, 1, N, 7], where N is the number of detected
+The array of summary detection information, name: `reshape_do_2d`, shape: [1, 1, N, 7], where N is the number of detected
 bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
     where:
@@ -72,4 +72,5 @@ bounding boxes. For each detection, the description has the format:
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates stored in normalized format, in range [0, 1])
 
 ## Legal Information
+
 [https://raw.githubusercontent.com/tensorflow/models/master/LICENSE]()

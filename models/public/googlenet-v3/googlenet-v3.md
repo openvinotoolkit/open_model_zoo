@@ -13,7 +13,7 @@ The `googlenet-v3` model is the first of the Inception family of models designed
 | Type              | Classification|
 | GFLOPs            | 11.469        |
 | MParams           | 23.819        |
-| Source framework  | Tensorflow    |
+| Source framework  | Tensorflow\*  |
 
 ## Accuracy
 
@@ -23,7 +23,7 @@ The `googlenet-v3` model is the first of the Inception family of models designed
 
 ### Original model
 
-1. Name: `input`, shape: [1x299x299x3] - An input image in the format [BxHxWxC],
+Image, name: `input`, shape: [1x299x299x3], format [BxHxWxC],
    where:
 
     - B - batch size
@@ -36,7 +36,7 @@ The `googlenet-v3` model is the first of the Inception family of models designed
 
 ### Converted model
 
-1. Name: `input`, shape: [1x3x299x299] - An input image in the format [BxCxHxW],
+Image, name: `input`, shape: [1x3x299x299], format [BxCxHxW],
    where:
 
     - B - batch size
@@ -48,10 +48,11 @@ The `googlenet-v3` model is the first of the Inception family of models designed
 
 ## Output
 
-1. Name: `InceptionV3/Predictions/Softmax`, shape: [1,1001] in [BxC] format, where:
+Object classifier according to ImageNet classes, name: `InceptionV3/Predictions/Softmax`, shape: [1,1001] in [BxC] format, where:
 
     - B - batch size
     - C - vector of probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format.
 
 ## Legal Information
+
 [https://raw.githubusercontent.com/tensorflow/models/master/LICENSE]()

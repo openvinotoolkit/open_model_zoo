@@ -2,9 +2,8 @@
 
 ## Use Case and High-Level Description
 
-This is an Tensorflow version of `densenet-169` model, one of the DenseNet
+This is an Tensorflow\* version of `densenet-169` model, one of the DenseNet
 group of models designed to perform image classification. The weights were converted from DenseNet-Keras Models. For details see [repository](https://github.com/pudae/tensorflow-densenet/), [paper](https://arxiv.org/pdf/1608.06993.pdf)
-
 
 ## Example
 
@@ -15,7 +14,7 @@ group of models designed to perform image classification. The weights were conve
 | Type                            | Classification                            |
 | GFlops                          | 6.16                                      |
 | MParams                         | 14.139                                    |
-| Source framework                | Tensorflow                                |
+| Source framework                | Tensorflow\*                              |
 
 ## Performance
 

@@ -13,7 +13,7 @@ The `ssd_mobilenet_v1_coco` model is a [Single-Shot multibox Detection (SSD)](ht
 | Type              | Detection     |
 | GFLOPs            | 2.494         |
 | MParams           | 6.807         |
-| Source framework  | Tensorflow    |
+| Source framework  | Tensorflow\*  |
 
 ## Accuracy
 
@@ -23,7 +23,7 @@ The `ssd_mobilenet_v1_coco` model is a [Single-Shot multibox Detection (SSD)](ht
 
 ### Original model
 
-1. Name: `image_tensor`, shape: [1x300x300x3] - An input image in the format [BxHxWxC],
+Image, name: `image_tensor`, shape: [1x300x300x3], format [BxHxWxC],
    where:
 
     - B - batch size
@@ -35,7 +35,7 @@ The `ssd_mobilenet_v1_coco` model is a [Single-Shot multibox Detection (SSD)](ht
 
 ### Converted model
 
-1. Name: `image_tensor`, shape: [1x3x300x300] - An input image in the format [BxCxHxW],
+Image, name: `image_tensor`, shape: [1x3x300x300], format [BxCxHxW],
    where:
 
     - B - batch size
@@ -49,14 +49,14 @@ The `ssd_mobilenet_v1_coco` model is a [Single-Shot multibox Detection (SSD)](ht
 
 ### Original model
 
-1. Name: `detection_classes` contains predicted bounding boxes classes in range [1, 91]. The model was trained on MS COCO dataset version with 90 categories of object.
-2. Name: `detection_scores` probability of detected bounding boxes
-3. Name: `detection_boxes` contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]` where (`x_min`, `y_min`)  is coordinates top left corner,  (`x_max`, `y_max`) is coordinates right bottom corner. Coordinates rescaled to input image size.
-4. Name: `num_detections` contains the number of predicted detection boxes
+1. Classifier, name - `detection_classes`, contains predicted bounding boxes classes in range [1, 91]. The model was trained on Microsoft\* COCO dataset version with 90 categories of object.
+2. Probability, name - `detection_scores`, contains probability of detected bounding boxes.
+3. Detection box, name - `detection_boxes`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are rescaled to input image size.
+4. Detections number, name - `num_detections`, contains the number of predicted detection boxes.
 
 ### Converted model
 
-1. Name: `DetectionOutput`, shape: [1, 1, N, 7], where N is the number of detected
+The array of summary detection information, name: `DetectionOutput`, shape: [1, 1, N, 7], where N is the number of detected
 bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
     where:
@@ -68,4 +68,5 @@ bounding boxes. For each detection, the description has the format:
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates stored in normalized format, in range [0, 1])
 
 ## Legal Information
+
 [https://raw.githubusercontent.com/tensorflow/models/master/LICENSE]()

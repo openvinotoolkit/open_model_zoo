@@ -13,7 +13,7 @@ DeepLab is a state-of-art deep learning model for semantic image segmentation. F
 | Type              | Semantic segmentation|
 | GFLOPs            | 11.469               |
 | MParams           | 23.819               |
-| Source framework  | Tensorflow           |
+| Source framework  | Tensorflow\*         |
 
 ## Accuracy
 
@@ -23,7 +23,7 @@ DeepLab is a state-of-art deep learning model for semantic image segmentation. F
 
 ### Original model
 
-1. Name: `ImageTensor`, shape: [1x513x513x3] - An input image in the format [BxHxWxC],
+Image, name: `ImageTensor`, shape: [1x513x513x3], format [BxHxWxC],
    where:
 
     - B - batch size
@@ -35,7 +35,7 @@ DeepLab is a state-of-art deep learning model for semantic image segmentation. F
 
 ### Converted model
 
-1. Name: `mul_1/placeholder_port_1`, shape: [1x3x513x513] - An input image in the format [BxCxHxW],
+Image, name: `mul_1/placeholder_port_1`, shape: [1x3x513x513], format [BxCxHxW],
    where:
 
     - B - batch size
@@ -49,23 +49,22 @@ DeepLab is a state-of-art deep learning model for semantic image segmentation. F
 
 ### Original model
 
-1. Name: `ArgMax`, shape: [1x513x513] in [BxHxW] format, where
+Integer values in range [0, 20], which represents the index of predicted class for each image pixel. Name: `ArgMax`, shape: [1x513x513] in [BxHxW] format, where
 
     - B - batch size
     - H - image height
     - W - image width
 
-Contains integer values in range [0, 20], which represents the index of predicted class for each image pixel.
 
 ### Converted model
 
-1. Name: `ArgMax/Squeeze`, shape: [1x513x513] in [BxHxW] format, where
+Integer values in range [0, 20], which represents the index of predicted class for each image pixel. Name: `ArgMax/Squeeze`, shape: [1x513x513] in [BxHxW] format, where
 
     - B - batch size
     - H - image height
     - W - image width
 
-Contains integer values in range [0, 20], which represents the index of predicted class for each image pixel.
 
 ## Legal Information
+
 [https://raw.githubusercontent.com/tensorflow/models/master/LICENSE]()

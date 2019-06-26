@@ -2,9 +2,8 @@
 
 ## Use Case and High-Level Description
 
-This is an Tensorflow version of `densenet-161` model, one of the DenseNet
+This is an Tensorflow\* version of `densenet-161` model, one of the DenseNet
 group of models designed to perform image classification. The weights were converted from DenseNet-Keras Models. For details see [repository](https://github.com/pudae/tensorflow-densenet/), [paper](https://arxiv.org/pdf/1608.06993.pdf)
-
 
 ## Example
 
@@ -15,7 +14,7 @@ group of models designed to perform image classification. The weights were conve
 | Type                            | Classification                            |
 | GFlops                          | 14.128                                    |
 | MParams                         | 28.666                                    |
-| Source framework                | Tensorflow                                |
+| Source framework                | Tensorflow\*                              |
 
 ## Performance
 
@@ -23,7 +22,7 @@ group of models designed to perform image classification. The weights were conve
 
 ### Original model
 
-1. Name: `Placeholder` , shape: [1x224x224x3] - An input image in the format [BxHxWxC],
+Image, name: `Placeholder` , shape: [1x224x224x3], format [BxHxWxC],
    where:
 
     - B - batch size
@@ -36,7 +35,7 @@ group of models designed to perform image classification. The weights were conve
 
 ### Converted model
 
-1. Name: `Placeholder`, shape: [1x3x224x224] - An input image in the format [BxCxHxW],
+Image, name: `Placeholder`, shape: [1x3x224x224], format [BxCxHxW],
    where:
 
     - B - batch size
@@ -50,11 +49,12 @@ group of models designed to perform image classification. The weights were conve
 
 ### Original model
 
-1. Name: `densenet161/predictions/Reshape_1`, contains floating point values in range [0, 1], which represent probabilities for classes in dataset.
+Floating point values in range [0, 1], which represent probabilities for classes in dataset. Name: `densenet161/predictions/Reshape_1`.
 
 ### Converted model
 
-1. Names: `densenet161/predictions/Reshape_1/Transpose`, shape: [1, 1, 1, 1000], contains floating point values in range [0, 1], which represent probabilities for classes in dataset.
+Floating point values in range [0, 1], which represent probabilities for classes in dataset. Name: `densenet161/predictions/Reshape_1/Transpose`, shape: [1, 1, 1, 1000].
 
 ## Legal Information
+
 [https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE]()
