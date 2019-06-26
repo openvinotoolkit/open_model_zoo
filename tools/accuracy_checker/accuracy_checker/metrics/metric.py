@@ -131,9 +131,7 @@ class Metric(ClassProvider):
     def _resolve_representation_containers(self, annotation, prediction):
         def get_resolve_subject(representation, source=None):
             def is_container(representation):
-                if isinstance(representation, ContainerRepresentation):
-                    return True
-                representation_parents = type(representation).__bases__
+                representation_parents = type(representation).__mro__
                 representation_parents_names = [parent.__name__ for parent in representation_parents]
 
                 return ContainerRepresentation.__name__ in representation_parents_names
