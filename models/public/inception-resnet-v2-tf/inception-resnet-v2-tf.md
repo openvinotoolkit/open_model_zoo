@@ -21,7 +21,7 @@ The `inception-resnet-v2` model is one of the Inception family of models designe
 
 ### Original model
 
-Image, name: `input` , shape: [1x299x299x3], format [BxHxWxC],
+Image, name - `input` , shape - [1x299x299x3], format [BxHxWxC],
    where:
 
     - B - batch size
@@ -34,7 +34,7 @@ Image, name: `input` , shape: [1x299x299x3], format [BxHxWxC],
 
 ### Converted model
 
-Image, name: `input`, shape: [1x3x299x299], format [BxCxHxW],
+Image, name - `input`, shape - [1x3x299x299], format [BxCxHxW],
    where:
 
     - B - batch size
@@ -48,11 +48,11 @@ Image, name: `input`, shape: [1x3x299x299], format [BxCxHxW],
 
 ### Original model
 
-Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `InceptionResnetV2/AuxLogits/Logits/BiasAdd`.
+Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name - `InceptionResnetV2/AuxLogits/Logits/BiasAdd`.
 
 ### Converted model
 
-Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `InceptionResnetV2/AuxLogits/Logits/MatMul`, shape: [1,1001] in [BxC] format,
+Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name - `InceptionResnetV2/AuxLogits/Logits/MatMul`, shape - [1,1001] in [BxC] format,
     where:
 
     - B - batch size

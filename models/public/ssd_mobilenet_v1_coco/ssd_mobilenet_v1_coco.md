@@ -23,7 +23,7 @@ The `ssd_mobilenet_v1_coco` model is a [Single-Shot multibox Detection (SSD)](ht
 
 ### Original model
 
-Image, name: `image_tensor`, shape: [1x300x300x3], format [BxHxWxC],
+Image, name - `image_tensor`, shape - [1x300x300x3], format [BxHxWxC],
    where:
 
     - B - batch size
@@ -35,7 +35,7 @@ Image, name: `image_tensor`, shape: [1x300x300x3], format [BxHxWxC],
 
 ### Converted model
 
-Image, name: `image_tensor`, shape: [1x3x300x300], format [BxCxHxW],
+Image, name - `image_tensor`, shape - [1x3x300x300], format [BxCxHxW],
    where:
 
     - B - batch size
@@ -56,7 +56,7 @@ Image, name: `image_tensor`, shape: [1x3x300x300], format [BxCxHxW],
 
 ### Converted model
 
-The array of summary detection information, name: `DetectionOutput`, shape: [1, 1, N, 7], where N is the number of detected
+The array of summary detection information, name - `DetectionOutput`, shape - [1, 1, N, 7], where N is the number of detected
 bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
     where:

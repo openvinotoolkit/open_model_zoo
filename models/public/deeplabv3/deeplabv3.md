@@ -23,7 +23,7 @@ DeepLab is a state-of-art deep learning model for semantic image segmentation. F
 
 ### Original model
 
-Image, name: `ImageTensor`, shape: [1x513x513x3], format [BxHxWxC],
+Image, name - `ImageTensor`, shape - [1x513x513x3], format [BxHxWxC],
    where:
 
     - B - batch size
@@ -35,7 +35,7 @@ Image, name: `ImageTensor`, shape: [1x513x513x3], format [BxHxWxC],
 
 ### Converted model
 
-Image, name: `mul_1/placeholder_port_1`, shape: [1x3x513x513], format [BxCxHxW],
+Image, name - `mul_1/placeholder_port_1`, shape - [1x3x513x513], format [BxCxHxW],
    where:
 
     - B - batch size
@@ -49,7 +49,7 @@ Image, name: `mul_1/placeholder_port_1`, shape: [1x3x513x513], format [BxCxHxW],
 
 ### Original model
 
-Integer values in range [0, 20], which represents the index of predicted class for each image pixel. Name: `ArgMax`, shape: [1x513x513] in [BxHxW] format, where
+Integer values in range [0, 20], which represents the index of predicted class for each image pixel. Name - `ArgMax`, shape - [1x513x513] in [BxHxW] format, where
 
     - B - batch size
     - H - image height
@@ -58,7 +58,7 @@ Integer values in range [0, 20], which represents the index of predicted class f
 
 ### Converted model
 
-Integer values in range [0, 20], which represents the index of predicted class for each image pixel. Name: `ArgMax/Squeeze`, shape: [1x513x513] in [BxHxW] format, where
+Integer values in range [0, 20], which represents the index of predicted class for each image pixel. Name - `ArgMax/Squeeze`, shape - [1x513x513] in [BxHxW] format, where
 
     - B - batch size
     - H - image height

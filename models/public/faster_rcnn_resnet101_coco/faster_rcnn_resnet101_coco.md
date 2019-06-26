@@ -21,7 +21,7 @@ Faster R-CNN Resnet-101 model. Used for object detection. For details see [paper
 
 ### Original model
 
-Image, name: `image_tensor`, shape: [1x600x600x3], format [BxHxWxC],
+Image, name - `image_tensor`, shape - [1x600x600x3], format [BxHxWxC],
    where:
 
     - B - batch size
@@ -33,7 +33,7 @@ Image, name: `image_tensor`, shape: [1x600x600x3], format [BxHxWxC],
 
 ### Converted model
 
-1. Image, name: `image_tensor`, shape: [1x3x600x600], format [BxCxHxW],
+1. Image, name - `image_tensor`, shape - [1x3x600x600], format [BxCxHxW],
    where:
 
     - B - batch size
@@ -43,7 +43,7 @@ Image, name: `image_tensor`, shape: [1x600x600x3], format [BxHxWxC],
 
    Expected color order - BGR.
 
-2. Information of input image size, name: `image_info`, shape: [1x3], in format [BxC],
+2. Information of input image size, name - `image_info`, shape - [1x3], in format [BxC],
    where:
 
     - B - batch size
@@ -60,7 +60,7 @@ Image, name: `image_tensor`, shape: [1x600x600x3], format [BxHxWxC],
 
 ### Converted model
 
-The array of summary detection information, name: `reshape_do_2d`, shape: [1, 1, N, 7], where N is the number of detected
+The array of summary detection information, name - `reshape_do_2d`, shape - [1, 1, N, 7], where N is the number of detected
 bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
     where:

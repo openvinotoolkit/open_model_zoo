@@ -22,7 +22,7 @@ group of models designed to perform image classification. The weights were conve
 
 ### Original model
 
-Image, name: `Placeholder` , shape: [1x224x224x3], format [BxHxWxC],
+Image, name - `Placeholder` , shape - [1x224x224x3], format [BxHxWxC],
    where:
 
     - B - batch size
@@ -35,7 +35,7 @@ Image, name: `Placeholder` , shape: [1x224x224x3], format [BxHxWxC],
 
 ### Converted model
 
-Image, name: `Placeholder`, shape: [1x3x224x224], [BxCxHxW],
+Image, name - `Placeholder`, shape - [1x3x224x224], [BxCxHxW],
    where:
 
     - B - batch size
@@ -49,11 +49,11 @@ Image, name: `Placeholder`, shape: [1x3x224x224], [BxCxHxW],
 
 ### Original model
 
-Floating point values in range [0, 1], which represent probabilities for classes in dataset. Name: `densenet121/predictions/Reshape_1`.
+Floating point values in range [0, 1], which represent probabilities for classes in dataset. Name - `densenet121/predictions/Reshape_1`.
 
 ### Converted model
 
-Floating point values in range [0, 1], which represent probabilities for classes in dataset. Name: `densenet121/predictions/Reshape_1/Transpose`, shape: [1, 1, 1, 1000].
+Floating point values in range [0, 1], which represent probabilities for classes in dataset. Name - `densenet121/predictions/Reshape_1/Transpose`, shape - [1, 1, 1, 1000].
 
 ## Legal Information
 

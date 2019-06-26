@@ -22,7 +22,7 @@ group of models designed to perform image classification. The weights were conve
 
 ### Original model
 
-1. Name: `Placeholder` , shape: [1x224x224x3] - An input image in the format [BxHxWxC],
+1. Name - `Placeholder` , shape - [1x224x224x3] - An input image in the format [BxHxWxC],
    where:
 
     - B - batch size
@@ -35,7 +35,7 @@ group of models designed to perform image classification. The weights were conve
 
 ### Converted model
 
-1. Name: `Placeholder`, shape: [1x3x224x224] - An input image in the format [BxCxHxW],
+1. Name - `Placeholder`, shape - [1x3x224x224] - An input image in the format [BxCxHxW],
    where:
 
     - B - batch size
@@ -49,11 +49,11 @@ group of models designed to perform image classification. The weights were conve
 
 ### Original model
 
-1. Name: `densenet169/predictions/Reshape_1`, contains floating point values in range [0, 1], which represent probabilities for classes in dataset.
+1. Name - `densenet169/predictions/Reshape_1`, contains floating point values in range [0, 1], which represent probabilities for classes in dataset.
 
 ### Converted model
 
-1. Names: `densenet169/predictions/Reshape_1/Transpose`, shape: [1, 1, 1, 1000], contains floating point values in range [0, 1], which represent probabilities for classes in dataset.
+1. Names - `densenet169/predictions/Reshape_1/Transpose`, shape - [1, 1, 1, 1000], contains floating point values in range [0, 1], which represent probabilities for classes in dataset.
 
 ## Legal Information
 [https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE]()

@@ -23,7 +23,7 @@ The `googlenet-v3` model is the first of the Inception family of models designed
 
 ### Original model
 
-Image, name: `input`, shape: [1x299x299x3], format [BxHxWxC],
+Image, name - `input`, shape - [1x299x299x3], format [BxHxWxC],
    where:
 
     - B - batch size
@@ -36,7 +36,7 @@ Image, name: `input`, shape: [1x299x299x3], format [BxHxWxC],
 
 ### Converted model
 
-Image, name: `input`, shape: [1x3x299x299], format [BxCxHxW],
+Image, name - `input`, shape - [1x3x299x299], format [BxCxHxW],
    where:
 
     - B - batch size
@@ -48,7 +48,7 @@ Image, name: `input`, shape: [1x3x299x299], format [BxCxHxW],
 
 ## Output
 
-Object classifier according to ImageNet classes, name: `InceptionV3/Predictions/Softmax`, shape: [1,1001] in [BxC] format, where:
+Object classifier according to ImageNet classes, name - `InceptionV3/Predictions/Softmax`, shape - [1,1001] in [BxC] format, where:
 
     - B - batch size
     - C - vector of probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format.

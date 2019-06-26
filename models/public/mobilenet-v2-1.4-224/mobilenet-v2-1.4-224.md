@@ -21,7 +21,7 @@
 
 ### Original model
 
-Image, name: `input` , shape: [1x224x224x3], format [BxHxWxC],
+Image, name - `input` , shape - [1x224x224x3], format [BxHxWxC],
    where:
 
     - B - batch size
@@ -34,7 +34,7 @@ Image, name: `input` , shape: [1x224x224x3], format [BxHxWxC],
 
 ### Converted model
 
-Image, name: `input` , shape: [1x3x224x224], format [BxCxHxW], where:
+Image, name - `input` , shape - [1x3x224x224], format [BxCxHxW], where:
 
     - B - batch size
     - C - number of channels
@@ -47,11 +47,11 @@ Image, name: `input` , shape: [1x3x224x224], format [BxCxHxW], where:
 
 ### Original model
 
-Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `MobilenetV1/Predictions/Reshape_1`.
+Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name - `MobilenetV1/Predictions/Reshape_1`.
 
 ### Converted model
 
-Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `MobilenetV1/Predictions/Softmax`, shape: [1,1001] in [BxC] format,
+Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name - `MobilenetV1/Predictions/Softmax`, shape - [1,1001] in [BxC] format,
     where:
 
     - B - batch size
