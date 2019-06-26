@@ -3,8 +3,9 @@
 ## Use case and High-level description
 
 This model is an instance segmentation network for 80 classes of objects.
-It is a Mask R-CNN with ResNet50 backbone, PANet feature refiner with GroupNorm
-and DeformableConv operations and Adaptive Feature Pooling in all ROI-wise heads.
+It is a Mask R-CNN with ResNeXt101-32x8 backbone, PANet feature refiner with
+GroupNorm and DeformableConv operations and Adaptive Feature Pooling
+in all ROI-wise heads.
 
 ## Example
 
