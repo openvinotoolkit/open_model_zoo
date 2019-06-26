@@ -13,8 +13,8 @@ Text detector based on [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) archite
 | Metric                                                        | Value                   |
 |---------------------------------------------------------------|-------------------------|
 | F-measure (Harmonic mean of precision and recall on ICDAR2015)| 79.43%                  |
-| GFlops                                                        | TBD                     |
-| MParams                                                       | TBD                     |
+| GFlops                                                        | 23.305                  |
+| MParams                                                       | 4.328                   |
 | Source framework                                              | TensorFlow              |
 
 ## Performance

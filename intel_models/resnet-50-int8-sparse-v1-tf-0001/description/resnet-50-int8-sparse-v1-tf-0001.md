@@ -16,7 +16,7 @@ The model output for `resnet-50-int8-sparse-v1-tf-0001` is the usual object clas
 |-------------------|---------------|
 | Type              | Classification|
 | GFLOPs            | 6.996         |
-| MParams           | 25.53         |
+| MParams           | 25.530        |
 | Source framework  | TensorFlow    |
 
 ## Accuracy

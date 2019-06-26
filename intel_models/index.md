@@ -25,11 +25,11 @@ network to detect objects of the same type better.
 | [face-detection-retail-0004](./face-detection-retail-0004/description/face-detection-retail-0004.md)                                                                                | 1.067                | 0.588      | X     |         |          |       |                |
 | [face-detection-retail-0005](./face-detection-retail-0005/description/face-detection-retail-0005.md)                                                                                | 0.982                | 1.021      | X     |         |          |       |                |
 | [face-person-detection-retail-0002](./face-person-detection-retail-0002/description/face-person-detection-retail-0002.md)                                                           | 2.757                | 0.791      | X     | X       |          |       |                |
-| [person-detection-retail-0002](./person-detection-retail-0002/description/person-detection-retail-0002.md)                                                                          | 12.424               | 3.244      |       | X       |          |       |                |
+| [person-detection-retail-0002](./person-detection-retail-0002/description/person-detection-retail-0002.md)                                                                          | 12.427               | 3.244      |       | X       |          |       |                |
 | [person-detection-retail-0013](./person-detection-retail-0013/description/person-detection-retail-0013.md)                                                                          | 2.300                | 0.723      |       | X       |          |       |                |
 | [person-detection-action-recognition-0005](./person-detection-action-recognition-0005/description/person-detection-action-recognition-0005.md)                                      | 7.140                | 1.951      |       | X       |          |       |                |
 | [person-detection-action-recognition-teacher-0002](./person-detection-action-recognition-teacher-0002/description/person-detection-action-recognition-teacher-0002.md)              | 7.140                | 1.951      |       | X       |          |       |                |
-| [person-detection-raisinghand-recognition-0001](./person-detection-raisinghand-recognition-0001/description/person-detection-raisinghand-recognition-0001.md)                    | 7.140                | 1.951      |       | X       |          |       |                |
+| [person-detection-raisinghand-recognition-0001](./person-detection-raisinghand-recognition-0001/description/person-detection-raisinghand-recognition-0001.md)                    | 7.138                | 1.951      |       | X       |          |       |                |
 | [pedestrian-detection-adas-0002](./pedestrian-detection-adas-0002/description/pedestrian-detection-adas-0002.md)                                                                    | 2.836                | 1.165      |       | X       |          |       |                |
 | [pedestrian-detection-adas-binary-0001](./pedestrian-detection-adas-binary-0001/description/pedestrian-detection-adas-binary-0001.md)                                               | 0.945                | 1.165      |       | X       |          |       |                |
 | [pedestrian-and-vehicle-detector-adas-0001](./pedestrian-and-vehicle-detector-adas-0001/description/pedestrian-and-vehicle-detector-adas-0001.md)                                   | 3.974                | 1.650      |       | X       | X        |       |                |
@@ -122,7 +122,7 @@ instances, thus faster than previous, because network runs once.
 
 | Model Name                                                                                                                 | Complexity (GFLOPs)  | Size (Mp)       |
 |----------------------------------------------------------------------------------------------------------------------------|--------------------- |---------------- |
-| [human-pose-estimation-0001](./human-pose-estimation-0001/description/human-pose-estimation-0001.md)                       | 15.435               | 4.099           |
+| [human-pose-estimation-0001](./human-pose-estimation-0001/description/human-pose-estimation-0001.md)                       | 15.435               | 4.099      |
 
 ## Image Processing
 
@@ -141,7 +141,7 @@ Deep Learning models for text detection in various applications
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [text-detection-0003](./text-detection-0003/description/text-detection-0003.md)                                                                | 51.256               | 6.747      |
-| [text-detection-0004](./text-detection-0004/description/text-detection-0004.md)                                                                | TBD                  | TBD        |
+| [text-detection-0004](./text-detection-0004/description/text-detection-0004.md)                                                                | 23.305               | 4.328      |
 
 ## Text Recognition
 
@@ -174,9 +174,9 @@ Deep Learning compressed models
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [resnet50-binary-0001](./resnet50-binary-0001/description/resnet50-binary-0001.md)                                                             | 1.002                | 7.446      |
-| [resnet-50-int8-tf-0001](./resnet-50-int8-tf-0001/description/resnet-50-int8-tf-0001.md)                                                       | 6.996                | 25.53      |
-| [resnet-50-int8-sparse-v1-tf-0001](./resnet-50-int8-sparse-v1-tf-0001/description/resnet-50-int8-sparse-v1-tf-0001.md)                         | 6.996                | 25.53      |
-| [resnet-50-int8-sparse-v2-tf-0001](./resnet-50-int8-sparse-v2-tf-0001/description/resnet-50-int8-sparse-v2-tf-0001.md)                         | 6.996                | 25.53      |
+| [resnet-50-int8-tf-0001](./resnet-50-int8-tf-0001/description/resnet-50-int8-tf-0001.md)                                                       | 6.996                | 25.530     |
+| [resnet-50-int8-sparse-v1-tf-0001](./resnet-50-int8-sparse-v1-tf-0001/description/resnet-50-int8-sparse-v1-tf-0001.md)                         | 6.996                | 25.530     |
+| [resnet-50-int8-sparse-v2-tf-0001](./resnet-50-int8-sparse-v2-tf-0001/description/resnet-50-int8-sparse-v2-tf-0001.md)                         | 6.996                | 25.530     |
 | [inceptionv3-int8-tf-0001](./inceptionv3-int8-tf-0001/description/inceptionv3-int8-tf-0001.md)                                                 | 11.469               | 23.819     |
 | [inceptionv3-int8-sparse-v1-tf-0001](./inceptionv3-int8-sparse-v1-tf-0001/description/inceptionv3-int8-sparse-v1-tf-0001.md)                   | 11.469               | 23.819     |
 | [inceptionv3-int8-sparse-v2-tf-0001](./inceptionv3-int8-sparse-v2-tf-0001/description/inceptionv3-int8-sparse-v2-tf-0001.md)                   | 11.469               | 23.819     |
