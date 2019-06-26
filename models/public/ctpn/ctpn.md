@@ -63,17 +63,17 @@ Image, name - `Placeholder`, shape - [1x3x600x600], format [BxCxHxW],
 
 ### Converted model
 
-1. Detection boxes, name - `rpn_bbox_pred/Reshape_1/Transpose`, shape - [Bx40x18x18] contains predicted regions, in format [BxAxHxW], where:
+1. Detection boxes, name - `rpn_bbox_pred/Reshape_1/Transpose`, shape - [1x40x18x18] contains predicted regions, in format [BxAxHxW], where:
 
     - B - batch size
     - A - vector of 4*N coordinates, where N is the number of detected anchors.
     - H - image height
     - W - image width
 
-2. Probability, name - `Reshape_2/Transpose`, shape - [Bx20x18x18], contains probabilities for predicted regions in [0,1] range in format [BxAxHxW], where:
+2. Probability, name - `Reshape_2/Transpose`, shape - [1x20x18x18], contains probabilities for predicted regions in [0,1] range in format [BxAxHxW], where:
 
     - B - batch size
-    - A - vector of 4*N coordinates, where N is the number of detected anchors.
+    - A - vector of 2*N class probabilities (0 class for background, 1 class for text), where N is the number of detected anchors.
     - H - image height
     - W - image width
 
