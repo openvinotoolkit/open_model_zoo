@@ -7,6 +7,7 @@ The Open Model Zoo includes the following demos:
 
 - [Action Recognition Python* Demo](https://github.com/opencv/open_model_zoo/tree/master/demos/python_demos/action_recognition/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
 - [Crossroad Camera C++ Demo](https://github.com/opencv/open_model_zoo/tree/master/demos/crossroad_camera_demo/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
+- [Gaze Estimation C++ Demo](https://github.com/opencv/open_model_zoo/tree/master/demos/gaze_estimation_demo/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
 - [Human Pose Estimation C++ Demo](https://github.com/opencv/open_model_zoo/tree/master/demos/human_pose_estimation_demo/README.md) - Human pose estimation demo.
 - [Image Segmentation C++ Demo](https://github.com/opencv/open_model_zoo/tree/master/demos/segmentation_demo/README.md) - Inference of image segmentation networks like FCN8 (the demo supports only images as inputs).
 - [Instance Segmentation Python* Demo](https://github.com/opencv/open_model_zoo/tree/master/demos/python_demos/instance_segmentation_demo/README.md) - Inference of instance segmentation networks trained in `Detectron` or `maskrcnn-benchmark`.
