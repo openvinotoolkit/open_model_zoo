@@ -804,11 +804,11 @@ int main(int argc, char* argv[]) {
         worker->join();
         const auto t1 = std::chrono::steady_clock::now();
 
-        if (FLAGS_pc) {  // Show performace results
-            for (auto& net : std::array<std::vector<InferRequest>, 3>{context.detectorsInfers.getActualInferRequests(),
-                    context.attributesInfers.getActualInferRequests(), context.platesInfers.getActualInferRequests()}) {
-                for (InferRequest& ir : net) {
-                    ir.Wait(IInferRequest::WaitMode::RESULT_READY);
+        for (auto& net : std::array<std::vector<InferRequest>, 3>{context.detectorsInfers.getActualInferRequests(),
+                context.attributesInfers.getActualInferRequests(), context.platesInfers.getActualInferRequests()}) {
+            for (InferRequest& ir : net) {
+                ir.Wait(IInferRequest::WaitMode::RESULT_READY);
+                if (FLAGS_pc) {
                     printPerformanceCounts(ir, std::cout);
                 }
             }
