@@ -183,7 +183,7 @@ DEFINE_bool(r, false, raw_output_message);
 
 /// @brief Define probability threshold for person/action detection <br>
 /// It is an optional parameter
-DEFINE_double(t_ad, 0.4, person_threshold_output_message);
+DEFINE_double(t_ad, 0.3, person_threshold_output_message);
 
 /// @brief Define probability threshold for action recognition <br>
 /// It is an optional parameter
