@@ -40,7 +40,7 @@ InferenceEngine:
     API version ............ <version>
     Build .................. <number>
 
-interactive_face_detection [OPTION]
+interactive_face_detection_demo [OPTION]
 Options:
 
     -h                         Print a usage message
@@ -71,7 +71,9 @@ Options:
     -no_show                   Do not show processed video.
     -no_show_perf              Do not show performance numbers on processed video.
     -no_show_face_bbox         Do not show face bounding boxes on processed video.
-    -blur_faces_sigma          Value of sigma parameter in Gaussian blur that is used for face blurring. If it is negative then face blurring is disabled. Positive values enable face blurring, sigma equals to 40 seems like a good choice. By default it equals to -1 (disabled).
+    -blur_faces_sigma "<val>"  Value of sigma parameter in Gaussian blur that is used for face blurring. If it is negative then face blurring is disabled. Positive values enable face blurring, sigma equals to 40 seems like a good choice. By default it equals to -1 (disabled).
+    -td_h "<val>"              If this value is positive it will be used as new height of face detector input image.
+    -td_w "<val>"              If this value is positive it will be used as new width of face detector input image.
     -write_video               Where processed video should be written to.
     -pc                        Enable per-layer performance report
     -r                         Output inference results as raw values

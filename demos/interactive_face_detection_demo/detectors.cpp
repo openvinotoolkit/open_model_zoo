@@ -84,10 +84,12 @@ void BaseDetection::printPerformanceCounts() {
 FaceDetection::FaceDetection(const std::string &pathToModel,
                              const std::string &deviceForInference,
                              int maxBatch, bool isBatchDynamic, bool isAsync,
-                             double detectionThreshold, bool doRawOutputMessages)
+                             double detectionThreshold, bool doRawOutputMessages,
+                             int new_input_height, int new_input_width )
     : BaseDetection("Face Detection", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync),
       detectionThreshold(detectionThreshold), doRawOutputMessages(doRawOutputMessages),
-      enquedFrames(0), width(0), height(0), bb_enlarge_coefficient(1.2), resultsFetched(false) {
+      enquedFrames(0), width(0), height(0), bb_enlarge_coefficient(1.2), resultsFetched(false),
+      new_input_height(new_input_height), new_input_width(new_input_width)  {
 }
 
 void FaceDetection::submitRequest() {
@@ -144,6 +146,17 @@ CNNNetwork FaceDetection::read()  {
     }
     InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
     inputInfoFirst->setPrecision(Precision::U8);
+
+    SizeVector input_dims = inputInfoFirst->getInputData()->getTensorDesc().getDims();
+    if (new_input_height > 0) {
+        input_dims[2] = static_cast<size_t>(new_input_height);
+    }
+    if (new_input_width > 0) {
+        input_dims[3] = static_cast<size_t>(new_input_width);
+    }
+    std::map<std::string, SizeVector> input_shapes;
+    input_shapes[inputInfo.begin()->first] = input_dims;
+    netReader.getNetwork().reshape(input_shapes);
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check outputs ------------------------------------------------------------

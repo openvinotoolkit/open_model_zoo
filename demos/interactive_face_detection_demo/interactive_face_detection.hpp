@@ -111,12 +111,17 @@ static const char blur_faces_sigma_message[] = "Value of sigma parameter in Gaus
 "If it is negative then face blurring is disabled. Positive values enable face blurring, sigma equals to 40 seems like a good choice. "\
 "By default it equals to -1 (disabled).";
 
+/// @brief Message for face detector input image height.
+static const char face_detector_input_image_height_message[] = "If this value is positive it will be used as new height of face detector input image.";
+
+/// @brief Message for face detector input image width.
+static const char face_detector_input_image_width_message[] = "If this value is positive it will be used as new width of face detector input image.";
+
 /// @brief Message for asynchronous mode
 static const char async_message[] = "Enable asynchronous mode.";
 
 /// @brief Message for where processed video should be written to
 static const char write_video_message[] = "Where processed video should be written to.";
-
 
 /// \brief Define flag for showing help message<br>
 DEFINE_bool(h, false, help_message);
@@ -223,6 +228,14 @@ DEFINE_bool(no_show_face_bbox, false, no_show_face_bbox_message);
 /// It is an optional parameter
 DEFINE_double(blur_faces_sigma,-1.0, blur_faces_sigma_message);
 
+/// \brief Define parameter for height of face detector input image.<br>
+/// It is an optional parameter
+DEFINE_int32(fd_h, 0.0, face_detector_input_image_height_message);
+
+/// \brief Define parameter for width of face detector input image.<br>
+/// It is an optional parameter
+DEFINE_int32(fd_w, 0.0, face_detector_input_image_width_message);
+
 /// \brief Define a flag to enable aynchronous execution<br>
 /// It is an optional parameter
 DEFINE_bool(async, false, async_message);
@@ -268,7 +281,9 @@ static void showUsage() {
     std::cout << "    -no_show                   " << no_show_processed_video << std::endl;
     std::cout << "    -no_show_perf              " << no_show_perf_message << std::endl;
     std::cout << "    -no_show_face_bbox         " << no_show_face_bbox_message << std::endl;
-    std::cout << "    -blur_faces_sigma          " << blur_faces_sigma_message << std::endl;
+    std::cout << "    -blur_faces_sigma \"<val>\"  " << blur_faces_sigma_message << std::endl;
+    std::cout << "    -fd_h \"<val>\"              " << face_detector_input_image_height_message << std::endl;
+    std::cout << "    -fd_w \"<val>\"              " << face_detector_input_image_width_message << std::endl;
     std::cout << "    -write_video               " << write_video_message << std::endl;
     std::cout << "    -pc                        " << performance_counter_message << std::endl;
     std::cout << "    -r                         " << raw_output_message << std::endl;

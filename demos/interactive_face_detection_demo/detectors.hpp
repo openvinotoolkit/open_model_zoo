@@ -78,11 +78,14 @@ struct FaceDetection : BaseDetection {
     bool resultsFetched;
     std::vector<std::string> labels;
     std::vector<Result> results;
+    int new_input_height;
+    int new_input_width;
 
     FaceDetection(const std::string &pathToModel,
                   const std::string &deviceForInference,
                   int maxBatch, bool isBatchDynamic, bool isAsync,
-                  double detectionThreshold, bool doRawOutputMessages);
+                  double detectionThreshold, bool doRawOutputMessages,
+                  int new_input_height, int new_input_width);
 
     InferenceEngine::CNNNetwork read() override;
     void submitRequest() override;
