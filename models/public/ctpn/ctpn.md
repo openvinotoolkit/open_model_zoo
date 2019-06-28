@@ -30,6 +30,7 @@ Image, name - `image_tensor`, shape - [1x300x300x3], format [BxHxWxC],
     - C - number of channels
 
    Expected color order - RGB.
+   Mean values - [102.9801, 115.9465, 122.7717].
 
 ### Converted model
 

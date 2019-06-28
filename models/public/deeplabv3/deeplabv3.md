@@ -1,4 +1,4 @@
-# deeplab-v3
+# deeplabv3
 
 ## Use Case and High-Level Description
 
