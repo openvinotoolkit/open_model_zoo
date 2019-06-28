@@ -1408,6 +1408,64 @@ topologies:
     framework: tf
     license: https://raw.githubusercontent.com/davidsandberg/facenet/master/LICENSE.md
 
+  - name: "action-recognition-0001-decoder"
+    description: >-
+      This is an general-purpose action recognition model for Kinetics-400 dataset.
+      The model uses Video Transformer approach with ResNet34 encoder. Please refer
+      to the kinetics <https://deepmind.com/research/open-source/open-source-datasets/kinetics/>
+      dataset specification to see list of action that are recognised by this model.
+
+      This model is only decoder part of the whole pipeline. It accepts stack of frame
+      embeddings, computed by action-recognition-0001-encoder, and produces prediction
+      on input video. Video frames should be sampled to cover ~1 second fragment (i.e.
+      skip every second frame in 30 fps video).
+    task_type: "action_recognition"
+    files:
+      - name: FP32/action-recognition-0001-decoder.xml
+        sha256: eeda01c569bb41af0714fb3714e85d5e532fc3819adb0ad9323b97feddf87b34
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.xml
+      - name: FP32/action-recognition-0001-decoder.bin
+        sha256: a840e506f821d927fda6f7dfa597adae29b0d68363727d0b31f56a7c4dfd80b5
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.bin
+      - name: FP16/action-recognition-0001-decoder.xml
+        sha256: 220f09742e7ee77b44b1cab3491ac792a004ec6eb1551211b29e7c32c85ff0a0
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.xml
+      - name: FP16/action-recognition-0001-decoder.bin
+        sha256: 4ffa032a282559da0fd6a27dcb69d81dce7237574f1dde9e1c97478e109c96a6
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
+    output: "Transportation/action_recognition/resnet34_vtn/kinetics/decoder/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "action-recognition-0001-encoder"
+    description: >-
+      This is an general-purpose action recognition model for Kinetics-400 dataset.
+      The model uses Video Transformer approach with ResNet34 encoder. Please refer
+      to the kinetics <https://deepmind.com/research/open-source/open-source-datasets/kinetics/>
+      dataset specification to see list of action that are recognised by this model.
+
+      This model is only encoder part of the whole pipeline. It accepts video frame
+      and produces embedding. Use action-recognition-0001-decoder to produce prediction
+      from embeddings of 16 frames. Video frames should be sampled to cover ~1 second
+      fragment (i.e. skip every second frame in 30 fps video).
+    task_type: "action_recognition"
+    files:
+      - name: FP32/action-recognition-0001-encoder.xml
+        sha256: 88338f18f82dfb2d9843735a9d7352e2fe04ce1053280044aa7993be1770f167
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.xml
+      - name: FP32/action-recognition-0001-encoder.bin
+        sha256: 35e1454bdac521c7b7664db9b26aebda2bba6944e9da225e9884c0241021d92a
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.bin
+      - name: FP16/action-recognition-0001-encoder.xml
+        sha256: 852ae9a90dce025e0a0d95af94de54c58686bf3032d74c8fd5e32337fe4055fb
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.xml
+      - name: FP16/action-recognition-0001-encoder.bin
+        sha256: f6347d5c4baf60581d0179a90702180798cb5f3d76079e919493d50f81406e14
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.bin
+    output: "Transportation/action_recognition/resnet34_vtn/kinetics/encoder/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
   - name: "age-gender-recognition-retail-0013"
     description: >-
       Fully convolutional network for simultaneous Age/Gender recognition. The network
@@ -1428,6 +1486,64 @@ topologies:
         sha256: 401101e0a01b3d68add39deae833bcf9f54238d37dd13e3fb1534aa8fbe4719d
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin
     output: "Retail/object_attributes/age_gender/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "driver-action-recognition-adas-0002-decoder"
+    description: >-
+      This is an action recognition model for the driver monitoring use case. The
+      model uses Video Transformer approach with MobileNetv2 encoder. It is able to
+      recognize the following actions: drinking, doing hair or making up, operating
+      the radio, reaching behind, safe driving, talking on the phone, texting.
+
+      This model is only decoder part of the whole pipeline. It accepts stack of frame
+      embeddings, computed by driver-action-recognition-adas-0002-encoder, and produces
+      prediction on input video. Video frames should be sampled to cover ~1 second
+      fragment (i.e. skip every second frame in 30 fps video).
+    task_type: "action_recognition"
+    files:
+      - name: FP32/driver-action-recognition-adas-0002-decoder.xml
+        sha256: 90f4d84e8d237647fd2b23f0245bbc63b55fca625dd10fd2778afb51aa99e8d7
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
+      - name: FP32/driver-action-recognition-adas-0002-decoder.bin
+        sha256: c4c302f54a79364e672e91b7c202275545cff1468ad0a6b226c45baac0082e71
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
+      - name: FP16/driver-action-recognition-adas-0002-decoder.xml
+        sha256: d85192c526c537280d35cf369af98ffe205612088a143f7fcb92eb4c94b38006
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
+      - name: FP16/driver-action-recognition-adas-0002-decoder.bin
+        sha256: d2d0396bddaf5c7b47c8198806c773ad48516f9c3c8d1abe724187fda8ad0b66
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
+    output: "Transportation/action_recognition/driver_monitoring/mobilenetv2/decoder/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "driver-action-recognition-adas-0002-encoder"
+    description: >-
+      This is an action recognition model for the driver monitoring use case. The
+      model uses Video Transformer approach with MobileNetv2 encoder. It is able to
+      recognize the following actions: drinking, doing hair or making up, operating
+      the radio, reaching behind, safe driving, talking on the phone, texting.
+
+      This model is only encoder part of the whole pipeline. It accepts video frame
+      and produces embedding. Use driver-action-recognition-adas-0002-decoder to produce
+      prediction from embeddings of 16 frames. Video frames should be sampled to cover
+      ~1 second fragment (i.e. skip every second frame in 30 fps video).
+    task_type: "action_recognition"
+    files:
+      - name: FP32/driver-action-recognition-adas-0002-encoder.xml
+        sha256: b8625862f80388a63c3229824be44a75cb1baffdbd4fe00c560e7cdfc03f2b8d
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-encoder/FP32/driver-action-recognition-adas-0002-encoder.xml
+      - name: FP32/driver-action-recognition-adas-0002-encoder.bin
+        sha256: f49782784647b4d84520d83b1260054ed6d6ce4c3da49e92357f64727a147805
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-encoder/FP32/driver-action-recognition-adas-0002-encoder.bin
+      - name: FP16/driver-action-recognition-adas-0002-encoder.xml
+        sha256: a20c385b32b426db15eb0554a8428c8239aa3fbc7e63894f332d6ad4af65969c
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-encoder/FP16/driver-action-recognition-adas-0002-encoder.xml
+      - name: FP16/driver-action-recognition-adas-0002-encoder.bin
+        sha256: cc6619627ded268452836220c8f23d228d674c94349778219ab032e611b6983f
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-encoder/FP16/driver-action-recognition-adas-0002-encoder.bin
+    output: "Transportation/action_recognition/driver_monitoring/mobilenetv2/encoder/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
@@ -1485,6 +1601,24 @@ topologies:
         sha256: 0c4c0d53c12cd36b946e36a4b97a0271d1b1f46dc6feb7241d08a611724b04e2
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-0001/INT8/face-detection-adas-0001.bin
     output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "face-detection-adas-binary-0001"
+    description: >-
+      Face detector for driver monitoring and similar scenarios. The network features
+      a pruned MobileNet backbone that includes depth-wise convolutions to reduce
+      the amount of computation for the 3x3 convolution block. Also some 1x1 convolutions
+      are binary that can be implemented using effective binary XNOR+POPCOUNT approach
+    task_type: "detection"
+    files:
+      - name: INT1/face-detection-adas-binary-0001.xml
+        sha256: fde8c465a5e3f3425fb567d31b9591ff8be589930c8488639f8feddf7f0301f2
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.xml
+      - name: INT1/face-detection-adas-binary-0001.bin
+        sha256: 0e0742b61fb924e937a8974da8a2e15cc6afc15630afa3f220676ee7a3a99700
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.bin
+    output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights_binary/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
@@ -1591,6 +1725,57 @@ topologies:
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
+  - name: "gaze-estimation-adas-0002"
+    description: >-
+      This is a custom VGG-like convolutional neural network for gaze direction estimation.
+    task_type: "object_attributes"
+    files:
+      - name: FP32/gaze-estimation-adas-0002.xml
+        sha256: b4860d52445836f5a1d4bce65e43054ffdbb0c9c9b75973abc93718f70b5baec
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
+      - name: FP32/gaze-estimation-adas-0002.bin
+        sha256: 9c48f7595d1dbb13dded4371e165401c9acc04c4018e8d3e05148c8a98f88727
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
+      - name: FP16/gaze-estimation-adas-0002.xml
+        sha256: 48724b449b8f379f646141411530342078cc738306e78fed3c969d83e8fd58e0
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
+      - name: FP16/gaze-estimation-adas-0002.bin
+        sha256: f10fae31d4bc925ea1b38f528a0adc7bde4b01badb427597bad0703e7adc947d
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
+      - name: INT8/gaze-estimation-adas-0002.xml
+        sha256: 580c768b167d78039ccec566e6c5bde3a82d5aee785867423bc867c78ce57247
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.xml
+      - name: INT8/gaze-estimation-adas-0002.bin
+        sha256: 5e9651470495b1b4b31e6d4cdb44b721b0d82aeeea13e24c5cfd9ad0629b4d6c
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.bin
+    output: "Transportation/object_attributes/gaze/custom-architecture/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "handwritten-score-recognition-0001"
+    description: >-
+      This is a network for text recognition scenario. It consists of VGG16-like backbone
+      and bidirectional LSTM encoder-decoder. The network is able to recognize school
+      marks that should have format either `<digit>` or `<digit>.<digit>` (e.g. `4`
+      or `3.5`).
+    task_type: "optical_character_recognition"
+    files:
+      - name: FP32/handwritten-score-recognition-0001.xml
+        sha256: 86d461c1fa55c1bccfdf3b5488847abc72d19ba3ee838a033d7b3886da6da443
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/handwritten-score-recognition-0001/FP32/handwritten-score-recognition-0001.xml
+      - name: FP32/handwritten-score-recognition-0001.bin
+        sha256: 5d2b8fc1233a184335728c8582f3458d44164f8de4a47e85d5865da69efe158c
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/handwritten-score-recognition-0001/FP32/handwritten-score-recognition-0001.bin
+      - name: FP16/handwritten-score-recognition-0001.xml
+        sha256: d36c5a3396aaaed02d1734ac2d03c8e656ab4e8432147d0473dfdd4dbb890745
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/handwritten-score-recognition-0001/FP16/handwritten-score-recognition-0001.xml
+      - name: FP16/handwritten-score-recognition-0001.bin
+        sha256: 12ac804b9f1699c36fbc5d08b6e9878bbdb8441e782f6fe1948eecef5d0c6e14
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/handwritten-score-recognition-0001/FP16/handwritten-score-recognition-0001.bin
+    output: "Retail/handwritten-score-recognition/0001/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
   - name: "head-pose-estimation-adas-0001"
     description: >-
       Head pose estimation network based on simple, handmade CNN architecture. Angle
@@ -1648,6 +1833,52 @@ topologies:
         sha256: 0d252f0fd98c598fb38eaa907fa8b3d15cf2d420d743649b4b6c5dbdbbe5f1ac
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/human-pose-estimation-0001/INT8/human-pose-estimation-0001.bin
     output: "Transportation/human_pose_estimation/mobilenet-v1/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "instance-segmentation-security-0033"
+    description: >-
+      This model is an instance segmentation network for 80 classes of objects. It
+      is a Mask-RCNN-like model with ResNeXt152 backbone and Feature Pyramid Networks
+      block for feature maps refinement.
+    task_type: "instance_segmentation"
+    files:
+      - name: FP32/instance-segmentation-security-0033.xml
+        sha256: 2dc0e866c37247702076b8a225870b58bc48b6adaef972308dce0c78a3372e70
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0033/FP32/instance-segmentation-security-0033.xml
+      - name: FP32/instance-segmentation-security-0033.bin
+        sha256: 1f496c48b4fc8ebc38f0ffb7ba82d638ff1ad2209ac9f504f7228e85a4d41f11
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0033/FP32/instance-segmentation-security-0033.bin
+      - name: FP16/instance-segmentation-security-0033.xml
+        sha256: 68c967b026008cf6750c02846d25dec1f072fd43127a5b852998432b4ef034fb
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0033/FP16/instance-segmentation-security-0033.xml
+      - name: FP16/instance-segmentation-security-0033.bin
+        sha256: 694b9bc747ffb441dc8749deda3016004fe94fd8d67598d3ded557d28de29887
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0033/FP16/instance-segmentation-security-0033.bin
+    output: "Security/instance_segmentation/common/0033/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "instance-segmentation-security-0049"
+    description: >-
+      This model is an instance segmentation network for 80 classes of objects. It
+      is a Mask-RCNN-like model with ResNet50 backbone, Feature Pyramid Networks block
+      for feature maps refinement and relatively light segmentation head.
+    task_type: "instance_segmentation"
+    files:
+      - name: FP32/instance-segmentation-security-0049.xml
+        sha256: b059a10f5aec72aada8f322fe02787fca26fab94580814496978854e37d16b06
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0049/FP32/instance-segmentation-security-0049.xml
+      - name: FP32/instance-segmentation-security-0049.bin
+        sha256: 7565934ca333d2c7ae6978d47a22e12f94e96101b3743aa28fd98886362be807
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0049/FP32/instance-segmentation-security-0049.bin
+      - name: FP16/instance-segmentation-security-0049.xml
+        sha256: 0723349aec16f7382b0e1778a2765ce87db236ab0de6220cd31775c3f1c05462
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0049/FP16/instance-segmentation-security-0049.xml
+      - name: FP16/instance-segmentation-security-0049.bin
+        sha256: 60ebee3bd3da59971499398eaa466dffe0a8230cf7c880b014004a70fefd3473
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0049/FP16/instance-segmentation-security-0049.bin
+    output: "Security/instance_segmentation/common/0049/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
@@ -1753,6 +1984,22 @@ topologies:
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
+  - name: "pedestrian-detection-adas-binary-0001"
+    description: >-
+      Pedestrian detection network based on SSD framework with tuned MobileNet v1
+      as a feature extractor. Some layers of MobileNet v1 are binary and use I1 arithm
+    task_type: "detection"
+    files:
+      - name: INT1/pedestrian-detection-adas-binary-0001.xml
+        sha256: e64e7ce32c87e1c698b50abb8f2cf1d96c7651d45fc20bac09c417e046afa7f4
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.xml
+      - name: INT1/pedestrian-detection-adas-binary-0001.bin
+        sha256: 7c2761ca3859ef55a80d9ed924225df7ba363fcb151e4ec2f7d1061b70bdb374
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.bin
+    output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd-binary/dldt"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
   - name: "person-attributes-recognition-crossroad-0230"
     description: >-
       This model presents a person attributes classification algorithm analysis scenario.
@@ -1800,6 +2047,58 @@ topologies:
         sha256: e76f97d714c7eae3bd9007e91e0906cb239ae0260a46efde860d95d6da84a6bc
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.bin
     output: "Retail/action_detection/pedestrian/rmnet_ssd/0165/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "person-detection-action-recognition-teacher-0002"
+    description: >-
+      This is an action detector for the Smart Classroom scenario. It is based on
+      the RMNet backbone that includes depth-wise convolutions to reduce the amount
+      of computations for the 3x3 convolution block. The first SSD head from 1/16
+      scale feature map has four clustered prior boxes and outputs detected persons
+      (two class detector). The second SSD-based head predicts actions of the detected
+      persons. Possible actions: standing, writing, demonstrating.
+    task_type: "detection"
+    files:
+      - name: FP32/person-detection-action-recognition-teacher-0002.xml
+        sha256: fa3d9d2d8da10f4c63291a6b89589453849b94edd079fe92a219f15c179cc8a9
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
+      - name: FP32/person-detection-action-recognition-teacher-0002.bin
+        sha256: 231e01a33e8ceec66af07a54991c4611ec74a5e5f3070ac9482f4ab242b10d46
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
+      - name: FP16/person-detection-action-recognition-teacher-0002.xml
+        sha256: ad5b89b88ab04c05cb3b9fc5b968a027434719030b76f4538b6c944078338ac4
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
+      - name: FP16/person-detection-action-recognition-teacher-0002.bin
+        sha256: 22a0d3c984a66ab48ba4857b428dc4433224ff2dbdb0dd57ccb83153ef4d3275
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
+    output: "Retail/action_detection/teacher/rmnet_ssd/0005_cut/dldt"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "person-detection-raisinghand-recognition-0001"
+    description: >-
+      This is an action detector for the Smart Classroom scenario. It is based on
+      the RMNet backbone that includes depth-wise convolutions to reduce the amount
+      of computations for the 3x3 convolution block. The first SSD head from 1/16
+      scale feature map has four clustered prior boxes and outputs detected persons
+      (two class detector). The second SSD-based head predicts actions of the detected
+      persons. Possible actions: raising hand and other.
+    task_type: "detection"
+    files:
+      - name: FP32/person-detection-raisinghand-recognition-0001.xml
+        sha256: f15dacbaea3954b8c1b97ca48991a31347881504a9fabfc444c0e828c1a285b6
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.xml
+      - name: FP32/person-detection-raisinghand-recognition-0001.bin
+        sha256: 0e0b22f2c3731cc6226e96710c558190b8b53777bb194152563249d305fb5498
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.bin
+      - name: FP16/person-detection-raisinghand-recognition-0001.xml
+        sha256: 0f091550cdc61d709fbe0d6eb0f86b6bfaae771e66c5c579d7b0933b8f6db965
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.xml
+      - name: FP16/person-detection-raisinghand-recognition-0001.bin
+        sha256: 8931e2a54277581c9a6a53c57b045d0d7473c819c7abd0d361a7e1a638a41566
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.bin
+    output: "Retail/action_detection/pedestrian/rmnet_ssd/0165_cut_2cl/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
@@ -1950,6 +2249,25 @@ topologies:
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
+  - name: "resnet50-binary-0001"
+    description: >-
+      This is a classical classification network for 1000 classes trained on ImageNet.
+      The difference is that most convolutional layers were replaced by binary once
+      that can be implemented as XNOR+POPCOUN operations. Only input, final and shortcut
+      layers were kept as FP32, all the rest convolutional layers are replaced by
+      BinaryConvolution layers.
+    task_type: "classification"
+    files:
+      - name: INT1/resnet50-binary-0001.xml
+        sha256: 1a7e41ab273f9e7b064e60e889ba2f13ce1b07cb4610096bd3abef33a93bf992
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/resnet50-binary-0001/INT1/resnet50-binary-0001.xml
+      - name: INT1/resnet50-binary-0001.bin
+        sha256: e843a458ae786f860698919709fb0852ef8138d4461ce8c744f96fe29ef0d580
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/resnet50-binary-0001/INT1/resnet50-binary-0001.bin
+    output: "PublicCompressed/classification/resnet50_binary/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
   - name: "road-segmentation-adas-0001"
     description: >-
       This is a segmentation network to classify each pixel into four classes: BG,
@@ -2039,6 +2357,29 @@ topologies:
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
+  - name: "single-image-super-resolution-1032"
+    description: >-
+      An Attention-Based Approach for Single Image Super Resolution <https://arxiv.org/pdf/1807.06779.pdf>
+      but with reduced number of channels and changes in network achitecture. It enhances
+      the resolution of the input image by a factor of 4.
+    task_type: "image_processing"
+    files:
+      - name: FP32/single-image-super-resolution-1032.xml
+        sha256: cee9c808e3cf9f9c640a01cd445c4bdb518de9202d90fb2d78281456ebecb7a4
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
+      - name: FP32/single-image-super-resolution-1032.bin
+        sha256: 4840a2f6d1793052b5b0cd5f5da4d69315831b044951c413a267ccf923ef7ebd
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
+      - name: FP16/single-image-super-resolution-1032.xml
+        sha256: a6e670402d9f2b34ca4721bb89196a5e018daaee0e47de61ac5aedbadaa49529
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
+      - name: FP16/single-image-super-resolution-1032.bin
+        sha256: 3a1b4aeab87229c5f91f16c0d6672f6cc185238674f5a967d7098dccc970e5ce
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
+    output: "Security/super_resolution/srresnet/dldt/1032/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
   - name: "single-image-super-resolution-1033"
     description: >-
       An Attention-Based Approach for Single Image Super Resolution <https://arxiv.org/pdf/1807.06779.pdf>
@@ -2082,6 +2423,29 @@ topologies:
         sha256: 18508f0fc72bb142d50e00326dfbba63a54143f3cae4f54f8833b2e4d9891b0d
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-detection-0002/FP16/text-detection-0002.bin
     output: "Retail/object_detection/text/pixel_link_mobilenet_v2/0001/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "text-recognition-0012"
+    description: >-
+      This is a network for text recognition scenario. It consists of VGG16-like backbone
+      and bidirectional LSTM encoder-decoder. The network is able to recognize case-insensitive
+      alpha-numeric text (36 unique symbols).
+    task_type: "optical_character_recognition"
+    files:
+      - name: FP32/text-recognition-0012.xml
+        sha256: 71158750324de227342acec7b2edca95d5991be2242eaf3a0c54877c32dc9dff
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-recognition-0012/FP32/text-recognition-0012.xml
+      - name: FP32/text-recognition-0012.bin
+        sha256: d057d4536805ce4529876964e8277a21dbcfae4a65a7762417b4c884cb866347
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-recognition-0012/FP32/text-recognition-0012.bin
+      - name: FP16/text-recognition-0012.xml
+        sha256: 322f6c6902714b81084bc71f560af2a6df69581181549e3d640ddef153c13b9e
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-recognition-0012/FP16/text-recognition-0012.xml
+      - name: FP16/text-recognition-0012.bin
+        sha256: 9f75d14d812695b71212f6fb92feffa42d8a75312d7c58c0fc6af3ff17a6c166
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-recognition-0012/FP16/text-recognition-0012.bin
+    output: "Retail/text_recognition/bilstm_crnn_bilstm_decoder/0012/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
@@ -2141,6 +2505,23 @@ topologies:
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
+  - name: "vehicle-detection-adas-binary-0001"
+    description: >-
+      This is a vehicle detection network based on an SSD framework with tuned MobileNet
+      v1 as a feature extractor and using binary layer for speedup. This detecector
+      was created by binarization the vehicle-detection-adas-0002
+    task_type: "detection"
+    files:
+      - name: INT1/vehicle-detection-adas-binary-0001.xml
+        sha256: c98bf5984895b1309861597ec36181446877407cd985bb490e14461f41312670
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.xml
+      - name: INT1/vehicle-detection-adas-binary-0001.bin
+        sha256: afdd8a2f175b2f19c07083ff23b2e28105f3d1c7dc06a4b1a1d5c2c42b98294f
+        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.bin
+    output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd-binary/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
   - name: "vehicle-license-plate-detection-barrier-0106"
     description: >-
       This is a MobileNetV2 + SSD-based vehicle and (Chinese) license plate detector
@@ -2160,386 +2541,5 @@ topologies:
         sha256: 8899c10509ad8dfd029c845bcc409976a56c46f73f3354044f243f0bba9c6b97
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.bin
     output: "Security/object_detection/barrier/0106/dldt/"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "face-detection-adas-binary-0001"
-    description: >-
-      Face detector for driver monitoring and similar scenarios. The network features
-      a pruned MobileNet backbone that includes depth-wise convolutions to reduce
-      the amount of computation for the 3x3 convolution block. Also some 1x1 convolutions
-      are binary that can be implemented using effective binary XNOR+POPCOUNT approach
-    task_type: "detection"
-    files:
-      - name: INT1/face-detection-adas-binary-0001.xml
-        sha256: fde8c465a5e3f3425fb567d31b9591ff8be589930c8488639f8feddf7f0301f2
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.xml
-      - name: INT1/face-detection-adas-binary-0001.bin
-        sha256: 0e0742b61fb924e937a8974da8a2e15cc6afc15630afa3f220676ee7a3a99700
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.bin
-    output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights_binary/dldt/"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "single-image-super-resolution-1032"
-    description: >-
-      An Attention-Based Approach for Single Image Super Resolution <https://arxiv.org/pdf/1807.06779.pdf>
-      but with reduced number of channels and changes in network achitecture. It enhances
-      the resolution of the input image by a factor of 4.
-    task_type: "image_processing"
-    files:
-      - name: FP32/single-image-super-resolution-1032.xml
-        sha256: cee9c808e3cf9f9c640a01cd445c4bdb518de9202d90fb2d78281456ebecb7a4
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
-      - name: FP32/single-image-super-resolution-1032.bin
-        sha256: 4840a2f6d1793052b5b0cd5f5da4d69315831b044951c413a267ccf923ef7ebd
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
-      - name: FP16/single-image-super-resolution-1032.xml
-        sha256: a6e670402d9f2b34ca4721bb89196a5e018daaee0e47de61ac5aedbadaa49529
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
-      - name: FP16/single-image-super-resolution-1032.bin
-        sha256: 3a1b4aeab87229c5f91f16c0d6672f6cc185238674f5a967d7098dccc970e5ce
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
-    output: "Security/super_resolution/srresnet/dldt/1032/"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "action-recognition-0001-encoder"
-    description: >-
-      This is an general-purpose action recognition model for Kinetics-400 dataset.
-      The model uses Video Transformer approach with ResNet34 encoder. Please refer
-      to the kinetics <https://deepmind.com/research/open-source/open-source-datasets/kinetics/>
-      dataset specification to see list of action that are recognised by this model.
-
-      This model is only encoder part of the whole pipeline. It accepts video frame
-      and produces embedding. Use action-recognition-0001-decoder to produce prediction
-      from embeddings of 16 frames. Video frames should be sampled to cover ~1 second
-      fragment (i.e. skip every second frame in 30 fps video).
-    task_type: "action_recognition"
-    files:
-      - name: FP32/action-recognition-0001-encoder.xml
-        sha256: 88338f18f82dfb2d9843735a9d7352e2fe04ce1053280044aa7993be1770f167
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.xml
-      - name: FP32/action-recognition-0001-encoder.bin
-        sha256: 35e1454bdac521c7b7664db9b26aebda2bba6944e9da225e9884c0241021d92a
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.bin
-      - name: FP16/action-recognition-0001-encoder.xml
-        sha256: 852ae9a90dce025e0a0d95af94de54c58686bf3032d74c8fd5e32337fe4055fb
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.xml
-      - name: FP16/action-recognition-0001-encoder.bin
-        sha256: f6347d5c4baf60581d0179a90702180798cb5f3d76079e919493d50f81406e14
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.bin
-    output: "Transportation/action_recognition/resnet34_vtn/kinetics/encoder/dldt/"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "instance-segmentation-security-0049"
-    description: >-
-      This model is an instance segmentation network for 80 classes of objects. It
-      is a Mask-RCNN-like model with ResNet50 backbone, Feature Pyramid Networks block
-      for feature maps refinement and relatively light segmentation head.
-    task_type: "instance_segmentation"
-    files:
-      - name: FP32/instance-segmentation-security-0049.xml
-        sha256: b059a10f5aec72aada8f322fe02787fca26fab94580814496978854e37d16b06
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0049/FP32/instance-segmentation-security-0049.xml
-      - name: FP32/instance-segmentation-security-0049.bin
-        sha256: 7565934ca333d2c7ae6978d47a22e12f94e96101b3743aa28fd98886362be807
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0049/FP32/instance-segmentation-security-0049.bin
-      - name: FP16/instance-segmentation-security-0049.xml
-        sha256: 0723349aec16f7382b0e1778a2765ce87db236ab0de6220cd31775c3f1c05462
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0049/FP16/instance-segmentation-security-0049.xml
-      - name: FP16/instance-segmentation-security-0049.bin
-        sha256: 60ebee3bd3da59971499398eaa466dffe0a8230cf7c880b014004a70fefd3473
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0049/FP16/instance-segmentation-security-0049.bin
-    output: "Security/instance_segmentation/common/0049/dldt/"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "vehicle-detection-adas-binary-0001"
-    description: >-
-      This is a vehicle detection network based on an SSD framework with tuned MobileNet
-      v1 as a feature extractor and using binary layer for speedup. This detecector
-      was created by binarization the vehicle-detection-adas-0002
-    task_type: "detection"
-    files:
-      - name: INT1/vehicle-detection-adas-binary-0001.xml
-        sha256: c98bf5984895b1309861597ec36181446877407cd985bb490e14461f41312670
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.xml
-      - name: INT1/vehicle-detection-adas-binary-0001.bin
-        sha256: afdd8a2f175b2f19c07083ff23b2e28105f3d1c7dc06a4b1a1d5c2c42b98294f
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.bin
-    output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd-binary/dldt/"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "driver-action-recognition-adas-0002-decoder"
-    description: >-
-      This is an action recognition model for the driver monitoring use case. The
-      model uses Video Transformer approach with MobileNetv2 encoder. It is able to
-      recognize the following actions: drinking, doing hair or making up, operating
-      the radio, reaching behind, safe driving, talking on the phone, texting.
-
-      This model is only decoder part of the whole pipeline. It accepts stack of frame
-      embeddings, computed by driver-action-recognition-adas-0002-encoder, and produces
-      prediction on input video. Video frames should be sampled to cover ~1 second
-      fragment (i.e. skip every second frame in 30 fps video).
-    task_type: "action_recognition"
-    files:
-      - name: FP32/driver-action-recognition-adas-0002-decoder.xml
-        sha256: 90f4d84e8d237647fd2b23f0245bbc63b55fca625dd10fd2778afb51aa99e8d7
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
-      - name: FP32/driver-action-recognition-adas-0002-decoder.bin
-        sha256: c4c302f54a79364e672e91b7c202275545cff1468ad0a6b226c45baac0082e71
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
-      - name: FP16/driver-action-recognition-adas-0002-decoder.xml
-        sha256: d85192c526c537280d35cf369af98ffe205612088a143f7fcb92eb4c94b38006
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
-      - name: FP16/driver-action-recognition-adas-0002-decoder.bin
-        sha256: d2d0396bddaf5c7b47c8198806c773ad48516f9c3c8d1abe724187fda8ad0b66
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
-    output: "Transportation/action_recognition/driver_monitoring/mobilenetv2/decoder/dldt/"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "pedestrian-detection-adas-binary-0001"
-    description: >-
-      Pedestrian detection network based on SSD framework with tuned MobileNet v1
-      as a feature extractor. Some layers of MobileNet v1 are binary and use I1 arithm
-    task_type: "detection"
-    files:
-      - name: INT1/pedestrian-detection-adas-binary-0001.xml
-        sha256: e64e7ce32c87e1c698b50abb8f2cf1d96c7651d45fc20bac09c417e046afa7f4
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.xml
-      - name: INT1/pedestrian-detection-adas-binary-0001.bin
-        sha256: 7c2761ca3859ef55a80d9ed924225df7ba363fcb151e4ec2f7d1061b70bdb374
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.bin
-    output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd-binary/dldt"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "person-detection-action-recognition-teacher-0002"
-    description: >-
-      This is an action detector for the Smart Classroom scenario. It is based on
-      the RMNet backbone that includes depth-wise convolutions to reduce the amount
-      of computations for the 3x3 convolution block. The first SSD head from 1/16
-      scale feature map has four clustered prior boxes and outputs detected persons
-      (two class detector). The second SSD-based head predicts actions of the detected
-      persons. Possible actions: standing, writing, demonstrating.
-    task_type: "detection"
-    files:
-      - name: FP32/person-detection-action-recognition-teacher-0002.xml
-        sha256: fa3d9d2d8da10f4c63291a6b89589453849b94edd079fe92a219f15c179cc8a9
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
-      - name: FP32/person-detection-action-recognition-teacher-0002.bin
-        sha256: 231e01a33e8ceec66af07a54991c4611ec74a5e5f3070ac9482f4ab242b10d46
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
-      - name: FP16/person-detection-action-recognition-teacher-0002.xml
-        sha256: ad5b89b88ab04c05cb3b9fc5b968a027434719030b76f4538b6c944078338ac4
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
-      - name: FP16/person-detection-action-recognition-teacher-0002.bin
-        sha256: 22a0d3c984a66ab48ba4857b428dc4433224ff2dbdb0dd57ccb83153ef4d3275
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
-    output: "Retail/action_detection/teacher/rmnet_ssd/0005_cut/dldt"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "instance-segmentation-security-0033"
-    description: >-
-      This model is an instance segmentation network for 80 classes of objects. It
-      is a Mask-RCNN-like model with ResNeXt152 backbone and Feature Pyramid Networks
-      block for feature maps refinement.
-    task_type: "instance_segmentation"
-    files:
-      - name: FP32/instance-segmentation-security-0033.xml
-        sha256: 2dc0e866c37247702076b8a225870b58bc48b6adaef972308dce0c78a3372e70
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0033/FP32/instance-segmentation-security-0033.xml
-      - name: FP32/instance-segmentation-security-0033.bin
-        sha256: 1f496c48b4fc8ebc38f0ffb7ba82d638ff1ad2209ac9f504f7228e85a4d41f11
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0033/FP32/instance-segmentation-security-0033.bin
-      - name: FP16/instance-segmentation-security-0033.xml
-        sha256: 68c967b026008cf6750c02846d25dec1f072fd43127a5b852998432b4ef034fb
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0033/FP16/instance-segmentation-security-0033.xml
-      - name: FP16/instance-segmentation-security-0033.bin
-        sha256: 694b9bc747ffb441dc8749deda3016004fe94fd8d67598d3ded557d28de29887
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/instance-segmentation-security-0033/FP16/instance-segmentation-security-0033.bin
-    output: "Security/instance_segmentation/common/0033/dldt/"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "action-recognition-0001-decoder"
-    description: >-
-      This is an general-purpose action recognition model for Kinetics-400 dataset.
-      The model uses Video Transformer approach with ResNet34 encoder. Please refer
-      to the kinetics <https://deepmind.com/research/open-source/open-source-datasets/kinetics/>
-      dataset specification to see list of action that are recognised by this model.
-
-      This model is only decoder part of the whole pipeline. It accepts stack of frame
-      embeddings, computed by action-recognition-0001-encoder, and produces prediction
-      on input video. Video frames should be sampled to cover ~1 second fragment (i.e.
-      skip every second frame in 30 fps video).
-    task_type: "action_recognition"
-    files:
-      - name: FP32/action-recognition-0001-decoder.xml
-        sha256: eeda01c569bb41af0714fb3714e85d5e532fc3819adb0ad9323b97feddf87b34
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.xml
-      - name: FP32/action-recognition-0001-decoder.bin
-        sha256: a840e506f821d927fda6f7dfa597adae29b0d68363727d0b31f56a7c4dfd80b5
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.bin
-      - name: FP16/action-recognition-0001-decoder.xml
-        sha256: 220f09742e7ee77b44b1cab3491ac792a004ec6eb1551211b29e7c32c85ff0a0
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.xml
-      - name: FP16/action-recognition-0001-decoder.bin
-        sha256: 4ffa032a282559da0fd6a27dcb69d81dce7237574f1dde9e1c97478e109c96a6
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
-    output: "Transportation/action_recognition/resnet34_vtn/kinetics/decoder/dldt/"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "text-recognition-0012"
-    description: >-
-      This is a network for text recognition scenario. It consists of VGG16-like backbone
-      and bidirectional LSTM encoder-decoder. The network is able to recognize case-insensitive
-      alpha-numeric text (36 unique symbols).
-    task_type: "optical_character_recognition"
-    files:
-      - name: FP32/text-recognition-0012.xml
-        sha256: 71158750324de227342acec7b2edca95d5991be2242eaf3a0c54877c32dc9dff
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-recognition-0012/FP32/text-recognition-0012.xml
-      - name: FP32/text-recognition-0012.bin
-        sha256: d057d4536805ce4529876964e8277a21dbcfae4a65a7762417b4c884cb866347
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-recognition-0012/FP32/text-recognition-0012.bin
-      - name: FP16/text-recognition-0012.xml
-        sha256: 322f6c6902714b81084bc71f560af2a6df69581181549e3d640ddef153c13b9e
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-recognition-0012/FP16/text-recognition-0012.xml
-      - name: FP16/text-recognition-0012.bin
-        sha256: 9f75d14d812695b71212f6fb92feffa42d8a75312d7c58c0fc6af3ff17a6c166
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-recognition-0012/FP16/text-recognition-0012.bin
-    output: "Retail/text_recognition/bilstm_crnn_bilstm_decoder/0012/dldt/"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "driver-action-recognition-adas-0002-encoder"
-    description: >-
-      This is an action recognition model for the driver monitoring use case. The
-      model uses Video Transformer approach with MobileNetv2 encoder. It is able to
-      recognize the following actions: drinking, doing hair or making up, operating
-      the radio, reaching behind, safe driving, talking on the phone, texting.
-
-      This model is only encoder part of the whole pipeline. It accepts video frame
-      and produces embedding. Use driver-action-recognition-adas-0002-decoder to produce
-      prediction from embeddings of 16 frames. Video frames should be sampled to cover
-      ~1 second fragment (i.e. skip every second frame in 30 fps video).
-    task_type: "action_recognition"
-    files:
-      - name: FP32/driver-action-recognition-adas-0002-encoder.xml
-        sha256: b8625862f80388a63c3229824be44a75cb1baffdbd4fe00c560e7cdfc03f2b8d
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-encoder/FP32/driver-action-recognition-adas-0002-encoder.xml
-      - name: FP32/driver-action-recognition-adas-0002-encoder.bin
-        sha256: f49782784647b4d84520d83b1260054ed6d6ce4c3da49e92357f64727a147805
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-encoder/FP32/driver-action-recognition-adas-0002-encoder.bin
-      - name: FP16/driver-action-recognition-adas-0002-encoder.xml
-        sha256: a20c385b32b426db15eb0554a8428c8239aa3fbc7e63894f332d6ad4af65969c
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-encoder/FP16/driver-action-recognition-adas-0002-encoder.xml
-      - name: FP16/driver-action-recognition-adas-0002-encoder.bin
-        sha256: cc6619627ded268452836220c8f23d228d674c94349778219ab032e611b6983f
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-encoder/FP16/driver-action-recognition-adas-0002-encoder.bin
-    output: "Transportation/action_recognition/driver_monitoring/mobilenetv2/encoder/dldt/"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "gaze-estimation-adas-0002"
-    description: >-
-      This is a custom VGG-like convolutional neural network for gaze direction estimation.
-    task_type: "object_attributes"
-    files:
-      - name: FP32/gaze-estimation-adas-0002.xml
-        sha256: b4860d52445836f5a1d4bce65e43054ffdbb0c9c9b75973abc93718f70b5baec
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
-      - name: FP32/gaze-estimation-adas-0002.bin
-        sha256: 9c48f7595d1dbb13dded4371e165401c9acc04c4018e8d3e05148c8a98f88727
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
-      - name: FP16/gaze-estimation-adas-0002.xml
-        sha256: 48724b449b8f379f646141411530342078cc738306e78fed3c969d83e8fd58e0
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
-      - name: FP16/gaze-estimation-adas-0002.bin
-        sha256: f10fae31d4bc925ea1b38f528a0adc7bde4b01badb427597bad0703e7adc947d
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
-      - name: INT8/gaze-estimation-adas-0002.xml
-        sha256: 580c768b167d78039ccec566e6c5bde3a82d5aee785867423bc867c78ce57247
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.xml
-      - name: INT8/gaze-estimation-adas-0002.bin
-        sha256: 5e9651470495b1b4b31e6d4cdb44b721b0d82aeeea13e24c5cfd9ad0629b4d6c
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.bin
-    output: "Transportation/object_attributes/gaze/custom-architecture/dldt/"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "resnet50-binary-0001"
-    description: >-
-      This is a classical classification network for 1000 classes trained on ImageNet.
-      The difference is that most convolutional layers were replaced by binary once
-      that can be implemented as XNOR+POPCOUN operations. Only input, final and shortcut
-      layers were kept as FP32, all the rest convolutional layers are replaced by
-      BinaryConvolution layers.
-    task_type: "classification"
-    files:
-      - name: INT1/resnet50-binary-0001.xml
-        sha256: 1a7e41ab273f9e7b064e60e889ba2f13ce1b07cb4610096bd3abef33a93bf992
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/resnet50-binary-0001/INT1/resnet50-binary-0001.xml
-      - name: INT1/resnet50-binary-0001.bin
-        sha256: e843a458ae786f860698919709fb0852ef8138d4461ce8c744f96fe29ef0d580
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/resnet50-binary-0001/INT1/resnet50-binary-0001.bin
-    output: "PublicCompressed/classification/resnet50_binary/dldt/"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "person-detection-raisinghand-recognition-0001"
-    description: >-
-      This is an action detector for the Smart Classroom scenario. It is based on
-      the RMNet backbone that includes depth-wise convolutions to reduce the amount
-      of computations for the 3x3 convolution block. The first SSD head from 1/16
-      scale feature map has four clustered prior boxes and outputs detected persons
-      (two class detector). The second SSD-based head predicts actions of the detected
-      persons. Possible actions: raising hand and other.
-    task_type: "detection"
-    files:
-      - name: FP32/person-detection-raisinghand-recognition-0001.xml
-        sha256: f15dacbaea3954b8c1b97ca48991a31347881504a9fabfc444c0e828c1a285b6
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.xml
-      - name: FP32/person-detection-raisinghand-recognition-0001.bin
-        sha256: 0e0b22f2c3731cc6226e96710c558190b8b53777bb194152563249d305fb5498
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.bin
-      - name: FP16/person-detection-raisinghand-recognition-0001.xml
-        sha256: 0f091550cdc61d709fbe0d6eb0f86b6bfaae771e66c5c579d7b0933b8f6db965
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.xml
-      - name: FP16/person-detection-raisinghand-recognition-0001.bin
-        sha256: 8931e2a54277581c9a6a53c57b045d0d7473c819c7abd0d361a7e1a638a41566
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.bin
-    output: "Retail/action_detection/pedestrian/rmnet_ssd/0165_cut_2cl/dldt/"
-    framework: dldt
-    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
-
-  - name: "handwritten-score-recognition-0001"
-    description: >-
-      This is a network for text recognition scenario. It consists of VGG16-like backbone
-      and bidirectional LSTM encoder-decoder. The network is able to recognize school
-      marks that should have format either `<digit>` or `<digit>.<digit>` (e.g. `4`
-      or `3.5`).
-    task_type: "optical_character_recognition"
-    files:
-      - name: FP32/handwritten-score-recognition-0001.xml
-        sha256: 86d461c1fa55c1bccfdf3b5488847abc72d19ba3ee838a033d7b3886da6da443
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/handwritten-score-recognition-0001/FP32/handwritten-score-recognition-0001.xml
-      - name: FP32/handwritten-score-recognition-0001.bin
-        sha256: 5d2b8fc1233a184335728c8582f3458d44164f8de4a47e85d5865da69efe158c
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/handwritten-score-recognition-0001/FP32/handwritten-score-recognition-0001.bin
-      - name: FP16/handwritten-score-recognition-0001.xml
-        sha256: d36c5a3396aaaed02d1734ac2d03c8e656ab4e8432147d0473dfdd4dbb890745
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/handwritten-score-recognition-0001/FP16/handwritten-score-recognition-0001.xml
-      - name: FP16/handwritten-score-recognition-0001.bin
-        sha256: 12ac804b9f1699c36fbc5d08b6e9878bbdb8441e782f6fe1948eecef5d0c6e14
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/handwritten-score-recognition-0001/FP16/handwritten-score-recognition-0001.bin
-    output: "Retail/handwritten-score-recognition/0001/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
