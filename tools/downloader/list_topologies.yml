@@ -1422,17 +1422,17 @@ topologies:
     task_type: "action_recognition"
     files:
       - name: FP32/action-recognition-0001-decoder.xml
-        sha256: eeda01c569bb41af0714fb3714e85d5e532fc3819adb0ad9323b97feddf87b34
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.xml
+        sha256: 0b610eb203e870e39ad1588ab7b986983d8f50e9b6c93307fadccf52ff2dc0d8
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.xml
       - name: FP32/action-recognition-0001-decoder.bin
-        sha256: a840e506f821d927fda6f7dfa597adae29b0d68363727d0b31f56a7c4dfd80b5
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.bin
+        sha256: 3fe939d259eb096dba98c6e0870237399344a415ae49d33b729812a8d34c4cf3
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.bin
       - name: FP16/action-recognition-0001-decoder.xml
-        sha256: 220f09742e7ee77b44b1cab3491ac792a004ec6eb1551211b29e7c32c85ff0a0
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.xml
+        sha256: 96146a2af743d860b4bc20b2d0bb82560840b3c623f8b1a2a4dc74deaf6c902c
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.xml
       - name: FP16/action-recognition-0001-decoder.bin
-        sha256: 4ffa032a282559da0fd6a27dcb69d81dce7237574f1dde9e1c97478e109c96a6
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
+        sha256: ba5d5b410c9e8f3cb198e92868d494f69ab2048cf739c397acfa58c9b9ddb92a
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
     output: "Transportation/action_recognition/resnet34_vtn/kinetics/decoder/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -1451,17 +1451,17 @@ topologies:
     task_type: "action_recognition"
     files:
       - name: FP32/action-recognition-0001-encoder.xml
-        sha256: 88338f18f82dfb2d9843735a9d7352e2fe04ce1053280044aa7993be1770f167
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.xml
+        sha256: e9574d46d6d029064c7ceb799efc8052e67e3705397cf85add3d41f230fd91ec
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.xml
       - name: FP32/action-recognition-0001-encoder.bin
         sha256: 35e1454bdac521c7b7664db9b26aebda2bba6944e9da225e9884c0241021d92a
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/action-recognition-0001-encoder/FP32/action-recognition-0001-encoder.bin
       - name: FP16/action-recognition-0001-encoder.xml
-        sha256: 852ae9a90dce025e0a0d95af94de54c58686bf3032d74c8fd5e32337fe4055fb
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.xml
+        sha256: b01deaf04d548458bdb5ef7dc0101e4321539fbb5d00f4fcfd06ea26ff9fc783
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.xml
       - name: FP16/action-recognition-0001-encoder.bin
         sha256: f6347d5c4baf60581d0179a90702180798cb5f3d76079e919493d50f81406e14
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/action-recognition-0001-encoder/FP16/action-recognition-0001-encoder.bin
     output: "Transportation/action_recognition/resnet34_vtn/kinetics/encoder/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -1474,17 +1474,17 @@ topologies:
     task_type: "object_attributes"
     files:
       - name: FP32/age-gender-recognition-retail-0013.xml
-        sha256: 110126ae5e77bccc694dcfe9064af8c4cff93c0452ae265574f12170de356348
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.xml
+        sha256: 455b13ac99528739099a319fd05ec96177fa8a65577443d9675974a1db06ec5a
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.xml
       - name: FP32/age-gender-recognition-retail-0013.bin
         sha256: 4dab79cfedebd628f3327367a91c9736a32fbf9cc733cbbf1629d16910d4ace7
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.bin
       - name: FP16/age-gender-recognition-retail-0013.xml
-        sha256: 885c3fbc32f2f42b37f09dd4f6d309c3aa12996737433164b5d1c59816b8b4e1
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.xml
+        sha256: 195365f6fe6960859f93603629064fdc2c58dfa79223ae33c22059cfb804adc9
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.xml
       - name: FP16/age-gender-recognition-retail-0013.bin
         sha256: 401101e0a01b3d68add39deae833bcf9f54238d37dd13e3fb1534aa8fbe4719d
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin
     output: "Retail/object_attributes/age_gender/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -1503,17 +1503,17 @@ topologies:
     task_type: "action_recognition"
     files:
       - name: FP32/driver-action-recognition-adas-0002-decoder.xml
-        sha256: 90f4d84e8d237647fd2b23f0245bbc63b55fca625dd10fd2778afb51aa99e8d7
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
+        sha256: 6d8fb6a69db5a0de0ee9e5fa1fed254256776ba8b3ae2fd7e8baf9967aee34a9
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
       - name: FP32/driver-action-recognition-adas-0002-decoder.bin
-        sha256: c4c302f54a79364e672e91b7c202275545cff1468ad0a6b226c45baac0082e71
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
+        sha256: ad9bdefcc540be5d704820fd6af43e1c5d7463a07de62cd24d27d8d081d9303e
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
       - name: FP16/driver-action-recognition-adas-0002-decoder.xml
-        sha256: d85192c526c537280d35cf369af98ffe205612088a143f7fcb92eb4c94b38006
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
+        sha256: 89b86a12cfb30f07a14b52c7bee77df2285e83519255ee2120d92ddf1976e2a7
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
       - name: FP16/driver-action-recognition-adas-0002-decoder.bin
-        sha256: d2d0396bddaf5c7b47c8198806c773ad48516f9c3c8d1abe724187fda8ad0b66
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
+        sha256: ab2ffc20577fc71c01bf850b325e261e29bd4470d3b6afd7ea4a940a3fb74fec
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
     output: "Transportation/action_recognition/driver_monitoring/mobilenetv2/decoder/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -1532,17 +1532,17 @@ topologies:
     task_type: "action_recognition"
     files:
       - name: FP32/driver-action-recognition-adas-0002-encoder.xml
-        sha256: b8625862f80388a63c3229824be44a75cb1baffdbd4fe00c560e7cdfc03f2b8d
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-encoder/FP32/driver-action-recognition-adas-0002-encoder.xml
+        sha256: 11d07ccf267a0c01293bacbc3a1c272de40197a6b012cc088402a775d649ffad
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/driver-action-recognition-adas-0002-encoder/FP32/driver-action-recognition-adas-0002-encoder.xml
       - name: FP32/driver-action-recognition-adas-0002-encoder.bin
         sha256: f49782784647b4d84520d83b1260054ed6d6ce4c3da49e92357f64727a147805
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-encoder/FP32/driver-action-recognition-adas-0002-encoder.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/driver-action-recognition-adas-0002-encoder/FP32/driver-action-recognition-adas-0002-encoder.bin
       - name: FP16/driver-action-recognition-adas-0002-encoder.xml
-        sha256: a20c385b32b426db15eb0554a8428c8239aa3fbc7e63894f332d6ad4af65969c
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-encoder/FP16/driver-action-recognition-adas-0002-encoder.xml
+        sha256: 7557c3fd719b2932a70f8cb196a80c54898e5f6135f70ba1646b6664ec0ee438
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/driver-action-recognition-adas-0002-encoder/FP16/driver-action-recognition-adas-0002-encoder.xml
       - name: FP16/driver-action-recognition-adas-0002-encoder.bin
         sha256: cc6619627ded268452836220c8f23d228d674c94349778219ab032e611b6983f
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/driver-action-recognition-adas-0002-encoder/FP16/driver-action-recognition-adas-0002-encoder.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/driver-action-recognition-adas-0002-encoder/FP16/driver-action-recognition-adas-0002-encoder.bin
     output: "Transportation/action_recognition/driver_monitoring/mobilenetv2/encoder/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -1554,23 +1554,23 @@ topologies:
     task_type: "object_attributes"
     files:
       - name: FP32/emotions-recognition-retail-0003.xml
-        sha256: 946571833aeb9488ea5202f806d5a07e7d2acc25e7cc29206e36e66530a963d9
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
+        sha256: 2c65b6d7bbd6c61f46965c97c29a3a38997cdd96f6f06a78f5d0efb4ab1908e3
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
       - name: FP32/emotions-recognition-retail-0003.bin
         sha256: bcb9b1a910fa3cd18a638bb1dbb0597c4ef7a080d1b83008c8e8c2c3c42b99dd
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
       - name: FP16/emotions-recognition-retail-0003.xml
-        sha256: 5450c027ac54c42527ffbe91379c2cbbf7c656a118968411f138445acd508266
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
+        sha256: e506d0138518313c6c5dce0ced506fd83a92d548508334e421fe58afb3809827
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
       - name: FP16/emotions-recognition-retail-0003.bin
         sha256: e62fb4b819b3b3ad8aafcd308d4353db2f164a1a31d78de6cf5970837aeb6f7b
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
       - name: INT8/emotions-recognition-retail-0003.xml
-        sha256: 81a2697a0d4c718d00a78bcf2ec9a35470cc6a48f44b66dd7a2d8968e869048b
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/emotions-recognition-retail-0003/INT8/emotions-recognition-retail-0003.xml
+        sha256: 990bf896af668e09010cd9f36bf20554ec8132e4d2b0169f8325d1d59284fda6
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/emotions-recognition-retail-0003/INT8/emotions-recognition-retail-0003.xml
       - name: INT8/emotions-recognition-retail-0003.bin
         sha256: 61203cb3b7318101637b444c12c9e050cb3447f682c44bc343e8926f9bfe6130
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/emotions-recognition-retail-0003/INT8/emotions-recognition-retail-0003.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/emotions-recognition-retail-0003/INT8/emotions-recognition-retail-0003.bin
     output: "Retail/object_attributes/emotions_recognition/0003/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -1583,23 +1583,23 @@ topologies:
     task_type: "detection"
     files:
       - name: FP32/face-detection-adas-0001.xml
-        sha256: 4c46152ca5b2dbaec38a96ab610336f5ed84d750bafbc605cb0aa44a707830f1
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-0001/FP32/face-detection-adas-0001.xml
+        sha256: 15c2f22e50749c47d8eee8b769925c2c15e9d1d8b7ea32c386641b5d753687b5
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-adas-0001/FP32/face-detection-adas-0001.xml
       - name: FP32/face-detection-adas-0001.bin
-        sha256: 044fbca5222245ea8623eee4dd9475112a562f3b644f47e136f87660f5da4958
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-0001/FP32/face-detection-adas-0001.bin
+        sha256: 0e8fd765cfac0dc369373d456cad17aab0b6c1534f6de33398f89946aa04c673
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-adas-0001/FP32/face-detection-adas-0001.bin
       - name: FP16/face-detection-adas-0001.xml
-        sha256: b2d7ebc94c56f75ebfabeab7142464bf56c6c809aa1942d58925fcba6b80c314
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-0001/FP16/face-detection-adas-0001.xml
+        sha256: eb8b3523326f3906cfdc7c8141715228829cc51bb49dd62f694045a4ef295037
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-adas-0001/FP16/face-detection-adas-0001.xml
       - name: FP16/face-detection-adas-0001.bin
-        sha256: a2486566011e77bfa3180c437911c71f164a9f0a8039498ed1ef7237f612559f
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-0001/FP16/face-detection-adas-0001.bin
+        sha256: e4d1ca072f26173321e580168d6b066eac5123cee136093fca492b2a0cf18cbc
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-adas-0001/FP16/face-detection-adas-0001.bin
       - name: INT8/face-detection-adas-0001.xml
-        sha256: 86f664283b69479d1dd48ad7fcb5fb4e255b505cbb13e0df4b512d0718d56d1c
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-0001/INT8/face-detection-adas-0001.xml
+        sha256: a2057c0e9d12df6dc0fb9cf3710ab1baca5f42e31eb33f8cd3641470f9f208fd
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-adas-0001/INT8/face-detection-adas-0001.xml
       - name: INT8/face-detection-adas-0001.bin
-        sha256: 0c4c0d53c12cd36b946e36a4b97a0271d1b1f46dc6feb7241d08a611724b04e2
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-0001/INT8/face-detection-adas-0001.bin
+        sha256: 69650c48ce9ab68928397eb15f6fd8a41f0f9259098623c962720bbfaeb906a1
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-adas-0001/INT8/face-detection-adas-0001.bin
     output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -1614,10 +1614,10 @@ topologies:
     files:
       - name: INT1/face-detection-adas-binary-0001.xml
         sha256: fde8c465a5e3f3425fb567d31b9591ff8be589930c8488639f8feddf7f0301f2
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.xml
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.xml
       - name: INT1/face-detection-adas-binary-0001.bin
         sha256: 0e0742b61fb924e937a8974da8a2e15cc6afc15630afa3f220676ee7a3a99700
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.bin
     output: "Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights_binary/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -1631,24 +1631,47 @@ topologies:
     task_type: "detection"
     files:
       - name: FP32/face-detection-retail-0004.xml
-        sha256: f3e74c6e0e0d119623907d3ef95ceca6d06a50f8d98d2a8f5f5b5c1b5177c372
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-retail-0004/FP32/face-detection-retail-0004.xml
+        sha256: ee8fc971a02577fde5d6e1d3efc47952d666cf8054ffdf5da2dfb6aff3847060
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-retail-0004/FP32/face-detection-retail-0004.xml
       - name: FP32/face-detection-retail-0004.bin
-        sha256: 6bca00dde8f950df941b02e70e4152c701b9e8cbffed50432eab3d797d1e080c
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-retail-0004/FP32/face-detection-retail-0004.bin
+        sha256: a066b383f7b59055326f4facaef34c6669d8cb2cb817f98b8517fa6cebfb6f41
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-retail-0004/FP32/face-detection-retail-0004.bin
       - name: FP16/face-detection-retail-0004.xml
-        sha256: 2e93db782f42c63740e43d5f0a4327e85d6e811d1123abf41eeb4ee41d602f24
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-retail-0004/FP16/face-detection-retail-0004.xml
+        sha256: ba2aa1707cdcaae6e27c8dcde52a409ec5b9cfe21c03a6137252f507a61c4295
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-retail-0004/FP16/face-detection-retail-0004.xml
       - name: FP16/face-detection-retail-0004.bin
-        sha256: 5c33fe026afe0a7b0c88603b4f826b7e319fa42740d576bf14aafd0b7cbb44d2
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-retail-0004/FP16/face-detection-retail-0004.bin
+        sha256: d20f133227037747343eb635c004679cb25f10acf5e823de72888f64d99ff77a
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-retail-0004/FP16/face-detection-retail-0004.bin
       - name: INT8/face-detection-retail-0004.xml
-        sha256: ba1a7c1c72156ecfef2eff7594ee22515cd88393242f78f72fb07fbcc0a0fee7
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-retail-0004/INT8/face-detection-retail-0004.xml
+        sha256: 6f19c152aa885a00d7833e6b82dbc0ab912309a7f6951f8df2fb9baacf0b3b85
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-retail-0004/INT8/face-detection-retail-0004.xml
       - name: INT8/face-detection-retail-0004.bin
-        sha256: 9abed3810ba767675751f9ebaf6c7b4915535a6d1af3b0254c85e4237e01b8c2
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-detection-retail-0004/INT8/face-detection-retail-0004.bin
+        sha256: ea68f90c1b55b70fe0c4e356b5469177a08981c4c71ad27532a1151ee7407430
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-retail-0004/INT8/face-detection-retail-0004.bin
     output: "Retail/object_detection/face/sqnet1.0modif-ssd/0004/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "face-detection-retail-0005"
+    description: >-
+      Face detector based on MobileNetV2 as a backbone with a single SSD head for
+      indoor/outdoor scenes shot by a front-facing camera. The single SSD head from
+      1/16 scale feature map has nine clustered prior boxes.
+    task_type: "detection"
+    files:
+      - name: FP32/face-detection-retail-0005.xml
+        sha256: 45954a038233643ea25bc8bc0fbba4fffa1325380d1c2231758af377c29c17d6
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-retail-0005/FP32/face-detection-retail-0005.xml
+      - name: FP32/face-detection-retail-0005.bin
+        sha256: e5d2d463fe3b11fc99a77fe23d1daaa497309e73eca222be02bed99d0601115b
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-retail-0005/FP32/face-detection-retail-0005.bin
+      - name: FP16/face-detection-retail-0005.xml
+        sha256: 4fc042ff5bf1594b3754c9fb3a871da84b413fc0d514f89173fe38a261804a2d
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-retail-0005/FP16/face-detection-retail-0005.xml
+      - name: FP16/face-detection-retail-0005.bin
+        sha256: aee37d488af499cd89382ab5632449fce5985660c639217494ae9b64ede7d07e
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-detection-retail-0005/FP16/face-detection-retail-0005.bin
+    output: "Retail/object_detection/face/mobilenet_v2/0005/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
@@ -1688,17 +1711,17 @@ topologies:
     task_type: "face_recognition"
     files:
       - name: FP32/face-reidentification-retail-0095.xml
-        sha256: 6c28a0155e022b04756c31f3992a64237085def07a213563fad1cbede543eb8a
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
+        sha256: fd0e720e2735d862509158f2b17f96dc121ebf0c951d40d91805d27f7f2f779b
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
       - name: FP32/face-reidentification-retail-0095.bin
         sha256: 03836a6a1d03828322491b0608a579b1c47e5097d355c489b5b8aaf5fce1ef48
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
       - name: FP16/face-reidentification-retail-0095.xml
-        sha256: b0d6a49d3d1d623003e78e58aba2b2884237ed0d9d591c0255bb5d5d75c91548
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
+        sha256: e7f09f959f2cbe7f07fe0db552f92a33da0a4a9aec0f3229f8456bdcde1ce498
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
       - name: FP16/face-reidentification-retail-0095.bin
         sha256: 3289078133e40e4263f682ded2a26a500905abb0fd7b943f41ca8037a4f3fe21
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
     output: "Retail/object_reidentification/face/mobilenet_based/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -1710,17 +1733,17 @@ topologies:
     task_type: "object_attributes"
     files:
       - name: FP32/facial-landmarks-35-adas-0002.xml
-        sha256: d3f7f1e0b84708247424630c7523426a81a9884070e084f2b9cf8f11c07cb4f0
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml
+        sha256: f23b51964bdfb3187dd730637ab5275ca12d232c7bdf5ddff5e8d33424535188
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml
       - name: FP32/facial-landmarks-35-adas-0002.bin
         sha256: 232b1a25de480227f36428fdb11a7a1f623acf37eb4232ced5fabac9b7dd2ad7
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
       - name: FP16/facial-landmarks-35-adas-0002.xml
-        sha256: d9e3e98918d15320aac8f5550f4e9f2a6f33ee5bccd6398f042b59084b71abac
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.xml
+        sha256: f25216f3bdb2a823f731f7aecf28c975bc10c520c5bfca5301fef2ee1cb2b5b7
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.xml
       - name: FP16/facial-landmarks-35-adas-0002.bin
         sha256: b8945ba897072289c8cb44357bd211e728ecd1c093c1d4777b79d118a19ab58a
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
     output: "Transportation/object_attributes/facial_landmarks/custom-35-facial-landmarks/dldt"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -1731,28 +1754,28 @@ topologies:
     task_type: "object_attributes"
     files:
       - name: FP32/gaze-estimation-adas-0002.xml
-        sha256: b4860d52445836f5a1d4bce65e43054ffdbb0c9c9b75973abc93718f70b5baec
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
+        sha256: 461ccdd058b41499942489323e2512b2b8db183ba8582392c83e571d377aa83a
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
       - name: FP32/gaze-estimation-adas-0002.bin
-        sha256: 9c48f7595d1dbb13dded4371e165401c9acc04c4018e8d3e05148c8a98f88727
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
+        sha256: 0c73b93bc4162b61a4abf6f1decc892f769e9c289de86793673dc0a723b84652
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
       - name: FP16/gaze-estimation-adas-0002.xml
-        sha256: 48724b449b8f379f646141411530342078cc738306e78fed3c969d83e8fd58e0
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
+        sha256: 8fdbe6265ddd718ac1e555484418e458cfe372257b42232051742fde2a5deea2
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
       - name: FP16/gaze-estimation-adas-0002.bin
-        sha256: f10fae31d4bc925ea1b38f528a0adc7bde4b01badb427597bad0703e7adc947d
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
+        sha256: 01acb7d0a596f1a691e6f36235fab07b99bcab9d97b9b8fb545ea1d1a27db3b0
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
       - name: INT8/gaze-estimation-adas-0002.xml
-        sha256: 580c768b167d78039ccec566e6c5bde3a82d5aee785867423bc867c78ce57247
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.xml
+        sha256: 82da2fed6d0c2560f67f3e6d5fbf10b5ebd538d4608f5a6c49f667245394010c
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.xml
       - name: INT8/gaze-estimation-adas-0002.bin
-        sha256: 5e9651470495b1b4b31e6d4cdb44b721b0d82aeeea13e24c5cfd9ad0629b4d6c
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.bin
+        sha256: ac281130aab7eb4a69a59520a483301b3cfe3d385402bfdec5640941fc1433f7
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.bin
     output: "Transportation/object_attributes/gaze/custom-architecture/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
-  - name: "handwritten-score-recognition-0001"
+  - name: "handwritten-score-recognition-0003"
     description: >-
       This is a network for text recognition scenario. It consists of VGG16-like backbone
       and bidirectional LSTM encoder-decoder. The network is able to recognize school
@@ -1760,19 +1783,19 @@ topologies:
       or `3.5`).
     task_type: "optical_character_recognition"
     files:
-      - name: FP32/handwritten-score-recognition-0001.xml
-        sha256: 86d461c1fa55c1bccfdf3b5488847abc72d19ba3ee838a033d7b3886da6da443
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/handwritten-score-recognition-0001/FP32/handwritten-score-recognition-0001.xml
-      - name: FP32/handwritten-score-recognition-0001.bin
-        sha256: 5d2b8fc1233a184335728c8582f3458d44164f8de4a47e85d5865da69efe158c
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/handwritten-score-recognition-0001/FP32/handwritten-score-recognition-0001.bin
-      - name: FP16/handwritten-score-recognition-0001.xml
-        sha256: d36c5a3396aaaed02d1734ac2d03c8e656ab4e8432147d0473dfdd4dbb890745
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/handwritten-score-recognition-0001/FP16/handwritten-score-recognition-0001.xml
-      - name: FP16/handwritten-score-recognition-0001.bin
-        sha256: 12ac804b9f1699c36fbc5d08b6e9878bbdb8441e782f6fe1948eecef5d0c6e14
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/handwritten-score-recognition-0001/FP16/handwritten-score-recognition-0001.bin
-    output: "Retail/handwritten-score-recognition/0001/dldt/"
+      - name: FP32/handwritten-score-recognition-0003.xml
+        sha256: 3e418fec8f5212e4b0ece4c9c404442238b728abba8971faadd3a0b746fa3752
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/handwritten-score-recognition-0003/FP32/handwritten-score-recognition-0003.xml
+      - name: FP32/handwritten-score-recognition-0003.bin
+        sha256: cbdcb8dfb74366851e65fa1a5726f532c127e1813b43d7bd8b4e5eeb6b32a28d
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/handwritten-score-recognition-0003/FP32/handwritten-score-recognition-0003.bin
+      - name: FP16/handwritten-score-recognition-0003.xml
+        sha256: 7659397eb71820a6bbe3460e381a7887d545e8464371f3568da7a1e202d7e984
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/handwritten-score-recognition-0003/FP16/handwritten-score-recognition-0003.xml
+      - name: FP16/handwritten-score-recognition-0003.bin
+        sha256: a9bb5318844872bb97bcfa1f2ee83faeaf01d6a745770d71ac75acff457d87bd
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/handwritten-score-recognition-0003/FP16/handwritten-score-recognition-0003.bin
+    output: "Retail/handwritten-score-recognition/0003/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
@@ -1784,23 +1807,23 @@ topologies:
     task_type: "head_pose_estimation"
     files:
       - name: FP32/head-pose-estimation-adas-0001.xml
-        sha256: 5cc24273db0aedbf44ee5671135228cea7187fb5bec81be216af74aac3d5e8d9
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
+        sha256: c491619aaefda7a31d81e19298aa0a3dcdb020db80c70bb057fe5e3840dbeab1
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
       - name: FP32/head-pose-estimation-adas-0001.bin
         sha256: e4047e643bd39d97288dc5d22abe8ead850e05ac1bc44605443bbb2abfc2e246
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
       - name: FP16/head-pose-estimation-adas-0001.xml
-        sha256: d570c7b43a20428ac41915c6b915860d6a141d0057b0091c22fe014b79ee5ea7
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
+        sha256: b43bc9576e6a50184e565ccfc3770ef32889aa86f328f735de4147e809b573f8
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
       - name: FP16/head-pose-estimation-adas-0001.bin
         sha256: 535a6af806999e22cca5e4071e55841a694a6b60370a6f8fb3b9d0cda5f81c41
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
       - name: INT8/head-pose-estimation-adas-0001.xml
-        sha256: 3d820d5aede971aef3b760328bfe1edd96d395b272622cea816c573003ae2b89
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/head-pose-estimation-adas-0001/INT8/head-pose-estimation-adas-0001.xml
+        sha256: 8b871a657653a42b6f3d369edb10e0db011a3997f87583310c5ec657d7116e79
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/head-pose-estimation-adas-0001/INT8/head-pose-estimation-adas-0001.xml
       - name: INT8/head-pose-estimation-adas-0001.bin
         sha256: abc0fb7f08e782301c4ffccf9fc5ce626e608a1e7f9c179baf6513519fa38416
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/head-pose-estimation-adas-0001/INT8/head-pose-estimation-adas-0001.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/head-pose-estimation-adas-0001/INT8/head-pose-estimation-adas-0001.bin
     output: "Transportation/object_attributes/headpose/vanilla_cnn/dldt"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -1833,6 +1856,106 @@ topologies:
         sha256: 0d252f0fd98c598fb38eaa907fa8b3d15cf2d420d743649b4b6c5dbdbbe5f1ac
         source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/human-pose-estimation-0001/INT8/human-pose-estimation-0001.bin
     output: "Transportation/human_pose_estimation/mobilenet-v1/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "inceptionv3-int8-sparse-v1-tf-0001"
+    description: >-
+      This is the Inception v3 model that is designed to perform image classification.
+      The model has been pretrained on the ImageNet image database and then pruned
+      to **30.9%** of sparsity and quantized to INT8 fixed-point precision using
+      so-called Quantization-aware training approach implemented in TensorFlow framework.
+      The sparsity is represented by zeros inside the weights of Convolutional and
+      Fully-conneted layers. For details about the original floating point model,
+      check out the paper <https://arxiv.org/pdf/1512.03385.pdf>.
+
+      The model input is a blob that consists of a single image of "1x299x299x3"
+      in BGR order.
+
+      The model output for `inceptionv3-int8-sparse-v1-tf-0001` is the usual object
+      classifier output for the 1001 different classifications matching those in
+      the ImageNet database (the first item represents the background).
+    task_type: "classification"
+    files:
+      - name: FP32/inceptionv3-int8-sparse-v1-tf-0001.xml
+        sha256: 8bc1d7de85fc724d101adc69e4dc9e87063f8235f8478a9234f491ba4b326d43
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/inceptionv3-int8-sparse-v1-tf-0001/FP32/inceptionv3-int8-sparse-v1-tf-0001.xml
+      - name: FP32/inceptionv3-int8-sparse-v1-tf-0001.bin
+        sha256: 9e370db96022b379bc3d10bfa7f52290702c230108a0f3e798b3aad36b8da99f
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/inceptionv3-int8-sparse-v1-tf-0001/FP32/inceptionv3-int8-sparse-v1-tf-0001.bin
+      - name: FP16/inceptionv3-int8-sparse-v1-tf-0001.xml
+        sha256: a5be42d6f6bfe917de2f3afecbeb6087e5cabfcf15e7f785daf2a7a9544cbfc6
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/inceptionv3-int8-sparse-v1-tf-0001/FP16/inceptionv3-int8-sparse-v1-tf-0001.xml
+      - name: FP16/inceptionv3-int8-sparse-v1-tf-0001.bin
+        sha256: a671e7b4eb18ea926861e01272af28d2d14a7738aa95fcbd53115682c1a9e290
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/inceptionv3-int8-sparse-v1-tf-0001/FP16/inceptionv3-int8-sparse-v1-tf-0001.bin
+    output: "PublicCompressed/classification/inceptionv3-dldt/INT8_sparse_v1/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "inceptionv3-int8-sparse-v2-tf-0001"
+    description: >-
+      This is the Inception v3 model that is designed to perform image classification.
+      The model has been pretrained on the ImageNet image database and then pruned
+      to **59.9%** of sparsity and quantized to INT8 fixed-point precision using
+      so-called Quantization-aware training approach implemented in TensorFlow framework.
+      The sparsity is represented by zeros inside the weights of Convolutional and
+      Fully-conneted layers. For details about the original floating point model,
+      check out the paper <https://arxiv.org/pdf/1512.03385.pdf>.
+
+      The model input is a blob that consists of a single image of "1x299x299x3"
+      in BGR order.
+
+      The model output for `inceptionv3-int8-sparse-v2-tf-0001` is the usual object
+      classifier output for the 1001 different classifications matching those in
+      the ImageNet database (the first item represents the background).
+    task_type: "classification"
+    files:
+      - name: FP32/inceptionv3-int8-sparse-v2-tf-0001.xml
+        sha256: eb7a29e8926a0101219182b178fc2aabb435eb3aead440a01460af90c60d7e61
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/inceptionv3-int8-sparse-v2-tf-0001/FP32/inceptionv3-int8-sparse-v2-tf-0001.xml
+      - name: FP32/inceptionv3-int8-sparse-v2-tf-0001.bin
+        sha256: 2c7faf42a761c343815621fde4d2b79ec316f87ffefb2f4105b59ea915806279
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/inceptionv3-int8-sparse-v2-tf-0001/FP32/inceptionv3-int8-sparse-v2-tf-0001.bin
+      - name: FP16/inceptionv3-int8-sparse-v2-tf-0001.xml
+        sha256: 494d34f34fdbf874c731c34cf47d09129a31ac2c58911fa93efc33d50bbb5825
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/inceptionv3-int8-sparse-v2-tf-0001/FP16/inceptionv3-int8-sparse-v2-tf-0001.xml
+      - name: FP16/inceptionv3-int8-sparse-v2-tf-0001.bin
+        sha256: 865a63e70da08213d5181842d080cb356417bbe19285ddb4ecb4e1f595902c6a
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/inceptionv3-int8-sparse-v2-tf-0001/FP16/inceptionv3-int8-sparse-v2-tf-0001.bin
+    output: "PublicCompressed/classification/inceptionv3-dldt/INT8_sparse_v2/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "inceptionv3-int8-tf-0001"
+    description: >-
+      This is the Inception v3 model that is designed to perform image classification.
+      The model has been pretrained on the ImageNet image database and then quantized
+      to INT8 fixed-point precision using so-called Quantization-aware training
+      approach implemented in TensorFlow framework. For details about the original
+      floating point model, check out the paper <https://arxiv.org/pdf/1512.03385.pdf>.
+
+      The model input is a blob that consists of a single image of "1x299x299x3"
+      in BGR order.
+
+      The model output for `inceptionv3-int8-tf-0001` is the usual object classifier
+      output for the 1001 different classifications matching those in the ImageNet
+      database (the first item represents the background).
+    task_type: "classification"
+    files:
+      - name: FP32/inceptionv3-int8-tf-0001.xml
+        sha256: 38a2fe8c13680858873e15c5fbd75d7533ce0e7b71140fd84733b4edf4d084ce
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/inceptionv3-int8-tf-0001/FP32/inceptionv3-int8-tf-0001.xml
+      - name: FP32/inceptionv3-int8-tf-0001.bin
+        sha256: db5aa42bd86e072235b1fc1b822d8b53f2f9f6710fbb8a18c8047158afef26f8
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/inceptionv3-int8-tf-0001/FP32/inceptionv3-int8-tf-0001.bin
+      - name: FP16/inceptionv3-int8-tf-0001.xml
+        sha256: 621a11d8d9c5f1af5445b3f641f653833f98ec90a8acfb6ebb9fbf31ff5a742d
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/inceptionv3-int8-tf-0001/FP16/inceptionv3-int8-tf-0001.xml
+      - name: FP16/inceptionv3-int8-tf-0001.bin
+        sha256: 2321c645c5a633d4afd8dff3d7ce358a7654c3c579afd1a3a0e07d6b8f87f328
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/inceptionv3-int8-tf-0001/FP16/inceptionv3-int8-tf-0001.bin
+    output: "PublicCompressed/classification/inceptionv3-dldt/INT8/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
@@ -1892,17 +2015,17 @@ topologies:
     task_type: "object_attributes"
     files:
       - name: FP32/landmarks-regression-retail-0009.xml
-        sha256: db495316e343dc5cdb3edaf6ca5853c4a478c96772eb6da042ccdddeeefd0936
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
+        sha256: 324a91c77f34e17ff3fe4e8d5cede9a679d85e46c16c1ca1b2c92cc1a2cd56f8
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
       - name: FP32/landmarks-regression-retail-0009.bin
         sha256: 46795837d35e8199b7c5b57e1f76297827bf516a150c0d5643197d8c325f1dbc
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
       - name: FP16/landmarks-regression-retail-0009.xml
-        sha256: bcf274a704031d24af7fdd7f868f052e346cf96029b6b6e85cdc168beddbe401
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
+        sha256: 36428de3d64c4952c1121642ba8f697bda67c86cc8e578292696aadbb9db74a0
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
       - name: FP16/landmarks-regression-retail-0009.bin
         sha256: 5d74c26cbb836b3de358ab05d4cbd92c4eb713dc74484cff9de82b2deb3d8527
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
     output: "Retail/object_attributes/landmarks_regression/0009/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -1914,18 +2037,83 @@ topologies:
     task_type: "optical_character_recognition"
     files:
       - name: FP32/license-plate-recognition-barrier-0001.xml
-        sha256: 19fc9d960f1d18aa0f45c6a3018f5bb3422d2a7ff0db870aaa46a1bc1f13b74a
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.xml
+        sha256: 183182aa6b20440599c08d90c611c9068bda45422de2265accd2b9840a295b52
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.xml
       - name: FP32/license-plate-recognition-barrier-0001.bin
-        sha256: 16f07102e8e936f80d36e77126723b7ca1c4eaf99f0f4b9762d48aeb4e452a90
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.bin
+        sha256: e28f7533481c31ee768bba89c6ee0ef05a1892c9919bd4abc125335a8644291d
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.bin
       - name: FP16/license-plate-recognition-barrier-0001.xml
-        sha256: e7607025021490c84950f211ef6480547b7a30d0ffd3b72c43ebe0c04de315c8
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.xml
+        sha256: 8b6fd0af0ef9eb7778ba6e51fd1f7f16a54237318a9abb49876c94f56ae283c8
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.xml
       - name: FP16/license-plate-recognition-barrier-0001.bin
-        sha256: 67f79aa7fe46b35b13a7c083520c2dcc1218b6104292a4a00da46fa8fcaf3fcf
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.bin
+        sha256: cdead95dde2f27f85a192360343998ca6f0fac160a1aecdf7ecbda06eafc883f
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.bin
     output: "Security/optical_character_recognition/license_plate/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "mobilenetv2-int8-sparse-v1-tf-0001"
+    description: >-
+      Mobilenet v2 INT8 quantized and pruned to 30.8% weights sparsity rate in TensorFlow.
+      Acc@top-1 on ImageNet is 71.42.
+    task_type: "classification"
+    files:
+      - name: FP32/mobilenetv2-int8-sparse-v1-tf-0001.xml
+        sha256: b1173d67ff5e6ed69cd88274320532c44617799579e5e6088c1af6882306e569
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/mobilenetv2-int8-sparse-v1-tf-0001/FP32/mobilenetv2-int8-sparse-v1-tf-0001.xml
+      - name: FP32/mobilenetv2-int8-sparse-v1-tf-0001.bin
+        sha256: 6ae4be4a4672f44fbdf7286b6d15a6bc2c21dacd5f257e39f8121c0d109d2f86
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/mobilenetv2-int8-sparse-v1-tf-0001/FP32/mobilenetv2-int8-sparse-v1-tf-0001.bin
+      - name: FP16/mobilenetv2-int8-sparse-v1-tf-0001.xml
+        sha256: 884ac8619391bea7acd830a12b02679eabf05072ee3242ef3d782e8820749da2
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/mobilenetv2-int8-sparse-v1-tf-0001/FP16/mobilenetv2-int8-sparse-v1-tf-0001.xml
+      - name: FP16/mobilenetv2-int8-sparse-v1-tf-0001.bin
+        sha256: eec27b598e2d94e1157a2939b8dc67b32e61c75fa4debf6a421df77013299d09
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/mobilenetv2-int8-sparse-v1-tf-0001/FP16/mobilenetv2-int8-sparse-v1-tf-0001.bin
+    output: "PublicCompressed/classification/mobilenetv2-dldt/INT8_sparse_v1/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "mobilenetv2-int8-sparse-v2-tf-0001"
+    description: >-
+      Mobilenet v2 INT8 quantized and pruned to 53.01% weights sparsity rate in TensorFlow.
+      Acc@top-1 on ImageNet is 70.856.
+    task_type: "classification"
+    files:
+      - name: FP32/mobilenetv2-int8-sparse-v2-tf-0001.xml
+        sha256: d068b17ef38f707de2b4648b0ab9115c2dfb51a25ec5956284e9b3e0800b617c
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/mobilenetv2-int8-sparse-v2-tf-0001/FP32/mobilenetv2-int8-sparse-v2-tf-0001.xml
+      - name: FP32/mobilenetv2-int8-sparse-v2-tf-0001.bin
+        sha256: 344db57e36e27befffde4e372c59b5f650c96e6bda6e2488d28dfaffc4984ee7
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/mobilenetv2-int8-sparse-v2-tf-0001/FP32/mobilenetv2-int8-sparse-v2-tf-0001.bin
+      - name: FP16/mobilenetv2-int8-sparse-v2-tf-0001.xml
+        sha256: c895b020ae3ae4588f328b920f411366386e4ec4c11b626b1a9914485ea4b3be
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/mobilenetv2-int8-sparse-v2-tf-0001/FP16/mobilenetv2-int8-sparse-v2-tf-0001.xml
+      - name: FP16/mobilenetv2-int8-sparse-v2-tf-0001.bin
+        sha256: 7402ebe219256139d218b1b2eec7fd4b9fcfad393064ee50234c0d3f725a97eb
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/mobilenetv2-int8-sparse-v2-tf-0001/FP16/mobilenetv2-int8-sparse-v2-tf-0001.bin
+    output: "PublicCompressed/classification/mobilenetv2-dldt/INT8_sparse_v2/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "mobilenetv2-int8-tf-0001"
+    description: >-
+      MobileNet v2 INT8 quantized in TensorFlow. Acc@Top-1 on ImageNet is 70.8.
+    task_type: "classification"
+    files:
+      - name: FP32/mobilenetv2-int8-tf-0001.xml
+        sha256: 13af6e73a43e82ef19becb2cbc5a4eb5f955a7b95fa02f39fcd87220029cce7e
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/mobilenetv2-int8-tf-0001/FP32/mobilenetv2-int8-tf-0001.xml
+      - name: FP32/mobilenetv2-int8-tf-0001.bin
+        sha256: a659b393c3f8f9a00855198a90471a5b8a0b00c67c683e814014033c76a33139
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/mobilenetv2-int8-tf-0001/FP32/mobilenetv2-int8-tf-0001.bin
+      - name: FP16/mobilenetv2-int8-tf-0001.xml
+        sha256: 2e31d643d38e92cb9eba939d9867a036309fcdb05f912a38fc113ca56dbde497
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/mobilenetv2-int8-tf-0001/FP16/mobilenetv2-int8-tf-0001.xml
+      - name: FP16/mobilenetv2-int8-tf-0001.bin
+        sha256: 4c8fe0c18392971949d396e82ed02b3c520f12ee242eda3aabff282164edadcf
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/mobilenetv2-int8-tf-0001/FP16/mobilenetv2-int8-tf-0001.bin
+    output: "PublicCompressed/classification/mobilenetv2-dldt/INT8/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
@@ -1935,23 +2123,23 @@ topologies:
     task_type: "detection"
     files:
       - name: FP32/pedestrian-and-vehicle-detector-adas-0001.xml
-        sha256: 6455b1836781e62ccc5d699eeb4e1eb4adf598d7c4e6e1638d066ae08dda7007
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.xml
+        sha256: 8b325366a7ee4cd4c7f2a475ecc679d60a89680170934b3e535c7d9b4b540edd
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.xml
       - name: FP32/pedestrian-and-vehicle-detector-adas-0001.bin
-        sha256: 5919c7c49b557b389aa502894d3b2e6c213d36166e554d9a0726d2b06485acc6
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.bin
+        sha256: 7ce62bc9708c2407b60269c968b5b0a3167aec47c4070e87634657134aa1aaf8
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.bin
       - name: FP16/pedestrian-and-vehicle-detector-adas-0001.xml
-        sha256: a9a6cf98fe6dbc033db0b8a7d57bcbe215d69447b28c32cb02dd9a9665e9b356
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.xml
+        sha256: 31004ac33ab9b8b22cf1b44b7a2afab5849edc567c5e3f13f9eb555de9116c84
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.xml
       - name: FP16/pedestrian-and-vehicle-detector-adas-0001.bin
-        sha256: 8d162bdaf55d289cc8ce792b49d1416eff345ec58097f6231a5ec8dba9d2722e
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.bin
+        sha256: d5b2a74485313299515400f0de6b116a6cb5c776098a1f36bddf942f6fba2087
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.bin
       - name: INT8/pedestrian-and-vehicle-detector-adas-0001.xml
-        sha256: 166849d75fc273fc3459d67258683153119ebabb95ce7556d5f883b395a73fbc
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-and-vehicle-detector-adas-0001/INT8/pedestrian-and-vehicle-detector-adas-0001.xml
+        sha256: 1dc1fcacde1ba70b94213231eb43905509c259d4c15075b0ba45e44cf483d6f6
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/pedestrian-and-vehicle-detector-adas-0001/INT8/pedestrian-and-vehicle-detector-adas-0001.xml
       - name: INT8/pedestrian-and-vehicle-detector-adas-0001.bin
-        sha256: 43d91e778368ec13aee4d1883bb70324f196a600b77d18d889c6568ebcda6e4e
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-and-vehicle-detector-adas-0001/INT8/pedestrian-and-vehicle-detector-adas-0001.bin
+        sha256: 6d3da94b2f4cb6a63fb23ed34409d5c706877584c251e4610d6854f2d480d72c
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/pedestrian-and-vehicle-detector-adas-0001/INT8/pedestrian-and-vehicle-detector-adas-0001.bin
     output: "Transportation/object_detection/pedestrian-and-vehicle/mobilenet-reduced-ssd/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -1963,23 +2151,23 @@ topologies:
     task_type: "detection"
     files:
       - name: FP32/pedestrian-detection-adas-0002.xml
-        sha256: 255b8d15b0f424bda0ad206c0908e6fa46394f9d8f61018f175676af806e8854
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.xml
+        sha256: 77f394c9a1b60014e4b97cdaa7bb5aba81971ce69c422c45d5e354ce391eaf18
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.xml
       - name: FP32/pedestrian-detection-adas-0002.bin
-        sha256: cdf00f3882285d646d2e77b43bd2eef05d1ca88de048d352a3339c79b63767ff
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.bin
+        sha256: d4b8cad14ad4e85cb88aca6ab3f55be4214c0fd04cd036b631f9b365eb287377
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.bin
       - name: FP16/pedestrian-detection-adas-0002.xml
-        sha256: be00995bfbd482115bcf4bb4ddc69322f1d92bff6eef064d8575f49f1e9248d2
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.xml
+        sha256: 691c6c7b36104816921009cc48165a0138d063c7503ad2980fc81681ac1d4061
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.xml
       - name: FP16/pedestrian-detection-adas-0002.bin
-        sha256: ebc3f941934f1df17faf9379b4686745c5d2553ffa469c95e1cc950ea1d013c7
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.bin
+        sha256: 6f5c036879005f87e2ddaf09d7c48988fc142e6c72182b2abc3d09b275f4597d
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.bin
       - name: INT8/pedestrian-detection-adas-0002.xml
-        sha256: e4251d56e11da101e05a7fe273b27971cdc82abc351773bc0b42f58cbdbf0dc2
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-0002/INT8/pedestrian-detection-adas-0002.xml
+        sha256: 70005dedbb44f4b7ae0423c4c54adfda0681d9f9268d9fac01d51df15921d9ef
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/pedestrian-detection-adas-0002/INT8/pedestrian-detection-adas-0002.xml
       - name: INT8/pedestrian-detection-adas-0002.bin
-        sha256: 34753fc4edbbf5f0e7aaedf625000ffe74f443bf20b80cb49a7d2bfc45775e19
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-0002/INT8/pedestrian-detection-adas-0002.bin
+        sha256: 929d7dba718a5e51745a0d6f331fc96013573ced80c72ff4b5125c32e51c4ce6
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/pedestrian-detection-adas-0002/INT8/pedestrian-detection-adas-0002.bin
     output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -1992,10 +2180,10 @@ topologies:
     files:
       - name: INT1/pedestrian-detection-adas-binary-0001.xml
         sha256: e64e7ce32c87e1c698b50abb8f2cf1d96c7651d45fc20bac09c417e046afa7f4
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.xml
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.xml
       - name: INT1/pedestrian-detection-adas-binary-0001.bin
         sha256: 7c2761ca3859ef55a80d9ed924225df7ba363fcb151e4ec2f7d1061b70bdb374
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.bin
     output: "Transportation/object_detection/pedestrian/mobilenet-reduced-ssd-binary/dldt"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -2009,17 +2197,17 @@ topologies:
     task_type: "object_attributes"
     files:
       - name: FP32/person-attributes-recognition-crossroad-0230.xml
-        sha256: 2c5aaf5ded5ad7108b36333c0885e63a6b5200d59fdecc311502f2befc8a7c07
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.xml
+        sha256: 9870d3b7a7fbd1dbef21eba3b3d67825807fb9e5d7ece046bba37b1fc1cfaef5
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.xml
       - name: FP32/person-attributes-recognition-crossroad-0230.bin
         sha256: 1d1c392826e77373d87fd1d7c65ce238c615f729e5524f1dfbc07a3a6c0cf8db
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.bin
       - name: FP16/person-attributes-recognition-crossroad-0230.xml
-        sha256: 0ee68005a9703b32628b2b1d68c4abee815ab4667fcd2478e9517fbac9ca225b
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.xml
+        sha256: d3337cdc3a4e9dddbe4edf12815e76a6b12223f2015fcd09464f9b506b0d0bc1
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.xml
       - name: FP16/person-attributes-recognition-crossroad-0230.bin
         sha256: 033c56ba8e93c03604e78b99f9b7e5ab07fa57cfd1d865cb62fc001744fc6e72
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.bin
     output: "Security/object_attributes/pedestrian/person-attributes-recognition-crossroad-0230/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -2035,18 +2223,39 @@ topologies:
     task_type: "detection"
     files:
       - name: FP32/person-detection-action-recognition-0005.xml
-        sha256: d39d16f5f8de90e6f4a2eae51e3ecc44ebd1a78bf4f0bd113d39592166c14f7c
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.xml
+        sha256: d8afadba7029260983fdb92896dfc7eef03c55b0451bcb202dd677ddf3cbe9d8
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.xml
       - name: FP32/person-detection-action-recognition-0005.bin
-        sha256: 57a2481289ab817945fc93b18fe4f15f45ae154f974d72f8e92e428a5b86bb5f
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.bin
+        sha256: b68ab79b18b570569024665ec9a72e1c15568c5721d243e0e74f0423560361db
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.bin
       - name: FP16/person-detection-action-recognition-0005.xml
-        sha256: b33df7fdc11a71eb05c63eb23cdb0fa3935bbfca85e8ac867e1610778e03396e
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.xml
+        sha256: 37829863d23179fc0027c285d0fbff025d7634296f70a6d146bf3461e6561513
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.xml
       - name: FP16/person-detection-action-recognition-0005.bin
-        sha256: e76f97d714c7eae3bd9007e91e0906cb239ae0260a46efde860d95d6da84a6bc
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.bin
+        sha256: 72263b506b29f7d41eadd33386d67faebea19b35cf799ae876a807d35160da8f
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.bin
     output: "Retail/action_detection/pedestrian/rmnet_ssd/0165/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "person-detection-action-recognition-0006"
+    description: >-
+      Person Detection and Action Recognition model on TF
+    task_type: "detection"
+    files:
+      - name: FP32/person-detection-action-recognition-0006.xml
+        sha256: bf49376361c78018790b490cb24b5d7ec85b568b3455d6c89ecfd0602cf3b1ba
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-action-recognition-0006/FP32/person-detection-action-recognition-0006.xml
+      - name: FP32/person-detection-action-recognition-0006.bin
+        sha256: 8d643910cd1e670f1832d989b7af1d90d14c44a665fb7fd3c6c5bdcb61a36517
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-action-recognition-0006/FP32/person-detection-action-recognition-0006.bin
+      - name: FP16/person-detection-action-recognition-0006.xml
+        sha256: 8b0b7adb7f6400a138dcbcac2bc2f5faaf0150513eb1684cdedf28956f2dc896
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-action-recognition-0006/FP16/person-detection-action-recognition-0006.xml
+      - name: FP16/person-detection-action-recognition-0006.bin
+        sha256: 1db6fef93efe3214720ce8d05ad52cd0f24c92c5c49fa72ebe6c32debb2e798f
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-action-recognition-0006/FP16/person-detection-action-recognition-0006.bin
+    output: "Retail/action_detection/pedestrian/rmnet_ssd/0028_tf/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
@@ -2061,17 +2270,17 @@ topologies:
     task_type: "detection"
     files:
       - name: FP32/person-detection-action-recognition-teacher-0002.xml
-        sha256: fa3d9d2d8da10f4c63291a6b89589453849b94edd079fe92a219f15c179cc8a9
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
+        sha256: 572ecc772f0231244a2ca0e349e1ffdc25123479b49c3e7cf999a59524bd4a3a
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
       - name: FP32/person-detection-action-recognition-teacher-0002.bin
-        sha256: 231e01a33e8ceec66af07a54991c4611ec74a5e5f3070ac9482f4ab242b10d46
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
+        sha256: 711ab8b5737f72d6087c86c017e97d8ebc6e29795b5c63c7665f1e1c37909347
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
       - name: FP16/person-detection-action-recognition-teacher-0002.xml
-        sha256: ad5b89b88ab04c05cb3b9fc5b968a027434719030b76f4538b6c944078338ac4
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
+        sha256: 2e6ce03a019810626407ba26b87942e2c38f31fd9ccf40bcae5028a453b17df9
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
       - name: FP16/person-detection-action-recognition-teacher-0002.bin
-        sha256: 22a0d3c984a66ab48ba4857b428dc4433224ff2dbdb0dd57ccb83153ef4d3275
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
+        sha256: 9854776b1233e7021deaeb3fc0fe245375b67bd9c5d3e1528d04286b1793e440
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
     output: "Retail/action_detection/teacher/rmnet_ssd/0005_cut/dldt"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -2087,17 +2296,17 @@ topologies:
     task_type: "detection"
     files:
       - name: FP32/person-detection-raisinghand-recognition-0001.xml
-        sha256: f15dacbaea3954b8c1b97ca48991a31347881504a9fabfc444c0e828c1a285b6
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.xml
+        sha256: ae4e353baa83bb970c72fd07bcec31c9ee5264d5231a5c6afbf7531de9f44e30
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.xml
       - name: FP32/person-detection-raisinghand-recognition-0001.bin
-        sha256: 0e0b22f2c3731cc6226e96710c558190b8b53777bb194152563249d305fb5498
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.bin
+        sha256: 327aeec1ddc53cc03406ca28c45d4b8b9965030b353142d9cc0c13f229991a61
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.bin
       - name: FP16/person-detection-raisinghand-recognition-0001.xml
-        sha256: 0f091550cdc61d709fbe0d6eb0f86b6bfaae771e66c5c579d7b0933b8f6db965
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.xml
+        sha256: 2375182009fac657b7f60a34791ec52340d87c8e6e66e83b17847cfef1feedf8
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.xml
       - name: FP16/person-detection-raisinghand-recognition-0001.bin
-        sha256: 8931e2a54277581c9a6a53c57b045d0d7473c819c7abd0d361a7e1a638a41566
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.bin
+        sha256: 58ff7bba9d4f10665dd52aa011fcfe6184cccfbd48f3ecfef79b90033de1e6a5
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.bin
     output: "Retail/action_detection/pedestrian/rmnet_ssd/0165_cut_2cl/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -2107,17 +2316,17 @@ topologies:
     task_type: "detection"
     files:
       - name: FP32/person-detection-retail-0002.xml
-        sha256: bfacb328e853120e5fc8c42b7d123e3da64170eaf8ce72ddc067af1a6d74ddc7
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-retail-0002/FP32/person-detection-retail-0002.xml
+        sha256: c3cc1941eee45419aa5771a00a75de5132cecf5f10545dc69c37a66e139c5afe
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-retail-0002/FP32/person-detection-retail-0002.xml
       - name: FP32/person-detection-retail-0002.bin
-        sha256: c510c14c7d41c20782e288f60a955faf4a0fcc7cb6d92a7db6c0013431e01673
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-retail-0002/FP32/person-detection-retail-0002.bin
+        sha256: 78f600869517ee2a9ecc79505b5cfab9849c4c4494035041993c97cc7f4fb745
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-retail-0002/FP32/person-detection-retail-0002.bin
       - name: FP16/person-detection-retail-0002.xml
-        sha256: a209128472a8ce16e37305a13e54587754219ab472247830f813f835b4f5d68a
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-retail-0002/FP16/person-detection-retail-0002.xml
+        sha256: 43bc0d5efbda2d0b0c6942070232686a3dd4231c78067ac4761b4979e285f68c
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-retail-0002/FP16/person-detection-retail-0002.xml
       - name: FP16/person-detection-retail-0002.bin
-        sha256: f14c44ebfec32e7aede4ebc1435e46e7ee8191f7c9c7bdc728c96560e6d45834
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-retail-0002/FP16/person-detection-retail-0002.bin
+        sha256: 04d28806b41709a01e803a1da0894c17d8033f93e6d38822a732f2ba2fe6ea1c
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-retail-0002/FP16/person-detection-retail-0002.bin
     output: "Retail/object_detection/pedestrian/hypernet-rfcn/0026/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -2131,17 +2340,17 @@ topologies:
     task_type: "detection"
     files:
       - name: FP32/person-detection-retail-0013.xml
-        sha256: 0f6fc8657b45ba7216cada7546ba8bdd489e357578ee017386dad555b34e1ed6
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-retail-0013/FP32/person-detection-retail-0013.xml
+        sha256: 0ac20c802f32fadc5320262ec367dd8126cfe4678b7278c62a72129bae67e8db
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-retail-0013/FP32/person-detection-retail-0013.xml
       - name: FP32/person-detection-retail-0013.bin
-        sha256: 3d2c6572e6b6f845a1f2c23c32de958333f40b4ee6c3448201f00450a5b8c8d3
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-retail-0013/FP32/person-detection-retail-0013.bin
+        sha256: c870150640a9ed9e6ab7e3d93398d4ca7604d7b97569b77ee7494649271bbc83
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-retail-0013/FP32/person-detection-retail-0013.bin
       - name: FP16/person-detection-retail-0013.xml
-        sha256: f0a9f7d819dd79a4e03ee77d530ad822035817121abeff547dcacc736f0ce206
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-retail-0013/FP16/person-detection-retail-0013.xml
+        sha256: 900e29cc09d0df5c130c99b7ee153ed5e8f6894626784db55ac3b51a9c204c29
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-retail-0013/FP16/person-detection-retail-0013.xml
       - name: FP16/person-detection-retail-0013.bin
-        sha256: 5b65ddc561b86e48420f7942cd5762deebc8691d1d11dc7567842a8b4548bf93
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-detection-retail-0013/FP16/person-detection-retail-0013.bin
+        sha256: 77eb13de84d9368da1d437aece02ba14b4ff0e48b194feb48a8b5076c861039a
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-detection-retail-0013/FP16/person-detection-retail-0013.bin
     output: "Retail/object_detection/pedestrian/rmnet_ssd/0013/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -2156,17 +2365,17 @@ topologies:
     task_type: "object_attributes"
     files:
       - name: FP32/person-reidentification-retail-0031.xml
-        sha256: cd8cd51352b6f5f5d734733c357d7505dc36d7db6e79e61d97a3ad80083aba4a
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0031/FP32/person-reidentification-retail-0031.xml
+        sha256: 4dcba66678466fea954cb273b6d6877127f6d00a103503b164417f788dfe8e36
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-reidentification-retail-0031/FP32/person-reidentification-retail-0031.xml
       - name: FP32/person-reidentification-retail-0031.bin
         sha256: 8b9d349d330909815d2e75b57654c4cd6c27eb37c87d3280dfeaae03d166a4f4
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0031/FP32/person-reidentification-retail-0031.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-reidentification-retail-0031/FP32/person-reidentification-retail-0031.bin
       - name: FP16/person-reidentification-retail-0031.xml
-        sha256: c52a06b1c9332e5c1a87ad5eec35b46ed781f09faefa80bcbd090673273b814a
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.xml
+        sha256: 520c63986ccd80bf5a4116b75a12dcc7961e35196fa4d7dcef9baddc06ce3acb
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.xml
       - name: FP16/person-reidentification-retail-0031.bin
         sha256: 833c136bcce82bcba6de6289fc21ee24f24d4597e52c41717c2602ee275b2f7d
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.bin
     output: "Retail/object_reidentification/pedestrian/rmnet_based/0031/dldt"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -2183,17 +2392,17 @@ topologies:
     task_type: "object_attributes"
     files:
       - name: FP32/person-reidentification-retail-0076.xml
-        sha256: d8ae8edd22583d518cd7322aee3dd4743e1dbdb7ab2ff4d8af2f782d2e9dfc6c
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0076/FP32/person-reidentification-retail-0076.xml
+        sha256: 42c1f7d186cd55662eed3b8ee6910bea562b9b824e3ec6b2889c71e65b60ee3d
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-reidentification-retail-0076/FP32/person-reidentification-retail-0076.xml
       - name: FP32/person-reidentification-retail-0076.bin
         sha256: acd718a8e6bd0c9e52605ecfe3f5a7ba87280976315bccc94e9302bbe520d898
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0076/FP32/person-reidentification-retail-0076.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-reidentification-retail-0076/FP32/person-reidentification-retail-0076.bin
       - name: FP16/person-reidentification-retail-0076.xml
-        sha256: 4ce21984663dfbfece074e951883f9d6cebd320465d913fd0799b693a5dd4521
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0076/FP16/person-reidentification-retail-0076.xml
+        sha256: f7995d3a9f25396faa25c79d9880207a7e3469df4a4d91ebf5f5ac49ad964959
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-reidentification-retail-0076/FP16/person-reidentification-retail-0076.xml
       - name: FP16/person-reidentification-retail-0076.bin
         sha256: c8a127cb2b8ff5f26b1d248de5a07b79c916103ee39bec0825fb990e4b043fd6
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0076/FP16/person-reidentification-retail-0076.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-reidentification-retail-0076/FP16/person-reidentification-retail-0076.bin
     output: "Retail/object_reidentification/pedestrian/rmnet_based/0076/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -2210,17 +2419,17 @@ topologies:
     task_type: "object_attributes"
     files:
       - name: FP32/person-reidentification-retail-0079.xml
-        sha256: 82271346ae9487df85583eae591aeb588f1ca0ac48f7b8caf8b001b760aa8d05
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0079/FP32/person-reidentification-retail-0079.xml
+        sha256: ff0f664612d522127e8f85604169f7ab3d76aed7a095d7ec8daac3597f3f37b9
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-reidentification-retail-0079/FP32/person-reidentification-retail-0079.xml
       - name: FP32/person-reidentification-retail-0079.bin
         sha256: e341d80b568d939dc121d2c4785d1f8bc90df477cd1754d0b286b2e24b7b33e4
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0079/FP32/person-reidentification-retail-0079.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-reidentification-retail-0079/FP32/person-reidentification-retail-0079.bin
       - name: FP16/person-reidentification-retail-0079.xml
-        sha256: b8f53174f7f7a02a01540042f4778a414ae1218e48bf5881d128b01f8dae88bd
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0079/FP16/person-reidentification-retail-0079.xml
+        sha256: 7132c7bc0cdb0ee6240741c6298a5920af0e3bff64680516280d44deb1ad940f
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-reidentification-retail-0079/FP16/person-reidentification-retail-0079.xml
       - name: FP16/person-reidentification-retail-0079.bin
         sha256: 95c426b1d7e8f06f417172f5b1058bd906c769c8c10b3846f8b3adc826390d93
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-reidentification-retail-0079/FP16/person-reidentification-retail-0079.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-reidentification-retail-0079/FP16/person-reidentification-retail-0079.bin
     output: "Retail/object_reidentification/pedestrian/rmnet_based/0079/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -2234,18 +2443,140 @@ topologies:
     task_type: "detection"
     files:
       - name: FP32/person-vehicle-bike-detection-crossroad-0078.xml
-        sha256: f2e59c8b24fae359f577caaa58cf4485c5620aedf6b46aba9d83de8d1e4c78d2
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-vehicle-bike-detection-crossroad-0078/FP32/person-vehicle-bike-detection-crossroad-0078.xml
+        sha256: 2aac64d7b61aa2270605979ac027529ccf0480f6dfea6ac89556a720112e04d4
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-vehicle-bike-detection-crossroad-0078/FP32/person-vehicle-bike-detection-crossroad-0078.xml
       - name: FP32/person-vehicle-bike-detection-crossroad-0078.bin
-        sha256: d9969d9fbef7f69f1fe683344746953dd7638b6d9d323dc8aa8a58671dc46ca7
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-vehicle-bike-detection-crossroad-0078/FP32/person-vehicle-bike-detection-crossroad-0078.bin
+        sha256: 755e0442d18eadf6b6b1b83cf0b80e742e9e2f4c0792e5050509a9f376636a94
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-vehicle-bike-detection-crossroad-0078/FP32/person-vehicle-bike-detection-crossroad-0078.bin
       - name: FP16/person-vehicle-bike-detection-crossroad-0078.xml
-        sha256: 6dee99dc7fd212f5fa3b7eaac2eff1567f546435c640a849d016654be4e295b7
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-vehicle-bike-detection-crossroad-0078/FP16/person-vehicle-bike-detection-crossroad-0078.xml
+        sha256: 267788e04f7dcf9e609b5139cc76b20f727be2481a16d5c8520fccbfc14dbb18
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-vehicle-bike-detection-crossroad-0078/FP16/person-vehicle-bike-detection-crossroad-0078.xml
       - name: FP16/person-vehicle-bike-detection-crossroad-0078.bin
-        sha256: e1f9566a108510b68330080eb85e9a82becd64614c1570afaa5d4bcd1df00eaf
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/person-vehicle-bike-detection-crossroad-0078/FP16/person-vehicle-bike-detection-crossroad-0078.bin
+        sha256: 361bb6e53c199e0b332cb27f11c553b08432b3e39218c8b865cf8116083703c8
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-vehicle-bike-detection-crossroad-0078/FP16/person-vehicle-bike-detection-crossroad-0078.bin
     output: "Security/object_detection/crossroad/0078/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "person-vehicle-bike-detection-crossroad-1016"
+    description: >-
+      Multiclass (person -  vehicle -  non-vehicle) detector based on SSD detection
+      architecture -  MobileNetV2 backbone)
+    task_type: "detection"
+    files:
+      - name: FP32/person-vehicle-bike-detection-crossroad-1016.xml
+        sha256: 2e9ad5c91220e4e4b11aada60840fd9f19e27d091e29d18b02b99157f0a1a6c7
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.xml
+      - name: FP32/person-vehicle-bike-detection-crossroad-1016.bin
+        sha256: 0858938f00ee87fb47c632f47039316f6060a096e74dd3e5dc061d850b4b702d
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.bin
+      - name: FP16/person-vehicle-bike-detection-crossroad-1016.xml
+        sha256: 7cf57b58230e7a819439807c7c9e4f83289c9db3db83d824d146398224479a8e
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.xml
+      - name: FP16/person-vehicle-bike-detection-crossroad-1016.bin
+        sha256: 3d22081d3b1a8c3e24dcbbe23b677a92ad144530880df33f070615e42901cc55
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.bin
+    output: "Security/object_detection/crossroad/1016/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "resnet-50-int8-sparse-v1-tf-0001"
+    description: >-
+      This is the Resnet-50 v1 model that is designed to perform image classification.
+      The model has been pretrained on the ImageNet image database and then pruned
+      to **28.4%** of sparsity and quantized to INT8 fixed-point precision using
+      so-called Quantization-aware training approach implemented in TensorFlow framework.
+      The sparsity is represented by zeros inside the weights of Convolutional and
+      Fully-conneted layers. For details about the original floating point model,
+      check out the [paper](https://arxiv.org/pdf/1512.03385.pdf).
+
+      The model input is a blob that consists of a single image of "1x224x224x3"
+      in BGR order.
+
+      The model output for `resnet-50-int8-sparse-v1-tf-0001` is the usual object
+      classifier output for the 1000 different classifications matching those in
+      the ImageNet database.
+    task_type: "classification"
+    files:
+      - name: FP32/resnet-50-int8-sparse-v1-tf-0001.xml
+        sha256: 05f15d221fb249f26528e76854164835a03c3976862c3c56a89d866ba0049f65
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/resnet-50-int8-sparse-v1-tf-0001/FP32/resnet-50-int8-sparse-v1-tf-0001.xml
+      - name: FP32/resnet-50-int8-sparse-v1-tf-0001.bin
+        sha256: 1053b7d0808e0c2a77cc5681f1acfaf87d297639449a498efa30bebfd25c18ac
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/resnet-50-int8-sparse-v1-tf-0001/FP32/resnet-50-int8-sparse-v1-tf-0001.bin
+      - name: FP16/resnet-50-int8-sparse-v1-tf-0001.xml
+        sha256: fb04edeaa8f4258edf834316d9587ee350fdbc8aaf83b6d6865ece33b3edc44d
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/resnet-50-int8-sparse-v1-tf-0001/FP16/resnet-50-int8-sparse-v1-tf-0001.xml
+      - name: FP16/resnet-50-int8-sparse-v1-tf-0001.bin
+        sha256: ff58a5f185e7db302496854e62a0b8eacbd4496eeb2ef87e2bd1d3d7dda95ec0
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/resnet-50-int8-sparse-v1-tf-0001/FP16/resnet-50-int8-sparse-v1-tf-0001.bin
+    output: "PublicCompressed/classification/resnet50-dldt/INT8_sparse_v1/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "resnet-50-int8-sparse-v2-tf-0001"
+    description: >-
+      This is the Resnet-50 v1 model that is designed to perform image classification.
+      The model has been pretrained on the ImageNet image database and then pruned
+      to **60.4%** of sparsity and quantized to INT8 fixed-point precision using
+      so-called Quantization-aware training approach implemented in TensorFlow framework.
+      The sparsity is represented by zeros inside the weights of Convolutional and
+      Fully-conneted layers. For details about the original floating point model,
+      check out the [paper](https://arxiv.org/pdf/1512.03385.pdf).
+
+      The model input is a blob that consists of a single image of "1x224x224x3"
+      in BGR order.
+
+      The model output for `resnet-50-int8-sparse-v2-tf-0001` is the usual object
+      classifier output for the 1000 different classifications matching those in
+      the ImageNet database.
+    task_type: "classification"
+    files:
+      - name: FP32/resnet-50-int8-sparse-v2-tf-0001.xml
+        sha256: 02d91fc16145d1a5d63ec7bb333af0ab8bbdca214bb66ae62f5c8f60045bdace
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/resnet-50-int8-sparse-v2-tf-0001/FP32/resnet-50-int8-sparse-v2-tf-0001.xml
+      - name: FP32/resnet-50-int8-sparse-v2-tf-0001.bin
+        sha256: 9858ddf582f225518fb106514b81ffdb0cf8db61d31a848f8e3994c492cb10ff
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/resnet-50-int8-sparse-v2-tf-0001/FP32/resnet-50-int8-sparse-v2-tf-0001.bin
+      - name: FP16/resnet-50-int8-sparse-v2-tf-0001.xml
+        sha256: 750c393f8d2f775578a8157ab34d316d4e544171340ea27f355c8cbe23b7f24e
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/resnet-50-int8-sparse-v2-tf-0001/FP16/resnet-50-int8-sparse-v2-tf-0001.xml
+      - name: FP16/resnet-50-int8-sparse-v2-tf-0001.bin
+        sha256: d52cd898a3cdadd32700a29342a956cca50dd0d11985470cbe6c4d8fbc29f8b2
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/resnet-50-int8-sparse-v2-tf-0001/FP16/resnet-50-int8-sparse-v2-tf-0001.bin
+    output: "PublicCompressed/classification/resnet50-dldt/INT8_sparse_v2/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "resnet-50-int8-tf-0001"
+    description: >-
+      This is the Resnet-50 v1 model that is designed to perform image classification.
+      The model has been pretrained on the ImageNet image database and then quantized
+      to INT8 fixed-point precision using so-called Quantization-aware training approach
+      implemented in TensorFlow framework. For details about the original floating
+      point model, check out the [paper](https://arxiv.org/pdf/1512.03385.pdf).
+
+      The model input is a blob that consists of a single image of "1x224x224x3"
+      in BGR order.
+
+      The model output for `resnet-50-int8-tf-0001` is the usual object classifier
+      output for the 1000 different classifications matching those in the ImageNet
+      database.
+    task_type: "classification"
+    files:
+      - name: FP32/resnet-50-int8-tf-0001.xml
+        sha256: 0e2203093690d98bc80a4996a89878e1318d1c0ae60d19b90eb6e8d1bf932827
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/resnet-50-int8-tf-0001/FP32/resnet-50-int8-tf-0001.xml
+      - name: FP32/resnet-50-int8-tf-0001.bin
+        sha256: 1aa88c32c3d4bcef7945be75a18e805076db706f39da5242d62cbbcfa7172303
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/resnet-50-int8-tf-0001/FP32/resnet-50-int8-tf-0001.bin
+      - name: FP16/resnet-50-int8-tf-0001.xml
+        sha256: dcf5837a2295c84aca587e2716751983e86fd66a312a066af4de00c6eb572645
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/resnet-50-int8-tf-0001/FP16/resnet-50-int8-tf-0001.xml
+      - name: FP16/resnet-50-int8-tf-0001.bin
+        sha256: 0b252f934968afbe6a6dd096e1c4cc542bae8bcd27d4b6a6755e222fde770c19
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/resnet-50-int8-tf-0001/FP16/resnet-50-int8-tf-0001.bin
+    output: "PublicCompressed/classification/resnet50-dldt/INT8/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
@@ -2260,10 +2591,10 @@ topologies:
     files:
       - name: INT1/resnet50-binary-0001.xml
         sha256: 1a7e41ab273f9e7b064e60e889ba2f13ce1b07cb4610096bd3abef33a93bf992
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/resnet50-binary-0001/INT1/resnet50-binary-0001.xml
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/resnet50-binary-0001/INT1/resnet50-binary-0001.xml
       - name: INT1/resnet50-binary-0001.bin
         sha256: e843a458ae786f860698919709fb0852ef8138d4461ce8c744f96fe29ef0d580
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/resnet50-binary-0001/INT1/resnet50-binary-0001.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/resnet50-binary-0001/INT1/resnet50-binary-0001.bin
     output: "PublicCompressed/classification/resnet50_binary/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -2342,17 +2673,17 @@ topologies:
     task_type: "semantic_segmentation"
     files:
       - name: FP32/semantic-segmentation-adas-0001.xml
-        sha256: 4e86d8cab9778dcb85eac3856cfa7b13516ccdc922a47e00a764e159972cca92
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.xml
+        sha256: 0094abe880665e359cc83a2919b04d76d88c1fc9dc427fed387aba0905daa84d
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.xml
       - name: FP32/semantic-segmentation-adas-0001.bin
         sha256: 5a616b105fa42f574e4d23cfc227c10b8bdcc0ba0e66864d7aa4b8a269b7cc76
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.bin
       - name: FP16/semantic-segmentation-adas-0001.xml
-        sha256: 10696961209fbdf6106196b4aa8574aa2311031eae568a5e0f1583ab9c6f1d1d
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.xml
+        sha256: 053be7e275f97639273541b15143f4ded4ebf8b372f96f516d70d74b103eb06d
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.xml
       - name: FP16/semantic-segmentation-adas-0001.bin
         sha256: 8c39dcb0d3569003264165eda163833eef2d0803121147ab06f46697e4f8b4c4
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.bin
     output: "Transportation/segmentation/semantic_segmentation/icnet_icv/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -2365,17 +2696,17 @@ topologies:
     task_type: "image_processing"
     files:
       - name: FP32/single-image-super-resolution-1032.xml
-        sha256: cee9c808e3cf9f9c640a01cd445c4bdb518de9202d90fb2d78281456ebecb7a4
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
+        sha256: 9a7de1a174e61e6b9c0db1c833ada3f8fa909866b633c357460cf83c924ef070
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
       - name: FP32/single-image-super-resolution-1032.bin
-        sha256: 4840a2f6d1793052b5b0cd5f5da4d69315831b044951c413a267ccf923ef7ebd
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
+        sha256: e2403b56bd57b0e7c68e33dad3fb1af5e3f0be4a3ad7c7cbc1836fddf0c062b0
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
       - name: FP16/single-image-super-resolution-1032.xml
-        sha256: a6e670402d9f2b34ca4721bb89196a5e018daaee0e47de61ac5aedbadaa49529
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
+        sha256: 71e1a1d49bda9dbdf09612cbc8cdcbb9e98a38c12b84228b9721faecf05ac052
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
       - name: FP16/single-image-super-resolution-1032.bin
-        sha256: 3a1b4aeab87229c5f91f16c0d6672f6cc185238674f5a967d7098dccc970e5ce
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
+        sha256: ac8a8c9387098ae9bc0cbda82cfe3235c9d2f9652277bbf07d78b96d2c4ff7e9
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
     output: "Security/super_resolution/srresnet/dldt/1032/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -2388,41 +2719,64 @@ topologies:
     task_type: "image_processing"
     files:
       - name: FP32/single-image-super-resolution-1033.xml
-        sha256: 7314cb08b98e6287cb7ed25fa06d969bd7aa4dd605e940953b912e3bf1eeeae2
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.xml
+        sha256: d8172282081e8feadb00357ed354d81bbcab43eb78fa6b192f604f2f0e264855
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.xml
       - name: FP32/single-image-super-resolution-1033.bin
-        sha256: eab6008bc5c2773199078402d4ad68072e0d4a7bfc5c6b7bcfe7d8230ea5eb5b
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.bin
+        sha256: 4f788a5d05373a8e68a20df7bde17347dbaf1531db0ed7ca340977c0dcb18b7a
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.bin
       - name: FP16/single-image-super-resolution-1033.xml
-        sha256: 09548920b37974d6bcbd5ed6d03825da363062dddba86fcc72ab2a56e4bbc0f5
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.xml
+        sha256: 1f7a9fb82479d4e14e3bf6fa767bf7c5ffd14f1bf1c140a77df0314243c6000c
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.xml
       - name: FP16/single-image-super-resolution-1033.bin
-        sha256: 4288e8ad4e9a8a6829b186aeb7e4112db1c7e971f935c3271c5ce47c7379cfbe
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.bin
+        sha256: 0c0bd11d77f6a23242592db1c6ae0a3f0c8b472952aa3c2f5449cc448f68d90f
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.bin
     output: "Security/super_resolution/srresnet/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
-  - name: "text-detection-0002"
+  - name: "text-detection-0003"
     description: >-
       Text detector based on PixelLink <https://arxiv.org/pdf/1801.01315.pdf> architecture
-      with MobileNetV2 <https://arxiv.org/pdf/1801.04381.pdf> as a backbone for indoor/outdoor
-      scenes.
+      with MobileNetV2-like <https://arxiv.org/pdf/1801.04381.pdf> as a backbone
+      for indoor/outdoor scenes.
     task_type: "detection"
     files:
-      - name: FP32/text-detection-0002.xml
-        sha256: 0c9bbaa480bbbf6be0bea431494b9478dd61c84c31b3a454784a012b7031a872
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-detection-0002/FP32/text-detection-0002.xml
-      - name: FP32/text-detection-0002.bin
-        sha256: fd2cdb0d70d816361c156fbc42a3363535009e1a7140494a4fb1acc7acbe4555
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-detection-0002/FP32/text-detection-0002.bin
-      - name: FP16/text-detection-0002.xml
-        sha256: 6193001bbef96a6f40fd3f0cc1726669baff9f1a5a6bcaa9d0eb9cda5f9513b4
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-detection-0002/FP16/text-detection-0002.xml
-      - name: FP16/text-detection-0002.bin
-        sha256: 18508f0fc72bb142d50e00326dfbba63a54143f3cae4f54f8833b2e4d9891b0d
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-detection-0002/FP16/text-detection-0002.bin
-    output: "Retail/object_detection/text/pixel_link_mobilenet_v2/0001/"
+      - name: FP32/text-detection-0003.xml
+        sha256: d5defa4829d7abd27cae752637dd84e3f4cfc532b88dcb26025571e38d612bb4
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/text-detection-0003/FP32/text-detection-0003.xml
+      - name: FP32/text-detection-0003.bin
+        sha256: 4ce684ad28cb70dc464565e1a476718845e3cc190fca14f385117f9ad970bcc4
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/text-detection-0003/FP32/text-detection-0003.bin
+      - name: FP16/text-detection-0003.xml
+        sha256: 13f3cf4a11b4f9b5cd3327c261549b904052554a3eaf2e8011a4c4f8d3e3d6a5
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/text-detection-0003/FP16/text-detection-0003.xml
+      - name: FP16/text-detection-0003.bin
+        sha256: 0ee50f6aad475bf34116f809278766e0ecc82a648bbde40e2070c2e36f62ace7
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/text-detection-0003/FP16/text-detection-0003.bin
+    output: "Retail/object_detection/text/pixel_link_mobilenet_v2/0003/dldt/"
+    framework: dldt
+    license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+
+  - name: "text-detection-0004"
+    description: >-
+      Text detector based on PixelLink <https://arxiv.org/pdf/1801.01315.pdf> architecture
+      with MobileNetV2, depth_multiplier=1.4 <(https://arxiv.org/pdf/1801.04381.pdf>
+      as a backbone for indoor/outdoor scenes.
+    task_type: "detection"
+    files:
+      - name: FP32/text-detection-0004.xml
+        sha256: 77b0ff0596492d6f1a46de5ae2e04f7658c5d9fae93fdefbf2bbe68cd20d924e
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/text-detection-0004/FP32/text-detection-0004.xml
+      - name: FP32/text-detection-0004.bin
+        sha256: f6b58bf15c43cc017bd5f979b46b3159969968e47d3827de866d76d537931e1a
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/text-detection-0004/FP32/text-detection-0004.bin
+      - name: FP16/text-detection-0004.xml
+        sha256: 07e93e262a201c4211b7f5108b794c2de9e7aa5bc57af3c699e95f8b1a9f3ddc
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/text-detection-0004/FP16/text-detection-0004.xml
+      - name: FP16/text-detection-0004.bin
+        sha256: 25b12925d0695af246ae68fbdf2ca1b61ac5b1f6b4b368386c2d82c880c93b70
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/text-detection-0004/FP16/text-detection-0004.bin
+    output: "Retail/object_detection/text/pixel_link_mobilenet_v2/0004/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
 
@@ -2434,17 +2788,17 @@ topologies:
     task_type: "optical_character_recognition"
     files:
       - name: FP32/text-recognition-0012.xml
-        sha256: 71158750324de227342acec7b2edca95d5991be2242eaf3a0c54877c32dc9dff
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-recognition-0012/FP32/text-recognition-0012.xml
+        sha256: e0f84d0f32e754b39cca0841fce151dc16c44c52ca89b9c53d2f1b7b0e29cf0c
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/text-recognition-0012/FP32/text-recognition-0012.xml
       - name: FP32/text-recognition-0012.bin
-        sha256: d057d4536805ce4529876964e8277a21dbcfae4a65a7762417b4c884cb866347
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-recognition-0012/FP32/text-recognition-0012.bin
+        sha256: 0c39f2556de97d7e504c803b9ce67047cd3ca3d4e292db7034e2df61a4f961ae
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/text-recognition-0012/FP32/text-recognition-0012.bin
       - name: FP16/text-recognition-0012.xml
-        sha256: 322f6c6902714b81084bc71f560af2a6df69581181549e3d640ddef153c13b9e
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-recognition-0012/FP16/text-recognition-0012.xml
+        sha256: e51e7983ce403f809dfe3fef580d5242fbb03e252a4bf160e398e227519d3e56
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/text-recognition-0012/FP16/text-recognition-0012.xml
       - name: FP16/text-recognition-0012.bin
-        sha256: 9f75d14d812695b71212f6fb92feffa42d8a75312d7c58c0fc6af3ff17a6c166
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/text-recognition-0012/FP16/text-recognition-0012.bin
+        sha256: 436013b2ea1f5d79c37c529e201003986ab23db298af411551007662532faa0c
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/text-recognition-0012/FP16/text-recognition-0012.bin
     output: "Retail/text_recognition/bilstm_crnn_bilstm_decoder/0012/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -2456,23 +2810,23 @@ topologies:
     task_type: "object_attributes"
     files:
       - name: FP32/vehicle-attributes-recognition-barrier-0039.xml
-        sha256: 7dc03429bbba0f588d37dfcbe1fe82c149cf624f3e19967c9f88c087f76f8f4c
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.xml
+        sha256: 24e427930fc6e40166e41333538c8aa119bcd6247376b70b70470d001bb3c144
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.xml
       - name: FP32/vehicle-attributes-recognition-barrier-0039.bin
         sha256: 8195ea60216d9aefdab41e3129900aa847f4f0d3d003ce93aa15ecba0ca18e91
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.bin
       - name: FP16/vehicle-attributes-recognition-barrier-0039.xml
-        sha256: 4987bda5dfc22429f9bc41f48ae9f8ac075224152551e8d90694657494707955
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.xml
+        sha256: 0445c03cc3ceee7a3c3c879f12b9d95cd13d420345448c31e3971bf0e93c0c84
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.xml
       - name: FP16/vehicle-attributes-recognition-barrier-0039.bin
         sha256: be8b61e337a23ffa57d1742f92d2317560303652f330fef0cbe918161bfcaf50
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.bin
       - name: INT8/vehicle-attributes-recognition-barrier-0039.xml
-        sha256: 6b78a13e44ad3c7e6247061aec582e311d1d0b336a288bef1aceaa3d5147f0b1
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-attributes-recognition-barrier-0039/INT8/vehicle-attributes-recognition-barrier-0039.xml
+        sha256: 0089dc9e1080293589f9feb2b1cb49a55bb883001cda3afad8ad6dac2951e087
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/vehicle-attributes-recognition-barrier-0039/INT8/vehicle-attributes-recognition-barrier-0039.xml
       - name: INT8/vehicle-attributes-recognition-barrier-0039.bin
         sha256: 4ca9587b866ecc92418b87424ec5becb05f73a9781cd2eab6abeff7a54067590
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-attributes-recognition-barrier-0039/INT8/vehicle-attributes-recognition-barrier-0039.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/vehicle-attributes-recognition-barrier-0039/INT8/vehicle-attributes-recognition-barrier-0039.bin
     output: "Security/object_attributes/vehicle/resnet10_update_1/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -2484,23 +2838,23 @@ topologies:
     task_type: "detection"
     files:
       - name: FP32/vehicle-detection-adas-0002.xml
-        sha256: 79245ea24591f452b60498b9b5930870a4b00caca9f8a0b5e83c0a6d57b507dc
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.xml
+        sha256: 0345002ce727faf960b7fb60584a683e6b81a20a6cb6f736de9b090cf9f9f468
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.xml
       - name: FP32/vehicle-detection-adas-0002.bin
-        sha256: a3046a4d72eb8a382ae3056533f570e3e9b049d463a3b33bfe20bd1dc8f9c0e4
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.bin
+        sha256: bafe8ad70bb232e2b35928a31b9a4d3c7d4a6d6995b6bf2012c0ba9674f9d66d
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.bin
       - name: FP16/vehicle-detection-adas-0002.xml
-        sha256: d31ba2739f3aa953a17b1f645b77045e6116e3f890bd044414125c2965f8b654
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.xml
+        sha256: 2abcaa155bf835e61d926ccbc83039b860882cee20508294d8252fe2632310ec
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.xml
       - name: FP16/vehicle-detection-adas-0002.bin
-        sha256: 257a2a9c27ca3d3f5b515f982c3af50683ade869be966e57f0f04f2d95073714
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.bin
+        sha256: f2ce728a0140da04f1c7cb3726e73b8868055bc59518ed2bdd2de3a787dbf8cb
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.bin
       - name: INT8/vehicle-detection-adas-0002.xml
-        sha256: 40f9090d64ec72236e6b95a6f00220e8e5779e05fc4079febb22ad72b9bcd44f
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-0002/INT8/vehicle-detection-adas-0002.xml
+        sha256: 95776b50e1b976741fd87cb2ed5f395208c73fe56a299d2dfbce33a91cb1b224
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/vehicle-detection-adas-0002/INT8/vehicle-detection-adas-0002.xml
       - name: INT8/vehicle-detection-adas-0002.bin
-        sha256: d529c1303bf5ab92167a304591cbb82a58655a949f13c56d88dacc89c536be1d
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-0002/INT8/vehicle-detection-adas-0002.bin
+        sha256: a7bf4a5edbc278a2d25ef33541958170670f346baf9dd07e6b02fc5618ba4a63
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/vehicle-detection-adas-0002/INT8/vehicle-detection-adas-0002.bin
     output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
@@ -2514,10 +2868,10 @@ topologies:
     files:
       - name: INT1/vehicle-detection-adas-binary-0001.xml
         sha256: c98bf5984895b1309861597ec36181446877407cd985bb490e14461f41312670
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.xml
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.xml
       - name: INT1/vehicle-detection-adas-binary-0001.bin
         sha256: afdd8a2f175b2f19c07083ff23b2e28105f3d1c7dc06a4b1a1d5c2c42b98294f
-        source: https://download.01.org/opencv/2019/open_model_zoo/R1/20190404_140900_models_bin/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.bin
+        source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190628_180000_models_bin/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.bin
     output: "Transportation/object_detection/vehicle/mobilenet-reduced-ssd-binary/dldt/"
     framework: dldt
     license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
