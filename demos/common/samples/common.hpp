@@ -26,14 +26,8 @@
 #include <algorithm>
 #include <chrono>
 
-#include <ie_inference_engine.hpp>
-#include <ie_plugin_dispatcher.hpp>
-#include <ie_plugin_ptr.hpp>
-#include <cpp/ie_cnn_net_reader.h>
 #include <cpp/ie_infer_request.hpp>
-#include <ie_device.hpp>
 #include <ie_blob.h>
-#include <ie_utils.hpp>
 
 #ifndef UNUSED
   #ifdef WIN32
