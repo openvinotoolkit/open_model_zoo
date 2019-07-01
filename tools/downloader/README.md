@@ -231,11 +231,16 @@ configuration file and exit:
 
 ```
 $ ./TOOL.py --print_all
+Sphereface
+action-recognition-0001-decoder
+action-recognition-0001-encoder
+age-gender-recognition-retail-0013
+alexnet
+brain-tumor-segmentation-0001
+ctpn
+deeplabv3
 densenet-121
-densenet-161
-densenet-169
-densenet-201
-squeezenet1.0
+densenet-121-tf
 [...]
 ```
 
