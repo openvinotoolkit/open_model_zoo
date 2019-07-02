@@ -40,7 +40,7 @@ try:
 except ImportError:
     requirements['opencv'] = 'opencv-python'
 
-tests_requirements = OrderedDict([("PyTest", 'pytest==4.0.0'), ("PyTest Mock", 'pytest-mock')])
+tests_requirements = OrderedDict([("PyTest", 'pytest==4.0.0'), ("PyTest Mock", 'pytest-mock==1.10.4')])
 
 
 class PyTest(test_command):
