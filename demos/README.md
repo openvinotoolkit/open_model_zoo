@@ -14,7 +14,7 @@ The Open Model Zoo includes the following demos:
 - [Interactive Face Detection C++ Demo](interactive_face_detection_demo/README.md) - Face Detection coupled with Age/Gender, Head-Pose, Emotion, and Facial Landmarks detectors. Supports video and camera inputs.
 - [Mask R-CNN C++ Demo for TensorFlow* Object Detection API](mask_rcnn_demo/README.md) - Inference of instance segmentation networks created with TensorFlow\* Object Detection API.
 - [Multi-Channel Face Detection C++ Demo](multichannel_demo/README.md) - Simultaneous Multi Camera Face Detection demo.
-- [Object Detection C++ Demo](object_detection_demo/README.md) - Inference of object detection networks like Faster R-CNN (the demo supports only images as inputs).
+- [Object Detection for Faster R-CNN C++ Demo](object_detection_demo_faster_rcnn/README.md) - Inference of object detection networks like Faster R-CNN (the demo supports only images as inputs).
 - [Object Detection for SSD C++ Demo](object_detection_demo_ssd_async/README.md) - Demo application for SSD-based Object Detection networks, new Async API performance showcase, and simple OpenCV interoperability (supports video and camera inputs).
 - [Object Detection for YOLO V3 C++ Demo](object_detection_demo_yolov3_async/README.md) - Demo application for YOLOV3-based Object Detection networks, new Async API performance showcase, and simple OpenCV interoperability (supports video and camera inputs).
 - [Pedestrian Tracker C++ Demo](pedestrian_tracker_demo/README.md) - Demo application for pedestrian tracking scenario.
