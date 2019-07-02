@@ -19,7 +19,7 @@ conditions.
 | AP vehicles                     | 77.84%                                    |
 | AP bikes                        | 36.18%                                    |
 | Max objects to detect           | 200                                       |
-| GFlops                          | 1.75                                      |
+| GFlops                          | 3.560                                     |
 | Source framework                | PyTorch                                   |
 
 Average Precision (AP) is defined as an area under the
