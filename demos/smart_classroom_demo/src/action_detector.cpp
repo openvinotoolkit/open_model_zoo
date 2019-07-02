@@ -83,9 +83,6 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
 
         new_network_ = outputInfo.find(config_.new_loc_blob_name) != outputInfo.end();
         input_name_ = inputInfo.begin()->first;
-<<<<<<< HEAD
-        net_ = config_.ie.LoadNetwork(net_reader.getNetwork(), config_.deviceName);
-=======
         net_ = config_.plugin.LoadNetwork(net_reader.getNetwork(), {});
 
         const auto& head_anchors = new_network_ ? config_.new_anchors : config_.old_anchors;
@@ -127,7 +124,6 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
         num_candidates_ = head_shift;
 
         binary_task_ = config_.num_action_classes == 2;
->>>>>>> Added new 6 classes AD model. Updated demo and accuracy checker.
     }
 }
 
