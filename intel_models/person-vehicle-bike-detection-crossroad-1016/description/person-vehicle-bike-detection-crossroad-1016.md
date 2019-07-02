@@ -42,7 +42,7 @@ Similarly, training dataset has 219,181 images with:
 | Pedestrian     | 1,114,799                |
 | Non-vehicle    | 62,334                   |
 
-## Performance (FPS)
+## Performance 
 
 ### Performance disclaimer
 
