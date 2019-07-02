@@ -44,10 +44,6 @@ Similarly, training dataset has 219,181 images with:
 
 ## Performance 
 
-### Performance disclaimer
-
-### Optimization notice
-
 ## Inputs
 
 1. name: "input.1" , shape: [1x3x512x512] - An input image in the format [BxCxHxW],
