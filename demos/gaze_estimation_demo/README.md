@@ -83,6 +83,6 @@ The following keys are supported:
 * Esc - to quit the demo
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/master/demos/README.md)
+* [Using Open Model Zoo demos](../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader)
+* [Model Downloader](../../tools/downloader/README.md)

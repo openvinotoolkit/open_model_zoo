@@ -3,7 +3,7 @@
 This demo provides an inference pipeline for multi-channel face detection. The demo uses Face Detection network. You can use the following pre-trained model with the demo:
 * `face-detection-retail-0004`, which is a primary detection network for finding faces
 
-For more information about the pre-trained models, refer to https://github.com/opencv/open_model_zoo/blob/master/intel_models/index.md in the Open Model Zoo repository.
+For more information about the pre-trained models, refer to the [model documentation](../../../intel_models/index.md).
 
 Other demo objectives are:
 
@@ -50,7 +50,7 @@ Options:
 
 ```
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](https://github.com/opencv/open_model_zoo/tree/2018/model_downloader) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -105,6 +105,6 @@ If your cameras are connected to PC with indexes gap (for example, `0,1,3`), use
 IP-cameras through RSTP URI interface are not supported.
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/master/demos/README.md)
+* [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader)
+* [Model Downloader](../../../tools/downloader/README.md)
