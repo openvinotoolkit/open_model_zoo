@@ -44,18 +44,6 @@ Similarly, training dataset has 219,181 images with:
 
 ## Performance (FPS)
 
-### Configuration #1: Ubuntu* 16.04, Intel® Core™ i5-6500 CPU @ 2.90GHz fixed, GPU GT2 @ 1.00GHz fixed, DDR4 PC17000/2133MHz
-
-| Caffe CPU MKL | IE MKLDNN | IE clDNN FP16 | IE clDNN FP32 | OpenCV CPU |
-|---------------|-----------|---------------|---------------|------------|
-|           tbd |       tbd |           tbd |           tbd |        tbd |
-
-### Configuration #2: Intel® Movidius™ M2 NCS/MA2450, Intel® Core™ i5-6500 CPU @ 2.90GHz fixed
-
-| IE M2 FP16 |
-|------------|
-|        tbd |
-
 ### Performance disclaimer
 
 ### Optimization notice
