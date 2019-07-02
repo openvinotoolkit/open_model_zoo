@@ -1,26 +1,27 @@
-# instance-segmentation-security-0033
+# instance-segmentation-security-0010
 
 ## Use case and High-level description
 
 This model is an instance segmentation network for 80 classes of objects.
-It is a Mask-RCNN-like model with ResNeXt152 backbone and
-Feature Pyramid Networks block for feature maps refinement.
+It is a Mask R-CNN with ResNeXt101-32x8 backbone, PANet feature refiner with
+GroupNorm and DeformableConv operations and Adaptive Feature Pooling
+in all ROI-wise heads.
 
 ## Example
 
-![](./instance-segmentation-security-0033.png)
+![](./instance-segmentation-security-0010.png)
 
 ## Specification
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| MS COCO val2017 box AP (max short side 480, max long side 640)   | 38.9%    |
-| MS COCO val2017 mask AP (max short side 480, max long side 640)  | 34.7%    |
-| MS COCO val2017 box AP (max height 480, max width 640)           | 38.6%    |
-| MS COCO val2017 mask AP (max height 480, max width 640)          | 34.3%    |
+| MS COCO val2017 box AP (max short side 800, max long side 1333)   | 45.36%  |
+| MS COCO val2017 mask AP (max short side 800, max long side 1333)  | 40.00%  |
+| MS COCO val2017 box AP (max height 800, max width 1333)           | 45.11%  |
+| MS COCO val2017 mask AP (max height 800, max width 1333)          | 39.84%  |
 | Max objects to detect           | 100                                       |
-| GFlops                          | 354.274                                   |
-| MParams                         | 143.444                                   |
+| GFlops                          | 899.568                                   |
+| MParams                         | 174.568                                   |
 | Source framework                | PyTorch\*                                 |
 
 Average Precision (AP) is defined and measured according to standard
@@ -30,7 +31,7 @@ Average Precision (AP) is defined and measured according to standard
 
 ## Inputs
 
-1.	name: `im_data` , shape: [1x3x480x640] - An input image in the format
+1.	name: `im_data` , shape: [1x3x800x1344] - An input image in the format
     [1xCxHxW]. The expected channel order is BGR.
 1.	name: `im_info`, shape: [1x3] - Image information: processed image height,
     processed image width and processed image scale

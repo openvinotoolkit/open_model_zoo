@@ -105,8 +105,9 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
-| [instance-segmentation-security-0033](./instance-segmentation-security-0033/description/instance-segmentation-security-0033.md)                | 354.274              | 143.444    |
-| [instance-segmentation-security-0049](./instance-segmentation-security-0049/description/instance-segmentation-security-0049.md)                | 56.433               | 44.920     |
+| [instance-segmentation-security-0050](./instance-segmentation-security-0050/description/instance-segmentation-security-0050.md)                | 46.602               | 30.448     |
+| [instance-segmentation-security-0083](./instance-segmentation-security-0083/description/instance-segmentation-security-0083.md)                | 365.626              | 143.444    |
+| [instance-segmentation-security-0010](./instance-segmentation-security-0010/description/instance-segmentation-security-0010.md)                | 899.568              | 174.568    |
 
 
 ## Human Pose Estimation Models
