@@ -71,3 +71,4 @@ Similarly, training dataset has 219,181 images with:
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner.
 
 ## Legal information
+[*] Other names and brands may be claimed as the property of others.
