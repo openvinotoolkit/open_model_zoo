@@ -49,8 +49,8 @@ def set_box_scores(prediction, scores):
 class NMS(Postprocessor):
     __provider__ = 'nms'
 
-    prediction_types = (DetectionPrediction, )
-    annotation_types = (DetectionAnnotation, )
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
+    annotation_types = (DetectionAnnotation, ActionDetectionPrediction)
 
     @classmethod
     def parameters(cls):
@@ -122,8 +122,8 @@ class NMS(Postprocessor):
 class SoftNMS(Postprocessor):
     __provider__ = 'soft_nms'
 
-    prediction_types = (DetectionPrediction,)
-    annotation_types = (DetectionAnnotation,)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
 
     @classmethod
     def parameters(cls):
