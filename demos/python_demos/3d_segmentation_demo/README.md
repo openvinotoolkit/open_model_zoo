@@ -52,7 +52,7 @@ Options:
 ```
 
 Running the application with the empty list of options yields the usage message and an error message.
-To run the demo, use public or pre-trained models that support 3D convolution, for example, UNet3D. You can download the pre-trained models using the OpenVINO [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, use public or pre-trained models that support 3D convolution, for example, UNet3D. You can download the pre-trained models using the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -73,6 +73,6 @@ python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/mul
 The demo outputs a multipage TIFF image and a NIFTI archive.
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/master/demos/README.md)
+* [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader)
+* [Model Downloader](../../../tools/downloader/README.md)

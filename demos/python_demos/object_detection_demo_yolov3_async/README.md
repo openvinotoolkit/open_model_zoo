@@ -2,7 +2,7 @@
 
 This demo showcases Object Detection with YOLO* V3 and Async API.
 
-To learn more about Async API features, please refer to [Object Detection for SSD Demo, Async API Performance Showcase](https://github.com/opencv/open_model_zoo/tree/master/demos/object_detection_demo_ssd_async/README.md).
+To learn more about Async API features, please refer to [Object Detection for SSD Demo, Async API Performance Showcase](../../object_detection_demo_ssd_async/README.md).
 
 Other demo objectives are:
 * Video as input support via OpenCV*
@@ -73,7 +73,7 @@ You can use the following command to do inference on GPU with a pre-trained obje
     python3 object_detection_demo_yolov3_async.py -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/yolo_v3.xml -d GPU
 ```
 
-To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -88,6 +88,6 @@ In the default mode, the demo reports:
 * **Wallclock time**, which is combined application-level performance.
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/master/demos/README.md)
+* [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader)
+* [Model Downloader](../../../tools/downloader/README.md)
