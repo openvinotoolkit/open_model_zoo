@@ -382,7 +382,8 @@ def set_image_metadata(annotation, images):
     if not isinstance(data, list):
         data = [data]
     for image in data:
-        image_sizes.append(image.shape)
+        data_shape = np.shape(image) if not np.isscalar(image) else 1
+        image_sizes.append(data_shape)
     annotation.set_image_size(image_sizes)
 
     return annotation, images
