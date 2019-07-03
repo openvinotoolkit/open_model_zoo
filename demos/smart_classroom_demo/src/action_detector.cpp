@@ -70,8 +70,8 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
         inputInfoFirst->setPrecision(Precision::U8);
         inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
 
-        network_input_size_.height = inputInfoFirst->getTensorDesc().getDims()[1];
-        network_input_size_.width = inputInfoFirst->getTensorDesc().getDims()[0];
+        network_input_size_.height = inputInfoFirst->getTensorDesc().getDims()[2];
+        network_input_size_.width = inputInfoFirst->getTensorDesc().getDims()[3];
 
         OutputsDataMap outputInfo(net_reader.getNetwork().getOutputsInfo());
 
@@ -82,7 +82,7 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
 
         new_network_ = outputInfo.find(config_.new_loc_blob_name) != outputInfo.end();
         input_name_ = inputInfo.begin()->first;
-        net_ = config_.ie.LoadNetwork(net_reader.getNetwork(), {});
+        net_ = config_.ie.LoadNetwork(net_reader.getNetwork(), config_.deviceName);
 
         const auto& head_anchors = new_network_ ? config_.new_anchors : config_.old_anchors;
         const int num_heads = head_anchors.size();
