@@ -62,7 +62,7 @@ Channel order is `BGR`
 
 ## Output
 
-### Origial model
+### Original model
 
 Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000,1,1`, contains predicted
 probability for each class in logits format
