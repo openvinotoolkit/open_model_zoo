@@ -595,6 +595,7 @@ topologies:
       - --framework=caffe
       - --data_type=FP32
       - --input_shape=[1,3,224,224]
+      - --mean_values=data[104.0,117.0,123.0]
       - --input=data
       - --output=prob
       - --input_model=$dl_dir/resnet-50.caffemodel
@@ -619,6 +620,7 @@ topologies:
       - --framework=caffe
       - --data_type=FP32
       - --input_shape=[1,3,224,224]
+      - --mean_values=data[104.0,117.0,123.0]
       - --input=data
       - --output=prob
       - --input_model=$dl_dir/resnet-101.caffemodel
@@ -643,6 +645,7 @@ topologies:
       - --framework=caffe
       - --data_type=FP32
       - --input_shape=[1,3,224,224]
+      - --mean_values=data[104.0,117.0,123.0]
       - --input=data
       - --output=prob
       - --input_model=$dl_dir/resnet-152.caffemodel
