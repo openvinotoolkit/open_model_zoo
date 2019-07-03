@@ -1,4 +1,4 @@
-# mobilenet-v1-1.0-224
+# mobilenet-v1-1.0-224-tf
 
 ## Use Case and High-Level Description
 
