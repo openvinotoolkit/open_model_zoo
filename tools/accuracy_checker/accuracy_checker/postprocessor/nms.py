@@ -150,7 +150,7 @@ class SoftNMS(Postprocessor):
 
     def process_image(self, annotations, predictions):
         for prediction in predictions:
-            if len(prediction.scores) == 0:  # pylint: len-as-condition
+            if len(prediction.scores) == 0:  # pylint: disable=len-as-condition
                 continue
 
             scores = get_scores(prediction)
@@ -187,7 +187,7 @@ class SoftNMS(Postprocessor):
         return overlaps
 
     def _nms(self, input_bboxes, input_scores):
-        if len(input_bboxes) == 0:  # pylint: len-as-condition
+        if len(input_bboxes) == 0:  # pylint: disable=len-as-condition
             return [], []
 
         if len(input_bboxes) > self.keep_top_k:
