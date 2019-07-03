@@ -29,11 +29,6 @@ from .launcher import Launcher, LauncherConfigValidator
 from .model_conversion import convert_model, FrameworkParameters
 from ..logging import print_info
 
-# It is an important switch -- while the FASTER RCNN is not reshaped correctly, the
-# whole network should be recreated during reshape
-WAS_BUG_ON_FASTER_RCNN_RESHAPE_CRASH_FIXED = False
-
-
 HETERO_KEYWORD = 'HETERO:'
 FPGA_COMPILER_MODE_VAR = 'CL_CONTEXT_COMPILER_MODE_INTELFPGA'
 DEVICE_REGEX = r"(?:^{hetero}(?P<devices>(?:{devices})(?:,(?:{devices}))*)$)|(?:^(?P<device>{devices})$)".format(
@@ -211,6 +206,9 @@ class DLSDKLauncher(Launcher):
 
         self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
         self._do_reshape = False
+        # It is an important switch -- while the FASTER RCNN is not reshaped correctly, the
+        # whole network should be recreated during reshape
+        self.reload_network = True
 
     @property
     def inputs(self):
@@ -393,7 +391,7 @@ class DLSDKLauncher(Launcher):
         return self.exec_network.requests
 
     def _reshape_input(self, shapes):
-        if not WAS_BUG_ON_FASTER_RCNN_RESHAPE_CRASH_FIXED:
+        if self.reload_network:
             # Should recreate the whole network
             del self.exec_network
             del self.network
