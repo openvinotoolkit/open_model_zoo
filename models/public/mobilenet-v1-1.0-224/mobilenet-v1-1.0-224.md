@@ -21,7 +21,7 @@
 
 ### Original model
 
-Image, name - `input` , shape - [1x3x224x224], format [BxCxHxW], where:
+Image, name - `input` , shape - `1,3,224,224`, format `B,C,H,W`, where:
 
     - B - batch size
     - C - number of channels
@@ -33,7 +33,7 @@ Image, name - `input` , shape - [1x3x224x224], format [BxCxHxW], where:
 
 ### Converted model
 
-Image, name - `input` , shape - [1x3x224x224], format [BxCxHxW], where:
+Image, name - `input` , shape - `1,3,224,224`, format `B,C,H,W`, where:
 
     - B - batch size
     - C - number of channels
@@ -44,7 +44,7 @@ Image, name - `input` , shape - [1x3x224x224], format [BxCxHxW], where:
 
 ## Output
 
-### Origial model
+### Original model
 
 Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
 

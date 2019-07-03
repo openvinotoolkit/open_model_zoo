@@ -46,7 +46,7 @@ Channel order is `BGR`
 
 ## Output
 
-### Origial model
+### Original model
 
 Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, output data format is `B,C` where:
 

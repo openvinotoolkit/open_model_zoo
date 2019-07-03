@@ -46,7 +46,7 @@ Channel order is `BGR`.
 
 ## Output
 
-### Origial model
+### Original model
 
 Face embedings, name - `fc5`,  shape - `1,512`, output data format  - `B,C`, where:
 
