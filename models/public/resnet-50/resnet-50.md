@@ -31,6 +31,7 @@ Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `BGR`. 
+Mean values - [104, 117, 123].
 
 ### Converted model
 
