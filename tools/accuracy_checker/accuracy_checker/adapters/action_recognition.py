@@ -234,7 +234,7 @@ class ActionDetection(Adapter):
         layer_id = 0
         head_shift = 0
         head_shifts = [0]
-        for head_id in range(len(head_sizes)):
+        for head_id, _ in enumerate(head_sizes):
             for _ in range(head_sizes[head_id]):
                 layer = add_conf_outs[layer_id]
                 layer_shape = raw_outputs[layer][0].shape
