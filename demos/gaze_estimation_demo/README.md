@@ -20,7 +20,7 @@ Other demo objectives are:
 4. The application performs inference on gaze estimation model using inference results of auxiliary models
 5. The application shows the results
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html)
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with the `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html)
 
 ## Running
 
@@ -40,10 +40,10 @@ Options:
     -m_fd "<path>"           Required. Path to an .xml file with a trained Face Detection model.
     -m_hp "<path>"           Required. Path to an .xml file with a trained Head Pose Estimation model.
     -m_lm "<path>"           Required. Path to an .xml file with a trained Facial Landmarks Estimation model.
-    -d "<device>"            Optional. Target device for Gaze Estimation network (CPU, GPU, FPGA, or MYRIAD). The demo will look for a suitable plugin for a specified device. Default value is "CPU".
-    -d_fd "<device>"         Optional. Target device for Face Detection network (CPU, GPU, FPGA, or MYRIAD). The demo will look for a suitable plugin for a specified device. Default value is "CPU".
-    -d_hp "<device>"         Optional. Target device for Head Pose Estimation network (CPU, GPU, FPGA, or MYRIAD). The demo will look for a suitable plugin for a specified device. Default value is "CPU".
-    -d_lm "<device>"         Optional. Target device for Facial Landmarks Estimation network (CPU, GPU, FPGA, or MYRIAD). The demo will look for a suitable plugin for device specified. Default value is "CPU".
+    -d "<device>"            Optional. Target device for Gaze Estimation network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
+    -d_fd "<device>"         Optional. Target device for Face Detection network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
+    -d_hp "<device>"         Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
+    -d_lm "<device>"         Optional. Target device for Facial Landmarks Estimation network (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device. Default value is "CPU".
     -res "<WxH>"             Optional. Set camera resolution in format WxH.
     -fd_reshape              Optional. Reshape Face Detector network so that its input resolution has the same aspect ratio as the input frame.
     -no_show                 Optional. Do not show processed video.
