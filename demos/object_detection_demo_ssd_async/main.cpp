@@ -8,16 +8,11 @@
 * \example object_detection_demo_ssd_async/main.cpp
 */
 #include <gflags/gflags.h>
-#include <functional>
 #include <iostream>
-#include <fstream>
-#include <random>
 #include <memory>
-#include <chrono>
 #include <vector>
 #include <string>
 #include <algorithm>
-#include <iterator>
 
 #include <inference_engine.hpp>
 
@@ -34,6 +29,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
        showUsage();
+       showAvailableDevices();
        return false;
     }
     slog::info << "Parsing input parameters" << slog::endl;
@@ -382,7 +378,7 @@ int main(int argc, char *argv[]) {
 
         /** Show performace results **/
         if (FLAGS_pc) {
-            printPerformanceCounts(*async_infer_request_curr, std::cout);
+            printPerformanceCounts(*async_infer_request_curr, std::cout, getFullDeviceName(ie, FLAGS_d));
         }
     }
     catch (const std::exception& error) {
