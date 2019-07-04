@@ -20,7 +20,7 @@ You can copy and paste this code without pulling Open Model Zoo demos helpers in
 On the start-up, the application reads command-line parameters and loads a network to the Inference
 Engine. Upon getting a frame from the OpenCV VideoCapture, it performs inference and displays the results.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Running
 
@@ -40,7 +40,7 @@ Options:
       -l "<absolute_path>"    Optional. Required for CPU custom layers. Absolute path to a shared library with the layers implementation.
           Or
       -c "<absolute_path>"    Optional. Required for GPU custom kernels. Absolute path to the .xml file with the kernels description.
-    -d "<device>"             Optional. Specify a target device to infer on (CPU, GPU). The demo will look for a suitable plugin for the specified device
+    -d "<device>"             Optional. Specify a target device to infer on (the list of available devices is shown below). Default value is CPU. The demo will look for a suitable plugin for the specified device
     -pc                       Optional. Enable per-layer performance report.
     -r                        Optional. Output inference results raw values showing.
     -t                        Optional. Probability threshold for detections.
