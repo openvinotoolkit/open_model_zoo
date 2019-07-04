@@ -14,7 +14,20 @@
 
 topologies:
   - name: "densenet-121"
-    description: "DenseNet-121 (https://github.com/shicai/DenseNet-Caffe). The following Caffe patch must be used to be able to convert this model: https://github.com/BVLC/caffe/pull/3057/files"
+    description: >-
+      The `densenet-121` model is one of the DenseNet <https://arxiv.org/pdf/1608.06993>
+      group of models designed to perform image classification. Originally trained
+      on Torch, the authors converted them into Caffe\* format. All the DenseNet models
+      have been pretrained on the ImageNet image database. For details about this
+      family of models, check out the repository <https://github.com/shicai/DenseNet-Caffe>.
+
+      The model input is a blob that consists of a single image of 1x3x224x224 in
+      BGR order. The BGR mean values need to be subtracted as follows: [103.94, 116.78,
+      123.68] before passing the image blob into the network. In addition, values
+      must be divided by 0.017.
+
+      The model output for `densenet-121` is the typical object classifier output
+      for the 1000 different classifications matching those in the ImageNet database.
     task_type: "classification"
     files:
       - name: densenet-121.prototxt
@@ -41,7 +54,22 @@ topologies:
     license: https://raw.githubusercontent.com/liuzhuang13/DenseNet/master/LICENSE
 
   - name: "densenet-161"
-    description: "DenseNet-161 (https://github.com/shicai/DenseNet-Caffe). The following Caffe patch must be used to be able to convert this model: https://github.com/BVLC/caffe/pull/3057/files"
+    description: >-
+      The `densenet-161` model is one of the DenseNet <https://arxiv.org/pdf/1608.06993>
+      group of models designed to perform image classification. The main difference
+      with the `densenet-121` model is the size and accuracy of the model. The `densenet-161`
+      is much larger at 100MB in size vs the `densenet-121` model's roughly 31MB size.
+      Originally trained on Torch, the authors converted them into Caffe* format.
+      All the DenseNet models have been pretrained on the ImageNet image database.
+      For details about this family of models, check out the repository <https://github.com/shicai/DenseNet-Caffe>.
+
+      The model input is a blob that consists of a single image of 1x3x224x224 in
+      BGR order. The BGR mean values need to be subtracted as follows: [103.94, 116.78,
+      123.68] before passing the image blob into the network. In addition, values
+      must be divided by 0.017.
+
+      The model output for `densenet-161` is the typical object classifier output
+      for the 1000 different classifications matching those in the ImageNet database.
     task_type: "classification"
     files:
       - name: densenet-161.prototxt
@@ -68,7 +96,22 @@ topologies:
     license: https://raw.githubusercontent.com/liuzhuang13/DenseNet/master/LICENSE
 
   - name: "densenet-169"
-    description: "DenseNet-169 (https://github.com/shicai/DenseNet-Caffe). The following Caffe patch must be used to be able to convert this model: https://github.com/BVLC/caffe/pull/3057/files"
+    description: >-
+      The `densenet-169` model is one of the DenseNet <https://arxiv.org/pdf/1608.06993>
+      group of models designed to perform image classification. The main difference
+      with the `densenet-121` model is the size and accuracy of the model. The `densenet-169`
+      is larger at just about 55MB in size vs the `densenet-121` model's roughly 31MB
+      size. Originally trained on Torch, the authors converted them into Caffe* format.
+      All the DenseNet models have been pretrained on the ImageNet image database.
+      For details about this family of models, check out the repository <https://github.com/shicai/DenseNet-Caffe>.
+
+      The model input is a blob that consists of a single image of 1x3x224x224 in
+      BGR order. The BGR mean values need to be subtracted as follows: [103.94, 116.78,
+      123.68] before passing the image blob into the network. In addition, values
+      must be divided by 0.017.
+
+      The model output for `densenet-169` is the typical object classifier output
+      for the 1000 different classifications matching those in the ImageNet database.
     task_type: "classification"
     files:
       - name: densenet-169.prototxt
@@ -95,7 +138,22 @@ topologies:
     license: https://raw.githubusercontent.com/liuzhuang13/DenseNet/master/LICENSE
 
   - name: "densenet-201"
-    description: "DenseNet-201 (https://github.com/shicai/DenseNet-Caffe). The following Caffe patch must be used to be able to convert this model: https://github.com/BVLC/caffe/pull/3057/files"
+    description: >-
+      The `densenet-201` model is also one of the DenseNet <https://arxiv.org/pdf/1608.06993>
+      group of models designed to perform image classification. The main difference
+      with the `densenet-121` model is the size and accuracy of the model. The `densenet-201`
+      is larger at over 77MB in size vs the `densenet-121` model's roughly 31MB size.
+      Originally trained on Torch, the authors converted them into Caffe\* format.
+      All the DenseNet models have been pretrained on the ImageNet image database.
+      For details about this family of models, check out the repository <https://github.com/shicai/DenseNet-Caffe>.
+
+      The model input is a blob that consists of a single image of 1x3x224x224 in
+      BGR order. The BGR mean values need to be subtracted as follows: [103.94, 116.78,
+      123.68] before passing the image blob into the network. In addition, values
+      must be divided by 0.017.
+
+      The model output for `densenet-201` is the typical object classifier output
+      for the 1000 different classifications matching those in the ImageNet database.
     task_type: "classification"
     files:
       - name: densenet-201.prototxt
@@ -122,7 +180,18 @@ topologies:
     license: https://raw.githubusercontent.com/liuzhuang13/DenseNet/master/LICENSE
 
   - name: "squeezenet1.0"
-    description: "SqueezeNet v1.0 (https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.0)"
+    description: >-
+      The `squeezenet1.0` model is one of the SqueezeNet <https://arxiv.org/pdf/1602.07360>
+      topology models, is designed to perform image classification. The SqueezeNet
+      models have been pre-trained on the ImageNet image database. For details about
+      this family of models, check out the repository <https://github.com/DeepScale/SqueezeNet>.
+
+      The model input is a blob that consists of a single image of 1x3x227x227 in
+      BGR order. The BGR mean values need to be subtracted as follows: [104, 117,
+      123] before passing the image blob into the network.
+
+      The model output for `squeezenet1.0` is the typical object classifier output
+      for the 1000 different classifications matching those in the ImageNet database.
     task_type: "classification"
     files:
       - name: squeezenet1.0.prototxt
@@ -150,7 +219,20 @@ topologies:
     license: https://raw.githubusercontent.com/DeepScale/SqueezeNet/master/LICENSE
 
   - name: "squeezenet1.1"
-    description: "SqueezeNet v1.1 (https://github.com/DeepScale/SqueezeNet/tree/master/SqueezeNet_v1.1)"
+    description: >-
+      The `squeezenet1.1` updated version of the SqueezeNet <https://arxiv.org/pdf/1602.07360>
+      topology. It is designed to perform image classification.  It requires 2.4x
+      less computation than SqueezeNet v1.0 <../squeezenet1.0/squeezenet1.0.md> without
+      diminishing accuracy. The SqueezeNet models have been pre-trained on the ImageNet
+      image database. For details about this family of models, check out the repository
+      <https://github.com/DeepScale/SqueezeNet>.
+
+      The model input is a blob that consists of a single image of 1x3x227x227 in
+      BGR order. The BGR mean values need to be subtracted as follows: [104, 117,
+      123] before passing the image blob into the network.
+
+      The model output for `squeezenet1.1` is the typical object classifier output
+      for the 1000 different classifications matching those in the ImageNet database.
     task_type: "classification"
     files:
       - name: squeezenet1.1.prototxt
@@ -178,7 +260,21 @@ topologies:
     license: https://raw.githubusercontent.com/DeepScale/SqueezeNet/master/LICENSE
 
   - name: "mtcnn-p"
-    description: "MTCNN-Proposal Network (https://github.com/DuinoDu/mtcnn/tree/master/model https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf)"
+    description: >-
+      The `mtcnn-p` model is one of the mtcnn <https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf>
+      group of models designed to perform face detection. Short for "Multi-task Cascaded
+      Convolutional Neural Network", it is implemented using the Caffe\* framework.
+      The "p" designation indicates that this model is the "proposal" network intended
+      to find the initial set of faces. For details about this family of models, check
+      out the repository <https://github.com/DuinoDu/mtcnn>.
+
+      The model input is an image containing the data to be analyzed. The mean values
+      need to be subtracted as follows: [127.5, 127.5, 127.5] before passing the image
+      blob into the network. In addition, values must be divided by 0.0078125.
+
+      The model output is a blob with a vector containing the first pass of face data.
+      If there are no faces detected, no further processing is needed. Otherwise,
+      you will typically use this output as input to the `mtcnn-r` model.
     task_type: "detection"
     files:
       - name: mtcnn-p.prototxt
@@ -213,7 +309,22 @@ topologies:
     license: https://raw.githubusercontent.com/DuinoDu/mtcnn/master/LICENSE
 
   - name: "mtcnn-r"
-    description: "MTCNN-Refine Network (https://github.com/DuinoDu/mtcnn/tree/master/model https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf)"
+    description: >-
+      The `mtcnn-r` model is one of the mtcnn <https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf>
+      group of models designed to perform face detection. Short for "Multi-task Cascaded
+      Convolutional Neural Network", it is implemented using the Caffe\* framework.
+      The "r" designation indicates that this model is the "refine" network intended
+      to refine the data returned as output from the "proposal" `mtcnn-p` network.
+      For details about this family of models, check out the repository <https://github.com/DuinoDu/mtcnn>.
+
+      The model input is a blob with a vector containing the first pass of face data,
+      as returned by the `mtcnn-p` model. The mean values need to be subtracted as
+      follows: [127.5, 127.5, 127.5] before passing the image blob into the network.
+      In addition, values must be divided by 0.0078125.
+
+      The model output is a blob with a vector containing the refined face data. If
+      there are no faces detected by the refine pass, no further processing is needed.
+      Otherwise, you will typically use this output as input to the `mtcnn-o` model.
     task_type: "detection"
     files:
       - name: mtcnn-r.prototxt
@@ -237,7 +348,21 @@ topologies:
     license: https://raw.githubusercontent.com/DuinoDu/mtcnn/master/LICENSE
 
   - name: "mtcnn-o"
-    description: "MTCNN-Output Network (https://github.com/DuinoDu/mtcnn/tree/master/model https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf)"
+    description: >-
+      The `mtcnn-o` model is the third of the mtcnn <https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf>
+      group of models designed to perform face detection. Short for "Multi-task Cascaded
+      Convolutional Neural Network", it is implemented using the Caffe\* framework.
+      The "o" designation indicates that this model is the "output" network intended
+      to take the data returned from the "refine" `mtcnn-r` network, and transform
+      it into the final output data.  For details about this family of models, check
+      out the repository <https://github.com/DuinoDu/mtcnn>.
+
+      The model input is a blob with a vector containing the refined face data, as
+      returned by the `mtcnn-r` model. The mean values need to be subtracted as follows:
+      [127.5, 127.5, 127.5] before passing the image blob into the network. In addition,
+      values must be divided by 0.0078125.
+
+      The model output is a blob with a vector containing the output face data.
     task_type: "detection"
     files:
       - name: mtcnn-o.prototxt
@@ -261,7 +386,18 @@ topologies:
     license: https://raw.githubusercontent.com/DuinoDu/mtcnn/master/LICENSE
 
   - name: "mobilenet-ssd"
-    description: "Common object detection architecture (https://github.com/chuanqi305/MobileNet-SSD)"
+    description: >-
+      The `mobilenet-ssd` model is a Single-Shot multibox Detection (SSD) network
+      intended to perform object detection. This model is implemented using the Caffe\*
+      framework. For details about this model, check out the repository <https://github.com/chuanqi305/MobileNet-SSD>.
+
+      The model input is a blob that consists of a single image of 1x3x300x300 in
+      BGR order, also like the `densenet-121` model. The BGR mean values need to be
+      subtracted as follows: [127.5, 127.5, 127.5] before passing the image blob into
+      the network. In addition, values must be divided by 0.007843.
+
+      The model output is a typical vector containing the tracked object data, as
+      previously described.
     task_type: "detection"
     files:
       - name: mobilenet-ssd.prototxt
@@ -288,7 +424,16 @@ topologies:
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "vgg19"
-    description: "VGG Net-E (https://arxiv.org/pdf/1409.1556.pdf)"
+    description: >-
+      The `vgg19` model is one of the vgg <https://arxiv.org/pdf/1409.1556.pdf> models
+      designed to perform image classification in Caffe\* format.
+
+      The model input is a blob that consists of a single image of 1x3x224x224 in
+      BGR order. The BGR mean values need to be subtracted as follows: [103.939, 116.779,
+      123.68] before passing the image blob into the network.
+
+      The model output for `vgg19` is the typical object classifier output for the
+      1000 different classifications matching those in the ImageNet database.
     task_type: "classification"
     files:
       - name: vgg19.prototxt
@@ -316,7 +461,16 @@ topologies:
     license: https://raw.githubusercontent.com/keras-team/keras/master/LICENSE
 
   - name: "vgg16"
-    description: "VGG Net-D (https://arxiv.org/pdf/1409.1556.pdf)"
+    description: >-
+      The `vgg16` model is one of the vgg <https://arxiv.org/pdf/1409.1556.pdf> models
+      designed to perform image classification in Caffe\*format.
+
+      The model input is a blob that consists of a single image of "1x3x224x224" in
+      BGR order. The BGR mean values need to be subtracted as follows: [103.939, 116.779,
+      123.68] before passing the image blob into the network.
+
+      The model output for `vgg16` is the typical object classifier output for the
+      1000 different classifications matching those in the ImageNet database.
     task_type: "classification"
     files:
       - name: vgg16.prototxt
@@ -344,7 +498,18 @@ topologies:
     license: https://raw.githubusercontent.com/keras-team/keras/master/LICENSE
 
   - name: "ssd512"
-    description: "SSD-512 (https://arxiv.org/pdf/1512.02325.pdf)"
+    description: >-
+      The `ssd512` model is a Single-Shot multibox Detection <SSD> <https://arxiv.org/pdf/1512.02325.pdf>
+      network intended to perform face detection. This model is implemented using
+      the Caffe\*framework. For details about this model, check out the repository
+      <https://github.com/weiliu89/caffe/tree/ssd>.
+
+      The model input is a blob that consists of a single image of 1x3x512x512 in
+      BGR order. The BGR mean values need to be subtracted as follows: [104.0,117.0,123.0]
+      before passing the image blob into the network.
+
+      The model output is a typical vector containing the tracked object data, as
+      previously described.
     task_type: "detection"
     files:
       - name: ssd512.tar.gz
@@ -375,7 +540,18 @@ topologies:
     license: https://raw.githubusercontent.com/weiliu89/caffe/ssd/LICENSE
 
   - name: "ssd300"
-    description: "SSD-300 (https://arxiv.org/pdf/1512.02325.pdf)"
+    description: >-
+      The "ssd300" model is a Single-Shot multibox Detection <SSD> <https://arxiv.org/pdf/1512.02325.pdf>
+      network intended to perform face detection. This model is implemented using
+      the Caffe\* framework. For details about this model, check out the repository
+      <https://github.com/weiliu89/caffe/tree/ssd>.
+
+      The model input is a blob that consists of a single image of 1x3x300x300 in
+      BGR order.  The BGR mean values need to be subtracted as follows: [104.0,117.0,123.0]
+      before passing the image blob into the network.
+
+      The model output is a typical vector containing the tracked object data, as
+      previously described.
     task_type: "detection"
     files:
       - name: ssd300.tar.gz
@@ -406,7 +582,20 @@ topologies:
     license: https://raw.githubusercontent.com/weiliu89/caffe/ssd/LICENSE
 
   - name: "inception-resnet-v2"
-    description: "Inception-ResNet V2 architecture (https://arxiv.org/pdf/1602.07261.pdf)"
+    description: >-
+      The `inception-resnet-v2` model is one of the Inception <https://arxiv.org/pdf/1602.07261.pdf>
+      family of models designed to perform image classification.1 Like the other Inception
+      models, the `inception-resnet-v2` model has been pretrained on the ImageNet
+      image database. For details about this family of models, check out the paper.
+
+      The model input is a blob that consists of a single image of 1x3x299x299 in
+      BGR order. The BGR mean values need to be subtracted as follows: [128.0,128.0,128.0]
+      before passing the image blob into the network. In addition, values must be
+      divided by 0.0078125.
+
+      The model output for `inception-resnet-v2` is the typical object classifier
+      output for the 1000 different classifications matching those in the ImageNet
+      database.
     task_type: "classification"
     files:
       - name: inception-resnet-v2.prototxt
@@ -436,7 +625,18 @@ topologies:
     license: https://raw.githubusercontent.com/soeaver/caffe-model/master/LICENSE
 
   - name: "googlenet-v1"
-    description: "GoogleNet v1 (Inception v1) (https://arxiv.org/pdf/1409.4842.pdf)"
+    description: >-
+      The `googlenet-v1` model is the first of the Inception <https://arxiv.org/pdf/1602.07261.pdf>
+      family of models designed to perform image classification. Like the other Inception
+      models, the `googlenet-v1` model has been pretrained on the ImageNet image database.
+      For details about this family of models, check out the paper.
+
+      The model input is a blob that consists of a single image of 1x3x224x224 in
+      BGR order.  The BGR mean values need to be subtracted as follows: [104.0,117.0,123.0]
+      before passing the image blob into the network.
+
+      The model output for `googlenet-v1` is the typical object classifier output
+      for the 1000 different classifications matching those in the ImageNet database.
     task_type: "classification"
     files:
       - name: googlenet-v1.prototxt
@@ -464,7 +664,18 @@ topologies:
     license: https://raw.githubusercontent.com/BVLC/caffe/master/LICENSE
 
   - name: "googlenet-v2"
-    description: "GoogleNet v2 (Inception v2) (https://arxiv.org/pdf/1502.03167.pdf)"
+    description: >-
+      The `googlenet-v2` model is the second of the Inception <https://arxiv.org/pdf/1602.07261.pdf>
+      family of models designed to perform image classification. Like the other Inception
+      models, the `googlenet-v2` model has been pretrained on the ImageNet image database.
+      For details about this family of models, check out the paper.
+
+      The model input is a blob that consists of a single image of 1x3x224x224 in
+      BGR order. The BGR mean values need to be subtracted as follows: [104.0,117.0,123.0]
+      before passing the image blob into the network.
+
+      The model output for `googlenet-v2` is the typical object classifier output
+      for the 1000 different classifications matching those in the ImageNet database.
     task_type: "classification"
     files:
       - name: googlenet-v2.prototxt
@@ -496,7 +707,19 @@ topologies:
     license: https://raw.githubusercontent.com/lim0606/caffe-googlenet-bn/master/README.md
 
   - name: "googlenet-v4"
-    description: "GoogleNet v4 (Inception v4)"
+    description: >-
+      The `googlenet-v4` model is the most recent of the Inception <https://arxiv.org/pdf/1602.07261.pdf>
+      family of models designed to perform image classification. Like the other Inception
+      models, the `googlenet-v4` model has been pretrained on the ImageNet image database.
+      For details about this family of models, check out the paper.
+
+      The model input is a blob that consists of a single image of 1x3x299x299 in
+      BGR order. The BGR mean values need to be subtracted as follows: [128.0,128.0,128.0]
+      before passing the image blob into the network. In addition, values must be
+      divided by 0.0078125.
+
+      The model output for `googlenet-v4` is the typical object classifier output
+      for the 1000 different classifications matching those in the ImageNet database.
     task_type: "classification"
     files:
       - name: googlenet-v4.prototxt
@@ -526,7 +749,17 @@ topologies:
     license: https://raw.githubusercontent.com/soeaver/caffe-model/master/LICENSE
 
   - name: "alexnet"
-    description: "AlexNet (http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)"
+    description: >-
+      The `alexnet` model is designed to perform image classification. Just like other
+      common classification models, the `alexnet` model has been pretrained on the
+      ImageNet image database. For details about this model, check out the paper <http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf>.
+
+      The model input is a blob that consists of a single image of 1x3x227x227 in
+      BGR order. The BGR mean values need to be subtracted as follows: [104, 117,
+      123] before passing the image blob into the network.
+
+      The model output for `alexnet` is the usual object classifier output for the
+      1000 different classifications matching those in the ImageNet database.
     task_type: "classification"
     files:
       - name: alexnet.prototxt
@@ -554,7 +787,20 @@ topologies:
     license: https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/readme.md
 
   - name: "ssd_mobilenet_v2_coco"
-    description: "MobileNetV2 object detection architecture (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
+    description: >-
+      The `ssd_mobilenet_v2_coco` model is a Single-Shot multibox Detection <SSD>
+      <https://arxiv.org/pdf/1801.04381.pdf> network intended to perform object detection.
+      The difference between this model and the `mobilenet-ssd` is that the while
+      `mobilenet-ssd` detects faces only, the `ssd_mobilenet_v2_coco` model detects
+      objects, as it has been trained from the Common Objects in Context (COCO) image
+      dataset.
+
+      The model input is a blob that consists of a single image of 1x3x300x300 in
+      RGB order.
+
+      The model output is a typical vector containing the tracked object data, as
+      previously described. Note that the "class_id" data is now significant and should
+      be used to determine the classification for any detected object.
     task_type: "detection"
     files:
       - name: ssd_mobilenet_v2_coco.tar.gz
@@ -579,7 +825,8 @@ topologies:
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "resnet-50"
-    description: "ResNet-50 (https://arxiv.org/pdf/1512.03385.pdf)"
+    description: >-
+      ResNet-50 <https://arxiv.org/pdf/1512.03385.pdf>
     task_type: "classification"
     files:
       - name: resnet-50.prototxt
@@ -604,7 +851,8 @@ topologies:
     license: https://raw.githubusercontent.com/KaimingHe/deep-residual-networks/master/LICENSE
 
   - name: "resnet-101"
-    description: "ResNet-101 (https://arxiv.org/pdf/1512.03385.pdf)"
+    description: >-
+      ResNet-101 <https://arxiv.org/pdf/1512.03385.pdf>
     task_type: "classification"
     files:
       - name: resnet-101.prototxt
@@ -629,7 +877,8 @@ topologies:
     license: https://raw.githubusercontent.com/KaimingHe/deep-residual-networks/master/LICENSE
 
   - name: "resnet-152"
-    description: "ResNet-152 (https://arxiv.org/pdf/1512.03385.pdf)"
+    description: >-
+      ResNet-152 <https://arxiv.org/pdf/1512.03385.pdf>
     task_type: "classification"
     files:
       - name: resnet-152.prototxt
@@ -654,7 +903,10 @@ topologies:
     license: https://raw.githubusercontent.com/KaimingHe/deep-residual-networks/master/LICENSE
 
   - name: "googlenet-v3"
-    description: "GoogleNet v3 (Inception v3) (https://arxiv.org/pdf/1512.00567.pdf)"
+    description: >-
+      The `googlenet-v3` model is the first of the Inception family of models designed
+      to perform image classification. Like the other Inception models. For details
+      about this family of models, check out the paper <https://arxiv.org/pdf/1602.07261.pdf>.
     task_type: "classification"
     files:
       - name: googlenet-v3.tar.gz
@@ -679,7 +931,8 @@ topologies:
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "se-inception"
-    description: "BN-Inception with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
+    description: >-
+      BN-Inception with Squeeze-and-Excitation blocks <https://arxiv.org/pdf/1709.01507.pdf>
     task_type: "classification"
     files:
       - name: se-inception.prototxt
@@ -705,7 +958,8 @@ topologies:
     license: https://raw.githubusercontent.com/hujie-frank/SENet/master/LICENSE
 
   - name: "se-resnet-101"
-    description: "ResNet-101 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
+    description: >-
+      ResNet-101 with Squeeze-and-Excitation blocks <https://arxiv.org/pdf/1709.01507.pdf>
     task_type: "classification"
     files:
       - name: se-resnet-101.prototxt
@@ -731,7 +985,8 @@ topologies:
     license: https://raw.githubusercontent.com/hujie-frank/SENet/master/LICENSE
 
   - name: "se-resnet-152"
-    description: "ResNet-152 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
+    description: >-
+      ResNet-152 with Squeeze-and-Excitation blocks <https://arxiv.org/pdf/1709.01507.pdf>
     task_type: "classification"
     files:
       - name: se-resnet-152.prototxt
@@ -757,7 +1012,8 @@ topologies:
     license: https://raw.githubusercontent.com/hujie-frank/SENet/master/LICENSE
 
   - name: "se-resnet-50"
-    description: "ResNet-50 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
+    description: >-
+      ResNet-50 with Squeeze-and-Excitation blocks <https://arxiv.org/pdf/1709.01507.pdf>
     task_type: "classification"
     files:
       - name: se-resnet-50.prototxt
@@ -783,7 +1039,8 @@ topologies:
     license: https://raw.githubusercontent.com/hujie-frank/SENet/master/LICENSE
 
   - name: "se-resnext-50"
-    description: "ResNeXt-50 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
+    description: >-
+      ResNext-50 with Squeeze-and-Excitation blocks <https://arxiv.org/pdf/1709.01507.pdf>
     task_type: "classification"
     files:
       - name: se-resnext-50.prototxt
@@ -809,7 +1066,8 @@ topologies:
     license: https://raw.githubusercontent.com/hujie-frank/SENet/master/LICENSE
 
   - name: "se-resnext-101"
-    description: "ResNeXt-101 with Squeeze-and-Excitation blocks (https://arxiv.org/pdf/1709.01507.pdf)"
+    description: >-
+      ResNext-101 with Squeeze-and-Excitation blocks <https://arxiv.org/pdf/1709.01507.pdf>
     task_type: "classification"
     files:
       - name: se-resnext-101.prototxt
@@ -835,7 +1093,8 @@ topologies:
     license: https://raw.githubusercontent.com/hujie-frank/SENet/master/LICENSE
 
   - name: "Sphereface"
-    description: "Deep face recognition under open-set protocol (https://arxiv.org/pdf/1704.08063.pdf)"
+    description: >-
+      Deep face recognition under open-set protocol <https://arxiv.org/pdf/1704.08063.pdf>
     task_type: "face_recognition"
     files:
       - name: Sphereface.prototxt
@@ -907,7 +1166,12 @@ topologies:
     license: https://raw.githubusercontent.com/opencv/training_toolbox_caffe/develop/LICENSE
 
   - name: "mobilenet-v1-1.0-224"
-    description: "MobileNet V1 architecture with the width multiplier 1.0 and resolution 224 (https://arxiv.org/pdf/1704.04861.pdf)"
+    description: >-
+      `mobilenet-v1-1.0-224` is one of MobileNet V1 architecture <https://arxiv.org/abs/1704.04861>
+      with the width multiplier 1.0 and resolution 224. It is small, low-latency,
+      low-power models parameterized to meet the resource constraints of a variety
+      of use cases. They can be built upon for classification, detection, embeddings
+      and segmentation similar to how other popular large scale models are used.
     task_type: "classification"
     files:
       - name: mobilenet-v1-1.0-224.prototxt
@@ -931,7 +1195,8 @@ topologies:
     license: https://raw.githubusercontent.com/shicai/MobileNet-Caffe/26a8b8c0afb6114a07c1c9e4f550e4e0dd8cced1/LICENSE
 
   - name: "mobilenet-v2"
-    description: "MobileNet V2 (https://arxiv.org/pdf/1801.04381.pdf)"
+    description: >-
+      MobileNet V2 <https://arxiv.org/pdf/1801.04381.pdf>
     task_type: "classification"
     files:
       - name: mobilenet-v2.prototxt
@@ -955,7 +1220,9 @@ topologies:
     license: https://raw.githubusercontent.com/shicai/MobileNet-Caffe/26a8b8c0afb6114a07c1c9e4f550e4e0dd8cced1/LICENSE
 
   - name: "faster_rcnn_inception_v2_coco"
-    description: "Faster R-CNN with Inception v2 (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
+    description: >-
+      Faster R-CNN with Inception v2. Used for object detection. For details see paper
+      <https://arxiv.org/pdf/1801.04381.pdf>.
     task_type: "detection"
     files:
       - name: faster_rcnn_inception_v2_coco.tar.gz
@@ -980,7 +1247,9 @@ topologies:
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "deeplabv3"
-    description: "Rethinking Atrous Convolution for Semantic Image Segmentation (https://arxiv.org/pdf/1706.05587.pdf)"
+    description: >-
+      DeepLab is a state-of-art deep learning model for semantic image segmentation.
+      For details see paper <https://arxiv.org/pdf/1706.05587.pdf>
     task_type: "semantic_segmentation"
     files:
       - name: deeplabv3.tar.gz
@@ -1002,7 +1271,9 @@ topologies:
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "ctpn"
-    description: "Detecting Text in Natural Image with Connectionist Text Proposal Network (https://arxiv.org/pdf/1609.03605.pdf)"
+    description: >-
+      Detecting Text in Natural Image with Connectionist Text Proposal Network. For
+      details see paper <https://arxiv.org/pdf/1609.03605.pdf>.
     task_type: "detection"
     files:
       - name: ctpn.pb
@@ -1022,7 +1293,12 @@ topologies:
     license: https://raw.githubusercontent.com/eragonruan/text-detection-ctpn/banjin-dev/LICENSE
 
   - name: "ssd_mobilenet_v1_coco"
-    description: "MobileNetV1 object detection architecture (https://arxiv.org/pdf/1807.03284.pdf) pre-trained on the COCO dataset"
+    description: >-
+      The `ssd_mobilenet_v1_coco` model is a Single-Shot multibox Detection <SSD>
+      <https://arxiv.org/pdf/1801.04381.pdf> network intended to perform object detection.
+      The difference bewteen this model and the `mobilenet-ssd` is that there the
+      `mobilenet-ssd` can only detect face, the `ssd_mobilenet_v1_coco` model can
+      detect objects.
     task_type: "detection"
     files:
       - name: ssd_mobilenet_v1_coco.tar.gz
@@ -1047,7 +1323,9 @@ topologies:
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "faster_rcnn_resnet101_coco"
-    description: "Faster R-CNN Resnet-101 (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
+    description: >-
+      Faster R-CNN Resnet-101 model. Used for object detection. For details see paper
+      <https://arxiv.org/pdf/1801.04381.pdf>.
     task_type: "detection"
     files:
       - name: faster_rcnn_resnet101_coco.tar.gz
@@ -1072,7 +1350,12 @@ topologies:
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "mobilenet-v2-1.4-224"
-    description: "MobileNet V2 architecture with the width multiplier 1.4 and resolution 224 (https://arxiv.org/abs/1801.04381)"
+    description: >-
+      `mobilenet-v2-1.4-224` is one of MobileNets - small, low-latency, low-power
+      models parameterized to meet the resource constraints of a variety of use cases.
+      They can be built upon for classification, detection, embeddings and segmentation
+      similar to how other popular large scale models are used. For details see paper
+      <https://arxiv.org/abs/1704.04861>
     task_type: "classification"
     files:
       - name: mobilenet-v2-1.4-224.tar.gz
@@ -1097,7 +1380,16 @@ topologies:
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "brain-tumor-segmentation-0001"
-    description: "Cascaded UNet for brain tumor segmentation (https://arxiv.org/abs/1810.04008)"
+    description: >-
+      This model was created for participation in the Brain Tumor Segmentation Challenge
+      <https://www.med.upenn.edu/sbia/brats2018.html> (BraTS) 2018.   The model is
+      based on the corresponding paper <https://arxiv.org/abs/1810.04008>, where authors
+      present deep cascaded approach for automatic brain tumor segmentation. The paper
+      describes modifications to 3D UNet architecture and specific augmentation strategy
+      to efficiently handle multimodal MRI input. Besides this, the approach to enhance
+      segmentation quality with context obtained from models of the same topology
+      operating on downscaled data is introduced.   Each input modality has its own
+      encoder which are later fused together to produce single output segmentation.
     task_type: "semantic_segmentation"
     files:
       - name: brain-tumor-segmentation-0001-symbol.json
@@ -1124,7 +1416,12 @@ topologies:
     license: https://raw.githubusercontent.com/lachinov/brats2018-graphlabunn/master/LICENSE
 
   - name: "mobilenet-v1-1.0-224-tf"
-    description: "MobileNet V1 architecture with the width multiplier 1.0 and resolution 224 (https://arxiv.org/pdf/1704.04861.pdf)"
+    description: >-
+      `mobilenet-v1-1.0-224` is one of MobileNets - small, low-latency, low-power
+      models parameterized to meet the resource constraints of a variety of use cases.
+      They can be built upon for classification, detection, embeddings and segmentation
+      similar to how other popular large scale models are used. For details see paper
+      <https://arxiv.org/abs/1704.04861>
     task_type: "classification"
     files:
       - name: mobilenet_v1_1.0_224.tgz
@@ -1149,7 +1446,12 @@ topologies:
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "mobilenet-v1-0.50-224"
-    description: "MobileNet V1 architecture with the width multiplier 0.5 and resolution 224 (https://arxiv.org/pdf/1704.04861.pdf)"
+    description: >-
+      `mobilenet-v1-0.50-224` is one of MobileNets - small, low-latency, low-power
+      models parameterized to meet the resource constraints of a variety of use cases.
+      They can be built upon for classification, detection, embeddings and segmentation
+      similar to how other popular large scale models are used. For details see paper
+      <https://arxiv.org/abs/1704.04861>
     task_type: "classification"
     files:
       - name: mobilenet_v1_0.5_224.tgz
@@ -1174,7 +1476,12 @@ topologies:
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "mobilenet-v1-0.50-160"
-    description: "MobileNet V1 architecture with the width multiplier 0.5 and resolution 160 (https://arxiv.org/pdf/1704.04861.pdf)"
+    description: >-
+      `mobilenet-v1-0.50-160` is one of MobileNets - small, low-latency, low-power
+      models parameterized to meet the resource constraints of a variety of use cases.
+      They can be built upon for classification, detection, embeddings and segmentation
+      similar to how other popular large scale models are used. For details see paper
+      <https://arxiv.org/abs/1704.04861>
     task_type: "classification"
     files:
       - name: mobilenet_v1_0.5_160.tgz
@@ -1199,7 +1506,12 @@ topologies:
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "mobilenet-v1-0.25-128"
-    description: "MobileNet V1 architecture with the width multiplier 0.25 and resolution 128 (https://arxiv.org/pdf/1704.04861.pdf)"
+    description: >-
+      `mobilenet-v1-0.25-128` is one of MobileNets - small, low-latency, low-power
+      models parameterized to meet the resource constraints of a variety of use cases.
+      They can be built upon for classification, detection, embeddings and segmentation
+      similar to how other popular large scale models are used. For details see paper
+      <https://arxiv.org/abs/1704.04861>
     task_type: "classification"
     files:
       - name: mobilenet_v1_0.25_128.tgz
@@ -1224,7 +1536,9 @@ topologies:
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "faster_rcnn_resnet50_coco"
-    description: "Faster R-CNN Resnet-50 (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
+    description: >-
+      Faster R-CNN Resnet-50 model. Used for object detection. For details see paper
+      <https://arxiv.org/pdf/1801.04381.pdf>.
     task_type: "detection"
     files:
       - name: faster_rcnn_resnet50_coco_2018_01_28.tar.gz
@@ -1249,7 +1563,9 @@ topologies:
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "faster_rcnn_inception_resnet_v2_atrous_coco"
-    description: "Faster R-CNN with Inception Resnet v2 Atrous version (https://arxiv.org/pdf/1801.04381.pdf) pre-trained on the COCO dataset"
+    description: >-
+      Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection.
+      For details see paper <https://arxiv.org/pdf/1801.04381.pdf>.
     task_type: "detection"
     files:
       - name: faster_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
@@ -1274,7 +1590,10 @@ topologies:
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "inception-resnet-v2-tf"
-    description: "Inception-ResNet V2 architecture (https://arxiv.org/pdf/1602.07261.pdf)"
+    description: >-
+      The `inception-resnet-v2` model is one of the Inception family of models designed
+      to perform image classification.1 Like the other Inception models. For details
+      about this family of models, check out the paper <https://arxiv.org/pdf/1602.07261.pdf>.
     task_type: "classification"
     files:
       - name: inception_resnet_v2_2018_04_27.tgz
@@ -1299,7 +1618,11 @@ topologies:
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
   - name: "densenet-121-tf"
-    description: "This is an Tensorflow implementation of DenseNet by G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten with ImageNet pretrained models. The weights are converted from DenseNet-Keras Models."
+    description: >-
+      This is an Tensorflow\* version of `densenet-121` model, one of the DenseNet
+      group of models designed to perform image classification. The weights were converted
+      from DenseNet-Keras Models. For details see repository <https://github.com/pudae/tensorflow-densenet/>,
+      paper <https://arxiv.org/pdf/1608.06993.pdf>
     task_type: "classification"
     files:
       - name: tf-densenet121.tar.gz
@@ -1327,7 +1650,11 @@ topologies:
     license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE
 
   - name: "densenet-169-tf"
-    description: "This is an Tensorflow implementation of DenseNet by G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten with ImageNet pretrained models. The weights are converted from DenseNet-Keras Models."
+    description: >-
+      This is an Tensorflow\* version of `densenet-169` model, one of the DenseNet
+      group of models designed to perform image classification. The weights were converted
+      from DenseNet-Keras Models. For details see repository <https://github.com/pudae/tensorflow-densenet/>,
+      paper <https://arxiv.org/pdf/1608.06993.pdf>
     task_type: "classification"
     files:
       - name: tf-densenet169.tar.gz
@@ -1355,7 +1682,11 @@ topologies:
     license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE
 
   - name: "densenet-161-tf"
-    description: "This is an Tensorflow implementation of DenseNet by G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten with ImageNet pretrained models. The weights are converted from from DenseNet-Keras Models."
+    description: >-
+      This is an Tensorflow\* version of `densenet-161` model, one of the DenseNet
+      group of models designed to perform image classification. The weights were converted
+      from DenseNet-Keras Models. For details see repository <https://github.com/pudae/tensorflow-densenet/>,
+      paper <https://arxiv.org/pdf/1608.06993.pdf>
     task_type: "classification"
     files:
       - name: tf-densenet161.tar.gz
@@ -1383,7 +1714,9 @@ topologies:
     license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE
 
   - name: "facenet-20180408-102900"
-    description: "FaceNet: A Unified Embedding for Face Recognition and Clustering trained on CASIA-WebFace dataset (https://arxiv.org/pdf/1503.03832.pdf)"
+    description: >-
+      FaceNet: A Unified Embedding for Face Recognition and Clustering. For details
+      see repository <https://github.com/davidsandberg/facenet/>, paper <https://arxiv.org/pdf/1503.03832.pdf>
     task_type: "face_recognition"
     files:
       - name: 20180408-102900.zip
