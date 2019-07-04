@@ -47,7 +47,7 @@ public:
     ///
     /// \brief Prints performance counts for CNN-based descriptors
     ///
-    virtual void PrintPerformanceCounts() const {}
+    virtual void PrintPerformanceCounts(std::string fullDeviceName) const {}
 
     virtual ~IImageDescriptor() {}
 };
@@ -145,8 +145,8 @@ public:
         handler.Compute(mats, descrs);
     }
 
-    virtual void PrintPerformanceCounts() const {
-        handler.PrintPerformanceCounts();
+    virtual void PrintPerformanceCounts(std::string fullDeviceName) const {
+        handler.PrintPerformanceCounts(fullDeviceName);
     }
 };
 

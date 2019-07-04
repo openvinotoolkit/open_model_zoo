@@ -330,7 +330,7 @@ public:
     ///
     /// \brief Prints reid performance counter
     ///
-    void PrintReidPerformanceCounts() const;
+    void PrintReidPerformanceCounts(std::string fullDeviceName) const;
 
 private:
     struct Match {

@@ -62,5 +62,5 @@ public:
 
     const TrackedObjects& getResults() const;
 
-    void PrintPerformanceCounts();
+    void PrintPerformanceCounts(std::string fullDeviceName);
 };
