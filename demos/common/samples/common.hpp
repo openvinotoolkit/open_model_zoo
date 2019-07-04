@@ -14,18 +14,15 @@
 #include <vector>
 #include <list>
 #include <limits>
-#include <random>
-#include <cctype>
 #include <functional>
-#include <time.h>
-#include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <utility>
-
 #include <algorithm>
-#include <chrono>
+#include <random>
 
+#include <ie_core.hpp>
+#include <ie_plugin_config.hpp>
 #include <cpp/ie_infer_request.hpp>
 #include <ie_blob.h>
 
@@ -61,7 +58,6 @@ inline std::string &trim(std::string &s) {
     s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
     return s;
 }
-
 /**
  * @brief Gets filename without extension
  * @param filepath - full file name
@@ -569,14 +565,6 @@ static UNUSED bool writeOutputBmp(unsigned char *data, size_t height, size_t wid
     return true;
 }
 
-inline double getDurationOf(std::function<void()> func) {
-    auto t0 = std::chrono::high_resolution_clock::now();
-    func();
-    auto t1 = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<float> fs = t1 - t0;
-    return std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1000>>>(fs).count();
-}
-
 static std::vector<std::pair<std::string, InferenceEngine::InferenceEngineProfileInfo>>
 perfCountersSorted(std::map<std::string, InferenceEngine::InferenceEngineProfileInfo> perfMap) {
     using perfItem = std::pair<std::string, InferenceEngine::InferenceEngineProfileInfo>;
@@ -592,7 +580,7 @@ perfCountersSorted(std::map<std::string, InferenceEngine::InferenceEngineProfile
 }
 
 static UNUSED void printPerformanceCounts(const std::map<std::string, InferenceEngine::InferenceEngineProfileInfo>& performanceMap,
-                                          std::ostream &stream,
+                                          std::ostream &stream, std::string deviceName,
                                           bool bshowHeader = true) {
     long long totalTime = 0;
     // Print performance counts
@@ -633,11 +621,50 @@ static UNUSED void printPerformanceCounts(const std::map<std::string, InferenceE
         }
     }
     stream << std::setw(20) << std::left << "Total time: " + std::to_string(totalTime) << " microseconds" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Full device name: " << deviceName << std::endl;
+    std::cout << std::endl;
 }
 
-static UNUSED void printPerformanceCounts(InferenceEngine::InferRequest request, std::ostream &stream) {
+static UNUSED void printPerformanceCounts(InferenceEngine::InferRequest request, std::ostream &stream, std::string deviceName, bool bshowHeader = true) {
     auto performanceMap = request.GetPerformanceCounts();
-    printPerformanceCounts(performanceMap, stream);
+    printPerformanceCounts(performanceMap, stream, deviceName, bshowHeader);
+}
+
+inline std::map<std::string, std::string> getMapFullDevicesNames(InferenceEngine::Core& ie, std::vector<std::string> devices) {
+    std::map<std::string, std::string> devicesMap;
+    InferenceEngine::Parameter p;
+    for (std::string& deviceName : devices) {
+        if (deviceName != "") {
+            try {
+                p = ie.GetMetric(deviceName, METRIC_KEY(FULL_DEVICE_NAME));
+                devicesMap.insert(std::pair<std::string, std::string>(deviceName, p.as<std::string>()));
+            }
+            catch (InferenceEngine::details::InferenceEngineException &) {
+            }
+        }
+    }
+    return devicesMap;
+}
+
+inline std::string getFullDeviceName(std::map<std::string, std::string>& devicesMap, std::string device) {
+    std::map<std::string, std::string>::iterator it = devicesMap.find(device);
+    if (it != devicesMap.end()) {
+        return it->second;
+    } else {
+        return "";
+    }
+}
+
+inline std::string getFullDeviceName(InferenceEngine::Core& ie, std::string device) {
+    InferenceEngine::Parameter p;
+    try {
+        p = ie.GetMetric(device, METRIC_KEY(FULL_DEVICE_NAME));
+        return  p.as<std::string>();
+    }
+    catch (InferenceEngine::details::InferenceEngineException &) {
+        return "";
+    }
 }
 
 /**
@@ -1081,4 +1108,18 @@ inline std::size_t getTensorBatch(const InferenceEngine::TensorDesc& desc) {
         THROW_IE_EXCEPTION << "Tensor does not have channels dimension";
     }
     return 0;
+}
+
+inline void showAvailableDevices() {
+    InferenceEngine::Core ie;
+    std::vector<std::string> devices = ie.GetAvailableDevices();
+    if (!devices.empty()) {
+        std::cout << std::endl;
+        std::cout << "Available target devices:";
+        for (const auto& device : devices) {
+            std::cout << "  " << device;
+        }
+    } else {
+        THROW_IE_EXCEPTION << "Not available any target device to infer on";
+    }
 }
