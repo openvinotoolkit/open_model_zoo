@@ -15,7 +15,7 @@ On the start-up, the application reads command-line parameters and loads the
 specified network. After that, the application reads a 200x200 input image and
 performs 4x upscale using super resolution.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Running
 
@@ -32,9 +32,8 @@ Options:
     -h                      Print a usage message.
     -i "<path>"             Required. Path to an image.
     -m "<path>"             Required. Path to an .xml file with a trained model.
-    -d "<device>"           Optional. Specify the target device to infer on (CPU, GPU, FPGA, HDDL or MYRIAD). The demo will look for a suitable plugin for the specified device.
-    -niter "<integer>"      Optional. Number of iterations. Default value is 1
-    -pc                     Optional. Enable per-layer performance report
+    -d "<device>"           Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for the specified device.
+    -show                   Optional. Show processed images. Default value is false.
 
 ```
 
