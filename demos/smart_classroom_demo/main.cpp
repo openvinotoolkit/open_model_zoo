@@ -425,6 +425,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
     }
 
@@ -914,12 +915,13 @@ int main(int argc, char* argv[]) {
         }
         slog::info << "Frames processed: " << total_num_frames << slog::endl;
         if (FLAGS_pc) {
+            std::map<std::string, std::string>  mapDevices = getMapFullDevicesNames(ie, devices);
             face_detector.wait();
             action_detector.wait();
-            action_detector.PrintPerformanceCounts();
-            face_detector.PrintPerformanceCounts();
-            face_reid.PrintPerformanceCounts();
-            landmarks_detector.PrintPerformanceCounts();
+            action_detector.PrintPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_act));
+            face_detector.PrintPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_fd));
+            face_reid.PrintPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
+            landmarks_detector.PrintPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_lm));
         }
 
         if (actions_type == STUDENT) {

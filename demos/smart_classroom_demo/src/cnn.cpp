@@ -79,12 +79,12 @@ void CnnDLSDKBase::InferBatch(
     }
 }
 
-void CnnDLSDKBase::PrintPerformanceCounts() const {
+void CnnDLSDKBase::PrintPerformanceCounts(std::string fullDeviceName) const {
     if (!config_.enabled) {
         return;
     }
     std::cout << "Performance counts for " << config_.path_to_model << std::endl << std::endl;
-    ::printPerformanceCounts(infer_request_.GetPerformanceCounts(), std::cout, false);
+    ::printPerformanceCounts(infer_request_, std::cout, fullDeviceName, false);
 }
 
 void CnnDLSDKBase::Infer(const cv::Mat& frame,
