@@ -811,26 +811,28 @@ int main(int argc, char* argv[]) {
         worker->join();
         const auto t1 = std::chrono::steady_clock::now();
 
-        if (FLAGS_pc) {  // Show performace results
-            for (auto& net : std::array<std::pair<std::vector<InferRequest>, std::string>, 3>{
-                std::make_pair(context.detectorsInfers.getActualInferRequests(), FLAGS_d),
-                    std::make_pair(context.attributesInfers.getActualInferRequests(), FLAGS_d_va),
-                    std::make_pair(context.platesInfers.getActualInferRequests(), FLAGS_d_lpr)}) {
-                for (InferRequest& ir : net.first) {
-                    ir.Wait(IInferRequest::WaitMode::RESULT_READY);
+        for (auto& net : std::array<std::pair<std::vector<InferRequest>, std::string>, 3>{
+            std::make_pair(context.detectorsInfers.getActualInferRequests(), FLAGS_d),
+                std::make_pair(context.attributesInfers.getActualInferRequests(), FLAGS_d_va),
+                std::make_pair(context.platesInfers.getActualInferRequests(), FLAGS_d_lpr)}) {
+            for (InferRequest& ir : net.first) {
+                ir.Wait(IInferRequest::WaitMode::RESULT_READY);
+                if (FLAGS_pc) {  // Show performace results
                     printPerformanceCounts(ir, std::cout, getFullDeviceName(mapDevices, net.second));
                 }
             }
         }
 
-        uint64_t frameCounter = context.frameCounter;
-        const ms meanOverallTimePerAllInputs = std::chrono::duration_cast<ms>((t1 - context.t0)
-            * context.readersContext.inputChannels.size()) / frameCounter;
-        std::cout << "Mean overall time per all inputs: " << std::fixed << std::setprecision(2) << meanOverallTimePerAllInputs.count()
-                  << "ms / " << std::chrono::seconds(1) / meanOverallTimePerAllInputs << "FPS for " << frameCounter << " frames\n";
-        const double detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
-            / (frameCounter * context.nireq) * 100;
-        std::cout << "Detection InferRequests usage: " << detectionsInfersUsage << "%\n";
+        if (0 != frameCounter) {
+            uint64_t frameCounter = context.frameCounter;
+            const ms meanOverallTimePerAllInputs = std::chrono::duration_cast<ms>((t1 - context.t0)
+                * context.readersContext.inputChannels.size()) / frameCounter;
+            std::cout << "Mean overall time per all inputs: " << std::fixed << std::setprecision(2) << meanOverallTimePerAllInputs.count()
+                      << "ms / " << std::chrono::seconds(1) / meanOverallTimePerAllInputs << "FPS for " << frameCounter << " frames\n";
+            const double detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
+                / (frameCounter * context.nireq) * 100;
+            std::cout << "Detection InferRequests usage: " << detectionsInfersUsage << "%\n";
+        }
     } catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
         return 1;

@@ -44,8 +44,8 @@ At the end of the sequence, the `VideoFrame` is destroyed and the sequence start
 Running the application with the <code>-h</code> option yields the following usage message:
 ```sh
 [ INFO ] InferenceEngine:
-        API version ............ <version>
-        Build .................. <number>
+    API version ............ <version>
+    Build .................. <number>
 
 interactive_vehicle_detection [OPTION]
 Options:
