@@ -823,8 +823,8 @@ int main(int argc, char* argv[]) {
             }
         }
 
+        uint64_t frameCounter = context.frameCounter;
         if (0 != frameCounter) {
-            uint64_t frameCounter = context.frameCounter;
             const ms meanOverallTimePerAllInputs = std::chrono::duration_cast<ms>((t1 - context.t0)
                 * context.readersContext.inputChannels.size()) / frameCounter;
             std::cout << "Mean overall time per all inputs: " << std::fixed << std::setprecision(2) << meanOverallTimePerAllInputs.count()
