@@ -35,7 +35,7 @@ Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: main.py [-h] -m "<path>" --labels "<path>" [-v "<path>"] [-i "<path>"]
-               [-d "<device>"] [-l "<absolute_path>"] [-pp "<absolute_path>"]
+               [-d "<device>"] [-l "<absolute_path>"]
                [-pt "<num>"] [--show_scores] [--show_boxes] [-pc]
 
 Options:
@@ -57,8 +57,6 @@ Options:
   -l "<absolute_path>", --cpu_extension "<absolute_path>"
                         Required for CPU custom layers. Absolute path to a
                         shared library with the kernels implementation.
-  -pp "<absolute_path>", --plugin_dir "<absolute_path>"
-                        Optional. Path to a plugin folder.
   -pt "<num>", --prob_threshold "<num>"
                         Optional. Probability threshold for detections
                         filtering.

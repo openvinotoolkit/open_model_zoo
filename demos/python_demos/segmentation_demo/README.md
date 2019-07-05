@@ -19,7 +19,7 @@ python3 segmentation_demo.py -h
 The command yields the following usage message:
 ```
 usage: segmentation_demo.py [-h] -m MODEL -i INPUT [INPUT ...]
-                            [-l CPU_EXTENSION] [-pp PLUGIN_DIR] [-d DEVICE]
+                            [-l CPU_EXTENSION] [-d DEVICE]
                             [-nt NUMBER_TOP] [-ni NUMBER_ITER] [-pc]
 
 Options:
@@ -33,8 +33,6 @@ Options:
                         Optional. Required for CPU custom layers. Absolute
                         MKLDNN (CPU)-targeted custom layers. Absolute path to
                         a shared library with the kernels implementations
-  -pp PLUGIN_DIR, --plugin_dir PLUGIN_DIR
-                        Optional. Path to a plugin folder
   -d DEVICE, --device DEVICE
                         Optional. Required for CPU custom layers Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. Sample will
@@ -42,9 +40,6 @@ Options:
                         by default)
   -nt NUMBER_TOP, --number_top NUMBER_TOP
                         Optional. Number of top results
-  -ni NUMBER_ITER, --number_iter NUMBER_ITER
-                        Optional. Number of inference iterations
-  -pc, --perf_counts    Optional. Report performance counters
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

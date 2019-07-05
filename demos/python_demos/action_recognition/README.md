@@ -6,7 +6,7 @@ The following pre-trained models are delivered with the product:
 * `driver-action-recognition-adas-0002-encoder` + `driver-action-recognition-adas-0002-decoder`, which are models for driver monitoring scenario. They recognize actions like safe driving, talking to the phone and others
 * `action-recognition-0001-encoder` + `action-recognition-0001-decoder`, which are general-purpose action recognition (400 actions) models for Kinetics-400 dataset.
 
-For more information about the pre-trained models, refer to the [model documentation](../../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [models documentation](../../../intel_models/index.md).
 
 How It Works
 ------------
@@ -35,7 +35,7 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: demo.py [-h] --encoder ENCODER --decoder DECODER [-v VIDEO]
-               [-vl VIDEO_LIST] [-e CPU_EXTENSION] [-pp PLUGIN_DIR]
+               [-vl VIDEO_LIST] [-e CPU_EXTENSION]
                [-d DEVICE] [--fps FPS] [-l LABELS]
 
 Options:
@@ -51,8 +51,6 @@ Options:
   -e CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         Optional. For CPU custom layers, if any. Absolute path
                         to a shared library with the kernels implementation.
-  -pp PLUGIN_DIR, --plugin_dir PLUGIN_DIR
-                        Optional. Path to a plugin folder
   -d DEVICE, --device DEVICE
                         Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is "
                         acceptable. The demo will look for a suitable plugin for the device specified.
