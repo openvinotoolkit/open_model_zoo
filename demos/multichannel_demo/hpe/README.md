@@ -3,7 +3,7 @@
 This demo provides an inference pipeline for Multi-Channel Human Pose Estimation. The demo uses Human Pose Estimation network. You can use the following pre-trained model with the demos:
 * `human-pose-estimation-0001`
 
-For more information about the pre-trained models, refer to the [models documentation](../../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../intel_models/index.md).
 
 Other demo objectives are:
 

@@ -8,7 +8,7 @@ reports general vehicle attributes, for example, vehicle type (car/van/bus/track
 * `license-plate-recognition-barrier-0001`, which is executed on top of the results from the first network
 and reports a string per recognized license plate
 
-For more information about the pre-trained models, refer to the [models documentation](../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../intel_models/index.md).
 
 Other demo objectives are:
 * Video/Camera as inputs, via OpenCV\*

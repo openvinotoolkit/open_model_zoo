@@ -3,7 +3,7 @@
 This demo provides an inference pipeline for multi-channel face detection. The demo uses Face Detection network. You can use the following pre-trained model with the demo:
 * `face-detection-retail-0004`, which is a primary detection network for finding faces
 
-For more information about the pre-trained models, refer to the [models documentation](../../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../intel_models/index.md).
 
 Other demo objectives are:
 
