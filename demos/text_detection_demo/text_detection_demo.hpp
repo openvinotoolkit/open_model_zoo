@@ -52,11 +52,13 @@ static const char text_max_rectangles_number_message[] = "Optional. Maximum numb
                                                          "If it is negative, number of rectangles to recognize is not limited.";
 
 /// @brief Message for text detection target device argument
-static const char text_detection_target_device_message[] = "Optional. Specify the target device for the Text Detection model to infer on: CPU, GPU. "
+static const char text_detection_target_device_message[] = "Optional. Specify the target device for the Text Detection model to infer on "
+                                                           "(the list of available devices is shown below). "
                                                            "The demo will look for a suitable plugin for a specified device. By default, it is CPU.";
 
 /// @brief Message for text recognition target device argument
-static const char text_recognition_target_device_message[] = "Optional. Specify the target device for the Text Recognition model to infer on: CPU, GPU. "
+static const char text_recognition_target_device_message[] = "Optional. Specify the target device for the Text Recognition model to infer on "
+                                                             "(the list of available devices is shown below). "
                                                              "The demo will look for a suitable plugin for a specified device. By default, it is CPU.";
 
 /// @brief Message for user library argument
