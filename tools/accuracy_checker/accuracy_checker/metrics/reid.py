@@ -30,6 +30,7 @@ from .metric import FullDatasetEvaluationMetric
 
 PairDesc = namedtuple('PairDesc', 'image1 image2 same')
 
+
 class CMCScore(FullDatasetEvaluationMetric):
     """
     Cumulative Matching Characteristics (CMC) score.
@@ -111,8 +112,10 @@ class ReidMAP(FullDatasetEvaluationMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'interpolated_auc' : BoolField(optional=True, default=True, description="Should area under precision recall"
-                                           " curve be computed using trapezoidal rule or directly.")
+            'interpolated_auc': BoolField(
+                optional=True, default=True, description="Should area under precision recall"
+                                                         " curve be computed using trapezoidal rule or directly."
+            )
         })
         return parameters
 
@@ -138,9 +141,12 @@ class PairwiseAccuracy(FullDatasetEvaluationMetric):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'min_score' : BaseField(optional=True, default='train_median', description="Min score for determining that "
-                                    "objects are different. You can provide value or use train_median value which will "
-                                    "be calculated if annotations has training subset.")
+            'min_score': BaseField(
+                optional=True, default='train_median',
+                description="Min score for determining that objects are different. "
+                            "You can provide value or use train_median value which will be calculated "
+                            "if annotations has training subset."
+            )
         })
         return parameters
 

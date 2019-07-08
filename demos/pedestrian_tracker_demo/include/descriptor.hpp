@@ -5,6 +5,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 #include <memory>
 #include <ie_plugin_ptr.hpp>
 #include <inference_engine.hpp>
@@ -112,9 +113,10 @@ private:
     VectorCNN handler;
 
 public:
-    explicit DescriptorIE(const CnnConfig& config,
-                          const InferenceEngine::InferencePlugin& plugin):
-        handler(config, plugin) {}
+    DescriptorIE(const CnnConfig& config,
+                 const InferenceEngine::Core& ie,
+                 const std::string & deviceName):
+        handler(config, ie, deviceName) {}
 
     ///
     /// \brief Descriptor size getter.

@@ -243,7 +243,10 @@ def get_supported_representations(container, supported_types):
 
 
 def check_representation_type(representation, representation_types):
-    return isinstance(representation, representation_types)
+    for representation_type in representation_types:
+        if type(representation).__name__ == representation_type.__name__:
+            return True
+    return False
 
 
 def is_single_metric_source(source):
@@ -379,7 +382,8 @@ def set_image_metadata(annotation, images):
     if not isinstance(data, list):
         data = [data]
     for image in data:
-        image_sizes.append(image.shape)
+        data_shape = np.shape(image) if not np.isscalar(image) else 1
+        image_sizes.append(data_shape)
     annotation.set_image_size(image_sizes)
 
     return annotation, images

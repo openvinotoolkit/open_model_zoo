@@ -40,7 +40,7 @@ try:
 except ImportError:
     requirements['opencv'] = 'opencv-python'
 
-tests_requirements = OrderedDict([("PyTest", 'pytest'), ("PyTest Mock", 'pytest-mock')])
+tests_requirements = OrderedDict([("PyTest", 'pytest==4.0.0'), ("PyTest Mock", 'pytest-mock==1.10.4')])
 
 
 class PyTest(test_command):
@@ -83,7 +83,11 @@ setup(
     version=version,
     long_description=long_description,
     packages=find_packages(),
-    entry_points={"console_scripts": ["accuracy_check=accuracy_checker.main:main", "convert_annotation=accuracy_checker.annotation_converters.convert:main"]},
+    entry_points={
+        "console_scripts": [
+            "accuracy_check=accuracy_checker.main:main",
+            "convert_annotation=accuracy_checker.annotation_converters.convert:main",
+    ]},
     zip_safe=False,
     python_requires='>=3.5',
     install_requires=list(requirements.values()),

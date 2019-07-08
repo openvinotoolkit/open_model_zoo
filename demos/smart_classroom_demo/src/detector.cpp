@@ -130,7 +130,7 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
         _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
         input_name_ = inputInfo.begin()->first;
-        net_ = config_.plugin.LoadNetwork(net_reader.getNetwork(), {});
+        net_ = config_.ie.LoadNetwork(net_reader.getNetwork(), config_.deviceName);
     }
 }
 

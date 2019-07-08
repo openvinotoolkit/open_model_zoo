@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 from .base_representation import BaseRepresentation
-
 from .classification_representation import (
     Classification,
     ClassificationAnnotation,
@@ -68,8 +67,8 @@ __all__ = [
 
     'Classification',
     'ClassificationAnnotation',
-    'ArgMaxClassificationPrediction',
     'ClassificationPrediction',
+    'ArgMaxClassificationPrediction',
 
     'Detection',
     'DetectionAnnotation',

@@ -49,8 +49,8 @@ def set_box_scores(prediction, scores):
 class NMS(Postprocessor):
     __provider__ = 'nms'
 
-    prediction_types = (DetectionPrediction, )
-    annotation_types = (DetectionAnnotation, )
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
+    annotation_types = (DetectionAnnotation, ActionDetectionPrediction)
 
     @classmethod
     def parameters(cls):
@@ -122,8 +122,8 @@ class NMS(Postprocessor):
 class SoftNMS(Postprocessor):
     __provider__ = 'soft_nms'
 
-    prediction_types = (DetectionPrediction,)
-    annotation_types = (DetectionAnnotation,)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
 
     @classmethod
     def parameters(cls):
@@ -150,8 +150,9 @@ class SoftNMS(Postprocessor):
 
     def process_image(self, annotations, predictions):
         for prediction in predictions:
-            if len(prediction.scores) <= self.keep_top_k:
+            if len(prediction.scores) == 0:  # pylint: disable=len-as-condition
                 continue
+
             scores = get_scores(prediction)
             keep, new_scores = self._nms(
                 np.c_[prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs], scores,
@@ -163,15 +164,15 @@ class SoftNMS(Postprocessor):
 
     @staticmethod
     def _matrix_iou(set_a, set_b):
-        intersect_ymin = np.maximum(set_a[:, 0].reshape([-1, 1]), set_b[:, 0].reshape([1, -1]))
-        intersect_xmin = np.maximum(set_a[:, 1].reshape([-1, 1]), set_b[:, 1].reshape([1, -1]))
-        intersect_ymax = np.minimum(set_a[:, 2].reshape([-1, 1]), set_b[:, 2].reshape([1, -1]))
-        intersect_xmax = np.minimum(set_a[:, 3].reshape([-1, 1]), set_b[:, 3].reshape([1, -1]))
+        intersect_xmin = np.maximum(set_a[:, 0].reshape([-1, 1]), set_b[:, 0].reshape([1, -1]))
+        intersect_ymin = np.maximum(set_a[:, 1].reshape([-1, 1]), set_b[:, 1].reshape([1, -1]))
+        intersect_xmax = np.minimum(set_a[:, 2].reshape([-1, 1]), set_b[:, 2].reshape([1, -1]))
+        intersect_ymax = np.minimum(set_a[:, 3].reshape([-1, 1]), set_b[:, 3].reshape([1, -1]))
 
-        intersect_heights = np.maximum(0.0, intersect_ymax - intersect_ymin)
         intersect_widths = np.maximum(0.0, intersect_xmax - intersect_xmin)
+        intersect_heights = np.maximum(0.0, intersect_ymax - intersect_ymin)
 
-        intersect_areas = intersect_heights * intersect_widths
+        intersect_areas = intersect_widths * intersect_heights
         areas_set_a = ((set_a[:, 2] - set_a[:, 0]) * (set_a[:, 3] - set_a[:, 1])).reshape([-1, 1])
         areas_set_b = ((set_b[:, 2] - set_b[:, 0]) * (set_b[:, 3] - set_b[:, 1])).reshape([1, -1])
 
@@ -185,15 +186,23 @@ class SoftNMS(Postprocessor):
 
         return overlaps
 
-    def _nms(self, bboxes, scores):
-        similarity_matrix = self._matrix_iou(bboxes, bboxes)
+    def _nms(self, input_bboxes, input_scores):
+        if len(input_bboxes) == 0:  # pylint: disable=len-as-condition
+            return [], []
 
-        scores = np.copy(scores)
-        indices = np.arange(len(scores))
+        if len(input_bboxes) > self.keep_top_k:
+            indices = np.argsort(-input_scores)[:self.keep_top_k]
+            scores = input_scores[indices]
+            bboxes = input_bboxes[indices]
+        else:
+            scores = np.copy(input_scores)
+            indices = np.arange(len(scores))
+            bboxes = input_bboxes
+
+        similarity_matrix = self._matrix_iou(bboxes, bboxes)
 
         out_ids = []
         out_scores = []
-
         for _ in range(self.keep_top_k):
             bbox_id = np.argmax(scores)
             bbox_score = scores[bbox_id]

@@ -9,12 +9,6 @@
 #include <vector>
 #include <gflags/gflags.h>
 
-#ifdef _WIN32
-#include <os/windows/w_dirent.h>
-#else
-#include <dirent.h>
-#endif
-
 /// @brief message for help argument
 static const char help_message[] = "Print a usage message.";
 
@@ -134,7 +128,7 @@ static void showUsage() {
     std::cout << "pedestrian_tracker_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
-    std::cout << "    -h                             " << help_message << std::endl;
+    std::cout << "    -h                           " << help_message << std::endl;
     std::cout << "    -i \"<path>\"                  " << video_message << std::endl;
     std::cout << "    -m_det \"<path>\"              " << pedestrian_detection_model_message << std::endl;
     std::cout << "    -m_reid \"<path>\"             " << pedestrian_reid_model_message << std::endl;
@@ -143,11 +137,11 @@ static void showUsage() {
     std::cout << "    -c \"<absolute_path>\"         " << custom_cldnn_message << std::endl;
     std::cout << "    -d_det \"<device>\"            " << target_device_detection_message << std::endl;
     std::cout << "    -d_reid \"<device>\"           " << target_device_reid_message << std::endl;
-    std::cout << "    -r                             " << raw_output_message << std::endl;
-    std::cout << "    -pc                            " << performance_counter_message << std::endl;
-    std::cout << "    -no_show                       " << no_show_processed_video << std::endl;
-    std::cout << "    -delay                         " << delay_message << std::endl;
+    std::cout << "    -r                           " << raw_output_message << std::endl;
+    std::cout << "    -pc                          " << performance_counter_message << std::endl;
+    std::cout << "    -no_show                     " << no_show_processed_video << std::endl;
+    std::cout << "    -delay                       " << delay_message << std::endl;
     std::cout << "    -out \"<path>\"                " << output_log_message << std::endl;
-    std::cout << "    -first                         " << first_frame_message << std::endl;
-    std::cout << "    -last                          " << last_frame_message << std::endl;
+    std::cout << "    -first                       " << first_frame_message << std::endl;
+    std::cout << "    -last                        " << last_frame_message << std::endl;
 }

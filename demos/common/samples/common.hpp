@@ -26,11 +26,7 @@
 #include <algorithm>
 #include <chrono>
 
-#include <ie_plugin_dispatcher.hpp>
-#include <ie_plugin_ptr.hpp>
-#include <cpp/ie_cnn_net_reader.h>
 #include <cpp/ie_infer_request.hpp>
-#include <ie_device.hpp>
 #include <ie_blob.h>
 
 #ifndef UNUSED
@@ -51,7 +47,7 @@ class ConsoleErrorListener : public InferenceEngine::IErrorListener {
      * @param msg Error message
      */
     void onError(const char *msg) noexcept override {
-        std::clog << "Plugin message: " << msg << std::endl;
+        std::clog << "Device message: " << msg << std::endl;
     }
 };
 
@@ -64,48 +60,6 @@ inline std::string &trim(std::string &s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
     s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
     return s;
-}
-
-/**
-* @brief Converts string to TargetDevice
-* @param deviceName - string value representing device
-* @return TargetDevice value that corresponds to input string.
-*         eDefault in case no corresponding value was found
-*/
-static InferenceEngine::TargetDevice getDeviceFromStr(const std::string &deviceName) {
-    return InferenceEngine::TargetDeviceInfo::fromStr(deviceName);
-}
-
-/**
-* @brief Loads plugin from directories
-* @param pluginDirs - plugin paths
-* @param plugin - plugin name
-* @param device - device to infer on
-* @return Plugin pointer
-*/
-static InferenceEngine::InferenceEnginePluginPtr selectPlugin(const std::vector<file_name_t> &pluginDirs,
-                                                              const file_name_t &plugin,
-                                                              InferenceEngine::TargetDevice device) {
-    InferenceEngine::PluginDispatcher dispatcher(pluginDirs);
-
-    if (!plugin.empty()) {
-        return dispatcher.getPluginByName(plugin);
-    } else {
-        return dispatcher.getSuitablePlugin(device);
-    }
-}
-
-/**
- * @brief Loads plugin from directories
- * @param pluginDirs - plugin paths
- * @param plugin - plugin name
- * @param device - string representation of device to infer on
- * @return Plugin pointer
- */
-static UNUSED InferenceEngine::InferenceEnginePluginPtr selectPlugin(const std::vector<file_name_t> &pluginDirs,
-                                                                     const file_name_t &plugin,
-                                                                     const std::string &device) {
-    return selectPlugin(pluginDirs, plugin, getDeviceFromStr(device));
 }
 
 /**
@@ -146,64 +100,47 @@ static UNUSED std::ostream &operator<<(std::ostream &os, const InferenceEngine::
     return os;
 }
 
-/**
- * @class PluginVersion
- * @brief A PluginVersion class stores plugin version and initialization status
- */
-struct PluginVersion : public InferenceEngine::Version {
-    bool initialized = false;
+inline std::ostream &operator<<(std::ostream &os, const InferenceEngine::Version &version) {
+    os << "\t" << version.description << " version ......... ";
+    os << version.apiVersion.major << "." << version.apiVersion.minor;
 
-    explicit PluginVersion(const InferenceEngine::Version *ver) {
-        if (nullptr == ver) {
-            return;
-        }
-        InferenceEngine::Version::operator=(*ver);
-        initialized = true;
-    }
-
-    operator bool() const noexcept {
-        return initialized;
-    }
-};
-
-static UNUSED std::ostream &operator<<(std::ostream &os, const PluginVersion &version) {
-    os << "\tPlugin version ......... ";
-    if (!version) {
-        os << "UNKNOWN";
-    } else {
-        os << version.apiVersion.major << "." << version.apiVersion.minor;
-    }
-
-    os << "\n\tPlugin name ............ ";
-    if (!version || version.description == nullptr) {
-        os << "UNKNOWN";
-    } else {
-        os << version.description;
-    }
-
-    os << "\n\tPlugin build ........... ";
-    if (!version || version.buildNumber == nullptr) {
-        os << "UNKNOWN";
-    } else {
-        os << version.buildNumber;
-    }
+    os << "\n\tBuild ........... ";
+    os << version.buildNumber;
 
     return os;
 }
 
-inline void printPluginVersion(InferenceEngine::InferenceEnginePluginPtr ptr, std::ostream& stream) {
-    const InferenceEngine::Version *pluginVersion = nullptr;
-    ptr->GetVersion(pluginVersion);
-    stream << pluginVersion << std::endl;
+inline std::ostream &operator<<(std::ostream &os, const std::map<std::string, InferenceEngine::Version> &versions) {
+    for (auto && version : versions) {
+        os << "\t" << version.first << std::endl;
+        os << version.second << std::endl;
+    }
+
+    return os;
 }
 
 static UNUSED std::vector<std::vector<size_t>> blobToImageOutputArray(InferenceEngine::TBlob<float>::Ptr output,
                                                                       size_t *pWidth, size_t *pHeight,
                                                                       size_t *pChannels) {
     std::vector<std::vector<size_t>> outArray;
-    size_t W = output->dims().at(0);
-    size_t H = output->dims().at(1);
-    size_t C = output->dims().at(2);
+    size_t W = 0, C = 0, H = 0;
+
+    auto outputDims = output->getTensorDesc().getDims();
+    if (outputDims.size() == 3) {
+        C = outputDims.at(0);
+        H = outputDims.at(1);
+        W = outputDims.at(2);
+    } else if (outputDims.size() == 4) {
+        C = outputDims.at(1);
+        H = outputDims.at(2);
+        W = outputDims.at(3);
+    } else if (outputDims.size() == 5) {
+        C = outputDims.at(1);
+        H = outputDims.at(3);
+        W = outputDims.at(4);
+    } else {
+        THROW_IE_EXCEPTION << "Output blob has unsupported layout " << output->getTensorDesc().getLayout();
+    }
 
     // Get classes
     const float *outData = output->data();
@@ -689,7 +626,7 @@ static UNUSED void printPerformanceCounts(const std::map<std::string, InferenceE
         }
         stream << std::setw(30) << std::left << "layerType: " + std::string(it.second.layer_type) + " ";
         stream << std::setw(20) << std::left << "realTime: " + std::to_string(it.second.realTime_uSec);
-        stream << std::setw(20) << std::left << " cpu: "  + std::to_string(it.second.cpu_uSec);
+        stream << std::setw(20) << std::left << "cpu: "  + std::to_string(it.second.cpu_uSec);
         stream << " execType: " << it.second.exec_type << std::endl;
         if (it.second.realTime_uSec > 0) {
             totalTime += it.second.realTime_uSec;
@@ -700,15 +637,6 @@ static UNUSED void printPerformanceCounts(const std::map<std::string, InferenceE
 
 static UNUSED void printPerformanceCounts(InferenceEngine::InferRequest request, std::ostream &stream) {
     auto performanceMap = request.GetPerformanceCounts();
-    printPerformanceCounts(performanceMap, stream);
-}
-
-/**
- * @deprecated
- */
-static UNUSED void printPerformanceCountsPlugin(InferenceEngine::InferenceEnginePluginPtr plugin, std::ostream &stream) {
-    std::map<std::string, InferenceEngine::InferenceEngineProfileInfo> performanceMap;
-    plugin->GetPerformanceCounts(performanceMap, nullptr);
     printPerformanceCounts(performanceMap, stream);
 }
 
@@ -1057,4 +985,100 @@ static UNUSED void addRectangles(unsigned char *data, size_t height, size_t widt
             data[shift_second + y*width * 3 + 2] = colors.at(cls).blue();
         }
     }
+}
+
+inline std::size_t getTensorWidth(const InferenceEngine::TensorDesc& desc) {
+    const auto& layout = desc.getLayout();
+    const auto& dims = desc.getDims();
+    const auto& size = dims.size();
+    if ((size >= 2) &&
+        (layout == InferenceEngine::Layout::NCHW  ||
+         layout == InferenceEngine::Layout::NHWC  ||
+         layout == InferenceEngine::Layout::NCDHW ||
+         layout == InferenceEngine::Layout::NDHWC ||
+         layout == InferenceEngine::Layout::OIHW  ||
+         layout == InferenceEngine::Layout::CHW   ||
+         layout == InferenceEngine::Layout::HW)) {
+        // Regardless of layout, dimensions are stored in fixed order
+        return dims.back();
+    } else {
+        THROW_IE_EXCEPTION << "Tensor does not have width dimension";
+    }
+    return 0;
+}
+
+inline std::size_t getTensorHeight(const InferenceEngine::TensorDesc& desc) {
+    const auto& layout = desc.getLayout();
+    const auto& dims = desc.getDims();
+    const auto& size = dims.size();
+    if ((size >= 2) &&
+        (layout == InferenceEngine::Layout::NCHW  ||
+         layout == InferenceEngine::Layout::NHWC  ||
+         layout == InferenceEngine::Layout::NCDHW ||
+         layout == InferenceEngine::Layout::NDHWC ||
+         layout == InferenceEngine::Layout::OIHW  ||
+         layout == InferenceEngine::Layout::CHW   ||
+         layout == InferenceEngine::Layout::HW)) {
+        // Regardless of layout, dimensions are stored in fixed order
+        return dims.at(size - 2);
+    } else {
+        THROW_IE_EXCEPTION << "Tensor does not have height dimension";
+    }
+    return 0;
+}
+
+inline std::size_t getTensorChannels(const InferenceEngine::TensorDesc& desc) {
+    const auto& layout = desc.getLayout();
+    if (layout == InferenceEngine::Layout::NCHW  ||
+        layout == InferenceEngine::Layout::NHWC  ||
+        layout == InferenceEngine::Layout::NCDHW ||
+        layout == InferenceEngine::Layout::NDHWC ||
+        layout == InferenceEngine::Layout::C     ||
+        layout == InferenceEngine::Layout::CHW   ||
+        layout == InferenceEngine::Layout::NC    ||
+        layout == InferenceEngine::Layout::CN) {
+        // Regardless of layout, dimensions are stored in fixed order
+        const auto& dims = desc.getDims();
+        switch (desc.getLayoutByDims(dims)) {
+            case InferenceEngine::Layout::C:     return dims.at(0);
+            case InferenceEngine::Layout::NC:    return dims.at(1);
+            case InferenceEngine::Layout::CHW:   return dims.at(0);
+            case InferenceEngine::Layout::NCHW:  return dims.at(1);
+            case InferenceEngine::Layout::NCDHW: return dims.at(1);
+            case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
+            case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
+            default:
+                THROW_IE_EXCEPTION << "Tensor does not have channels dimension";
+        }
+    } else {
+        THROW_IE_EXCEPTION << "Tensor does not have channels dimension";
+    }
+    return 0;
+}
+
+inline std::size_t getTensorBatch(const InferenceEngine::TensorDesc& desc) {
+    const auto& layout = desc.getLayout();
+    if (layout == InferenceEngine::Layout::NCHW  ||
+        layout == InferenceEngine::Layout::NHWC  ||
+        layout == InferenceEngine::Layout::NCDHW ||
+        layout == InferenceEngine::Layout::NDHWC ||
+        layout == InferenceEngine::Layout::NC    ||
+        layout == InferenceEngine::Layout::CN) {
+        // Regardless of layout, dimensions are stored in fixed order
+        const auto& dims = desc.getDims();
+        switch (desc.getLayoutByDims(dims)) {
+            case InferenceEngine::Layout::NC:    return dims.at(0);
+            case InferenceEngine::Layout::NCHW:  return dims.at(0);
+            case InferenceEngine::Layout::NCDHW: return dims.at(0);
+            case InferenceEngine::Layout::CHW:      // [[fallthrough]]
+            case InferenceEngine::Layout::C:        // [[fallthrough]]
+            case InferenceEngine::Layout::SCALAR:   // [[fallthrough]]
+            case InferenceEngine::Layout::BLOCKED:  // [[fallthrough]]
+            default:
+                THROW_IE_EXCEPTION << "Tensor does not have channels dimension";
+        }
+    } else {
+        THROW_IE_EXCEPTION << "Tensor does not have channels dimension";
+    }
+    return 0;
 }

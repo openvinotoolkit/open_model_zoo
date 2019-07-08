@@ -21,6 +21,7 @@ class MaskRCNNAdapter(Adapter):
         super().__init__(launcher_config, label_map, output_blob)
         try:
             import pycocotools.mask as mask_util
+            self.encoder = mask_util.encode
         except ImportError:
             raise ImportError('pycocotools is not installed. Please install it before using mask_rcnn adapter.')
 
@@ -158,8 +159,7 @@ class MaskRCNNAdapter(Adapter):
     def segm_postprocess(self, box, raw_cls_mask, im_h, im_w, full_image_mask=False, encode=False):
         # Add zero border to prevent upsampling artifacts on segment borders.
         raw_cls_mask = np.pad(raw_cls_mask, ((1, 1), (1, 1)), 'constant', constant_values=0)
-        extended_box = self.expand_boxes(box[np.newaxis, :],
-                                    raw_cls_mask.shape[0] / (raw_cls_mask.shape[0] - 2.0))[0]
+        extended_box = self.expand_boxes(box[np.newaxis, :], raw_cls_mask.shape[0] / (raw_cls_mask.shape[0] - 2.0))[0]
         extended_box = extended_box.astype(int)
         w, h = np.maximum(extended_box[2:] - extended_box[:2] + 1, 1)
         x0, y0 = np.clip(extended_box[:2], a_min=0, a_max=[im_w, im_h])
@@ -171,18 +171,20 @@ class MaskRCNNAdapter(Adapter):
         if full_image_mask:
             # Put an object mask in an image mask.
             im_mask = np.zeros((im_h, im_w), dtype=np.uint8)
-            im_mask[y0:y1, x0:x1] = mask[(y0 - extended_box[1]):(y1 - extended_box[1]),
-                                    (x0 - extended_box[0]):(x1 - extended_box[0])]
+            im_mask[y0:y1, x0:x1] = mask[
+                (y0 - extended_box[1]):(y1 - extended_box[1]),
+                (x0 - extended_box[0]):(x1 - extended_box[0])
+            ]
         else:
             original_box = box.astype(int)
             x0, y0 = np.clip(original_box[:2], a_min=0, a_max=[im_w, im_h])
             x1, y1 = np.clip(original_box[2:] + 1, a_min=0, a_max=[im_w, im_h])
-            im_mask = np.ascontiguousarray(mask[(y0 - original_box[1]):(y1 - original_box[1]),
-                                           (x0 - original_box[0]):(x1 - original_box[0])])
+            im_mask = np.ascontiguousarray(
+                mask[(y0 - original_box[1]):(y1 - original_box[1]), (x0 - original_box[0]):(x1 - original_box[0])]
+            )
 
         if encode:
-            import pycocotools.mask as mask_util
-            im_mask = mask_util.encode(np.array(im_mask[:, :, np.newaxis].astype(np.uint8), order='F'))[0]
+            im_mask = self.encoder(np.array(im_mask[:, :, np.newaxis].astype(np.uint8), order='F'))[0]
             im_mask['counts'] = im_mask['counts'].decode('utf-8')
 
         return im_mask

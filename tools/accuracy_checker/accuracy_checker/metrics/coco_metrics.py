@@ -49,10 +49,9 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
             ),
             'threshold' : BaseField(
                 optional=True, default='.50:.05:.95',
-                description="Intersection over union threshold. "
-                            "You can specify one value or comma separated range of values. "
-                            "This parameter supports precomputed values for "
-                            "standard COCO thresholds: {}".format(', '.format(COCO_THRESHOLDS)))
+                description="Intersection over union threshold. You can specify one value or comma separated range "
+                            "of values. This parameter supports precomputed values for "
+                            "standard COCO thresholds: {}".format(', '.join(COCO_THRESHOLDS)))
         })
 
         return parameters
@@ -189,7 +188,7 @@ def compute_precision_recall(thresholds, matching_results):
     precision = -np.ones((num_thresholds, num_rec_thresholds))  # -1 for the precision of absent categories
     recall = -np.ones(num_thresholds)
     dt_scores = np.concatenate([e['scores'] for e in matching_results])
-    inds = np.argsort(-dt_scores, kind='mergesort')
+    inds = np.argsort(dt_scores, kind='mergesort')[::-1]
     dtm = np.concatenate([e['dt_matches'] for e in matching_results], axis=1)[:, inds]
     dt_ignored = np.concatenate([e['dt_ignore'] for e in matching_results], axis=1)[:, inds]
     gt_ignored = np.concatenate([e['gt_ignore'] for e in matching_results])

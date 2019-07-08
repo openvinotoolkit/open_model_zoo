@@ -24,7 +24,10 @@ import numpy as np
 from ..utils import finalize_metric_result
 from .overlap import Overlap, IOA
 from ..config import BoolField, NumberField, StringField
-from ..representation import DetectionAnnotation, DetectionPrediction
+from ..representation import (
+    DetectionAnnotation, DetectionPrediction,
+    ActionDetectionPrediction, ActionDetectionAnnotation
+)
 from .metric import Metric, FullDatasetEvaluationMetric
 
 class APIntegralType(enum.Enum):
@@ -130,8 +133,8 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
 
     __provider__ = 'map'
 
-    annotation_types = (DetectionAnnotation, )
-    prediction_types = (DetectionPrediction, )
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
 
     @classmethod
     def parameters(cls):
@@ -180,8 +183,8 @@ class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
 
     __provider__ = 'miss_rate'
 
-    annotation_types = (DetectionAnnotation, )
-    prediction_types = (DetectionPrediction, )
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
 
     @classmethod
     def parameters(cls):
@@ -219,8 +222,8 @@ class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
 
     __provider__ = 'recall'
 
-    annotation_types = (DetectionAnnotation, )
-    prediction_types = (DetectionPrediction, )
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
 
     def evaluate(self, annotations, predictions):
         valid_labels = get_valid_labels(self.labels, self.dataset.metadata.get('background_label'))
@@ -246,8 +249,8 @@ class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
 class DetectionAccuracyMetric(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
     __provider__ = 'detection_accuracy'
 
-    annotation_types = (DetectionAnnotation, )
-    prediction_types = (DetectionPrediction, )
+    annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
+    prediction_types = (DetectionPrediction, ActionDetectionPrediction)
 
     @classmethod
     def parameters(cls):
@@ -255,30 +258,39 @@ class DetectionAccuracyMetric(BaseDetectionMetricMixin, FullDatasetEvaluationMet
         parameters.update({
             'use_normalization': BoolField(
                 default=False, optional=True, description="Allows to normalize confusion_matrix for metric calculation."
+            ),
+            'ignore_label': NumberField(
+                optional=True, value_type=int, min_value=0, description="Ignore label ID."
             )
         })
         return parameters
 
     def configure(self):
         super().configure()
+
         self.use_normalization = self.get_value_from_config('use_normalization')
+        self.ignore_label = self.get_value_from_config('ignore_label')
 
     def evaluate(self, annotations, predictions):
-        all_matches, _, _ = match_detections_class_agnostic(
+        all_matches = match_detections_class_agnostic(
             predictions, annotations, self.overlap_threshold, self.overlap_method
         )
-        cm = confusion_matrix(all_matches, predictions, annotations, len(self.labels))
+        cm = confusion_matrix(all_matches, predictions, annotations, len(self.labels), self.ignore_label)
         if self.use_normalization:
             return np.mean(normalize_confusion_matrix(cm).diagonal())
 
         return float(np.sum(cm.diagonal())) / float(np.maximum(1, np.sum(cm)))
 
 
-def confusion_matrix(all_matched_ids, predicted_data, gt_data, num_classes):
+def confusion_matrix(all_matched_ids, predicted_data, gt_data, num_classes, ignore_label=None):
     out_cm = np.zeros([num_classes, num_classes], dtype=np.int32)
     for gt, prediction in zip(gt_data, predicted_data):
         for match_pair in all_matched_ids[gt.identifier]:
             gt_label = int(gt.labels[match_pair[0]])
+
+            if ignore_label and gt_label == ignore_label:
+                continue
+
             pred_label = int(prediction.labels[match_pair[1]])
             out_cm[gt_label, pred_label] += 1
 
@@ -300,31 +312,44 @@ def match_detections_class_agnostic(predicted_data, gt_data, min_iou, overlap_me
         predicted_bboxes = np.stack(
             (prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs), axis=-1
         )
+        predicted_scores = prediction.scores
 
-        total_gt_bbox_num += len(gt_bboxes)
+        gt_bboxes_num = len(gt_bboxes)
+        predicted_bboxes_num = len(predicted_bboxes)
 
-        similarity_matrix = calculate_similarity_matrix(gt_bboxes, predicted_bboxes, overlap_method)
+        sorted_ind = np.argsort(-predicted_scores)
+        predicted_bboxes = predicted_bboxes[sorted_ind]
+        predicted_original_ids = np.arange(predicted_bboxes_num)[sorted_ind]
+
+        similarity_matrix = calculate_similarity_matrix(predicted_bboxes, gt_bboxes, overlap_method)
 
         matches = []
-        for _ in gt_bboxes:
-            best_match_pos = np.unravel_index(similarity_matrix.argmax(), similarity_matrix.shape)
-            best_match_value = similarity_matrix[best_match_pos]
+        visited_gt = np.zeros(gt_bboxes_num, dtype=np.bool)
+        for predicted_id in range(predicted_bboxes_num):
+            best_overlap = 0.0
+            best_gt_id = -1
+            for gt_id in range(gt_bboxes_num):
+                if visited_gt[gt_id]:
+                    continue
 
-            if best_match_value <= min_iou:
-                break
+                overlap_value = similarity_matrix[predicted_id, gt_id]
+                if overlap_value > best_overlap:
+                    best_overlap = overlap_value
+                    best_gt_id = gt_id
 
-            gt_id = best_match_pos[0]
-            predicted_id = best_match_pos[1]
+            if best_gt_id >= 0 and best_overlap > min_iou:
+                visited_gt[best_gt_id] = True
 
-            similarity_matrix[gt_id, :] = 0.0
-            similarity_matrix[:, predicted_id] = 0.0
-
-            matches.append((gt_id, predicted_id))
-            matched_gt_bbox_num += 1
+                matches.append((best_gt_id, predicted_original_ids[predicted_id]))
+                if len(matches) >= gt_bboxes_num:
+                    break
 
         all_matches[gt.identifier] = matches
 
-    return all_matches, total_gt_bbox_num, matched_gt_bbox_num
+        total_gt_bbox_num += gt_bboxes_num
+        matched_gt_bbox_num += len(matches)
+
+    return all_matches
 
 
 def calculate_similarity_matrix(set_a, set_b, overlap):

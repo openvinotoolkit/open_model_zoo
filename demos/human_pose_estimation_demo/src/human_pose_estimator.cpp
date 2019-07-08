@@ -29,13 +29,12 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
       minSubsetScore(0.2f),
       inputLayerSize(-1, -1),
       upsampleRatio(4),
+      targetDeviceName(targetDeviceName),
       enablePerformanceReport(enablePerformanceReport),
       modelPath(modelPath) {
-    plugin = InferenceEngine::PluginDispatcher()
-            .getPluginByDevice(targetDeviceName);
     if (enablePerformanceReport) {
-        plugin.SetConfig({{InferenceEngine::PluginConfigParams::KEY_PERF_COUNT,
-                           InferenceEngine::PluginConfigParams::YES}});
+        ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_PERF_COUNT,
+                       InferenceEngine::PluginConfigParams::YES}});
     }
     netReader.ReadNetwork(modelPath);
     std::string binFileName = fileNameNoExt(modelPath) + ".bin";
@@ -49,7 +48,7 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
     pafsBlobName = outputBlobsIt->first;
     heatmapsBlobName = (++outputBlobsIt)->first;
 
-    executableNetwork = plugin.LoadNetwork(network, {});
+    executableNetwork = ie.LoadNetwork(network, targetDeviceName);
     request = executableNetwork.CreateInferRequest();
 }
 
@@ -66,7 +65,7 @@ std::vector<HumanPose> HumanPoseEstimator::estimate(const cv::Mat& image) {
         input_shape[3] = inputLayerSize.width;
         input_shapes[input_name] = input_shape;
         network.reshape(input_shapes);
-        executableNetwork = plugin.LoadNetwork(network, {});
+        executableNetwork = ie.LoadNetwork(network, targetDeviceName);
         request = executableNetwork.CreateInferRequest();
     }
     InferenceEngine::Blob::Ptr input = request.GetBlob(network.getInputsInfo().begin()->first);
@@ -232,9 +231,14 @@ bool HumanPoseEstimator::inputWidthIsChanged(const cv::Size& imageSize) {
 }
 
 HumanPoseEstimator::~HumanPoseEstimator() {
-    if (enablePerformanceReport) {
-        std::cout << "Performance counts for " << modelPath << std::endl << std::endl;
-        printPerformanceCounts(request.GetPerformanceCounts(), std::cout, false);
+    try {
+        if (enablePerformanceReport) {
+            std::cout << "Performance counts for " << modelPath << std::endl << std::endl;
+            printPerformanceCounts(request.GetPerformanceCounts(), std::cout, false);
+        }
+    }
+    catch (...) {
+        std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
     }
 }
 }  // namespace human_pose_estimation

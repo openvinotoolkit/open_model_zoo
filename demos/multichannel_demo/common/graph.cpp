@@ -47,21 +47,20 @@ void IEGraph::initNetwork(const std::string& deviceName) {
         throw std::logic_error("Failed to parse model!");
     }
 
-    plugin = InferenceEngine::PluginDispatcher().getPluginByDevice(deviceName);
     if (deviceName.find("CPU") != std::string::npos) {
-        plugin.AddExtension(std::make_shared<InferenceEngine::Extensions::Cpu::CpuExtensions>());
-        plugin.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CPU_BIND_THREAD, "NO"}});
+        ie.AddExtension(std::make_shared<InferenceEngine::Extensions::Cpu::CpuExtensions>(), "CPU");
+        ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CPU_BIND_THREAD, "NO"}}, "CPU");
     }
     if (!cpuExtensionPath.empty()) {
         auto extension_ptr = InferenceEngine::make_so_pointer<InferenceEngine::IExtension>(cpuExtensionPath);
-        plugin.AddExtension(extension_ptr);
+        ie.AddExtension(extension_ptr, "CPU");
     }
     if (!cldnnConfigPath.empty()) {
-        plugin.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, cldnnConfigPath}});
+        ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, cldnnConfigPath}}, "GPU");
     }
-    /** Setting plugin parameter for collecting per layer metrics **/
+    /** Setting parameter for collecting per layer metrics **/
     if (printPerfReport) {
-        plugin.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_PERF_COUNT, InferenceEngine::PluginConfigParams::YES } });
+        ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_PERF_COUNT, InferenceEngine::PluginConfigParams::YES } });
     }
 
     // Set batch size
@@ -77,7 +76,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     }
 
     InferenceEngine::ExecutableNetwork network;
-    network = plugin.LoadNetwork(netReader.getNetwork(), {});
+    network = ie.LoadNetwork(netReader.getNetwork(), deviceName);
 
     InferenceEngine::InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
     if (inputInfo.size() != 1) {

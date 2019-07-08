@@ -10,12 +10,6 @@
 #include <gflags/gflags.h>
 #include <iostream>
 
-#ifdef _WIN32
-#include <os/windows/w_dirent.h>
-#else
-#include <dirent.h>
-#endif
-
 /// @brief Message for help argument
 static const char help_message[] = "Print a usage message";
 
@@ -146,15 +140,15 @@ DEFINE_string(o, "", output_video_message);
 /// It is a required parameter
 DEFINE_string(m, "", face_detection_model_message);
 
-/// \brief Define parameter for Face Detection  model file<br>
+/// \brief Define parameter for Age Gender Recognition model file<br>
 /// It is a optional parameter
 DEFINE_string(m_ag, "", age_gender_model_message);
 
-/// \brief Define parameter for Face Detection  model file<br>
+/// \brief Define parameter for Head Pose Estimation model file<br>
 /// It is a optional parameter
 DEFINE_string(m_hp, "", head_pose_model_message);
 
-/// \brief Define parameter for Face Detection model file<br>
+/// \brief Define parameter for Emotions Recognition model file<br>
 /// It is a optional parameter
 DEFINE_string(m_em, "", emotions_model_message);
 

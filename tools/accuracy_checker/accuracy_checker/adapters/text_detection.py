@@ -273,7 +273,7 @@ class LPRAdapter(Adapter):
         for output in outputs:
             if output == -1:
                 break
-            decode_out += str(self.label_map[output])
+            decode_out += str(self.label_map[int(output)])
 
         return decode_out
 

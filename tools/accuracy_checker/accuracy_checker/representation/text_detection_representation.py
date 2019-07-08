@@ -22,7 +22,7 @@ from .base_representation import BaseRepresentation
 class TextDetectionRepresentation(BaseRepresentation):
     def __init__(self, identifier='', points=None):
         super().__init__(identifier)
-        self.points = points or []
+        self.points = points if points is not None else []
 
     def remove(self, indexes):
         self.points = np.delete(self.points, indexes, axis=0)

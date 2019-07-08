@@ -39,12 +39,8 @@ file (GLOB MAIN_HEADERS
 source_group("src" FILES ${MAIN_SRC})
 source_group("include" FILES ${MAIN_HEADERS})
 
-link_directories(${LIB_FOLDER})
-
 # Create library file from sources.
 add_executable(${TARGET_NAME} ${MAIN_SRC} ${MAIN_HEADERS})
-
-add_dependencies(${TARGET_NAME} gflags)
 
 set_target_properties(${TARGET_NAME} PROPERTIES
     POSITION_INDEPENDENT_CODE ON
@@ -67,5 +63,15 @@ endif()
 target_link_libraries(${TARGET_NAME} IE::ie_cpu_extension ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} common)
 
 if(UNIX)
-    target_link_libraries( ${TARGET_NAME} ${LIB_DL} pthread)
+    target_link_libraries( ${TARGET_NAME} pthread)
 endif()
+
+if(COMMAND add_cpplint_target)
+    add_cpplint_target(${TARGET_NAME}_cpplint FOR_TARGETS ${TARGET_NAME})
+endif()
+
+if(NOT TARGET ie_samples)
+    add_custom_target(ie_samples ALL)
+endif()
+
+add_dependencies(ie_samples ${TARGET_NAME})
