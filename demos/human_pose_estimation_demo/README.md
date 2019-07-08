@@ -16,7 +16,7 @@ Other demo objectives are:
 
 On the start-up, the application reads command line parameters and loads human pose estimation model. Upon getting a frame from the OpenCV VideoCapture, the application executes human pose estimation algorithm and displays the results.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Running
 
@@ -33,7 +33,7 @@ Options:
     -h                         Print a usage message.
     -i "<path>"                Required. Path to a video. Default value is "cam" to work with camera.
     -m "<path>"                Required. Path to the Human Pose Estimation model (.xml) file.
-    -d "<device>"              Optional. Specify the target device for Human Pose Estimation (CPU, GPU, FPGA, HDDL or MYRIAD is acceptable). Default value is "CPU".
+    -d "<device>"              Optional. Specify the target device for Human Pose Estimation (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -pc                        Optional. Enable per-layer performance report.
     -no_show                   Optional. Do not show processed video.
     -r                         Optional. Output inference results as raw values.

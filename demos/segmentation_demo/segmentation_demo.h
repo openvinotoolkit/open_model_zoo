@@ -19,14 +19,9 @@ static const char image_message[] = "Required. Path to an .bmp image.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";\
 
 /// @brief message for assigning cnn calculation to device
-static const char target_device_message[] = "Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. " \
-"The demo will look for a suitable plugin for a specified device. Default value is CPU.";
-
-/// @brief message for performance counters
-static const char performance_counter_message[] = "Optional. Enables per-layer performance report";
-
-/// @brief message for iterations count
-static const char iterations_count_message[] = "Optional. Number of iterations. Default value is 1";
+static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). " \
+"Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+"The demo will look for a suitable plugin for a specified device.";
 
 /// @brief message for clDNN custom kernels desc
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "\
@@ -61,12 +56,6 @@ DEFINE_string(m, "", model_message);
 /// @brief device the target device to infer on <br>
 DEFINE_string(d, "CPU", target_device_message);
 
-/// \brief Enable per-layer performance report
-DEFINE_bool(pc, false, performance_counter_message);
-
-/// @brief Iterations count (default 1)
-DEFINE_uint32(niter, 1, iterations_count_message);
-
 /// @brief Define path to plugin config
 DEFINE_string(config, "", config_message);
 
@@ -86,6 +75,4 @@ static void showUsage() {
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
-    std::cout << "    -niter \"<integer>\"        " << iterations_count_message << std::endl;
-    std::cout << "    -pc                       " << performance_counter_message << std::endl;
 }

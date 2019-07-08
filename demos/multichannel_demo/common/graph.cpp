@@ -195,7 +195,7 @@ IEGraph::IEGraph(const InitParams& p):
     confidenceThreshold(0.5f), batchSize(p.batchSize),
     modelPath(p.modelPath), weightsPath(p.weightsPath),
     cpuExtensionPath(p.cpuExtPath), cldnnConfigPath(p.cldnnConfigPath),
-    printPerfReport(p.reportPerf),
+    printPerfReport(p.reportPerf), deviceName(p.deviceName),
     maxRequests(p.maxRequests) {
     assert(p.maxRequests > 0);
 
@@ -273,7 +273,7 @@ IEGraph::~IEGraph() {
         }
         if (printPerfReport) {
             slog::info << "Performance counts report" << slog::endl << slog::endl;
-            printPerformanceCounts();
+            printPerformanceCounts(getFullDeviceName(ie, deviceName));
         }
         condVarAvailableRequests.notify_one();
     }
@@ -286,6 +286,6 @@ IEGraph::Stats IEGraph::getStats() const {
     return Stats{perfTimerPreprocess.getValue(), perfTimerInfer.getValue()};
 }
 
-void IEGraph::printPerformanceCounts() {
-    ::printPerformanceCounts(availableRequests.front()->GetPerformanceCounts(), std::cout, false);
+void IEGraph::printPerformanceCounts(std::string fullDeviceName) {
+    ::printPerformanceCounts(*availableRequests.front(), std::cout, fullDeviceName, false);
 }

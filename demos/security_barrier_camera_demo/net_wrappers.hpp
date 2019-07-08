@@ -8,6 +8,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <map>
 
 #include <inference_engine.hpp>
 #include <samples/common.hpp>
@@ -26,7 +27,7 @@ public:
 
     Detector() = default;
     Detector(InferenceEngine::Core& ie, const std::string deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
-            const bool autoResize) :
+            const bool autoResize, const std::map<std::string, std::string> & pluginConfig) :
         detectionTresholds{detectionTresholds}, ie_{ie} {
         InferenceEngine::CNNNetReader netReader;
         netReader.ReadNetwork(xmlPath);
@@ -66,7 +67,7 @@ public:
         }
         _output->setPrecision(InferenceEngine::Precision::FP32);
 
-        net = ie_.LoadNetwork(netReader.getNetwork(), deviceName);
+        net = ie_.LoadNetwork(netReader.getNetwork(), deviceName, pluginConfig);
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -131,7 +132,7 @@ class VehicleAttributesClassifier {
 public:
     VehicleAttributesClassifier() = default;
     VehicleAttributesClassifier(InferenceEngine::Core& ie, const std::string & deviceName,
-        const std::string& xmlPath, const bool autoResize) : ie_(ie) {
+        const std::string& xmlPath, const bool autoResize, const std::map<std::string, std::string> & pluginConfig) : ie_(ie) {
         InferenceEngine::CNNNetReader attributesNetReader;
         attributesNetReader.ReadNetwork(FLAGS_m_va);
         std::string attributesBinFileName = fileNameNoExt(FLAGS_m_va) + ".bin";
@@ -161,7 +162,7 @@ public:
         it->second->setPrecision(InferenceEngine::Precision::FP32);
         outputNameForType = (it)->second->getName();  // type is the second output.
 
-        net = ie_.LoadNetwork(attributesNetReader.getNetwork(), deviceName);
+        net = ie_.LoadNetwork(attributesNetReader.getNetwork(), deviceName, pluginConfig);
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -210,7 +211,8 @@ private:
 class Lpr {
 public:
     Lpr() = default;
-    Lpr(InferenceEngine::Core& ie, const std::string & deviceName, const std::string& xmlPath, const bool autoResize):
+    Lpr(InferenceEngine::Core& ie, const std::string & deviceName, const std::string& xmlPath, const bool autoResize,
+        const std::map<std::string, std::string> &pluginConfig) :
         ie_{ie} {
         InferenceEngine::CNNNetReader LprNetReader;
         LprNetReader.ReadNetwork(FLAGS_m_lpr);
@@ -244,7 +246,7 @@ public:
         }
         LprOutputName = LprOutputInfo.begin()->first;
 
-        net = ie_.LoadNetwork(LprNetReader.getNetwork(), deviceName);
+        net = ie_.LoadNetwork(LprNetReader.getNetwork(), deviceName, pluginConfig);
     }
 
     InferenceEngine::InferRequest createInferRequest() {

@@ -23,7 +23,7 @@ import cv2
 import time
 import logging as log
 
-from openvino.inference_engine import IENetwork, IEPlugin
+from openvino.inference_engine import IENetwork, IECore
 
 
 def build_argparser():
@@ -38,7 +38,6 @@ def build_argparser():
     args.add_argument("-l", "--cpu_extension",
                       help="Optional. Required for CPU custom layers. Absolute path to a shared library with the "
                            "kernels implementations.", type=str, default=None)
-    args.add_argument("-pp", "--plugin_dir", help="Optional. Path to a plugin folder", type=str, default=None)
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. The demo will look for a suitable plugin for device specified. "
@@ -55,22 +54,22 @@ def main():
     args = build_argparser().parse_args()
     model_xml = args.model
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
-    # Plugin initialization for specified device and load extensions library if specified
-    log.info("Initializing plugin for {} device...".format(args.device))
-    plugin = IEPlugin(device=args.device, plugin_dirs=args.plugin_dir)
+
+    log.info("Creating Inference Engine...")
+    ie = IECore()
     if args.cpu_extension and 'CPU' in args.device:
-        plugin.add_cpu_extension(args.cpu_extension)
+        ie.add_extension(args.cpu_extension, "CPU")
     # Read IR
-    log.info("Reading IR...")
+    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
     net = IENetwork(model=model_xml, weights=model_bin)
 
-    if plugin.device == "CPU":
-        supported_layers = plugin.get_supported_layers(net)
+    if "CPU" in args.device:
+        supported_layers = ie.query_network(net, "CPU")
         not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
         if len(not_supported_layers) != 0:
             log.error("Following layers are not supported by the plugin for specified device {}:\n {}".
-                      format(plugin.device, ', '.join(not_supported_layers)))
-            log.error("Please try to specify cpu extensions library path in demo's command line parameters using -l "
+                      format(args.device, ', '.join(not_supported_layers)))
+            log.error("Please try to specify cpu extensions library path in sample's command line parameters using -l "
                       "or --cpu_extension command line argument")
             sys.exit(1)
 
@@ -89,7 +88,7 @@ def main():
 
     out_blob = next(iter(net.outputs))
     log.info("Loading IR to the plugin...")
-    exec_net = plugin.load(network=net, num_requests=2)
+    exec_net = ie.load_network(network=net, num_requests=2, device_name=args.device)
     # Read and pre-process input image
     n, c, h, w = net.inputs[input_blob].shape
     if img_info_input_blob:

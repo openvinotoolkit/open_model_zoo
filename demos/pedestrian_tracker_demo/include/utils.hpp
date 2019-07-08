@@ -7,8 +7,6 @@
 #include "core.hpp"
 #include "logging.hpp"
 
-#include <inference_engine.hpp>
-
 #include <set>
 #include <string>
 #include <unordered_map>

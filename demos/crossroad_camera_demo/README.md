@@ -31,7 +31,7 @@ compared one-by-one with all previously detected persons vectors using cosine si
 is greater than the specified (or default) threshold value, it is concluded that the person was already detected and a known
 REID value is assigned. Otherwise, the vector is added to a global list, and new REID value is assigned.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Running
 
@@ -53,9 +53,9 @@ Options:
       -l "<absolute_path>"       Optional. For CPU custom layers, if any. Absolute path to a shared library with the kernels impl.
           Or
       -c "<absolute_path>"       Optional. For GPU custom kernels, if any. Absolute path to the xml file with the kernels desc.
-    -d "<device>"                Optional. Specify the target device for Person/Vehicle/Bike Detection (CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO).
-    -d_pa "<device>"             Optional. Specify the target device for Person Attributes Recognition (CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO).
-    -d_reid "<device>"           Optional. Specify the target device for Person Reidentification Retail (CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO).
+    -d "<device>"                Optional. Specify the target device for Person/Vehicle/Bike Detection. The list of available devices is shown below. Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
+    -d_pa "<device>"             Optional. Specify the target device for Person Attributes Recognition. The list of available devices is shown below. Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
+    -d_reid "<device>"           Optional. Specify the target device for Person Reidentification Retail. The list of available devices is shown below. Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -pc                          Optional. Enables per-layer performance statistics.
     -r                           Optional. Output Inference results as raw values.
     -t                           Optional. Probability threshold for person/vehicle/bike crossroad detections.

@@ -51,6 +51,7 @@ private:
     std::vector<std::string> outputDataBlobNames;
 
     bool printPerfReport;
+    std::string deviceName;
 
     InferenceEngine::Core ie;
     std::queue<InferenceEngine::InferRequest::Ptr> availableRequests;
@@ -112,6 +113,6 @@ public:
 
     Stats getStats() const;
 
-    void printPerformanceCounts();
+    void printPerformanceCounts(std::string fullDeviceName);
 };
 

@@ -4,15 +4,11 @@
 
 #include <gflags/gflags.h>
 #include <algorithm>
-#include <functional>
 #include <iostream>
-#include <fstream>
-#include <random>
 #include <string>
 #include <memory>
 #include <vector>
 #include <limits>
-#include <chrono>
 
 #include <format_reader_ptr.h>
 #include <inference_engine.hpp>
@@ -34,14 +30,11 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
     }
 
     slog::info << "Parsing input parameters" << slog::endl;
-
-    if (FLAGS_niter < 1) {
-        throw std::logic_error("Parameter -niter should be greater than 0 (default: 1)");
-    }
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -55,7 +48,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 }
 
 /**
-* \brief The entry point for the Inference Engine object_detection demo application
+* \brief The entry point for the Inference Engine object_detection demo Faster RCNN application
 * \file object_detection_demo_faster_rcnn/main.cpp
 * \example object_detection_demo_faster_rcnn/main.cpp
 */
@@ -106,11 +99,6 @@ int main(int argc, char *argv[]) {
             slog::info << "GPU Extension loaded: " << FLAGS_c << slog::endl;
         }
 
-        /** Setting plugin parameter for per layer metrics **/
-        if (FLAGS_pc) {
-            ie.SetConfig({ { PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES } });
-        }
-
         /** Printing plugin version **/
         slog::info << "Device info: " << slog::endl;
         std::cout << ie.GetVersions(FLAGS_d) << std::endl;
@@ -131,7 +119,7 @@ int main(int argc, char *argv[]) {
         networkReader.ReadWeights(binFileName);
         CNNNetwork network = networkReader.getNetwork();
 
-        Precision p = network.getPrecision();
+        Precision precision = network.getPrecision();
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 3. Configure input & output ---------------------------------------------
@@ -193,7 +181,7 @@ int main(int argc, char *argv[]) {
         LayerParams detectionOutParams;
         detectionOutParams.name = "detection_out";
         detectionOutParams.type = "DetectionOutput";
-        detectionOutParams.precision = p;
+        detectionOutParams.precision = precision;
         CNNLayerPtr detectionOutLayer = CNNLayerPtr(new CNNLayer(detectionOutParams));
         detectionOutLayer->params["background_label_id"] = "0";
         detectionOutLayer->params["code_type"] = "caffe.PriorBoxParameter.CENTER_SIZE";
@@ -214,7 +202,7 @@ int main(int argc, char *argv[]) {
         detectionOutLayer->insData.push_back(rois_reshapeInPort);
 
         SizeVector detectionOutLayerOutDims = {1, 1, 200, 7};
-        DataPtr detectionOutLayerOutPort = DataPtr(new Data("detection_out", detectionOutLayerOutDims, p,
+        DataPtr detectionOutLayerOutPort = DataPtr(new Data("detection_out", detectionOutLayerOutDims, precision,
                                                             TensorDesc::getLayoutByDims(detectionOutLayerOutDims)));
         detectionOutLayerOutPort->getCreatorLayer() = detectionOutLayer;
         detectionOutLayer->outData.push_back(detectionOutLayerOutPort);
@@ -282,11 +270,11 @@ int main(int argc, char *argv[]) {
 
         // --------------------------- 4. Loading model to the device ------------------------------------------
         slog::info << "Loading model to the device" << slog::endl;
-
         ExecutableNetwork executable_network = ie.LoadNetwork(network, FLAGS_d);
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 5. Create infer request -------------------------------------------------
+        slog::info << "Create infer request" << slog::endl;
         InferRequest infer_request = executable_network.CreateInferRequest();
         // -----------------------------------------------------------------------------------------------------
 
@@ -342,7 +330,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        if (imInfoInputName != "") {
+        if (!imInfoInputName.empty()) {
             Blob::Ptr input2 = infer_request.GetBlob(imInfoInputName);
             auto imInfoDim = inputsInfo.find(imInfoInputName)->second->getTensorDesc().getDims()[1];
 
@@ -360,22 +348,8 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------- 7. Do inference --------------------------------------------------------
-        slog::info << "Start inference (" << FLAGS_niter << " iterations)" << slog::endl;
-
-        typedef std::chrono::high_resolution_clock Time;
-        typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
-        typedef std::chrono::duration<float> fsec;
-
-        double total = 0.0;
-        /** Start inference & calc performance **/
-        for (size_t iter = 0; iter < FLAGS_niter; ++iter) {
-            auto t0 = Time::now();
-            infer_request.Infer();
-            auto t1 = Time::now();
-            fsec fs = t1 - t0;
-            ms d = std::chrono::duration_cast<ms>(fs);
-            total += d.count();
-        }
+        slog::info << "Start inference" << slog::endl;
+        infer_request.Infer();
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------- 8. Process output ------------------------------------------------------
@@ -436,19 +410,7 @@ int main(int argc, char *argv[]) {
                 throw std::logic_error(std::string("Can't create a file: ") + image_path);
             }
         }
-        if (std::fabs(total) < std::numeric_limits<double>::epsilon()) {
-            throw std::logic_error("total can't be equal to zero");
-        }
         // -----------------------------------------------------------------------------------------------------
-        std::cout << std::endl << "total inference time: " << total << std::endl;
-        std::cout << "Average running time of one iteration: " << total / static_cast<double>(FLAGS_niter) << " ms" << std::endl;
-        std::cout << std::endl << "Throughput: " << 1000 * static_cast<double>(FLAGS_niter) * batchSize / total << " FPS" << std::endl;
-        std::cout << std::endl;
-
-        /** Show performace results **/
-        if (FLAGS_pc) {
-            printPerformanceCounts(infer_request, std::cout);
-        }
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -460,5 +422,7 @@ int main(int argc, char *argv[]) {
     }
 
     slog::info << "Execution successful" << slog::endl;
+    slog::info << slog::endl << "This demo is an API example, for any performance measurements "
+                                "please use the dedicated benchmark_app tool from the openVINO toolkit" << slog::endl;
     return 0;
 }

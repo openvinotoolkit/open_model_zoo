@@ -15,7 +15,8 @@ static const char help_message[] = "Print a usage message";
 static const char face_detection_model_message[] = "Required. Path to an .xml file with a trained model.";
 
 /// @brief Message for assigning face detection calculation to a device
-static const char target_device_message[] = "Optional. Specify the target device for a network (CPU, GPU, FPGA, HDDL or MYRIAD). " \
+static const char target_device_message[] = "Optional. Specify the target device for a network (the list of available devices is shown below). " \
+"Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo looks for a suitable plugin for a specified device.";
 
 /// @brief Message for performance counters

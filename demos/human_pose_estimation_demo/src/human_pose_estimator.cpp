@@ -17,7 +17,7 @@ namespace human_pose_estimation {
 const size_t HumanPoseEstimator::keypointsNumber = 18;
 
 HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
-                                       const std::string& targetDeviceName,
+                                       const std::string& targetDeviceName_,
                                        bool enablePerformanceReport)
     : minJointsNumber(3),
       stride(8),
@@ -29,7 +29,7 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
       minSubsetScore(0.2f),
       inputLayerSize(-1, -1),
       upsampleRatio(4),
-      targetDeviceName(targetDeviceName),
+      targetDeviceName(targetDeviceName_),
       enablePerformanceReport(enablePerformanceReport),
       modelPath(modelPath) {
     if (enablePerformanceReport) {
@@ -234,7 +234,7 @@ HumanPoseEstimator::~HumanPoseEstimator() {
     try {
         if (enablePerformanceReport) {
             std::cout << "Performance counts for " << modelPath << std::endl << std::endl;
-            printPerformanceCounts(request.GetPerformanceCounts(), std::cout, false);
+            printPerformanceCounts(request, std::cout, getFullDeviceName(ie, targetDeviceName), false);
         }
     }
     catch (...) {

@@ -29,7 +29,7 @@ Engine.
 4.	The application performs four simultaneous inferences, using the Age/Gender, Head Pose, Emotions, and Facial Landmarks detection networks if they are specified in the command line.
 5.	The application displays the results.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 The new Async API operates with a new notion of the Infer Request that encapsulates the inputs/outputs and separates scheduling and waiting for result. For more information about Async API and the difference between Sync and Async modes performance, refer to **How it Works** and **Async API** sections in [Object Detection SSD, Async API Performance Showcase Demo](../object_detection_demo_ssd_async/README.md).
 
@@ -57,11 +57,11 @@ Options:
       -l "<absolute_path>"     Required for CPU custom layers. Absolute path to a shared library with the kernels implementation.
           Or
       -c "<absolute_path>"     Required for GPU custom kernels. Absolute path to an .xml file with the kernels description.
-    -d "<device>"              Optional. Target device for Face Detection network (CPU, GPU, FPGA, HDDL, or MYRIAD). The demo will look for a suitable plugin for a specified device.
-    -d_ag "<device>"           Optional. Target device for Age/Gender Recognition network (CPU, GPU, FPGA, HDDL, or MYRIAD). The demo will look for a suitable plugin for a specified device.
-    -d_hp "<device>"           Optional. Target device for Head Pose Estimation network (CPU, GPU, FPGA, HDDL, or MYRIAD). The demo will look for a suitable plugin for a specified device.
-    -d_em "<device>"           Optional. Target device for Emotions Recognition network (CPU, GPU, FPGA, HDDL, or MYRIAD). The demo will look for a suitable plugin for a specified device.
-    -d_lm "<device>"           Optional. Target device for Facial Landmarks Estimation network (CPU, GPU, FPGA, HDDL, or MYRIAD). The demo will look for a suitable plugin for device specified.
+    -d "<device>"              Optional. Target device for Face Detection network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
+    -d_ag "<device>"           Optional. Target device for Age/Gender Recognition network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
+    -d_hp "<device>"           Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
+    -d_em "<device>"           Optional. Target device for Emotions Recognition network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
+    -d_lm "<device>"           Optional. Target device for Facial Landmarks Estimation network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -n_ag "<num>"              Optional. Number of maximum simultaneously processed faces for Age/Gender Recognition network (by default, it is 16)
     -n_hp "<num>"              Optional. Number of maximum simultaneously processed faces for Head Pose Estimation network (by default, it is 16)
     -n_em "<num>"              Optional. Number of maximum simultaneously processed faces for Emotions Recognition network (by default, it is 16)

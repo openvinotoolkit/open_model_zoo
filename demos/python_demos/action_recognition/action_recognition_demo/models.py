@@ -66,9 +66,8 @@ class AsyncWrapper:
 
 
 class IEModel:
-    def __init__(self, model_xml, model_bin, ie_plugin, num_requests, batch_size=1):
+    def __init__(self, model_xml, model_bin, ie_core, target_device, num_requests, batch_size=1):
         # Plugin initialization for specified device and load extensions library if specified
-        self.plugin = ie_plugin
 
         # Read IR
         print("Reading IR...")
@@ -79,7 +78,7 @@ class IEModel:
 
         print("Loading IR to the plugin...")
 
-        self.exec_net = self.plugin.load(self.net, num_requests=num_requests)
+        self.exec_net = ie_core.load_network(network=self.net, device_name=target_device, num_requests=num_requests)
         self.input_name = next(iter(self.net.inputs))
         self.output_name = next(iter(self.net.outputs))
         self.input_size = self.net.inputs[self.input_name]

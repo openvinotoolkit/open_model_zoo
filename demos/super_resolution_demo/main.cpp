@@ -8,13 +8,9 @@
  * @example super_resolution_demo/main.cpp
  */
 #include <algorithm>
-#include <fstream>
-#include <iomanip>
 #include <vector>
 #include <string>
-#include <chrono>
 #include <memory>
-#include <utility>
 
 #include <format_reader_ptr.h>
 #include <inference_engine.hpp>
@@ -40,11 +36,8 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
-    }
-
-    if (FLAGS_niter < 1) {
-        throw std::logic_error("Parameter -niter should be more than 0 !!! (default 1)");
     }
 
     if (FLAGS_i.empty()) {
@@ -209,37 +202,14 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 7. Do inference ---------------------------------------------------------
-        slog::info << "Start inference (" << FLAGS_niter << " iterations)" << slog::endl;
-
-        typedef std::chrono::high_resolution_clock Time;
-        typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
-        typedef std::chrono::duration<float> fsec;
-
-        double total = 0.0;
-
         std::cout << "To close the application, press 'CTRL+C' here";
         if (FLAGS_show) {
             std::cout << " or switch to the output window and press any key";
         }
         std::cout << std::endl;
 
-        /** Start inference & calc performance **/
-        for (size_t iter = 0; iter < FLAGS_niter; ++iter) {
-            auto t0 = Time::now();
-            inferRequest.Infer();
-            auto t1 = Time::now();
-            fsec fs = t1 - t0;
-            ms d = std::chrono::duration_cast<ms>(fs);
-            total += d.count();
-        }
-
-        /** Show performance results **/
-        std::cout << std::endl << "Average running time of one iteration: " << total / static_cast<double>(FLAGS_niter)
-                  << " ms" << std::endl;
-
-        if (FLAGS_pc) {
-            printPerformanceCounts(inferRequest, std::cout);
-        }
+        slog::info << "Start inference" << slog::endl;
+        inferRequest.Infer();
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 8. Process output -------------------------------------------------------
@@ -284,5 +254,7 @@ int main(int argc, char *argv[]) {
     }
 
     slog::info << "Execution successful" << slog::endl;
+    slog::info << slog::endl << "This demo is an API example, for any performance measurements "
+                                "please use the dedicated benchmark_app tool from the openVINO toolkit" << slog::endl;
     return 0;
 }

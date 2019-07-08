@@ -28,11 +28,9 @@ Options:
       -l "<absolute_path>"            Required for CPU custom layers. Absolute path to a shared library with the kernels implementations.
           Or
       -c "<absolute_path>"            Required for GPU custom kernels. Absolute path to the .xml file with the kernels descriptions.
-    -d "<device>"                     Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will look for a suitable plugin for a specified device (CPU by default)
-    -niter "<integer>"                Optional. Number of iterations. Default value is 1
+    -d "<device>"                     Optional. Specify the target device to infer on (the list of available devices is shown below). Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device (CPU by default).
     -detection_output_name "<string>" Optional. The name of detection output layer. Default value is "detection_output"
     -masks_name "<string>"            Optional. The name of masks layer. Default value is "masks"
-    -pc                               Optional. Enables per-layer performance report
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

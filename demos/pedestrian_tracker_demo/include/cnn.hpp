@@ -57,7 +57,7 @@ public:
     /**
      * @brief Prints performance report
      */
-    void PrintPerformanceCounts() const;
+    void PrintPerformanceCounts(std::string fullDeviceName) const;
 
 protected:
     /**

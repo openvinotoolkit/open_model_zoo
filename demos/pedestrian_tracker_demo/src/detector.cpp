@@ -201,8 +201,8 @@ void ObjectDetector::waitAndFetchResults() {
     fetchResults();
 }
 
-void ObjectDetector::PrintPerformanceCounts() {
+void ObjectDetector::PrintPerformanceCounts(std::string fullDeviceName) {
     std::cout << "Performance counts for object detector" << std::endl << std::endl;
-    ::printPerformanceCounts(request->GetPerformanceCounts(), std::cout, false);
+    ::printPerformanceCounts(*request, std::cout, fullDeviceName, false);
 }
 
