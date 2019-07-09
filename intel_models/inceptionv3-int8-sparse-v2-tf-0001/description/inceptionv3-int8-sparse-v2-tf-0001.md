@@ -23,6 +23,10 @@ The model output for `inceptionv3-int8-sparse-v2-tf-0001` is the usual object cl
 
 The quality metrics calculated on ImageNet validation dataset is 78.26% accuracy top-1.
 
+| Metric                    | Value         |
+|---------------------------|---------------|
+| Accuracy top-1 (ImageNet) |        78.26% |
+
 ## Performance
 
 ## Input

@@ -23,6 +23,10 @@ The model output for `inceptionv3-int8-tf-0001` is the usual object classifier o
 
 The quality metrics calculated on ImageNet validation dataset is 78.07% accuracy top-1.
 
+| Metric                    | Value         |
+|---------------------------|---------------|
+| Accuracy top-1 (ImageNet) |        78.07% |
+
 ## Performance
 
 ## Input
