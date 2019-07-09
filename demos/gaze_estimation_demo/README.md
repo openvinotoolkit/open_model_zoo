@@ -84,6 +84,12 @@ The following keys are supported:
 * F - to flip frames horizontally
 * Esc - to quit the demo
 
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
+* `face-detection-retail-0004`
+* `head-pose-estimation-adas-0001`
+* `facial-landmarks-35-adas-0002`
+All other models may work incorrectly on these devices.
+
 ## See Also
 * [Using Open Model Zoo demos](../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)

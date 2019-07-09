@@ -44,12 +44,12 @@ The table below shows the correlation between models, demos, and supported plugi
 | action-recognition-0001-encoder                  | [Action Recognition Demo](python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
 | driver-action-recognition-adas-0002-decoder      | [Action Recognition Demo](python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
 | driver-action-recognition-adas-0002-encoder      | [Action Recognition Demo](python_demos/action_recognition/README.md)            | Supported | Supported |             | Supported       |
-| person-attributes-recognition-crossroad-0230     | [Crossroad Camera Demo](crossroad_camera_demo/README.md)                            | Supported | Supported |             | Supported       |
+| person-attributes-recognition-crossroad-0230     | [Crossroad Camera Demo](crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
 | person-reidentification-retail-0031              | [Crossroad Camera Demo](crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
 | person-reidentification-retail-0076              | [Crossroad Camera Demo](crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
 | person-reidentification-retail-0079              | [Crossroad Camera Demo](crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
 | person-vehicle-bike-detection-crossroad-0078     | [Crossroad Camera Demo](crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
-| human-pose-estimation-adas-0001                  | [Human Pose Estimation Demo](human_pose_estimation_demo/README.md)                  | Supported | Supported |             | Supported       |
+| human-pose-estimation-adas-0001                  | [Human Pose Estimation Demo](human_pose_estimation_demo/README.md)                  | Supported | Supported | Supported   | Supported       |
 | semantic-segmentation-adas-0001                  | [Image Segmentation Demo](segmentation_demo/README.md)                              | Supported | Supported |             | Supported       |
 | instance-segmentation-security-0033              | [Instance Segmentation Demo](python_demos/instance_segmentation_demo/README.md) | Supported | Supported |             | Supported       |
 | instance-segmentation-security-0049              | [Instance Segmentation Demo](python_demos/instance_segmentation_demo/README.md) | Supported | Supported |             | Supported       |
@@ -58,14 +58,14 @@ The table below shows the correlation between models, demos, and supported plugi
 | face-detection-adas-0001                         | [Interactive Face Detection Demo](interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
 | face-detection-adas-binary-0001                  | [Interactive Face Detection Demo](interactive_face_detection_demo/README.md)        | Supported | Supported |             |                 |
 | face-detection-retail-0004                       | [Interactive Face Detection Demo](interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
-| facial-landmarks-35-adas-0002                    | [Interactive Face Detection Demo](interactive_face_detection_demo/README.md)        | Supported | Supported |             | Supported       |
+| facial-landmarks-35-adas-0002                    | [Interactive Face Detection Demo](interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
 | head-pose-estimation-adas-0001                   | [Interactive Face Detection Demo](interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
 | license-plate-recognition-barrier-0001           | [Security Barrier Camera Demo](security_barrier_camera_demo/README.md)              | Supported | Supported | Supported   | Supported       |
 | vehicle-attributes-recognition-barrier-0039      | [Security Barrier Camera Demo](security_barrier_camera_demo/README.md)              | Supported | Supported | Supported   | Supported       |
 | vehicle-license-plate-detection-barrier-0106     | [Security Barrier Camera Demo](security_barrier_camera_demo/README.md)              | Supported | Supported | Supported   | Supported       |
 | face-reidentification-retail-0095                | [Smart Classroom Demo](smart_classroom_demo/README.md)                              | Supported | Supported | Supported   | Supported       |
 | landmarks-regression-retail-0009                 | [Smart Classroom Demo](smart_classroom_demo/README.md)                              | Supported | Supported | Supported   | Supported       |
-| person-detection-action-recognition-0005         | [Smart Classroom Demo](smart_classroom_demo/README.md)                              | Supported | Supported |             | Supported       |
+| person-detection-action-recognition-0005         | [Smart Classroom Demo](smart_classroom_demo/README.md)                              | Supported | Supported | Supported   | Supported       |
 | person-detection-action-recognition-teacher-0002 | [Smart Classroom Demo](smart_classroom_demo/README.md)                              | Supported | Supported |             | Supported       |
 | single-image-super-resolution-1032               | [Super Resolution Demo](super_resolution_demo/README.md)                            | Supported | Supported |             | Supported       |
 | single-image-super-resolution-1033               | [Super Resolution Demo](super_resolution_demo/README.md)                            | Supported | Supported |             | Supported       |

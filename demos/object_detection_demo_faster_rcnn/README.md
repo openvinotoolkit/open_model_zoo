@@ -67,6 +67,8 @@ The application outputs an image (`out_0.bmp`) with detected objects enclosed in
 of the detected objects along with the respective confidence values and the coordinates of the
 rectangles to the standard output stream.
 
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo is not supported with any of the Model Downloader available topologies. Other models may work incorrectly on these devices as well.
+
 ## See Also
 * [Using Open Model Zoo demos](../README.md)
 * [Model Downloader](../../tools/downloader/README.md)
