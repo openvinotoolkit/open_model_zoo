@@ -23,6 +23,10 @@ The model output for `mobilenetv2-int8-tf-0001` is the usual object classifier o
 
 The quality metrics calculated on ImageNet validation dataset is 70.8% accuracy top-1.
 
+| Metric                    | Value         |
+|---------------------------|---------------|
+| Accuracy top-1 (ImageNet) |         70.8% |
+
 ## Performance
 
 ## Input

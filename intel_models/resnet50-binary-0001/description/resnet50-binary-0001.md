@@ -19,6 +19,10 @@ Only input, final and shortcut layers were kept as FP32, all the rest convolutio
 
 The quality metrics calculated on ImageNet validation dataset is 70.69% accuracy
 
+| Metric                    | Value         |
+|---------------------------|---------------|
+| Accuracy top-1 (ImageNet) |        70.69% |
+
 ## Performance
 
 ## Inputs

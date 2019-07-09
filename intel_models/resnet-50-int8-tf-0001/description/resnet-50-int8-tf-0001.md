@@ -23,6 +23,10 @@ The model output for `resnet-50-int8-tf-0001` is the usual object classifier out
 
 The quality metrics calculated on ImageNet validation dataset is 74.6% accuracy top-1.
 
+| Metric                    | Value         |
+|---------------------------|---------------|
+| Accuracy top-1 (ImageNet) |         74.6% |
+
 ## Performance
 
 ## Input
