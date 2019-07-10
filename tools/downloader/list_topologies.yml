@@ -421,7 +421,7 @@ topologies:
       - --input_model=$dl_dir/mobilenet-ssd.caffemodel
       - --input_proto=$dl_dir/mobilenet-ssd.prototxt
     framework: caffe
-    license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
+    license: https://raw.githubusercontent.com/chuanqi305/MobileNet-SSD/master/LICENSE
 
   - name: "vgg19"
     description: >-
