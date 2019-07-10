@@ -458,7 +458,7 @@ topologies:
       - --input_model=$dl_dir/vgg19.caffemodel
       - --input_proto=$dl_dir/vgg19.prototxt
     framework: caffe
-    license: https://raw.githubusercontent.com/keras-team/keras/master/LICENSE
+    license: https://creativecommons.org/licenses/by/4.0/legalcode.txt
 
   - name: "vgg16"
     description: >-
@@ -495,7 +495,7 @@ topologies:
       - --input_model=$dl_dir/vgg16.caffemodel
       - --input_proto=$dl_dir/vgg16.prototxt
     framework: caffe
-    license: https://raw.githubusercontent.com/keras-team/keras/master/LICENSE
+    license: https://creativecommons.org/licenses/by/4.0/legalcode.txt
 
   - name: "ssd512"
     description: >-
