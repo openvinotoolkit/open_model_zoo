@@ -21,7 +21,6 @@ import sys
 import warnings
 
 _DEFAULT_LOGGER_NAME = 'accuracy_checker'
-_DEFAULT_LOG_FILE = 'accuracy_checker.log'
 
 PRINT_INFO = logging.INFO + 5
 logging.addLevelName(PRINT_INFO, "PRINT_INFO")
