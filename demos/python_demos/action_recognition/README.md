@@ -35,7 +35,7 @@ Running the application with the `-h` option yields the following usage message:
 
 ```
 usage: demo.py [-h] --encoder ENCODER --decoder DECODER [-v VIDEO]
-               [-vl VIDEO_LIST] [-e CPU_EXTENSION] [-pp PLUGIN_DIR]
+               [-vl VIDEO_LIST] [-e CPU_EXTENSION]
                [-d DEVICE] [--fps FPS] [-l LABELS]
 
 Options:
@@ -51,8 +51,6 @@ Options:
   -e CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         Optional. For CPU custom layers, if any. Absolute path
                         to a shared library with the kernels implementation.
-  -pp PLUGIN_DIR, --plugin_dir PLUGIN_DIR
-                        Optional. Path to a plugin folder
   -d DEVICE, --device DEVICE
                         Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is "
                         acceptable. The demo will look for a suitable plugin for the device specified.

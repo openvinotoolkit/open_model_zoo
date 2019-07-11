@@ -18,7 +18,9 @@ static const char human_pose_estimation_model_message[] = "Required. Path to the
 
 /// @brief Message for assigning Human Pose Estimation inference to device
 static const char target_device_message[] = "Optional. Specify the target device for Human Pose Estimation "\
-                                            "(CPU, GPU, FPGA, HDDL or MYRIAD is acceptable). Default value is \"CPU\".";
+                                            "(the list of available devices is shown below). Default value is CPU. " \
+                                            "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+                                            "The application looks for a suitable plugin for the specified device.";
 
 /// @brief Message for performance counter
 static const char performance_counter_message[] = "Optional. Enable per-layer performance report.";

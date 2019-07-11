@@ -31,7 +31,7 @@ Options:
       -l "<absolute_path>"       Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
           Or
       -c "<absolute_path>"       Required for GPU custom kernels. Absolute path to an .xml file with the kernel descriptions.
-    -d "<device>"                Optional. Specify the target device for a network (CPU, GPU, FPGA, HDDL or MYRIAD). The demo looks for a suitable plugin for a specified device.
+    -d "<device>"                Optional. Specify the target device for a network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo looks for a suitable plugin for a specified device.
     -nc                          Optional. Maximum number of processed camera inputs (web cameras)
     -bs                          Optional. Batch size for processing (the number of frames processed per infer request)
     -n_ir                        Optional. Number of infer requests

@@ -44,6 +44,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
     }
     slog::info << "Parsing input parameters" << slog::endl;
@@ -372,11 +373,11 @@ int main(int argc, char *argv[]) {
 
         // Showing performance results
         if (FLAGS_pc) {
-            faceDetector.printPerformanceCounts();
-            ageGenderDetector.printPerformanceCounts();
-            headPoseDetector.printPerformanceCounts();
-            emotionsDetector.printPerformanceCounts();
-            facialLandmarksDetector.printPerformanceCounts();
+            faceDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d));
+            ageGenderDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_ag));
+            headPoseDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_hp));
+            emotionsDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_em));
+            facialLandmarksDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_lm));
         }
         // ---------------------------------------------------------------------------------------------------
 

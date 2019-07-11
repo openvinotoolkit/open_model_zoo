@@ -22,15 +22,21 @@ static const char lpr_model_message[] = "Optional. Path to the License Plate Rec
 
 /// @brief message for assigning vehicle detection inference to device
 static const char target_device_message[] = "Optional. Specify the target device for Vehicle Detection "\
-                                            "(CPU, GPU, FPGA, MYRIAD, HDDL or HETERO).";
+                                            "(the list of available devices is shown below).Default value is CPU. " \
+                                            "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+                                            "The application looks for a suitable plugin for the specified device.";
 
 /// @brief message for assigning vehicle attributes to device
 static const char target_device_message_vehicle_attribs[] = "Optional. Specify the target device for Vehicle Attributes "\
-                                                            "(CPU, GPU, FPGA, MYRIAD, HDDL or HETERO).";
+                                                            "(the list of available devices is shown below).Default value is CPU. " \
+                                                            "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+                                                            "The application looks for a suitable plugin for the specified device.";
 
 /// @brief message for assigning LPR inference to device
 static const char target_device_message_lpr[] = "Optional. Specify the target device for License Plate Recognition "\
-                                                "(CPU, GPU, FPGA, MYRIAD, HDDL or HETERO).";
+                                                "(the list of available devices is shown below).Default value is CPU. " \
+                                                "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+                                                "The application looks for a suitable plugin for the specified device.";
 
 /// @brief message for performance counters
 static const char performance_counter_message[] = "Optional. Enables per-layer performance statistics.";

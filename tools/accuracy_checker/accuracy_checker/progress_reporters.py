@@ -68,6 +68,7 @@ class PrintProgressReporter(ProgressReporter):
         print_info('Total dataset size: {}'.format(dataset_size))
         self.start_time = time.time()
         self.prev_time = self.start_time
+        self.current = 0
 
     def update(self, batch_id, batch_size):
         self.current += batch_size

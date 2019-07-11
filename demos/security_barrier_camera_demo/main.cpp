@@ -14,15 +14,16 @@
 #include <set>
 
 #include <inference_engine.hpp>
+#include <vpu/vpu_plugin_config.hpp>
 #include <ext_list.hpp>
 #include <samples/ocv_common.hpp>
 #include <samples/args_helper.hpp>
+
 #include "common.hpp"
 #include "grid_mat.hpp"
 #include "input_wrappers.hpp"
 #include "security_barrier_camera_demo.hpp"
 #include "net_wrappers.hpp"
-#include <vpu/vpu_plugin_config.hpp>
 
 using namespace InferenceEngine;
 
@@ -33,6 +34,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
     }
 
@@ -628,6 +630,7 @@ int main(int argc, char* argv[]) {
 
         std::vector<std::string> files;
         parseInputFilesArguments(files);
+        if (files.empty()) throw std::logic_error("No files were found");
         std::vector<std::shared_ptr<VideoCaptureSource>> videoCapturSourcess;
         std::vector<std::shared_ptr<ImageSource>> imageSourcess;
         if (FLAGS_nc) {
@@ -728,33 +731,38 @@ int main(int argc, char* argv[]) {
         }
 
         /** Per layer metrics **/
+        std::map<std::string, std::string> mapDevices;
         if (FLAGS_pc) {
             ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
+            mapDevices = getMapFullDevicesNames(ie, pluginNames);
         }
+
+        /** Graph tagging via config options**/
+        auto makeTagConfig = [&](const std::string &deviceName, const std::string &suffix) {
+            std::map<std::string, std::string> config;
+            if (FLAGS_tag && deviceName == "HDDL") {
+                config[VPU_HDDL_CONFIG_KEY(GRAPH_TAG)] = "tag" + suffix;
+            }
+            return config;
+        };
 
         // -----------------------------------------------------------------------------------------------------
         unsigned nireq = FLAGS_nireq == 0 ? inputChannels.size() : FLAGS_nireq;
         slog::info << "Loading detection model to the "<< FLAGS_d << " plugin" << slog::endl;
-        if (FLAGS_tag && FLAGS_d == "HDDL")
-            ie.SetConfig({{VPUConfigParams::KEY_VPU_HDDL_GRAPH_TAG, "tagDetect"}}, "HDDL");
         Detector detector(ie, FLAGS_d, FLAGS_m,
-            {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize);
+            {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeTagConfig(FLAGS_d, "Detect"));
         VehicleAttributesClassifier vehicleAttributesClassifier;
         std::size_t nclassifiersireq{0};
         Lpr lpr;
         std::size_t nrecognizersireq{0};
         if (!FLAGS_m_va.empty()) {
             slog::info << "Loading Vehicle Attribs model to the "<< FLAGS_d_va << " plugin" << slog::endl;
-            if (FLAGS_tag && FLAGS_d_va == "HDDL")
-                ie.SetConfig({{VPUConfigParams::KEY_VPU_HDDL_GRAPH_TAG, "tagAttr"}}, "HDDL");
-            vehicleAttributesClassifier = VehicleAttributesClassifier(ie, FLAGS_d_va, FLAGS_m_va, FLAGS_auto_resize);
+            vehicleAttributesClassifier = VehicleAttributesClassifier(ie, FLAGS_d_va, FLAGS_m_va, FLAGS_auto_resize, makeTagConfig(FLAGS_d_va, "Attr"));
             nclassifiersireq = nireq * 3;
         }
         if (!FLAGS_m_lpr.empty()) {
             slog::info << "Loading Licence Plate Recognition (LPR) model to the "<< FLAGS_d_lpr << " plugin" << slog::endl;
-            if (FLAGS_tag && FLAGS_d_lpr == "HDDL")
-                ie.SetConfig({{VPUConfigParams::KEY_VPU_HDDL_GRAPH_TAG, "tagLPR"}}, "HDDL");
-            lpr = Lpr(ie, FLAGS_d_lpr, FLAGS_m_lpr, FLAGS_auto_resize);
+            lpr = Lpr(ie, FLAGS_d_lpr, FLAGS_m_lpr, FLAGS_auto_resize, makeTagConfig(FLAGS_d_lpr, "LPR"));
             nrecognizersireq = nireq * 3;
         }
         std::shared_ptr<Worker> worker = std::make_shared<Worker>(FLAGS_n_wt - 1);
@@ -804,12 +812,14 @@ int main(int argc, char* argv[]) {
         worker->join();
         const auto t1 = std::chrono::steady_clock::now();
 
-        for (auto& net : std::array<std::vector<InferRequest>, 3>{context.detectorsInfers.getActualInferRequests(),
-                context.attributesInfers.getActualInferRequests(), context.platesInfers.getActualInferRequests()}) {
-            for (InferRequest& ir : net) {
+        for (auto& net : std::array<std::pair<std::vector<InferRequest>, std::string>, 3>{
+            std::make_pair(context.detectorsInfers.getActualInferRequests(), FLAGS_d),
+                std::make_pair(context.attributesInfers.getActualInferRequests(), FLAGS_d_va),
+                std::make_pair(context.platesInfers.getActualInferRequests(), FLAGS_d_lpr)}) {
+            for (InferRequest& ir : net.first) {
                 ir.Wait(IInferRequest::WaitMode::RESULT_READY);
-                if (FLAGS_pc) {
-                    printPerformanceCounts(ir, std::cout);
+                if (FLAGS_pc) {  // Show performace results
+                    printPerformanceCounts(ir, std::cout, getFullDeviceName(mapDevices, net.second));
                 }
             }
         }

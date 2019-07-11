@@ -33,19 +33,23 @@ static const char plugin_message[] = "Plugin name. For example, CPU. If this par
 "the demo will look for this plugin only.";
 
 /// @brief Message for assigning gaze calculation to device
-static const char target_device_message[] = "Optional. Target device for Gaze Estimation network (CPU, GPU, FPGA, or MYRIAD). " \
+static const char target_device_message[] = "Optional. Target device for Gaze Estimation network (the list of available devices is shown below). " \
+"Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
 
 /// @brief Message for assigning face detection calculation to device
-static const char target_device_message_fd[] = "Optional. Target device for Face Detection network (CPU, GPU, FPGA, or MYRIAD). " \
+static const char target_device_message_fd[] = "Optional. Target device for Face Detection network (the list of available devices is shown below). " \
+"Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
 
 /// @brief Message for assigning head pose calculation to device
-static const char target_device_message_hp[] = "Optional. Target device for Head Pose Estimation network (CPU, GPU, FPGA, or MYRIAD). " \
+static const char target_device_message_hp[] = "Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). " \
+"Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
 
 /// @brief Message for assigning facial landmarks calculation to device
-static const char target_device_message_lm[] = "Optional. Target device for Facial Landmarks Estimation network (CPU, GPU, FPGA, or MYRIAD). " \
+static const char target_device_message_lm[] = "Optional. Target device for Facial Landmarks Estimation network " \
+"(the list of available devices is shown below). Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo will look for a suitable plugin for device specified. Default value is \"CPU\".";
 
 /// @brief Message for assigning setting resolution of camera

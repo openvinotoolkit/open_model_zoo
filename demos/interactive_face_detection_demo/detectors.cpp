@@ -73,12 +73,12 @@ bool BaseDetection::enabled() const  {
     return _enabled;
 }
 
-void BaseDetection::printPerformanceCounts() {
+void BaseDetection::printPerformanceCounts(std::string fullDeviceName) {
     if (!enabled()) {
         return;
     }
     slog::info << "Performance counts for " << topoName << slog::endl << slog::endl;
-    ::printPerformanceCounts(request->GetPerformanceCounts(), std::cout, false);
+    ::printPerformanceCounts(*request, std::cout, fullDeviceName, false);
 }
 
 

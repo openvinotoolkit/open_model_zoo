@@ -1,11 +1,26 @@
 #!/usr/bin/env python
+"""
+ Copyright (c) 2019 Intel Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
 
 from __future__ import print_function
 
 import sys
 from argparse import ArgumentParser, SUPPRESS
 
-from openvino.inference_engine import IEPlugin
+from openvino.inference_engine import IECore
 
 from action_recognition_demo.models import IEModel
 from action_recognition_demo.result_renderer import ResultRenderer
@@ -18,20 +33,6 @@ def video_demo(encoder, decoder, videos, fps=30, labels=None):
     run_pipeline(videos, encoder, decoder, result_presenter.render_frame, fps=fps)
 
 
-def create_ie_plugin(device='CPU', cpu_extension=None, plugin_dir=None):
-    print("Initializing plugin for {} device...".format(device))
-    plugin = IEPlugin(device, plugin_dirs=plugin_dir)
-
-    if 'MYRIAD' in device:
-        myriad_config = {"VPU_HW_STAGES_OPTIMIZATION": "YES"}
-        plugin.set_config(myriad_config)
-
-    if cpu_extension and 'CPU' in device:
-        plugin.add_cpu_extension(cpu_extension)
-
-    return plugin
-
-
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
@@ -40,20 +41,19 @@ def build_argparser():
     args.add_argument("--decoder", help="Required. Path to decoder model", required=True, type=str)
 
     args.add_argument("-v", "--video",
-                        help="Optional. Path to a video or file. 'cam' for capturing video", type=str)
+                      help="Optional. Path to a video or file. 'cam' for capturing video", type=str)
     args.add_argument('-vl', '--video_list',
-                        help="Optional. Path to a list with video files (text file, one video per "
-                             "line)",
-                        type=str)
+                      help="Optional. Path to a list with video files (text file, one video per "
+                           "line)",
+                      type=str)
     args.add_argument("-e", "--cpu_extension",
-                        help="Optional. For CPU custom layers, if any. Absolute path to a shared library with the "
-                             "kernels implementation.", type=str, default=None)
-    args.add_argument("-pp", "--plugin_dir", help="Optional. Path to a plugin folder", type=str, default=None)
+                      help="Optional. For CPU custom layers, if any. Absolute path to a shared library with the "
+                           "kernels implementation.", type=str, default=None)
     args.add_argument("-d", "--device",
-                        help="Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is "
-                             "acceptable. The demo will look for a suitable plugin for the device specified. "
-                             "Default value is CPU",
-                        default="CPU", type=str)
+                      help="Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is "
+                           "acceptable. The demo will look for a suitable plugin for the device specified. "
+                           "Default value is CPU",
+                      default="CPU", type=str)
     args.add_argument("--fps", help="Optional. FPS for renderer", default=30, type=int)
     args.add_argument("-l", "--labels", help="Optional. Path to file with label names", type=str)
 
@@ -78,19 +78,29 @@ def main():
     else:
         labels = None
 
-    decoder_plugin = create_ie_plugin('CPU', cpu_extension=args.cpu_extension, plugin_dir=args.plugin_dir)
+    ie = IECore()
+
+    if 'MYRIAD' in args.device:
+        myriad_config = {"VPU_HW_STAGES_OPTIMIZATION": "YES"}
+        ie.set_config(myriad_config, "MYRIAD")
+
+    if args.cpu_extension and 'CPU' in args.device:
+        ie.add_extension(args.cpu_extension, "CPU")
+
+    decoder_target_device = "CPU"
     if args.device != 'CPU':
-        encoder_plugin = create_ie_plugin(args.device, cpu_extension=args.cpu_extension, plugin_dir=args.plugin_dir)
+        encoder_target_device = args.device
     else:
-        encoder_plugin = decoder_plugin
+        encoder_target_device = decoder_target_device
 
     encoder_xml = args.encoder
     encoder_bin = args.encoder.replace(".xml", ".bin")
     decoder_xml = args.decoder
     decoder_bin = args.decoder.replace(".xml", ".bin")
 
-    encoder = IEModel(encoder_xml, encoder_bin, encoder_plugin, num_requests=(3 if args.device == 'MYRIAD' else 1))
-    decoder = IEModel(decoder_xml, decoder_bin, decoder_plugin, num_requests=2)
+    encoder = IEModel(encoder_xml, encoder_bin, ie, encoder_target_device,
+                      num_requests=(3 if args.device == 'MYRIAD' else 1))
+    decoder = IEModel(decoder_xml, decoder_bin, ie, decoder_target_device, num_requests=2)
     video_demo(encoder, decoder, videos, args.fps, labels)
 
 

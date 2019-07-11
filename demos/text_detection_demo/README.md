@@ -15,7 +15,7 @@ On the start-up, the application reads command line parameters and loads one net
 
 If text recognition model is provided, the demo prints recognized text as well.
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Running
 
@@ -39,8 +39,8 @@ Options:
     -cls_pixel_thr "<value>"     Optional. Specify a confidence threshold for pixel classification. Pixels with classification confidence below specified threshold are rejected.
     -link_pixel_thr "<value>"    Optional. Specify a confidence threshold for pixel linkage. Pixels with linkage confidence below specified threshold are not linked.
     -max_rect_num "<value>"      Optional. Maximum number of rectangles to recognize. If it is negative, number of rectangles to recognize is not limited.
-    -d_td "<device>"             Optional. Specify the target device for the Text Detection model to infer on: CPU, GPU. The demo will look for a suitable plugin for a specified device. By default, it is CPU.
-    -d_tr "<device>"             Optional. Specify the target device for the Text Recognition model to infer on: CPU, GPU. The demo will look for a suitable plugin for a specified device. By default, it is CPU.
+    -d_td "<device>"             Optional. Specify the target device for the Text Detection model to infer on (the list of available devices is shown below). The demo will look for a suitable plugin for a specified device. By default, it is CPU.
+    -d_tr "<device>"             Optional. Specify the target device for the Text Recognition model to infer on (the list of available devices is shown below). The demo will look for a suitable plugin for a specified device. By default, it is CPU.
     -l "<absolute_path>"         Optional. Absolute path to a shared library with the CPU kernels implementation for custom layers.
     -c "<absolute_path>"         Optional. Absolute path to the GPU kernels implementation for custom layers.
     -no_show                     Optional. If it is true, then detected text will not be shown on image frame. By default, it is false.
@@ -63,6 +63,8 @@ For example, use the following command line command to run the application:
 ## Demo Output
 
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
+
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo is not supported with any of the Model Downloader available topologies. Other models may work incorrectly on these devices as well.
 
 ## See Also
 * [Using Open Model Zoo demos](../README.md)

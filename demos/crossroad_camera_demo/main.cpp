@@ -36,6 +36,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
     }
 
@@ -118,8 +119,8 @@ struct BaseDetection {
         return _enabled;
     }
 
-    void printPerformanceCounts() const {
-        ::printPerformanceCounts(request, std::cout);
+    void printPerformanceCounts(std::string fullDeviceName) const {
+        ::printPerformanceCounts(request, std::cout, fullDeviceName);
     }
 };
 
@@ -824,14 +825,15 @@ int main(int argc, char *argv[]) {
 
         /** Show performace results **/
         if (FLAGS_pc) {
+            std::map<std::string, std::string>  mapDevices = getMapFullDevicesNames(ie, deviceNames);
             std::cout << "Performance counts for person detection: " << std::endl;
-            personDetection.printPerformanceCounts();
+            personDetection.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d));
 
             std::cout << "Performance counts for person attributes: " << std::endl;
-            personAttribs.printPerformanceCounts();
+            personAttribs.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_pa));
 
             std::cout << "Performance counts for person re-identification: " << std::endl;
-            personReId.printPerformanceCounts();
+            personReId.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
         }
         // -----------------------------------------------------------------------------------------------------
     }

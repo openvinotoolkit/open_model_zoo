@@ -43,9 +43,7 @@ Options:
     -m "<path>"               Required. Path to an .xml file with a trained model.
       -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
       -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
-    -d "<device>"             Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will look for a suitable plugin for a specified device.
-    -pc                       Optional. Enables per-layer performance report
-    -niter "<integer>"        Optional. Number of iterations. Default value is 1
+    -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -bbox_name "<string>"     Optional. The name of output box prediction layer. Default value is "bbox_pred"
     -proposal_name "<string>" Optional. The name of output proposal layer. Default value is "proposal"
     -prob_name "<string>"     Optional. The name of output probability layer. Default value is "cls_prob"
@@ -68,6 +66,8 @@ You can use the following command to do inference on CPU on an image using a tra
 The application outputs an image (`out_0.bmp`) with detected objects enclosed in rectangles. It outputs the list of classes
 of the detected objects along with the respective confidence values and the coordinates of the
 rectangles to the standard output stream.
+
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo is not supported with any of the Model Downloader available topologies. Other models may work incorrectly on these devices as well.
 
 ## See Also
 * [Using Open Model Zoo demos](../README.md)

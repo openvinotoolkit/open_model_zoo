@@ -29,9 +29,8 @@ python3 object_detection_demo_yolov3_async.py -h
 The command yields the following usage message:
 ```
 usage: object_detection_demo_yolov3_async.py [-h] -m MODEL -i INPUT
-                                       [-l CPU_EXTENSION] [-pp PLUGIN_DIR]
-                                       [-d DEVICE] [--labels LABELS]
-                                       [-t PROB_THRESHOLD]
+                                       [-l CPU_EXTENSION] [-d DEVICE] 
+                                       [--labels LABELS] [-t PROB_THRESHOLD]
                                        [-iout IOU_THRESHOLD] [-ni NUMBER_ITER]
                                        [-pc] [-r]
 
@@ -46,8 +45,6 @@ Options:
                         Optional. Required for CPU custom layers. Absolute
                         path to a shared library with the kernels
                         implementations.
-  -pp PLUGIN_DIR, --plugin_dir PLUGIN_DIR
-                        Optional. Path to a plugin folder
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The sample

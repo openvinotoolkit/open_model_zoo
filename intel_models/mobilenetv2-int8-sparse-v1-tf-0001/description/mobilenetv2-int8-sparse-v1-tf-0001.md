@@ -23,6 +23,10 @@ The model output for `mobilenetv2-int8-sparse-v1-tf-0001` is the usual object cl
 
 The quality metrics calculated on ImageNet validation dataset is 71.42% accuracy top-1.
 
+| Metric                    | Value         |
+|---------------------------|---------------|
+| Accuracy top-1 (ImageNet) |        71.42% |
+
 ## Performance
 
 ## Input

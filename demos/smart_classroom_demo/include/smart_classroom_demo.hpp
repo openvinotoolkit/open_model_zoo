@@ -23,19 +23,27 @@ static const char face_reid_model_message[] = "Required. Path to the Face Reiden
 
 /// @brief Message for assigning Person/Action detection inference to device
 static const char target_device_message_action_detection[] = "Optional. Specify the target device for Person/Action Detection Retail "\
-                                            "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO). ";
+                                                             "(the list of available devices is shown below).Default value is CPU. " \
+                                                             "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+                                                             "The application looks for a suitable plugin for the specified device.";
 
 /// @brief Message for assigning Face Detection inference to device
 static const char target_device_message_face_detection[] = "Optional. Specify the target device for Face Detection Retail "\
-                                                           "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO).";
+                                                           "(the list of available devices is shown below).Default value is CPU. " \
+                                                           "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+                                                           "The application looks for a suitable plugin for the specified device.";
 
 /// @brief Message for assigning Landmarks Regression retail inference to device
 static const char target_device_message_landmarks_regression[] = "Optional. Specify the target device for Landmarks Regression Retail "\
-                                                        "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO). ";
+                                                                 "(the list of available devices is shown below).Default value is CPU. " \
+                                                                 "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+                                                                 "The application looks for a suitable plugin for the specified device.";
 
 /// @brief Message for assigning Face Reidentification retail inference to device
 static const char target_device_message_face_reid[] = "Optional. Specify the target device for Face Reidentification Retail "\
-                                                        "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO). ";
+                                                      "(the list of available devices is shown below).Default value is CPU. " \
+                                                      "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+                                                      "The application looks for a suitable plugin for the specified device.";
 
 /// @brief Message for performance counters
 static const char performance_counter_message[] = "Optional. Enables per-layer performance statistics.";

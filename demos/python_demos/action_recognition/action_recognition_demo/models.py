@@ -1,3 +1,19 @@
+"""
+ Copyright (c) 2019 Intel Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
 from collections import deque
 from itertools import cycle
 
@@ -66,9 +82,8 @@ class AsyncWrapper:
 
 
 class IEModel:
-    def __init__(self, model_xml, model_bin, ie_plugin, num_requests, batch_size=1):
+    def __init__(self, model_xml, model_bin, ie_core, target_device, num_requests, batch_size=1):
         # Plugin initialization for specified device and load extensions library if specified
-        self.plugin = ie_plugin
 
         # Read IR
         print("Reading IR...")
@@ -79,7 +94,7 @@ class IEModel:
 
         print("Loading IR to the plugin...")
 
-        self.exec_net = self.plugin.load(self.net, num_requests=num_requests)
+        self.exec_net = ie_core.load_network(network=self.net, device_name=target_device, num_requests=num_requests)
         self.input_name = next(iter(self.net.inputs))
         self.output_name = next(iter(self.net.outputs))
         self.input_size = self.net.inputs[self.input_name]

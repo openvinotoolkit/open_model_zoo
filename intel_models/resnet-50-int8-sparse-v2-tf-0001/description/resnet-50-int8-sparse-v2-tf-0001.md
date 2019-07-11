@@ -21,7 +21,11 @@ The model output for `resnet-50-int8-sparse-v2-tf-0001` is the usual object clas
 
 ## Accuracy
 
-The quality metrics calculated on ImageNet validation dataset is 75.9% accuracy top-1.
+The quality metrics calculated on ImageNet validation dataset is 74.56% accuracy top-1.
+
+| Metric                    | Value         |
+|---------------------------|---------------|
+| Accuracy top-1 (ImageNet) |        74.56% |
 
 ## Performance
 

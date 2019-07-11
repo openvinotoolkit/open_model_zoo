@@ -3,17 +3,11 @@
 //
 
 #include <gflags/gflags.h>
-#include <functional>
 #include <iostream>
 #include <memory>
 #include <map>
-#include <fstream>
-#include <random>
 #include <string>
 #include <vector>
-#include <time.h>
-#include <chrono>
-#include <limits>
 #include <iomanip>
 
 #include <inference_engine.hpp>
@@ -39,11 +33,8 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
-    }
-
-    if (FLAGS_niter < 1) {
-        throw std::logic_error("Parameter -niter should be greater than 0 (default: 1)");
     }
 
     if (FLAGS_i.empty()) {
@@ -107,11 +98,6 @@ int main(int argc, char *argv[]) {
             // clDNN Extensions are loaded from an .xml description and OpenCL kernel files
             ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
             slog::info << "GPU Extension loaded: " << FLAGS_c << slog::endl;
-        }
-
-        /** Setting parameter for per layer metrics **/
-        if (FLAGS_pc) {
-            ie.SetConfig({ { PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES } });
         }
 
         /** Printing device version **/
@@ -196,6 +182,7 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 5. Create infer request -------------------------------------------------
+        slog::info << "Create infer request" << slog::endl;
         InferRequest infer_request = executable_network.CreateInferRequest();
         // -----------------------------------------------------------------------------------------------------
 
@@ -227,22 +214,8 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 7. Do inference ---------------------------------------------------------
-        slog::info << "Start inference (" << FLAGS_niter << " iterations)" << slog::endl;
-
-        typedef std::chrono::high_resolution_clock Time;
-        typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
-        typedef std::chrono::duration<float> fsec;
-
-        double total = 0.0;
-        /** Start inference & calc performance **/
-        for (size_t iter = 0; iter < FLAGS_niter; ++iter) {
-            auto t0 = Time::now();
-            infer_request.Infer();
-            auto t1 = Time::now();
-            fsec fs = t1 - t0;
-            ms d = std::chrono::duration_cast<ms>(fs);
-            total += d.count();
-        }
+        slog::info << "Start inference" << slog::endl;
+        infer_request.Infer();
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 8. Process output -------------------------------------------------------
@@ -305,12 +278,6 @@ int main(int argc, char *argv[]) {
             slog::info << "File : " << fileName << " was created" << slog::endl;
         }
         // -----------------------------------------------------------------------------------------------------
-        std::cout << std::endl << "Average running time of one iteration: " << total / static_cast<double>(FLAGS_niter) << " ms" << std::endl << std::endl;
-
-        /** Show performance results **/
-        if (FLAGS_pc) {
-            printPerformanceCounts(infer_request, std::cout);
-        }
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;
@@ -322,5 +289,7 @@ int main(int argc, char *argv[]) {
     }
 
     slog::info << "Execution successful" << slog::endl;
+    slog::info << slog::endl << "This demo is an API example, for any performance measurements "
+                                "please use the dedicated benchmark_app tool from the openVINO toolkit" << slog::endl;
     return 0;
 }
