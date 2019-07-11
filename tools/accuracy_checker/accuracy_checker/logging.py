@@ -54,7 +54,7 @@ class ConsoleHandler(logging.StreamHandler):
 _LOGGING_CONFIGURATION = {
     'loggers': {
         _DEFAULT_LOGGER_NAME: {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
             'level': _LOGGING_LEVEL,
             'propagate': False
         }
@@ -72,12 +72,6 @@ _LOGGING_CONFIGURATION = {
         }
     },
     'handlers': {
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'formatter': 'detailed',
-            'filename': _DEFAULT_LOG_FILE,
-        },
         'console': {
             'level': 'DEBUG',
             '()': ConsoleHandler,
