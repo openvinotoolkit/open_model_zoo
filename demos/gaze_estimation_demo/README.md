@@ -85,10 +85,12 @@ The following keys are supported:
 * Esc - to quit the demo
 
 > **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
-* `face-detection-retail-0004`
-* `head-pose-estimation-adas-0001`
-* `facial-landmarks-35-adas-0002`
-All other models may work incorrectly on these devices.
+>* `gaze-estimation-adas-0002`
+>* `face-detection-retail-0004`
+>* `face-detection-adas-0001`
+>* `head-pose-estimation-adas-0001`
+>* `facial-landmarks-35-adas-0002`
+> Other models may produce unexpected result on these devices.
 
 ## See Also
 * [Using Open Model Zoo demos](../README.md)
