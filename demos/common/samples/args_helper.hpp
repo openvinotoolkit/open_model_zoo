@@ -18,6 +18,10 @@
 #include <iostream>
 #include <sys/stat.h>
 
+#include <sstream>
+#include <set>
+#include <algorithm>
+
 #include <samples/slog.hpp>
 
 #ifdef _WIN32
