@@ -40,7 +40,7 @@ class ResultRenderer(object):
         self.output_height = output_height
         self.meters = defaultdict(partial(WindowAverageMeter, 16))
         self.postprocessing = [LabelPostprocessing(n_frames=30, history_size=100) for _ in range(number_of_predictions)]
-        print("To close the application, press 'CTRL+C' here or switch to the output window and press any key")
+        print("To close the application, press 'CTRL+C' here or switch to the output window and press Esc or q")
 
     def update_timers(self, timers):
         self.meters['encoder'].update(timers['encoder'])
@@ -86,7 +86,8 @@ class ResultRenderer(object):
 
         cv2.imshow("Action Recognition", frame)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q') or key == ord('Q') or key == 27:
             return -1
 
 
