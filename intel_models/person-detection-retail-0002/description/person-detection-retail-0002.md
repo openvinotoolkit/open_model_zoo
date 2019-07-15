@@ -18,7 +18,7 @@ This is a pedestrian detector based on backbone with hyper-feature + R-FCN for t
 | Occlusion coverage              | <50%                                      |
 | Min pedestrian height           | 80 pixels (on 1080p)                      |
 | Max objects to detect           | 200                                       |
-| GFlops                          | 12.424                                    |
+| GFlops                          | 12.427                                    |
 | MParams                         | 3.244                                     |
 | Source framework                | Caffe*                                     |
 
