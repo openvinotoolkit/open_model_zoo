@@ -53,7 +53,7 @@ class ResultRenderer(object):
         if logits is not None:
             labels, probs = decode_output(logits, self.lables, top_k=self.number_of_predictions,
                                           label_postprocessing=self.postprocessing)
-            print("Frame {}: {} - {:.2f}% -- {:.2f} fps".format(frame_ind, labels[0], probs[0] * 100, inference_time))
+            print("Frame {}: {} - {:.2f}% -- {:.2f}ms".format(frame_ind, labels[0], probs[0] * 100, inference_time))
         else:
             labels = ['Preparing...']
             probs = [0.]
