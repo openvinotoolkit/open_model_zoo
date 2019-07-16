@@ -330,7 +330,19 @@ class DLSDKLauncher(Launcher):
         if cpu_extensions_name != 'AUTO':
             return cpu_extensions
         extensions_path = cpu_extensions.parent
-        file_format = '{}.dll' if platform.system() == 'Windows' else 'lib{}.so'
+        os_specific_formats = {
+            'Windows': '{}.dll',
+            'Darwin': 'lib{}d.dylib',
+            'Linux': 'lib{}.so'
+        }
+        system_name = platform.system()
+        file_format = os_specific_formats.get(system_name)
+        if not file_format:
+            raise ConfigError(
+                'Accuracy Checker can not automatically found cpu extensions library '
+                'for {} platform. Please, set cpu extension library manually.'.format(system_name)
+            )
+
         if not selection_mode:
             default_cpu_extension = file_format.format('cpu_extension')
             extension_list = list(extensions_path.glob(default_cpu_extension))
