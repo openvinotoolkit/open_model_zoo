@@ -326,43 +326,57 @@ class DLSDKLauncher(Launcher):
 
     @staticmethod
     def get_cpu_extension(cpu_extensions, selection_mode):
+        def get_cpu_extensions_list(file_format, base_name, selection_mode='',):
+            if not selection_mode:
+                default_cpu_extension = file_format.format(base_name)
+                extension_list = list(extensions_path.glob(default_cpu_extension))
+
+                if extension_list:
+                    return extension_list
+
+                cpu_info_flags = get_cpu_info()['flags']
+                supported_flags = ['avx512', 'avx2', 'sse4']
+                for flag in supported_flags:
+                    if flag in cpu_info_flags:
+                        selection_mode = flag
+                        break
+
+            extension_list = list(extensions_path.glob(file_format.format('{}_{}'.format(base_name, selection_mode))))
+
+            return extension_list
+
+        os_specific_formats = {
+            'Darwin': ('lib{}.dylib', 'lib{}.so'),
+            'Linux': 'lib{}.so',
+            'Windows': '{}.dll',
+        }
+
         cpu_extensions_name = cpu_extensions.parts[-1]
         if cpu_extensions_name != 'AUTO':
             return cpu_extensions
         extensions_path = cpu_extensions.parent
-        os_specific_formats = {
-            'Darwin': 'lib{}.dylib',
-            'Linux': 'lib{}.so',
-            'Windows': '{}.dll',
-        }
         system_name = platform.system()
-        file_format = os_specific_formats.get(system_name)
-        if not file_format:
+        file_formats = os_specific_formats.get(system_name)
+        if not file_formats:
             raise ConfigError(
                 'Accuracy Checker can not automatically find cpu extensions library '
                 'for {} platform. Please, set cpu extension library manually.'.format(system_name)
             )
 
-        if not selection_mode:
-            default_cpu_extension = file_format.format('cpu_extension')
-            extension_list = list(extensions_path.glob(default_cpu_extension))
+        if not isinstance(file_formats, (list, tuple)):
+            file_formats = [file_formats]
 
+        extension_list = []
+
+        for supported_format in file_formats:
+            extension_list = get_cpu_extensions_list(supported_format, 'cpu_extension', selection_mode)
             if extension_list:
-                return extension_list[0]
-
-            cpu_info_flags = get_cpu_info()['flags']
-            supported_flags = ['avx512', 'avx2', 'sse4']
-            for flag in supported_flags:
-                if flag in cpu_info_flags:
-                    selection_mode = flag
-                    break
-        extension_list = list(extensions_path.glob(file_format.format('cpu_extension_{}'.format(selection_mode))))
+                break
 
         if not extension_list:
             raise ConfigError('suitable CPU extension lib not found in {}'.format(extensions_path))
 
         return extension_list[0]
-
 
 
     @staticmethod
