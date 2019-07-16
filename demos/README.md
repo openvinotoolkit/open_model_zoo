@@ -51,8 +51,9 @@ The table below shows the correlation between models, demos, and supported plugi
 | person-vehicle-bike-detection-crossroad-0078     | [Crossroad Camera Demo](./crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
 | human-pose-estimation-adas-0001                  | [Human Pose Estimation Demo](./human_pose_estimation_demo/README.md)                  | Supported | Supported | Supported   | Supported       |
 | semantic-segmentation-adas-0001                  | [Image Segmentation Demo](./segmentation_demo/README.md)                              | Supported | Supported |             | Supported       |
-| instance-segmentation-security-0033              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported | Supported |             | Supported       |
-| instance-segmentation-security-0049              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported | Supported |             | Supported       |
+| instance-segmentation-security-0010              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported |           |             | Supported       |
+| instance-segmentation-security-0050              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported |           |             | Supported       |
+| instance-segmentation-security-0083              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported |           |             | Supported       |
 | age-gender-recognition-retail-0013               | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
 | emotions-recognition-retail-0003                 | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
 | face-detection-adas-0001                         | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
@@ -69,9 +70,9 @@ The table below shows the correlation between models, demos, and supported plugi
 | person-detection-action-recognition-teacher-0002 | [Smart Classroom Demo](./smart_classroom_demo/README.md)                              | Supported | Supported |             | Supported       |
 | single-image-super-resolution-1032               | [Super Resolution Demo](./super_resolution_demo/README.md)                            | Supported | Supported |             | Supported       |
 | single-image-super-resolution-1033               | [Super Resolution Demo](./super_resolution_demo/README.md)                            | Supported | Supported |             | Supported       |
-| text-detection-0002                              | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             | Supported       |
+| text-detection-0003                              | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             | Supported       |
+| text-detection-0004                              | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             | Supported       |
 | text-recognition-0012                            | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             |                 |
-| face-person-detection-retail-0002                | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
 | pedestrian-and-vehicle-detector-adas-0001        | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
 | pedestrian-detection-adas-0002                   | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
 | pedestrian-detection-adas-binary-0001            | any demo that supports SSD\*-based models, above                                                               | Supported | Supported |             |                 |

@@ -2575,7 +2575,6 @@ License terms:
 * face-detection-adas-binary-0001
 * face-detection-retail-0004
 * face-detection-retail-0005
-* face-person-detection-retail-0002
 * face-reidentification-retail-0095
 * facial-landmarks-35-adas-0002
 * gaze-estimation-adas-0002
@@ -2585,8 +2584,9 @@ License terms:
 * inceptionv3-int8-sparse-v1-tf-0001
 * inceptionv3-int8-sparse-v2-tf-0001
 * inceptionv3-int8-tf-0001
-* instance-segmentation-security-0033
-* instance-segmentation-security-0049
+* instance-segmentation-security-0010
+* instance-segmentation-security-0050
+* instance-segmentation-security-0083
 * landmarks-regression-retail-0009
 * license-plate-recognition-barrier-0001
 * mobilenetv2-int8-sparse-v1-tf-0001
