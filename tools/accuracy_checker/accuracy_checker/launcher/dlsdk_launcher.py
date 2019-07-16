@@ -326,7 +326,7 @@ class DLSDKLauncher(Launcher):
 
     @staticmethod
     def get_cpu_extension(cpu_extensions, selection_mode):
-        def get_cpu_extensions_list(file_format, base_name, selection_mode='',):
+        def get_cpu_extensions_list(file_format, base_name, selection_mode):
             if not selection_mode:
                 default_cpu_extension = file_format.format(base_name)
                 extension_list = list(extensions_path.glob(default_cpu_extension))
@@ -335,10 +335,16 @@ class DLSDKLauncher(Launcher):
                     return extension_list
 
                 cpu_info_flags = get_cpu_info()['flags']
-                supported_flags = ['avx512', 'avx2', 'sse4']
+                supported_flags = ['avx512', 'avx2', 'sse4_1', 'sse4_2']
+                cpu_info_flag_to_suffix = {
+                    'avx512': 'avx512',
+                    'avx2': 'avx2',
+                    'sse4_1': 'sse4',
+                    'sse4_2': 'sse4'
+                }
                 for flag in supported_flags:
+                    selection_mode = cpu_info_flag_to_suffix[flag]
                     if flag in cpu_info_flags:
-                        selection_mode = flag
                         break
 
             extension_list = list(extensions_path.glob(file_format.format('{}_{}'.format(base_name, selection_mode))))
@@ -347,8 +353,8 @@ class DLSDKLauncher(Launcher):
 
         os_specific_formats = {
             'Darwin': ('lib{}.dylib', 'lib{}.so'),
-            'Linux': 'lib{}.so',
-            'Windows': '{}.dll',
+            'Linux': ('lib{}.so', ),
+            'Windows': ('{}.dll', ),
         }
 
         cpu_extensions_name = cpu_extensions.parts[-1]
@@ -362,9 +368,6 @@ class DLSDKLauncher(Launcher):
                 'Accuracy Checker can not automatically find cpu extensions library '
                 'for {} platform. Please, set cpu extension library manually.'.format(system_name)
             )
-
-        if not isinstance(file_formats, (list, tuple)):
-            file_formats = [file_formats]
 
         extension_list = []
 
