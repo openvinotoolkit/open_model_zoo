@@ -343,29 +343,20 @@ class DLSDKLauncher(Launcher):
                 'for {} platform. Please, set cpu extension library manually.'.format(system_name)
             )
 
-        def get_cpu_extensions_list(file_format, base_name, selection_mode='',):
-            if not selection_mode:
-                default_cpu_extension = file_format.format(base_name)
-                extension_list = list(extensions_path.glob(default_cpu_extension))
+        if not selection_mode:
+            default_cpu_extension = file_format.format('cpu_extension')
+            extension_list = list(extensions_path.glob(default_cpu_extension))
 
-                if extension_list:
-                    return extension_list
+            if extension_list:
+                return extension_list[0]
 
-                cpu_info_flags = get_cpu_info()['flags']
-                supported_flags = ['avx512', 'avx2', 'sse4']
-                for flag in supported_flags:
-                    if flag in cpu_info_flags:
-                        selection_mode = flag
-                        break
-
-            extension_list = list(extensions_path.glob(file_format.format('{}_{}'.format(base_name, selection_mode))))
-
-            return extension_list
-
-        extension_list = get_cpu_extensions_list(file_format, 'cpu_extension', selection_mode)
-
-        if not extension_list and system_name == 'Darwin':
-            extension_list = get_cpu_extensions_list(file_format, 'cpu_extensiond', selection_mode)
+            cpu_info_flags = get_cpu_info()['flags']
+            supported_flags = ['avx512', 'avx2', 'sse4']
+            for flag in supported_flags:
+                if flag in cpu_info_flags:
+                    selection_mode = flag
+                    break
+        extension_list = list(extensions_path.glob(file_format.format('cpu_extension_{}'.format(selection_mode))))
 
         if not extension_list:
             raise ConfigError('suitable CPU extension lib not found in {}'.format(extensions_path))
