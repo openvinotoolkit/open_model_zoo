@@ -25,6 +25,7 @@ from openvino.inference_engine import IECore
 from action_recognition_demo.models import IEModel
 from action_recognition_demo.result_renderer import ResultRenderer
 from action_recognition_demo.steps import run_pipeline
+from os import path
 
 
 def video_demo(encoder, decoder, videos, fps=30, labels=None):
@@ -37,16 +38,11 @@ def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("--encoder", help="Required. Path to encoder model", required=True, type=str)
-    args.add_argument("--decoder", help="Required. Path to decoder model", required=True, type=str)
-
-    args.add_argument("-v", "--video",
-                      help="Optional. Path to a video or file. 'cam' for capturing video", type=str)
-    args.add_argument('-vl', '--video_list',
-                      help="Optional. Path to a list with video files (text file, one video per "
-                           "line)",
-                      type=str)
-    args.add_argument("-e", "--cpu_extension",
+    args.add_argument("-m_en", "--m_encoder", help="Required. Path to encoder model", required=True, type=str)
+    args.add_argument("-m_de", "--m_decoder", help="Required. Path to decoder model", required=True, type=str)
+    args.add_argument("-i", "--input",
+                      help="Required. Path to a video or a .txt file with a list of video files (one video per line)", type=str)
+    args.add_argument("-l", "--cpu_extension",
                       help="Optional. For CPU custom layers, if any. Absolute path to a shared library with the "
                            "kernels implementation.", type=str, default=None)
     args.add_argument("-d", "--device",
@@ -55,7 +51,7 @@ def build_argparser():
                            "Default value is CPU",
                       default="CPU", type=str)
     args.add_argument("--fps", help="Optional. FPS for renderer", default=30, type=int)
-    args.add_argument("-l", "--labels", help="Optional. Path to file with label names", type=str)
+    args.add_argument("-lb", "--labels", help="Optional. Path to file with label names", type=str)
 
     return parser
 
@@ -63,14 +59,17 @@ def build_argparser():
 def main():
     args = build_argparser().parse_args()
 
-    if args.video_list:
-        with open(args.video_list) as f:
-            videos = [line.strip() for line in f.read().split('\n')]
-    if args.video:
-        videos = [args.video]
+    full_name = path.basename(args.input)
+    extension = path.splitext(full_name)[1]
 
-    if not args.video_list and not args.video:
-        raise ValueError("Either --video or --video_list option is expected")
+    if '.txt' in  extension:
+        with open(args.input) as f:
+            videos = [line.strip() for line in f.read().split('\n')]
+    else:
+        videos = [args.input]
+
+    if not args.input:
+        raise ValueError("--input option is expected")
 
     if args.labels:
         with open(args.labels) as f:
@@ -93,10 +92,10 @@ def main():
     else:
         encoder_target_device = decoder_target_device
 
-    encoder_xml = args.encoder
-    encoder_bin = args.encoder.replace(".xml", ".bin")
-    decoder_xml = args.decoder
-    decoder_bin = args.decoder.replace(".xml", ".bin")
+    encoder_xml = args.m_encoder
+    encoder_bin = args.m_encoder.replace(".xml", ".bin")
+    decoder_xml = args.m_decoder
+    decoder_bin = args.m_decoder.replace(".xml", ".bin")
 
     encoder = IEModel(encoder_xml, encoder_bin, ie, encoder_target_device,
                       num_requests=(3 if args.device == 'MYRIAD' else 1))
