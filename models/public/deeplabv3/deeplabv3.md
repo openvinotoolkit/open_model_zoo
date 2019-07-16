@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-DeepLab is a state-of-art deep learning model for semantic image segmentation. For details see [paper](https://arxiv.org/pdf/1706.05587.pdf)
+DeepLab is a state-of-art deep learning model for semantic image segmentation. For details see [paper](https://arxiv.org/pdf/1706.05587.pdf).
 
 ## Example
 
@@ -23,7 +23,7 @@ DeepLab is a state-of-art deep learning model for semantic image segmentation. F
 
 ### Original model
 
-Image, name - `ImageTensor`, shape - [1x513x513x3], format [BxHxWxC],
+Image, name: `ImageTensor`, shape: [1x513x513x3], format: [BxHxWxC],
    where:
 
     - B - batch size
@@ -31,11 +31,11 @@ Image, name - `ImageTensor`, shape - [1x513x513x3], format [BxHxWxC],
     - W - image width
     - C - number of channels
 
-   Expected color order - BGR.
+   Expected color order: BGR.
 
-### Converted model
+### Converted Model
 
-Image, name - `mul_1/placeholder_port_1`, shape - [1x3x513x513], format [BxCxHxW],
+Image, name: `mul_1/placeholder_port_1`, shape: [1x3x513x513], format: [BxCxHxW],
    where:
 
     - B - batch size
@@ -43,22 +43,22 @@ Image, name - `mul_1/placeholder_port_1`, shape - [1x3x513x513], format [BxCxHxW
     - H - image height
     - W - image width
 
-   Expected color order - BGR.
+   Expected color order: BGR.
 
 ## Output
 
-### Original model
+### Original Model
 
-Integer values in range [0, 20], which represents the index of predicted class for each image pixel. Name - `ArgMax`, shape - [1x513x513] in [BxHxW] format, where
+Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `ArgMax`, shape: [1x513x513] in [BxHxW] format, where
 
     - B - batch size
     - H - image height
     - W - image width
 
 
-### Converted model
+### Converted Model
 
-Integer values in range [0, 20], which represents the index of predicted class for each image pixel. Name - `ArgMax/Squeeze`, shape - [1x513x513] in [BxHxW] format, where
+Integer values in a range [0, 20], which represent an index of a predicted class for each image pixel. Name: `ArgMax/Squeeze`, shape: [1x513x513] in [BxHxW] format, where
 
     - B - batch size
     - H - image height

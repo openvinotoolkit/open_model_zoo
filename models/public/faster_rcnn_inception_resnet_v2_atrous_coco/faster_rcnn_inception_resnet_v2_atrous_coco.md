@@ -19,9 +19,9 @@ Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection.
 
 ## Input
 
-### Original model
+### Original Model
 
-Image, name - `image_tensor`, shape - [1x600x600x3], format [BxHxWxC],
+Image, name: `image_tensor`, shape: [1x600x600x3], format: [BxHxWxC],
    where:
 
     - B - batch size
@@ -29,11 +29,11 @@ Image, name - `image_tensor`, shape - [1x600x600x3], format [BxHxWxC],
     - W - image width
     - C - number of channels
 
-   Expected color order - RGB.
+   Expected color order: RGB.
 
-### Converted model
+### Converted Model
 
-1. Image, name - `image_tensor`, shape - [1x3x600x600], format [BxCxHxW],
+1. Image, name: `image_tensor`, shape: [1x3x600x600], format: [BxCxHxW],
    where:
 
     - B - batch size
@@ -41,26 +41,26 @@ Image, name - `image_tensor`, shape - [1x600x600x3], format [BxHxWxC],
     - H - image height
     - W - image width
 
-   Expected color order - BGR.
+   Expected color order: BGR.
 
-2. Information of input image size, name - `image_info`, shape - [1x3], in format [BxC],
+2. Information of input image size, name: `image_info`, shape: [1x3], format: [BxC],
    where:
 
     - B - batch size
-    - C - vector of 3 values in format [H,W,S], where H - image height, W - imahe width, S - image scale factor (usually 1)
+    - C - vector of three values in a format [H,W,S], where H is an image height, W is an image width, S is an image scale factor (usually 1).
 
 ## Output
 
-### Original model
+### Original Model
 
-1. Classifier, name - `detection_classes`, contains predicted bounding boxes classes in range [1, 91]. The model was trained on Microsoft\* COCO dataset version with 90 categories of object.
-2. Probability, name - `detection_scores`, contains probability of detected bounding boxes.
-3. Detection box, name - `detection_boxes`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are rescaled to input image size.
-4. Detections number, name - `num_detections`, contains the number of predicted detection boxes.
+1. Classifier, name: `detection_classes`. Contains predicted bounding boxes classes in a range [1, 91]. The model was trained on the Microsoft\* COCO dataset version with 90 categories of object.
+2. Probability, name: `detection_scores`. Contains probability of detected bounding boxes.
+3. Detection box, name: `detection_boxes`. Contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates of the top left corner, (`x_max`, `y_max`) are coordinates of the right bottom corner. Coordinates are rescaled to input image size.
+4. Detections number, name: `num_detections`. Contains the number of predicted detection boxes.
 
-### Converted model
+### Converted Model
 
-The array of summary detection information, name - `reshape_do_2d`, shape - [1, 1, N, 7], where N is the number of detected
+The array of summary detection information, name: `reshape_do_2d`, shape: [1, 1, N, 7], where N is the number of detected
 bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
     where:
