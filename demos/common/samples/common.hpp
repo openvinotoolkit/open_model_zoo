@@ -1114,14 +1114,11 @@ inline std::size_t getTensorBatch(const InferenceEngine::TensorDesc& desc) {
 inline void showAvailableDevices() {
     InferenceEngine::Core ie;
     std::vector<std::string> devices = ie.GetAvailableDevices();
-    if (!devices.empty()) {
-        std::cout << std::endl;
-        std::cout << "Available target devices:";
-        for (const auto& device : devices) {
-            std::cout << "  " << device;
-        }
-        std::cout << "  HDDL" << std::endl;
-    } else {
-        THROW_IE_EXCEPTION << "Not available any target device to infer on";
+
+    std::cout << std::endl;
+    std::cout << "Available target devices:";
+    for (const auto& device : devices) {
+        std::cout << "  " << device;
     }
+    std::cout << "  HDDL" << std::endl;
 }
