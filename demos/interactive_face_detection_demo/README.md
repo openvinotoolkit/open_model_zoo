@@ -102,6 +102,14 @@ For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-train
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).
 The demo reports total image throughput which includes frame decoding time, inference time, time to render bounding boxes and labels, and time to display the results.
 
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
+>* `face-detection-adas-0001`
+>* `age-gender-recognition-retail-0013`
+>* `head-pose-estimation-adas-0001`
+>* `emotions-recognition-retail-0003`
+>* `facial-landmarks-35-adas-0002`
+> Other models may produce unexpected results on these devices.
+
 ## See Also
 * [Using Open Model Zoo demos](../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)

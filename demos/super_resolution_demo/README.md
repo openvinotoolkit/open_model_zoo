@@ -54,7 +54,7 @@ To do inference on CPU using a trained model, run the following command:
 The application outputs a reconstructed high-resolution image and saves it in
 the current working directory as `*.bmp` file with `sr` prefix.
 
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo is not supported with any of the Model Downloader available topologies. Other models may work incorrectly on these devices as well.
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo is not supported with any of the Model Downloader available topologies. Other models may produce unexpected results on these devices as well.
 
 ## See Also
 * [Using Open Model Zoo demos](../README.md)

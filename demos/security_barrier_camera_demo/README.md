@@ -75,7 +75,7 @@ Options:
     -fps                       Optional. Set the playback speed not faster than the specified FPS. 0 removes the upper bound.
     -n_wt                      Optional. Set the number of threads including the main thread a Worker class will use.
     -display_resolution        Optional. Specify the maximum output window resolution.
-    -tag                       Optional. For HDDL plugin only. Running each network on a set of Intel(R) Movidius(TM) X VPUs with a specific tag. You must specify the number of VPUs for each network in the hddl_service.config file. Refer to the corresponding README file for more information.
+    -tag                       Optional. Required for HDDL plugin only. If not set, the performance on Intel(R) Movidius(TM) X VPUs will not be optimal. Running each network on a set of Intel(R) Movidius(TM) X VPUs with a specific tag. You must specify the number of VPUs for each network in the hddl_service.config file. Refer to the corresponding README file for more information.
 
 ```
 
@@ -121,6 +121,11 @@ If you build the Inference Engine with the OMP, you can use the following parame
 
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
 
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
+>* `vehicle-license-plate-detection-barrier-0106`
+>* `vehicle-attributes-recognition-barrier-0039`
+>* `license-plate-recognition-barrier-0001`
+> Other models may produce unexpected results on these devices.
 
 ## See Also
 * [Using Open Model Zoo demos](../README.md)
