@@ -1120,6 +1120,7 @@ inline void showAvailableDevices() {
         for (const auto& device : devices) {
             std::cout << "  " << device;
         }
+        std::cout << "  HDDL" << std::endl;
     } else {
         THROW_IE_EXCEPTION << "Not available any target device to infer on";
     }
