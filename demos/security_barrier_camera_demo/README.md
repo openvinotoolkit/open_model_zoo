@@ -122,9 +122,9 @@ If you build the Inference Engine with the OMP, you can use the following parame
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
 
 > **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
->* `vehicle-license-plate-detection-barrier-0106`
->* `vehicle-attributes-recognition-barrier-0039`
 >* `license-plate-recognition-barrier-0001`
+>* `vehicle-attributes-recognition-barrier-0039`
+>* `vehicle-license-plate-detection-barrier-0106`
 > Other models may produce unexpected results on these devices.
 
 ## See Also
