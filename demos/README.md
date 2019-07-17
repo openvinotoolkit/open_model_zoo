@@ -62,7 +62,7 @@ The table below shows the correlation between models, demos, and supported plugi
 | facial-landmarks-35-adas-0002                    | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
 | head-pose-estimation-adas-0001                   | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
 | license-plate-recognition-barrier-0001           | [Security Barrier Camera Demo](./security_barrier_camera_demo/README.md)              | Supported | Supported | Supported   | Supported       |
-| vehicle-attributes-recognition-barrier-0039      | [Security Barrier Camera Demo](/.security_barrier_camera_demo/README.md)              | Supported | Supported | Supported   | Supported       |
+| vehicle-attributes-recognition-barrier-0039      | [Security Barrier Camera Demo](./security_barrier_camera_demo/README.md)              | Supported | Supported | Supported   | Supported       |
 | vehicle-license-plate-detection-barrier-0106     | [Security Barrier Camera Demo](./security_barrier_camera_demo/README.md)              | Supported | Supported | Supported   | Supported       |
 | face-reidentification-retail-0095                | [Smart Classroom Demo](./smart_classroom_demo/README.md)                              | Supported | Supported | Supported   | Supported       |
 | landmarks-regression-retail-0009                 | [Smart Classroom Demo](./smart_classroom_demo/README.md)                              | Supported | Supported | Supported   | Supported       |
