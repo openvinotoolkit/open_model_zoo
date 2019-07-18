@@ -1283,8 +1283,7 @@ topologies:
     model_optimizer_args:
       - --framework=tf
       - --data_type=FP32
-      - --reverse_input_channels
-      - --input_shape=[1,300,300,3]
+      - --input_shape=[1,600,600,3]
       - --input=Placeholder
       - --mean_values=Placeholder[102.9801,115.9465,122.7717]
       - --output=Reshape_2,rpn_bbox_pred/Reshape_1
