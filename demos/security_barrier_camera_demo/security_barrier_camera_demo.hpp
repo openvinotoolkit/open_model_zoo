@@ -91,8 +91,9 @@ static const char worker_threads[] = "Optional. Set the number of threads includ
 static const char display_resolution_message[] = "Optional. Specify the maximum output window resolution.";
 
 /// @brief Message for using tag scheduler
-static const char use_tag_scheduler_message[] = "Optional. For HDDL plugin only. Running each network on a set of "
-                                                "Intel(R) Movidius(TM) X VPUs with a specific tag. "
+static const char use_tag_scheduler_message[] = "Required for HDDL plugin only. "
+                                                "If not set, the performance on Intel(R) Movidius(TM) X VPUs will not be optimal. "
+                                                "Running each network on a set of Intel(R) Movidius(TM) X VPUs with a specific tag. "
                                                 "You must specify the number of VPUs for each network in the hddl_service.config file. "
                                                 "Refer to the corresponding README file for more information.";
 

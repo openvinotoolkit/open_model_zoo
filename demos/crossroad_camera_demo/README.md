@@ -85,6 +85,11 @@ If Person Attributes Recognition or Person Reidentification Retail are enabled, 
 	* **Person Attributes Recognition time** - Inference time of Person Attributes Recognition averaged by the number of detected persons.
 	* **Person Reidentification time** - Inference time of Person Reidentification averaged by the number of detected persons.
 
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
+>* `person-attributes-recognition-crossroad-0230`
+>* `person-reidentification-retail-0079`
+>* `person-vehicle-bike-detection-crossroad-0078`
+> Other models may produce unexpected results on these devices.
 
 ## See Also
 * [Using Open Model Zoo demos](../README.md)

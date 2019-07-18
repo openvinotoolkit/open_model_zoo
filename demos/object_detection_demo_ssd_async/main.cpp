@@ -7,7 +7,10 @@
 * \file object_detection_demo_ssd_async/main.cpp
 * \example object_detection_demo_ssd_async/main.cpp
 */
+
 #include <gflags/gflags.h>
+
+#include <chrono>
 #include <iostream>
 #include <memory>
 #include <vector>

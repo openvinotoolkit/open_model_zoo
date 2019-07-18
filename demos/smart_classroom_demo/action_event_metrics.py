@@ -20,6 +20,7 @@ from os.path import exists
 
 import json
 import numpy as np
+from builtins import range
 from lxml import etree
 from tqdm import tqdm
 
@@ -91,7 +92,7 @@ def load_annotation(file_path):
                 continue
 
             action_name = None
-            for bbox_attr_id in xrange(len(bbox)):
+            for bbox_attr_id in range(len(bbox)):
                 attribute_name = bbox[bbox_attr_id].attrib['name']
                 if attribute_name != 'action':
                     continue
@@ -169,13 +170,13 @@ def match_detections(predicted_data, gt_data, min_iou):
 
         matches = []
         visited_gt = np.zeros(len(gt_bboxes), dtype=np.bool)
-        for i in xrange(len(sorted_predicted_bboxes)):
+        for i in range(len(sorted_predicted_bboxes)):
             predicted_id = sorted_predicted_bboxes[i][0]
             predicted_bbox = sorted_predicted_bboxes[i][1]
 
             best_overlap = 0.0
             best_gt_id = -1
-            for gt_id in xrange(len(gt_bboxes)):
+            for gt_id in range(len(gt_bboxes)):
                 if visited_gt[gt_id]:
                     continue
 
@@ -274,7 +275,7 @@ def extract_events(frame_events, window_size, min_length, frame_limits):
 
         if len(input_events) > 0:
             last_range = Range(input_events[0][0], input_events[0][0] + 1, input_events[0][1])
-            for i in xrange(1, len(input_events)):
+            for i in range(1, len(input_events)):
                 if last_range.end + window_size - 1 >= input_events[i][0] and last_range.label == input_events[i][1]:
                     last_range = last_range._replace(end=input_events[i][0] + 1)
                 else:
@@ -324,7 +325,7 @@ def extract_events(frame_events, window_size, min_length, frame_limits):
 
         if len(input_events) > 0:
             last_event = input_events[0]
-            for event_id in xrange(1, len(input_events)):
+            for event_id in range(1, len(input_events)):
                 cur_event = input_events[event_id]
 
                 middle_point = int(0.5 * (last_event.end + cur_event.start))
@@ -382,10 +383,10 @@ def match_events(gt_events, pred_events):
         return []
 
     matches = []
-    for pred_id in xrange(len(pred_events)):
+    for pred_id in range(len(pred_events)):
         best_overlap_value = 0
         best_gt_id = -1
-        for gt_id in xrange(len(gt_events)):
+        for gt_id in range(len(gt_events)):
             intersect_start = np.maximum(gt_events[gt_id].start, pred_events[pred_id].start)
             intersect_end = np.minimum(gt_events[gt_id].end, pred_events[pred_id].end)
 

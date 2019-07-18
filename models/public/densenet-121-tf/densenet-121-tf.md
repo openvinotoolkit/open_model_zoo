@@ -2,8 +2,8 @@
 
 ## Use Case and High-Level Description
 
-This is an Tensorflow\* version of `densenet-121` model, one of the DenseNet
-group of models designed to perform image classification. The weights were converted from DenseNet-Keras Models. For details see [repository](https://github.com/pudae/tensorflow-densenet/), [paper](https://arxiv.org/pdf/1608.06993.pdf)
+This is an Tensorflow\* version of `densenet-121` model, one of the DenseNet\*
+group of models designed to perform image classification. The weights were converted from DenseNet-Keras Models. For details, see [repository](https://github.com/pudae/tensorflow-densenet/) and [paper](https://arxiv.org/pdf/1608.06993.pdf).
 
 ## Example
 
@@ -20,9 +20,9 @@ group of models designed to perform image classification. The weights were conve
 
 ## Input
 
-### Original model
+### Original Model
 
-Image, name - `Placeholder` , shape - [1x224x224x3], format [BxHxWxC],
+Image, name: `Placeholder` , shape: [1x224x224x3], format: [BxHxWxC],
    where:
 
     - B - batch size
@@ -30,12 +30,12 @@ Image, name - `Placeholder` , shape - [1x224x224x3], format [BxHxWxC],
     - W - image width
     - C - number of channels
 
-   Expected color order - RGB.
-   Mean values - [123.68, 116.78, 103.94], scale factor for each channel - 58.8235294
+   Expected color order: RGB.
+   Mean values: [123.68, 116.78, 103.94], scale factor for each channel: 58.8235294
 
-### Converted model
+### Converted Model
 
-Image, name - `Placeholder`, shape - [1x3x224x224], [BxCxHxW],
+Image, name: `Placeholder`, shape: [1x3x224x224], [BxCxHxW],
    where:
 
     - B - batch size
@@ -43,17 +43,17 @@ Image, name - `Placeholder`, shape - [1x3x224x224], [BxCxHxW],
     - H - image height
     - W - image width
 
-   Expected color order - BGR.
+   Expected color order: BGR.
 
 ## Output
 
-### Original model
+### Original Model
 
-Floating point values in range [0, 1], which represent probabilities for classes in dataset. Name - `densenet121/predictions/Reshape_1`.
+Floating point values in a range [0, 1], which represent probabilities for classes in a dataset. Name: `densenet121/predictions/Reshape_1`.
 
-### Converted model
+### Converted Model
 
-Floating point values in range [0, 1], which represent probabilities for classes in dataset. Name - `densenet121/predictions/Reshape_1/Transpose`, shape - [1, 1, 1, 1000].
+Floating point values in a range [0, 1], which represent probabilities for classes in a dataset. Name: `densenet121/predictions/Reshape_1/Transpose`, shape - [1, 1, 1, 1000].
 
 ## Legal Information
 

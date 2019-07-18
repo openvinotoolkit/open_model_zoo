@@ -111,12 +111,15 @@ class MaskRCNNAdapter(Adapter):
 
         for identifier, image_meta in zip(identifiers, frame_meta):
             original_image_size = image_meta['image_size'][:2]
-            if 'scale_x' in image_meta and 'scale_y':
-                im_scale = min(image_meta['scale_x'], image_meta['scale_y'])
+            if 'scale_x' in image_meta and 'scale_y' in image_meta:
+                im_scale_x = image_meta['scale_x']
+                im_scale_y = image_meta['scale_y']
             else:
                 processed_image_size = next(image_meta['input_shape'])[1:]
-                im_scale = processed_image_size[0] / original_image_size[0]
-            boxes = boxes / im_scale
+                im_scale_y = processed_image_size[0] / original_image_size[0]
+                im_scale_x = processed_image_size[1] / original_image_size[1]
+            boxes[:, 0::2] /= im_scale_x
+            boxes[:, 1::2] /= im_scale_y
             classes = classes.astype(np.uint32)
             masks = []
             for box, cls, raw_mask in zip(boxes, classes, raw_masks):

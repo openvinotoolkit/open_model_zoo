@@ -4,6 +4,7 @@
 
 #include "cnn.hpp"
 
+#include <chrono>
 #include <map>
 #include <string>
 
