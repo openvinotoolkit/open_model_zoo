@@ -85,7 +85,7 @@ python3 instance_segmentation_demo/instance_segmentation_demo.py \
     --label instance_segmentation_demo/coco_labels.txt \
     -l <openvino_root>/inference_engine/lib/intel64/libcpu_extension_avx2.so \
     --no_keep_aspect_ratio \
-    --video 0 \
+    -i 0 \
     --delay 1
 ```
 
