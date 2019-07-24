@@ -3491,6 +3491,7 @@ topologies:
 
       The model output is typical object classifier for the 1000 different classifications
       matching with those in the ImageNet database.
+    task_type: "classification"
     files:
       - name: MobileNetV2.py
         sha256: 7071e01e07e5f1b6127a2628d1be9c65cc20edfa745f4f4eb6354e7b27f5b444
@@ -3534,6 +3535,7 @@ topologies:
 
       The model output is typical object classifier for the 1000 different classifications
       matching with those in the ImageNet database.
+    task_type: "classification"
     files:
       - name: inception_v3_google-1a9a5a14.pth
         sha256: 1a9a5a14f40645a370184bd54f4e8e631351e71399112b43ad0294a79da290c8
@@ -3572,6 +3574,7 @@ topologies:
 
       The model output is typical object classifier for the 1000 different classifications
       matching with those in the ImageNet database.
+    task_type: "classification"
     files:
       - name: resnet50-19c8e357.pth
         sha256: 19c8e3572231adff6824a2da93fd67b5986919a2e65f8b6007eab4edee220097
