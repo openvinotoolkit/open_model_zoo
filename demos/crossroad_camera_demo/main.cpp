@@ -829,11 +829,15 @@ int main(int argc, char *argv[]) {
             std::cout << "Performance counts for person detection: " << std::endl;
             personDetection.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d));
 
-            std::cout << "Performance counts for person attributes: " << std::endl;
-            personAttribs.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_pa));
+            if (!FLAGS_m_pa.empty()) {
+                std::cout << "Performance counts for person attributes: " << std::endl;
+                personAttribs.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_pa));
+            }
 
-            std::cout << "Performance counts for person re-identification: " << std::endl;
-            personReId.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
+            if (!FLAGS_m_reid.empty()) {
+                std::cout << "Performance counts for person re-identification: " << std::endl;
+                personReId.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
+            }
         }
         // -----------------------------------------------------------------------------------------------------
     }
