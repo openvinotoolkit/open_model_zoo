@@ -25,7 +25,7 @@ from argparse import ArgumentParser, SUPPRESS
 
 import cv2
 import numpy as np
-from openvino.inference_engine import IENetwork, IEPlugin
+from openvino.inference_engine import IENetwork, IECore
 
 from instance_segmentation_demo.images_capture import ImagesCapture
 from instance_segmentation_demo.tracker import StaticIOUTracker
@@ -57,9 +57,6 @@ def build_argparser():
     args.add_argument('-l', '--cpu_extension',
                       help='Required for CPU custom layers. '
                            'Absolute path to a shared library with the kernels implementation.',
-                      default=None, type=str, metavar='"<absolute_path>"')
-    args.add_argument('-pp', '--plugin_dir',
-                      help='Optional. Path to a plugin folder.',
                       default=None, type=str, metavar='"<absolute_path>"')
     args.add_argument('-pt', '--prob_threshold',
                       help='Optional. Probability threshold for detections filtering.',
@@ -116,27 +113,21 @@ def main():
     model_bin = os.path.splitext(model_xml)[0] + '.bin'
 
     # Plugin initialization for specified device and load extensions library if specified.
-    log.info('Initializing plugin for {} device...'.format(args.device))
-    plugin = IEPlugin(device=args.device, plugin_dirs=args.plugin_dir)
+    log.info("Creating Inference Engine...")
+    ie = IECore()
     if args.cpu_extension and 'CPU' in args.device:
-        plugin.add_cpu_extension(args.cpu_extension)
-
+        ie.add_extension(args.cpu_extension, "CPU")
     # Read IR
-    log.info('Reading IR...')
+    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
     net = IENetwork(model=model_xml, weights=model_bin)
 
-    if plugin.device == 'CPU':
-        supported_layers = plugin.get_supported_layers(net)
+    if "CPU" in args.device:
+        supported_layers = ie.query_network(net, "CPU")
         not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
         if len(not_supported_layers) != 0:
-            log.error('Following layers are not supported by the plugin for specified device {}:\n\t{}'.
-                      format(plugin.device,
-                             '\n\t'.join('{} ({} with params {})'.format(layer_id, net.layers[layer_id].type,
-                                                                         str(net.layers[layer_id].params))
-                                         for layer_id in not_supported_layers)
-                             )
-                      )
-            log.error("Please try to specify cpu extensions library path in demo's command line parameters using -l "
+            log.error("Following layers are not supported by the plugin for specified device {}:\n {}".
+                      format(args.device, ', '.join(not_supported_layers)))
+            log.error("Please try to specify cpu extensions library path in sample's command line parameters using -l "
                       "or --cpu_extension command line argument")
             sys.exit(1)
 
@@ -151,7 +142,7 @@ def main():
     assert n == 1, 'Only batch 1 is supported by the demo application'
 
     log.info('Loading IR to the plugin...')
-    exec_net = plugin.load(network=net, num_requests=2)
+    exec_net = ie.load_network(network=net, device_name=args.device, num_requests=2)
     del net
 
     tracker = None
@@ -177,11 +168,10 @@ def main():
 
     visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
 
-    log.info('Starting inference...')
-    log.info('To stop the demo execution press Esc button')
     render_time = 0
 
-    print("To close the application, press 'CTRL+C' or any key with focus on the output window")
+    log.info('Starting inference...')
+    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
@@ -262,7 +252,7 @@ def main():
     cv2.destroyAllWindows()
     cap.release()
     del exec_net
-    del plugin
+    del ie
 
 
 if __name__ == '__main__':

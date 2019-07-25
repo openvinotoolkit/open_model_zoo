@@ -22,7 +22,8 @@ from argparse import ArgumentParser, SUPPRESS
 import cv2
 import time
 import logging as log
-from openvino.inference_engine import IENetwork, IEPlugin
+
+from openvino.inference_engine import IENetwork, IECore
 
 
 def build_argparser():
@@ -37,7 +38,6 @@ def build_argparser():
     args.add_argument("-l", "--cpu_extension",
                       help="Optional. Required for CPU custom layers. Absolute path to a shared library with the "
                            "kernels implementations.", type=str, default=None)
-    args.add_argument("-pp", "--plugin_dir", help="Optional. Path to a plugin folder", type=str, default=None)
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. The demo will look for a suitable plugin for device specified. "
@@ -54,33 +54,46 @@ def main():
     args = build_argparser().parse_args()
     model_xml = args.model
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
-    # Plugin initialization for specified device and load extensions library if specified
-    log.info("Initializing plugin for {} device...".format(args.device))
-    plugin = IEPlugin(device=args.device, plugin_dirs=args.plugin_dir)
+
+    log.info("Creating Inference Engine...")
+    ie = IECore()
     if args.cpu_extension and 'CPU' in args.device:
-        plugin.add_cpu_extension(args.cpu_extension)
+        ie.add_extension(args.cpu_extension, "CPU")
     # Read IR
-    log.info("Reading IR...")
+    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
     net = IENetwork(model=model_xml, weights=model_bin)
 
-    if plugin.device == "CPU":
-        supported_layers = plugin.get_supported_layers(net)
+    if "CPU" in args.device:
+        supported_layers = ie.query_network(net, "CPU")
         not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
         if len(not_supported_layers) != 0:
             log.error("Following layers are not supported by the plugin for specified device {}:\n {}".
-                      format(plugin.device, ', '.join(not_supported_layers)))
-            log.error("Please try to specify cpu extensions library path in demo's command line parameters using -l "
+                      format(args.device, ', '.join(not_supported_layers)))
+            log.error("Please try to specify cpu extensions library path in sample's command line parameters using -l "
                       "or --cpu_extension command line argument")
             sys.exit(1)
-    assert len(net.inputs.keys()) == 1, "Demo supports only single input topologies"
+
+    img_info_input_blob = None
+    feed_dict = {}
+    for blob_name in net.inputs:
+        if len(net.inputs[blob_name].shape) == 4:
+            input_blob = blob_name
+        elif len(net.inputs[blob_name].shape) == 2:
+            img_info_input_blob = blob_name
+        else:
+            raise RuntimeError("Unsupported {}D input layer '{}'. Only 2D and 4D input layers are supported"
+                               .format(len(net.inputs[blob_name].shape), blob_name))
+
     assert len(net.outputs) == 1, "Demo supports only single output topologies"
-    input_blob = next(iter(net.inputs))
+
     out_blob = next(iter(net.outputs))
     log.info("Loading IR to the plugin...")
-    exec_net = plugin.load(network=net, num_requests=2)
+    exec_net = ie.load_network(network=net, num_requests=2, device_name=args.device)
     # Read and pre-process input image
     n, c, h, w = net.inputs[input_blob].shape
-    del net
+    if img_info_input_blob:
+        feed_dict[img_info_input_blob] = [h, w, 1]
+
     if args.input == 'cam':
         input_stream = 0
     else:
@@ -98,13 +111,13 @@ def main():
     next_request_id = 1
 
     log.info("Starting inference in async mode...")
-    log.info("To switch between sync and async modes press Tab button")
-    log.info("To stop the demo execution press Esc button")
     is_async_mode = True
     render_time = 0
     ret, frame = cap.read()
 
-    print("To close the application, press 'CTRL+C' or any key with focus on the output window")
+    print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
+    print("To switch between sync/async modes, press TAB key in the output window")
+
     while cap.isOpened():
         if is_async_mode:
             ret, next_frame = cap.read()
@@ -122,12 +135,14 @@ def main():
             in_frame = cv2.resize(next_frame, (w, h))
             in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
             in_frame = in_frame.reshape((n, c, h, w))
-            exec_net.start_async(request_id=next_request_id, inputs={input_blob: in_frame})
+            feed_dict[input_blob] = in_frame
+            exec_net.start_async(request_id=next_request_id, inputs=feed_dict)
         else:
             in_frame = cv2.resize(frame, (w, h))
             in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
             in_frame = in_frame.reshape((n, c, h, w))
-            exec_net.start_async(request_id=cur_request_id, inputs={input_blob: in_frame})
+            feed_dict[input_blob] = in_frame
+            exec_net.start_async(request_id=cur_request_id, inputs=feed_dict)
         if exec_net.requests[cur_request_id].wait(-1) == 0:
             inf_end = time.time()
             det_time = inf_end - inf_start

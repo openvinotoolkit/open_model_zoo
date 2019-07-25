@@ -2,1275 +2,845 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-/**
-* \brief The entry point for the Inference Engine interactive_Vehicle_detection demo application
-* \file security_barrier_camera_demo/main.cpp
-* \example security_barrier_camera_demo/main.cpp
-*/
-#include <gflags/gflags.h>
-#include <functional>
-#include <iostream>
-#include <fstream>
-#include <random>
-#include <memory>
-#include <chrono>
 #include <algorithm>
-#include <iterator>
+#include <iomanip>
+#include <list>
 #include <map>
+#include <memory>
+#include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
-#include <queue>
+#include <set>
 
 #include <inference_engine.hpp>
-
-#include <samples/ocv_common.hpp>
-#include <samples/slog.hpp>
-#include <samples/args_helper.hpp>
-#include "security_barrier_camera.hpp"
-#include <ie_iextension.h>
+#include <vpu/vpu_plugin_config.hpp>
 #include <ext_list.hpp>
+#include <samples/ocv_common.hpp>
+#include <samples/args_helper.hpp>
+
+#include "common.hpp"
+#include "grid_mat.hpp"
+#include "input_wrappers.hpp"
+#include "security_barrier_camera_demo.hpp"
+#include "net_wrappers.hpp"
 
 using namespace InferenceEngine;
 
+typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
+
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
-
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
-    }
-
-    slog::info << "Parsing input parameters" << slog::endl;
-
-    if (FLAGS_i.empty()) {
-        throw std::logic_error("Parameter -i is not set");
     }
 
     if (FLAGS_m.empty()) {
         throw std::logic_error("Parameter -m is not set");
     }
-
-    if (FLAGS_display_resolution.find("x") == std::string::npos) {
-        throw std::logic_error("Incorrect format of -displayresolution parameter. Correct format is  \"width x height\". For example \"1920x1080\"");
+    if (FLAGS_nc == 0 && FLAGS_i.empty()) {
+        throw std::logic_error("Please specify at least one video source(web cam or video file)");
     }
-
+    if (FLAGS_display_resolution.find("x") == std::string::npos) {
+        throw std::logic_error("Incorrect format of -displayresolution parameter. Correct format is  \"width\"x\"height\". For example \"1920x1080\"");
+    }
+    if (FLAGS_n_wt == 0) {
+        throw std::logic_error("-n_wt can not be zero");
+    }
     return true;
 }
 
-// -------------------------Generic routines for detection networks-------------------------------------------------
-
-typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
-
-struct BaseInferRequest {
-    InferRequest::Ptr request;
-    std::string inputName;
-    std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
-    std::chrono::time_point<std::chrono::high_resolution_clock> endTime;
-    size_t requestId;
-
-    BaseInferRequest(ExecutableNetwork& net, std::string& inputName) :
-        request(net.CreateInferRequestPtr()), inputName(inputName), requestId(0) {
-        auto lambda = [&] {
-               endTime = std::chrono::high_resolution_clock::now();
-            };
-        request->SetCompletionCallback(lambda);
-    }
-
-    virtual ~BaseInferRequest() {}
-
-    virtual void startAsync() {
-        startTime = std::chrono::high_resolution_clock::now();
-        request->StartAsync();
-    }
-
-    virtual void wait() {
-        request->Wait(IInferRequest::WaitMode::RESULT_READY);
-    }
-
-    virtual void setBlob(const Blob::Ptr &frameBlob) {
-        request->SetBlob(inputName, frameBlob);
-    }
-
-    virtual void setImage(const cv::Mat &frame) {
-        Blob::Ptr inputBlob;
-
-        if (FLAGS_auto_resize) {
-            inputBlob = wrapMat2Blob(frame);
-            request->SetBlob(inputName, inputBlob);
-        } else {
-            inputBlob = request->GetBlob(inputName);
-            matU8ToBlob<uint8_t>(frame, inputBlob);
-        }
-    }
-
-    virtual Blob::Ptr getBlob(const std::string &name) {
-        return request->GetBlob(name);
-    }
-
-    virtual ms getTime() {
-        return std::chrono::duration_cast<ms>(endTime - startTime);
-    }
-
-    void setId(size_t id) {
-        requestId = id;
-    }
-
-    size_t getId() {
-        return requestId;
-    }
-
-    using Ptr = std::shared_ptr<BaseInferRequest>;
+struct BboxAndDescr {
+    enum class ObjectType {
+        NONE,
+        VEHICCLE,
+        PLATE,
+    } objectType;
+    cv::Rect rect;
+    std::string descr;
 };
 
-struct BaseDetection {
-    ExecutableNetwork net;
-    InferencePlugin plugin;
-    std::string & commandLineFlag;
-    std::string topoName;
-    std::string inputName;
-    std::string outputName;
-
-    BaseDetection(std::string &commandLineFlag, std::string topoName)
-            : commandLineFlag(commandLineFlag), topoName(topoName)  {}
-
-    ExecutableNetwork * operator ->() {
-        return &net;
-    }
-    virtual CNNNetwork read()  = 0;
-
-    mutable bool enablingChecked = false;
-    mutable bool _enabled = false;
-
-    bool enabled() const  {
-        if (!enablingChecked) {
-            _enabled = !commandLineFlag.empty();
-            if (!_enabled) {
-                slog::info << topoName << " detection DISABLED" << slog::endl;
-            }
-            enablingChecked = true;
-        }
-        return _enabled;
-    }
-};
-
-struct VehicleDetectionInferRequest : BaseInferRequest {
-    cv::Size srcImageSize;
-
-    VehicleDetectionInferRequest(ExecutableNetwork& net, std::string& inputName) :
-        BaseInferRequest(net, inputName), srcImageSize(0, 0) {}
-
-    void setImage(const cv::Mat &frame) override {
-        BaseInferRequest::setImage(frame);
-
-        srcImageSize.height = frame.rows;
-        srcImageSize.width = frame.cols;
-    }
-
-    void setSourceImageSize(int width, int height) {
-        srcImageSize.height = height;
-        srcImageSize.width = width;
-    }
-
-    cv::Size getSourceImageSize() {
-        return srcImageSize;
-    }
-
-    using Ptr = std::shared_ptr<VehicleDetectionInferRequest>;
-};
-
-struct VehicleDetection : BaseDetection {
-    int maxProposalCount;
-    int objectSize;
-
-    struct Result {
-        int label;
-        float confidence;
-        cv::Rect location;
-        size_t channelId;
-    };
-
-    VehicleDetection() : BaseDetection(FLAGS_m, "Vehicle"), maxProposalCount(0), objectSize(0) {
-    }
-
-    VehicleDetectionInferRequest::Ptr createInferRequest() {
-        if (!enabled())
-            return nullptr;
-
-        return std::make_shared<VehicleDetectionInferRequest>(net, inputName);
-    }
-
-    CNNNetwork read() override {
-        slog::info << "Loading network files for VehicleDetection" << slog::endl;
-        CNNNetReader netReader;
-        /** Read network model **/
-        netReader.ReadNetwork(FLAGS_m);
-        /** Set batch size to 1 **/
-        slog::info << "Batch size is forced to  1" << slog::endl;
-        netReader.getNetwork().setBatchSize(1);
-        /** Extract model name and load it's weights **/
-        std::string binFileName = fileNameNoExt(FLAGS_m) + ".bin";
-        netReader.ReadWeights(binFileName);
-        // -----------------------------------------------------------------------------------------------------
-
-        /** SSD-based network should have one input and one output **/
-        // ---------------------------Check inputs ------------------------------------------------------
-        slog::info << "Checking Vehicle Detection inputs" << slog::endl;
-        InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
-        if (inputInfo.size() != 1) {
-            throw std::logic_error("Vehicle Detection network should have only one input");
-        }
-        InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
-        inputInfoFirst->setInputPrecision(Precision::U8);
-
-        if (FLAGS_auto_resize) {
-            inputInfoFirst->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-            inputInfoFirst->getInputData()->setLayout(Layout::NHWC);
-        } else {
-            inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
-        }
-        inputName = inputInfo.begin()->first;
-        // -----------------------------------------------------------------------------------------------------
-
-        // ---------------------------Check outputs ------------------------------------------------------
-        slog::info << "Checking Vehicle Detection outputs" << slog::endl;
-        OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
-        if (outputInfo.size() != 1) {
-            throw std::logic_error("Vehicle Detection network should have only one output");
-        }
-        DataPtr& _output = outputInfo.begin()->second;
-        const SizeVector outputDims = _output->getTensorDesc().getDims();
-        outputName = outputInfo.begin()->first;
-        maxProposalCount = outputDims[2];
-        objectSize = outputDims[3];
-        if (objectSize != 7) {
-            throw std::logic_error("Output should have 7 as a last dimension");
-        }
-        if (outputDims.size() != 4) {
-            throw std::logic_error("Incorrect output dimensions for SSD");
-        }
-        _output->setPrecision(Precision::FP32);
-        _output->setLayout(Layout::NCHW);
-
-        slog::info << "Loading Vehicle Detection model to the "<< FLAGS_d << " plugin" << slog::endl;
-        return netReader.getNetwork();
-    }
-
-    void fetchResults(VehicleDetectionInferRequest::Ptr request, std::vector<Result>& results) {
-        cv::Size srcImageSize = request->getSourceImageSize();
-        size_t channelId = request->getId();
-        const float *detections = request->getBlob(outputName)->buffer().as<float *>();
-        // pretty much regular SSD post-processing
-        for (int i = 0; i < maxProposalCount; i++) {
-            float image_id = detections[i * objectSize + 0];  // in case of batch
-            Result r;
-            r.label = static_cast<int>(detections[i * objectSize + 1]);
-            r.confidence = detections[i * objectSize + 2];
-            if (r.confidence <= FLAGS_t) {
-                continue;
-            }
-
-            r.location.x = static_cast<int>(detections[i * objectSize + 3] * srcImageSize.width);
-            r.location.y = static_cast<int>(detections[i * objectSize + 4] * srcImageSize.height);
-            r.location.width = static_cast<int>(detections[i * objectSize + 5] * srcImageSize.width - r.location.x);
-            r.location.height = static_cast<int>(detections[i * objectSize + 6] * srcImageSize.height - r.location.y);
-
-            r.channelId = channelId;
-
-            if (image_id < 0) {  // indicates end of detections
-                break;
-            }
-            if (FLAGS_r) {
-                std::cout << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
-                          "    (" << r.location.x << "," << r.location.y << ")-(" << r.location.width << ","
-                          << r.location.height << ")"
-                          << ((r.confidence > FLAGS_t) ? " WILL BE RENDERED!" : "") << std::endl;
-            }
-
-            results.push_back(r);
+struct InferRequestsContainer {
+    explicit InferRequestsContainer(std::vector<InferRequest> inferRequests):
+        actualInferRequests{inferRequests} {
+        for (auto& ir : actualInferRequests) {
+            inferRequests.push_back(ir);
         }
     }
-};
-
-struct VehicleAttribsDetection : BaseDetection {
-    std::string outputNameForType;
-    std::string outputNameForColor;
-
-    VehicleAttribsDetection() : BaseDetection(FLAGS_m_va, "Vehicle Attribs") {}
-
-    BaseInferRequest::Ptr createInferRequest() {
-        if (!enabled())
-            return nullptr;
-
-        return std::make_shared<BaseInferRequest>(net, inputName);
-    }
-
-    struct Attributes { std::string type; std::string color;};
-    Attributes GetAttributes(BaseInferRequest::Ptr request) {
-        static const std::string colors[] = {
-                "white", "gray", "yellow", "red", "green", "blue", "black"
-        };
-        static const std::string types[] = {
-                "car", "bus", "truck", "van"
-        };
-
-        // 7 possible colors for each vehicle and we should select the one with the maximum probability
-        auto colorsValues = request->getBlob(outputNameForColor)->buffer().as<float*>();
-        // 4 possible types for each vehicle and we should select the one with the maximum probability
-        auto typesValues  = request->getBlob(outputNameForType)->buffer().as<float*>();
-
-        const auto color_id = std::max_element(colorsValues, colorsValues + 7) - colorsValues;
-        const auto type_id =  std::max_element(typesValues,  typesValues  + 4) - typesValues;
-
-        return {types[type_id], colors[color_id]};
-    }
-
-    CNNNetwork read() override {
-        slog::info << "Loading network files for VehicleAttribs" << slog::endl;
-        CNNNetReader netReader;
-        /** Read network model **/
-        netReader.ReadNetwork(FLAGS_m_va);
-        netReader.getNetwork().setBatchSize(1);
-        slog::info << "Batch size is forced to 1 for Vehicle Attribs" << slog::endl;
-
-        /** Extract model name and load it's weights **/
-        std::string binFileName = fileNameNoExt(FLAGS_m_va) + ".bin";
-        netReader.ReadWeights(binFileName);
-        // -----------------------------------------------------------------------------------------------------
-
-        /** Vehicle Attribs network should have one input two outputs **/
-        // ---------------------------Check inputs ------------------------------------------------------
-        slog::info << "Checking VehicleAttribs inputs" << slog::endl;
-        InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
-        if (inputInfo.size() != 1) {
-            throw std::logic_error("Vehicle Attribs topology should have only one input");
-        }
-        InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
-        inputInfoFirst->setInputPrecision(Precision::U8);
-        if (FLAGS_auto_resize) {
-            inputInfoFirst->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-            inputInfoFirst->getInputData()->setLayout(Layout::NHWC);
-        } else {
-            inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
-        }
-        inputName = inputInfo.begin()->first;
-        // -----------------------------------------------------------------------------------------------------
-
-        // ---------------------------Check outputs ------------------------------------------------------
-        slog::info << "Checking Vehicle Attribs outputs" << slog::endl;
-        OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
-        if (outputInfo.size() != 2) {
-            throw std::logic_error("Vehicle Attribs Network expects networks having two outputs");
-        }
-        auto it = outputInfo.begin();
-        outputNameForColor = (it++)->second->name;  // color is the first output
-        outputNameForType = (it++)->second->name;  // type is the second output
-
-        slog::info << "Loading Vehicle Attribs model to the "<< FLAGS_d_va << " plugin" << slog::endl;
-        _enabled = true;
-        return netReader.getNetwork();
-    }
-};
-
-struct LPRInferRequest : BaseInferRequest {
-    std::string inputSeqName;
-
-    LPRInferRequest(ExecutableNetwork& net, std::string& inputName, std::string& inputSeqName) :
-        BaseInferRequest(net, inputName), inputSeqName(inputSeqName) {}
-
-    void fillSeqBlob() {
-        Blob::Ptr seqBlob = request->GetBlob(inputSeqName);
-        int maxSequenceSizePerPlate = seqBlob->getTensorDesc().getDims()[0];
-        // second input is sequence, which is some relic from the training
-        // it should have the leading 0.0f and rest 1.0f
-        float* blob_data = seqBlob->buffer().as<float*>();
-        blob_data[0] = 0.0f;
-        std::fill(blob_data + 1, blob_data + maxSequenceSizePerPlate, 1.0f);
-    }
-
-    void setBlob(const Blob::Ptr &frameBlob) override {
-        BaseInferRequest::setBlob(frameBlob);
-        if (!inputSeqName.empty()) {
-            fillSeqBlob();
-        }
-    }
-
-    void setImage(const cv::Mat &frame) override {
-        BaseInferRequest::setImage(frame);
-        if (!inputSeqName.empty()) {
-            fillSeqBlob();
-        }
-    }
-
-    using Ptr = std::shared_ptr<LPRInferRequest>;
-};
-
-struct LPRDetection : BaseDetection {
-    std::string inputSeqName;
-    const size_t maxSequenceSizePerPlate = 88;
-
-    LPRDetection() : BaseDetection(FLAGS_m_lpr, "License Plate Recognition") {}
-
-    BaseInferRequest::Ptr createInferRequest() {
-        if (!enabled())
-            return nullptr;
-
-        return std::make_shared<LPRInferRequest>(net, inputName, inputSeqName);
-    }
-
-    std::string GetLicencePlateText(BaseInferRequest::Ptr request) {
-        static std::vector<std::string> items = {
-                "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-                "<Anhui>", "<Beijing>", "<Chongqing>", "<Fujian>",
-                "<Gansu>", "<Guangdong>", "<Guangxi>", "<Guizhou>",
-                "<Hainan>", "<Hebei>", "<Heilongjiang>", "<Henan>",
-                "<HongKong>", "<Hubei>", "<Hunan>", "<InnerMongolia>",
-                "<Jiangsu>", "<Jiangxi>", "<Jilin>", "<Liaoning>",
-                "<Macau>", "<Ningxia>", "<Qinghai>", "<Shaanxi>",
-                "<Shandong>", "<Shanghai>", "<Shanxi>", "<Sichuan>",
-                "<Tianjin>", "<Tibet>", "<Xinjiang>", "<Yunnan>",
-                "<Zhejiang>", "<police>",
-                "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
-                "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
-                "U", "V", "W", "X", "Y", "Z"
-        };
-        // up to 88 items per license plate, ended with "-1"
-        const auto data = request->getBlob(outputName)->buffer().as<float*>();
-        std::string result;
-        for (size_t i = 0; i < maxSequenceSizePerPlate; i++) {
-            if (data[i] == -1)
-                break;
-            result += items[static_cast<size_t>(data[i])];
-        }
-
-        return result;
-    }
-    CNNNetwork read() override {
-        slog::info << "Loading network files for Licence Plate Recognition (LPR)" << slog::endl;
-        CNNNetReader netReader;
-        /** Read network model **/
-        netReader.ReadNetwork(FLAGS_m_lpr);
-        slog::info << "Batch size is forced to  1 for LPR Network" << slog::endl;
-        netReader.getNetwork().setBatchSize(1);
-        /** Extract model name and load it's weights **/
-        std::string binFileName = fileNameNoExt(FLAGS_m_lpr) + ".bin";
-        netReader.ReadWeights(binFileName);
-
-        /** LPR network should have 2 inputs (and second is just a stub) and one output **/
-        // ---------------------------Check inputs ------------------------------------------------------
-        slog::info << "Checking LPR Network inputs" << slog::endl;
-        InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
-        if (inputInfo.size() == 2) {
-            auto sequenceInput = (++inputInfo.begin());
-            inputSeqName = sequenceInput->first;
-            if (sequenceInput->second->getTensorDesc().getDims()[0] != maxSequenceSizePerPlate) {
-                throw std::logic_error("LPR post-processing assumes certain maximum sequences");
-            }
-        } else if (inputInfo.size() == 1) {
-            inputSeqName = "";
-        } else {
-            throw std::logic_error("LPR should have 1 or 2 inputs");
-        }
-
-        InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
-        inputInfoFirst->setInputPrecision(Precision::U8);
-        if (FLAGS_auto_resize) {
-            inputInfoFirst->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-            inputInfoFirst->getInputData()->setLayout(Layout::NHWC);
-        } else {
-            inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
-        }
-        inputName = inputInfo.begin()->first;
-        // -----------------------------------------------------------------------------------------------------
-
-        // ---------------------------Check outputs ------------------------------------------------------
-        slog::info << "Checking LPR Network outputs" << slog::endl;
-        OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
-        if (outputInfo.size() != 1) {
-            throw std::logic_error("LPR should have 1 output");
-        }
-        outputName = outputInfo.begin()->first;
-        slog::info << "Loading LPR model to the "<< FLAGS_d_lpr << " plugin" << slog::endl;
-
-        _enabled = true;
-        return netReader.getNetwork();
-    }
-};
-
-struct Load {
-    BaseDetection& detector;
-    explicit Load(BaseDetection& detector) : detector(detector) { }
-
-    void into(InferencePlugin & plg) const {
-        if (detector.enabled()) {
-            detector.net = plg.LoadNetwork(detector.read(), {});
-            detector.plugin = plg;
-        }
-    }
-};
-
-struct VehicleObject {
-    std::string type;
-    std::string color;
-    cv::Rect location;
-    int channelId;
-};
-
-struct LicensePlateObject {
-    std::string text;
-    cv::Rect location;
-    int channelId;
-};
-
-struct GridMat {
-    cv::Mat outimg;
-    cv::Size cellSize;
-    std::vector<cv::Point> points;
-    int width;
-    int height;
-
-    explicit GridMat(size_t dispWidth, size_t dispHeight, size_t nChannels, std::vector<cv::VideoCapture>& cap, std::vector<cv::Mat>& images) {
-        size_t maxWidth = 0;
-        size_t maxHeight = 0;
-        for (size_t i = 0; i < cap.size(); i++) {
-            maxWidth = std::max(maxWidth, (size_t) cap[i].get(cv::CAP_PROP_FRAME_WIDTH));
-            maxHeight = std::max(maxHeight, (size_t) cap[i].get(cv::CAP_PROP_FRAME_HEIGHT));
-        }
-
-        for (size_t i = 0; i < images.size(); i++) {
-            maxWidth = std::max(maxWidth, (size_t) images[i].cols);
-            maxHeight = std::max(maxHeight, (size_t) images[i].rows);
-        }
-
-        size_t nGridCols = static_cast<size_t>(ceil(sqrt(static_cast<float>(nChannels))));
-        size_t nGridRows = (nChannels - 1) / nGridCols + 1;
-        size_t gridMaxWidth = static_cast<size_t>(dispWidth/nGridCols);
-        size_t gridMaxHeight = static_cast<size_t>(dispHeight/nGridRows);
-
-        if (maxWidth == 0) {
-            throw std::logic_error("Image max width can't be equal to 0");
-        }
-        if (maxHeight == 0) {
-            throw std::logic_error("Image max height can't be equal to 0");
-        }
-        float scaleWidth = static_cast<float>(gridMaxWidth) / maxWidth;
-        float scaleHeight = static_cast<float>(gridMaxHeight) / maxHeight;
-        float scaleFactor = std::min(1.f, std::min(scaleWidth, scaleHeight));
-
-        cellSize.width = static_cast<int>(maxWidth * scaleFactor);
-        cellSize.height = static_cast<int>(maxHeight * scaleFactor);
-
-        for (size_t i = 0; i < nChannels; i++) {
-            cv::Point p;
-            p.x = cellSize.width * (i % nGridCols);
-            p.y = cellSize.height * (i / nGridCols);
-            points.push_back(p);
-        }
-
-        height = cellSize.height * nGridRows;
-        width = cellSize.width * nGridCols;
-        outimg.create(height, width, CV_8UC3);
-        outimg.setTo(0);
-    }
-
-    void fill(std::vector<cv::Mat>& frames) {
-        if (frames.size() > points.size()) {
-            throw std::logic_error("Cannot display " + std::to_string(frames.size()) + " channels in a grid with " + std::to_string(points.size()) + " cells");
-        }
-
-        for (size_t i = 0; i < frames.size(); i++) {
-            cv::Mat cell = outimg(cv::Rect(points[i].x, points[i].y, cellSize.width, cellSize.height));
-
-            if ((cellSize.width == frames[i].cols) && (cellSize.height == frames[i].rows)) {
-                frames[i].copyTo(cell);
-            } else if ((cellSize.width > frames[i].cols) && (cellSize.height > frames[i].rows)) {
-                frames[i].copyTo(cell(cv::Rect(0, 0, frames[i].cols, frames[i].rows)));
-            } else {
-                cv::resize(frames[i], cell, cellSize);
+    InferRequestsContainer() = default;
+    InferRequestsContainer& operator=(const InferRequestsContainer& other) {  // copy assignment
+        if (this != &other) {  // self-assignment check expected
+            this->actualInferRequests = other.actualInferRequests;
+            for (auto& ir : this->actualInferRequests) {
+                this->inferRequests.container.push_back(ir);
             }
         }
+        return *this;
     }
+    std::vector<InferRequest> getActualInferRequests() {
+        return actualInferRequests;
+    }
+    ConcurrentContainer<std::vector<std::reference_wrapper<InferRequest>>> inferRequests;
 
-    const cv::Mat& getMat() {
-        return outimg;
-    }
+private:
+    std::vector<InferRequest> actualInferRequests;
 };
 
-struct CallStat {
-    typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
-
-    CallStat():
-        numberOfCalls(0), totalDuration(0.0), lastCallDuration(0.0), smoothedDuration(-1.0) {
+struct Context {  // stores all global data for tasks
+    Context(const std::vector<std::shared_ptr<InputChannel>>& inputChannels, const std::weak_ptr<Worker>& readersWorker,
+            const Detector& detector, const std::weak_ptr<Worker>& inferTasksWorker,
+            const VehicleAttributesClassifier& vehicleAttributesClassifier, const Lpr& lpr, const std::weak_ptr<Worker>& detectionsProcessorsWorker,
+            int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
+                const std::weak_ptr<Worker>& drawersWorker,
+            uint64_t lastFrameId,
+            const std::weak_ptr<Worker> resAggregatorsWorker,
+            uint64_t nireq,
+            bool isVideo,
+            std::size_t nclassifiersireq, std::size_t nrecognizersireq):
+        readersContext{inputChannels, readersWorker, std::vector<int64_t>(inputChannels.size(), -1), std::vector<std::mutex>(inputChannels.size())},
+        inferTasksContext{detector, inferTasksWorker},
+        detectionsProcessorsContext{vehicleAttributesClassifier, lpr, detectionsProcessorsWorker},
+        drawersContext{pause, gridParam, displayResolution, showPeriod, drawersWorker},
+        videoFramesContext{std::vector<uint64_t>(inputChannels.size(), lastFrameId), std::vector<std::mutex>(inputChannels.size())},
+        resAggregatorsWorker{resAggregatorsWorker},
+        nireq{nireq},
+        isVideo{isVideo},
+        t0{std::chrono::steady_clock::time_point()},
+        freeDetectionInfersCount{0},
+        frameCounter{0}
+    {
+        assert(inputChannels.size() == gridParam.size());
+        std::vector<InferRequest> detectorInferRequests;
+        std::vector<InferRequest> attributesInferRequests;
+        std::vector<InferRequest> lprInferRequests;
+        detectorInferRequests.reserve(nireq);
+        attributesInferRequests.reserve(nclassifiersireq);
+        lprInferRequests.reserve(nrecognizersireq);
+        std::generate_n(std::back_inserter(detectorInferRequests), nireq, [&]{
+            return inferTasksContext.detector.createInferRequest();});
+        std::generate_n(std::back_inserter(attributesInferRequests), nclassifiersireq, [&]{
+            return detectionsProcessorsContext.vehicleAttributesClassifier.createInferRequest();});
+        std::generate_n(std::back_inserter(lprInferRequests), nrecognizersireq, [&]{
+            return detectionsProcessorsContext.lpr.createInferRequest();});
+        detectorsInfers = InferRequestsContainer(detectorInferRequests);
+        attributesInfers = InferRequestsContainer(attributesInferRequests);
+        platesInfers = InferRequestsContainer(lprInferRequests);
     }
+    struct {
+        std::vector<std::shared_ptr<InputChannel>> inputChannels;
+        std::weak_ptr<Worker> readersWorker;
+        std::vector<int64_t> lastCapturedFrameIds;
+        std::vector<std::mutex> lastCapturedFrameIdsMutexes;
+    } readersContext;
+    struct {
+        Detector detector;
+        std::weak_ptr<Worker> inferTasksWorker;
+    } inferTasksContext;
+    struct {
+        VehicleAttributesClassifier vehicleAttributesClassifier;
+        Lpr lpr;
+        std::weak_ptr<Worker> detectionsProcessorsWorker;
+    } detectionsProcessorsContext;
+    struct DrawersContext {
+        DrawersContext(int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
+                       const std::weak_ptr<Worker>& drawersWorker):
+            pause{pause}, gridParam{gridParam}, displayResolution{displayResolution}, showPeriod{showPeriod}, drawersWorker{drawersWorker},
+            lastShownframeId{0}, prevShow{std::chrono::steady_clock::time_point()} {}
+        int pause;
+        std::vector<cv::Size> gridParam;
+        cv::Size displayResolution;
+        std::chrono::steady_clock::duration showPeriod;  // desiered frequency of imshow
+        std::weak_ptr<Worker> drawersWorker;
+        int64_t lastShownframeId;
+        std::chrono::steady_clock::time_point prevShow;  // time stamp of previous imshow
+        std::map<int64_t, GridMat> gridMats;
+        std::mutex drawerMutex;
+    } drawersContext;
+    struct {
+        std::vector<uint64_t> lastframeIds;
+        std::vector<std::mutex> lastFrameIdsMutexes;
+    } videoFramesContext;
+    std::weak_ptr<Worker> resAggregatorsWorker;
+    uint64_t nireq;
+    bool isVideo;
+    std::chrono::steady_clock::time_point t0;
+    std::atomic<std::vector<InferRequest>::size_type> freeDetectionInfersCount;
+    std::atomic<uint64_t> frameCounter;
+    InferRequestsContainer detectorsInfers, attributesInfers, platesInfers;
+};
 
-    void setCallDuration(ms value) {
-        lastCallDuration = value.count();
-        numberOfCalls++;
-        totalDuration += lastCallDuration;
-        if (smoothedDuration < 0) {
-            smoothedDuration = lastCallDuration;
+class ReborningVideoFrame: public VideoFrame {
+public:
+    ReborningVideoFrame(Context& context, const unsigned sourceID, const int64_t frameId, const cv::Mat& frame = cv::Mat()) :
+        VideoFrame{sourceID, frameId, frame}, context(context) {}  // can not write context{context} because of CentOS 7.4 compiler bug
+    virtual ~ReborningVideoFrame();
+    Context& context;
+};
+
+class Drawer: public Task {  // accumulates and shows processed frames
+public:
+    explicit Drawer(VideoFrame::Ptr sharedVideoFrame):
+        Task{sharedVideoFrame, 1.0} {}
+    bool isReady() override;
+    void process() override;
+};
+
+class ResAggregator: public Task {  // draws results on the frame
+public:
+    ResAggregator(const VideoFrame::Ptr& sharedVideoFrame, std::list<BboxAndDescr>&& boxesAndDescrs):
+        Task{sharedVideoFrame, 4.0}, boxesAndDescrs{std::move(boxesAndDescrs)} {}
+    bool isReady() override {
+        return true;
+    }
+    void process() override;
+private:
+    std::list<BboxAndDescr> boxesAndDescrs;
+};
+
+class ClassifiersAggreagator {  // waits for all classifiers and recognisers accumulating results
+public:
+    std::string rawDetections;
+    ConcurrentContainer<std::list<std::string>> rawAttributes;
+    ConcurrentContainer<std::list<std::string>> rawDecodedPlates;
+
+    explicit ClassifiersAggreagator(const VideoFrame::Ptr& sharedVideoFrame):
+        sharedVideoFrame{sharedVideoFrame} {}
+    ~ClassifiersAggreagator() {
+        static std::mutex printMutex;
+        printMutex.lock();
+        std::cout << rawDetections;
+        for (const std::string& rawAttribute : rawAttributes.container) {  // destructor assures that none uses the container
+            std::cout << rawAttribute;
         }
-        double alpha = 0.1;
-        smoothedDuration = smoothedDuration * (1.0 - alpha) + lastCallDuration * alpha;
+        for (const std::string& rawDecodedPlate : rawDecodedPlates.container) {
+            std::cout << rawDecodedPlate;
+        }
+        printMutex.unlock();
+        tryPush(static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.resAggregatorsWorker,
+                std::make_shared<ResAggregator>(sharedVideoFrame, std::move(boxesAndDescrs)));
     }
-
-    void start() {
-        lastCallStart = std::chrono::high_resolution_clock::now();
+    void push(BboxAndDescr&& bboxAndDescr) {
+        boxesAndDescrs.lockedPush_back(std::move(bboxAndDescr));
     }
+    const VideoFrame::Ptr sharedVideoFrame;
 
-    void finish() {
-        auto t = std::chrono::high_resolution_clock::now();
-        setCallDuration(std::chrono::duration_cast<ms>(t - lastCallStart));
-    }
-
-    double avarageTotalDuration() {
-        return totalDuration / numberOfCalls;
-    }
-
-    size_t numberOfCalls;
-    double totalDuration;
-    double lastCallDuration;
-    double smoothedDuration;
-    std::chrono::time_point<std::chrono::high_resolution_clock> lastCallStart;
+private:
+    ConcurrentContainer<std::list<BboxAndDescr>> boxesAndDescrs;
 };
 
-void fillROIColor(GridMat& displayImage, cv::Rect roi, cv::Scalar color, double opacity) {
-    if (opacity > 0) {
-        roi = roi & cv::Rect(0, 0, displayImage.width, displayImage.height);
-        cv::Mat textROI = displayImage.getMat()(roi);
-        cv::addWeighted(color, opacity, textROI, 1.0 - opacity , 0.0, textROI);
-    }
-}
+class DetectionsProcessor: public Task {  // extracts detections from blob InferRequests and runs classifiers and recognisers
+public:
+    DetectionsProcessor(VideoFrame::Ptr sharedVideoFrame, InferRequest* inferRequest):
+        Task{sharedVideoFrame, 1.0}, inferRequest{inferRequest}, requireGettingNumberOfDetections{true} {}
+    DetectionsProcessor(VideoFrame::Ptr sharedVideoFrame, std::shared_ptr<ClassifiersAggreagator>&& classifiersAggreagator, std::list<cv::Rect>&& vehicleRects,
+    std::list<cv::Rect>&& plateRects):
+        Task{sharedVideoFrame, 1.0}, classifiersAggreagator{std::move(classifiersAggreagator)}, inferRequest{nullptr},
+        vehicleRects{std::move(vehicleRects)}, plateRects{std::move(plateRects)}, requireGettingNumberOfDetections{false} {}
+    bool isReady() override;
+    void process() override;
 
-void putTextOnImage(GridMat& displayImage, std::string str, cv::Point p,
-                    cv::HersheyFonts font, double fontScale, cv::Scalar color,
-                    int thickness, cv::Scalar bgcolor = cv::Scalar(),
-                    double opacity = 0) {
-    int baseline = 0;
-    cv::Size textSize = cv::getTextSize(str, font, 0.5, 1, &baseline);
-    fillROIColor(displayImage, cv::Rect(cv::Point(p.x, p.y + baseline),
-                                        cv::Point(p.x + textSize.width, p.y - textSize.height)),
-                 bgcolor, opacity);
-    cv::putText(displayImage.getMat(), str, p, font, fontScale, color, thickness);
-}
+private:
+    std::shared_ptr<ClassifiersAggreagator> classifiersAggreagator;  // when no one stores this object we will draw
+    InferRequest* inferRequest;
+    std::list<cv::Rect> vehicleRects;
+    std::list<cv::Rect> plateRects;
+    std::vector<std::reference_wrapper<InferRequest>> reservedAttributesRequests;
+    std::vector<std::reference_wrapper<InferRequest>> reservedLprRequests;
+    bool requireGettingNumberOfDetections;
+};
 
-/** Map {device : plugin} for each topology **/
-std::map<std::string, InferencePlugin> pluginsForNetworks;
+class InferTask: public Task {  // runs detection
+public:
+    explicit InferTask(VideoFrame::Ptr sharedVideoFrame):
+        Task{sharedVideoFrame, 5.0} {}
+    bool isReady() override;
+    void process() override;
+};
 
-int main(int argc, char *argv[]) {
+class Reader: public Task {
+public:
+    explicit Reader(VideoFrame::Ptr sharedVideoFrame):
+        Task{sharedVideoFrame, 2.0} {}
+    bool isReady() override;
+    void process() override;
+};
+
+ReborningVideoFrame::~ReborningVideoFrame() {
     try {
-        /** This demo covers 3 certain topologies and cannot be generalized **/
-        slog::info << "InferenceEngine: " << GetInferenceEngineVersion() << slog::endl;
+        const std::shared_ptr<Worker>& worker = std::shared_ptr<Worker>(context.readersContext.readersWorker);
+        context.videoFramesContext.lastFrameIdsMutexes[sourceID].lock();
+        const auto frameId = ++context.videoFramesContext.lastframeIds[sourceID];
+        context.videoFramesContext.lastFrameIdsMutexes[sourceID].unlock();
+        std::shared_ptr<ReborningVideoFrame> reborn = std::make_shared<ReborningVideoFrame>(context, sourceID, frameId, frame);
+        worker->push(std::make_shared<Reader>(reborn));
+    } catch (const std::bad_weak_ptr&) {}
+}
+
+bool Drawer::isReady() {
+    Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
+    std::chrono::steady_clock::time_point prevShow = context.drawersContext.prevShow;
+    std::chrono::steady_clock::duration showPeriod = context.drawersContext.showPeriod;
+    if (1u == context.drawersContext.gridParam.size()) {
+        if (std::chrono::steady_clock::now() - prevShow > showPeriod) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        std::map<int64_t, GridMat>& gridMats = context.drawersContext.gridMats;
+        auto gridMatIt = gridMats.find(sharedVideoFrame->frameId);
+        if (gridMats.end() == gridMatIt) {
+            if (2 > gridMats.size()) {  // buffer size
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (1u == gridMatIt->second.getUnupdatedSourceIDs().size()) {
+                if (context.drawersContext.lastShownframeId == sharedVideoFrame->frameId
+                    && std::chrono::steady_clock::now() - prevShow > showPeriod) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+    }
+}
+
+void Drawer::process() {
+    const int64_t frameId = sharedVideoFrame->frameId;
+    Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
+    std::map<int64_t, GridMat>& gridMats = context.drawersContext.gridMats;
+    context.drawersContext.drawerMutex.lock();
+    auto gridMatIt = gridMats.find(frameId);
+    if (gridMats.end() == gridMatIt) {
+        gridMatIt = gridMats.emplace(frameId, GridMat(context.drawersContext.gridParam,
+                                                      context.drawersContext.displayResolution)).first;
+    }
+
+    gridMatIt->second.update(sharedVideoFrame->frame, sharedVideoFrame->sourceID);
+    auto firstGridIt = gridMats.begin();
+    int64_t& lastShownframeId = context.drawersContext.lastShownframeId;
+    if (firstGridIt->first == lastShownframeId && firstGridIt->second.isFilled()) {
+        lastShownframeId++;
+        cv::Mat mat = firstGridIt->second.getMat();
+
+        float opacity = 0.6f;
+        fillROIColor(mat, cv::Rect(5, 5, 700, 115), cv::Scalar(255, 0, 0), opacity);
+
+        std::ostringstream out;
+        out << "Mean overall time per all inputs: " << std::fixed << std::setprecision(2) << std::setw(6);
+        const auto t1 = std::chrono::steady_clock::now();
+        uint64_t frameCounter = context.frameCounter;
+        const ms meanOverallTimePerAllInputs = std::chrono::duration_cast<ms>((t1 - context.t0)
+                                               * context.readersContext.inputChannels.size()) / frameCounter;
+        out << meanOverallTimePerAllInputs.count();
+        out << "ms /" << std::setw(6) << std::chrono::seconds(1) / meanOverallTimePerAllInputs << "FPS";
+
+        cv::putText(mat, out.str(), cv::Point2f(10, 35), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
+        cv::putText(mat, "Detection InferRequests usage", cv::Point2f(10, 70), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
+        cv::Rect usage(15, 90, 400, 20);
+        cv::rectangle(mat, usage, {0, 255, 0}, 2);
+        uint64_t nireq = context.nireq;
+        usage.width = static_cast<int>(usage.width * static_cast<float>(frameCounter * nireq - context.freeDetectionInfersCount) / (frameCounter * nireq));
+        cv::rectangle(mat, usage, {0, 255, 0}, cv::FILLED);
+
+        cv::imshow("Detection results", firstGridIt->second.getMat());
+        context.drawersContext.prevShow = std::chrono::steady_clock::now();
+        const int key = cv::waitKey(context.drawersContext.pause);
+        if (key == 27 || 'q' == key || 'Q' == key || !context.isVideo) {
+            try {
+                std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
+            } catch (const std::bad_weak_ptr&) {}
+        } else if (key == 32) {
+            context.drawersContext.pause = (context.drawersContext.pause + 1) & 1;
+        }
+        firstGridIt->second.clear();
+        gridMats.emplace((--gridMats.end())->first + 1, firstGridIt->second);
+        gridMats.erase(firstGridIt);
+    }
+    context.drawersContext.drawerMutex.unlock();
+}
+
+void ResAggregator::process() {
+    Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
+    context.freeDetectionInfersCount += context.detectorsInfers.inferRequests.lockedSize();
+    context.frameCounter++;
+    if (!FLAGS_no_show) {
+        for (const BboxAndDescr& bboxAndDescr : boxesAndDescrs) {
+            switch (bboxAndDescr.objectType) {
+                case BboxAndDescr::ObjectType::NONE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {255, 255, 0},  4);
+                                                     break;
+                case BboxAndDescr::ObjectType::VEHICCLE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 255, 0},  4);
+                                                         cv::putText(sharedVideoFrame->frame, bboxAndDescr.descr,
+                                                                     cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y + 35},
+                                                                     cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 255, 0), 4);
+                                                         break;
+                case BboxAndDescr::ObjectType::PLATE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 0, 255},  4);
+                                                      cv::putText(sharedVideoFrame->frame, bboxAndDescr.descr,
+                                                                  cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y - 10},
+                                                                  cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 0, 255), 4);
+                                                      break;
+                default: throw std::exception();  // must never happen
+                          break;
+            }
+        }
+        tryPush(context.drawersContext.drawersWorker, std::make_shared<Drawer>(sharedVideoFrame));
+    } else {
+        if (!context.isVideo) {
+           try {
+                std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
+            } catch (const std::bad_weak_ptr&) {}
+        }
+    }
+}
+
+bool DetectionsProcessor::isReady() {
+    Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
+    if (requireGettingNumberOfDetections) {
+        classifiersAggreagator = std::make_shared<ClassifiersAggreagator>(sharedVideoFrame);
+        std::list<Detector::Result> results;
+        if (!(FLAGS_r && ((sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo))) {
+            results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size());
+        } else {
+            std::ostringstream rawResultsStream;
+            results = context.inferTasksContext.detector.getResults(*inferRequest, sharedVideoFrame->frame.size(), &rawResultsStream);
+            classifiersAggreagator->rawDetections = rawResultsStream.str();
+        }
+        for (Detector::Result result : results) {
+            switch (result.label) {
+                case 1:
+                {
+                    vehicleRects.emplace_back(result.location & cv::Rect{cv::Point(0, 0), sharedVideoFrame->frame.size()});
+                    break;
+                }
+                case 2:
+                {
+                    // expanding a bounding box a bit, better for the license plate recognition
+                    result.location.x -= 5;
+                    result.location.y -= 5;
+                    result.location.width += 10;
+                    result.location.height += 10;
+                    plateRects.emplace_back(result.location & cv::Rect{cv::Point(0, 0), sharedVideoFrame->frame.size()});
+                    break;
+                }
+                default: throw std::exception();  // must never happen
+                         break;
+            }
+        }
+        context.detectorsInfers.inferRequests.lockedPush_back(*inferRequest);
+        requireGettingNumberOfDetections = false;
+    }
+
+    if ((vehicleRects.empty() || FLAGS_m_va.empty()) && (plateRects.empty() || FLAGS_m_lpr.empty())) {
+        return true;
+    } else {
+        // isReady() is called under mutexes so it is assured that available InferRequests will not be taken, but new InferRequests can come in
+        // acquire as many InferRequests as it is possible or needed
+        InferRequestsContainer& attributesInfers = context.attributesInfers;
+        attributesInfers.inferRequests.mutex.lock();
+        const std::size_t numberOfAttributesInferRequestsAcquired = std::min(vehicleRects.size(), attributesInfers.inferRequests.container.size());
+        reservedAttributesRequests.assign(attributesInfers.inferRequests.container.end() - numberOfAttributesInferRequestsAcquired,
+                                          attributesInfers.inferRequests.container.end());
+        attributesInfers.inferRequests.container.erase(attributesInfers.inferRequests.container.end() - numberOfAttributesInferRequestsAcquired,
+                                                       attributesInfers.inferRequests.container.end());
+        attributesInfers.inferRequests.mutex.unlock();
+
+        InferRequestsContainer& platesInfers = context.platesInfers;
+        platesInfers.inferRequests.mutex.lock();
+        const std::size_t numberOfLprInferRequestsAcquired = std::min(plateRects.size(), platesInfers.inferRequests.container.size());
+        reservedLprRequests.assign(platesInfers.inferRequests.container.end() - numberOfLprInferRequestsAcquired, platesInfers.inferRequests.container.end());
+        platesInfers.inferRequests.container.erase(platesInfers.inferRequests.container.end() - numberOfLprInferRequestsAcquired,
+                                                   platesInfers.inferRequests.container.end());
+        platesInfers.inferRequests.mutex.unlock();
+        return numberOfAttributesInferRequestsAcquired || numberOfLprInferRequestsAcquired;
+    }
+}
+
+void DetectionsProcessor::process() {
+    Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
+    if (!FLAGS_m_va.empty()) {
+        auto vehicleRectsIt = vehicleRects.begin();
+        for (auto attributesRequestIt = reservedAttributesRequests.begin(); attributesRequestIt != reservedAttributesRequests.end();
+                vehicleRectsIt++, attributesRequestIt++) {
+            const cv::Rect vehicleRect = *vehicleRectsIt;
+            InferRequest& attributesRequest = *attributesRequestIt;
+            context.detectionsProcessorsContext.vehicleAttributesClassifier.setImage(attributesRequest, sharedVideoFrame->frame, vehicleRect);
+
+            attributesRequest.SetCompletionCallback(
+                std::bind(
+                    [](std::shared_ptr<ClassifiersAggreagator> classifiersAggreagator,
+                        InferRequest& attributesRequest,
+                        cv::Rect rect,
+                        Context& context) {
+                            attributesRequest.SetCompletionCallback([]{});  // destroy the stored bind object
+
+                            const std::pair<std::string, std::string>& attributes
+                                = context.detectionsProcessorsContext.vehicleAttributesClassifier.getResults(attributesRequest);
+
+                            if (FLAGS_r && ((classifiersAggreagator->sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
+                                classifiersAggreagator->rawAttributes.lockedPush_back("Vehicle Attributes results:" + attributes.first + ';'
+                                                                                      + attributes.second + '\n');
+                            }
+                            classifiersAggreagator->push(BboxAndDescr{BboxAndDescr::ObjectType::VEHICCLE, rect, attributes.first + ' ' + attributes.second});
+                            context.attributesInfers.inferRequests.lockedPush_back(attributesRequest);
+                        }, classifiersAggreagator,
+                           std::ref(attributesRequest),
+                           vehicleRect,
+                           std::ref(context)));
+
+            attributesRequest.StartAsync();
+        }
+        vehicleRects.erase(vehicleRects.begin(), vehicleRectsIt);
+    } else {
+        for (const cv::Rect vehicleRect : vehicleRects) {
+            classifiersAggreagator->push(BboxAndDescr{BboxAndDescr::ObjectType::NONE, vehicleRect, ""});
+        }
+        vehicleRects.clear();
+    }
+
+    if (!FLAGS_m_lpr.empty()) {
+        auto plateRectsIt = plateRects.begin();
+        for (auto lprRequestsIt = reservedLprRequests.begin(); lprRequestsIt != reservedLprRequests.end(); plateRectsIt++, lprRequestsIt++) {
+            const cv::Rect plateRect = *plateRectsIt;
+            InferRequest& lprRequest = *lprRequestsIt;
+            context.detectionsProcessorsContext.lpr.setImage(lprRequest, sharedVideoFrame->frame, plateRect);
+
+            lprRequest.SetCompletionCallback(
+                std::bind(
+                    [](std::shared_ptr<ClassifiersAggreagator> classifiersAggreagator,
+                        InferRequest& lprRequest,
+                        cv::Rect rect,
+                        Context& context) {
+                            lprRequest.SetCompletionCallback([]{});  // destroy the stored bind object
+
+                            std::string result = context.detectionsProcessorsContext.lpr.getResults(lprRequest);
+
+                            if (FLAGS_r && ((classifiersAggreagator->sharedVideoFrame->frameId == 0 && !context.isVideo) || context.isVideo)) {
+                                classifiersAggreagator->rawDecodedPlates.lockedPush_back("License Plate Recognition results:" + result + '\n');
+                            }
+                            classifiersAggreagator->push(BboxAndDescr{BboxAndDescr::ObjectType::PLATE, rect, std::move(result)});
+                            context.platesInfers.inferRequests.lockedPush_back(lprRequest);
+                        }, classifiersAggreagator,
+                           std::ref(lprRequest),
+                           plateRect,
+                           std::ref(context)));
+
+            lprRequest.StartAsync();
+        }
+        plateRects.erase(plateRects.begin(), plateRectsIt);
+    } else {
+        for (const cv::Rect& plateRect : plateRects) {
+            classifiersAggreagator->push(BboxAndDescr{BboxAndDescr::ObjectType::NONE, plateRect, ""});
+        }
+        plateRects.clear();
+    }
+    if (!vehicleRects.empty() || !plateRects.empty()) {
+        tryPush(context.detectionsProcessorsContext.detectionsProcessorsWorker,
+            std::make_shared<DetectionsProcessor>(sharedVideoFrame, std::move(classifiersAggreagator), std::move(vehicleRects), std::move(plateRects)));
+    }
+}
+
+bool InferTask::isReady() {
+    InferRequestsContainer& detectorsInfers = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.detectorsInfers;
+    if (detectorsInfers.inferRequests.container.empty()) {
+        return false;
+    } else {
+        detectorsInfers.inferRequests.mutex.lock();
+        if (detectorsInfers.inferRequests.container.empty()) {
+            detectorsInfers.inferRequests.mutex.unlock();
+            return false;
+        } else {
+            return true;  // process() will unlock the mutex
+        }
+    }
+}
+
+void InferTask::process() {
+    Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
+    InferRequestsContainer& detectorsInfers = context.detectorsInfers;
+    std::reference_wrapper<InferRequest> inferRequest = detectorsInfers.inferRequests.container.back();
+    detectorsInfers.inferRequests.container.pop_back();
+    detectorsInfers.inferRequests.mutex.unlock();
+
+    context.inferTasksContext.detector.setImage(inferRequest, sharedVideoFrame->frame);
+
+    inferRequest.get().SetCompletionCallback(
+        std::bind(
+            [](VideoFrame::Ptr sharedVideoFrame,
+               InferRequest& inferRequest,
+               Context& context) {
+                    inferRequest.SetCompletionCallback([]{});  // destroy the stored bind object
+                    tryPush(context.detectionsProcessorsContext.detectionsProcessorsWorker,
+                        std::make_shared<DetectionsProcessor>(sharedVideoFrame, &inferRequest));
+                }, sharedVideoFrame,
+                   inferRequest,
+                   std::ref(context)));
+    inferRequest.get().StartAsync();
+    // do not push as callback does it
+}
+
+bool Reader::isReady() {
+    Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
+    context.readersContext.lastCapturedFrameIdsMutexes[sharedVideoFrame->sourceID].lock();
+    if (context.readersContext.lastCapturedFrameIds[sharedVideoFrame->sourceID] + 1 == sharedVideoFrame->frameId) {
+        return true;
+    } else {
+        context.readersContext.lastCapturedFrameIdsMutexes[sharedVideoFrame->sourceID].unlock();
+        return false;
+    }
+}
+
+void Reader::process() {
+    unsigned sourceID = sharedVideoFrame->sourceID;
+    Context& context = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context;
+    const std::vector<std::shared_ptr<InputChannel>>& inputChannels = context.readersContext.inputChannels;
+    if (inputChannels[sourceID]->read(sharedVideoFrame->frame)) {
+        context.readersContext.lastCapturedFrameIds[sourceID]++;
+        context.readersContext.lastCapturedFrameIdsMutexes[sourceID].unlock();
+        tryPush(context.inferTasksContext.inferTasksWorker, std::make_shared<InferTask>(sharedVideoFrame));
+    } else {
+        context.readersContext.lastCapturedFrameIds[sourceID]++;
+        context.readersContext.lastCapturedFrameIdsMutexes[sourceID].unlock();
+        try {
+            std::shared_ptr<Worker>(context.drawersContext.drawersWorker)->stop();
+        } catch (const std::bad_weak_ptr&) {}
+    }
+}
+
+int main(int argc, char* argv[]) {
+    try {
+        slog::info << "InferenceEngine: " << InferenceEngine::GetInferenceEngineVersion() << slog::endl;
 
         // ------------------------------ Parsing and validation of input args ---------------------------------
-        if (!ParseAndCheckCommandLine(argc, argv)) {
-            return 0;
+        try {
+            if (!ParseAndCheckCommandLine(argc, argv)) {
+                return 0;
+            }
+        } catch (std::logic_error& error) {
+            std::cerr << "[ ERROR ] " << error.what() << std::endl;
+            return 1;
         }
 
-        std::vector<cv::VideoCapture> cap;
-        std::vector<cv::Mat> images;
-        std::vector<std::string> videoFiles;
-        std::map<std::string, CallStat> timers;
-
-        if (FLAGS_i == "cam") {
-            slog::info << "Capturing video streams from the cameras" << slog::endl;
-            slog::info << "Number of input web cams:    " << FLAGS_nc << slog::endl;
-
-            if (FLAGS_nc > 0) {
-                slog::info << "Trying to connect " << FLAGS_nc << " web cams ..." << slog::endl;
-                for (size_t i = 0; i < FLAGS_nc; i++) {
-                    cv::VideoCapture camera(i);
-                    if (!camera.isOpened()) {
-                        throw std::logic_error("Cannot open camera: " + std::to_string(i));
-                    }
-
-                    cap.push_back(camera);
+        std::vector<std::string> files;
+        parseInputFilesArguments(files);
+        if (files.empty()) throw std::logic_error("No files were found");
+        std::vector<std::shared_ptr<VideoCaptureSource>> videoCapturSourcess;
+        std::vector<std::shared_ptr<ImageSource>> imageSourcess;
+        if (FLAGS_nc) {
+            for (size_t i = 0; i < FLAGS_nc; ++i) {
+                cv::VideoCapture videoCapture(i);
+                if (!videoCapture.isOpened()) {
+                    slog::info << "Cannot open web cam [" << i << "]" << slog::endl;
+                    return 1;
                 }
-            }
-        } else {
-            slog::info << "Capturing video streams from the video files or loading images" << slog::endl;
-            /** This vector stores paths to the processed videos and images **/
-            std::vector<std::string> inputFiles;
-            parseInputFilesArguments(inputFiles);
-
-            for (auto && name : inputFiles) {
-                timers["capture"].start();
-                cv::Mat frame = cv::imread(name, cv::IMREAD_COLOR);
-                if (frame.empty()) {
-                    videoFiles.push_back(name);
-                } else {
-                    images.push_back(frame);
-                }
-                timers["capture"].finish();
-            }
-
-            size_t nImageFiles = images.size();
-            size_t nVideoFiles = videoFiles.size();
-
-            slog::info << "Number of input image files: " << nImageFiles << slog::endl;
-            slog::info << "Number of input video files: " << nVideoFiles << slog::endl;
-
-            if (nVideoFiles > 0) {
-                slog::info << "Trying to open input video ..." << slog::endl;
-                for (auto && videoFile : videoFiles) {
-                    cv::VideoCapture video(videoFile);
-                    if (!video.isOpened()) {
-                        throw std::logic_error("Cannot open input file: " + videoFile);
-                    }
-
-                    cap.push_back(video);
-                }
+                videoCapture.set(cv::CAP_PROP_FPS , 30);
+                videoCapturSourcess.push_back(std::make_shared<VideoCaptureSource>(videoCapture, FLAGS_loop_video));
             }
         }
+        for (const std::string& file : files) {
+            cv::Mat frame = cv::imread(file, cv::IMREAD_COLOR);
+            if (frame.empty()) {
+                cv::VideoCapture videoCapture(file);
+                if (!videoCapture.isOpened()) {
+                    slog::info << "Cannot open " << file << slog::endl;
+                    return 1;
+                }
+                videoCapturSourcess.push_back(std::make_shared<VideoCaptureSource>(videoCapture, FLAGS_loop_video));
+            } else {
+                imageSourcess.push_back(std::make_shared<ImageSource>(frame, true));
+            }
+        }
+        uint32_t channelsNum = 0 == FLAGS_ni ? videoCapturSourcess.size() + imageSourcess.size() : FLAGS_ni;
+        std::vector<std::shared_ptr<IInputSource>> inputSources;
+        inputSources.reserve(videoCapturSourcess.size() + imageSourcess.size());
+        for (const std::shared_ptr<VideoCaptureSource>& videoSource : videoCapturSourcess) {
+            inputSources.push_back(videoSource);
+        }
+        for (const std::shared_ptr<ImageSource>& imageSource : imageSourcess) {
+            inputSources.push_back(imageSource);
+        }
 
-        size_t nInputChannels = (FLAGS_ni >= 0) ? FLAGS_ni : (cap.size() + images.size());
-        slog::info << "Number of input channels: " << nInputChannels << slog::endl;
-
-        size_t dispWidth, dispHeight;
-        size_t found = FLAGS_display_resolution.find("x");
-        dispWidth = std::stoi(FLAGS_display_resolution.substr(0, found));
-        dispHeight = std::stoi(FLAGS_display_resolution.substr(found + 1, FLAGS_display_resolution.length()));
-        slog::info << "Display resolution: " << FLAGS_display_resolution << slog::endl;
-
-        /** Create display image **/
-        GridMat displayImage(dispWidth, dispHeight, nInputChannels, cap, images);
+        std::vector<std::shared_ptr<InputChannel>> inputChannels;
+        inputChannels.reserve(channelsNum);
+        for (decltype(inputSources.size()) channelI = 0, counter = 0; counter < channelsNum; channelI++, counter++) {
+            if (inputSources.size() == channelI) {
+                channelI = 0;
+            }
+            inputChannels.push_back(InputChannel::create(inputSources[channelI]));
+        }
 
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 1. Load Plugin for inference engine -------------------------------------
-        LPRDetection LPR;
-        VehicleDetection VehicleDetector;
-        VehicleAttribsDetection VehicleAttribs;
+        // --------------------------- 1. Load Inference Engine -------------------------------------
+        InferenceEngine::Core ie;
 
+        std::set<std::string> loadedDevices;
         std::vector<std::string> pluginNames = {
                 FLAGS_d,
-                VehicleAttribs.enabled() ? FLAGS_d_va : "",
-                LPR.enabled() ? FLAGS_d_lpr : ""
+                FLAGS_d_va,
+                FLAGS_d_lpr
         };
 
         for (auto && flag : pluginNames) {
-            if (flag == "") continue;
-            auto i = pluginsForNetworks.find(flag);
-            if (i != pluginsForNetworks.end()) {
+            if (flag.empty())
                 continue;
-            }
-            slog::info << "Loading plugin " << flag << slog::endl;
-            InferencePlugin plugin = PluginDispatcher().getPluginByDevice(flag);
+            if (loadedDevices.find(flag) != loadedDevices.end())
+                continue;
 
-            /** Printing plugin version **/
-            printPluginVersion(plugin, std::cout);
+            slog::info << "Loading device " << flag << slog::endl;
+
+            /** Printing device version **/
+            std::cout << ie.GetVersions(flag) << std::endl;
 
             if ((flag.find("CPU") != std::string::npos)) {
-                /** Load default extensions lib for the CPU plugin (e.g. SSD's DetectionOutput)**/
-                plugin.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>());
+                /** Load default extensions lib for the CPU device (e.g. SSD's DetectionOutput)**/
+                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
 
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
-                    plugin.AddExtension(extension_ptr);
+                    ie.AddExtension(extension_ptr, "CPU");
                     slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
-
-                if (nInputChannels > 1) {
-                    plugin.SetConfig({{PluginConfigParams::KEY_CPU_THROUGHPUT_STREAMS, PluginConfigParams::CPU_THROUGHPUT_AUTO}});
+                if (inputChannels.size() > 1) {
+                    ie.SetConfig({{PluginConfigParams::KEY_CPU_THROUGHPUT_STREAMS, PluginConfigParams::CPU_THROUGHPUT_AUTO}}, "CPU");
                 }
             }
 
-            if ((flag.find("GPU") != std::string::npos) && !FLAGS_c.empty()) {
+            if ((flag.find("GPU") != std::string::npos)) {
+                if (inputChannels.size() > 1) {
+                    ie.SetConfig({{PluginConfigParams::KEY_GPU_THROUGHPUT_STREAMS, std::to_string(inputChannels.size())}}, "GPU");
+                }
                 // Load any user-specified clDNN Extensions
-                plugin.SetConfig({ { PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } });
+                if (!FLAGS_c.empty())
+                    ie.SetConfig({ { PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
             }
 
             if ((flag.find("FPGA") != std::string::npos) && !FLAGS_fpga_device_ids.empty()) {
-                plugin.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_DEVICE_ID, FLAGS_fpga_device_ids } });
-
-                if (FLAGS_fpga_device_ids.find(",") != std::string::npos) {
-                    plugin.SetConfig({ { "DLIA_DEVICE_REQUEST_PROCESSING", "DLIA_SERIAL" } });
-                }
+                ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_DEVICE_ID, FLAGS_fpga_device_ids } }, "FPGA");
             }
 
-            pluginsForNetworks[flag] = plugin;
+            loadedDevices.insert(flag);
         }
 
         /** Per layer metrics **/
+        std::map<std::string, std::string> mapDevices;
         if (FLAGS_pc) {
-            for (auto && plugin : pluginsForNetworks) {
-                plugin.second.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
-            }
-        }
-        // -----------------------------------------------------------------------------------------------------
-
-        // --------------------------- 2. Read IR models and load them to plugins ------------------------------
-        Load(VehicleDetector).into(pluginsForNetworks[FLAGS_d]);
-        Load(VehicleAttribs).into(pluginsForNetworks[FLAGS_d_va]);
-        Load(LPR).into(pluginsForNetworks[FLAGS_d_lpr]);
-        // -----------------------------------------------------------------------------------------------------
-
-        // --------------------------- 3. Create inferense requests --------------------------------------------
-        std::queue<VehicleDetectionInferRequest::Ptr> availableVDetectionRequests, pendingVDetectionRequests;
-        std::queue<BaseInferRequest::Ptr> availableVAttribsRequestes, pendingVAttribsRequestes;
-        std::queue<BaseInferRequest::Ptr> availableLPRRequests, pendingLPRRequests;
-        for (size_t i = 0; i < FLAGS_nireq; i++) {
-            availableVDetectionRequests.push(VehicleDetector.createInferRequest());
-            availableVAttribsRequestes.push(VehicleAttribs.createInferRequest());
-            availableLPRRequests.push(LPR.createInferRequest());
-        }
-        // -----------------------------------------------------------------------------------------------------
-
-        // --------------------------- 4. Do inference ---------------------------------------------------------
-        std::vector<cv::Mat> frames(nInputChannels);  // frame images
-        std::vector<Blob::Ptr> frameBlobs(nInputChannels);  // blobs include pixel data from each frame
-
-        slog::info << "Start inference " << slog::endl;
-
-        /** Start inference & calc performance **/
-        size_t nImageChannels = std::min(nInputChannels, images.size());
-        size_t nVideoChannels = std::min(nInputChannels - nImageChannels, cap.size());
-        size_t nChannels = nImageChannels + nVideoChannels;
-        size_t nExtChannels = nInputChannels - nChannels;
-        bool isVideo = (nImageChannels == 0);
-        int pause(isVideo ? 1 :0);
-        timers["total"].start();
-
-        if (!FLAGS_no_show) {
-            std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
+            mapDevices = getMapFullDevicesNames(ie, pluginNames);
         }
 
-        do {
-            timers["capture"].start();
-            /** set images **/
-            for (size_t i = 0; i < nImageChannels; i++) {
-                frames[i] = images[i];
+        /** Graph tagging via config options**/
+        auto makeTagConfig = [&](const std::string &deviceName, const std::string &suffix) {
+            std::map<std::string, std::string> config;
+            if (FLAGS_tag && deviceName == "HDDL") {
+                config[VPU_HDDL_CONFIG_KEY(GRAPH_TAG)] = "tag" + suffix;
             }
-
-            /** decode frames **/
-            bool endOfVideo = false;
-            for (size_t i = 0; i < nVideoChannels; i++) {
-                if (!cap[i].read(frames[i + nImageChannels])) {
-                    if (frames[i + nImageChannels].empty()) {
-                         endOfVideo = true;  // end of video file
-                         break;
-                    }
-                    throw std::logic_error("Failed to get frame from cv::VideoCapture from " + std::to_string(i) + " channel");
-                }
-            }
-
-            /** added extra channels **/
-            for (size_t i = 0; i < nExtChannels; i++) {
-                frames[i + nChannels] = frames[i % nChannels].clone();
-            }
-
-            /** stop processing if one of the input channel is empty **/
-            if (endOfVideo) {
-                if (FLAGS_loop_video) {
-                    slog::info << "Trying to reopen input video ... " << slog::endl;
-                    for (size_t i = 0; i < videoFiles.size(); i++) {
-                        if (!cap[i].open(videoFiles[i])) {
-                            throw std::logic_error("Cannot reopen input file: " + videoFiles[i]);
-                        }
-                    }
-                    continue;
-                }
-                break;
-            }
-            timers["capture"].finish();
-
-            /** inference **/
-            std::vector<VehicleObject> vehicles;
-            std::vector<LicensePlateObject> licensePlates;
-            std::vector<VehicleDetection::Result> results;
-            timers["inference"].start();
-            for (size_t i = 0; i < nInputChannels; i++) {
-                if (availableVDetectionRequests.empty()) {
-                    // ----------------------------Get vehicle detection results -------------------------------------------
-                    VehicleDetectionInferRequest::Ptr vehicleDetectionRequest = pendingVDetectionRequests.front();
-
-                    vehicleDetectionRequest->wait();
-
-                    VehicleDetector.fetchResults(vehicleDetectionRequest, results);
-
-                    timers["vehicle_detector"].setCallDuration(vehicleDetectionRequest->getTime());
-
-                    pendingVDetectionRequests.pop();
-                    availableVDetectionRequests.push(vehicleDetectionRequest);
-                    // -----------------------------------------------------------------------------------------------------
-                }
-
-                // ----------------------------Asynchronous run of a vehicle detection inference -----------------------
-                VehicleDetectionInferRequest::Ptr vehicleDetectionRequest = availableVDetectionRequests.front();
-
-                vehicleDetectionRequest->setId(i);
-
-                if (FLAGS_auto_resize) {
-                    // just wrap Mat object with Blob::Ptr without additional memory allocation
-                    frameBlobs[i] = wrapMat2Blob(frames[i]);
-                    vehicleDetectionRequest->setBlob(frameBlobs[i]);
-                    vehicleDetectionRequest->setSourceImageSize(frames[i].cols, frames[i].rows);
-                } else {
-                    vehicleDetectionRequest->setImage(frames[i]);
-                }
-
-                vehicleDetectionRequest->startAsync();
-
-                availableVDetectionRequests.pop();
-                pendingVDetectionRequests.push(vehicleDetectionRequest);
-                // -----------------------------------------------------------------------------------------------------
-            }
-
-            size_t pidx = 0;
-            while (!pendingVDetectionRequests.empty()) {
-                if (pidx == results.size()) {
-                    // ----------------------------Get vehicle detection results -------------------------------------------
-                    VehicleDetectionInferRequest::Ptr vehicleDetectionRequest = pendingVDetectionRequests.front();
-
-                    vehicleDetectionRequest->wait();
-
-                    VehicleDetector.fetchResults(vehicleDetectionRequest, results);
-
-                    timers["vehicle_detector"].setCallDuration(vehicleDetectionRequest->getTime());
-
-                    pendingVDetectionRequests.pop();
-                    availableVDetectionRequests.push(vehicleDetectionRequest);
-                    // -----------------------------------------------------------------------------------------------------
-                }
-
-                for (; pidx < results.size(); pidx++) {
-                    if (results[pidx].label == 1) {  // vehicle
-                        if (VehicleAttribs.enabled()) {
-                            // ----------------------------Run Vehicle Attributes Classification -----------------------
-                            if (availableVAttribsRequestes.empty()) {
-                                // ----------------------------Get vehicle attributes --------------------------------------
-                                BaseInferRequest::Ptr VehicleAttribsRequest = pendingVAttribsRequestes.front();
-
-                                VehicleAttribsRequest->wait();
-
-                                auto attr = VehicleAttribs.GetAttributes(VehicleAttribsRequest);
-                                size_t ridx = VehicleAttribsRequest->getId();
-
-                                VehicleObject v;
-                                v.location = results[ridx].location;
-                                v.color = attr.color;
-                                v.type = attr.type;
-                                v.channelId = results[ridx].channelId;
-
-                                vehicles.push_back(v);
-
-                                timers["attribs"].setCallDuration(VehicleAttribsRequest->getTime());
-
-                                pendingVAttribsRequestes.pop();
-                                availableVAttribsRequestes.push(VehicleAttribsRequest);
-                                // -----------------------------------------------------------------------------------------
-                            }
-
-                            // -----------------------Asynchronous run of a vehicle attributes classification --------------
-                            BaseInferRequest::Ptr VehicleAttribsRequest = availableVAttribsRequestes.front();
-
-                            VehicleAttribsRequest->setId(pidx);
-
-                            cv::Mat frame = frames[results[pidx].channelId];
-                            if (FLAGS_auto_resize) {
-                                ROI cropRoi;
-                                cropRoi.posX = (results[pidx].location.x < 0) ? 0 : results[pidx].location.x;
-                                cropRoi.posY = (results[pidx].location.y < 0) ? 0 : results[pidx].location.y;
-                                cropRoi.sizeX = std::min((size_t) results[pidx].location.width, frame.cols - cropRoi.posX);
-                                cropRoi.sizeY = std::min((size_t) results[pidx].location.height, frame.rows - cropRoi.posY);
-                                Blob::Ptr roiBlob = make_shared_blob(frameBlobs[results[pidx].channelId], cropRoi);
-                                VehicleAttribsRequest->setBlob(roiBlob);
-                            } else {
-                                // To crop ROI manually and allocate required memory (cv::Mat) again
-                                auto clippedRect = results[pidx].location & cv::Rect(0, 0, frame.cols, frame.rows);
-                                cv::Mat vehicle = frame(clippedRect);
-                                VehicleAttribsRequest->setImage(vehicle);
-                            }
-
-                            VehicleAttribsRequest->startAsync();
-
-                            availableVAttribsRequestes.pop();
-                            pendingVAttribsRequestes.push(VehicleAttribsRequest);
-                            // -----------------------------------------------------------------------------------------
-                        } else {
-                            VehicleObject v;
-                            v.location = results[pidx].location;
-                            v.channelId = results[pidx].channelId;
-                            vehicles.push_back(v);
-                        }
-                    } else {
-                        if (LPR.enabled()) {  // licence plate
-                            // ----------------------------Run License Plate Recognition -------------------------------
-                            if (availableLPRRequests.empty()) {
-                                // ----------------------------Get License Plate Text --------------------------------------
-                                BaseInferRequest::Ptr LPRRequest = pendingLPRRequests.front();
-
-                                LPRRequest->wait();
-
-                                std::string text = LPR.GetLicencePlateText(LPRRequest);
-                                size_t ridx = LPRRequest->getId();
-
-                                LicensePlateObject lp;
-                                lp.location = results[ridx].location;
-                                lp.text = text;
-                                lp.channelId = results[ridx].channelId;
-
-                                licensePlates.push_back(lp);
-
-                                timers["lpr"].setCallDuration(LPRRequest->getTime());
-
-                                pendingLPRRequests.pop();
-                                availableLPRRequests.push(LPRRequest);
-                                // -----------------------------------------------------------------------------------------
-                            }
-
-                            // ----------------------------Asynchronous run of a license plate decoding ----------------
-                            BaseInferRequest::Ptr LPRRequest = availableLPRRequests.front();
-
-                            LPRRequest->setId(pidx);
-
-                            cv::Mat frame = frames[results[pidx].channelId];
-                            // expanding a bounding box a bit, better for the license plate recognition
-                            results[pidx].location.x -= 5;
-                            results[pidx].location.y -= 5;
-                            results[pidx].location.width += 10;
-                            results[pidx].location.height += 10;
-                            if (FLAGS_auto_resize) {
-                                ROI cropRoi;
-                                cropRoi.posX = (results[pidx].location.x < 0) ? 0 : results[pidx].location.x;
-                                cropRoi.posY = (results[pidx].location.y < 0) ? 0 : results[pidx].location.y;
-                                cropRoi.sizeX = std::min((size_t) results[pidx].location.width, frame.cols - cropRoi.posX);
-                                cropRoi.sizeY = std::min((size_t) results[pidx].location.height, frame.rows - cropRoi.posY);
-                                Blob::Ptr roiBlob = make_shared_blob(frameBlobs[results[pidx].channelId], cropRoi);
-                                LPRRequest->setBlob(roiBlob);
-                            } else {
-                                // To crop ROI manually and allocate required memory (cv::Mat) again
-                                auto clippedRect = results[pidx].location & cv::Rect(0, 0, frame.cols, frame.rows);
-                                cv::Mat plate = frame(clippedRect);
-                                LPRRequest->setImage(plate);
-                            }
-
-                            LPRRequest->startAsync();
-
-                            availableLPRRequests.pop();
-                            pendingLPRRequests.push(LPRRequest);
-                            // -----------------------------------------------------------------------------------------
-                        } else {
-                            LicensePlateObject lp;
-                            lp.location = results[pidx].location;
-                            lp.channelId = results[pidx].channelId;
-                            licensePlates.push_back(lp);
-                        }
-                    }
-                }
-            }
-
-            // ----------------------------Get results from pending requests --------------------------------------
-            while (!pendingVAttribsRequestes.empty()) {
-                // ----------------------------Get vehicle attributes --------------------------------------
-                BaseInferRequest::Ptr VehicleAttribsRequest = pendingVAttribsRequestes.front();
-
-                VehicleAttribsRequest->wait();
-
-                auto attr = VehicleAttribs.GetAttributes(VehicleAttribsRequest);
-                size_t ridx = VehicleAttribsRequest->getId();
-
-                VehicleObject v;
-                v.location = results[ridx].location;
-                v.color = attr.color;
-                v.type = attr.type;
-                v.channelId = results[ridx].channelId;
-
-                vehicles.push_back(v);
-
-                timers["attribs"].setCallDuration(VehicleAttribsRequest->getTime());
-
-                pendingVAttribsRequestes.pop();
-                availableVAttribsRequestes.push(VehicleAttribsRequest);
-                // -----------------------------------------------------------------------------------------
-            }
-
-            while (!pendingLPRRequests.empty()) {
-                // ----------------------------Get License Plate Text --------------------------------------
-                BaseInferRequest::Ptr LPRRequest = pendingLPRRequests.front();
-
-                LPRRequest->wait();
-
-                std::string text = LPR.GetLicencePlateText(LPRRequest);
-                size_t ridx = LPRRequest->getId();
-
-                LicensePlateObject lp;
-                lp.location = results[ridx].location;
-                lp.text = text;
-                lp.channelId = results[ridx].channelId;
-
-                licensePlates.push_back(lp);
-
-                timers["lpr"].setCallDuration(LPRRequest->getTime());
-
-                pendingLPRRequests.pop();
-                availableLPRRequests.push(LPRRequest);
-                // -----------------------------------------------------------------------------------------
-            }
-
-            timers["inference"].finish();
-
-            // ----------------------------Process outputs-----------------------------------------------------
-            timers["render"].start();
-            int vehicleRectThinkness = 2;
-            int licensePlateRectThinkness = 1;
-            int fontScale = 1;
-            int fontThinkness = 1;
-            int vehicleAttribOffset = 25;
-            int lprOffset = 50;
-            for (auto && v : vehicles) {
-                auto findLP = [&](VehicleObject& vehicle) {
-                    auto itlp = licensePlates.begin();
-                    for (; itlp != licensePlates.end(); itlp++) {
-                        if ((itlp->channelId == vehicle.channelId) &&
-                           ((itlp->location & vehicle.location).area() > 0)) {
-                            return itlp;
-                        }
-                    }
-                    return itlp;
-                };
-
-                auto lp = findLP(v);
-
-                if (lp == licensePlates.end()) {
-                    continue;
-                }
-
-                cv::rectangle(frames[lp->channelId], lp->location, cv::Scalar(0, 255, 0), licensePlateRectThinkness);
-
-                if (!lp->text.empty()) {
-                    int y_position = lp->location.y + lp->location.height - lprOffset;
-                    if (y_position < 0)
-                        y_position = 0;
-
-                    cv::putText(frames[lp->channelId],
-                        lp->text,
-                        cv::Point2f(static_cast<float>(lp->location.x), static_cast<float>(y_position)),
-                        cv::FONT_HERSHEY_COMPLEX_SMALL,
-                        fontScale,
-                        cv::Scalar(0, 0, 255),
-                        fontThinkness);
-
-                    if (FLAGS_r) {
-                        std::cout << "License Plate Recognition results:" << lp->text << std::endl;
-                    }
-                }
-
-                cv::rectangle(frames[v.channelId], v.location, cv::Scalar(0, 255, 0), vehicleRectThinkness);
-
-                if (!v.color.empty() && !v.type.empty()) {
-                    cv::putText(frames[v.channelId],
-                                v.color,
-                                cv::Point2f(static_cast<float>(v.location.x + 5), static_cast<float>(v.location.y + vehicleAttribOffset)),
-                                cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                fontScale,
-                                cv::Scalar(255, 0, 0),
-                                fontThinkness);
-                    cv::putText(frames[v.channelId],
-                                v.type,
-                                cv::Point2f(static_cast<float>(v.location.x + 5), static_cast<float>(v.location.y + 2 * vehicleAttribOffset)),
-                                cv::FONT_HERSHEY_COMPLEX_SMALL,
-                                fontScale,
-                                cv::Scalar(255, 0, 0),
-                                fontThinkness);
-                    if (FLAGS_r) {
-                        std::cout << "Vehicle Attributes results:" << v.color << ";" << v.type << std::endl;
-                    }
-                }
-            }
-
-            // ----------------------------Fill display images ------------------------------------------------------
-            displayImage.fill(frames);
-
-           // ----------------------------Execution statistics -----------------------------------------------------
-            fillROIColor(displayImage, cv::Rect(0, 0, 530, 100), cv::Scalar(255, 0, 0), 0.6);
-
-            std::ostringstream out;
-            out << std::fixed << std::setprecision(2)
-                << 1000. / (timers["capture"].smoothedDuration +
-                            std::max(0., timers["render"].smoothedDuration) +
-                            timers["inference"].smoothedDuration) << " fps";
-            putTextOnImage(displayImage, out.str(), cv::Point(5, 35), cv::FONT_HERSHEY_TRIPLEX, 1.1,
-                           cv::Scalar(255, 255, 255), 2);
-
-
-            out.str("");
-            out << "Inference for " << nInputChannels << ((nInputChannels == 1) ? " stream: " : " streams: ")
-                << 1000. / timers["inference"].smoothedDuration << " fps";
-            putTextOnImage(displayImage, out.str(), cv::Point(5, 60), cv::FONT_HERSHEY_TRIPLEX, 0.6,
-                           cv::Scalar(255, 255, 255), 1);
-
-            out.str("");
-            out << "Capture: " << std::fixed << std::setprecision(2)
-                << 1000. / timers["capture"].smoothedDuration << " fps";
-            if (isVideo) {
-                out << "; Render: " << std::max(0., 1000. / timers["render"].smoothedDuration) << " fps";
-            }
-            putTextOnImage(displayImage, out.str(), cv::Point(5, 85), cv::FONT_HERSHEY_TRIPLEX, 0.6,
-                           cv::Scalar(255, 255, 255), 1);
-
-            if (!FLAGS_no_show) {
-                cv::imshow("Detection results", displayImage.getMat());
-                timers["render"].finish();
-
-                const int key = cv::waitKey(pause);
-                if (key == 27) {
-                    break;
-                } else if (key == 32) {
-                    pause = (pause + 1) & 1;
-                }
-            }
-        } while (isVideo);
-
-        timers["total"].finish();
+            return config;
+        };
 
         // -----------------------------------------------------------------------------------------------------
-        if (timers["inference"].numberOfCalls > 0) {
-            std::cout << std::endl << "Average inference time: " << timers["inference"].avarageTotalDuration() << " ms ("
-                      << 1000.f / timers["inference"].avarageTotalDuration() << " fps)" << std::endl;
+        unsigned nireq = FLAGS_nireq == 0 ? inputChannels.size() : FLAGS_nireq;
+        slog::info << "Loading detection model to the "<< FLAGS_d << " plugin" << slog::endl;
+        Detector detector(ie, FLAGS_d, FLAGS_m,
+            {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeTagConfig(FLAGS_d, "Detect"));
+        VehicleAttributesClassifier vehicleAttributesClassifier;
+        std::size_t nclassifiersireq{0};
+        Lpr lpr;
+        std::size_t nrecognizersireq{0};
+        if (!FLAGS_m_va.empty()) {
+            slog::info << "Loading Vehicle Attribs model to the "<< FLAGS_d_va << " plugin" << slog::endl;
+            vehicleAttributesClassifier = VehicleAttributesClassifier(ie, FLAGS_d_va, FLAGS_m_va, FLAGS_auto_resize, makeTagConfig(FLAGS_d_va, "Attr"));
+            nclassifiersireq = nireq * 3;
+        }
+        if (!FLAGS_m_lpr.empty()) {
+            slog::info << "Loading Licence Plate Recognition (LPR) model to the "<< FLAGS_d_lpr << " plugin" << slog::endl;
+            lpr = Lpr(ie, FLAGS_d_lpr, FLAGS_m_lpr, FLAGS_auto_resize, makeTagConfig(FLAGS_d_lpr, "LPR"));
+            nrecognizersireq = nireq * 3;
+        }
+        std::shared_ptr<Worker> worker = std::make_shared<Worker>(FLAGS_n_wt - 1);
+        bool isVideo = imageSourcess.empty() ? true : false;
+        int pause = imageSourcess.empty() ? 1 : 0;
+        std::chrono::steady_clock::duration showPeriod = 0 == FLAGS_fps ? std::chrono::steady_clock::duration::zero()
+            : std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::seconds{1}) / FLAGS_fps;
+        std::vector<cv::Size> gridParam;
+        gridParam.reserve(inputChannels.size());
+        for (const auto& inputChannel : inputChannels) {
+            gridParam.emplace_back(inputChannel->getSize());
+        }
+        size_t found = FLAGS_display_resolution.find("x");
+        cv::Size displayResolution = cv::Size{std::stoi(FLAGS_display_resolution.substr(0, found)),
+                                              std::stoi(FLAGS_display_resolution.substr(found + 1, FLAGS_display_resolution.length()))};
 
-            if ((nInputChannels == 1) && (timers["vehicle_detector"].numberOfCalls > 0)) {
-                std::cout << std::endl << "Average vehicle detection time: " << timers["vehicle_detector"].avarageTotalDuration() << " ms ("
-                          << 1000.f / timers["vehicle_detector"].avarageTotalDuration() << " fps)" << std::endl;
+        slog::info << "Number of InferRequests: " << nireq << slog::endl;
+        slog::info << "Display resolution: " << FLAGS_display_resolution << slog::endl;
 
-                if (timers["attribs"].numberOfCalls > 0) {
-                    std::cout << std::endl << "Average vehicle attribs time: " << timers["attribs"].avarageTotalDuration() << " ms ("
-                              << 1000.f / timers["attribs"].avarageTotalDuration() << " fps)" << std::endl;
-                }
-                if (timers["lpr"].numberOfCalls > 0) {
-                    std::cout << std::endl << "Average lpr time: " << timers["lpr"].avarageTotalDuration() << " ms ("
-                              << 1000.f / timers["lpr"].avarageTotalDuration() << " fps)" << std::endl;
+        Context context{inputChannels, worker,
+                        detector, worker,
+                        vehicleAttributesClassifier, lpr, worker,
+                        pause, gridParam, displayResolution, showPeriod, worker,
+                        FLAGS_n_iqs - 1,
+                        worker,
+                        nireq,
+                        isVideo,
+                        nclassifiersireq, nrecognizersireq};
+
+        for (uint64_t i = 0; i < FLAGS_n_iqs; i++) {
+            for (unsigned sourceID = 0; sourceID < inputChannels.size(); sourceID++) {
+                VideoFrame::Ptr sharedVideoFrame = std::make_shared<ReborningVideoFrame>(context, sourceID, i);
+                worker->push(std::make_shared<Reader>(sharedVideoFrame));
+            }
+        }
+        slog::info << "Number of allocated frames: " << FLAGS_n_iqs * (inputChannels.size()) << slog::endl;
+        if (FLAGS_auto_resize) {
+            slog::info << "Resizable input with support of ROI crop and auto resize is enabled" << slog::endl;
+        } else {
+            slog::info << "Resizable input with support of ROI crop and auto resize is disabled" << slog::endl;
+        }
+
+        // Running
+        context.t0 = std::chrono::steady_clock::now();
+        worker->runThreads();
+        worker->threadFunc();
+        worker->join();
+        const auto t1 = std::chrono::steady_clock::now();
+
+        for (auto& net : std::array<std::pair<std::vector<InferRequest>, std::string>, 3>{
+            std::make_pair(context.detectorsInfers.getActualInferRequests(), FLAGS_d),
+                std::make_pair(context.attributesInfers.getActualInferRequests(), FLAGS_d_va),
+                std::make_pair(context.platesInfers.getActualInferRequests(), FLAGS_d_lpr)}) {
+            for (InferRequest& ir : net.first) {
+                ir.Wait(IInferRequest::WaitMode::RESULT_READY);
+                if (FLAGS_pc) {  // Show performace results
+                    printPerformanceCounts(ir, std::cout, getFullDeviceName(mapDevices, net.second));
                 }
             }
         }
 
-        std::cout << std::endl << "Total execution time: " << timers["total"].totalDuration << std::endl << std::endl;
-
-        /** Show performace results **/
-        if (FLAGS_pc) {
-            for (auto && plugin : pluginsForNetworks) {
-                std::cout << "Performance counts for " << plugin.first << " plugin";
-                printPerformanceCountsPlugin(plugin.second, std::cout);
-            }
+        uint64_t frameCounter = context.frameCounter;
+        if (0 != frameCounter) {
+            const ms meanOverallTimePerAllInputs = std::chrono::duration_cast<ms>((t1 - context.t0)
+                * context.readersContext.inputChannels.size()) / frameCounter;
+            std::cout << "Mean overall time per all inputs: " << std::fixed << std::setprecision(2) << meanOverallTimePerAllInputs.count()
+                      << "ms / " << std::chrono::seconds(1) / meanOverallTimePerAllInputs << "FPS for " << frameCounter << " frames\n";
+            const double detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
+                / (frameCounter * context.nireq) * 100;
+            std::cout << "Detection InferRequests usage: " << detectionsInfersUsage << "%\n";
         }
-
-        /** release input channels **/
-        for (auto && c : cap) {
-            c.release();
-        }
-
-        cv::destroyAllWindows();
-    }
-    catch (const std::exception& error) {
+    } catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
         return 1;
-    }
-    catch (...) {
+    } catch (...) {
         std::cerr << "[ ERROR ] Unknown/internal exception happened." << std::endl;
         return 1;
     }
-
     slog::info << "Execution successful" << slog::endl;
     return 0;
 }

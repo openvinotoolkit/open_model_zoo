@@ -8,8 +8,9 @@ This repository includes optimized deep learning models and a set of demos to ex
 
 ## Repository Components:
 * [Pre-Trained Models](intel_models/index.md)
-* [Public Models Downloader](model_downloader/README.md)
-* [Demos](demos/Readme.md) that demonstrate models usage with Deep Learning Deployment Toolkit
+* [Model Downloader](tools/downloader/README.md) and other automation tools
+* [Demos](demos/README.md) that demonstrate models usage with Deep Learning Deployment Toolkit
+* [Accuracy Checker](tools/accuracy_checker/README.md) tool for models accuracy validation
 
 ## License
 Open Model Zoo is licensed under [Apache License Version 2.0](LICENSE).
@@ -32,7 +33,7 @@ Open Model Zoo is licensed under Apache License, Version 2.0. By contributing to
 ## Support
 Please report questions, issues and suggestions using:
 * [\#open_model_zoo](https://stackoverflow.com/search?q=%23open_model_zoo) tag on StackOverflow*
-* [GitHub* Issues](https://github.com/opencv/open_model_zoo/issues) 
+* [GitHub* Issues](https://github.com/opencv/open_model_zoo/issues)
 * [Forum](https://software.intel.com/en-us/forums/computer-vision)
 * [Gitter](https://gitter.im/open_model_zoo/community)
 

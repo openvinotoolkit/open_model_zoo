@@ -19,9 +19,11 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <set>
 
 #include <inference_engine.hpp>
 
+#include <samples/slog.hpp>
 #include <samples/ocv_common.hpp>
 #include "crossroad_camera_demo.hpp"
 #include <ext_list.hpp>
@@ -34,10 +36,11 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
     }
 
-    std::cout << "[ INFO ] Parsing input parameters" << std::endl;
+    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -54,7 +57,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 struct BaseDetection {
     ExecutableNetwork net;
-    InferencePlugin plugin;
     InferRequest request;
     std::string & commandLineFlag;
     std::string topoName;
@@ -110,11 +112,15 @@ struct BaseDetection {
         if (!enablingChecked) {
             _enabled = !commandLineFlag.empty();
             if (!_enabled) {
-                std::cout << "[ INFO ] " << topoName << " detection DISABLED" << std::endl;
+                slog::info << topoName << " detection DISABLED" << slog::endl;
             }
             enablingChecked = true;
         }
         return _enabled;
+    }
+
+    void printPerformanceCounts(std::string fullDeviceName) const {
+        ::printPerformanceCounts(request, std::cout, fullDeviceName);
     }
 };
 
@@ -153,12 +159,12 @@ struct PersonDetection : BaseDetection{
 
     PersonDetection() : BaseDetection(FLAGS_m, "Person Detection"), maxProposalCount(0), objectSize(0) {}
     CNNNetwork read() override {
-        std::cout << "[ INFO ] Loading network files for PersonDetection" << std::endl;
+        slog::info << "Loading network files for PersonDetection" << slog::endl;
         CNNNetReader netReader;
         /** Read network model **/
         netReader.ReadNetwork(FLAGS_m);
         /** Set batch size to 1 **/
-        std::cout << "[ INFO ] Batch size is forced to  1" << std::endl;
+        slog::info << "Batch size is forced to  1" << slog::endl;
         netReader.getNetwork().setBatchSize(1);
         /** Extract model name and load it's weights **/
         std::string binFileName = fileNameNoExt(FLAGS_m) + ".bin";
@@ -167,13 +173,13 @@ struct PersonDetection : BaseDetection{
 
         /** SSD-based network should have one input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
-        std::cout << "[ INFO ] Checking Person Detection inputs" << std::endl;
+        slog::info << "Checking Person Detection inputs" << slog::endl;
         InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Detection network should have only one input");
         }
         InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
-        inputInfoFirst->setInputPrecision(Precision::U8);
+        inputInfoFirst->setPrecision(Precision::U8);
 
         if (FLAGS_auto_resize) {
             inputInfoFirst->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
@@ -185,7 +191,7 @@ struct PersonDetection : BaseDetection{
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Check outputs ------------------------------------------------------
-        std::cout << "[ INFO ] Checking Person Detection outputs" << std::endl;
+        slog::info << "Checking Person Detection outputs" << slog::endl;
         OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
         if (outputInfo.size() != 1) {
             throw std::logic_error("Person Detection network should have only one output");
@@ -204,7 +210,7 @@ struct PersonDetection : BaseDetection{
         _output->setPrecision(Precision::FP32);
         _output->setLayout(Layout::NCHW);
 
-        std::cout << "[ INFO ] Loading Person Detection model to the "<< FLAGS_d << " plugin" << std::endl;
+        slog::info << "Loading Person Detection model to the "<< FLAGS_d << " device" << slog::endl;
         return netReader.getNetwork();
     }
 
@@ -269,6 +275,7 @@ struct PersonAttribsDetection : BaseDetection {
         cv::Mat image32f;
         image.convertTo(image32f, CV_32F);
         image32f = image32f.reshape(1, image32f.rows*image32f.cols);
+        clusterCount = std::min(clusterCount, image32f.rows);
         cv::kmeans(image32f, clusterCount, labels, cv::TermCriteria(cv::TermCriteria::EPS+cv::TermCriteria::MAX_ITER, 10, 1.0),
                     10, cv::KMEANS_RANDOM_CENTERS, centers);
         centers.convertTo(centers, CV_8U);
@@ -334,12 +341,12 @@ struct PersonAttribsDetection : BaseDetection {
     }
 
     CNNNetwork read() override {
-        std::cout << "[ INFO ] Loading network files for PersonAttribs" << std::endl;
+        slog::info << "Loading network files for PersonAttribs" << slog::endl;
         CNNNetReader netReader;
         /** Read network model **/
         netReader.ReadNetwork(FLAGS_m_pa);
         netReader.getNetwork().setBatchSize(1);
-        std::cout << "[ INFO ] Batch size is forced to 1 for Person Attribs" << std::endl;
+        slog::info << "Batch size is forced to 1 for Person Attribs" << slog::endl;
 
         /** Extract model name and load it's weights **/
         std::string binFileName = fileNameNoExt(FLAGS_m_pa) + ".bin";
@@ -348,13 +355,13 @@ struct PersonAttribsDetection : BaseDetection {
 
         /** Person Attribs network should have one input two outputs **/
         // ---------------------------Check inputs ------------------------------------------------------
-        std::cout << "[ INFO ] Checking PersonAttribs inputs" << std::endl;
+        slog::info << "Checking PersonAttribs inputs" << slog::endl;
         InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Attribs topology should have only one input");
         }
         InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
-        inputInfoFirst->setInputPrecision(Precision::U8);
+        inputInfoFirst->setPrecision(Precision::U8);
         if (FLAGS_auto_resize) {
             inputInfoFirst->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
             inputInfoFirst->getInputData()->setLayout(Layout::NHWC);
@@ -365,16 +372,16 @@ struct PersonAttribsDetection : BaseDetection {
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Check outputs ------------------------------------------------------
-        std::cout << "[ INFO ] Checking Person Attribs outputs" << std::endl;
+        slog::info << "Checking Person Attribs outputs" << slog::endl;
         OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
         if (outputInfo.size() != 3) {
              throw std::logic_error("Person Attribs Network expects networks having one output");
         }
         auto it = outputInfo.begin();
-        outputNameForAttributes = (it++)->second->name;  // attribute probabilities
-        outputNameForTopColorPoint = (it++)->second->name;  // top color location
-        outputNameForBottomColorPoint = (it++)->second->name;  // bottom color location
-        std::cout << "[ INFO ] Loading Person Attributes Recognition model to the "<< FLAGS_d_pa << " plugin" << std::endl;
+        outputNameForAttributes = (it++)->second->getName();  // attribute probabilities
+        outputNameForTopColorPoint = (it++)->second->getName();  // top color location
+        outputNameForBottomColorPoint = (it++)->second->getName();  // bottom color location
+        slog::info << "Loading Person Attributes Recognition model to the "<< FLAGS_d_pa << " device" << slog::endl;
         _enabled = true;
         return netReader.getNetwork();
     }
@@ -445,11 +452,11 @@ struct PersonReIdentification : BaseDetection {
     }
 
     CNNNetwork read() override {
-        std::cout << "[ INFO ] Loading network files for Person Reidentification" << std::endl;
+        slog::info << "Loading network files for Person Reidentification" << slog::endl;
         CNNNetReader netReader;
         /** Read network model **/
         netReader.ReadNetwork(FLAGS_m_reid);
-        std::cout << "[ INFO ] Batch size is forced to  1 for Person Reidentification Network" << std::endl;
+        slog::info << "Batch size is forced to  1 for Person Reidentification Network" << slog::endl;
         netReader.getNetwork().setBatchSize(1);
         /** Extract model name and load it's weights **/
         std::string binFileName = fileNameNoExt(FLAGS_m_reid) + ".bin";
@@ -457,13 +464,13 @@ struct PersonReIdentification : BaseDetection {
 
         /** Person Reidentification network should have 1 input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
-        std::cout << "[ INFO ] Checking Person Reidentification Network input" << std::endl;
+        slog::info << "Checking Person Reidentification Network input" << slog::endl;
         InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Reidentification Retail should have 1 input");
         }
         InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
-        inputInfoFirst->setInputPrecision(Precision::U8);
+        inputInfoFirst->setPrecision(Precision::U8);
         if (FLAGS_auto_resize) {
             inputInfoFirst->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
             inputInfoFirst->getInputData()->setLayout(Layout::NHWC);
@@ -474,13 +481,13 @@ struct PersonReIdentification : BaseDetection {
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Check outputs ------------------------------------------------------
-        std::cout << "[ INFO ] Checking Person Reidentification Network output" << std::endl;
+        slog::info << "Checking Person Reidentification Network output" << slog::endl;
         OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
         if (outputInfo.size() != 1) {
             throw std::logic_error("Person Reidentification Network should have 1 output");
         }
         outputName = outputInfo.begin()->first;
-        std::cout << "[ INFO ] Loading Person Reidentification Retail model to the "<< FLAGS_d_reid << " plugin" << std::endl;
+        slog::info << "Loading Person Reidentification Retail model to the "<< FLAGS_d_reid << " device" << slog::endl;
 
         _enabled = true;
         return netReader.getNetwork();
@@ -491,10 +498,9 @@ struct Load {
     BaseDetection& detector;
     explicit Load(BaseDetection& detector) : detector(detector) { }
 
-    void into(InferencePlugin & plg) const {
+    void into(Core & ie, const std::string & deviceName) const {
         if (detector.enabled()) {
-            detector.net = plg.LoadNetwork(detector.read(), {});
-            detector.plugin = plg;
+            detector.net = ie.LoadNetwork(detector.read(), deviceName);
         }
     }
 };
@@ -511,7 +517,7 @@ int main(int argc, char *argv[]) {
             return 0;
         }
 
-        std::cout << "[ INFO ] Reading input" << std::endl;
+        slog::info << "Reading input" << slog::endl;
         cv::Mat frame = cv::imread(FLAGS_i, cv::IMREAD_COLOR);
         const bool isVideo = frame.empty();
         cv::VideoCapture cap;
@@ -522,58 +528,63 @@ int main(int argc, char *argv[]) {
         const size_t height = isVideo ? (size_t) cap.get(cv::CAP_PROP_FRAME_HEIGHT) : frame.size().height;
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 1. Load Plugin for inference engine -------------------------------------
-        std::map<std::string, InferencePlugin> pluginsForNetworks;
-        std::vector<std::string> pluginNames = {
-                FLAGS_d, FLAGS_d_pa, FLAGS_d_reid
-        };
+        // --------------------------- 1. Load inference engine -------------------------------------
+        Core ie;
+
+        std::set<std::string> loadedDevices;
 
         PersonDetection personDetection;
         PersonAttribsDetection personAttribs;
         PersonReIdentification personReId;
 
-        for (auto && flag : pluginNames) {
-            if (flag == "") continue;
-            auto i = pluginsForNetworks.find(flag);
-            if (i != pluginsForNetworks.end()) {
+        std::vector<std::string> deviceNames = {
+                FLAGS_d,
+                personAttribs.enabled() ? FLAGS_d_pa : "",
+                personReId.enabled() ? FLAGS_d_reid : ""
+        };
+
+        for (auto && flag : deviceNames) {
+            if (flag.empty())
+                continue;
+
+            auto i = loadedDevices.find(flag);
+            if (i != loadedDevices.end()) {
                 continue;
             }
-            std::cout << "[ INFO ] Loading plugin " << flag << std::endl;
-            InferencePlugin plugin = PluginDispatcher().getPluginByDevice(flag);
+            slog::info << "Loading device " << flag << slog::endl;
 
-            /** Printing plugin version **/
-            printPluginVersion(plugin, std::cout);
+            /** Printing device version **/
+            std::cout << ie.GetVersions(flag) << std::endl;
 
             if ((flag.find("CPU") != std::string::npos)) {
-                /** Load default extensions lib for the CPU plugin (e.g. SSD's DetectionOutput)**/
-                plugin.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>());
+                /** Load default extensions lib for the CPU device (e.g. SSD's DetectionOutput)**/
+                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
-                    plugin.AddExtension(extension_ptr);
-                    std::cout << "CPU Extension loaded: " << FLAGS_l << std::endl;
+                    ie.AddExtension(extension_ptr, "CPU");
+                    slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
             }
 
             if ((flag.find("GPU") != std::string::npos) && !FLAGS_c.empty()) {
                 // Load any user-specified clDNN Extensions
-                plugin.SetConfig({ { PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } });
+                ie.SetConfig({ { PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
             }
-            pluginsForNetworks[flag] = plugin;
+
+            loadedDevices.insert(flag);
         }
 
         /** Per layer metrics **/
         if (FLAGS_pc) {
-            for (auto && plugin : pluginsForNetworks) {
-                plugin.second.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
-            }
+            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
         }
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 2. Read IR models and load them to plugins ------------------------------
-        Load(personDetection).into(pluginsForNetworks[FLAGS_d]);
-        Load(personAttribs).into(pluginsForNetworks[FLAGS_d_pa]);
-        Load(personReId).into(pluginsForNetworks[FLAGS_d_reid]);
+        // --------------------------- 2. Read IR models and load them to devices ------------------------------
+        Load(personDetection).into(ie, FLAGS_d);
+        Load(personAttribs).into(ie, FLAGS_d_pa);
+        Load(personReId).into(ie, FLAGS_d_reid);
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 3. Do inference ---------------------------------------------------------
@@ -585,10 +596,13 @@ int main(int argc, char *argv[]) {
         /** Start inference & calc performance **/
         typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
         auto total_t0 = std::chrono::high_resolution_clock::now();
-        std::cout << "[ INFO ] Start inference " << std::endl;
+        slog::info << "Start inference " << slog::endl;
+
+        std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
-            std::cout << "[ INFO ] To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+            std::cout << " or switch to the output window and press ESC key";
         }
+        std::cout << std::endl;
 
         do {
             // get and enqueue the next frame (in case of video)
@@ -798,23 +812,28 @@ int main(int argc, char *argv[]) {
 
             if (!FLAGS_no_show) {
                 cv::imshow("Detection results", frame);
+                // for still images wait until any key is pressed, for video 1 ms is enough per frame
+                const int key = cv::waitKey(isVideo ? 1 : 0);
+                if (27 == key)  // Esc
+                    break;
             }
-            // for still images wait until any key is pressed, for video 1 ms is enough per frame
-            const int key = cv::waitKey(isVideo ? 1 : 0);
-            if (27 == key)  // Esc
-                break;
         } while (isVideo);
 
         auto total_t1 = std::chrono::high_resolution_clock::now();
         ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
-        std::cout << "[ INFO ] Total Inference time: " << total.count() << std::endl;
+        slog::info << "Total Inference time: " << total.count() << slog::endl;
 
         /** Show performace results **/
         if (FLAGS_pc) {
-            for (auto && plugin : pluginsForNetworks) {
-                std::cout << "[ INFO ] Performance counts for " << plugin.first << " plugin";
-                printPerformanceCountsPlugin(plugin.second, std::cout);
-            }
+            std::map<std::string, std::string>  mapDevices = getMapFullDevicesNames(ie, deviceNames);
+            std::cout << "Performance counts for person detection: " << std::endl;
+            personDetection.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d));
+
+            std::cout << "Performance counts for person attributes: " << std::endl;
+            personAttribs.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_pa));
+
+            std::cout << "Performance counts for person re-identification: " << std::endl;
+            personReId.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
         }
         // -----------------------------------------------------------------------------------------------------
     }
@@ -827,6 +846,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    std::cout << "[ INFO ] Execution successful" << std::endl;
+    slog::info << "Execution successful" << slog::endl;
     return 0;
 }

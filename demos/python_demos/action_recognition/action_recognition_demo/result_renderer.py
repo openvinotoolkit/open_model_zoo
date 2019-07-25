@@ -1,3 +1,19 @@
+"""
+ Copyright (c) 2019 Intel Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
 from collections import Counter, defaultdict, deque
 from functools import partial
 from itertools import islice
@@ -24,7 +40,7 @@ class ResultRenderer(object):
         self.output_height = output_height
         self.meters = defaultdict(partial(WindowAverageMeter, 16))
         self.postprocessing = [LabelPostprocessing(n_frames=30, history_size=100) for _ in range(number_of_predictions)]
-        print("To close the application, press 'CTRL+C' or any key with focus on the output window")
+        print("To close the application, press 'CTRL+C' here or switch to the output window and press any key")
 
     def update_timers(self, timers):
         self.meters['encoder'].update(timers['encoder'])

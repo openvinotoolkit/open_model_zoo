@@ -20,6 +20,7 @@
 #include <iterator>
 
 #include <inference_engine.hpp>
+#include <ie_utils.hpp>
 
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
@@ -30,15 +31,12 @@
 
 using namespace InferenceEngine;
 
-#define yolo_scale_13 13
-#define yolo_scale_26 26
-#define yolo_scale_52 52
-
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validating the input arguments--------------------------------------
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
     }
     slog::info << "Parsing input parameters" << slog::endl;
@@ -120,27 +118,24 @@ void ParseYOLOV3Output(const CNNLayerPtr &layer, const Blob::Ptr &blob, const un
         ", current W = " + std::to_string(out_blob_h));
     // --------------------------- Extracting layer parameters -------------------------------------
     auto num = layer->GetParamAsInt("num");
-    try { num = layer->GetParamAsInts("mask").size(); } catch (...) {}
     auto coords = layer->GetParamAsInt("coords");
     auto classes = layer->GetParamAsInt("classes");
     std::vector<float> anchors = {10.0, 13.0, 16.0, 30.0, 33.0, 23.0, 30.0, 61.0, 62.0, 45.0, 59.0, 119.0, 116.0, 90.0,
                                   156.0, 198.0, 373.0, 326.0};
     try { anchors = layer->GetParamAsFloats("anchors"); } catch (...) {}
+    try {
+        auto mask = layer->GetParamAsInts("mask");
+        num = mask.size();
+
+        std::vector<float> maskedAnchors(num * 2);
+        for (int i = 0; i < num; ++i) {
+            maskedAnchors[i * 2] = anchors[mask[i] * 2];
+            maskedAnchors[i * 2 + 1] = anchors[mask[i] * 2 + 1];
+        }
+        anchors = maskedAnchors;
+    } catch (...) {}
+
     auto side = out_blob_h;
-    int anchor_offset = 0;
-    switch (side) {
-        case yolo_scale_13:
-            anchor_offset = 2 * 6;
-            break;
-        case yolo_scale_26:
-            anchor_offset = 2 * 3;
-            break;
-        case yolo_scale_52:
-            anchor_offset = 2 * 0;
-            break;
-        default:
-            throw std::runtime_error("Invalid output size");
-    }
     auto side_square = side * side;
     const float *output_blob = blob->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
     // --------------------------- Parsing YOLO Region output -------------------------------------
@@ -155,8 +150,8 @@ void ParseYOLOV3Output(const CNNLayerPtr &layer, const Blob::Ptr &blob, const un
                 continue;
             double x = (col + output_blob[box_index + 0 * side_square]) / side * resized_im_w;
             double y = (row + output_blob[box_index + 1 * side_square]) / side * resized_im_h;
-            double height = std::exp(output_blob[box_index + 3 * side_square]) * anchors[anchor_offset + 2 * n + 1];
-            double width = std::exp(output_blob[box_index + 2 * side_square]) * anchors[anchor_offset + 2 * n];
+            double height = std::exp(output_blob[box_index + 3 * side_square]) * anchors[2 * n + 1];
+            double width = std::exp(output_blob[box_index + 2 * side_square]) * anchors[2 * n];
             for (int j = 0; j < classes; ++j) {
                 int class_index = EntryIndex(side, coords, classes, n * side_square + i, coords + 1 + j);
                 float prob = scale * output_blob[class_index];
@@ -201,12 +196,14 @@ int main(int argc, char *argv[]) {
         }
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 1. Load Plugin for inference engine -------------------------------------
-        slog::info << "Loading plugin" << slog::endl;
-        InferencePlugin plugin = PluginDispatcher().getPluginByDevice(FLAGS_d);
-        printPluginVersion(plugin, std::cout);
+        // --------------------------- 1. Load inference engine -------------------------------------
+        slog::info << "Loading Inference Engine" << slog::endl;
+        Core ie;
 
-        /**Loading extensions to the plugin **/
+        slog::info << "Device info: " << slog::endl;
+        std::cout << ie.GetVersions(FLAGS_d);
+
+        /**Loading extensions to the devices **/
 
         /** Loading default extensions **/
         if (FLAGS_d.find("CPU") != std::string::npos) {
@@ -214,22 +211,22 @@ int main(int argc, char *argv[]) {
              * cpu_extensions library is compiled from the "extension" folder containing
              * custom CPU layer implementations.
             **/
-            plugin.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>());
+            ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
         }
 
         if (!FLAGS_l.empty()) {
             // CPU extensions are loaded as a shared library and passed as a pointer to the base extension
             IExtensionPtr extension_ptr = make_so_pointer<IExtension>(FLAGS_l.c_str());
-            plugin.AddExtension(extension_ptr);
+            ie.AddExtension(extension_ptr, "CPU");
         }
         if (!FLAGS_c.empty()) {
             // GPU extensions are loaded from an .xml description and OpenCL kernel files
-            plugin.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}});
+            ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
         }
 
         /** Per-layer metrics **/
         if (FLAGS_pc) {
-            plugin.SetConfig({ { PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES } });
+            ie.SetConfig({ { PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES } });
         }
         // -----------------------------------------------------------------------------------------------------
 
@@ -273,18 +270,15 @@ int main(int argc, char *argv[]) {
         // --------------------------------- Preparing output blobs -------------------------------------------
         slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
         OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
-        if (outputInfo.size() != 3) {
-            throw std::logic_error("This demo only accepts networks with three layers");
-        }
         for (auto &output : outputInfo) {
             output.second->setPrecision(Precision::FP32);
             output.second->setLayout(Layout::NCHW);
         }
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 4. Loading model to the plugin ------------------------------------------
-        slog::info << "Loading model to the plugin" << slog::endl;
-        ExecutableNetwork network = plugin.LoadNetwork(netReader.getNetwork(), {});
+        // --------------------------- 4. Loading model to the device ------------------------------------------
+        slog::info << "Loading model to the device" << slog::endl;
+        ExecutableNetwork network = ie.LoadNetwork(netReader.getNetwork(), FLAGS_d);
 
         // -----------------------------------------------------------------------------------------------------
 
@@ -305,7 +299,8 @@ int main(int argc, char *argv[]) {
         auto wallclock = std::chrono::high_resolution_clock::now();
         double ocv_decode_time = 0, ocv_render_time = 0;
 
-        std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+        std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and press ESC key" << std::endl;
+        std::cout << "To switch between sync/async modes, press TAB key in the output window" << std::endl;
         while (true) {
             auto t0 = std::chrono::high_resolution_clock::now();
             // Here is the first asynchronous point:
@@ -374,8 +369,9 @@ int main(int argc, char *argv[]) {
 
                 // ---------------------------Processing output blobs--------------------------------------------------
                 // Processing results of the CURRENT request
-                unsigned long resized_im_h = inputInfo.begin()->second.get()->getDims()[0];
-                unsigned long resized_im_w = inputInfo.begin()->second.get()->getDims()[1];
+                const TensorDesc& inputDesc = inputInfo.begin()->second.get()->getTensorDesc();
+                unsigned long resized_im_h = getTensorHeight(inputDesc);
+                unsigned long resized_im_w = getTensorWidth(inputDesc);
                 std::vector<DetectionObject> objects;
                 // Parsing outputs
                 for (auto &output : outputInfo) {
@@ -431,7 +427,6 @@ int main(int argc, char *argv[]) {
                 isModeChanged = false;
             }
 
-
             // Final point:
             // in the truly Async mode, we swap the NEXT and CURRENT requests for the next iteration
             frame = next_frame;
@@ -455,7 +450,7 @@ int main(int argc, char *argv[]) {
 
         /** Showing performace results **/
         if (FLAGS_pc) {
-            printPerformanceCounts(*async_infer_request_curr, std::cout);
+            printPerformanceCounts(*async_infer_request_curr, std::cout, getFullDeviceName(ie, FLAGS_d));
         }
     }
     catch (const std::exception& error) {

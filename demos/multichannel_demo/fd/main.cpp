@@ -74,6 +74,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
     }
     slog::info << "Parsing input parameters" << slog::endl;
@@ -302,13 +303,14 @@ int main(int argc, char* argv[]) {
             auto output = req->GetBlob(outputDataBlobNames[0]);
 
             float* dataPtr = output->buffer();
-            InferenceEngine::SizeVector svec = output->dims();
+            InferenceEngine::SizeVector svec = output->getTensorDesc().getDims();
             size_t total = 1;
-            for (size_t j = 0; j < svec.size(); j++) {
-                total *= svec[j];
+            for (auto v : svec) {
+                total *= v;
             }
 
-            std::vector<Detections> detections(svec[1] / 200);
+
+            std::vector<Detections> detections(getTensorHeight(output->getTensorDesc()) / 200);
             for (auto& d : detections) {
                 d.set(new std::vector<Face>);
             }
@@ -338,9 +340,12 @@ int main(int argc, char* argv[]) {
         std::mutex statMutex;
         std::stringstream statStream;
 
+        std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
-            std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+            std::cout << " or switch to the output window and press ESC key";
         }
+        std::cout << std::endl;
+
         const size_t outputQueueSize = 1;
         AsyncOutput output(FLAGS_show_stats, outputQueueSize,
         [&](const std::vector<std::shared_ptr<VideoFrame>>& result) {

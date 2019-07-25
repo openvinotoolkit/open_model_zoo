@@ -40,8 +40,9 @@ public:
     /**
      * @brief Constructor
      */
-    explicit CnnBase(const Config& config,
-                     const InferenceEngine::InferencePlugin& plugin);
+    CnnBase(const Config& config,
+            const InferenceEngine::Core & ie,
+            const std::string & deviceName);
 
     /**
      * @brief Descructor
@@ -56,7 +57,7 @@ public:
     /**
      * @brief Prints performance report
      */
-    void PrintPerformanceCounts() const;
+    void PrintPerformanceCounts(std::string fullDeviceName) const;
 
 protected:
     /**
@@ -79,8 +80,10 @@ protected:
 
     /** @brief Config */
     Config config_;
-    /** @brief IE plugin */
-    InferenceEngine::InferencePlugin net_plugin_;
+    /** @brief Inference Engine instance */
+    InferenceEngine::Core ie_;
+    /** @brief Inference Engine device */
+    std::string deviceName_;
     /** @brief Net outputs info */
     InferenceEngine::OutputsDataMap outInfo_;
     /** @brief IE network */
@@ -95,8 +98,9 @@ protected:
 
 class VectorCNN : public CnnBase {
 public:
-    explicit VectorCNN(const CnnConfig& config,
-                       const InferenceEngine::InferencePlugin& plugin);
+    VectorCNN(const CnnConfig& config,
+              const InferenceEngine::Core & ie,
+              const std::string & deviceName);
 
     void Compute(const cv::Mat& image,
                  cv::Mat* vector, cv::Size outp_shape = cv::Size()) const;

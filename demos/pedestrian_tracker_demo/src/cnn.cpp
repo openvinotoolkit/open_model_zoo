@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <numeric>
+#include <functional>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -16,8 +18,9 @@
 using namespace InferenceEngine;
 
 CnnBase::CnnBase(const Config& config,
-                 const InferenceEngine::InferencePlugin& plugin) :
-    config_(config), net_plugin_(plugin) {}
+                 const InferenceEngine::Core & ie,
+                 const std::string & deviceName) :
+    config_(config), ie_(ie), deviceName_(deviceName) {}
 
 void CnnBase::Load() {
     CNNNetReader net_reader;
@@ -39,7 +42,7 @@ void CnnBase::Load() {
     }
 
     SizeVector inputDims = in.begin()->second->getTensorDesc().getDims();
-    in.begin()->second->setInputPrecision(Precision::U8);
+    in.begin()->second->setPrecision(Precision::U8);
     input_blob_ = make_shared_blob<uint8_t>(TensorDesc(Precision::U8, inputDims, Layout::NCHW));
     input_blob_->allocate();
     BlobMap inputs;
@@ -55,7 +58,7 @@ void CnnBase::Load() {
         outputs_[item.first] = output;
     }
 
-    executable_network_ = net_plugin_.LoadNetwork(net_reader.getNetwork(), {});
+    executable_network_ = ie_.LoadNetwork(net_reader.getNetwork(), deviceName_);
     infer_request_ = executable_network_.CreateInferRequest();
     infer_request_.SetInput(inputs);
     infer_request_.SetOutput(outputs_);
@@ -80,9 +83,9 @@ void CnnBase::InferBatch(
     }
 }
 
-void CnnBase::PrintPerformanceCounts() const {
+void CnnBase::PrintPerformanceCounts(std::string fullDeviceName) const {
     std::cout << "Performance counts for " << config_.path_to_model << std::endl << std::endl;
-    ::printPerformanceCounts(infer_request_.GetPerformanceCounts(), std::cout, false);
+    ::printPerformanceCounts(infer_request_, std::cout, fullDeviceName, false);
 }
 
 void CnnBase::Infer(const cv::Mat& frame,
@@ -91,20 +94,17 @@ void CnnBase::Infer(const cv::Mat& frame,
 }
 
 VectorCNN::VectorCNN(const Config& config,
-                     const InferenceEngine::InferencePlugin& plugin)
-    : CnnBase(config, plugin) {
+                     const InferenceEngine::Core& ie,
+                     const std::string & deviceName)
+    : CnnBase(config, ie, deviceName) {
     Load();
 
     if (outputs_.size() != 1) {
         THROW_IE_EXCEPTION << "Demo supports topologies only with 1 output";
     }
-    InferenceEngine::SizeVector dims = outInfo_.begin()->second->dims;
-    int num_dims = static_cast<int>(dims.size());
 
-    result_size_ = 1;
-    for (int i = 0; i < num_dims - 1; ++i) {
-        result_size_ *= dims[i];
-    }
+    InferenceEngine::SizeVector dims = outInfo_.begin()->second->getTensorDesc().getDims();
+    result_size_ = std::accumulate(std::next(dims.begin(), 1), dims.end(), 1, std::multiplies<int>());
 }
 
 void VectorCNN::Compute(const cv::Mat& frame,

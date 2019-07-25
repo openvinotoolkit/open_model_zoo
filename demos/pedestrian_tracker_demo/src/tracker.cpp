@@ -928,8 +928,8 @@ void PedestrianTracker::PrintConfusionMatrices() const {
     }
 }
 
-void PedestrianTracker::PrintReidPerformanceCounts() const {
+void PedestrianTracker::PrintReidPerformanceCounts(std::string fullDeviceName) const {
     if (descriptor_strong_) {
-        descriptor_strong_->PrintPerformanceCounts();
+        descriptor_strong_->PrintPerformanceCounts(fullDeviceName);
     }
 }

@@ -3,11 +3,13 @@
 //
 
 #include <algorithm>
+#include <chrono>
 #include <cstdlib>
 #include <iomanip>
 #include <limits>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -20,7 +22,6 @@
 #include <inference_engine.hpp>
 
 #include <samples/common.hpp>
-#include <samples/slog.hpp>
 
 #include "cnn.hpp"
 #include "image_grabber.hpp"
@@ -44,6 +45,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
     }
 
@@ -52,6 +54,9 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     }
     if (FLAGS_m_td.empty() && FLAGS_m_tr.empty()) {
         throw std::logic_error("Neither parameter -m_td nor -m_tr is not set");
+    }
+    if (FLAGS_dt.empty()) {
+        throw std::logic_error("Parameter -dt is not set");
     }
 
     return true;
@@ -79,57 +84,70 @@ int main(int argc, char *argv[]) {
 
         const char kPadSymbol = '#';
         if (FLAGS_m_tr_ss.find(kPadSymbol) != FLAGS_m_tr_ss.npos)
-            throw std::invalid_argument("Symbols set for Text Recongition model must not contain reserved symbol '#'");
+            throw std::invalid_argument("Symbols set for the Text Recongition model must not contain the reserved symbol '#'");
 
         std::string kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
 
         const double min_text_recognition_confidence = FLAGS_thr;
 
-        std::map<std::string, InferencePlugin> plugins_for_devices;
-        std::vector<std::string> devices = {FLAGS_d_td, FLAGS_d_tr};
+        Core ie;
 
-        float cls_conf_threshold = static_cast<float>(FLAGS_cls_pixel_thr);
-        float link_conf_threshold = static_cast<float>(FLAGS_link_pixel_thr);
+        std::set<std::string> loadedDevices;
+        std::vector<std::string> devices = {FLAGS_m_td.empty() ? "" : FLAGS_d_td, FLAGS_m_tr.empty() ? "" : FLAGS_d_tr};
 
         for (const auto &device : devices) {
-            if (plugins_for_devices.find(device) != plugins_for_devices.end()) {
+            if (device.empty())
                 continue;
-            }
-            InferencePlugin plugin = PluginDispatcher({"../../../lib/intel64", ""}).getPluginByDevice(device);
-            /** Load extensions for the CPU plugin **/
+            if (loadedDevices.find(device) != loadedDevices.end())
+                continue;
+
+            std::cout << "Loading device " << device << std::endl;
+            std::cout << ie.GetVersions(device) << std::endl;
+
+            /** Load extensions for the CPU device **/
             if ((device.find("CPU") != std::string::npos)) {
-                plugin.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>());
+                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
 
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
-                    plugin.AddExtension(extension_ptr);
-                    slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
+                    ie.AddExtension(extension_ptr, "CPU");
+                    std::cout << "CPU Extension loaded: " << FLAGS_l << std::endl;
                 }
             } else if (!FLAGS_c.empty()) {
-                // Load Extensions for other plugins not CPU
-                plugin.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}});
+                // Load Extensions for GPU
+                ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
             }
-            plugins_for_devices[device] = plugin;
+
+            loadedDevices.insert(device);
         }
 
         auto image_path = FLAGS_i;
         auto text_detection_model_path = FLAGS_m_td;
         auto text_recognition_model_path = FLAGS_m_tr;
         auto extension_path = FLAGS_l;
+        auto cls_conf_threshold = static_cast<float>(FLAGS_cls_pixel_thr);
+        auto link_conf_threshold = static_cast<float>(FLAGS_link_pixel_thr);
 
         Cnn text_detection, text_recognition;
 
         if (!FLAGS_m_td.empty())
-            text_detection.Init(FLAGS_m_td, &plugins_for_devices[FLAGS_d_td], cv::Size(FLAGS_w_td, FLAGS_h_td));
+            text_detection.Init(FLAGS_m_td, ie, FLAGS_d_td, cv::Size(FLAGS_w_td, FLAGS_h_td));
 
         if (!FLAGS_m_tr.empty())
-            text_recognition.Init(FLAGS_m_tr, &plugins_for_devices[FLAGS_d_tr]);
+            text_recognition.Init(FLAGS_m_tr, ie, FLAGS_d_tr);
 
         std::unique_ptr<Grabber> grabber = Grabber::make_grabber(FLAGS_dt, FLAGS_i);
+        int wait_time = (FLAGS_dt == "image" || FLAGS_dt == "list") ? 0 : 3;
 
         cv::Mat image;
         grabber->GrabNextImage(&image);
+
+        std::cout << "To close the application, press 'CTRL+C' here";
+        if (!FLAGS_no_show) {
+            std::cout << " or switch to the output window and press ESC key";
+        }
+        std::cout << std::endl;
 
         while (!image.empty()) {
             cv::Mat demo_image = image.clone();
@@ -151,7 +169,7 @@ int main(int argc, char *argv[]) {
                 std::sort(rects.begin(), rects.end(), [](const cv::RotatedRect & a, const cv::RotatedRect & b) {
                     return a.size.area() > b.size.area();
                 });
-                rects.resize(FLAGS_max_rect_num);
+                rects.resize(static_cast<size_t>(FLAGS_max_rect_num));
             }
 
             int num_found = text_recognition.is_initialized() ? 0 : static_cast<int>(rects.size());
@@ -172,14 +190,16 @@ int main(int argc, char *argv[]) {
                     if (FLAGS_cc) {
                         int w = static_cast<int>(image.cols * 0.05);
                         int h = static_cast<int>(w * 0.5);
-                        int tl_x = static_cast<int>(image.cols * 0.5 - w * 0.5);
-                        int tl_y = static_cast<int>(image.rows * 0.5 - h * 0.5);
-                        cv::Rect r(tl_x, tl_y, w, h);
+                        cv::Rect r(static_cast<int>(image.cols * 0.5 - w * 0.5), static_cast<int>(image.rows * 0.5 - h * 0.5), w, h);
                         cropped_text = image(r).clone();
                         cv::rectangle(demo_image, r, cv::Scalar(0, 0, 255), 2);
                         points.emplace_back(r.tl());
                     } else {
                         cropped_text = image;
+                        points.emplace_back(0.0f, 0.0f);
+                        points.emplace_back(static_cast<float>(image.cols - 1), 0.0f);
+                        points.emplace_back(static_cast<float>(image.cols - 1), static_cast<float>(image.rows - 1));
+                        points.emplace_back(0.0f, static_cast<float>(image.rows - 1));
                     }
                 }
 
@@ -215,7 +235,9 @@ int main(int argc, char *argv[]) {
                         std::cout << "," << res;
                     }
 
-                    std::cout << std::endl;
+                    if (!points.empty()) {
+                        std::cout << std::endl;
+                    }
                 }
 
                 if (!FLAGS_no_show && (!res.empty() || !text_recognition.is_initialized())) {
@@ -224,14 +246,14 @@ int main(int argc, char *argv[]) {
                     }
 
                     if (!points.empty() && !res.empty()) {
-                        setLabel(demo_image, res, points[top_left_point_idx]);
+                        setLabel(demo_image, res, points[static_cast<size_t>(top_left_point_idx)]);
                     }
                 }
             }
 
             std::chrono::steady_clock::time_point end_frame = std::chrono::steady_clock::now();
 
-            if (avg_time == 0) {
+            if (avg_time == 0.0) {
                 avg_time = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(end_frame - begin_frame).count());
             } else {
                 auto cur_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_frame - begin_frame).count();
@@ -240,11 +262,10 @@ int main(int argc, char *argv[]) {
             int fps = static_cast<int>(1000 / avg_time);
 
             if (!FLAGS_no_show) {
-                std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
                 cv::putText(demo_image, "fps: " + std::to_string(fps) + " found: " + std::to_string(num_found),
                             cv::Point(50, 50), cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255), 1);
-                cv::imshow("Press any key to exit", demo_image);
-                char k = cv::waitKey(3);
+                cv::imshow("Press ESC key to exit", demo_image);
+                char k = static_cast<char>(cv::waitKey(wait_time));
                 if (k == 27) break;
             }
 
@@ -308,16 +329,16 @@ cv::Point topLeftPoint(const std::vector<cv::Point2f> & points, int *idx) {
 
     for (size_t i = 0; i < points.size() ; i++) {
         if (most_left.x > points[i].x) {
-            if (most_left.x != std::numeric_limits<float>::max()) {
+            if (most_left.x < std::numeric_limits<float>::max()) {
                 almost_most_left = most_left;
                 almost_most_left_idx = most_left_idx;
             }
             most_left = points[i];
-            most_left_idx = i;
+            most_left_idx = static_cast<int>(i);
         }
         if (almost_most_left.x > points[i].x && points[i] != most_left) {
             almost_most_left = points[i];
-            almost_most_left_idx = i;
+            almost_most_left_idx = static_cast<int>(i);
         }
     }
 
@@ -331,7 +352,7 @@ cv::Point topLeftPoint(const std::vector<cv::Point2f> & points, int *idx) {
 }
 
 cv::Mat cropImage(const cv::Mat &image, const std::vector<cv::Point2f> &points, const cv::Size& target_size, int top_left_point_idx) {
-    cv::Point2f point0 = points[top_left_point_idx];
+    cv::Point2f point0 = points[static_cast<size_t>(top_left_point_idx)];
     cv::Point2f point1 = points[(top_left_point_idx + 1) % 4];
     cv::Point2f point2 = points[(top_left_point_idx + 2) % 4];
 

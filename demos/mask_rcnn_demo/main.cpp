@@ -8,18 +8,12 @@
  * @example mask_rcnn_demo/main.cpp
  */
 #include <gflags/gflags.h>
-#include <functional>
 #include <iostream>
 #include <memory>
 #include <map>
 #include <algorithm>
-#include <fstream>
-#include <random>
 #include <string>
 #include <vector>
-#include <time.h>
-#include <chrono>
-#include <limits>
 #include <iomanip>
 
 #include <inference_engine.hpp>
@@ -40,14 +34,11 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
     }
 
     slog::info << "Parsing input parameters" << slog::endl;
-
-    if (FLAGS_ni < 1) {
-        throw std::logic_error("Parameter -ni should be greater than 0 (default: 1)");
-    }
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -75,9 +66,9 @@ int main(int argc, char *argv[]) {
         if (images.empty()) throw std::logic_error("No suitable images were found");
         // -----------------------------------------------------------------------------------------------------
 
-        // ---------------------Load plugin for inference engine------------------------------------------------
-        slog::info << "Loading plugin" << slog::endl;
-        InferencePlugin plugin = PluginDispatcher({ FLAGS_pp }).getPluginByDevice(FLAGS_d);
+        // ---------------------Load inference engine------------------------------------------------
+        slog::info << "Loading Inference Engine" << slog::endl;
+        Core ie;
 
         /** Loading default extensions **/
         if (FLAGS_d.find("CPU") != std::string::npos) {
@@ -86,27 +77,24 @@ int main(int argc, char *argv[]) {
              * custom MKLDNNPlugin layer implementations. These layers are not supported
              * by mkldnn, but they can be useful for inferring custom topologies.
             **/
-            plugin.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>());
+            ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
         }
 
         if (!FLAGS_l.empty()) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
             auto extension_ptr = make_so_pointer<InferenceEngine::IExtension>(FLAGS_l);
-            plugin.AddExtension(extension_ptr);
+            ie.AddExtension(extension_ptr, "CPU");
             slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
         }
         if (!FLAGS_c.empty()) {
             // clDNN Extensions are loaded from an .xml description and OpenCL kernel files
-            plugin.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}});
+            ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "CPU");
             slog::info << "GPU Extension loaded: " << FLAGS_c << slog::endl;
         }
 
-        /** Setting plugin parameter for per layer metrics **/
-        if (FLAGS_pc) {
-            plugin.SetConfig({ { PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES } });
-        }
-        /** Printing plugin version **/
-        printPluginVersion(plugin, std::cout);
+        /** Printing version **/
+        slog::info << "Device info: " << slog::endl;
+        std::cout << ie.GetVersions(FLAGS_d);
 
         // -----------------------------------------------------------------------------------------------------
 
@@ -135,21 +123,23 @@ int main(int argc, char *argv[]) {
         std::string imageInputName;
 
         for (const auto & inputInfoItem : inputInfo) {
-            if (inputInfoItem.second->getDims().size() == 4) {  // first input contains images
+            if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // first input contains images
                 imageInputName = inputInfoItem.first;
                 inputInfoItem.second->setPrecision(Precision::U8);
-            } else if (inputInfoItem.second->getDims().size() == 2) {  // second input contains image info
+            } else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // second input contains image info
                 inputInfoItem.second->setPrecision(Precision::FP32);
             } else {
-                throw std::logic_error("Unsupported input shape with size = " + std::to_string(inputInfoItem.second->getDims().size()));
+                throw std::logic_error("Unsupported input shape with size = " + std::to_string(inputInfoItem.second->getTensorDesc().getDims().size()));
             }
         }
 
         /** network dimensions for image input **/
-        size_t netBatchSize = inputInfo[imageInputName]->getDims()[3];
-        size_t netInputChannels = inputInfo[imageInputName]->getDims()[2];
-        size_t netInputHeight = inputInfo[imageInputName]->getDims()[1];
-        size_t netInputWidth = inputInfo[imageInputName]->getDims()[0];
+        const TensorDesc& inputDesc = inputInfo[imageInputName]->getTensorDesc();
+        IE_ASSERT(inputDesc.getDims().size() == 4);
+        size_t netBatchSize = getTensorBatch(inputDesc);
+        size_t netInputChannels = getTensorChannels(inputDesc);
+        size_t netInputHeight = getTensorHeight(inputDesc);
+        size_t netInputWidth = getTensorWidth(inputDesc);
 
         slog::info << "Network batch size is " << netBatchSize << slog::endl;
 
@@ -198,15 +188,17 @@ int main(int argc, char *argv[]) {
 
         // -----------------------------------------------------------------------------------------------------
 
-        // -------------------------Load model to the plugin-------------------------------------------------
-        slog::info << "Loading model to the plugin" << slog::endl;
+        // -------------------------Load model to the device----------------------------------------------------
+        slog::info << "Loading model to the device" << slog::endl;
+        auto executable_network = ie.LoadNetwork(network, FLAGS_d);
 
-        auto executable_network = plugin.LoadNetwork(network, {});
+        // -------------------------Create Infer Request--------------------------------------------------------
+        slog::info << "Create infer request" << slog::endl;
         auto infer_request = executable_network.CreateInferRequest();
 
         // -----------------------------------------------------------------------------------------------------
 
-        // -------------------------------Set input data----------------------------------------------------
+        // -------------------------------Set input data--------------------------------------------------------
         slog::info << "Setting input data to the blobs" << slog::endl;
 
         /** Iterate over all the input blobs **/
@@ -214,7 +206,7 @@ int main(int argc, char *argv[]) {
             Blob::Ptr input = infer_request.GetBlob(inputInfoItem.first);
 
             /** Fill first input tensor with images. First b channel, then g and r channels **/
-            if (inputInfoItem.second->getDims().size() == 4) {
+            if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {
                 auto data = input->buffer().as<PrecisionTrait<Precision::U8>::value_type *>();
                 size_t image_size = netInputHeight * netInputWidth;
 
@@ -233,7 +225,7 @@ int main(int argc, char *argv[]) {
             }
 
             /** Fill second input tensor with image info **/
-            if (inputInfoItem.second->getDims().size() == 2) {
+            if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {
                 auto data = input->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
                 data[0] = static_cast<float>(netInputHeight);  // height
                 data[1] = static_cast<float>(netInputWidth);  // width
@@ -245,29 +237,8 @@ int main(int argc, char *argv[]) {
 
 
         // ----------------------------Do inference-------------------------------------------------------------
-        slog::info << "Start inference (" << FLAGS_ni << " iterations)" << slog::endl;
-
-        typedef std::chrono::high_resolution_clock Time;
-        typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
-        typedef std::chrono::duration<float> fsec;
-
-        double total = 0.0;
-        /** Start inference & calc performance **/
-        for (size_t iter = 0; iter < FLAGS_ni; ++iter) {
-            auto t0 = Time::now();
-            infer_request.Infer();
-            auto t1 = Time::now();
-            fsec fs = t1 - t0;
-            ms d = std::chrono::duration_cast<ms>(fs);
-            total += d.count();
-        }
-
-        /** Show performance results **/
-        std::cout << std::endl << "Average running time of one iteration: " << total / static_cast<double>(FLAGS_ni) << " ms" << std::endl << std::endl;
-
-        if (FLAGS_pc) {
-            printPerformanceCounts(infer_request, std::cout);
-        }
+        slog::info << "Start inference" << slog::endl;
+        infer_request.Infer();
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Postprocess output blobs--------------------------------------------------
@@ -281,11 +252,17 @@ int main(int argc, char *argv[]) {
 
         const float PROBABILITY_THRESHOLD = 0.2f;
         const float MASK_THRESHOLD = 0.5f;  // threshold used to determine whether mask pixel corresponds to object or to background
-        size_t BOX_DESCRIPTION_SIZE = do_blob->dims().at(0);  // amount of elements in each detected box description (batch, label, prob, x1, y1, x2, y2)
-        size_t BOXES = masks_blob->dims().at(3);
-        size_t C = masks_blob->dims().at(2);
-        size_t H = masks_blob->dims().at(1);
-        size_t W = masks_blob->dims().at(0);
+        // amount of elements in each detected box description (batch, label, prob, x1, y1, x2, y2)
+        IE_ASSERT(do_blob->getTensorDesc().getDims().size() == 4);
+        size_t BOX_DESCRIPTION_SIZE = do_blob->getTensorDesc().getDims().back();
+
+        const TensorDesc& masksDesc = masks_blob->getTensorDesc();
+        IE_ASSERT(masksDesc.getDims().size() == 4);
+        size_t BOXES = getTensorBatch(masksDesc);
+        size_t C = getTensorChannels(masksDesc);
+        size_t H = getTensorHeight(masksDesc);
+        size_t W = getTensorWidth(masksDesc);
+
 
         size_t box_stride = W * H * C;
 
@@ -381,5 +358,7 @@ int main(int argc, char *argv[]) {
     }
 
     slog::info << "Execution successful" << slog::endl;
+    slog::info << slog::endl << "This demo is an API example, for any performance measurements "
+                                "please use the dedicated benchmark_app tool from the openVINO toolkit" << slog::endl;
     return 0;
 }

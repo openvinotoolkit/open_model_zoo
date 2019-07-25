@@ -33,7 +33,7 @@ BaseDetection::BaseDetection(std::string topoName,
                              const std::string &deviceForInference,
                              int maxBatch, bool isBatchDynamic, bool isAsync,
                              bool doRawOutputMessages)
-    : plugin(nullptr), topoName(topoName), pathToModel(pathToModel), deviceForInference(deviceForInference),
+    : topoName(topoName), pathToModel(pathToModel), deviceForInference(deviceForInference),
       maxBatch(maxBatch), isBatchDynamic(isBatchDynamic), isAsync(isAsync),
       enablingChecked(false), _enabled(false), doRawOutputMessages(doRawOutputMessages) {
     if (isAsync) {
@@ -73,12 +73,12 @@ bool BaseDetection::enabled() const  {
     return _enabled;
 }
 
-void BaseDetection::printPerformanceCounts() {
+void BaseDetection::printPerformanceCounts(std::string fullDeviceName) {
     if (!enabled()) {
         return;
     }
     slog::info << "Performance counts for " << topoName << slog::endl << slog::endl;
-    ::printPerformanceCounts(request->GetPerformanceCounts(), std::cout, false);
+    ::printPerformanceCounts(*request, std::cout, fullDeviceName, false);
 }
 
 
@@ -188,7 +188,7 @@ CNNNetwork FaceDetection::read()  {
     }
     _output->setPrecision(Precision::FP32);
 
-    slog::info << "Loading Face Detection model to the "<< deviceForInference << " plugin" << slog::endl;
+    slog::info << "Loading Face Detection model to the "<< deviceForInference << " device" << slog::endl;
     input = inputInfo.begin()->first;
     return netReader.getNetwork();
 }
@@ -370,8 +370,8 @@ CNNNetwork AgeGenderDetection::read() {
     slog::info << "Age layer: " << ageCreatorLayer->name<< slog::endl;
     slog::info << "Gender layer: " << genderCreatorLayer->name<< slog::endl;
 
-    outputAge = ptrAgeOutput->name;
-    outputGender = ptrGenderOutput->name;
+    outputAge = ptrAgeOutput->getName();
+    outputGender = ptrGenderOutput->getName();
 
     slog::info << "Loading Age/Gender Recognition model to the "<< deviceForInference << " plugin" << slog::endl;
     _enabled = true;
@@ -635,7 +635,7 @@ CNNNetwork EmotionsDetection::read() {
     }
     slog::info << "Emotions layer: " << emotionsCreatorLayer->name<< slog::endl;
 
-    outputEmotions = emotionsOutput->name;
+    outputEmotions = emotionsOutput->getName();
 
     slog::info << "Loading Emotions Recognition model to the "<< deviceForInference << " plugin" << slog::endl;
     _enabled = true;
@@ -682,7 +682,7 @@ std::vector<float> FacialLandmarksDetection::operator[] (int idx) const {
     std::vector<float> normedLandmarks;
 
     auto landmarksBlob = request->GetBlob(outputFacialLandmarksBlobName);
-    auto n_lm = landmarksBlob->dims()[0];
+    auto n_lm = getTensorChannels(landmarksBlob->getTensorDesc());
     const float *normed_coordinates = request->GetBlob(outputFacialLandmarksBlobName)->buffer().as<float *>();
 
     if (doRawOutputMessages) {
@@ -768,17 +768,17 @@ CNNNetwork FacialLandmarksDetection::read() {
 Load::Load(BaseDetection& detector) : detector(detector) {
 }
 
-void Load::into(InferencePlugin & plg, bool enable_dynamic_batch) const {
+void Load::into(InferenceEngine::Core & ie, const std::string & deviceName, bool enable_dynamic_batch) const {
     if (detector.enabled()) {
-        std::map<std::string, std::string> config;
-        std::string pluginName = plg.GetVersion()->description;
-        bool isPossibleDynBatch = pluginName.find("MKLDNN") != std::string::npos ||
-                                  pluginName.find("clDNN") != std::string::npos;
+        std::map<std::string, std::string> config = { };
+        bool isPossibleDynBatch = deviceName.find("CPU") != std::string::npos ||
+                                  deviceName.find("GPU") != std::string::npos;
+
         if (enable_dynamic_batch && isPossibleDynBatch) {
             config[PluginConfigParams::KEY_DYN_BATCH_ENABLED] = PluginConfigParams::YES;
         }
-        detector.net = plg.LoadNetwork(detector.read(), config);
-        detector.plugin = &plg;
+
+        detector.net = ie.LoadNetwork(detector.read(), deviceName, config);
     }
 }
 

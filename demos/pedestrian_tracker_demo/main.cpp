@@ -27,7 +27,8 @@ using ImageWithFrameIndex = std::pair<cv::Mat, int>;
 std::unique_ptr<PedestrianTracker>
 CreatePedestrianTracker(const std::string& reid_model,
                         const std::string& reid_weights,
-                        const InferenceEngine::InferencePlugin& reid_plugin,
+                        const InferenceEngine::Core & ie,
+                        const std::string & deviceName,
                         bool should_keep_tracking_info) {
     TrackerParams params;
 
@@ -53,7 +54,7 @@ CreatePedestrianTracker(const std::string& reid_model,
         reid_config.max_batch_size = 16;
 
         std::shared_ptr<IImageDescriptor> descriptor_strong =
-            std::make_shared<DescriptorIE>(reid_config, reid_plugin);
+            std::make_shared<DescriptorIE>(reid_config, ie, deviceName);
 
         if (descriptor_strong == nullptr) {
             THROW_IE_EXCEPTION << "[SAMPLES] internal error - invalid descriptor";
@@ -78,10 +79,11 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
     }
 
-    std::cout << "[ INFO ] Parsing input parameters" << std::endl;
+    std::cout << "Parsing input parameters" << std::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -143,21 +145,17 @@ int main_work(int argc, char **argv) {
         std::cout << "last_frame = " << last_frame << std::endl;
 
     std::vector<std::string> devices{detector_mode, reid_mode};
-    std::map<std::string, InferencePlugin> plugins_for_devices =
-        LoadPluginForDevices(
+    InferenceEngine::Core ie =
+        LoadInferenceEngine(
             devices, custom_cpu_library, path_to_custom_layers,
             should_use_perf_counter);
 
     DetectorConfig detector_confid(det_model, det_weights);
-    auto detector_plugin = plugins_for_devices[detector_mode];
-
-    ObjectDetector pedestrian_detector(detector_confid, detector_plugin);
-
-    auto reid_plugin = plugins_for_devices[reid_mode];
+    ObjectDetector pedestrian_detector(detector_confid, ie, detector_mode);
 
     bool should_keep_tracking_info = should_save_det_log || should_print_out;
     std::unique_ptr<PedestrianTracker> tracker =
-        CreatePedestrianTracker(reid_model, reid_weights, reid_plugin,
+        CreatePedestrianTracker(reid_model, reid_weights, ie, reid_mode,
                                 should_keep_tracking_info);
 
 
@@ -171,9 +169,12 @@ int main_work(int argc, char **argv) {
     if (first_frame > 0)
         video->SetFrameIndex(first_frame);
 
-    if (should_show) {
-        std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+    std::cout << "To close the application, press 'CTRL+C' here";
+    if (!FLAGS_no_show) {
+        std::cout << " or switch to the output window and press ESC key";
     }
+    std::cout << std::endl;
+
     for (;;) {
         auto pair = video->Read();
         cv::Mat frame = pair.first;
@@ -239,8 +240,8 @@ int main_work(int argc, char **argv) {
             PrintDetectionLog(log);
     }
     if (should_use_perf_counter) {
-        pedestrian_detector.PrintPerformanceCounts();
-        tracker->PrintReidPerformanceCounts();
+        pedestrian_detector.PrintPerformanceCounts(getFullDeviceName(ie, FLAGS_d_det));
+        tracker->PrintReidPerformanceCounts(getFullDeviceName(ie, FLAGS_d_reid));
     }
     return 0;
 }
@@ -258,7 +259,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    std::cout << "[ INFO ] Execution successful" << std::endl;
+    std::cout << "Execution successful" << std::endl;
 
     return 0;
 }

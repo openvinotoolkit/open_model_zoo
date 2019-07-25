@@ -86,9 +86,11 @@ void ObjectDetector::submitFrame(const cv::Mat &frame, int frame_idx) {
 
 ObjectDetector::ObjectDetector(
     const DetectorConfig& config,
-    const InferenceEngine::InferencePlugin& plugin) :
+    const InferenceEngine::Core & ie,
+    const std::string & deviceName) :
     config_(config),
-    plugin_(plugin) {
+    ie_(ie),
+    deviceName_(deviceName) {
     CNNNetReader net_reader;
     net_reader.ReadNetwork(config.path_to_model);
     net_reader.ReadWeights(config.path_to_weights);
@@ -143,7 +145,7 @@ ObjectDetector::ObjectDetector(
     _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
     input_name_ = inputInfo.begin()->first;
-    net_ = plugin_.LoadNetwork(net_reader.getNetwork(), {});
+    net_ = ie_.LoadNetwork(net_reader.getNetwork(), deviceName_);
 }
 
 void ObjectDetector::wait() {
@@ -199,8 +201,8 @@ void ObjectDetector::waitAndFetchResults() {
     fetchResults();
 }
 
-void ObjectDetector::PrintPerformanceCounts() {
+void ObjectDetector::PrintPerformanceCounts(std::string fullDeviceName) {
     std::cout << "Performance counts for object detector" << std::endl << std::endl;
-    ::printPerformanceCounts(request->GetPerformanceCounts(), std::cout, false);
+    ::printPerformanceCounts(*request, std::cout, fullDeviceName, false);
 }
 

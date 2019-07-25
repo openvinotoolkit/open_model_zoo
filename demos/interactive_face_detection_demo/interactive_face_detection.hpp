@@ -10,12 +10,6 @@
 #include <gflags/gflags.h>
 #include <iostream>
 
-#ifdef _WIN32
-#include <os/windows/w_dirent.h>
-#else
-#include <dirent.h>
-#endif
-
 /// @brief Message for help argument
 static const char help_message[] = "Print a usage message";
 
@@ -37,23 +31,28 @@ static const char plugin_message[] = "Plugin name. For example, CPU. If this par
 "the demo will look for this plugin only.";
 
 /// @brief Message for assigning face detection calculation to device
-static const char target_device_message[] = "Optional. Target device for Face Detection network (CPU, GPU, FPGA, HDDL, or MYRIAD). " \
+static const char target_device_message[] = "Optional. Target device for Face Detection network (the list of available devices is shown below). " \
+"Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo will look for a suitable plugin for a specified device.";
 
 /// @brief Message for assigning age/gender calculation to device
-static const char target_device_message_ag[] = "Optional. Target device for Age/Gender Recognition network (CPU, GPU, FPGA, HDDL, or MYRIAD). " \
+static const char target_device_message_ag[] = "Optional. Target device for Age/Gender Recognition network (the list of available devices is shown below). " \
+"Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo will look for a suitable plugin for a specified device.";
 
 /// @brief Message for assigning head pose calculation to device
-static const char target_device_message_hp[] = "Optional. Target device for Head Pose Estimation network (CPU, GPU, FPGA, HDDL, or MYRIAD). " \
+static const char target_device_message_hp[] = "Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). " \
+"Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo will look for a suitable plugin for a specified device.";
 
 /// @brief Message for assigning emotions calculation to device
-static const char target_device_message_em[] = "Optional. Target device for Emotions Recognition network (CPU, GPU, FPGA, HDDL, or MYRIAD). " \
+static const char target_device_message_em[] = "Optional. Target device for Emotions Recognition network (the list of available devices is shown below). " \
+"Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo will look for a suitable plugin for a specified device.";
 
 /// @brief Message for assigning Facial Landmarks Estimation network to device
-static const char target_device_message_lm[] = "Optional. Target device for Facial Landmarks Estimation network (CPU, GPU, FPGA, HDDL, or MYRIAD). " \
+static const char target_device_message_lm[] = "Optional. Target device for Facial Landmarks Estimation network " \
+"(the list of available devices is shown below). Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo will look for a suitable plugin for device specified.";
 
 /// @brief Message for the maximum number of simultaneously processed faces for Age Gender network
@@ -146,15 +145,15 @@ DEFINE_string(o, "", output_video_message);
 /// It is a required parameter
 DEFINE_string(m, "", face_detection_model_message);
 
-/// \brief Define parameter for Face Detection  model file<br>
+/// \brief Define parameter for Age Gender Recognition model file<br>
 /// It is a optional parameter
 DEFINE_string(m_ag, "", age_gender_model_message);
 
-/// \brief Define parameter for Face Detection  model file<br>
+/// \brief Define parameter for Head Pose Estimation model file<br>
 /// It is a optional parameter
 DEFINE_string(m_hp, "", head_pose_model_message);
 
-/// \brief Define parameter for Face Detection model file<br>
+/// \brief Define parameter for Emotions Recognition model file<br>
 /// It is a optional parameter
 DEFINE_string(m_em, "", emotions_model_message);
 

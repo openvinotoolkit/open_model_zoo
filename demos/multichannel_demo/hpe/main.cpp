@@ -61,7 +61,7 @@ namespace {
 */
 void showUsage() {
     std::cout << std::endl;
-    std::cout << "multichannel_face_detection [OPTION]" << std::endl;
+    std::cout << "multi-channel-human-pose-estimation-demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                           " << help_message << std::endl;
@@ -89,6 +89,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
     }
     slog::info << "Parsing input parameters" << slog::endl;
@@ -297,19 +298,30 @@ int main(int argc, char* argv[]) {
             currentFrame = (currentFrame + 1) % numberOfInputs;
             return sources.getFrame(camIdx, img);
         }, [](InferenceEngine::InferRequest::Ptr req, const std::vector<std::string>& outputDataBlobNames, cv::Size frameSize) {
-            auto pafsBlobIt = req->GetBlob(outputDataBlobNames[0]);
-            auto heatMapsBlobIt = req->GetBlob(outputDataBlobNames[1]);
-            std::vector<Detections> detections(pafsBlobIt->dims()[3]);
+            auto pafsBlobIt   = req->GetBlob(outputDataBlobNames[0]);
+            auto pafsDesc     = pafsBlobIt->getTensorDesc();
+            auto pafsWidth    = getTensorWidth(pafsDesc);
+            auto pafsHeight   = getTensorHeight(pafsDesc);
+            auto pafsChannels = getTensorChannels(pafsDesc);
+            auto pafsBatch    = getTensorBatch(pafsDesc);
 
-            for (size_t i = 0; i < pafsBlobIt->dims()[3]; i++) {
+            auto heatMapsBlobIt   = req->GetBlob(outputDataBlobNames[1]);
+            auto heatMapsDesc     = heatMapsBlobIt->getTensorDesc();
+            auto heatMapsWidth    = getTensorWidth(heatMapsDesc);
+            auto heatMapsHeight   = getTensorHeight(heatMapsDesc);
+            auto heatMapsChannels = getTensorChannels(heatMapsDesc);
+            std::vector<Detections> detections(pafsBatch);
+
+
+            for (size_t i = 0; i < pafsBatch; i++) {
                 std::vector<HumanPose> poses = postprocess(
-                static_cast<float*>(heatMapsBlobIt->buffer()) + i * heatMapsBlobIt->dims()[0]*heatMapsBlobIt->dims()[1]*heatMapsBlobIt->dims()[2],
-                heatMapsBlobIt->dims()[0] * heatMapsBlobIt->dims()[1],
+                static_cast<float*>(heatMapsBlobIt->buffer()) + i * heatMapsWidth * heatMapsHeight * heatMapsChannels,
+                heatMapsWidth * heatMapsHeight,
                 keypointsNumber,
-                static_cast<float*>(pafsBlobIt->buffer()) + i * pafsBlobIt->dims()[0]*pafsBlobIt->dims()[1]*pafsBlobIt->dims()[2],
-                pafsBlobIt->dims()[0] * pafsBlobIt->dims()[1],
-                pafsBlobIt->dims()[2],
-                heatMapsBlobIt->dims()[0], heatMapsBlobIt->dims()[1], frameSize);
+                static_cast<float*>(pafsBlobIt->buffer()) + i * pafsWidth * pafsHeight * pafsChannels,
+                pafsWidth * pafsHeight,
+                pafsChannels,
+                heatMapsWidth, heatMapsHeight, frameSize);
 
                 detections[i].set(new std::vector<HumanPose>(poses.size()));
                 for (decltype(poses.size()) j = 0; j < poses.size(); j++) {
@@ -326,9 +338,12 @@ int main(int argc, char* argv[]) {
         std::mutex statMutex;
         std::stringstream statStream;
 
+        std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
-            std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+            std::cout << " or switch to the output window and press ESC key";
         }
+        std::cout << std::endl;
+
         const size_t outputQueueSize = 1;
         AsyncOutput output(FLAGS_show_stats, outputQueueSize,
         [&](const std::vector<std::shared_ptr<VideoFrame>>& result) {

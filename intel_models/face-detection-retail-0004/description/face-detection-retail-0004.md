@@ -15,7 +15,7 @@ head from 1/16 scale feature map has nine clustered prior boxes.
 
 | Metric                                                        | Value                   |
 |---------------------------------------------------------------|-------------------------|
-| AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 83.00%                  |
+| AP ([WIDER](http://shuoyang1213.me/WIDERFACE/))               | 83.00%                  |
 | GFlops                                                        | 1.067                   |
 | MParams                                                       | 0.588                   |
 | Source framework                                              | Caffe*                  |

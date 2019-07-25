@@ -7,17 +7,15 @@
 * \file object_detection_demo_ssd_async/main.cpp
 * \example object_detection_demo_ssd_async/main.cpp
 */
+
 #include <gflags/gflags.h>
-#include <functional>
-#include <iostream>
-#include <fstream>
-#include <random>
-#include <memory>
+
 #include <chrono>
+#include <iostream>
+#include <memory>
 #include <vector>
 #include <string>
 #include <algorithm>
-#include <iterator>
 
 #include <inference_engine.hpp>
 
@@ -34,6 +32,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
        showUsage();
+       showAvailableDevices();
        return false;
     }
     slog::info << "Parsing input parameters" << slog::endl;
@@ -90,10 +89,12 @@ int main(int argc, char *argv[]) {
         }
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 1. Load Plugin for inference engine -------------------------------------
-        slog::info << "Loading plugin" << slog::endl;
-        InferencePlugin plugin = PluginDispatcher().getPluginByDevice(FLAGS_d);
-        printPluginVersion(plugin, std::cout);
+        // --------------------------- 1. Load inference engine -------------------------------------
+        slog::info << "Loading Inference Engine" << slog::endl;
+        Core ie;
+
+        slog::info << "Device info: " << slog::endl;
+        std::cout << ie.GetVersions(FLAGS_d);
 
         /** Load extensions for the plugin **/
 
@@ -104,22 +105,22 @@ int main(int argc, char *argv[]) {
              * custom MKLDNNPlugin layer implementations. These layers are not supported
              * by mkldnn, but they can be useful for inferring custom topologies.
             **/
-            plugin.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>());
+            ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
         }
 
         if (!FLAGS_l.empty()) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
             IExtensionPtr extension_ptr = make_so_pointer<IExtension>(FLAGS_l.c_str());
-            plugin.AddExtension(extension_ptr);
+            ie.AddExtension(extension_ptr, "CPU");
         }
         if (!FLAGS_c.empty()) {
             // clDNN Extensions are loaded from an .xml description and OpenCL kernel files
-            plugin.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}});
+            ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
         }
 
         /** Per layer metrics **/
         if (FLAGS_pc) {
-            plugin.SetConfig({ { PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES } });
+            ie.SetConfig({ { PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES } });
         }
         // -----------------------------------------------------------------------------------------------------
 
@@ -148,18 +149,34 @@ int main(int argc, char *argv[]) {
         // --------------------------- Prepare input blobs -----------------------------------------------------
         slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
         InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
-        if (inputInfo.size() != 1) {
-            throw std::logic_error("This demo accepts networks having only one input");
+
+        std::string imageInputName, imageInfoInputName;
+        size_t netInputHeight, netInputWidth;
+
+        for (const auto & inputInfoItem : inputInfo) {
+            if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {  // first input contains images
+                imageInputName = inputInfoItem.first;
+                inputInfoItem.second->setPrecision(Precision::U8);
+                if (FLAGS_auto_resize) {
+                    inputInfoItem.second->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
+                    inputInfoItem.second->getInputData()->setLayout(Layout::NHWC);
+                } else {
+                    inputInfoItem.second->getInputData()->setLayout(Layout::NCHW);
+                }
+                const TensorDesc& inputDesc = inputInfoItem.second->getTensorDesc();
+                netInputHeight = getTensorHeight(inputDesc);
+                netInputWidth = getTensorWidth(inputDesc);
+            } else if (inputInfoItem.second->getTensorDesc().getDims().size() == 2) {  // second input contains image info
+                imageInfoInputName = inputInfoItem.first;
+                inputInfoItem.second->setPrecision(Precision::FP32);
+            } else {
+                throw std::logic_error("Unsupported " +
+                                       std::to_string(inputInfoItem.second->getTensorDesc().getDims().size()) + "D "
+                                       "input layer '" + inputInfoItem.first + "'. "
+                                       "Only 2D and 4D input layers are supported");
+            }
         }
-        InputInfo::Ptr& input = inputInfo.begin()->second;
-        auto inputName = inputInfo.begin()->first;
-        input->setPrecision(Precision::U8);
-        if (FLAGS_auto_resize) {
-            input->getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
-            input->getInputData()->setLayout(Layout::NHWC);
-        } else {
-            input->getInputData()->setLayout(Layout::NCHW);
-        }
+
         // --------------------------- Prepare output blobs -----------------------------------------------------
         slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
         OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
@@ -188,14 +205,27 @@ int main(int argc, char *argv[]) {
         output->setLayout(Layout::NCHW);
         // -----------------------------------------------------------------------------------------------------
 
-        // --------------------------- 4. Loading model to the plugin ------------------------------------------
-        slog::info << "Loading model to the plugin" << slog::endl;
-        ExecutableNetwork network = plugin.LoadNetwork(netReader.getNetwork(), {});
+        // --------------------------- 4. Loading model to the device ------------------------------------------
+        slog::info << "Loading model to the device" << slog::endl;
+        ExecutableNetwork network = ie.LoadNetwork(netReader.getNetwork(), FLAGS_d);
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 5. Create infer request -------------------------------------------------
-        InferRequest::Ptr async_infer_request_next = network.CreateInferRequestPtr();
         InferRequest::Ptr async_infer_request_curr = network.CreateInferRequestPtr();
+        InferRequest::Ptr async_infer_request_next = network.CreateInferRequestPtr();
+
+        /* it's enough just to set image info input (if used in the model) only once */
+        if (!imageInfoInputName.empty()) {
+            auto setImgInfoBlob = [&](const InferRequest::Ptr &inferReq) {
+                auto blob = inferReq->GetBlob(imageInfoInputName);
+                auto data = blob->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+                data[0] = static_cast<float>(netInputHeight);  // height
+                data[1] = static_cast<float>(netInputWidth);  // width
+                data[2] = 1;
+            };
+            setImgInfoBlob(async_infer_request_curr);
+            setImgInfoBlob(async_infer_request_next);
+        }
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 6. Do inference ---------------------------------------------------------
@@ -210,7 +240,8 @@ int main(int argc, char *argv[]) {
         auto wallclock = std::chrono::high_resolution_clock::now();
         double ocv_decode_time = 0, ocv_render_time = 0;
 
-        std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+        std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and press ESC key" << std::endl;
+        std::cout << "To switch between sync/async modes, press TAB key in the output window" << std::endl;
         while (true) {
             auto t0 = std::chrono::high_resolution_clock::now();
             // Here is the first asynchronous point:
@@ -225,13 +256,13 @@ int main(int argc, char *argv[]) {
             }
             if (isAsyncMode) {
                 if (isModeChanged) {
-                    frameToBlob(curr_frame, async_infer_request_curr, inputName);
+                    frameToBlob(curr_frame, async_infer_request_curr, imageInputName);
                 }
                 if (!isLastFrame) {
-                    frameToBlob(next_frame, async_infer_request_next, inputName);
+                    frameToBlob(next_frame, async_infer_request_next, imageInputName);
                 }
             } else if (!isModeChanged) {
-                frameToBlob(curr_frame, async_infer_request_curr, inputName);
+                frameToBlob(curr_frame, async_infer_request_curr, imageInputName);
             }
 
             auto t1 = std::chrono::high_resolution_clock::now();
@@ -350,7 +381,7 @@ int main(int argc, char *argv[]) {
 
         /** Show performace results **/
         if (FLAGS_pc) {
-            printPerformanceCounts(*async_infer_request_curr, std::cout);
+            printPerformanceCounts(*async_infer_request_curr, std::cout, getFullDeviceName(ie, FLAGS_d));
         }
     }
     catch (const std::exception& error) {

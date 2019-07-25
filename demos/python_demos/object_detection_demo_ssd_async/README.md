@@ -7,8 +7,8 @@ Specifically, this demo keeps two parallel infer requests and while the current 
 is being captured. This essentially hides the latency of capturing, so that the overall framerate is rather
 determined by the `MAXIMUM(detection time, input capturing time)` and not the `SUM(detection time, input capturing time)`.
 
-The technique can be generalized to any available parallel slack, e.g. doing inference and simultaneously encoding the resulting
-(previous) frames or running further inference, like some emotion detection on top of the face detection results, etc.
+The technique can be generalized to any available parallel slack, for example, doing inference and simultaneously encoding the resulting
+(previous) frames or running further inference, like some emotion detection on top of the face detection results.
 There are important performance
 caveats though, for example the tasks that run in parallel should try to avoid oversubscribing the shared compute resources.
 For example, if the inference is performed on the FPGA, and the CPU is essentially idle, than it makes sense to do things on the CPU
@@ -19,17 +19,17 @@ This and other performance implications and tips for the Async API are covered i
 
 Other demo objectives are:
 * Video as input support via OpenCV
-* Visualization of the resulting bounding boxes and text labels (from the .labels file) or class number (if no file is provided)
-* Again, the OpenCV is used to draw resulting bounding boxes, labels, etc, so you can copy paste this code without
+* Visualization of the resulting bounding boxes and text labels (from the `.labels` file) or class number (if no file is provided)
+* OpenCV is used to draw resulting bounding boxes, labels, so you can copy paste this code without
 need to pull Open Model Zoo demos helpers to your app
-* Demonstration of the Async API in action, so the demo features two modes (toggled by the Tab key)
+* Demonstration of the Async API in action, so the demo features two modes (toggled by the **Tab** key)
     -  Old-style "Sync" way, where the frame capturing with OpenCV executes back to back with the Detection
     -  "Truly Async" way when the Detection performed on the current frame, while the OpenCV captures the next one.
 
 ## How It Works
 
 On the start-up the application reads command line parameters and loads a network to the Inference
-Engine. Upon getting a frame from the OpenCV's VideoCapture it performs inference and displays the results.
+Engine. Upon getting a frame from the OpenCV VideoCapture it performs inference and displays the results.
 
 New "Async API" operates with new notion of the "Infer Request" that encapsulates the inputs/outputs and separates *scheduling and waiting for result*,
 next section. And here what makes the performance look different:
@@ -59,12 +59,12 @@ In this case, the NEXT request is populated in the main (app) thread, while the 
 (this is handled in the dedicated thread, internal to the IE runtime).
 
 
-> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Specify Input Shapes** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ### Async API
 
 The Inference Engine offers new API based on the notion of Infer Requests. One specific usability upside
-is that the requests encapsulate the inputs and outputs allocation, so you just need to access the blob  with GetBlob method.
+is that the requests encapsulate the inputs and outputs allocation, so you just need to access the blob  with `GetBlob` method.
 
 More importantly, you can execute a request asynchronously (in the background) and wait until ready, when the result is actually needed.
 In a mean time your app can continue :
@@ -108,9 +108,8 @@ python3 object_detection_demo_ssd_async.py -h
 The command yields the following usage message:
 ```
 usage: object_detection_demo_ssd_async.py [-h] -m MODEL -i INPUT
-                                          [-l CPU_EXTENSION] [-pp PLUGIN_DIR]
-                                          [-d DEVICE] [--labels LABELS]
-                                          [-pt PROB_THRESHOLD]
+                                          [-l CPU_EXTENSION] [-d DEVICE] 
+                                          [--labels LABELS] [-pt PROB_THRESHOLD]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -123,12 +122,10 @@ Options:
                         Optional. Required for CPU custom layers. Absolute
                         path to a shared library with the kernels
                         implementations.
-  -pp PLUGIN_DIR, --plugin_dir PLUGIN_DIR
-                        Optional. Path to a plugin folder
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
-                        look for a suitable plugin for device specified. 
+                        look for a suitable plugin for device specified.
                         Default value is CPU
   --labels LABELS       Optional. Path to labels mapping file
   -pt PROB_THRESHOLD, --prob_threshold PROB_THRESHOLD
@@ -142,7 +139,7 @@ You can use the following command to do inference on GPU with a pre-trained obje
     python3 object_detection_demo_ssd_async.py -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/ssd.xml -d GPU
 ```
 
-To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use public or pre-trained models. You can download the pre-trained models with the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
@@ -158,6 +155,6 @@ In the default mode the demo reports
 
 
 ## See Also
-* [Using Open Model Zoo demos](https://github.com/opencv/open_model_zoo/tree/master/demos/README.md)
+* [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](https://github.com/opencv/open_model_zoo/tree/master/model_downloader)
+* [Model Downloader](../../../tools/downloader/README.md)

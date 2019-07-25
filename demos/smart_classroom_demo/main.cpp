@@ -14,6 +14,7 @@
 #include <vector>
 #include <deque>
 #include <map>
+#include <set>
 #include <algorithm>
 #include <utility>
 #include <ie_iextension.h>
@@ -50,9 +51,8 @@ private:
     static int const margin_size_ = 5;
 
 public:
-    Visualizer(bool enabled, cv::VideoWriter& writer, int num_top_persons)
-        : enabled_(enabled), num_top_persons_(num_top_persons), writer_(writer),
-          rect_scale_x_(0), rect_scale_y_(0) {
+    Visualizer(bool enabled, cv::VideoWriter& writer, int num_top_persons) : enabled_(enabled), num_top_persons_(num_top_persons), writer_(writer),
+                                                        rect_scale_x_(0), rect_scale_y_(0) {
         if (!enabled_) {
             return;
         }
@@ -141,11 +141,11 @@ public:
         }
 
         if (rect_scale_x_ != 1 || rect_scale_y_ != 1) {
-                rect.x = cvRound(rect.x * rect_scale_x_);
-                rect.y = cvRound(rect.y * rect_scale_y_);
+            rect.x = cvRound(rect.x * rect_scale_x_);
+            rect.y = cvRound(rect.y * rect_scale_y_);
 
-                rect.height = cvRound(rect.height * rect_scale_y_);
-                rect.width = cvRound(rect.width * rect_scale_x_);
+            rect.height = cvRound(rect.height * rect_scale_y_);
+            rect.width = cvRound(rect.width * rect_scale_x_);
         }
         cv::rectangle(frame_, rect, bbox_color);
 
@@ -154,8 +154,8 @@ public:
             const cv::Size label_size =
                 cv::getTextSize(label_to_draw, cv::FONT_HERSHEY_PLAIN, 1, 1, &baseLine);
             cv::rectangle(frame_, cv::Point(rect.x, rect.y - label_size.height),
-                          cv::Point(rect.x + label_size.width, rect.y + baseLine),
-                          bbox_color, cv::FILLED);
+                            cv::Point(rect.x + label_size.width, rect.y + baseLine),
+                            bbox_color, cv::FILLED);
         }
         if (!label_to_draw.empty()) {
             cv::putText(frame_, label_to_draw, cv::Point(rect.x, rect.y), cv::FONT_HERSHEY_PLAIN, 1,
@@ -425,6 +425,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
     }
 
@@ -491,42 +492,52 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        std::map<std::string, InferencePlugin> plugins_for_devices;
+        slog::info << "Loading Inference Engine" << slog::endl;
+        Core ie;
+
         std::vector<std::string> devices = {FLAGS_d_act, FLAGS_d_fd, FLAGS_d_lm,
                                             FLAGS_d_reid};
+        std::set<std::string> loadedDevices;
+
+        slog::info << "Device info: " << slog::endl;
 
         for (const auto &device : devices) {
-            if (plugins_for_devices.find(device) != plugins_for_devices.end()) {
+            if (loadedDevices.find(device) != loadedDevices.end())
                 continue;
-            }
-            slog::info << "Loading plugin " << device << slog::endl;
-            InferencePlugin plugin = PluginDispatcher().getPluginByDevice(device);
-            printPluginVersion(plugin, std::cout);
-            /** Load extensions for the CPU plugin **/
+
+            std::cout << ie.GetVersions(device) << std::endl;
+
+            /** Load extensions for the CPU device **/
             if ((device.find("CPU") != std::string::npos)) {
-                plugin.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>());
+                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
 
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
-                    plugin.AddExtension(extension_ptr);
+                    ie.AddExtension(extension_ptr, "CPU");
                     slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
             } else if (!FLAGS_c.empty()) {
                 // Load Extensions for other plugins not CPU
-                plugin.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}});
+                ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
             }
-            if (device.find("CPU") != std::string::npos || device.find("GPU") != std::string::npos) {
-                plugin.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}});
+
+            if (device.find("CPU") != std::string::npos) {
+                ie.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}}, "CPU");
+            } else if (device.find("GPU") != std::string::npos) {
+                ie.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}}, "GPU");
             }
+
             if (FLAGS_pc)
-                plugin.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
-            plugins_for_devices[device] = plugin;
+                ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
+
+            loadedDevices.insert(device);
         }
 
         // Load action detector
         ActionDetectorConfig action_config(ad_model_path, ad_weights_path);
-        action_config.plugin = plugins_for_devices[FLAGS_d_act];
+        action_config.deviceName = FLAGS_d_act;
+        action_config.ie = ie;
         action_config.is_async = true;
         action_config.enabled = !ad_model_path.empty();
         action_config.detection_confidence_threshold = static_cast<float>(FLAGS_t_ad);
@@ -536,7 +547,8 @@ int main(int argc, char* argv[]) {
 
         // Load face detector
         detection::DetectorConfig face_config(fd_model_path, fd_weights_path);
-        face_config.plugin = plugins_for_devices[FLAGS_d_fd];
+        face_config.deviceName = FLAGS_d_fd;
+        face_config.ie = ie;
         face_config.is_async = true;
         face_config.enabled = !fd_model_path.empty();
         face_config.confidence_threshold = static_cast<float>(FLAGS_t_fd);
@@ -548,7 +560,8 @@ int main(int argc, char* argv[]) {
 
         // Load face detector for face database registration
         detection::DetectorConfig face_registration_det_config(fd_model_path, fd_weights_path);
-        face_registration_det_config.plugin = plugins_for_devices[FLAGS_d_fd];
+        face_registration_det_config.deviceName = FLAGS_d_fd;
+        face_registration_det_config.ie = ie;
         face_registration_det_config.enabled = !fd_model_path.empty();
         face_registration_det_config.is_async = false;
         face_registration_det_config.confidence_threshold = static_cast<float>(FLAGS_t_reg_fd);
@@ -560,14 +573,16 @@ int main(int argc, char* argv[]) {
         CnnConfig reid_config(fr_model_path, fr_weights_path);
         reid_config.max_batch_size = 16;
         reid_config.enabled = face_config.enabled && !fr_model_path.empty() && !lm_model_path.empty();
-        reid_config.plugin = plugins_for_devices[FLAGS_d_reid];
+        reid_config.deviceName = FLAGS_d_reid;
+        reid_config.ie = ie;
         VectorCNN face_reid(reid_config);
 
         // Load landmarks detector
         CnnConfig landmarks_config(lm_model_path, lm_weights_path);
         landmarks_config.max_batch_size = 16;
         landmarks_config.enabled = face_config.enabled && reid_config.enabled && !lm_model_path.empty();
-        landmarks_config.plugin = plugins_for_devices[FLAGS_d_lm];
+        landmarks_config.deviceName = FLAGS_d_lm;
+        landmarks_config.ie = ie;
         VectorCNN landmarks_detector(landmarks_config);
 
         // Create face gallery
@@ -667,9 +682,12 @@ int main(int argc, char* argv[]) {
         const int smooth_window_size = static_cast<int>(cap.GetFPS() * FLAGS_d_ad);
         const int smooth_min_length = static_cast<int>(cap.GetFPS() * FLAGS_min_ad);
 
+        std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
-            std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+            std::cout << " or switch to the output window and press ESC key";
         }
+        std::cout << std::endl;
+
         while (!is_last_frame) {
             logger.CreateNextFrameRecord(cap.GetVideoPath(), work_num_frames, prev_frame.cols, prev_frame.rows);
             auto started = std::chrono::high_resolution_clock::now();
@@ -863,7 +881,7 @@ int main(int argc, char* argv[]) {
                     face_obj_id_to_action_maps.push_back(frame_face_obj_id_to_action);
                 } else if (teacher_track_id >= 0) {
                     auto res_find = std::find_if(tracked_actions.begin(), tracked_actions.end(),
-                                 [teacher_track_id](const TrackedObject& o){ return o.object_id == teacher_track_id; });
+                                [teacher_track_id](const TrackedObject& o){ return o.object_id == teacher_track_id; });
                     if (res_find != tracked_actions.end()) {
                         const auto& track_action = *res_find;
                         const auto& action_label = GetActionTextLabel(track_action.label, actions_map);
@@ -897,12 +915,13 @@ int main(int argc, char* argv[]) {
         }
         slog::info << "Frames processed: " << total_num_frames << slog::endl;
         if (FLAGS_pc) {
+            std::map<std::string, std::string>  mapDevices = getMapFullDevicesNames(ie, devices);
             face_detector.wait();
             action_detector.wait();
-            action_detector.PrintPerformanceCounts();
-            face_detector.PrintPerformanceCounts();
-            face_reid.PrintPerformanceCounts();
-            landmarks_detector.PrintPerformanceCounts();
+            action_detector.PrintPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_act));
+            face_detector.PrintPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_fd));
+            face_reid.PrintPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
+            landmarks_detector.PrintPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_lm));
         }
 
         if (actions_type == STUDENT) {

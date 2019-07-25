@@ -10,12 +10,6 @@
 #include <gflags/gflags.h>
 #include <iostream>
 
-#ifdef _WIN32
-#include <os/windows/w_dirent.h>
-#else
-#include <dirent.h>
-#endif
-
 /// @brief Message for help argument
 static const char help_message[] = "Print a usage message.";
 
@@ -26,8 +20,8 @@ static const char video_message[] = "Required. Path to a video file (specify \"c
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 
 /// @brief Message for assigning cnn calculation to device
-static const char target_device_message[] = "Optional. Specify a target device to infer on (CPU, GPU). " \
-"The demo will look for a suitable plugin for the specified device";
+static const char target_device_message[] = "Optional. Specify a target device to infer on (the list of available devices is shown below). " \
+"Default value is CPU. The demo will look for a suitable plugin for the specified device";
 
 /// @brief Message for performance counters
 static const char performance_counter_message[] = "Optional. Enable per-layer performance report.";

@@ -1,0 +1,10 @@
+# This file can be used with the --list option of the model downloader.
+face-detection-adas-????
+face-detection-adas-binary-????
+face-detection-retail-????
+pedestrian-and-vehicle-detector-adas-????
+pedestrian-detection-adas-????
+pedestrian-detection-adas-binary-????
+vehicle-detection-adas-????
+vehicle-detection-adas-binary-????
+vehicle-license-plate-detection-barrier-????

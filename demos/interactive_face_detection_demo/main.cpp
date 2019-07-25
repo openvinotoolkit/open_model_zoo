@@ -21,6 +21,7 @@
 #include <iterator>
 #include <map>
 #include <list>
+#include <set>
 
 #include <inference_engine.hpp>
 
@@ -43,6 +44,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
+        showAvailableDevices();
         return false;
     }
     slog::info << "Parsing input parameters" << slog::endl;
@@ -99,11 +101,17 @@ int main(int argc, char *argv[]) {
             videoWriter.open(FLAGS_o, cv::VideoWriter::fourcc('I', 'Y', 'U', 'V'), 25, cv::Size(width, height));
         }
         // ---------------------------------------------------------------------------------------------------
-        // --------------------------- 1. Loading plugin to the Inference Engine -----------------------------
-        std::map<std::string, InferencePlugin> pluginsForDevices;
+        // --------------------------- 1. Loading Inference Engine -----------------------------
+
+        Core ie;
+
+        std::set<std::string> loadedDevices;
         std::vector<std::pair<std::string, std::string>> cmdOptions = {
-            {FLAGS_d, FLAGS_m}, {FLAGS_d_ag, FLAGS_m_ag}, {FLAGS_d_hp, FLAGS_m_hp},
-            {FLAGS_d_em, FLAGS_m_em}, {FLAGS_d_lm, FLAGS_m_lm}
+            {FLAGS_d, FLAGS_m},
+            {FLAGS_d_ag, FLAGS_m_ag},
+            {FLAGS_d_hp, FLAGS_m_hp},
+            {FLAGS_d_em, FLAGS_m_em},
+            {FLAGS_d_lm, FLAGS_m_lm}
         };
         FaceDetection faceDetector(FLAGS_m, FLAGS_d, 1, false, FLAGS_async, FLAGS_t, FLAGS_r,
                                    static_cast<float>(FLAGS_bb_enlarge_coef), static_cast<float>(FLAGS_dx_coef), static_cast<float>(FLAGS_dy_coef));
@@ -116,59 +124,52 @@ int main(int argc, char *argv[]) {
             auto deviceName = option.first;
             auto networkName = option.second;
 
-            if (deviceName == "" || networkName == "") {
+            if (deviceName.empty() || networkName.empty()) {
                 continue;
             }
 
-            if (pluginsForDevices.find(deviceName) != pluginsForDevices.end()) {
+            if (loadedDevices.find(deviceName) != loadedDevices.end()) {
                 continue;
             }
-            slog::info << "Loading plugin " << deviceName << slog::endl;
-            InferencePlugin plugin = PluginDispatcher().getPluginByDevice(deviceName);
+            slog::info << "Loading device " << deviceName << slog::endl;
+            std::cout << ie.GetVersions(deviceName) << std::endl;
 
-            /** Printing plugin version **/
-            printPluginVersion(plugin, std::cout);
-
-            /** Loading extensions for the CPU plugin **/
+            /** Loading extensions for the CPU device **/
             if ((deviceName.find("CPU") != std::string::npos)) {
-                plugin.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>());
+                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
 
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
-                    plugin.AddExtension(extension_ptr);
+                    ie.AddExtension(extension_ptr, "CPU");
                     slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
             } else if (!FLAGS_c.empty()) {
-                // Loading extensions for other plugins not CPU
-                plugin.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}});
+                // Loading extensions for GPU
+                ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
             }
-            pluginsForDevices[deviceName] = plugin;
+
+            loadedDevices.insert(deviceName);
         }
 
         /** Per-layer metrics **/
         if (FLAGS_pc) {
-            for (auto && plugin : pluginsForDevices) {
-                plugin.second.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
-            }
+            ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
         }
         // ---------------------------------------------------------------------------------------------------
 
         // --------------------------- 2. Reading IR models and loading them to plugins ----------------------
         // Disable dynamic batching for face detector as it processes one image at a time
-        Load(faceDetector).into(pluginsForDevices[FLAGS_d], false);
-        Load(ageGenderDetector).into(pluginsForDevices[FLAGS_d_ag], FLAGS_dyn_ag);
-        Load(headPoseDetector).into(pluginsForDevices[FLAGS_d_hp], FLAGS_dyn_hp);
-        Load(emotionsDetector).into(pluginsForDevices[FLAGS_d_em], FLAGS_dyn_em);
-        Load(facialLandmarksDetector).into(pluginsForDevices[FLAGS_d_lm], FLAGS_dyn_lm);
+        Load(faceDetector).into(ie, FLAGS_d, false);
+        Load(ageGenderDetector).into(ie, FLAGS_d_ag, FLAGS_dyn_ag);
+        Load(headPoseDetector).into(ie, FLAGS_d_hp, FLAGS_dyn_hp);
+        Load(emotionsDetector).into(ie, FLAGS_d_em, FLAGS_dyn_em);
+        Load(facialLandmarksDetector).into(ie, FLAGS_d_lm, FLAGS_dyn_lm);
         // ----------------------------------------------------------------------------------------------------
 
         // --------------------------- 3. Doing inference -----------------------------------------------------
         // Starting inference & calculating performance
         slog::info << "Start inference " << slog::endl;
-        if (!FLAGS_no_show) {
-            std::cout << "Press any key to stop" << std::endl;
-        }
 
         bool isFaceAnalyticsEnabled = ageGenderDetector.enabled() || headPoseDetector.enabled() ||
                                       emotionsDetector.enabled() || facialLandmarksDetector.enabled();
@@ -204,9 +205,12 @@ int main(int argc, char *argv[]) {
         // Reading the next frame
         frameReadStatus = cap.read(frame);
 
+        std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
-            std::cout << "To close the application, press 'CTRL+C' or any key with focus on the output window" << std::endl;
+            std::cout << " or switch to the output window and press any key";
         }
+        std::cout << std::endl;
+
         while (true) {
             timer.start("total");
             framesCounter++;
@@ -355,7 +359,7 @@ int main(int argc, char *argv[]) {
             // End of file (or a single frame file like an image). The last frame is displayed to let you check what is shown
             if (isLastFrame) {
                 if (!FLAGS_no_wait) {
-                    std::cout << "No more frames to process. Press any key to exit" << std::endl;
+                    std::cout << "No more frames to process!" << std::endl;
                     cv::waitKey(0);
                 }
                 break;
@@ -369,11 +373,11 @@ int main(int argc, char *argv[]) {
 
         // Showing performance results
         if (FLAGS_pc) {
-            faceDetector.printPerformanceCounts();
-            ageGenderDetector.printPerformanceCounts();
-            headPoseDetector.printPerformanceCounts();
-            emotionsDetector.printPerformanceCounts();
-            facialLandmarksDetector.printPerformanceCounts();
+            faceDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d));
+            ageGenderDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_ag));
+            headPoseDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_hp));
+            emotionsDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_em));
+            facialLandmarksDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_lm));
         }
         // ---------------------------------------------------------------------------------------------------
 

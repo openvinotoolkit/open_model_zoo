@@ -31,8 +31,10 @@ struct CnnConfig {
     /** @brief Enabled/disabled status */
     bool enabled{true};
 
-    /** @brief Plugin to use for inference */
-    InferenceEngine::InferencePlugin plugin;
+    /** @brief Inference Engine */
+    InferenceEngine::Core ie;
+    /** @brief Device name */
+    std::string deviceName;
 };
 
 /**
@@ -60,7 +62,7 @@ public:
     /**
     * @brief Prints performance report
     */
-    void PrintPerformanceCounts() const;
+    void PrintPerformanceCounts(std::string fullDeviceName) const;
 
     /**
     * @brief Indicates whether model enabled or not
@@ -143,11 +145,11 @@ public:
         return enabledFlag;
     }
 
-    void PrintPerformanceCounts() {
+    void PrintPerformanceCounts(std::string fullDeviceName) {
         if (!enabled()) {
             return;
         }
         std::cout << "Performance counts for " << topoName << std::endl << std::endl;
-        ::printPerformanceCounts(request->GetPerformanceCounts(), std::cout, false);
+        ::printPerformanceCounts(*request, std::cout, fullDeviceName, false);
     }
 };

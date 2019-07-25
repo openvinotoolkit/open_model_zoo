@@ -9,12 +9,6 @@
 #include <vector>
 #include <gflags/gflags.h>
 
-#ifdef _WIN32
-#include <os/windows/w_dirent.h>
-#else
-#include <dirent.h>
-#endif
-
 /// @brief message for help argument
 static const char help_message[] = "Print a usage message.";
 
@@ -27,16 +21,22 @@ static const char person_attribs_model_message[] = "Optional. Path to the Person
 static const char person_reid_model_message[] = "Optional. Path to the Person Reidentification Retail model (.xml) file.";
 
 /// @brief message for assigning Person/Vehicle/Bike detection inference to device
-static const char target_device_message[] = "Optional. Specify the target device for Person/Vehicle/Bike Detection "\
-                                            "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO). ";
+static const char target_device_message[] = "Optional. Specify the target device for Person/Vehicle/Bike Detection. " \
+                                            "The list of available devices is shown below. Default value is CPU. " \
+                                            "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+                                            "The application looks for a suitable plugin for the specified device.";
 
 /// @brief message for assigning Person attributes recognition inference to device
-static const char target_device_message_person_attribs[] = "Optional. Specify the target device for Person Attributes Recognition "\
-                                                           "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO).";
+static const char target_device_message_person_attribs[] = "Optional. Specify the target device for Person Attributes Recognition. "\
+                                                            "The list of available devices is shown below. Default value is CPU. " \
+                                                            "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+                                                            "The application looks for a suitable plugin for the specified device.";
 
 /// @brief message for assigning Person Reidentification retail inference to device
-static const char target_device_message_person_reid[] = "Optional. Specify the target device for Person Reidentification Retail "\
-                                                        "(CPU, GPU, FPGA, HDDL, MYRIAD, or HETERO). ";
+static const char target_device_message_person_reid[] = "Optional. Specify the target device for Person Reidentification Retail. "\
+                                                        "The list of available devices is shown below. Default value is CPU. " \
+                                                        "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+                                                        "The application looks for a suitable plugin for the specified device.";
 
 /// @brief message for performance counters
 static const char performance_counter_message[] = "Optional. Enables per-layer performance statistics.";

@@ -4,13 +4,14 @@
 
 #include "cnn.hpp"
 
+#include <chrono>
 #include <map>
 #include <string>
 
 #include <samples/common.hpp>
 
 
-void Cnn::Init(const std::string &model_path, InferencePlugin *plugin, const cv::Size &new_input_resolution) {
+void Cnn::Init(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution) {
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- 1. Reading network ----------------------------------------------------
@@ -62,8 +63,8 @@ void Cnn::Init(const std::string &model_path, InferencePlugin *plugin, const cv:
 
     // ---------------------------------------------------------------------------------------------------
 
-    // --------------------------- Loading model to the plugin -------------------------------------------
-    ExecutableNetwork executable_network = plugin->LoadNetwork(network, {});
+    // --------------------------- Loading model to the device -------------------------------------------
+    ExecutableNetwork executable_network = ie.LoadNetwork(network, deviceName);
     // ---------------------------------------------------------------------------------------------------
 
     // --------------------------- Creating infer request ------------------------------------------------

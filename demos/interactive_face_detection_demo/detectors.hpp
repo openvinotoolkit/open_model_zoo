@@ -32,7 +32,6 @@
 
 struct BaseDetection {
     InferenceEngine::ExecutableNetwork net;
-    InferenceEngine::InferencePlugin * plugin;
     InferenceEngine::InferRequest::Ptr request;
     std::string topoName;
     std::string pathToModel;
@@ -57,7 +56,7 @@ struct BaseDetection {
     virtual void submitRequest();
     virtual void wait();
     bool enabled() const;
-    void printPerformanceCounts();
+    void printPerformanceCounts(std::string fullDeviceName);
 };
 
 struct FaceDetection : BaseDetection {
@@ -188,7 +187,7 @@ struct Load {
 
     explicit Load(BaseDetection& detector);
 
-    void into(InferenceEngine::InferencePlugin & plg, bool enable_dynamic_batch = false) const;
+    void into(InferenceEngine::Core & ie, const std::string & deviceName, bool enable_dynamic_batch = false) const;
 };
 
 class CallStat {
