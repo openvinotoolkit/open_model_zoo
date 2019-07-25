@@ -34,7 +34,7 @@ Running
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: action_recognition.py [-h] -m_en M_ENCODER -m_de M_DECODER [-i INPUT]
+usage: action_recognition.py [-h] -m_en M_ENCODER -m_de M_DECODER -i INPUT
                              [-l CPU_EXTENSION] [-d DEVICE] [--fps FPS]
                              [-lb LABELS]
 
