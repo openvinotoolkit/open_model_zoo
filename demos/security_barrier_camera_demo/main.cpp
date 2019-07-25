@@ -630,7 +630,7 @@ int main(int argc, char* argv[]) {
 
         std::vector<std::string> files;
         parseInputFilesArguments(files);
-        if (files.empty()) throw std::logic_error("No files were found");
+        if (files.empty() && 0 == FLAGS_nc) throw std::logic_error("No inputs were found");
         std::vector<std::shared_ptr<VideoCaptureSource>> videoCapturSourcess;
         std::vector<std::shared_ptr<ImageSource>> imageSourcess;
         if (FLAGS_nc) {
