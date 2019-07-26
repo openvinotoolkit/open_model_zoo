@@ -57,11 +57,11 @@ Image, name: `image_tensor`, shape: [1x800x800x3], format: [BxHxWxC],
 2. Probability, name: `detection_scores`. Contains probability of detected bounding boxes.
 3. Detection box, name: `detection_boxes`. Contains detection boxes coordinates in a format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates of the top left corner, (`x_max`, `y_max`) are coordinates of the right bottom corner. Coordinates are rescaled to input image size.
 4. Detections number, name: `num_detections`. Contains the number of predicted detection boxes.
-5. Segmentation mask, name: `detection_masks`. Contains segmentation masks of detected objects for each class.
+5. Segmentation mask, name: `detection_masks`. Contains segmentation heatmaps of detected objects for all classes for every output bounding box.
 
 ### Converted Model
 
-1. The array of summary detection information, name: `reshape_do_2d`, shape: [1, 1, N, 7], where N is the number of detected
+1. The array of summary detection information, name: `reshape_do_2d`, shape: [N, 7], where N is the number of detected
 bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
     where:
@@ -71,7 +71,7 @@ bounding boxes. For each detection, the description has the format:
     - `conf` - confidence for the predicted class
     - (`x_min`, `y_min`) - coordinates of the top left bounding box corner (coordinates stored in normalized format, in range [0, 1])
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner  (coordinates stored in normalized format, in range [0, 1])
-2. Segmentation mask, name: `masks`, shape: [N, 90, 33, 33], where N is the number of detected masks. 
+2. Segmentation heatmaps for all classes for every output bounding box, name: `masks`, shape: [N, 90, 33, 33], where N is the number of detected masks, 90 is the number of classes, with background class excluded.
 
 ## Legal Information
 
