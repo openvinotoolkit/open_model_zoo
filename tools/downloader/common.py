@@ -243,7 +243,7 @@ class Topology:
         self.license_url = license_url
         self.precisions = precisions
         self.task_type = task_type
-		self.pytorch_to_onnx_args = pytorch_to_onnx_args
+        self.pytorch_to_onnx_args = pytorch_to_onnx_args
 
     @classmethod
     def deserialize(cls, top):
@@ -273,7 +273,7 @@ class Topology:
             pytorch_to_onnx_args = None
             if top.get('pytorch_to_onnx', None):
                 pytorch_to_onnx_args = [validate_string('"pytorch_to_onnx" #{}'.format(i), arg)
-                                        for i, arg in enumerate(top['pytorch_ot_onnx'])]
+                                        for i, arg in enumerate(top['pytorch_to_onnx'])]
 
 
             if 'model_optimizer_args' in top:

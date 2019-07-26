@@ -3496,7 +3496,7 @@ topologies:
       - name: MobileNetV2.py
         sha256: 7071e01e07e5f1b6127a2628d1be9c65cc20edfa745f4f4eb6354e7b27f5b444
         source: https://raw.githubusercontent.com/tonylins/pytorch-mobilenet-v2/fa86a85e4026caa217fe8d62f370848195cedf4b/MobileNetV2.py
-      - name: mobilenet-v2.pth.tar
+      - name: mobilenet-v2.pth
         sha256: ecbe2b568c8602549fa9e1d5833c63848f490a48d92e5d224d1eb2063e152cf8
         size: 14205652
         source:
@@ -3506,10 +3506,10 @@ topologies:
     framework: pytorch
     pytorch_to_onnx:
       - --model-name=mobilenet-v2
-      - --model-path=classification/mobilenet/v2/pytorch
-      - --weights=classification/mobilenet/v2/pytorch/mobilenet-v2.pth.tar
+      - --model-path=$dl_dir
+      - --weights=$dl_dir/mobilenet-v2.pth
       - --input-shape=1,3,224,224
-      - --output-file=classification/mobilenet/v2/pytorch/mobilenet-v2.onnx
+      - --output-file=$dl_dir/mobilenet-v2.onnx
       - --input-names=data
       - --output-names=prob
     model_optimizer_args:
@@ -3545,10 +3545,9 @@ topologies:
     framework: pytorch
     pytorch_to_onnx:
       - --model-name=inception-v3
-      - --model-path=classification/googlenet/v3/pytorch
-      - --weights=classification/googlenet/v3/pytorch/inception_v3_google-1a9a5a14.pth
+      - --weights=$dl_dir/inception_v3_google-1a9a5a14.pth
       - --input-shape=1,3,299,299
-      - --output-file=classification/googlenet/v3/pytorch/googlenet-v3.onnx
+      - --output-file=$dl_dir/googlenet-v3.onnx
       - --input-names=data
       - --output-names=prob
     model_optimizer_args:
@@ -3584,10 +3583,9 @@ topologies:
     framework: pytorch
     pytorch_to_onnx:
       - --model-name=resnet-v1-50
-      - --model-path=classification/resnet/v1/50/pytorch
-      - --weights=classification/resnet/v1/50/pytorch/resnet50-19c8e357.pth
+      - --weights=$dl_dir/resnet50-19c8e357.pth
       - --input-shape=1,3,224,224
-      - --output-file=classification/resnet/v1/50/pytorch/resnet-v1-50.onnx
+      - --output-file=$dl_dir/resnet-v1-50.onnx
       - --input-names=data
       - --output-names=prob
     model_optimizer_args:
