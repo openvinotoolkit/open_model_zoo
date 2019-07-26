@@ -389,7 +389,7 @@ topologies:
     description: >-
       Mask R-CNN Inception Resnet V2 Atrous trained on COCO dataset. Used for object instance segmentation. For details see paper
       <https://arxiv.org/pdf/1703.06870.pdf>
-    task_type: "instance segmentation"
+    task_type: "instance_segmentation"
     files:
       - name: mask_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
         sha256: 816afc8987c2152cbd0e24af3a6fb82086cea0645a38778884bd166c0d016bb5
@@ -401,7 +401,7 @@ topologies:
         file: mask_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
     model_optimizer_args:
       - --framework=tf
-      - --data_type=FP16
+      - --data_type=FP32
       - --reverse_input_channels
       - --input_shape=[1,800,800,3]
       - --input=image_tensor
@@ -415,7 +415,7 @@ topologies:
     description: >-
       Mask R-CNN Inception V2 trained on COCO dataset. Used for object instance segmentation. For details see paper
       <https://arxiv.org/pdf/1703.06870.pdf>
-    task_type: "instance segmentation"
+    task_type: "instance_segmentation"
     files:
       - name: mask_rcnn_inception_v2_coco_2018_01_28.tar.gz
         sha256: 4f57861c2ff1c87e92495789ee266e41a7dc79a038521d93a153be403b0b601f
@@ -427,7 +427,7 @@ topologies:
         file: mask_rcnn_inception_v2_coco_2018_01_28.tar.gz
     model_optimizer_args:
       - --framework=tf
-      - --data_type=FP16
+      - --data_type=FP32
       - --reverse_input_channels
       - --input_shape=[1,800,800,3]
       - --input=image_tensor
@@ -441,7 +441,7 @@ topologies:
     description: >-
       Mask R-CNN ResNet50 Atrous trained on COCO dataset. Used for object instance segmentation. For details see paper
       <https://arxiv.org/pdf/1703.06870.pdf>
-    task_type: "instance segmentation"
+    task_type: "instance_segmentation"
     files:
       - name: mask_rcnn_resnet50_atrous_coco_2018_01_28.tar.gz
         sha256: f3741f099bdb414e172cc8cc41370213a41afd04d7aa970f7854f09a75172481
@@ -453,7 +453,7 @@ topologies:
         file: mask_rcnn_resnet50_atrous_coco_2018_01_28.tar.gz
     model_optimizer_args:
       - --framework=tf
-      - --data_type=FP16
+      - --data_type=FP32
       - --reverse_input_channels
       - --input_shape=[1,800,800,3]
       - --input=image_tensor
@@ -467,7 +467,7 @@ topologies:
     description: >-
       Mask R-CNN ResNet101 Atrous trained on COCO dataset. Used for object instance segmentation. For details see paper
       <https://arxiv.org/pdf/1703.06870.pdf>
-    task_type: "instance segmentation"
+    task_type: "instance_segmentation"
     files:
       - name: mask_rcnn_resnet101_atrous_coco_2018_01_28.tar.gz
         sha256: 67ac8d5f0974753e9a5b04d36376e20b3be55b5dcd6ce43bc25aed6c5583709d
@@ -479,7 +479,7 @@ topologies:
         file: mask_rcnn_resnet101_atrous_coco_2018_01_28.tar.gz
     model_optimizer_args:
       - --framework=tf
-      - --data_type=FP16
+      - --data_type=FP32
       - --reverse_input_channels
       - --input_shape=[1,800,800,3]
       - --input=image_tensor
@@ -505,7 +505,7 @@ topologies:
         file: ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz
     model_optimizer_args:
       - --framework=tf
-      - --data_type=FP16
+      - --data_type=FP32
       - --reverse_input_channels
       - --input_shape=[1,300,300,3]
       - --input=image_tensor
@@ -532,7 +532,7 @@ topologies:
         file: ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
     model_optimizer_args:
       - --framework=tf
-      - --data_type=FP16
+      - --data_type=FP32
       - --reverse_input_channels
       - --input_shape=[1,640,640,3]
       - --input=image_tensor
