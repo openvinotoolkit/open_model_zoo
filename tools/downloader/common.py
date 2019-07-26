@@ -26,7 +26,7 @@ import yaml
 DOWNLOAD_TIMEOUT = 5 * 60
 
 # make sure to update the documentation if you modify these
-KNOWN_FRAMEWORKS = {'caffe', 'dldt', 'mxnet', 'tf', 'pytorch'}
+KNOWN_FRAMEWORKS = {'caffe', 'dldt', 'mxnet', 'pytorch', 'tf'}
 KNOWN_PRECISIONS = {'FP16', 'FP32', 'INT1', 'INT8'}
 KNOWN_TASK_TYPES = {
     'action_recognition',
