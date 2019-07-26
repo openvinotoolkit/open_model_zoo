@@ -13,6 +13,7 @@
 #include <vector>
 #include <set>
 
+#include <cldnn/cldnn_config.hpp>
 #include <inference_engine.hpp>
 #include <vpu/vpu_plugin_config.hpp>
 #ifdef WITH_EXTENSIONS
@@ -333,27 +334,27 @@ void Drawer::process() {
         lastShownframeId++;
         cv::Mat mat = firstGridIt->second.getMat();
 
-        float opacity = 0.6f;
-        fillROIColor(mat, cv::Rect(5, 5, 700, 115), cv::Scalar(255, 0, 0), opacity);
+        constexpr float OPACITY = 0.6f;
+        fillROIColor(mat, cv::Rect(5, 5, 390, 115), cv::Scalar(255, 0, 0), OPACITY);
 
         std::ostringstream out;
-        out << "Mean overall time per all inputs: " << std::fixed << std::setprecision(2) << std::setw(6);
+        out << std::fixed << std::setprecision(1);
         const auto t1 = std::chrono::steady_clock::now();
         uint64_t frameCounter = context.frameCounter;
         const ms meanOverallTimePerAllInputs = std::chrono::duration_cast<ms>((t1 - context.t0)
                                                * context.readersContext.inputChannels.size()) / frameCounter;
         out << meanOverallTimePerAllInputs.count();
-        out << "ms /" << std::setw(6) << std::chrono::seconds(1) / meanOverallTimePerAllInputs << "FPS";
+        out << "ms / " << std::chrono::seconds(1) / meanOverallTimePerAllInputs << "FPS";
 
-        cv::putText(mat, out.str(), cv::Point2f(10, 35), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
-        cv::putText(mat, "Detection InferRequests usage", cv::Point2f(10, 70), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
-        cv::Rect usage(15, 90, 400, 20);
+        cv::putText(mat, out.str(), cv::Point2f(15, 35), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
+        cv::putText(mat, "Detection InferRequests usage", cv::Point2f(15, 70), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
+        cv::Rect usage(15, 90, 370, 20);
         cv::rectangle(mat, usage, {0, 255, 0}, 2);
         uint64_t nireq = context.nireq;
         usage.width = static_cast<int>(usage.width * static_cast<float>(frameCounter * nireq - context.freeDetectionInfersCount) / (frameCounter * nireq));
         cv::rectangle(mat, usage, {0, 255, 0}, cv::FILLED);
 
-        cv::imshow("Detection results", firstGridIt->second.getMat());
+        cv::imshow("security_barrier_camera", firstGridIt->second.getMat());
         context.drawersContext.prevShow = std::chrono::steady_clock::now();
         const int key = cv::waitKey(context.drawersContext.pause);
         if (key == 27 || 'q' == key || 'Q' == key || !context.isVideo) {
@@ -643,6 +644,9 @@ int main(int argc, char* argv[]) {
                     return 1;
                 }
                 videoCapture.set(cv::CAP_PROP_FPS , 30);
+                videoCapture.set(cv::CAP_PROP_BUFFERSIZE , 1);
+                videoCapture.set(cv::CAP_PROP_FRAME_WIDTH, 640);
+                videoCapture.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
                 videoCapturSourcess.push_back(std::make_shared<VideoCaptureSource>(videoCapture, FLAGS_loop_video));
             }
         }
@@ -683,25 +687,24 @@ int main(int argc, char* argv[]) {
         // --------------------------- 1. Load Inference Engine -------------------------------------
         InferenceEngine::Core ie;
 
-        std::set<std::string> loadedDevices;
-        std::vector<std::string> pluginNames = {
-                FLAGS_d,
-                FLAGS_d_va,
-                FLAGS_d_lpr
-        };
-
-        for (auto && flag : pluginNames) {
-            if (flag.empty())
+        std::set<std::string> devices;
+        for (const std::string& netDevices : std::array<std::string, 3>{FLAGS_d, FLAGS_d_va, FLAGS_d_lpr}) {
+            if (netDevices.empty()) {
                 continue;
-            if (loadedDevices.find(flag) != loadedDevices.end())
-                continue;
+            }
+            for (const std::string& device : parseDevices(netDevices)) {
+                devices.insert(device);
+            }
+        }
+        std::map<std::string, uint32_t> device_nstreams = parseValuePerDevice(devices, FLAGS_nstreams);
 
-            slog::info << "Loading device " << flag << slog::endl;
+        for (const std::string& device : devices) {
+            slog::info << "Loading device " << device << slog::endl;
 
             /** Printing device version **/
-            std::cout << ie.GetVersions(flag) << std::endl;
+            std::cout << ie.GetVersions(device) << std::endl;
 
-            if ((flag.find("CPU") != std::string::npos)) {
+            if ("CPU" == device) {
 #ifdef WITH_EXTENSIONS
                 /** Load default extensions lib for the CPU device (e.g. SSD's DetectionOutput)**/
                 ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
@@ -713,32 +716,38 @@ int main(int argc, char* argv[]) {
                     ie.AddExtension(extension_ptr, "CPU");
                     slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
-                if (inputChannels.size() > 1) {
-                    ie.SetConfig({{PluginConfigParams::KEY_CPU_THROUGHPUT_STREAMS, PluginConfigParams::CPU_THROUGHPUT_AUTO}}, "CPU");
-                }
+                if (FLAGS_nthreads != 0)
+                    ie.SetConfig({{ CONFIG_KEY(CPU_THREADS_NUM), std::to_string(FLAGS_nthreads) }}, "CPU");
+                ie.SetConfig({{ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO) }}, "CPU");
+                ie.SetConfig({{ CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
+                                (device_nstreams.count("CPU") > 0 ? std::to_string(device_nstreams.at("CPU")) :
+                                                                   "CPU_THROUGHPUT_AUTO") }}, "CPU");
+                device_nstreams["CPU"] = std::stoi(ie.GetConfig("CPU", CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
             }
 
-            if ((flag.find("GPU") != std::string::npos)) {
-                if (inputChannels.size() > 1) {
-                    ie.SetConfig({{PluginConfigParams::KEY_GPU_THROUGHPUT_STREAMS, std::to_string(inputChannels.size())}}, "GPU");
-                }
+            if ("GPU" == device) {
                 // Load any user-specified clDNN Extensions
                 if (!FLAGS_c.empty())
                     ie.SetConfig({ { PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
+                ie.SetConfig({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
+                                (device_nstreams.count("GPU") > 0 ? std::to_string(device_nstreams.at("GPU")) :
+                                                                    "GPU_THROUGHPUT_AUTO") }}, "GPU");
+                device_nstreams["GPU"] = std::stoi(ie.GetConfig("GPU", CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
+                if (devices.end() != devices.find("CPU")) {
+                    // multi-device execution with the CPU + GPU performs best with GPU trottling hint,
+                    // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
+                    ie.SetConfig({{ CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
+                }
             }
 
-            if ((flag.find("FPGA") != std::string::npos) && !FLAGS_fpga_device_ids.empty()) {
+            if ("FPGA" == device) {
                 ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_DEVICE_ID, FLAGS_fpga_device_ids } }, "FPGA");
             }
-
-            loadedDevices.insert(flag);
         }
 
         /** Per layer metrics **/
-        std::map<std::string, std::string> mapDevices;
         if (FLAGS_pc) {
             ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
-            mapDevices = getMapFullDevicesNames(ie, pluginNames);
         }
 
         /** Graph tagging via config options**/
@@ -783,7 +792,17 @@ int main(int argc, char* argv[]) {
         cv::Size displayResolution = cv::Size{std::stoi(FLAGS_display_resolution.substr(0, found)),
                                               std::stoi(FLAGS_display_resolution.substr(found + 1, FLAGS_display_resolution.length()))};
 
-        slog::info << "Number of InferRequests: " << nireq << slog::endl;
+        slog::info << "Number of InferRequests: " << nireq << " (detection), " << nclassifiersireq << " (classification), " << nrecognizersireq << " (recognition)" << slog::endl;
+        std::ostringstream device_ss;
+        for (const auto& nstreams : device_nstreams) {
+            if (!device_ss.str().empty()) {
+                device_ss << ", ";
+            }
+            device_ss << nstreams.second << " streams for " << nstreams.first;
+        }
+        if (!device_ss.str().empty()) {
+            slog::info << device_ss.str() << slog::endl;
+        }
         slog::info << "Display resolution: " << FLAGS_display_resolution << slog::endl;
 
         Context context{inputChannels, worker,
@@ -810,12 +829,13 @@ int main(int argc, char* argv[]) {
         }
 
         // Running
-        context.t0 = std::chrono::steady_clock::now();
         worker->runThreads();
+        context.t0 = std::chrono::steady_clock::now();
         worker->threadFunc();
         worker->join();
         const auto t1 = std::chrono::steady_clock::now();
 
+        std::map<std::string, std::string> mapDevices = getMapFullDevicesNames(ie, {FLAGS_d, FLAGS_d_va, FLAGS_d_lpr});
         for (auto& net : std::array<std::pair<std::vector<InferRequest>, std::string>, 3>{
             std::make_pair(context.detectorsInfers.getActualInferRequests(), FLAGS_d),
                 std::make_pair(context.attributesInfers.getActualInferRequests(), FLAGS_d_va),
@@ -823,7 +843,8 @@ int main(int argc, char* argv[]) {
             for (InferRequest& ir : net.first) {
                 ir.Wait(IInferRequest::WaitMode::RESULT_READY);
                 if (FLAGS_pc) {  // Show performace results
-                    printPerformanceCounts(ir, std::cout, getFullDeviceName(mapDevices, net.second));
+                    printPerformanceCounts(ir, std::cout, std::string::npos == net.second.find("MULTI") ? getFullDeviceName(mapDevices, net.second)
+                                                                                                        : net.second);
                 }
             }
         }
