@@ -144,7 +144,7 @@ def try_retrieve_from_cache(cache, files):
     try:
         if all(cache.has(file[0]) for file in files):
             for hash, destination in files:
-                print('========= Retrieving {} from the cache'.format(destination))
+                print('========= Retrieving {} from the cache'.format(destination), flush=True)
                 cache.get(hash, destination)
             print()
             return True

@@ -70,5 +70,4 @@ cd $build_dir
 cmake -DCMAKE_BUILD_TYPE=Release $DEMOS_PATH
 make $NUM_THREADS
 
-
-printf "\nBuild completed, you can find binaries for all demos in the $HOME/omz_demos_build/${OS_PATH}/Release subfolder.\n\n"
+printf "\nBuild completed, you can find binaries for all demos in the $build_dir/${OS_PATH}/Release subfolder.\n\n"

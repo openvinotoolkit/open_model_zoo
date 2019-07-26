@@ -7,7 +7,7 @@ For enabling OpenVINO™ launcher you need to add `framework: dlsdk` in launcher
 * `weights` - path to bin file with weights for your topology.
 
 launcher may optionally provide model parameters in source framework format which will be converted to Inference Engine IR using Model Optimizer.
-If you want to use Model Optimizer for model conversion, please view [Model Optimizer Developer Guide][openvino-mo].
+If you want to use Model Optimizer for model conversion, please view [Model Optimizer Developer Guide](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
 You can provide:
 
 * `caffe_model` and `caffe_weights` for Caffe model and weights (*.prototxt and *.caffemodel).
@@ -23,7 +23,7 @@ Full list of supported parameters you can find in Model Optimizer Developer Guid
 Model will be converted before every evaluation. 
 You can provide `converted_model_dir` for saving converted model in specific folder, otherwise, converted models will be saved in path provided via `-C` command line argument or source model directory.
 
-* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here][adapters].
+* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
 
 Launcher understands which batch size will be used from model intermediate representation (IR). If you want to use batch for infer, please, provide model with required batch or convert it using specific parameter in `mo_params`.
 
@@ -63,6 +63,3 @@ launchers:
       - reverse_input_channels
     cpu_extensions: cpu_extentions_avx512.so
 ```
-
-[adapters]: ../adapters/README.md
-[openvino-mo]: https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer
