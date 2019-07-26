@@ -3,7 +3,7 @@
 For enabling TensorFlow Lite launcher you need to add `framework: tf_lite` in launchers section of your configuration file and provide following parameters:
 
 * `model` - path to file with TFLite model for your topology.
-* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here][adapters].
+* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
 * `device` - specifies which device will be used for infer (`cpu` or `gpu`).
 
 ## Specifying model inputs in config.
@@ -26,5 +26,3 @@ launchers:
     model: path_to_model/alexnet.tflite
     adapter: classification
 ```
-
-[adapters]: ../adapters/README.md

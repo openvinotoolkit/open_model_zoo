@@ -3,7 +3,7 @@
 For enabling TensorFlow launcher you need to add `framework: tf` in launchers section of your configuration file and provide following parameters:
 
 * `model` - path to frozen graph file with TF model for your topology.
-* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here][adapters].
+* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
 * `output_names` - list of node names which will be used as model output (Optional, if not provided will be used from graph)
 * `device` - specifies which device will be used for infer (`cpu` or `gpu`).
 
@@ -27,5 +27,3 @@ launchers:
     model: path_to_model/alexnet.pb
     adapter: classification
 ```
-
-[adapters]: ../adapters/README.md
