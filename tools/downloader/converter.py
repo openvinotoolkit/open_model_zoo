@@ -39,10 +39,10 @@ else:
     quote_arg = shlex.quote
 
 
-def convert_to_onnx(topology, args):
+def convert_to_onnx(topology, output_dir, args):
     print('========= {}Converting {} to ONNX'.format('(DRY RUN) ' if args.dry_run else '', topology.name))
     pytorch_to_onnx_args = [
-        string.Template(arg).substitute(dl_dir=args.download_dir / topology.subdirectory)
+        string.Template(arg).substitute(dl_dir=output_dir / topology.subdirectory)
         for arg in topology.pytorch_to_onnx_args]
     cmd = [str(args.python), 'pytorch_to_onnx.py', *pytorch_to_onnx_args]
     print('Conversion to ONNX command:', ' '.join(map(quote_arg, cmd)))
@@ -92,7 +92,7 @@ def main():
             continue
 
         if top.pytorch_to_onnx_args:
-            if convert_to_onnx(top, args) != 0:
+            if convert_to_onnx(top, output_dir, args) != 0:
                 failed_topologies.add(top.name)
                 continue
 
