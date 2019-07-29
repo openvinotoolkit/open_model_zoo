@@ -2,7 +2,7 @@
 
 ## Install OpenCV 3.3 or later with Python3 bindings
 
-Accuracy Checker uses OpenCV library for image processing. You can miss this step if you are using OpenCV from [OpenVINO toolkit](ttps://software.intel.com/en-us/openvino-toolkit/documentation/get-started).
+Accuracy Checker uses OpenCV library for image processing. You can miss this step if you are using OpenCV from [OpenVINO toolkit](https://software.intel.com/en-us/openvino-toolkit/documentation/get-started).
 
 ```bash
 sudo apt-get install libopencv-dev

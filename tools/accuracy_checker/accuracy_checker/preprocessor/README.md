@@ -25,7 +25,7 @@ Accuracy Checker supports following set of preprocessors:
     - `fit_to_window` - adaptive resize keeping aspect ratio for fit image into window with fixed size `[dst_height x dst_width]`,
          but trying to make the image as big as possible.
     - `frcnn_keep_aspect_ratio` - adaptive resize keeping aspect ratio for fit image into window with fixed size `[max_size x max_size]`,
-         but trying to make the minimal dimension of image to be equal to `min_size` or as close to `min_size` as possible, where 
+         but trying to make the minimal dimension of image to be equal to `min_size` or as close to `min_size` as possible, where
          `min_size = min(dst_width, dst_height)`,
          `max_size = max(dst_width, dst_height)`.
 * `auto_resize` - automatic resizing image to input layer shape. (supported only for one input layer case, use OpenCV for image resize)
