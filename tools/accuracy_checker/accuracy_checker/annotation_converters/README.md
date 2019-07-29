@@ -140,6 +140,4 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `labels_file` - path to file, which contains labels (optional, if omitted no labels will be shown)
   * `data_suffix` - suffix for files with data (default `_data_cropped`)
   * `label_suffix` - suffix for files with groundtruth data (default `_label_cropped`)
-  * `boxes_file` - path to file with brain boxes (optional). Set this option with including postprocessor `segmentation-prediction-resample`(see [Postprocessors][spr])
-  
- [spr]: ../postprocessor/README.md  
+  * `boxes_file` - path to file with brain boxes (optional). Set this option with including postprocessor `segmentation-prediction-resample`(see [Postprocessors](../postprocessor/README.md)).
