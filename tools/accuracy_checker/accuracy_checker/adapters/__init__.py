@@ -17,7 +17,14 @@ limitations under the License.
 from .adapter import Adapter, AdapterField, create_adapter
 
 from .action_recognition import ActionDetection
-from .text_detection import TextDetectionAdapter, LPRAdapter, BeamSearchDecoder
+from .text_detection import (
+    TextDetectionAdapter,
+    TextProposalsDetectionAdapter,
+    EASTTextDetectionAdapter,
+    LPRAdapter,
+    BeamSearchDecoder
+)
+
 from .image_processing import SuperResolutionAdapter
 from .attributes_recognition import (
     HeadPoseEstimatorAdapter,
@@ -73,6 +80,8 @@ __all__ = [
     'GazeEstimationAdapter',
 
     'TextDetectionAdapter',
+    'TextProposalsDetectionAdapter',
+    'EASTTextDetectionAdapter',
 
     'BeamSearchDecoder',
     'LPRAdapter',

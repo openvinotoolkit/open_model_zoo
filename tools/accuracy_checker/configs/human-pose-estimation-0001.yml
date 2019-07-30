@@ -5,7 +5,6 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        device: CPU
         model:   Transportation/human_pose_estimation/mobilenet-v1/dldt/FP32/human-pose-estimation-0001.xml
         weights: Transportation/human_pose_estimation/mobilenet-v1/dldt/FP32/human-pose-estimation-0001.bin
         allow_reshape_input: True
@@ -17,7 +16,6 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        device: CPU
         model:   Transportation/human_pose_estimation/mobilenet-v1/dldt/FP16/human-pose-estimation-0001.xml
         weights: Transportation/human_pose_estimation/mobilenet-v1/dldt/FP16/human-pose-estimation-0001.bin
         allow_reshape_input: True
@@ -32,30 +30,6 @@ models:
         device: CPU
         model:   Transportation/human_pose_estimation/mobilenet-v1/dldt/INT8/human-pose-estimation-0001.xml
         weights: Transportation/human_pose_estimation/mobilenet-v1/dldt/INT8/human-pose-estimation-0001.bin
-        allow_reshape_input: True
-        adapter:
-          type: human_pose_estimation
-          part_affinity_fields_out: Mconv7_stage2_L1
-          keypoints_heatmap_out: Mconv7_stage2_L2
-
-      - framework: dlsdk
-        tags:
-          - FP32
-        device: GPU
-        model:   Transportation/human_pose_estimation/mobilenet-v1/dldt/FP32/human-pose-estimation-0001.xml
-        weights: Transportation/human_pose_estimation/mobilenet-v1/dldt/FP32/human-pose-estimation-0001.bin
-        allow_reshape_input: True
-        adapter:
-          type: human_pose_estimation
-          part_affinity_fields_out: Mconv7_stage2_L1
-          keypoints_heatmap_out: Mconv7_stage2_L2
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        device: GPU
-        model:   Transportation/human_pose_estimation/mobilenet-v1/dldt/FP16/human-pose-estimation-0001.xml
-        weights: Transportation/human_pose_estimation/mobilenet-v1/dldt/FP16/human-pose-estimation-0001.bin
         allow_reshape_input: True
         adapter:
           type: human_pose_estimation

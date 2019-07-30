@@ -39,8 +39,15 @@ from .regression import (
     AngleError
 )
 from .multilabel_recognition import MultiLabelRecall, MultiLabelPrecision, MultiLabelAccuracy, F1Score
-from .text_detection import TextDetectionMetric
-from .coco_metrics import MSCOCOAveragePresicion
+from .text_detection import (
+    FocusedTextLocalizationPrecision,
+    FocusedTextLocalizationRecall,
+    FocusedTextLocalizationHMean,
+    IncidentalSceneTextLocalizationPrecision,
+    IncidentalSceneTextLocalizationRecall,
+    IncidentalSceneTextLocalizationHMean
+)
+from .coco_metrics import MSCOCOAveragePrecision, MSCOCORecall
 from .coco_orig_metrics import (
     MSCOCOorigAveragePrecision,
     MSCOCOorigRecall,
@@ -92,14 +99,20 @@ __all__ = [
     'MultiLabelPrecision',
     'F1Score',
 
-    'TextDetectionMetric',
+    'FocusedTextLocalizationHMean',
+    'FocusedTextLocalizationRecall',
+    'FocusedTextLocalizationPrecision',
+    'IncidentalSceneTextLocalizationPrecision',
+    'IncidentalSceneTextLocalizationRecall',
+    'IncidentalSceneTextLocalizationHMean',
 
-    'MSCOCOAveragePresicion',
+    'MSCOCOAveragePrecision',
+    'MSCOCORecall',
     'MSCOCOorigAveragePrecision',
     'MSCOCOorigRecall',
     'MSCOCOOrigSegmAveragePrecision',
     'MSCOCOorigSegmRecall',
 
     'HitRatioMetric',
-    'NDSGMetric'
+    'NDSGMetric',
 ]

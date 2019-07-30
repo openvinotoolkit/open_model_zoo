@@ -106,10 +106,42 @@ More detailed information about calculation segmentation metrics you can find [h
 * `f1_score` - [F score](https://en.wikipedia.org/wiki/F1_score) metric for multilabel recognition. Supported representations: `MultiLabelRecognitionAnnotation`, `MultiLabelRecognitionPrediction`.
   * `label_map` - the field in annotation metadata, which contains dataset label map.
   * `calculate_average` - allows calculation of average f-score (default value: `True`).
-* `text_detection` - Harmonic mean of precision and recall for text detection task. Supported representations: `TextDetectionAnnotation`, `TextDetectionPrediction`.
-  * `iou_constrain` - minimal value for intersection over union that allows to make decision that prediction polygon is true positive.
+* `focused_text_hmean` - Harmonic mean of precision and recall for focused scene text detection task introduced in [Robust Reading Competition challenge 2](https://rrc.cvc.uab.es/?ch=2&com=introduction). Supported representations: `TextDetectionAnnotation`, `TextDetectionPrediction`.
   * `ignore_difficult` - allows to ignore difficult ground truth text polygons in metric calculation.
-  * `area_precision_constrain` - minimal value for intersection over union that allows to make decision that prediction polygon matched with ignored annotation.
+  * `area_precision_constrain` - minimal value for precision that allows to make decision that prediction polygon matched with annotation.
+  * `area_recall_constrain` - minimal value for recall that allows to make decision that prediction polygon matched with annotation.
+  * `center_diff_threshold` - acceptable difference between center of predicted text region and ground truth.
+  * `one_to_one_match_score` - weight for one to one matching results (Optional, default 1).
+  * `one_to_many_match_score` - weight for one to many matching results (Optional, default 0.8).
+  * `many_to_one_match_score` - weight for many to one matching results (optional, default 1).
+* `focused_text_precision` - precision for focused scene text detection task introduced in [Robust Reading Competition challenge 2](https://rrc.cvc.uab.es/?ch=2&com=introduction). Supported representations: `TextDetectionAnnotation`, `TextDetectionPrediction`.
+  * `ignore_difficult` - allows to ignore difficult ground truth text polygons in metric calculation.
+  * `area_precision_constrain` - minimal value for precision that allows to make decision that prediction polygon matched with annotation.
+  * `area_recall_constrain` - minimal value for recall that allows to make decision that prediction polygon matched with annotation.
+  * `center_diff_threshold` - acceptable difference between center of predicted text region and ground truth.
+  * `one_to_one_match_score` - weight for one to one matching results (Optional, default 1).
+  * `one_to_many_match_score` - weight for one to many matching results (Optional, default 0.8).
+  * `many_to_one_match_score` - weight for many to one matching results (optional, default 1).
+* `focused_text_precision` - recall for focused scene text detection task introduced in [Robust Reading Competition challenge 2](https://rrc.cvc.uab.es/?ch=2&com=introduction). Supported representations: `TextDetectionAnnotation`, `TextDetectionPrediction`.
+  * `ignore_difficult` - allows to ignore difficult ground truth text polygons in metric calculation.
+  * `area_precision_constrain` - minimal value for precision that allows to make decision that prediction polygon matched with annotation.
+  * `area_recall_constrain` - minimal value for recall that allows to make decision that prediction polygon matched with annotation.
+  * `center_diff_threshold` - acceptable difference between center of predicted text region and ground truth.
+  * `one_to_one_match_score` - weight for one to one matching results (Optional, default 1).
+  * `one_to_many_match_score` - weight for one to many matching results (Optional, default 0.8).
+  * `many_to_one_match_score` - weight for many to one matching results (optional, default 1).
+* `incidental_text_hmean` - Harmonic mean of precision and recall for incidental scene text detection task introduced in [Robust Reading Competition challenge 4](https://rrc.cvc.uab.es/?ch=4&com=introduction). Supported representations: `TextDetectionAnnotation`, `TextDetectionPrediction`.
+  * `ignore_difficult` - allows to ignore difficult ground truth text polygons in metric calculation.
+  * `iou_constrain` - minimal value for intersection over union that allows to make decision that prediction polygon is true positive.
+  * `area_precision_constrain` - minimal value for precision that allows to make decision that prediction polygon matched with ignored annotation.
+* `incidental_text_precision` - precision for incidental scene text detection task introduced in [Robust Reading Competition challenge 4](https://rrc.cvc.uab.es/?ch=4&com=introduction). Supported representations: `TextDetectionAnnotation`, `TextDetectionPrediction`.
+  * `ignore_difficult` - allows to ignore difficult ground truth text polygons in metric calculation.
+  * `iou_constrain` - minimal value for intersection over union that allows to make decision that prediction polygon is true positive.
+  * `area_precision_constrain` - minimal value for precision that allows to make decision that prediction polygon matched with ignored annotation.
+* `incidental_text_precision` - recall for incidental scene text detection task introduced in [Robust Reading Competition challenge 4](https://rrc.cvc.uab.es/?ch=4&com=introduction). Supported representations: `TextDetectionAnnotation`, `TextDetectionPrediction`.
+  * `ignore_difficult` - allows to ignore difficult ground truth text polygons in metric calculation.
+  * `iou_constrain` - minimal value for intersection over union that allows to make decision that prediction polygon is true positive.
+  * `area_precision_constrain` - minimal value for precision that allows to make decision that prediction polygon matched with ignored annotation.
 * `coco_precision` - MS COCO Average Precision metric for keypoints recognition and object detection tasks. Supported representations: `PoseEstimationAnnotation`, `PoseEstimationPrediction`, `DetectionAnnotation`, `DetectionPrediction`.
   * `max_detections` - max number of predicted results per image. If you have more predictions,the results with minimal confidence will be ignored.
   * `threshold` - intersection over union threshold. You can specify one value or comma separated range of values. This parameter supports precomputed values for standard COCO thresholds (`.5`, `.75`, `.5:.05:.95`).

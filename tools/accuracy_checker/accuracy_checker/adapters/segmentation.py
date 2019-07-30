@@ -19,6 +19,7 @@ from ..adapters import Adapter
 from ..representation import SegmentationPrediction, BrainTumorSegmentationPrediction
 from ..config import ConfigValidator, BoolField
 
+
 class SegmentationAdapter(Adapter):
     __provider__ = 'segmentation'
     prediction_types = (SegmentationPrediction, )
@@ -27,8 +28,9 @@ class SegmentationAdapter(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'make_argmax' : BoolField(optional=True, default=False,
-                                      description="Allows to apply argmax operation to output values.")
+            'make_argmax': BoolField(
+                optional=True, default=False, description="Allows to apply argmax operation to output values."
+            )
         })
         return parameters
 

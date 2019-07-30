@@ -16,56 +16,20 @@ limitations under the License.
 
 import math
 from collections import namedtuple
+
 import cv2
 import numpy as np
 from PIL import Image
 
-from ..config import BoolField, ConfigValidator, NumberField, StringField, ConfigError, BaseField
+from ..config import ConfigError, NumberField, StringField, BoolField
 from ..dependency import ClassProvider
-from ..utils import get_size_from_config, get_or_parse_value, string_to_tuple, get_size_3d_from_config, contains_all
-from ..utils import get_parameter_value_from_config
 from ..logging import warning
+from ..preprocessor import Preprocessor
+from ..utils import contains_all, get_size_from_config, string_to_tuple, get_size_3d_from_config
+
 
 # The field .type should be string, the field .parameters should be dict
-GeometricOperationMetadata = namedtuple('GeometricOperationMetadata',
-                                        ['type', 'parameters'])
-
-
-class Preprocessor(ClassProvider):
-    __provider_type__ = 'preprocessor'
-
-    def __init__(self, config, name=None, input_shapes=None):
-        self.config = config
-        self.name = name
-        self.input_shapes = input_shapes
-
-        self.validate_config()
-        self.configure()
-
-    def __call__(self, *args, **kwargs):
-        return self.process(*args, **kwargs)
-
-    def get_value_from_config(self, key):
-        return get_parameter_value_from_config(self.config, self.parameters(), key)
-
-    @classmethod
-    def parameters(cls):
-        return {
-            'type': StringField(
-                default=cls.__provider__ if hasattr(cls, '__provider__') else None, description="Preprocessor type."
-            )
-        }
-
-    def process(self, image, annotation_meta=None):
-        raise NotImplementedError
-
-    def configure(self):
-        pass
-
-    def validate_config(self):
-        ConfigValidator(self.name,
-                        on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT,
-                        fields=self.parameters()).validate(self.config)
+GeometricOperationMetadata = namedtuple('GeometricOperationMetadata', ['type', 'parameters'])
 
 
 def scale_width(dst_width, dst_height, image_width, image_height,):
@@ -90,13 +54,46 @@ def scale_fit_to_window(dst_width, dst_height, image_width, image_height):
 def frcnn_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):
     min_size = min(dst_width, dst_height)
     max_size = max(dst_width, dst_height)
-
     w1, h1 = scale_greater(min_size, min_size, image_width, image_height)
-
     if max(w1, h1) <= max_size:
         return w1, h1
 
     return scale_fit_to_window(max_size, max_size, image_width, image_height)
+
+
+def ctpn_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):
+    scale = min(dst_height, dst_width)
+    max_scale = max(dst_height, dst_width)
+    im_min_size = min(image_width, image_height)
+    im_max_size = max(image_width, image_height)
+    im_scale = float(scale) / float(im_min_size)
+    if np.round(im_scale * im_max_size) > max_scale:
+        im_scale = float(max_scale) / float(im_max_size)
+    new_h = np.round(image_height * im_scale)
+    new_w = np.round(image_width * im_scale)
+    return int(new_w), int(new_h)
+
+
+def east_keep_aspect_ratio(dst_width, dst_height, image_width, image_height):
+    resize_w = image_width
+    resize_h = image_height
+    max_side_len = max(dst_width, dst_height)
+    min_side_len = min(dst_width, dst_height)
+
+    # limit the max side
+    if max(resize_h, resize_w) > max_side_len:
+        ratio = float(max_side_len) / resize_h if resize_h > resize_w else float(max_side_len) / resize_w
+    else:
+        ratio = 1.
+    resize_h = int(resize_h * ratio)
+    resize_w = int(resize_w * ratio)
+
+    resize_h = resize_h if resize_h % min_side_len == 0 else (resize_h // min_side_len - 1) * min_side_len
+    resize_w = resize_w if resize_w % min_side_len == 0 else (resize_w // min_side_len - 1) * min_side_len
+    resize_h = max(32, resize_h)
+    resize_w = max(32, resize_w)
+
+    return resize_w, resize_h
 
 
 ASPECT_RATIO_SCALE = {
@@ -104,7 +101,9 @@ ASPECT_RATIO_SCALE = {
     'height': scale_height,
     'greater': scale_greater,
     'fit_to_window': scale_fit_to_window,
-    'frcnn_keep_aspect_ratio': frcnn_keep_aspect_ratio
+    'frcnn_keep_aspect_ratio': frcnn_keep_aspect_ratio,
+    'ctpn_keep_aspect_ratio': ctpn_keep_aspect_ratio,
+    'east_keep_aspect_ratio': east_keep_aspect_ratio
 }
 
 
@@ -308,8 +307,8 @@ class Resize(Preprocessor):
 
             if is_simple_case:
                 # support GeometricOperationMetadata array for simple case only -- without tiling, pyramids, etc
-                image.metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('resize',
-                                                                                                        resize_meta))
+                image.metadata.setdefault(
+                    'geometric_operations', []).append(GeometricOperationMetadata('resize', resize_meta))
 
             image.metadata.update(resize_meta)
 
@@ -349,8 +348,9 @@ class AutoResize(Preprocessor):
 
             if is_simple_case:
                 # support GeometricOperationMetadata array for simple case only -- without tiling, pyramids, etc
-                image.metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('auto_resize',
-                                                                                                        {}))
+                image.metadata.setdefault('geometric_operations', []).append(
+                    GeometricOperationMetadata('auto_resize', {})
+                )
 
             return data
 
@@ -363,90 +363,8 @@ class AutoResize(Preprocessor):
 
         return image
 
-class Normalize(Preprocessor):
-    __provider__ = 'normalization'
 
-    PRECOMPUTED_MEANS = {
-        'imagenet': (104.00698793, 116.66876762, 122.67891434),
-        'cifar10': (125.307, 122.961, 113.8575),
-    }
-
-    PRECOMPUTED_STDS = {
-        'imagenet': (104.00698793, 116.66876762, 122.67891434),
-        'cifar10': (125.307, 122.961, 113.8575),
-    }
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'mean': BaseField(
-                optional=True,
-                description="Values which will be subtracted from image channels. You can specify one "
-                            "value for all channels or list of comma separated channel-wise values."
-            ),
-            'std': BaseField(
-                optional=True,
-                description="Specifies values, on which pixels will be divided. You can specify one value for all "
-                            "channels or list of comma separated channel-wise values."
-            )
-        })
-        return parameters
-
-    def configure(self):
-        self.mean = get_or_parse_value(self.config.get('mean'), Normalize.PRECOMPUTED_MEANS)
-        self.std = get_or_parse_value(self.config.get('std'), Normalize.PRECOMPUTED_STDS)
-        if not self.mean and not self.std:
-            raise ConfigError('mean or std value should be provided')
-
-        if self.std and 0 in self.std:
-            raise ConfigError('std value should not contain 0')
-
-        if self.mean and not (len(self.mean) == 3 or len(self.mean) == 1):
-            raise ConfigError('mean should be one value or comma-separated list channel-wise values')
-
-        if self.std and not (len(self.std) == 3 or len(self.std) == 1):
-            raise ConfigError('std should be one value or comma-separated list channel-wise values')
-
-    def process(self, image, annotation_meta=None):
-        def process_data(data, mean, std):
-            if self.mean:
-                data = data - mean
-            if self.std:
-                data = data / std
-
-            return data
-
-        image.data = process_data(image.data, self.mean, self.std) if not isinstance(image.data, list) else [
-            process_data(data_fragment, self.mean, self.std) for data_fragment in image.data
-        ]
-
-        return image
-
-
-class BgrToRgb(Preprocessor):
-    __provider__ = 'bgr_to_rgb'
-
-    def process(self, image, annotation_meta=None):
-        def process_data(data):
-            return cv2.cvtColor(data, cv2.COLOR_BGR2RGB)
-        image.data = process_data(image.data) if not isinstance(image.data, list) else [
-            process_data(fragment) for fragment in image.data
-        ]
-        return image
-
-
-class BgrToGray(Preprocessor):
-    __provider__ = 'bgr_to_gray'
-
-    def process(self, image, annotation_meta=None):
-        image.data = np.expand_dims(cv2.cvtColor(image.data, cv2.COLOR_BGR2GRAY).astype(np.float32), -1)
-        return image
-
-FLIP_MODES = {
-    'horizontal': 0,
-    'vertical': 1
-}
+FLIP_MODES = {'horizontal': 0, 'vertical': 1}
 
 
 class Flip(Preprocessor):
@@ -540,7 +458,6 @@ class Crop(Preprocessor):
                     resized = resized * new_width / resized[0]
                 if resized[1] < new_height:
                     resized = resized * new_height / resized[1]
-
                 data = cv2.resize(data, tuple(np.ceil(resized).astype(int)))
 
             height, width = data.shape[:2]
@@ -582,6 +499,7 @@ class CropRect(Preprocessor):
         image.data = image.data[start_height:height, start_width:width]
         image.metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop_rect', {}))
         return image
+
 
 class ExtendAroundRect(Preprocessor):
     __provider__ = 'extend_around_rect'
@@ -645,6 +563,7 @@ class ExtendAroundRect(Preprocessor):
         )
 
         return image
+
 
 class PointAligner(Preprocessor):
     __provider__ = 'point_alignment'
@@ -846,6 +765,7 @@ class Padding(Preprocessor):
             mode='constant', constant_values=pad_values
         )
 
+
 class Tiling(Preprocessor):
     __provider__ = 'tiling'
 
@@ -896,6 +816,7 @@ class Tiling(Preprocessor):
 
         return image
 
+
 class Crop3D(Preprocessor):
     __provider__ = 'crop3d'
 
@@ -944,48 +865,3 @@ class Crop3D(Preprocessor):
         endz = min(startz + cropz, z)
 
         return img[startz:endz, starty:endy, startx:endx, :]
-
-
-class Normalize3d(Preprocessor):
-    __provider__ = "normalize3d"
-
-    def process(self, image, annotation_meta=None):
-        data = self.normalize_img(image.data)
-        image_list = []
-        for img in data:
-            image_list.append(img)
-        image.data = image_list
-        image.metadata['multi_infer'] = True
-
-        return image
-
-    @staticmethod
-    def normalize_img(img):
-        for channel in range(img.shape[3]):
-            channel_val = img[:, :, :, channel] - np.mean(img[:, :, :, channel])
-            channel_val /= np.std(img[:, :, :, channel])
-            img[:, :, :, channel] = channel_val
-
-        return img
-
-
-class TfConvertImageDType(Preprocessor):
-    __provider__ = 'tf_convert_image_dtype'
-
-    def __init__(self, config, name, input_shapes=None):
-        super().__init__(config, name, input_shapes)
-        try:
-            import tensorflow as tf
-        except ImportError as import_error:
-            raise ImportError(
-                'tf_convert_image_dtype disabled.Please, install Tensorflow before using. \n{}'.format(import_error.msg)
-            )
-        tf.enable_eager_execution()
-        self.converter = tf.image.convert_image_dtype
-        self.dtype = tf.float32
-
-    def process(self, image, annotation_meta=None):
-        converted_data = self.converter(image.data, dtype=self.dtype)
-        image.data = converted_data.numpy()
-
-        return image

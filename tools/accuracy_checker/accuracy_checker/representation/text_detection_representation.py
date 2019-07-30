@@ -23,6 +23,8 @@ class TextDetectionRepresentation(BaseRepresentation):
     def __init__(self, identifier='', points=None):
         super().__init__(identifier)
         self.points = points if points is not None else []
+        if isinstance(points, list):
+            self.points = np.array(points)
 
     def remove(self, indexes):
         self.points = np.delete(self.points, indexes, axis=0)
@@ -30,6 +32,20 @@ class TextDetectionRepresentation(BaseRepresentation):
         if not difficult:
             return
         self.metadata['difficult_boxes'] = remove_difficult(difficult, indexes)
+
+    @property
+    def boxes(self):
+        if np.size(self.points) == 0:
+            return []
+
+        x_coords = np.reshape(self.points[:, :, 0], (-1, 4))
+        y_coords = np.reshape(self.points[:, :, 1], (-1, 4))
+        x_mins = np.min(x_coords, axis=1)
+        x_maxs = np.max(x_coords, axis=1)
+        y_mins = np.min(y_coords, axis=1)
+        y_maxs = np.max(y_coords, axis=1)
+
+        return [[x_min, y_min, x_max, y_max] for x_min, y_min, x_max, y_max in zip(x_mins, y_mins, x_maxs, y_maxs)]
 
 
 class TextDetectionAnnotation(TextDetectionRepresentation):
