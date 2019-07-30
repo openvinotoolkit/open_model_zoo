@@ -85,7 +85,7 @@ AccuracyChecker supports following set of adapters:
 * `pixel_link_text_detection` - converting output of PixelLink like model for text detection to `TextDetectionPrediction`.
   * `pixel_class_out` - name of layer containing information related to text/no-text classification for each pixel.
   * `pixel_link_out` - name of layer containing information related to linkage between pixels and their neighbors.
-  * `pixel_class_confidene_threshold` - confidence threshold for valid segmentation mask (Optional, default 0.8).
+  * `pixel_class_confidence_threshold` - confidence threshold for valid segmentation mask (Optional, default 0.8).
   * `pixel_link_confidence_threshold` - confidence threshold for valid pixel links (Optional, default 0.8).
   * `min_area` - minimal area for valid text prediction (Optional, default 0).
   * `min_height` - minimal height for valid text prediction (Optional, default 0).
