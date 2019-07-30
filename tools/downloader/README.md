@@ -85,7 +85,9 @@ The basic usage is to run the script like this:
 ```
 
 This will convert all models into the Inference Engine IR format. Models that
-were originally in that format are ignored.
+were originally in that format are ignored. If model in unsupported format (see 
+[PyTorch\* models conversion](pytorch_models_conversion.md)) they will be converted 
+in supported format first.
 
 The current directory must be the root of a download tree created by the model
 downloader. To specify a different download tree path, use the `-d`/`--download_dir`
@@ -101,6 +103,7 @@ into a different directory tree, use the `-o`/`--output_dir` option:
 ```sh
 ./converter.py --all --output_dir my/output/directory
 ```
+>Note: models in intermediate format are placed to this directory too.
 
 The `--all` option can be replaced with other filter options to convert only
 a subset of models. See the "Shared options" section.

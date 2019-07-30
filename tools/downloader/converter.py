@@ -42,7 +42,8 @@ else:
 def convert_to_onnx(topology, output_dir, args):
     print('========= {}Converting {} to ONNX'.format('(DRY RUN) ' if args.dry_run else '', topology.name))
     pytorch_to_onnx_args = [
-        string.Template(arg).substitute(dl_dir=output_dir / topology.subdirectory)
+        string.Template(arg).substitute(conv_dir=output_dir / topology.subdirectory,
+                                        dl_dir=args.download_dir / topology.subdirectory)
         for arg in topology.pytorch_to_onnx_args]
     cmd = [str(args.python), 'pytorch_to_onnx.py', *pytorch_to_onnx_args]
     print('Conversion to ONNX command:', ' '.join(map(quote_arg, cmd)))
@@ -97,7 +98,9 @@ def main():
                 continue
 
         expanded_mo_args = [
-            string.Template(arg).substitute(dl_dir=args.download_dir / top.subdirectory, mo_dir=mo_path.parent)
+            string.Template(arg).substitute(dl_dir=args.download_dir / top.subdirectory,
+                                            mo_dir=mo_path.parent,
+                                            conv_dir=output_dir / top.subdirectory)
             for arg in top.mo_args]
 
         assert len(top.precisions) == 1 # only one precision per model is supported at the moment

@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 import sys
 
 import torch.onnx
@@ -42,7 +43,7 @@ def parse_args():
                         help='Path to the PyTorch pretrained weights')
     parser.add_argument('--input-shape', metavar='INPUT_DIM', type=positive_int_arg, required=True,
                         help='Shape of the input blob')
-    parser.add_argument('--output-file', type=str, required=True,
+    parser.add_argument('--output-file', type=Path, required=True,
                         help='Path to the output ONNX model')
 
     parser.add_argument('--model-path', type=str,
@@ -90,14 +91,15 @@ def load_model(model_name, weights, model_path=None):
 def convert_to_onnx(pytorch_model, input_shape, output_file, input_names, output_names):
     """Convert PyTorch model to ONNX and check the resulting onnx model"""
 
+    output_file.parent.mkdir(parents=True, exist_ok=True)
     pytorch_model.eval()
     onnx_input_shape = torch.randn(input_shape)
-    torch.onnx.export(pytorch_model, onnx_input_shape, output_file,
+    torch.onnx.export(pytorch_model, onnx_input_shape, str(output_file),
                       verbose=False, input_names=input_names, output_names=output_names)
 
     # Model check after conversion
     import onnx
-    model_from_onnx = onnx.load(output_file)
+    model_from_onnx = onnx.load(str(output_file))
     try:
         onnx.checker.check_model(model_from_onnx)
         print('ONNX check passed successfully.')

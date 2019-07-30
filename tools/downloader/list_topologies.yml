@@ -3509,7 +3509,7 @@ topologies:
       - --model-path=$dl_dir
       - --weights=$dl_dir/mobilenet-v2.pth
       - --input-shape=1,3,224,224
-      - --output-file=$dl_dir/mobilenet-v2.onnx
+      - --output-file=$conv_dir/mobilenet-v2.onnx
       - --input-names=data
       - --output-names=prob
     model_optimizer_args:
@@ -3520,7 +3520,7 @@ topologies:
       - --mean_values=data[123.675,116.28,103.53]
       - --scale_values=data[58.624,57.12,57.375]
       - --output=prob
-      - --input_model=$dl_dir/mobilenet-v2.onnx
+      - --input_model=$conv_dir/mobilenet-v2.onnx
     license: https://raw.githubusercontent.com/tonylins/pytorch-mobilenet-v2/master/LICENSE
 
   - name: "googlenet-v3-pytorch"
@@ -3547,7 +3547,7 @@ topologies:
       - --model-name=inception-v3
       - --weights=$dl_dir/inception_v3_google-1a9a5a14.pth
       - --input-shape=1,3,299,299
-      - --output-file=$dl_dir/googlenet-v3.onnx
+      - --output-file=$conv_dir/googlenet-v3.onnx
       - --input-names=data
       - --output-names=prob
     model_optimizer_args:
@@ -3558,7 +3558,7 @@ topologies:
       - --mean_values=data[127.5]
       - --scale_values=data[127.5]
       - --output=prob
-      - --input_model=$dl_dir/googlenet-v3.onnx
+      - --input_model=$conv_dir/googlenet-v3.onnx
     license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE
 
   - name: "resnet-50-pytorch"
@@ -3585,7 +3585,7 @@ topologies:
       - --model-name=resnet-v1-50
       - --weights=$dl_dir/resnet50-19c8e357.pth
       - --input-shape=1,3,224,224
-      - --output-file=$dl_dir/resnet-v1-50.onnx
+      - --output-file=$conv_dir/resnet-v1-50.onnx
       - --input-names=data
       - --output-names=prob
     model_optimizer_args:
@@ -3596,5 +3596,5 @@ topologies:
       - --mean_values=data[123.675,116.28,103.53]
       - --scale_values=data[58.395,57.12,57.375]
       - --output=prob
-      - --input_model=$dl_dir/resnet-v1-50.onnx
+      - --input_model=$conv_dir/resnet-v1-50.onnx
     license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE
