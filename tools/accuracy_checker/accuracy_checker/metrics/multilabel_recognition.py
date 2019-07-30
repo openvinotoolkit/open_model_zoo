@@ -99,6 +99,13 @@ class MultiLabelMetric(PerImageEvaluationMetric):
     def evaluate(self, annotations, predictions):
         pass
 
+    def reset(self):
+        self.tp = np.zeros_like(list(self.labels.keys()), dtype=np.float)
+        self.fp = np.zeros_like(list(self.labels.keys()), dtype=np.float)
+        self.tn = np.zeros_like(list(self.labels.keys()), dtype=np.float)
+        self.fn = np.zeros_like(list(self.labels.keys()), dtype=np.float)
+        self.counter = np.zeros_like(list(self.labels.keys()), dtype=np.float)
+
 
 class MultiLabelAccuracy(MultiLabelMetric):
     __provider__ = 'multi_accuracy'
@@ -203,3 +210,7 @@ class F1Score(PerImageEvaluationMetric):
         average = 2 * (precisions[-1] * recalls[-1]) / (precisions[-1] + recalls[-1])
 
         return [*per_class, average]
+
+    def reset(self):
+        self.precision.reset()
+        self.recall.reset()

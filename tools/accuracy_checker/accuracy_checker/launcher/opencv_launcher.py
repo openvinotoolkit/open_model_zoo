@@ -131,7 +131,7 @@ class OpenCVLauncher(Launcher):
     def output_blob(self):
         return next(iter(self.output_names))
 
-    def predict(self, inputs, metadata, *args, **kwargs):
+    def predict(self, inputs, metadata=None, **kwargs):
         """
         Args:
             inputs: dictionary where keys are input layers names and values are data for them.
@@ -148,6 +148,10 @@ class OpenCVLauncher(Launcher):
                 output_name: output_value for output_name, output_value in zip(self.output_names, list_prediction)
             }
             results.append(dict_result)
+
+        if metadata is not None:
+            for meta_ in metadata:
+                meta_['input_shape'] = self.inputs_info_for_meta()
 
         return results
 

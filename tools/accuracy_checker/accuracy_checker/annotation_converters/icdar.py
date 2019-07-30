@@ -20,8 +20,12 @@ from ..utils import read_txt
 from .format_converter import  FileBasedAnnotationConverter, DirectoryBasedAnnotationConverter
 
 
+def box_to_points(box):
+    return np.array([[box[0][0], box[0][1]], [box[1][0], box[0][1]], [box[1][0], box[1][1]], [box[0][0], box[1][1]]])
+
+
 class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
-    __provider__ = 'icdar15_detection'
+    __provider__ = 'icdar_detection'
     annotation_types = (TextDetectionAnnotation, )
 
     def convert(self):
@@ -35,7 +39,11 @@ class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
             for text_area in read_txt(gt_file):
                 text_annotation = text_area.split(',')
                 transcription = text_annotation[-1]
-                points = np.reshape(list(map(float, text_annotation[:8])), (-1, 2))
+                num_coords = 8 if len(text_annotation) >= 8 else 4
+                coords = text_annotation[:num_coords]
+                points = np.reshape(list(map(float, coords)), (-1, 2))
+                if num_coords == 4:
+                    points = box_to_points(points)
                 if transcription == '###':
                     difficult.append(len(transcriptions))
                 all_points.append(points)

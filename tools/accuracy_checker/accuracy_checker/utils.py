@@ -40,7 +40,7 @@ def concat_lists(*lists):
     return list(itertools.chain(*lists))
 
 
-def get_path(entry: Union[str, Path], is_directory=False, check_exists=True):
+def get_path(entry: Union[str, Path], is_directory=False, check_exists=True, file_or_directory=False):
     try:
         path = Path(entry)
     except TypeError:
@@ -53,12 +53,13 @@ def get_path(entry: Union[str, Path], is_directory=False, check_exists=True):
     if not os.path.exists(str(path)):
         raise FileNotFoundError('{}: {}'.format(os.strerror(errno.ENOENT), path))
 
-    if is_directory and not path.is_dir():
-        raise NotADirectoryError('{}: {}'.format(os.strerror(errno.ENOTDIR), path))
+    if not file_or_directory:
+        if is_directory and not path.is_dir():
+            raise NotADirectoryError('{}: {}'.format(os.strerror(errno.ENOTDIR), path))
 
-    # if it exists it is either file (or valid symlink to file) or directory (or valid symlink to directory)
-    if not is_directory and not path.is_file():
-        raise IsADirectoryError('{}: {}'.format(os.strerror(errno.EISDIR), path))
+        # if it exists it is either file (or valid symlink to file) or directory (or valid symlink to directory)
+        if not is_directory and not path.is_file():
+            raise IsADirectoryError('{}: {}'.format(os.strerror(errno.EISDIR), path))
 
     return path
 
@@ -89,7 +90,7 @@ def string_to_tuple(string, casting_type=float):
     processed = processed.replace(')', '')
     processed = processed.split(',')
 
-    return tuple([casting_type(entry) for entry in processed])
+    return tuple([casting_type(entry) for entry in processed]) if not casting_type is None else tuple(processed)
 
 
 def string_to_list(string):
@@ -301,22 +302,26 @@ def convert_bboxes_xywh_to_x1y1x2y2(x_coord, y_coord, width, height):
     return x_coord, y_coord, x_coord + width, y_coord + height
 
 
-def get_or_parse_value(item, supported_values, default=None):
+def get_or_parse_value(item, supported_values=None, default=None, casting_type=float):
     if isinstance(item, str):
         item = item.lower()
-        if item in supported_values:
+        if supported_values and item in supported_values:
             return supported_values[item]
 
         try:
-            return string_to_tuple(item)
+            return string_to_tuple(item, casting_type=casting_type)
         except ValueError:
-            message = 'Invalid value "{}", expected one of precomputed: ({}) or list of values'.format(
-                item, ', '.join(supported_values.keys())
+            message = 'Invalid value "{}", expected {}list of values'.format(
+                item,
+                'one of precomputed: ({}) or '.format(', '.join(supported_values.keys())) if supported_values else ''
             )
             raise ValueError(message)
 
     if isinstance(item, (float, int)):
-        return (item, )
+        return (casting_type(item), )
+
+    if isinstance(item, list):
+        return item
 
     return default
 
@@ -382,7 +387,7 @@ def set_image_metadata(annotation, images):
     if not isinstance(data, list):
         data = [data]
     for image in data:
-        data_shape = np.shape(image) if not np.isscalar(image) else 1
+        data_shape = image.shape if not np.isscalar(image) else 1
         image_sizes.append(data_shape)
     annotation.set_image_size(image_sizes)
 
@@ -403,6 +408,7 @@ def find_nearest(array, value, mode=None):
     if mode == 'more':
         return idx + 1 if array[idx] < value else idx
     return idx
+
 
 def get_parameter_value_from_config(config, parameters, key):
     if key not in parameters.keys():

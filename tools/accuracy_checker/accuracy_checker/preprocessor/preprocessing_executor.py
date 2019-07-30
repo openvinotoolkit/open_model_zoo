@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from ..config import ConfigValidator, StringField
-from ..preprocessor.preprocessors import Preprocessor
+from .preprocessor import Preprocessor
 
 
 class PreprocessingExecutor:

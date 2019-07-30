@@ -28,6 +28,12 @@ Accuracy Checker supports following set of preprocessors:
          but trying to make the minimal dimension of image to be equal to `min_size` or as close to `min_size` as possible, where
          `min_size = min(dst_width, dst_height)`,
          `max_size = max(dst_width, dst_height)`.
+    - `ctpn_keep_aspect_ratio` - adaptive resize keeping aspect ratio for fit image into window with fixed size `[max_size x min_size]` using this algorithm:
+      1. Try to resize min original image size to minimal destination size.
+      2. If scaled max size greater than maximal destination size, rescale minimal size to get max size equal to max destination size.
+    - `east_keep_aspect_ratio` - adaptive resize keeping aspect ratio using this algorithm:
+      1. If max image size greater max destination size, make max image size equal to max destination size.
+      2. Make image height and width divisible by min destination size without remainder.
 * `auto_resize` - automatic resizing image to input layer shape. (supported only for one input layer case, use OpenCV for image resize)
 * `normalization` - changing the range of pixel intensity values.
   * `mean` values which will be subtracted from image channels.

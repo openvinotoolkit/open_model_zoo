@@ -32,13 +32,13 @@ from accuracy_checker.preprocessor import (
     GeometricOperationMetadata
 )
 from accuracy_checker.preprocessor.preprocessing_executor import PreprocessingExecutor
-from accuracy_checker.preprocessor.preprocessors import _OpenCVResizer
+from accuracy_checker.preprocessor.geometric_transformations import _OpenCVResizer
 from accuracy_checker.data_readers import DataRepresentation
 
 
 class TestResize:
     def test_default_resize(self, mocker):
-        cv2_resize_mock = mocker.patch('accuracy_checker.preprocessor.preprocessors.cv2.resize')
+        cv2_resize_mock = mocker.patch('accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
         resize = Preprocessor.provide('resize', {'type': 'resize', 'size': 200})
 
         input_mock = mocker.Mock()
@@ -51,7 +51,7 @@ class TestResize:
         )
 
     def test_custom_resize(self, mocker):
-        cv2_resize_mock = mocker.patch('accuracy_checker.preprocessor.preprocessors.cv2.resize')
+        cv2_resize_mock = mocker.patch('accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
 
         resize = Preprocessor.provide(
             'resize', {'type': 'resize', 'dst_width': 126, 'dst_height': 128, 'interpolation': 'CUBIC'}
@@ -185,7 +185,7 @@ class TestResize:
 
 class TestAutoResize:
     def test_default_auto_resize(self, mocker):
-        cv2_resize_mock = mocker.patch('accuracy_checker.preprocessor.preprocessors.cv2.resize')
+        cv2_resize_mock = mocker.patch('accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
         resize = Preprocessor.provide('auto_resize', {'type': 'auto_resize'}, input_shapes={'data': [1, 3, 200, 200]})
 
         input_mock = mocker.Mock()

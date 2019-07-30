@@ -44,3 +44,7 @@ class AverageMeter:
         return np.divide(
             self.accumulator, self.total_count, out=np.zeros_like(self.accumulator), where=self.total_count != 0
         )
+
+    def reset(self):
+        self.accumulator = None
+        self.total_count = None

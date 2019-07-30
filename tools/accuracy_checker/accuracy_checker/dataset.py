@@ -85,8 +85,8 @@ class Dataset:
 
         self._annotation = annotation
         self._meta = meta
-        self.size = len(self._annotation)
         self.name = self._config.get('name')
+        self.subset = None
 
     @property
     def annotation(self):
@@ -107,6 +107,12 @@ class Dataset:
     def labels(self):
         return self._meta.get('label_map', {})
 
+    @property
+    def size(self):
+        if self.subset:
+            return len(self.subset)
+        return len(self._annotation)
+
     def __call__(self, context, *args, **kwargs):
         batch_annotation = self.__getitem__(self.iteration)
         self.iteration += 1
@@ -119,9 +125,18 @@ class Dataset:
 
         batch_start = item * self.batch
         batch_end = min(self.size, batch_start + self.batch)
-        batch_annotation = self._annotation[batch_start:batch_end]
+        if self.subset:
+            return [self._annotation[idx] for idx in self.subset[batch_start:batch_end]]
 
-        return batch_annotation
+        return self._annotation[batch_start:batch_end]
+
+    def make_subset(self, ids=None, start=0, step=1, end=None):
+        if ids:
+            self.subset = ids
+            return
+        if not end:
+            end = self.size
+        self.subset = range(start, end, step)
 
     @staticmethod
     def set_image_metadata(annotation, images):

@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-
 from ..representation import HitRatioAnnotation
 from ..utils import read_txt, get_path
 from ..config import PathField, NumberField
 
 from .format_converter import BaseFormatConverter
+
 
 class MovieLensConverter(BaseFormatConverter):
     __provider__ = "movie_lens_converter"
