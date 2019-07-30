@@ -25,7 +25,7 @@ reader:
   scheme:
     *.json: json_reader
     *.jpeg: opencv_imread
-``` 
+```
 
 AccuracyChecker supports following list of data readers:
 * `opencv_imread` - read images using OpenCV library. Default color space is BGR.
