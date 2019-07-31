@@ -25,10 +25,7 @@ namespace cv { namespace open_model_zoo {
         Ptr<Impl> impl;
     };
 
-    CV_EXPORTS_W Ptr<Topology> face_detection_retail()
-    {
-        return new Topology("myurl", "");
-    }
+    CV_EXPORTS_W Ptr<Topology> face_detection_retail();
 
 }}  // namespace cv::open_model_zoo
 

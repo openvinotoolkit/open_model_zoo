@@ -20,6 +20,13 @@ void Topology::download()
     std::cout << 3 << std::endl;
 }
 
+Ptr<Topology> face_detection_retail()
+{
+    Ptr<Topology> t(new Topology("myurl", ""));
+    t->download();
+    return t;
+}
+
 }}  // namespace open_model_zoo
 
 #endif
