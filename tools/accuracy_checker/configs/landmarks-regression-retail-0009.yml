@@ -5,34 +5,6 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        device: CPU
-        model:   Retail/object_attributes/landmarks_regression/0009/dldt/FP32/landmarks-regression-retail-0009.xml
-        weights: Retail/object_attributes/landmarks_regression/0009/dldt/FP32/landmarks-regression-retail-0009.bin
-        adapter: landmarks_regression
-        cpu_extensions: AUTO
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        device: CPU
-        model:   Retail/object_attributes/landmarks_regression/0009/dldt/FP16/landmarks-regression-retail-0009.xml
-        weights: Retail/object_attributes/landmarks_regression/0009/dldt/FP16/landmarks-regression-retail-0009.bin
-        adapter: landmarks_regression
-        cpu_extensions: AUTO
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        device: CPU
-        model:   Retail/object_attributes/landmarks_regression/0009/dldt/INT8/landmarks-regression-retail-0009.xml
-        weights: Retail/object_attributes/landmarks_regression/0009/dldt/INT8/landmarks-regression-retail-0009.bin
-        adapter: landmarks_regression
-        cpu_extensions: AUTO
-
-      - framework: dlsdk
-        tags:
-          - FP32
-        device: GPU
         model:   Retail/object_attributes/landmarks_regression/0009/dldt/FP32/landmarks-regression-retail-0009.xml
         weights: Retail/object_attributes/landmarks_regression/0009/dldt/FP32/landmarks-regression-retail-0009.bin
         adapter: landmarks_regression
@@ -40,7 +12,6 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        device: GPU
         model:   Retail/object_attributes/landmarks_regression/0009/dldt/FP16/landmarks-regression-retail-0009.xml
         weights: Retail/object_attributes/landmarks_regression/0009/dldt/FP16/landmarks-regression-retail-0009.bin
         adapter: landmarks_regression

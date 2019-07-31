@@ -4,35 +4,15 @@ models:
     launchers:
       - framework: dlsdk
         tags:
-          - FP32
-        device: CPU
-        model:   Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/FP32/face-detection-adas-0001.xml
-        weights: Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/FP32/face-detection-adas-0001.bin
-        adapter: ssd
-        cpu_extensions: AUTO
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        device: CPU
-        model:   Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/FP16/face-detection-adas-0001.xml
-        weights: Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/FP16/face-detection-adas-0001.bin
-        adapter: ssd
-        cpu_extensions: AUTO
-
-      - framework: dlsdk
-        tags:
           - INT8
         device: CPU
         model:   fTransportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/INT8/face-detection-adas-0001.xml
         weights: Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/INT8/face-detection-adas-0001.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
           - FP32
-        device: GPU
         model:   Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/FP32/face-detection-adas-0001.xml
         weights: Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/FP32/face-detection-adas-0001.bin
         adapter: ssd
@@ -40,7 +20,6 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        device: GPU
         model:   Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/FP16/face-detection-adas-0001.xml
         weights: Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt//FP16/face-detection-adas-0001.bin
         adapter: ssd

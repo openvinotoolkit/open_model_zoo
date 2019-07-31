@@ -165,6 +165,17 @@ class EvaluationContext:
         }
         return _shared_context
 
+    def reset(self):
+        self.annotations = []
+        self.predictions = []
+        self.annotation_batch = []
+        self.prediction_batch = []
+        self.data_batch = []
+        self.metrics_results = []
+        self.identifiers_batch = []
+        if self.metrics_executor is not None:
+            self.metrics_executor.reset()
+
 
 class PipeLineEvaluator:
     def __init__(self, stages):

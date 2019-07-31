@@ -70,6 +70,10 @@ class BaseRecommenderMetric(FullDatasetEvaluationMetric):
 
         return np.mean(measure)
 
+    def reset(self):
+        self.pred_per_user = {i: [] for i in range(self.users_num)}
+        self.gt_items = {}
+
 
 def hit_ratio_discounter(item, rank):
     return int(item in rank)

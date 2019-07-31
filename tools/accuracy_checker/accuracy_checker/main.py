@@ -65,7 +65,7 @@ def build_arguments_parser():
     parser.add_argument(
         '-e', '--extensions',
         help='prefix path to extensions folder',
-        type=partial(get_path, is_directory=True),
+        type=partial(get_path, check_exists=False),
         default=Path.cwd(),
         required=False
     )
@@ -78,7 +78,7 @@ def build_arguments_parser():
     parser.add_argument(
         '-b', '--bitstreams',
         help='prefix path to bitstreams folder',
-        type=partial(get_path, is_directory=True),
+        type=partial(get_path, file_or_directory=True),
         default=Path.cwd(),
         required=False
     )
@@ -167,7 +167,7 @@ def build_arguments_parser():
     parser.add_argument(
         '-am', '--affinity_map',
         help='prefix path to the affinity maps',
-        type=partial(get_path, is_directory=True),
+        type=partial(get_path, file_or_directory=True),
         default=Path.cwd(),
         required=False
     )
@@ -238,7 +238,7 @@ def print_processing_info(model, launcher, device, tags, dataset):
     print_info('launcher: {}'.format(launcher))
     if tags:
         print_info('launcher tags: {}'.format(' '.join(tags)))
-    print_info('device: {}'.format(device))
+    print_info('device: {}'.format(device.upper()))
     print_info('dataset: {}'.format(dataset))
     print_info('OpenCV version: {}'.format(cv2.__version__))
 
