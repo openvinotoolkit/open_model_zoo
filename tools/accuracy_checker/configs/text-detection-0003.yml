@@ -70,6 +70,6 @@ models:
             apply_to: prediction
 
         metrics:
-          - type: incedental_text_hmean
+          - type: incidental_text_hmean
             name: f-measure
             ignore_difficult: True
