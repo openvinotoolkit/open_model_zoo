@@ -387,7 +387,8 @@ topologies:
 
   - name: "mask_rcnn_inception_resnet_v2_atrous_coco"
     description: >-
-      Mask R-CNN Inception Resnet V2 Atrous trained on COCO dataset. Used for object instance segmentation. For details see paper
+      Mask R-CNN Inception Resnet V2 Atrous trained on COCO dataset.
+      Used for object instance segmentation. For details see paper 
       <https://arxiv.org/pdf/1703.06870.pdf>
     task_type: "instance_segmentation"
     files:
@@ -413,7 +414,8 @@ topologies:
 
   - name: "mask_rcnn_inception_v2_coco"
     description: >-
-      Mask R-CNN Inception V2 trained on COCO dataset. Used for object instance segmentation. For details see paper
+      Mask R-CNN Inception V2 trained on COCO dataset.
+      Used for object instance segmentation. For details see paper
       <https://arxiv.org/pdf/1703.06870.pdf>
     task_type: "instance_segmentation"
     files:
@@ -439,7 +441,8 @@ topologies:
 
   - name: "mask_rcnn_resnet50_atrous_coco"
     description: >-
-      Mask R-CNN ResNet50 Atrous trained on COCO dataset. Used for object instance segmentation. For details see paper
+      Mask R-CNN ResNet50 Atrous trained on COCO dataset.
+      Used for object instance segmentation. For details see paper
       <https://arxiv.org/pdf/1703.06870.pdf>
     task_type: "instance_segmentation"
     files:
@@ -465,7 +468,8 @@ topologies:
 
   - name: "mask_rcnn_resnet101_atrous_coco"
     description: >-
-      Mask R-CNN ResNet101 Atrous trained on COCO dataset. Used for object instance segmentation. For details see paper
+      Mask R-CNN ResNet101 Atrous trained on COCO dataset.
+      Used for object instance segmentation. For details see paper
       <https://arxiv.org/pdf/1703.06870.pdf>
     task_type: "instance_segmentation"
     files:
@@ -491,8 +495,8 @@ topologies:
 
   - name: "ssdlite_mobilenet_v2"
     description: >-
-      MobileNetV2: Inverted Residuals and Linear Bottlenecks. Used for object detection. For details see paper
-      <https://arxiv.org/pdf/1801.04381.pdf>
+      MobileNetV2: Inverted Residuals and Linear Bottlenecks. Used for object detection.
+      For details see paper <https://arxiv.org/pdf/1801.04381.pdf>
     task_type: "detection"
     files:
       - name: ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `ssdlite_mobilenet_v2` is used for object detection. For details, see [paper](https://arxiv.org/pdf/1801.04381.pdf) MobileNetV2: Inverted Residuals and Linear Bottlenecks.
+The `ssdlite_mobilenet_v2` model is used for object detection. For details, see [paper](https://arxiv.org/pdf/1801.04381.pdf) MobileNetV2: Inverted Residuals and Linear Bottlenecks.
 
 ## Example
 
@@ -13,7 +13,7 @@ The `ssdlite_mobilenet_v2` is used for object detection. For details, see [paper
 | Type              | Detection     |
 | GFLOPs            | 1.525         |
 | MParams           | 4.475         |
-| Source framework  | Tensorflow\*  |
+| Source framework  | TensorFlow\*  |
 
 ## Accuracy
 

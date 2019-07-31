@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-MobileNetV1 FPN is used for object detection. For details, see [paper](https://arxiv.org/pdf/1807.03284.pdf)
+MobileNetV1 FPN is used for object detection. For details, see [paper](https://arxiv.org/pdf/1807.03284.pdf).
 
 ## Example
 
@@ -13,7 +13,7 @@ MobileNetV1 FPN is used for object detection. For details, see [paper](https://a
 | Type              | Detection     |
 | GFLOPs            | 123.309       |
 | MParams           | 36.188        |
-| Source framework  | Tensorflow\*  |
+| Source framework  | TensorFlow\*  |
 
 ## Accuracy
 

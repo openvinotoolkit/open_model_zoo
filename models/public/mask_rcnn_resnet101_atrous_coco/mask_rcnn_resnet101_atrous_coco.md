@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Mask R-CNN Resnet101 Atrous trained on COCO dataset. Used for object instance segmentation. For details, see [paper](https://arxiv.org/pdf/1703.06870.pdf)
+Mask R-CNN Resnet101 Atrous trained on COCO dataset. Used for object instance segmentation. For details, see [paper](https://arxiv.org/pdf/1703.06870.pdf).
 
 ## Example
 
@@ -13,7 +13,7 @@ Mask R-CNN Resnet101 Atrous trained on COCO dataset. Used for object instance se
 | Type                            | Instance segmentation                     |
 | GFlops                          | 674.58                                    |
 | MParams                         | 69.188                                    |
-| Source framework                | Tensorflow\*                              |
+| Source framework                | TensorFlow\*                              |
 
 ## Performance
 
