@@ -3,8 +3,8 @@
 """
 Test script for the demos.
 
-The test data directory must contain a subdirectory "ILSVRC2012_img_val"
-containing the ILSVRC2012 dataset.
+For the tests to work, the test data directory must contain a "ILSVRC2012_img_val"
+subdirectory with the ILSVRC2012 dataset.
 """
 
 import argparse
@@ -24,11 +24,16 @@ from cases import DEMOS
 from image_sequences import IMAGE_SEQUENCES
 
 def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--demo-build-dir', type=Path, required=True)
-    parser.add_argument('--test-data-dir', type=Path, required=True)
-    parser.add_argument('--downloader-cache-dir', type=Path, required=True)
-    parser.add_argument('--demos')
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter, description=__doc__)
+    parser.add_argument('--demo-build-dir', type=Path, required=True, metavar='DIR',
+        help='directory with demo binaries')
+    parser.add_argument('--test-data-dir', type=Path, required=True, metavar='DIR',
+        help='directory with test data')
+    parser.add_argument('--downloader-cache-dir', type=Path, required=True, metavar='DIR',
+        help='directory to use as the cache for the model downloader')
+    parser.add_argument('--demos', metavar='DEMO[,DEMO...]',
+        help='list of demos to run tests for (by default, every demo is tested)')
     return parser.parse_args()
 
 def main():
