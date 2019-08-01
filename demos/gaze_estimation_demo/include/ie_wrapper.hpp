@@ -14,7 +14,6 @@
 
 
 #include <ie_iextension.h>
-#include <ext_list.hpp>
 
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>

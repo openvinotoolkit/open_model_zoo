@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include "ext_list.hpp"
-#include "ext_base.hpp"
-
 #include <cfloat>
 #include <vector>
 #include <cmath>
@@ -13,9 +10,6 @@
 #include <algorithm>
 
 using namespace InferenceEngine;
-using namespace InferenceEngine::Extensions;
-using namespace InferenceEngine::Extensions::Cpu;
-
 using InferenceEngine::details::InferenceEngineException;
 
 template <typename T>
