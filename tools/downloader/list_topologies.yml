@@ -389,7 +389,7 @@ topologies:
     description: >-
       Mask R-CNN Inception Resnet V2 Atrous trained on COCO dataset.
       Used for object instance segmentation. For details see paper 
-      <https://arxiv.org/pdf/1703.06870.pdf>
+      <https://arxiv.org/pdf/1703.06870.pdf>.
     task_type: "instance_segmentation"
     files:
       - name: mask_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
@@ -416,7 +416,7 @@ topologies:
     description: >-
       Mask R-CNN Inception V2 trained on COCO dataset.
       Used for object instance segmentation. For details see paper
-      <https://arxiv.org/pdf/1703.06870.pdf>
+      <https://arxiv.org/pdf/1703.06870.pdf>.
     task_type: "instance_segmentation"
     files:
       - name: mask_rcnn_inception_v2_coco_2018_01_28.tar.gz
@@ -443,7 +443,7 @@ topologies:
     description: >-
       Mask R-CNN ResNet50 Atrous trained on COCO dataset.
       Used for object instance segmentation. For details see paper
-      <https://arxiv.org/pdf/1703.06870.pdf>
+      <https://arxiv.org/pdf/1703.06870.pdf>.
     task_type: "instance_segmentation"
     files:
       - name: mask_rcnn_resnet50_atrous_coco_2018_01_28.tar.gz
@@ -470,7 +470,7 @@ topologies:
     description: >-
       Mask R-CNN ResNet101 Atrous trained on COCO dataset.
       Used for object instance segmentation. For details see paper
-      <https://arxiv.org/pdf/1703.06870.pdf>
+      <https://arxiv.org/pdf/1703.06870.pdf>.
     task_type: "instance_segmentation"
     files:
       - name: mask_rcnn_resnet101_atrous_coco_2018_01_28.tar.gz
@@ -496,7 +496,7 @@ topologies:
   - name: "ssdlite_mobilenet_v2"
     description: >-
       MobileNetV2: Inverted Residuals and Linear Bottlenecks. Used for object detection.
-      For details see paper <https://arxiv.org/pdf/1801.04381.pdf>
+      For details see paper <https://arxiv.org/pdf/1801.04381.pdf>.
     task_type: "detection"
     files:
       - name: ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz
@@ -523,7 +523,7 @@ topologies:
   - name: "ssd_mobilenet_v1_fpn_coco"
     description: >-
       MobileNetV1 FPN. Used for object detection. For details see paper
-      <https://arxiv.org/pdf/1807.03284.pdf>
+      <https://arxiv.org/pdf/1807.03284.pdf>.
     task_type: "detection"
     files:
       - name: ssd_mobilenet_v1_fpn_shared_box_predictor_640x640_coco14_sync_2018_07_03.tar.gz
@@ -1546,7 +1546,7 @@ topologies:
       models parameterized to meet the resource constraints of a variety of use cases.
       They can be built upon for classification, detection, embeddings and segmentation
       similar to how other popular large scale models are used. For details see paper
-      <https://arxiv.org/abs/1704.04861>
+      <https://arxiv.org/abs/1704.04861>.
     task_type: "classification"
     files:
       - name: mobilenet_v2_1.0_224.tgz
