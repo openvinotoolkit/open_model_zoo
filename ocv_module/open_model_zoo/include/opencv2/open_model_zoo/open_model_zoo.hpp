@@ -4,13 +4,14 @@
 #include "opencv2/core.hpp"
 
 #include <iostream>
+#include <map>
 
 namespace cv { namespace open_model_zoo {
 
     class CV_EXPORTS_W Topology
     {
     public:
-        Topology(const std::string& modelURL, const std::string& description);
+        Topology(const std::map<std::string, std::string>& config);
 
         virtual ~Topology();
 
@@ -18,14 +19,19 @@ namespace cv { namespace open_model_zoo {
 
         CV_WRAP std::string getDescription() const;
 
-        CV_WRAP std::string getModelURL() const;
+        CV_WRAP std::string getLicense() const;
+
+        CV_WRAP void getModelInfo(CV_OUT String& url, CV_OUT String& sha256,
+                                  CV_OUT String& path) const;
 
     protected:
         struct Impl;
         Ptr<Impl> impl;
     };
 
-    CV_EXPORTS_W Ptr<Topology> face_detection_retail();
+    CV_EXPORTS_W Ptr<Topology> densenet_161();
+
+    // CV_EXPORTS_W Ptr<Topology> face_detection_retail();
 
 }}  // namespace cv::open_model_zoo
 
