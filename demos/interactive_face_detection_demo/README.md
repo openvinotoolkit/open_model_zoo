@@ -10,7 +10,7 @@ This demo executes four parallel infer requests for the Age/Gender Recognition, 
 * `emotions-recognition-retail-0003`, which is executed on top of the results of the first model and reports an emotion for each detected face
 * `facial-landmarks-35-adas-0002`, which is executed on top of the results of the first model and reports normed coordinates of estimated facial landmarks
 
-For more information about the pre-trained models, refer to the [model documentation](../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
 Other demo objectives are:
 
