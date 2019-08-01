@@ -8,7 +8,7 @@ the paper ["Inverted Residuals and Linear Bottlenecks: Mobile Networks for Class
 Detection and Segmentation"](https://arxiv.org/pdf/1801.04381.pdf).
 
 The model input is a blob that consists of a single image of "1x3x224x224"
-in RGB order. 
+in RGB order.
 
 The model output is typical object classifier for the 1000 different classifications
 matching with those in the ImageNet database.
