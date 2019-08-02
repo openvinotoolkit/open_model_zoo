@@ -317,7 +317,7 @@ def load_topologies(args):
     if args.config is None: # per-model configs
         model_root = (Path(__file__).resolve().parent / '../../models').resolve()
 
-        for config_path in model_root.glob('**/model.yml'):
+        for config_path in sorted(model_root.glob('**/model.yml')):
             subdirectory = config_path.parent.relative_to(model_root)
 
             with config_path.open() as config_file, \
@@ -351,9 +351,8 @@ def load_topologies(args):
 # requires the --print_all, --all, --name and --list arguments to be in `args`
 def load_topologies_from_args(parser, args):
     if args.print_all:
-        print_list = [top.name for top in load_topologies(args)]
-        for p in sorted(print_list):
-            print(p)
+        for top in load_topologies(args):
+            print(top.name)
         sys.exit()
 
     filter_args_count = sum([args.all, args.name is not None, args.list is not None])

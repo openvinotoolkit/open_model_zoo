@@ -244,16 +244,16 @@ configuration file and exit:
 
 ```
 $ ./TOOL.py --print_all
-Sphereface
 action-recognition-0001-decoder
 action-recognition-0001-encoder
 age-gender-recognition-retail-0013
-alexnet
-brain-tumor-segmentation-0001
-ctpn
-deeplabv3
-densenet-121
-densenet-121-tf
+driver-action-recognition-adas-0002-decoder
+driver-action-recognition-adas-0002-encoder
+emotions-recognition-retail-0003
+face-detection-adas-0001
+face-detection-adas-binary-0001
+face-detection-retail-0004
+face-detection-retail-0005
 [...]
 ```
 
