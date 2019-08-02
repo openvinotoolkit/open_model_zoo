@@ -1,0 +1,40 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Head pose estimation network based on simple, handmade CNN architecture. Angle
+  regression layers are convolutions + ReLU + batch norm + fully connected with
+  one output.
+task_type: head_pose_estimation
+files:
+  - name: FP32/head-pose-estimation-adas-0001.xml
+    sha256: 4407734b15901641df2ff94005734173abdb910350d60ae498e3e889ac0eb195
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
+  - name: FP32/head-pose-estimation-adas-0001.bin
+    sha256: e4047e643bd39d97288dc5d22abe8ead850e05ac1bc44605443bbb2abfc2e246
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
+  - name: FP16/head-pose-estimation-adas-0001.xml
+    sha256: 436a6be25690800a4e39efe1b1c21478e0d7a26004a1d070848dc88719b351b0
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.xml
+  - name: FP16/head-pose-estimation-adas-0001.bin
+    sha256: 535a6af806999e22cca5e4071e55841a694a6b60370a6f8fb3b9d0cda5f81c41
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/head-pose-estimation-adas-0001/FP16/head-pose-estimation-adas-0001.bin
+  - name: INT8/head-pose-estimation-adas-0001.xml
+    sha256: 13f5a6967b29c7e24476450b8b1660ac1e8ad8fe680aa33ecd2a458b50b81242
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/head-pose-estimation-adas-0001/INT8/head-pose-estimation-adas-0001.xml
+  - name: INT8/head-pose-estimation-adas-0001.bin
+    sha256: abc0fb7f08e782301c4ffccf9fc5ce626e608a1e7f9c179baf6513519fa38416
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/head-pose-estimation-adas-0001/INT8/head-pose-estimation-adas-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

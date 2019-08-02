@@ -1,0 +1,41 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is a pedestrian detector for the Retail scenario. It is based on MobileNetV2-like
+  backbone that includes depth-wise convolutions to reduce the amount of computation
+  for the 3x3 convolution block. The single SSD head from 1/16 scale feature map
+  has 12 clustered prior boxes.
+task_type: detection
+files:
+  - name: FP32/person-detection-retail-0013.xml
+    sha256: 49cb6a4e0221fc7c32c15f7e35e4d7b7f0c5a8958809872ddfa1085eaf38a77d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0013/FP32/person-detection-retail-0013.xml
+  - name: FP32/person-detection-retail-0013.bin
+    sha256: c870150640a9ed9e6ab7e3d93398d4ca7604d7b97569b77ee7494649271bbc83
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0013/FP32/person-detection-retail-0013.bin
+  - name: FP16/person-detection-retail-0013.xml
+    sha256: 00c82c835e703f3167ef4b703f1297b146cfcc72ccdc19259e65dcd18c3bcdae
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0013/FP16/person-detection-retail-0013.xml
+  - name: FP16/person-detection-retail-0013.bin
+    sha256: 77eb13de84d9368da1d437aece02ba14b4ff0e48b194feb48a8b5076c861039a
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0013/FP16/person-detection-retail-0013.bin
+  - name: INT8/person-detection-retail-0013.xml
+    sha256: 569e111c0cecc2d7fcb43d3516fd793bbd5c1246cd0532055e58184cbb0cb7b0
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0013/INT8/person-detection-retail-0013.xml
+  - name: INT8/person-detection-retail-0013.bin
+    sha256: efdc2566e15bbc1e31990eb0a7a35becacc076e052212ec6f2b7341d0f33cb8e
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0013/INT8/person-detection-retail-0013.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

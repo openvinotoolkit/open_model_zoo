@@ -1,0 +1,39 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This model uses a small-footprint network trained end-to-end to recognize Chinese
+  license plates in traffic.
+task_type: optical_character_recognition
+files:
+  - name: FP32/license-plate-recognition-barrier-0001.xml
+    sha256: bda8905e09a79c3aa7b06cd65e9b48d9b92c534a344b65e6a2100b5b44a9bf05
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.xml
+  - name: FP32/license-plate-recognition-barrier-0001.bin
+    sha256: e28f7533481c31ee768bba89c6ee0ef05a1892c9919bd4abc125335a8644291d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.bin
+  - name: FP16/license-plate-recognition-barrier-0001.xml
+    sha256: a68cfb5a7d81d2896db97bbc06576b5b0df2e955ba770df96506eeefe505e722
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.xml
+  - name: FP16/license-plate-recognition-barrier-0001.bin
+    sha256: cdead95dde2f27f85a192360343998ca6f0fac160a1aecdf7ecbda06eafc883f
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.bin
+  - name: INT8/license-plate-recognition-barrier-0001.xml
+    sha256: c61e8998ef2c0ad16fe5c6e50b692c4663d7fb067b9bc7179bdbfca4cc954832
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/license-plate-recognition-barrier-0001/INT8/license-plate-recognition-barrier-0001.xml
+  - name: INT8/license-plate-recognition-barrier-0001.bin
+    sha256: 26f1211824ebfcef1db799b865aa31bb91aba9e1ebcc58b4817c775a3e7f7ea5
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/license-plate-recognition-barrier-0001/INT8/license-plate-recognition-barrier-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
