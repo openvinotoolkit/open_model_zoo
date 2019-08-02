@@ -13,6 +13,14 @@ Prerequisites
 sudo -E pip3 install pyyaml requests
 ```   
 
+Cloning the REPO
+----------------
+This folder is part of a branch (2018 or 2019) to clone it locally use the following command:
+
+```sh
+git clone --single-branch --branch 2019 https://github.com/opencv/open_model_zoo.git
+```
+
 Usage
 -----
 
