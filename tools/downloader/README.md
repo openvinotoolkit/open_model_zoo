@@ -2,7 +2,7 @@ Model Downloader and other automation tools
 ===========================================
 
 This directory contains scripts that automate certain model-related tasks
-based on the included configuration file.
+based on configuration files in the models' directories.
 
 * `downloader.py` (model downloader) downloads model files from online sources
   and, if necessary, patches them to make them more usable with Model
@@ -13,6 +13,10 @@ based on the included configuration file.
 
 * `info_dumper.py` (model information dumper) prints information about the models
   in a stable machine-readable format.
+
+Please use these tools instead of attempting to parse the configuration files
+directly. Their format is undocumented and may change in incompatible ways in
+future releases.
 
 Prerequisites
 -------------
@@ -255,17 +259,18 @@ densenet-121-tf
 
 Either `--print_all` or one of the filter options must be specified.
 
-By default, the tools will get information about the models from the configuration
-file in the automation tool directory. You can use a custom configuration file
-instead with the `-c`/`--config` option:
+Deprecated options
+------------------
+
+In earlier releases, the tools used a single configuration file instead of
+per-model configuration files. For compatibility, loading such a file is still
+supported. However, this feature is deprecated and will be removed in a future release.
+
+To load a configuration file in the old format, use the `-c`/`--config` option:
 
 ```sh
 ./TOOL.py --all --config my-config.yml
 ```
-
-Note, however, that the configuration file format is currently undocumented and
-may change in incompatible ways in future versions.
-
 __________
 
 OpenVINO is a trademark of Intel Corporation or its subsidiaries in the U.S.

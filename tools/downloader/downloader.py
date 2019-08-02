@@ -195,7 +195,7 @@ def positive_int_arg(value_str):
 
 parser = DownloaderArgumentParser(epilog = 'list_topologies.yml - default configuration file')
 parser.add_argument('-c', '--config', type = Path, metavar = 'CONFIG.YML',
-    default = common.get_default_config_path(), help = 'path to YML configuration file')
+    help = 'topology configuration file (deprecated)')
 parser.add_argument('--name', metavar = 'PAT[,PAT...]',
     help = 'download only topologies whose names match at least one of the specified patterns')
 parser.add_argument('--list', type = Path, metavar = 'FILE.LST',
