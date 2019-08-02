@@ -417,3 +417,11 @@ def get_parameter_value_from_config(config, parameters, key):
     value = config.get(key, field.default)
     field.validate(value)
     return value
+
+
+def check_file_existence(file):
+    try:
+        get_path(file)
+        return True
+    except (FileNotFoundError, IsADirectoryError):
+        return False

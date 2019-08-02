@@ -101,7 +101,7 @@ class CityscapesConverter(BaseFormatConverter):
         self.images_suffix = self.get_value_from_config('images_suffix')
         self.use_full_label_map = self.get_value_from_config('use_full_label_map')
 
-    def convert(self):
+    def convert(self, check_content=False, **kwargs):
         images = list(self.dataset_root.rglob(r'{}/*/*{}.png'.format(self.images_dir, self.images_suffix)))
         annotations = []
         for image in images:

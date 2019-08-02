@@ -54,7 +54,7 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
         self.label_start = self.get_value_from_config('label_start')
         self.background_label = self.get_value_from_config('background_label')
 
-    def convert(self):
+    def convert(self, check_content=False, **kwargs):
         root = read_xml(self.annotation_file)
 
         labels_set = self.get_label_set(root)

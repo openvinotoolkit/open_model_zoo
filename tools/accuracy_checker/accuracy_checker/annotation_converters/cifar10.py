@@ -74,7 +74,7 @@ class Cifar10FormatConverter(BaseFormatConverter):
             self.converted_images_dir = os.path.join(self.data_batch_file.parent, 'converted_images')
         self.convert_images = self.get_value_from_config('convert_images')
 
-    def convert(self):
+    def convert(self, check_content=False, **kwargs):
         """
         This method is executed automatically when convert.py is started.
         All arguments are automatically got from command line arguments or config file in method configure
