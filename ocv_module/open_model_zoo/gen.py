@@ -1,19 +1,44 @@
 # This script is used to generate the models.
 
 import yaml
+import sys
+
+
+def getSource(entry):
+    name = entry['name']
+    sha = entry['sha256']
+    source = entry['source']
+    if isinstance(source, str):
+        url = source
+    elif isinstance(source, dict):
+        sourceType = source['$type']
+        if sourceType == 'google_drive':
+            url = 'https://drive.google.com/uc?export=download&id=' + source['id']
+        else:
+            print('Unknown source type: %s', sourceType)
+            sys.exit(1)
+    else:
+        print('Unexpected source instance: %s', type(source))
+        sys.exit(1)
+
+    return url, sha, name
+
 
 def generate(entry):
     config = {}
 
     name = topology['name'].replace('-', '_')
-    config['description'] = topology['description'].replace('\n', ' ').replace('\"', '\\"')
+    config['description'] = topology['description'].replace('\n', ' ') \
+                                                   .replace('\"', '\\"') \
+                                                   .replace('\\', '\\\\')
     config['license'] = topology['license']
 
     files = topology['files']
     assert(len(files) > 0)
-    config['model_url'] = files[0]['source']
-    config['model_sha256'] = files[0]['sha256']
-    config['model_name'] = files[0]['name']
+
+    config['config_url'], config['config_sha256'], config['config_name'] = getSource(files[0])
+    if len(files) > 1:
+        config['model_url'], config['model_sha256'], config['model_name'] = getSource(files[1])
 
     s = ', '.join(['{"%s", "%s"}' % (key, value) for key, value in config.items()])
 
@@ -25,6 +50,7 @@ Ptr<Topology> %s()
     return t;
 }
     """ % (name, s))
+
 
 # with open('/home/dkurt/open_model_zoo/tools/downloader/list_topologies.yml', 'rt') as f:
 with open('list_topologies.yml', 'rt') as f:
