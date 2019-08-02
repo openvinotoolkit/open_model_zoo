@@ -110,7 +110,13 @@ endif()
 
 target_include_directories(${TARGET_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
-target_link_libraries(${TARGET_NAME} IE::ie_cpu_extension ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES})
+if(TARGET IE::ie_cpu_extension)
+    add_definitions(-DWITH_EXTENSIONS)
+endif()
+target_link_libraries(${TARGET_NAME} ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES})
+if(TARGET IE::ie_cpu_extension)
+    target_link_libraries(${TARGET_NAME} IE::ie_cpu_extension)
+endif()
 
 if(UNIX)
     target_link_libraries( ${TARGET_NAME} pthread)
