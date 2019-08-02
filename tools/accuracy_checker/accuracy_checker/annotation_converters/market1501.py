@@ -19,15 +19,16 @@ from __future__ import absolute_import, print_function
 import re
 
 from ._reid_common import check_dirs, read_directory, ReIdentificationAnnotation
-from .format_converter import DirectoryBasedAnnotationConverter
+from .format_converter import DirectoryBasedAnnotationConverter, ConverterReturn
 
 MARKET_IMAGE_PATTERN = re.compile(r'([-\d]+)_c(\d)')
+
 
 class Market1501Converter(DirectoryBasedAnnotationConverter):
     __provider__ = 'market1501_reid'
     annotation_types = (ReIdentificationAnnotation, )
 
-    def convert(self):
+    def convert(self, check_content=False, **kwargs):
         gallery = self.data_dir / 'bounding_box_test'
         query = self.data_dir / 'query'
 
@@ -38,4 +39,4 @@ class Market1501Converter(DirectoryBasedAnnotationConverter):
 
         meta = {'num_identities': len(gallery_pids | query_pids)}
 
-        return annotation, meta
+        return ConverterReturn(annotation, meta, None)

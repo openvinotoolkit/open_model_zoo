@@ -22,6 +22,7 @@ from .config import ConfigValidator, StringField, PathField, ListField, DictFiel
 from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all
 from .representation import BaseRepresentation
 from .data_readers import DataReaderField
+import warnings
 
 
 class DatasetConfig(ConfigValidator):
@@ -161,10 +162,12 @@ class Dataset:
         converter = conversion_params['converter']
         annotation_converter = BaseFormatConverter.provide(converter, conversion_params)
         results = annotation_converter.convert()
-        if isinstance(results, tuple) and len(results) == 2:
-            annotation, meta = results
-        else:
-            annotation, meta = results, None
+        annotation = results.annotations
+        meta = results.meta
+        errors = results.content_check_errors
+        if errors:
+            warnings.warn('Following problems were found during conversion:'
+                          '\n{]'.format('\n'.join(errors)))
 
         return annotation, meta
 

@@ -18,7 +18,8 @@ import cv2
 from ..config import PathField, StringField, BoolField, ConfigError, NumberField
 from ..representation import SuperResolutionAnnotation
 from ..representation.super_resolution_representation import GTLoader
-from .format_converter import BaseFormatConverter
+from .format_converter import BaseFormatConverter, ConverterReturn
+from  ..utils import check_file_existence
 
 LOADERS_MAPPING = {
     'opencv': GTLoader.OPENCV,
@@ -75,7 +76,8 @@ class SRConverter(BaseFormatConverter):
         self.generate_upsample = self.get_value_from_config('generate_upsample')
         self.upsample_factor = self.get_value_from_config('upsample_factor')
 
-    def convert(self):
+    def convert(self, check_content=False, **kwargs):
+        content_errors = [] if check_content else None
         file_list_lr = []
         for file_in_dir in self.data_dir.iterdir():
             if self.lr_suffix in file_in_dir.parts[-1]:
@@ -87,12 +89,17 @@ class SRConverter(BaseFormatConverter):
             upsampled_file_name = self.upsample_suffix.join(lr_file_name.split(self.lr_suffix))
             if self.two_streams and self.generate_upsample:
                 self.generate_upsample_file(lr_file, self.upsample_factor, upsampled_file_name)
-
             hr_file_name = self.hr_suffix.join(lr_file_name.split(self.lr_suffix))
+            if check_content:
+                if not check_file_existence(self.data_dir / hr_file_name):
+                    content_errors.append('{}: does not exist'.format(self.data_dir / hr_file_name))
+                if self.two_streams and not check_file_existence(self.data_dir / upsampled_file_name):
+                    content_errors.append('{}: does not exist'.format(self.data_dir / hr_file_name))
+
             identifier = [lr_file_name, upsampled_file_name] if self.two_streams else lr_file_name
             annotation.append(SuperResolutionAnnotation(identifier, hr_file_name, gt_loader=self.annotation_loader))
 
-        return annotation
+        return ConverterReturn(annotation, None, content_errors)
 
     @staticmethod
     def generate_upsample_file(original_image_path, scale_factor, upsampled_file_name):

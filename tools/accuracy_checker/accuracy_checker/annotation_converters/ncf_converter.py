@@ -43,7 +43,7 @@ class MovieLensConverter(BaseFormatConverter):
         self.negative_file = self.get_value_from_config('negative_file')
         self.users_max_number = self.get_value_from_config('users_max_number')
 
-    def convert(self):
+    def convert(self, check_content=False, **kwargs):
         annotations = []
         users = []
 

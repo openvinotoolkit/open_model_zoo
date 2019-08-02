@@ -14,14 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import os
 from PIL import Image
 import numpy as np
 from ..config import PathField, BoolField
 from ..representation import ClassificationAnnotation
-from ..utils import read_pickle
+from ..utils import read_pickle, check_file_existence
 
-from .format_converter import BaseFormatConverter
+from .format_converter import BaseFormatConverter, ConverterReturn
 
 CIFAR10_LABELS_LIST = [
     'airplane', 'automobile', 'bird', 'cat', 'deer',
@@ -71,7 +70,7 @@ class Cifar10FormatConverter(BaseFormatConverter):
         self.has_background = self.get_value_from_config('has_background')
         self.converted_images_dir = self.get_value_from_config('converted_images_dir')
         if not self.converted_images_dir:
-            self.converted_images_dir = os.path.join(self.data_batch_file.parent, 'converted_images')
+            self.converted_images_dir = self.data_batch_file.parent / 'converted_images'
         self.convert_images = self.get_value_from_config('convert_images')
 
     def convert(self, check_content=False, **kwargs):
@@ -86,6 +85,16 @@ class Cifar10FormatConverter(BaseFormatConverter):
         # create directory for storing images if it is necessary
         if self.convert_images and not self.converted_images_dir.exists():
             self.converted_images_dir.mkdir(parents=True)
+        check_images = check_content and not self.convert_images
+        content_errors = None
+
+        if self.converted_images_dir and check_content:
+            if not self.converted_images_dir.exists():
+                content_errors = ['{}: does not exist'.format(self.converted_images_dir)]
+                check_images = False
+
+        if check_images:
+            content_errors = []
 
         annotation = []
         # read original dataset annotation
@@ -112,6 +121,11 @@ class Cifar10FormatConverter(BaseFormatConverter):
                 image = image.convert('RGB')
                 image.save(str(self.converted_images_dir / identifier))
 
+            # check image existence if it is necessary
+            if check_images:
+                if not check_file_existence(self.converted_images_dir / identifier):
+                    # add error to errors list if file not found
+                    content_errors.append('{]: does not exist'.format(self.converted_images_dir / identifier))
         # crete metadata for dataset. Provided additional information is task specific and can includes, for example
         # label_map, information about background, used class color representation (for semantic segmentation task)
         # If your dataset does not have additional meta, you can to not provide it.
@@ -125,4 +139,4 @@ class Cifar10FormatConverter(BaseFormatConverter):
             meta['label_map'][0] = 'background'
             meta['background_label'] = 0
 
-        return annotation, meta
+        return ConverterReturn(annotation, meta, content_errors)

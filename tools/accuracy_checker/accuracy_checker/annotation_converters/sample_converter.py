@@ -20,7 +20,8 @@ from ..config import PathField
 from ..representation import ClassificationAnnotation
 from ..utils import get_path, read_txt
 
-from .format_converter import BaseFormatConverter
+from .format_converter import BaseFormatConverter, ConverterReturn
+
 
 class SampleConverter(BaseFormatConverter):
     """
@@ -36,7 +37,7 @@ class SampleConverter(BaseFormatConverter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'data_dir' : PathField(is_directory=True, description="Path to sample dataset root directory.")
+            'data_dir': PathField(is_directory=True, description="Path to sample dataset root directory.")
         })
         return parameters
 
@@ -47,7 +48,7 @@ class SampleConverter(BaseFormatConverter):
         """
         self.data_dir = self.config['data_dir']
 
-    def convert(self):
+    def convert(self, check_content=False, **kwargs):
         """
         This method is executed automatically when convert.py is started.
         All arguments are automatically got from command line arguments or config file in method configure
@@ -67,7 +68,7 @@ class SampleConverter(BaseFormatConverter):
         label_map = {i: labels[i] for i in range(len(labels))}
         metadata = {'label_map': label_map}
 
-        return annotations, metadata
+        return ConverterReturn(annotations, metadata, None)
 
     @staticmethod
     def _read_labels(labels_file):
