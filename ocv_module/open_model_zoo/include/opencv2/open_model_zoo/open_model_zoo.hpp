@@ -29,11 +29,6 @@ namespace cv { namespace open_model_zoo {
         Ptr<Impl> impl;
     };
 
-    CV_EXPORTS_W Ptr<Topology> densenet_161();
-    CV_EXPORTS_W Ptr<Topology> densenet_121();
-
-    // CV_EXPORTS_W Ptr<Topology> face_detection_retail();
-
 }}  // namespace cv::open_model_zoo
 
 #endif  // __OPENCV_OPEN_MODEL_ZOO_OPEN_MODEL_ZOO_HPP__

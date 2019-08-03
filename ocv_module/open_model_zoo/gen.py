@@ -24,13 +24,14 @@ def getSource(entry):
     return url, sha, name
 
 
-def generate(entry):
+def generate(entry, output_hdr, impl_hdr):
     config = {}
 
-    name = topology['name'].replace('-', '_')
+    name = topology['name'].replace('-', '_').replace('.', '_')
     config['description'] = topology['description'].replace('\n', ' ') \
-                                                   .replace('\"', '\\"') \
-                                                   .replace('\\', '\\\\')
+                                                   .replace('\\', '\\\\') \
+                                                   .replace('\"', '\\"')
+
     config['license'] = topology['license']
 
     files = topology['files']
@@ -42,21 +43,40 @@ def generate(entry):
 
     s = ', '.join(['{"%s", "%s"}' % (key, value) for key, value in config.items()])
 
-    print("""
-Ptr<Topology> %s()
-{
-    Ptr<Topology> t(new Topology({%s}));
-    t->download();
-    return t;
-}
-    """ % (name, s))
+    impl_hdr.write("""
+    Ptr<Topology> %s()
+    {
+        Ptr<Topology> t(new Topology({%s}));
+        t->download();
+        return t;
+    }\n""" % (name, s))
+
+    output_hdr.write('    CV_EXPORTS_W Ptr<Topology> %s();\n' % name)
 
 
-# with open('/home/dkurt/open_model_zoo/tools/downloader/list_topologies.yml', 'rt') as f:
-with open('list_topologies.yml', 'rt') as f:
-    content = yaml.safe_load(f)
-    for topology in content['topologies']:
-        generate(topology)
+list_topologies = sys.argv[1]
+output_hdr_path = sys.argv[2]
+impl_hdr_path = sys.argv[3]
+
+with open(output_hdr_path, 'wt') as output_hdr:
+    output_hdr.write("#ifndef __OPENCV_OPEN_MODEL_ZOO_TOPOLOGIES_HPP__\n")
+    output_hdr.write("#define __OPENCV_OPEN_MODEL_ZOO_TOPOLOGIES_HPP__\n\n")
+    output_hdr.write("namespace cv { namespace open_model_zoo {\n")
+
+    with open(impl_hdr_path, 'wt') as impl_hdr:
+        impl_hdr.write("#ifdef HAVE_OPENCV_OPEN_MODEL_ZOO\n\n")
+        impl_hdr.write("namespace cv { namespace open_model_zoo {")
+
+        with open(list_topologies, 'rt') as f:
+            content = yaml.safe_load(f)
+            for topology in content['topologies']:
+                generate(topology, output_hdr, impl_hdr)
+
+        impl_hdr.write("}}  // namespace cv::open_model_zoo\n\n")
+        impl_hdr.write("#endif  // HAVE_OPENCV_OPEN_MODEL_ZOO")
+
+    output_hdr.write("}}  // namespace cv::open_model_zoo\n\n")
+    output_hdr.write("#endif  // __OPENCV_OPEN_MODEL_ZOO_TOPOLOGIES_HPP__")
 
 
 # def tokenizeBlock(content, i, level):
