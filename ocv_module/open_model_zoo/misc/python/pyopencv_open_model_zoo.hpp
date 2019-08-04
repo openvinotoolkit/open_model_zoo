@@ -77,7 +77,11 @@ static void downloadFile(const std::string& url, const std::string& sha,
 void Topology::download()
 {
     std::string url, sha, path;
+
     getModelInfo(url, sha, path);
+    downloadFile(url, sha, path);
+
+    getConfigInfo(url, sha, path);
     downloadFile(url, sha, path);
 }
 

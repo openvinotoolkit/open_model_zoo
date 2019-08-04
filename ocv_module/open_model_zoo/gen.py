@@ -24,7 +24,7 @@ def getSource(entry):
     return url, sha, name
 
 
-def generate(entry, output_hdr, impl_hdr):
+def generate(topology, output_hdr, impl_hdr):
     config = {}
 
     name = topology['name'].replace('-', '_').replace('.', '_')
@@ -33,6 +33,8 @@ def generate(entry, output_hdr, impl_hdr):
                                                    .replace('\"', '\\"')
 
     config['license'] = topology['license']
+    if 'model_optimizer_args' in topology:
+        config['model_optimizer_args'] = ' '.join(topology['model_optimizer_args'])
 
     files = topology['files']
     assert(len(files) > 0)

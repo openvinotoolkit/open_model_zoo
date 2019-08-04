@@ -3,17 +3,16 @@
 
 #include "opencv2/core.hpp"
 
-#include <iostream>
 #include <map>
 
 namespace cv { namespace open_model_zoo {
 
-    class CV_EXPORTS_W Topology
+    class CV_EXPORTS_W_SIMPLE Topology
     {
     public:
-        Topology(const std::map<std::string, std::string>& config);
+        Topology();
 
-        virtual ~Topology();
+        Topology(const std::map<std::string, std::string>& config);
 
         CV_WRAP void download();
 
@@ -23,6 +22,19 @@ namespace cv { namespace open_model_zoo {
 
         CV_WRAP void getModelInfo(CV_OUT String& url, CV_OUT String& sha256,
                                   CV_OUT String& path) const;
+
+        CV_WRAP void getConfigInfo(CV_OUT String& url, CV_OUT String& sha256,
+                                   CV_OUT String& path) const;
+
+        CV_WRAP String getModelPath() const;
+
+        CV_WRAP String getConfigPath() const;
+
+        void getMeans(std::map<std::string, Scalar>& means) const;
+
+        void getScales(std::map<std::string, double>& scales) const;
+
+        std::map<String, String> getModelOptimizerArgs() const;
 
     protected:
         struct Impl;
