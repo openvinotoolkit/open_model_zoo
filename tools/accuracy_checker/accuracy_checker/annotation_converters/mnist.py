@@ -95,7 +95,7 @@ class MNISTCSVFormatConverter(BaseFormatConverter):
             if check_images:
                 if not check_file_existence(self.converted_images_dir / identifier):
                     # add error to errors list if file not found
-                    content_errors.append('{]: does not exist'.format(self.converted_images_dir / identifier))
+                    content_errors.append('{}: does not exist'.format(self.converted_images_dir / identifier))
 
         meta = {'label_map': {str(i): i for i in range(10)}}
 

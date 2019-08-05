@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import warnings
 from copy import deepcopy
 from pathlib import Path
 
@@ -22,7 +23,6 @@ from .config import ConfigValidator, StringField, PathField, ListField, DictFiel
 from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all
 from .representation import BaseRepresentation
 from .data_readers import DataReaderField
-import warnings
 
 
 class DatasetConfig(ConfigValidator):
@@ -167,7 +167,7 @@ class Dataset:
         errors = results.content_check_errors
         if errors:
             warnings.warn('Following problems were found during conversion:'
-                          '\n{]'.format('\n'.join(errors)))
+                          '\n{}'.format('\n'.join(errors)))
 
         return annotation, meta
 

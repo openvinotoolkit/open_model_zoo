@@ -125,7 +125,7 @@ class Cifar10FormatConverter(BaseFormatConverter):
             if check_images:
                 if not check_file_existence(self.converted_images_dir / identifier):
                     # add error to errors list if file not found
-                    content_errors.append('{]: does not exist'.format(self.converted_images_dir / identifier))
+                    content_errors.append('{}: does not exist'.format(self.converted_images_dir / identifier))
         # crete metadata for dataset. Provided additional information is task specific and can includes, for example
         # label_map, information about background, used class color representation (for semantic segmentation task)
         # If your dataset does not have additional meta, you can to not provide it.

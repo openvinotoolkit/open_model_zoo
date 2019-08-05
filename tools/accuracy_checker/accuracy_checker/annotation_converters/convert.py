@@ -114,7 +114,7 @@ def main():
     errors = results.content_check_errors
     if errors:
         warnings.warn('Following problems were found during conversion:'
-                      '\n{]'.format('\n'.join(errors)))
+                      '\n{}'.format('\n'.join(errors)))
 
     subsample = args.subsample
     if subsample:
