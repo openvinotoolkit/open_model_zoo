@@ -19,9 +19,9 @@ from pathlib import Path
 
 from ..config import PathField
 from ..representation import ReIdentificationClassificationAnnotation
-from ..utils import read_txt
+from ..utils import read_txt, check_file_existence
 
-from .format_converter import BaseFormatConverter
+from .format_converter import BaseFormatConverter, ConverterReturn
 
 
 class LFWConverter(BaseFormatConverter):
@@ -35,6 +35,10 @@ class LFWConverter(BaseFormatConverter):
             'pairs_file': PathField(description="Path to file with annotation positive and negative pairs."),
             'landmarks_file': PathField(
                 optional=True, description="Path to file with facial landmarks coordinates for annotation images."
+            ),
+            'images_dir': PathField(
+                is_directory=True, optional=True,
+                description='path to dataset images, used only for content existence check'
             )
         })
 
@@ -43,8 +47,9 @@ class LFWConverter(BaseFormatConverter):
     def configure(self):
         self.pairs_file = self.get_value_from_config('pairs_file')
         self.landmarks_file = self.get_value_from_config('landmarks_file')
+        self.images_dir = self.get_value_from_config('images_dir') or self.pairs_file.parent
 
-    def convert(self):
+    def convert(self, check_content=False, **kwargs):
         landmarks_map = {}
         if self.landmarks_file:
             for landmark_line in read_txt(self.landmarks_file):
@@ -82,8 +87,9 @@ class LFWConverter(BaseFormatConverter):
 
         return negatives, all_images
 
-    def prepare_annotation(self, ann_file: Path, train=False, landmarks_map=None):
+    def prepare_annotation(self, ann_file: Path, train=False, landmarks_map=None, check_content=False):
         positive_pairs, negative_pairs = [], []
+        content_errors = [] if check_content else None
         ann_lines = read_txt(ann_file)
         for line in ann_lines[1:]:  # skip header
             pair = line.strip().split()
@@ -109,4 +115,9 @@ class LFWConverter(BaseFormatConverter):
 
             annotations.append(annotation)
 
-        return annotations
+            if check_content:
+                image_full_path = self.images_dir / image
+                if not check_file_existence(image_full_path):
+                    content_errors.append('{}: does nit exist'.format(image_full_path))
+
+        return ConverterReturn(annotations, None, content_errors)

@@ -56,6 +56,7 @@ def prepare_detection_labels(has_background=True):
 def reverse_label_map(label_map):
     return {value: key for key, value in label_map.items()}
 
+
 class PascalVOCSegmentationConverter(BaseFormatConverter):
     __provider__ = 'voc_segmentation'
     annotation_types = (SegmentationAnnotation, )
@@ -88,7 +89,7 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
         if not self.mask_dir:
             self.mask_dir = get_path(self.image_set_file.parents[-2] / 'SegmentationClass', is_directory=True)
 
-    def convert(self):
+    def convert(self, check_content=False, **kwargs):
 
         annotations = []
         for image in read_txt(self.image_set_file):

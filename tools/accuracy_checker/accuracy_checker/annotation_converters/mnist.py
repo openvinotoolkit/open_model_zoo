@@ -18,9 +18,9 @@ from PIL import Image
 import numpy as np
 from ..config import PathField, BoolField
 from ..representation import ClassificationAnnotation
-from ..utils import read_csv
+from ..utils import read_csv, check_file_existence
 
-from .format_converter import BaseFormatConverter
+from .format_converter import BaseFormatConverter, ConverterReturn
 
 
 class MNISTCSVFormatConverter(BaseFormatConverter):
@@ -63,7 +63,7 @@ class MNISTCSVFormatConverter(BaseFormatConverter):
             if not self.converted_images_dir.exists():
                 self.converted_images_dir.mkdir(parents=True)
 
-    def convert(self):
+    def convert(self, check_content=False, **kwargs):
         """
         This method is executed automatically when convert.py is started.
         All arguments are automatically got from command line arguments or config file in method configure
@@ -73,6 +73,15 @@ class MNISTCSVFormatConverter(BaseFormatConverter):
             meta: dictionary with additional dataset level metadata.
         """
         annotations = []
+        check_images = check_content and not self.convert_images
+        content_errors = None
+        if check_content:
+            self.converted_images_dir = self.converted_images_dir or self.test_csv_file.parent / 'converted_images'
+
+        if self.converted_images_dir and check_content:
+            if not self.converted_images_dir.exists():
+                content_errors = ['{}: does not exist'.format(self.converted_images_dir)]
+                check_images = False
         # read original dataset annotation
         annotation_table = read_csv(self.test_csv_file)
         for index, annotation in enumerate(annotation_table):
@@ -83,10 +92,14 @@ class MNISTCSVFormatConverter(BaseFormatConverter):
                 image = image.convert("L")
                 image.save(str(self.converted_images_dir / identifier))
             annotations.append(ClassificationAnnotation(identifier, label))
+            if check_images:
+                if not check_file_existence(self.converted_images_dir / identifier):
+                    # add error to errors list if file not found
+                    content_errors.append('{]: does not exist'.format(self.converted_images_dir / identifier))
 
         meta = {'label_map': {str(i): i for i in range(10)}}
 
-        return annotations, meta
+        return ConverterReturn(annotations, meta, None)
 
     @staticmethod
     def convert_image(features):
