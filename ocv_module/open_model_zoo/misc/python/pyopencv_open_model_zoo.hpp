@@ -94,7 +94,14 @@ void Topology::download()
     if (!url.empty())
     {
         downloadFile(url, sha, path);
-        extract(path);
+
+        std::string modelPath, configPath;
+        getModelInfo(url, sha, modelPath);
+        getConfigInfo(url, sha, configPath);
+
+        if ((!modelPath.empty() && !utils::fs::exists(modelPath)) ||
+            (!configPath.empty() && !utils::fs::exists(configPath)))
+            extract(path);
     }
     else
     {

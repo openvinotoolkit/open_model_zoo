@@ -3,6 +3,10 @@
 #include <iostream>
 #include <sstream>
 
+#include <opencv2/core/utils/filesystem.hpp>
+
+#define path(cache, file) utils::fs::canonical(utils::fs::join(cache, file))
+
 namespace cv { namespace open_model_zoo {
 
 struct Topology::Impl
@@ -19,6 +23,9 @@ Topology::Topology() {}
 Topology::Topology(const std::map<std::string, std::string>& config)
     : impl(new Impl())
 {
+    auto cache = utils::fs::getCacheDirectory("open_model_zoo_cache",
+                                              "OPENCV_OPEN_MODEL_ZOO_CACHE_DIR");
+
     auto it = config.find("model_optimizer_args");
     if (it != config.end())
     {
@@ -38,7 +45,7 @@ Topology::Topology(const std::map<std::string, std::string>& config)
 
         impl->archiveURL = config.at("archive_url");
         impl->archiveSHA = config.at("archive_sha256");
-        impl->archivePath = config.at("archive_name");  // TODO: detect cache
+        impl->archivePath = path(cache, config.at("archive_name"));
         impl->configURL = impl->modelURL = impl->archiveURL;
         impl->configSHA = impl->modelSHA = impl->archiveSHA;
 
@@ -67,7 +74,7 @@ Topology::Topology(const std::map<std::string, std::string>& config)
         {
             impl->modelURL = config.at("model_url");
             impl->modelSHA = config.at("model_sha256");
-            impl->modelPath = config.at("model_name");  // TODO: detect cache
+            impl->modelPath = config.at("model_name");
         }
 
         it = config.find("config_url");
@@ -75,12 +82,17 @@ Topology::Topology(const std::map<std::string, std::string>& config)
         {
             impl->configURL = config.at("config_url");
             impl->configSHA = config.at("config_sha256");
-            impl->configPath = config.at("config_name");  // TODO: detect cache
+            impl->configPath = config.at("config_name");
         }
     }
 
     impl->description = config.at("description");
     impl->license = config.at("license");
+
+    if (!impl->modelPath.empty())
+        impl->modelPath = path(cache, impl->modelPath);
+    if (!impl->configPath.empty())
+        impl->configPath = path(cache, impl->configPath);
 }
 
 std::string Topology::getDescription() const { return impl->description; }
