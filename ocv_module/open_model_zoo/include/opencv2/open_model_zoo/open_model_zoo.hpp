@@ -20,6 +20,9 @@ namespace cv { namespace open_model_zoo {
 
         CV_WRAP std::string getLicense() const;
 
+        CV_WRAP void getArchiveInfo(CV_OUT String& url, CV_OUT String& sha256,
+                                    CV_OUT String& path) const;
+
         CV_WRAP void getModelInfo(CV_OUT String& url, CV_OUT String& sha256,
                                   CV_OUT String& path) const;
 

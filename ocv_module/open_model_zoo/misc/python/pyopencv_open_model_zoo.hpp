@@ -28,6 +28,19 @@ static std::string getSHA(const std::string& path)
     return sha;
 }
 
+static void extract(const std::string& archive)
+{
+    PyGILState_STATE gstate = PyGILState_Ensure();
+
+    std::string archiveOpen = "f = tarfile.open('" + archive + "')";
+    PyRun_SimpleString("import tarfile");
+    PyRun_SimpleString(archiveOpen.c_str());
+    PyRun_SimpleString("f.extractall()");
+    PyRun_SimpleString("f.close()");
+
+    PyGILState_Release(gstate);
+}
+
 static void downloadFile(const std::string& url, const std::string& sha,
                          const std::string& path)
 {
@@ -77,12 +90,22 @@ static void downloadFile(const std::string& url, const std::string& sha,
 void Topology::download()
 {
     std::string url, sha, path;
+    getArchiveInfo(url, sha, path);
+    if (!url.empty())
+    {
+        downloadFile(url, sha, path);
+        extract(path);
+    }
+    else
+    {
+        getModelInfo(url, sha, path);
+        if (!url.empty())
+            downloadFile(url, sha, path);
 
-    getModelInfo(url, sha, path);
-    downloadFile(url, sha, path);
-
-    getConfigInfo(url, sha, path);
-    downloadFile(url, sha, path);
+        getConfigInfo(url, sha, path);
+        if (!url.empty())
+            downloadFile(url, sha, path);
+    }
 }
 
 }}  // namespace open_model_zoo

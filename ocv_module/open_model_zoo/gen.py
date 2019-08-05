@@ -39,9 +39,13 @@ def generate(topology, output_hdr, impl_hdr):
     files = topology['files']
     assert(len(files) > 0)
 
-    config['config_url'], config['config_sha256'], config['config_name'] = getSource(files[0])
-    if len(files) > 1:
-        config['model_url'], config['model_sha256'], config['model_name'] = getSource(files[1])
+    fileURL, fileSHA, fileName = getSource(files[0])
+    if fileName.endswith('tar.gz'):
+        config['archive_url'], config['archive_sha256'], config['archive_name'] = fileURL, fileSHA, fileName
+    else:
+        config['config_url'], config['config_sha256'], config['config_name'] = fileURL, fileSHA, fileName
+        if len(files) > 1:
+            config['model_url'], config['model_sha256'], config['model_name'] = getSource(files[1])
 
     s = ', '.join(['{"%s", "%s"}' % (key, value) for key, value in config.items()])
 

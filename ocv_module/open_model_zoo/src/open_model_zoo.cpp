@@ -9,6 +9,7 @@ struct Topology::Impl
 {
     std::string modelURL, modelSHA, modelPath,
                 configURL, configSHA, configPath,
+                archiveURL, archiveSHA, archivePath,
                 description, license;
     std::map<std::string, std::string> modelOptimizerArgs;
 };
@@ -18,15 +19,6 @@ Topology::Topology() {}
 Topology::Topology(const std::map<std::string, std::string>& config)
     : impl(new Impl())
 {
-    impl->modelURL = config.at("model_url");
-    impl->modelSHA = config.at("model_sha256");
-    impl->modelPath = config.at("model_name");  // TODO: detect cache
-    impl->configURL = config.at("config_url");
-    impl->configSHA = config.at("config_sha256");
-    impl->configPath = config.at("config_name");  // TODO: detect cache
-    impl->description = config.at("description");
-    impl->license = config.at("license");
-
     auto it = config.find("model_optimizer_args");
     if (it != config.end())
     {
@@ -38,21 +30,69 @@ Topology::Topology(const std::map<std::string, std::string>& config)
             impl->modelOptimizerArgs[arg.substr(0, delim)] = arg.substr(delim + 1);
         }
     }
+
+    it = config.find("archive_url");
+    if (it != config.end())
+    {
+        static const std::string kDownloadDir = "$dl_dir";
+
+        impl->archiveURL = config.at("archive_url");
+        impl->archiveSHA = config.at("archive_sha256");
+        impl->archivePath = config.at("archive_name");  // TODO: detect cache
+        impl->configURL = impl->modelURL = impl->archiveURL;
+        impl->configSHA = impl->modelSHA = impl->archiveSHA;
+
+        it = impl->modelOptimizerArgs.find("--input_model");
+        if (it == impl->modelOptimizerArgs.end())
+            CV_Error(Error::StsNotImplemented, "Expected --input_model option");
+
+        // Weights path is in MO arguments
+        impl->modelPath = it->second;
+        if (impl->modelPath.substr(0, kDownloadDir.size()) == kDownloadDir)
+            impl->modelPath = impl->modelPath.substr(kDownloadDir.size() + 1);
+
+        // Config path is in MO arguments
+        it = impl->modelOptimizerArgs.find("--input_proto");
+        if (it != impl->modelOptimizerArgs.end())
+        {
+            impl->configPath = it->second;
+            if (impl->configPath.substr(0, kDownloadDir.size()) == kDownloadDir)
+                impl->configPath = impl->configPath.substr(kDownloadDir.size() + 1);
+        }
+    }
+    else
+    {
+        it = config.find("model_url");
+        if (it != config.end())
+        {
+            impl->modelURL = config.at("model_url");
+            impl->modelSHA = config.at("model_sha256");
+            impl->modelPath = config.at("model_name");  // TODO: detect cache
+        }
+
+        it = config.find("config_url");
+        if (it != config.end())
+        {
+            impl->configURL = config.at("config_url");
+            impl->configSHA = config.at("config_sha256");
+            impl->configPath = config.at("config_name");  // TODO: detect cache
+        }
+    }
+
+    impl->description = config.at("description");
+    impl->license = config.at("license");
 }
 
 std::string Topology::getDescription() const { return impl->description; }
 std::string Topology::getLicense() const { return impl->license; }
+std::string Topology::getConfigPath() const { return impl->configPath; }
+std::string Topology::getModelPath() const { return impl->modelPath; }
 
 void Topology::getModelInfo(std::string& url, std::string& sha, std::string& path) const
 {
     url = impl->modelURL;
     sha = impl->modelSHA;
     path = impl->modelPath;
-}
-
-std::string Topology::getModelPath() const
-{
-    return impl->modelPath;
 }
 
 void Topology::getConfigInfo(String& url, String& sha, String& path) const
@@ -62,9 +102,11 @@ void Topology::getConfigInfo(String& url, String& sha, String& path) const
     path = impl->configPath;
 }
 
-std::string Topology::getConfigPath() const
+void Topology::getArchiveInfo(String& url, String& sha, String& path) const
 {
-    return impl->configPath;
+    url = impl->archiveURL;
+    sha = impl->archiveSHA;
+    path = impl->archivePath;
 }
 
 void Topology::getMeans(std::map<std::string, Scalar>& means) const
