@@ -39,6 +39,8 @@ namespace cv { namespace open_model_zoo {
 
         std::map<String, String> getModelOptimizerArgs() const;
 
+        CV_WRAP void convertToIR(CV_OUT String& xmlPath, CV_OUT String& binPath) const;
+
     protected:
         struct Impl;
         Ptr<Impl> impl;
