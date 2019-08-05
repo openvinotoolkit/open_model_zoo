@@ -24,7 +24,7 @@ from .config import ConfigReader
 from .logging import print_info, add_file_handler
 from .evaluators import ModelEvaluator, PipeLineEvaluator, get_processing_info
 from .progress_reporters import ProgressReporter
-from .utils import get_path
+from .utils import get_path, cast_to_bool
 
 
 def build_arguments_parser():
@@ -161,7 +161,8 @@ def build_arguments_parser():
         '--ignore_result_formatting',
         help='allow to get raw metrics results without data formatting',
         required=False,
-        default=False
+        default=False,
+        type=cast_to_bool
     )
 
     parser.add_argument(
