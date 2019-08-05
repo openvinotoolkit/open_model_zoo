@@ -156,3 +156,6 @@ More detailed information about calculation segmentation metrics you can find [h
 * `dice_index` - [Sørensen–Dice coefficient](https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient). Supported representations: `BrainTumorSegmentationAnnotation, BrainTumorSegmentationPrediction`. Supports result representation for multiple classes. Metric represents result for each class if `label_map` for used dataset is provided, otherwise it represents overall result. For `brats_numpy` converter file with labels set in `labels_file` tag.
   * `mean` - allows calculation mean value (default - `True`)
   * `median` - allows calculation median value (default - `False`)
+* `bleu` - [Bilingual Evaluation Understudy](https://en.wikipedia.org/wiki/BLEU). Supperted representations: `MachineTranslationAnnotation`, `MachineTranslationPrediction`.
+  * `smooth` - Whether or not to apply Lin et al. 2004 smoothing.
+  *  `max_order` - Maximum n-gram order to use when computing BLEU score. (Optional, default 4).

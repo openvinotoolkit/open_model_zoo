@@ -56,6 +56,7 @@ from .coco_orig_metrics import (
     MSCOCOorigSegmRecall
 )
 from .hit_ratio import HitRatioMetric, NDSGMetric
+from .machine_translation import BilingualEvaluationUnderstudy
 
 
 __all__ = [
@@ -115,4 +116,6 @@ __all__ = [
 
     'HitRatioMetric',
     'NDSGMetric',
+
+    'BilingualEvaluationUnderstudy'
 ]
