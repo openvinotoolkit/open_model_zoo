@@ -74,3 +74,10 @@ Accuracy Checker supports following set of preprocessors:
     You can also use `size` instead in case when destination sizes are equal for all three dimensions.
 * `normalize3d` - normalizing 3D-images using mean and std values per channel of current image for subtraction and division respectively.
 * `tf_convert_image_dtype` - cast image values to floating point values in range [0, 1]. Requires Tensorflow installation.
+* `decode_by_vocabulary` - Decode words to set of indexes using model vocab.
+  * `vocabulary_file` - path to vocabulary file for decoding. Path can be prefixed with `--models` argument.
+  * `unk_index` - index of unknown symbol in vocab.
+*  `pad_with_eos` - supplement the input sequence to a specific size using a line terminator character or index.
+  * `eos_symbol` or `eos_index` - line terminator symbol or index of this symbol in vocab for encoded sequence respectively.
+  *  `sequence_len` - length of sequence after supplement.
+
