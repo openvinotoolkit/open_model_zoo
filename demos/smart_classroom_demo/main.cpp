@@ -422,7 +422,7 @@ std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_track
 bool checkDynamicBatchSupport(const Core& ie, const std::string& device)  {
     bool is_supported = true;
     try  {
-        if (ie.GetConfig(FLAGS_d_reid, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != PluginConfigParams::YES)
+        if (ie.GetConfig(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != PluginConfigParams::YES)
             is_supported = false;
     }
     catch(const std::exception& error)  {
