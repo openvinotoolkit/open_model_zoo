@@ -14,7 +14,7 @@ struct Topology::Impl
     std::string modelURL, modelSHA, modelPath,
                 configURL, configSHA, configPath,
                 archiveURL, archiveSHA, archivePath,
-                description, license;
+                description, license, topologyName;
     std::map<std::string, std::string> modelOptimizerArgs;
 };
 
@@ -23,8 +23,10 @@ Topology::Topology() {}
 Topology::Topology(const std::map<std::string, std::string>& config)
     : impl(new Impl())
 {
+    impl->topologyName = config.at("topology_name");
     auto cache = utils::fs::getCacheDirectory("open_model_zoo_cache",
                                               "OPENCV_OPEN_MODEL_ZOO_CACHE_DIR");
+    cache = utils::fs::join(cache, impl->topologyName);
 
     auto it = config.find("model_optimizer_args");
     if (it != config.end())
@@ -74,7 +76,7 @@ Topology::Topology(const std::map<std::string, std::string>& config)
         {
             impl->modelURL = config.at("model_url");
             impl->modelSHA = config.at("model_sha256");
-            impl->modelPath = config.at("model_name");
+            impl->modelPath = config.at("model_path");
         }
 
         it = config.find("config_url");
@@ -82,7 +84,7 @@ Topology::Topology(const std::map<std::string, std::string>& config)
         {
             impl->configURL = config.at("config_url");
             impl->configSHA = config.at("config_sha256");
-            impl->configPath = config.at("config_name");
+            impl->configPath = config.at("config_path");
         }
     }
 
@@ -99,6 +101,7 @@ std::string Topology::getDescription() const { return impl->description; }
 std::string Topology::getLicense() const { return impl->license; }
 std::string Topology::getConfigPath() const { return impl->configPath; }
 std::string Topology::getModelPath() const { return impl->modelPath; }
+std::string Topology::getName() const { return impl->topologyName; }
 
 void Topology::getModelInfo(std::string& url, std::string& sha, std::string& path) const
 {

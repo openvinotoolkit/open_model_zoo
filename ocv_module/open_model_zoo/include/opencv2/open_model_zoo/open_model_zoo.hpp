@@ -14,6 +14,8 @@ namespace cv { namespace open_model_zoo {
 
         Topology(const std::map<std::string, std::string>& config);
 
+        CV_WRAP String getName() const;
+
         CV_WRAP void download();
 
         CV_WRAP std::string getDescription() const;

@@ -31,13 +31,11 @@ static std::string getSHA(const std::string& path)
 
 static void extract(const std::string& archive)
 {
-    auto cache = utils::fs::getCacheDirectory("open_model_zoo_cache",
-                                              "OPENCV_OPEN_MODEL_ZOO_CACHE_DIR");
     PyGILState_STATE gstate = PyGILState_Ensure();
 
     std::string archiveOpen = "f = tarfile.open('" + archive + "')";
-    std::string cmd = "f.extractall(path='" + cache + "')";
-    PyRun_SimpleString("import tarfile");
+    std::string cmd = "f.extractall(path=os.path.dirname('" + archive + "'))";
+    PyRun_SimpleString("import tarfile; import os");
     PyRun_SimpleString(archiveOpen.c_str());
     PyRun_SimpleString(cmd.c_str());
     PyRun_SimpleString("f.close()");
@@ -56,6 +54,8 @@ static void downloadFile(const std::string& url, const std::string& sha,
         PyGILState_Release(gstate);
         return;
     }
+
+    utils::fs::createDirectories(utils::fs::getParent(path));
 
     std::string urlOpen = "r = urlopen('" + url + "')";
     std::string fileOpen = "f = open('" + path + "', 'wb')";
@@ -123,6 +123,9 @@ void Topology::download()
 
 void Topology::convertToIR(String& xmlPath, String& binPath) const
 {
+    std::string outDir = utils::fs::getParent(getModelPath());
+    std::string topologyName = getName();
+
     // Create a list of args
     std::string args = "";
     for (const auto& it : getModelOptimizerArgs())
@@ -134,6 +137,8 @@ void Topology::convertToIR(String& xmlPath, String& binPath) const
             value = getConfigPath();
         args += format("'%s=%s', ", it.first.c_str(), value.c_str());
     }
+    args += "'--output_dir=" + outDir + "', ";
+    args += "'--model_name=" + topologyName + "', ";
     args = "sys.argv = ['', " + args + "]";
 
     // We aren't able to run mo.py directly because there is also module names "mo"
@@ -143,8 +148,11 @@ void Topology::convertToIR(String& xmlPath, String& binPath) const
     PyRun_SimpleString("import mo_tf; import os; import sys");
     PyRun_SimpleString("path = os.path.join(os.path.dirname(mo_tf.__file__), 'mo.py')");
     PyRun_SimpleString(args.c_str());
-    PyRun_SimpleString("exec(open(path).read())");
+    PyRun_SimpleString("try: exec(open(path).read())\nexcept: pass");  // There is sys.exit() inside MO so wrap it to try-except
     PyGILState_Release(gstate);
+
+    xmlPath = utils::fs::join(outDir, topologyName + ".xml");
+    binPath = utils::fs::join(outDir, topologyName + ".bin");
 }
 
 }}  // namespace open_model_zoo
