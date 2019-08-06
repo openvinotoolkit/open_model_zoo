@@ -115,13 +115,23 @@ class BratsNumpyConverter(DirectoryBasedAnnotationConverter):
         for i, name in enumerate(ids):
             data = name + self.data_suffix + '.npy'
             label = name + self.label_suffix + '.npy'
+            files_exists = True
 
-            if not self._check_files(data, label):
-                warning_message = 'One of files {} or {} is not exist. Files will be ignored'.format(data, label)
-
+            if not check_file_existence(self.data_dir / data):
+                warning_message = '{}: does not exist'.format(self.data_dir / data)
                 warnings.warn(warning_message)
                 if check_content:
                     check_content_errors.append(warning_message)
+                files_exists = False
+
+            if not check_file_existence(self.data_dir / label):
+                warning_message = '{}: does not exist'.format(self.data_dir / label)
+                warnings.warn(warning_message)
+                if check_content:
+                    check_content_errors.append(warning_message)
+                files_exists = False
+
+            if not files_exists:
                 continue
 
             box = boxes[i, :, :] if self.boxes_file else None
@@ -136,6 +146,3 @@ class BratsNumpyConverter(DirectoryBasedAnnotationConverter):
         if not self.labels_file:
             return None
         return {'label_map': [line for line in read_txt(self.labels_file)]}
-
-    def _check_files(self, data, label):
-        return check_file_existence(self.data_dir / data) and check_file_existence(self.data_dir / label)

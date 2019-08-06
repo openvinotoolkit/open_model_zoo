@@ -21,8 +21,8 @@ from ..topology_types import ObjectDetection
 from ..config import PathField, BoolField
 from ..representation import DetectionAnnotation, SegmentationAnnotation
 from ..representation.segmentation_representation import GTMaskLoader
-from ..utils import get_path, read_txt, read_xml
-from .format_converter import BaseFormatConverter
+from ..utils import get_path, read_txt, read_xml, check_file_existence
+from .format_converter import BaseFormatConverter, ConverterReturn
 
 _VOC_CLASSES_DETECTION = (
     'aeroplane', 'bicycle', 'bird', 'boat',
@@ -90,16 +90,23 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
             self.mask_dir = get_path(self.image_set_file.parents[-2] / 'SegmentationClass', is_directory=True)
 
     def convert(self, check_content=False, **kwargs):
-
+        content_check_errors = [] if check_content else None
         annotations = []
         for image in read_txt(self.image_set_file):
+            image_file = '{}.jpg'.format(image)
+            mask_file = '{}.png'.format(image)
             annotation = SegmentationAnnotation(
-                str(Path(self.image_dir.name) / '{}.jpg'.format(image)),
-                str(Path(self.mask_dir.name) / '{}.png'.format(image)),
+                str(Path(self.image_dir.name) / image_file),
+                str(Path(self.mask_dir.name) / mask_file),
                 mask_loader=GTMaskLoader.SCIPY
             )
-
             annotations.append(annotation)
+            if check_content:
+                if not check_file_existence(self.image_dir / image_file):
+                    content_check_errors.append('{}: does not exist'.format(self.image_dir / image_file))
+
+                if not check_file_existence(self.mask_dir / mask_file):
+                    content_check_errors.append('{}: does not exist'.format(self.image_dir / image_file))
 
         meta = {
             'label_map': dict(enumerate(_VOC_CLASSES_SEGMENTATION)),
@@ -107,7 +114,8 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
             'segmentation_colors': _SEGMENTATION_COLORS
         }
 
-        return annotations, meta
+        return ConverterReturn(annotations, meta, content_check_errors)
+
 
 class PascalVOCDetectionConverter(BaseFormatConverter):
     __provider__ = 'voc_detection'
@@ -138,8 +146,9 @@ class PascalVOCDetectionConverter(BaseFormatConverter):
         self.annotations_dir = self.get_value_from_config('annotations_dir')
         self.has_background = self.get_value_from_config('has_background')
 
-    def convert(self):
+    def convert(self, check_content=False, **kwargs):
         class_to_ind = prepare_detection_labels(self.has_background)
+        content_check_errors = [] if check_content else None
 
         detections = []
         for image in tqdm(read_txt(self.image_set_file, sep=None)):
@@ -147,6 +156,9 @@ class PascalVOCDetectionConverter(BaseFormatConverter):
 
             identifier = root.find('.//filename').text
             get_path(self.image_dir / identifier)
+            if check_content:
+                if not check_file_existence(self.image_dir / identifier):
+                    content_check_errors.append('{}: does not exist'.format(self.image_dir / identifier))
 
             labels, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], []
             difficult_indices = []
@@ -175,4 +187,4 @@ class PascalVOCDetectionConverter(BaseFormatConverter):
         if self.has_background:
             meta['background_label'] = 0
 
-        return detections, meta
+        return ConverterReturn(detections, meta, content_check_errors)
