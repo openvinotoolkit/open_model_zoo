@@ -7,7 +7,7 @@ available for cloning or downloading from the internet resources.
 
 ## Supported models
 
-Any model may be converted by this script. To do this weights and model's source code is needed.
+Any model may be converted by this script. To do this weights and model's source code are needed.
 
 ## Setup
 
