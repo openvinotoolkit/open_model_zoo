@@ -431,7 +431,6 @@ bool checkDynamicBatchSupport(const Core& ie, const std::string& device)  {
     return is_supported;
 }
 
-
 }  // namespace
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
