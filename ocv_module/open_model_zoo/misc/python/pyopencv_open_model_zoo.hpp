@@ -123,6 +123,13 @@ void Topology::download()
 
 void Topology::convertToIR(String& xmlPath, String& binPath) const
 {
+    if (getOriginFramework() == "dldt")
+    {
+        xmlPath = getConfigPath();
+        binPath = getModelPath();
+        return;
+    }
+
     std::string outDir = utils::fs::getParent(getModelPath());
     std::string topologyName = getName();
 

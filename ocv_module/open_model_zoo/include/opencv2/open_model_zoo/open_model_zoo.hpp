@@ -35,6 +35,8 @@ namespace cv { namespace open_model_zoo {
 
         CV_WRAP String getConfigPath() const;
 
+        CV_WRAP String getOriginFramework() const;
+
         void getMeans(std::map<std::string, Scalar>& means) const;
 
         void getScales(std::map<std::string, double>& scales) const;
