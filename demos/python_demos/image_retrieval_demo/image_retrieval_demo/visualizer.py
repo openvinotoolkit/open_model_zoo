@@ -38,9 +38,13 @@ def add_top10_gallery_images(demo_image, impaths, distances, input_image, target
 
         demo_image[h_shift: h_shift + SIZE, w_shift: w_shift + SIZE] = image
 
-        cv2.putText(demo_image, '{}:{}'.format(index, int(distances[index] * 100) / 100),
-                    (w_shift - BORDER, h_shift - 5), 1,
-                    TEXT_SIZE, BLACK, LWD)
+        if distances:
+            cv2.putText(demo_image, '{}:{}'.format(index, int(distances[index] * 100) / 100),
+                        (w_shift - BORDER, h_shift - 5), 1,
+                        TEXT_SIZE, BLACK, LWD)
+        else:
+            cv2.putText(demo_image, '{}'.format(index), (w_shift - BORDER, h_shift - 5), 1,
+                        TEXT_SIZE, BLACK, LWD)
 
         if target_pos == index:
             cv2.rectangle(demo_image, (w_shift, h_shift), (w_shift + SIZE, h_shift + SIZE),
