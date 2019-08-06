@@ -56,7 +56,7 @@ def build_argparser():
                            'Absolute path to a shared library with the kernels implementation.',
                       default=None, type=str, metavar='"<absolute_path>"')
     args.add_argument('--delay',
-                      help='Optional. Interval in millisecond to wait for key pressed.',
+                      help='Optional. Interval in milliseconds of waiting for a key to be pressed.',
                       default=0, type=int, metavar='"<num>"')
     args.add_argument('-pt', '--prob_threshold',
                       help='Optional. Probability threshold for detections filtering.',
