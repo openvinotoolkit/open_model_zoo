@@ -7,7 +7,7 @@
 This repository includes optimized deep learning models and a set of demos to expedite development of high-performance deep learning inference applications. Use these free pre-trained models instead of training your own models to speed-up the development and production deployment process.
 
 ## Repository Components:
-* [Pre-Trained Models](intel_models/index.md)
+* [Pre-Trained Models](models/intel/index.md)
 * [Model Downloader](tools/downloader/README.md) and other automation tools
 * [Demos](demos/README.md) that demonstrate models usage with Deep Learning Deployment Toolkit
 * [Accuracy Checker](tools/accuracy_checker/README.md) tool for models accuracy validation
