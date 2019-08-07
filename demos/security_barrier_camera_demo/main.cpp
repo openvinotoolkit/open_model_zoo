@@ -30,7 +30,8 @@
 
 using namespace InferenceEngine;
 
-typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
+typedef std::chrono::duration<float, std::chrono::milliseconds::period> Ms;
+typedef std::chrono::duration<float, std::chrono::seconds::period> Sec;
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
@@ -336,23 +337,35 @@ void Drawer::process() {
 
         constexpr float OPACITY = 0.6f;
         fillROIColor(mat, cv::Rect(5, 5, 390, 115), cv::Scalar(255, 0, 0), OPACITY);
-
-        std::ostringstream out;
-        out << std::fixed << std::setprecision(1);
-        const auto t1 = std::chrono::steady_clock::now();
-        uint64_t frameCounter = context.frameCounter;
-        const ms meanOverallTimePerAllInputs = std::chrono::duration_cast<ms>((t1 - context.t0)
-                                               * context.readersContext.inputChannels.size()) / frameCounter;
-        out << meanOverallTimePerAllInputs.count();
-        out << "ms / " << std::chrono::seconds(1) / meanOverallTimePerAllInputs << "FPS";
-
-        cv::putText(mat, out.str(), cv::Point2f(15, 35), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
         cv::putText(mat, "Detection InferRequests usage", cv::Point2f(15, 70), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
         cv::Rect usage(15, 90, 370, 20);
         cv::rectangle(mat, usage, {0, 255, 0}, 2);
         uint64_t nireq = context.nireq;
+        uint64_t frameCounter = context.frameCounter;
         usage.width = static_cast<int>(usage.width * static_cast<float>(frameCounter * nireq - context.freeDetectionInfersCount) / (frameCounter * nireq));
         cv::rectangle(mat, usage, {0, 255, 0}, cv::FILLED);
+
+        static std::ostringstream outThroughput;
+        static unsigned fps = 0;
+        static bool runningFirstSecond = true;
+        static std::chrono::steady_clock::time_point localT0 = context.t0;
+        fps++;
+        const std::chrono::steady_clock::time_point localT1 = std::chrono::steady_clock::now();
+        const Sec timeDuration = localT1 - localT0;
+        if (std::chrono::seconds{1} <= timeDuration) {
+            outThroughput.str("");
+            outThroughput << std::fixed << std::setprecision(1)
+                << static_cast<float>(fps) / timeDuration.count() << "FPS";
+            fps = 0;
+            runningFirstSecond = false;
+            localT0 = localT1;
+        } else if (runningFirstSecond) {
+            // the pipeline isn't running for long enough, print what it has for now
+            outThroughput.str("");
+            outThroughput << std::fixed << std::setprecision(1)
+                << static_cast<float>(fps) / timeDuration.count() << "FPS";
+        }
+        cv::putText(mat, outThroughput.str(), cv::Point2f(15, 35), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
 
         cv::imshow("security_barrier_camera", firstGridIt->second.getMat());
         context.drawersContext.prevShow = std::chrono::steady_clock::now();
@@ -716,8 +729,9 @@ int main(int argc, char* argv[]) {
                     ie.AddExtension(extension_ptr, "CPU");
                     slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
                 }
-                if (FLAGS_nthreads != 0)
+                if (FLAGS_nthreads != 0) {
                     ie.SetConfig({{ CONFIG_KEY(CPU_THREADS_NUM), std::to_string(FLAGS_nthreads) }}, "CPU");
+                }
                 ie.SetConfig({{ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO) }}, "CPU");
                 ie.SetConfig({{ CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
                                 (device_nstreams.count("CPU") > 0 ? std::to_string(device_nstreams.at("CPU")) :
@@ -727,8 +741,9 @@ int main(int argc, char* argv[]) {
 
             if ("GPU" == device) {
                 // Load any user-specified clDNN Extensions
-                if (!FLAGS_c.empty())
+                if (!FLAGS_c.empty()) {
                     ie.SetConfig({ { PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c } }, "GPU");
+                }
                 ie.SetConfig({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
                                 (device_nstreams.count("GPU") > 0 ? std::to_string(device_nstreams.at("GPU")) :
                                                                     "GPU_THROUGHPUT_AUTO") }}, "GPU");
@@ -851,10 +866,10 @@ int main(int argc, char* argv[]) {
 
         uint64_t frameCounter = context.frameCounter;
         if (0 != frameCounter) {
-            const ms meanOverallTimePerAllInputs = std::chrono::duration_cast<ms>((t1 - context.t0)
+            const Ms meanOverallTimePerAllInputs = std::chrono::duration_cast<Ms>((t1 - context.t0)
                 * context.readersContext.inputChannels.size()) / frameCounter;
-            std::cout << "Mean overall time per all inputs: " << std::fixed << std::setprecision(2) << meanOverallTimePerAllInputs.count()
-                      << "ms / " << std::chrono::seconds(1) / meanOverallTimePerAllInputs << "FPS for " << frameCounter << " frames\n";
+            std::cout << std::fixed << std::setprecision(1) << std::chrono::seconds{1} / meanOverallTimePerAllInputs
+                << "FPS for (" << frameCounter << " / " << inputChannels.size() << ") frames\n";
             const double detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
                 / (frameCounter * context.nireq) * 100;
             std::cout << "Detection InferRequests usage: " << detectionsInfersUsage << "%\n";
