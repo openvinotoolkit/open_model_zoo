@@ -88,7 +88,7 @@ The basic usage is to run the script like this:
 ```
 
 This will convert all models into the Inference Engine IR format. Models that
-were originally in that format are ignored. If model in PyTorch's format they will be 
+were originally in that format are ignored. If models in PyTorch's format they will be 
 converted in supported ONNX format first.
 
 The current directory must be the root of a download tree created by the model
