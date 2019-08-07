@@ -29,8 +29,11 @@ toolkit and the prerequisite libraries for Model Optimizer. See the
 [OpenVINO toolkit documentation](https://docs.openvinotoolkit.org/) for details.
 
 If you using models from PyTorch framework, you will also need to use intermediate
-conversion to ONNX format. See [this](pytorch_models_conversion.md) for details.
-If you using automatic conversion just install prerequisites for script
+conversion to ONNX format. To use automatic conversion install additional dependencies:
+
+```sh
+python3 -mpip install --user -r ./requirements-pytorch.in 
+```
 
 Model downloader usage
 ----------------------
@@ -85,9 +88,8 @@ The basic usage is to run the script like this:
 ```
 
 This will convert all models into the Inference Engine IR format. Models that
-were originally in that format are ignored. If model in unsupported format (see 
-[PyTorch\* models conversion](pytorch_models_conversion.md)) they will be converted 
-in supported format first.
+were originally in that format are ignored. If model in PyTorch's format they will be 
+converted in supported ONNX format first.
 
 The current directory must be the root of a download tree created by the model
 downloader. To specify a different download tree path, use the `-d`/`--download_dir`
