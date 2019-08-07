@@ -17,7 +17,7 @@ class DecodeByVocabulary(Preprocessor):
         return parameters
 
     def configure(self):
-        vocab = read_txt(self.get_value_from_config('vocab'))
+        vocab = read_txt(self.get_value_from_config('vocabulary_file'))
         decoding_dict = {}
         for idx, word in enumerate(vocab):
             decoding_dict[word] = idx
