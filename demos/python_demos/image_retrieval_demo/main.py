@@ -40,10 +40,10 @@ def build_argparser():
     args.add_argument('-m', '--model',
                       help='Required. Path to an .xml file with a trained model.',
                       required=True, type=str)
-    args.add_argument('-v', '--video',
+    args.add_argument('-i',
                       help='Required. Path to a video file or numeric camera ID.',
                       required=True, type=str)
-    args.add_argument('-i', '--images',
+    args.add_argument('-g', '--gallery',
                       help='Required. Path to a folder with gallery images.',
                       required=True, type=str)
     args.add_argument('-gt', '--ground_truth',
@@ -98,8 +98,8 @@ def main():
     log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
-    img_retrieval = ImageRetrieval(args.model, args.device, args.images, INPUT_SIZE)
-    frames = RoiDetectorOnVideo(args.video)
+    img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE)
+    frames = RoiDetectorOnVideo(args.i)
 
     compute_embeddings_times = []
     search_in_gallery_times = []
