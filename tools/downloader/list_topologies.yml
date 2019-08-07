@@ -1580,8 +1580,8 @@ topologies:
         sha256: 472d4a06035497b180636d8a82667129960371375bd10fcb6df5c6c7631f25e0
         source: http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
       - name: deploy.prototxt
-        sha256: 08e3bd35deed9de30c9090c7aa52b6cc9902966c70c45ed4361e194d52bac619
-        source: https://github.com/BVLC/caffe/blob/master/models/bvlc_reference_caffenet/deploy.prototxt
+        sha256: 922248a4d2f6aac1cc8e7e5dbd996cc2ecd3356480d67c198f6cf96b12311a04
+        source: https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_reference_caffenet/deploy.prototxt
     output: "classification/caffenet/cf/"
     model_optimizer_args:
       - --framework=caffe
