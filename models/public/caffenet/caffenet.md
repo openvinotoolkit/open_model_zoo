@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-CaffeNet model. Used for classification. For deatails see [paper](https://arxiv.org/abs/1408.5093).
+CaffeNet model. Used for classification. For details see [paper](https://arxiv.org/abs/1408.5093).
 
 ## Example
 
