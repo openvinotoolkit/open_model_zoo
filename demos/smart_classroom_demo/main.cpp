@@ -420,15 +420,14 @@ std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_track
 }
 
 bool checkDynamicBatchSupport(const Core& ie, const std::string& device)  {
-    bool is_supported = true;
     try  {
         if (ie.GetConfig(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != PluginConfigParams::YES)
-            is_supported = false;
+            return false;
     }
     catch(const std::exception& error)  {
-        is_supported = false;
+        return false;
     }
-    return is_supported;
+    return true;
 }
 
 }  // namespace
@@ -589,10 +588,10 @@ int main(int argc, char* argv[]) {
         CnnConfig reid_config(fr_model_path, fr_weights_path);
         reid_config.enabled = face_config.enabled && !fr_model_path.empty() && !lm_model_path.empty();
         reid_config.deviceName = FLAGS_d_reid;
-        if (!checkDynamicBatchSupport(ie, FLAGS_d_reid))
-            reid_config.max_batch_size = 1;
-        else
+        if (checkDynamicBatchSupport(ie, FLAGS_d_reid))
             reid_config.max_batch_size = 16;
+        else
+            reid_config.max_batch_size = 1;
         reid_config.ie = ie;
         VectorCNN face_reid(reid_config);
 
@@ -601,10 +600,10 @@ int main(int argc, char* argv[]) {
         landmarks_config.max_batch_size = 16;
         landmarks_config.enabled = face_config.enabled && reid_config.enabled && !lm_model_path.empty();
         landmarks_config.deviceName = FLAGS_d_lm;
-        if (!checkDynamicBatchSupport(ie, FLAGS_d_lm))
-            landmarks_config.max_batch_size = 1;
-        else
+        if (checkDynamicBatchSupport(ie, FLAGS_d_lm))
             landmarks_config.max_batch_size = 16;
+        else
+            landmarks_config.max_batch_size = 1;
         landmarks_config.ie = ie;
         VectorCNN landmarks_detector(landmarks_config);
 

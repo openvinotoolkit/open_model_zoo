@@ -69,7 +69,7 @@ void CnnDLSDKBase::InferBatch(
         }
 
         if (config_.max_batch_size != 1)
-          infer_request_.SetBatch(current_batch_size);
+            infer_request_.SetBatch(current_batch_size);
         infer_request_.Infer();
 
         InferenceEngine::BlobMap blobs;
