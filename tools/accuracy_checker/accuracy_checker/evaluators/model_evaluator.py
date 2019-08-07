@@ -55,14 +55,15 @@ class ModelEvaluator:
         data_reader_config = dataset_config.get('reader', 'opencv_imread')
         data_source = dataset_config.get('data_source')
 
+        dataset = Dataset(dataset_config)
         if isinstance(data_reader_config, str):
-            data_reader = BaseReader.provide(data_reader_config, data_source)
+            data_reader = BaseReader.provide(data_reader_config, data_source, dataset.annotation)
         elif isinstance(data_reader_config, dict):
-            data_reader = BaseReader.provide(data_reader_config['type'], data_source, data_reader_config)
+            data_reader = BaseReader.provide(
+                data_reader_config['type'], data_source, data_reader_config, dataset.annotation
+            )
         else:
             raise ConfigError('reader should be dict or string')
-
-        dataset = Dataset(dataset_config)
         launcher = create_launcher(launcher_config)
         async_mode = launcher.async_mode if hasattr(launcher, 'async_mode') else False
         config_adapter = launcher_config.get('adapter')
