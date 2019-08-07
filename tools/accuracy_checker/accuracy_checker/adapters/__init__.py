@@ -49,6 +49,8 @@ from .hit_ratio import HitRatioAdapter
 
 from .mask_rcnn import MaskRCNNAdapter
 
+from .nlp import MachineTranslationAdapter
+
 __all__ = [
     'Adapter',
     'AdapterField',
@@ -92,5 +94,7 @@ __all__ = [
 
     'HitRatioAdapter',
 
-    'MaskRCNNAdapter'
+    'MaskRCNNAdapter',
+
+    'MachineTranslationAdapter'
 ]

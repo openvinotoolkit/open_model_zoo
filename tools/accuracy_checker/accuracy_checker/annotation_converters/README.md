@@ -141,3 +141,6 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `data_suffix` - suffix for files with data (default `_data_cropped`)
   * `label_suffix` - suffix for files with groundtruth data (default `_label_cropped`)
   * `boxes_file` - path to file with brain boxes (optional). Set this option with including postprocessor `segmentation-prediction-resample`(see [Postprocessors](../postprocessor/README.md)).
+* `wmt` - converts WMT dataset for Machine Translation task to `MachineTranslationAnnotation`.
+  * `input_file` - path to file which contains input sentences tokens for translation.
+  * `reference_file` - path to file with reference for translation.

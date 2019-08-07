@@ -12,7 +12,7 @@ a vector of features for each detected face.
 * `person-detection-raisinghand-recognition-0001`, which is a detection network for finding students and simultaneously predicting their current actions (in contrast with the previous model, predicts only if a student raising hand or not).
 * `person-detection-action-recognition-teacher-0002`, which is a detection network for finding persons and simultaneously predicting their current actions.
 
-For more information about the pre-trained models, refer to the [model documentation](../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
 ## How It Works
 

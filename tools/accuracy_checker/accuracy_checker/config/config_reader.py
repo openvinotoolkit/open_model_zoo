@@ -264,29 +264,46 @@ class ConfigReader:
                     raise ConfigError('argument: {} should be a directory'.format(argument))
                 value[field] = args[argument] / config_path
 
-        def create_command_line_for_conversion(config):
-            mapping = {}
-            value = 'source'
-            for key in config:
-                if key.endswith('file') or key.endswith('dir'):
-                    mapping[key] = value
-            return mapping
+        def process_config(
+                config_item, entries_paths, dataset_identifier='datasets',
+                launchers_idenitfier='launchers', identifers_mapping=None
+        ):
 
-        def process_config(config_item, entries_paths, dataset_identifier='datasets', identifers_mapping=None):
+            def process_dataset(datasets_configs):
+                if not isinstance(datasets_configs, list):
+                    datasets_configs = [datasets_configs]
+                for datasets_config in datasets_configs:
+                    annotation_conversion_config = datasets_config.get('annotation_conversion')
+                    if annotation_conversion_config:
+                        command_line_conversion = (create_command_line_mapping(annotation_conversion_config, 'source'))
+                        merge_entry_paths(command_line_conversion, annotation_conversion_config)
+                    if 'preprocessing' in datasets_config:
+                        for preprocessor in datasets_config['preprocessing']:
+                            command_line_preprocessing = (create_command_line_mapping(preprocessor, 'models'))
+                            merge_entry_paths(command_line_preprocessing, preprocessor)
+
+            def process_launchers(launchers_configs):
+                if not isinstance(launchers_configs, list):
+                    launchers_configs = [launchers_configs]
+
+                for launcher_config in launchers_configs:
+                    adapter_config = launcher_config.get('adapter')
+                    if not isinstance(adapter_config, dict):
+                        continue
+                    command_line_adapter = (create_command_line_mapping(adapter_config, 'models'))
+                    merge_entry_paths(command_line_adapter, adapter_config)
+
             for entry, command_line_arg in entries_paths.items():
                 entry_id = entry if not identifers_mapping else identifers_mapping[entry]
                 if entry_id not in config_item:
                     continue
 
                 if entry_id == dataset_identifier:
-                    datasets_configs = config_item[entry_id]
-                    if not isinstance(datasets_configs, list):
-                        datasets_configs = [datasets_configs]
-                    for datasets_config in datasets_configs:
-                        annotation_conversion_config = datasets_config.get('annotation_conversion')
-                        if annotation_conversion_config:
-                            command_line_conversion = (create_command_line_for_conversion(annotation_conversion_config))
-                            merge_entry_paths(command_line_conversion, annotation_conversion_config)
+                    process_dataset(config_item[entry_id])
+
+                if entry_id == launchers_idenitfier:
+                    launchers_configs = config_item[entry_id]
+                    process_launchers(launchers_configs)
 
                 config_entires = config_item[entry_id]
                 if not isinstance(config_entires, list):
@@ -303,7 +320,7 @@ class ConfigReader:
             entries_paths.update({'reader': {'data_source': 'source'}})
             for pipeline in config['pipelines']:
                 for stage in pipeline['stages']:
-                    process_config(stage, entries_paths, 'dataset', identifiers_mapping)
+                    process_config(stage, entries_paths, 'dataset', 'launcher', identifiers_mapping)
 
         functors_by_mode = {
             'models': process_models,
@@ -454,3 +471,12 @@ class ConfigReader:
         target_devices = to_lower_register(args.get('target_devices') or [])
         filtering_mode = functors_by_mode[mode]
         filtering_mode(config, target_devices)
+
+
+def create_command_line_mapping(config, value):
+    mapping = {}
+    for key in config:
+        if key.endswith('file') or key.endswith('dir'):
+            mapping[key] = value
+
+    return mapping

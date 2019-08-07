@@ -149,7 +149,7 @@ class TopologyFile:
     def deserialize(cls, file):
         name = validate_relative_path('"name"', file['name'])
 
-        with deserialization_context('In file "{}"'):
+        with deserialization_context('In file "{}"'.format(name)):
             size = file.get('size')
             if size is not None:
                 size = validate_nonnegative_int('"size"', size)

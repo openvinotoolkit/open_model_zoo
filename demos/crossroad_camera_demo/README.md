@@ -8,7 +8,7 @@ reports person attributes like gender, has hat, has long-sleeved clothes
 * `person-reidentification-retail-0079`, which is executed on top of the results from the first network and prints
 a vector of features for each detected person. This vector is used to conclude if it is already detected person or not.
 
-For more information about the pre-trained models, refer to the [model documentation](../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
 Other demo objectives are:
 * Images/Video/Camera as inputs, via OpenCV*

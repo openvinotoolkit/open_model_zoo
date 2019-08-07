@@ -30,6 +30,7 @@ from .geometric_transformations import (
     Tiling,
     Crop3D
 )
+from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
 
 __all__ = [
     'PreprocessingExecutor',
@@ -52,5 +53,8 @@ __all__ = [
     'TfConvertImageDType',
 
     'Normalize3d',
-    'Normalize'
+    'Normalize',
+
+    'DecodeByVocabulary',
+    'PadWithEOS'
 ]

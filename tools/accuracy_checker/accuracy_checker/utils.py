@@ -326,8 +326,10 @@ def get_or_parse_value(item, supported_values=None, default=None, casting_type=f
     return default
 
 
-def string_to_bool(string):
-    return string.lower() in ['yes', 'true', 't', '1']
+def cast_to_bool(entry):
+    if isinstance(entry, str):
+        return entry.lower() in ['yes', 'true', 't', '1']
+    return bool(entry)
 
 
 def get_key_by_value(container, target):
