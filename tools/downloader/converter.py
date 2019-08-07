@@ -40,11 +40,12 @@ else:
 
 
 def convert_to_onnx(topology, output_dir, args):
+    pytorch_converter = Path(__file__).absolute().parent / 'pytorch_to_onnx.py'
     print('========= {}Converting {} to ONNX'.format('(DRY RUN) ' if args.dry_run else '', topology.name))
     pytorch_to_onnx_args = [string.Template(arg).substitute(conv_dir=output_dir / topology.subdirectory,
                                                             dl_dir=args.download_dir / topology.subdirectory)
                             for arg in topology.pytorch_to_onnx_args]
-    cmd = [str(args.python), str(Path('pytorch_to_onnx.py').absolute()), *pytorch_to_onnx_args]
+    cmd = [str(args.python), str(pytorch_converter), *pytorch_to_onnx_args]
     print('Conversion to ONNX command:', ' '.join(map(quote_arg, cmd)))
     return subprocess.run(cmd).returncode if not args.dry_run else 0
 
