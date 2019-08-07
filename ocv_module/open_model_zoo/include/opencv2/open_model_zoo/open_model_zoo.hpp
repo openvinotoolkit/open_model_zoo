@@ -41,6 +41,8 @@ namespace cv { namespace open_model_zoo {
 
         void getScales(std::map<std::string, double>& scales) const;
 
+        CV_WRAP void getInputShape(CV_OUT std::vector<int>& shape) const;
+
         std::map<String, String> getModelOptimizerArgs() const;
 
         CV_WRAP void convertToIR(CV_OUT String& xmlPath, CV_OUT String& binPath) const;

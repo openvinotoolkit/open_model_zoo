@@ -177,6 +177,28 @@ void Topology::getScales(std::map<std::string, double>& scales) const
     }
 }
 
+void Topology::getInputShape(std::vector<int>& shape) const
+{
+    // input_shape has format "[v1,v2,v3,v4]"
+    shape.clear();
+
+    auto it = impl->modelOptimizerArgs.find("--input_shape");
+    if (it == impl->modelOptimizerArgs.end())
+        return;
+
+    std::string values = it->second;
+    values = values.substr(values.find('[') + 1, values.find(']'));
+
+    int value;
+    std::string valueStr;
+    std::stringstream ss(values);
+    while (std::getline(ss, valueStr, ','))
+    {
+        std::stringstream(valueStr) >> value;
+        shape.push_back(value);
+    }
+}
+
 std::map<String, String> Topology::getModelOptimizerArgs() const
 {
     return impl->modelOptimizerArgs;

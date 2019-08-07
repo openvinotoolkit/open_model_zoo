@@ -34,7 +34,16 @@ static void setParams(Ptr<dnn::Model> model, const Topology& topology)
     {
         model->setInputSwapRB(true);
     }
-    model->setInputSize(300, 300);
+
+    std::vector<int> inpShape;
+    topology.getInputShape(inpShape);
+    if (inpShape.size() == 4)
+    {
+        if (topology.getOriginFramework() == "tf")  // NHWC
+            model->setInputSize(inpShape[2], inpShape[1]);
+        else  // NCHW
+            model->setInputSize(inpShape[3], inpShape[2]);
+    }
 }
 
 Ptr<dnn::Model> DnnModel(const Topology& topology)
