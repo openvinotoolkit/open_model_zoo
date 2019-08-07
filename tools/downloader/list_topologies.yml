@@ -1570,6 +1570,31 @@ topologies:
     framework: "tf"
     license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
 
+  - name: "caffenet"
+    description: >-
+      CaffeNet model. Used for classification. For deatails see paper
+      <https://arxiv.org/abs/1408.5093>.
+    task_type: "classification"
+    files:
+      - name: bvlc_reference_caffenet.caffemodel
+        sha256: 472d4a06035497b180636d8a82667129960371375bd10fcb6df5c6c7631f25e0
+        source: http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
+      - name: deploy.prototxt
+        sha256: 08e3bd35deed9de30c9090c7aa52b6cc9902966c70c45ed4361e194d52bac619
+        source: https://github.com/BVLC/caffe/blob/master/models/bvlc_reference_caffenet/deploy.prototxt
+    output: "classification/caffenet/cf/"
+    model_optimizer_args:
+      - --framework=caffe
+      - --data_type=FP32
+      - --input_shape=[1,3,227,227]
+      - --input=data
+      - --mean_values=data[104.0,117.0,123.0]
+      - --output=prob
+      - --input_model=$dl_dir/bvlc_reference_caffenet.caffemodel
+      - --input_proto=$dl_dir/deploy.prototxt
+    framework: "caffe"
+    license: https://raw.githubusercontent.com/BVLC/caffe/master/LICENSE
+
   - name: "brain-tumor-segmentation-0001"
     description: >-
       This model was created for participation in the Brain Tumor Segmentation Challenge
