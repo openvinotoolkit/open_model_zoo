@@ -27,7 +27,6 @@ import cv2
 import numpy as np
 from openvino.inference_engine import IENetwork, IECore
 
-from instance_segmentation_demo.images_capture import ImagesCapture
 from instance_segmentation_demo.tracker import StaticIOUTracker
 from instance_segmentation_demo.visualizer import Visualizer
 
@@ -43,12 +42,10 @@ def build_argparser():
     args.add_argument('--labels',
                       help='Required. Path to a text file with class labels.',
                       required=True, type=str, metavar='"<path>"')
-    args.add_argument('-v', '--video',
-                      help='Required for video input. Path to a video file or numeric camera ID.',
-                      default=None, type=str, metavar='"<path>"')
-    args.add_argument('-i', '--images',
-                      help='Required for still images input. Path to an image or a folder with images.',
-                      type=str, metavar='"<path>"')
+    args.add_argument('-i',
+                      dest='input_source',
+                      help='Required. Path to an image, video file or a numeric camera ID.',
+                      required=True, type=str, metavar='"<path>"')
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL or MYRIAD. '
                            'The demo will look for a suitable plugin for device specified '
@@ -58,9 +55,18 @@ def build_argparser():
                       help='Required for CPU custom layers. '
                            'Absolute path to a shared library with the kernels implementation.',
                       default=None, type=str, metavar='"<absolute_path>"')
+    args.add_argument('--delay',
+                      help='Optional. Interval in milliseconds of waiting for a key to be pressed.',
+                      default=0, type=int, metavar='"<num>"')
     args.add_argument('-pt', '--prob_threshold',
                       help='Optional. Probability threshold for detections filtering.',
                       default=0.5, type=float, metavar='"<num>"')
+    args.add_argument('--no_keep_aspect_ratio',
+                      help='Optional. Force image resize not to keep aspect ratio.',
+                      action='store_true')
+    args.add_argument('--no_track',
+                      help='Optional. Disable tracking.',
+                      action='store_true')
     args.add_argument('--show_scores',
                       help='Optional. Show detection scores.',
                       action='store_true')
@@ -68,7 +74,10 @@ def build_argparser():
                       help='Optional. Show bounding boxes.',
                       action='store_true')
     args.add_argument('-pc', '--perf_counts',
-                      help='Optional. Report performance counters',
+                      help='Optional. Report performance counters.',
+                      action='store_true')
+    args.add_argument('-r', '--raw_output_message',
+                      help='Optional. Output inference results raw values.',
                       action='store_true')
     return parser
 
@@ -113,19 +122,19 @@ def main():
     model_bin = os.path.splitext(model_xml)[0] + '.bin'
 
     # Plugin initialization for specified device and load extensions library if specified.
-    log.info("Creating Inference Engine...")
+    log.info('Creating Inference Engine...')
     ie = IECore()
     if args.cpu_extension and 'CPU' in args.device:
-        ie.add_extension(args.cpu_extension, "CPU")
+        ie.add_extension(args.cpu_extension, 'CPU')
     # Read IR
-    log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
+    log.info('Loading network files:\n\t{}\n\t{}'.format(model_xml, model_bin))
     net = IENetwork(model=model_xml, weights=model_bin)
 
-    if "CPU" in args.device:
-        supported_layers = ie.query_network(net, "CPU")
+    if 'CPU' in args.device:
+        supported_layers = ie.query_network(net, 'CPU')
         not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
         if len(not_supported_layers) != 0:
-            log.error("Following layers are not supported by the plugin for specified device {}:\n {}".
+            log.error('Following layers are not supported by the plugin for specified device {}:\n {}'.
                       format(args.device, ', '.join(not_supported_layers)))
             log.error("Please try to specify cpu extensions library path in sample's command line parameters using -l "
                       "or --cpu_extension command line argument")
@@ -145,23 +154,19 @@ def main():
     exec_net = ie.load_network(network=net, device_name=args.device, num_requests=2)
     del net
 
-    tracker = None
-    assert (args.video is None) != (args.images is None), \
-        'Please specify either --video or --images command line argument'
-    if args.video is not None:
-        try:
-            video = int(args.video)
-        except ValueError:
-            video = args.video
-        log.info('Using video "{}" as an image source...'.format(video))
-        cap = cv2.VideoCapture(video)
-        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-        delay = 1
+    try:
+        input_source = int(args.input_source)
+    except ValueError:
+        input_source = args.input_source
+    cap = cv2.VideoCapture(input_source)
+    if not cap.isOpened():
+        log.error('Failed to open "{}"'.format(args.input_source))
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+
+    if args.no_track:
+        tracker = None
+    else:
         tracker = StaticIOUTracker()
-    if args.images is not None:
-        log.info('Using images "{}" as an image source...'.format(args.images))
-        cap = ImagesCapture(args.images, skip_non_images=True)
-        delay = 0
 
     with open(args.labels, 'rt') as labels_file:
         class_labels = labels_file.read().splitlines()
@@ -177,9 +182,16 @@ def main():
         if not ret:
             break
 
-        # Resize the image to leave the same aspect ratio and to fit it to a window of a target size.
-        scale = min(h / frame.shape[0], w / frame.shape[1])
-        input_image = cv2.resize(frame, None, fx=scale, fy=scale)
+        if args.no_keep_aspect_ratio:
+            # Resize the image to a target size.
+            scale_x = w / frame.shape[1]
+            scale_y = h / frame.shape[0]
+            input_image = cv2.resize(frame, (w, h))
+        else:
+            # Resize the image to keep the same aspect ratio and to fit it to a window of a target size.
+            scale_x = scale_y = min(h / frame.shape[0], w / frame.shape[1])
+            input_image = cv2.resize(frame, None, fx=scale_x, fy=scale_y)
+
         input_image_size = input_image.shape[:2]
         input_image = np.pad(input_image, ((0, h - input_image_size[0]),
                                            (0, w - input_image_size[1]),
@@ -188,7 +200,7 @@ def main():
         # Change data layout from HWC to CHW.
         input_image = input_image.transpose((2, 0, 1))
         input_image = input_image.reshape((n, c, h, w)).astype(np.float32)
-        input_image_info = np.asarray([[input_image_size[0], input_image_size[1], scale]], dtype=np.float32)
+        input_image_info = np.asarray([[input_image_size[0], input_image_size[1], 1]], dtype=np.float32)
 
         # Run the net.
         inf_start = time.time()
@@ -197,7 +209,9 @@ def main():
         det_time = inf_end - inf_start
 
         # Parse detection results of the current request
-        boxes = outputs['boxes'] / scale
+        boxes = outputs['boxes']
+        boxes[:, 0::2] /= scale_x
+        boxes[:, 1::2] /= scale_y
         scores = outputs['scores']
         classes = outputs['classes'].astype(np.uint32)
         masks = []
@@ -214,6 +228,12 @@ def main():
         masks = list(segm for segm, is_valid in zip(masks, detections_filter) if is_valid)
 
         render_start = time.time()
+
+        if len(boxes) and args.raw_output_message:
+            log.info('Detected boxes:')
+            log.info('  Class ID | Confidence |     XMIN |     YMIN |     XMAX |     YMAX ')
+            for box, cls, score, mask in zip(boxes, classes, scores, masks):
+                log.info('{:>10} | {:>10f} | {:>8.2f} | {:>8.2f} | {:>8.2f} | {:>8.2f} '.format(cls, score, *box))
 
         # Get instance track IDs.
         masks_tracks_ids = None
@@ -244,7 +264,7 @@ def main():
         render_end = time.time()
         render_time = render_end - render_start
 
-        key = cv2.waitKey(delay)
+        key = cv2.waitKey(args.delay)
         esc_code = 27
         if key == esc_code:
             break
