@@ -50,7 +50,6 @@ static void downloadFile(const std::string& url, const std::string& sha,
 
     if (utils::fs::exists(path) && sha == getSHA(path))
     {
-        std::cout << "File " + path + " exists" << std::endl;
         PyGILState_Release(gstate);
         return;
     }
@@ -59,6 +58,10 @@ static void downloadFile(const std::string& url, const std::string& sha,
 
     std::string urlOpen = "r = urlopen('" + url + "')";
     std::string fileOpen = "f = open('" + path + "', 'wb')";
+    std::string printSize = "d = dict(r.info()); size = '<unknown>'\n" \
+                            "if 'content-length' in d: size = int(d['content-length']) / MB\n" \
+                            "elif 'Content-Length' in d: size = int(d['Content-Length']) / MB\n" \
+                            "print('  %s %s [%s MB]' % (r.getcode(), r.msg, size))";
 
 #if PY_MAJOR_VERSION >= 3
     PyRun_SimpleString("from urllib.request import urlopen, Request");
@@ -66,9 +69,14 @@ static void downloadFile(const std::string& url, const std::string& sha,
     PyRun_SimpleString("from urllib2 import urlopen, Request");
 #endif
     PyRun_SimpleString(fileOpen.c_str());
-    PyRun_SimpleString("BUFSIZE = 10*1024*1024");  // 10MB
+    PyRun_SimpleString("MB = 1024*1024");
+    PyRun_SimpleString("BUFSIZE = 10*MB");
 
+    std::string info = "print('get ' + '" + url + "')";
+    PyRun_SimpleString(info.c_str());
     PyRun_SimpleString(urlOpen.c_str());
+    PyRun_SimpleString(printSize.c_str());
+    PyRun_SimpleString("import sys; sys.stdout.write('  progress '); sys.stdout.flush()");
     PyRun_SimpleString("buf = r.read(BUFSIZE)");
 
     if (url.find("drive.google.com") != std::string::npos)
@@ -85,8 +93,9 @@ static void downloadFile(const std::string& url, const std::string& sha,
                           "buf = r.read(BUFSIZE)";  // Reread first chunk
         PyRun_SimpleString(cmd.c_str());
     }
-    PyRun_SimpleString("while buf: f.write(buf); buf = r.read(BUFSIZE)");
-    PyRun_SimpleString("f.close()");
+    PyRun_SimpleString("while buf: sys.stdout.write('>'); sys.stdout.flush(); " \
+                       "f.write(buf); buf = r.read(BUFSIZE)");
+    PyRun_SimpleString("sys.stdout.write('\\n'); f.close()");
 
     std::string resSHA = getSHA(path);
     if (sha != resSHA)
