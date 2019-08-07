@@ -59,8 +59,8 @@ static void downloadFile(const std::string& url, const std::string& sha,
     std::string urlOpen = "r = urlopen('" + url + "')";
     std::string fileOpen = "f = open('" + path + "', 'wb')";
     std::string printSize = "d = dict(r.info()); size = '<unknown>'\n" \
-                            "if 'content-length' in d: size = int(d['content-length']) / MB\n" \
-                            "elif 'Content-Length' in d: size = int(d['Content-Length']) / MB\n" \
+                            "if 'content-length' in d: size = int(d['content-length']) // MB\n" \
+                            "elif 'Content-Length' in d: size = int(d['Content-Length']) // MB\n" \
                             "print('  %s %s [%s MB]' % (r.getcode(), r.msg, size))";
 
 #if PY_MAJOR_VERSION >= 3

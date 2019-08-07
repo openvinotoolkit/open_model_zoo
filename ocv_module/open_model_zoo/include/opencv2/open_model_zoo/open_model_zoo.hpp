@@ -52,6 +52,19 @@ namespace cv { namespace open_model_zoo {
         Ptr<Impl> impl;
     };
 
+    class CV_EXPORTS_W TextRecognitionPipeline
+    {
+    public:
+        CV_WRAP TextRecognitionPipeline(const Topology& detection,
+                                        const Topology& recognition);
+
+        CV_WRAP void process(InputArray frame, CV_OUT std::vector<RotatedRect>& rects,
+                             CV_OUT std::vector<String>& texts);
+    private:
+        struct Impl;
+        Ptr<Impl> impl;
+    };
+
 }}  // namespace cv::open_model_zoo
 
 #endif  // __OPENCV_OPEN_MODEL_ZOO_OPEN_MODEL_ZOO_HPP__
