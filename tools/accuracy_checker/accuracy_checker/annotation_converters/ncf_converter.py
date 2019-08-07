@@ -47,7 +47,7 @@ class MovieLensConverter(BaseFormatConverter):
         annotations = []
         users = []
 
-        for file_row in read_txt(self.rating_file):
+        for file_row in enumerate(read_txt(self.rating_file)):
             user_id, item_id, _ = file_row.split()
             users.append(user_id)
             identifier = ['u:'+user_id, 'i:' + item_id]

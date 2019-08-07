@@ -55,10 +55,12 @@ class ImageNetFormatConverter(BaseFormatConverter):
         self.has_background = self.get_value_from_config('has_background')
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
 
-    def convert(self, check_content=False, **kwargs):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotation = []
         content_errors = [] if check_content else None
-        for image in read_txt(get_path(self.annotation_file)):
+        original_annotation = read_txt(get_path(self.annotation_file))
+        num_iterations = len(original_annotation)
+        for image_id, image in enumerate(original_annotation):
             image_name, label = image.split()
             if check_content:
                 if not check_file_existence(self.images_dir / image_name):
@@ -66,6 +68,9 @@ class ImageNetFormatConverter(BaseFormatConverter):
 
             label = np.int64(label) if not self.has_background else np.int64(label) + 1
             annotation.append(ClassificationAnnotation(image_name, label))
+            if progress_callback is not None and image_id % progress_interval == 0:
+                progress_callback(image_id / num_iterations * 100)
+
         meta = self._create_meta(self.labels_file, self.has_background) if self.labels_file else None
 
         return ConverterReturn(annotation, meta, content_errors)

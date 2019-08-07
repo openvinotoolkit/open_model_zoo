@@ -50,7 +50,7 @@ class WiderFormatConverter(BaseFormatConverter):
         self.label_start = self.get_value_from_config('label_start')
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
 
-    def convert(self, check_content=False, **kwargs):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         image_annotations = read_txt(self.annotation_file)
         content_errors = None if not check_content else []
         image_ids = []
@@ -59,7 +59,8 @@ class WiderFormatConverter(BaseFormatConverter):
                 image_ids.append(image_id)
 
         annotations = []
-        for image_id in image_ids:
+        num_iterations = len(image_ids)
+        for index, image_id in enumerate(image_ids):
             identifier = image_annotations[image_id]
             if check_content:
                 if not check_file_existence(self.images_dir / identifier):
@@ -80,6 +81,9 @@ class WiderFormatConverter(BaseFormatConverter):
                 identifier, [self.label_start] * len(x_mins),
                 x_mins, y_mins, x_maxs, y_maxs
             ))
+            if progress_callback and index % progress_interval == 0:
+                progress_callback(index * 100 / num_iterations)
+
         meta = {'label_map': {0: '__background__', self.label_start: 'face'}, 'background_label': 0}
 
         return ConverterReturn(annotations, meta, content_errors)

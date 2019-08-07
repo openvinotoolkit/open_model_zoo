@@ -46,12 +46,13 @@ class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
         super().configure()
         self.images_dir = self.get_value_from_config('images_dir')
 
-    def convert(self, check_content=False, **kwargs):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations = []
         content_errors = None if not check_content else []
         self.images_dir = self.images_dir or self.data_dir
+        num_iterations = len(self.data_dir.iterdir())
 
-        for gt_file in self.data_dir.iterdir():
+        for gt_id, gt_file in enumerate(self.data_dir.iterdir()):
             gt_file_name = str(gt_file.parts[-1])
             identifier = '{}.jpg'.format(gt_file_name.split('gt_')[-1].split('.txt')[0])
             if check_content:
@@ -75,6 +76,9 @@ class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
             annotation = TextDetectionAnnotation(identifier, all_points, transcriptions)
             annotation.metadata['difficult_boxes'] = difficult
             annotations.append(annotation)
+
+            if progress_callback is not None and gt_id % progress_interval == 0:
+                progress_callback(gt_id / num_iterations * 100)
 
         return ConverterReturn(annotations, None, content_errors)
 
@@ -102,19 +106,24 @@ class ICDAR13RecognitionDatasetConverter(FileBasedAnnotationConverter):
         super().configure()
         self.images_dir = self.get_value_from_config('images_dir')
 
-    def convert(self, check_content=False, **kwargs):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations = []
         content_errors = None
         if check_content:
             content_errors = []
             self.images_dir = self.images_dir or self.annotation_file.parent
 
-        for line in read_txt(self.annotation_file):
+        original_annotations = read_txt(self.annotation_file)
+        num_iterations = len(original_annotations)
+
+        for line_id, line in enumerate(original_annotations):
             identifier, text = line.strip().split(' ')
             annotations.append(CharacterRecognitionAnnotation(identifier, text))
             if check_content:
                 if not check_file_existence(self.images_dir / identifier):
                     content_errors.append('{}: does not exist'.format(identifier))
+            if progress_callback is not None and line_id % progress_interval:
+                progress_callback(line_id / num_iterations * 100)
 
         label_map = {ind: str(key) for ind, key in enumerate(self.supported_symbols)}
         meta = {'label_map': label_map, 'blank_label': len(label_map)}

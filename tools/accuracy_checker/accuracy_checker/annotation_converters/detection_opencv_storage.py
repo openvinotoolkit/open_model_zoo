@@ -61,7 +61,11 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
         if self.data_dir is None:
             self.data_dir = self.annotation_file.parent
 
-    def convert(self, check_content=False, **kwargs):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+        def update_progress(frame_id):
+            if progress_callback is not None and frame_id % progress_interval == 0:
+                progress_callback(frame_id / num_iterations * 100)
+
         root = read_xml(self.annotation_file)
 
         labels_set = self.get_label_set(root)
@@ -75,7 +79,8 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
 
         annotations = []
         for frames in root:
-            for frame in frames:
+            num_iterations = len(frames)
+            for frame_id, frame in enumerate(frames):
                 identifier = '{}.png'.format(frame.tag)
                 labels, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], []
                 difficult_indices = []
@@ -103,6 +108,7 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
                 detection_annotation = DetectionAnnotation(identifier, labels, x_mins, y_mins, x_maxs, y_maxs)
                 detection_annotation.metadata['difficult_boxes'] = difficult_indices
                 annotations.append(detection_annotation)
+                update_progress(frame_id)
 
         if self.image_names_file:
             self.rename_identifiers(annotations, self.image_names_file)

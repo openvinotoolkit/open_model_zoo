@@ -73,7 +73,7 @@ class Cifar10FormatConverter(BaseFormatConverter):
             self.converted_images_dir = self.data_batch_file.parent / 'converted_images'
         self.convert_images = self.get_value_from_config('convert_images')
 
-    def convert(self, check_content=False, **kwargs):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         """
         This method is executed automatically when convert.py is started.
         All arguments are automatically got from command line arguments or config file in method configure
@@ -105,7 +105,7 @@ class Cifar10FormatConverter(BaseFormatConverter):
         image_file = '{}_{}.png'
         # Originally dataset labels start from 0, some networks can be trained with usage 1 as label start.
         labels_offset = 0 if not self.has_background else 1
-
+        num_iterations = len(labels)
         # convert each annotation object to ClassificationAnnotation
         for data_id, (label, feature) in enumerate(zip(labels, images)):
             # generate id of image which will be used for evaluation (usually name of file is used)
@@ -126,6 +126,9 @@ class Cifar10FormatConverter(BaseFormatConverter):
                 if not check_file_existence(self.converted_images_dir / identifier):
                     # add error to errors list if file not found
                     content_errors.append('{}: does not exist'.format(self.converted_images_dir / identifier))
+
+            if progress_callback is not None and data_id % progress_interval == 0:
+                progress_callback(data_id / num_iterations * 100)
         # crete metadata for dataset. Provided additional information is task specific and can includes, for example
         # label_map, information about background, used class color representation (for semantic segmentation task)
         # If your dataset does not have additional meta, you can to not provide it.

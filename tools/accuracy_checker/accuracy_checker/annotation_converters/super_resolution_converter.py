@@ -76,7 +76,7 @@ class SRConverter(BaseFormatConverter):
         self.generate_upsample = self.get_value_from_config('generate_upsample')
         self.upsample_factor = self.get_value_from_config('upsample_factor')
 
-    def convert(self, check_content=False, **kwargs):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         content_errors = [] if check_content else None
         file_list_lr = []
         for file_in_dir in self.data_dir.iterdir():
@@ -84,7 +84,8 @@ class SRConverter(BaseFormatConverter):
                 file_list_lr.append(file_in_dir)
 
         annotation = []
-        for lr_file in file_list_lr:
+        num_iterations = len(file_list_lr)
+        for lr_id, lr_file in enumerate(file_list_lr):
             lr_file_name = lr_file.parts[-1]
             upsampled_file_name = self.upsample_suffix.join(lr_file_name.split(self.lr_suffix))
             if self.two_streams and self.generate_upsample:
@@ -98,6 +99,8 @@ class SRConverter(BaseFormatConverter):
 
             identifier = [lr_file_name, upsampled_file_name] if self.two_streams else lr_file_name
             annotation.append(SuperResolutionAnnotation(identifier, hr_file_name, gt_loader=self.annotation_loader))
+            if progress_callback is not None and lr_id % progress_interval == 0:
+                progress_callback(lr_id / num_iterations * 100)
 
         return ConverterReturn(annotation, None, content_errors)
 

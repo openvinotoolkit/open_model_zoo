@@ -49,14 +49,16 @@ class LFWConverter(BaseFormatConverter):
         self.landmarks_file = self.get_value_from_config('landmarks_file')
         self.images_dir = self.get_value_from_config('images_dir') or self.pairs_file.parent
 
-    def convert(self, check_content=False, **kwargs):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         landmarks_map = {}
         if self.landmarks_file:
             for landmark_line in read_txt(self.landmarks_file):
                 landmark_line = landmark_line.split('\t')
                 landmarks_map[landmark_line[0]] = [int(point) for point in landmark_line[1:]]
 
-        test_annotations = self.prepare_annotation(self.pairs_file, True, landmarks_map)
+        test_annotations = self.prepare_annotation(
+            self.pairs_file, True, landmarks_map, check_content, progress_callback, progress_interval
+        )
 
         return test_annotations
 
@@ -87,7 +89,10 @@ class LFWConverter(BaseFormatConverter):
 
         return negatives, all_images
 
-    def prepare_annotation(self, ann_file: Path, train=False, landmarks_map=None, check_content=False):
+    def prepare_annotation(
+            self, ann_file: Path, train=False, landmarks_map=None,
+            check_content=False, progress_callback=None, progress_interval=100
+    ):
         positive_pairs, negative_pairs = [], []
         content_errors = [] if check_content else None
         ann_lines = read_txt(ann_file)
@@ -103,7 +108,8 @@ class LFWConverter(BaseFormatConverter):
         negative_data, all_images = self.convert_negative(negative_pairs, all_images)
 
         annotations = []
-        for image in all_images:
+        num_iterations = len(all_images)
+        for image_id, image in enumerate(all_images):
             annotation = ReIdentificationClassificationAnnotation(image, positive_data[image], negative_data[image])
 
             if landmarks_map:
@@ -119,5 +125,8 @@ class LFWConverter(BaseFormatConverter):
                 image_full_path = self.images_dir / image
                 if not check_file_existence(image_full_path):
                     content_errors.append('{}: does nit exist'.format(image_full_path))
+
+            if progress_callback is not None and image_id % progress_interval == 0:
+                progress_callback(image_id / num_iterations * 100)
 
         return ConverterReturn(annotations, None, content_errors)

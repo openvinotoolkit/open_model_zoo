@@ -106,12 +106,13 @@ class BratsNumpyConverter(DirectoryBasedAnnotationConverter):
         self.data_suffix = self.get_value_from_config('data_suffix')
         self.label_suffix = self.get_value_from_config('label_suffix')
 
-    def convert(self, check_content=False, **kwargs):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         ids = read_pickle(get_path(self.ids_file), encoding='latin1')
         boxes = read_pickle(get_path(self.boxes_file), encoding='latin1') if self.boxes_file else None
         check_content_errors = [] if check_content else None
 
         annotations = []
+        num_iterations = len(ids)
         for i, name in enumerate(ids):
             data = name + self.data_suffix + '.npy'
             label = name + self.label_suffix + '.npy'
@@ -139,6 +140,8 @@ class BratsNumpyConverter(DirectoryBasedAnnotationConverter):
             annotation = BrainTumorSegmentationAnnotation(data, label, GTMaskLoader.NUMPY, box)
 
             annotations.append(annotation)
+            if progress_callback is not None and i % progress_interval == 0:
+                progress_callback(i / num_iterations * 100)
 
         return ConverterReturn(annotations, self._get_meta(), check_content_errors)
 

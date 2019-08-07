@@ -77,7 +77,7 @@ class MSCocoDetectionConverter(BaseFormatConverter):
         self.sort_annotations = self.get_value_from_config('sort_annotations')
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
 
-    def convert(self, check_content=False, **kwargs):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         full_annotation = read_json(self.annotation_file)
         image_info = full_annotation['images']
         image_ids = [(image['id'], image['file_name']) for image in image_info]
@@ -94,16 +94,19 @@ class MSCocoDetectionConverter(BaseFormatConverter):
 
         meta.update({'label_map': label_map})
         detection_annotations, content_errors = self._create_representations(
-            image_ids, annotations, label_id_to_label, check_content
+            image_ids, annotations, label_id_to_label, check_content, progress_callback, progress_interval
         )
 
         return ConverterReturn(detection_annotations, meta, content_errors)
 
-    def _create_representations(self, image_info, annotations, label_id_to_label, check_content=False):
+    def _create_representations(
+            self, image_info, annotations, label_id_to_label, check_content, progress_callback, progress_interval
+    ):
         detection_annotations = []
         content_errors = [] if check_content else None
+        num_iterations = len(image_info)
 
-        for image in tqdm(image_info):
+        for (image_id, image) in tqdm(enumerate(image_info)):
             image_labels, xmins, ymins, xmaxs, ymaxs, is_crowd, _ = self._read_image_annotation(
                 image, annotations,
                 label_id_to_label
@@ -115,6 +118,8 @@ class MSCocoDetectionConverter(BaseFormatConverter):
             detection_annotation = DetectionAnnotation(image[1], image_labels, xmins, ymins, xmaxs, ymaxs)
             detection_annotation.metadata['iscrowd'] = is_crowd
             detection_annotations.append(detection_annotation)
+            if progress_callback is not None and image_id % progress_interval == 0:
+                progress_callback(image_id / num_iterations * 100)
 
         return detection_annotations, content_errors
 
@@ -154,7 +159,7 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
         super().configure()
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
 
-    def convert(self, check_content=False, **kwargs):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         keypoints_annotations = []
         content_errors = []
 
@@ -162,7 +167,8 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
         image_info = full_annotation['images']
         annotations = full_annotation['annotations']
         label_map, _ = get_label_map(full_annotation, True)
-        for image in image_info:
+        num_iterations = len(image_info)
+        for image_id, image in enumerate(image_info):
             identifier = image['file_name']
             if check_content:
                 full_image_path = self.images_dir / identifier
@@ -192,6 +198,8 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
             keypoints_annotation.metadata['difficult_boxes'] = difficult
 
             keypoints_annotations.append(keypoints_annotation)
+            if progress_callback is not None and image_id & progress_interval == 0:
+                progress_callback(image_id / num_iterations * 100)
 
         return ConverterReturn(keypoints_annotations, {'label_map': label_map}, None)
 
@@ -200,12 +208,15 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
     __provider__ = 'mscoco_segmentation'
     annotation_types = (CoCoInstanceSegmentationAnnotation, )
 
-    def _create_representations(self, image_info, annotations, label_id_to_label, check_content=False):
+    def _create_representations(
+            self, image_info, annotations, label_id_to_label, check_content, progress_callback, progress_interval
+    ):
         segmentation_annotations = []
         content_errors = None if not check_content else []
+        num_iterations = len(image_info)
 
-        for image in tqdm(image_info):
-            image_labels, _, _, _, _, is_crowd, segmentations = self._read_image_annotattion(
+        for (image_id, image) in tqdm(enumerate(image_info)):
+            image_labels, _, _, _, _, is_crowd, segmentations = self._read_image_annotation(
                 image, annotations,
                 label_id_to_label
             )
@@ -216,6 +227,8 @@ class MSCocoSegmentationConverter(MSCocoDetectionConverter):
                     content_errors.append('{}: does not exist'.format(image_full_path))
             annotation.metadata['iscrowd'] = is_crowd
             segmentation_annotations.append(annotation)
+            if progress_callback is not None and image_id % progress_interval == 0:
+                progress_callback(image_id / num_iterations * 100)
 
         return segmentation_annotations, content_errors
 
@@ -224,12 +237,15 @@ class MSCocoMaskRCNNConverter(MSCocoDetectionConverter):
     __provider__ = 'mscoco_mask_rcnn'
     annotation_types = (DetectionAnnotation, CoCoInstanceSegmentationAnnotation)
 
-    def _create_representations(self, image_info, annotations, label_id_to_label, check_content=False):
+    def _create_representations(
+            self, image_info, annotations, label_id_to_label, check_content, progress_callback, progress_interval
+    ):
         container_annotations = []
         content_errors = None if not check_content else []
+        num_iterations = len(image_info)
 
-        for image in tqdm(image_info):
-            image_labels, xmins, ymins, xmaxs, ymaxs, is_crowd, segmentations = self._read_image_annotattion(
+        for (image_id, image) in tqdm(enumerate(image_info)):
+            image_labels, xmins, ymins, xmaxs, ymaxs, is_crowd, segmentations = self._read_image_annotation(
                 image, annotations,
                 label_id_to_label
             )
@@ -246,5 +262,8 @@ class MSCocoMaskRCNNConverter(MSCocoDetectionConverter):
                 'detection_annotation': detection_annotation,
                 'segmentation_annotation': segmentation_annotation
             }))
+
+            if progress_callback is not None and image_id % progress_interval == 0:
+                progress_callback(image_id / num_iterations * 100)
 
         return container_annotations, content_errors

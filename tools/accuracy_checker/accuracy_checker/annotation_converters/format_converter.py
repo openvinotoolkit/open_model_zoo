@@ -51,11 +51,12 @@ class BaseFormatConverter(ClassProvider):
     def get_value_from_config(self, key):
         return get_parameter_value_from_config(self.config, self.parameters(), key)
 
-    def convert(self, check_content=False, **kwargs):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         """
         Converts specific annotation format to the ResultRepresentation specific for current dataset/task.
         Arguments:
             check_content: bool flag which enable dataset files (e. g. images, gt segmentation masks) existence checking
+            progress_callback: callback function for handling conversion progress status
 
         Returns:
             instance of ConverterReturn, where:
