@@ -40,8 +40,9 @@ Image, name - `data`, shape - [1x3x299x299], format [BxCxHxW],
 - `H` - image height
 - `W` - image width
 
-   Expected color order - RGB.
-   Mean values - [127.5, 127.5, 127.5], scale factor for each channel - 127.5
+Expected color order - `RGB`.
+
+Mean values - [127.5, 127.5, 127.5], scale factor for each channel - 127.5
 
 ### Converted model
 
@@ -53,7 +54,7 @@ Image, name - `data`, shape - [1x3x299x299], format [BxCxHxW],
 - `H` - image height
 - `W` - image width
 
-   Expected color order - RGB.
+Expected color order - `BGR`.
 
 ## Output
 

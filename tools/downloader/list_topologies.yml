@@ -3519,6 +3519,7 @@ topologies:
       - --input=data
       - --mean_values=data[123.675,116.28,103.53]
       - --scale_values=data[58.624,57.12,57.375]
+      - --reverse_input_channels
       - --output=prob
       - --input_model=$conv_dir/mobilenet-v2.onnx
     license: https://raw.githubusercontent.com/tonylins/pytorch-mobilenet-v2/master/LICENSE
@@ -3531,7 +3532,7 @@ topologies:
       in TorchVision package (see here <https://github.com/pytorch/vision>).
 
       The model input is a blob that consists of a single image of "1x3x299x299" in
-      RGB order. 
+      RGB order.
 
       The model output is typical object classifier for the 1000 different classifications
       matching with those in the ImageNet database.
@@ -3557,6 +3558,7 @@ topologies:
       - --input=data
       - --mean_values=data[127.5]
       - --scale_values=data[127.5]
+      - --reverse_input_channels
       - --output=prob
       - --input_model=$conv_dir/googlenet-v3.onnx
     license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE
@@ -3569,7 +3571,7 @@ topologies:
       package (see here <https://github.com/pytorch/vision>).
 
       The model input is a blob that consists of a single image of "1x3x224x224" in
-      RGB order. 
+      RGB order.
 
       The model output is typical object classifier for the 1000 different classifications
       matching with those in the ImageNet database.
@@ -3595,6 +3597,7 @@ topologies:
       - --input=data
       - --mean_values=data[123.675,116.28,103.53]
       - --scale_values=data[58.395,57.12,57.375]
+      - --reverse_input_channels
       - --output=prob
       - --input_model=$conv_dir/resnet-v1-50.onnx
     license: https://raw.githubusercontent.com/pytorch/vision/master/LICENSE
