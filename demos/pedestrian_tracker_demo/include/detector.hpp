@@ -23,8 +23,6 @@ struct DetectorConfig : public CnnConfig {
     float increase_scale_x{1.f};
     float increase_scale_y{1.f};
     bool is_async = false;
-    int input_h = 320;
-    int input_w = 544;
 };
 
 class ObjectDetector {
@@ -36,6 +34,7 @@ private:
 
     InferenceEngine::ExecutableNetwork net_;
     std::string input_name_;
+    std::string im_info_name_;
     std::string output_name_;
     int max_detections_count_;
     int object_size_;
