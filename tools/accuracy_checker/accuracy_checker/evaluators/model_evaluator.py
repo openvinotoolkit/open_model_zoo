@@ -56,10 +56,10 @@ class ModelEvaluator:
         data_source = dataset_config.get('data_source')
         dataset = Dataset(dataset_config)
         if isinstance(data_reader_config, str):
-            data_reader = BaseReader.provide(data_reader_config, data_source, dataset.annotation)
+            data_reader = BaseReader.provide(data_reader_config, data_source, annotations=dataset.annotation)
         elif isinstance(data_reader_config, dict):
             data_reader = BaseReader.provide(
-                data_reader_config['type'], data_source, data_reader_config, dataset.annotation
+                data_reader_config['type'], data_source, data_reader_config, annotations=dataset.annotation
             )
         else:
             raise ConfigError('reader should be dict or string')

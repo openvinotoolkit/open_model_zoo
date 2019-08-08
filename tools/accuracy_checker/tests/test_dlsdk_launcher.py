@@ -34,6 +34,14 @@ from tests.common import update_dict
 from accuracy_checker.data_readers import DataRepresentation
 from accuracy_checker.utils import contains_all
 
+def check_no_gpu():
+    try:
+        import openvino.inference_engine as ie
+        gpu_plugin = ie.IEPlugin('GPU')
+        del gpu_plugin
+        return False
+    except (ImportError, RuntimeError):
+        return True
 
 @pytest.fixture()
 def mock_inference_engine(mocker):
@@ -99,7 +107,7 @@ class TestDLSDKLauncherInfer:
         dlsdk_test_model = get_dlsdk_test_model(models_dir, {'batch': 2})
         assert dlsdk_test_model.batch == 2
 
-
+@pytest.mark.skipif(check_no_gpu(), reason="GPU is not installed")
 @pytest.mark.usefixtures('mock_path_exists')
 class TestDLSDKLauncherAffinity:
     def test_dlsdk_launcher_valid_affinity_map(self, mocker, models_dir):
@@ -109,7 +117,7 @@ class TestDLSDKLauncherAffinity:
             'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
-        dlsdk_test_model = get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,GPU', 'affinity_map' : './affinity_map.yml'})
+        dlsdk_test_model = get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,GPU', 'affinity_map': './affinity_map.yml'})
         layers = dlsdk_test_model.network.layers
         for key, value in affinity_map.items():
             assert layers[key].affinity == value

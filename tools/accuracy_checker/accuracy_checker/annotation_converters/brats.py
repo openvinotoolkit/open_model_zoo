@@ -18,10 +18,11 @@ from pathlib import Path
 import warnings
 
 from ..representation import BrainTumorSegmentationAnnotation
-from ..utils import get_path, read_txt, read_pickle
+from ..utils import get_path, read_txt, read_pickle, check_file_existence
 from ..config import StringField, PathField
 from .format_converter import DirectoryBasedAnnotationConverter
 from ..representation.segmentation_representation import GTMaskLoader
+from .format_converter import ConverterReturn
 
 
 class BratsConverter(DirectoryBasedAnnotationConverter):
@@ -43,18 +44,26 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
         self.image_folder = self.get_value_from_config('image_folder')
         self.mask_folder = self.get_value_from_config('mask_folder')
 
-    def convert(self):
+    def convert(self, check_content=False, **kwargs):
         mask_folder = Path(self.mask_folder)
         image_folder = Path(self.image_folder)
         image_dir = get_path(self.data_dir / image_folder, is_directory=True)
         mask_dir = get_path(self.data_dir / mask_folder, is_directory=True)
+        content_check_erros = [] if check_content else None
 
         annotations = []
         for file_in_dir in image_dir.iterdir():
             file_name = file_in_dir.parts[-1]
             mask = mask_dir / file_name
             if not mask.exists():
-                warnings.warn('Annotation mask for {} does not exists. File will be ignored.'.format(file_name))
+                if not check_content:
+                    warnings.warn('Annotation mask for {} does not exists. File will be ignored.'.format(file_name))
+                else:
+                    content_check_erros.append(
+                        '{}: '.format(str(file_in_dir)) +
+                        'annotation mask does not exists, please remove this file or add gt mask '
+                        '({}).'.format(str(mask))
+                    )
                 continue
             annotation = BrainTumorSegmentationAnnotation(
                 str(image_folder / file_name),
@@ -63,7 +72,7 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
 
             annotations.append(annotation)
 
-        return annotations
+        return ConverterReturn(annotations, None, content_check_erros)
 
 
 class BratsNumpyConverter(DirectoryBasedAnnotationConverter):
@@ -97,41 +106,46 @@ class BratsNumpyConverter(DirectoryBasedAnnotationConverter):
         self.data_suffix = self.get_value_from_config('data_suffix')
         self.label_suffix = self.get_value_from_config('label_suffix')
 
-    def convert(self):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         ids = read_pickle(get_path(self.ids_file), encoding='latin1')
         boxes = read_pickle(get_path(self.boxes_file), encoding='latin1') if self.boxes_file else None
+        check_content_errors = [] if check_content else None
 
         annotations = []
+        num_iterations = len(ids)
         for i, name in enumerate(ids):
             data = name + self.data_suffix + '.npy'
             label = name + self.label_suffix + '.npy'
+            files_exists = True
 
-            if not self._check_files(data, label):
-                warnings.warn('One of files {} or {} is not exist. Files will be ignored'.format(data, label))
+            if not check_file_existence(self.data_dir / data):
+                warning_message = '{}: does not exist'.format(self.data_dir / data)
+                warnings.warn(warning_message)
+                if check_content:
+                    check_content_errors.append(warning_message)
+                files_exists = False
+
+            if not check_file_existence(self.data_dir / label):
+                warning_message = '{}: does not exist'.format(self.data_dir / label)
+                warnings.warn(warning_message)
+                if check_content:
+                    check_content_errors.append(warning_message)
+                files_exists = False
+
+            if not files_exists:
                 continue
 
             box = boxes[i, :, :] if self.boxes_file else None
 
-            annotation = BrainTumorSegmentationAnnotation(
-                data,
-                label,
-                GTMaskLoader.NUMPY,
-                box
-            )
+            annotation = BrainTumorSegmentationAnnotation(data, label, GTMaskLoader.NUMPY, box)
 
             annotations.append(annotation)
+            if progress_callback is not None and i % progress_interval == 0:
+                progress_callback(i / num_iterations * 100)
 
-        return annotations, self._get_meta()
+        return ConverterReturn(annotations, self._get_meta(), check_content_errors)
 
     def _get_meta(self):
         if not self.labels_file:
             return None
         return {'label_map': [line for line in read_txt(self.labels_file)]}
-
-    def _check_files(self, data, label):
-        try:
-            get_path(self.data_dir / data)
-            get_path(self.data_dir / label)
-            return True
-        except (FileNotFoundError, IsADirectoryError):
-            return False

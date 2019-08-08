@@ -20,7 +20,8 @@ from ..config import PathField
 from ..representation import ClassificationAnnotation
 from ..utils import get_path, read_txt
 
-from .format_converter import BaseFormatConverter
+from .format_converter import BaseFormatConverter, ConverterReturn
+
 
 class SampleConverter(BaseFormatConverter):
     """
@@ -36,7 +37,7 @@ class SampleConverter(BaseFormatConverter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'data_dir' : PathField(is_directory=True, description="Path to sample dataset root directory.")
+            'data_dir': PathField(is_directory=True, description="Path to sample dataset root directory.")
         })
         return parameters
 
@@ -47,7 +48,7 @@ class SampleConverter(BaseFormatConverter):
         """
         self.data_dir = self.config['data_dir']
 
-    def convert(self):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         """
         This method is executed automatically when convert.py is started.
         All arguments are automatically got from command line arguments or config file in method configure
@@ -61,13 +62,14 @@ class SampleConverter(BaseFormatConverter):
 
         # read and convert annotation
         labels = self._read_labels(dataset_directory / 'labels.txt')
-        annotations = self._convert_annotations(dataset_directory / 'test', labels)
+        images_dir = dataset_directory / 'test'
+        annotations = self._convert_annotations(images_dir, labels, progress_callback, progress_interval)
 
         # convert label list to label map
         label_map = {i: labels[i] for i in range(len(labels))}
         metadata = {'label_map': label_map}
 
-        return annotations, metadata
+        return ConverterReturn(annotations, metadata, None)
 
     @staticmethod
     def _read_labels(labels_file):
@@ -78,7 +80,7 @@ class SampleConverter(BaseFormatConverter):
         return read_txt(labels_file)
 
     @staticmethod
-    def _convert_annotations(test_dir, labels):
+    def _convert_annotations(test_dir, labels, progress_callback, progress_interval):
         """
         Create annotation representations list.
         """
@@ -88,8 +90,9 @@ class SampleConverter(BaseFormatConverter):
         file_pattern_regex = re.compile(r'\d+_(\w+)\.png')
 
         annotations = []
+        num_iterations = len(test_dir.glob('*.png'))
         # iterate over all png images in test directory
-        for image in test_dir.glob('*.png'):
+        for image_id, image in enumerate(test_dir.glob('*.png')):
             # get file name (e.g. from /foo/bar/image.png we get image.png)
             image_base = str(image.parts[-1])
 
@@ -104,5 +107,7 @@ class SampleConverter(BaseFormatConverter):
             # Provided parameters can be differ depends on task.
             # ClassificationAnnotation contains image identifier and label for evaluation.
             annotations.append(ClassificationAnnotation(image_base, class_id))
+            if progress_callback is not None and image_id % progress_interval == 0:
+                progress_callback(image_id / num_iterations * 100)
 
         return annotations
