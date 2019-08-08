@@ -334,8 +334,8 @@ struct TextRecognitionPipeline::Impl
     Ptr<dnn::Model> recognitionNet;
 };
 
-TextRecognitionPipeline::TextRecognitionPipeline(const Topology& detection,
-                                                 const Topology& recognition)
+TextRecognitionPipeline::TextRecognitionPipelineImpl(const Topology& detection,
+                                                     const Topology& recognition)
     : impl(new Impl())
 {
     impl->detectionNet = DnnModel(detection);

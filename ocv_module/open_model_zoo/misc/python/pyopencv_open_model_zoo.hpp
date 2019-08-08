@@ -48,10 +48,15 @@ static void downloadFile(const std::string& url, const std::string& sha,
 {
     PyGILState_STATE gstate = PyGILState_Ensure();
 
-    if (utils::fs::exists(path) && sha == getSHA(path))
+    if (utils::fs::exists(path))
     {
-        PyGILState_Release(gstate);
-        return;
+        std::string currSHA = getSHA(path);
+        if (sha == currSHA)
+        {
+            PyGILState_Release(gstate);
+            return;
+        }
+        CV_LOG_WARNING(NULL, "Hash mismatch for " + path + "\n" + "expected: " + sha + "\ngot:      " + currSHA);
     }
 
     utils::fs::createDirectories(utils::fs::getParent(path));
@@ -164,11 +169,17 @@ void Topology::convertToIR(String& xmlPath, String& binPath) const
     PyRun_SimpleString("import mo_tf; import os; import sys");
     PyRun_SimpleString("path = os.path.join(os.path.dirname(mo_tf.__file__), 'mo.py')");
     PyRun_SimpleString(args.c_str());
+    PyRun_SimpleString("sys.argv[0] = path");
     PyRun_SimpleString("try: exec(open(path).read())\nexcept: pass");  // There is sys.exit() inside MO so wrap it to try-except
     PyGILState_Release(gstate);
 
     xmlPath = utils::fs::join(outDir, topologyName + ".xml");
     binPath = utils::fs::join(outDir, topologyName + ".bin");
+}
+
+static Ptr<TextRecognitionPipeline> createTextRecognitionPipeline(const Topology& detection, const Topology& recognition)
+{
+    return new TextRecognitionPipeline(detection, recognition);
 }
 
 }}  // namespace open_model_zoo

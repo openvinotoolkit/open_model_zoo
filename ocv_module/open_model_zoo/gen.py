@@ -109,11 +109,12 @@ impl_hdr_path = sys.argv[3]
 with open(output_hdr_path, 'wt') as output_hdr:
     output_hdr.write("#ifndef __OPENCV_OPEN_MODEL_ZOO_TOPOLOGIES_HPP__\n")
     output_hdr.write("#define __OPENCV_OPEN_MODEL_ZOO_TOPOLOGIES_HPP__\n\n")
-    output_hdr.write("namespace cv { namespace open_model_zoo {\n")
+    output_hdr.write("using namespace cv::open_model_zoo;\n\n")
+    output_hdr.write("namespace cv { namespace open_model_zoo { namespace topologies {\n")
 
     with open(impl_hdr_path, 'wt') as impl_hdr:
         impl_hdr.write("#ifdef HAVE_OPENCV_OPEN_MODEL_ZOO\n\n")
-        impl_hdr.write("namespace cv { namespace open_model_zoo {")
+        impl_hdr.write("namespace cv { namespace open_model_zoo { namespace topologies {")
 
         with open(list_topologies, 'rt') as f:
             content = yaml.safe_load(f)
@@ -132,8 +133,8 @@ with open(output_hdr_path, 'wt') as output_hdr:
 
                 output_hdr.write('    CV_EXPORTS_W Ptr<Topology> %s();\n' % alias)
 
-        impl_hdr.write("}}  // namespace cv::open_model_zoo\n\n")
+        impl_hdr.write("}}}  // namespace cv::open_model_zoo::topologies\n\n")
         impl_hdr.write("#endif  // HAVE_OPENCV_OPEN_MODEL_ZOO")
 
-    output_hdr.write("}}  // namespace cv::open_model_zoo\n\n")
+    output_hdr.write("}}}  // namespace cv::open_model_zoo::topologies\n\n")
     output_hdr.write("#endif  // __OPENCV_OPEN_MODEL_ZOO_TOPOLOGIES_HPP__")

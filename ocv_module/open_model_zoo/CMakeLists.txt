@@ -16,4 +16,4 @@ if(NOT HAVE_opencv_dnn)
   ocv_list_filterout(OPENCV_MODULE_${the_module}_HEADERS "dnn.hpp")
 endif()
 
-ocv_create_module()
+ocv_create_module(${INF_ENGINE_TARGET})
