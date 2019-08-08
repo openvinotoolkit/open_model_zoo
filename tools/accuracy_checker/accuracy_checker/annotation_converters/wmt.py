@@ -35,11 +35,11 @@ class WMTConverter(BaseFormatConverter):
         self.reference_file = self.get_value_from_config('reference_file')
 
     def convert(self, *args, **kwargs):
-        with open(str(self.input_file), 'r') as input_f:
+        with open(str(self.input_file), 'r', encoding="utf-8") as input_f:
             input_lines = input_f.readlines()
 
         subword_option = self.reference_file.name.split('.')[2]
-        with open(str(self.reference_file), 'r') as ref_f:
+        with open(str(self.reference_file), 'r', encoding="utf-8") as ref_f:
             reference_lines = ref_f.readlines()
 
         reference_list = []

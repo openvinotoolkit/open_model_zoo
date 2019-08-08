@@ -49,6 +49,10 @@ AccuracyChecker supports following set of adapters:
   * `confidence_threshold` - lower bound for valid boxes scores (optional, default 0.05).
   * `nms_threshold` - overlap threshold for NMS (optional, default 0.5).
   * `keep_top_k ` - maximal number of boxes which should be kept (optional, default 200).
+* `ssd_onnx` - converting output of SSD-based model from Pytorch with NonMaxSuppression layer.
+  * `labels_out` - name of output layer with labels
+  * `scores_out`- name of output layer with scores
+  * `bboxes_out` - name of output layer with bboxes
 * `tf_object_detection` - converting output of detection models from TensorFlow object detection API to `DetectionPrediction`.
   * `classes_out` - name of output layer with predicted classes.
   * `boxes_out` - name of output layer with predicted boxes coordinates in format [y0, x0, y1, x1].
