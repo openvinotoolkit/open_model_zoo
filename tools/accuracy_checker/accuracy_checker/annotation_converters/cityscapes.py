@@ -18,7 +18,8 @@ from pathlib import Path
 from ..representation import SegmentationAnnotation
 from ..representation.segmentation_representation import GTMaskLoader
 from ..config import PathField, StringField, BoolField
-from .format_converter import BaseFormatConverter
+from .format_converter import BaseFormatConverter, ConverterReturn
+from ..utils import check_file_existence
 
 
 train_meta = {
@@ -101,14 +102,22 @@ class CityscapesConverter(BaseFormatConverter):
         self.images_suffix = self.get_value_from_config('images_suffix')
         self.use_full_label_map = self.get_value_from_config('use_full_label_map')
 
-    def convert(self):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         images = list(self.dataset_root.rglob(r'{}/*/*{}.png'.format(self.images_dir, self.images_suffix)))
+        content_errors = None if not check_content else []
         annotations = []
-        for image in images:
+        num_iterations = len(images)
+        for idx, image in enumerate(images):
             identifier = str(Path(self.images_dir).joinpath(*image.parts[-2:]))
             mask = Path(self.masks_dir) / image.parts[-2] / self.masks_suffix.join(
                 str(image.name).split(self.images_suffix)
             )
+            if check_content:
+                if not check_file_existence(self.dataset_root / mask):
+                    content_errors.append('{}: does not exist'.format(self.dataset_root / mask))
             annotations.append(SegmentationAnnotation(identifier, mask, mask_loader=GTMaskLoader.PILLOW))
+            if progress_callback is not None and idx % progress_interval == 0:
+                progress_callback(idx / num_iterations * 100)
+        meta = full_dataset_meta if self.use_full_label_map else train_meta
 
-        return annotations, full_dataset_meta if self.use_full_label_map else train_meta
+        return ConverterReturn(annotations, meta, content_errors)

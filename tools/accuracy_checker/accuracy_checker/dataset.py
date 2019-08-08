@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import warnings
 from copy import deepcopy
 from pathlib import Path
 
@@ -161,10 +162,12 @@ class Dataset:
         converter = conversion_params['converter']
         annotation_converter = BaseFormatConverter.provide(converter, conversion_params)
         results = annotation_converter.convert()
-        if isinstance(results, tuple) and len(results) == 2:
-            annotation, meta = results
-        else:
-            annotation, meta = results, None
+        annotation = results.annotations
+        meta = results.meta
+        errors = results.content_check_errors
+        if errors:
+            warnings.warn('Following problems were found during conversion:'
+                          '\n{}'.format('\n'.join(errors)))
 
         return annotation, meta
 

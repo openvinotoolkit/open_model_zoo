@@ -16,9 +16,9 @@ limitations under the License.
 
 from ..config import PathField, NumberField
 from ..representation import DetectionAnnotation
-from ..utils import convert_bboxes_xywh_to_x1y1x2y2, read_xml, read_txt
+from ..utils import convert_bboxes_xywh_to_x1y1x2y2, read_xml, read_txt, check_file_existence
 
-from .format_converter import BaseFormatConverter
+from .format_converter import BaseFormatConverter, ConverterReturn
 
 
 class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
@@ -40,10 +40,14 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
                             "You can provide another value, if you want to use this dataset "
                             "for separate label validation."
             ),
-            'background_label' : NumberField(
+            'background_label': NumberField(
                 value_type=int, optional=True,
                 description="Specifies which index will be used for background label. "
                             "You can not provide this parameter if your dataset has not background label."
+            ),
+            'data_dir': PathField(
+                is_directory=True, optional=True,
+                description='this parameter used only for dataset image existence validation purposes.'
             )
         })
         return parameters
@@ -53,8 +57,15 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
         self.image_names_file = self.get_value_from_config('image_names_file')
         self.label_start = self.get_value_from_config('label_start')
         self.background_label = self.get_value_from_config('background_label')
+        self.data_dir = self.get_value_from_config('data_dir')
+        if self.data_dir is None:
+            self.data_dir = self.annotation_file.parent
 
-    def convert(self):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+        def update_progress(frame_id):
+            if progress_callback is not None and frame_id % progress_interval == 0:
+                progress_callback(frame_id / num_iterations * 100)
+
         root = read_xml(self.annotation_file)
 
         labels_set = self.get_label_set(root)
@@ -62,12 +73,14 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
         labels_set = sorted(labels_set)
         class_to_ind = dict(zip(labels_set, list(range(self.label_start, len(labels_set) + self.label_start + 1))))
         label_map = {}
+        content_check_errors = None
         for class_label, ind in class_to_ind.items():
             label_map[ind] = class_label
 
         annotations = []
         for frames in root:
-            for frame in frames:
+            num_iterations = len(frames)
+            for frame_id, frame in enumerate(frames):
                 identifier = '{}.png'.format(frame.tag)
                 labels, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], []
                 difficult_indices = []
@@ -95,9 +108,16 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
                 detection_annotation = DetectionAnnotation(identifier, labels, x_mins, y_mins, x_maxs, y_maxs)
                 detection_annotation.metadata['difficult_boxes'] = difficult_indices
                 annotations.append(detection_annotation)
+                update_progress(frame_id)
 
         if self.image_names_file:
             self.rename_identifiers(annotations, self.image_names_file)
+
+        if check_content:
+            content_check_errors = []
+            for annotation in annotations:
+                if not check_file_existence(self.data_dir / annotation.identifier):
+                    content_check_errors.append('{}: file not found'.format(self.data_dir / annotation.identifier))
 
         meta = {}
         if self.background_label:
@@ -105,7 +125,7 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
             meta['background_label'] = self.background_label
         meta['label_map'] = label_map
 
-        return annotations, meta
+        return ConverterReturn(annotations, meta, content_check_errors)
 
     @staticmethod
     def rename_identifiers(annotation_list, images_file):

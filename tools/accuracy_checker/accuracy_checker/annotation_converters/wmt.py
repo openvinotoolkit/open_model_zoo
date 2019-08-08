@@ -1,5 +1,5 @@
 import re
-from .format_converter import BaseFormatConverter
+from .format_converter import BaseFormatConverter, ConverterReturn
 from ..config import PathField
 from ..representation import MachineTranslationAnnotation
 
@@ -34,7 +34,7 @@ class WMTConverter(BaseFormatConverter):
         self.input_file = self.get_value_from_config('input_file')
         self.reference_file = self.get_value_from_config('reference_file')
 
-    def convert(self, *args, **kwargs):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         with open(str(self.input_file), 'r', encoding="utf-8") as input_f:
             input_lines = input_f.readlines()
 
@@ -53,7 +53,10 @@ class WMTConverter(BaseFormatConverter):
             input_list.append(input_line.split(" "))
 
         annotations = []
+        num_iterations = len(input_list)
         for identifier, (source, ref) in enumerate(zip(input_list, reference_list)):
             annotations.append(MachineTranslationAnnotation(identifier, source, ref))
+            if progress_callback and identifier % progress_interval == 0:
+                progress_callback(identifier / num_iterations * 100)
 
-        return annotations
+        return ConverterReturn(annotations, None, None)
