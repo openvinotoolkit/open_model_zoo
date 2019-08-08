@@ -214,11 +214,13 @@ def in_interval(value, interval):
 
     return minimum <= value < maximum
 
+
 def is_config_input(input_name, config_inputs):
     for config_input in config_inputs:
         if config_input['name'] == input_name:
             return True
     return False
+
 
 def finalize_metric_result(values, names):
     result_values, result_names = [], []
@@ -261,8 +263,8 @@ def read_txt(file: Union[str, Path], sep='\n', **kwargs):
     def is_empty(string):
         return not string or string.isspace()
 
-    with get_path(file).open() as content:
-        content = content.read(**kwargs).split(sep)
+    with get_path(file).open(**kwargs) as content:
+        content = content.read().split(sep)
         content = list(filter(lambda string: not is_empty(string), content))
 
         return list(map(str.strip, content))

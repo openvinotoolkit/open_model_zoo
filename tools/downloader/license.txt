@@ -36,6 +36,14 @@ License terms:
 
 ==================================================================================================
 
+* caffenet - CaffeNet https://arxiv.org/abs/1408.5093
+
+License terms:
+
+    This model is released for unrestricted use.
+
+==================================================================================================
+
 * squeezenet1.0, squeezenet1.1 - SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and $<$0.5MB model size https://github.com/DeepScale/SqueezeNet
 
 License terms:

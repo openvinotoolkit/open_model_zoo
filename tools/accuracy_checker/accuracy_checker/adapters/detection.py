@@ -643,3 +643,35 @@ class SSDAdapterMxNet(Adapter):
             result.append(DetectionPrediction(identifier, *zip(*detections)))
 
         return result
+
+
+class SSDONNXAdapter(Adapter):
+    __provider__ = 'ssd_onnx'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update(
+            {
+                'labels_out': StringField(description='name of output layer with labels'),
+                'scores_out': StringField(description='name of output layer with scores'),
+                'bboxes_out': StringField(description='name of output layer with bboxes')
+            }
+        )
+        return parameters
+
+    def configure(self):
+        self.labels_out = self.get_value_from_config('labels_out')
+        self.scores_out = self.get_value_from_config('scores_out')
+        self.bboxes_out = self.get_value_from_config('bboxes_out')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        results = []
+        for identifier, bboxes, scores, labels in zip(
+                identifiers, raw_outputs[self.bboxes_out], raw_outputs[self.scores_out], raw_outputs[self.labels_out]
+        ):
+            x_mins, y_mins, x_maxs, y_maxs = bboxes.T
+            results.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
+
+        return results
