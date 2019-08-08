@@ -1593,7 +1593,7 @@ topologies:
       - --input_model=$dl_dir/bvlc_reference_caffenet.caffemodel
       - --input_proto=$dl_dir/deploy.prototxt
     framework: "caffe"
-    license: https://raw.githubusercontent.com/BVLC/caffe/master/LICENSE
+    license: https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_reference_caffenet/readme.md
 
   - name: "brain-tumor-segmentation-0001"
     description: >-

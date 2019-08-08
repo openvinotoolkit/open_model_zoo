@@ -58,4 +58,4 @@ probability for each class.
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/BVLC/caffe/master/LICENSE]()
+[https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_reference_caffenet/readme.md]()
