@@ -92,10 +92,13 @@ def main():
             print()
             continue
 
+        top_format = top.framework
+
         if top.pytorch_to_onnx_args:
             if convert_to_onnx(top, output_dir, args) != 0:
                 failed_topologies.add(top.name)
                 continue
+            top_format = 'onnx'
 
         expanded_mo_args = [
             string.Template(arg).substitute(dl_dir=args.download_dir / top.subdirectory,
@@ -105,8 +108,12 @@ def main():
 
         assert len(top.precisions) == 1 # only one precision per model is supported at the moment
 
+        top_precision = next(iter(top.precisions))
+
         mo_cmd = [str(args.python), '--', str(mo_path),
-            '--output_dir={}'.format(output_dir / top.subdirectory / next(iter(top.precisions))),
+            '--framework={}'.format(top_format),
+            '--data_type={}'.format(top_precision),
+            '--output_dir={}'.format(output_dir / top.subdirectory / top_precision),
             '--model_name={}'.format(top.name),
             *expanded_mo_args]
 

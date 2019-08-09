@@ -37,8 +37,6 @@ files:
       $type: google_drive
       id: 1T2ldCISt5N2TEUfv6ggRB1dw0cucTqT2
 model_optimizer_args:
-  - --framework=mxnet
-  - --data_type=FP32
   - --input_shape=[1,4,128,128,128]
   - --input=data_crop
   - --output=blockgrad7

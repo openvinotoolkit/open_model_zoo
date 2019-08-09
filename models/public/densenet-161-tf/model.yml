@@ -30,8 +30,6 @@ postprocessing:
     format: gztar
     file: tf-densenet161.tar.gz
 model_optimizer_args:
-  - --framework=tf
-  - --data_type=FP32
   - --reverse_input_channels
   - --input_shape=[1,224,224,3]
   - --input=Placeholder

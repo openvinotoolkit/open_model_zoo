@@ -28,8 +28,6 @@ postprocessing:
     format: zip
     file: 20180408-102900.zip
 model_optimizer_args:
-  - --framework=tf
-  - --data_type=FP32
   - --freeze_placeholder_with_value=phase_train->False
   - --reverse_input_channels
   - --input_shape=[1,160,160,3],[1]

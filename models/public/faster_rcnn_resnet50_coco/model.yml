@@ -25,8 +25,6 @@ postprocessing:
     format: gztar
     file: faster_rcnn_resnet50_coco_2018_01_28.tar.gz
 model_optimizer_args:
-  - --framework=tf
-  - --data_type=FP32
   - --reverse_input_channels
   - --input_shape=[1,600,600,3]
   - --input=image_tensor
