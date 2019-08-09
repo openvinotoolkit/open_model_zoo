@@ -275,7 +275,7 @@ class Topology:
                 mo_args = [validate_string('"model_optimizer_args" #{}'.format(i), arg)
                     for i, arg in enumerate(top['model_optimizer_args'])]
 
-                precisions = {'FP32'}
+                precisions = {'FP16', 'FP32'}
             else:
                 mo_args = None
 

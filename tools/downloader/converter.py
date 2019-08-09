@@ -106,28 +106,26 @@ def main():
                                             conv_dir=output_dir / top.subdirectory)
             for arg in top.mo_args]
 
-        assert len(top.precisions) == 1 # only one precision per model is supported at the moment
+        for top_precision in top.precisions:
+            mo_cmd = [str(args.python), '--', str(mo_path),
+                '--framework={}'.format(top_format),
+                '--data_type={}'.format(top_precision),
+                '--output_dir={}'.format(output_dir / top.subdirectory / top_precision),
+                '--model_name={}'.format(top.name),
+                *expanded_mo_args]
 
-        top_precision = next(iter(top.precisions))
+            print('========= {}Converting {} to IR ({})'.format(
+                '(DRY RUN) ' if args.dry_run else '', top.name, top_precision))
 
-        mo_cmd = [str(args.python), '--', str(mo_path),
-            '--framework={}'.format(top_format),
-            '--data_type={}'.format(top_precision),
-            '--output_dir={}'.format(output_dir / top.subdirectory / top_precision),
-            '--model_name={}'.format(top.name),
-            *expanded_mo_args]
+            print('Conversion command:', ' '.join(map(quote_arg, mo_cmd)))
 
-        print('========= {}Converting {}'.format('(DRY RUN) ' if args.dry_run else '', top.name))
+            if not args.dry_run:
+                print(flush=True)
 
-        print('Conversion command:', ' '.join(map(quote_arg, mo_cmd)))
+                if subprocess.run(mo_cmd).returncode != 0:
+                    failed_topologies.add(top.name)
 
-        if not args.dry_run:
-            print(flush=True)
-
-            if subprocess.run(mo_cmd).returncode != 0:
-                failed_topologies.add(top.name)
-
-        print()
+            print()
 
     if failed_topologies:
         print('FAILED:')
