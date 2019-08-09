@@ -99,8 +99,9 @@ std::vector<std::string> split(const std::string &s, char delim) {
 
 std::vector<std::string> parseDevices(const std::string& device_string) {
     std::string comma_separated_devices = device_string;
-    if (comma_separated_devices.find(":") != std::string::npos) {
-        comma_separated_devices = comma_separated_devices.substr(comma_separated_devices.find(":") + 1);
+    const std::string::size_type colon_position = comma_separated_devices.find(":");
+    if (colon_position != std::string::npos) {
+        comma_separated_devices = comma_separated_devices.substr(colon_position + 1);
     }
     auto devices = split(comma_separated_devices, ',');
     for (auto& device : devices)
