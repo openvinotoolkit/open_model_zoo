@@ -64,6 +64,8 @@ def main():
         help='convert only topologies whose names match at least one of the patterns in the specified file')
     parser.add_argument('--all', action='store_true', help='convert all topologies from the configuration file')
     parser.add_argument('--print_all', action='store_true', help='print all available topologies')
+    parser.add_argument('--precisions', metavar='PREC[,PREC...]',
+        help='run only conversions that produce models with the specified precisions')
     parser.add_argument('-p', '--python', type=Path, metavar='PYTHON', default=sys.executable,
         help='Python executable to run Model Optimizer with')
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
@@ -80,6 +82,14 @@ def main():
             sys.exit('Unable to locate Model Optimizer. '
                 + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
 
+    if args.precisions is None:
+        requested_precisions = common.KNOWN_PRECISIONS
+    else:
+        requested_precisions = set(args.precisions.split(','))
+        unknown_precisions = requested_precisions - common.KNOWN_PRECISIONS
+        if unknown_precisions:
+            sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
+
     topologies = common.load_topologies_from_args(parser, args)
 
     output_dir = args.download_dir if args.output_dir is None else args.output_dir
@@ -88,7 +98,13 @@ def main():
 
     for top in topologies:
         if top.mo_args is None:
-            print('========= Skipping {} (no conversion defined)'.format(top.name))
+            print('========= Skipping {} (no conversions defined)'.format(top.name))
+            print()
+            continue
+
+        top_precisions = requested_precisions & top.precisions
+        if not top_precisions:
+            print('========= Skipping {} (all conversions skipped)'.format(top.name))
             print()
             continue
 
@@ -106,7 +122,7 @@ def main():
                                             conv_dir=output_dir / top.subdirectory)
             for arg in top.mo_args]
 
-        for top_precision in top.precisions:
+        for top_precision in top_precisions:
             mo_cmd = [str(args.python), '--', str(mo_path),
                 '--framework={}'.format(top_format),
                 '--data_type={}'.format(top_precision),

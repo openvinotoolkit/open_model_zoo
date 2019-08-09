@@ -114,6 +114,16 @@ into a different directory tree, use the `-o`/`--output_dir` option:
 The `--all` option can be replaced with other filter options to convert only
 a subset of models. See the "Shared options" section.
 
+By default, the script will produce models in every precision that is supported
+for conversion. To only produce models in a specific precision, use the `--precisions`
+option:
+
+```sh
+./converter.py --all --precisions=FP16
+```
+
+If the specified precision is not supported for a model, that model will be skipped.
+
 The script will attempt to locate Model Optimizer using the environment
 variables set by the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
 script. You can override this heuristic with the `--mo` option:
