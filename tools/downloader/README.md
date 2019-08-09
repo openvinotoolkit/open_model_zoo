@@ -28,6 +28,13 @@ For the model converter, you will also need to install the OpenVINO&trade;
 toolkit and the prerequisite libraries for Model Optimizer. See the
 [OpenVINO toolkit documentation](https://docs.openvinotoolkit.org/) for details.
 
+If you using models from PyTorch framework, you will also need to use intermediate
+conversion to ONNX format. To use automatic conversion install additional dependencies:
+
+```sh
+python3 -mpip install --user -r ./requirements-pytorch.in 
+```
+
 Model downloader usage
 ----------------------
 
@@ -81,7 +88,8 @@ The basic usage is to run the script like this:
 ```
 
 This will convert all models into the Inference Engine IR format. Models that
-were originally in that format are ignored.
+were originally in that format are ignored. Models in PyTorch's format will be 
+converted in ONNX format first.
 
 The current directory must be the root of a download tree created by the model
 downloader. To specify a different download tree path, use the `-d`/`--download_dir`
@@ -97,6 +105,7 @@ into a different directory tree, use the `-o`/`--output_dir` option:
 ```sh
 ./converter.py --all --output_dir my/output/directory
 ```
+>Note: models in intermediate format are placed to this directory too.
 
 The `--all` option can be replaced with other filter options to convert only
 a subset of models. See the "Shared options" section.
@@ -149,7 +158,7 @@ describing a single model. Each such object has the following keys:
 * `description`: text describing the model. Paragraphs are separated by line feed characters.
 
 * `framework`: a string identifying the framework whose format the model is downloaded in.
-  Current possible values are `dldt` (Inference Engine IR), `caffe`, `mxnet` and `tf` (TensorFlow).
+  Current possible values are `dldt` (Inference Engine IR), `caffe`, `mxnet`, `pytorch` and `tf` (TensorFlow).
   Additional possible values might be added in the future.
 
 * `license_url`: an URL for the license that the model is distributed under.

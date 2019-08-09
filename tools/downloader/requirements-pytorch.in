@@ -1,0 +1,4 @@
+onnx
+scipy           # via torchvision
+torch
+torchvision
