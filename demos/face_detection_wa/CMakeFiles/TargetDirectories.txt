@@ -1,0 +1,3 @@
+/home/volskig/projects/PR3/CMakeFiles/rebuild_cache.dir
+/home/volskig/projects/PR3/CMakeFiles/three.dir
+/home/volskig/projects/PR3/CMakeFiles/edit_cache.dir
