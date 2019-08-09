@@ -29,3 +29,12 @@ from cv2.open_model_zoo import squeezenet1_0
 
 net = squeezenet1_0()
 ```
+
+## Tests
+
+To run Python tests, build the module and type the following command:
+```bash
+export OPENCV_PYTEST_FILTER=test_open_model_zoo
+cd ~/open_model_zoo/ocv_module/open_model_zoo/misc/python/test
+python3 ~/opencv/modules/python/test/test.py --repo ~/opencv -v
+```

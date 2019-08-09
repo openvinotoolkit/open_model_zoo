@@ -14,6 +14,33 @@ namespace cv { namespace open_model_zoo {
 
         Topology(const std::map<std::string, std::string>& config);
 
+        /**
+         * @brief Convert model from native framework to OpenVINO Intermadiate Representation (IR)
+         * @param[out] xmlPath Path to generated .xml file.
+         * @param[out] binPath Path to generated .bin file.
+         *
+         * This method calls Model Optimizer Python tool with arguments from
+         * topology's description. If model is already in IR format or there are
+         * already converted files - returns paths without MO invocation.
+         * @note Method is available from Python3 only.
+         */
+        CV_WRAP void convertToIR(CV_OUT String& xmlPath, CV_OUT String& binPath) const;
+
+        /**
+         * @brief Get a name of topology.
+         *
+         * Name is generated from description file. Symbols '-' and '.' are replaced to '_'
+         *
+         * OpenVINO IR models may additionally have precision prefix which specifies
+         * weights precision (FP32 models have no prefix). In example,
+         * `face_detection_retail_0004` for FP32, `face_detection_retail_0004_fp16` for FP16
+         *
+         * OpenVINO IR models with version digits have aliases. In example, there is
+         * `face_detection_retail` for `face_detection_retail_0004`. If there are
+         * multiple versions, alias is generated for the highest version:
+         * `face_detection_retail_0004` and `face_detection_retail_0005` but
+         * `face_detection_retail` is the same as `face_detection_retail_0005`.
+         */
         CV_WRAP String getName() const;
 
         CV_WRAP void download();
@@ -44,8 +71,6 @@ namespace cv { namespace open_model_zoo {
         CV_WRAP void getInputShape(CV_OUT std::vector<int>& shape) const;
 
         std::map<String, String> getModelOptimizerArgs() const;
-
-        CV_WRAP void convertToIR(CV_OUT String& xmlPath, CV_OUT String& binPath) const;
 
     protected:
         struct Impl;

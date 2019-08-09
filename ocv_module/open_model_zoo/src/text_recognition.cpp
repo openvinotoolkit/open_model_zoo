@@ -339,10 +339,7 @@ TextRecognitionPipeline::TextRecognitionPipelineImpl(const Topology& detection,
     : impl(new Impl())
 {
     impl->detectionNet = DnnModel(detection);
-    impl->detectionNet->setInputSize(1280, 768);
-
     impl->recognitionNet = DnnModel(recognition);
-    impl->recognitionNet->setInputSize(120, 32);
 }
 
 void TextRecognitionPipeline::process(InputArray frame, std::vector<RotatedRect>& rects,

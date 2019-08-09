@@ -79,7 +79,11 @@ static void downloadFile(const std::string& url, const std::string& sha,
 
     std::string info = "print('get ' + '" + url + "')";
     PyRun_SimpleString(info.c_str());
-    PyRun_SimpleString(urlOpen.c_str());
+    if (PyRun_SimpleString(urlOpen.c_str()) == -1)
+    {
+        PyGILState_Release(gstate);
+        CV_Error(Error::StsError, "Failed to download a file");
+    }
     PyRun_SimpleString(printSize.c_str());
     PyRun_SimpleString("import sys; sys.stdout.write('  progress '); sys.stdout.flush()");
     PyRun_SimpleString("buf = r.read(BUFSIZE)");
@@ -147,6 +151,12 @@ void Topology::convertToIR(String& xmlPath, String& binPath) const
     std::string outDir = utils::fs::getParent(getModelPath());
     std::string topologyName = getName();
 
+    xmlPath = utils::fs::join(outDir, topologyName + ".xml");
+    binPath = utils::fs::join(outDir, topologyName + ".bin");
+
+    if (utils::fs::exists(xmlPath) && utils::fs::exists(binPath))
+        return;
+
     // Create a list of args
     std::string args = "";
     for (const auto& it : getModelOptimizerArgs())
@@ -160,21 +170,22 @@ void Topology::convertToIR(String& xmlPath, String& binPath) const
     }
     args += "'--output_dir=" + outDir + "', ";
     args += "'--model_name=" + topologyName + "', ";
-    args = "sys.argv = ['', " + args + "]";
 
     // We aren't able to run mo.py directly because there is also module names "mo"
     // in the same location. As a workaround we import mo_tf and detect mo.py location
     // by mo_tf.py
     PyGILState_STATE gstate = PyGILState_Ensure();
-    PyRun_SimpleString("import mo_tf; import os; import sys");
-    PyRun_SimpleString("path = os.path.join(os.path.dirname(mo_tf.__file__), 'mo.py')");
-    PyRun_SimpleString(args.c_str());
-    PyRun_SimpleString("sys.argv[0] = path");
-    PyRun_SimpleString("try: exec(open(path).read())\nexcept: pass");  // There is sys.exit() inside MO so wrap it to try-except
+    auto cmd = "import mo_tf; import os; import sys; " \
+               "path = os.path.join(os.path.dirname(mo_tf.__file__), 'mo.py'); " \
+               "sys.argv = [path, " + args + "]";
+    // There is sys.exit() inside MO so wrap it to try-except
+    auto run = "try: exec(open(path).read())\nexcept SystemExit as e: assert(e.code == 0)";
+    if (PyRun_SimpleString(cmd.c_str()) == -1 || PyRun_SimpleString(run) == -1)
+    {
+        PyGILState_Release(gstate);
+        CV_Error(Error::StsError, "Failed to run Model Optimizer");
+    }
     PyGILState_Release(gstate);
-
-    xmlPath = utils::fs::join(outDir, topologyName + ".xml");
-    binPath = utils::fs::join(outDir, topologyName + ".bin");
 }
 
 static Ptr<TextRecognitionPipeline> createTextRecognitionPipeline(const Topology& detection, const Topology& recognition)
