@@ -3633,9 +3633,9 @@ topologies:
   - name: "octave-densenet-121-0.125"
     description: >-
       The `octave-densenet-121-0.125` model is a modification of `densenet-121` from
-      the this paper <https://arxiv.org/pdf/1608.06993> with octave convolutions from
+      this paper <https://arxiv.org/pdf/1608.06993> with octave convolutions from
       Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks
-      with Octave Convolution <https://arxiv.org/abs/1904.05049> with &alpha;=0.125.
+      with Octave Convolution <https://arxiv.org/abs/1904.05049> with `alpha=0.125`.
       As origin, it's designed to perform image classification. For details about
       family of octave convolution models, check out the repository <https://github.com/facebookresearch/OctConv>.
 
@@ -3660,6 +3660,7 @@ topologies:
     model_optimizer_args:
       - --framework=mxnet
       - --data_type=FP32
+      - --reverse_input_channels
       - --mean_values=data[124,117,104]
       - --scale_values=data[59.880239521]
       - --input_shape=[1,3,224,224]
@@ -3672,12 +3673,12 @@ topologies:
 
   - name: "octave-resnet-26-0.25"
     description: >-
-      The `octave-resnet-26-0.25` model is a modification of `resnet-26` from the
-      this paper <https://arxiv.org/pdf/1512.03385.pdf> with octave convolutions from
-      Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks
-      with Octave Convolution <https://arxiv.org/abs/1904.05049> with &alpha;=0.25.
-      As origin, it's designed to perform image classification. For details about
-      family of octave convolution models, check out the repository <https://github.com/facebookresearch/OctConv>.
+      The `octave-resnet-26-0.25` model is a modification of `resnet-26` from this
+      paper <https://arxiv.org/pdf/1512.03385.pdf> with octave convolutions from Drop
+      an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with
+      Octave Convolution <https://arxiv.org/abs/1904.05049> with `alpha=0.25`. As
+      origin, it's designed to perform image classification. For details about family
+      of octave convolution models, check out the repository <https://github.com/facebookresearch/OctConv>.
 
       The model input is a blob that consists of a single image of 1x3x224x224 in
       RGB order. The RGB mean values need to be subtracted as follows: [124,117,104]
@@ -3700,6 +3701,7 @@ topologies:
     model_optimizer_args:
       - --framework=mxnet
       - --data_type=FP32
+      - --reverse_input_channels
       - --mean_values=data[124,117,104]
       - --scale_values=data[59.880239521]
       - --input_shape=[1,3,224,224]
@@ -3712,12 +3714,12 @@ topologies:
 
   - name: "octave-resnet-50-0.125"
     description: >-
-      The `octave-resnet-50-0.125` model is a modification of `resnet-50` from the
-      this paper <https://arxiv.org/pdf/1512.03385.pdf> with octave convolutions from
-      Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks
-      with Octave Convolution <https://arxiv.org/abs/1904.05049> with &alpha;=0.125.
-      As origin, it's designed to perform image classification. For details about
-      family of octave convolution models, check out the repository <https://github.com/facebookresearch/OctConv>.
+      The `octave-resnet-50-0.125` model is a modification of `resnet-50` from this
+      paper <https://arxiv.org/pdf/1512.03385.pdf> with octave convolutions from Drop
+      an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with
+      Octave Convolution <https://arxiv.org/abs/1904.05049> with `alpha=0.125`. As
+      origin, it's designed to perform image classification. For details about family
+      of octave convolution models, check out the repository <https://github.com/facebookresearch/OctConv>.
 
       The model input is a blob that consists of a single image of 1x3x224x224 in
       RGB order. The RGB mean values need to be subtracted as follows: [124,117,104]
@@ -3740,6 +3742,7 @@ topologies:
     model_optimizer_args:
       - --framework=mxnet
       - --data_type=FP32
+      - --reverse_input_channels
       - --mean_values=data[124,117,104]
       - --scale_values=data[59.880239521]
       - --input_shape=[1,3,224,224]
@@ -3752,12 +3755,12 @@ topologies:
 
   - name: "octave-resnet-101-0.125"
     description: >-
-      The `octave-resnet-101-0.125` model is a modification of `resnet-101` from the
-      this paper <https://arxiv.org/pdf/1512.03385.pdf> with octave convolutions from
-      Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks
-      with Octave Convolution <https://arxiv.org/abs/1904.05049> with &alpha;=0.125.
-      As origin, it's designed to perform image classification. For details about
-      family of octave convolution models, check out the repository <https://github.com/facebookresearch/OctConv>.
+      The `octave-resnet-101-0.125` model is a modification of `resnet-101` from this
+      paper <https://arxiv.org/pdf/1512.03385.pdf> with octave convolutions from Drop
+      an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with
+      Octave Convolution <https://arxiv.org/abs/1904.05049> with `alpha=0.125`. As
+      origin, it's designed to perform image classification. For details about family
+      of octave convolution models, check out the repository <https://github.com/facebookresearch/OctConv>.
 
       The model input is a blob that consists of a single image of 1x3x224x224 in
       RGB order. The RGB mean values need to be subtracted as follows: [124,117,104]
@@ -3780,6 +3783,7 @@ topologies:
     model_optimizer_args:
       - --framework=mxnet
       - --data_type=FP32
+      - --reverse_input_channels
       - --mean_values=data[124,117,104]
       - --scale_values=data[59.880239521]
       - --input_shape=[1,3,224,224]
@@ -3792,12 +3796,12 @@ topologies:
 
   - name: "octave-resnet-200-0.125"
     description: >-
-      The `octave-resnet-200-0.125` model is a modification of `resnet-200` from the
-      this paper <https://arxiv.org/pdf/1512.03385.pdf> with octave convolutions from
-      Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks
-      with Octave Convolution <https://arxiv.org/abs/1904.05049> with &alpha;=0.125.
-      As origin, it's designed to perform image classification. For details about
-      family of octave convolution models, check out the repository <https://github.com/facebookresearch/OctConv>.
+      The `octave-resnet-200-0.125` model is a modification of `resnet-200` from this
+      paper <https://arxiv.org/pdf/1512.03385.pdf> with octave convolutions from Drop
+      an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with
+      Octave Convolution <https://arxiv.org/abs/1904.05049> with `alpha=0.125`. As
+      origin, it's designed to perform image classification. For details about family
+      of octave convolution models, check out the repository <https://github.com/facebookresearch/OctConv>.
 
       The model input is a blob that consists of a single image of 1x3x224x224 in
       RGB order. The RGB mean values need to be subtracted as follows: [124,117,104]
@@ -3820,6 +3824,7 @@ topologies:
     model_optimizer_args:
       - --framework=mxnet
       - --data_type=FP32
+      - --reverse_input_channels
       - --mean_values=data[124,117,104]
       - --scale_values=data[59.880239521]
       - --input_shape=[1,3,224,224]
@@ -3832,12 +3837,12 @@ topologies:
 
   - name: "octave-resnext-50-0.25"
     description: >-
-      The `octave-resnext-50-0.25` model is a modification of `resnext-50` from the
-      this paper <https://arxiv.org/abs/1611.05431> with octave convolutions from
-      Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks
-      with Octave Convolution <https://arxiv.org/abs/1904.05049> with &alpha;=0.25.
-      As origin, it's designed to perform image classification. For details about
-      family of octave convolution models, check out the repository <https://github.com/facebookresearch/OctConv>.
+      The `octave-resnext-50-0.25` model is a modification of `resnext-50` from this
+      paper <https://arxiv.org/abs/1611.05431> with octave convolutions from Drop
+      an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with
+      Octave Convolution <https://arxiv.org/abs/1904.05049> with `alpha=0.25`. As
+      origin, it's designed to perform image classification. For details about family
+      of octave convolution models, check out the repository <https://github.com/facebookresearch/OctConv>.
 
       The model input is a blob that consists of a single image of 1x3x224x224 in
       RGB order. The RGB mean values need to be subtracted as follows: [124,117,104]
@@ -3860,6 +3865,7 @@ topologies:
     model_optimizer_args:
       - --framework=mxnet
       - --data_type=FP32
+      - --reverse_input_channels
       - --mean_values=data[124,117,104]
       - --scale_values=data[59.880239521]
       - --input_shape=[1,3,224,224]
@@ -3873,9 +3879,9 @@ topologies:
   - name: "octave-resnext-101-0.25"
     description: >-
       The `octave-resnext-101-0.25` model is a modification of `resnext-101` from
-      the this paper <https://arxiv.org/abs/1611.05431> with octave convolutions from
+      this paper <https://arxiv.org/abs/1611.05431> with octave convolutions from
       Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks
-      with Octave Convolution <https://arxiv.org/abs/1904.05049> with &alpha;=0.25.
+      with Octave Convolution <https://arxiv.org/abs/1904.05049> with `alpha=0.25`.
       As origin, it's designed to perform image classification. For details about
       family of octave convolution models, check out the repository <https://github.com/facebookresearch/OctConv>.
 
@@ -3900,6 +3906,7 @@ topologies:
     model_optimizer_args:
       - --framework=mxnet
       - --data_type=FP32
+      - --reverse_input_channels
       - --mean_values=data[124,117,104]
       - --scale_values=data[59.880239521]
       - --input_shape=[1,3,224,224]

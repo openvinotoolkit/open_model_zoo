@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `octave-resnet-26-0.25` model is a modification of `resnet-26` from the [this paper](https://arxiv.org/pdf/1512.03385.pdf) with octave convolutions from [Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution](https://arxiv.org/abs/1904.05049) with &alpha;=0.25. As origin, it's designed to perform image classification. For details about family of octave convolution models, check out the [repository](https://github.com/facebookresearch/OctConv).
+The `octave-resnet-26-0.25` model is a modification of `resnet-26` from [this paper](https://arxiv.org/pdf/1512.03385.pdf) with octave convolutions from [Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution](https://arxiv.org/abs/1904.05049) with `alpha=0.25`. As origin, it's designed to perform image classification. For details about family of octave convolution models, check out the [repository](https://github.com/facebookresearch/OctConv).
 
 The model input is a blob that consists of a single image of 1x3x224x224 in RGB order. The RGB mean values need to be subtracted as follows: [124,117,104] before passing the image blob into the network. In addition, values must be divided by 0.0167.
 
@@ -17,7 +17,7 @@ The model output for `octave-resnet-26-0.25` is the typical object classifier ou
 | Type              | Classification|
 | GFLOPs            | 3.768         |
 | MParams           | 15.99         |
-| Source framework  | MXNET\*       |
+| Source framework  | MXNet\*       |
 
 ## Accuracy
 
@@ -46,7 +46,7 @@ Image, name - `data`,  shape - `1,3,224,224`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-Channel order is `RGB`
+Channel order is `BGR`.
 
 ## Output
 
