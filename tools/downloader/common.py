@@ -320,7 +320,7 @@ def load_topologies(args):
         for config_path in sorted(model_root.glob('**/model.yml')):
             subdirectory = config_path.parent.relative_to(model_root)
 
-            with config_path.open() as config_file, \
+            with config_path.open('rb') as config_file, \
                     deserialization_context('In config "{}"'.format(config_path)):
 
                 top = yaml.safe_load(config_file)
@@ -334,7 +334,7 @@ def load_topologies(args):
     else: # monolithic config
         print('########## Warning: the --config option is deprecated and will be removed in a future release',
             file=sys.stderr)
-        with args.config.open() as config_file, \
+        with args.config.open('rb') as config_file, \
                 deserialization_context('In config "{}"'.format(args.config)):
             for i, top in enumerate(yaml.safe_load(config_file)['topologies']):
                 with deserialization_context('In topology #{}'.format(i)):
