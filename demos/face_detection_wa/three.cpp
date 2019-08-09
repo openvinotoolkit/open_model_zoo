@@ -152,8 +152,7 @@ int main(int argc, char* argv[])
                         if(state[i] == CAP_CAM_READY && nt == i)
                         {
                             VCM[nt].retrieve(forImg[nt]);
-                            blobFromImage(forImg[nt], forTen[nt], 1, Size(300, 300));
-                            threadState[nt] = 0;
+                            blobFromImage(forImg[nt], forTen[nt], 1, Size(300, 300));                     
                             vRequest[nt].StartAsync();
                         }
                     }
