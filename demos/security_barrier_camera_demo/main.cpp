@@ -30,7 +30,6 @@
 
 using namespace InferenceEngine;
 
-typedef std::chrono::duration<float, std::chrono::milliseconds::period> Ms;
 typedef std::chrono::duration<float, std::chrono::seconds::period> Sec;
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -152,7 +151,7 @@ struct Context {  // stores all global data for tasks
         DrawersContext(int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
                        const std::weak_ptr<Worker>& drawersWorker):
             pause{pause}, gridParam{gridParam}, displayResolution{displayResolution}, showPeriod{showPeriod}, drawersWorker{drawersWorker},
-            lastShownframeId{0}, prevShow{std::chrono::steady_clock::time_point()} {}
+            lastShownframeId{0}, prevShow{std::chrono::steady_clock::time_point()}, framesAfterUpdate{0}, localT0{std::chrono::steady_clock::time_point()} {}
         int pause;
         std::vector<cv::Size> gridParam;
         cv::Size displayResolution;
@@ -162,12 +161,16 @@ struct Context {  // stores all global data for tasks
         std::chrono::steady_clock::time_point prevShow;  // time stamp of previous imshow
         std::map<int64_t, GridMat> gridMats;
         std::mutex drawerMutex;
+        std::ostringstream outThroughput;
+        unsigned framesAfterUpdate;
+        std::chrono::steady_clock::time_point localT0;
     } drawersContext;
     struct {
         std::vector<uint64_t> lastframeIds;
         std::vector<std::mutex> lastFrameIdsMutexes;
     } videoFramesContext;
     std::weak_ptr<Worker> resAggregatorsWorker;
+    std::mutex classifiersAggreagatorPrintMutex;
     uint64_t nireq;
     bool isVideo;
     std::chrono::steady_clock::time_point t0;
@@ -213,7 +216,7 @@ public:
     explicit ClassifiersAggreagator(const VideoFrame::Ptr& sharedVideoFrame):
         sharedVideoFrame{sharedVideoFrame} {}
     ~ClassifiersAggreagator() {
-        static std::mutex printMutex;
+        std::mutex& printMutex = static_cast<ReborningVideoFrame*>(sharedVideoFrame.get())->context.classifiersAggreagatorPrintMutex;
         printMutex.lock();
         std::cout << rawDetections;
         for (const std::string& rawAttribute : rawAttributes.container) {  // destructor assures that none uses the container
@@ -345,29 +348,27 @@ void Drawer::process() {
         usage.width = static_cast<int>(usage.width * static_cast<float>(frameCounter * nireq - context.freeDetectionInfersCount) / (frameCounter * nireq));
         cv::rectangle(mat, usage, {0, 255, 0}, cv::FILLED);
 
-        static std::ostringstream outThroughput;
-        static unsigned fps = 0;
-        static bool runningFirstSecond = true;
-        static std::chrono::steady_clock::time_point localT0 = context.t0;
-        fps++;
-        const std::chrono::steady_clock::time_point localT1 = std::chrono::steady_clock::now();
-        const Sec timeDuration = localT1 - localT0;
-        if (std::chrono::seconds{1} <= timeDuration) {
-            outThroughput.str("");
-            outThroughput << std::fixed << std::setprecision(1)
-                << static_cast<float>(fps) / timeDuration.count() << "FPS";
-            fps = 0;
-            runningFirstSecond = false;
-            localT0 = localT1;
-        } else if (runningFirstSecond) {
-            // the pipeline isn't running for long enough, print what it has for now
-            outThroughput.str("");
-            outThroughput << std::fixed << std::setprecision(1)
-                << static_cast<float>(fps) / timeDuration.count() << "FPS";
+        if (std::chrono::steady_clock::time_point() == context.drawersContext.localT0) {
+            context.drawersContext.localT0 = context.t0;
         }
-        cv::putText(mat, outThroughput.str(), cv::Point2f(15, 35), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
+        context.drawersContext.framesAfterUpdate++;
+        const std::chrono::steady_clock::time_point localT1 = std::chrono::steady_clock::now();
+        const Sec timeDuration = localT1 - context.drawersContext.localT0;
+        if (Sec{1} <= timeDuration) {
+            context.drawersContext.outThroughput.str("");
+            context.drawersContext.outThroughput << std::fixed << std::setprecision(1)
+                << static_cast<float>(context.drawersContext.framesAfterUpdate) / timeDuration.count() << "FPS";
+            context.drawersContext.framesAfterUpdate = 0;
+            context.drawersContext.localT0 = localT1;
+        } else if (context.drawersContext.localT0 == context.t0) {
+            // the pipeline isn't running for long enough, print what it has for now
+            context.drawersContext.outThroughput.str("");
+            context.drawersContext.outThroughput << std::fixed << std::setprecision(1)
+                << static_cast<float>(context.drawersContext.framesAfterUpdate) / timeDuration.count() << "FPS";
+        }
+        cv::putText(mat, context.drawersContext.outThroughput.str(), cv::Point2f(15, 35), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
 
-        cv::imshow("security_barrier_camera", firstGridIt->second.getMat());
+        cv::imshow("Detection results", firstGridIt->second.getMat());
         context.drawersContext.prevShow = std::chrono::steady_clock::now();
         const int key = cv::waitKey(context.drawersContext.pause);
         if (key == 27 || 'q' == key || 'Q' == key || !context.isVideo) {
@@ -701,7 +702,7 @@ int main(int argc, char* argv[]) {
         InferenceEngine::Core ie;
 
         std::set<std::string> devices;
-        for (const std::string& netDevices : std::array<std::string, 3>{FLAGS_d, FLAGS_d_va, FLAGS_d_lpr}) {
+        for (const std::string& netDevices : {FLAGS_d, FLAGS_d_va, FLAGS_d_lpr}) {
             if (netDevices.empty()) {
                 continue;
             }
@@ -844,8 +845,8 @@ int main(int argc, char* argv[]) {
         }
 
         // Running
-        worker->runThreads();
         context.t0 = std::chrono::steady_clock::now();
+        worker->runThreads();
         worker->threadFunc();
         worker->join();
         const auto t1 = std::chrono::steady_clock::now();
@@ -866,10 +867,10 @@ int main(int argc, char* argv[]) {
 
         uint64_t frameCounter = context.frameCounter;
         if (0 != frameCounter) {
-            const Ms meanOverallTimePerAllInputs = std::chrono::duration_cast<Ms>((t1 - context.t0)
-                * context.readersContext.inputChannels.size()) / frameCounter;
-            std::cout << std::fixed << std::setprecision(1) << std::chrono::seconds{1} / meanOverallTimePerAllInputs
-                << "FPS for (" << frameCounter << " / " << inputChannels.size() << ") frames\n";
+            const float fps = static_cast<float>(frameCounter) / std::chrono::duration_cast<Sec>(t1 - context.t0).count()
+                / context.readersContext.inputChannels.size();
+            std::cout << std::fixed << std::setprecision(1) << fps << "FPS for (" << frameCounter << " / "
+                 << inputChannels.size() << ") frames\n";
             const double detectionsInfersUsage = static_cast<float>(frameCounter * context.nireq - context.freeDetectionInfersCount)
                 / (frameCounter * context.nireq) * 100;
             std::cout << "Detection InferRequests usage: " << detectionsInfersUsage << "%\n";
