@@ -53,6 +53,15 @@ Ptr<dnn::Model> DnnModel(const Topology& topology)
     return model;
 }
 
+Ptr<dnn::ClassificationModel> DnnClassificationModel(const Topology& topology)
+{
+    Ptr<dnn::ClassificationModel> model(
+          new dnn::ClassificationModel(topology.getModelPath(),
+                                       topology.getConfigPath()));
+    setParams(model, topology);
+    return model;
+}
+
 Ptr<dnn::DetectionModel> DnnDetectionModel(const Topology& topology)
 {
     Ptr<dnn::DetectionModel> model(new dnn::DetectionModel(topology.getModelPath(),

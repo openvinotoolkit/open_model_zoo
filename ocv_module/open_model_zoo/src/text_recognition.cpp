@@ -40,7 +40,7 @@ namespace  {
 }  // namespace
 
 
-static std::string CTCGreedyDecoder(const std::vector<float> &data, const std::string& alphabet, char pad_symbol, double *conf) {
+static std::string CTCGreedyDecoder(const std::vector<float> &data, const std::string& alphabet, char pad_symbol, float *conf) {
     std::string res = "";
     bool prev_pad = false;
     *conf = 1;
@@ -329,10 +329,25 @@ static cv::Mat cropImage(const cv::Mat &image, const std::vector<cv::Point2f> &p
     return crop;
 }
 
+static int strToDnnTarget(std::string device)
+{
+    std::transform(device.begin(), device.begin(), device.end(), ::tolower);
+    if (device == "cpu")        return dnn::DNN_TARGET_CPU;
+    else if (device == "gpu")   return dnn::DNN_TARGET_OPENCL;
+    else if (device == "vpu")   return dnn::DNN_TARGET_MYRIAD;
+    else if (device == "gpu16") return dnn::DNN_TARGET_OPENCL_FP16;
+    else if (device == "fpga")  return dnn::DNN_TARGET_FPGA;
+    else
+        CV_Error(Error::StsNotImplemented, "Unknown device target: " + device);
+}
+
 struct TextRecognitionPipeline::Impl
 {
     Ptr<dnn::Model> detectionNet;
     Ptr<dnn::Model> recognitionNet;
+
+    int maxRectNum = -1;
+    float pixelClsThr = 0.8, pixelLinkThr = 0.8, recognThr = 0.2;
 };
 
 TextRecognitionPipeline::TextRecognitionPipelineImpl(const Topology& detection,
@@ -343,19 +358,44 @@ TextRecognitionPipeline::TextRecognitionPipelineImpl(const Topology& detection,
     impl->recognitionNet = DnnModel(recognition);
 }
 
+void TextRecognitionPipeline::setDetectionDevice(const String& device)
+{
+    impl->detectionNet->setPreferableTarget(strToDnnTarget(device));
+}
+
+void TextRecognitionPipeline::setRecognitionDevice(const String& device)
+{
+    impl->recognitionNet->setPreferableTarget(strToDnnTarget(device));
+}
+
+void TextRecognitionPipeline::setMaxRectNum(int num) { impl->maxRectNum = num; }
+void TextRecognitionPipeline::setRecognitionThresh(float thr) { impl->recognThr = thr; }
+void TextRecognitionPipeline::setPixelClassificationThresh(float thr) { impl->pixelClsThr = thr; }
+void TextRecognitionPipeline::setPixelLinkThresh(float thr) { impl->pixelLinkThr = thr; }
+
 void TextRecognitionPipeline::process(InputArray frame, std::vector<RotatedRect>& rects,
-                                      std::vector<String>& texts)
+                                      std::vector<String>& texts,
+                                      std::vector<float>& confidences)
 {
     rects.clear();
     texts.clear();
+    confidences.clear();
 
     std::vector<Mat> outs;
     impl->detectionNet->predict(frame, outs);
 
-    postProcess(outs, frame.size(), 0.5, 0.5, rects);
+    std::vector<RotatedRect> detectedRects;
+    postProcess(outs, frame.size(), impl->pixelClsThr, impl->pixelLinkThr, detectedRects);
+
+    if (impl->maxRectNum >= 0 && static_cast<int>(detectedRects.size()) > impl->maxRectNum) {
+        std::sort(detectedRects.begin(), detectedRects.end(), [](const cv::RotatedRect& a, const cv::RotatedRect& b) {
+            return a.size.area() > b.size.area();
+        });
+        detectedRects.resize(static_cast<size_t>(impl->maxRectNum));
+    }
 
     // Recognition
-    for (const auto &rect : rects) {
+    for (const auto &rect : detectedRects) {
         cv::Mat cropped_text;
         std::vector<cv::Point2f> points;
         int top_left_point_idx = 0;
@@ -375,8 +415,14 @@ void TextRecognitionPipeline::process(InputArray frame, std::vector<RotatedRect>
         float *ouput_data_pointer = (float*)recOuts[0].data;
         std::vector<float> output_data(ouput_data_pointer, ouput_data_pointer + output_shape[0] * output_shape[2]);
 
-        double conf;
-        texts.push_back(CTCGreedyDecoder(output_data, kAlphabet, kPadSymbol, &conf));
+        float conf;
+        std::string text = CTCGreedyDecoder(output_data, kAlphabet, kPadSymbol, &conf);
+        if (conf >= impl->recognThr)
+        {
+            texts.push_back(text);
+            rects.push_back(rect);
+            confidences.push_back(conf);
+        }
     }
 }
 

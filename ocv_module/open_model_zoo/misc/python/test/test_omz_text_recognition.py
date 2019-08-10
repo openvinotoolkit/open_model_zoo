@@ -28,8 +28,10 @@ class omz_text_recognition_test(NewOpenCVTests):
         img = cv.imread(self.find_file('cv/cloning/Mixed_Cloning/source1.png'))
 
         p = omz.TextRecognitionPipeline()
+        p.setPixelLinkThresh(0.5)
+        p.setPixelClassificationThresh(0.5)
 
-        rects, texts = p.process(img)
+        rects, texts, confs = p.process(img)
 
         refTexts = ["c57410", "jie", "howard"]
         refRects = [
@@ -41,15 +43,15 @@ class omz_text_recognition_test(NewOpenCVTests):
         self.assertEqual(len(rects), len(texts))
         self.assertEqual(len(texts), len(refTexts))
 
-        for rect, text in zip(rects, texts):
+        for refRect, refText in zip(refRects, refTexts):
             matched = False
 
-            for refRect, refText in zip(refRects, refTexts):
+            for rect, text in zip(rects, texts):
                 if text == refText:
                     matched = True
                     self.assertGreater(rotatedRectIOU(rect, refRect), 0.99)
                     break
-            self.assertTrue(matched, text)
+            self.assertTrue(matched, refText)
 
 
 if __name__ == '__main__':

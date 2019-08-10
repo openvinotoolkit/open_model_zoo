@@ -8,6 +8,8 @@ namespace cv { namespace open_model_zoo {
 
 CV_EXPORTS_W Ptr<dnn::Model> DnnModel(const Topology& topology);
 
+CV_EXPORTS_W Ptr<dnn::ClassificationModel> DnnClassificationModel(const Topology& topology);
+
 CV_EXPORTS_W Ptr<dnn::DetectionModel> DnnDetectionModel(const Topology& topology);
 
 }}  // namespace cv::open_model_zoo

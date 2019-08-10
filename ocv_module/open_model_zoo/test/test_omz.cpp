@@ -35,12 +35,15 @@ TEST(TextRecognitionPipeline, Accuracy)
     auto detection = text_detection();
     auto recognition = text_recognition();
     TextRecognitionPipeline p(detection, recognition);
+    p.setPixelLinkThresh(0.5f);
+    p.setPixelClassificationThresh(0.5f);
 
     Mat img = imread(findDataFile("cv/cloning/Mixed_Cloning/source1.png"));
 
     std::vector<RotatedRect> rects;
     std::vector<std::string> texts;
-    p.process(img, rects, texts);
+    std::vector<float> confs;
+    p.process(img, rects, texts, confs);
 
     std::vector<std::string> refTexts = {"c57410", "jie", "howard"};
     std::vector<RotatedRect> refRects = {
