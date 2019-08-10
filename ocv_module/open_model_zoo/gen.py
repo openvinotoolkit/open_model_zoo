@@ -44,7 +44,7 @@ def registerVersionedName(fullName, precision=''):
             versionedNames[shortName] = [version, originName]
 
 
-def generate(topology, output_hdr, impl_hdr):
+def generate(topology, topologies_hdr, py_impl, cpp_impl):
     name = topology['name'].replace('-', '_').replace('.', '_')
 
     # DLDT models come with multiple files foe different precision
@@ -63,7 +63,7 @@ def generate(topology, output_hdr, impl_hdr):
             if precision != 'fp32':  # Keep origin name for FP32
                 subTopology['name'] += '_' + precision
                 registerVersionedName(name, precision)
-            generate(subTopology, output_hdr, impl_hdr)
+            generate(subTopology, topologies_hdr, py_impl, cpp_impl)
         return
 
 
@@ -91,50 +91,60 @@ def generate(topology, output_hdr, impl_hdr):
 
     s = ', '.join(['{"%s", "%s"}' % (key, value) for key, value in config.items()])
 
-    impl_hdr.write("""
-    Ptr<Topology> %s()
+    for impl in [py_impl, cpp_impl]:
+        impl.write("""
+    Ptr<Topology> %s(bool download)
     {
         Ptr<Topology> t(new Topology({%s}));
-        t->download();
+        if (download)
+            t->download();
         return t;
     }\n""" % (name, s))
 
-    output_hdr.write('    CV_EXPORTS_W Ptr<Topology> %s();\n' % name)
-
+    topologies_hdr.write('    CV_EXPORTS_W Ptr<Topology> %s(bool download = true);\n' % name)
 
 list_topologies = sys.argv[1]
-output_hdr_path = sys.argv[2]
-impl_hdr_path = sys.argv[3]
+topologies_hdr = open(sys.argv[2], 'wt')
+py_impl = open(sys.argv[3], 'wt')
+cpp_impl = open(sys.argv[4], 'wt')
 
-with open(output_hdr_path, 'wt') as output_hdr:
-    output_hdr.write("#ifndef __OPENCV_OPEN_MODEL_ZOO_TOPOLOGIES_HPP__\n")
-    output_hdr.write("#define __OPENCV_OPEN_MODEL_ZOO_TOPOLOGIES_HPP__\n\n")
-    output_hdr.write("using namespace cv::open_model_zoo;\n\n")
-    output_hdr.write("namespace cv { namespace open_model_zoo { namespace topologies {\n")
+topologies_hdr.write("#ifndef __OPENCV_OPEN_MODEL_ZOO_TOPOLOGIES_HPP__\n")
+topologies_hdr.write("#define __OPENCV_OPEN_MODEL_ZOO_TOPOLOGIES_HPP__\n\n")
+topologies_hdr.write("using namespace cv::open_model_zoo;\n\n")
+topologies_hdr.write("namespace cv { namespace open_model_zoo { namespace topologies {\n")
 
-    with open(impl_hdr_path, 'wt') as impl_hdr:
-        impl_hdr.write("#ifdef HAVE_OPENCV_OPEN_MODEL_ZOO\n\n")
-        impl_hdr.write("namespace cv { namespace open_model_zoo { namespace topologies {")
+py_impl.write("#ifdef HAVE_OPENCV_OPEN_MODEL_ZOO\n\n")
+py_impl.write("namespace cv { namespace open_model_zoo { namespace topologies {")
 
-        with open(list_topologies, 'rt') as f:
-            content = yaml.safe_load(f)
-            for topology in content['topologies']:
-                generate(topology, output_hdr, impl_hdr)
+cpp_impl.write("#include <opencv2/open_model_zoo.hpp>\n")
+cpp_impl.write("#include <opencv2/open_model_zoo/topologies.hpp>\n\n")
+cpp_impl.write("namespace cv { namespace open_model_zoo { namespace topologies {")
 
-            # Register DLDT aliases
-            for alias, data in versionedNames.items():
-                _, originName = data
+with open(list_topologies, 'rt') as f:
+    content = yaml.safe_load(f)
+    for topology in content['topologies']:
+        generate(topology, topologies_hdr, py_impl, cpp_impl)
 
-                impl_hdr.write("""
-    Ptr<Topology> %s()
+    # Register DLDT aliases
+    for alias, data in versionedNames.items():
+        _, originName = data
+
+        for impl in [py_impl, cpp_impl]:
+            impl.write("""
+    Ptr<Topology> %s(bool download)
     {
-        return %s();
+        return %s(download);
     }\n""" % (alias, originName))
 
-                output_hdr.write('    CV_EXPORTS_W Ptr<Topology> %s();\n' % alias)
+        topologies_hdr.write('    CV_EXPORTS_W Ptr<Topology> %s(bool download = true);\n' % alias)
 
-        impl_hdr.write("}}}  // namespace cv::open_model_zoo::topologies\n\n")
-        impl_hdr.write("#endif  // HAVE_OPENCV_OPEN_MODEL_ZOO")
+    py_impl.write("}}}  // namespace cv::open_model_zoo::topologies\n\n")
+    py_impl.write("#endif  // HAVE_OPENCV_OPEN_MODEL_ZOO")
+    cpp_impl.write("}}}  // namespace cv::open_model_zoo::topologies\n\n")
 
-    output_hdr.write("}}}  // namespace cv::open_model_zoo::topologies\n\n")
-    output_hdr.write("#endif  // __OPENCV_OPEN_MODEL_ZOO_TOPOLOGIES_HPP__")
+topologies_hdr.write("}}}  // namespace cv::open_model_zoo::topologies\n\n")
+topologies_hdr.write("#endif  // __OPENCV_OPEN_MODEL_ZOO_TOPOLOGIES_HPP__")
+
+topologies_hdr.close()
+py_impl.close()
+cpp_impl.close()

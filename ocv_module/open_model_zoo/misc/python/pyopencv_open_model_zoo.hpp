@@ -51,12 +51,14 @@ static void downloadFile(const std::string& url, const std::string& sha,
     if (utils::fs::exists(path))
     {
         std::string currSHA = getSHA(path);
-        if (sha == currSHA)
+        if (sha != currSHA)
         {
-            PyGILState_Release(gstate);
-            return;
+            // We won't download this file because in case of outdated SHA all
+            // the applications will download it and still have hash mismatch.
+            CV_LOG_WARNING(NULL, "Hash mismatch for " + path + "\n" + "expected: " + sha + "\ngot:      " + currSHA);
         }
-        CV_LOG_WARNING(NULL, "Hash mismatch for " + path + "\n" + "expected: " + sha + "\ngot:      " + currSHA);
+        PyGILState_Release(gstate);
+        return;
     }
 
     utils::fs::createDirectories(utils::fs::getParent(path));
@@ -113,7 +115,7 @@ static void downloadFile(const std::string& url, const std::string& sha,
     PyGILState_Release(gstate);
 }
 
-void Topology::download()
+void Topology::download() const
 {
     std::string url, sha, path;
     getArchiveInfo(url, sha, path);

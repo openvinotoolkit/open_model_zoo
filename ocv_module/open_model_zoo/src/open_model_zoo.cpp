@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <opencv2/core/utils/filesystem.hpp>
+#include <opencv2/core/utils/logger.hpp>
 
 #define path(cache, file) utils::fs::canonical(utils::fs::join(cache, file))
 
@@ -202,6 +203,21 @@ void Topology::getInputShape(std::vector<int>& shape) const
 std::map<String, String> Topology::getModelOptimizerArgs() const
 {
     return impl->modelOptimizerArgs;
+}
+
+void Topology::download() const
+{
+    std::vector<std::string> paths(2);
+    std::vector<std::string> urls(2);
+    std::string sha;
+    getModelInfo(urls[0], sha, paths[0]);
+    getConfigInfo(urls[1], sha, paths[1]);
+    for (int i = 0; i < 2; ++i)
+    {
+        if (!paths[i].empty() && !utils::fs::exists(paths[i]))
+            CV_LOG_WARNING(NULL, "\nFile " + paths[i] + " does not exist. Download it from " +
+                                 urls[i] + " or specify OPENCV_OPEN_MODEL_ZOO_CACHE_DIR environment variable");
+    }
 }
 
 }}  // namespace cv::omz

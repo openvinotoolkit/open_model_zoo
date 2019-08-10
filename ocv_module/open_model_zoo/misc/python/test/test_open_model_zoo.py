@@ -13,10 +13,18 @@ class open_model_zoo_test(NewOpenCVTests):
         super(open_model_zoo_test, self).setUp()
 
     def test_downloadGoogleDriveWithConfirm(self):
-        t = omz.topologies.densenet_161()
+        t = omz.topologies.densenet_161(download=False)
         modelPath = t.getModelPath()
         configPath = t.getConfigPath()
 
+        for path in modelPath, configPath:
+            if os.path.exists(path):
+                os.remove(path)
+
+        t = omz.topologies.densenet_161(download=True)
+
+        self.assertTrue(os.path.exists(modelPath))
+        self.assertTrue(os.path.exists(configPath))
         self.assertEqual(os.path.basename(modelPath), 'densenet-161.caffemodel')
         self.assertEqual(os.path.basename(configPath), 'densenet-161.prototxt')
         os.remove(modelPath)

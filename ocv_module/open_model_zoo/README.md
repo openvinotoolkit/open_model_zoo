@@ -38,3 +38,10 @@ export OPENCV_PYTEST_FILTER=test_open_model_zoo
 cd ~/open_model_zoo/ocv_module/open_model_zoo/misc/python/test
 python3 ~/opencv/modules/python/test/test.py --repo ~/opencv -v
 ```
+
+To run C++ tests, build OpenCV with tests enabled (`-DBUILD_TESTS=ON` and with `ts` module added to `-DBUILD_LIST`) then run
+```
+./bin/opencv_test_open_model_zoo
+```
+
+from OpenCV build folder.
