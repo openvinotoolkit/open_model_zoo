@@ -1,5 +1,6 @@
 // This file is based on https://github.com/opencv/open_model_zoo/tree/2019/demos/text_detection_demo
 #include "opencv2/open_model_zoo.hpp"
+#include "opencv2/open_model_zoo/text_recognition.hpp"
 #include "opencv2/open_model_zoo/dnn.hpp"
 #include "opencv2/dnn.hpp"
 #include "opencv2/imgproc.hpp"

@@ -8,5 +8,6 @@
 
 #include "opencv2/open_model_zoo.hpp"
 #include "opencv2/open_model_zoo/topologies.hpp"
+#include "opencv2/open_model_zoo/text_recognition.hpp"
 
 #endif

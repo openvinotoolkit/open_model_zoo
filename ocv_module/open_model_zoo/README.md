@@ -34,7 +34,7 @@ net = squeezenet1_0()
 
 To run Python tests, build the module and type the following command:
 ```bash
-export OPENCV_PYTEST_FILTER=test_open_model_zoo
+export OPENCV_PYTEST_FILTER=test_omz
 cd ~/open_model_zoo/ocv_module/open_model_zoo/misc/python/test
 python3 ~/opencv/modules/python/test/test.py --repo ~/opencv -v
 ```

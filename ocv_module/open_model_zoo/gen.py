@@ -93,15 +93,15 @@ def generate(topology, topologies_hdr, py_impl, cpp_impl):
 
     for impl in [py_impl, cpp_impl]:
         impl.write("""
-    Ptr<Topology> %s(bool download)
+    Topology %s(bool download)
     {
-        Ptr<Topology> t(new Topology({%s}));
+        Topology t({%s});
         if (download)
-            t->download();
+            t.download();
         return t;
     }\n""" % (name, s))
 
-    topologies_hdr.write('    CV_EXPORTS_W Ptr<Topology> %s(bool download = true);\n' % name)
+    topologies_hdr.write('    CV_EXPORTS_W Topology %s(bool download = true);\n' % name)
 
 list_topologies = sys.argv[1]
 topologies_hdr = open(sys.argv[2], 'wt')
@@ -131,12 +131,12 @@ with open(list_topologies, 'rt') as f:
 
         for impl in [py_impl, cpp_impl]:
             impl.write("""
-    Ptr<Topology> %s(bool download)
+    Topology %s(bool download)
     {
         return %s(download);
     }\n""" % (alias, originName))
 
-        topologies_hdr.write('    CV_EXPORTS_W Ptr<Topology> %s(bool download = true);\n' % alias)
+        topologies_hdr.write('    CV_EXPORTS_W Topology %s(bool download = true);\n' % alias)
 
     py_impl.write("}}}  // namespace cv::open_model_zoo::topologies\n\n")
     py_impl.write("#endif  // HAVE_OPENCV_OPEN_MODEL_ZOO")

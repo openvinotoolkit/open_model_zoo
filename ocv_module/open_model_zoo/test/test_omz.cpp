@@ -10,8 +10,8 @@ using namespace open_model_zoo::topologies;
 TEST(Topologies, visibility)
 {
     auto t = face_detection_retail_fp16();
-    std::string bin = t->getModelPath();
-    std::string xml = t->getConfigPath();
+    std::string bin = t.getModelPath();
+    std::string xml = t.getConfigPath();
     ASSERT_EQ(bin.substr(bin.rfind('.')), ".bin");
     ASSERT_EQ(xml.substr(xml.rfind('.')), ".xml");
 }
@@ -34,7 +34,7 @@ TEST(TextRecognitionPipeline, Accuracy)
 {
     auto detection = text_detection();
     auto recognition = text_recognition();
-    TextRecognitionPipeline p(*detection.get(), *recognition.get());
+    TextRecognitionPipeline p(detection, recognition);
 
     Mat img = imread(findDataFile("cv/cloning/Mixed_Cloning/source1.png"));
 
