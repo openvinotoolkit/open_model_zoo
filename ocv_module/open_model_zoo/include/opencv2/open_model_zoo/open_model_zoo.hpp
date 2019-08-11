@@ -45,10 +45,6 @@ namespace cv { namespace open_model_zoo {
 
         CV_WRAP void download() const;
 
-        CV_WRAP std::string getDescription() const;
-
-        CV_WRAP std::string getLicense() const;
-
         CV_WRAP void getArchiveInfo(CV_OUT String& url, CV_OUT String& sha256,
                                     CV_OUT String& path) const;
 

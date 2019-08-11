@@ -15,7 +15,7 @@ struct Topology::Impl
     std::string modelURL, modelSHA, modelPath,
                 configURL, configSHA, configPath,
                 archiveURL, archiveSHA, archivePath,
-                description, license, topologyName, framework;
+                topologyName, framework;
     std::map<std::string, std::string> modelOptimizerArgs;
 };
 
@@ -89,8 +89,6 @@ Topology::Topology(const std::map<std::string, std::string>& config)
         }
     }
 
-    impl->description = config.at("description");
-    impl->license = config.at("license");
     impl->framework = config.at("framework");
 
     if (!impl->modelPath.empty())
@@ -99,8 +97,6 @@ Topology::Topology(const std::map<std::string, std::string>& config)
         impl->configPath = path(cache, impl->configPath);
 }
 
-std::string Topology::getDescription() const { return impl->description; }
-std::string Topology::getLicense() const { return impl->license; }
 std::string Topology::getConfigPath() const { return impl->configPath; }
 std::string Topology::getModelPath() const { return impl->modelPath; }
 std::string Topology::getName() const { return impl->topologyName; }

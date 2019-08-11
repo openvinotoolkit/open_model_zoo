@@ -70,11 +70,7 @@ def generate(topology, topologies_hdr, py_impl, cpp_impl):
     registerVersionedName(name)
 
     config = {}
-    config['description'] = topology['description'].replace('\n', ' ') \
-                                                   .replace('\\', '\\\\') \
-                                                   .replace('\"', '\\"')
 
-    config['license'] = topology['license']
     config['framework'] = topology['framework']
 
     config['topology_name'] = name
@@ -82,7 +78,7 @@ def generate(topology, topologies_hdr, py_impl, cpp_impl):
         config['model_optimizer_args'] = ' '.join(topology['model_optimizer_args'])
 
     fileURL, fileSHA, fileName = getSource(files[0])
-    if fileName.endswith('tar.gz'):
+    if fileName.endswith('.tar.gz') or fileName.endswith('.zip'):
         config['archive_url'], config['archive_sha256'], config['archive_name'] = fileURL, fileSHA, fileName
     else:
         config['config_url'], config['config_sha256'], config['config_path'] = fileURL, fileSHA, fileName
@@ -101,7 +97,15 @@ def generate(topology, topologies_hdr, py_impl, cpp_impl):
         return t;
     }\n""" % (name, s))
 
-    topologies_hdr.write('    CV_EXPORTS_W Topology %s(bool download = true);\n' % name)
+    topologies_hdr.write("""
+    /**
+     %s
+
+License: %s
+     */
+    CV_EXPORTS_W Topology %s(bool download = true);
+    """ % (topology['description'], topology['license'], name))
+
 
 list_topologies = sys.argv[1]
 topologies_hdr = open(sys.argv[2], 'wt')
@@ -136,7 +140,11 @@ with open(list_topologies, 'rt') as f:
         return %s(download);
     }\n""" % (alias, originName))
 
-        topologies_hdr.write('    CV_EXPORTS_W Topology %s(bool download = true);\n' % alias)
+        topologies_hdr.write("""
+    /**
+     * Alias for %s
+     */
+    CV_EXPORTS_W Topology %s(bool download = true);\n""" % (originName, alias))
 
     py_impl.write("}}}  // namespace cv::open_model_zoo::topologies\n\n")
     py_impl.write("#endif  // HAVE_OPENCV_OPEN_MODEL_ZOO")

@@ -33,9 +33,22 @@ static void extract(const std::string& archive)
 {
     PyGILState_STATE gstate = PyGILState_Ensure();
 
-    std::string archiveOpen = "f = tarfile.open('" + archive + "')";
+    std::string archiveOpen;
+    if (archive.size() >= 7 && archive.substr(archive.size() - 7) == ".tar.gz")
+    {
+        PyRun_SimpleString("import tarfile");
+        archiveOpen = "f = tarfile.open('" + archive + "')";
+    }
+    else if (archive.size() >= 4 && archive.substr(archive.size() - 4) == ".zip")
+    {
+        PyRun_SimpleString("from zipfile import ZipFile");
+        archiveOpen = "f = ZipFile('" + archive + "', 'r')";
+    }
+    else
+        CV_Error(Error::StsNotImplemented, "Unexpected archive extension: " + archive);
+
     std::string cmd = "f.extractall(path=os.path.dirname('" + archive + "'))";
-    PyRun_SimpleString("import tarfile; import os");
+    PyRun_SimpleString("import os");
     PyRun_SimpleString(archiveOpen.c_str());
     PyRun_SimpleString(cmd.c_str());
     PyRun_SimpleString("f.close()");

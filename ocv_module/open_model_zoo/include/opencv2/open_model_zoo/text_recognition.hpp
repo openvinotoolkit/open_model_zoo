@@ -8,6 +8,18 @@ using namespace cv::open_model_zoo::topologies;
 
 namespace cv { namespace open_model_zoo {
 
+
+/**
+ * @brief Text detection and recognition pipeline.
+ */
+
+#if 0
+// This is a trick to enable open_model_zoo::TextRecognitionPipeline both in Python and in C++
+CV_WRAP_AS(TextRecognitionPipeline)
+Ptr<TextRecognitionPipeline> createTextRecognitionPipeline(const Topology& detection = text_detection(),
+                                                           const Topology& recognition = text_recognition());
+#endif
+
 class CV_EXPORTS_W TextRecognitionPipelineImpl
 {
 public:
@@ -52,13 +64,6 @@ private:
 };
 
 typedef TextRecognitionPipelineImpl TextRecognitionPipeline;
-
-#if 0
-// This is a trick to enable open_model_zoo::TextRecognitionPipeline both in Python and in C++
-CV_WRAP_AS(TextRecognitionPipeline)
-Ptr<TextRecognitionPipeline> createTextRecognitionPipeline(const Topology& detection = text_detection(),
-                                                           const Topology& recognition = text_recognition());
-#endif
 
 }}  // namespace cv::open_model_zoo
 
