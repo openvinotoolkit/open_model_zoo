@@ -63,6 +63,8 @@ python main.py -m /home/user/image-retrieval-0001.xml -v /home/user/video.dav.mp
 
 The application uses OpenCV to display gallery searching result and current inference performance.
 
+![](./image_retrieval_demo.jpg)
+
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
