@@ -144,18 +144,18 @@ int main(int argc, char* argv[])
         }
         if(!SYNC)
         {
-            for(int nt = 0; nt < NUM_THREAD;)
+            for(int nt = 0; nt < NUM_THREAD; )
             {
                 for(unsigned int i = 0; i < state.size(); ++i)
                 {
+                    if(threadState[nt] == 1)
+                    {
+                        postprocess(forImg[nt], forTen[nt]);
+                        imshow(cam_names[numCam[nt]], forImg[nt]);
+                        threadState[nt] = 0;
+                    }
                     if(state[i] == CAP_CAM_READY)
                     {
-                        if(threadState[nt] == 1)
-                        {
-                            postprocess(forImg[nt], forTen[nt]);
-                            imshow(cam_names[numCam[nt]], forImg[nt]);
-                            threadState[nt] = 0;
-                        }
                         VCM[i].retrieve(forImg[nt]);
                         numCam[nt] = i;
                         if(threadState[nt] == 0)
