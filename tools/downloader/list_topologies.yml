@@ -1534,7 +1534,7 @@ topologies:
       - --input_shape=[1,224,224,3]
       - --input=input
       - --mean_values=input[127.5,127.5,127.5]
-      - --scale_values=input[127.00001206500114]
+      - --scale_values=input[127.5]
       - --output=MobilenetV2/Predictions/Reshape_1
       - --input_model=$dl_dir/mobilenet_v2_1.4_224_frozen.pb
     framework: "tf"
@@ -1564,7 +1564,7 @@ topologies:
       - --input_shape=[1,224,224,3]
       - --input=input
       - --mean_values=input[127.5,127.5,127.5]
-      - --scale_values=input[127.00001206500114]
+      - --scale_values=input[127.5]
       - --output=MobilenetV2/Predictions/Reshape_1
       - --input_model=$dl_dir/mobilenet_v2_1.0_224_frozen.pb
     framework: "tf"
