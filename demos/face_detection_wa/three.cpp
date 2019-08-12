@@ -10,7 +10,7 @@ using namespace cv;
 using namespace cv::dnn;
 using namespace InferenceEngine;
 
-float confThreshold = 0.5;//*100%
+float confThreshold = 0.9;//*100%
 int NUM_THREAD = 2;
 bool SYNC = false;// SYNC - true, ASYNC - false
 
@@ -40,6 +40,7 @@ int main(int argc, char* argv[])
     std::vector<InferRequest> vRequest;
     std::vector<int> threadState(NUM_THREAD, 0);// 0 - ready to start, 1 - not ready
     std::vector<std::string>cam_names = {"cam1", "cam2"};
+    std::vector<int> numCam(NUM_THREAD, -1);
     std::string xmlPath = "/home/volskig/src/weights/face-detection-retail-0004/FP32/face-detection-retail-0004.xml";
     std::string binPath = "/home/volskig/src/weights/face-detection-retail-0004/FP32/face-detection-retail-0004.bin";
 
@@ -54,6 +55,8 @@ int main(int argc, char* argv[])
     std::vector<VideoCapture> VCM;
     VideoCapture cap1(0);
     VideoCapture cap2(2);
+    VCM.push_back(cap1);
+    VCM.push_back(cap2);
 
     Mat ten1({1,3,300,300}, CV_32F),
         ten2({1,3,300,300}, CV_32F),
@@ -69,9 +72,6 @@ int main(int argc, char* argv[])
 
     Mat img1, img2, img3, img4, img5, img6, img7, img8, img9, img10;
     std::vector<Mat> forImg = {img1, img2, img3, img4, img5, img6, img7, img8, img9, img10};
-
-    VCM.push_back(cap1);
-    VCM.push_back(cap2);
 
     std::vector<int> state(VCM.size(), 0);
 
@@ -142,40 +142,35 @@ int main(int argc, char* argv[])
                 }
             }
         }
-        else
-            for(int nt = 0; nt < NUM_THREAD; ++nt)
+        if(!SYNC)
+        {
+            for(int nt = 0; nt < NUM_THREAD;)
             {
-                if(threadState[nt] == 0)
+                for(unsigned int i = 0; i < state.size(); ++i)
                 {
-                    for(unsigned int i = 0; i < state.size(); ++i)
+                    if(state[i] == CAP_CAM_READY)
                     {
-                        if(state[i] == CAP_CAM_READY && nt == i)
+                        if(threadState[nt] == 1)
                         {
-                            VCM[nt].retrieve(forImg[nt]);
+                            postprocess(forImg[nt], forTen[nt]);
+                            imshow(cam_names[numCam[nt]], forImg[nt]);
+                            threadState[nt] = 0;
+                        }
+                        VCM[i].retrieve(forImg[nt]);
+                        numCam[nt] = i;
+                        if(threadState[nt] == 0)
+                        {
                             blobFromImage(forImg[nt], forTen[nt], 1, Size(300, 300));
-                            vRequest[nt].StartAsync();
-                            //postprocess(forImg[nt], forTen[nt]);
-                            //imshow(cam_names[nt], forImg[nt]);
+                            vRequest[nt++].StartAsync();
                         }
                     }
                 }
             }
-        VideoCapture::waitAny(VCM, state, -1);
-        if(!SYNC)
-        {
-            for(int nt = 0; nt < NUM_THREAD; ++nt)
-            {
-                if(threadState[nt] == 1)
-                {
-                    threadState[nt] = 0;
-                    postprocess(forImg[nt], forTen[nt]);
-                    imshow(cam_names[nt], forImg[nt]);
-                }
-            }
         }
+        VideoCapture::waitAny(VCM, state, -1);
 
         if ((int)waitKey(10) == 27)
-        {
+        {           
             break;
         }
     }
