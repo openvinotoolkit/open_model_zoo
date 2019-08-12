@@ -151,7 +151,7 @@ struct Context {  // stores all global data for tasks
         DrawersContext(int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
                        const std::weak_ptr<Worker>& drawersWorker):
             pause{pause}, gridParam{gridParam}, displayResolution{displayResolution}, showPeriod{showPeriod}, drawersWorker{drawersWorker},
-            lastShownframeId{0}, prevShow{std::chrono::steady_clock::time_point()}, framesAfterUpdate{0}, localT0{std::chrono::steady_clock::time_point()} {}
+            lastShownframeId{0}, prevShow{std::chrono::steady_clock::time_point()}, framesAfterUpdate{0}, updateTime{std::chrono::steady_clock::time_point()} {}
         int pause;
         std::vector<cv::Size> gridParam;
         cv::Size displayResolution;
@@ -163,7 +163,7 @@ struct Context {  // stores all global data for tasks
         std::mutex drawerMutex;
         std::ostringstream outThroughput;
         unsigned framesAfterUpdate;
-        std::chrono::steady_clock::time_point localT0;
+        std::chrono::steady_clock::time_point updateTime;
     } drawersContext;
     struct {
         std::vector<uint64_t> lastframeIds;
@@ -348,23 +348,15 @@ void Drawer::process() {
         usage.width = static_cast<int>(usage.width * static_cast<float>(frameCounter * nireq - context.freeDetectionInfersCount) / (frameCounter * nireq));
         cv::rectangle(mat, usage, {0, 255, 0}, cv::FILLED);
 
-        if (std::chrono::steady_clock::time_point() == context.drawersContext.localT0) {
-            context.drawersContext.localT0 = context.t0;
-        }
         context.drawersContext.framesAfterUpdate++;
         const std::chrono::steady_clock::time_point localT1 = std::chrono::steady_clock::now();
-        const Sec timeDuration = localT1 - context.drawersContext.localT0;
-        if (Sec{1} <= timeDuration) {
+        const Sec timeDuration = localT1 - context.drawersContext.updateTime;
+        if (Sec{1} <= timeDuration || context.drawersContext.updateTime == context.t0) {
             context.drawersContext.outThroughput.str("");
             context.drawersContext.outThroughput << std::fixed << std::setprecision(1)
                 << static_cast<float>(context.drawersContext.framesAfterUpdate) / timeDuration.count() << "FPS";
             context.drawersContext.framesAfterUpdate = 0;
-            context.drawersContext.localT0 = localT1;
-        } else if (context.drawersContext.localT0 == context.t0) {
-            // the pipeline isn't running for long enough, print what it has for now
-            context.drawersContext.outThroughput.str("");
-            context.drawersContext.outThroughput << std::fixed << std::setprecision(1)
-                << static_cast<float>(context.drawersContext.framesAfterUpdate) / timeDuration.count() << "FPS";
+            context.drawersContext.updateTime = localT1;
         }
         cv::putText(mat, context.drawersContext.outThroughput.str(), cv::Point2f(15, 35), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
 
@@ -845,7 +837,9 @@ int main(int argc, char* argv[]) {
         }
 
         // Running
-        context.t0 = std::chrono::steady_clock::now();
+        const std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
+        context.t0 = t0;
+        context.drawersContext.updateTime = t0;
         worker->runThreads();
         worker->threadFunc();
         worker->join();
