@@ -10,16 +10,20 @@ using namespace cv;
 using namespace cv::dnn;
 using namespace InferenceEngine;
 
-float confThreshold = 0.9;//*100%
+float confThreshold = 0.5;//*100%
 int NUM_THREAD = 2;
 bool SYNC = false;// SYNC - true, ASYNC - false
 
+enum {
+    REQ_READY_TO_START = 0,
+    REQ_WORK_FIN = 1,
+    REQ_WORK = 2
+};
 void postprocess(Mat& frame, const Mat& outs)
 {
     // Network produces output blob with a shape 1x1xNx7 where N is a number of
     // detections and an every detection is a vector of values
-    // [batchId, classId, confidence, left, top, right, bottom]   
-   
+    // [batchId, classId, confidence, left, top, right, bottom]
     float* data = (float*)outs.data;
     for (size_t i = 0; i < outs.total(); i += 7)
     {
@@ -122,7 +126,7 @@ int main(int argc, char* argv[])
                 {
                     int* ptr;
                     reqst->GetUserData((void**)&ptr, 0);
-                    *ptr = 1;
+                    *ptr = REQ_WORK_FIN;
                 });
     }
     VideoCapture::waitAny(VCM, state, -1);
@@ -144,24 +148,28 @@ int main(int argc, char* argv[])
         }
         if(!SYNC)
         {
-            for(int nt = 0; nt < NUM_THREAD; )
+            for(int nt = 0; nt < NUM_THREAD; ++nt)
             {
-                for(unsigned int i = 0; i < state.size(); ++i)
+                if(threadState[nt] == REQ_WORK_FIN)
                 {
-                    if(threadState[nt] == 1)
+                    postprocess(forImg[nt], forTen[nt]);
+                    imshow(cam_names[numCam[nt]], forImg[nt]);
+                    threadState[nt] = REQ_READY_TO_START;
+                }
+                if(threadState[nt] == REQ_READY_TO_START)
+                {
+                    for(unsigned int i = 0; i < state.size(); ++i)
                     {
-                        postprocess(forImg[nt], forTen[nt]);
-                        imshow(cam_names[numCam[nt]], forImg[nt]);
-                        threadState[nt] = 0;
-                    }
-                    if(state[i] == CAP_CAM_READY)
-                    {
-                        VCM[i].retrieve(forImg[nt]);
-                        numCam[nt] = i;
-                        if(threadState[nt] == 0)
+                        if(state[i] == CAP_CAM_READY)
                         {
+                            VCM[i].retrieve(forImg[nt]);
+                            numCam[nt] = i;
+                            //if(threadState[nt] == REQ_READY_TO_START)
+                            //{
                             blobFromImage(forImg[nt], forTen[nt], 1, Size(300, 300));
+                            threadState[nt] = REQ_WORK;
                             vRequest[nt++].StartAsync();
+                            //}
                         }
                     }
                 }
@@ -169,7 +177,7 @@ int main(int argc, char* argv[])
         }
         VideoCapture::waitAny(VCM, state, -1);
 
-        if ((int)waitKey(10) == 27)
+        if((int)waitKey(10) == 27)
         {           
             break;
         }
