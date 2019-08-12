@@ -10,8 +10,9 @@ namespace cv { namespace open_model_zoo {
 
 static std::string getSHA(const std::string& path)
 {
-    std::string fileOpen = "f = open('" + path + "', 'rb')";
+    PyGILState_STATE gstate = PyGILState_Ensure();
 
+    std::string fileOpen = "f = open('" + path + "', 'rb')";
     PyObject* pModule = PyImport_AddModule("__main__");
 
     PyRun_SimpleString("import hashlib");
@@ -26,32 +27,35 @@ static std::string getSHA(const std::string& path)
     getUnicodeString(sha256, sha);
 
     Py_DECREF(sha256);
+    PyGILState_Release(gstate);
     return sha;
 }
 
-static void extract(const std::string& archive)
+static void extractAndRemove(const std::string& archive)
 {
     PyGILState_STATE gstate = PyGILState_Ensure();
+
+    std::string cmd = "archive = '" + archive + "'";
+    PyRun_SimpleString(cmd.c_str());
 
     std::string archiveOpen;
     if (archive.size() >= 7 && archive.substr(archive.size() - 7) == ".tar.gz")
     {
         PyRun_SimpleString("import tarfile");
-        archiveOpen = "f = tarfile.open('" + archive + "')";
+        PyRun_SimpleString("f = tarfile.open(archive)");
     }
     else if (archive.size() >= 4 && archive.substr(archive.size() - 4) == ".zip")
     {
         PyRun_SimpleString("from zipfile import ZipFile");
-        archiveOpen = "f = ZipFile('" + archive + "', 'r')";
+        PyRun_SimpleString("f = ZipFile.open(archive, 'r')");
     }
     else
         CV_Error(Error::StsNotImplemented, "Unexpected archive extension: " + archive);
 
-    std::string cmd = "f.extractall(path=os.path.dirname('" + archive + "'))";
     PyRun_SimpleString("import os");
-    PyRun_SimpleString(archiveOpen.c_str());
-    PyRun_SimpleString(cmd.c_str());
+    PyRun_SimpleString("f.extractall(path=os.path.dirname(archive))");
     PyRun_SimpleString("f.close()");
+    PyRun_SimpleString("os.remove(archive)");
 
     PyGILState_Release(gstate);
 }
@@ -59,8 +63,6 @@ static void extract(const std::string& archive)
 static void downloadFile(const std::string& url, const std::string& sha,
                          const std::string& path)
 {
-    PyGILState_STATE gstate = PyGILState_Ensure();
-
     if (utils::fs::exists(path))
     {
         std::string currSHA = getSHA(path);
@@ -70,9 +72,9 @@ static void downloadFile(const std::string& url, const std::string& sha,
             // the applications will download it and still have hash mismatch.
             CV_LOG_WARNING(NULL, "Hash mismatch for " + path + "\n" + "expected: " + sha + "\ngot:      " + currSHA);
         }
-        PyGILState_Release(gstate);
         return;
     }
+    PyGILState_STATE gstate = PyGILState_Ensure();
 
     utils::fs::createDirectories(utils::fs::getParent(path));
 
@@ -120,41 +122,54 @@ static void downloadFile(const std::string& url, const std::string& sha,
     PyRun_SimpleString("while buf: sys.stdout.write('>'); sys.stdout.flush(); " \
                        "f.write(buf); buf = r.read(BUFSIZE)");
     PyRun_SimpleString("sys.stdout.write('\\n'); f.close()");
+    PyGILState_Release(gstate);
 
     std::string resSHA = getSHA(path);
     if (sha != resSHA)
         CV_LOG_WARNING(NULL, "Hash mismatch for " + path + "\n" + "expected: " + sha + "\ngot:      " + resSHA);
-
-    PyGILState_Release(gstate);
 }
 
 void Topology::download() const
 {
-    std::string url, sha, path;
-    getArchiveInfo(url, sha, path);
-    if (!url.empty())
+    std::string archiveURL, archiveSHA, archivePath;
+    std::vector<std::string> paths(2), shas(2), urls(2);
+    getModelInfo(urls[0], shas[0], paths[0]);
+    getConfigInfo(urls[1], shas[1], paths[1]);
+    getArchiveInfo(archiveURL, archiveSHA, archivePath);
+    if ((!paths[0].empty() && !utils::fs::exists(paths[0])) ||
+        (!paths[1].empty() && !utils::fs::exists(paths[1])))
     {
-        downloadFile(url, sha, path);
-
-        std::string modelPath = getModelPath();
-        std::string configPath = getConfigPath();
-        if ((!modelPath.empty() && !utils::fs::exists(modelPath)) ||
-            (!configPath.empty() && !utils::fs::exists(configPath)))
-            extract(path);
+        if (!archiveURL.empty())
+        {
+            downloadFile(archiveURL, archiveSHA, archivePath);
+            extractAndRemove(archivePath);
+        }
+        else
+        {
+            for (int i = 0; i < 2; ++i)
+            {
+                if (!urls[i].empty())
+                    downloadFile(urls[i], shas[i], paths[i]);
+            }
+        }
     }
-    else
+    else if (archiveURL.empty())  // There is no SHA sums for files from archives.
     {
-        getModelInfo(url, sha, path);
-        if (!url.empty())
-            downloadFile(url, sha, path);
-
-        getConfigInfo(url, sha, path);
-        if (!url.empty())
-            downloadFile(url, sha, path);
+        for (int i = 0; i < 2; ++i)
+        {
+            if (!paths[i].empty())
+            {
+                std::string sha = getSHA(paths[i]);
+                if (sha != shas[i])
+                    CV_LOG_WARNING(NULL, "Hash mismatch for " + paths[i] + "\n" + "expected: " + shas[i] + "\ngot:      " + sha);
+            }
+        }
     }
 }
 
-void Topology::convertToIR(String& xmlPath, String& binPath) const
+void Topology::convertToIR(String& xmlPath, String& binPath,
+                           const std::vector<String>& extraArgs,
+                           const std::vector<String>& excludeArgs) const
 {
     if (getOriginFramework() == "dldt")
     {
@@ -166,6 +181,17 @@ void Topology::convertToIR(String& xmlPath, String& binPath) const
     std::string outDir = utils::fs::getParent(getModelPath());
     std::string topologyName = getName();
 
+    // Precision suffix
+    for (const auto& arg : extraArgs)
+    {
+        if (arg.size() >= 11 && arg.substr(0, 11) == "--data_type")
+        {
+            std::string suffix = arg.substr(arg.find_first_not_of(" =", 11));
+            std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
+            topologyName += "_" + suffix;
+            break;
+        }
+    }
     xmlPath = utils::fs::join(outDir, topologyName + ".xml");
     binPath = utils::fs::join(outDir, topologyName + ".bin");
 
@@ -176,15 +202,22 @@ void Topology::convertToIR(String& xmlPath, String& binPath) const
     std::string args = "";
     for (const auto& it : getModelOptimizerArgs())
     {
+        const std::string& key = it.first;
         std::string value = it.second;
-        if (it.first == "--input_model")
+
+        if (std::find(excludeArgs.begin(), excludeArgs.end(), key) != excludeArgs.end())
+            continue;
+
+        if (key == "--input_model")
             value = getModelPath();
-        else if (it.first == "--input_symbol" || it.first == "--input_proto")
+        else if (key == "--input_symbol" || key == "--input_proto")
             value = getConfigPath();
-        args += format("'%s=%s', ", it.first.c_str(), value.c_str());
+        args += format("'%s=%s', ", key.c_str(), value.c_str());
     }
     args += "'--output_dir=" + outDir + "', ";
     args += "'--model_name=" + topologyName + "', ";
+    for (const auto& arg : extraArgs)
+        args += "'" + arg + "', ";
 
     // We aren't able to run mo.py directly because there is also module names "mo"
     // in the same location. As a workaround we import mo_tf and detect mo.py location
@@ -193,14 +226,16 @@ void Topology::convertToIR(String& xmlPath, String& binPath) const
     auto cmd = "import mo_tf; import os; import sys; " \
                "path = os.path.join(os.path.dirname(mo_tf.__file__), 'mo.py'); " \
                "sys.argv = [path, " + args + "]";
-    // There is sys.exit() inside MO so wrap it to try-except
+    // There is sys.exit(0) inside MO so wrap it to try-except
     auto run = "try: exec(open(path).read())\nexcept SystemExit as e: assert(e.code == 0)";
-    if (PyRun_SimpleString(cmd.c_str()) == -1 || PyRun_SimpleString(run) == -1)
-    {
-        PyGILState_Release(gstate);
-        CV_Error(Error::StsError, "Failed to run Model Optimizer");
-    }
+    bool failed = PyRun_SimpleString(cmd.c_str()) == -1 || PyRun_SimpleString(run) == -1;
+
+    // Prevent AttributeError: protobuf
+    PyRun_SimpleString("if 'google.protobuf' in sys.modules: del sys.modules['google.protobuf']");
     PyGILState_Release(gstate);
+
+    if (failed)
+        CV_Error(Error::StsError, "Failed to run Model Optimizer");
 }
 
 static Ptr<TextRecognitionPipeline> createTextRecognitionPipeline(const Topology& detection, const Topology& recognition)

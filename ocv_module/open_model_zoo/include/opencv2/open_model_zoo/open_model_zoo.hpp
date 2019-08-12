@@ -18,13 +18,20 @@ namespace cv { namespace open_model_zoo {
          * @brief Convert model from native framework to OpenVINO Intermadiate Representation (IR)
          * @param[out] xmlPath Path to generated .xml file.
          * @param[out] binPath Path to generated .bin file.
+         * @param[in]  extraArgs   List of extra arguments to be added for Model Optimizer. Every argument should contain both key and value, i.e. "--data_type=FP16".
+         * @param[in]  excludeArgs List of flags to be excluded from Model Optimizer arguments. Every flag should have complete key, i.e. "--input_shape".
          *
          * This method calls Model Optimizer Python tool with arguments from
          * topology's description. If model is already in IR format or there are
          * already converted files - returns paths without MO invocation.
          * @note Method is available from Python3 only.
+         *
+         * Input parameter @p extraArgs can be combined with @p excludeArgs to
+         * override arguments specified in the .yml file.
          */
-        CV_WRAP void convertToIR(CV_OUT String& xmlPath, CV_OUT String& binPath) const;
+        CV_WRAP void convertToIR(CV_OUT String& xmlPath, CV_OUT String& binPath,
+                                 const std::vector<String>& extraArgs = std::vector<String>(),
+                                 const std::vector<String>& excludeArgs = std::vector<String>()) const;
 
         /**
          * @brief Get a name of topology.

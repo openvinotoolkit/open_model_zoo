@@ -30,11 +30,31 @@ class open_model_zoo_test(NewOpenCVTests):
         os.remove(modelPath)
         os.remove(configPath)
 
+
+    def test_downloadArchive(self):
+        t = omz.topologies.license_plate_recognition_barrier()
+
+        _, _, archivePath = t.getArchiveInfo()
+        self.assertFalse(os.path.exists(archivePath), 'Archive should be removed')
+
+        for path in [t.getModelPath(), t.getConfigPath()]:
+            if path:
+                self.assertTrue(os.path.exists(path))
+                self.assertNotEqual(path, archivePath)
+                os.remove(path)
+
+
     def test_convertToIR(self):
         t = omz.topologies.squeezenet1_0()
         xmlPath, binPath = t.convertToIR()
         self.assertEqual(os.path.basename(xmlPath), 'squeezenet1_0.xml')
         self.assertEqual(os.path.basename(binPath), 'squeezenet1_0.bin')
+        os.remove(xmlPath)
+        os.remove(binPath)
+
+        xmlPath, binPath = t.convertToIR(['--data_type=FP16'])
+        self.assertEqual(os.path.basename(xmlPath), 'squeezenet1_0_fp16.xml')
+        self.assertEqual(os.path.basename(binPath), 'squeezenet1_0_fp16.bin')
         os.remove(xmlPath)
         os.remove(binPath)
 

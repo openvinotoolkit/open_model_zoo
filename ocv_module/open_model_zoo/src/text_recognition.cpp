@@ -331,7 +331,7 @@ static cv::Mat cropImage(const cv::Mat &image, const std::vector<cv::Point2f> &p
 
 static int strToDnnTarget(std::string device)
 {
-    std::transform(device.begin(), device.begin(), device.end(), ::tolower);
+    std::transform(device.begin(), device.end(), device.begin(), ::tolower);
     if (device == "cpu")        return dnn::DNN_TARGET_CPU;
     else if (device == "gpu")   return dnn::DNN_TARGET_OPENCL;
     else if (device == "vpu")   return dnn::DNN_TARGET_MYRIAD;
