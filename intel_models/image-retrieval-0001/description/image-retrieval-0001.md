@@ -13,8 +13,8 @@ Image retrieval model based on [MobileNetV2](https://arxiv.org/pdf/1801.04381.pd
 | Metric                                                        | Value                   |
 |---------------------------------------------------------------|-------------------------|
 | Top1 accuracy                                                 | TBD                     |
-| GFlops                                                        | TBD                     |
-| MParams                                                       | TBD                     |
+| GFlops                                                        | 0.613                   |
+| MParams                                                       | 2.535                   |
 | Source framework                                              | TensorFlow              |
 
 ## Performance
