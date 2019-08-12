@@ -38,7 +38,7 @@ def add_top10_gallery_images(demo_image, impaths, distances, input_image, target
 
         demo_image[h_shift: h_shift + SIZE, w_shift: w_shift + SIZE] = image
 
-        if distances:
+        if distances is not None:
             cv2.putText(demo_image, '{}:{}'.format(index, int(distances[index] * 100) / 100),
                         (w_shift - BORDER, h_shift - 5), 1,
                         TEXT_SIZE, BLACK, LWD)
