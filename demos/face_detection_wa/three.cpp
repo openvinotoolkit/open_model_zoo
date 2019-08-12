@@ -152,8 +152,10 @@ int main(int argc, char* argv[])
                         if(state[i] == CAP_CAM_READY && nt == i)
                         {
                             VCM[nt].retrieve(forImg[nt]);
-                            blobFromImage(forImg[nt], forTen[nt], 1, Size(300, 300));                     
+                            blobFromImage(forImg[nt], forTen[nt], 1, Size(300, 300));
                             vRequest[nt].StartAsync();
+                            //postprocess(forImg[nt], forTen[nt]);
+                            //imshow(cam_names[nt], forImg[nt]);
                         }
                     }
                 }
