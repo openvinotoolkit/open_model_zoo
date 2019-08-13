@@ -27,8 +27,8 @@ from warnings import warn
 
 from shapely.geometry.polygon import Polygon
 import numpy as np
-import yaml
 import yamlloader
+import yaml
 
 try:
     import lxml.etree as et
