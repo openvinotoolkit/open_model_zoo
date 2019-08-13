@@ -1,7 +1,5 @@
 #include <opencv2/opencv.hpp>
 #include <inference_engine.hpp>
-
-
 #include <ie_extension.h>
 #include <ie_plugin_dispatcher.hpp>
 #include <string>
@@ -11,14 +9,21 @@ using namespace cv::dnn;
 using namespace InferenceEngine;
 
 float confThreshold = 0.5;//*100%
-int NUM_THREAD = 2;
+int NUM_THREAD = 2; // >=2 for SYNC == true
 bool SYNC = false;// SYNC - true, ASYNC - false
+bool ASYNC = !SYNC;
 
 enum {
     REQ_READY_TO_START = 0,
     REQ_WORK_FIN = 1,
     REQ_WORK = 2
 };
+
+static char* get_cameras_list()
+{
+    return getenv("OPENCV_TEST_CAMERA_LIST");
+}
+
 void postprocess(Mat& frame, const Mat& outs)
 {
     // Network produces output blob with a shape 1x1xNx7 where N is a number of
@@ -39,45 +44,58 @@ void postprocess(Mat& frame, const Mat& outs)
     }
 }
 
+std::vector<Mat> GetVector(int sizev)
+{
+    std::vector<Mat> vectorr;
+    for (int i =0; i < sizev; ++i)
+    {
+        vectorr.push_back(Mat({1,3,300,300}, CV_32F));
+    }
+    return vectorr;
+}
+
+template<typename T>
+std::vector<T> GetVector(int sizev)
+{
+    std::vector<T> vectorr;
+    for (int i = 0; i < sizev; ++i)
+    {
+        vectorr.push_back(T());
+    }
+    return vectorr;
+}
+
 int main(int argc, char* argv[])
 {
-    std::vector<InferRequest> vRequest;
+    char* datapath_dir = get_cameras_list(); //export OPENCV_TEST_CAMERA_LIST=...
+    std::vector<VideoCapture> VCM;
+    int step = 0; std::string path;
+    while(true)
+    {
+        if(datapath_dir[step] == ':' || datapath_dir[step] == '\0')
+        {
+            VCM.push_back(VideoCapture(path, CAP_V4L));
+            path.clear();
+            if(datapath_dir[step] != '\0')
+                ++step;
+        }
+        if(datapath_dir[step] == '\0')
+            break;
+        path += datapath_dir[step];
+        ++step;
+    }
+    std::vector<int> state(VCM.size(), 0);
+    std::vector<InferRequest> vRequest;    
     std::vector<int> threadState(NUM_THREAD, 0);// 0 - ready to start, 1 - not ready
-    std::vector<std::string>cam_names = {"cam1", "cam2"};
+    std::vector<std::string>cam_names = {"cam1", "cam2", "cam3", "cam4", "cam5", "cam6", "cam7", "cam8", "cam9", "cam10"};
     std::vector<int> numCam(NUM_THREAD, -1);
+    std::vector<BlobMap> IblobMap = GetVector<BlobMap>(NUM_THREAD);
+    std::vector<BlobMap> OblobMap = GetVector<BlobMap>(NUM_THREAD);
+    std::vector<Mat> forTen = GetVector(NUM_THREAD);
+    std::vector<Mat> forImg = GetVector(NUM_THREAD);
+
     std::string xmlPath = "/home/volskig/src/weights/face-detection-retail-0004/FP32/face-detection-retail-0004.xml";
     std::string binPath = "/home/volskig/src/weights/face-detection-retail-0004/FP32/face-detection-retail-0004.bin";
-
-    std::map<std::string, cv::Mat> inputsMap1, inputsMap2, inputsMap3, inputsMap4, inputsMap5, inputsMap6,
-                                                                        ieOutputsMap1, ieOutputsMap2, ieOutputsMap3, ieOutputsMap4, ieOutputsMap5, ieOutputsMap6;
-
-    BlobMap inputBlobs1, inputBlobs2, inputBlobs3, inputBlobs4, inputBlobs5, inputBlobs6,
-                        outBlobs1, outBlobs2, outBlobs3, outBlobs4, outBlobs5, outBlobs6;
-    std::vector<BlobMap> IblobMap = {inputBlobs1, inputBlobs2, inputBlobs3, inputBlobs4, inputBlobs5, inputBlobs6};
-    std::vector<BlobMap> OblobMap = {outBlobs1, outBlobs2, outBlobs3, outBlobs4, outBlobs5, outBlobs6};
-
-    std::vector<VideoCapture> VCM;
-    VideoCapture cap1(0);
-    VideoCapture cap2(2);
-    VCM.push_back(cap1);
-    VCM.push_back(cap2);
-
-    Mat ten1({1,3,300,300}, CV_32F),
-        ten2({1,3,300,300}, CV_32F),
-        ten3({1,3,300,300}, CV_32F),
-        ten4({1,3,300,300}, CV_32F),
-        ten5({1,3,300,300}, CV_32F),
-        ten6({1,3,300,300}, CV_32F),
-        ten7({1,3,300,300}, CV_32F),
-        ten8({1,3,300,300}, CV_32F),
-        ten9({1,3,300,300}, CV_32F),
-        ten10({1,3,300,300}, CV_32F);
-    std::vector<Mat> forTen = {ten1, ten2, ten3, ten4, ten5, ten6, ten7, ten8, ten9, ten10};
-
-    Mat img1, img2, img3, img4, img5, img6, img7, img8, img9, img10;
-    std::vector<Mat> forImg = {img1, img2, img3, img4, img5, img6, img7, img8, img9, img10};
-
-    std::vector<int> state(VCM.size(), 0);
 
     CNNNetReader reader;
     reader.ReadNetwork(xmlPath);
@@ -87,26 +105,24 @@ int main(int argc, char* argv[])
     InferenceEnginePluginPtr enginePtr;
     InferencePlugin plugin;	
     ExecutableNetwork netExec;
+    try
+    {
+            auto dispatcher = InferenceEngine::PluginDispatcher({""});
+            enginePtr = dispatcher.getPluginByDevice("CPU");
+
+            IExtensionPtr extension = make_so_pointer<IExtension>("libcpu_extension.so");
+            enginePtr->AddExtension(extension, 0);
+            plugin = InferencePlugin(enginePtr);
+            netExec = plugin.LoadNetwork(net, {});
+    }
+    catch (const std::exception& ex)
+    {
+            CV_Error(Error::StsAssert, format("Failed to initialize Inference Engine backend: %s", ex.what()));
+    }
 				
     for(int nt = 0; nt < NUM_THREAD; ++nt)
-    {
-        try
-        {
-                auto dispatcher = InferenceEngine::PluginDispatcher({""});
-                enginePtr = dispatcher.getPluginByDevice("CPU");
-
-                IExtensionPtr extension = make_so_pointer<IExtension>("libcpu_extension.so");
-                enginePtr->AddExtension(extension, 0);
-                plugin = InferencePlugin(enginePtr);
-                netExec = plugin.LoadNetwork(net, {});
-
-                vRequest.push_back(netExec.CreateInferRequest());
-        }
-        catch (const std::exception& ex)
-        {
-                CV_Error(Error::StsAssert, format("Failed to initialize Inference Engine backend: %s", ex.what()));
-        }
-
+    {       
+        vRequest.push_back(netExec.CreateInferRequest());
         for (auto& it : net.getInputsInfo())
         {
                 IblobMap[nt][it.first] = make_shared_blob<float>({Precision::FP32,  it.second->getTensorDesc().getDims(), Layout::ANY}, (float*)forTen[nt].data);
@@ -146,7 +162,7 @@ int main(int argc, char* argv[])
                 }
             }
         }
-        if(!SYNC)
+        if(ASYNC)
         {
             for(int nt = 0; nt < NUM_THREAD; ++nt)
             {
@@ -162,14 +178,13 @@ int main(int argc, char* argv[])
                     {
                         if(state[i] == CAP_CAM_READY)
                         {
+                            state[i] = CAP_CAM_NOT_READY;
                             VCM[i].retrieve(forImg[nt]);
                             numCam[nt] = i;
-                            //if(threadState[nt] == REQ_READY_TO_START)
-                            //{
                             blobFromImage(forImg[nt], forTen[nt], 1, Size(300, 300));
                             threadState[nt] = REQ_WORK;
-                            vRequest[nt++].StartAsync();
-                            //}
+                            vRequest[nt].StartAsync();
+                            break;
                         }
                     }
                 }
@@ -177,7 +192,7 @@ int main(int argc, char* argv[])
         }
         VideoCapture::waitAny(VCM, state, -1);
 
-        if((int)waitKey(10) == 27)
+        if((int)waitKey(1) == 27)
         {           
             break;
         }
