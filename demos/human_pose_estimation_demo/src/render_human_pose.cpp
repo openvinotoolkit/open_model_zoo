@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/imgproc.hpp>
 
 #include "human_pose_estimator.hpp"
 #include "render_human_pose.hpp"

@@ -6,7 +6,7 @@
 
 #include <vector>
 
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
 
 namespace human_pose_estimation {
 struct HumanPose {

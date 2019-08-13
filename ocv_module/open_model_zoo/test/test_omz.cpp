@@ -72,4 +72,17 @@ TEST(TextRecognitionPipeline, Accuracy)
     }
 }
 
+// This test requires downloaded models.
+TEST(HumanPoseEstimation, Accuracy)
+{
+    HumanPoseEstimation p;
+
+    Mat img = imread(findDataFile("gpu/lbpcascade/er.png"));
+    std::vector<HumanPose> poses;
+    p.process(img, poses);
+
+    ASSERT_EQ((int)poses.size(), 6);
+    p.render(img, poses);
+}
+
 }}  // namespace opencv_test

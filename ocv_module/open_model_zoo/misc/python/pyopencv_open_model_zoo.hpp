@@ -1,5 +1,7 @@
 #ifdef HAVE_OPENCV_OPEN_MODEL_ZOO
 
+typedef std::vector<HumanPose> vector_HumanPose;
+
 #include <iostream>
 #include <string>
 
@@ -243,6 +245,24 @@ static Ptr<TextRecognitionPipeline> createTextRecognitionPipeline(const Topology
     return new TextRecognitionPipeline(detection, recognition);
 }
 
+static Ptr<HumanPoseEstimation> createHumanPoseEstimation(const Topology& t)
+{
+    return new HumanPoseEstimation(t);
+}
+
 }}  // namespace open_model_zoo
+
+template<> struct pyopencvVecConverter<HumanPose>
+{
+    static bool to(PyObject* obj, std::vector<HumanPose>& value, const ArgInfo info)
+    {
+        return pyopencv_to_generic_vec(obj, value, info);
+    }
+
+    static PyObject* from(const std::vector<HumanPose>& value)
+    {
+        return pyopencv_from_generic_vec(value);
+    }
+};
 
 #endif
