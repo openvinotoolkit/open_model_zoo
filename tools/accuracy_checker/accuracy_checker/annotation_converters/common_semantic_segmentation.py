@@ -22,7 +22,7 @@ class CommonSegmentationConverter(BaseFormatConverter):
                 'mask_postfix': StringField(optional=True, default='.png', description='prefix for gt masks'),
                 'mask_loader': StringField(
                     optional=True, choices=LOADERS_MAPPING,
-                    description='reader for gt masks. Supported: {}'.format(', '.format(LOADERS_MAPPING)),
+                    description='reader for gt masks. Supported: {}'.format(', '.join(LOADERS_MAPPING)),
                     default='pillow'
                 ),
                 'dataset_meta': PathField(
@@ -47,7 +47,7 @@ class CommonSegmentationConverter(BaseFormatConverter):
         mask_name = '{prefix}{base}{postfix}'.format(
             prefix=self.mask_prefix, base='{base}', postfix=self.mask_postfix
         )
-        image_pattern='*'
+        image_pattern = '*'
         if self.images_prefix:
             image_pattern = self.images_prefix + image_pattern
         if self.images_postfix:
@@ -74,7 +74,4 @@ class CommonSegmentationConverter(BaseFormatConverter):
 
         dataset_meta = read_json(self.dataset_meta) if self.dataset_meta else None
 
-        return ConverterReturn(annotations, read_json(self.dataset_meta), content_errors)
-
-
-
+        return ConverterReturn(annotations, dataset_meta, content_errors)
