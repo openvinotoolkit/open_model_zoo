@@ -34,6 +34,7 @@ from .brats import BratsConverter, BratsNumpyConverter
 from .cifar10 import Cifar10FormatConverter
 from .mnist import MNISTCSVFormatConverter
 from .wmt import WMTConverter
+from .common_semantic_segmentation import CommonSegmentationConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -61,5 +62,6 @@ __all__ = [
     'BratsNumpyConverter',
     'Cifar10FormatConverter',
     'MNISTCSVFormatConverter',
-    'WMTConverter'
+    'WMTConverter',
+    'CommonSegmentationConverter'
 ]
