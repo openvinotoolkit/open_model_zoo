@@ -132,20 +132,19 @@ DEMOS = [
         single_option_cases('-m_va', None, ModelArg('vehicle-attributes-recognition-barrier-0039')),
     )),
 
-    # disabled because -no_show is not supported
-#    Demo(name='segmentation_demo', test_cases=combine_cases(
-#        # TestCase(options={'-no_show': None}),
-#        [
-#            TestCase(options={
-#                '-m': ModelArg('road-segmentation-adas-0001'),
-#                '-i': ImagePatternArg('road-segmentation-adas'),
-#            }),
-#            TestCase(options={
-#                '-m': ModelArg('semantic-segmentation-adas-0001'),
-#                '-i': ImagePatternArg('semantic-segmentation-adas'),
-#            }),
-#        ],
-#    )),
+    Demo(name='segmentation_demo', test_cases=combine_cases(
+        device_cases('-d'),
+        [
+            TestCase(options={
+                '-m': ModelArg('road-segmentation-adas-0001'),
+                '-i': ImageDirectoryArg('road-segmentation-adas'),
+            }),
+            TestCase(options={
+                '-m': ModelArg('semantic-segmentation-adas-0001'),
+                '-i': ImageDirectoryArg('semantic-segmentation-adas'),
+            }),
+        ],
+    )),
 
     # TODO: smart_classroom_demo
 
