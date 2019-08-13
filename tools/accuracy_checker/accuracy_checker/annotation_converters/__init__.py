@@ -63,5 +63,5 @@ __all__ = [
     'Cifar10FormatConverter',
     'MNISTCSVFormatConverter',
     'WMTConverter',
-    'common_semantic_segmentation'
+    'CommonSegmentationConverter'
 ]
