@@ -140,7 +140,8 @@ def main():
         if key == 27:
             break
 
-    compute_metrics(positions)
+    if positions:
+        compute_metrics(positions)
 
 
 if __name__ == '__main__':
