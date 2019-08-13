@@ -44,36 +44,16 @@ void postprocess(Mat& frame, const Mat& outs)
     }
 }
 
-std::vector<std::string> GetNames(int size)
-{
-    std::vector<std::string> vectorr;
-    for (int i =0; i < size; ++i)
-    {
-        vectorr.emplace_back("Camera " + std::to_string(i + 1));
-    }
-    return vectorr;
-}
-
-std::vector<Mat> GetMats(int size, const std::initializer_list< int > sizes)
-{
-    std::vector<Mat> vectorr;
-    for (int i =0; i < size; ++i)
-    {
-        vectorr.emplace_back(Mat(sizes, CV_32F));
-    }
-    return vectorr;
-}
-
 int main(int argc, char* argv[])
 {
     char* datapath_dir = get_cameras_list(); //export OPENCV_TEST_CAMERA_LIST=...
-    std::vector<VideoCapture> VCM;
+    std::vector<VideoCapture> cameras;
     int step = 0; std::string path;
     while(true)
     {
         if(datapath_dir[step] == ':' || datapath_dir[step] == '\0')
         {
-            VCM.emplace_back(VideoCapture(path, CAP_V4L));
+            cameras.emplace_back(VideoCapture(path, CAP_V4L));
             path.clear();
             if(datapath_dir[step] != '\0')
                 ++step;
@@ -83,20 +63,18 @@ int main(int argc, char* argv[])
         path += datapath_dir[step];
         ++step;
     }
-    std::vector<int> state(VCM.size(), 0);
     std::vector<InferRequest> vRequest;
-    std::vector<int> threadState(NUM_THREAD, 0);// 0 - ready to start, 1 - not ready
-    std::vector<std::string>cam_names = GetNames(NUM_THREAD);
+    std::vector<int> state(cameras.size(), 0);
+    std::vector<int> threadState(NUM_THREAD, 0);// 0 - ready to start, 1 - not ready, 2 - work
     std::vector<int> numCam(NUM_THREAD, -1);
+    std::vector<std::string>cam_names;
     std::vector<BlobMap> inpBlobMap(NUM_THREAD);
     std::vector<BlobMap> outBlobMap(NUM_THREAD);
-    std::vector<Mat> inpTen = GetMats(NUM_THREAD, {1,3,300,300});
-    std::vector<Mat> outTen = GetMats(NUM_THREAD, {1,1,200,7});
     std::vector<Mat> forImg(NUM_THREAD);
+    std::vector<Mat> inpTen, outTen;
 
     std::string xmlPath = "/home/volskig/src/weights/face-detection-retail-0004/FP32/face-detection-retail-0004.xml";
     std::string binPath = "/home/volskig/src/weights/face-detection-retail-0004/FP32/face-detection-retail-0004.bin";
-
     CNNNetReader reader;
     reader.ReadNetwork(xmlPath);
     reader.ReadWeights(binPath);
@@ -107,52 +85,46 @@ int main(int argc, char* argv[])
     ExecutableNetwork netExec;
     try
     {
-            auto dispatcher = InferenceEngine::PluginDispatcher({""});
-            enginePtr = dispatcher.getPluginByDevice("CPU");
-
-            IExtensionPtr extension = make_so_pointer<IExtension>("libcpu_extension.so");
-            enginePtr->AddExtension(extension, 0);
-            plugin = InferencePlugin(enginePtr);
-            netExec = plugin.LoadNetwork(net, {});
+        auto dispatcher = InferenceEngine::PluginDispatcher({""});
+        enginePtr = dispatcher.getPluginByDevice("CPU");
+        IExtensionPtr extension = make_so_pointer<IExtension>("libcpu_extension.so");
+        enginePtr->AddExtension(extension, 0);
+        plugin = InferencePlugin(enginePtr);
+        netExec = plugin.LoadNetwork(net, {});
     }
     catch (const std::exception& ex)
     {
-            CV_Error(Error::StsAssert, format("Failed to initialize Inference Engine backend: %s", ex.what()));
+        CV_Error(Error::StsAssert, format("Failed to initialize Inference Engine backend: %s", ex.what()));
     }
 
     for(int nt = 0; nt < NUM_THREAD; ++nt)
     {
-        vRequest.emplace_back(netExec.CreateInferRequest());
-        for (auto& it : net.getInputsInfo())
-        {
-                inpBlobMap[nt][it.first] = make_shared_blob<float>({Precision::FP32,  it.second->getTensorDesc().getDims(), Layout::ANY}, (float*)inpTen[nt].data);
-        }
+        inpTen.emplace_back(Mat({1,3,300,300}, CV_32F));
+        outTen.emplace_back(Mat({1,1,200,7}, CV_32F));
+        cam_names.emplace_back("Camera " + std::to_string(nt + 1));
+        inpBlobMap[nt]["data"] = make_shared_blob<float>({Precision::FP32,  {1,3,300,300}, Layout::ANY}, (float*)inpTen[nt].data);
+        outBlobMap[nt]["detection_out"] = make_shared_blob<float>({Precision::FP32, {1,1,200,7}, Layout::ANY}, (float*)outTen[nt].data);
 
-        for (auto& it : net.getOutputsInfo())
-        {
-                outBlobMap[nt][it.first] = make_shared_blob<float>({Precision::FP32, it.second->getTensorDesc().getDims(), Layout::ANY}, (float*)outTen[nt].data);
-        }
+        vRequest.emplace_back(netExec.CreateInferRequest());
         vRequest[nt].SetInput(inpBlobMap[nt]);
         vRequest[nt].SetOutput(outBlobMap[nt]);
         InferenceEngine::IInferRequest::Ptr infRequestPtr = vRequest[nt];
         int* pmsg = &threadState[nt];
         infRequestPtr->SetUserData(pmsg, 0);
         infRequestPtr->SetCompletionCallback(
-                [](InferenceEngine::IInferRequest::Ptr reqst, InferenceEngine::StatusCode code)
-                {
-                    int* ptr;
-                    reqst->GetUserData((void**)&ptr, 0);
-                    *ptr = REQ_WORK_FIN;
-                });
+            [](InferenceEngine::IInferRequest::Ptr reqst, InferenceEngine::StatusCode code)
+            {
+                int* ptr;
+                reqst->GetUserData((void**)&ptr, 0);
+                *ptr = REQ_WORK_FIN;
+            });
     }
 
-    if(READ)
+    if(READ)//.read() method
     {
         while(true)
         {
-            //for (int nc = 0; nc < VCM.size(); ++nc)
-            //{
-            int nc = 0;
+            int NUM_CAM = 0;
             for(int nt = 0; nt < NUM_THREAD; ++nt)
             {
                 if(threadState[nt] == REQ_WORK_FIN)
@@ -163,19 +135,15 @@ int main(int argc, char* argv[])
                 }
                 if(threadState[nt] == REQ_READY_TO_START)
                 {
-                    VCM[nc].read(forImg[nt]);
-                    numCam[nt] = nc;
-                    if(nc < VCM.size() - 1)
-                        ++nc;
-                    else
-                        nc = 0;
+                    cameras[NUM_CAM].read(forImg[nt]);
+                    numCam[nt] = NUM_CAM;
+                    if(((++NUM_CAM) % cameras.size()) == 0)
+                        NUM_CAM = 0;
                     blobFromImage(forImg[nt], inpTen[nt], 1, Size(300, 300));
                     threadState[nt] = REQ_WORK;
                     vRequest[nt].StartAsync();
-                    //break;
                 }
             }
-            //}
             if((int)waitKey(1) == 27)
             {
                 break;
@@ -183,9 +151,9 @@ int main(int argc, char* argv[])
         }
     }
 
-    if(WA)
+    if(WA)//waitAny() method
     {
-        VideoCapture::waitAny(VCM, state, -1);
+        VideoCapture::waitAny(cameras, state, -1);
         while(true)
         {
             for(int nt = 0; nt < NUM_THREAD; ++nt)
@@ -203,7 +171,7 @@ int main(int argc, char* argv[])
                         if(state[i] == CAP_CAM_READY)
                         {
                             state[i] = CAP_CAM_NOT_READY;
-                            VCM[i].retrieve(forImg[nt]);
+                            cameras[i].retrieve(forImg[nt]);
                             numCam[nt] = i;
                             blobFromImage(forImg[nt], inpTen[nt], 1, Size(300, 300));
                             threadState[nt] = REQ_WORK;
@@ -214,7 +182,7 @@ int main(int argc, char* argv[])
                 }
             }
 
-            VideoCapture::waitAny(VCM, state, -1);
+            VideoCapture::waitAny(cameras, state, -1);
 
             if((int)waitKey(1) == 27)
             {
@@ -222,13 +190,11 @@ int main(int argc, char* argv[])
             }
         }
     }
-    //for(int nt = 0; nt < NUM_THREAD; ++nt)
-    //{
-    //    if(threadState[nt] == REQ_WORK)
-    //    {
-    //        vRequest[nt].Wait(InferenceEngine::IInferRequest::RESULT_READY);
-    //    }
-    //}
+
+    for(int nt = 0; nt < NUM_THREAD; ++nt)
+    {
+        vRequest[nt].Wait(InferenceEngine::IInferRequest::RESULT_READY);
+    }
     return 0;
 }
 
