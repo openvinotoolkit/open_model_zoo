@@ -20,20 +20,33 @@ namespace cv { namespace open_model_zoo {
 struct HumanPoseEstimationImpl::Impl
 {
 #ifdef HAVE_INF_ENGINE
-    Impl(const std::string& modelPath) : estimator(modelPath, "CPU", false) {}
+    Impl(const std::string& modelPath, const std::string& device) : estimator(modelPath, device, false) {}
 
     HumanPoseEstimator estimator;
-#else
-    Impl(const std::string&) {}
 #endif
 };
 
-HumanPoseEstimation::HumanPoseEstimationImpl(const Topology& t)
-    : impl(new Impl(t.getConfigPath()))
+HumanPoseEstimation::HumanPoseEstimationImpl(const std::string& device)
 {
 #ifndef HAVE_INF_ENGINE
     CV_Error(Error::StsNotImplemented, "Human pose estimation without Inference Engine");
 #endif
+
+    Topology t;
+    if (device == "GPU16" || device == "MYRIAD")
+        t = topologies::human_pose_estimation_fp16();
+    else
+        t = topologies::human_pose_estimation();
+
+    impl.reset(new Impl(t.getConfigPath(), device == "GPU16" ? "GPU" : device));
+}
+
+HumanPoseEstimation::HumanPoseEstimationImpl(const Topology& t, const std::string& device)
+{
+#ifndef HAVE_INF_ENGINE
+    CV_Error(Error::StsNotImplemented, "Human pose estimation without Inference Engine");
+#endif
+    impl.reset(new Impl(t.getConfigPath(), device));
 }
 
 void HumanPoseEstimation::process(InputArray frame, CV_OUT std::vector<HumanPose>& humanPoses)

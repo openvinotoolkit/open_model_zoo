@@ -245,9 +245,19 @@ static Ptr<TextRecognitionPipeline> createTextRecognitionPipeline(const Topology
     return new TextRecognitionPipeline(detection, recognition);
 }
 
-static Ptr<HumanPoseEstimation> createHumanPoseEstimation(const Topology& t)
+static Ptr<HumanPoseEstimation> createHumanPoseEstimation(const std::string& device)
 {
-    return new HumanPoseEstimation(t);
+    Topology t;
+    if (device == "GPU16" || device == "MYRIAD")
+        t = topologies::human_pose_estimation_fp16();
+    else
+        t = topologies::human_pose_estimation();
+    return new HumanPoseEstimation(t, device);
+}
+
+static Ptr<HumanPoseEstimation> createHumanPoseEstimation(const Topology& t, const std::string& device)
+{
+    return new HumanPoseEstimation(t, device);
 }
 
 }}  // namespace open_model_zoo

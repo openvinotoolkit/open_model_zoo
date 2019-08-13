@@ -8,14 +8,22 @@ using namespace cv::open_model_zoo::topologies;
 
 namespace cv { namespace open_model_zoo {
 
-/**
- * @brief Human body pose estimation.
- */
-
-#if 0
 // This is a trick to enable open_model_zoo::HumanPoseEstimation both in Python and in C++
+#if 0
+/**
+ * @brief Constructor
+ * @param[in] device Computational device
+ */
 CV_WRAP_AS(HumanPoseEstimation)
-Ptr<HumanPoseEstimation> createHumanPoseEstimation(const Topology& t = human_pose_estimation());
+Ptr<HumanPoseEstimation> createHumanPoseEstimation(const String& device = "CPU");
+
+/**
+ * @brief Constructor
+ * @param[in] t open_model_zoo::Topology instance
+ * @param[in] device Computational device
+ */
+CV_WRAP_AS(HumanPoseEstimation)
+Ptr<HumanPoseEstimation> createHumanPoseEstimation(const Topology& t, const String& device = "CPU");
 #endif
 
 struct CV_EXPORTS_W_SIMPLE HumanPose
@@ -24,10 +32,24 @@ struct CV_EXPORTS_W_SIMPLE HumanPose
     CV_PROP String type;  // COCO or MPI
 };
 
+/**
+ * @brief Human body pose estimation.
+ */
 class CV_EXPORTS_W HumanPoseEstimationImpl
 {
 public:
-    CV_WRAP HumanPoseEstimationImpl(const Topology& t = human_pose_estimation());
+    /**
+     * @brief Constructor
+     * @param[in] device Computational device
+     */
+    CV_WRAP HumanPoseEstimationImpl(const String& device = "CPU");
+
+    /**
+     * @brief Constructor
+     * @param[in] t open_model_zoo::Topology instance
+     * @param[in] device Computational device
+     */
+    CV_WRAP HumanPoseEstimationImpl(const Topology& t, const String& device = "CPU");
 
     CV_WRAP void process(InputArray frame, CV_OUT std::vector<HumanPose>& poses);
 
