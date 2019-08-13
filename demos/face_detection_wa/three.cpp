@@ -9,7 +9,7 @@ using namespace cv::dnn;
 using namespace InferenceEngine;
 
 float confThreshold = 0.5;//*100%
-int NUM_THREAD = 6; // >=2 for WA == true
+int NUM_THREAD = 12; // >=2 for WA == true
 bool READ = true;// READ - true, WA - false
 bool WA = !READ;
 
@@ -119,14 +119,19 @@ int main(int argc, char* argv[])
                 *ptr = REQ_WORK_FIN;
             });
     }
-
+    int start_frame = 100;
+    bool flag = false;
+    int NUM_CAM = 0;
     if(READ)//.read() method
     {
         TickMeter tm; int frame_count = 0;
         while(true)
         {
-            tm.start();
-            int NUM_CAM = 0;
+            if(frame_count > start_frame && !flag)
+            {
+                tm.start();
+                flag = true;
+            }
             for(int nt = 0; nt < NUM_THREAD; ++nt)
             {
                 if(threadState[nt] == REQ_WORK_FIN)
@@ -138,21 +143,23 @@ int main(int argc, char* argv[])
                 }
                 if(threadState[nt] == REQ_READY_TO_START)
                 {
+                    std::cout << nt + 1 << std::endl;
                     cameras[NUM_CAM].read(forImg[nt]);
                     numCam[nt] = NUM_CAM;
-                    NUM_CAM = ((NUM_CAM + 1) % cameras.size());
+                    NUM_CAM = (NUM_CAM + 1) % cameras.size();
                     blobFromImage(forImg[nt], inpTen[nt], 1, Size(300, 300));
                     threadState[nt] = REQ_WORK;
                     vRequest[nt].StartAsync();
+                    break;
                 }
             }
-            tm.stop();
             if((int)waitKey(1) == 27)
             {
-                std::cout << frame_count / tm.getTimeSec() << std::endl;
                 break;
             }
         }
+        tm.stop();
+        std::cout << (frame_count - start_frame) / tm.getTimeSec() << std::endl;
     }
 
     if(WA)//waitAny() method
@@ -161,7 +168,11 @@ int main(int argc, char* argv[])
         VideoCapture::waitAny(cameras, state, -1);
         while(true)
         {
-            tm.start();
+            if(frame_count > start_frame && !flag)
+            {
+                tm.start();
+                flag = true;
+            }
             for(int nt = 0; nt < NUM_THREAD; ++nt)
             {
                 if(threadState[nt] == REQ_WORK_FIN)
@@ -177,6 +188,7 @@ int main(int argc, char* argv[])
                     {
                         if(state[i] == CAP_CAM_READY)
                         {
+                            std::cout << nt + 1 << std::endl;
                             state[i] = CAP_CAM_NOT_READY;
                             cameras[i].retrieve(forImg[nt]);
                             numCam[nt] = i;
@@ -190,13 +202,13 @@ int main(int argc, char* argv[])
             }
 
             VideoCapture::waitAny(cameras, state, -1);
-            tm.stop();
             if((int)waitKey(1) == 27)
             {
-                std::cout << frame_count / tm.getTimeSec() << std::endl;
                 break;
             }
         }
+        tm.stop();
+        std::cout << (frame_count - start_frame) / tm.getTimeSec() << std::endl;
     }
 
     for(int nt = 0; nt < NUM_THREAD; ++nt)
