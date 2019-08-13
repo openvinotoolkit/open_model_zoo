@@ -16,6 +16,10 @@ ocv_module_include_directories()
 if(INF_ENGINE_TARGET)
   file(GLOB demo_srcs "${CMAKE_CURRENT_SOURCE_DIR}/../../demos/human_pose_estimation_demo/src/*")
   list(APPEND OPENCV_MODULE_${the_module}_SOURCES ${demo_srcs})
+
+  file(GLOB demo_srcs "${CMAKE_CURRENT_SOURCE_DIR}/../../demos/text_detection_demo/src/*")
+  ocv_list_filterout(demo_srcs "image_grabber*")
+  list(APPEND OPENCV_MODULE_${the_module}_SOURCES ${demo_srcs})
 endif()
 
 if(NOT HAVE_opencv_dnn)
@@ -28,6 +32,7 @@ ocv_add_accuracy_tests()
 if(INF_ENGINE_TARGET)
   target_include_directories(${the_module}
       PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../demos/human_pose_estimation_demo/include/"
+      PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../demos/text_detection_demo/include/"
       PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../demos/common"
   )
   ocv_warnings_disable(CMAKE_CXX_FLAGS -Wnon-virtual-dtor -Wshadow)

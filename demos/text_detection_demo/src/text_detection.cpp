@@ -9,6 +9,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <opencv2/imgproc.hpp>
+
 namespace {
 void softmax(std::vector<float>* data) {
     auto &rdata = *data;

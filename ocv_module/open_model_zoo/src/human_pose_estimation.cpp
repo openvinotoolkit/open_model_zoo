@@ -46,11 +46,15 @@ void HumanPoseEstimation::process(InputArray frame, CV_OUT std::vector<HumanPose
         humanPoses[i].keypoints = poses[i].keypoints;
         humanPoses[i].type = "COCO";
     }
+#else
+    CV_UNUSED(frame); CV_UNUSED(humanPoses);
+    CV_Error(Error::StsNotImplemented, "Inference Engine is required");
 #endif
 }
 
 void HumanPoseEstimation::render(InputOutputArray frame, const std::vector<HumanPose>& humanPoses)
 {
+#ifdef HAVE_INF_ENGINE
     Mat img = frame.getMat();
 
     std::vector<human_pose_estimation::HumanPose> poses(humanPoses.size());
@@ -59,6 +63,10 @@ void HumanPoseEstimation::render(InputOutputArray frame, const std::vector<Human
         poses[i].keypoints = humanPoses[i].keypoints;
     }
     renderHumanPose(poses, img);
+#else
+    CV_UNUSED(frame); CV_UNUSED(humanPoses);
+    CV_Error(Error::StsNotImplemented, "Inference Engine is required");
+#endif
 }
 
 }}  // namespace cv::open_model_zoo

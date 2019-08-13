@@ -9,7 +9,7 @@
 #include <string>
 
 #include <samples/common.hpp>
-
+#include <opencv2/imgproc.hpp>
 
 void Cnn::Init(const std::string &model_path, Core & ie, const std::string & deviceName, const cv::Size &new_input_resolution) {
     // ---------------------------------------------------------------------------------------------------
