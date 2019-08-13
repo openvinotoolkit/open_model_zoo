@@ -17,14 +17,18 @@ mxnet==1.3.1
 networkx==2.3
 numpy==1.14.6
 onnx==1.5.0
+pillow==6.1.0             # via torchvision
 protobuf==3.6.1
 requests==2.22.0          # via mxnet
+scipy==1.3.0              # via torchvision
 six==1.12.0               # via absl-py, grpcio, h5py, keras-preprocessing, mock, onnx, protobuf, tensorboard, tensorflow, tensorflow-estimator, test-generator
 tensorboard==1.13.1       # via tensorflow
 tensorflow-estimator==1.13.0  # via tensorflow
 tensorflow==1.13.1
 termcolor==1.1.0          # via tensorflow
 test-generator==0.1.1
+torch==1.1.0
+torchvision==0.3.0
 typing-extensions==3.7.2  # via onnx
 typing==3.6.6             # via onnx
 urllib3==1.25.3           # via requests
