@@ -106,32 +106,25 @@ ObjectDetector::ObjectDetector(
     }
 
     InputsDataMap inputInfo(net_reader.getNetwork().getInputsInfo());
-    switch(inputInfo.size()) {
-        case 1: {
-            InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
-            inputInfoFirst->setPrecision(Precision::U8);
-            inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
-            input_name_ = inputInfo.begin()->first;
-            im_info_name_.clear();
-            break;
-        }
-        case 2: {
-            for (const std::pair<std::string, InputInfo::Ptr>& input : inputInfo) {
-                InputInfo::Ptr inputInfo = input.second;
-                if (4 == inputInfo->getTensorDesc().getDims().size()) {
-                    inputInfo->setPrecision(Precision::U8);
-                    inputInfo->getInputData()->setLayout(Layout::NCHW);
-                    input_name_ = input.first;
-                } else if (SizeVector{1, 6} == inputInfo->getTensorDesc().getDims()) {
-                    inputInfo->setPrecision(Precision::FP32);
-                    im_info_name_ = input.first;
-                } else {
-                    THROW_IE_EXCEPTION << "Unknown input for Person Detection network";
-                }
+    if (1 == inputInfo.size() || 2 == inputInfo.size()) {
+        for (const std::pair<std::string, InputInfo::Ptr>& input : inputInfo) {
+            InputInfo::Ptr inputInfo = input.second;
+            if (4 == inputInfo->getTensorDesc().getDims().size()) {
+                inputInfo->setPrecision(Precision::U8);
+                inputInfo->getInputData()->setLayout(Layout::NCHW);
+                input_name_ = input.first;
+            } else if (SizeVector{1, 6} == inputInfo->getTensorDesc().getDims()) {
+                inputInfo->setPrecision(Precision::FP32);
+                im_info_name_ = input.first;
+            } else {
+                THROW_IE_EXCEPTION << "Unknown input for Person Detection network";
             }
-            break;
         }
-        default: THROW_IE_EXCEPTION << "Person Detection network should have one or two inputs";
+        if (input_name_.empty()) {
+            THROW_IE_EXCEPTION << "No image input for Person Detection network found";
+        }
+    } else {
+        THROW_IE_EXCEPTION << "Person Detection network should have one or two inputs";
     }
     InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
     inputInfoFirst->setPrecision(Precision::U8);
