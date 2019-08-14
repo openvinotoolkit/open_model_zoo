@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import argparse
+import concurrent.futures
 import os
 import platform
 import re
@@ -49,6 +50,17 @@ def convert_to_onnx(topology, output_dir, args):
     print('Conversion to ONNX command:', ' '.join(map(quote_arg, cmd)))
     return subprocess.run(cmd).returncode if not args.dry_run else 0
 
+def num_jobs_arg(value_str):
+    if value_str == 'auto':
+        return os.cpu_count() or 1
+
+    try:
+        value = int(value_str)
+        if value > 0: return value
+    except ValueError:
+        pass
+
+    raise argparse.ArgumentTypeError('must be a positive integer or "auto" (got {!r})'.format(value_str))
 
 def main():
     parser = argparse.ArgumentParser()
@@ -72,6 +84,8 @@ def main():
         help='Model Optimizer entry point script')
     parser.add_argument('--dry-run', action='store_true',
         help='Print the conversion commands without running them')
+    parser.add_argument('-j', '--jobs', type=num_jobs_arg, default=1,
+        help='number of conversions to run concurrently')
     args = parser.parse_args()
 
     mo_path = args.mo
@@ -94,26 +108,23 @@ def main():
 
     output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
-    failed_topologies = set()
-
-    for top in topologies:
+    def convert(top):
         if top.mo_args is None:
             print('========= Skipping {} (no conversions defined)'.format(top.name))
             print()
-            continue
+            return True
 
         top_precisions = requested_precisions & top.precisions
         if not top_precisions:
             print('========= Skipping {} (all conversions skipped)'.format(top.name))
             print()
-            continue
+            return True
 
         top_format = top.framework
 
         if top.pytorch_to_onnx_args:
             if convert_to_onnx(top, output_dir, args) != 0:
-                failed_topologies.add(top.name)
-                continue
+                return False
             top_format = 'onnx'
 
         expanded_mo_args = [
@@ -139,9 +150,16 @@ def main():
                 print(flush=True)
 
                 if subprocess.run(mo_cmd).returncode != 0:
-                    failed_topologies.add(top.name)
+                    return False
 
             print()
+
+        return True
+
+    with concurrent.futures.ThreadPoolExecutor(args.jobs) as executor:
+        results = list(executor.map(convert, topologies))
+
+    failed_topologies = [top.name for top, successful in zip(topologies, results) if not successful]
 
     if failed_topologies:
         print('FAILED:')
