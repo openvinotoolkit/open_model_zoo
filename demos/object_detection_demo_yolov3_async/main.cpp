@@ -417,7 +417,9 @@ int main(int argc, char *argv[]) {
                     }
                 }
             }
-            cv::imshow("Detection results", frame);
+            if (!FLAGS_no_show) {
+                cv::imshow("Detection results", frame);
+            }
 
             t1 = std::chrono::high_resolution_clock::now();
             ocv_render_time = std::chrono::duration_cast<ms>(t1 - t0).count();

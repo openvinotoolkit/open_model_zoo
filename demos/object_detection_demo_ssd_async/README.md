@@ -112,14 +112,15 @@ Options:
     -h                        Print a usage message.
     -i "<path>"               Required. Path to a video file (specify "cam" to work with camera).
     -m "<path>"               Required. Path to an .xml file with a trained model.
-      -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernel implementations.
+      -l "<absolute_path>"    Required for CPU custom layers. Absolute path to a shared library with the kernels implementations.
           Or
-      -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernel descriptions.
+      -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernels descriptions.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
     -pc                       Optional. Enables per-layer performance report.
     -r                        Optional. Inference results as raw values.
     -t                        Optional. Probability threshold for detections.
     -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
+    -no_show                  Optional. Do not show processed video.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

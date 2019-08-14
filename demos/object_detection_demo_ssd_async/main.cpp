@@ -319,7 +319,6 @@ int main(int argc, char *argv[]) {
                 for (int i = 0; i < maxProposalCount; i++) {
                     float image_id = detections[i * objectSize + 0];
                     if (image_id < 0) {
-                        std::cout << "Only " << i << " proposals found" << std::endl;
                         break;
                     }
 
@@ -349,7 +348,9 @@ int main(int argc, char *argv[]) {
                     }
                 }
             }
-            cv::imshow("Detection results", curr_frame);
+            if (!FLAGS_no_show) {
+                cv::imshow("Detection results", curr_frame);
+            }
 
             t1 = std::chrono::high_resolution_clock::now();
             ocv_render_time = std::chrono::duration_cast<ms>(t1 - t0).count();

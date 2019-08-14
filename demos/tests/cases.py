@@ -125,24 +125,23 @@ NATIVE_DEMOS = [
 
     # TODO: object_detection_demo_faster_rcnn
 
-    # disabled because -no_show is not supported
-#    NativeDemo(name='object_detection_demo_ssd_async', test_cases=combine_cases(
-#        TestCase(options={'-no_show': None}),
-#        [
-#            TestCase(options={
-#                '-m': ModelArg('face-detection-adas-0001'),
-#                '-i': ImagePatternArg('face-detection-adas-0001'),
-#            }),
-#            TestCase(options={
-#                '-m': ModelArg('person-detection-retail-0002'),
-#                '-i': ImagePatternArg('person-detection-retail-0002'),
-#            }),
-#            TestCase(options={
-#                '-m': ModelArg('person-detection-retail-0013'),
-#                '-i': ImagePatternArg('person-detection-retail-0013'),
-#            }),
-#        ],
-#    )),
+    NativeDemo(name='object_detection_demo_ssd_async', test_cases=combine_cases(
+        TestCase(options={'-no_show': None}),
+        [
+            TestCase(options={
+                '-m': ModelArg('face-detection-adas-0001'),
+                '-i': ImagePatternArg('face-detection-adas'),
+            }),
+            TestCase(options={
+                '-m': ModelArg('person-detection-retail-0002'),
+                '-i': ImagePatternArg('person-detection-retail'),
+            }),
+            TestCase(options={
+                '-m': ModelArg('person-detection-retail-0013'),
+                '-i': ImagePatternArg('person-detection-retail'),
+            }),
+        ],
+    )),
 
     # TODO: object_detection_demo_yolov3_async
 
