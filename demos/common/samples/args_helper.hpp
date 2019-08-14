@@ -9,6 +9,9 @@
 
 #pragma once
 
+#include <algorithm>
+#include <set>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <gflags/gflags.h>
