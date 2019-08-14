@@ -5,4 +5,4 @@
 /ci/** -omz.package
 /demos/build_demos.sh omz.package=l,m
 /demos/build_demos_msvc.bat omz.package=w
-/demos/tests/ -omz.package
+/demos/tests/** -omz.package
