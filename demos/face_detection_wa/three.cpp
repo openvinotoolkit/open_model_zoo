@@ -8,8 +8,8 @@ using namespace cv;
 using namespace cv::dnn;
 using namespace InferenceEngine;
 
-float confThreshold = 0.5;//*100%
-int NUM_THREAD = 12; // >=2 for WA == true
+float confThreshold = 0.9;//*100%
+int NUM_THREAD = 12; //
 bool READ = true;// READ - true, WA - false
 bool WA = !READ;
 
@@ -54,6 +54,8 @@ int main(int argc, char* argv[])
         if(datapath_dir[step] == ':' || datapath_dir[step] == '\0')
         {
             cameras.emplace_back(VideoCapture(path, CAP_V4L));
+            cameras.back().set(CAP_PROP_FRAME_WIDTH, 640);
+            cameras.back().set(CAP_PROP_FRAME_HEIGHT, 480);
             path.clear();
             if(datapath_dir[step] != '\0')
                 ++step;
@@ -132,25 +134,43 @@ int main(int argc, char* argv[])
                 tm.start();
                 flag = true;
             }
+            for(int nc = 0; nc < cameras.size(); ++nc)
+            {
+                for(int nt = 0; nt < NUM_THREAD; ++nt)
+                {
+                    if(forImg[nt].empty())
+                    {
+                        cameras[nc].read(forImg[nt]);
+                        numCam[nt] = nc;
+                        break;
+                    }
+                }
+            }
             for(int nt = 0; nt < NUM_THREAD; ++nt)
             {
                 if(threadState[nt] == REQ_WORK_FIN)
                 {
                     postprocess(forImg[nt], outTen[nt]);
-                    imshow(cam_names[numCam[nt]], forImg[nt]);
+                    if(!forImg[nt].empty())
+                        imshow(cam_names[numCam[nt]], forImg[nt]);
                     threadState[nt] = REQ_READY_TO_START;
                     ++frame_count;
                 }
+
                 if(threadState[nt] == REQ_READY_TO_START)
                 {
-                    std::cout << nt + 1 << std::endl;
-                    cameras[NUM_CAM].read(forImg[nt]);
-                    numCam[nt] = NUM_CAM;
-                    NUM_CAM = (NUM_CAM + 1) % cameras.size();
-                    blobFromImage(forImg[nt], inpTen[nt], 1, Size(300, 300));
-                    threadState[nt] = REQ_WORK;
-                    vRequest[nt].StartAsync();
-                    break;
+                    for(unsigned int i = 0; i < forImg.size(); ++i)
+                    {
+                        if(!forImg[i].empty())
+                        {
+                            //std::cout << nt + 1 << std::endl;
+                            blobFromImage(forImg[i], inpTen[nt], 1, Size(300, 300));
+                            Mat mt; forImg[i] = mt;
+                            threadState[nt] = REQ_WORK;
+                            vRequest[nt].StartAsync();
+                            break;
+                        }
+                    }
                 }
             }
             if((int)waitKey(1) == 27)
