@@ -9,8 +9,8 @@ using namespace cv::dnn;
 using namespace InferenceEngine;
 
 float confThreshold = 0.9;//*100%
-int NUM_THREAD = 6; //
-bool READ = true;// READ - true, WA - false
+int NUM_THREAD = 12; //
+bool READ = false;// READ - true, WA - false
 bool WA = !READ;
 
 enum {
@@ -145,16 +145,16 @@ int main(int argc, char* argv[])
                      postprocess(forImg[nt], outTen[nt]);
                      imshow(cam_names[numCam[nt]], forImg[nt]);                     
                      threadState[nt] = REQ_READY_TO_START;
+                     ++next_frame[numCam[nt]];
                      ++frame_count;
                 }
                 if(threadState[nt] == REQ_READY_TO_START)
                 {
+                    std::cout << nt + 1 << std::endl;
                     cameras[NUM_CAM].read(forImg[nt]);
                     blobFromImage(forImg[nt], inpTen[nt], 1, Size(300, 300));
                     numCam[nt] = NUM_CAM;
-
-                    thread_frame[nt] = launch_frame[NUM_CAM] + 1;
-
+                    thread_frame[nt] = ++launch_frame[NUM_CAM];
                     threadState[nt] = REQ_WORK;
                     vRequest[nt].StartAsync();
                     break;
@@ -187,6 +187,7 @@ int main(int argc, char* argv[])
                     postprocess(forImg[nt], outTen[nt]);
                     imshow(cam_names[numCam[nt]], forImg[nt]);
                     threadState[nt] = REQ_READY_TO_START;
+                    ++next_frame[numCam[nt]];
                     ++frame_count;
                 }
                 if(threadState[nt] == REQ_READY_TO_START)
@@ -194,12 +195,11 @@ int main(int argc, char* argv[])
                     for(unsigned int i = 0; i < state.size(); ++i)
                     {
                         if(state[i] == CAP_CAM_READY)
-                        {
-                            std::cout << nt + 1 << std::endl;
+                        {                            
                             state[i] = CAP_CAM_NOT_READY;
                             cameras[i].retrieve(forImg[nt]);
                             numCam[nt] = i;
-                            thread_frame[nt] = launch_frame[i] + 1;
+                            thread_frame[nt] = ++launch_frame[i];
                             blobFromImage(forImg[nt], inpTen[nt], 1, Size(300, 300));
                             threadState[nt] = REQ_WORK;
                             vRequest[nt].StartAsync();
