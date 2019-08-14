@@ -9,7 +9,7 @@ using namespace cv::dnn;
 using namespace InferenceEngine;
 
 float confThreshold = 0.9;//*100%
-int NUM_THREAD = 12; //
+int NUM_THREAD = 6; //
 bool READ = true;// READ - true, WA - false
 bool WA = !READ;
 
@@ -120,14 +120,16 @@ int main(int argc, char* argv[])
                 reqst->GetUserData((void**)&ptr, 0);
                 *ptr = REQ_WORK_FIN;
             });
-    }
+    }    
     int start_frame = 100;
     bool flag = false;
     int NUM_CAM = 0;
+    TickMeter tm; int frame_count = 0;
+    std::vector<int> next_frame(cameras.size(), 0);
+    std::vector<int> thread_frame(NUM_THREAD, 0);
+    std::vector<int> launch_frame(cameras.size(), 0);
     if(READ)//.read() method
-    {
-        TickMeter tm; int frame_count = 0;
-        std::vector<int> num_st;
+    {         
         while(true)
         {
             if(frame_count > start_frame && !flag)
@@ -138,25 +140,21 @@ int main(int argc, char* argv[])
 
             for(int nt = 0; nt < NUM_THREAD; ++nt)
             {
-                if(threadState[nt] == REQ_WORK_FIN)
+                if(threadState[nt] == REQ_WORK_FIN && thread_frame[nt] == next_frame[numCam[nt]] + 1)
                 {
-                    for (unsigned int i = 0; i < num_st.size(); ++i)
-                    {
-                        postprocess(forImg[num_st[i]], outTen[num_st[i]]);
-                        imshow(cam_names[numCam[num_st[i]]], forImg[num_st[i]]);
-                        ++frame_count;
-                        std::cout << num_st.size() << "   ";
-                    }
-                    threadState[nt] = REQ_READY_TO_START;
-                    num_st.clear();
+                     postprocess(forImg[nt], outTen[nt]);
+                     imshow(cam_names[numCam[nt]], forImg[nt]);                     
+                     threadState[nt] = REQ_READY_TO_START;
+                     ++frame_count;
                 }
                 if(threadState[nt] == REQ_READY_TO_START)
                 {
-                    //std::cout << nt + 1 << std::endl;
                     cameras[NUM_CAM].read(forImg[nt]);
                     blobFromImage(forImg[nt], inpTen[nt], 1, Size(300, 300));
                     numCam[nt] = NUM_CAM;
-                    num_st.push_back(nt);
+
+                    thread_frame[nt] = launch_frame[NUM_CAM] + 1;
+
                     threadState[nt] = REQ_WORK;
                     vRequest[nt].StartAsync();
                     break;
@@ -173,8 +171,7 @@ int main(int argc, char* argv[])
     }
 
     if(WA)//waitAny() method
-    {
-        TickMeter tm; int frame_count = 0;
+    {        
         VideoCapture::waitAny(cameras, state, -1);
         while(true)
         {
@@ -185,7 +182,7 @@ int main(int argc, char* argv[])
             }
             for(int nt = 0; nt < NUM_THREAD; ++nt)
             {
-                if(threadState[nt] == REQ_WORK_FIN)
+                if(threadState[nt] == REQ_WORK_FIN  && thread_frame[nt] == next_frame[numCam[nt]] + 1)
                 {
                     postprocess(forImg[nt], outTen[nt]);
                     imshow(cam_names[numCam[nt]], forImg[nt]);
@@ -202,6 +199,7 @@ int main(int argc, char* argv[])
                             state[i] = CAP_CAM_NOT_READY;
                             cameras[i].retrieve(forImg[nt]);
                             numCam[nt] = i;
+                            thread_frame[nt] = launch_frame[i] + 1;
                             blobFromImage(forImg[nt], inpTen[nt], 1, Size(300, 300));
                             threadState[nt] = REQ_WORK;
                             vRequest[nt].StartAsync();
