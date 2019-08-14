@@ -9,7 +9,7 @@ using namespace cv::dnn;
 using namespace InferenceEngine;
 
 float confThreshold = 0.9;//*100%
-int NUM_THREAD = 10; //
+int NUM_THREAD = 12; //
 bool READ = true;// READ - true, WA - false
 bool WA = !READ;
 
@@ -127,6 +127,7 @@ int main(int argc, char* argv[])
     if(READ)//.read() method
     {
         TickMeter tm; int frame_count = 0;
+        std::vector<int> num_st;
         while(true)
         {
             if(frame_count > start_frame && !flag)
@@ -134,24 +135,28 @@ int main(int argc, char* argv[])
                 tm.start();
                 flag = true;
             }
-            Mat current_frame;
-            cameras[NUM_CAM].read(current_frame);
+
             for(int nt = 0; nt < NUM_THREAD; ++nt)
             {
                 if(threadState[nt] == REQ_WORK_FIN)
                 {
-                    postprocess(forImg[nt], outTen[nt]);
-                    imshow(cam_names[numCam[nt]], forImg[nt]);
+                    for (unsigned int i = 0; i < num_st.size(); ++i)
+                    {
+                        postprocess(forImg[num_st[i]], outTen[num_st[i]]);
+                        imshow(cam_names[numCam[num_st[i]]], forImg[num_st[i]]);
+                        ++frame_count;
+                        std::cout << num_st.size() << "   ";
+                    }
                     threadState[nt] = REQ_READY_TO_START;
-                    ++frame_count;
+                    num_st.clear();
                 }
                 if(threadState[nt] == REQ_READY_TO_START)
                 {
-                    //if((nt + 1) > 2)
-                    //    std::cout << nt + 1 << std::endl;
-                    forImg[nt] = current_frame;
-                    numCam[nt] = NUM_CAM;
+                    //std::cout << nt + 1 << std::endl;
+                    cameras[NUM_CAM].read(forImg[nt]);
                     blobFromImage(forImg[nt], inpTen[nt], 1, Size(300, 300));
+                    numCam[nt] = NUM_CAM;
+                    num_st.push_back(nt);
                     threadState[nt] = REQ_WORK;
                     vRequest[nt].StartAsync();
                     break;
