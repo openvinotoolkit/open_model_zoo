@@ -28,7 +28,7 @@ models:
       - name: lfw
         data_source: LFW/lfw
         annotation_conversion:
-          converter: face_reid_pairwise
+          converter: lfw
           pairs_file: LFW/annotation/pairs.txt
           landmarks_file: LFW/annotation/lfw_landmark.txt
 
