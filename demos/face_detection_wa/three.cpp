@@ -9,8 +9,8 @@ using namespace cv::dnn;
 using namespace InferenceEngine;
 
 float confThreshold = 0.9;//*100%
-int NUM_THREAD = 12; //
-bool READ = false;// READ - true, WA - false
+int NUM_THREAD = -1; //
+bool READ = true;// READ - true, WA - false
 bool WA = !READ;
 
 enum {
@@ -46,6 +46,22 @@ void postprocess(Mat& frame, const Mat& outs)
 
 int main(int argc, char* argv[])
 {
+    bool ADAS = true;
+    NUM_THREAD = atoi(argv[1]);
+    READ = atoi(argv[2]);
+    ADAS = atoi(argv[3]);
+    std::cout <<"========================================================================"<< std::endl;
+    if(ADAS)
+        std::cout << "ADAS    ";
+    else
+        std::cout << "RETAIL    ";
+
+    WA = !READ;
+    if(WA)
+        std::cout << "WA mode   ";
+    if(READ)
+        std::cout << "READ mode   ";
+    std::cout << "NUM_THREAD: " << NUM_THREAD << std::endl;
     char* datapath_dir = get_cameras_list(); //export OPENCV_TEST_CAMERA_LIST=...
     std::vector<VideoCapture> cameras;
     int step = 0; std::string path;
@@ -54,8 +70,10 @@ int main(int argc, char* argv[])
         if(datapath_dir[step] == ':' || datapath_dir[step] == '\0')
         {
             cameras.emplace_back(VideoCapture(path, CAP_V4L));
-            cameras.back().set(CAP_PROP_FRAME_WIDTH, 640);
-            cameras.back().set(CAP_PROP_FRAME_HEIGHT, 480);
+            cameras.back().set(CAP_PROP_FRAME_WIDTH, 1280);
+            cameras.back().set(CAP_PROP_FRAME_HEIGHT, 720);
+            cameras.back().set(CAP_PROP_FOURCC, VideoWriter::fourcc('M', 'J', 'P', 'G'));
+            cameras.back().set(CAP_PROP_FPS, 60);
             path.clear();
             if(datapath_dir[step] != '\0')
                 ++step;
@@ -75,16 +93,33 @@ int main(int argc, char* argv[])
     std::vector<Mat> forImg(NUM_THREAD);
     std::vector<Mat> inpTen, outTen;
 
-    std::string xmlPath = "/home/volskig/src/weights/face-detection-retail-0004/FP32/face-detection-retail-0004.xml";
-    std::string binPath = "/home/volskig/src/weights/face-detection-retail-0004/FP32/face-detection-retail-0004.bin";
+    std::string xmlPath;
+    std::string binPath;
+    if(ADAS)
+    {
+        xmlPath = "/home/volskig/src/weights/face-detection-adas-0001/FP32/face-detection-adas-0001.xml";
+        binPath = "/home/volskig/src/weights/face-detection-adas-0001/FP32/face-detection-adas-0001.bin";
+    }
+    else
+    {
+        binPath = "/home/volskig/src/weights/face-detection-retail-0004/FP32/face-detection-retail-0004.bin";
+        xmlPath = "/home/volskig/src/weights/face-detection-retail-0004/FP32/face-detection-retail-0004.xml";
+    }
     CNNNetReader reader;
     reader.ReadNetwork(xmlPath);
     reader.ReadWeights(binPath);
-
     CNNNetwork net = reader.getNetwork();
+
+    SizeVector  v_s = {1,3,1000, 1000};
+    std::map<std::string, SizeVector> MPP;
+
+    MPP.insert(std::pair<std::string, SizeVector>("data", v_s));
+
+    net.reshape(MPP);
+
     InferenceEnginePluginPtr enginePtr;
     InferencePlugin plugin;
-    ExecutableNetwork netExec;
+    ExecutableNetwork netExec;    
     try
     {
         auto dispatcher = InferenceEngine::PluginDispatcher({""});
@@ -97,14 +132,23 @@ int main(int argc, char* argv[])
     catch (const std::exception& ex)
     {
         CV_Error(Error::StsAssert, format("Failed to initialize Inference Engine backend: %s", ex.what()));
-    }
-
+    }   
     for(int nt = 0; nt < NUM_THREAD; ++nt)
     {
-        inpTen.emplace_back(Mat({1,3,300,300}, CV_32F));
+
+        if(ADAS)
+            inpTen.emplace_back(Mat({1,3,384,672}, CV_32F));//adas
+        else
+            inpTen.emplace_back(Mat({1,3,1000,1000}, CV_32F));//retail
+
         outTen.emplace_back(Mat({1,1,200,7}, CV_32F));
-        cam_names.emplace_back("Camera " + std::to_string(nt + 1));
-        inpBlobMap[nt]["data"] = make_shared_blob<float>({Precision::FP32,  {1,3,300,300}, Layout::ANY}, (float*)inpTen[nt].data);
+
+        cam_names.emplace_back("Camera " + std::to_string(nt + 1));        
+        if(ADAS)
+            inpBlobMap[nt]["data"] = make_shared_blob<float>({Precision::FP32,  {1,3,384,672}, Layout::ANY}, (float*)inpTen[nt].data);//adas
+        else
+            inpBlobMap[nt]["data"] = make_shared_blob<float>({Precision::FP32,  {1,3,1000,1000}, Layout::ANY}, (float*)inpTen[nt].data);//retail
+
         outBlobMap[nt]["detection_out"] = make_shared_blob<float>({Precision::FP32, {1,1,200,7}, Layout::ANY}, (float*)outTen[nt].data);
 
         vRequest.emplace_back(netExec.CreateInferRequest());
@@ -118,9 +162,9 @@ int main(int argc, char* argv[])
             {
                 int* ptr;
                 reqst->GetUserData((void**)&ptr, 0);
-                *ptr = REQ_WORK_FIN;
+                *ptr = REQ_WORK_FIN;                
             });
-    }    
+    }
     int start_frame = 100;
     bool flag = false;
     int NUM_CAM = 0;
@@ -128,8 +172,9 @@ int main(int argc, char* argv[])
     std::vector<int> next_frame(cameras.size(), 0);
     std::vector<int> thread_frame(NUM_THREAD, 0);
     std::vector<int> launch_frame(cameras.size(), 0);
+
     if(READ)//.read() method
-    {         
+    {
         while(true)
         {
             if(frame_count > start_frame && !flag)
@@ -143,16 +188,18 @@ int main(int argc, char* argv[])
                 if(threadState[nt] == REQ_WORK_FIN && thread_frame[nt] == next_frame[numCam[nt]] + 1)
                 {
                      postprocess(forImg[nt], outTen[nt]);
-                     imshow(cam_names[numCam[nt]], forImg[nt]);                     
+                     imshow(cam_names[numCam[nt]], forImg[nt]);
                      threadState[nt] = REQ_READY_TO_START;
                      ++next_frame[numCam[nt]];
                      ++frame_count;
                 }
                 if(threadState[nt] == REQ_READY_TO_START)
                 {
-                    std::cout << nt + 1 << std::endl;
                     cameras[NUM_CAM].read(forImg[nt]);
-                    blobFromImage(forImg[nt], inpTen[nt], 1, Size(300, 300));
+                    if(ADAS)
+                        blobFromImage(forImg[nt], inpTen[nt], 1, Size(672, 384));
+                    else
+                        blobFromImage(forImg[nt], inpTen[nt], 1, Size(1000, 1000));
                     numCam[nt] = NUM_CAM;
                     thread_frame[nt] = ++launch_frame[NUM_CAM];
                     threadState[nt] = REQ_WORK;
@@ -168,11 +215,13 @@ int main(int argc, char* argv[])
         }
         tm.stop();
         std::cout << (frame_count - start_frame) / tm.getTimeSec() << std::endl;
+        std::cout <<"-------------------------------------------------------------------"<< std::endl;
+        return 0;
     }
 
     if(WA)//waitAny() method
-    {        
-        VideoCapture::waitAny(cameras, state, -1);
+    {
+        VideoCapture::waitAny(cameras, state);
         while(true)
         {
             if(frame_count > start_frame && !flag)
@@ -195,12 +244,15 @@ int main(int argc, char* argv[])
                     for(unsigned int i = 0; i < state.size(); ++i)
                     {
                         if(state[i] == CAP_CAM_READY)
-                        {                            
+                        {
                             state[i] = CAP_CAM_NOT_READY;
                             cameras[i].retrieve(forImg[nt]);
                             numCam[nt] = i;
                             thread_frame[nt] = ++launch_frame[i];
-                            blobFromImage(forImg[nt], inpTen[nt], 1, Size(300, 300));
+                            if(ADAS)
+                                blobFromImage(forImg[nt], inpTen[nt], 1, Size(672, 384));
+                            else
+                                blobFromImage(forImg[nt], inpTen[nt], 1, Size(1000, 1000));
                             threadState[nt] = REQ_WORK;
                             vRequest[nt].StartAsync();
                             break;
@@ -209,7 +261,7 @@ int main(int argc, char* argv[])
                 }
             }
 
-            VideoCapture::waitAny(cameras, state, -1);
+            VideoCapture::waitAny(cameras, state);
             if((int)waitKey(1) == 27)
             {
                 break;
@@ -217,6 +269,8 @@ int main(int argc, char* argv[])
         }
         tm.stop();
         std::cout << (frame_count - start_frame) / tm.getTimeSec() << std::endl;
+        std::cout <<"-------------------------------------------------------------------"<< std::endl;
+        return 0;
     }
 
     for(int nt = 0; nt < NUM_THREAD; ++nt)
