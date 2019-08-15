@@ -34,8 +34,10 @@
 inline void readInputFilesArguments(std::vector<std::string> &files, const std::string& arg) {
     struct stat sb;
     if (stat(arg.c_str(), &sb) != 0) {
-        slog::warn << "File " << arg << " cannot be opened!" << slog::endl;
-        return;
+        if (arg.find("rtsp:") != 0) {
+            slog::warn << "File " << arg << " cannot be opened!" << slog::endl;
+            return;
+        }
     }
     if (S_ISDIR(sb.st_mode)) {
         DIR *dp;
