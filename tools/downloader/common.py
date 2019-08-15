@@ -46,6 +46,7 @@ KNOWN_PRECISIONS = {
 KNOWN_TASK_TYPES = {
     'action_recognition',
     'classification',
+    'colorization',
     'detection',
     'face_recognition',
     'feature_extraction',

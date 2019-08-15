@@ -1,0 +1,37 @@
+evaluations:
+  - name: colorization-v2-norebal
+    module: custom_evaluators.colorization_v2_evaluator.ColorizationEvaluator
+    module_config:
+        network_info:
+            test:
+                model:   public/colorization-v2-norebal/FP32/colorization-v2-norebal.xml
+                weights: public/colorization-v2-norebal/FP32/colorization-v2-norebal.bin
+                color_reconstruction:
+                -   coeff: public/colorization-v2/colorization-v2.npy
+                -   mean: 50
+
+            checker:
+                model:   public/vgg16/FP32/vgg16.xml
+                weights: public/vgg16/FP32/vgg16.bin
+                adapter: classification
+
+        launchers:
+            -   framework: dlsdk
+                device: CPU
+                tags:
+                    - FP32
+
+        datasets:
+          - name: imagenet_1000_classes
+            reader: pillow_imread
+
+            preprocessing:
+            -   type: resize
+                size: 256
+                aspect_ratio_scale: greater
+            -   type: crop
+                size: 224
+            -   type: normalization
+                std:  255
+
+global_definitions: ../dataset_definitions.yml
