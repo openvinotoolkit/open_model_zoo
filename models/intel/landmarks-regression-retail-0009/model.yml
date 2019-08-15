@@ -1,0 +1,36 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is a lightweight landmarks regressor for the Smart Classroom scenario.
+  It has a classic convolutional design: stacked 3x3 convolutions, batch normalizations,
+  PReLU activations, and poolings. Final regression is done by the global depthwise
+  pooling head and FullyConnected layers. The model predicts five facial landmarks:
+  two eyes, nose, and two lip corners.
+task_type: object_attributes
+files:
+  - name: FP32/landmarks-regression-retail-0009.xml
+    sha256: d12e17ea039d75ff2cbd6dde58ffd46998dc1e6761e3d5ebbf094df0b58ce56c
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
+  - name: FP32/landmarks-regression-retail-0009.bin
+    sha256: 46795837d35e8199b7c5b57e1f76297827bf516a150c0d5643197d8c325f1dbc
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
+  - name: FP16/landmarks-regression-retail-0009.xml
+    sha256: fa0000165ce9b35b0c6e08e07d7cdfd12c68fcf043a07a1f8c8f3c0545f0a0e5
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
+  - name: FP16/landmarks-regression-retail-0009.bin
+    sha256: 5d74c26cbb836b3de358ab05d4cbd92c4eb713dc74484cff9de82b2deb3d8527
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

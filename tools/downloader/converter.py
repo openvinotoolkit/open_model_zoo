@@ -53,7 +53,7 @@ def convert_to_onnx(topology, output_dir, args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=Path, metavar='CONFIG.YML',
-        default=common.get_default_config_path(), help='topology configuration file')
+        help='topology configuration file (deprecated)')
     parser.add_argument('-d', '--download_dir', type=Path, metavar='DIR',
         default=Path.cwd(), help='root of the directory tree with downloaded topology files')
     parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',

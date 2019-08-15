@@ -246,13 +246,8 @@ class Topology:
         self.pytorch_to_onnx_args = pytorch_to_onnx_args
 
     @classmethod
-    def deserialize(cls, top):
-        name = validate_string('"name"', top['name'])
-        if not name: raise DeserializationError('"name": must not be empty')
-
+    def deserialize(cls, top, name, subdirectory):
         with deserialization_context('In topology "{}"'.format(name)):
-            subdirectory = validate_relative_path('"output"', top['output'])
-
             files = []
             file_names = set()
 
@@ -307,30 +302,57 @@ class Topology:
             return cls(name, subdirectory, files, postprocessing, mo_args, framework,
                 description, license_url, precisions, task_type, pytorch_to_onnx_args)
 
-def load_topologies(config):
-    with config.open() as config_file:
-        try:
-            topologies = []
-            topology_names = set()
+def load_topologies(args):
+    topologies = []
+    topology_names = set()
 
-            for top in yaml.safe_load(config_file)['topologies']:
-                topologies.append(Topology.deserialize(top))
+    def add_topology(topology):
+        topologies.append(topology)
 
-                if topologies[-1].name in topology_names:
-                    raise RuntimeError(
-                        'In config "{}": Duplicate topology name "{}"'.format(config, topologies[-1].name))
-                topology_names.add(topologies[-1].name)
+        if topologies[-1].name in topology_names:
+            raise DeserializationError(
+                'Duplicate topology name "{}"'.format(topologies[-1].name))
+        topology_names.add(topologies[-1].name)
 
-            return topologies
-        except DeserializationError as exc:
-            raise RuntimeError('In config "{}": {}'.format(config, exc)) from exc
+    if args.config is None: # per-model configs
+        model_root = (Path(__file__).resolve().parent / '../../models').resolve()
+
+        for config_path in sorted(model_root.glob('**/model.yml')):
+            subdirectory = config_path.parent.relative_to(model_root)
+
+            with config_path.open() as config_file, \
+                    deserialization_context('In config "{}"'.format(config_path)):
+
+                top = yaml.safe_load(config_file)
+
+                for bad_key in ['name', 'subdirectory']:
+                    if bad_key in top:
+                        raise DeserializationError('Unsupported key "{}"'.format(bad_key))
+
+                add_topology(Topology.deserialize(top, subdirectory.name, subdirectory))
+
+    else: # monolithic config
+        print('########## Warning: the --config option is deprecated and will be removed in a future release',
+            file=sys.stderr)
+        with args.config.open() as config_file, \
+                deserialization_context('In config "{}"'.format(args.config)):
+            for i, top in enumerate(yaml.safe_load(config_file)['topologies']):
+                with deserialization_context('In topology #{}'.format(i)):
+                    name = validate_string('"name"', top['name'])
+                    if not name: raise DeserializationError('"name": must not be empty')
+
+                with deserialization_context('In topology "{}"'.format(name)):
+                    subdirectory = validate_relative_path('"output"', top['output'])
+
+                add_topology(Topology.deserialize(top, name, subdirectory))
+
+    return topologies
 
 # requires the --print_all, --all, --name and --list arguments to be in `args`
 def load_topologies_from_args(parser, args):
     if args.print_all:
-        print_list = [top.name for top in load_topologies(args.config)]
-        for p in sorted(print_list):
-            print(p)
+        for top in load_topologies(args):
+            print(top.name)
         sys.exit()
 
     filter_args_count = sum([args.all, args.name is not None, args.list is not None])
@@ -341,7 +363,7 @@ def load_topologies_from_args(parser, args):
     if filter_args_count == 0:
         parser.error('one of "--print_all", "--all", "--name" or "--list" must be specified')
 
-    all_topologies = load_topologies(args.config)
+    all_topologies = load_topologies(args)
 
     if args.all:
         return all_topologies
@@ -370,6 +392,3 @@ def load_topologies_from_args(parser, args):
             topologies.extend(matching_topologies)
 
         return topologies
-
-def get_default_config_path():
-    return Path(__file__).resolve().parent / 'list_topologies.yml'
