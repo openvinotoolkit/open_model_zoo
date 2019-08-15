@@ -270,6 +270,7 @@ def main():
 
             start_time = time()
             for layer_name, out_blob in output.items():
+                out_blob = out_blob.reshape(net.layers[net.layers[layer_name].parents[0]].shape)
                 layer_params = YoloParams(net.layers[layer_name].params, out_blob.shape[2])
                 log.info("Layer {} parameters: ".format(layer_name))
                 layer_params.log_params()
