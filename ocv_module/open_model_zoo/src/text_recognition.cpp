@@ -80,17 +80,26 @@ static cv::Mat cropImage(const cv::Mat &image, const std::vector<cv::Point2f> &p
 static int strToDnnTarget(std::string device)
 {
     std::transform(device.begin(), device.end(), device.begin(), ::tolower);
-    if (device == "cpu")        return dnn::DNN_TARGET_CPU;
-    else if (device == "gpu")   return dnn::DNN_TARGET_OPENCL;
-    else if (device == "vpu")   return dnn::DNN_TARGET_MYRIAD;
-    else if (device == "gpu16") return dnn::DNN_TARGET_OPENCL_FP16;
-    else if (device == "fpga")  return dnn::DNN_TARGET_FPGA;
+    if (device == "cpu")          return dnn::DNN_TARGET_CPU;
+    else if (device == "gpu")     return dnn::DNN_TARGET_OPENCL;
+    else if (device == "myriad")  return dnn::DNN_TARGET_MYRIAD;
+    else if (device == "gpu16")   return dnn::DNN_TARGET_OPENCL_FP16;
+    else if (device == "fpga")    return dnn::DNN_TARGET_FPGA;
     else
         CV_Error(Error::StsNotImplemented, "Unknown device target: " + device);
 }
 
 struct TextRecognitionPipeline::Impl
 {
+    Impl(const Topology& detection, const Topology& recognition,
+         const String& dd, const String& rd)
+    {
+        detectionNet = DnnModel(detection);
+        recognitionNet = DnnModel(recognition);
+        detectionNet->setPreferableTarget(strToDnnTarget(dd));
+        recognitionNet->setPreferableTarget(strToDnnTarget(rd));
+    }
+
     Ptr<dnn::Model> detectionNet;
     Ptr<dnn::Model> recognitionNet;
 
@@ -98,22 +107,19 @@ struct TextRecognitionPipeline::Impl
     float pixelClsThr = 0.8, pixelLinkThr = 0.8, recognThr = 0.2;
 };
 
+TextRecognitionPipeline::TextRecognitionPipelineImpl(const String& dd, const String& rd)
+{
+    auto detection = (dd == "GPU16" || dd == "MYRIAD") ? text_detection_fp16() : text_detection();
+    auto recognition = (rd == "GPU16" || rd == "MYRIAD") ? text_recognition_fp16() : text_recognition();
+    impl.reset(new Impl(detection, recognition, dd, rd));
+}
+
 TextRecognitionPipeline::TextRecognitionPipelineImpl(const Topology& detection,
-                                                     const Topology& recognition)
-    : impl(new Impl())
+                                                     const Topology& recognition,
+                                                     const String& dd,
+                                                     const String& rd)
+    : impl(new Impl(detection, recognition, dd, rd))
 {
-    impl->detectionNet = DnnModel(detection);
-    impl->recognitionNet = DnnModel(recognition);
-}
-
-void TextRecognitionPipeline::setDetectionDevice(const String& device)
-{
-    impl->detectionNet->setPreferableTarget(strToDnnTarget(device));
-}
-
-void TextRecognitionPipeline::setRecognitionDevice(const String& device)
-{
-    impl->recognitionNet->setPreferableTarget(strToDnnTarget(device));
 }
 
 void TextRecognitionPipeline::setMaxRectNum(int num) { impl->maxRectNum = num; }

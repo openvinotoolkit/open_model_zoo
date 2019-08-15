@@ -16,23 +16,34 @@ namespace cv { namespace open_model_zoo {
 #if 0
 // This is a trick to enable open_model_zoo::TextRecognitionPipeline both in Python and in C++
 CV_WRAP_AS(TextRecognitionPipeline)
-Ptr<TextRecognitionPipeline> createTextRecognitionPipeline(const Topology& detection = text_detection(),
-                                                           const Topology& recognition = text_recognition());
+Ptr<TextRecognitionPipeline> createTextRecognitionPipeline(const String& detectionDevice = "CPU",
+                                                           const String& recognitionDevice = "CPU");
+
+CV_WRAP_AS(TextRecognitionPipeline)
+Ptr<TextRecognitionPipeline> createTextRecognitionPipeline(const Topology& detection,
+                                                           const Topology& recognition,
+                                                           const String& detectionDevice = "CPU",
+                                                           const String& recognitionDevice = "CPU");
 #endif
 
 class CV_EXPORTS_W TextRecognitionPipelineImpl
 {
 public:
-    CV_WRAP TextRecognitionPipelineImpl(const Topology& detection = text_detection(),
-                                        const Topology& recognition = text_recognition());
+    /**
+     * @brief Constructor
+     * @param[in] device Computational device
+     */
+    CV_WRAP TextRecognitionPipelineImpl(const String& detectionDevice = "CPU",
+                                        const String& recognitionDevice = "CPU");
+
+    CV_WRAP TextRecognitionPipelineImpl(const Topology& detection,
+                                        const Topology& recognition,
+                                        const String& detectionDevice = "CPU",
+                                        const String& recognitionDevice = "CPU");
 
     CV_WRAP void process(InputArray frame, CV_OUT std::vector<RotatedRect>& rects,
                          CV_OUT std::vector<String>& texts,
                          CV_OUT std::vector<float>& confidences);
-
-    CV_WRAP void setDetectionDevice(const String& device);
-
-    CV_WRAP void setRecognitionDevice(const String& device);
 
     /**
      * @brief Set maximum number of text rectangles to recognize.

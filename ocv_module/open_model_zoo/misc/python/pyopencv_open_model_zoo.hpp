@@ -240,9 +240,19 @@ void Topology::convertToIR(String& xmlPath, String& binPath,
         CV_Error(Error::StsError, "Failed to run Model Optimizer");
 }
 
-static Ptr<TextRecognitionPipeline> createTextRecognitionPipeline(const Topology& detection, const Topology& recognition)
+static Ptr<TextRecognitionPipeline>
+createTextRecognitionPipeline(const String& dd, const String& rd)
 {
-    return new TextRecognitionPipeline(detection, recognition);
+    auto detection = (dd == "GPU16" || dd == "MYRIAD") ? text_detection_fp16() : text_detection();
+    auto recognition = (rd == "GPU16" || rd == "MYRIAD") ? text_recognition_fp16() : text_recognition();
+    return new TextRecognitionPipeline(detection, recognition, dd, rd);
+}
+
+static Ptr<TextRecognitionPipeline>
+createTextRecognitionPipeline(const Topology& detection, const Topology& recognition,
+                              const String& dd, const String& rd)
+{
+    return new TextRecognitionPipeline(detection, recognition, dd, rd);
 }
 
 static Ptr<HumanPoseEstimation> createHumanPoseEstimation(const std::string& device)

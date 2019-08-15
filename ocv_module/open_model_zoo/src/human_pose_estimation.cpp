@@ -20,7 +20,8 @@ namespace cv { namespace open_model_zoo {
 struct HumanPoseEstimationImpl::Impl
 {
 #ifdef HAVE_INF_ENGINE
-    Impl(const std::string& modelPath, const std::string& device) : estimator(modelPath, device, false) {}
+    Impl(const std::string& modelPath, const std::string& device)
+        : estimator(modelPath, device == "GPU16" ? "GPU" : device, false) {}
 
     HumanPoseEstimator estimator;
 #endif
@@ -38,7 +39,7 @@ HumanPoseEstimation::HumanPoseEstimationImpl(const std::string& device)
     else
         t = topologies::human_pose_estimation();
 
-    impl.reset(new Impl(t.getConfigPath(), device == "GPU16" ? "GPU" : device));
+    impl.reset(new Impl(t.getConfigPath(), device));
 }
 
 HumanPoseEstimation::HumanPoseEstimationImpl(const Topology& t, const std::string& device)
