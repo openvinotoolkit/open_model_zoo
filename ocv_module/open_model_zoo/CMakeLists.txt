@@ -7,8 +7,9 @@ set(omz_topologies_cpp_impl "${CMAKE_CURRENT_SOURCE_DIR}/src/topologies.cpp")
 
 execute_process(COMMAND "${PYTHON_DEFAULT_EXECUTABLE}"
                         "${CMAKE_CURRENT_SOURCE_DIR}/gen.py"
-                        "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/downloader/list_topologies.yml"
-                        ${omz_topologies_hdr} ${omz_topologies_py_impl} ${omz_topologies_cpp_impl})
+                        ${omz_topologies_hdr} ${omz_topologies_py_impl} ${omz_topologies_cpp_impl}
+                        "${CMAKE_CURRENT_SOURCE_DIR}/../../models/intel"
+                        "${CMAKE_CURRENT_SOURCE_DIR}/../../models/public")
 
 ocv_glob_module_sources()
 ocv_module_include_directories()

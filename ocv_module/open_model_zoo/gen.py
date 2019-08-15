@@ -3,6 +3,7 @@
 import yaml
 import sys
 import re
+import os
 
 
 def getSource(entry):
@@ -44,26 +45,27 @@ def registerVersionedName(fullName, precision=''):
             versionedNames[shortName] = [version, originName]
 
 
-def generate(topology, topologies_hdr, py_impl, cpp_impl):
-    name = topology['name'].replace('-', '_').replace('.', '_')
+def generate(topology, topologyName, topologies_hdr, py_impl, cpp_impl):
+    name = topologyName.replace('-', '_').replace('.', '_')
 
     # DLDT models come with multiple files foe different precision
     files = topology['files']
-    assert(len(files) > 0), topology['name']
+    assert(len(files) > 0), topologyName
     if len(files) > 2:
-        assert(topology['framework'] == 'dldt'), topology['name']
-        assert(len(files) % 2 == 0), topology['name']
+        assert(topology['framework'] == 'dldt'), topologyName
+        assert(len(files) % 2 == 0), topologyName
 
         for i in range(len(files) / 2):
             subTopology = topology.copy()
+            subTopologyName = topologyName
             subTopology['files'] = [files[i * 2], files[i * 2 + 1]]
             # Detect precision by the first file
             precision = subTopology['files'][0]['name']
             precision = precision[:precision.find('/')].lower()
             if precision != 'fp32':  # Keep origin name for FP32
-                subTopology['name'] += '_' + precision
+                subTopologyName += '_' + precision
                 registerVersionedName(name, precision)
-            generate(subTopology, topologies_hdr, py_impl, cpp_impl)
+            generate(subTopology, subTopologyName, topologies_hdr, py_impl, cpp_impl)
         return
 
 
@@ -106,11 +108,10 @@ License: %s
     CV_EXPORTS_W Topology %s(bool download = true);
     """ % (topology['description'], topology['license'], name))
 
-
-list_topologies = sys.argv[1]
-topologies_hdr = open(sys.argv[2], 'wt')
-py_impl = open(sys.argv[3], 'wt')
-cpp_impl = open(sys.argv[4], 'wt')
+topologies_hdr = open(sys.argv[1], 'wt')
+py_impl = open(sys.argv[2], 'wt')
+cpp_impl = open(sys.argv[3], 'wt')
+modelsDirs = sys.argv[4:]
 
 topologies_hdr.write("#ifndef __OPENCV_OPEN_MODEL_ZOO_TOPOLOGIES_HPP__\n")
 topologies_hdr.write("#define __OPENCV_OPEN_MODEL_ZOO_TOPOLOGIES_HPP__\n\n")
@@ -124,31 +125,36 @@ cpp_impl.write("#include <opencv2/open_model_zoo.hpp>\n")
 cpp_impl.write("#include <opencv2/open_model_zoo/topologies.hpp>\n\n")
 cpp_impl.write("namespace cv { namespace open_model_zoo { namespace topologies {")
 
-with open(list_topologies, 'rt') as f:
-    content = yaml.safe_load(f)
-    for topology in content['topologies']:
-        generate(topology, topologies_hdr, py_impl, cpp_impl)
+for models in modelsDirs:
+    for topologyName in os.listdir(models):
+        config = os.path.join(models, topologyName, 'model.yml')
+        if not os.path.exists(config):
+            continue
 
-    # Register DLDT aliases
-    for alias, data in versionedNames.items():
-        _, originName = data
+        with open(config, 'rt') as f:
+            topology = yaml.safe_load(f)
+            generate(topology, topologyName, topologies_hdr, py_impl, cpp_impl)
 
-        for impl in [py_impl, cpp_impl]:
-            impl.write("""
-    Topology %s(bool download)
-    {
-        return %s(download);
-    }\n""" % (alias, originName))
+# Register DLDT aliases
+for alias, data in versionedNames.items():
+    _, originName = data
 
-        topologies_hdr.write("""
-    /**
-     * Alias for %s
-     */
-    CV_EXPORTS_W Topology %s(bool download = true);\n""" % (originName, alias))
+    for impl in [py_impl, cpp_impl]:
+        impl.write("""
+Topology %s(bool download)
+{
+    return %s(download);
+}\n""" % (alias, originName))
 
-    py_impl.write("}}}  // namespace cv::open_model_zoo::topologies\n\n")
-    py_impl.write("#endif  // HAVE_OPENCV_OPEN_MODEL_ZOO")
-    cpp_impl.write("}}}  // namespace cv::open_model_zoo::topologies\n\n")
+    topologies_hdr.write("""
+/**
+ * Alias for %s
+ */
+CV_EXPORTS_W Topology %s(bool download = true);\n""" % (originName, alias))
+
+py_impl.write("}}}  // namespace cv::open_model_zoo::topologies\n\n")
+py_impl.write("#endif  // HAVE_OPENCV_OPEN_MODEL_ZOO")
+cpp_impl.write("}}}  // namespace cv::open_model_zoo::topologies\n\n")
 
 topologies_hdr.write("}}}  // namespace cv::open_model_zoo::topologies\n\n")
 topologies_hdr.write("#endif  // __OPENCV_OPEN_MODEL_ZOO_TOPOLOGIES_HPP__")
