@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
 import contextlib
 import fnmatch
 import re
@@ -381,7 +382,8 @@ def load_topologies_from_args(parser, args):
                     # For now, ignore any other tokens in the line.
                     # We might use them as additional parameters later.
 
-        topologies = []
+        topologies = collections.OrderedDict() # deduplicate topologies while preserving order
+
         for pattern in patterns:
             matching_topologies = [top for top in all_topologies
                 if fnmatch.fnmatchcase(top.name, pattern)]
@@ -389,6 +391,7 @@ def load_topologies_from_args(parser, args):
             if not matching_topologies:
                 sys.exit('No matching topologies: "{}"'.format(pattern))
 
-            topologies.extend(matching_topologies)
+            for top in matching_topologies:
+                topologies[top.name] = top
 
-        return topologies
+        return list(topologies.values())
