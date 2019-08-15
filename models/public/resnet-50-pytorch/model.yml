@@ -39,8 +39,6 @@ pytorch_to_onnx:
   - --input-names=data
   - --output-names=prob
 model_optimizer_args:
-  - --framework=onnx
-  - --data_type=FP32
   - --input=data
   - --mean_values=data[123.675,116.28,103.53]
   - --scale_values=data[58.395,57.12,57.375]

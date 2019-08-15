@@ -36,8 +36,6 @@ files:
     sha256: 9d6098829a4d6d318f37cec42142465637fafe4c673f2e93b69495bf7ca23d2d
     source: https://github.com/DuinoDu/mtcnn/raw/db5bd8f02023f8d37913140fd2bf2749c2dbf266/model/det3.caffemodel
 model_optimizer_args:
-  - --framework=caffe
-  - --data_type=FP32
   - --input_shape=[1,3,48,48]
   - --input=data
   - --mean_values=data[127.5,127.5,127.5]

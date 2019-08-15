@@ -28,8 +28,6 @@ postprocessing:
     format: gztar
     file: mobilenet_v2_1.0_224.tgz
 model_optimizer_args:
-  - --framework=tf
-  - --data_type=FP32
   - --reverse_input_channels
   - --input_shape=[1,224,224,3]
   - --input=input

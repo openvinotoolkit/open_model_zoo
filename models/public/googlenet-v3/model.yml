@@ -26,8 +26,6 @@ postprocessing:
     format: gztar
     file: googlenet-v3.tar.gz
 model_optimizer_args:
-  - --framework=tf
-  - --data_type=FP32
   - --reverse_input_channels
   - --input_shape=[1,299,299,3]
   - --input=input

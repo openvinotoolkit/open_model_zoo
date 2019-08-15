@@ -38,8 +38,6 @@ postprocessing:
     format: tar
     file: a08_resnet-200_alpha-0.125.tar
 model_optimizer_args:
-  - --framework=mxnet
-  - --data_type=FP32
   - --reverse_input_channels
   - --mean_values=data[124,117,104]
   - --scale_values=data[59.880239521]

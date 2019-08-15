@@ -64,6 +64,8 @@ def main():
         help='convert only topologies whose names match at least one of the patterns in the specified file')
     parser.add_argument('--all', action='store_true', help='convert all topologies from the configuration file')
     parser.add_argument('--print_all', action='store_true', help='print all available topologies')
+    parser.add_argument('--precisions', metavar='PREC[,PREC...]',
+        help='run only conversions that produce models with the specified precisions')
     parser.add_argument('-p', '--python', type=Path, metavar='PYTHON', default=sys.executable,
         help='Python executable to run Model Optimizer with')
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
@@ -80,6 +82,14 @@ def main():
             sys.exit('Unable to locate Model Optimizer. '
                 + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
 
+    if args.precisions is None:
+        requested_precisions = common.KNOWN_PRECISIONS
+    else:
+        requested_precisions = set(args.precisions.split(','))
+        unknown_precisions = requested_precisions - common.KNOWN_PRECISIONS
+        if unknown_precisions:
+            sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
+
     topologies = common.load_topologies_from_args(parser, args)
 
     output_dir = args.download_dir if args.output_dir is None else args.output_dir
@@ -88,14 +98,23 @@ def main():
 
     for top in topologies:
         if top.mo_args is None:
-            print('========= Skipping {} (no conversion defined)'.format(top.name))
+            print('========= Skipping {} (no conversions defined)'.format(top.name))
             print()
             continue
+
+        top_precisions = requested_precisions & top.precisions
+        if not top_precisions:
+            print('========= Skipping {} (all conversions skipped)'.format(top.name))
+            print()
+            continue
+
+        top_format = top.framework
 
         if top.pytorch_to_onnx_args:
             if convert_to_onnx(top, output_dir, args) != 0:
                 failed_topologies.add(top.name)
                 continue
+            top_format = 'onnx'
 
         expanded_mo_args = [
             string.Template(arg).substitute(dl_dir=args.download_dir / top.subdirectory,
@@ -103,24 +122,26 @@ def main():
                                             conv_dir=output_dir / top.subdirectory)
             for arg in top.mo_args]
 
-        assert len(top.precisions) == 1 # only one precision per model is supported at the moment
+        for top_precision in top_precisions:
+            mo_cmd = [str(args.python), '--', str(mo_path),
+                '--framework={}'.format(top_format),
+                '--data_type={}'.format(top_precision),
+                '--output_dir={}'.format(output_dir / top.subdirectory / top_precision),
+                '--model_name={}'.format(top.name),
+                *expanded_mo_args]
 
-        mo_cmd = [str(args.python), '--', str(mo_path),
-            '--output_dir={}'.format(output_dir / top.subdirectory / next(iter(top.precisions))),
-            '--model_name={}'.format(top.name),
-            *expanded_mo_args]
+            print('========= {}Converting {} to IR ({})'.format(
+                '(DRY RUN) ' if args.dry_run else '', top.name, top_precision))
 
-        print('========= {}Converting {}'.format('(DRY RUN) ' if args.dry_run else '', top.name))
+            print('Conversion command:', ' '.join(map(quote_arg, mo_cmd)))
 
-        print('Conversion command:', ' '.join(map(quote_arg, mo_cmd)))
+            if not args.dry_run:
+                print(flush=True)
 
-        if not args.dry_run:
-            print(flush=True)
+                if subprocess.run(mo_cmd).returncode != 0:
+                    failed_topologies.add(top.name)
 
-            if subprocess.run(mo_cmd).returncode != 0:
-                failed_topologies.add(top.name)
-
-        print()
+            print()
 
     if failed_topologies:
         print('FAILED:')
