@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
 import contextlib
 import fnmatch
 import re
@@ -320,7 +321,7 @@ def load_topologies(args):
         for config_path in sorted(model_root.glob('**/model.yml')):
             subdirectory = config_path.parent.relative_to(model_root)
 
-            with config_path.open() as config_file, \
+            with config_path.open('rb') as config_file, \
                     deserialization_context('In config "{}"'.format(config_path)):
 
                 top = yaml.safe_load(config_file)
@@ -334,7 +335,7 @@ def load_topologies(args):
     else: # monolithic config
         print('########## Warning: the --config option is deprecated and will be removed in a future release',
             file=sys.stderr)
-        with args.config.open() as config_file, \
+        with args.config.open('rb') as config_file, \
                 deserialization_context('In config "{}"'.format(args.config)):
             for i, top in enumerate(yaml.safe_load(config_file)['topologies']):
                 with deserialization_context('In topology #{}'.format(i)):
@@ -381,7 +382,8 @@ def load_topologies_from_args(parser, args):
                     # For now, ignore any other tokens in the line.
                     # We might use them as additional parameters later.
 
-        topologies = []
+        topologies = collections.OrderedDict() # deduplicate topologies while preserving order
+
         for pattern in patterns:
             matching_topologies = [top for top in all_topologies
                 if fnmatch.fnmatchcase(top.name, pattern)]
@@ -389,6 +391,7 @@ def load_topologies_from_args(parser, args):
             if not matching_topologies:
                 sys.exit('No matching topologies: "{}"'.format(pattern))
 
-            topologies.extend(matching_topologies)
+            for top in matching_topologies:
+                topologies[top.name] = top
 
-        return topologies
+        return list(topologies.values())
