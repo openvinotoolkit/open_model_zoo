@@ -1,9 +1,13 @@
 import sys
 import os
 import yaml
+import types
+
+_loc = os.path.dirname(__file__)
 
 # TODO: Decide where open_model_zoo is located in OpenVINO relatively to this script
-_modelsDir = os.path.join('..', '..', 'models', 'public')
+_modelsDir = os.path.join(_loc, '..', '..', 'models')
+_downloader = os.path.join(_loc, 'downloader.py')
 
 # Determine cache directory
 _cache = None
@@ -18,44 +22,52 @@ if not _cache:
 assert(_cache), 'Cache must be specified by ' + _cacheEnv + ' environment variable'
 _cache = os.path.abspath(_cache)
 
-# TODO: topologies.public and topologies.intel submodules
+
 # Parse topologies.
-for _topologyName in os.listdir(_modelsDir):
-    _config = os.path.join(_modelsDir, _topologyName, 'model.yml')
-    if not os.path.exists(_config):
-        continue
+for _moduleName in os.listdir(_modelsDir):
+    _module = types.ModuleType(_moduleName)
+    sys.modules['topologies.' + _moduleName] = _module
+    globals()[_moduleName] = _module
+    _module.__dict__['sys'] = sys
+    _module.__dict__['os'] = os
 
-    with open(_config, 'rt') as _f:
-        _topology = yaml.safe_load(_f)
-        _name = _topologyName.replace('-', '_').replace('.', '_')
-        _description = _topology['description']
-        _license = _topology['license']
-        _files = _topology['files']
-        _framework = _topology['framework']
-        _configPath = ''
-        _modelPath = ''
-        _downloadDir = os.path.join(_cache, 'public', _topologyName)
+    _modelsSubDir = os.path.join(_modelsDir, _moduleName)
+    for _topologyName in os.listdir(_modelsSubDir):
+        _config = os.path.join(_modelsSubDir, _topologyName, 'model.yml')
+        if not os.path.exists(_config):
+            continue
 
-        assert(len(_files) > 0)
-        if len(_files) > 2:
-            assert(_framework == 'dldt'), ('Unexpected framework type: ' + _framework)
-            pass
-        else:
-            _configPath = os.path.join(_downloadDir, _files[0]['name'])
-            _modelPath = os.path.join(_downloadDir, _files[-1]['name'])
+        with open(_config, 'rt') as _f:
+            _topology = yaml.safe_load(_f)
+            _name = _topologyName.replace('-', '_').replace('.', '_')
+            _description = _topology['description']
+            _license = _topology['license']
+            _files = _topology['files']
+            _framework = _topology['framework']
+            _configPath = ''
+            _modelPath = ''
+            _downloadDir = os.path.join(_cache, _moduleName, _topologyName)
 
-        # To manage origin files location from archives
-        if 'model_optimizer_args' in _topology:
-            for arg in _topology['model_optimizer_args']:
-                tokens = arg.split('=')
-                if len(tokens) == 2:
-                    if tokens[0] == '--input_model':
-                        _modelPath = os.path.realpath(tokens[1].replace('$dl_dir', _downloadDir))
-                    elif tokens[0] == '--input_proto':
-                        _configPath = os.path.realpath(tokens[1].replace('$dl_dir', _downloadDir))
+            assert(len(_files) > 0)
+            if len(_files) > 2:
+                assert(_framework == 'dldt'), ('Unexpected framework type: ' + _framework)
+                pass
+            else:
+                _configPath = os.path.join(_downloadDir, _files[0]['name'])
+                _modelPath = os.path.join(_downloadDir, _files[-1]['name'])
+
+            # To manage origin files location from archives
+            if 'model_optimizer_args' in _topology:
+                for _arg in _topology['model_optimizer_args']:
+                    _tokens = _arg.split('=')
+                    if len(_tokens) == 2:
+                        if _tokens[0] == '--input_model':
+                            _modelPath = os.path.realpath(_tokens[1].replace('$dl_dir', _downloadDir))
+                        elif _tokens[0] == '--input_proto':
+                            _configPath = os.path.realpath(_tokens[1].replace('$dl_dir', _downloadDir))
 
 
-        exec("""
+            exec("""
 class {className}:
     '''
     {description}
@@ -74,14 +86,14 @@ class {className}:
         self.framework = '{framework}'
 
         sys.argv = ['', '--name={name}', '--output_dir={outdir}', '--cache_dir={cache}']
-        exec(open('downloader.py').read(), globals())
+        exec(open('{downloader}').read(), globals())
 
 
     def getIR(self, precision='{defaultPrecision}'):
         if self.framework == 'dldt':
             return self.config, self.model
 
-        prefix = os.path.join('{outdir}', 'public', '{name}', precision, '{name}')
+        prefix = os.path.join('{outdir}', '{module}', '{name}', precision, '{name}')
         xmlPath = prefix + '.xml'
         binPath = prefix + '.bin'
         if os.path.exists(xmlPath) and os.path.exists(binPath):
@@ -93,7 +105,8 @@ class {className}:
 
         return xmlPath, binPath
 
-        """.format(className=_name, description=_description, license=_license,
-                   name=_topologyName, outdir=_cache, cache=_cache,
-                   config=_configPath, model=_modelPath, defaultPrecision='FP32',
-                   framework=_framework))
+            """.format(className=_name, description=_description, license=_license,
+                       name=_topologyName, outdir=_cache, cache=_cache,
+                       config=_configPath, model=_modelPath, defaultPrecision='FP32',
+                       framework=_framework, downloader=_downloader, module=_moduleName),
+            _module.__dict__)
