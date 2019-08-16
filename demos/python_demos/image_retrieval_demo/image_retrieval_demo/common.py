@@ -32,21 +32,6 @@ def max_central_square_crop(image):
     return image
 
 
-def preproces_image(image):
-    ''' Scales and subtracts mean value from image. '''
-
-    image = image / 127.5 - 1.0
-    return image
-
-
-def depreprocess_image(image):
-    ''' Makes transform which is inverse to preprocessing. '''
-
-    image = (image + 1.0) * 127.5
-    image = image.astype(np.uint8)
-    return image
-
-
 def fit_to_max_size(image, max_size):
     ''' Fits input image to max_size. '''
 
@@ -59,12 +44,11 @@ def fit_to_max_size(image, max_size):
     return image
 
 
-def crop_resize_shift_scale(image, input_size):
-    ''' Makes max-sized central crop, resizes to input_size, scales and subtracts mean values. '''
+def crop_resize(image, input_size):
+    ''' Makes max-sized central crop, resizes to input_size '''
 
     image = max_central_square_crop(image)
     image = cv2.resize(image, (input_size, input_size))
-    image = preproces_image(image)
     image = np.expand_dims(image, axis=0)
     return image
 

@@ -43,6 +43,9 @@ def build_argparser():
     args.add_argument('-i',
                       help='Required. Path to a video file or numeric camera ID.',
                       required=True, type=str)
+    args.add_argument('-l', '--cpu_extensions',
+                      help='Required. Path to library with CPU extensions.',
+                      required=True, type=str)
     args.add_argument('-g', '--gallery',
                       help='Required. Path to a folder with gallery images.',
                       required=True, type=str)
@@ -98,7 +101,9 @@ def main():
     log.basicConfig(format='[ %(levelname)s ] %(message)s', level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
 
-    img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE)
+    img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE,
+                                   args.cpu_extensions)
+
     frames = RoiDetectorOnVideo(args.i)
 
     compute_embeddings_times = []

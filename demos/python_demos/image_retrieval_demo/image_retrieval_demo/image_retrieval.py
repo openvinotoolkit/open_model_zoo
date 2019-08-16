@@ -20,27 +20,30 @@ import cv2
 from sklearn.metrics.pairwise import cosine_distances # pylint: disable=import-error
 from tqdm import tqdm
 
-from image_retrieval_demo.common import from_list, crop_resize_shift_scale
+from image_retrieval_demo.common import from_list, crop_resize
 
-from openvino.inference_engine import IENetwork, IEPlugin # pylint: disable=no-name-in-module
+from openvino.inference_engine import IENetwork, IECore # pylint: disable=no-name-in-module
 
 
 class IEModel(): # pylint: disable=too-few-public-methods
     """ Class that allows worknig with Inference Engine model. """
 
-    def __init__(self, model_path, device):
-        self.plugin = IEPlugin(device=device, plugin_dirs=None)
+    def __init__(self, model_path, device, cpu_extensions):
+        ie = IECore()
+        if device == 'CPU':
+            ie.add_extension(cpu_extensions, 'CPU')
+
         path = '.'.join(model_path.split('.')[:-1])
         self.net = IENetwork(model=path + '.xml', weights=path + '.bin')
-        self.plugin.load(network=self.net)
-        self.exec_net = self.plugin.load(network=self.net)
+        self.exec_net = ie.load_network(network=self.net, device_name=device)
 
     def predict(self, image):
         ''' Takes input image and returns L2-normalized embedding vector. '''
 
         assert len(image.shape) == 4
         image = np.transpose(image, (0, 3, 1, 2))
-        out = self.exec_net.infer(inputs={'Placeholder': image})['model/flatten/Reshape']
+        out = self.exec_net.infer(inputs={'Placeholder': image})[
+            'model/tf_op_layer_mul/mul/Normalize']
         out = out / np.linalg.norm(out, axis=-1)
         return out
 
@@ -48,17 +51,17 @@ class IEModel(): # pylint: disable=too-few-public-methods
 class ImageRetrieval:
     """ Class representing Image Retrieval algorithm. """
 
-    def __init__(self, model_path, device, gallery_path, input_size):
+    def __init__(self, model_path, device, gallery_path, input_size, cpu_extensions):
         self.impaths, self.gallery_classes, _, self.text_label_to_class_id = from_list(
             gallery_path, multiple_images_per_label=False)
         self.input_size = input_size
-        self.model = IEModel(model_path, device)
+        self.model = IEModel(model_path, device, cpu_extensions)
         self.embeddings = self.compute_gallery_embeddings()
 
     def compute_embedding(self, image):
         ''' Takes input image and computes embedding vector. '''
 
-        image = crop_resize_shift_scale(image, self.input_size)
+        image = crop_resize(image, self.input_size)
         embedding = self.model.predict(image)
         return embedding
 
@@ -78,7 +81,7 @@ class ImageRetrieval:
             image = cv2.imread(full_path)
             if image is None:
                 print("ERROR: cannot find image, full_path =", full_path)
-            image = crop_resize_shift_scale(image, self.input_size)
+            image = crop_resize(image, self.input_size)
             images.append(image)
 
         embeddings = [None for _ in self.impaths]
