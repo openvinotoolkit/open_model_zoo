@@ -275,7 +275,6 @@ class DLSDKLauncher(Launcher):
         if metadata is not None:
             for image_meta in metadata:
                 image_meta['input_shape'] = self.inputs_info_for_meta()
-
         self._do_reshape = False
 
         return results

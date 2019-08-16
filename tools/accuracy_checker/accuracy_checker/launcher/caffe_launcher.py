@@ -37,11 +37,13 @@ class CaffeLauncher(Launcher):
 
         caffe_launcher_config = LauncherConfigValidator('Caffe_Launcher', fields=self.parameters())
         caffe_launcher_config.validate(self.config)
+        self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
+        self._do_reshape = False
 
-        self.model = str(self.get_value_from_config('model'))
-        self.weights = str(self.get_value_from_config('weights'))
-
-        self.network = caffe.Net(self.model, self.weights, caffe.TEST)
+        if not self._delayed_model_loading:
+            self.model = str(self.get_value_from_config('model'))
+            self.weights = str(self.get_value_from_config('weights'))
+            self.network = caffe.Net(self.model, self.weights, caffe.TEST)
         self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
 
         match = re.match(DEVICE_REGEX, self.get_value_from_config('device').lower())
@@ -90,10 +92,14 @@ class CaffeLauncher(Launcher):
 
     def fit_to_input(self, data, layer_name, layout):
         data_shape = np.shape(data)
-        data = np.transpose(data, layout) if len(data_shape) == 4 else np.array(data)
         layer_shape = self.inputs[layer_name]
+        if len(data_shape) == 5 and len(layer_shape) == 4:
+            data = data[0]
+            data_shape = np.shape(data)
+        data = np.transpose(data, layout) if len(data_shape) == 4 else np.array(data)
+        data_shape = np.shape(data)
         if layer_shape != data_shape:
-            self.network.blobs[layer_name].reshape(*data.shape)
+            self._do_reshape = True
 
         return data
 
@@ -106,10 +112,18 @@ class CaffeLauncher(Launcher):
             raw data from network.
         """
         results = []
+        input_shapes_per_infer = []
         for infer_input in inputs:
+            if self._do_reshape:
+                for layer_name, data in infer_input.items():
+                    if data.shape != self.inputs[layer_name]:
+                        self.network.blobs[layer_name].reshape(*data.shape)
+
             results.append(self.network.forward(**infer_input))
+            input_shapes_per_infer.append(self.inputs_info_for_meta())
+        if metadata is not None:
             for image_meta in metadata:
-                image_meta['input_shape'] = self.inputs_info_for_meta()
+                image_meta['input_shape'] = input_shapes_per_infer
 
         return results
 

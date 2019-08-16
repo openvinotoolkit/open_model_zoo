@@ -29,9 +29,10 @@ from ..preprocessor import PreprocessingExecutor
 from ..adapters import create_adapter
 from ..config import ConfigError
 from ..data_readers import BaseReader
+from .base_evaluator import BaseEvaluator
 
 
-class ModelEvaluator:
+class ModelEvaluator(BaseEvaluator):
     def __init__(
             self, launcher, input_feeder, adapter, reader, preprocessor, postprocessor, dataset, metric, async_mode
     ):
@@ -50,10 +51,13 @@ class ModelEvaluator:
         self._metrics_results = []
 
     @classmethod
-    def from_configs(cls, launcher_config, dataset_config):
+    def from_configs(cls, model_config):
+        launcher_config = model_config['launchers'][0]
+        dataset_config = model_config['datasets'][0]
         dataset_name = dataset_config['name']
         data_reader_config = dataset_config.get('reader', 'opencv_imread')
         data_source = dataset_config.get('data_source')
+
         dataset = Dataset(dataset_config)
         if isinstance(data_reader_config, str):
             data_reader = BaseReader.provide(data_reader_config, data_source, annotations=dataset.annotation)
@@ -63,8 +67,6 @@ class ModelEvaluator:
             )
         else:
             raise ConfigError('reader should be dict or string')
-
-        dataset = Dataset(dataset_config)
         launcher = create_launcher(launcher_config)
         async_mode = launcher.async_mode if hasattr(launcher, 'async_mode') else False
         config_adapter = launcher_config.get('adapter')
@@ -81,6 +83,17 @@ class ModelEvaluator:
         return cls(
             launcher, input_feeder, adapter, data_reader,
             preprocessor, postprocessor, dataset, metric_dispatcher, async_mode
+        )
+
+    @staticmethod
+    def get_processing_info(config):
+        launcher_config = config['launchers'][0]
+        dataset_config = config['datasets'][0]
+
+        return (
+            config['name'],
+            launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
+            dataset_config['name']
         )
 
     def _get_batch_input(self, batch_annotation):

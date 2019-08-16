@@ -22,9 +22,15 @@ import cv2
 
 from .config import ConfigReader
 from .logging import print_info, add_file_handler
-from .evaluators import ModelEvaluator, PipeLineEvaluator, get_processing_info
+from .evaluators import ModelEvaluator, PipeLineEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
 from .utils import get_path, cast_to_bool
+
+EVALUATION_MODE = {
+    'models': ModelEvaluator,
+    'pipelines': PipeLineEvaluator,
+    'evaluations': ModuleEvaluator
+}
 
 
 def build_arguments_parser():
@@ -198,38 +204,16 @@ def main():
         add_file_handler(args.log_file)
 
     config, mode = ConfigReader.merge(args)
-    if mode == 'models':
-        model_evaluation_mode(config, progress_reporter, args)
-    else:
-        pipeline_evaluation_mode(config, progress_reporter, args)
-
-
-def model_evaluation_mode(config, progress_reporter, args):
-    for model in config['models']:
-        for launcher_config in model['launchers']:
-            for dataset_config in model['datasets']:
-                print_processing_info(
-                    model['name'],
-                    launcher_config['framework'],
-                    launcher_config['device'],
-                    launcher_config.get('tags'),
-                    dataset_config['name']
-                )
-                model_evaluator = ModelEvaluator.from_configs(launcher_config, dataset_config)
-                progress_reporter.reset(model_evaluator.dataset.size)
-                model_evaluator.dataset_processor(args.stored_predictions, progress_reporter=progress_reporter)
-                model_evaluator.compute_metrics(ignore_results_formatting=args.ignore_result_formatting)
-
-                model_evaluator.release()
-
-
-def pipeline_evaluation_mode(config, progress_reporter, args):
-    for pipeline_config in config['pipelines']:
-        print_processing_info(*get_processing_info(pipeline_config))
-        evaluator = PipeLineEvaluator.from_configs(pipeline_config['stages'])
+    evaluator_class = EVALUATION_MODE.get(mode)
+    if not evaluator_class:
+        raise ValueError('Unknown evaluation mode')
+    for config_entry in config[mode]:
+        evaluator = evaluator_class.from_configs(config_entry)
+        processing_info = evaluator.get_processing_info(config_entry)
+        print_processing_info(*processing_info)
+        evaluator.reset_progress(progress_reporter)
         evaluator.process_dataset(args.stored_predictions, progress_reporter=progress_reporter)
         evaluator.compute_metrics(ignore_results_formatting=args.ignore_result_formatting)
-
         evaluator.release()
 
 

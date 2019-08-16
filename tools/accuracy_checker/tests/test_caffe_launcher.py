@@ -49,14 +49,14 @@ class TestCaffeLauncher:
         input_blob = np.transpose([img_resized], (0, 3, 1, 2))
         res = caffe_test_model.predict([{'data': input_blob.astype(np.float32)}], [{}])
 
-        assert np.argmax(res[0]['fc3']) == 7
+        assert np.argmax(res[0]['fc3']) == 6
 
     def test_caffe_launcher_provide_input_shape_to_adapter(self, mocker, models_dir):
         mocker.patch('caffe.Net.forward', return_value={'fc3': 0})
         launcher = get_caffe_test_model(models_dir)
         zeros = DataRepresentation(np.zeros((1, 3, 32, 32)))
         launcher.predict([{'data': zeros.data}], [zeros.metadata])
-        assert zeros.metadata['input_shape'] == {'data': (1, 3, 32, 32)}
+        assert zeros.metadata['input_shape'] == [{'data': (1, 3, 32, 32)}]
 
 
 def test_missed_model_in_create_caffe_launcher_raises_config_error_exception():
@@ -71,4 +71,3 @@ def test_missed_weights_in_create_caffe_launcher_raises_config_error_exception()
 
     with pytest.raises(ConfigError):
         create_launcher(launcher)
-
