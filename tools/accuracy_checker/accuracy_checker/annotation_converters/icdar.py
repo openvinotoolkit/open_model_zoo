@@ -50,9 +50,10 @@ class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
         annotations = []
         content_errors = None if not check_content else []
         self.images_dir = self.images_dir or self.data_dir
-        num_iterations = len(self.data_dir.iterdir())
+        files = list(self.data_dir.iterdir())
+        num_iterations = len(files)
 
-        for gt_id, gt_file in enumerate(self.data_dir.iterdir()):
+        for gt_id, gt_file in enumerate(files):
             gt_file_name = str(gt_file.parts[-1])
             identifier = '{}.jpg'.format(gt_file_name.split('gt_')[-1].split('.txt')[0])
             if check_content:
