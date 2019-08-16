@@ -17,8 +17,8 @@ description: >-
 task_type: "object_attributes"
 files:
   - name: image-retrieval-0001.tar.gz
-    sha256: ca5517554b4fbb3cd7b2c7d6462dcb9ad7f2426092b979318f0fd1730f45c735
-    source: https://download.01.org/opencv/openvino_training_extensions/models/image-retrieval/image-retrieval-0001.tar.gz
+    sha256: e73255a04d6dd860c48168410f347ec96f85e52fba3aa93bbc17eaf72fe1e80f
+    source: https://download.01.org/opencv/openvino_training_extensions/models/image_retrieval/image-retrieval-0001.tar.gz
 output: "Retail/image-retrieval-0001"
 postprocessing:
   - $type: unpack_archive
