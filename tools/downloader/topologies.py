@@ -3,11 +3,14 @@ import os
 import yaml
 import types
 
+import common
+
 _loc = os.path.dirname(__file__)
 
 # TODO: Decide where open_model_zoo is located in OpenVINO relatively to this script
 _modelsDir = os.path.join(_loc, '..', '..', 'models')
 _downloader = os.path.join(_loc, 'downloader.py')
+_precisionMarker = '$precision'
 
 # Determine cache directory
 _cache = None
@@ -51,7 +54,18 @@ for _moduleName in os.listdir(_modelsDir):
             assert(len(_files) > 0)
             if len(_files) > 2:
                 assert(_framework == 'dldt'), ('Unexpected framework type: ' + _framework)
-                pass
+                # Get only basename and add precision marker
+                _configPath = _files[0]['name']
+                _modelPath = _files[1]['name']
+
+                pos = _configPath.find('/')
+                if _configPath[:pos] in common.KNOWN_PRECISIONS:
+                    _configPath = _precisionMarker + _configPath[pos:]
+
+                pos = _modelPath.find('/')
+                if _modelPath[:pos] in common.KNOWN_PRECISIONS:
+                    _modelPath = _precisionMarker + _modelPath[pos:]
+
             else:
                 _configPath = os.path.join(_downloadDir, _files[0]['name'])
                 _modelPath = os.path.join(_downloadDir, _files[-1]['name'])
@@ -62,9 +76,12 @@ for _moduleName in os.listdir(_modelsDir):
                     _tokens = _arg.split('=')
                     if len(_tokens) == 2:
                         if _tokens[0] == '--input_model':
-                            _modelPath = os.path.realpath(_tokens[1].replace('$dl_dir', _downloadDir))
+                            _modelPath = _tokens[1].replace('$dl_dir', _downloadDir)
                         elif _tokens[0] == '--input_proto':
-                            _configPath = os.path.realpath(_tokens[1].replace('$dl_dir', _downloadDir))
+                            _configPath = _tokens[1].replace('$dl_dir', _downloadDir)
+
+            _modelPath = os.path.realpath(_modelPath)
+            _configPath = os.path.realpath(_configPath)
 
 
             exec("""
@@ -80,12 +97,13 @@ class {className}:
         framework (str): Name of the framework in which format network is represented.
     '''
 
-    def __init__(self):
-        self.config = '{config}'
-        self.model = '{model}'
+    def __init__(self, precision='{defaultPrecision}'):
+        self.config = '{config}'.replace('{precisionMarker}', precision)
+        self.model = '{model}'.replace('{precisionMarker}', precision)
         self.framework = '{framework}'
 
-        sys.argv = ['', '--name={name}', '--output_dir={outdir}', '--cache_dir={cache}']
+        sys.argv = ['', '--name={name}', '--output_dir={outdir}',
+                    '--cache_dir={cache}', '--precisions=' + precision]
         exec(open('{downloader}').read(), globals())
 
 
@@ -99,7 +117,7 @@ class {className}:
         if os.path.exists(xmlPath) and os.path.exists(binPath):
             return xmlPath, binPath
 
-        sys.argv = ['', '--name={name}', '--precision=' + precision]
+        sys.argv = ['', '--name={name}', '--precisions=' + precision]
         from converter import main
         main()
 
@@ -108,5 +126,6 @@ class {className}:
             """.format(className=_name, description=_description, license=_license,
                        name=_topologyName, outdir=_cache, cache=_cache,
                        config=_configPath, model=_modelPath, defaultPrecision='FP32',
-                       framework=_framework, downloader=_downloader, module=_moduleName),
+                       framework=_framework, downloader=_downloader, module=_moduleName,
+                       precisionMarker=_precisionMarker),
             _module.__dict__)

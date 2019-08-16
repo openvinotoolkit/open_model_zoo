@@ -18,8 +18,17 @@ for path, name in zip ([t.model, t.config, xmlPath, binPath, xmlPath_fp16, binPa
     assert(os.path.basename(path) == name), name
 
 #
-# Check aliases
+# Check Intel models
 #
 from topologies.intel import vehicle_license_plate_detection_barrier_0106
 
-t = vehicle_license_plate_detection_barrier_0106()
+t = vehicle_license_plate_detection_barrier_0106('FP16')
+xmlPath, binPath = t.config, t.model
+xmlPathIR, binPathIR = t.getIR()
+
+for path, ref in zip([xmlPath, binPath, xmlPathIR, binPathIR],
+                     ['FP16/vehicle-license-plate-detection-barrier-0106.xml',
+                      'FP16/vehicle-license-plate-detection-barrier-0106.bin',
+                      'FP16/vehicle-license-plate-detection-barrier-0106.xml',
+                      'FP16/vehicle-license-plate-detection-barrier-0106.bin']):
+    assert(path.endswith(ref)), ref
