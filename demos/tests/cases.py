@@ -154,7 +154,10 @@ NATIVE_DEMOS = [
             TestCase(options={'-m_det': ModelArg('person-detection-retail-0002')}),
             TestCase(options={'-m_det': ModelArg('person-detection-retail-0013')}),
         ],
-        TestCase(options={'-m_reid': ModelArg('person-reidentification-retail-0031')}),
+        single_option_cases('-m_reid',
+            ModelArg('person-reidentification-retail-0031'),
+            ModelArg('person-reidentification-retail-0076'),
+            ModelArg('person-reidentification-retail-0079')),
     )),
 
     NativeDemo(name='security_barrier_camera_demo', test_cases=combine_cases(
