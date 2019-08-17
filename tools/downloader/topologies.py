@@ -6,10 +6,14 @@ import types
 import common
 
 _loc = os.path.dirname(__file__)
-
-# TODO: Decide where open_model_zoo is located in OpenVINO relatively to this script
 _modelsDir = os.path.join(_loc, '..', '..', 'models')
 _downloader = os.path.join(_loc, 'downloader.py')
+
+# TODO: for OpenVINO distribution
+# _loc = os.path.join(os.environ['INTEL_OPENVINO_DIR'], 'deployment_tools', 'open_model_zoo')
+# _modelsDir = os.path.join(_loc, 'models')
+# _downloader = os.path.join(_loc, 'tools', 'downloader', 'downloader.py')
+
 _precisionMarker = '$precision'
 
 # Determine cache directory
@@ -47,9 +51,16 @@ for _moduleName in os.listdir(_modelsDir):
             _license = _topology['license']
             _files = _topology['files']
             _framework = _topology['framework']
+            _taskType = _topology['task_type']
             _configPath = ''
             _modelPath = ''
             _downloadDir = os.path.join(_cache, _moduleName, _topologyName)
+            _moArgs = {}
+            if 'model_optimizer_args' in _topology:
+                for _arg in _topology['model_optimizer_args']:
+                    _tokens = _arg.split('=')
+                    _moArgs[_tokens[0]] = _tokens[1] if len(_tokens) == 2 else None
+
 
             assert(len(_files) > 0)
             if len(_files) > 2:
@@ -58,27 +69,23 @@ for _moduleName in os.listdir(_modelsDir):
                 _configPath = _files[0]['name']
                 _modelPath = _files[1]['name']
 
-                pos = _configPath.find('/')
-                if _configPath[:pos] in common.KNOWN_PRECISIONS:
-                    _configPath = _precisionMarker + _configPath[pos:]
+                _pos = _configPath.find('/')
+                if _configPath[:_pos] in common.KNOWN_PRECISIONS:
+                    _configPath = _precisionMarker + _configPath[_pos:]
 
-                pos = _modelPath.find('/')
-                if _modelPath[:pos] in common.KNOWN_PRECISIONS:
-                    _modelPath = _precisionMarker + _modelPath[pos:]
+                _pos = _modelPath.find('/')
+                if _modelPath[:_pos] in common.KNOWN_PRECISIONS:
+                    _modelPath = _precisionMarker + _modelPath[_pos:]
 
             else:
                 _configPath = _files[0]['name']
                 _modelPath = _files[-1]['name']
 
             # To manage origin files location from archives
-            if 'model_optimizer_args' in _topology:
-                for _arg in _topology['model_optimizer_args']:
-                    _tokens = _arg.split('=')
-                    if len(_tokens) == 2:
-                        if _tokens[0] == '--input_model':
-                            _modelPath = _tokens[1].replace('$dl_dir/', '')
-                        elif _tokens[0] == '--input_proto':
-                            _configPath = _tokens[1].replace('$dl_dir/', '')
+            if '--input_model' in _moArgs:
+                _modelPath = _moArgs['--input_model'].replace('$dl_dir/', '')
+            if '--input_proto' in _moArgs:
+                _configPath = _moArgs['--input_proto'].replace('$dl_dir/', '')
 
             if _configPath:
                 _configPath = os.path.realpath(os.path.join(_downloadDir, _configPath))
@@ -126,9 +133,78 @@ class {className}:
 
         return xmlPath, binPath
 
+
+    def getOCVModel(self, useIR=True):
+        '''
+        Creates OpenCV's cv::dnn::Model from origin network. Depends on network type,
+        returns cv.dnn_DetectionModel, cv.dnn_ClassificationModel, cv.dnn_SegmentationModel
+        or cv.dnn_Model if not specified.
+
+        Preprocessing parameters are set.
+        '''
+        import cv2 as cv
+
+        task_type = '{task_type}'
+        mo_args = {mo_args}
+
+        if useIR:
+            model, config = self.getIR()
+        else:
+            model, config = self.model, self.config
+
+        if task_type == 'detection':
+            m = cv.dnn_DetectionModel(model, config)
+        elif task_type == 'classification':
+            m = cv.dnn_ClassificationModel(model, config)
+        elif task_type == 'semantic_segmentation':
+            m = cv.dnn_SegmentationModel(model, config)
+        else:
+            m = cv.dnn_Model(model, config)
+
+        if useIR:
+            return m
+
+        if '--mean_values' in mo_args:
+            mean = mo_args['--mean_values']
+            mean = mean[mean.find('[') + 1:mean.find(']')].split(',')
+            mean = [float(val) for val in mean]
+            m.setInputMean(mean)
+
+        if '--scale_values' in mo_args:
+            scale = mo_args['--scale_values']
+            scale = 1.0 / float(scale[scale.find('[') + 1:scale.find(']')])
+            m.setInputScale(scale)
+
+        if '--input_shape' in mo_args:
+            shape = mo_args['--input_shape']
+            shape = shape[shape.find('[') + 1:shape.find(']')].split(',')
+            shape = [int(val) for val in shape]
+            if len(shape) == 4:
+                if self.framework == 'tf':  # NHWC
+                    w, h = shape[2], shape[1]
+                else:  # NCHW
+                    w, h = shape[3], shape[2]
+            m.setInputSize(w, h)
+
+        if '--reverse_input_channels' in mo_args:
+            m.setInputSwapRB(True)
+
+        return m
+
+
+    def getIENetwork(self):
+        '''
+        Creates openvino.inference_engine.IENetwork instance.
+        Model Optimizer is lauched to create OpenVINO Intermediate Representation (IR).
+        '''
+        from openvino.inference_engine import IENetwork
+        xmlPath, binPath = self.getIR()
+        return IENetwork(xmlPath, binPath)
+
             """.format(className=_name, description=_description, license=_license,
                        name=_topologyName, outdir=_cache,
                        config=_configPath, model=_modelPath,
                        framework=_framework, downloader=_downloader, module=_moduleName,
-                       precisionMarker=_precisionMarker),
+                       precisionMarker=_precisionMarker, task_type=_taskType,
+                       mo_args=_moArgs),
             _module.__dict__)
