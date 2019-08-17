@@ -16,6 +16,7 @@ for path, name in zip ([t.model, t.config, xmlPath, binPath, xmlPath_fp16, binPa
                         'ssd300.xml', 'ssd300.bin']):
     assert(os.path.exists(path)), path
     assert(os.path.basename(path) == name), name
+    os.remove(path)
 
 #
 # Check Intel models
@@ -31,4 +32,7 @@ for path, ref in zip([xmlPath, binPath, xmlPathIR, binPathIR],
                       'FP16/vehicle-license-plate-detection-barrier-0106.bin',
                       'FP16/vehicle-license-plate-detection-barrier-0106.xml',
                       'FP16/vehicle-license-plate-detection-barrier-0106.bin']):
+    assert(os.path.exists(path)), path
     assert(path.endswith(ref)), ref
+os.remove(xmlPath)
+os.remove(binPath)

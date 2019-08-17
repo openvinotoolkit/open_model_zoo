@@ -67,8 +67,8 @@ for _moduleName in os.listdir(_modelsDir):
                     _modelPath = _precisionMarker + _modelPath[pos:]
 
             else:
-                _configPath = os.path.join(_downloadDir, _files[0]['name'])
-                _modelPath = os.path.join(_downloadDir, _files[-1]['name'])
+                _configPath = _files[0]['name']
+                _modelPath = _files[-1]['name']
 
             # To manage origin files location from archives
             if 'model_optimizer_args' in _topology:
@@ -76,12 +76,14 @@ for _moduleName in os.listdir(_modelsDir):
                     _tokens = _arg.split('=')
                     if len(_tokens) == 2:
                         if _tokens[0] == '--input_model':
-                            _modelPath = _tokens[1].replace('$dl_dir', _downloadDir)
+                            _modelPath = _tokens[1].replace('$dl_dir/', '')
                         elif _tokens[0] == '--input_proto':
-                            _configPath = _tokens[1].replace('$dl_dir', _downloadDir)
+                            _configPath = _tokens[1].replace('$dl_dir/', '')
 
-            _modelPath = os.path.realpath(_modelPath)
-            _configPath = os.path.realpath(_configPath)
+            if _configPath:
+                _configPath = os.path.realpath(os.path.join(_downloadDir, _configPath))
+            if _modelPath:
+                _modelPath = os.path.realpath(os.path.join(_downloadDir, _modelPath))
 
 
             exec("""
@@ -97,17 +99,18 @@ class {className}:
         framework (str): Name of the framework in which format network is represented.
     '''
 
-    def __init__(self, precision='{defaultPrecision}'):
+    def __init__(self, precision='FP32'):
         self.config = '{config}'.replace('{precisionMarker}', precision)
         self.model = '{model}'.replace('{precisionMarker}', precision)
         self.framework = '{framework}'
 
-        sys.argv = ['', '--name={name}', '--output_dir={outdir}',
-                    '--cache_dir={cache}', '--precisions=' + precision]
-        exec(open('{downloader}').read(), globals())
+        if not os.path.exists(self.config) or not os.path.exists(self.model):
+            sys.argv = ['', '--name={name}', '--output_dir={outdir}',
+                        '--precisions=' + precision]
+            exec(open('{downloader}').read(), globals())
 
 
-    def getIR(self, precision='{defaultPrecision}'):
+    def getIR(self, precision='FP32'):
         if self.framework == 'dldt':
             return self.config, self.model
 
@@ -124,8 +127,8 @@ class {className}:
         return xmlPath, binPath
 
             """.format(className=_name, description=_description, license=_license,
-                       name=_topologyName, outdir=_cache, cache=_cache,
-                       config=_configPath, model=_modelPath, defaultPrecision='FP32',
+                       name=_topologyName, outdir=_cache,
+                       config=_configPath, model=_modelPath,
                        framework=_framework, downloader=_downloader, module=_moduleName,
                        precisionMarker=_precisionMarker),
             _module.__dict__)
