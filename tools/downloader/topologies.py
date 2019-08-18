@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 import yaml
 import types
 
@@ -32,13 +33,22 @@ _cache = os.path.abspath(_cache)
 
 # Parse topologies.
 for _moduleName in os.listdir(_modelsDir):
+    _modelsSubDir = os.path.join(_modelsDir, _moduleName)
+    if not os.path.isdir(_modelsSubDir):
+        continue
+
     _module = types.ModuleType(_moduleName)
     sys.modules['topologies.' + _moduleName] = _module
     globals()[_moduleName] = _module
     _module.__dict__['sys'] = sys
     _module.__dict__['os'] = os
 
-    _modelsSubDir = os.path.join(_modelsDir, _moduleName)
+    # List of models which have versions (mostly DLDT models). For such kind of models
+    # with the highest version we will add short names. In example, for
+    # "face_detection_retail_0004" and "face_detection_retail_0005" method with name
+    # "face_detection_retail" returns result of "face_detection_retail_0005".
+    _versionedNames = {}
+
     for _topologyName in os.listdir(_modelsSubDir):
         _config = os.path.join(_modelsSubDir, _topologyName, 'model.yml')
         if not os.path.exists(_config):
@@ -100,10 +110,14 @@ class {className}:
 
     License: {license}
 
-    Attributes:
-        config (str): Absolute path to text file with network configuration.
-        model (str): Absolute path to weights file of network.
-        framework (str): Name of the framework in which format network is represented.
+    Attributes
+    ----------
+        config : str
+            Absolute path to text file with network configuration.
+        model : str
+            Absolute path to weights file of network.
+        framework : str
+            Name of the framework in which format network is represented.
     '''
 
     def __init__(self, precision='FP32'):
@@ -118,6 +132,16 @@ class {className}:
 
 
     def getIR(self, precision='FP32'):
+        '''
+        Creates OpenVINO Intermediate Representation (IR) network format.
+
+        Returns
+        -------
+            xmlPath
+                Path to generated or downloaded .xml file
+            binPath
+                Path to generated or downloaded .bin file
+        '''
         if self.framework == 'dldt':
             return self.config, self.model
 
@@ -208,3 +232,15 @@ class {className}:
                        precisionMarker=_precisionMarker, task_type=_taskType,
                        mo_args=_moArgs),
             _module.__dict__)
+
+            # Extract version and add an alias.
+            _matches = re.search('(.+)_(\d{4})$', _name)
+            if _matches:
+                _shortName = _matches.group(1)
+                _version = _matches.group(2)
+                if not _shortName in _versionedNames or int(_version) > int(_versionedNames[_shortName]):
+                    _versionedNames[_shortName] = _version
+                    exec("""
+{alias} = {className}
+                    """.format(alias=_shortName, className=_name),
+                    _module.__dict__)

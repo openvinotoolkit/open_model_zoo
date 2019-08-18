@@ -60,7 +60,11 @@ def iou(a, b):
 
 
 t = mobilenet_ssd()
-net = t.getOCVModel()
+try:
+    net = t.getOCVModel()
+except:
+    net = t.getOCVModel(useIR=False)
+
 
 img = cv.imread(os.path.join(os.environ['OPENCV_TEST_DATA_PATH'], 'dnn', 'dog416.png'))
 assert(not img is None), 'Test image'
@@ -86,3 +90,20 @@ for refCl, refConf, refBox in zip(refClassIds, refConfs, refBoxes):
 
 os.remove(t.model)
 os.remove(t.config)
+
+#
+# Test aliases
+#
+from topologies.intel import text_detection
+
+t = text_detection('FP16')
+xmlPath, binPath = t.config, t.model
+
+for path, ref in zip([t.config, t.model],
+                     ['FP16/text-detection-0004.xml',
+                      'FP16/text-detection-0004.bin',]):
+    assert(os.path.exists(path)), path
+    assert(path.endswith(ref)), ref
+
+os.remove(t.config)
+os.remove(t.model)
