@@ -16,20 +16,7 @@ _downloader = os.path.join(_loc, 'downloader.py')
 # _downloader = os.path.join(_loc, 'tools', 'downloader', 'downloader.py')
 
 _precisionMarker = '$precision'
-
-# Determine cache directory
-_cache = None
-_cacheEnv = 'OPENCV_OPEN_MODEL_ZOO_CACHE_DIR'
-_cache = os.getenv(_cacheEnv, None)
-if not _cache:
-    try:
-        import cv2 as cv
-        _cache = cv.utils.fs.getCacheDirectory('open_model_zoo', _cacheEnv)
-    except:
-        pass
-assert(_cache), 'Cache must be specified by ' + _cacheEnv + ' environment variable'
-_cache = os.path.abspath(_cache)
-
+_cache = os.path.abspath(os.getenv('OPENCV_OPEN_MODEL_ZOO_CACHE_DIR', 'models'))
 
 # Parse topologies.
 for _moduleName in os.listdir(_modelsDir):
