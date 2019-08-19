@@ -28,10 +28,10 @@ from openvino.inference_engine import IENetwork, IECore # pylint: disable=no-nam
 class IEModel(): # pylint: disable=too-few-public-methods
     """ Class that allows worknig with Inference Engine model. """
 
-    def __init__(self, model_path, device, cpu_extensions):
+    def __init__(self, model_path, device, cpu_extension):
         ie = IECore()
         if device == 'CPU':
-            ie.add_extension(cpu_extensions, 'CPU')
+            ie.add_extension(cpu_extension, 'CPU')
 
         path = '.'.join(model_path.split('.')[:-1])
         self.net = IENetwork(model=path + '.xml', weights=path + '.bin')
@@ -51,11 +51,11 @@ class IEModel(): # pylint: disable=too-few-public-methods
 class ImageRetrieval:
     """ Class representing Image Retrieval algorithm. """
 
-    def __init__(self, model_path, device, gallery_path, input_size, cpu_extensions):
+    def __init__(self, model_path, device, gallery_path, input_size, cpu_extension):
         self.impaths, self.gallery_classes, _, self.text_label_to_class_id = from_list(
             gallery_path, multiple_images_per_label=False)
         self.input_size = input_size
-        self.model = IEModel(model_path, device, cpu_extensions)
+        self.model = IEModel(model_path, device, cpu_extension)
         self.embeddings = self.compute_gallery_embeddings()
 
     def compute_embedding(self, image):

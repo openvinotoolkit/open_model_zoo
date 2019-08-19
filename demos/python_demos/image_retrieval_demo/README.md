@@ -29,15 +29,15 @@ The demo workflow is the following:
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: main.py [-h] -m MODEL -v VIDEO -i IMAGES [-gt GROUND_TRUTH] [-d DEVICE]
+usage: main.py [-h] -m MODEL -i I -g GALLERY [-gt GROUND_TRUTH] [-d DEVICE]
+               [-l CPU_EXTENSION]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -v VIDEO, --video VIDEO
-                        Required. Path to a video file or numeric camera ID.
-  -i IMAGES, --images IMAGES
+  -i I                  Required. Path to a video file or numeric camera ID.
+  -g GALLERY, --gallery GALLERY
                         Required. Path to a folder with gallery images.
   -gt GROUND_TRUTH, --ground_truth GROUND_TRUTH
                         Optional. Ground truth class.
@@ -46,6 +46,10 @@ Options:
                         GPU, FPGA, HDDL or MYRIAD. The demo will look for a
                         suitable plugin for device specified (by default, it
                         is CPU).
+  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
+                        Optional. Required for CPU custom layers. Absolute
+                        path to a shared library with the kernels
+                        implementations.
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.

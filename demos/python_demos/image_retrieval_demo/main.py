@@ -43,9 +43,6 @@ def build_argparser():
     args.add_argument('-i',
                       help='Required. Path to a video file or numeric camera ID.',
                       required=True, type=str)
-    args.add_argument('-l', '--cpu_extensions',
-                      help='Required. Path to library with CPU extensions.',
-                      required=True, type=str)
     args.add_argument('-g', '--gallery',
                       help='Required. Path to a folder with gallery images.',
                       required=True, type=str)
@@ -57,6 +54,10 @@ def build_argparser():
                            'or MYRIAD. The demo will look for a suitable plugin for device '
                            'specified (by default, it is CPU).',
                       default='CPU', type=str)
+    args.add_argument("-l", "--cpu_extension",
+                      help="Optional. Required for CPU custom layers. Absolute path to "
+                           "a shared library with the kernels implementations.", type=str,
+                      default=None)
 
     return parser
 
@@ -102,7 +103,7 @@ def main():
     args = build_argparser().parse_args()
 
     img_retrieval = ImageRetrieval(args.model, args.device, args.gallery, INPUT_SIZE,
-                                   args.cpu_extensions)
+                                   args.cpu_extension)
 
     frames = RoiDetectorOnVideo(args.i)
 
