@@ -23,7 +23,7 @@ from .format_converter import BaseFormatConverter, ConverterReturn
 
 
 class ActionRecognitionConverter(BaseFormatConverter):
-    __provider__ = 'action_recognition'
+    __provider__ = 'clip_action_recognition'
     annotation_types = (ClassificationAnnotation, )
 
     @classmethod

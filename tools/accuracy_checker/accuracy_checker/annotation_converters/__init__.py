@@ -90,11 +90,8 @@ __all__ = [
     'CVATMultilabelAttributesRecognitionConverter',
     'CVATPoseEstimationConverter',
     'CVATPersonDetectionActionRecognitionConverter',
-<<<<<<< 6e51d20e644e4b8f6ba2b08b0ac0dea20005b30e
     'SQUADConverter',
-    'XNLIDatasetConverter'
-=======
+    'XNLIDatasetConverter',
     'CVATMultilabelAttributesRecognitionConverter',
     'ActionRecognitionConverter'
->>>>>>> added converter
 ]
