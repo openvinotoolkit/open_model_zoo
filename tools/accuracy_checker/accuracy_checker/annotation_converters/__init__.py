@@ -48,6 +48,7 @@ from .cvat_human_pose import CVATPoseEstimationConverter
 from .cvat_person_detection_action_recognition import CVATPersonDetectionActionRecognitionConverter
 from .squad import SQUADConverter
 from .xnli import XNLIDatasetConverter
+from .action_recognition import ActionRecognitionConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -89,6 +90,11 @@ __all__ = [
     'CVATMultilabelAttributesRecognitionConverter',
     'CVATPoseEstimationConverter',
     'CVATPersonDetectionActionRecognitionConverter',
+<<<<<<< 6e51d20e644e4b8f6ba2b08b0ac0dea20005b30e
     'SQUADConverter',
     'XNLIDatasetConverter'
+=======
+    'CVATMultilabelAttributesRecognitionConverter',
+    'ActionRecognitionConverter'
+>>>>>>> added converter
 ]
