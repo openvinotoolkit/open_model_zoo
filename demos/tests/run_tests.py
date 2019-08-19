@@ -65,14 +65,14 @@ def main():
     if args.demos is not None:
         demos_to_test = set(args.demos.split(','))
     else:
-        demos_to_test = {demo.name for demo in DEMOS}
+        demos_to_test = {demo.full_name for demo in DEMOS}
 
     num_failures = 0
 
     for demo in DEMOS:
-        if demo.name not in demos_to_test: continue
+        if demo.full_name not in demos_to_test: continue
 
-        print('Testing {}...'.format(demo.name))
+        print('Testing {}...'.format(demo.full_name))
         print()
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -85,7 +85,7 @@ def main():
                     [
                         sys.executable, '--', str(auto_tools_dir / 'downloader.py'),
                         '--output_dir', str(dl_dir), '--cache_dir', str(args.downloader_cache_dir),
-                        '--list', str(demos_dir / demo.name / 'models.lst')
+                        '--list', str(demo.models_lst_path(demos_dir)),
                     ],
                     stderr=subprocess.STDOUT, universal_newlines=True)
             except subprocess.CalledProcessError as e:
@@ -113,19 +113,22 @@ def main():
                 if isinstance(value, list): return [key, *map(resolve_arg, value)]
                 return [key, resolve_arg(value)]
 
-            for test_case_index, test_case in enumerate(demo.test_cases):
-                demo_executable = args.demo_build_dir / demo.name
+            fixed_args = demo.fixed_args(demos_dir, args.demo_build_dir)
 
-                demo_args = [demo_arg
+            print('Fixed arguments:', ' '.join(map(shlex.quote, fixed_args)))
+            print()
+
+            for test_case_index, test_case in enumerate(demo.test_cases):
+                case_args = [demo_arg
                     for key, value in sorted(test_case.options.items())
                     for demo_arg in option_to_args(key, value)]
 
                 print('Test case #{}:'.format(test_case_index + 1),
-                    ' '.join(shlex.quote(str(arg)) for arg in demo_args))
+                    ' '.join(shlex.quote(str(arg)) for arg in case_args))
                 print(flush=True)
 
                 try:
-                    subprocess.check_output([str(demo_executable), *demo_args],
+                    subprocess.check_output(fixed_args + case_args,
                         stderr=subprocess.STDOUT, universal_newlines=True)
                 except subprocess.CalledProcessError as e:
                     print(e.output)

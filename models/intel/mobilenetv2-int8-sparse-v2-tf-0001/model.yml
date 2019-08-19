@@ -1,0 +1,33 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Mobilenet v2 INT8 quantized and pruned to 53.01% weights sparsity rate in TensorFlow.
+  Acc@top-1 on ImageNet is 70.856.
+task_type: classification
+files:
+  - name: FP32/mobilenetv2-int8-sparse-v2-tf-0001.xml
+    sha256: 484058458c8efaa061cfed8d373fa6194a17f4a74385528680b046bfdb0a872d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/mobilenetv2-int8-sparse-v2-tf-0001/FP32/mobilenetv2-int8-sparse-v2-tf-0001.xml
+  - name: FP32/mobilenetv2-int8-sparse-v2-tf-0001.bin
+    sha256: 344db57e36e27befffde4e372c59b5f650c96e6bda6e2488d28dfaffc4984ee7
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/mobilenetv2-int8-sparse-v2-tf-0001/FP32/mobilenetv2-int8-sparse-v2-tf-0001.bin
+  - name: FP16/mobilenetv2-int8-sparse-v2-tf-0001.xml
+    sha256: 76819b86b945291425697884b2acc6ceb0c49bb4b3925d81dc747c7173f363ad
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/mobilenetv2-int8-sparse-v2-tf-0001/FP16/mobilenetv2-int8-sparse-v2-tf-0001.xml
+  - name: FP16/mobilenetv2-int8-sparse-v2-tf-0001.bin
+    sha256: 7402ebe219256139d218b1b2eec7fd4b9fcfad393064ee50234c0d3f725a97eb
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/mobilenetv2-int8-sparse-v2-tf-0001/FP16/mobilenetv2-int8-sparse-v2-tf-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

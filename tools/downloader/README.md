@@ -2,7 +2,7 @@ Model Downloader and other automation tools
 ===========================================
 
 This directory contains scripts that automate certain model-related tasks
-based on the included configuration file.
+based on configuration files in the models' directories.
 
 * `downloader.py` (model downloader) downloads model files from online sources
   and, if necessary, patches them to make them more usable with Model
@@ -13,6 +13,10 @@ based on the included configuration file.
 
 * `info_dumper.py` (model information dumper) prints information about the models
   in a stable machine-readable format.
+
+Please use these tools instead of attempting to parse the configuration files
+directly. Their format is undocumented and may change in incompatible ways in
+future releases.
 
 Prerequisites
 -------------
@@ -109,6 +113,16 @@ into a different directory tree, use the `-o`/`--output_dir` option:
 
 The `--all` option can be replaced with other filter options to convert only
 a subset of models. See the "Shared options" section.
+
+By default, the script will produce models in every precision that is supported
+for conversion. To only produce models in a specific precision, use the `--precisions`
+option:
+
+```sh
+./converter.py --all --precisions=FP16
+```
+
+If the specified precision is not supported for a model, that model will be skipped.
 
 The script will attempt to locate Model Optimizer using the environment
 variables set by the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
@@ -240,32 +254,33 @@ configuration file and exit:
 
 ```
 $ ./TOOL.py --print_all
-Sphereface
 action-recognition-0001-decoder
 action-recognition-0001-encoder
 age-gender-recognition-retail-0013
-alexnet
-brain-tumor-segmentation-0001
-ctpn
-deeplabv3
-densenet-121
-densenet-121-tf
+driver-action-recognition-adas-0002-decoder
+driver-action-recognition-adas-0002-encoder
+emotions-recognition-retail-0003
+face-detection-adas-0001
+face-detection-adas-binary-0001
+face-detection-retail-0004
+face-detection-retail-0005
 [...]
 ```
 
 Either `--print_all` or one of the filter options must be specified.
 
-By default, the tools will get information about the models from the configuration
-file in the automation tool directory. You can use a custom configuration file
-instead with the `-c`/`--config` option:
+Deprecated options
+------------------
+
+In earlier releases, the tools used a single configuration file instead of
+per-model configuration files. For compatibility, loading such a file is still
+supported. However, this feature is deprecated and will be removed in a future release.
+
+To load a configuration file in the old format, use the `-c`/`--config` option:
 
 ```sh
 ./TOOL.py --all --config my-config.yml
 ```
-
-Note, however, that the configuration file format is currently undocumented and
-may change in incompatible ways in future versions.
-
 __________
 
 OpenVINO is a trademark of Intel Corporation or its subsidiaries in the U.S.

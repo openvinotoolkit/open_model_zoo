@@ -1,0 +1,39 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Fully convolutional network for recognition of five emotions ('neutral', 'happy',
+  'sad', 'surprise', 'anger').
+task_type: object_attributes
+files:
+  - name: FP32/emotions-recognition-retail-0003.xml
+    sha256: 31e1a6aecce64f57d0c634767b0ea84d830571dd973f3b63d70bdd344d9f879a
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
+  - name: FP32/emotions-recognition-retail-0003.bin
+    sha256: bcb9b1a910fa3cd18a638bb1dbb0597c4ef7a080d1b83008c8e8c2c3c42b99dd
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
+  - name: FP16/emotions-recognition-retail-0003.xml
+    sha256: 9c529df09b00cd6d3c038b3db36da8a6804b98164beecb8e726c14cf56b49efc
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
+  - name: FP16/emotions-recognition-retail-0003.bin
+    sha256: e62fb4b819b3b3ad8aafcd308d4353db2f164a1a31d78de6cf5970837aeb6f7b
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
+  - name: INT8/emotions-recognition-retail-0003.xml
+    sha256: e6a17e31dd90c9c8617c54909199875ef1ac25f7b50f810a1940e8c243ad5499
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/emotions-recognition-retail-0003/INT8/emotions-recognition-retail-0003.xml
+  - name: INT8/emotions-recognition-retail-0003.bin
+    sha256: 61203cb3b7318101637b444c12c9e050cb3447f682c44bc343e8926f9bfe6130
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/emotions-recognition-retail-0003/INT8/emotions-recognition-retail-0003.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

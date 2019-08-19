@@ -1,0 +1,8 @@
+# A list of models that covers all Model Downloader/Converter features
+
+mobilenet-v1-0.25-128 # TensorFlow, HTTP downloads
+mobilenet-v2-pytorch # PyTorch (external module), Google Drive downloads
+mtcnn-p # Caffe, HTTPS downloads, regex replacement
+octave-densenet-121-0.125 # MXNet, archive unpacking
+resnet-50-pytorch # PyTorch (torchvision)
+single-image-super-resolution-1032 # DLDT
