@@ -14,10 +14,10 @@ conditions.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Mean Average Precision (mAP)    | 64.48%                                    |
-| AP people                       | 76.22%                                    |
-| AP vehicles                     | 74.66%                                    |
-| AP bikes                        | 42.56%                                    |
+| Mean Average Precision (mAP)    | 65.12%                                    |
+| AP people                       | 76.28%                                    |
+| AP vehicles                     | 74.94%                                    |
+| AP bikes                        | 44.14%                                    |
 | Max objects to detect           | 200                                       |
 | GFlops                          | 3.964                                     |
 | MParams                         | 1.178                                     |
