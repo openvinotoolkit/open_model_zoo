@@ -6,14 +6,14 @@ import types
 
 import common
 
-_loc = os.path.dirname(__file__)
-_modelsDir = os.path.join(_loc, '..', '..', 'models')
-_downloader = os.path.join(_loc, 'downloader.py')
-
-# TODO: for OpenVINO distribution
-# _loc = os.path.join(os.environ['INTEL_OPENVINO_DIR'], 'deployment_tools', 'open_model_zoo')
-# _modelsDir = os.path.join(_loc, 'models')
-# _downloader = os.path.join(_loc, 'tools', 'downloader', 'downloader.py')
+if 'INTEL_OPENVINO_DIR' in os.environ:  # As a part of OpenVINO
+    _loc = os.path.join(os.environ['INTEL_OPENVINO_DIR'], 'deployment_tools', 'open_model_zoo')
+    _modelsDir = os.path.join(_loc, 'models')
+    _downloader = os.path.join(_loc, 'tools', 'downloader', 'downloader.py')
+else:  # Standalone
+    _loc = os.path.dirname(__file__)
+    _modelsDir = os.path.join(_loc, '..', '..', 'models')
+    _downloader = os.path.join(_loc, 'downloader.py')
 
 _precisionMarker = '$precision'
 _cache = os.path.abspath(os.getenv('OPENCV_OPEN_MODEL_ZOO_CACHE_DIR', 'models'))
