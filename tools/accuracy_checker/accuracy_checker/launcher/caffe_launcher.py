@@ -112,7 +112,6 @@ class CaffeLauncher(Launcher):
             raw data from network.
         """
         results = []
-        input_shapes_per_infer = []
         for infer_input in inputs:
             if self._do_reshape:
                 for layer_name, data in infer_input.items():
@@ -120,10 +119,9 @@ class CaffeLauncher(Launcher):
                         self.network.blobs[layer_name].reshape(*data.shape)
 
             results.append(self.network.forward(**infer_input))
-            input_shapes_per_infer.append(self.inputs_info_for_meta())
         if metadata is not None:
             for image_meta in metadata:
-                image_meta['input_shape'] = input_shapes_per_infer
+                image_meta['input_shape'] = self.inputs_info_for_meta()
 
         return results
 

@@ -56,7 +56,7 @@ class TestCaffeLauncher:
         launcher = get_caffe_test_model(models_dir)
         zeros = DataRepresentation(np.zeros((1, 3, 32, 32)))
         launcher.predict([{'data': zeros.data}], [zeros.metadata])
-        assert zeros.metadata['input_shape'] == [{'data': (1, 3, 32, 32)}]
+        assert zeros.metadata['input_shape'] == {'data': (1, 3, 32, 32)}
 
 
 def test_missed_model_in_create_caffe_launcher_raises_config_error_exception():

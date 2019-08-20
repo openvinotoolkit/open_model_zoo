@@ -93,7 +93,7 @@ class TestDLSDKLauncherInfer:
         assert dlsdk_test_model.output_blob == 'fc3'
 
         assert np.argmax(result[0][dlsdk_test_model.output_blob]) == 7
-        assert image.metadata['input_shape'] == [{'data': [1, 3, 32, 32]}]
+        assert image.metadata['input_shape'] == {'data': [1, 3, 32, 32]}
 
     def test_launcher_creates(self, models_dir):
         assert get_dlsdk_test_model(models_dir).inputs['data'].shape == [1, 3, 32, 32]
@@ -120,7 +120,7 @@ class TestDLSDKLauncherAffinity:
             'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
-        dlsdk_test_model = get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,GPU', 'affinity_map' : './affinity_map.yml'})
+        dlsdk_test_model = get_dlsdk_test_model(models_dir, {'device': 'HETERO:CPU,GPU', 'affinity_map': './affinity_map.yml'})
         layers = dlsdk_test_model.network.layers
         for key, value in affinity_map.items():
             assert layers[key].affinity == value
@@ -133,17 +133,17 @@ class TestDLSDKLauncherAffinity:
         )
 
         with pytest.raises(ConfigError):
-            get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,CPU', 'affinity_map' : './affinity_map.yml'})
+            get_dlsdk_test_model(models_dir, {'device': 'HETERO:CPU,CPU', 'affinity_map': './affinity_map.yml'})
 
     def test_dlsdk_launcher_affinity_map_invalid_layer(self, mocker, models_dir):
-        affinity_map = {'none-existing-layer' : 'CPU'}
+        affinity_map = {'none-existing-layer': 'CPU'}
 
         mocker.patch(
             'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
         with pytest.raises(ConfigError):
-            get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,CPU', 'affinity_map' : './affinity_map.yml'})
+            get_dlsdk_test_model(models_dir, {'device': 'HETERO:CPU,CPU', 'affinity_map': './affinity_map.yml'})
 
 
 @pytest.mark.usefixtures('mock_path_exists', 'mock_inference_engine', 'mock_inputs')
