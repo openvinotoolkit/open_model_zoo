@@ -193,56 +193,60 @@ def positive_int_arg(value_str):
 
     raise argparse.ArgumentTypeError('must be a positive integer (got {!r})'.format(value_str))
 
-parser = DownloaderArgumentParser()
-parser.add_argument('-c', '--config', type = Path, metavar = 'CONFIG.YML',
-    help = 'topology configuration file (deprecated)')
-parser.add_argument('--name', metavar = 'PAT[,PAT...]',
-    help = 'download only topologies whose names match at least one of the specified patterns')
-parser.add_argument('--list', type = Path, metavar = 'FILE.LST',
-    help = 'download only topologies whose names match at least one of the patterns in the specified file')
-parser.add_argument('--all',  action = 'store_true', help = 'download all available topologies')
-parser.add_argument('--print_all', action = 'store_true', help = 'print all available topologies')
-parser.add_argument('-o', '--output_dir', type = Path, metavar = 'DIR',
-    default = Path.cwd(), help = 'path where to save topologies')
-parser.add_argument('--cache_dir', type = Path, metavar = 'DIR',
-    help = 'directory to use as a cache for downloaded files')
-parser.add_argument('--num_attempts', type = positive_int_arg, metavar = 'N', default = 1,
-    help = 'attempt each download up to N times')
+def main():
+    parser = DownloaderArgumentParser()
+    parser.add_argument('-c', '--config', type=Path, metavar='CONFIG.YML',
+        help='topology configuration file (deprecated)')
+    parser.add_argument('--name', metavar='PAT[,PAT...]',
+        help='download only topologies whose names match at least one of the specified patterns')
+    parser.add_argument('--list', type=Path, metavar='FILE.LST',
+        help='download only topologies whose names match at least one of the patterns in the specified file')
+    parser.add_argument('--all',  action='store_true', help='download all available topologies')
+    parser.add_argument('--print_all', action='store_true', help='print all available topologies')
+    parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',
+        default=Path.cwd(), help='path where to save topologies')
+    parser.add_argument('--cache_dir', type=Path, metavar='DIR',
+        help='directory to use as a cache for downloaded files')
+    parser.add_argument('--num_attempts', type=positive_int_arg, metavar='N', default=1,
+        help='attempt each download up to N times')
 
-args = parser.parse_args()
-cache = NullCache() if args.cache_dir is None else DirCache(args.cache_dir)
-topologies = common.load_topologies_from_args(parser, args)
+    args = parser.parse_args()
+    cache = NullCache() if args.cache_dir is None else DirCache(args.cache_dir)
+    topologies = common.load_topologies_from_args(parser, args)
 
-print('')
-print('###############|| Downloading topologies ||###############')
-print('')
-with requests.Session() as session:
+    print('')
+    print('###############|| Downloading topologies ||###############')
+    print('')
+    with requests.Session() as session:
+        for top in topologies:
+            output = args.output_dir / top.subdirectory
+            output.mkdir(parents=True, exist_ok=True)
+
+            for top_file in top.files:
+                destination = output / top_file.name
+
+                try_retrieve(top.name, destination, top_file.sha256, cache, args.num_attempts,
+                    lambda: top_file.source.start_download(session, CHUNK_SIZE, top_file.size))
+
+                if top.name in failed_topologies:
+                    shutil.rmtree(str(output))
+                    break
+
+    print('')
+    print('###############|| Post processing ||###############')
+    print('')
     for top in topologies:
+        if top.name in failed_topologies: continue
+
         output = args.output_dir / top.subdirectory
-        output.mkdir(parents=True, exist_ok=True)
 
-        for top_file in top.files:
-            destination = output / top_file.name
+        for postproc in top.postprocessing:
+            postproc.apply(output)
 
-            try_retrieve(top.name, destination, top_file.sha256, cache, args.num_attempts,
-                lambda: top_file.source.start_download(session, CHUNK_SIZE, top_file.size))
+    if failed_topologies:
+        print('FAILED:')
+        print(*sorted(failed_topologies), sep='\n')
+        sys.exit(1)
 
-            if top.name in failed_topologies:
-                shutil.rmtree(str(output))
-                break
-
-print('')
-print('###############|| Post processing ||###############')
-print('')
-for top in topologies:
-    if top.name in failed_topologies: continue
-
-    output = args.output_dir / top.subdirectory
-
-    for postproc in top.postprocessing:
-        postproc.apply(output)
-
-if failed_topologies:
-    print('FAILED:')
-    print(*sorted(failed_topologies), sep='\n')
-    sys.exit(1)
+if __name__ == '__main__':
+    main()
