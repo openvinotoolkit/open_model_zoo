@@ -179,7 +179,7 @@ def main():
 
         return True
 
-    if args.jobs == 1:
+    if args.jobs == 1 or args.dry_run:
         results = [convert(top, do_prefix_stdout=False) for top in topologies]
     else:
         with concurrent.futures.ThreadPoolExecutor(args.jobs) as executor:
