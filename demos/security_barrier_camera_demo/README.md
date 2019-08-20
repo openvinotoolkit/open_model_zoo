@@ -96,7 +96,16 @@ To do inference for two video inputs using two asynchronous infer request on FPG
 ./security_barrier_camera_demo -i <path_to_video>/inputVideo_0.mp4 <path_to_video>/inputVideo_1.mp4 -m <path_to_model>/vehicle-license-plate-detection-barrier-0106.xml -m_va <path_to_model>/vehicle-attributes-recognition-barrier-0039.xml -m_lpr <path_to_model>/license-plate-recognition-barrier-0001.xml -d HETERO:FPGA,CPU -d_va HETERO:FPGA,CPU -d_lpr HETERO:FPGA,CPU -nireq 2
 ```
 
-> **NOTE**: For the `-tag` option (HDDL plugin only), you must specify the number of VPUs for each network in the `hddl_service.config` file located in the `<INSTALL_DIR>/deployment_tools/inference_engine/external/hddl/config/` direcrtory using the following tags:
+> **NOTE**: Some Optimization Hints with Intel® Vision Accelerator Design with Intel® Movidius™ VPUs
+> The default scheduler strategy of security_barrier_camera_demo is Squeeze scheduler. To show the priority of Intel® Vision Accelerator Design with Intel® Movidius™ VPUs in this setting, you are suggested to config some parameters.
+> For example, to do inference on a HDDL with the OpenVINO toolkit pre-trained models and Squeeze scheduler (default), run the following command:
+> 
+> ```sh
+> ./security_barrier_camera_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/vehicle-license-plate-detection-barrier-0106.xml -m_va <path_to_model>/vehicle-attributes-recognition-barrier-0039.xml -m_lpr <path_to_model>/license-plate-recognition-barrier-0001.xml
+> -d HDDL -d_va HDDL -d_lpr HDDL -n_iqs 10 -n_wt 30 -nireq 50
+> ```
+> 
+> For the `-tag` option (HDDL plugin only), you must specify the number of VPUs for each network in the `hddl_service.config` file located in the `<INSTALL_DIR>/deployment_tools/inference_engine/external/hddl/config/` direcrtory using the following tags:
 > * `tagDetect` for the Vehicle and License Plate Detection network
 > * `tagAttr` for the Vehicle Attributes Recognition network
 > * `tagLPR` for the License Plate Recognition network
