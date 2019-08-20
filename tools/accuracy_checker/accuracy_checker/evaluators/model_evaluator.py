@@ -177,6 +177,8 @@ class ModelEvaluator(BaseEvaluator):
         return self.postprocessor.process_dataset(self._annotations, self._predictions)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
+        if progress_reporter:
+            progress_reporter.reset(self.dataset.size)
         if self._is_stored(stored_predictions) or isinstance(self.launcher, DummyLauncher):
             self._annotations, self._predictions = self.load(stored_predictions, progress_reporter)
             self._annotations, self._predictions = self.postprocessor.full_process(self._annotations, self._predictions)
@@ -327,6 +329,9 @@ class ModelEvaluator(BaseEvaluator):
             pickle.dump(predictions, content)
             print_info("prediction objects are save to {}".format(stored_predictions))
 
+    def reset_progress(self, progress_reporter):
+        progress_reporter.reset(self.dataset.size)
+
     def reset(self):
         self.metric_executor.reset()
         del self._annotations
@@ -335,6 +340,7 @@ class ModelEvaluator(BaseEvaluator):
         self._annotations = []
         self._predictions = []
         self._metrics_results = []
+        self.dataset.reset()
 
     def release(self):
         self.launcher.release()

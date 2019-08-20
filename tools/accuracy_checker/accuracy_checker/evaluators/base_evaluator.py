@@ -23,10 +23,6 @@ class BaseEvaluator:
     def get_processing_info(config):
         return config['name'], 'framework', 'device', None, 'dataset_name'
 
-    def reset_progress(self, progress_reporter):
-        self.progress_reporter = progress_reporter
-        progress_reporter.reset(0)
-
     def process_dataset(self, *args, **kwargs):
         raise NotImplementedError
 

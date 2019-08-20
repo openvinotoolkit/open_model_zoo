@@ -578,6 +578,7 @@ def filter_models(config, target_devices, args):
                     launcher_with_device['device'] = device
                     if not filtered(launcher_with_device, target_devices, args):
                         launchers_after_filtration.append(launcher_with_device)
+                continue
             if not filtered(launcher, target_devices, args):
                 launchers_after_filtration.append(launcher)
 
@@ -618,8 +619,16 @@ def filter_modules(config, target_devices, args):
             filtered_evals.append(evaluation)
             continue
         module_config = evaluation['module_config']
+        launchers = module_config['launchers']
+        if target_devices:
+            launchers_without_device = [launcher for launcher in launchers if 'device' not in launcher]
+            for launcher in launchers_without_device:
+                for device in target_devices:
+                    launcher_with_device = copy.deepcopy(launcher)
+                    launcher_with_device['device'] = device
+                    launchers.append(launcher_with_device)
         launchers = [
-            launcher for launcher in module_config['launchers'] if not filtered(launcher, target_devices, args)
+            launcher for launcher in launchers if not filtered(launcher, target_devices, args)
         ]
         if not launchers:
             warnings.warn('Model "{}" has no launchers'.format(evaluation['name']))
