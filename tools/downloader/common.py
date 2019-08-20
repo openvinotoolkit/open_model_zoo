@@ -139,7 +139,7 @@ class FileSourceGoogleDrive(FileSource):
 
 FileSource.types['google_drive'] = FileSourceGoogleDrive
 
-class TopologyFile:
+class ModelFile:
     def __init__(self, name, size, sha256, source):
         self.name = name
         self.size = size
@@ -231,7 +231,7 @@ class PostprocUnpackArchive(Postproc):
 
 Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
-class Topology:
+class Model:
     def __init__(self, name, subdirectory, files, postprocessing, mo_args, framework,
             description, license_url, precisions, task_type, pytorch_to_onnx_args):
         self.name = name
@@ -247,13 +247,13 @@ class Topology:
         self.pytorch_to_onnx_args = pytorch_to_onnx_args
 
     @classmethod
-    def deserialize(cls, top, name, subdirectory):
-        with deserialization_context('In topology "{}"'.format(name)):
+    def deserialize(cls, model, name, subdirectory):
+        with deserialization_context('In model "{}"'.format(name)):
             files = []
             file_names = set()
 
-            for file in top['files']:
-                files.append(TopologyFile.deserialize(file))
+            for file in model['files']:
+                files.append(ModelFile.deserialize(file))
 
                 if files[-1].name in file_names:
                     raise DeserializationError(
@@ -262,19 +262,19 @@ class Topology:
 
             postprocessing = []
 
-            for i, postproc in enumerate(top.get('postprocessing', [])):
+            for i, postproc in enumerate(model.get('postprocessing', [])):
                 with deserialization_context('"postprocessing" #{}'.format(i)):
                     postprocessing.append(Postproc.deserialize(postproc))
 
             pytorch_to_onnx_args = None
-            if top.get('pytorch_to_onnx', None):
+            if model.get('pytorch_to_onnx', None):
                 pytorch_to_onnx_args = [validate_string('"pytorch_to_onnx" #{}'.format(i), arg)
-                                        for i, arg in enumerate(top['pytorch_to_onnx'])]
+                                        for i, arg in enumerate(model['pytorch_to_onnx'])]
 
 
-            if 'model_optimizer_args' in top:
+            if 'model_optimizer_args' in model:
                 mo_args = [validate_string('"model_optimizer_args" #{}'.format(i), arg)
-                    for i, arg in enumerate(top['model_optimizer_args'])]
+                    for i, arg in enumerate(model['model_optimizer_args'])]
 
                 precisions = {'FP16', 'FP32'}
             else:
@@ -292,28 +292,28 @@ class Topology:
 
                 precisions = set(map(file_precision, files))
 
-            framework = validate_string_enum('"framework"', top['framework'], KNOWN_FRAMEWORKS)
+            framework = validate_string_enum('"framework"', model['framework'], KNOWN_FRAMEWORKS)
 
-            description = validate_string('"description"', top['description'])
+            description = validate_string('"description"', model['description'])
 
-            license_url = validate_string('"license"', top['license'])
+            license_url = validate_string('"license"', model['license'])
 
-            task_type = validate_string_enum('"task_type"', top['task_type'], KNOWN_TASK_TYPES)
+            task_type = validate_string_enum('"task_type"', model['task_type'], KNOWN_TASK_TYPES)
 
             return cls(name, subdirectory, files, postprocessing, mo_args, framework,
                 description, license_url, precisions, task_type, pytorch_to_onnx_args)
 
-def load_topologies(args):
-    topologies = []
-    topology_names = set()
+def load_models(args):
+    models = []
+    model_names = set()
 
-    def add_topology(topology):
-        topologies.append(topology)
+    def add_model(model):
+        models.append(model)
 
-        if topologies[-1].name in topology_names:
+        if models[-1].name in model_names:
             raise DeserializationError(
-                'Duplicate topology name "{}"'.format(topologies[-1].name))
-        topology_names.add(topologies[-1].name)
+                'Duplicate model name "{}"'.format(models[-1].name))
+        model_names.add(models[-1].name)
 
     if args.config is None: # per-model configs
         model_root = (Path(__file__).resolve().parent / '../../models').resolve()
@@ -324,36 +324,36 @@ def load_topologies(args):
             with config_path.open('rb') as config_file, \
                     deserialization_context('In config "{}"'.format(config_path)):
 
-                top = yaml.safe_load(config_file)
+                model = yaml.safe_load(config_file)
 
                 for bad_key in ['name', 'subdirectory']:
-                    if bad_key in top:
+                    if bad_key in model:
                         raise DeserializationError('Unsupported key "{}"'.format(bad_key))
 
-                add_topology(Topology.deserialize(top, subdirectory.name, subdirectory))
+                add_model(Model.deserialize(model, subdirectory.name, subdirectory))
 
     else: # monolithic config
         print('########## Warning: the --config option is deprecated and will be removed in a future release',
             file=sys.stderr)
         with args.config.open('rb') as config_file, \
                 deserialization_context('In config "{}"'.format(args.config)):
-            for i, top in enumerate(yaml.safe_load(config_file)['topologies']):
-                with deserialization_context('In topology #{}'.format(i)):
-                    name = validate_string('"name"', top['name'])
+            for i, model in enumerate(yaml.safe_load(config_file)['topologies']):
+                with deserialization_context('In model #{}'.format(i)):
+                    name = validate_string('"name"', model['name'])
                     if not name: raise DeserializationError('"name": must not be empty')
 
-                with deserialization_context('In topology "{}"'.format(name)):
-                    subdirectory = validate_relative_path('"output"', top['output'])
+                with deserialization_context('In model "{}"'.format(name)):
+                    subdirectory = validate_relative_path('"output"', model['output'])
 
-                add_topology(Topology.deserialize(top, name, subdirectory))
+                add_model(Model.deserialize(model, name, subdirectory))
 
-    return topologies
+    return models
 
 # requires the --print_all, --all, --name and --list arguments to be in `args`
-def load_topologies_from_args(parser, args):
+def load_models_from_args(parser, args):
     if args.print_all:
-        for top in load_topologies(args):
-            print(top.name)
+        for model in load_models(args):
+            print(model.name)
         sys.exit()
 
     filter_args_count = sum([args.all, args.name is not None, args.list is not None])
@@ -364,10 +364,10 @@ def load_topologies_from_args(parser, args):
     if filter_args_count == 0:
         parser.error('one of "--print_all", "--all", "--name" or "--list" must be specified')
 
-    all_topologies = load_topologies(args)
+    all_models = load_models(args)
 
     if args.all:
-        return all_topologies
+        return all_models
     elif args.name is not None or args.list is not None:
         if args.name is not None:
             patterns = args.name.split(',')
@@ -382,16 +382,16 @@ def load_topologies_from_args(parser, args):
                     # For now, ignore any other tokens in the line.
                     # We might use them as additional parameters later.
 
-        topologies = collections.OrderedDict() # deduplicate topologies while preserving order
+        models = collections.OrderedDict() # deduplicate models while preserving order
 
         for pattern in patterns:
-            matching_topologies = [top for top in all_topologies
-                if fnmatch.fnmatchcase(top.name, pattern)]
+            matching_models = [model for model in all_models
+                if fnmatch.fnmatchcase(model.name, pattern)]
 
-            if not matching_topologies:
-                sys.exit('No matching topologies: "{}"'.format(pattern))
+            if not matching_models:
+                sys.exit('No matching models: "{}"'.format(pattern))
 
-            for top in matching_topologies:
-                topologies[top.name] = top
+            for model in matching_models:
+                models[model.name] = model
 
-        return list(topologies.values())
+        return list(models.values())
