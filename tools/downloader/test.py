@@ -94,9 +94,9 @@ os.remove(t.config)
 #
 # Test aliases
 #
-from topologies.intel import text_detection
+from topologies.intel import text_detection_0004
 
-t = text_detection('FP16')
+t = text_detection_0004('FP16')
 xmlPath, binPath = t.config, t.model
 
 for path, ref in zip([t.config, t.model],
