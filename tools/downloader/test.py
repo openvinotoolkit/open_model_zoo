@@ -3,7 +3,7 @@ import os
 #
 # Test paths from MO args
 #
-from topologies.public import ssd300
+from topologies import ssd300
 
 t = ssd300()
 xmlPath, binPath = t.getIR()
@@ -21,7 +21,7 @@ for path, name in zip ([t.model, t.config, xmlPath, binPath, xmlPath_fp16, binPa
 #
 # Check Intel models
 #
-from topologies.intel import vehicle_license_plate_detection_barrier_0106
+from topologies import vehicle_license_plate_detection_barrier_0106
 
 t = vehicle_license_plate_detection_barrier_0106('FP16')
 xmlPath, binPath = t.config, t.model
@@ -44,7 +44,7 @@ os.remove(binPath)
 # Test inference with OpenCV
 #
 import cv2 as cv
-from topologies.public import mobilenet_ssd
+from topologies import mobilenet_ssd
 
 def iou(a, b):
     def inter_area(box1, box2):
@@ -94,7 +94,7 @@ os.remove(t.config)
 #
 # Test aliases
 #
-from topologies.intel import text_detection_0004
+from topologies import text_detection_0004
 
 t = text_detection_0004('FP16')
 xmlPath, binPath = t.config, t.model

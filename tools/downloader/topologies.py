@@ -20,72 +20,50 @@ else:  # Standalone
 _precision_marker = '$precision'
 _cache = Path(os.getenv('OPENCV_OPEN_MODEL_ZOO_CACHE_DIR', 'models')).resolve()
 
-# Parse topologies.
-for _module_name in os.listdir(_models_dir):
-    _models_subdir = _models_dir / _module_name
-    if not _models_subdir.is_dir():
-        continue
 
-    _module = types.ModuleType(_module_name)
-    sys.modules['topologies.' + _module_name] = _module
-    globals()[_module_name] = _module
-    _module.__dict__['sys'] = sys
-    _module.__dict__['os'] = os
+class _args: config = None
+for _topology in common.load_topologies(_args):
+    _name = _topology.name.replace('-', '_').replace('.', '_')
+    _files = _topology.files
+    _download_dir = _cache / _topology.subdirectory
+    _mo_args = {}
+    if _topology.mo_args:
+        for _arg in _topology.mo_args:
+            _tokens = _arg.split('=')
+            _mo_args[_tokens[0]] = _tokens[1] if len(_tokens) == 2 else None
 
-    for _topology_name in os.listdir(_models_subdir):
-        _config = _models_subdir / _topology_name / 'model.yml'
-        if not _config.exists():
-            continue
+    # Rsolve weights and text files names.
+    assert(len(_files) > 0)
 
-        with open(_config, 'rt') as _f:
-            _topology = yaml.safe_load(_f)
-            _name = _topology_name.replace('-', '_').replace('.', '_')
-            _description = _topology['description']
-            _license = _topology['license']
-            _files = _topology['files']
-            _framework = _topology['framework']
-            _task_type = _topology['task_type']
-            _config_path = ''
-            _model_path = ''
-            _download_dir = _cache / _module_name / _topology_name
-            _mo_args = {}
-            if 'model_optimizer_args' in _topology:
-                for _arg in _topology['model_optimizer_args']:
-                    _tokens = _arg.split('=')
-                    _mo_args[_tokens[0]] = _tokens[1] if len(_tokens) == 2 else None
+    _config_path = str(_files[0].name)
+    _model_path = str(_files[-1].name)
+
+    if len(_files) > 2:
+        assert(_topology.framework == 'dldt'), ('Unexpected framework type: ' + _framework)
+        # Get only basename and add precision marker
+        _pos = _config_path.find('/')
+        if _config_path[:_pos] in common.KNOWN_PRECISIONS:
+            _config_path = _precision_marker / _config_path[_pos:]
+
+        _pos = _model_path.find('/')
+        if _model_path[:_pos] in common.KNOWN_PRECISIONS:
+            _model_path = _precision_marker / _model_path[_pos:]
+
+    # To manage origin files location from archives
+    if '--input_model' in _mo_args:
+        _model_path = _mo_args['--input_model'].replace('$dl_dir/', '')
+        _config_path = ''  # If there is a text file - we will set it next
+
+    for key in ['--input_proto', '--input_symbol']:
+        if key in _mo_args:
+            _config_path = _mo_args[key].replace('$dl_dir/', '')
+
+    _model_path = (_download_dir / _model_path).resolve()
+    if _config_path:
+        _config_path = (_download_dir / _config_path).resolve()
 
 
-            assert(len(_files) > 0)
-            if len(_files) > 2:
-                assert(_framework == 'dldt'), ('Unexpected framework type: ' + _framework)
-                # Get only basename and add precision marker
-                _config_path = _files[0]['name']
-                _model_path = _files[1]['name']
-
-                _pos = _config_path.find('/')
-                if _config_path[:_pos] in common.KNOWN_PRECISIONS:
-                    _config_path = _precision_marker + _config_path[_pos:]
-
-                _pos = _model_path.find('/')
-                if _model_path[:_pos] in common.KNOWN_PRECISIONS:
-                    _model_path = _precision_marker + _model_path[_pos:]
-
-            else:
-                _config_path = _files[0]['name']
-                _model_path = _files[-1]['name']
-
-            # To manage origin files location from archives
-            if '--input_model' in _mo_args:
-                _model_path = _mo_args['--input_model'].replace('$dl_dir/', '')
-            if '--input_proto' in _mo_args:
-                _config_path = _mo_args['--input_proto'].replace('$dl_dir/', '')
-
-            if _config_path:
-                _config_path = (_download_dir / _config_path).resolve()
-            if _model_path:
-                _model_path = (_download_dir / _model_path).resolve()
-
-            exec("""
+    exec("""
 class {className}:
     '''
     {description}
@@ -127,7 +105,7 @@ class {className}:
         if self.framework == 'dldt':
             return self.config, self.model
 
-        prefix = os.path.join('{outdir}', '{module}', '{name}', precision, '{name}')
+        prefix = os.path.join('{outdir}', '{name}', precision, '{name}')
         xmlPath = prefix + '.xml'
         binPath = prefix + '.bin'
         if os.path.exists(xmlPath) and os.path.exists(binPath):
@@ -207,12 +185,14 @@ class {className}:
         xmlPath, binPath = self.getIR()
         return IENetwork(xmlPath, binPath)
 
-            """.format(className=_name, description=_description, license=_license,
-                       name=_topology_name, outdir=str(_cache).replace('\\', '\\\\'),
+            """.format(className=_name, description=_topology.description,
+                       license=_topology.license_url,
+                       name=_topology.name,
+                       outdir=str(_cache).replace('\\', '\\\\'),
                        config=str(_config_path).replace('\\', '\\\\'),
                        model=str(_model_path).replace('\\', '\\\\'),
-                       framework=_framework, module=_module_name,
+                       framework=_topology.framework,
                        downloader=str(_downloader).replace('\\', '\\\\'),
-                       precisionMarker=_precision_marker, task_type=_task_type,
-                       mo_args=_mo_args),
-            _module.__dict__)
+                       precisionMarker=_precision_marker,
+                       task_type=_topology.task_type,
+                       mo_args=_mo_args))
