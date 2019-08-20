@@ -193,14 +193,14 @@ def positive_int_arg(value_str):
 
     raise argparse.ArgumentTypeError('must be a positive integer (got {!r})'.format(value_str))
 
-parser = DownloaderArgumentParser(epilog = 'list_topologies.yml - default configuration file')
+parser = DownloaderArgumentParser()
 parser.add_argument('-c', '--config', type = Path, metavar = 'CONFIG.YML',
     help = 'topology configuration file (deprecated)')
 parser.add_argument('--name', metavar = 'PAT[,PAT...]',
     help = 'download only topologies whose names match at least one of the specified patterns')
 parser.add_argument('--list', type = Path, metavar = 'FILE.LST',
     help = 'download only topologies whose names match at least one of the patterns in the specified file')
-parser.add_argument('--all',  action = 'store_true', help = 'download all topologies from the configuration file')
+parser.add_argument('--all',  action = 'store_true', help = 'download all available topologies')
 parser.add_argument('--print_all', action = 'store_true', help = 'print all available topologies')
 parser.add_argument('-o', '--output_dir', type = Path, metavar = 'DIR',
     default = Path.cwd(), help = 'path where to save topologies')

@@ -93,7 +93,7 @@ def main():
         help='convert only topologies whose names match at least one of the specified patterns')
     parser.add_argument('--list', type=Path, metavar='FILE.LST',
         help='convert only topologies whose names match at least one of the patterns in the specified file')
-    parser.add_argument('--all', action='store_true', help='convert all topologies from the configuration file')
+    parser.add_argument('--all', action='store_true', help='convert all available topologies')
     parser.add_argument('--print_all', action='store_true', help='print all available topologies')
     parser.add_argument('--precisions', metavar='PREC[,PREC...]',
         help='run only conversions that produce models with the specified precisions')
