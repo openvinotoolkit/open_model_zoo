@@ -3,26 +3,18 @@ import os
 import re
 import yaml
 import types
+import argparse
 
 from pathlib import Path
 
 import common
 
-if 'INTEL_OPENVINO_DIR' in os.environ:  # As a part of OpenVINO
-    _loc = Path(os.environ['INTEL_OPENVINO_DIR']) / 'deployment_tools' / 'open_model_zoo'
-    _models_dir = _loc / 'models'
-    _downloader = _loc / 'tools' / 'downloader' / 'downloader.py'
-else:  # Standalone
-    _loc = Path(__file__).parent
-    _models_dir = _loc / '../../models'
-    _downloader = _loc / 'downloader.py'
-
+_downloader = Path(__file__).parent / 'downloader.py'
 _precision_marker = '$precision'
 _cache = Path(os.getenv('OPENCV_OPEN_MODEL_ZOO_CACHE_DIR', 'models')).resolve()
 
 
-class _args: config = None
-for _topology in common.load_topologies(_args):
+for _topology in common.load_topologies(argparse.Namespace(config=None)):
     _name = _topology.name.replace('-', '_').replace('.', '_')
     _files = _topology.files
     _download_dir = _cache / _topology.subdirectory
@@ -32,31 +24,31 @@ for _topology in common.load_topologies(_args):
             _tokens = _arg.split('=')
             _mo_args[_tokens[0]] = _tokens[1] if len(_tokens) == 2 else None
 
-    # Rsolve weights and text files names.
+    # Resolve weights and text files names.
     assert(len(_files) > 0)
-
-    _config_path = str(_files[0].name)
-    _model_path = str(_files[-1].name)
 
     if len(_files) > 2:
         assert(_topology.framework == 'dldt'), ('Unexpected framework type: ' + _framework)
-        # Get only basename and add precision marker
-        _pos = _config_path.find('/')
-        if _config_path[:_pos] in common.KNOWN_PRECISIONS:
-            _config_path = _precision_marker / _config_path[_pos:]
 
-        _pos = _model_path.find('/')
-        if _model_path[:_pos] in common.KNOWN_PRECISIONS:
-            _model_path = _precision_marker / _model_path[_pos:]
+        _paths = []
+        for i in range(2):
+            # Get only basename and add precision marker
+            _path = str(_files[i].name)
+            _pos = _path.find('/')
+            if _path[:_pos] in common.KNOWN_PRECISIONS:
+                _path = _precision_marker + _path[_pos:]
+            _paths.append(_path)
 
-    # To manage origin files location from archives
-    if '--input_model' in _mo_args:
-        _model_path = _mo_args['--input_model'].replace('$dl_dir/', '')
-        _config_path = ''  # If there is a text file - we will set it next
+        _config_path, _model_path = _paths
+    else:
+        # Get paths from Model Optimizer arguments
+        if '--input_model' in _mo_args:
+            _model_path = _mo_args['--input_model'].replace('$dl_dir/', '')
+            _config_path = ''  # If there is a text file - we will set it next
 
-    for key in ['--input_proto', '--input_symbol']:
-        if key in _mo_args:
-            _config_path = _mo_args[key].replace('$dl_dir/', '')
+        for key in ['--input_proto', '--input_symbol']:
+            if key in _mo_args:
+                _config_path = _mo_args[key].replace('$dl_dir/', '')
 
     _model_path = (_download_dir / _model_path).resolve()
     if _config_path:
@@ -105,13 +97,13 @@ class {className}:
         if self.framework == 'dldt':
             return self.config, self.model
 
-        prefix = os.path.join('{outdir}', '{name}', precision, '{name}')
+        prefix = os.path.join('{subdir}', precision, '{name}')
         xmlPath = prefix + '.xml'
         binPath = prefix + '.bin'
         if os.path.exists(xmlPath) and os.path.exists(binPath):
             return xmlPath, binPath
 
-        sys.argv = ['', '--name={name}', '--precisions=' + precision]
+        sys.argv = ['', '--name={name}', '--precisions=' + precision, '--download_dir={outdir}']
         from converter import main
         main()
 
@@ -189,6 +181,7 @@ class {className}:
                        license=_topology.license_url,
                        name=_topology.name,
                        outdir=str(_cache).replace('\\', '\\\\'),
+                       subdir=str(_download_dir),
                        config=str(_config_path).replace('\\', '\\\\'),
                        model=str(_model_path).replace('\\', '\\\\'),
                        framework=_topology.framework,
