@@ -211,7 +211,6 @@ def main():
         evaluator = evaluator_class.from_configs(config_entry)
         processing_info = evaluator.get_processing_info(config_entry)
         print_processing_info(*processing_info)
-        evaluator.reset_progress(progress_reporter)
         evaluator.process_dataset(args.stored_predictions, progress_reporter=progress_reporter)
         evaluator.compute_metrics(ignore_results_formatting=args.ignore_result_formatting)
         evaluator.release()

@@ -14,23 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+
+# base class for custom evaluators
 class BaseEvaluator:
+    # create class instance using config
     @classmethod
     def from_configs(cls, config):
         return cls()
 
+    # extract information related to evaluation from config
     @staticmethod
     def get_processing_info(config):
         return config['name'], 'framework', 'device', None, 'dataset_name'
 
+    # determine cycle for dataset processing
     def process_dataset(self, *args, **kwargs):
         raise NotImplementedError
 
+    # finalize and get metrics results
     def compute_metrics(self, print_results=True, output_callback=None, ignore_results_formatting=False):
         raise NotImplementedError
 
+    # destruction for entity, which can not be deleted automatically
     def release(self):
         pass
 
+    # reset progress for metrics calculation
     def reset(self):
         raise NotImplementedError
