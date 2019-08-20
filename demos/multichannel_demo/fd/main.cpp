@@ -56,7 +56,7 @@ void showUsage() {
     std::cout << "    -d \"<device>\"                " << target_device_message << std::endl;
     std::cout << "    -nc                          " << num_cameras << std::endl;
     std::cout << "    -bs                          " << batch_size << std::endl;
-    std::cout << "    -nireq                        " << num_infer_requests << std::endl;
+    std::cout << "    -nireq                       " << num_infer_requests << std::endl;
     std::cout << "    -n_iqs                       " << input_queue_size << std::endl;
     std::cout << "    -fps_sp                      " << fps_sampling_period << std::endl;
     std::cout << "    -n_sp                        " << num_sampling_periods << std::endl;
