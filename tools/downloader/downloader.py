@@ -33,8 +33,6 @@ import common
 
 CHUNK_SIZE = 1 << 15 if sys.stdout.isatty() else 1 << 20
 
-failed_topologies = set()
-
 def process_download(chunk_iterable, size, file):
     start_time = time.monotonic()
     progress_size = 0
@@ -82,7 +80,6 @@ def try_download(name, file, num_attempts, start_download):
         except (requests.exceptions.RequestException, ssl.SSLError) as e:
             print(e)
 
-    failed_topologies.add(name)
     return False
 
 def verify_hash(file, expected_hash, path, top_name):
@@ -96,7 +93,6 @@ def verify_hash(file, expected_hash, path, top_name):
         print('########## Error: Hash mismatch for "{}" ##########'.format(path))
         print('##########     Expected: {}'.format(expected_hash))
         print('##########     Actual:   {}'.format(actual_hash.hexdigest()))
-        failed_topologies.add(top_name)
         return False
     return True
 
@@ -166,17 +162,21 @@ def try_retrieve(name, destination, expected_hash, cache, num_attempts, start_do
     destination.parent.mkdir(parents=True, exist_ok=True)
 
     if try_retrieve_from_cache(cache, [[expected_hash, destination]]):
-        return
+        return True
 
     print('========= Downloading {}'.format(destination))
+
+    success = False
 
     with destination.open('w+b') as f:
         if try_download(name, f, num_attempts, start_download):
             f.seek(0)
             if verify_hash(f, expected_hash, destination, name):
                 try_update_cache(cache, expected_hash, destination)
+                success = True
 
     print('')
+    return success
 
 class DownloaderArgumentParser(argparse.ArgumentParser):
     def error(self, message):
@@ -214,6 +214,8 @@ def main():
     cache = NullCache() if args.cache_dir is None else DirCache(args.cache_dir)
     topologies = common.load_topologies_from_args(parser, args)
 
+    failed_topologies = set()
+
     print('')
     print('###############|| Downloading topologies ||###############')
     print('')
@@ -225,11 +227,10 @@ def main():
             for top_file in top.files:
                 destination = output / top_file.name
 
-                try_retrieve(top.name, destination, top_file.sha256, cache, args.num_attempts,
-                    lambda: top_file.source.start_download(session, CHUNK_SIZE, top_file.size))
-
-                if top.name in failed_topologies:
+                if not try_retrieve(top.name, destination, top_file.sha256, cache, args.num_attempts,
+                        lambda: top_file.source.start_download(session, CHUNK_SIZE, top_file.size)):
                     shutil.rmtree(str(output))
+                    failed_topologies.add(top.name)
                     break
 
     print('')
