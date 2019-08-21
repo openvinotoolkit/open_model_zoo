@@ -101,7 +101,7 @@ class FileSourceHttp(FileSource):
 
     @classmethod
     def deserialize(cls, source):
-        return FileSourceHttp(validate_string('"url"', source['url']))
+        return cls(validate_string('"url"', source['url']))
 
     def start_download(self, session, chunk_size, total_size=None):
         response = session.get(self.url, stream=True, timeout=DOWNLOAD_TIMEOUT)
@@ -122,7 +122,7 @@ class FileSourceGoogleDrive(FileSource):
 
     @classmethod
     def deserialize(cls, source):
-        return FileSourceGoogleDrive(validate_string('"id"', source['id']))
+        return cls(validate_string('"id"', source['id']))
 
     def start_download(self, session, chunk_size, total_size):
         URL = 'https://docs.google.com/uc?export=download'
@@ -178,7 +178,7 @@ class PostprocRegexReplace(Postproc):
 
     @classmethod
     def deserialize(cls, postproc):
-        return PostprocRegexReplace(
+        return cls(
             validate_relative_path('"file"', postproc['file']),
             re.compile(validate_string('"pattern"', postproc['pattern'])),
             validate_string('"replacement"', postproc['replacement']),
@@ -217,7 +217,7 @@ class PostprocUnpackArchive(Postproc):
 
     @classmethod
     def deserialize(cls, postproc):
-        return PostprocUnpackArchive(
+        return cls(
             validate_relative_path('"file"', postproc['file']),
             validate_string('"format"', postproc['format']),
         )
