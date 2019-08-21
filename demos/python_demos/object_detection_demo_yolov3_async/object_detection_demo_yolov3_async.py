@@ -126,6 +126,8 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
             if scale < threshold:
                 continue
             box_index = entry_index(params.side, params.coords, params.classes, n * side_square + i, 0)
+            # Network produces location predictions in absolute coordinates of feature maps.
+            # Scale it to relative coordinates.
             x = (col + predictions[box_index + 0 * side_square]) / params.side
             y = (row + predictions[box_index + 1 * side_square]) / params.side
             # Value for exp is very big number in some cases so following construction is using here
@@ -134,6 +136,7 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
                 h_exp = exp(predictions[box_index + 3 * side_square])
             except OverflowError:
                 continue
+            # Depends on topology we need to normalize sizes by feature maps (up to YOLOv3) or by input shape (YOLOv3)
             w = w_exp * params.anchors[2 * n] / (resized_image_w if params.isYoloV3 else params.side)
             h = h_exp * params.anchors[2 * n + 1] / (resized_image_h if params.isYoloV3 else params.side)
             for j in range(params.classes):
