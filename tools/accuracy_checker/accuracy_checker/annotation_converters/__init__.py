@@ -35,6 +35,7 @@ from .cifar10 import Cifar10FormatConverter
 from .mnist import MNISTCSVFormatConverter
 from .wmt import WMTConverter
 from .common_semantic_segmentation import CommonSegmentationConverter
+from .cvat_attributes_recognition import CVATForAttributesRecognition
 
 __all__ = [
     'BaseFormatConverter',
@@ -63,5 +64,6 @@ __all__ = [
     'Cifar10FormatConverter',
     'MNISTCSVFormatConverter',
     'WMTConverter',
-    'CommonSegmentationConverter'
+    'CommonSegmentationConverter',
+    'CVATForAttributesRecognition'
 ]
