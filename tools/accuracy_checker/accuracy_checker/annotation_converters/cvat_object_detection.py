@@ -5,7 +5,7 @@ from ..utils import read_xml, check_file_existence
 from ..config import PathField, ConfigError, BoolField
 
 
-class CVATForObjectDetection(FileBasedAnnotationConverter):
+class CVATObjectDetectionConverter(FileBasedAnnotationConverter):
     __provider__ = 'cvat_object_detection'
     annotation_types = (DetectionAnnotation, )
     topology_types = (ObjectDetection, )
@@ -52,7 +52,7 @@ class CVATForObjectDetection(FileBasedAnnotationConverter):
                 labels_ids.append(label_to_id[bbox.attrib['label']])
                 x_mins.append(float(bbox.attrib['xtl']))
                 y_mins.append(float(bbox.attrib['ytl']))
-                x_maxs.append(float(bbox.attrib['xbr'])),
+                x_maxs.append(float(bbox.attrib['xbr']))
                 y_maxs.append(float(bbox.attrib['ybr']))
                 if 'occluded' in bbox.attrib and int(bbox.attrib['occluded']):
                     difficult.append(bbox_id)
