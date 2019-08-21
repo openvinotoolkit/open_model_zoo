@@ -5,7 +5,7 @@ from ..utils import read_xml, check_file_existence
 from ..config import StringField, PathField, ConfigError
 
 
-class CVATForAttributesRecognition(FileBasedAnnotationConverter):
+class CVATAttributesRecognitionConverter(FileBasedAnnotationConverter):
     __provider__ = 'cvat_attributes_recognition'
     annotation_types = (ClassificationAnnotation, )
     topology_types = (ImageClassification, )
