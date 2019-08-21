@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import argparse
+import concurrent.futures
 import os
 import platform
 import re
@@ -22,6 +23,7 @@ import shlex
 import string
 import subprocess
 import sys
+import threading
 
 from pathlib import Path
 
@@ -38,17 +40,46 @@ if platform.system() == 'Windows':
 else:
     quote_arg = shlex.quote
 
+def prefixed_printf(prefix, format, *args, **kwargs):
+    if prefix is None:
+        print(format.format(*args), **kwargs)
+    else:
+        print(prefix + ': ' + format.format(*args), **kwargs)
 
-def convert_to_onnx(topology, output_dir, args):
+def prefixed_subprocess(prefix, args):
+    if prefix is None:
+        return subprocess.run(args).returncode == 0
+
+    with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            universal_newlines=True) as p:
+        for line in p.stdout:
+            sys.stdout.write(prefix + ': ' + line)
+        return p.wait() == 0
+
+def convert_to_onnx(topology, output_dir, args, stdout_prefix):
     pytorch_converter = Path(__file__).absolute().parent / 'pytorch_to_onnx.py'
-    print('========= {}Converting {} to ONNX'.format('(DRY RUN) ' if args.dry_run else '', topology.name))
+    prefixed_printf(stdout_prefix, '========= {}Converting {} to ONNX',
+        '(DRY RUN) ' if args.dry_run else '', topology.name)
+
     pytorch_to_onnx_args = [string.Template(arg).substitute(conv_dir=output_dir / topology.subdirectory,
                                                             dl_dir=args.download_dir / topology.subdirectory)
                             for arg in topology.pytorch_to_onnx_args]
     cmd = [str(args.python), str(pytorch_converter), *pytorch_to_onnx_args]
-    print('Conversion to ONNX command:', ' '.join(map(quote_arg, cmd)))
-    return subprocess.run(cmd).returncode if not args.dry_run else 0
+    prefixed_printf(stdout_prefix, 'Conversion to ONNX command: {}', ' '.join(map(quote_arg, cmd)))
 
+    return True if args.dry_run else prefixed_subprocess(stdout_prefix, cmd)
+
+def num_jobs_arg(value_str):
+    if value_str == 'auto':
+        return os.cpu_count() or 1
+
+    try:
+        value = int(value_str)
+        if value > 0: return value
+    except ValueError:
+        pass
+
+    raise argparse.ArgumentTypeError('must be a positive integer or "auto" (got {!r})'.format(value_str))
 
 def main():
     parser = argparse.ArgumentParser()
@@ -72,6 +103,8 @@ def main():
         help='Model Optimizer entry point script')
     parser.add_argument('--dry-run', action='store_true',
         help='Print the conversion commands without running them')
+    parser.add_argument('-j', '--jobs', type=num_jobs_arg, default=1,
+        help='number of conversions to run concurrently')
     args = parser.parse_args()
 
     mo_path = args.mo
@@ -94,26 +127,27 @@ def main():
 
     output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
-    failed_topologies = set()
+    def convert(top, do_prefix_stdout=True):
+        stdout_prefix = None
+        if do_prefix_stdout:
+            stdout_prefix = threading.current_thread().name
 
-    for top in topologies:
         if top.mo_args is None:
-            print('========= Skipping {} (no conversions defined)'.format(top.name))
-            print()
-            continue
+            prefixed_printf(stdout_prefix, '========= Skipping {} (no conversions defined)', top.name)
+            prefixed_printf(stdout_prefix, '')
+            return True
 
         top_precisions = requested_precisions & top.precisions
         if not top_precisions:
-            print('========= Skipping {} (all conversions skipped)'.format(top.name))
-            print()
-            continue
+            prefixed_printf(stdout_prefix, '========= Skipping {} (all conversions skipped)', top.name)
+            prefixed_printf(stdout_prefix, '')
+            return True
 
         top_format = top.framework
 
         if top.pytorch_to_onnx_args:
-            if convert_to_onnx(top, output_dir, args) != 0:
-                failed_topologies.add(top.name)
-                continue
+            if not convert_to_onnx(top, output_dir, args, stdout_prefix):
+                return False
             top_format = 'onnx'
 
         expanded_mo_args = [
@@ -130,18 +164,28 @@ def main():
                 '--model_name={}'.format(top.name),
                 *expanded_mo_args]
 
-            print('========= {}Converting {} to IR ({})'.format(
-                '(DRY RUN) ' if args.dry_run else '', top.name, top_precision))
+            prefixed_printf(stdout_prefix, '========= {}Converting {} to IR ({})',
+                '(DRY RUN) ' if args.dry_run else '', top.name, top_precision)
 
-            print('Conversion command:', ' '.join(map(quote_arg, mo_cmd)))
+            prefixed_printf(stdout_prefix, 'Conversion command: {}', ' '.join(map(quote_arg, mo_cmd)))
 
             if not args.dry_run:
-                print(flush=True)
+                prefixed_printf(stdout_prefix, '', flush=True)
 
-                if subprocess.run(mo_cmd).returncode != 0:
-                    failed_topologies.add(top.name)
+                if not prefixed_subprocess(stdout_prefix, mo_cmd):
+                    return False
 
-            print()
+            prefixed_printf(stdout_prefix, '')
+
+        return True
+
+    if args.jobs == 1 or args.dry_run:
+        results = [convert(top, do_prefix_stdout=False) for top in topologies]
+    else:
+        with concurrent.futures.ThreadPoolExecutor(args.jobs) as executor:
+            results = list(executor.map(convert, topologies))
+
+    failed_topologies = [top.name for top, successful in zip(topologies, results) if not successful]
 
     if failed_topologies:
         print('FAILED:')

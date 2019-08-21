@@ -158,3 +158,6 @@ Accuracy Checker supports following list of annotation converters and specific f
 * `cvat_object_detection` - converts [CVAT XML annotation version 1.1](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `DetectionAnnotation`.
   * `annotation_file` - path to xml file in appropriate format.
   * `has_background` - allows prepend original labels with special class represented background and convert dataset for n+1 classes instead n (default value is True).
+* `cvat_attributes_recognition` - converts [CVAT XML annotation version 1.1](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `ClassificationAnnotation` or `ContainerAnnotation` with `ClassificationAnnotation` as value type and attribute names as keys (in multiple attributes case). Used bbox attributes as annotation classes.
+  * `annotation_file` - path to xml file in appropriate format.
+  * `label` - the dataset label which will be used for attributes collection (e.g. if your dataset contains 2 labels: `face` and `person` and you want recognise attributes for face, you should use `face` as vale for this parameter).

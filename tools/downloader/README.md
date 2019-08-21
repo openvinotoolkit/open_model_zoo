@@ -140,6 +140,17 @@ use the `-p`/`--python` option:
 ./converter.py --all --python my/python
 ```
 
+The script can run multiple conversion commands concurrently. To enable this,
+use the `-j`/`--jobs` option:
+
+```sh
+./converter.py --all -j8 # run up to 8 commands at a time
+```
+
+The argument to the option must be either a maximum number of concurrently
+executed commands, or "auto", in which case the number of CPUs in the system is used.
+By default, all commands are run sequentially.
+
 The script can print the conversion commands without actually running them.
 To do this, use the `--dry-run` option:
 
