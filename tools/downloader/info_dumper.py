@@ -42,7 +42,7 @@ def main():
         help='only dump info for topologies whose names match at least one of the specified patterns')
     parser.add_argument('--list', type=Path, metavar='FILE.LST',
         help='only dump info for topologies whose names match at least one of the patterns in the specified file')
-    parser.add_argument('--all', action='store_true', help='dump info for all topologies from the configuration file')
+    parser.add_argument('--all', action='store_true', help='dump info for all available topologies')
     parser.add_argument('--print_all', action='store_true', help='print all available topologies')
     args = parser.parse_args()
 

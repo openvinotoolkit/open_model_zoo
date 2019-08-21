@@ -30,12 +30,9 @@ class CVATAttributesRecognitionConverter(FileBasedAnnotationConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotation = read_xml(self.annotation_file)
         meta = annotation.find('meta')
-        size = int(meta.find('size').text)
-        label = [label for label in meta.iter('label') if label.find('name').text == self.label]
-        if not label:
-            raise ConfigError('{} does not present in annotation')
-        label = label[0]
+        size = int(meta.find('task').find('size').text)
         attribute_values_mapping = {}
+        label = self.select_label(meta)
         for attribute in label.iter('attribute'):
             label_to_id = {
                 label: idx for idx, label in enumerate(attribute.find('values').text.split('\n'))
@@ -83,3 +80,9 @@ class CVATAttributesRecognitionConverter(FileBasedAnnotationConverter):
             meta['{}_label_map'.format(key)] = {value: key for key, value in reversed_label_map.items()}
 
         return meta
+
+    def select_label(self, meta):
+        label = [label for label in meta.iter('label') if label.find('name').text == self.label]
+        if not label:
+            raise ConfigError('{} does not present in annotation'.format(self.label))
+        return label[0]
