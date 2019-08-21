@@ -13,9 +13,9 @@ the "Barrier" use case.
 
 | Metric                          | Value                                      |
 |---------------------------------|--------------------------------------------|
-| Mean Average Precision (mAP)    | 98.62%                                     |
-| AP vehicles                     | 98.03%                                     |
-| AP plates                       | 99.21%                                     |
+| Mean Average Precision (mAP)    | 99.65%                                     |
+| AP vehicles                     | 99.88%                                     |
+| AP plates                       | 99.42%                                     |
 | Car pose                        | Front facing cars                          |
 | Min plate width                 | 96 pixels                                  |
 | Max objects to detect           | 200                                        |
