@@ -9,14 +9,12 @@ from pathlib import Path
 
 import common
 
-_downloader = Path(__file__).parent / 'downloader.py'
 _precision_marker = '$precision'
-_cache = Path(os.getenv('OPENCV_OPEN_MODEL_ZOO_CACHE_DIR', 'models')).resolve()
+_cache = Path(os.getenv('OPENCV_OPEN_MODEL_ZOO_CACHE_DIR', Path('.').resolve() / 'models'))
 
 
-for _topology in common.load_topologies(argparse.Namespace(config=None)):
+for _topology in common.load_models(argparse.Namespace(config=None)):
     _name = _topology.name.replace('-', '_').replace('.', '_')
-    _files = _topology.files
     _download_dir = _cache / _topology.subdirectory
     _mo_args = {}
     if _topology.mo_args:
@@ -25,21 +23,19 @@ for _topology in common.load_topologies(argparse.Namespace(config=None)):
             _mo_args[_tokens[0]] = _tokens[1] if len(_tokens) == 2 else None
 
     # Resolve weights and text files names.
-    assert(len(_files) > 0)
-
-    if len(_files) > 2:
-        assert(_topology.framework == 'dldt'), ('Unexpected framework type: ' + _framework)
-
+    if _topology.framework == 'dldt':
+        assert(len(_topology.files) >= 2), 'Expected to have at least two files in IR format'
         _paths = []
+        # DLDT topologies usually come with multiple precision configuration files.
         for i in range(2):
             # Get only basename and add precision marker
-            _path = str(_files[i].name)
+            _path = str(_topology.files[i].name)
             _pos = _path.find('/')
             if _path[:_pos] in common.KNOWN_PRECISIONS:
                 _path = _precision_marker + _path[_pos:]
             _paths.append(_path)
 
-        _config_path, _model_path = _paths
+        _config_path, _model_path = _paths if _paths[0].endswith('.xml') else _paths[::-1]
     else:
         # Get paths from Model Optimizer arguments
         if '--input_model' in _mo_args:
@@ -50,9 +46,9 @@ for _topology in common.load_topologies(argparse.Namespace(config=None)):
             if key in _mo_args:
                 _config_path = _mo_args[key].replace('$dl_dir/', '')
 
-    _model_path = (_download_dir / _model_path).resolve()
+    _model_path = _download_dir / _model_path
     if _config_path:
-        _config_path = (_download_dir / _config_path).resolve()
+        _config_path = _download_dir / _config_path
 
 
     exec("""
@@ -80,7 +76,8 @@ class {className}:
         if not os.path.exists(self.config) or not os.path.exists(self.model):
             sys.argv = ['', '--name={name}', '--output_dir={outdir}',
                         '--precisions=' + precision]
-            exec(open('{downloader}').read(), globals())
+            from downloader import main
+            main()
 
 
     def getIR(self, precision='FP32'):
@@ -185,7 +182,6 @@ class {className}:
                        config=str(_config_path).replace('\\', '\\\\'),
                        model=str(_model_path).replace('\\', '\\\\'),
                        framework=_topology.framework,
-                       downloader=str(_downloader).replace('\\', '\\\\'),
                        precisionMarker=_precision_marker,
                        task_type=_topology.task_type,
                        mo_args=_mo_args))
