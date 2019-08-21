@@ -26,11 +26,6 @@
 
 using namespace InferenceEngine;
 
-template <typename T>
-T clip(const T& n, const T& lower, const T& upper) {
-  return std::max(lower, std::min(n, upper));
-}
-
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
     slog::info << "Parsing input parameters" << slog::endl;
@@ -51,6 +46,37 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     }
 
     return true;
+}
+
+
+template <typename T>
+void matToBlob(const cv::Mat& orig_image, InferenceEngine::Blob::Ptr& blob, int batchIndex = 0) {
+    InferenceEngine::SizeVector blobSize = blob->getTensorDesc().getDims();
+    const size_t width = blobSize[3];
+    const size_t height = blobSize[2];
+    const size_t channels = blobSize[1];
+
+    T* blob_data = blob->buffer().as<T*>();
+    int batchOffset = batchIndex * width * height * channels;
+
+    if (channels == 1) {
+        for (size_t  h = 0; h < height; h++) {
+            for (size_t w = 0; w < width; w++) {
+                blob_data[batchOffset + h * width + w] = orig_image.at<uchar>(h, w);
+            }
+        }
+    } else if (channels == 3) {
+        for (size_t c = 0; c < channels; c++) {
+            for (size_t  h = 0; h < height; h++) {
+                for (size_t w = 0; w < width; w++) {
+                    blob_data[batchOffset + c * width * height + h * width + w] =
+                            orig_image.at<cv::Vec3b>(h, w)[c];
+                }
+            }
+        }
+    } else {
+        slog::err << "Unsupported number of channels" << slog::endl;
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -129,7 +155,7 @@ int main(int argc, char *argv[]) {
         /** Collect images**/
         std::vector<cv::Mat> inputImages;
         for (const auto &i : imageNames) {
-            cv::Mat img = cv::imread(i);
+            cv::Mat img = cv::imread(i, -1);
             if (img.empty()) {
                 slog::warn << "Image " + i + " cannot be read!" << slog::endl;
                 continue;
@@ -139,10 +165,15 @@ int main(int argc, char *argv[]) {
             auto lrInputInfoItem = inputInfo[lrInputBlobName];
             int w = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[3]);
             int h = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[2]);
+            int c = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[1]);
 
             if (w != img.cols || h != img.rows) {
                 slog::warn << "Size of the image " << i << " is not equal to WxH = " << w << "x" << h << slog::endl;
                 continue;
+            }
+            if (c != img.channels()) {
+              slog::warn << "Number of channels of the image " << i << " is not equal to " << c <<slog::endl;
+              continue;
             }
 
             inputImages.push_back(img);
@@ -187,7 +218,7 @@ int main(int argc, char *argv[]) {
         Blob::Ptr lrInputBlob = inferRequest.GetBlob(lrInputBlobName);
         for (size_t i = 0; i < inputImages.size(); ++i) {
             cv::Mat img = inputImages[i];
-            matU8ToBlob<float_t>(img, lrInputBlob, i);
+            matToBlob<float_t>(img, lrInputBlob, i);
 
             bool twoInputs = inputInfo.size() == 2;
             if (twoInputs) {
@@ -200,7 +231,7 @@ int main(int argc, char *argv[]) {
                 cv::Mat resized;
                 cv::resize(img, resized, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
 
-                matU8ToBlob<float_t>(resized, bicInputBlob, i);
+                matToBlob<float_t>(resized, bicInputBlob, i);
             }
         }
         // -----------------------------------------------------------------------------------------------------
@@ -229,9 +260,19 @@ int main(int argc, char *argv[]) {
         slog::info << "Output size [N,C,H,W]: " << numOfImages << ", " << numOfChannels << ", " << h << ", " << w << slog::endl;
 
         for (size_t i = 0; i < numOfImages; ++i) {
-            std::vector<cv::Mat> imgPlanes{cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels])),
-                                           cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels + nunOfPixels])),
-                                           cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels + nunOfPixels * 2]))};
+            std::vector<cv::Mat> imgPlanes;
+            if (numOfChannels == 3) {
+                imgPlanes = std::vector<cv::Mat>{
+                      cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels])),
+                      cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels + nunOfPixels])),
+                      cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels + nunOfPixels * 2]))};
+            } else {
+                imgPlanes = std::vector<cv::Mat>{cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels]))};
+
+                // Post-processing for text-image-super-resolution models
+                cv::threshold(imgPlanes[0], imgPlanes[0], 0.5f, 1.0f, cv::THRESH_BINARY);
+            };
+
             for (auto & img : imgPlanes)
                 img.convertTo(img, CV_8UC1, 255);
 
