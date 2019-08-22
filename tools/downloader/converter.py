@@ -101,6 +101,8 @@ def main():
         help='Python executable to run Model Optimizer with')
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
         help='Model Optimizer entry point script')
+    parser.add_argument('--add-mo-arg', dest='extra_mo_args', metavar='ARG', action='append',
+        help='Extra argument to pass to Model Optimizer')
     parser.add_argument('--dry-run', action='store_true',
         help='Print the conversion commands without running them')
     parser.add_argument('-j', '--jobs', type=num_jobs_arg, default=1,
@@ -114,6 +116,8 @@ def main():
         except KeyError:
             sys.exit('Unable to locate Model Optimizer. '
                 + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
+
+    extra_mo_args = args.extra_mo_args or []
 
     if args.precisions is None:
         requested_precisions = common.KNOWN_PRECISIONS
@@ -162,7 +166,7 @@ def main():
                 '--data_type={}'.format(model_precision),
                 '--output_dir={}'.format(output_dir / model.subdirectory / model_precision),
                 '--model_name={}'.format(model.name),
-                *expanded_mo_args]
+                *expanded_mo_args, *extra_mo_args]
 
             prefixed_printf(stdout_prefix, '========= {}Converting {} to IR ({})',
                 '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)

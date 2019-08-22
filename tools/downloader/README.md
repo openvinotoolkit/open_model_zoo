@@ -132,6 +132,14 @@ script. You can override this heuristic with the `--mo` option:
 ./converter.py --all --mo my/openvino/path/model_optimizer/mo.py
 ```
 
+You can add extra Model Optimizer arguments to the ones specified in the model
+configuration by using the `--add-mo-arg` option. The option can be repeated
+to add multiple arguments:
+
+```sh
+./converter.py --name=caffenet --add-mo-arg=--reverse_input_channels --add-mo-arg=--silent
+```
+
 By default, the script will run Model Optimizer using the same Python executable
 that was used to run the script itself. To use a different Python executable,
 use the `-p`/`--python` option:
