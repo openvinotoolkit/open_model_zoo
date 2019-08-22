@@ -27,6 +27,11 @@ class LauncherConfigValidator(ConfigValidator):
         self.delayed_model_loading = delayed_model_loading
 
     def validate(self, entry, field_uri=None):
+        if self.delayed_model_loading:
+            if 'model' in self.fields:
+                self.fields['model'].optional = True
+            if 'weights' in self.fields:
+                self.fields['weights'].optional = True
         super().validate(entry, field_uri)
         inputs = entry.get('inputs')
         count_non_const_inputs = 0
@@ -186,4 +191,4 @@ def create_launcher(launcher_config, delayed_model_loading=False):
     launcher_config_validator.validate(launcher_config)
     config_framework = launcher_config['framework']
 
-    return Launcher.provide(config_framework, launcher_config)
+    return Launcher.provide(config_framework, launcher_config, delayed_model_loading=delayed_model_loading)

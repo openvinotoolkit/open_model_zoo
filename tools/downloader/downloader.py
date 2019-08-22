@@ -82,7 +82,7 @@ def try_download(name, file, num_attempts, start_download):
 
     return False
 
-def verify_hash(file, expected_hash, path, top_name):
+def verify_hash(file, expected_hash, path, model_name):
     actual_hash = hashlib.sha256()
     while True:
         chunk = file.read(1 << 20)
@@ -196,15 +196,15 @@ def positive_int_arg(value_str):
 def main():
     parser = DownloaderArgumentParser()
     parser.add_argument('-c', '--config', type=Path, metavar='CONFIG.YML',
-        help='topology configuration file (deprecated)')
+        help='model configuration file (deprecated)')
     parser.add_argument('--name', metavar='PAT[,PAT...]',
-        help='download only topologies whose names match at least one of the specified patterns')
+        help='download only models whose names match at least one of the specified patterns')
     parser.add_argument('--list', type=Path, metavar='FILE.LST',
-        help='download only topologies whose names match at least one of the patterns in the specified file')
-    parser.add_argument('--all',  action='store_true', help='download all available topologies')
-    parser.add_argument('--print_all', action='store_true', help='print all available topologies')
+        help='download only models whose names match at least one of the patterns in the specified file')
+    parser.add_argument('--all',  action='store_true', help='download all available models')
+    parser.add_argument('--print_all', action='store_true', help='print all available models')
     parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',
-        default=Path.cwd(), help='path where to save topologies')
+        default=Path.cwd(), help='path where to save models')
     parser.add_argument('--cache_dir', type=Path, metavar='DIR',
         help='directory to use as a cache for downloaded files')
     parser.add_argument('--num_attempts', type=positive_int_arg, metavar='N', default=1,
@@ -212,41 +212,41 @@ def main():
 
     args = parser.parse_args()
     cache = NullCache() if args.cache_dir is None else DirCache(args.cache_dir)
-    topologies = common.load_topologies_from_args(parser, args)
+    models = common.load_models_from_args(parser, args)
 
-    failed_topologies = set()
+    failed_models = set()
 
     print('')
-    print('###############|| Downloading topologies ||###############')
+    print('###############|| Downloading models ||###############')
     print('')
     with requests.Session() as session:
-        for top in topologies:
-            output = args.output_dir / top.subdirectory
+        for model in models:
+            output = args.output_dir / model.subdirectory
             output.mkdir(parents=True, exist_ok=True)
 
-            for top_file in top.files:
-                destination = output / top_file.name
+            for model_file in model.files:
+                destination = output / model_file.name
 
-                if not try_retrieve(top.name, destination, top_file.sha256, cache, args.num_attempts,
-                        lambda: top_file.source.start_download(session, CHUNK_SIZE, top_file.size)):
+                if not try_retrieve(model.name, destination, model_file.sha256, cache, args.num_attempts,
+                        lambda: model_file.source.start_download(session, CHUNK_SIZE, model_file.size)):
                     shutil.rmtree(str(output))
-                    failed_topologies.add(top.name)
+                    failed_models.add(model.name)
                     break
 
     print('')
     print('###############|| Post processing ||###############')
     print('')
-    for top in topologies:
-        if top.name in failed_topologies: continue
+    for model in models:
+        if model.name in failed_models: continue
 
-        output = args.output_dir / top.subdirectory
+        output = args.output_dir / model.subdirectory
 
-        for postproc in top.postprocessing:
+        for postproc in model.postprocessing:
             postproc.apply(output)
 
-    if failed_topologies:
+    if failed_models:
         print('FAILED:')
-        print(*sorted(failed_topologies), sep='\n')
+        print(*sorted(failed_models), sep='\n')
         sys.exit(1)
 
 if __name__ == '__main__':
