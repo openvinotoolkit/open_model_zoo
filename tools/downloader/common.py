@@ -290,17 +290,24 @@ class Model:
 
                 mo_args = None
 
-                def file_precision(file):
-                    if len(file.name.parts) < 2:
+                files_per_precision = {}
+
+                for file in files:
+                    if len(file.name.parts) != 2:
                         raise DeserializationError('Can\'t derive precision from file name {!r}'.format(file.name))
                     p = file.name.parts[0]
                     if p not in KNOWN_PRECISIONS:
                         raise DeserializationError(
                             'Unknown precision {!r} derived from file name {!r}, expected one of {!r}'.format(
                                 p, file.name, KNOWN_PRECISIONS))
-                    return p
+                    files_per_precision.setdefault(p, set()).add(file.name.parts[1])
 
-                precisions = set(map(file_precision, files))
+                for precision, precision_files in files_per_precision.items():
+                    for ext in ['xml', 'bin']:
+                        if (name + '.' + ext) not in precision_files:
+                            raise DeserializationError('No {} file for precision "{}"'.format(ext.upper(), precision))
+
+                precisions = set(files_per_precision.keys())
 
             description = validate_string('"description"', model['description'])
 
