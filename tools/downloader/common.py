@@ -47,14 +47,17 @@ RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
 RE_SHA256SUM = re.compile(r'[0-9a-fA-F]{64}')
 
 class DeserializationError(Exception):
-    pass
+    def __init__(self, problem, contexts=()):
+        super().__init__(': '.join(contexts + (problem,)))
+        self.problem = problem
+        self.contexts = contexts
 
 @contextlib.contextmanager
-def deserialization_context(message):
+def deserialization_context(context):
     try:
         yield None
     except DeserializationError as exc:
-        raise DeserializationError('{}: {}'.format(message, exc)) from exc
+        raise DeserializationError(exc.problem, (context,) + exc.contexts) from exc
 
 def validate_string(context, value):
     if not isinstance(value, str):
@@ -364,10 +367,21 @@ def load_models(args):
 
     return models
 
+def load_models_or_die(args):
+    try:
+        return load_models(args)
+    except DeserializationError as e:
+        indent = '    '
+
+        for i, context in enumerate(e.contexts):
+            print(indent * i + context + ':', file=sys.stderr)
+        print(indent * len(e.contexts) + e.problem, file=sys.stderr)
+        sys.exit(1)
+
 # requires the --print_all, --all, --name and --list arguments to be in `args`
 def load_models_from_args(parser, args):
     if args.print_all:
-        for model in load_models(args):
+        for model in load_models_or_die(args):
             print(model.name)
         sys.exit()
 
@@ -379,7 +393,7 @@ def load_models_from_args(parser, args):
     if filter_args_count == 0:
         parser.error('one of "--print_all", "--all", "--name" or "--list" must be specified')
 
-    all_models = load_models(args)
+    all_models = load_models_or_die(args)
 
     if args.all:
         return all_models
