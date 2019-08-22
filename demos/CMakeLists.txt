@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 2.8.12)
 
 project(Demos)
 
@@ -179,7 +179,7 @@ macro(ie_add_sample)
     target_include_directories(${IE_SAMPLE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../common")
 
     if(TARGET IE::ie_cpu_extension)
-        target_link_libraries(${IE_SAMPLE_NAME} IE::ie_cpu_extension)
+        target_link_libraries(${IE_SAMPLE_NAME} PRIVATE IE::ie_cpu_extension)
     endif()
 
     target_link_libraries(${IE_SAMPLE_NAME} PRIVATE ${OpenCV_LIBRARIES} ${InferenceEngine_LIBRARIES}
