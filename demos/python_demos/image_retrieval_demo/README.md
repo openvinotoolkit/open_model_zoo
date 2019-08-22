@@ -29,8 +29,9 @@ The demo workflow is the following:
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: main.py [-h] -m MODEL -i I -g GALLERY [-gt GROUND_TRUTH] [-d DEVICE]
-               [-l CPU_EXTENSION]
+usage: image_retrieval_demo.py [-h] -m MODEL -i I -g GALLERY
+                               [-gt GROUND_TRUTH] [-d DEVICE]
+                               [-l CPU_EXTENSION]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -60,7 +61,12 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 To run the demo, please provide paths to the model in the IR format, to a file with class labels, and to an input video, image, or folder with images:
 ```bash
-python main.py -m /home/user/image-retrieval-0001.xml -v /home/user/video.dav.mp4 -i /home/user/list.txt --ground_truth text_label
+python image_retrieval_demo.py \
+-m /home/user/image-retrieval-0001.xml \
+-v /home/user/video.dav.mp4 \
+-i /home/user/list.txt \
+-l /opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension_avx512.so \
+--ground_truth text_label
 ```
 
 ## Demo Output
