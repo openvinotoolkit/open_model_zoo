@@ -1,0 +1,35 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This model is an instance segmentation network for 80 classes of objects.
+  It is a Mask R-CNN with ResNeXt101-32x8 backbone, PANet feature refiner with
+  GroupNorm and DeformableConv operations and Adaptive Feature Pooling in all
+  ROI-wise heads.
+task_type: instance_segmentation
+files:
+  - name: FP32/instance-segmentation-security-0010.xml
+    sha256: 1824cfe7005b6523d488696a701ec6e55512c8eac2386c80dafc3e624ac0fecd
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/instance-segmentation-security-0010/FP32/instance-segmentation-security-0010.xml
+  - name: FP32/instance-segmentation-security-0010.bin
+    sha256: 1c4d3791f5c28cdb0e716ee02bf8ff41f61d45e6d3b8692c97a6540aa2bc5437
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/instance-segmentation-security-0010/FP32/instance-segmentation-security-0010.bin
+  - name: FP16/instance-segmentation-security-0010.xml
+    sha256: 9edd060c56cc9afd243bf2799ba5dd73b0a56232e437f6b940ec04a355093e23
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/instance-segmentation-security-0010/FP16/instance-segmentation-security-0010.xml
+  - name: FP16/instance-segmentation-security-0010.bin
+    sha256: 7aeb02fbe551607be9abb32a24e57c703bf992ee89138ce1b73644b56a3c7adb
+    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/instance-segmentation-security-0010/FP16/instance-segmentation-security-0010.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

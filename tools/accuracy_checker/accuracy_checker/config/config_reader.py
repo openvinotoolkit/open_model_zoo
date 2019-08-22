@@ -44,7 +44,7 @@ class ConfigReader:
         mode = ConfigReader._check_local_config(local_config)
         ConfigReader._prepare_global_configs(global_config)
 
-        config = ConfigReader._merge_configs(global_config, local_config, mode)
+        config = ConfigReader._merge_configs(global_config, local_config, arguments, mode)
 
         ConfigReader._provide_cmd_arguments(arguments, config, mode)
         ConfigReader._merge_paths_with_prefixes(arguments, config, mode)
@@ -87,7 +87,7 @@ class ConfigReader:
                     if entry in stage:
                         count += 1
                 return count
-            required_pipeline_entries = ['name', 'device_info', 'stages']
+            required_pipeline_entries = ['name', 'stages']
             pipelines = config['pipelines']
             if not pipelines:
                 raise ConfigError('Missed "{}" in local config'.format('pipelines'))
@@ -140,8 +140,8 @@ class ConfigReader:
             merge(dataset.get('postprocessing'), global_configs.get('postprocessing'), 'type')
 
     @staticmethod
-    def _merge_configs(global_configs, local_config, mode='models'):
-        def _merge_models_config(global_configs, local_config):
+    def _merge_configs(global_configs, local_config, arguments, mode='models'):
+        def _merge_models_config(global_configs, local_config, arguments):
             config = copy.deepcopy(local_config)
             if not global_configs:
                 return config
@@ -161,12 +161,14 @@ class ConfigReader:
 
             return config
 
-        def _merge_pipelines_config(global_config, local_config):
+        def _merge_pipelines_config(global_config, local_config, args):
             config = copy.deepcopy(local_config)
             pipelines = []
             raw_pipelines = local_config['pipelines']
             for pipeline in raw_pipelines:
-                device_infos = pipeline['device_info']
+                device_infos = pipeline.get('device_info', [])
+                if not device_infos:
+                    device_infos = [{'device': device} for device in args.target_devices]
                 per_device_pipelines = []
                 for device_info in device_infos:
                     copy_pipeline = copy.deepcopy(pipeline)
@@ -193,7 +195,7 @@ class ConfigReader:
             'pipelines': _merge_pipelines_config
         }
 
-        return functors_by_mode[mode](global_configs, local_config)
+        return functors_by_mode[mode](global_configs, local_config, arguments)
 
     @staticmethod
     def _merge_configs_by_identifier(global_config, local_config, identifier):
@@ -235,7 +237,7 @@ class ConfigReader:
                 'cpu_extensions': 'extensions',
                 'gpu_extensions': 'extensions',
                 'bitstream': 'bitstreams',
-                'affinity_map' : 'affinity_map'
+                'affinity_map': 'affinity_map'
             },
             'datasets': {
                 'segmentation_masks_source': 'source',
@@ -258,31 +260,50 @@ class ConfigReader:
                 if not argument in args or not args[argument]:
                     continue
 
+                if not args[argument].is_dir():
+                    raise ConfigError('argument: {} should be a directory'.format(argument))
                 value[field] = args[argument] / config_path
 
-        def create_command_line_for_conversion(config):
-            mapping = {}
-            value = 'source'
-            for key in config:
-                if key.endswith('file') or key.endswith('dir'):
-                    mapping[key] = value
-            return mapping
+        def process_config(
+                config_item, entries_paths, dataset_identifier='datasets',
+                launchers_idenitfier='launchers', identifers_mapping=None
+        ):
 
-        def process_config(config_item, entries_paths, dataset_identifier='datasets', identifers_mapping=None):
+            def process_dataset(datasets_configs):
+                if not isinstance(datasets_configs, list):
+                    datasets_configs = [datasets_configs]
+                for datasets_config in datasets_configs:
+                    annotation_conversion_config = datasets_config.get('annotation_conversion')
+                    if annotation_conversion_config:
+                        command_line_conversion = (create_command_line_mapping(annotation_conversion_config, 'source'))
+                        merge_entry_paths(command_line_conversion, annotation_conversion_config)
+                    if 'preprocessing' in datasets_config:
+                        for preprocessor in datasets_config['preprocessing']:
+                            command_line_preprocessing = (create_command_line_mapping(preprocessor, 'models'))
+                            merge_entry_paths(command_line_preprocessing, preprocessor)
+
+            def process_launchers(launchers_configs):
+                if not isinstance(launchers_configs, list):
+                    launchers_configs = [launchers_configs]
+
+                for launcher_config in launchers_configs:
+                    adapter_config = launcher_config.get('adapter')
+                    if not isinstance(adapter_config, dict):
+                        continue
+                    command_line_adapter = (create_command_line_mapping(adapter_config, 'models'))
+                    merge_entry_paths(command_line_adapter, adapter_config)
+
             for entry, command_line_arg in entries_paths.items():
                 entry_id = entry if not identifers_mapping else identifers_mapping[entry]
                 if entry_id not in config_item:
                     continue
 
                 if entry_id == dataset_identifier:
-                    datasets_configs = config_item[entry_id]
-                    if not isinstance(datasets_configs, list):
-                        datasets_configs = [datasets_configs]
-                    for datasets_config in datasets_configs:
-                        annotation_conversion_config = datasets_config.get('annotation_conversion')
-                        if annotation_conversion_config:
-                            command_line_conversion = (create_command_line_for_conversion(annotation_conversion_config))
-                            merge_entry_paths(command_line_conversion, annotation_conversion_config)
+                    process_dataset(config_item[entry_id])
+
+                if entry_id == launchers_idenitfier:
+                    launchers_configs = config_item[entry_id]
+                    process_launchers(launchers_configs)
 
                 config_entires = config_item[entry_id]
                 if not isinstance(config_entires, list):
@@ -299,7 +320,7 @@ class ConfigReader:
             entries_paths.update({'reader': {'data_source': 'source'}})
             for pipeline in config['pipelines']:
                 for stage in pipeline['stages']:
-                    process_config(stage, entries_paths, 'dataset', identifiers_mapping)
+                    process_config(stage, entries_paths, 'dataset', 'launcher', identifiers_mapping)
 
         functors_by_mode = {
             'models': process_models,
@@ -328,7 +349,7 @@ class ConfigReader:
             if models_prefix:
                 launcher_entry['_models_prefix'] = models_prefix
 
-            if not arguments.converted_models:
+            if 'converted_models' not in arguments or not arguments.converted_models:
                 return launcher_entry
 
             mo_params = launcher_entry.get('mo_params', {})
@@ -339,8 +360,22 @@ class ConfigReader:
 
             launcher_entry['mo_params'] = mo_params
 
-            if arguments.aocl:
+            if 'aocl' in arguments and arguments.aocl:
                 launcher_entry['_aocl'] = arguments.aocl
+
+            if 'bitstream' not in launcher_entry and 'bitstreams' in arguments and arguments.bitstreams:
+                if not arguments.bitstreams.is_dir():
+                    launcher_entry['bitstream'] = arguments.bitstreams
+
+            if 'cpu_extensions' not in launcher_entry and 'extensions' in arguments and arguments.extensions:
+                extensions = arguments.extensions
+                if not extensions.is_dir() or extensions.name == 'AUTO':
+                    launcher_entry['cpu_extensions'] = arguments.extensions
+
+            if 'affinity_map' not in launcher_entry and 'affinity_map' in arguments and arguments.affinity_map:
+                am = arguments.affinity_map
+                if not am.is_dir():
+                    launcher_entry['affinity_map'] = arguments.affinity_map
 
             return launcher_entry
 
@@ -390,14 +425,28 @@ class ConfigReader:
             return targets and launcher.get('device', '').lower() not in targets
 
         def filter_models(config, target_devices):
+            models_after_filtration = []
             for model in config['models']:
+                launchers_after_filtration = []
                 launchers = model['launchers']
-                launchers = [launcher for launcher in launchers if not filtered(launcher, target_devices)]
+                for launcher in launchers:
+                    if 'device' not in launcher and target_devices:
+                        for device in target_devices:
+                            launcher_with_device = copy.deepcopy(launcher)
+                            launcher_with_device['device'] = device
+                            if not filtered(launcher_with_device, target_devices):
+                                launchers_after_filtration.append(launcher_with_device)
+                    if not filtered(launcher, target_devices):
+                        launchers_after_filtration.append(launcher)
 
-                if not launchers:
+                if not launchers_after_filtration:
                     warnings.warn('Model "{}" has no launchers'.format(model['name']))
+                    continue
 
-                model['launchers'] = launchers
+                model['launchers'] = launchers_after_filtration
+                models_after_filtration.append(model)
+
+            config['models'] = models_after_filtration
 
         def filter_pipelines(config, target_devices):
             saved_pipelines = []
@@ -422,3 +471,12 @@ class ConfigReader:
         target_devices = to_lower_register(args.get('target_devices') or [])
         filtering_mode = functors_by_mode[mode]
         filtering_mode(config, target_devices)
+
+
+def create_command_line_mapping(config, value):
+    mapping = {}
+    for key in config:
+        if key.endswith('file') or key.endswith('dir'):
+            mapping[key] = value
+
+    return mapping

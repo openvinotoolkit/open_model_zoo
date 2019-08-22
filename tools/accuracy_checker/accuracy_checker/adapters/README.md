@@ -49,6 +49,10 @@ AccuracyChecker supports following set of adapters:
   * `confidence_threshold` - lower bound for valid boxes scores (optional, default 0.05).
   * `nms_threshold` - overlap threshold for NMS (optional, default 0.5).
   * `keep_top_k ` - maximal number of boxes which should be kept (optional, default 200).
+* `ssd_onnx` - converting output of SSD-based model from Pytorch with NonMaxSuppression layer.
+  * `labels_out` - name of output layer with labels or regular expression for it searching.
+  * `scores_out`- name of output layer with scores or regular expression for it searching.
+  * `bboxes_out` - name of output layer with bboxes or regular expression for it searching.
 * `tf_object_detection` - converting output of detection models from TensorFlow object detection API to `DetectionPrediction`.
   * `classes_out` - name of output layer with predicted classes.
   * `boxes_out` - name of output layer with predicted boxes coordinates in format [y0, x0, y1, x1].
@@ -82,9 +86,30 @@ AccuracyChecker supports following set of adapters:
 * `super_resolution` - converting output of single image super resolution network to `SuperResolutionPrediction`.
   * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
 * `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction`.
-* `text_detection` - converting output of model for text detection to `TextDetectionPrediction`.
+* `pixel_link_text_detection` - converting output of PixelLink like model for text detection to `TextDetectionPrediction`.
   * `pixel_class_out` - name of layer containing information related to text/no-text classification for each pixel.
   * `pixel_link_out` - name of layer containing information related to linkage between pixels and their neighbors.
+  * `pixel_class_confidence_threshold` - confidence threshold for valid segmentation mask (Optional, default 0.8).
+  * `pixel_link_confidence_threshold` - confidence threshold for valid pixel links (Optional, default 0.8).
+  * `min_area` - minimal area for valid text prediction (Optional, default 0).
+  * `min_height` - minimal height for valid text prediction (Optional, default 0).
+* `ctpn_text_detection` - converting output of CTPN like model for text detection to `TextDetectionPrediction`.
+  * `cls_prob_out` - name of output layer with class probabilities.
+  * `bbox_pred_out` - name of output layer with predicted boxes.
+  * `min_size` - minimal valid detected text proposals size (Optional, default 8).
+  * `min_ratio` - minimal width / height ratio for valid text line (Optional, default 0.5).
+  * `line_min_score` - minimal confidence for text line (Optional, default 0.9).
+  * `text_proposals_width` - minimal width for text proposal (Optional, default 16).
+  * `min_num_proposals` - minimal number for text proposals (Optional, default 2).
+  * `pre_nms_top_n` - saved top n proposals before NMS applying (Optional, default 12000).
+  * `post_nms_top_n` - saved top n proposals after NMS applying (Optional, default 1000).
+  * `nms_threshold` - overlap threshold for NMS (Optional, default 0.7).
+* `east_text_detection` - converting output of EAST like model for text detection to `TextDetectionPrediction`.
+  * `score_map_out` - the name of output layer which contains score map.
+  * `geometry_map_out` - the name of output layer which contains geometry map.
+  * `score_map_threshold` - threshold for score map (Optional, default 0.8).
+  * `nms_threshold` - threshold for text boxes NMS (Optional, default 0.2).
+  * `box_threshold` - minimal confidence threshold for text boxes (Optional, default 0.1).
 * `human_pose_estimation` - converting output of model for human pose estimation to `PoseEstimationPrediction`.
   * `part_affinity_fields_out` - name of output layer with keypoints pairwise relations (part affinity fields).
   * `keypoints_heatmap_out` - name of output layer with keypoints heatmaps.
@@ -95,3 +120,6 @@ AccuracyChecker supports following set of adapters:
 * `gaze_estimation` - converting output of gaze estimation model to `GazeVectorPrediction`.
 * `hit_ratio_adapter` - converting output NCF model to `HitRatioPrediction`.
 * `brain_tumor_segmentation` - converting output of brain tumor segmentation model to `BrainTumorSegmentationPrediction`.
+* `nmt` - converting output of neural machine translation model to `MachineTranslationPrediction`.
+  * `vocabulary_file` - file which contains vocabulary for encoding model predicted indexes to words (e. g. vocab.bpe.32000.de). Path can be prefixed with `--models` arguments.
+  * `eos_index` - index end of string symbol in vocabulary (Optional, used in cases when launcher does not support dynamic output shape for cut off empty prediction).

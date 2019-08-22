@@ -10,7 +10,7 @@ This demo executes four parallel infer requests for the Age/Gender Recognition, 
 * `emotions-recognition-retail-0003`, which is executed on top of the results of the first model and reports an emotion for each detected face
 * `facial-landmarks-35-adas-0002`, which is executed on top of the results of the first model and reports normed coordinates of estimated facial landmarks
 
-For more information about the pre-trained models, refer to the [model documentation](../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
 Other demo objectives are:
 
@@ -101,6 +101,14 @@ For example, to do inference on a GPU with the OpenVINO&trade; toolkit pre-train
 
 The demo uses OpenCV to display the resulting frame with detections (rendered as bounding boxes and labels, if provided).
 The demo reports total image throughput which includes frame decoding time, inference time, time to render bounding boxes and labels, and time to display the results.
+
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
+>* `age-gender-recognition-retail-0013`
+>* `emotions-recognition-retail-0003`
+>* `face-detection-adas-0001`
+>* `facial-landmarks-35-adas-0002`
+>* `head-pose-estimation-adas-0001`
+> Other models may produce unexpected results on these devices.
 
 ## See Also
 * [Using Open Model Zoo demos](../README.md)

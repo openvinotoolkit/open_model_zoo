@@ -22,33 +22,33 @@ from pathlib import Path
 
 import common
 
-def to_info(topology):
+def to_info(model):
     return {
-        'name': topology.name,
+        'name': model.name,
 
-        'description': topology.description,
-        'framework': topology.framework,
-        'license_url': topology.license_url,
-        'precisions': sorted(topology.precisions),
-        'subdirectory': str(topology.subdirectory),
-        'task_type': str(topology.task_type),
+        'description': model.description,
+        'framework': model.framework,
+        'license_url': model.license_url,
+        'precisions': sorted(model.precisions),
+        'subdirectory': str(model.subdirectory),
+        'task_type': str(model.task_type),
     }
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=Path, metavar='CONFIG.YML',
-        default=common.get_default_config_path(), help='topology configuration file')
+        help='model configuration file (deprecated)')
     parser.add_argument('--name', metavar='PAT[,PAT...]',
-        help='only dump info for topologies whose names match at least one of the specified patterns')
+        help='only dump info for models whose names match at least one of the specified patterns')
     parser.add_argument('--list', type=Path, metavar='FILE.LST',
-        help='only dump info for topologies whose names match at least one of the patterns in the specified file')
-    parser.add_argument('--all', action='store_true', help='dump info for all topologies from the configuration file')
-    parser.add_argument('--print_all', action='store_true', help='print all available topologies')
+        help='only dump info for models whose names match at least one of the patterns in the specified file')
+    parser.add_argument('--all', action='store_true', help='dump info for all available models')
+    parser.add_argument('--print_all', action='store_true', help='print all available models')
     args = parser.parse_args()
 
-    topologies = common.load_topologies_from_args(parser, args)
+    models = common.load_models_from_args(parser, args)
 
-    json.dump(list(map(to_info, topologies)), sys.stdout, indent=4)
+    json.dump(list(map(to_info, models)), sys.stdout, indent=4)
     print() # add a final newline
 
 if __name__ == '__main__':

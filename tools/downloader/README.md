@@ -2,7 +2,7 @@ Model Downloader and other automation tools
 ===========================================
 
 This directory contains scripts that automate certain model-related tasks
-based on the included configuration file.
+based on configuration files in the models' directories.
 
 * `downloader.py` (model downloader) downloads model files from online sources
   and, if necessary, patches them to make them more usable with Model
@@ -13,6 +13,10 @@ based on the included configuration file.
 
 * `info_dumper.py` (model information dumper) prints information about the models
   in a stable machine-readable format.
+
+Please use these tools instead of attempting to parse the configuration files
+directly. Their format is undocumented and may change in incompatible ways in
+future releases.
 
 Prerequisites
 -------------
@@ -27,6 +31,13 @@ python3 -mpip install --user -r ./requirements.in
 For the model converter, you will also need to install the OpenVINO&trade;
 toolkit and the prerequisite libraries for Model Optimizer. See the
 [OpenVINO toolkit documentation](https://docs.openvinotoolkit.org/) for details.
+
+If you using models from PyTorch framework, you will also need to use intermediate
+conversion to ONNX format. To use automatic conversion install additional dependencies:
+
+```sh
+python3 -mpip install --user -r ./requirements-pytorch.in 
+```
 
 Model downloader usage
 ----------------------
@@ -81,7 +92,8 @@ The basic usage is to run the script like this:
 ```
 
 This will convert all models into the Inference Engine IR format. Models that
-were originally in that format are ignored.
+were originally in that format are ignored. Models in PyTorch's format will be 
+converted in ONNX format first.
 
 The current directory must be the root of a download tree created by the model
 downloader. To specify a different download tree path, use the `-d`/`--download_dir`
@@ -97,9 +109,20 @@ into a different directory tree, use the `-o`/`--output_dir` option:
 ```sh
 ./converter.py --all --output_dir my/output/directory
 ```
+>Note: models in intermediate format are placed to this directory too.
 
 The `--all` option can be replaced with other filter options to convert only
 a subset of models. See the "Shared options" section.
+
+By default, the script will produce models in every precision that is supported
+for conversion. To only produce models in a specific precision, use the `--precisions`
+option:
+
+```sh
+./converter.py --all --precisions=FP16
+```
+
+If the specified precision is not supported for a model, that model will be skipped.
 
 The script will attempt to locate Model Optimizer using the environment
 variables set by the OpenVINO&trade; toolkit's `setupvars.sh`/`setupvars.bat`
@@ -116,6 +139,17 @@ use the `-p`/`--python` option:
 ```sh
 ./converter.py --all --python my/python
 ```
+
+The script can run multiple conversion commands concurrently. To enable this,
+use the `-j`/`--jobs` option:
+
+```sh
+./converter.py --all -j8 # run up to 8 commands at a time
+```
+
+The argument to the option must be either a maximum number of concurrently
+executed commands, or "auto", in which case the number of CPUs in the system is used.
+By default, all commands are run sequentially.
 
 The script can print the conversion commands without actually running them.
 To do this, use the `--dry-run` option:
@@ -149,7 +183,7 @@ describing a single model. Each such object has the following keys:
 * `description`: text describing the model. Paragraphs are separated by line feed characters.
 
 * `framework`: a string identifying the framework whose format the model is downloaded in.
-  Current possible values are `dldt` (Inference Engine IR), `caffe`, `mxnet` and `tf` (TensorFlow).
+  Current possible values are `dldt` (Inference Engine IR), `caffe`, `mxnet`, `pytorch` and `tf` (TensorFlow).
   Additional possible values might be added in the future.
 
 * `license_url`: an URL for the license that the model is distributed under.
@@ -231,32 +265,33 @@ configuration file and exit:
 
 ```
 $ ./TOOL.py --print_all
-Sphereface
 action-recognition-0001-decoder
 action-recognition-0001-encoder
 age-gender-recognition-retail-0013
-alexnet
-brain-tumor-segmentation-0001
-ctpn
-deeplabv3
-densenet-121
-densenet-121-tf
+driver-action-recognition-adas-0002-decoder
+driver-action-recognition-adas-0002-encoder
+emotions-recognition-retail-0003
+face-detection-adas-0001
+face-detection-adas-binary-0001
+face-detection-retail-0004
+face-detection-retail-0005
 [...]
 ```
 
 Either `--print_all` or one of the filter options must be specified.
 
-By default, the tools will get information about the models from the configuration
-file in the automation tool directory. You can use a custom configuration file
-instead with the `-c`/`--config` option:
+Deprecated options
+------------------
+
+In earlier releases, the tools used a single configuration file instead of
+per-model configuration files. For compatibility, loading such a file is still
+supported. However, this feature is deprecated and will be removed in a future release.
+
+To load a configuration file in the old format, use the `-c`/`--config` option:
 
 ```sh
 ./TOOL.py --all --config my-config.yml
 ```
-
-Note, however, that the configuration file format is currently undocumented and
-may change in incompatible ways in future versions.
-
 __________
 
 OpenVINO is a trademark of Intel Corporation or its subsidiaries in the U.S.

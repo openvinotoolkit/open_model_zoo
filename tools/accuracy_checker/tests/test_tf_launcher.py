@@ -72,4 +72,4 @@ class TestTFLauncherConfig:
 
     def test_unknown_output_name_in_create_tf_launcher_raises_config_error_exception(self, models_dir):
         with pytest.raises(ConfigError):
-            get_tf_test_model(models_dir, {'outputs_names': ['name']})
+            get_tf_test_model(models_dir, {'output_names': ['name']})

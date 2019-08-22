@@ -33,3 +33,6 @@ class CharacterRecognitionAccuracy(PerImageEvaluationMetric):
 
     def evaluate(self, annotations, predictions):
         return self.accuracy.evaluate()
+
+    def reset(self):
+        self.accuracy.reset()

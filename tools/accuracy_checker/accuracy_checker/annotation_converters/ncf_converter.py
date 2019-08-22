@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-
 from ..representation import HitRatioAnnotation
 from ..utils import read_txt, get_path
 from ..config import PathField, NumberField
 
 from .format_converter import BaseFormatConverter
+
 
 class MovieLensConverter(BaseFormatConverter):
     __provider__ = "movie_lens_converter"
@@ -43,11 +43,11 @@ class MovieLensConverter(BaseFormatConverter):
         self.negative_file = self.get_value_from_config('negative_file')
         self.users_max_number = self.get_value_from_config('users_max_number')
 
-    def convert(self):
+    def convert(self, check_content=False, **kwargs):
         annotations = []
         users = []
 
-        for file_row in read_txt(self.rating_file):
+        for file_row in enumerate(read_txt(self.rating_file)):
             user_id, item_id, _ = file_row.split()
             users.append(user_id)
             identifier = ['u:'+user_id, 'i:' + item_id]

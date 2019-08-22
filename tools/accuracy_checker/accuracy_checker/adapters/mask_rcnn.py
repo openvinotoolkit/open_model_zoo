@@ -17,17 +17,9 @@ limitations under the License.
 import cv2
 import numpy as np
 from .adapter import Adapter
-from ..config import ConfigValidator, StringField, ConfigError
+from ..config import StringField, ConfigError
 from ..representation import CoCocInstanceSegmentationPrediction, DetectionPrediction, ContainerPrediction
 from ..utils import contains_all
-
-class MaskRCNNAdapterConfig(ConfigValidator):
-    type = StringField()
-    classes_out = StringField(optional=True)
-    scores_out = StringField(optional=True)
-    boxes_out = StringField(optional=True)
-    detection_out = StringField(optional=True)
-    raw_masks_out = StringField()
 
 
 class MaskRCNNAdapter(Adapter):
@@ -71,12 +63,6 @@ class MaskRCNNAdapter(Adapter):
         })
 
         return parameters
-
-    def validate_config(self):
-        config_valiator = MaskRCNNAdapterConfig(
-            'MaskRCNN_adapter_config', MaskRCNNAdapterConfig.ERROR_ON_EXTRA_ARGUMENT
-        )
-        config_valiator.validate(self.launcher_config)
 
     def configure(self):
         box_outputs = ['classes_out', 'scores_out', 'boxes_out']

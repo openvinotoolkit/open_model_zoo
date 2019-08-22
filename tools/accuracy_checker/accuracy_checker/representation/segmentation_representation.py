@@ -30,6 +30,14 @@ class GTMaskLoader(Enum):
     NIFTI = 3
     NUMPY = 4
 
+LOADERS_MAPPING = {
+    'opencv': GTMaskLoader.OPENCV,
+    'pillow': GTMaskLoader.PILLOW,
+    'scipy': GTMaskLoader.SCIPY,
+    'nifty': GTMaskLoader.NIFTI,
+    'numpy': GTMaskLoader.NUMPY
+}
+
 
 class SegmentationRepresentation(BaseRepresentation):
     pass

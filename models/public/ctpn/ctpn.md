@@ -21,7 +21,7 @@ Detecting Text in Natural Image with Connectionist Text Proposal Network. For de
 
 ### Original Model
 
-Image, name: `image_tensor`, shape: [1x300x300x3], format: [BxHxWxC],
+Image, name: `image_tensor`, shape: [1x600x600x3], format: [BxHxWxC],
    where:
 
     - B - batch size
@@ -29,7 +29,7 @@ Image, name: `image_tensor`, shape: [1x300x300x3], format: [BxHxWxC],
     - W - image width
     - C - number of channels
 
-   Expected color order: RGB.
+   Expected color order: BGR.
    Mean values: [102.9801, 115.9465, 122.7717].
 
 ### Converted Model

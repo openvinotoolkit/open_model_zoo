@@ -18,10 +18,13 @@
 #include <gflags/gflags.h>
 #include <opencv2/opencv.hpp>
 
+#ifdef WITH_EXTENSIONS
 #include <ext_list.hpp>
+#endif
 #include <inference_engine.hpp>
 
 #include <samples/common.hpp>
+#include <samples/slog.hpp>
 
 #include "cnn.hpp"
 #include "image_grabber.hpp"
@@ -48,6 +51,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         showAvailableDevices();
         return false;
     }
+    slog::info << "Parsing input parameters" << slog::endl;
 
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
@@ -68,10 +72,10 @@ int clip(int x, int max_val) {
 
 int main(int argc, char *argv[]) {
     try {
-        // ----------------------------- Parsing and validating input arguments ------------------------------
-
         /** This demo covers one certain topology and cannot be generalized **/
+        std::cout << "InferenceEngine: " << GetInferenceEngineVersion() << std::endl;
 
+        // ----------------------------- Parsing and validating input arguments ------------------------------
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
@@ -90,6 +94,7 @@ int main(int argc, char *argv[]) {
 
         const double min_text_recognition_confidence = FLAGS_thr;
 
+        slog::info << "Loading Inference Engine" << slog::endl;
         Core ie;
 
         std::set<std::string> loadedDevices;
@@ -101,12 +106,14 @@ int main(int argc, char *argv[]) {
             if (loadedDevices.find(device) != loadedDevices.end())
                 continue;
 
-            std::cout << "Loading device " << device << std::endl;
+            slog::info << "Device info: " << slog::endl;
             std::cout << ie.GetVersions(device) << std::endl;
 
             /** Load extensions for the CPU device **/
             if ((device.find("CPU") != std::string::npos)) {
+#ifdef WITH_EXTENSIONS
                 ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
+#endif
 
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
@@ -129,6 +136,7 @@ int main(int argc, char *argv[]) {
         auto cls_conf_threshold = static_cast<float>(FLAGS_cls_pixel_thr);
         auto link_conf_threshold = static_cast<float>(FLAGS_link_pixel_thr);
 
+        slog::info << "Loading network files" << slog::endl;
         Cnn text_detection, text_recognition;
 
         if (!FLAGS_m_td.empty())
@@ -137,11 +145,14 @@ int main(int argc, char *argv[]) {
         if (!FLAGS_m_tr.empty())
             text_recognition.Init(FLAGS_m_tr, ie, FLAGS_d_tr);
 
+        slog::info << "Reading input" << slog::endl;
         std::unique_ptr<Grabber> grabber = Grabber::make_grabber(FLAGS_dt, FLAGS_i);
         int wait_time = (FLAGS_dt == "image" || FLAGS_dt == "list") ? 0 : 3;
 
         cv::Mat image;
         grabber->GrabNextImage(&image);
+
+        slog::info << "Starting inference" << slog::endl;
 
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
@@ -303,7 +314,11 @@ int main(int argc, char *argv[]) {
 
         // ---------------------------------------------------------------------------------------------------
     } catch (const std::exception & ex) {
-        std::cerr << ex.what() << std::endl;
+        slog::err << ex.what() << slog::endl;
+        return EXIT_FAILURE;
+    }
+    catch (...) {
+        slog::err << "Unknown/internal exception happened.\n";
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;

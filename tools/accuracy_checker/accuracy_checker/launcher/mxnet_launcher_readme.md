@@ -4,7 +4,7 @@ For enabling MxNet launcher you need to add `framework: mxnet` in launchers sect
 
 * `device` - specifies which device will be used for infer (`cpu`, `gpu_0` and so on).
 * `model`- path to params file specifying the numeric arrays used in the network.
-* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here][adapters].
+* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
 
 You also should specify all inputs for your model and provide their shapes, using specific parameter: `inputs`.
 Each input description should has following info:
@@ -30,5 +30,3 @@ launchers:
         shape: 3, 32, 32
     adapter: classification
 ```
-        
-[adapters]: ../adapters/README.md

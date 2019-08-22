@@ -92,7 +92,7 @@ class ActionDetection(Adapter):
         super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
 
     def configure(self):
-        self.new_net = self.get_value_from_config('multihead_net')
+        self.multihead = self.get_value_from_config('multihead_net')
         self.loc_out = self.get_value_from_config('loc_out')
         self.main_conf_out = self.get_value_from_config('main_conf_out')
         self.num_action_classes = self.get_value_from_config('num_action_classes')
@@ -101,7 +101,7 @@ class ActionDetection(Adapter):
         self.action_scale = self.get_value_from_config('action_scale')
         add_conf_out_prefix = self.get_value_from_config('add_conf_out_prefix')
 
-        if self.new_net:
+        if self.multihead:
             self.in_sizes = self.get_value_from_config('in_sizes')
             self.variance = self.get_value_from_config('variance')
             self.head_sizes = self.get_value_from_config('head_sizes')
@@ -137,10 +137,10 @@ class ActionDetection(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        prior_boxes = raw_outputs[self.priorbox_out][0][0].reshape(-1, 4) if not self.new_net else None
-        prior_variances = raw_outputs[self.priorbox_out][0][1].reshape(-1, 4) if not self.new_net else None
+        prior_boxes = raw_outputs[self.priorbox_out][0][0].reshape(-1, 4) if not self.multihead else None
+        prior_variances = raw_outputs[self.priorbox_out][0][1].reshape(-1, 4) if not self.multihead else None
 
-        head_shifts = self.estimate_head_shifts(raw_outputs, self. head_sizes, self.add_conf_outs, self.new_net)
+        head_shifts = self.estimate_head_shifts(raw_outputs, self. head_sizes, self.add_conf_outs, self.multihead)
 
         for batch_id, identifier in enumerate(identifiers):
             labels, class_scores, x_mins, y_mins, x_maxs, y_maxs, main_scores = self.prepare_detection_for_id(
@@ -165,7 +165,7 @@ class ActionDetection(Adapter):
         main_conf = raw_outputs[self.main_conf_out][batch_id].reshape(num_detections, -1)
 
         add_confs = [raw_outputs[layer][batch_id] for layer in self.add_conf_outs]
-        if self.new_net:
+        if self.multihead:
             spatial_sizes = [layer.shape[1:] for layer in add_confs]
             add_confs = [layer.reshape(self.num_action_classes, -1) for layer in add_confs]
         else:
@@ -185,13 +185,13 @@ class ActionDetection(Adapter):
 
             prior_box_data = self.generate_prior_box(
                 head_spatial_pos, self.head_scales[head_id], self.anchors[head_id][head_anchor_id],
-                self.in_sizes, spatial_sizes[glob_anchor_id]) if self.new_net else prior_boxes[index]
-            prior_variance_data = self.variance if self.new_net else prior_variances[index]
-            bbox_loc_data = locs[index][[1, 0, 3, 2]] if self.new_net else locs[index]
+                self.in_sizes, spatial_sizes[glob_anchor_id]) if self.multihead else prior_boxes[index]
+            prior_variance_data = self.variance if self.multihead else prior_variances[index]
+            bbox_loc_data = locs[index][[1, 0, 3, 2]] if self.multihead else locs[index]
             x_min, y_min, x_max, y_max = self.decode_box(prior_box_data, prior_variance_data, bbox_loc_data)
 
             add_confs_data = add_confs[glob_anchor_id]
-            action_confs = add_confs_data[:, head_spatial_pos] if self.new_net else add_confs_data[head_spatial_pos]
+            action_confs = add_confs_data[:, head_spatial_pos] if self.multihead else add_confs_data[head_spatial_pos]
             exp_action_confs = np.exp(self.action_scale * action_confs)
             sum_exp_conf = np.sum(exp_action_confs)
             action_label = np.argmax(action_confs)
@@ -230,15 +230,15 @@ class ActionDetection(Adapter):
         return decoded_xmin, decoded_ymin, decoded_xmax, decoded_ymax
 
     @staticmethod
-    def estimate_head_shifts(raw_outputs, head_sizes, add_conf_outs, new_net):
+    def estimate_head_shifts(raw_outputs, head_sizes, add_conf_outs, multihead_net):
         layer_id = 0
         head_shift = 0
         head_shifts = [0]
-        for head_id, _ in enumerate(head_sizes):
-            for _ in range(head_sizes[head_id]):
+        for head_size in head_sizes:
+            for _ in range(head_size):
                 layer = add_conf_outs[layer_id]
                 layer_shape = raw_outputs[layer][0].shape
-                layer_size = np.prod(layer_shape[1:]) if new_net else np.prod(layer_shape[:2])
+                layer_size = np.prod(layer_shape[1:]) if multihead_net else np.prod(layer_shape[:2])
                 head_shift += layer_size
                 layer_id += 1
 
@@ -264,9 +264,11 @@ class ActionDetection(Adapter):
         center_x = (col + 0.5) * step
         center_y = (row + 0.5) * step
 
-        normalized_bbox = [(center_x - 0.5 * anchor_width) / float(image_width),
-                           (center_y - 0.5 * anchor_height) / float(image_height),
-                           (center_x + 0.5 * anchor_width) / float(image_width),
-                           (center_y + 0.5 * anchor_height) / float(image_height)]
+        normalized_bbox = [
+            (center_x - 0.5 * anchor_width) / float(image_width),
+            (center_y - 0.5 * anchor_height) / float(image_height),
+            (center_x + 0.5 * anchor_width) / float(image_width),
+            (center_y + 0.5 * anchor_height) / float(image_height)
+        ]
 
         return normalized_bbox

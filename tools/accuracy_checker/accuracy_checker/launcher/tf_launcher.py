@@ -20,6 +20,7 @@ from .launcher import Launcher
 from ..config import BaseField, ListField, PathField, StringField, ConfigError, ConfigValidator
 
 
+
 class TFLauncher(Launcher):
     __provider__ = 'tf'
 
@@ -58,7 +59,7 @@ class TFLauncher(Launcher):
 
         self.device = '/{}:0'.format(self.get_value_from_config('device').lower())
 
-    def predict(self, inputs, metadata, *args, **kwargs):
+    def predict(self, inputs, metadata=None, **kwargs):
         """
         Args:
             inputs: dictionary where keys are input layers names and values are data for them.
@@ -76,6 +77,9 @@ class TFLauncher(Launcher):
                     result = session.run(self._outputs_tensors, feed_dict=feed_dictionary)
                     res = dict(zip(self._outputs_names, result))
                     results.append(res)
+            if metadata is not None:
+                for meta_ in metadata:
+                    meta_['input_shape'] = self.inputs_info_for_meta()
 
         return results
 
@@ -85,7 +89,7 @@ class TFLauncher(Launcher):
 
     @property
     def inputs(self):
-        graph_inputs = self._get_graph_inputs(self._graph)
+        graph_inputs = self._get_graph_inputs(self._graph, self.get_value_from_config('inputs'))
         return {
             node_name.split('import/')[-1]:
                 tuple(int(a.size) for a in node.attr['shape'].shape.dim) for node_name, node in graph_inputs.items()
@@ -113,9 +117,13 @@ class TFLauncher(Launcher):
         return graph
 
     @staticmethod
-    def _get_graph_inputs(graph):
+    def _get_graph_inputs(graph, config_inputs=None):
         inputs_ops = {'Placeholder'}
         inputs = [x for x in graph.as_graph_def().node if not x.input and x.op in inputs_ops]
+        if config_inputs:
+            config_inputs_names = ['import/{}'.format(layer['name']) for layer in config_inputs]
+            config_inputs = [x for x in graph.as_graph_def().node if x.name in config_inputs_names]
+            inputs.extend(config_inputs)
 
         return {node.name: node for node in inputs}
 

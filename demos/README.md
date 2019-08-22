@@ -31,9 +31,9 @@ To run the demo applications, you can use images and videos from the media files
 
 ## Demos that Support Pre-Trained Models
 
-> **NOTE:** Inference Engine MYRIAD and FPGA plugins are available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
+> **NOTE:** Inference Engine HDDL and FPGA plugins are available in [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution only.
 
-You can download the [pre-trained models](../intel_models/index.md) using the OpenVINO [Model Downloader](../tools/downloader/README.md) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
+You can download the [pre-trained models](../models/intel/index.md) using the OpenVINO [Model Downloader](../tools/downloader/README.md) or from [https://download.01.org/opencv/](https://download.01.org/opencv/).
 The table below shows the correlation between models, demos, and supported plugins. The plugins names are exactly as they are passed to the demos with `-d` option. The correlation between the plugins and supported devices see in the [Supported Devices](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_supported_plugins_Supported_Devices.html) section.
 
 > **NOTE:** **MYRIAD** below stands for Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ Vision Processing Units.
@@ -49,7 +49,7 @@ The table below shows the correlation between models, demos, and supported plugi
 | person-reidentification-retail-0076              | [Crossroad Camera Demo](./crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
 | person-reidentification-retail-0079              | [Crossroad Camera Demo](./crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
 | person-vehicle-bike-detection-crossroad-0078     | [Crossroad Camera Demo](./crossroad_camera_demo/README.md)                            | Supported | Supported | Supported   | Supported       |
-| human-pose-estimation-adas-0001                  | [Human Pose Estimation Demo](./human_pose_estimation_demo/README.md)                  | Supported | Supported | Supported   | Supported       |
+| human-pose-estimation-0001                       | [Human Pose Estimation Demo](./human_pose_estimation_demo/README.md)                  | Supported | Supported | Supported   | Supported       |
 | semantic-segmentation-adas-0001                  | [Image Segmentation Demo](./segmentation_demo/README.md)                              | Supported | Supported |             | Supported       |
 | instance-segmentation-security-0010              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported |           |             | Supported       |
 | instance-segmentation-security-0050              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported |           |             | Supported       |
@@ -73,6 +73,9 @@ The table below shows the correlation between models, demos, and supported plugi
 | text-detection-0003                              | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             | Supported       |
 | text-detection-0004                              | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             | Supported       |
 | text-recognition-0012                            | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             |                 |
+| gaze-estimation-adas-0002                        | [Gaze Estimation Demo](./gaze_estimation_demo/README.md)                              | Supported | Supported | Supported | Supported |
+| head-pose-estimation-adas-0001                   | [Gaze Estimation Demo](./gaze_estimation_demo/README.md)                              | Supported | Supported | Supported | Supported |
+| facial-landmarks-35-adas-0002                    | [Gaze Estimation Demo](./gaze_estimation_demo/README.md)                              | Supported | Supported | Supported | Supported |
 | pedestrian-and-vehicle-detector-adas-0001        | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
 | pedestrian-detection-adas-0002                   | any demo that supports SSD\*-based models, above                                                               | Supported | Supported | Supported   | Supported       |
 | pedestrian-detection-adas-binary-0001            | any demo that supports SSD\*-based models, above                                                               | Supported | Supported |             |                 |
