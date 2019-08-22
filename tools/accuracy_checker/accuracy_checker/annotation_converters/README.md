@@ -167,3 +167,5 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `annotation_file` - path to xml file in appropriate format.
 * `cvat_text_recognition` - converts  [CVAT XML annotation version 1.1](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to xml file in appropriate format.
+* `camvid` - converts CamVid dataset format to `SegmentationAnnotation`.
+  * `annotation_file` - file in txt format which contains list of validation pairs (`<path_to_image>` `<path_to_annotation>` separated by space).
