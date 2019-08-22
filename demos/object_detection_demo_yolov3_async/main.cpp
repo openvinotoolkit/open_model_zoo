@@ -20,7 +20,6 @@
 #include <iterator>
 
 #include <inference_engine.hpp>
-#include <ie_utils.hpp>
 
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
