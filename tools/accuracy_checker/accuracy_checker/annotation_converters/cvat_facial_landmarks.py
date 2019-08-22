@@ -22,7 +22,6 @@ class CVATFacialLandmarksRecognitionConverter(FileBasedAnnotationConverter):
 
     def configure(self):
         super().configure()
-        self.has_background = self.get_value_from_config('has_background')
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):

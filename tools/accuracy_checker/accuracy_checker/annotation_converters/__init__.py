@@ -39,6 +39,7 @@ from .cvat_object_detection import CVATObjectDetectionConverter
 from .cvat_attributes_recognition import CVATAttributesRecognitionConverter
 from .cvat_age_gender_recognition import CVATAgeGenderRecognitionConverter
 from .cvat_facial_landmarks import CVATFacialLandmarksRecognitionConverter
+from .cvat_text_recognition import CVATTextRecognitionConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -71,5 +72,6 @@ __all__ = [
     'CVATObjectDetectionConverter',
     'CVATAttributesRecognitionConverter',
     'CVATAgeGenderRecognitionConverter',
-    'CVATFacialLandmarksRecognitionConverter'
+    'CVATFacialLandmarksRecognitionConverter',
+    'CVATTextRecognitionConverter'
 ]
