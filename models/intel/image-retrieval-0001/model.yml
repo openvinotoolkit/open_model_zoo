@@ -13,20 +13,19 @@
 # limitations under the License.
 
 description: >-
-  `image-retrieval-0001` is an image retrieval model based on Mobilenet v2 as a backbone. The model produces l2-normalized embeddings with dimension equals to 256.
-task_type: "object_attributes"
+  `image-retrieval-0001` is an image retrieval model based on Mobilenet v2 as
+  a backbone. The model produces l2-normalized embeddings with dimension that
+  equals to 256.
+task_type: object_attributes
 files:
   - name: image-retrieval-0001.tar.gz
     sha256: e73255a04d6dd860c48168410f347ec96f85e52fba3aa93bbc17eaf72fe1e80f
     source: https://download.01.org/opencv/openvino_training_extensions/models/image_retrieval/image-retrieval-0001.tar.gz
-output: "Retail/image-retrieval-0001"
 postprocessing:
   - $type: unpack_archive
     format: gztar
     file: image-retrieval-0001.tar.gz
 model_optimizer_args:
-  - --framework=tf
-  - --data_type=FP32
   - --input_model=$dl_dir/model/frozen_graph.pb
-framework: "tf"
-license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
+framework: tf
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
