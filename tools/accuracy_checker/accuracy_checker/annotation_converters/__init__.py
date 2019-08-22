@@ -38,6 +38,7 @@ from .common_semantic_segmentation import CommonSegmentationConverter
 from .cvat_object_detection import CVATObjectDetectionConverter
 from .cvat_attributes_recognition import CVATAttributesRecognitionConverter
 from .cvat_age_gender_recognition import CVATAgeGenderRecognitionConverter
+from .cvat_facial_landmarks import CVATFacialLandmarksRecognitionConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -69,5 +70,6 @@ __all__ = [
     'CommonSegmentationConverter',
     'CVATObjectDetectionConverter',
     'CVATAttributesRecognitionConverter',
-    'CVATAgeGenderRecognitionConverter'
+    'CVATAgeGenderRecognitionConverter',
+    'CVATFacialLandmarksRecognitionConverter'
 ]
