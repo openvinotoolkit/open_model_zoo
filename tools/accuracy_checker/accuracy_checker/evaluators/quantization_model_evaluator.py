@@ -27,6 +27,7 @@ from ..adapters import create_adapter
 from ..config import ConfigError
 from ..data_readers import BaseReader
 from ..statistics_collector import StatisticsCollector
+from ..progress_reporters import ProgressReporter
 
 
 class ModelEvaluator:
@@ -90,7 +91,15 @@ class ModelEvaluator:
 
         return filled_inputs, batch_meta
 
-    def process_dataset_async(self, nreq=2, statistics_functors_maping=None, subset=None, num_images=None, **kwargs):
+    def process_dataset_async(
+            self,
+            nreq=2,
+            statistics_functors_maping=None,
+            subset=None,
+            num_images=None,
+            check_progress=False,
+            **kwargs
+    ):
         def _process_ready_predictions(batch_predictions, batch_identifiers, batch_meta, adapter):
             if self.stat_collector:
                 self.stat_collector.process_batch(batch_predictions)
@@ -99,12 +108,20 @@ class ModelEvaluator:
 
             return batch_predictions
 
+        def _create_subset(subset, num_images):
+            if subset is not None:
+                self.dataset.make_subset(ids=subset)
+            elif num_images is not None:
+                self.dataset.make_subset(end=num_images)
+
         self.dataset.batch = self.launcher.batch
         self.stat_collector = None
-        if subset is not None:
-            self.dataset.make_subset(ids=subset)
-        elif num_images is not None:
-            self.dataset.make_subset(end=num_images)
+        progress_reporter = None
+
+        _create_subset(subset, num_images)
+
+        if check_progress:
+            progress_reporter = ProgressReporter.provide('print', self.dataset.size)
 
         dataset_iterator = iter(enumerate(self.dataset))
         if self.launcher.num_requests != nreq:
@@ -123,7 +140,7 @@ class ModelEvaluator:
             ready_irs, queued_irs = self._wait_for_any(queued_irs)
             if ready_irs:
                 wait_time = 0.01
-                for _, batch_annotation, batch_meta, batch_identifiers, batch_predictions, ir in ready_irs:
+                for batch_id, batch_annotation, batch_meta, batch_identifiers, batch_predictions, ir in ready_irs:
                     batch_predictions = _process_ready_predictions(
                         batch_predictions, batch_identifiers, batch_meta, self.adapter
                     )
@@ -135,6 +152,9 @@ class ModelEvaluator:
 
                     self._annotations.extend(annotations)
                     self._predictions.extend(predictions)
+
+                    if progress_reporter:
+                        progress_reporter.update(batch_id, len(batch_predictions))
             else:
                 time.sleep(wait_time)
                 wait_time = max(wait_time * 2, .16)
@@ -142,17 +162,35 @@ class ModelEvaluator:
         if self.postprocessor.has_dataset_processors:
             self.metric_executor.update_metrics_on_batch(self._annotations, self._predictions)
 
+        if progress_reporter:
+            progress_reporter.finish()
+
         return self.postprocessor.process_dataset(self._annotations, self._predictions)
 
-    def process_dataset(self, statistics_functors_maping=None, subset=None, num_images=None, **kwargs):
+    def process_dataset(
+            self,
+            statistics_functors_maping=None,
+            subset=None,
+            num_images=None,
+            check_progress=False,
+            **kwargs
+    ):
         self.dataset.batch = self.launcher.batch
+        progress_reporter = None
+
         if statistics_functors_maping:
             self.stat_collector = StatisticsCollector(statistics_functors_maping)
+
         if subset is not None:
             self.dataset.make_subset(ids=subset)
+
         elif num_images is not None:
             self.dataset.make_subset(end=num_images)
-        for _, (batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
+
+        if check_progress:
+            progress_reporter = ProgressReporter.provide('print', self.dataset.size)
+
+        for batch_id, (batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta = self._get_batch_input(batch_inputs, batch_annotation)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
             if self.stat_collector:
@@ -168,8 +206,14 @@ class ModelEvaluator:
             self._annotations.extend(annotations)
             self._predictions.extend(predictions)
 
+            if progress_reporter:
+                progress_reporter.update(batch_id, len(batch_predictions))
+
         if self.postprocessor.has_dataset_processors and self.metric_executor:
             self.metric_executor.update_metrics_on_batch(self._annotations, self._predictions)
+
+        if progress_reporter:
+            progress_reporter.finish()
 
         return self.postprocessor.process_dataset(self._annotations, self._predictions)
 
