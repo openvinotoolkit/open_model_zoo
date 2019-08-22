@@ -165,3 +165,5 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `annotation_file` - path to xml file in appropriate format.
 * `cvat_facial_landmarks` - converts  [CVAT XML annotation version 1.1](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `FacialLandmarksAnnotation`.
   * `annotation_file` - path to xml file in appropriate format.
+* `cvat_text_recognition` - converts  [CVAT XML annotation version 1.1](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `CharacterRecognitionAnnotation`.
+  * `annotation_file` - path to xml file in appropriate format.
