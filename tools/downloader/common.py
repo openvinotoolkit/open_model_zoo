@@ -43,6 +43,7 @@ KNOWN_TASK_TYPES = {
     'semantic_segmentation',
 }
 
+RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
 RE_SHA256SUM = re.compile(r'[0-9a-fA-F]{64}')
 
 class DeserializationError(Exception):
@@ -251,6 +252,9 @@ class Model:
     @classmethod
     def deserialize(cls, model, name, subdirectory):
         with deserialization_context('In model "{}"'.format(name)):
+            if not RE_MODEL_NAME.fullmatch(name):
+                raise DeserializationError('Invalid name, must consist only of letters, digits or ._-')
+
             files = []
             file_names = set()
 
