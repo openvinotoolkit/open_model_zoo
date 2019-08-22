@@ -277,6 +277,7 @@ class Model:
                 pytorch_to_onnx_args = [validate_string('"pytorch_to_onnx" #{}'.format(i), arg)
                                         for i, arg in enumerate(model['pytorch_to_onnx'])]
 
+            framework = validate_string_enum('"framework"', model['framework'], KNOWN_FRAMEWORKS)
 
             if 'model_optimizer_args' in model:
                 mo_args = [validate_string('"model_optimizer_args" #{}'.format(i), arg)
@@ -284,6 +285,9 @@ class Model:
 
                 precisions = {'FP16', 'FP32'}
             else:
+                if framework != 'dldt':
+                    raise DeserializationError('Model not in IR format, but no conversions defined')
+
                 mo_args = None
 
                 def file_precision(file):
@@ -297,8 +301,6 @@ class Model:
                     return p
 
                 precisions = set(map(file_precision, files))
-
-            framework = validate_string_enum('"framework"', model['framework'], KNOWN_FRAMEWORKS)
 
             description = validate_string('"description"', model['description'])
 
