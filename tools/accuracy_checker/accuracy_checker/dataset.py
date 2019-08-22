@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import warnings
 from copy import deepcopy
 from pathlib import Path
+import warnings
 
 from .annotation_converters import BaseFormatConverter, save_annotation, make_subset, analyze_dataset
 from .config import ConfigValidator, StringField, PathField, ListField, DictField, BaseField, NumberField, ConfigError
-from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all
+from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata
 from .representation import BaseRepresentation
 from .data_readers import DataReaderField
 
@@ -166,8 +166,7 @@ class Dataset:
         meta = results.meta
         errors = results.content_check_errors
         if errors:
-            warnings.warn('Following problems were found during conversion:'
-                          '\n{}'.format('\n'.join(errors)))
+            warnings.warn('Following problems were found during conversion:\n{}'.format('\n'.join(errors)))
 
         return annotation, meta
 
@@ -184,3 +183,69 @@ def read_annotation(annotation_file: Path):
                 break
 
     return result
+
+
+class DatasetWrapper:
+    def __init__(self, data_reader, annotation_reader=None):
+        self.data_reader = data_reader
+        self.annotation_reader = annotation_reader
+        self._batch = 1
+        self.subset = None
+        if not annotation_reader:
+            self._identifiers = [file.name for file in self.data_reader.data_source.glob('*')]
+
+    def __getitem__(self, item):
+        if self.size <= item * self.batch:
+            raise IndexError
+        batch_annotation = []
+        if self.annotation_reader:
+            batch_annotation = self.annotation_reader[item]
+            batch_identifiers = [annotation.identifier for annotation in batch_annotation]
+            batch_input = [self.data_reader(identifier=identifier) for identifier in batch_identifiers]
+            for annotation, input_data in zip(batch_annotation, batch_input):
+                set_image_metadata(annotation, input_data)
+                annotation.metadata['data_source'] = self.data_reader.data_source
+            return batch_annotation, batch_input, batch_identifiers
+        batch_start = item * self.batch
+        batch_end = min(self.size, batch_start + self.batch)
+        if self.subset:
+            batch_identifiers = [self._identifiers[idx] for idx in self.subset[batch_start:batch_end]]
+        else:
+            batch_identifiers = self._identifiers[batch_start:batch_end]
+        batch_input = [self.data_reader(identifier=identifier) for identifier in batch_identifiers]
+
+        return batch_annotation, batch_input, batch_identifiers
+
+    def make_subset(self, ids=None, start=0, step=1, end=None):
+        if self.annotation_reader:
+            self.annotation_reader.make_subset(ids, start, step, end)
+        if ids:
+            self.subset = ids
+            return
+        if not end:
+            end = self.size
+        self.subset = range(start, end, step)
+
+    @property
+    def batch(self):
+        return self._batch
+
+    @batch.setter
+    def batch(self, batch):
+        if self.annotation_reader:
+            self.annotation_reader.batch = batch
+        self._batch = batch
+
+    def reset(self):
+        if self.subset:
+            self.subset = None
+        if self.annotation_reader:
+            self.annotation_reader.subset = None
+
+    @property
+    def size(self):
+        if self.annotation_reader:
+            return self.annotation_reader.size
+        if self.subset:
+            return len(self.subset)
+        return len(self._identifiers)
