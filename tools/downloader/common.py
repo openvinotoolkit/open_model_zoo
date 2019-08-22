@@ -43,6 +43,8 @@ KNOWN_TASK_TYPES = {
     'semantic_segmentation',
 }
 
+RE_SHA256SUM = re.compile(r'[0-9a-fA-F]{64}')
+
 class DeserializationError(Exception):
     pass
 
@@ -157,7 +159,7 @@ class ModelFile:
 
             sha256 = validate_string('"sha256"', file['sha256'])
 
-            if not re.fullmatch(r'[0-9a-fA-F]{64}', sha256):
+            if not RE_SHA256SUM.fullmatch(sha256):
                 raise DeserializationError(
                     '"sha256": got invalid hash {!r}'.format(sha256))
 
