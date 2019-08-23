@@ -36,7 +36,7 @@ class CVATTextRecognitionConverter(FileBasedAnnotationConverter):
             if check_content:
                 if not check_file_existence(self.images_dir / identifier):
                     content_errors.append('{}: does not exist'.format(self.images_dir / identifier))
-            for bbox_id, bbox in enumerate(image):
+            for bbox in image:
                 if 'label' not in bbox.attrib.keys() or bbox.attrib['label'] != target_label:
                     continue
                 bbox_rect = [

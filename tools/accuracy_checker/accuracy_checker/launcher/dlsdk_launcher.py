@@ -99,39 +99,8 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
             field_uri: id of launcher entry.
         """
         if not self.delayed_model_loading:
-            dlsdk_model_options = ['model', 'weights']
-            caffe_model_options = ['caffe_model', 'caffe_weights']
-            mxnet_model_options = ['mxnet_weights']
-            tf_model_options = ['tf_model']
-            tf_meta_options = ['tf_meta']
-            onnx_model_options = ['onnx_model']
-            kaldi_model_options = ['kaldi_model']
-
-            multiple_model_sources_err = (
-                'Either model and weights or caffe_model and caffe_weights '
-                'or mxnet_weights or tf_model or tf_meta should be specified.'
-            )
-            sources = {
-                FrameworkParameters('dlsdk', False): dlsdk_model_options,
-                FrameworkParameters('caffe', False): caffe_model_options,
-                FrameworkParameters('tf', False): tf_model_options,
-                FrameworkParameters('mxnet', False): mxnet_model_options,
-                FrameworkParameters('onnx', False): onnx_model_options,
-                FrameworkParameters('kaldi', False): kaldi_model_options,
-                FrameworkParameters('tf', True): tf_meta_options
-            }
-
-            specified = []
-            for mo_source_option in sources:
-                if contains_all(entry, sources[mo_source_option]):
-                    specified.append(mo_source_option)
-
-            if not specified:
-                raise ConfigError('{} None provided'.format(multiple_model_sources_err))
-            if len(specified) > 1:
-                raise ConfigError('{} Several provided'.format(multiple_model_sources_err))
-
-            self._set_model_source(specified[0])
+            framework_parameters = self.check_model_source(entry)
+            self._set_model_source(framework_parameters)
             super().validate(entry, field_uri)
 
     def _set_model_source(self, framework):
@@ -146,6 +115,42 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
         self.fields['tf_meta'].optional = framework != FrameworkParameters('tf', True)
         self.fields['onnx_model'].optional = framework.name != 'onnx'
         self.fields['kaldi_model'].optional = framework.name != 'kaldi'
+
+    @staticmethod
+    def check_model_source(entry):
+        dlsdk_model_options = ['model', 'weights']
+        caffe_model_options = ['caffe_model', 'caffe_weights']
+        mxnet_model_options = ['mxnet_weights']
+        tf_model_options = ['tf_model']
+        tf_meta_options = ['tf_meta']
+        onnx_model_options = ['onnx_model']
+        kaldi_model_options = ['kaldi_model']
+
+        multiple_model_sources_err = (
+            'Either model and weights or caffe_model and caffe_weights '
+            'or mxnet_weights or tf_model or tf_meta should be specified.'
+        )
+        sources = {
+            FrameworkParameters('dlsdk', False): dlsdk_model_options,
+            FrameworkParameters('caffe', False): caffe_model_options,
+            FrameworkParameters('tf', False): tf_model_options,
+            FrameworkParameters('mxnet', False): mxnet_model_options,
+            FrameworkParameters('onnx', False): onnx_model_options,
+            FrameworkParameters('kaldi', False): kaldi_model_options,
+            FrameworkParameters('tf', True): tf_meta_options
+        }
+
+        specified = []
+        for mo_source_option in sources:
+            if contains_all(entry, sources[mo_source_option]):
+                specified.append(mo_source_option)
+
+        if not specified:
+            raise ConfigError('{} None provided'.format(multiple_model_sources_err))
+        if len(specified) > 1:
+            raise ConfigError('{} Several provided'.format(multiple_model_sources_err))
+
+        return specified[0]
 
 
 class DLSDKLauncher(Launcher):
@@ -205,18 +210,20 @@ class DLSDKLauncher(Launcher):
 
         return parameters
 
-    def __init__(self, config_entry):
+    def __init__(self, config_entry, delayed_model_loading=False):
         super().__init__(config_entry)
 
-        dlsdk_launcher_config = DLSDKLauncherConfigValidator('DLSDK_Launcher', fields=self.parameters())
+        dlsdk_launcher_config = DLSDKLauncherConfigValidator(
+            'DLSDK_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading
+        )
         dlsdk_launcher_config.validate(self.config)
 
         self._device = self.config['device'].upper()
         self._set_variable = False
         self._prepare_bitstream_firmware(self.config)
-        self._delayed_network_load = dlsdk_launcher_config.delayed_model_loading
+        self._delayed_model_loading = delayed_model_loading
 
-        if not self._delayed_network_load:
+        if not delayed_model_loading:
             if dlsdk_launcher_config.need_conversion:
                 self._model, self._weights = DLSDKLauncher.convert_model(self.config, dlsdk_launcher_config.framework)
             else:
@@ -230,7 +237,7 @@ class DLSDKLauncher(Launcher):
         # It is an important switch -- while the FASTER RCNN is not reshaped correctly, the
         # whole network should be recreated during reshape
         # it can not be used in case delayed initialization
-        self.reload_network = not self._delayed_network_load
+        self.reload_network = not delayed_model_loading
 
     @property
     def inputs(self):
@@ -261,28 +268,25 @@ class DLSDKLauncher(Launcher):
             if self._do_reshape:
                 input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
                 self._reshape_input(input_shapes)
-                for input_name, input_data in infer_inputs.items():
-                    infer_inputs[input_name] = self._align_data_shape(input_data, input_name)
-
-            network_inputs_data = {**infer_inputs}
 
             benchmark = kwargs.get('benchmark')
 
             if benchmark:
-                benchmark(network_inputs_data)
+                benchmark(infer_inputs)
 
-            result = self.exec_network.infer(network_inputs_data)
+            result = self.exec_network.infer(infer_inputs)
 
             raw_outputs_callback = kwargs.get('output_callback')
 
             if raw_outputs_callback:
                 raw_outputs_callback(result)
-
             results.append(result)
 
-            if metadata is not None:
-                for meta_ in metadata:
-                    meta_['input_shape'] = self.inputs_info_for_meta()
+        if metadata is not None:
+            for image_meta in metadata:
+                image_meta['input_shape'] = self.inputs_info_for_meta()
+
+        self._do_reshape = False
 
         return results
 
@@ -416,7 +420,9 @@ class DLSDKLauncher(Launcher):
         return extension_list[0]
 
     @staticmethod
-    def convert_model(config, framework=FrameworkParameters('caffe', False)):
+    def convert_model(config, framework=None):
+        if framework is None:
+            framework = DLSDKLauncherConfigValidator.check_model_source(config)
         config_model = config.get('{}_model'.format(framework.name), '')
         config_weights = config.get('{}_weights'.format(framework.name), '')
         config_meta = config.get('{}_meta'.format(framework.name), '')
@@ -503,7 +509,7 @@ class DLSDKLauncher(Launcher):
         input_batch_size = input_shape[0]
 
         if data_batch_size < input_batch_size:
-            warning_message = 'data batch {} is not equal model input batch_size {}. '.format(
+            warning_message = 'data batch {} is not equal model input batch_size {}.'.format(
                 data_batch_size, input_batch_size
             )
             warning(warning_message)
@@ -516,7 +522,7 @@ class DLSDKLauncher(Launcher):
 
         return data.reshape(input_shape)
 
-    def _create_ie_plugin(self, log=True):
+    def create_ie_plugin(self, log=True):
         if hasattr(self, 'plugin'):
             del self.plugin
         if log:
@@ -585,7 +591,7 @@ class DLSDKLauncher(Launcher):
                 print_info('    {} - {}'.format(device, nreq))
 
     def _create_network(self, input_shapes=None):
-        assert self.plugin, "_create_ie_plugin should be called before _create_network"
+        assert self.plugin, "create_ie_plugin should be called before _create_network"
 
         self.network = ie.IENetwork(model=str(self._model), weights=str(self._weights))
 
@@ -616,7 +622,7 @@ class DLSDKLauncher(Launcher):
         if hasattr(self, 'exec_network'):
             del self.exec_network
         if not hasattr(self, 'plugin'):
-            self._create_ie_plugin()
+            self.create_ie_plugin()
         if network is None:
             self._create_network()
         else:
@@ -627,6 +633,10 @@ class DLSDKLauncher(Launcher):
         self._model = xml_path
         self._weights = bin_path
         self.load_network()
+
+    @staticmethod
+    def create_ie_network(model_xml, model_bin):
+        return ie.IENetwork(model_xml, model_bin)
 
     def inputs_info_for_meta(self):
         return {
