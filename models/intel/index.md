@@ -138,7 +138,7 @@ increase the quality of the output.
 
 ## Text Detection
 
-Deep Learning models for text detection in various applications
+Deep Learning models for text detection in various applications.
 
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
@@ -147,7 +147,7 @@ Deep Learning models for text detection in various applications
 
 ## Text Recognition
 
-Deep Learning models for text recognition in various applications
+Deep Learning models for text recognition in various applications.
 
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
@@ -168,6 +168,14 @@ that predict an actual labels are called *decoder*.
 | [driver-action-recognition-adas-0002-decoder](./driver-action-recognition-adas-0002-decoder/description/driver-action-recognition-adas-0002-decoder.md) | 0.147                | 4.205      |
 | [action-recognition-0001-encoder](./action-recognition-0001-encoder/description/action-recognition-0001-encoder.md)                                     | 7.340                | 21.276     |
 | [action-recognition-0001-decoder](./action-recognition-0001-decoder/description/action-recognition-0001-decoder.md)                                     | 0.147                | 4.405      |
+
+## Image Retrieval
+
+Deep Learning models for image retrieval (ranking 'gallery' images according to their similarity to some 'probe' image).
+
+| Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
+|------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [image-retrieval-0001](./image-retrieval-0001/description/image-retrieval-0001.md)                                                          | 0.613                | 2.535      |
 
 ## Compressed models
 
