@@ -44,7 +44,7 @@ def build_argparser():
                       help='Required. Path to a video file or numeric camera ID.',
                       required=True, type=str)
     args.add_argument('-g', '--gallery',
-                      help='Required. Path to a folder with gallery images.',
+                      help='Required. Path to a file listing gallery images.',
                       required=True, type=str)
     args.add_argument('-gt', '--ground_truth',
                       help='Optional. Ground truth class.',
