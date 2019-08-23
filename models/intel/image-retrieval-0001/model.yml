@@ -28,4 +28,4 @@ postprocessing:
 model_optimizer_args:
   - --input_model=$dl_dir/model/frozen_graph.pb
 framework: tf
-license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
+license: https://raw.githubusercontent.com/opencv/openvino_training_extensions/master/LICENSE
