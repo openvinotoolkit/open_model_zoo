@@ -15,6 +15,7 @@
 import collections
 import contextlib
 import fnmatch
+import json
 import re
 import shlex
 import shutil
@@ -52,21 +53,31 @@ class Reporter:
     SECTION_DECORATION = '=' * 10
     ERROR_DECORATION = '#' * 10
 
+    def __init__(self, enable_human_output=True, enable_json_output=False, event_context={}):
+        self.enable_human_output = enable_human_output
+        self.enable_json_output = enable_json_output
+        self.event_context = event_context
+
     def print_group_heading(self, text):
+        if not self.enable_human_output: return
         print(self.GROUP_DECORATION, text, self.GROUP_DECORATION[::-1])
         print()
 
     def print_section_heading(self, format, *args):
+        if not self.enable_human_output: return
         print(self.SECTION_DECORATION, format.format(*args), flush=True)
 
     def print_progress(self, format, *args):
+        if not self.enable_human_output: return
         print(format.format(*args), end='\r' if sys.stdout.isatty() else '\n', flush=True)
 
     def end_progress(self):
+        if not self.enable_human_output: return
         if sys.stdout.isatty():
             print()
 
     def print(self, format='', *args, flush=False):
+        if not self.enable_human_output: return
         print(format.format(*args), flush=flush)
 
     def log_warning(self, format, *args, exc_info=False):
@@ -81,6 +92,18 @@ class Reporter:
 
     def log_details(self, format, *args):
         print(self.ERROR_DECORATION, '    ', format.format(*args), file=sys.stderr)
+
+    def emit_event(self, type, **kwargs):
+        if not self.enable_json_output: return
+        json.dump({'$type': type, **self.event_context, **kwargs}, sys.stdout, indent=None)
+        print()
+
+    def with_event_context(self, **kwargs):
+        return Reporter(
+            enable_human_output=self.enable_human_output,
+            enable_json_output=self.enable_json_output,
+            event_context={**self.event_context, **kwargs},
+        )
 
 class DeserializationError(Exception):
     def __init__(self, problem, contexts=()):

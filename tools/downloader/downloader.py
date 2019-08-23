@@ -48,6 +48,7 @@ def process_download(reporter, chunk_iterable, size, file):
 
                     reporter.print_progress('... {}%, {} KB, {} KB/s, {} seconds passed',
                         percent, int(progress_size / 1024), speed, int(duration))
+                    reporter.emit_event('model_file_download_progress', size=progress_size)
 
                 file.write(chunk)
     finally:
@@ -196,10 +197,14 @@ def main():
         help='directory to use as a cache for downloaded files')
     parser.add_argument('--num_attempts', type=positive_int_arg, metavar='N', default=1,
         help='attempt each download up to N times')
+    parser.add_argument('--progress_format', choices=('text', 'json'), default='text',
+        help='which format to use for progress reporting')
 
     args = parser.parse_args()
 
-    reporter = common.Reporter()
+    reporter = common.Reporter(
+        enable_human_output=args.progress_format == 'text',
+        enable_json_output=args.progress_format == 'json')
 
     cache = NullCache() if args.cache_dir is None else DirCache(args.cache_dir)
     models = common.load_models_from_args(parser, args)
@@ -209,26 +214,41 @@ def main():
     reporter.print_group_heading('Downloading models')
     with requests.Session() as session:
         for model in models:
+            reporter.emit_event('model_download_begin', model=model.name, num_files=len(model.files))
+
             output = args.output_dir / model.subdirectory
             output.mkdir(parents=True, exist_ok=True)
 
             for model_file in model.files:
+                model_file_reporter = reporter.with_event_context(model=model.name, model_file=model_file.name.as_posix())
+                model_file_reporter.emit_event('model_file_download_begin', size=model_file.size)
+
                 destination = output / model_file.name
 
-                if not try_retrieve(reporter, model.name, destination, model_file, cache, args.num_attempts,
+                if not try_retrieve(model_file_reporter, model.name, destination, model_file, cache, args.num_attempts,
                         lambda: model_file.source.start_download(session, CHUNK_SIZE)):
                     shutil.rmtree(str(output))
                     failed_models.add(model.name)
+                    model_file_reporter.emit_event('model_file_download_end', successful=False)
+                    reporter.emit_event('model_download_end', model=model.name, successful=False)
                     break
+
+                model_file_reporter.emit_event('model_file_download_end', successful=True)
+            else:
+                reporter.emit_event('model_download_end', model=model.name, successful=True)
 
     reporter.print_group_heading('Post-processing')
     for model in models:
-        if model.name in failed_models: continue
+        if model.name in failed_models or not model.postprocessing: continue
+
+        reporter.emit_event('model_postprocessing_begin', model=model.name)
 
         output = args.output_dir / model.subdirectory
 
         for postproc in model.postprocessing:
             postproc.apply(reporter, output)
+
+        reporter.emit_event('model_postprocessing_end', model=model.name)
 
     if failed_models:
         reporter.print('FAILED:')
