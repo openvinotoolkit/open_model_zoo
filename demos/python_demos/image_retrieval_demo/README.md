@@ -10,7 +10,7 @@ The demo application expects an image retrieval model in the Intermediate Repres
 
 As input, the demo application takes:
 * a path to a list of images represeneted by textfile with following format 'path_to_image' 'ID' `--images`
-* a path to a video file or a numeric ID of a web-camera specified with a command line argument `--video`
+* a path to a video file or a device node of a web-camera specified with a command line argument `--video`
 
 The demo workflow is the following:
 
@@ -37,7 +37,7 @@ Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -i I                  Required. Path to a video file or numeric camera ID.
+  -i I                  Required. Path to a video file or a device node of a web-camera.
   -g GALLERY, --gallery GALLERY
                         Required. Path to a file listing gallery images.
   -gt GROUND_TRUTH, --ground_truth GROUND_TRUTH
