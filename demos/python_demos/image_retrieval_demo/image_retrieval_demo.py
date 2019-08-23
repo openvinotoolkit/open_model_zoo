@@ -41,7 +41,7 @@ def build_argparser():
                       help='Required. Path to an .xml file with a trained model.',
                       required=True, type=str)
     args.add_argument('-i',
-                      help='Required. Path to a video file or numeric camera ID.',
+                      help='Required. Path to a video file or a device node of a web-camera.',
                       required=True, type=str)
     args.add_argument('-g', '--gallery',
                       help='Required. Path to a file listing gallery images.',
