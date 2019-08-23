@@ -39,7 +39,7 @@ Options:
                         Required. Path to an .xml file with a trained model.
   -i I                  Required. Path to a video file or numeric camera ID.
   -g GALLERY, --gallery GALLERY
-                        Required. Path to a folder with gallery images.
+                        Required. Path to a file listing gallery images.
   -gt GROUND_TRUTH, --ground_truth GROUND_TRUTH
                         Optional. Ground truth class.
   -d DEVICE, --device DEVICE
