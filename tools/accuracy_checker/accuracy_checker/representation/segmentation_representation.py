@@ -163,7 +163,7 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
         masks = self.mask
         areas = []
         for mask in masks:
-            areas.append(pycocotools.mask.area(mask))
+            areas.append(maskUtils.area(mask))
         return areas
 
 
