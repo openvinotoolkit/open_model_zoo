@@ -368,6 +368,8 @@ class Visualizer:
 
     def run(self, args):
         input_stream = Visualizer.open_input_stream(args.input)
+        if input_stream is None or not input_stream.isOpened():
+            log.error("Cannot open input stream: %s" % args.input)
         fps = input_stream.get(cv2.CAP_PROP_FPS)
         frame_size = (int(input_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
                       int(input_stream.get(cv2.CAP_PROP_FRAME_HEIGHT)))
@@ -396,7 +398,6 @@ class Visualizer:
         try:
             stream = int(path)
         except ValueError:
-            assert osp.isfile(path), "Input file '%s' not found" % (path)
             pass
         return cv2.VideoCapture(stream)
 
