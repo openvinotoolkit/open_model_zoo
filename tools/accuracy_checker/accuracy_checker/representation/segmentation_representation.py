@@ -110,7 +110,8 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
     def __init__(self, identifier, mask, labels):
         try:
             # pylint: disable=W0611
-            import pycocotools.mask as maskUtils
+            import pycocotools.mask as mask_utils
+            self.mask_utils = mask_utils
         except ImportError:
             raise ValueError('can not create representation')
         super().__init__(identifier)
@@ -134,14 +135,13 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
 
         return self._mask
 
-    @staticmethod
-    def _convert_mask(mask, height, width):
+    def _convert_mask(self, mask, height, width):
         if isinstance(mask, list):
-            rles = maskUtils.frPyObjects(mask, height, width)
-            rle = maskUtils.merge(rles)
+            rles = self.mask_utils.frPyObjects(mask, height, width)
+            rle = self.mask_utils.merge(rles)
         elif isinstance(mask['counts'], list):
             # uncompressed RLE
-            rle = maskUtils.frPyObjects(mask, height, width)
+            rle = self.mask_utils.frPyObjects(mask, height, width)
         else:
             rle = mask
             # rle
@@ -163,7 +163,7 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
         masks = self.mask
         areas = []
         for mask in masks:
-            areas.append(pycocotools.mask.area(mask))
+            areas.append(self.mask_utils.area(mask))
         return areas
 
 
