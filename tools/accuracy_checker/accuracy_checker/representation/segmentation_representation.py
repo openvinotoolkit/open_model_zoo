@@ -18,6 +18,11 @@ from enum import Enum
 
 import numpy as np
 
+try:
+    import pycocotools.mask as maskUtils
+except ImportError:
+    maskUtils = None
+
 from .base_representation import BaseRepresentation
 from ..data_readers import BaseReader
 from ..utils import remove_difficult
@@ -108,10 +113,7 @@ class BrainTumorSegmentationPrediction(SegmentationPrediction):
 
 class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
     def __init__(self, identifier, mask, labels):
-        try:
-            # pylint: disable=W0611
-            import pycocotools.mask as maskUtils
-        except ImportError:
+        if not maskUtils
             raise ValueError('can not create representation')
         super().__init__(identifier)
         self.raw_mask = mask
