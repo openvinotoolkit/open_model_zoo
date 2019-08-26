@@ -138,10 +138,10 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
 
     @staticmethod
     def _convert_mask(mask, height, width):
-        if isinstance(mask, list):
+        if maskUtils and isinstance(mask, list):
             rles = maskUtils.frPyObjects(mask, height, width)
             rle = maskUtils.merge(rles)
-        elif isinstance(mask['counts'], list):
+        elif maskUtils and isinstance(mask['counts'], list):
             # uncompressed RLE
             rle = maskUtils.frPyObjects(mask, height, width)
         else:
