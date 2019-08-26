@@ -95,7 +95,6 @@ class FaceDetector(Module):
             if result.confidence < self.confidence_threshold:
                 break # results are sorted by confidence decrease
 
-            result.clip(1, 1)
             result.resize_roi(frame_width, frame_height)
             result.rescale_roi(self.roi_scale_factor)
             result.clip(frame_width, frame_height)

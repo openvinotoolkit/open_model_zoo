@@ -31,16 +31,16 @@ from face_detector import FaceDetector
 from faces_database import FacesDatabase
 from face_identifier import FaceIdentifier
 
-DEVICE_KINDS = ['CPU', 'GPU', 'FPGA', 'MYRIAD', 'HETERO']
+DEVICE_KINDS = ['CPU', 'GPU', 'FPGA', 'MYRIAD', 'HETERO', 'HDDL']
 
 
 def build_argparser():
     parser = ArgumentParser()
 
     general = parser.add_argument_group('General')
-    general.add_argument('-i', '--input', metavar="PATH", default='cam',
+    general.add_argument('-i', '--input', metavar="PATH", default='0',
                          help="(optional) Path to the input video " \
-                         "('cam' for the camera, default)")
+                         "('0' for the camera, default)")
     general.add_argument('-o', '--output', metavar="PATH", default="",
                          help="(optional) Path to save the output video to")
     general.add_argument('--no_show', action='store_true',
@@ -101,7 +101,8 @@ def build_argparser():
                        help="(optional) Scaling ratio for bboxes passed to face recognition " \
                        "(default: %(default)s)")
     infer.add_argument('--allow_grow', action='store_true',
-                       help="(optional) Allow to grow faces gallery and to dump on disk")
+                       help="(optional) Allow to grow faces gallery and to dump on disk. " \
+                       "Available only if --no_show option is off.")
 
     return parser
 
@@ -141,12 +142,12 @@ class FrameProcessor:
         log.info("Building faces database using images from '%s'" % (args.fg))
         self.faces_database = FacesDatabase(args.fg, self.face_identifier,
                                             self.landmarks_detector,
-                                            self.face_detector if args.run_detector else None)
+                                            self.face_detector if args.run_detector else None, args.no_show)
         self.face_identifier.set_faces_database(self.faces_database)
         log.info("Database is built, registered %s identities" % \
             (len(self.faces_database)))
 
-        self.allow_grow = args.allow_grow
+        self.allow_grow = args.allow_grow and not args.no_show
 
     def load_model(self, model_path):
         model_path = osp.abspath(model_path)
@@ -215,10 +216,8 @@ class FrameProcessor:
 
 
 class Visualizer:
-    DEFAULT_CAMERA_FOCAL_DISTANCE = 950.0
-
-    BREAK_KEY_LABEL = 'q'
-    BREAK_KEY = ord(BREAK_KEY_LABEL)
+    BREAK_KEY_LABELS = "q(Q) or Escape"
+    BREAK_KEYS = {ord('q'), ord('Q'), 27}
 
 
     def __init__(self, args):
@@ -229,6 +228,8 @@ class Visualizer:
         self.frame_time = 0
         self.frame_start_time = 0
         self.fps = 0
+        self.frame_num = 0
+        self.frame_count = -1
 
         self.input_crop = None
         if args.crop_width and args.crop_height:
@@ -306,9 +307,7 @@ class Visualizer:
 
         log.debug('Frame: %s/%s, detections: %s, ' \
                   'frame time: %.3fs, fps: %.1f' % \
-                    (int(self.input_stream.get(cv2.CAP_PROP_POS_FRAMES)),
-                     int(self.input_stream.get(cv2.CAP_PROP_FRAME_COUNT)),
-                     len(detections[-1]), self.frame_time, self.fps))
+                     (self.frame_num, self.frame_count, len(detections[-1]), self.frame_time, self.fps))
 
         if self.print_perf_stats:
             log.info('Performance stats:')
@@ -318,7 +317,7 @@ class Visualizer:
         color = (255, 255, 255)
         font = cv2.FONT_HERSHEY_SIMPLEX
         text_scale = 0.5
-        text = "Press '%s' key to exit" % (self.BREAK_KEY_LABEL)
+        text = "Press '%s' key to exit" % (self.BREAK_KEY_LABELS)
         thickness = 2
         text_size = cv2.getTextSize(text, font, text_scale, thickness)
         origin = np.array([frame.shape[-2] - text_size[0][0] - 10, 10])
@@ -329,7 +328,8 @@ class Visualizer:
         cv2.imshow('Face recognition demo', frame)
 
     def should_stop_display(self):
-        return cv2.waitKey(self.frame_timeout) & 0xFF == self.BREAK_KEY
+        key = cv2.waitKey(self.frame_timeout) & 0xFF
+        return key in self.BREAK_KEYS
 
     def process(self, input_stream, output_stream):
         self.input_stream = input_stream
@@ -355,6 +355,7 @@ class Visualizer:
                     break
 
             self.update_fps()
+            self.frame_num += 1
 
     @staticmethod
     def center_crop(frame, crop_size):
@@ -370,6 +371,7 @@ class Visualizer:
         fps = input_stream.get(cv2.CAP_PROP_FPS)
         frame_size = (int(input_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
                       int(input_stream.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+        self.frame_count = int(input_stream.get(cv2.CAP_PROP_FRAME_COUNT))
         if args.crop_width and args.crop_height:
             crop_size = (args.crop_width, args.crop_height)
             frame_size = tuple(np.minimum(frame_size, crop_size))
@@ -390,11 +392,12 @@ class Visualizer:
     @staticmethod
     def open_input_stream(path):
         log.info("Reading input data from '%s'" % (path))
-        if path == 'cam':
-            stream = 0
-        else:
+        stream = path
+        try:
+            stream = int(path)
+        except ValueError:
             assert osp.isfile(path), "Input file '%s' not found" % (path)
-            stream = path
+            pass
         return cv2.VideoCapture(stream)
 
     @staticmethod

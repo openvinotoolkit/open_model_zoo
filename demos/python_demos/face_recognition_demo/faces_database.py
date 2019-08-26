@@ -36,9 +36,10 @@ class FacesDatabase:
         def cosine_dist(x, y):
             return cosine(x, y) * 0.5
 
-    def __init__(self, path, face_identifier, landmarks_detector, face_detector=None):
+    def __init__(self, path, face_identifier, landmarks_detector, face_detector=None, no_show=False):
         path = osp.abspath(path)
         self.fg_path = path
+        self.no_show = no_show
         paths = []
         if osp.isdir(path):
             paths = [osp.join(path, f) for f in os.listdir(path) \
@@ -89,13 +90,14 @@ class FacesDatabase:
                         crop = orig_image[int(roi.position[1]):int(roi.position[1]+roi.size[1]), \
                                int(roi.position[0]):int(roi.position[0]+roi.size[0])]
                         name = self.ask_to_save(crop)
-                        if name:
-                            self.dump_faces(crop, descriptor, name)
+                        self.dump_faces(crop, descriptor, name)
                 else:
                     log.debug("Adding label {} to the gallery.".format(label))
                     self.add_item(descriptor, label)
 
     def ask_to_save(self, image):
+        if self.no_show:
+            return None
         save = False
         label = None
         winname = "Unknown face"
