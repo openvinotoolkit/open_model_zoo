@@ -1,0 +1,31 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  `image-retrieval-0001` is an image retrieval model based on Mobilenet v2 as
+  a backbone. The model produces l2-normalized embeddings with dimension that
+  equals to 256.
+task_type: object_attributes
+files:
+  - name: image-retrieval-0001.tar.gz
+    sha256: e73255a04d6dd860c48168410f347ec96f85e52fba3aa93bbc17eaf72fe1e80f
+    source: https://download.01.org/opencv/openvino_training_extensions/models/image_retrieval/image-retrieval-0001.tar.gz
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: image-retrieval-0001.tar.gz
+model_optimizer_args:
+  - --input_model=$dl_dir/model/frozen_graph.pb
+framework: tf
+license: https://raw.githubusercontent.com/opencv/openvino_training_extensions/master/LICENSE

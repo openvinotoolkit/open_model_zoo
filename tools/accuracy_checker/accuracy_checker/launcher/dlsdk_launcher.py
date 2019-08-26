@@ -279,7 +279,7 @@ class DLSDKLauncher(Launcher):
             raw_outputs_callback = kwargs.get('output_callback')
 
             if raw_outputs_callback:
-                raw_outputs_callback(result)
+                raw_outputs_callback(result, network=self.network, exec_network=self.exec_network)
             results.append(result)
 
         if metadata is not None:

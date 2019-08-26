@@ -98,7 +98,9 @@ class ModelEvaluator:
     def process_dataset_async(self, stored_predictions, progress_reporter, *args, **kwargs):
         def _process_ready_predictions(batch_predictions, batch_identifiers, batch_meta, adapter, raw_outputs_callback):
             if raw_outputs_callback:
-                raw_outputs_callback([batch_predictions])
+                raw_outputs_callback(
+                    [batch_predictions], network=self.launcher.network, exec_network=self.launcher.exec_network
+                )
             if adapter:
                 batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
 
