@@ -25,7 +25,7 @@ the "Barrier" use case.
 
 Average Precision (AP) is defined as an area under the
 [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)
-curve. Validation dataset is [BIT-Vehicle](http://iitlab.bit.edu.cn/mcislab/vehicledb/).
+curve. Validation dataset is BIT-Vehicle.
 
 ## Performance
 
