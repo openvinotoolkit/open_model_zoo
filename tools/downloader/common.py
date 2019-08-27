@@ -43,15 +43,21 @@ KNOWN_TASK_TYPES = {
     'semantic_segmentation',
 }
 
+RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
+RE_SHA256SUM = re.compile(r'[0-9a-fA-F]{64}')
+
 class DeserializationError(Exception):
-    pass
+    def __init__(self, problem, contexts=()):
+        super().__init__(': '.join(contexts + (problem,)))
+        self.problem = problem
+        self.contexts = contexts
 
 @contextlib.contextmanager
-def deserialization_context(message):
+def deserialization_context(context):
     try:
         yield None
     except DeserializationError as exc:
-        raise DeserializationError('{}: {}'.format(message, exc)) from exc
+        raise DeserializationError(exc.problem, (context,) + exc.contexts) from exc
 
 def validate_string(context, value):
     if not isinstance(value, str):
@@ -157,7 +163,7 @@ class ModelFile:
 
             sha256 = validate_string('"sha256"', file['sha256'])
 
-            if not re.fullmatch(r'[0-9a-fA-F]{64}', sha256):
+            if not RE_SHA256SUM.fullmatch(sha256):
                 raise DeserializationError(
                     '"sha256": got invalid hash {!r}'.format(sha256))
 
@@ -249,6 +255,9 @@ class Model:
     @classmethod
     def deserialize(cls, model, name, subdirectory):
         with deserialization_context('In model "{}"'.format(name)):
+            if not RE_MODEL_NAME.fullmatch(name):
+                raise DeserializationError('Invalid name, must consist only of letters, digits or ._-')
+
             files = []
             file_names = set()
 
@@ -271,6 +280,7 @@ class Model:
                 pytorch_to_onnx_args = [validate_string('"pytorch_to_onnx" #{}'.format(i), arg)
                                         for i, arg in enumerate(model['pytorch_to_onnx'])]
 
+            framework = validate_string_enum('"framework"', model['framework'], KNOWN_FRAMEWORKS)
 
             if 'model_optimizer_args' in model:
                 mo_args = [validate_string('"model_optimizer_args" #{}'.format(i), arg)
@@ -278,21 +288,29 @@ class Model:
 
                 precisions = {'FP16', 'FP32'}
             else:
+                if framework != 'dldt':
+                    raise DeserializationError('Model not in IR format, but no conversions defined')
+
                 mo_args = None
 
-                def file_precision(file):
-                    if len(file.name.parts) < 2:
+                files_per_precision = {}
+
+                for file in files:
+                    if len(file.name.parts) != 2:
                         raise DeserializationError('Can\'t derive precision from file name {!r}'.format(file.name))
                     p = file.name.parts[0]
                     if p not in KNOWN_PRECISIONS:
                         raise DeserializationError(
                             'Unknown precision {!r} derived from file name {!r}, expected one of {!r}'.format(
                                 p, file.name, KNOWN_PRECISIONS))
-                    return p
+                    files_per_precision.setdefault(p, set()).add(file.name.parts[1])
 
-                precisions = set(map(file_precision, files))
+                for precision, precision_files in files_per_precision.items():
+                    for ext in ['xml', 'bin']:
+                        if (name + '.' + ext) not in precision_files:
+                            raise DeserializationError('No {} file for precision "{}"'.format(ext.upper(), precision))
 
-            framework = validate_string_enum('"framework"', model['framework'], KNOWN_FRAMEWORKS)
+                precisions = set(files_per_precision.keys())
 
             description = validate_string('"description"', model['description'])
 
@@ -349,10 +367,21 @@ def load_models(args):
 
     return models
 
+def load_models_or_die(args):
+    try:
+        return load_models(args)
+    except DeserializationError as e:
+        indent = '    '
+
+        for i, context in enumerate(e.contexts):
+            print(indent * i + context + ':', file=sys.stderr)
+        print(indent * len(e.contexts) + e.problem, file=sys.stderr)
+        sys.exit(1)
+
 # requires the --print_all, --all, --name and --list arguments to be in `args`
 def load_models_from_args(parser, args):
     if args.print_all:
-        for model in load_models(args):
+        for model in load_models_or_die(args):
             print(model.name)
         sys.exit()
 
@@ -364,7 +393,7 @@ def load_models_from_args(parser, args):
     if filter_args_count == 0:
         parser.error('one of "--print_all", "--all", "--name" or "--list" must be specified')
 
-    all_models = load_models(args)
+    all_models = load_models_or_die(args)
 
     if args.all:
         return all_models
