@@ -43,6 +43,7 @@ from .cvat_facial_landmarks import CVATFacialLandmarksRecognitionConverter
 from .cvat_text_recognition import CVATTextRecognitionConverter
 from .cvat_multilabel_recognition import CVATMultilabelAttributesRecognitionConverter
 from .cvat_human_pose import CVATPoseEstimationConverter
+from .cvat_person_detection_action_recognition import CVATPersonDetectionActionRecognitionConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -79,5 +80,6 @@ __all__ = [
     'CVATFacialLandmarksRecognitionConverter',
     'CVATTextRecognitionConverter',
     'CVATMultilabelAttributesRecognitionConverter',
-    'CVATPoseEstimationConverter'
+    'CVATPoseEstimationConverter',
+    'CVATPersonDetectionActionRecognitionConverter'
 ]
