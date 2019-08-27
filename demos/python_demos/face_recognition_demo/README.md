@@ -13,7 +13,7 @@ The following pretrained models can be used:
 * `landmarks-regression-retail-0009`, to predict face keypoints;
 * `face-reidentification-retail-0095`, to recognize persons.
 
-For more information about the pre-trained models, refer to the [Open Model Zoo](https://github.com/opencv/open_model_zoo/tree/master/intel_models/index.md) repository on GitHub*.
+For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
 ### How it works
 
