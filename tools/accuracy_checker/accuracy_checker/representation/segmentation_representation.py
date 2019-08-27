@@ -113,7 +113,7 @@ class BrainTumorSegmentationPrediction(SegmentationPrediction):
 
 class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
     def __init__(self, identifier, mask, labels):
-        if not maskUtils
+        if not maskUtils:
             raise ValueError('can not create representation')
         super().__init__(identifier)
         self.raw_mask = mask
