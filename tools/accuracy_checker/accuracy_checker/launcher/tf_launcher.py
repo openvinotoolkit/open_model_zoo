@@ -14,11 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import re
+from pathlib import Path
 import tensorflow as tf
 
 from .launcher import Launcher
 from ..config import BaseField, ListField, PathField, StringField, ConfigError, ConfigValidator
-
 
 
 class TFLauncher(Launcher):
@@ -44,17 +45,23 @@ class TFLauncher(Launcher):
 
         tf_launcher_config = ConfigValidator('TF_Launcher', fields=self.parameters())
         tf_launcher_config.validate(self.config)
+        self._config_outputs = self.get_value_from_config('output_names')
 
         self._graph = self._load_graph(str(self.get_value_from_config('model')))
 
-        self._outputs_names = self._get_outputs_names(self._graph, self.get_value_from_config('output_names'))
+        self._outputs_names = self._get_outputs_names(self._graph, self._config_outputs)
 
         self._outputs_tensors = []
+        self.node_pattern = 'import/{}:0'
         for output in self._outputs_names:
             try:
                 tensor = self._graph.get_tensor_by_name('import/{}:0'.format(output))
             except KeyError:
-                raise ConfigError('model graph does not contains output {}'.format(output))
+                try:
+                    tensor = self._graph.get_tensor_by_name('{}:0'.format(output))
+                    self.node_pattern = '{}:0'
+                except KeyError:
+                    raise ConfigError('model graph does not contains output {}'.format(output))
             self._outputs_tensors.append(tensor)
 
         self.device = '/{}:0'.format(self.get_value_from_config('device').lower())
@@ -72,7 +79,8 @@ class TFLauncher(Launcher):
             with tf.device(self.device):
                 with tf.Session(graph=self._graph) as session:
                     feed_dictionary = {
-                        'import/{}:0'.format(input_name): input_data for input_name, input_data in infer_input.items()
+                        self.node_pattern.format(input_name): input_data
+                        for input_name, input_data in infer_input.items()
                     }
                     result = session.run(self._outputs_tensors, feed_dict=feed_dictionary)
                     res = dict(zip(self._outputs_names, result))
@@ -105,8 +113,10 @@ class TFLauncher(Launcher):
     def predict_async(self, *args, **kwargs):
         raise ValueError('TensorFlow Launcher does not support async mode yet')
 
-    @staticmethod
-    def _load_graph(model):
+    def _load_graph(self, model):
+        if 'meta' in Path(model).suffix:
+            return self._load_graph_using_meta(model)
+
         with tf.gfile.GFile(model, 'rb') as file:
             graph_def = tf.GraphDef()
             graph_def.ParseFromString(file.read())
@@ -116,12 +126,31 @@ class TFLauncher(Launcher):
 
         return graph
 
-    @staticmethod
-    def _get_graph_inputs(graph, config_inputs=None):
+    def _load_graph_using_meta(self, model):
+        tf.reset_default_graph()
+        graph = tf.Graph()
+        graph_def = tf.MetaGraphDef()
+
+        with open(model, "rb") as model_file:
+            graph_def.ParseFromString(model_file.read())
+
+        with tf.Session() as sess:
+            restorer = tf.train.import_meta_graph(graph_def)
+            restorer.restore(sess, re.sub(r'\.meta$', '', model))
+            graph_def = tf.graph_util.convert_variables_to_constants(
+                sess, graph_def.graph_def, self._config_outputs
+            )
+
+        with graph.as_default():
+            tf.import_graph_def(graph_def, name='')
+        return graph
+
+    def _get_graph_inputs(self, graph, config_inputs=None):
         inputs_ops = {'Placeholder'}
         inputs = [x for x in graph.as_graph_def().node if not x.input and x.op in inputs_ops]
         if config_inputs:
-            config_inputs_names = ['import/{}'.format(layer['name']) for layer in config_inputs]
+            node_pattern_without_op = self.node_pattern.split(':')[0]
+            config_inputs_names = [node_pattern_without_op.format(layer['name']) for layer in config_inputs]
             config_inputs = [x for x in graph.as_graph_def().node if x.name in config_inputs_names]
             inputs.extend(config_inputs)
 
