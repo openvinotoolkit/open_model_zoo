@@ -4,12 +4,9 @@ This topic demonstrates how to run Super Resolution demo application, which
 reconstructs the high resolution image from the original low resolution one.
 You can use the following pre-trained model with the demo:
 
-* `single-image-super-resolution-1032`, which is the primary and only model that
-  performs super resolution 4x upscale on a 270x480 image
-* `single-image-super-resolution-1033`, which is the primary and only model that
-  performs super resolution 3x upscale on a 360x640 image
-* `text-image-super-resolution-0001`, which is the primary and only model that
-  performs super resolution 3x upscale on a 360x640 image
+* `single-image-super-resolution-1032`, which is the model that performs super resolution 4x upscale on a 270x480 image
+* `single-image-super-resolution-1033`, which is the model that performs super resolution 3x upscale on a 360x640 image
+* `text-image-super-resolution-0001`, which is the model that performs super resolution 3x upscale on a 360x640 image
 
 For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
@@ -17,7 +14,7 @@ For more information about the pre-trained models, refer to the [model documenta
 
 On the start-up, the application reads command-line parameters and loads the
 specified network. After that, the application reads a input image and
-performs 4x upscale using super resolution.
+performs upscale using super resolution model.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
