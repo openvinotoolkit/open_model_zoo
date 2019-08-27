@@ -48,37 +48,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-
-template <typename T>
-void matToBlob(const cv::Mat& orig_image, InferenceEngine::Blob::Ptr& blob, int batchIndex = 0) {
-    InferenceEngine::SizeVector blobSize = blob->getTensorDesc().getDims();
-    const size_t width = blobSize[3];
-    const size_t height = blobSize[2];
-    const size_t channels = blobSize[1];
-
-    T* blob_data = blob->buffer().as<T*>();
-    int batchOffset = batchIndex * width * height * channels;
-
-    if (channels == 1) {
-        for (size_t  h = 0; h < height; h++) {
-            for (size_t w = 0; w < width; w++) {
-                blob_data[batchOffset + h * width + w] = orig_image.at<uchar>(h, w);
-            }
-        }
-    } else if (channels == 3) {
-        for (size_t c = 0; c < channels; c++) {
-            for (size_t  h = 0; h < height; h++) {
-                for (size_t w = 0; w < width; w++) {
-                    blob_data[batchOffset + c * width * height + h * width + w] =
-                            orig_image.at<cv::Vec3b>(h, w)[c];
-                }
-            }
-        }
-    } else {
-        slog::err << "Unsupported number of channels" << slog::endl;
-    }
-}
-
 int main(int argc, char *argv[]) {
     try {
         slog::info << "InferenceEngine: " << GetInferenceEngineVersion() << slog::endl;
@@ -155,7 +124,7 @@ int main(int argc, char *argv[]) {
         /** Collect images**/
         std::vector<cv::Mat> inputImages;
         for (const auto &i : imageNames) {
-            cv::Mat img = cv::imread(i, -1);
+            cv::Mat img = cv::imread(i, cv::IMREAD_UNCHANGED);
             if (img.empty()) {
                 slog::warn << "Image " + i + " cannot be read!" << slog::endl;
                 continue;
@@ -218,7 +187,7 @@ int main(int argc, char *argv[]) {
         Blob::Ptr lrInputBlob = inferRequest.GetBlob(lrInputBlobName);
         for (size_t i = 0; i < inputImages.size(); ++i) {
             cv::Mat img = inputImages[i];
-            matToBlob<float_t>(img, lrInputBlob, i);
+            matU8ToBlob<float_t>(img, lrInputBlob, i);
 
             bool twoInputs = inputInfo.size() == 2;
             if (twoInputs) {
@@ -231,7 +200,7 @@ int main(int argc, char *argv[]) {
                 cv::Mat resized;
                 cv::resize(img, resized, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
 
-                matToBlob<float_t>(resized, bicInputBlob, i);
+                matU8ToBlob<float_t>(resized, bicInputBlob, i);
             }
         }
         // -----------------------------------------------------------------------------------------------------
