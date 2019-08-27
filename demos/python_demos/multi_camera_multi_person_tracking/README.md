@@ -1,38 +1,43 @@
 # Multi Camera Multi Person Python* Demo
 
-This demo demonstrates how to run Multi Camera Multi Person demo using OpenVINO<sup>TM</sup>
+This demo demonstrates how to run Multi Camera Multi Person demo using OpenVINO<sup>TM</sup>.
 
-## Setup
+## How It Works
 
-### Prerequisites
-
-* Ubuntu 16.04
-* Python 3.5.2
-* OpenVINO 2019 R2 with Python API
-
-### Installation
-
-To install required dependencies run
-
-```bash
-$ cat requirements.txt | xargs -n 1 -L 1 pip3 install
-```
-
-## Using
-
-1. The demo expects the next models in the Intermediate Representation (IR) format:
+The demo expects the next models in the Intermediate Representation (IR) format:
 
    * Person detection model
    * Person re-identification model
 
 It can be your own models or pre-trained model from OpenVINO Open Model Zoo.
-In the `models.lst` are the list of appropriate models for this demo 
-that can be obtained via `Model downloader`. 
-Please see more information about `Model downloader` [here](https://github.com/opencv/open_model_zoo/blob/master/tools/downloader/README.md).
+In the `models.lst` are the list of appropriate models for this demo
+that can be obtained via `Model downloader`.
+Please see more information about `Model downloader` [here](../../../tools/downloader/README.md).
 
-2. Inputs for the demo are videos or web-cameras.
+As input, the demo application takes:
+* paths to several video files specified with a command line argument `--videos`
+* indexes of web cameras specified with a command line argument `--cam_ids`
 
-3. Run the application with the `-h` option to see the following usage message:
+The demo workflow is the following:
+
+1. The demo application reads tuples of frames from web cameras/videos one by one. For each frame in tuple it runs person detector
+and then for each detected object it extracts embeddings using re-identification model.
+2. All embeddings are passed to tracker which assigns an ID to each object.
+3. The demo visualizes the resulting bounding boxes and unique object IDs assigned during tracking.
+
+## Running
+
+### Installation of dependencies
+
+To install required dependencies run
+
+```bash
+pip3 install -r requirements.txt
+```
+
+### Command line arguments
+
+Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: run.py [-h] [--videos VIDEOS [VIDEOS ...]]
@@ -64,20 +69,25 @@ optional arguments:
                         MKLDNN (CPU)-targeted custom layers.Absolute path to a
                         shared library with the kernels impl.
 ```
-4. Minimum command examples to run the demo:
+Minimum command examples to run the demo:
 
 ```
 # videos
 python run.py \
     --videos path/to/video_1.avi path/to/video_2.avi \
     --pd_model path/to/person-detection-retail-0013.xml \
-    --pr_model path/to/person-reidentification-retail-0076.xml 
+    --pr_model path/to/person-reidentification-retail-0076.xml
 
 # web-cameras
 python run.py \
     --cam_ids 0 1 \
     --pd_model path/to/person-detection-retail-0013.xml \
-    --pr_model path/to/person-reidentification-retail-0076.xml 
+    --pr_model path/to/person-reidentification-retail-0076.xml
 ```
 
-5. To save output video with the result please use the option  `--output_video`, to change configuration parameters please open the `config.py` file and edit it.
+## Demo Output
+
+The demo displays bounding boxes of tracked objects and unique IDs of those objects.
+To save output video with the result please use the option  `--output_video`, to change configuration parameters please open the `config.py` file and edit it.
+
+Also demo can dump resulting tracks to a json file. To specify the file use the `--history_file` argument.
