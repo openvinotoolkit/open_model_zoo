@@ -141,8 +141,8 @@ int main(int argc, char *argv[]) {
                 continue;
             }
             if (c != img.channels()) {
-              slog::warn << "Number of channels of the image " << i << " is not equal to " << c <<slog::endl;
-              continue;
+                slog::warn << "Number of channels of the image " << i << " is not equal to " << c <<slog::endl;
+                continue;
             }
 
             inputImages.push_back(img);
