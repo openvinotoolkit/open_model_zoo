@@ -19,12 +19,12 @@ files:
   - name: model-r34-arcface-ms1m-refine-v1.zip
     sha256: efceea8a75b9f461772173d96670cfc678bdb507e1742c5b31cd3eda9407ffbf
     source: https://www.dropbox.com/s/yp7y6jic464l09z/model-r34-arcface-ms1m-refine-v1.zip?dl=1
-    output: "face_recognition/insightface/mxnet/resnet34/"
 postprocessing:
   - $type: unpack_archive
     format: zip
     file: model-r34-arcface-ms1m-refine-v1.zip
 model_optimizer_args:
+  - --reverse_input_channels
   - --input_shape=[1,3,112,112]
   - --input_model=$dl_dir/model-r34-amf/model-0000.params
 framework: mxnet

@@ -13,7 +13,7 @@
 | Type              | Face recognition |
 | GFLOPs            | 8.934         |
 | MParams           | 34.129        |
-| Source framework  | mxnet\*       |
+| Source framework  | MXNet\*       |
 
 ## Accuracy
 
@@ -30,7 +30,7 @@ Image, name - `data`,  shape - `1,3,112,112`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-Channel order is `BGR`.
+Channel order is `RGB`.
 
 ### Converted model
 

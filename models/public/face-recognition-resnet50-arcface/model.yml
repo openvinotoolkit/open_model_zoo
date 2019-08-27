@@ -19,12 +19,12 @@ files:
   - name: model-r50-arcface-ms1m-refine-v1.zip
     sha256: af511fc7e0f465258de1951584607e798307c7a9b2d24692e4bc6836c6eeeee7
     source: https://www.dropbox.com/s/ou8v3c307vyzawc/model-r50-arcface-ms1m-refine-v1.zip?dl=1
-    output: "face_recognition/insightface/mxnet/resnet50/"
 postprocessing:
   - $type: unpack_archive
     format: zip
     file: model-r50-arcface-ms1m-refine-v1.zip
 model_optimizer_args:
+  - --reverse_input_channels
   - --input_shape=[1,3,112,112]
   - --input_model=$dl_dir/model-r50-am-lfw/model-0000.params
 framework: mxnet

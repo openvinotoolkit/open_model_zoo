@@ -19,12 +19,12 @@ files:
   - name: model-MobileFaceNet-arcface-ms1m-refine-v1.zip
     sha256: 1a3ffb4c930a2398f68bc45f0eb86058a514c00808176303303f0783f494c2d1
     source: https://www.dropbox.com/s/akxeqp99jvsd6z7/model-MobileFaceNet-arcface-ms1m-refine-v1.zip?dl=1
-    output: "face_recognition/insightface/mxnet/mobilefacenet/"
 postprocessing:
   - $type: unpack_archive
     format: zip
     file: model-MobileFaceNet-arcface-ms1m-refine-v1.zip
 model_optimizer_args:
+  - --reverse_input_channels
   - --input_shape=[1,3,112,112]
   - --input_model=$dl_dir/model-y1-test2/model-0000.params
 framework: mxnet
