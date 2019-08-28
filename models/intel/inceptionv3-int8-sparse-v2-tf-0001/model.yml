@@ -30,15 +30,19 @@ description: >-
 task_type: classification
 files:
   - name: FP32/inceptionv3-int8-sparse-v2-tf-0001.xml
+    size: 613725
     sha256: bccb7f1820ce88cbb560885af9a577b586aecf7c799901d8ffe70845069fbf8c
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/inceptionv3-int8-sparse-v2-tf-0001/FP32/inceptionv3-int8-sparse-v2-tf-0001.xml
   - name: FP32/inceptionv3-int8-sparse-v2-tf-0001.bin
+    size: 95277636
     sha256: 2c7faf42a761c343815621fde4d2b79ec316f87ffefb2f4105b59ea915806279
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/inceptionv3-int8-sparse-v2-tf-0001/FP32/inceptionv3-int8-sparse-v2-tf-0001.bin
   - name: FP16/inceptionv3-int8-sparse-v2-tf-0001.xml
+    size: 613626
     sha256: 0f09ce6087bf36e2c5d3ba06587ce2a43dd362e89ac699670a33abaa3aae29e3
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/inceptionv3-int8-sparse-v2-tf-0001/FP16/inceptionv3-int8-sparse-v2-tf-0001.xml
   - name: FP16/inceptionv3-int8-sparse-v2-tf-0001.bin
+    size: 47638822
     sha256: 865a63e70da08213d5181842d080cb356417bbe19285ddb4ecb4e1f595902c6a
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/inceptionv3-int8-sparse-v2-tf-0001/FP16/inceptionv3-int8-sparse-v2-tf-0001.bin
 framework: dldt

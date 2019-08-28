@@ -19,15 +19,19 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/text-recognition-0012.xml
+    size: 50357
     sha256: b02671bb96f5699e39b80213005f30d144c42b7e12f97913c3debcb364e36b52
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-recognition-0012/FP32/text-recognition-0012.xml
   - name: FP32/text-recognition-0012.bin
+    size: 47470764
     sha256: df7426c3a16c005eda3c9efc6afeefe38259b36748819fc0b28f3d2a67c16239
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-recognition-0012/FP32/text-recognition-0012.bin
   - name: FP16/text-recognition-0012.xml
+    size: 50333
     sha256: b4d9e00f5e88e6a257b8b96ad2e99e1a72f2669a9fb1ea1861b2efb2ac597eda
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-recognition-0012/FP16/text-recognition-0012.xml
   - name: FP16/text-recognition-0012.bin
+    size: 23735394
     sha256: 657f2b3fdcab897980f976692bb0b93bd05f7b29b111bfe518726ef5c835c786
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-recognition-0012/FP16/text-recognition-0012.bin
 framework: dldt

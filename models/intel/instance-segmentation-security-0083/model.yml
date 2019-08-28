@@ -19,15 +19,19 @@ description: >-
 task_type: instance_segmentation
 files:
   - name: FP32/instance-segmentation-security-0083.xml
+    size: 254762
     sha256: 63a93786c3b45598165e5f7a226ed7ad67601a51e1d35d7dfd88302e4a78095a
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/instance-segmentation-security-0083/FP32/instance-segmentation-security-0083.xml
   - name: FP32/instance-segmentation-security-0083.bin
+    size: 564274416
     sha256: 3226bf893e9877749c723532164952416dab5b812e825ad533c44285207a2f23
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/instance-segmentation-security-0083/FP32/instance-segmentation-security-0083.bin
   - name: FP16/instance-segmentation-security-0083.xml
+    size: 254558
     sha256: c1a6fc6dce895252b7341933061db188a40773b101ecfd7c9d274042368e91a2
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/instance-segmentation-security-0083/FP16/instance-segmentation-security-0083.xml
   - name: FP16/instance-segmentation-security-0083.bin
+    size: 282137218
     sha256: 885f156f0947d873024dcdce51b1c5e59b60dd34d26b5bcc98da39b2267cca8b
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/instance-segmentation-security-0083/FP16/instance-segmentation-security-0083.bin
 framework: dldt

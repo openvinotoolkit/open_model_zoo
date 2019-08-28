@@ -28,15 +28,19 @@ description: >-
 task_type: classification
 files:
   - name: FP32/resnet-50-int8-tf-0001.xml
+    size: 1434852
     sha256: 27e9bc3b785fab357e84734722f51c4aee308946f05792be4c24e766fdfed477
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/resnet-50-int8-tf-0001/FP32/resnet-50-int8-tf-0001.xml
   - name: FP32/resnet-50-int8-tf-0001.bin
+    size: 102121960
     sha256: 1aa88c32c3d4bcef7945be75a18e805076db706f39da5242d62cbbcfa7172303
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/resnet-50-int8-tf-0001/FP32/resnet-50-int8-tf-0001.bin
   - name: FP16/resnet-50-int8-tf-0001.xml
+    size: 1434792
     sha256: 390d13c3f390b7430fc832a01cc7ce5e2004664703f4479cf698bfe1baa51e2c
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/resnet-50-int8-tf-0001/FP16/resnet-50-int8-tf-0001.xml
   - name: FP16/resnet-50-int8-tf-0001.bin
+    size: 51061004
     sha256: 0b252f934968afbe6a6dd096e1c4cc542bae8bcd27d4b6a6755e222fde770c19
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/resnet-50-int8-tf-0001/FP16/resnet-50-int8-tf-0001.bin
 framework: dldt

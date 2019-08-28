@@ -25,15 +25,19 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/action-recognition-0001-decoder.xml
+    size: 104052
     sha256: 022d1249402eaf4d50a4e6dcf0d9df4198a3248d409474d82271cacee9986cb6
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.xml
   - name: FP32/action-recognition-0001-decoder.bin
+    size: 30238472
     sha256: 3fe939d259eb096dba98c6e0870237399344a415ae49d33b729812a8d34c4cf3
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.bin
   - name: FP16/action-recognition-0001-decoder.xml
+    size: 104016
     sha256: 7fb29a3e7274d3b2dcbbc2f82a9e241415ecd0e85bc092c88b4ddbe5ebe4347d
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.xml
   - name: FP16/action-recognition-0001-decoder.bin
+    size: 15119336
     sha256: ba5d5b410c9e8f3cb198e92868d494f69ab2048cf739c397acfa58c9b9ddb92a
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
 framework: dldt

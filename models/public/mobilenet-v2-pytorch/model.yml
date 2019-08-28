@@ -26,6 +26,7 @@ description: >-
 task_type: classification
 files:
   - name: MobileNetV2.py
+    size: 4213
     sha256: 7071e01e07e5f1b6127a2628d1be9c65cc20edfa745f4f4eb6354e7b27f5b444
     source: https://raw.githubusercontent.com/tonylins/pytorch-mobilenet-v2/fa86a85e4026caa217fe8d62f370848195cedf4b/MobileNetV2.py
   - name: mobilenet-v2.pth

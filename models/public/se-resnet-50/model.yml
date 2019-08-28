@@ -17,6 +17,7 @@ description: >-
 task_type: classification
 files:
   - name: se-resnet-50.prototxt
+    size: 49272
     sha256: eebbe3c64201f34492caf501498f6031152edbd4a44ed106de69441060ff117c
     source: https://raw.githubusercontent.com/hujie-frank/SENet/369374b0678907a0e45c6f267256c7c34203177e/models/SE-ResNet-50.prototxt
   - name: se-resnet-50.caffemodel

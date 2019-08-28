@@ -19,15 +19,19 @@ description: >-
 task_type: image_processing
 files:
   - name: FP32/single-image-super-resolution-1032.xml
+    size: 26468
     sha256: 9e07cc539924ad57d4088a2f290eb115a6d1b3a60650c39a739c5b6115af7c77
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
   - name: FP32/single-image-super-resolution-1032.bin
+    size: 119424
     sha256: e2403b56bd57b0e7c68e33dad3fb1af5e3f0be4a3ad7c7cbc1836fddf0c062b0
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
   - name: FP16/single-image-super-resolution-1032.xml
+    size: 26448
     sha256: 1b56a9ce00fd386382cba178030f9ad58825d257db90338ddbadfddb68347a2a
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
   - name: FP16/single-image-super-resolution-1032.bin
+    size: 59752
     sha256: ac8a8c9387098ae9bc0cbda82cfe3235c9d2f9652277bbf07d78b96d2c4ff7e9
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
 framework: dldt
