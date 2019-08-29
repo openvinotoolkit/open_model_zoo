@@ -16,7 +16,7 @@ import queue
 import numpy as np
 from scipy.spatial.distance import cosine
 
-from .sct import SingleCameraTracker, clusters_distance
+from .sct import SingleCameraTracker, clusters_distance, THE_BIGGEST_DISTANCE
 
 
 class MultiCameraTracker:
@@ -63,7 +63,7 @@ class MultiCameraTracker:
         self.time += 1
 
     def _compute_mct_distance_matrix(self, all_tracks):
-        distance_matrix = 10*np.eye(len(all_tracks), dtype=np.float32)
+        distance_matrix = THE_BIGGEST_DISTANCE * np.eye(len(all_tracks), dtype=np.float32)
         for i, track1 in enumerate(all_tracks):
             for j, track2 in enumerate(all_tracks):
                 if j >= i:

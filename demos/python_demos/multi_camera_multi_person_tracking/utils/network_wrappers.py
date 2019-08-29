@@ -24,7 +24,7 @@ class Detector:
         self.max_num_frames = max_num_frames
 
     def get_detections(self, frames):
-        """Returns all detections on frame"""
+        """Returns all detections on frames"""
         assert len(frames) <= self.max_num_frames
 
         all_detections = []

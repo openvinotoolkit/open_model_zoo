@@ -21,6 +21,8 @@ from scipy.spatial.distance import cosine, cdist
 
 from utils.misc import none_to_zero
 
+THE_BIGGEST_DISTANCE = 10.
+
 
 class TrackedObj:
     def __init__(self, rect, label):
@@ -221,7 +223,7 @@ class SingleCameraTracker:
             clear_tracks.append(track)
         self.tracks = clear_tracks
 
-        distance_matrix = 10*np.eye(len(self.tracks), dtype=np.float32)
+        distance_matrix = THE_BIGGEST_DISTANCE * np.eye(len(self.tracks), dtype=np.float32)
         for i, track1 in enumerate(self.tracks):
             for j, track2 in enumerate(self.tracks):
                 if j >= i:
