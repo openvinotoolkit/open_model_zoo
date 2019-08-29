@@ -40,13 +40,13 @@ pip3 install -r requirements.txt
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: multi_camera_multi_person_tracking.py [-h] -i I [I ...] -d PD_MODEL
-                                             [--pd_thresh PD_THRESH] -r REID
+usage: multi_camera_multi_person_tracking.py [-h] -i I [I ...] -m M_DETECTOR
+                                             [--t_detector T_DETECTOR]
+                                             --m_reid M_REID
                                              [--output_video OUTPUT_VIDEO]
                                              [--config CONFIG]
                                              [--history_file HISTORY_FILE]
-                                             [--device DEVICE]
-                                             [-l CPU_EXTENSION]
+                                             [-d DEVICE] [-l CPU_EXTENSION]
 
 Multi camera multi person tracking live demo script
 
@@ -54,15 +54,15 @@ optional arguments:
   -h, --help            show this help message and exit
   -i I [I ...]          Input sources (indexes of cameras or paths to video
                         files)
-  -d PD_MODEL, --pd_model PD_MODEL
-                        Path to the detection model
-  --pd_thresh PD_THRESH
-                        Threshold for person detection model
-  -r REID, --reid REID  Path to the reidentification model
+  -m M_DETECTOR, --m_detector M_DETECTOR
+                        Path to the person detection model
+  --t_detector T_DETECTOR
+                        Threshold for the person detection model
+  --m_reid M_REID       Path to the person reidentification model
   --output_video OUTPUT_VIDEO
   --config CONFIG
   --history_file HISTORY_FILE
-  --device DEVICE
+  -d DEVICE, --device DEVICE
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         MKLDNN (CPU)-targeted custom layers.Absolute path to a
                         shared library with the kernels impl.
