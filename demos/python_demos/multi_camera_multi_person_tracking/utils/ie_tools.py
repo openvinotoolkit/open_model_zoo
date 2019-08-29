@@ -1,5 +1,5 @@
 """
- Copyright (c) 2018 Intel Corporation
+ Copyright (c) 2019 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -95,5 +95,4 @@ def load_ie_model(model_xml, device, plugin_dir, cpu_extension='', num_reqs=1):
     log.info("Loading model to the plugin")
     exec_net = ie.load_network(network=net, device_name=device, num_requests=num_reqs)
     model = IEModel(exec_net, net.inputs, input_blob, out_blob)
-    del net
     return model

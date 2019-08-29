@@ -40,7 +40,7 @@ pip3 install -r requirements.txt
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: run.py [-h] [--videos VIDEOS [VIDEOS ...]]
+usage: multi_camera_multi_person_tracking.py [-h] [--videos VIDEOS [VIDEOS ...]]
               [--cam_ids CAM_IDS [CAM_IDS ...]] --pd_model PD_MODEL
               [--pd_thresh PD_THRESH] [--pr_model PR_MODEL]
               [--pr_thresh PR_THRESH] [--output_video OUTPUT_VIDEO]
@@ -73,16 +73,18 @@ Minimum command examples to run the demo:
 
 ```
 # videos
-python run.py \
+python multi_camera_multi_person_tracking.py \
     --videos path/to/video_1.avi path/to/video_2.avi \
     --pd_model path/to/person-detection-retail-0013.xml \
-    --pr_model path/to/person-reidentification-retail-0076.xml
+    --pr_model path/to/person-reidentification-retail-0076.xml \
+    --config config.py
 
 # web-cameras
-python run.py \
+python multi_camera_multi_person_tracking.py \
     --cam_ids 0 1 \
     --pd_model path/to/person-detection-retail-0013.xml \
-    --pr_model path/to/person-reidentification-retail-0076.xml
+    --pr_model path/to/person-reidentification-retail-0076.xml \
+    --config config.py
 ```
 
 ## Demo Output

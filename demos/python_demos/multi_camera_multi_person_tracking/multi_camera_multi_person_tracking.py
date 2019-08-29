@@ -26,7 +26,7 @@ from utils.video import MulticamCapture
 from utils.visualization import visualize_multicam_detections
 
 
-class frames_thread_body:
+class FramesThreadBody:
     def __init__(self, capture, max_queue_length=2):
         self.process = True
         self.frames_queue = queue.Queue()
@@ -53,7 +53,7 @@ def run(params, capture, detector, reid):
 
     tracker = MultiCameraTracker(capture.get_num_sources(), reid, **config)
 
-    thread_body = frames_thread_body(capture, max_queue_length=len(capture.captures) * 2)
+    thread_body = FramesThreadBody(capture, max_queue_length=len(capture.captures) * 2)
     frames_thread = Thread(target=thread_body)
     frames_thread.start()
 
