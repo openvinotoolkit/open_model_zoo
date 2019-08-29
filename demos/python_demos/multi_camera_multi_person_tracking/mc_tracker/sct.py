@@ -82,7 +82,7 @@ class SingleCameraTracker:
                  time_window=10,
                  continue_time_thresh=2,
                  track_clear_thresh=3000,
-                 match_threshold=1.,
+                 match_threshold=0.4,
                  merge_thresh=0.35,
                  n_clusters=4,
                  max_bbox_velocity=0.2,
@@ -234,7 +234,7 @@ class SingleCameraTracker:
                         f_clust_dist = clusters_distance(track1['f_cluster'], track2['f_cluster'])
                         distance_matrix[i, j] = min(f_avg_dist, f_clust_dist)
                 else:
-                    distance_matrix[i, j] = 10
+                    distance_matrix[i, j] = THE_BIGGEST_DISTANCE
         distance_matrix += np.transpose(distance_matrix)
 
         assignment = [None]*distance_matrix.shape[0]
