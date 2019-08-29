@@ -11,10 +11,11 @@
  limitations under the License.
 """
 
-import cv2
 import random
 from copy import deepcopy as copy
+from collections import namedtuple
 
+import cv2
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cosine, cdist
@@ -23,11 +24,7 @@ from utils.misc import none_to_zero
 
 THE_BIGGEST_DISTANCE = 10.
 
-
-class TrackedObj:
-    def __init__(self, rect, label):
-        self.rect = rect
-        self.label = label
+TrackedObj = namedtuple('TrackedObj', 'rect label')
 
 
 class ClusterFeature:

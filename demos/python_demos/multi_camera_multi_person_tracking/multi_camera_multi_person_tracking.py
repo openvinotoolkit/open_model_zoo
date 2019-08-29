@@ -111,19 +111,19 @@ def main():
     parser.add_argument('-i', type=str, nargs='+', help='Input sources (indexes \
                         of cameras or paths to video files)', required=True)
 
-    parser.add_argument('-d', '--pd_model', type=str, required=True,
-                        help='Path to the detection model')
-    parser.add_argument('--pd_thresh', type=float, default=0.6,
-                        help='Threshold for person detection model')
+    parser.add_argument('-m', '--m_detector', type=str, required=True,
+                        help='Path to the person detection model')
+    parser.add_argument('--t_detector', type=float, default=0.6,
+                        help='Threshold for the person detection model')
 
-    parser.add_argument('-r', '--reid', type=str, required=True,
-                        help='Path to the reidentification model')
+    parser.add_argument('--m_reid', type=str, required=True,
+                        help='Path to the person reidentification model')
 
     parser.add_argument('--output_video', type=str, default='', required=False)
     parser.add_argument('--config', type=str, default='', required=False)
     parser.add_argument('--history_file', type=str, default='', required=False)
 
-    parser.add_argument('--device', type=str, default='CPU')
+    parser.add_argument('-d', '--device', type=str, default='CPU')
     parser.add_argument('-l', '--cpu_extension',
                         help='MKLDNN (CPU)-targeted custom layers.Absolute \
                               path to a shared library with the kernels impl.',
@@ -133,11 +133,11 @@ def main():
 
     capture = MulticamCapture(args.i)
 
-    person_detector = Detector(args.pd_model, args.pd_thresh,
+    person_detector = Detector(args.m_detector, args.t_detector,
                                args.device, args.cpu_extension,
                                capture.get_num_sources())
-    if args.reid:
-        person_recognizer = VectorCNN(args.reid, args.device)
+    if args.m_reid:
+        person_recognizer = VectorCNN(args.m_reid, args.device)
     else:
         person_recognizer = None
     run(args, capture, person_detector, person_recognizer)
