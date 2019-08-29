@@ -96,7 +96,8 @@ detect areas with complex shape (for example, free space on the road).
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [road-segmentation-adas-0001](./road-segmentation-adas-0001/description/road-segmentation-adas-0001.md)                                        | 4.770                | 0.184      |
 | [semantic-segmentation-adas-0001](./semantic-segmentation-adas-0001/description/semantic-segmentation-adas-0001.md)                            | 58.572               | 6.686      |
-
+| [icnet-camvid-fp32-onnx-0001](./icnet-camvid-fp32-onnx-0001/description/icnet-camvid-fp32-onnx-0001.md)                            | -               | -      |
+| [unet-camvid-fp32-onnx-0001](./unet-camvid-fp32-onnx-0001/description/unet-camvid-fp32-onnx-0001.md)                            | -              | -      |
 
 ## Instance Segmentation Models
 
@@ -194,6 +195,10 @@ Deep Learning compressed models
 | [mobilenetv2-int8-tf-0001](./mobilenetv2-int8-tf-0001/description/mobilenetv2-int8-tf-0001.md)                                                 | 0.615                | 3.489      |
 | [mobilenetv2-int8-sparse-v1-tf-0001](./mobilenetv2-int8-sparse-v1-tf-0001/description/mobilenetv2-int8-sparse-v1-tf-0001.md)                   | 0.615                | 3.489      |
 | [mobilenetv2-int8-sparse-v2-tf-0001](./mobilenetv2-int8-sparse-v2-tf-0001/description/mobilenetv2-int8-sparse-v2-tf-0001.md)                   | 0.615                | 3.489      |
+| [icnet-camvid-int8-onnx-0001](./icnet-camvid-int8-onnx-0001/description/icnet-camvid-int8-onnx-0001.md)                   | -                | -      |
+| [icnet-camvid-int8-sparse-v2-onnx-0001](./icnet-camvid-int8-sparse-v2-onnx-0001/description/icnet-camvid-int8-sparse-v2-onnx-0001.md)                   | -                | -      |
+| [unet-camvid-int8-onnx-0001](./unet-camvid-int8-onnx-0001/description/unet-camvid-int8-onnx-0001.md)                   | -                | -      |
+| [unet-camvid-int8-sparse-v2-onnx-0001](./unet-camvid-int8-sparse-v2-onnx-0001/description/unet-camvid-int8-sparse-v2-onnx-0001.md)                   | -                | -      |
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
