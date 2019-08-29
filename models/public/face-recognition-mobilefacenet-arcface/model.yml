@@ -17,6 +17,7 @@ description: >-
 task_type: face_recognition
 files:
   - name: model-MobileFaceNet-arcface-ms1m-refine-v1.zip
+    size: 3911771
     sha256: 1a3ffb4c930a2398f68bc45f0eb86058a514c00808176303303f0783f494c2d1
     source: https://www.dropbox.com/s/akxeqp99jvsd6z7/model-MobileFaceNet-arcface-ms1m-refine-v1.zip?dl=1
 postprocessing:

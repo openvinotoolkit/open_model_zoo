@@ -17,6 +17,7 @@ description: >-
 task_type: face_recognition
 files:
   - name: model-r34-arcface-ms1m-refine-v1.zip
+    size: 127123169
     sha256: efceea8a75b9f461772173d96670cfc678bdb507e1742c5b31cd3eda9407ffbf
     source: https://www.dropbox.com/s/yp7y6jic464l09z/model-r34-arcface-ms1m-refine-v1.zip?dl=1
 postprocessing:
