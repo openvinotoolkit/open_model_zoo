@@ -1,5 +1,7 @@
 # face-recognition-resnet100-arcface
 
+This model is originally named LResNet100E-IR,ArcFace@ms1m-refine-v2 [source](https://github.com/deepinsight/insightface/wiki/Model-Zoo)
+
 ## Use Case and High-Level Description
 
 [Deep face recognition net with ResNet100 backbone and Arcface loss](https://arxiv.org/abs/1801.07698)

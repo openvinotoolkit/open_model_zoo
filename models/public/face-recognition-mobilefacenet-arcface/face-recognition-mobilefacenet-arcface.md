@@ -1,5 +1,7 @@
 # face-recognition-mobilefacenet-arcface
 
+This model is originally named MobileFaceNet,ArcFace@ms1m-refine-v1 [source](https://github.com/deepinsight/insightface/wiki/Model-Zoo)
+
 ## Use Case and High-Level Description
 
 [Deep face recognition net with MobileFaceNet backbone and Arcface loss](https://arxiv.org/abs/1801.07698)
