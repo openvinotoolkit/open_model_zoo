@@ -18,15 +18,19 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/facial-landmarks-35-adas-0002.xml
+    size: 110798
     sha256: cbeec1382711cea61f94b8c8c8e1e5acc29d0d06d1efb6e9d4f4b73cbf56d6f0
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml
   - name: FP32/facial-landmarks-35-adas-0002.bin
+    size: 18381136
     sha256: 232b1a25de480227f36428fdb11a7a1f623acf37eb4232ced5fabac9b7dd2ad7
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
   - name: FP16/facial-landmarks-35-adas-0002.xml
+    size: 110662
     sha256: 1d3f3b4c2fec2a75a3712e8bca1ef7cda6d2bc6d3ebb4fbfa5883421fe5aac10
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.xml
   - name: FP16/facial-landmarks-35-adas-0002.bin
+    size: 9190568
     sha256: b8945ba897072289c8cb44357bd211e728ecd1c093c1d4777b79d118a19ab58a
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
 framework: dldt

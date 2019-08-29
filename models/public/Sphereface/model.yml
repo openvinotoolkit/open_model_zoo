@@ -17,6 +17,7 @@ description: >-
 task_type: face_recognition
 files:
   - name: Sphereface.prototxt
+    size: 11090
     sha256: 7cf5808fd0561db20daae862b83677b7437e788420fae68ab8d97c935e67d82c
     source: https://raw.githubusercontent.com/wy1iu/sphereface/7f9acb157c78a99dbefd041fce9f188400bbb4e5/train/code/sphereface_deploy.prototxt
   - name: Sphereface.caffemodel

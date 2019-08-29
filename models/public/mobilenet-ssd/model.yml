@@ -27,6 +27,7 @@ description: >-
 task_type: detection
 files:
   - name: mobilenet-ssd.prototxt
+    size: 29353
     sha256: e781559c4f5beaec2a486ccd952af5b6fa408e9498761bf5f4fb80b4e9f0d25e
     source: https://raw.githubusercontent.com/chuanqi305/MobileNet-SSD/ba00fc987b3eb0ba87bb99e89bf0298a2fd10765/MobileNetSSD_deploy.prototxt
   - name: mobilenet-ssd.caffemodel

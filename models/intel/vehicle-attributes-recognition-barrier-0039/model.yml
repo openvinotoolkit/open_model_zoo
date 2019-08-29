@@ -18,21 +18,27 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/vehicle-attributes-recognition-barrier-0039.xml
+    size: 18117
     sha256: eb7022336e05b57cf46e8a8cc5cbce85f4a28d40b0731cbe2e5452950fba2ef2
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.xml
   - name: FP32/vehicle-attributes-recognition-barrier-0039.bin
+    size: 2504004
     sha256: 8195ea60216d9aefdab41e3129900aa847f4f0d3d003ce93aa15ecba0ca18e91
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.bin
   - name: FP16/vehicle-attributes-recognition-barrier-0039.xml
+    size: 18103
     sha256: 9d7ffb084a2dab087f63f0671c95703a80a85bc451d9326699c56d3c2e2fdb05
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.xml
   - name: FP16/vehicle-attributes-recognition-barrier-0039.bin
+    size: 1252002
     sha256: be8b61e337a23ffa57d1742f92d2317560303652f330fef0cbe918161bfcaf50
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.bin
   - name: INT8/vehicle-attributes-recognition-barrier-0039.xml
+    size: 64190
     sha256: 6241052429bee567936b18f5c81db0c600c6e43c48dd64d20f6b56cb8681be1c
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/vehicle-attributes-recognition-barrier-0039/INT8/vehicle-attributes-recognition-barrier-0039.xml
   - name: INT8/vehicle-attributes-recognition-barrier-0039.bin
+    size: 2504004
     sha256: 4ca9587b866ecc92418b87424ec5becb05f73a9781cd2eab6abeff7a54067590
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/vehicle-attributes-recognition-barrier-0039/INT8/vehicle-attributes-recognition-barrier-0039.bin
 framework: dldt

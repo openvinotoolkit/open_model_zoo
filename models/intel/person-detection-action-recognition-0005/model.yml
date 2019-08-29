@@ -22,21 +22,27 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-action-recognition-0005.xml
+    size: 282034
     sha256: fafac8c503d5dd8216b7a55c797d85ab1e37e72f7d20b4573049097abd094dd1
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.xml
   - name: FP32/person-detection-action-recognition-0005.bin
+    size: 7800264
     sha256: b68ab79b18b570569024665ec9a72e1c15568c5721d243e0e74f0423560361db
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.bin
   - name: FP16/person-detection-action-recognition-0005.xml
+    size: 281790
     sha256: b9c879858c2c1308d82bd3038705cff9290d7757ae72fcdff5be6e8701514d2c
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.xml
   - name: FP16/person-detection-action-recognition-0005.bin
+    size: 3900138
     sha256: 72263b506b29f7d41eadd33386d67faebea19b35cf799ae876a807d35160da8f
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.bin
   - name: INT8/person-detection-action-recognition-0005.xml
+    size: 2081562
     sha256: 27ca878ed286ab655a681a1ec32f8b930fedcae59395f6fd3defddc8bcfb4fea
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-action-recognition-0005/INT8/person-detection-action-recognition-0005.xml
   - name: INT8/person-detection-action-recognition-0005.bin
+    size: 7804916
     sha256: f154273ce9138d2314f68e24a2319fd1add8e9099bd3f8163e939b7d09e73df6
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-action-recognition-0005/INT8/person-detection-action-recognition-0005.bin
 framework: dldt

@@ -17,6 +17,7 @@ description: >-
 task_type: classification
 files:
   - name: se-inception.prototxt
+    size: 66438
     sha256: 57813dfc27113ce1bc714b069d574f80643ad58480e6f35bdf1dec690075c6b3
     source: https://raw.githubusercontent.com/hujie-frank/SENet/369374b0678907a0e45c6f267256c7c34203177e/models/SE-BN-Inception.prototxt
   - name: se-inception.caffemodel

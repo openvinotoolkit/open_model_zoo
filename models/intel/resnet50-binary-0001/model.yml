@@ -21,9 +21,11 @@ description: >-
 task_type: classification
 files:
   - name: INT1/resnet50-binary-0001.xml
+    size: 169246
     sha256: 1a7e41ab273f9e7b064e60e889ba2f13ce1b07cb4610096bd3abef33a93bf992
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/resnet50-binary-0001/INT1/resnet50-binary-0001.xml
   - name: INT1/resnet50-binary-0001.bin
+    size: 22112960
     sha256: e843a458ae786f860698919709fb0852ef8138d4461ce8c744f96fe29ef0d580
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/resnet50-binary-0001/INT1/resnet50-binary-0001.bin
 framework: dldt

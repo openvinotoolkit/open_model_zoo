@@ -19,6 +19,7 @@ description: >-
 task_type: object_attributes
 files:
   - name: image-retrieval-0001.tar.gz
+    size: 47406715
     sha256: e73255a04d6dd860c48168410f347ec96f85e52fba3aa93bbc17eaf72fe1e80f
     source: https://download.01.org/opencv/openvino_training_extensions/models/image_retrieval/image-retrieval-0001.tar.gz
 postprocessing:

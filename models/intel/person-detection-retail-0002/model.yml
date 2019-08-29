@@ -16,15 +16,19 @@ description: Person detection (HyperNet+RFCN+DetectionOutput).
 task_type: detection
 files:
   - name: FP32/person-detection-retail-0002.xml
+    size: 132328
     sha256: 157f22003cdbd1b6c2ee4368d4a39b589f0a31f32571eda6424a37b42c7a0a03
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0002/FP32/person-detection-retail-0002.xml
   - name: FP32/person-detection-retail-0002.bin
+    size: 12976388
     sha256: 78f600869517ee2a9ecc79505b5cfab9849c4c4494035041993c97cc7f4fb745
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0002/FP32/person-detection-retail-0002.bin
   - name: FP16/person-detection-retail-0002.xml
+    size: 132204
     sha256: f09d1e90bb33706ffacbec9a52ab014438efbef4a38040875c289b18fd30783c
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0002/FP16/person-detection-retail-0002.xml
   - name: FP16/person-detection-retail-0002.bin
+    size: 6488220
     sha256: 04d28806b41709a01e803a1da0894c17d8033f93e6d38822a732f2ba2fe6ea1c
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0002/FP16/person-detection-retail-0002.bin
 framework: dldt
