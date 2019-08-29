@@ -3721,6 +3721,7 @@ License terms:
 * octave-resnet-200-0.125 - octave convolution networks https://github.com/facebookresearch/OctConv
 * octave-resnext-50-0.25 - octave convolution networks https://github.com/facebookresearch/OctConv
 * octave-resnext-101-0.25 - octave convolution networks https://github.com/facebookresearch/OctConv
+* octave-se-resnet-50-0.125  - octave convolution networks https://github.com/facebookresearch/OctConv
 
 License terms:
 
