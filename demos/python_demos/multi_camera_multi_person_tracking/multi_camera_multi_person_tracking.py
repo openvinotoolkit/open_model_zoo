@@ -16,6 +16,8 @@ import time
 import queue
 from threading import Thread
 import json
+import logging as log
+import sys
 
 import cv2 as cv
 
@@ -24,6 +26,8 @@ from mc_tracker.mct import MultiCameraTracker
 from utils.misc import read_py_config
 from utils.video import MulticamCapture
 from utils.visualization import visualize_multicam_detections
+
+log.basicConfig(stream=sys.stdout, level=log.DEBUG)
 
 
 class FramesThreadBody:
@@ -104,17 +108,16 @@ def main():
     """Prepares data for the person recognition demo"""
     parser = argparse.ArgumentParser(description='Multi camera multi person \
                                                   tracking live demo script')
-    parser.add_argument('--videos', type=str, nargs='+', help='Input videos')
-    parser.add_argument('--cam_ids', type=int, nargs='+', default=[-1],
-                        help='Indexes of input cameras')
+    parser.add_argument('-i', type=str, nargs='+', help='Input sources (indexes \
+                        of cameras or paths to video files)', required=True)
 
-    parser.add_argument('--pd_model', type=str, required=True)
+    parser.add_argument('-d', '--pd_model', type=str, required=True,
+                        help='Path to the detection model')
     parser.add_argument('--pd_thresh', type=float, default=0.6,
                         help='Threshold for person detection model')
 
-    parser.add_argument('--pr_model', type=str, required=False)
-    parser.add_argument('--pr_thresh', type=float, default=0.6,
-                        help='Threshold for person re-identification model')
+    parser.add_argument('-r', '--reid', type=str, required=True,
+                        help='Path to the reidentification model')
 
     parser.add_argument('--output_video', type=str, default='', required=False)
     parser.add_argument('--config', type=str, default='', required=False)
@@ -128,18 +131,17 @@ def main():
 
     args = parser.parse_args()
 
-    if args.cam_ids[0] >= 0:
-        capture = MulticamCapture(args.cam_ids, 'cam')
-    else:
-        capture = MulticamCapture(args.videos, 'video')
+    capture = MulticamCapture(args.i)
 
     person_detector = Detector(args.pd_model, args.pd_thresh,
-                               args.device, args.cpu_extension, capture.get_num_sources())
-    if args.pr_model:
-        person_recognizer = VectorCNN(args.pr_model, args.device)
+                               args.device, args.cpu_extension,
+                               capture.get_num_sources())
+    if args.reid:
+        person_recognizer = VectorCNN(args.reid, args.device)
     else:
         person_recognizer = None
     run(args, capture, person_detector, person_recognizer)
+    log.info('Demo finished successfully')
 
 
 if __name__ == '__main__':

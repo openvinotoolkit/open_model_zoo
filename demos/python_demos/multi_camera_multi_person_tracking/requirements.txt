@@ -1,4 +1,3 @@
 opencv-python
 numpy
 scipy
-glog

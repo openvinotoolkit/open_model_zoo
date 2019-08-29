@@ -1,3 +1,7 @@
+# This config is tuned for the bundle of person-detection-retail-xxx and person-reidentification-retail-xxx
+# models, but should be suitable for other well-trained detector and reid models
+# Alse all tracking update intervals are set assumin input frequency about 30FPS
+
 time_window = 20
 global_match_thresh = 0.35
 

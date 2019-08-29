@@ -11,15 +11,21 @@
  limitations under the License.
 """
 
+import logging as log
 import cv2 as cv
-import glog as log
 
 
 class MulticamCapture:
-    def __init__(self, sources, mode):
+    def __init__(self, sources):
         assert sources
-        assert mode in ['video', 'cam']
         self.captures = []
+
+        try:
+            sources = [int(src) for src in sources]
+            mode = 'cam'
+        except ValueError:
+            mode = 'video'
+
         if mode == 'cam':
             for id in sources:
                 log.info('Connection  cam {}'.format(id))

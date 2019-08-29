@@ -40,27 +40,25 @@ pip3 install -r requirements.txt
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: multi_camera_multi_person_tracking.py [-h] [--videos VIDEOS [VIDEOS ...]]
-              [--cam_ids CAM_IDS [CAM_IDS ...]] --pd_model PD_MODEL
-              [--pd_thresh PD_THRESH] [--pr_model PR_MODEL]
-              [--pr_thresh PR_THRESH] [--output_video OUTPUT_VIDEO]
-              [--config CONFIG] [--history_file HISTORY_FILE]
-              [--device DEVICE] [-l CPU_EXTENSION]
+usage: multi_camera_multi_person_tracking.py [-h] -i I [I ...] -d PD_MODEL
+                                             [--pd_thresh PD_THRESH] -r REID
+                                             [--output_video OUTPUT_VIDEO]
+                                             [--config CONFIG]
+                                             [--history_file HISTORY_FILE]
+                                             [--device DEVICE]
+                                             [-l CPU_EXTENSION]
 
 Multi camera multi person tracking live demo script
 
 optional arguments:
   -h, --help            show this help message and exit
-  --videos VIDEOS [VIDEOS ...]
-                        Input videos
-  --cam_ids CAM_IDS [CAM_IDS ...]
-                        Indexes of input cameras
-  --pd_model PD_MODEL
+  -i I [I ...]          Input sources (indexes of cameras or paths to video
+                        files)
+  -d PD_MODEL, --pd_model PD_MODEL
+                        Path to the detection model
   --pd_thresh PD_THRESH
                         Threshold for person detection model
-  --pr_model PR_MODEL
-  --pr_thresh PR_THRESH
-                        Threshold for person re-identification model
+  -r REID, --reid REID  Path to the reidentification model
   --output_video OUTPUT_VIDEO
   --config CONFIG
   --history_file HISTORY_FILE

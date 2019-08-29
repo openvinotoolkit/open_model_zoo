@@ -14,7 +14,7 @@
 import sys
 import os
 
-import glog as log
+import logging as log
 import numpy as np
 from openvino.inference_engine import IENetwork, IECore # pylint: disable=import-error,E0611
 import cv2 as cv
