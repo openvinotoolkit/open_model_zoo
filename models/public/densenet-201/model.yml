@@ -31,6 +31,7 @@ description: >-
 task_type: classification
 files:
   - name: densenet-201.prototxt
+    size: 127588
     sha256: 8edf61f867491315bc3780a41f74392c2a31042d20932eb145424a2dc8c6f8f7
     source: https://raw.githubusercontent.com/shicai/DenseNet-Caffe/a68651c0b91d8dcb7c0ecd39d1fc76da523baf8a/DenseNet_201.prototxt
   - name: densenet-201.caffemodel

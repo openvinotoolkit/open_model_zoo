@@ -21,21 +21,27 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/person-reidentification-retail-0031.xml
+    size: 66578
     sha256: d7578559b9188b1df506f1e85ad9cdb23562f4bfc7fc16279cefdb919ebbe54d
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-reidentification-retail-0031/FP32/person-reidentification-retail-0031.xml
   - name: FP32/person-reidentification-retail-0031.bin
+    size: 1120184
     sha256: 8b9d349d330909815d2e75b57654c4cd6c27eb37c87d3280dfeaae03d166a4f4
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-reidentification-retail-0031/FP32/person-reidentification-retail-0031.bin
   - name: FP16/person-reidentification-retail-0031.xml
+    size: 66516
     sha256: 7c6847b695bada6c28afcbda810c12cc65eedfad52ae8cf26c576103262206d6
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.xml
   - name: FP16/person-reidentification-retail-0031.bin
+    size: 560092
     sha256: 833c136bcce82bcba6de6289fc21ee24f24d4597e52c41717c2602ee275b2f7d
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.bin
   - name: INT8/person-reidentification-retail-0031.xml
+    size: 258852
     sha256: b173a43e1bdc09b8dde60ef4fb932feaf3faac8e7f8d5c8e467485ae72d68a2d
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-reidentification-retail-0031/INT8/person-reidentification-retail-0031.xml
   - name: INT8/person-reidentification-retail-0031.bin
+    size: 1120184
     sha256: 5533422c49746f6856dca186822a9a15c47b88dffced26401b374ba99e731f57
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-reidentification-retail-0031/INT8/person-reidentification-retail-0031.bin
 framework: dldt

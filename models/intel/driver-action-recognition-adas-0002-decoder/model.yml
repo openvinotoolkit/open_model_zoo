@@ -25,15 +25,19 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/driver-action-recognition-adas-0002-decoder.xml
+    size: 106320
     sha256: 123df0cea03c315f2f1ff67d4d32dea46f5fa0933d81b1606854368dd846b8cd
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
   - name: FP32/driver-action-recognition-adas-0002-decoder.bin
+    size: 29436112
     sha256: ad9bdefcc540be5d704820fd6af43e1c5d7463a07de62cd24d27d8d081d9303e
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
   - name: FP16/driver-action-recognition-adas-0002-decoder.xml
+    size: 106284
     sha256: 86f15bf0a4d1216f2ef8697991f7f457f6a80241b5f6dab8727f252091ec2539
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
   - name: FP16/driver-action-recognition-adas-0002-decoder.bin
+    size: 14718142
     sha256: ab2ffc20577fc71c01bf850b325e261e29bd4470d3b6afd7ea4a940a3fb74fec
     source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
 framework: dldt

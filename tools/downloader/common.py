@@ -109,16 +109,11 @@ class FileSourceHttp(FileSource):
     def deserialize(cls, source):
         return cls(validate_string('"url"', source['url']))
 
-    def start_download(self, session, chunk_size, total_size=None):
+    def start_download(self, session, chunk_size):
         response = session.get(self.url, stream=True, timeout=DOWNLOAD_TIMEOUT)
         response.raise_for_status()
 
-        if total_size is None:
-            size = int(response.headers.get('content-length', 0))
-        else:
-            size = total_size
-
-        return response.iter_content(chunk_size=chunk_size), size
+        return response.iter_content(chunk_size=chunk_size)
 
 FileSource.types['http'] = FileSourceHttp
 
@@ -130,7 +125,7 @@ class FileSourceGoogleDrive(FileSource):
     def deserialize(cls, source):
         return cls(validate_string('"id"', source['id']))
 
-    def start_download(self, session, chunk_size, total_size):
+    def start_download(self, session, chunk_size):
         URL = 'https://docs.google.com/uc?export=download'
         response = session.get(URL, params={'id' : self.id}, stream=True, timeout=DOWNLOAD_TIMEOUT)
         response.raise_for_status()
@@ -141,7 +136,7 @@ class FileSourceGoogleDrive(FileSource):
                 response = session.get(URL, params=params, stream=True, timeout=DOWNLOAD_TIMEOUT)
                 response.raise_for_status()
 
-        return response.iter_content(chunk_size=chunk_size), total_size
+        return response.iter_content(chunk_size=chunk_size)
 
 FileSource.types['google_drive'] = FileSourceGoogleDrive
 
@@ -157,9 +152,7 @@ class ModelFile:
         name = validate_relative_path('"name"', file['name'])
 
         with deserialization_context('In file "{}"'.format(name)):
-            size = file.get('size')
-            if size is not None:
-                size = validate_nonnegative_int('"size"', size)
+            size = validate_nonnegative_int('"size"', file['size'])
 
             sha256 = validate_string('"sha256"', file['sha256'])
 

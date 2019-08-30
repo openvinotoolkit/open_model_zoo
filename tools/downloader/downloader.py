@@ -44,10 +44,7 @@ def process_download(chunk_iterable, size, file):
                 progress_size += len(chunk)
                 if duration != 0:
                     speed = progress_size // (1024 * duration)
-                    if size == 0:
-                        percent = '---'
-                    else:
-                        percent = str(min(progress_size * 100 // size, 100))
+                    percent = str(progress_size * 100 // size)
 
                     print('... %s%%, %d KB, %d KB/s, %d seconds passed' %
                             (percent, progress_size / 1024, speed, duration),
@@ -58,7 +55,7 @@ def process_download(chunk_iterable, size, file):
         if sys.stdout.isatty():
             print()
 
-def try_download(name, file, num_attempts, start_download):
+def try_download(file, num_attempts, start_download, size):
     for attempt in range(num_attempts):
         if attempt != 0:
             retry_delay = 10
@@ -66,7 +63,7 @@ def try_download(name, file, num_attempts, start_download):
             time.sleep(retry_delay)
 
         try:
-            chunk_iterable, size = start_download()
+            chunk_iterable = start_download()
             file.seek(0)
             file.truncate()
             process_download(chunk_iterable, size, file)
@@ -158,10 +155,10 @@ def try_update_cache(cache, hash, source):
         print(e)
         print('########## Warning: Failed to update the cache ##########')
 
-def try_retrieve(name, destination, expected_hash, cache, num_attempts, start_download):
+def try_retrieve(name, destination, model_file, cache, num_attempts, start_download):
     destination.parent.mkdir(parents=True, exist_ok=True)
 
-    if try_retrieve_from_cache(cache, [[expected_hash, destination]]):
+    if try_retrieve_from_cache(cache, [[model_file.sha256, destination]]):
         return True
 
     print('========= Downloading {}'.format(destination))
@@ -169,10 +166,10 @@ def try_retrieve(name, destination, expected_hash, cache, num_attempts, start_do
     success = False
 
     with destination.open('w+b') as f:
-        if try_download(name, f, num_attempts, start_download):
+        if try_download(f, num_attempts, start_download, model_file.size):
             f.seek(0)
-            if verify_hash(f, expected_hash, destination, name):
-                try_update_cache(cache, expected_hash, destination)
+            if verify_hash(f, model_file.sha256, destination, name):
+                try_update_cache(cache, model_file.sha256, destination)
                 success = True
 
     print('')
@@ -227,8 +224,8 @@ def main():
             for model_file in model.files:
                 destination = output / model_file.name
 
-                if not try_retrieve(model.name, destination, model_file.sha256, cache, args.num_attempts,
-                        lambda: model_file.source.start_download(session, CHUNK_SIZE, model_file.size)):
+                if not try_retrieve(model.name, destination, model_file, cache, args.num_attempts,
+                        lambda: model_file.source.start_download(session, CHUNK_SIZE)):
                     shutil.rmtree(str(output))
                     failed_models.add(model.name)
                     break
