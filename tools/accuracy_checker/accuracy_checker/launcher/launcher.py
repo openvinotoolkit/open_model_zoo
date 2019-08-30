@@ -20,8 +20,18 @@ from ..config import ConfigValidator, StringField, ListField, ConfigError, Input
 from ..dependency import ClassProvider
 from ..utils import get_parameter_value_from_config
 
+
 class LauncherConfigValidator(ConfigValidator):
+    def __init__(self, config_uri, fields=None, delayed_model_loading=False, **kwarg):
+        super().__init__(config_uri, fields=fields, **kwarg)
+        self.delayed_model_loading = delayed_model_loading
+
     def validate(self, entry, field_uri=None):
+        if self.delayed_model_loading:
+            if 'model' in self.fields:
+                self.fields['model'].optional = True
+            if 'weights' in self.fields:
+                self.fields['weights'].optional = True
         super().validate(entry, field_uri)
         inputs = entry.get('inputs')
         count_non_const_inputs = 0
@@ -85,7 +95,7 @@ class Launcher(ClassProvider):
     def get_value_from_config(self, key):
         return get_parameter_value_from_config(self.config, self.parameters(), key)
 
-    def predict(self, inputs, metadata, *args, **kwargs):
+    def predict(self, inputs, metadata=None, **kwargs):
         """
         Args:
             inputs: dictionary where keys are input layers names and values are data for them.
@@ -97,7 +107,7 @@ class Launcher(ClassProvider):
         raise NotImplementedError
 
     def __call__(self, context, *args, **kwargs):
-        context.prediction_batch = self.predict(context.input_blobs, context.batch_meta)
+        context.prediction_batch = self.predict(context.input_blobs, context.batch_meta, **kwargs)
 
     def release(self):
         raise NotImplementedError
@@ -138,6 +148,10 @@ class Launcher(ClassProvider):
             if layer_name not in self.const_inputs + self.image_info_inputs
         }
 
+    @property
+    def name(self):
+        return self.__provider__
+
 def unsupported_launcher(name, error_message=None):
     class UnsupportedLauncher(Launcher):
         __provider__ = name
@@ -148,7 +162,7 @@ def unsupported_launcher(name, error_message=None):
             msg = "{launcher} launcher is disabled. Please install {launcher} to enable it.".format(launcher=name)
             raise ValueError(error_message or msg)
 
-        def predict(self, identifiers, data, *args, **kwargs):
+        def predict(self, data, meta=None, **kwargs):
             raise NotImplementedError
 
         def release(self):
@@ -161,7 +175,7 @@ def unsupported_launcher(name, error_message=None):
     return UnsupportedLauncher
 
 
-def create_launcher(launcher_config):
+def create_launcher(launcher_config, delayed_model_loading=False):
     """
     Args:
         launcher_config: launcher configuration file entry.
@@ -171,9 +185,10 @@ def create_launcher(launcher_config):
 
     launcher_config_validator = LauncherConfigValidator(
         'Launcher_validator',
+        delayed_model_loading=delayed_model_loading,
         on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT,
     )
     launcher_config_validator.validate(launcher_config)
     config_framework = launcher_config['framework']
 
-    return Launcher.provide(config_framework, launcher_config)
+    return Launcher.provide(config_framework, launcher_config, delayed_model_loading=delayed_model_loading)

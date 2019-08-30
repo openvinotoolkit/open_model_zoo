@@ -7,7 +7,7 @@ You can use the following pre-trained model with the demo:
 * `single-image-super-resolution-1033`, which is the primary and only model that
   performs super resolution 4x upscale on a 200x200 image
 
-For more information about the pre-trained models, refer to the [model documentation](../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
 ## How It Works
 

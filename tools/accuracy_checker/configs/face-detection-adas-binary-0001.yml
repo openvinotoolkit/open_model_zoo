@@ -9,7 +9,6 @@ models:
         model:   Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/INT1/face-detection-adas-binary-0001.xml
         weights: Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/INT1/face-detection-adas-binary-0001.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
     datasets:
       - name: wider

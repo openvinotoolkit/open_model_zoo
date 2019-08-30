@@ -18,21 +18,40 @@ import subprocess
 from pathlib import Path
 import os
 import platform
+import re
 import numpy as np
 from cpuinfo import get_cpu_info
 import openvino.inference_engine as ie
 
-from ..config import ConfigError, NumberField, PathField, StringField, DictField, ListField, BoolField
+from ..config import ConfigError, NumberField, PathField, StringField, DictField, ListField, BoolField, BaseField
 from ..logging import warning
-from ..utils import read_yaml, contains_all, get_path, contains_any, get_parameter_value_from_config
+from ..utils import (
+    read_yaml,
+    contains_all,
+    get_path,
+    contains_any,
+    get_parameter_value_from_config,
+    string_to_tuple,
+    get_or_parse_value
+)
 from .launcher import Launcher, LauncherConfigValidator
 from .model_conversion import convert_model, FrameworkParameters
 from ..logging import print_info
 
+
 HETERO_KEYWORD = 'HETERO:'
+MULTI_DEVICE_KEYWORD = 'MULTI:'
 FPGA_COMPILER_MODE_VAR = 'CL_CONTEXT_COMPILER_MODE_INTELFPGA'
-DEVICE_REGEX = r"(?:^{hetero}(?P<devices>(?:{devices})(?:,(?:{devices}))*)$)|(?:^(?P<device>{devices})$)".format(
-    hetero=HETERO_KEYWORD, devices="|".join(plugin for plugin in ie.known_plugins)
+NIREQ_REGEX = r"(\(\d+\))"
+HETERO_MODE_REGEX = r"(?:^{hetero}(?P<devices>(?:{devices})(?:,(?:{devices}))*)$)".format(
+    hetero=HETERO_KEYWORD, devices="|".join(ie.known_plugins)
+)
+MULTI_DEVICE_MODE_REGEX = r"(?:^{multi}(?P<devices_ireq>(?:{devices_ireq})(?:,(?:{devices_ireq}))*)$)".format(
+    multi=MULTI_DEVICE_KEYWORD, devices_ireq="{}?|".format(NIREQ_REGEX).join(ie.known_plugins)
+)
+DEVICE_REGEX = r"(?:^(?P<device>{devices})$)".format(devices="|".join(ie.known_plugins))
+SUPPORTED_DEVICE_REGEX = r"{multi}|{hetero}|{regular}".format(
+    multi=MULTI_DEVICE_MODE_REGEX, hetero=HETERO_MODE_REGEX, regular=DEVICE_REGEX
 )
 VPU_PLUGINS = ('HDDL', "MYRIAD")
 VPU_LOG_LEVELS = ('LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG')
@@ -79,6 +98,26 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
             entry: launcher configuration file entry.
             field_uri: id of launcher entry.
         """
+        if not self.delayed_model_loading:
+            framework_parameters = self.check_model_source(entry)
+            self._set_model_source(framework_parameters)
+            super().validate(entry, field_uri)
+
+    def _set_model_source(self, framework):
+        self.need_conversion = framework.name != 'dlsdk'
+        self.framework = framework
+        self.fields['model'].optional = self.need_conversion
+        self.fields['weights'].optional = self.need_conversion
+        self.fields['caffe_model'].optional = framework.name != 'caffe'
+        self.fields['caffe_weights'].optional = framework.name != 'caffe'
+        self.fields['mxnet_weights'].optional = framework.name != 'mxnet'
+        self.fields['tf_model'].optional = framework != FrameworkParameters('tf', False)
+        self.fields['tf_meta'].optional = framework != FrameworkParameters('tf', True)
+        self.fields['onnx_model'].optional = framework.name != 'onnx'
+        self.fields['kaldi_model'].optional = framework.name != 'kaldi'
+
+    @staticmethod
+    def check_model_source(entry):
         dlsdk_model_options = ['model', 'weights']
         caffe_model_options = ['caffe_model', 'caffe_weights']
         mxnet_model_options = ['mxnet_weights']
@@ -111,21 +150,7 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
         if len(specified) > 1:
             raise ConfigError('{} Several provided'.format(multiple_model_sources_err))
 
-        self._set_model_source(specified[0])
-        super().validate(entry, field_uri)
-
-    def _set_model_source(self, framework):
-        self.need_conversion = framework.name != 'dlsdk'
-        self.framework = framework
-        self.fields['model'].optional = self.need_conversion
-        self.fields['weights'].optional = self.need_conversion
-        self.fields['caffe_model'].optional = framework.name != 'caffe'
-        self.fields['caffe_weights'].optional = framework.name != 'caffe'
-        self.fields['mxnet_weights'].optional = framework.name != 'mxnet'
-        self.fields['tf_model'].optional = framework != FrameworkParameters('tf', False)
-        self.fields['tf_meta'].optional = framework != FrameworkParameters('tf', True)
-        self.fields['onnx_model'].optional = framework.name != 'onnx'
-        self.fields['kaldi_model'].optional = framework.name != 'kaldi'
+        return specified[0]
 
 
 class DLSDKLauncher(Launcher):
@@ -141,7 +166,7 @@ class DLSDKLauncher(Launcher):
         parameters.update({
             'model': PathField(description="Path to model."),
             'weights': PathField(description="Path to model."),
-            'device': StringField(regex=DEVICE_REGEX, description="Device name."),
+            'device': StringField(regex=SUPPORTED_DEVICE_REGEX, description="Device name."),
             'caffe_model': PathField(optional=True, description="Path to Caffe model file."),
             'caffe_weights': PathField(optional=True, description="Path to Caffe weights file."),
             'mxnet_weights': PathField(optional=True, description="Path to MxNet weights file."),
@@ -159,10 +184,12 @@ class DLSDKLauncher(Launcher):
             'affinity_map': PathField(optional=True, description="Affinity map."),
             'batch': NumberField(value_type=int, min_value=1, optional=True, default=1, description="Batch size."),
             'should_log_cmd': BoolField(optional=True, description="Log Model Optimizer command."),
-            'async_mode': BoolField(optional=True, description="Allows asynchronous mode."),
-            'num_requests': NumberField(
-                value_type=float, optional=True, min_value=1, default=1,
-                description="Number of requests (for async mode only)."
+            'async_mode': BoolField(optional=True, description="Allows asynchronous mode.", default=False),
+            'num_requests': BaseField(
+                optional=True,
+                description="Number of requests (for async mode only). "
+                            "In multi device mode allows setting comma-separated list for numbers "
+                            "or one value which will be used for all devices"
             ),
             '_models_prefix': PathField(is_directory=True, optional=True, description="Model prefix."),
             '_model_optimizer': PathField(optional=True, is_directory=True, description="Model optimizer."),
@@ -183,32 +210,34 @@ class DLSDKLauncher(Launcher):
 
         return parameters
 
-    def __init__(self, config_entry):
+    def __init__(self, config_entry, delayed_model_loading=False):
         super().__init__(config_entry)
 
-        dlsdk_launcher_config = DLSDKLauncherConfigValidator('DLSDK_Launcher', fields=self.parameters())
+        dlsdk_launcher_config = DLSDKLauncherConfigValidator(
+            'DLSDK_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading
+        )
         dlsdk_launcher_config.validate(self.config)
 
         self._device = self.config['device'].upper()
         self._set_variable = False
         self._prepare_bitstream_firmware(self.config)
+        self._delayed_model_loading = delayed_model_loading
 
-        if dlsdk_launcher_config.need_conversion:
-            self._model, self._weights = DLSDKLauncher.convert_model(self.config, dlsdk_launcher_config.framework)
-        else:
-            self._model = self.get_value_from_config('model')
-            self._weights = self.get_value_from_config('weights')
+        if not delayed_model_loading:
+            if dlsdk_launcher_config.need_conversion:
+                self._model, self._weights = DLSDKLauncher.convert_model(self.config, dlsdk_launcher_config.framework)
+            else:
+                self._model = self.get_value_from_config('model')
+                self._weights = self.get_value_from_config('weights')
 
-        self._create_ie_plugin()
-        self._create_network()
-        requests_num = self.get_value_from_config('num_requests')
-        self.exec_network = self.plugin.load(network=self.network, num_requests=requests_num)
+            self.load_network()
 
         self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
         self._do_reshape = False
         # It is an important switch -- while the FASTER RCNN is not reshaped correctly, the
         # whole network should be recreated during reshape
-        self.reload_network = True
+        # it can not be used in case delayed initialization
+        self.reload_network = not delayed_model_loading
 
     @property
     def inputs(self):
@@ -226,7 +255,7 @@ class DLSDKLauncher(Launcher):
     def output_blob(self):
         return next(iter(self.original_outputs))
 
-    def predict(self, inputs, metadata, *args, **kwargs):
+    def predict(self, inputs, metadata=None, **kwargs):
         """
         Args:
             inputs: dictionary where keys are input layers names and values are data for them.
@@ -239,42 +268,51 @@ class DLSDKLauncher(Launcher):
             if self._do_reshape:
                 input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
                 self._reshape_input(input_shapes)
-                for input_name, input_data in infer_inputs.items():
-                    infer_inputs[input_name] = self._align_data_shape(input_data, input_name)
-
-            network_inputs_data = {**infer_inputs}
 
             benchmark = kwargs.get('benchmark')
-            if benchmark:
-                benchmark(network_inputs_data)
 
-            result = self.exec_network.infer(network_inputs_data)
+            if benchmark:
+                benchmark(infer_inputs)
+
+            result = self.exec_network.infer(infer_inputs)
 
             raw_outputs_callback = kwargs.get('output_callback')
-            if raw_outputs_callback:
-                raw_outputs_callback(result)
 
+            if raw_outputs_callback:
+                raw_outputs_callback(result, network=self.network, exec_network=self.exec_network)
             results.append(result)
-            for meta_ in metadata:
-                meta_['input_shape'] = self.inputs_info_for_meta()
+
+        if metadata is not None:
+            for image_meta in metadata:
+                image_meta['input_shape'] = self.inputs_info_for_meta()
+
+        self._do_reshape = False
+
         return results
 
-    def predict_async(self, ir, inputs, metadata, *args, **kwargs):
+    def predict_async(self, ir, inputs, metadata=None, **kwargs):
         infer_inputs = inputs[0]
         benchmark = kwargs.get('benchmark')
         if benchmark:
             benchmark(infer_inputs)
         ir.async_infer(inputs=infer_inputs)
-        for meta_ in metadata:
-            meta_['input_shape'] = self.inputs_info_for_meta()
+        if metadata is not None:
+            for meta_ in metadata:
+                meta_['input_shape'] = self.inputs_info_for_meta()
 
     def _is_hetero(self):
         return self._device.startswith(HETERO_KEYWORD)
 
+    def _is_multi(self):
+        return self._device.startswith(MULTI_DEVICE_KEYWORD)
+
     def _devices_list(self):
         device = self._device
-        if HETERO_KEYWORD in self._device:
+        if self._is_hetero():
             device = self._device[len(HETERO_KEYWORD):]
+        if self._is_multi():
+            device = self._device[len(MULTI_DEVICE_KEYWORD):]
+            device = re.sub(NIREQ_REGEX, '', device)
 
         return [platform_.upper().strip() for platform_ in device.split(',')]
 
@@ -353,8 +391,8 @@ class DLSDKLauncher(Launcher):
 
         os_specific_formats = {
             'Darwin': ('lib{}.dylib', 'lib{}.so'),
-            'Linux': ('lib{}.so', ),
-            'Windows': ('{}.dll', ),
+            'Linux': ('lib{}.so',),
+            'Windows': ('{}.dll',),
         }
 
         cpu_extensions_name = cpu_extensions.parts[-1]
@@ -381,9 +419,10 @@ class DLSDKLauncher(Launcher):
 
         return extension_list[0]
 
-
     @staticmethod
-    def convert_model(config, framework=FrameworkParameters('caffe', False)):
+    def convert_model(config, framework=None):
+        if framework is None:
+            framework = DLSDKLauncherConfigValidator.check_model_source(config)
         config_model = config.get('{}_model'.format(framework.name), '')
         config_weights = config.get('{}_weights'.format(framework.name), '')
         config_meta = config.get('{}_meta'.format(framework.name), '')
@@ -418,6 +457,18 @@ class DLSDKLauncher(Launcher):
         )
 
     @property
+    def num_requests(self):
+        return self._num_requests
+
+    @num_requests.setter
+    def num_requests(self, num_ireq: int):
+        if num_ireq != self._num_requests:
+            self._num_requests = num_ireq
+            if hasattr(self, 'exec_network'):
+                del self.exec_network
+                self.exec_network = self.plugin.load(self.network, num_requests=self._num_requests)
+
+    @property
     def infer_requests(self):
         return self.exec_network.requests
 
@@ -431,8 +482,7 @@ class DLSDKLauncher(Launcher):
             del self.exec_network
             self.network.reshape(shapes)
 
-        requests_num = self.config.get('num_requests', 1)
-        self.exec_network = self.plugin.load(network=self.network, num_requests=requests_num)
+        self.exec_network = self.plugin.load(network=self.network, num_requests=self._num_requests)
         self._do_reshape = False
 
     def _set_batch_size(self, batch_size):
@@ -459,7 +509,7 @@ class DLSDKLauncher(Launcher):
         input_batch_size = input_shape[0]
 
         if data_batch_size < input_batch_size:
-            warning_message = 'data batch {} is not equal model input batch_size {}. '.format(
+            warning_message = 'data batch {} is not equal model input batch_size {}.'.format(
                 data_batch_size, input_batch_size
             )
             warning(warning_message)
@@ -472,13 +522,25 @@ class DLSDKLauncher(Launcher):
 
         return data.reshape(input_shape)
 
-    def _create_ie_plugin(self, log=True):
+    def create_ie_plugin(self, log=True):
         if hasattr(self, 'plugin'):
             del self.plugin
-        self.plugin = ie.IEPlugin(self._device)
         if log:
             print_info('IE version: {}'.format(ie.get_version()))
-            print_info('Loaded {} plugin version: {}'.format(self.plugin.device, self.plugin.version))
+        if self._is_multi():
+            self._create_multi_device_plugin(log)
+        else:
+            self.plugin = ie.IEPlugin(self._device)
+            self.async_mode = self.get_value_from_config('async_mode')
+            num_requests = get_or_parse_value(self.config.get('num_requests', 1), casting_type=int)
+            if len(num_requests) != 1:
+                raise ConfigError('Several values for _num_requests specified')
+            self._num_requests = num_requests[0]
+            if self._num_requests != 1 and not self.async_mode:
+                warning('{} infer requests in sync mode is not supported. Only 1 infer request will be used.')
+                self._num_requests = 1
+            if log:
+                print_info('Loaded {} plugin version: {}'.format(self.plugin.device, self.plugin.version))
 
         cpu_extensions = self.config.get('cpu_extensions')
         if cpu_extensions and 'CPU' in self._devices_list():
@@ -493,15 +555,56 @@ class DLSDKLauncher(Launcher):
             if log_level:
                 self.plugin.set_config({'VPU_LOG_LEVEL': log_level})
 
+    def _create_multi_device_plugin(self, log=True):
+        async_mode = self.get_value_from_config('async_mode')
+        if not async_mode:
+            warning('Using multi device in sync mode non-applicable. Async mode will be used.')
+        self.async_mode = True
+        num_per_device_req = re.findall(NIREQ_REGEX, self._device)
+        device_list = self._devices_list()
+        num_devices = len(device_list)
+        if num_per_device_req:
+            brackets = r"(\()|(\))"
+            num_per_device_requests = [int(re.sub(brackets, '', nreq)) for nreq in num_per_device_req]
+            if 'num_requests' in self.config:
+                warning(
+                    "number requests already provided in device name specification. "
+                    "'num_requests' option will be ignored."
+                )
+        else:
+            num_per_device_requests = get_or_parse_value(self.config.get('num_requests', 1), casting_type=int)
+        if len(num_per_device_requests) == 1:
+            num_per_device_requests = [num_per_device_requests[0]] * len(device_list)
+
+        if num_devices != len(num_per_device_requests):
+            raise ConfigError('num requests for all {} should be specified'.format(num_devices))
+        device_strings = [
+            '{device}({nreq})'.format(device=device, nreq=nreq)
+            for device, nreq in zip(device_list, num_per_device_requests)
+        ]
+        self.plugin = ie.IEPlugin('MULTI:{}'.format(','.join(device_strings)))
+        self._num_requests = sum(num_per_device_requests)*2
+        if log:
+            print_info('Loaded {} plugin version: {}'.format(self.plugin.device, self.plugin.version))
+            print_info('Request number for each device:')
+            for device, nreq in zip(device_list, num_per_device_requests):
+                print_info('    {} - {}'.format(device, nreq))
+
     def _create_network(self, input_shapes=None):
-        assert self.plugin, "_create_ie_plugin should be called before _create_network"
+        assert self.plugin, "create_ie_plugin should be called before _create_network"
 
         self.network = ie.IENetwork(model=str(self._model), weights=str(self._weights))
 
         self.original_outputs = self.network.outputs
         outputs = self.config.get('outputs')
         if outputs:
-            self.network.add_outputs(outputs)
+            def output_preprocessing(output_string):
+                output_tuple = string_to_tuple(output_string, casting_type=None)
+                if len(output_tuple) == 1:
+                    return output_string
+                return tuple([output_tuple[0], int(output_tuple[1])])
+            preprocessed_outputs = [output_preprocessing(output) for output in outputs]
+            self.network.add_outputs(preprocessed_outputs)
 
         if input_shapes is not None:
             self.network.reshape(input_shapes)
@@ -514,6 +617,26 @@ class DLSDKLauncher(Launcher):
             self._set_affinity(affinity_map_path)
         elif affinity_map_path:
             warning('affinity_map config is applicable only for HETERO device')
+
+    def load_network(self, network=None):
+        if hasattr(self, 'exec_network'):
+            del self.exec_network
+        if not hasattr(self, 'plugin'):
+            self.create_ie_plugin()
+        if network is None:
+            self._create_network()
+        else:
+            self.network = network
+        self.exec_network = self.plugin.load(network=self.network, num_requests=self.num_requests)
+
+    def load_ir(self, xml_path, bin_path):
+        self._model = xml_path
+        self._weights = bin_path
+        self.load_network()
+
+    @staticmethod
+    def create_ie_network(model_xml, model_bin):
+        return ie.IENetwork(model_xml, model_bin)
 
     def inputs_info_for_meta(self):
         return {

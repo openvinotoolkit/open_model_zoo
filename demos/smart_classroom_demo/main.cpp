@@ -7,7 +7,9 @@
 #include <gflags/gflags.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
+#ifdef WITH_EXTENSIONS
 #include <ext_list.hpp>
+#endif
 #include <string>
 #include <memory>
 #include <limits>
@@ -417,6 +419,17 @@ std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_track
     return face_track_id_to_label;
 }
 
+bool checkDynamicBatchSupport(const Core& ie, const std::string& device)  {
+    try  {
+        if (ie.GetConfig(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != PluginConfigParams::YES)
+            return false;
+    }
+    catch(const std::exception& error)  {
+        return false;
+    }
+    return true;
+}
+
 }  // namespace
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -509,7 +522,9 @@ int main(int argc, char* argv[]) {
 
             /** Load extensions for the CPU device **/
             if ((device.find("CPU") != std::string::npos)) {
+#ifdef WITH_EXTENSIONS
                 ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
+#endif
 
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
@@ -571,9 +586,12 @@ int main(int argc, char* argv[]) {
 
         // Load face reid
         CnnConfig reid_config(fr_model_path, fr_weights_path);
-        reid_config.max_batch_size = 16;
         reid_config.enabled = face_config.enabled && !fr_model_path.empty() && !lm_model_path.empty();
         reid_config.deviceName = FLAGS_d_reid;
+        if (checkDynamicBatchSupport(ie, FLAGS_d_reid))
+            reid_config.max_batch_size = 16;
+        else
+            reid_config.max_batch_size = 1;
         reid_config.ie = ie;
         VectorCNN face_reid(reid_config);
 
@@ -582,6 +600,10 @@ int main(int argc, char* argv[]) {
         landmarks_config.max_batch_size = 16;
         landmarks_config.enabled = face_config.enabled && reid_config.enabled && !lm_model_path.empty();
         landmarks_config.deviceName = FLAGS_d_lm;
+        if (checkDynamicBatchSupport(ie, FLAGS_d_lm))
+            landmarks_config.max_batch_size = 16;
+        else
+            landmarks_config.max_batch_size = 1;
         landmarks_config.ie = ie;
         VectorCNN landmarks_detector(landmarks_config);
 

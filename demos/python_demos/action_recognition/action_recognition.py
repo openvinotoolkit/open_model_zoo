@@ -41,7 +41,9 @@ def build_argparser():
     args.add_argument("-m_en", "--m_encoder", help="Required. Path to encoder model", required=True, type=str)
     args.add_argument("-m_de", "--m_decoder", help="Required. Path to decoder model", required=True, type=str)
     args.add_argument("-i", "--input",
-                      help="Required. Path to a video or a .txt file with a list of video files (one video per line)", type=str)
+                      help="Required. Id of the video capturing device to open (to open default camera just pass 0), "
+                           "path to a video or a .txt file with a list of ids or video files (one object per line)",
+                      required=True, type=str)
     args.add_argument("-l", "--cpu_extension",
                       help="Optional. For CPU custom layers, if any. Absolute path to a shared library with the "
                            "kernels implementation.", type=str, default=None)

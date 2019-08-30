@@ -14,7 +14,9 @@
 #include <string>
 #include <set>
 #include <memory>
+#ifdef WITH_EXTENSIONS
 #include <ext_list.hpp>
+#endif
 
 using namespace InferenceEngine;
 
@@ -83,7 +85,9 @@ LoadInferenceEngine(const std::vector<std::string>& devices,
 
         /** Load extensions for the CPU device **/
         if ((device.find("CPU") != std::string::npos)) {
+#ifdef WITH_EXTENSIONS
             ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
+#endif
             if (!custom_cpu_library.empty()) {
                 // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                 auto extension_ptr = make_so_pointer<IExtension>(custom_cpu_library);

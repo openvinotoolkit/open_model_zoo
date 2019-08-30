@@ -18,9 +18,9 @@ import numpy as np
 
 from ..config import PathField
 from ..representation import FacialLandmarksAnnotation
-from ..utils import convert_bboxes_xywh_to_x1y1x2y2, read_csv
+from ..utils import convert_bboxes_xywh_to_x1y1x2y2, read_csv, check_file_existence
 
-from .format_converter import BaseFormatConverter
+from .format_converter import BaseFormatConverter, ConverterReturn
 
 
 class VGGFaceRegressionConverter(BaseFormatConverter):
@@ -34,6 +34,10 @@ class VGGFaceRegressionConverter(BaseFormatConverter):
             'landmarks_csv_file': PathField(description="Path to csv file with coordinates of landmarks points."),
             'bbox_csv_file': PathField(
                 optional=True, description="Path to cvs file which contains bounding box coordinates for faces."
+            ),
+            'images_dir': PathField(
+                is_directory=True, optional=True,
+                description='path to dataset images, used only for content existence check'
             )
         })
 
@@ -42,10 +46,14 @@ class VGGFaceRegressionConverter(BaseFormatConverter):
     def configure(self):
         self.landmarks_csv = self.get_value_from_config('landmarks_csv_file')
         self.bbox_csv = self.get_value_from_config('bbox_csv_file')
+        self.images_dir = self.get_value_from_config('images_dir') or self.landmarks_csv.parent
 
-    def convert(self):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations = []
-        for row in read_csv(self.landmarks_csv):
+        content_errors = [] if check_content else None
+        landmarks_table = read_csv(self.landmarks_csv)
+        num_iterations = len(landmarks_table)
+        for row_id, row in enumerate(landmarks_table):
             identifier = row['NAME_ID'] + '.jpg'
             x_values = np.array(
                 [float(row["P1X"]), float(row["P2X"]), float(row["P3X"]), float(row["P4X"]), float(row["P5X"])]
@@ -58,6 +66,12 @@ class VGGFaceRegressionConverter(BaseFormatConverter):
             annotation.metadata['left_eye'] = 0
             annotation.metadata['right_eye'] = 1
             annotations.append(annotation)
+            if check_content:
+                if not check_file_existence(self.images_dir / identifier):
+                    content_errors.append('{}: does not exist'.format(self.images_dir / identifier))
+
+            if progress_callback and row_id % progress_interval == 0:
+                progress_callback(row_id / num_iterations * 100)
 
         if self.bbox_csv:
             for index, row in enumerate(read_csv(self.bbox_csv)):
@@ -69,4 +83,4 @@ class VGGFaceRegressionConverter(BaseFormatConverter):
             'label_map': {0: 'Left Eye', 1: 'Right Eye', 2: 'Nose', 3: 'Left Mouth Corner', 4: 'Right Mouth Corner'}
         }
 
-        return annotations, meta
+        return ConverterReturn(annotations, meta, content_errors)

@@ -1,0 +1,38 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The `inception-resnet-v2` model is one of the Inception family of models designed
+  to perform image classification.1 Like the other Inception models. For details
+  about this family of models, check out the paper <https://arxiv.org/pdf/1602.07261.pdf>.
+task_type: classification
+files:
+  - name: inception_resnet_v2_2018_04_27.tgz
+    size: 225882079
+    sha256: fb16b93ff2b2bcda0da5cdfd25a8d5b8b74438943dae738db659bad0d3d48ff1
+    source: https://storage.googleapis.com/download.tensorflow.org/models/tflite/model_zoo/upload_20180427/inception_resnet_v2_2018_04_27.tgz
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: inception_resnet_v2_2018_04_27.tgz
+model_optimizer_args:
+  - --reverse_input_channels
+  - --input_shape=[1,299,299,3]
+  - --input=input
+  - --mean_values=input[127.5,127.5,127.5]
+  - --scale_values=input[127.50000414375013]
+  - --output=InceptionResnetV2/AuxLogits/Logits/BiasAdd
+  - --input_model=$dl_dir/inception_resnet_v2.pb
+framework: tf
+license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

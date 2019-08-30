@@ -56,6 +56,4 @@ Accuracy Checker supports following set of postprocessors:
 * `clip_segmentation_mask` - clipping segmentation mask values. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`.
   * `min_value` - lower bound of range.
   * `max_value` - upper bound of range.
-* `segmentation-prediction-resample` - resamples output prediction in two steps: 1) rezises it to bounding box size; 2) extends to annotation size. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`. For correct bounding box size must be set via tag `boxes_file` in `brats_numpy` [converter]
-
-[converter]: ../annotation_converters/README.md 
+* `segmentation-prediction-resample` - resamples output prediction in two steps: 1) resizes it to bounding box size; 2) extends to annotation size. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`. For correct bounding box size must be set via tag `boxes_file` in `brats_numpy` [converter](../annotation_converters/README.md).

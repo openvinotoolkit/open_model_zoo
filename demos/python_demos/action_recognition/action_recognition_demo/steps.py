@@ -67,6 +67,10 @@ class DataStep(PipelineStep):
 
     def _open_video(self):
         next_video = next(self._video_cycle)
+        try:
+            next_video = int(next_video)
+        except ValueError:
+            pass
         self.cap = cv2.VideoCapture(next_video)
         if not self.cap.isOpened():
             return False

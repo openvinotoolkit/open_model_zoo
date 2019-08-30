@@ -6,7 +6,7 @@ You can use a set of the following pre-trained models with the demo:
 * _person-detection-retail-0013_, which is the primary detection network for finding pedestrians
 * _person-reidentification-retail-0031_, which is the network that is executed on top of the results from inference of the first network and makes reidentification of the pedestrians
 
-For more information about the pre-trained models, refer to the [model documentation](../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
 ## How It Works
 

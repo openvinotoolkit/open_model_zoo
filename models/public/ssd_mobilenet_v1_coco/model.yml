@@ -1,0 +1,40 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The `ssd_mobilenet_v1_coco` model is a Single-Shot multibox Detection <SSD>
+  <https://arxiv.org/pdf/1801.04381.pdf> network intended to perform object detection.
+  The difference bewteen this model and the `mobilenet-ssd` is that there the
+  `mobilenet-ssd` can only detect face, the `ssd_mobilenet_v1_coco` model can
+  detect objects.
+task_type: detection
+files:
+  - name: ssd_mobilenet_v1_coco.tar.gz
+    size: 76541073
+    sha256: 8788f89108519fd1102b8a5c2ac861cf6d86603571b6ce5bbd1c245b7fe005e3
+    source: http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: ssd_mobilenet_v1_coco.tar.gz
+model_optimizer_args:
+  - --reverse_input_channels
+  - --input_shape=[1,300,300,3]
+  - --input=image_tensor
+  - --output=detection_scores,detection_boxes,num_detections
+  - --tensorflow_use_custom_operations_config=$mo_dir/extensions/front/tf/ssd_v2_support.json
+  - --tensorflow_object_detection_api_pipeline_config=$dl_dir/ssd_mobilenet_v1_coco_2018_01_28/pipeline.config
+  - --input_model=$dl_dir/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb
+framework: tf
+license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

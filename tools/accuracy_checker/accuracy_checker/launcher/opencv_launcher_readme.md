@@ -6,7 +6,7 @@ For enabling OpenCV launcher you need to add `framework: opencv` in launchers se
 * `tags` - optional specifies which device bit type will be used for infer (`FP32` and `FP16`).
 * `backend` - specifies which backend OpenCV's will be used for infer (`ocv` and `ie`).
 * `model/weights` - path to configuration files with model and weights for your topology (`prototxt/caffemodel`, `xml/bin`, `pbtxt/pb` etc.) and preferably used in pairs .
-* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here][adapters].
+* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
 
 You also should specify all inputs for your model with their shapes to write inputs, using specific parameter: `inputs`.
 Each input description should has following info:
@@ -33,5 +33,3 @@ launchers:
         shape: 3, 32, 32
     adapter: classification
 ```
-        
-[adapters]: ../adapters/README.md

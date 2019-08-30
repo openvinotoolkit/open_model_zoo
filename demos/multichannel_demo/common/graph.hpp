@@ -27,7 +27,9 @@
 #include <samples/slog.hpp>
 #include "perf_timer.hpp"
 #include "input.hpp"
+#ifdef WITH_EXTENSIONS
 #include <ext_list.hpp>
+#endif
 
 void loadImageToIEGraph(cv::Mat img, void* ie_buffer);
 
