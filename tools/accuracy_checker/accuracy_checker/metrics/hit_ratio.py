@@ -62,11 +62,13 @@ class BaseRecommenderMetric(FullDatasetEvaluationMetric):
         for user in range(self.users_num):
             map_item_score = {}
             for j in range(iter_num):
-                item = self.pred_per_user[user][j][0]
-                score = self.pred_per_user[user][j][1]
-                map_item_score[item] = score
+                if len(self.pred_per_user[user]) != 0:
+                    item = self.pred_per_user[user][j][0]
+                    score = self.pred_per_user[user][j][1]
+                    map_item_score[item] = score
             ranklist = heapq.nlargest(10, map_item_score, key=map_item_score.get)
-            measure.append(self.discounter(self.gt_items[user], ranklist))
+            if user in self.gt_items.keys():
+                measure.append(self.discounter(self.gt_items[user], ranklist))
 
         return np.mean(measure)
 
