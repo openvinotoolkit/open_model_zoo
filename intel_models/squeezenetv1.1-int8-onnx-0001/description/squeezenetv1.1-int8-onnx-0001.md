@@ -2,7 +2,9 @@
 
 ## Use Case and High-Level Description
 
-This is the SquuezeNet v1.1 model that is designed to perform image classification. The model has been pretrained on the ImageNet image database and then symmetrically quantized to INT8 fixed-point precision using Neural Network Compression Framework (NNCF).  
+This is the SqueezeNet v1.1 model that is designed to perform image classification. 
+The model has been pretrained on the ImageNet image database and then symmetrically quantized 
+to INT8 fixed-point precision using Neural Network Compression Framework (NNCF).  
 
 The model input is a blob that consists of a single image of "1x224x224x3" in BGR order.
 

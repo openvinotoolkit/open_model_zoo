@@ -1,14 +1,14 @@
-# squeezenetv1.1-int8-sparse-v1-onnx-0001
+# resnet50-int8-sparse-v2-onnx-0001
 
 ## Use Case and High-Level Description
 
-This is the SquuezeNet v1.1 model that is designed to perform image classification. 
-The model has been pretrained on the ImageNet image database and then symmetrically quantized 
-to INT8 fixed-point precision with 51% sparsity using Neural Network Compression Framework (NNCF).  
+This is the Resnet-50 v1 model that is designed to perform image classification. 
+The model has been pretrained on the ImageNet image database and then symmetrically quantized to INT8 fixed-point 
+precision with 61.02% sparsity using Neural Network Compression Framework (NNCF).  
 
 The model input is a blob that consists of a single image of "1x224x224x3" in BGR order.
 
-The model output for `squeezenetv1.1-int8-sparse-v1-onnx-0001` is the usual object classifier output for the 1000 different classifications matching those in the ImageNet database.
+The model output for `resnet50-int8-sparse-v2-onnx-0001` is the usual object classifier output for the 1000 different classifications matching those in the ImageNet database.
 
 ## Example
 
@@ -17,18 +17,18 @@ The model output for `squeezenetv1.1-int8-sparse-v1-onnx-0001` is the usual obje
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Classification|
-| GFLOPs            | 0.707 |
-| MParams           | 1.236 |
+| GFLOPs            | 8.216 |
+| MParams           | 25.53 |
 | Source framework  | PyTorch    |
-| Sparsity  | 51%    |
+| Sparsity  | 61.02%    |
 
 ## Accuracy
 
-The quality metrics calculated on ImageNet validation dataset is 56.76% accuracy top-1.
+The quality metrics calculated on ImageNet validation dataset is 75.19% accuracy top-1.
 
 | Metric                    | Value         |
 |---------------------------|---------------|
-| Accuracy top-1 (ImageNet) |         56.76% |
+| Accuracy top-1 (ImageNet) |         75.19% |
 
 ## Performance
 
