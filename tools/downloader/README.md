@@ -79,8 +79,108 @@ The cache format is intended to remain compatible in future Open Model Zoo
 versions, so you can use a cache to avoid redownloading most files when updating
 Open Model Zoo.
 
+By default, the script outputs progress information as unstructured, human-readable
+text. If you want to consume progress information programmatically, use the
+`--progress_format` option:
+
+```sh
+./downloader.py --all --progress_format=json
+```
+
+When this option is set to `json`, the script's standard output is replaced by
+a machine-readable progress report, whose format is documented in the
+"JSON progress report format" section. This option does not affect errors and
+warnings, which will still be printed to the standard error stream in a
+human-readable format.
+
+You can also set this option to `text` to explicitly request the default text
+format.
+
 See the "Shared options" section for information on other options accepted by
 the script.
+
+### JSON progress report format
+
+This section documents the format of the progress report produced by the script
+when the `--progress_format=json` option is specified.
+
+The report consists of a sequence of events, where each event is represented
+by a line containing a JSON-encoded object. Each event has a member with the
+name `$type` whose value determines the type of the event, as well as which
+additional members it contains.
+
+The following event types are currently defined:
+
+* `model_download_begin`
+
+  Additional members: `model` (string), `num_files` (integer).
+
+  The script started downloading the model named by `model`.
+  `num_files` is the number of files that will be downloaded for this model.
+
+  This event will always be followed by a corresponding `model_download_end` event.
+
+* `model_download_end`
+
+  Additional members: `model` (string), `successful` (boolean).
+
+  The script stopped downloading the model named by `model`.
+  `successful` is true if every file was downloaded successfully.
+
+* `model_file_download_begin`
+
+  Additional members: `model` (string), `model_file` (string), `size` (integer).
+
+  The script started downloading the file named by `model_file` of the model named
+  by `model`. `size` is the size of the file in bytes.
+
+  This event will always occur between `model_download_begin` and `model_download_end`
+  events for the model, and will always be followed by a corresponding
+  `model_file_download_end` event.
+
+* `model_file_download_end`
+
+  Additional members: `model` (string), `model_file` (string), `successful` (boolean).
+
+  The script stopped downloading the file named by `model_file` of the model named
+  by `model`. `successful` is true if the file was downloaded successfully.
+
+* `model_file_download_progress`
+
+  Additional members: `model` (string), `model_file` (string), `size` (integer).
+
+  The script downloaded `size` bytes of the file named by `model_file` of
+  the model named by `model` so far. Note that `size` can decrease in a subsequent
+  event if the download is interrupted and retried.
+
+  This event will always occur between `model_file_download_begin` and
+  `model_file_download_end` events for the file.
+
+* `model_postprocessing_begin`
+
+  Additional members: `model`.
+
+  The script started post-download processing on the model named by `model`.
+
+  This event will always be followed by a corresponding `model_postprocessing_end` event.
+
+* `model_postprocessing_end`
+
+  Additional members: `model`.
+
+  The script stopped post-download processing on the model named by `model`.
+
+Additional event types and members may be added in the future.
+
+Tools parsing the machine-readable format should avoid relying on undocumented details.
+In particular:
+
+* Tools should not assume that any given event will occur for a given model/file
+  (unless specified otherwise above) or will only occur once.
+
+* Tools should not assume that events will occur in a certain order beyond
+  the ordering constraints specified above. Note that future versions of the script
+  may interleave the downloading of different files or models.
 
 Model converter usage
 ---------------------

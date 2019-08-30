@@ -15,10 +15,12 @@
 import collections
 import contextlib
 import fnmatch
+import json
 import re
 import shlex
 import shutil
 import sys
+import traceback
 
 from pathlib import Path
 
@@ -45,6 +47,63 @@ KNOWN_TASK_TYPES = {
 
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
 RE_SHA256SUM = re.compile(r'[0-9a-fA-F]{64}')
+
+class Reporter:
+    GROUP_DECORATION = '#' * 16 + '||'
+    SECTION_DECORATION = '=' * 10
+    ERROR_DECORATION = '#' * 10
+
+    def __init__(self, enable_human_output=True, enable_json_output=False, event_context={}):
+        self.enable_human_output = enable_human_output
+        self.enable_json_output = enable_json_output
+        self.event_context = event_context
+
+    def print_group_heading(self, text):
+        if not self.enable_human_output: return
+        print(self.GROUP_DECORATION, text, self.GROUP_DECORATION[::-1])
+        print()
+
+    def print_section_heading(self, format, *args):
+        if not self.enable_human_output: return
+        print(self.SECTION_DECORATION, format.format(*args), flush=True)
+
+    def print_progress(self, format, *args):
+        if not self.enable_human_output: return
+        print(format.format(*args), end='\r' if sys.stdout.isatty() else '\n', flush=True)
+
+    def end_progress(self):
+        if not self.enable_human_output: return
+        if sys.stdout.isatty():
+            print()
+
+    def print(self, format='', *args, flush=False):
+        if not self.enable_human_output: return
+        print(format.format(*args), flush=flush)
+
+    def log_warning(self, format, *args, exc_info=False):
+        if exc_info:
+            traceback.print_exc(file=sys.stderr)
+        print(self.ERROR_DECORATION, "Warning:", format.format(*args), file=sys.stderr)
+
+    def log_error(self, format, *args, exc_info=False):
+        if exc_info:
+            traceback.print_exc(file=sys.stderr)
+        print(self.ERROR_DECORATION, "Error:", format.format(*args), file=sys.stderr)
+
+    def log_details(self, format, *args):
+        print(self.ERROR_DECORATION, '    ', format.format(*args), file=sys.stderr)
+
+    def emit_event(self, type, **kwargs):
+        if not self.enable_json_output: return
+        json.dump({'$type': type, **self.event_context, **kwargs}, sys.stdout, indent=None)
+        print()
+
+    def with_event_context(self, **kwargs):
+        return Reporter(
+            enable_human_output=self.enable_human_output,
+            enable_json_output=self.enable_json_output,
+            event_context={**self.event_context, **kwargs},
+        )
 
 class DeserializationError(Exception):
     def __init__(self, problem, contexts=()):
@@ -184,10 +243,10 @@ class PostprocRegexReplace(Postproc):
             validate_nonnegative_int('"count"', postproc.get('count', 0)),
         )
 
-    def apply(self, output_dir):
+    def apply(self, reporter, output_dir):
         postproc_file = output_dir / self.file
 
-        print('========= Replacing text in {} ========='.format(postproc_file))
+        reporter.print_section_heading('Replacing text in {}', postproc_file)
 
         postproc_file_text = postproc_file.read_text()
 
@@ -221,10 +280,10 @@ class PostprocUnpackArchive(Postproc):
             validate_string('"format"', postproc['format']),
         )
 
-    def apply(self, output_dir):
+    def apply(self, reporter, output_dir):
         postproc_file = output_dir / self.file
 
-        print('========= Unpacking {} ========='.format(postproc_file))
+        reporter.print_section_heading('Unpacking {}', postproc_file)
 
         shutil.unpack_archive(str(postproc_file), str(output_dir), self.format)
 
