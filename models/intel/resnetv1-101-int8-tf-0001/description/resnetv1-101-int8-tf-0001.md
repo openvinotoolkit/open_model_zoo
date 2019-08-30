@@ -2,7 +2,10 @@
 
 ## Use Case and High-Level Description
 
-This is the Resnet-101 v1 model that is designed to perform image classification. The model has been pretrained on the ImageNet image database and then quantized to INT8 fixed-point precision using so-called Quantization-aware training approach implemented in TensorFlow framework. For details about the original floating point model, check out the [paper](https://arxiv.org/pdf/1512.03385.pdf).
+This is the Resnet-101 v1 model that is designed to perform image classification. 
+The model has been pretrained on the ImageNet image database and then quantized to INT8 fixed-point precision using 
+so-called Quantization-aware training approach implemented in TensorFlow framework. 
+For details about the original floating point model, check out the [paper](https://arxiv.org/pdf/1512.03385.pdf).
 
 The model input is a blob that consists of a single image of "1x224x224x3" in BGR order.
 
