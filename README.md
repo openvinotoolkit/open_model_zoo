@@ -20,6 +20,13 @@ Open Model Zoo is licensed under [Apache License Version 2.0](LICENSE).
 * [Pre-Trained Models](https://software.intel.com/en-us/openvino-toolkit/documentation/pretrained-models)
 * [Demos and samples](https://software.intel.com/en-us/articles/OpenVINO-IE-Samples)
 
+## Other usage examples
+* [Open Visual Cloud](https://01.org/openvisualcloud)
+  * [Tutorial: Build and Run the AD Insertion Sample on public cloud or local machine](https://01.org/openvisualcloud/documents/tutorial-build-and-run-ad-insertion-sample-public-cloud-or-local-machine)
+  * [GitHub Repo for Ad Insertion Sample](https://github.com/OpenVisualCloud/Ad-Insertion-Sample)
+* [OpenVINO for Smart City](https://github.com/incluit/OpenVino-For-SmartCity)
+* [OpenVINO Driver Behavior](https://github.com/incluit/OpenVino-Driver-Behaviour)
+
 ## How to Contribute
 We welcome community contributions to the Open Model Zoo repository. If you have an idea how to improve the product, please share it with us doing the following steps:
 * Make sure you can build the product and run all the demos with your patch.
