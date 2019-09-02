@@ -10,6 +10,12 @@
 #include "human_pose_estimator.hpp"
 #include "render_human_pose.hpp"
 
+#define COCO
+//#define MPI
+//#define BODY_25
+//#define FACE
+//#define HAND
+
 namespace human_pose_estimation {
 void renderHumanPose(const std::vector<HumanPose>& poses, cv::Mat& image) {
     CV_Assert(image.type() == CV_8UC3);
@@ -20,15 +26,75 @@ void renderHumanPose(const std::vector<HumanPose>& poses, cv::Mat& image) {
         cv::Scalar(0, 255, 0), cv::Scalar(0, 255, 85), cv::Scalar(0, 255, 170),
         cv::Scalar(0, 255, 255), cv::Scalar(0, 170, 255), cv::Scalar(0, 85, 255),
         cv::Scalar(0, 0, 255), cv::Scalar(85, 0, 255), cv::Scalar(170, 0, 255),
-        cv::Scalar(255, 0, 255), cv::Scalar(255, 0, 170), cv::Scalar(255, 0, 85)
+        cv::Scalar(255, 0, 255), cv::Scalar(255, 0, 170), cv::Scalar(255, 0, 85),
+		cv::Scalar(255, 128, 0), cv::Scalar(255, 85, 128), cv::Scalar(255, 170, 128),
+		cv::Scalar(255, 255, 128), cv::Scalar(170, 255, 128), cv::Scalar(85, 255, 128),
+		cv::Scalar(128, 255, 0), cv::Scalar(128, 255, 85), cv::Scalar(128, 255, 170),
+		cv::Scalar(128, 255, 255), cv::Scalar(128, 170, 255), cv::Scalar(128, 85, 255),
+		cv::Scalar(128, 0, 255), cv::Scalar(85, 128, 255), cv::Scalar(170, 128, 255),
+		cv::Scalar(255, 128, 255), cv::Scalar(255, 128, 170), cv::Scalar(255, 128, 85)
+
+		#ifdef FACE
+		,cv::Scalar(255, 0, 0), cv::Scalar(255, 85, 0), cv::Scalar(255, 170, 0),
+		cv::Scalar(255, 255, 0), cv::Scalar(170, 255, 0), cv::Scalar(85, 255, 0),
+		cv::Scalar(0, 255, 0), cv::Scalar(0, 255, 85), cv::Scalar(0, 255, 170),
+		cv::Scalar(0, 255, 255), cv::Scalar(0, 170, 255), cv::Scalar(0, 85, 255),
+		cv::Scalar(0, 0, 255), cv::Scalar(85, 0, 255), cv::Scalar(170, 0, 255),
+		cv::Scalar(255, 0, 255), cv::Scalar(255, 0, 170), cv::Scalar(255, 0, 85),
+		cv::Scalar(255, 128, 0), cv::Scalar(255, 85, 128), cv::Scalar(255, 170, 128),
+		cv::Scalar(255, 255, 128), cv::Scalar(170, 255, 128), cv::Scalar(85, 255, 128),
+		cv::Scalar(128, 255, 0), cv::Scalar(128, 255, 85), cv::Scalar(128, 255, 170),
+		cv::Scalar(128, 255, 255), cv::Scalar(128, 170, 255), cv::Scalar(128, 85, 255),
+		cv::Scalar(128, 0, 255), cv::Scalar(85, 128, 255)
+		#endif
     };
     const std::vector<std::pair<int, int> > limbKeypointsIds = {
+	#ifdef COCO
         {1, 2},  {1, 5},   {2, 3},
         {3, 4},  {5, 6},   {6, 7},
         {1, 8},  {8, 9},   {9, 10},
         {1, 11}, {11, 12}, {12, 13},
         {1, 0},  {0, 14},  {14, 16},
         {0, 15}, {15, 17}
+	#endif
+
+	#ifdef MPI
+		{0,1}, {1,2}, {2,3},
+		{3,4}, {1,5}, {5,6},
+		{6,7}, {1,14}, {14,8}, {8,9},
+		{9,10}, {14,11}, {11,12}, {12,13}
+	#endif
+
+	#ifdef BODY_25
+		{1,8}, {1,2}, {1,5}, {2,3}, {3,4},
+		{5,6}, {6,7}, {8,9}, {9,10}, {10,11},
+		{8,12}, {12,13}, {13,14}, {1,0}, {0,15},
+		{15,17}, {0,16}, {16,18}, {14,19}, {19,20},
+		{14,21}, {11,22}, {22,23}, {11,24}
+	#endif
+
+	#ifdef FACE
+		{0,1}, {1,2}, {1,3}, {3,4}, {4,5},
+		{5,6}, {6,7}, {7,8}, {8,9}, {9,10},
+		{10,11}, {11,12}, {12,13}, {13,14}, {14,15},
+		{15,16}, {17,18}, {18,19}, {19,20}, {20,21},
+		{22,23}, {23,24}, {24,25}, {25,26}, {27,28},
+		{28,29}, {29,30}, {31,32}, {32,33}, {33,34},
+		{34,35}, {36,37}, {37,38}, {38,39}, {39,40},
+		{40,41}, {41,36}, {42,43}, {43,44}, {44,45},
+		{45,46}, {46,47}, {47,42}, {48,49}, {49,50},
+		{50,51}, {51,52}, {52,53}, {53,54}, {54,55},
+		{55,56}, {56,57}, {57,58}, {58,59}, {59,48},
+		{60,61}, {61,62}, {62,63}, {63,64}, {64,65},
+		{65,66}, {66,67}, {67,60}, {37,68}, {44,69}
+	#endif
+
+	#ifdef HAND
+		{0,1}, {1,2}, {2,3}, {3,4}, {0,5},
+		{5,6}, {6,7}, {7,8}, {0,9}, {9,10},
+		{10,11}, {11,12}, {0,13}, {13,14}, {14,15},
+		{15,16}, {0,17}, {17,18}, {18,19}, {19,20}
+	#endif
     };
 
     const int stickWidth = 4;

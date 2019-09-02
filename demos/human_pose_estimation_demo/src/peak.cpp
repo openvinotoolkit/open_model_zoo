@@ -5,8 +5,15 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
+#include <iostream>
 
 #include "peak.hpp"
+
+#define COCO
+//#define MPI
+//#define BODY_25
+//#define FACE
+//#define HAND
 
 namespace human_pose_estimation {
 Peak::Peak(const int id, const cv::Point2f& pos, const float score)
@@ -112,13 +119,91 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
                                          const float foundMidPointsRatioThreshold,
                                          const int minJointsNumber,
                                          const float minSubsetScore) {
-    const std::vector<std::pair<int, int> > limbIdsHeatmap = {
-        {2, 3}, {2, 6}, {3, 4}, {4, 5}, {6, 7}, {7, 8}, {2, 9}, {9, 10}, {10, 11}, {2, 12}, {12, 13}, {13, 14},
-        {2, 1}, {1, 15}, {15, 17}, {1, 16}, {16, 18}, {3, 17}, {6, 18}
+	const std::vector<std::pair<int, int> > limbIdsHeatmap = {
+	#ifdef COCO
+		{2, 3}, {2, 6}, {3, 4}, {4, 5}, {6, 7}, {7, 8}, {2, 9}, {9, 10}, {10, 11}, {2, 12}, {12, 13}, {13, 14},
+		{2, 1}, {1, 15}, {15, 17}, {1, 16}, {16, 18}, {3, 17}, {6, 18}
+	#endif
+
+	#ifdef MPI
+		{1,2}, {2,3}, {3,4},
+		{4,5}, {2,6}, {6,7},
+		{7,8}, {2,15}, {15,9}, {9,10},
+		{10,11}, {15,12}, {12,13}, {13,14}
+	#endif
+
+	#ifdef BODY_25
+		{2,9}, {2,3}, {2,6}, {3,4}, {4,5},
+		{6,7}, {7,8}, {9,10}, {10,11}, {11,12},
+		{9,13}, {13,14}, {14,15}, {2,1}, {1,16},
+		{16,18}, {1,17}, {17,19}, {15,20}, {20,21},
+		{15,22}, {12,23}, {23,24}, {12,25}
+	#endif
+
+	#ifdef FACE
+		{1,2}, {2,3}, {3,4}, {4,5}, {5,6},
+		{6,7}, {7,8}, {8,9}, {9,10}, {10,11},
+		{11,12}, {12,13}, {13,14}, {14,15}, {15,16},
+		{16,17}, {18,19}, {19,20}, {20,21}, {21,22}, 
+		{23,24}, {24,25}, {25,26}, {26,27}, {28,29},
+		{29,30}, {30,31}, {32,33}, {33,34}, {34,35},
+		{35,36}, {37,38}, {38,39}, {39,40}, {40,41},
+		{41,42}, {42,37}, {43,44}, {44,45}, {45,46},
+		{46,47}, {47,48}, {48,43}, {49,50}, {50,51},
+		{51,52}, {52,53}, {53,54}, {54,55}, {55,56},
+		{56,57}, {57,58}, {58,59}, {59,60}, {60,49},
+		{61,62}, {62,63}, {63,64}, {64,65}, {65,66},
+		{66,67}, {67,68}, {68,61}, {38,69}, {45,70}
+	#endif
+
+	#ifdef HAND
+		{1,2}, {2,3}, {3,4}, {4,5}, {1,6},
+		{6,7}, {7,8}, {8,9}, {1,10}, {10,11},
+		{11,12}, {12,13}, {1,14}, {14,15}, {15,16},
+		{16,17}, {1,18}, {18,19}, {19,20}, {20,21}
+	#endif
     };
     const std::vector<std::pair<int, int> > limbIdsPaf = {
+	#ifdef COCO
         {31, 32}, {39, 40}, {33, 34}, {35, 36}, {41, 42}, {43, 44}, {19, 20}, {21, 22}, {23, 24}, {25, 26},
         {27, 28}, {29, 30}, {47, 48}, {49, 50}, {53, 54}, {51, 52}, {55, 56}, {37, 38}, {45, 46}
+	#endif
+
+	#ifdef MPI
+		{16, 17}, {18, 19}, {20, 21}, {22, 23}, {24, 25}, {26, 27}, {28, 29}, {30, 31},
+		{32, 33}, {34, 35}, {36, 37}, {38, 39}, {40, 41}, {42, 43}
+	#endif
+
+	#ifdef BODY_25
+		{0,1}, {14,15}, {22,23}, {16,17}, {18,19}, 
+		{24,25}, {26,27}, {6,7}, {2,3}, {4,5}, 
+		{8,9}, {10,11}, {12,13}, {30,31}, {32,33},
+		{36,37}, {34,35}, {38,39}, {40,41}, {42,43},
+		{44,45}, {46,47}, {48,49}, {50,51}
+	#endif
+
+	#ifdef FACE
+		{0,1}, {1,2}, {1,3}, {3,4}, {4,5},
+		{5,6}, {6,7}, {7,8}, {8,9}, {9,10}, 
+		{10,11}, {11,12}, {13,14}, {14,15}, {15,16},
+		{16,17}, {17,18}, {18,19}, {19,20}, {20,21},
+		{21,22}, {22,23}, {23,24}, {24,25}, {25,26},
+		{27,28}, {28,29}, {29,30}, {31,32}, {32,33}, 
+		{33,34}, {34,35}, {36,37}, {37,38}, {38,39},
+	    {39,40}, {40,41}, {41,36}, {42,43}, {43,44}, 
+		{44,45}, {45,46}, {46,47}, {47,42}, {48,49}, 
+		{49,50}, {50,51}, {51,52}, {52,53}, {53,54}, 
+		{54,55}, {55,56}, {56,57}, {57,58}, {58,59}, 
+		{59,48}, {60,61}, {61,62}, {62,63}, {63,64}, 
+		{64,65}, {65,66}, {66,67}, {67,68}, {68,69}
+	#endif
+
+	#ifdef HAND
+		{0,1}, {1,2}, {2,3}, {3,4}, {4,5},
+		{5,6}, {6,7}, {7,8}, {8,9}, {9,10},
+		{10,11}, {11,12}, {12,13}, {13,14}, {14,15},
+		{15,16}, {16,17}, {17,18}, {18,19}, {19,20}
+	#endif
     };
 
     std::vector<Peak> candidates;
@@ -128,15 +213,25 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
     std::vector<HumanPoseByPeaksIndices> subset(0, HumanPoseByPeaksIndices(keypointsNumber));
     for (size_t k = 0; k < limbIdsPaf.size(); k++) {
         std::vector<TwoJointsConnection> connections;
+
+	#if (defined MPI) || (defined COCO)
         const int mapIdxOffset = keypointsNumber + 1;
+	#endif
+
+	#if (defined BODY_25) || (defined FACE) || (defined HAND)
+		const int mapIdxOffset = 0;
+	#endif
+
         std::pair<cv::Mat, cv::Mat> scoreMid = { pafs[limbIdsPaf[k].first - mapIdxOffset],
                                                  pafs[limbIdsPaf[k].second - mapIdxOffset] };
-        const int idxJointA = limbIdsHeatmap[k].first - 1;
+		
+		const int idxJointA = limbIdsHeatmap[k].first - 1;
         const int idxJointB = limbIdsHeatmap[k].second - 1;
         const std::vector<Peak>& candA = allPeaks[idxJointA];
         const std::vector<Peak>& candB = allPeaks[idxJointB];
         const size_t nJointsA = candA.size();
         const size_t nJointsB = candB.size();
+
         if (nJointsA == 0
                 && nJointsB == 0) {
             continue;
@@ -189,7 +284,7 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
                     continue;
                 }
                 vec /= norm_vec;
-                float score = vec.x * scoreMid.first.at<float>(mid) + vec.y * scoreMid.second.at<float>(mid);
+				float score = vec.x * scoreMid.first.at<float>(mid) + vec.y * scoreMid.second.at<float>(mid);
                 int height_n  = pafs[0].rows / 2;
                 float suc_ratio = 0.0f;
                 float mid_score = 0.0f;
@@ -206,6 +301,9 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
                         cv::Point2f pred(scoreMid.first.at<float>(midPoint),
                                          scoreMid.second.at<float>(midPoint));
                         score = vec.x * pred.x + vec.y * pred.y;
+#if (defined FACE) || (defined HAND)
+						score = 1;
+#endif
                         if (score > midPointsScoreThreshold) {
                             p_sum += score;
                             p_count++;
@@ -302,6 +400,7 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
             }
         }
     }
+
     std::vector<HumanPose> poses;
     for (const auto& subsetI : subset) {
         if (subsetI.nJoints < minJointsNumber
