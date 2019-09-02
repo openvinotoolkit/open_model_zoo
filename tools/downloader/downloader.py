@@ -33,7 +33,7 @@ import common
 
 CHUNK_SIZE = 1 << 15 if sys.stdout.isatty() else 1 << 20
 
-def process_download(chunk_iterable, size, file):
+def process_download(reporter, chunk_iterable, size, file):
     start_time = time.monotonic()
     progress_size = 0
 
@@ -43,43 +43,36 @@ def process_download(chunk_iterable, size, file):
                 duration = time.monotonic() - start_time
                 progress_size += len(chunk)
                 if duration != 0:
-                    speed = progress_size // (1024 * duration)
+                    speed = int(progress_size / (1024 * duration))
                     percent = str(progress_size * 100 // size)
 
-                    print('... %s%%, %d KB, %d KB/s, %d seconds passed' %
-                            (percent, progress_size / 1024, speed, duration),
-                        end='\r' if sys.stdout.isatty() else '\n', flush=True)
+                    reporter.print_progress('... {}%, {} KB, {} KB/s, {} seconds passed',
+                        percent, int(progress_size / 1024), speed, int(duration))
+                    reporter.emit_event('model_file_download_progress', size=progress_size)
 
                 file.write(chunk)
     finally:
-        if sys.stdout.isatty():
-            print()
+        reporter.end_progress()
 
-def try_download(file, num_attempts, start_download, size):
+def try_download(reporter, file, num_attempts, start_download, size):
     for attempt in range(num_attempts):
         if attempt != 0:
             retry_delay = 10
-            print("Will retry in {} seconds...".format(retry_delay))
+            reporter.print("Will retry in {} seconds...", retry_delay, flush=True)
             time.sleep(retry_delay)
 
         try:
             chunk_iterable = start_download()
             file.seek(0)
             file.truncate()
-            process_download(chunk_iterable, size, file)
+            process_download(reporter, chunk_iterable, size, file)
             return True
-        except requests.exceptions.ConnectionError as e:
-            print("Error Connecting:", e)
-        except requests.exceptions.Timeout as e:
-            print("Timeout Error:", e)
-        except requests.exceptions.TooManyRedirects as e:
-            print("Redirects Error: requests exceeds maximum number of redirects", e)
-        except (requests.exceptions.RequestException, ssl.SSLError) as e:
-            print(e)
+        except (requests.exceptions.RequestException, ssl.SSLError):
+            reporter.log_error("Download failed", exc_info=True)
 
     return False
 
-def verify_hash(file, expected_hash, path, model_name):
+def verify_hash(reporter, file, expected_hash, path, model_name):
     actual_hash = hashlib.sha256()
     while True:
         chunk = file.read(1 << 20)
@@ -87,9 +80,9 @@ def verify_hash(file, expected_hash, path, model_name):
         actual_hash.update(chunk)
 
     if actual_hash.digest() != bytes.fromhex(expected_hash):
-        print('########## Error: Hash mismatch for "{}" ##########'.format(path))
-        print('##########     Expected: {}'.format(expected_hash))
-        print('##########     Actual:   {}'.format(actual_hash.hexdigest()))
+        reporter.log_error('Hash mismatch for "{}"', path)
+        reporter.log_details('Expected: {}', expected_hash)
+        reporter.log_details('Actual:   {}', actual_hash.hexdigest())
         return False
     return True
 
@@ -133,46 +126,44 @@ class DirCache:
         hash_path.parent.mkdir(parents=True, exist_ok=True)
         staging_path.replace(self._hash_path(hash))
 
-def try_retrieve_from_cache(cache, files):
+def try_retrieve_from_cache(reporter, cache, files):
     try:
         if all(cache.has(file[0]) for file in files):
             for hash, destination in files:
-                print('========= Retrieving {} from the cache'.format(destination), flush=True)
+                reporter.print_section_heading('Retrieving {} from the cache', destination)
                 cache.get(hash, destination)
-            print()
+            reporter.print()
             return True
-    except Exception as e:
-        print(e)
-        print('########## Warning: Cache retrieval failed; falling back to downloading ##########')
-        print()
+    except Exception:
+        reporter.log_warning('Cache retrieval failed; falling back to downloading', exc_info=True)
+        reporter.print()
 
     return False
 
 def try_update_cache(cache, hash, source):
     try:
         cache.put(hash, source)
-    except Exception as e:
-        print(e)
-        print('########## Warning: Failed to update the cache ##########')
+    except Exception:
+        reporter.log_warning('Failed to update the cache', exc_info=True)
 
-def try_retrieve(name, destination, model_file, cache, num_attempts, start_download):
+def try_retrieve(reporter, name, destination, model_file, cache, num_attempts, start_download):
     destination.parent.mkdir(parents=True, exist_ok=True)
 
-    if try_retrieve_from_cache(cache, [[model_file.sha256, destination]]):
+    if try_retrieve_from_cache(reporter, cache, [[model_file.sha256, destination]]):
         return True
 
-    print('========= Downloading {}'.format(destination))
+    reporter.print_section_heading('Downloading {}', destination)
 
     success = False
 
     with destination.open('w+b') as f:
-        if try_download(f, num_attempts, start_download, model_file.size):
+        if try_download(reporter, f, num_attempts, start_download, model_file.size):
             f.seek(0)
-            if verify_hash(f, model_file.sha256, destination, name):
+            if verify_hash(reporter, f, model_file.sha256, destination, name):
                 try_update_cache(cache, model_file.sha256, destination)
                 success = True
 
-    print('')
+    reporter.print()
     return success
 
 class DownloaderArgumentParser(argparse.ArgumentParser):
@@ -206,45 +197,63 @@ def main():
         help='directory to use as a cache for downloaded files')
     parser.add_argument('--num_attempts', type=positive_int_arg, metavar='N', default=1,
         help='attempt each download up to N times')
+    parser.add_argument('--progress_format', choices=('text', 'json'), default='text',
+        help='which format to use for progress reporting')
 
     args = parser.parse_args()
+
+    reporter = common.Reporter(
+        enable_human_output=args.progress_format == 'text',
+        enable_json_output=args.progress_format == 'json')
+
     cache = NullCache() if args.cache_dir is None else DirCache(args.cache_dir)
     models = common.load_models_from_args(parser, args)
 
     failed_models = set()
 
-    print('')
-    print('###############|| Downloading models ||###############')
-    print('')
+    reporter.print_group_heading('Downloading models')
     with requests.Session() as session:
         for model in models:
+            reporter.emit_event('model_download_begin', model=model.name, num_files=len(model.files))
+
             output = args.output_dir / model.subdirectory
             output.mkdir(parents=True, exist_ok=True)
 
             for model_file in model.files:
+                model_file_reporter = reporter.with_event_context(model=model.name, model_file=model_file.name.as_posix())
+                model_file_reporter.emit_event('model_file_download_begin', size=model_file.size)
+
                 destination = output / model_file.name
 
-                if not try_retrieve(model.name, destination, model_file, cache, args.num_attempts,
+                if not try_retrieve(model_file_reporter, model.name, destination, model_file, cache, args.num_attempts,
                         lambda: model_file.source.start_download(session, CHUNK_SIZE)):
                     shutil.rmtree(str(output))
                     failed_models.add(model.name)
+                    model_file_reporter.emit_event('model_file_download_end', successful=False)
+                    reporter.emit_event('model_download_end', model=model.name, successful=False)
                     break
 
-    print('')
-    print('###############|| Post processing ||###############')
-    print('')
+                model_file_reporter.emit_event('model_file_download_end', successful=True)
+            else:
+                reporter.emit_event('model_download_end', model=model.name, successful=True)
+
+    reporter.print_group_heading('Post-processing')
     for model in models:
-        if model.name in failed_models: continue
+        if model.name in failed_models or not model.postprocessing: continue
+
+        reporter.emit_event('model_postprocessing_begin', model=model.name)
 
         output = args.output_dir / model.subdirectory
 
         for postproc in model.postprocessing:
-            postproc.apply(output)
+            postproc.apply(reporter, output)
+
+        reporter.emit_event('model_postprocessing_end', model=model.name)
 
     if failed_models:
-        print('FAILED:')
-        print(*sorted(failed_models), sep='\n')
-        sys.exit(1)
+        reporter.print('FAILED:')
+        for failed_model_name in failed_models:
+            reporter.print(failed_model_name)
 
 if __name__ == '__main__':
     main()
