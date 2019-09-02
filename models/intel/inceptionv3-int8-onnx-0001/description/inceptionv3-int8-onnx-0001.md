@@ -34,7 +34,7 @@ The quality metrics calculated on ImageNet validation dataset is 78.36% accuracy
 
 ## Input
 
-Image, shape - `1,299,299,3`, format is `B,H,W,C` where:
+Image, shape - `1,3,299,299`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `H` - height
