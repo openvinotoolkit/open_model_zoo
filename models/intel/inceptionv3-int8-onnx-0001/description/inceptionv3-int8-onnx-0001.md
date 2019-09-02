@@ -20,7 +20,7 @@ classifications matching those in the ImageNet database.
 | Type              | Classification|
 | GFLOPs            | 11.469 |
 | MParams           | 23.817 |
-| Source framework  | PyTorch    |
+| Source framework  | PyTorch\*    |
 
 ## Accuracy
 
@@ -37,9 +37,9 @@ The quality metrics calculated on ImageNet validation dataset is 78.36% accuracy
 Image, shape - `1,3,299,299`, format is `B,C,H,W` where:
 
 - `B` - batch size
+- `C` - channel
 - `H` - height
 - `W` - width
-- `C` - channel
 
 Channel order is `BGR`
 

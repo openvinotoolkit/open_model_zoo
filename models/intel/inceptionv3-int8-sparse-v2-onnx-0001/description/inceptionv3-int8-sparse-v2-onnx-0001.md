@@ -19,7 +19,7 @@ The model output for `inceptionv3-int8-sparse-v2-onnx-0001` is the usual object 
 | Type              | Classification|
 | GFLOPs            | 11.469 |
 | MParams           | 23.817 |
-| Source framework  | PyTorch    |
+| Source framework  | PyTorch\*    |
 | Sparsity | 60.31% |
 
 ## Accuracy
@@ -37,9 +37,9 @@ The quality metrics calculated on ImageNet validation dataset is 77.05% accuracy
 Image, shape - `1,3,299,299`, format is `B,C,H,W` where:
 
 - `B` - batch size
+- `C` - channel
 - `H` - height
 - `W` - width
-- `C` - channel
 
 Channel order is `BGR`
 

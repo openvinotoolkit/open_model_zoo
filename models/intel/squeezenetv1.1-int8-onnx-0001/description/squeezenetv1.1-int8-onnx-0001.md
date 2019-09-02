@@ -19,7 +19,7 @@ The model output for `squeezenetv1.1-int8-onnx-0001` is the usual object classif
 | Type              | Classification|
 | GFLOPs            | 0.707 |
 | MParams           | 1.236 |
-| Source framework  | PyTorch    |
+| Source framework  | PyTorch\*    |
 
 ## Accuracy
 
@@ -36,9 +36,9 @@ The quality metrics calculated on ImageNet validation dataset is 57.9% accuracy 
 Image, shape - `1,3,224,224`, format is `B,C,H,W` where:
 
 - `B` - batch size
+- `C` - channel
 - `H` - height
 - `W` - width
-- `C` - channel
 
 Channel order is `BGR`
 
@@ -49,3 +49,5 @@ Object classifier according to ImageNet classes, shape -`1,1000`, output data fo
 - `B` - batch size
 - `C` - predicted probabilities for each class in  [0, 1] range
 
+## Legal Information
+[*] Other names and brands may be claimed as the property of others.
