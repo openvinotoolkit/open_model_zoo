@@ -4,7 +4,7 @@
 
 This is the MobileNet v2 model that is designed to perform image classification. The model has been pretrained on the ImageNet image database and then symmetrically quantized to INT8 fixed-point precision using Neural Network Compression Framework (NNCF).  
 
-The model input is a blob that consists of a single image of "1x224x224x3" in BGR order.
+The model input is a blob that consists of a single image of "1x3x224x224" in BGR order.
 
 The model output for `mobilenetv2-int8-onnx-0001` is the usual object classifier output for the 1000 different classifications matching those in the ImageNet database.
 
