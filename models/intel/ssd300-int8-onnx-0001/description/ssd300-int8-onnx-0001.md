@@ -1,12 +1,12 @@
-# ssd300-int8-sparse-v2-onnx-0001
+# ssd300-int8-onnx-0001
 
 ## Use Case and High-Level Description
 
-This is an SSD model with a VGG16 backbone that is designed to perform object detection. The model has been pretrained on the VOC image database (VOC07+12 dataset) and then symmetrically quantized to INT8 fixed-point precision and pruned to 90% sparsity rate using Neural Network Compression Framework (NNCF).
+This is an SSD model with a VGG16 backbone that is designed to perform object detection. The model has been pretrained on the VOC image database (VOC07+12 dataset) and then symmetrically quantized to INT8 fixed-point precision using Neural Network Compression Framework (NNCF).
 
-The model input is a blob that consists of a single image of "1x3x300x300" in RGB order.
+The model input is a blob that consists of a single image of "1x3x300x300" in BGR order.
 
-The model output for `ssd300-int8-sparse-v2-onnx-0001` is the usual object detection output for the 21 different classes present in the VOC database.
+The model output for `ssd300-int8-onnx-0001` is the usual object detection output for the 21 different classes present in the VOC database.
 
 ## Specification
 
@@ -15,15 +15,15 @@ The model output for `ssd300-int8-sparse-v2-onnx-0001` is the usual object detec
 | Type              | Detection |
 | GFLOPs            | 62.815 |
 | MParams           | 26.285 |
-| Source framework  | PyTorch    |
+| Source framework  | PyTorch\*    |
 
 ## Accuracy
 
-The quality metric (mAP) calculated on VOC07+12 validation dataset has the value of 77.94%.
+The quality metric (mAP) is calculated on VOC07+12 validation dataset. Details on how the mean average precision metric (mAP) is computed can be found [in the following paper](https://arxiv.org/pdf/1809.02165v3.pdf).
 
 | Metric                    | Value         |
 |---------------------------|---------------|
-| mAP |         77.94% |
+| mAP |         78.22% |
 
 ## Input
 
@@ -34,7 +34,7 @@ Image, shape - `1,3,300,300`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-Channel order is `RGB`
+Channel order is `BGR`
 
 ## Output
 
@@ -45,3 +45,6 @@ The net outputs a blob with shape: [1, 1, N, 7], where N is the number of detect
 - `conf` - confidence for the predicted class
 - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
 - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner
+
+## Legal Information
+[*] Other names and brands may be claimed as the property of others.
