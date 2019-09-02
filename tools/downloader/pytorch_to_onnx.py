@@ -21,14 +21,6 @@ def positive_int_arg(values):
             sys.exit('Invalid value for input argument: {!r}, a positive integer is expected'.format(value))
     return result
 
-def model_parameters(parameters):
-    if not parameters:
-        return None
-    model_params = dict((param, value) for param, value in (element.split('=') for element in parameters.split(',')))
-    for param in model_params.keys():
-        model_params[param] = eval(model_params[param])
-    return model_params
-
 
 def parse_args():
     """Parse input arguments"""
@@ -54,12 +46,11 @@ def parse_args():
                         help='Space separated names of the input layers')
     parser.add_argument('--output-names', type=str, nargs='+',
                         help='Space separated names of the output layers')
-    parser.add_argument('--model-params', type=model_parameters,
-                        help='Pairs "name"="value" of model constructor comma-separeted parameters')
+
     return parser.parse_args()
 
 
-def load_model(model_name, weights, from_torchvision=True, model_path=None, module_name=None, model_params=None):
+def load_model(model_name, weights, from_torchvision=True, model_path=None, module_name=None):
     """Import model and load pretrained weights"""
 
     if from_torchvision:
@@ -81,7 +72,7 @@ def load_model(model_name, weights, from_torchvision=True, model_path=None, modu
         try:
             module = __import__(module_name)
             creator = getattr(module, model_name)
-            model = creator(**model_params) if model_params else creator()
+            model = creator()
         except ImportError as err:
             print('Module {} in {} doesn\'t exist. Check import path and name'.format(model_name, model_path))
             sys.exit(err)
@@ -119,8 +110,7 @@ def convert_to_onnx(model, input_shape, output_file, input_names, output_names):
 
 def main():
     args = parse_args()
-    model = load_model(args.model_name, args.weights, args.from_torchvision,
-                       args.model_path, args.import_module, args.model_params)
+    model = load_model(args.model_name, args.weights, args.from_torchvision, args.model_path, args.import_module)
     convert_to_onnx(model, args.input_shape, args.output_file, args.input_names, args.output_names)
 
 
