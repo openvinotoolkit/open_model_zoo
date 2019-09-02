@@ -1,0 +1,82 @@
+launchers:
+  - framework: dlsdk
+    cpu_extensions: AUTO
+
+datasets:
+  - name: ms_coco_mask_rcnn
+    annotation_conversion:
+      converter: mscoco_mask_rcnn
+      annotation_file: MSCOCO/annotations/instances_val2017.json
+      has_background: True
+      sort_annotations: True
+    annotation: mscoco_mask_rcnn.pickle
+    dataset_meta: mscoco_mask_rcnn.json
+
+  - name: ms_coco_detection_91_class
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: MSCOCO/annotations/instances_val2017.json
+      has_background: True
+      sort_annotations: True
+      use_full_label_map: True
+    annotation: mscoco_det_91.pickle
+    dataset_meta: mscoco_det_91.json
+    data_source: MSCOCO/val2017
+
+  - name: imagenet_1000_classes
+    annotation_conversion:
+      converter: imagenet
+      annotation_file: ImageNet/val.txt
+    annotation: imagenet1000.pickle
+    data_source: ImageNet
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+    - name: acciracy@top5
+      type: accuracy
+      top_k: 5
+
+  - name: imagenet_1000_classes_2015
+    annotation_conversion:
+      converter: imagenet
+      annotation_file: ImageNet/val15.txt
+    annotation: imagenet1000_2015.pickle
+    data_source: ImageNet
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+    - name: acciracy@top5
+      type: accuracy
+      top_k: 5
+
+  - name: imagenet_1001_classes
+    annotation_conversion:
+      converter: imagenet
+      annotation_file: ImageNet/val.txt
+      has_background: True
+    annotation: imagenet1001.pickle
+    data_source: ImageNet
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+    - name: acciracy@top5
+      type: accuracy
+      top_k: 5
+
+  - name: VOC2007
+    annotation_conversion:
+      converter: voc_detection
+      annotations_dir: VOCdevkit/VOC2007/Annotations
+      images_dir: VOCdevkit/VOC2007/JPEGImages
+      imageset_file: VOCdevkit/VOC2007/ImageSets/Main/test.txt
+    data_source: VOCdevkit/VOC2007/JPEGImages
+    annotation: voc07.pickle
+    dataset_meta: voc07.json
+    metrics:
+    - type: map
+      integral: 11point
+      ignore_difficult: True
+      presenter: print_scalar
