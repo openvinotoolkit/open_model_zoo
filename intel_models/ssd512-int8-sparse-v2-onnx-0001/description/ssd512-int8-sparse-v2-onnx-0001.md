@@ -19,11 +19,11 @@ The model output for `ssd512-int8-sparse-v2-onnx-0001` is the usual object detec
 
 ## Accuracy
 
-The quality metric (mAP) calculated on VOC07+12 validation dataset has the value of 77.2%.
+The quality metric (mAP) calculated on VOC07+12 validation dataset has the value of 80.11%.
 
 | Metric                    | Value         |
 |---------------------------|---------------|
-| mAP |         77.2% |
+| mAP |         80.11% |
 
 ## Input
 
