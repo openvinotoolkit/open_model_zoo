@@ -6,8 +6,8 @@ models:
         tags:
           - INT1
         device: CPU
-        model:   PublicCompressed/classification/resnet50_binary/dldt/INT1/resnet50-binary-0001.xml
-        weights: PublicCompressed/classification/resnet50_binary/dldt/INT1/resnet50-binary-0001.bin
+        model:   intel/resnet50-binary-0001/INT1/resnet50-binary-0001.xml
+        weights: intel/resnet50-binary-0001/INT1/resnet50-binary-0001.bin
         adapter: classification
 
 

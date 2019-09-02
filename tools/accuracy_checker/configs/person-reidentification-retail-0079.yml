@@ -5,23 +5,23 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        model:   Retail/object_reidentification/pedestrian/rmnet_based/0079/dldt/FP32/person-reidentification-retail-0079.xml
-        weights: Retail/object_reidentification/pedestrian/rmnet_based/0079/dldt/FP32/person-reidentification-retail-0079.bin
+        model:   intel/person-reidentification-retail-0079/FP32/person-reidentification-retail-0079.xml
+        weights: intel/person-reidentification-retail-0079/FP32/person-reidentification-retail-0079.bin
         adapter: reid
 
       - framework: dlsdk
         tags:
           - FP16
-        model:   Retail/object_reidentification/pedestrian/rmnet_based/0079/dldt/FP16/person-reidentification-retail-0079.xml
-        weights: Retail/object_reidentification/pedestrian/rmnet_based/0079/dldt/FP16/person-reidentification-retail-0079.bin
+        model:   intel/person-reidentification-retail-0079/FP16/person-reidentification-retail-0079.xml
+        weights: intel/person-reidentification-retail-0079/FP16/person-reidentification-retail-0079.bin
         adapter: reid
 
       - framework: dlsdk
         tags:
           - INT8
         device: CPU
-        model:   Retail/object_reidentification/pedestrian/rmnet_based/0079/dldt/INT8/person-reidentification-retail-0079.xml
-        weights: Retail/object_reidentification/pedestrian/rmnet_based/0079/dldt/INT8/person-reidentification-retail-0079.bin
+        model:  intel/person-reidentification-retail-0079/dldt/INT8/person-reidentification-retail-0079.xml
+        weights: intel/person-reidentification-retail-0079/0079/dldt/INT8/person-reidentification-retail-0079.bin
         adapter: reid
 
     datasets:

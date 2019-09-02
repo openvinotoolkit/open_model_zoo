@@ -5,8 +5,8 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        model:   Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/FP32/text-detection-0003.xml
-        weights: Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/FP32/text-detection-0003.bin
+        model:   intel/text-detection-0003/FP32/text-detection-0003.xml
+        weights: intel/text-detection-0003/FP32/text-detection-0003.bin
         adapter:
           type: pixel_link_text_detection
           pixel_link_out: model/link_logits_/add
@@ -19,8 +19,8 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        model:   Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/FP16/text-detection-0003.xml
-        weights: Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/FP16/text-detection-0003.bin
+        model:   intel/text-detection-0003/FP16/text-detection-0003.xml
+        weights: intel/text-detection-0003/FP16/text-detection-0003.bin
         adapter:
           type: text_detection
           pixel_link_out: model/link_logits_/add
@@ -34,8 +34,8 @@ models:
         tags:
           - INT8
         device: CPU
-        model:   Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/INT8/text-detection-0003.xml
-        weights: Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/INT8/text-detection-0003.bin
+        model:   intel/text-detection-0003/INT8/text-detection-0003.xml
+        weights: intel/text-detection-0003/INT8/text-detection-0003.bin
         adapter:
           type: text_detection
           pixel_link_out: model/link_logits_/add

@@ -6,8 +6,8 @@ models:
         tags:
           - INT1
         device: CPU
-        model:   Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/INT1/face-detection-adas-binary-0001.xml
-        weights: Transportation/object_detection/face/pruned_mobilenet_reduced_ssd_shared_weights/dldt/INT1/face-detection-adas-binary-0001.bin
+        model:   intel/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.xml
+        weights: intel/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.bin
         adapter: ssd
 
     datasets:
