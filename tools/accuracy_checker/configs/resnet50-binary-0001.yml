@@ -13,11 +13,6 @@ models:
 
     datasets:
       - name: imagenet_1000_classes
-        data_source: ImageNet
-        annotation_conversion:
-          converter: imagenet
-          annotation_file: val.txt
-        annotation: imagenet1000.pickle
         reader: pillow_imread
 
         preprocessing:
