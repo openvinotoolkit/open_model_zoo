@@ -23,7 +23,7 @@ The `octave-resnext-50-0.25` model is a modification of [`resnext-50`](https://a
 
 A blob that consists of a single image of `1x3x224x224` in `RGB` order. Before passing the image blob into the network, subtract RGB mean values as follows: [124,117,104]. In addition, values must be divided by 0.0167.
 
-### Original model
+### Original Model
 
 Image, name: `data`,  shape: `1,3,224,224`, format: `B,C,H,W`, where:
 
@@ -35,7 +35,7 @@ Image, name: `data`,  shape: `1,3,224,224`, format: `B,C,H,W`, where:
 Channel order is `RGB`. 
 Mean values: [124,117,104], scale value: 59.880239521.
 
-### Converted model
+### Converted Model
 
 Image, name: `data`,  shape: `1,3,224,224`, format: `B,C,H,W`,where:
 
@@ -50,14 +50,14 @@ Channel order is `BGR`.
 
 The model output for `octave-resnext-50-0.125` is a typical object-classifier output for 1000 different classifications matching those in the ImageNet database.
 
-### Original model
+### Original Model
 
 Object classifier according to ImageNet classes, name: `prob`,  shape: `1,1000`, output data format is `B,C`, where:
 
 - `B` - batch size
 - `C` - predicted probabilities for each class in  [0, 1] range
 
-### Converted model
+### Converted Model
 
 Object classifier according to ImageNet classes, name: `prob`,  shape: `1,1000`, output data format is `B,C`, where:
 

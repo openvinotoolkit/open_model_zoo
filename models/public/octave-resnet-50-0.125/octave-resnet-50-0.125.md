@@ -25,7 +25,7 @@ The model output for `octave-resnet-50-0.125` is the typical object classifier o
 
 ## Input
 
-### Original model
+### Original Model
 
 Image, name: `data`,  shape: `1,3,224,224`, format: `B,C,H,W`, where:
 
@@ -37,7 +37,7 @@ Image, name: `data`,  shape: `1,3,224,224`, format: `B,C,H,W`, where:
 Channel order is `RGB`. 
 Mean values: [124,117,104], scale value: 59.880239521.
 
-### Converted model
+### Converted Model
 
 Image, name: `data`,  shape: `1,3,224,224`, format: `B,C,H,W`,where:
 
@@ -50,14 +50,14 @@ Channel order is `BGR`
 
 ## Output
 
-### Original model
+### Original Model
 
 Object classifier according to ImageNet classes, name: `prob`,  shape: `1,1000`, output data format is `B,C`, where:
 
 - `B` - batch size
 - `C` - predicted probabilities for each class in  [0, 1] range
 
-### Converted model
+### Converted Model
 
 Object classifier according to ImageNet classes, name: `prob`,  shape: `1,1000`, output data format is `B,C`, where:
 
