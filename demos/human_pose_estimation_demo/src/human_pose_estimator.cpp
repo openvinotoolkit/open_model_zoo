@@ -7,14 +7,40 @@
 #include <vector>
 
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui.hpp>
 
 #include <samples/common.hpp>
 
 #include "human_pose_estimator.hpp"
 #include "peak.hpp"
 
+#define COCO
+//#define MPI
+//#define BODY_25
+//#define FACE
+//#define HAND
+
 namespace human_pose_estimation {
-const size_t HumanPoseEstimator::keypointsNumber = 18;
+
+#ifdef COCO
+	const size_t HumanPoseEstimator::keypointsNumber = 18;
+#endif
+
+#ifdef MPI
+	const size_t HumanPoseEstimator::keypointsNumber = 15;
+#endif
+
+#ifdef BODY_25
+	const size_t HumanPoseEstimator::keypointsNumber = 25;
+#endif
+
+#ifdef FACE
+	const size_t HumanPoseEstimator::keypointsNumber = 70;
+#endif
+
+#ifdef HAND
+	const size_t HumanPoseEstimator::keypointsNumber = 21;
+#endif
 
 HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
                                        const std::string& targetDeviceName_,
@@ -42,12 +68,23 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
     network = netReader.getNetwork();
     InferenceEngine::InputInfo::Ptr inputInfo = network.getInputsInfo().begin()->second;
     inputLayerSize = cv::Size(inputInfo->getTensorDesc().getDims()[3], inputInfo->getTensorDesc().getDims()[2]);
-    inputInfo->setPrecision(InferenceEngine::Precision::U8);
 
     InferenceEngine::OutputsDataMap outputInfo = network.getOutputsInfo();
     auto outputBlobsIt = outputInfo.begin();
-    pafsBlobName = outputBlobsIt->first;
-    heatmapsBlobName = (++outputBlobsIt)->first;
+
+#if (defined MPI) || (defined COCO)
+	pafsBlobName = outputBlobsIt->first;
+	heatmapsBlobName = (++outputBlobsIt)->first;
+#endif
+
+#if (defined BODY_25) || (defined FACE)|| (defined HAND)
+	pafsBlobName = outputBlobsIt->first;
+	heatmapsBlobName = outputBlobsIt->first;
+#endif
+
+	//std::cout << "pafsBlobName = " << pafsBlobName << std::endl;
+	//std::cout << "heatmapsBlobName = " << heatmapsBlobName << std::endl;
+
 
     executableNetwork = ie.LoadNetwork(network, targetDeviceName);
     request = executableNetwork.CreateInferRequest();
@@ -70,14 +107,18 @@ std::vector<HumanPose> HumanPoseEstimator::estimate(const cv::Mat& image) {
         request = executableNetwork.CreateInferRequest();
     }
     InferenceEngine::Blob::Ptr input = request.GetBlob(network.getInputsInfo().begin()->first);
-    auto buffer = input->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type *>();
-    preprocess(image, buffer);
+    auto buffer = input->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
+    preprocess(image, static_cast<float*>(buffer));
 
     request.Infer();
 
     InferenceEngine::Blob::Ptr pafsBlob = request.GetBlob(pafsBlobName);
     InferenceEngine::Blob::Ptr heatMapsBlob = request.GetBlob(heatmapsBlobName);
+
+#if (defined MPI) || (defined COCO)
     CV_Assert(heatMapsBlob->getTensorDesc().getDims()[1] == keypointsNumber + 1);
+#endif
+
     InferenceEngine::SizeVector heatMapDims =
             heatMapsBlob->getTensorDesc().getDims();
     std::vector<HumanPose> poses = postprocess(
@@ -89,10 +130,22 @@ std::vector<HumanPose> HumanPoseEstimator::estimate(const cv::Mat& image) {
             pafsBlob->getTensorDesc().getDims()[1],
             heatMapDims[3], heatMapDims[2], imageSize);
 
+
+	//std::cout << "pafsBlobName = " << pafsBlobName << "   " 
+	//	<< pafsBlob->getTensorDesc().getDims()[0] << ", " 
+	//	<< pafsBlob->getTensorDesc().getDims()[1] << ", " 
+	//	<< pafsBlob->getTensorDesc().getDims()[2] << ", "
+	//	<< pafsBlob->getTensorDesc().getDims()[3] << std::endl;
+	//std::cout << "heatmapsBlobName = " << heatmapsBlobName << "   " 
+	//	<< heatMapsBlob->getTensorDesc().getDims()[0] << ", "
+	//	<< heatMapsBlob->getTensorDesc().getDims()[1] << ", "
+	//	<< heatMapsBlob->getTensorDesc().getDims()[2] << ", "
+	//	<< heatMapsBlob->getTensorDesc().getDims()[3] << std::endl;
+
     return poses;
 }
 
-void HumanPoseEstimator::preprocess(const cv::Mat& image, uint8_t* buffer) const {
+void HumanPoseEstimator::preprocess(const cv::Mat& image, float* buffer) const {
     cv::Mat resizedImage;
     double scale = inputLayerSize.height / static_cast<double>(image.rows);
     cv::resize(image, resizedImage, cv::Size(), scale, scale, cv::INTER_CUBIC);
@@ -100,33 +153,79 @@ void HumanPoseEstimator::preprocess(const cv::Mat& image, uint8_t* buffer) const
     cv::copyMakeBorder(resizedImage, paddedImage, pad(0), pad(2), pad(1), pad(3),
                        cv::BORDER_CONSTANT, meanPixel);
     std::vector<cv::Mat> planes(3);
-    for (size_t pId = 0; pId < planes.size(); pId++) {
-        planes[pId] = cv::Mat(inputLayerSize, CV_8UC1,
-                              buffer + pId * inputLayerSize.area());
-    }
     cv::split(paddedImage, planes);
+    for (size_t pId = 0; pId < planes.size(); pId++) {
+        cv::Mat dst(inputLayerSize.height, inputLayerSize.width, CV_32FC1,
+                    reinterpret_cast<void*>(
+                        buffer + pId * inputLayerSize.area()));
+        planes[pId].convertTo(dst, CV_32FC1);
+    }
 }
 
+//heatMapsData : heatmapsBlobName (1, 16, 46, 46)
+//pafsData : pafsBlobName (1, 28, 46, 46)
 std::vector<HumanPose> HumanPoseEstimator::postprocess(
         const float* heatMapsData, const int heatMapOffset, const int nHeatMaps,
         const float* pafsData, const int pafOffset, const int nPafs,
         const int featureMapWidth, const int featureMapHeight,
         const cv::Size& imageSize) const {
     std::vector<cv::Mat> heatMaps(nHeatMaps);
-    for (size_t i = 0; i < heatMaps.size(); i++) {
+
+	//cv::Mat img = cv::Mat(imageSize.height, imageSize.width, CV_32FC1, cv::Scalar(255));
+    
+	for (size_t i = 0; i < heatMaps.size(); i++) {
         heatMaps[i] = cv::Mat(featureMapHeight, featureMapWidth, CV_32FC1,
                               reinterpret_cast<void*>(
                                   const_cast<float*>(
                                       heatMapsData + i * heatMapOffset)));
+
+	//	cv::Point2f p(-1, -1);
+	//	cv::Point maxLoc;
+	//	double prob;
+	//	minMaxLoc(heatMaps[i], 0, &prob, 0, &maxLoc);
+	//	if (prob > 0.1)
+	//	{
+	//		p = maxLoc;
+	//		p.x *= (float)imageSize.width / featureMapWidth;
+	//		p.y *= (float)imageSize.height / featureMapHeight;
+	//
+	//
+	//		//std::cout << i << ". " << p.x << ", " << p.y << std::endl;
+	//
+	//		circle(img, cv::Point((int)p.x, (int)p.y), 8, cv::Scalar(0, 255, 255), -1);
+	//		cv::putText(img, cv::format("%d", i), cv::Point((int)p.x, (int)p.y), cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255), 2);
+	//
+	//	}
+	//
+	//	cv::imshow("show", img);
+	//	cv::waitKey(30);
     }
     resizeFeatureMaps(heatMaps);
 
+#if (defined MPI) || (defined COCO) || (defined FACE)|| (defined HAND)
     std::vector<cv::Mat> pafs(nPafs);
+#endif
+
+#ifdef BODY_25
+	int np = nPafs - nHeatMaps - 1;
+	std::vector<cv::Mat> pafs(np);
+	//std::cout << "nPafs - nHeatMaps = " << np << std::endl;
+#endif
+
     for (size_t i = 0; i < pafs.size(); i++) {
+#if (defined MPI) || (defined COCO) || (defined FACE)|| (defined HAND)
+		pafs[i] = cv::Mat(featureMapHeight, featureMapWidth, CV_32FC1,
+			reinterpret_cast<void*>(
+				const_cast<float*>(
+					pafsData + i * pafOffset)));
+#endif
+
+#ifdef BODY_25
         pafs[i] = cv::Mat(featureMapHeight, featureMapWidth, CV_32FC1,
                           reinterpret_cast<void*>(
                               const_cast<float*>(
-                                  pafsData + i * pafOffset)));
+                                  pafsData + (i + nHeatMaps + 1) * pafOffset)));
+#endif
     }
     resizeFeatureMaps(pafs);
 
@@ -159,6 +258,11 @@ std::vector<HumanPose> HumanPoseEstimator::extractPoses(
         const std::vector<cv::Mat>& heatMaps,
         const std::vector<cv::Mat>& pafs) const {
     std::vector<std::vector<Peak> > peaksFromHeatMap(heatMaps.size());
+
+	//std::cout << "heatMaps.size() = " << heatMaps.size() << std::endl;
+	//std::cout << "pafs.size() = " << pafs.size() << std::endl;
+
+
     FindPeaksBody findPeaksBody(heatMaps, minPeaksDistance, peaksFromHeatMap);
     cv::parallel_for_(cv::Range(0, static_cast<int>(heatMaps.size())),
                       findPeaksBody);
@@ -167,12 +271,16 @@ std::vector<HumanPose> HumanPoseEstimator::extractPoses(
         peaksBefore += static_cast<int>(peaksFromHeatMap[heatmapId - 1].size());
         for (auto& peak : peaksFromHeatMap[heatmapId]) {
             peak.id += peaksBefore;
+
+	//		std::cout << heatmapId <<". peak.id = " << peak.id << std::endl;
         }
     }
+
     std::vector<HumanPose> poses = groupPeaksToPoses(
                 peaksFromHeatMap, pafs, keypointsNumber, midPointsScoreThreshold,
                 foundMidPointsRatioThreshold, minJointsNumber, minSubsetScore);
-    return poses;
+
+	return poses;
 }
 
 void HumanPoseEstimator::resizeFeatureMaps(std::vector<cv::Mat>& featureMaps) const {
