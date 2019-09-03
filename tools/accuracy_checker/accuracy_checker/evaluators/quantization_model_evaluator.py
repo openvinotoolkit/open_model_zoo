@@ -128,7 +128,7 @@ class ModelEvaluator:
             self.launcher.num_requests = nreq
 
         if statistics_functors_maping:
-            self.stat_collector = StatisticsCollector(statistics_functors_maping)
+            self.stat_collector = StatisticsCollector(statistics_functors_maping, self.launcher.batch)
         free_irs = self.launcher.infer_requests
         queued_irs = []
         wait_time = 0.01
@@ -179,7 +179,7 @@ class ModelEvaluator:
         progress_reporter = None
 
         if statistics_functors_maping:
-            self.stat_collector = StatisticsCollector(statistics_functors_maping)
+            self.stat_collector = StatisticsCollector(statistics_functors_maping, self.launcher.batch)
 
         if subset is not None:
             self.dataset.make_subset(ids=subset)
