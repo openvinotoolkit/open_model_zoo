@@ -2,10 +2,11 @@ import numpy as np
 
 
 class Statistic:
-    def __init__(self, functor):
+    def __init__(self, functor, batch_size):
         self.iter_counter = 0
         self.state = np.array([])
         self.processor = functor
+        self.batch_size = batch_size
 
     def update(self, activation):
         an = self.processor(activation)
@@ -16,15 +17,19 @@ class Statistic:
         self.iter_counter += 1
 
     def update_on_batch(self, batch_a):
-        for a in batch_a:
-            self.update(a)
+        an_shape = np.shape(batch_a)
+        if an_shape[0] != self.batch_size:
+            self.update(batch_a)
+            return
+        for activation in batch_a:
+            self.update(activation)
 
 
 class StatisticsCollector:
-    def __init__(self, functors_mapping):
+    def __init__(self, functors_mapping, batch=1):
         self.statistics = {}
         for layer_name, functors in functors_mapping.items():
-            self.statistics[layer_name] = [Statistic(functor) for functor in functors]
+            self.statistics[layer_name] = [Statistic(functor, batch) for functor in functors]
 
     def process_batch(self, outputs):
         output_dict = outputs[0]
