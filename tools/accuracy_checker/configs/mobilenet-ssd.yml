@@ -6,7 +6,7 @@ models:
         weights: public/mobilenet-ssd/mobilenet-ssd.caffemodel
         adapter: ssd
     datasets:
-      - name: VOC2007
+      - name: VOC2012
         preprocessing:
           - type: resize
             size: 300
@@ -33,7 +33,7 @@ models:
         cpu_extensions: AUTO
 
     datasets:
-      - name: VOC2007
+      - name: VOC2012
         preprocessing:
           - type: resize
             size: 300

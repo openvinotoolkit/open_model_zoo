@@ -32,7 +32,7 @@ models:
         cpu_extensions: AUTO
 
     datasets:
-      - name: VOC2007
+      - name: VOC2012
         preprocessing:
           - type: resize
-            size: 300
+            size: 512
