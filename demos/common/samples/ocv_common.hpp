@@ -34,13 +34,23 @@ void matU8ToBlob(const cv::Mat& orig_image, InferenceEngine::Blob::Ptr& blob, in
 
     int batchOffset = batchIndex * width * height * channels;
 
-    for (size_t c = 0; c < channels; c++) {
+    if (channels == 1) {
         for (size_t  h = 0; h < height; h++) {
             for (size_t w = 0; w < width; w++) {
-                blob_data[batchOffset + c * width * height + h * width + w] =
-                        resized_image.at<cv::Vec3b>(h, w)[c];
+                blob_data[batchOffset + h * width + w] = resized_image.at<uchar>(h, w);
             }
         }
+    } else if (channels == 3) {
+        for (size_t c = 0; c < channels; c++) {
+            for (size_t  h = 0; h < height; h++) {
+                for (size_t w = 0; w < width; w++) {
+                    blob_data[batchOffset + c * width * height + h * width + w] =
+                            resized_image.at<cv::Vec3b>(h, w)[c];
+                }
+            }
+        }
+    } else {
+        THROW_IE_EXCEPTION << "Unsupported number of channels";
     }
 }
 
