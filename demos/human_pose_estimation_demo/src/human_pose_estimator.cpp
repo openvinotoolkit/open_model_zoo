@@ -152,8 +152,6 @@ std::vector<HumanPose> HumanPoseEstimator::postprocess(
         const int featureMapWidth, const int featureMapHeight,
         const cv::Size& imageSize) const {
     std::vector<cv::Mat> heatMaps(nHeatMaps);
-
-	//cv::Mat img = cv::Mat(imageSize.height, imageSize.width, CV_32FC1, cv::Scalar(255));
     
 	for (size_t i = 0; i < heatMaps.size(); i++) {
         heatMaps[i] = cv::Mat(featureMapHeight, featureMapWidth, CV_32FC1,
