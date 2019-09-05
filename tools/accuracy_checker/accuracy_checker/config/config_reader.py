@@ -41,16 +41,21 @@ class ConfigReader:
         if not local_config:
             raise ConfigError('Missing local config')
 
-        mode = ConfigReader._check_local_config(local_config)
+        mode = ConfigReader.check_local_config(local_config)
         ConfigReader._prepare_global_configs(global_config)
 
         config = ConfigReader._merge_configs(global_config, local_config, arguments, mode)
+        ConfigReader.process_config(config, mode, arguments)
 
+        return config, mode
+
+    @staticmethod
+    def process_config(config, mode='models', arguments=None):
+        if arguments is None:
+            arguments = dict()
         ConfigReader._provide_cmd_arguments(arguments, config, mode)
         ConfigReader._merge_paths_with_prefixes(arguments, config, mode)
         ConfigReader._filter_launchers(config, arguments, mode)
-
-        return config, mode
 
     @staticmethod
     def _read_configs(arguments):
@@ -60,7 +65,7 @@ class ConfigReader:
         return global_config, local_config
 
     @staticmethod
-    def _check_local_config(config):
+    def check_local_config(config):
         def _is_requirements_missed(target, requirements):
             return list(filter(lambda entry: not target.get(entry), requirements))
 
