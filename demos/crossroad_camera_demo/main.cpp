@@ -382,12 +382,11 @@ struct PersonReIdentification : BaseDetection {
     PersonReIdentification() : BaseDetection(FLAGS_m_reid, "Person Reidentification Retail") {}
 
     unsigned long int findMatchingPerson(const std::vector<float> &newReIdVec) {
-        float cosSim;
         auto size = globalReIdVec.size();
 
         /* assigned REID is index of the matched vector from the globalReIdVec */
         for (size_t i = 0; i < size; ++i) {
-            cosSim = cosineSimilarity(newReIdVec, globalReIdVec[i]);
+            float cosSim = cosineSimilarity(newReIdVec, globalReIdVec[i]);
             if (FLAGS_r) {
                 std::cout << "cosineSimilarity: " << cosSim << std::endl;
             }

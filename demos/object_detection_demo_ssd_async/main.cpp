@@ -224,7 +224,7 @@ int main(int argc, char *argv[]) {
         typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
         auto total_t0 = std::chrono::high_resolution_clock::now();
         auto wallclock = std::chrono::high_resolution_clock::now();
-        double ocv_decode_time = 0, ocv_render_time = 0;
+        double ocv_render_time = 0;
 
         std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and press ESC key" << std::endl;
         std::cout << "To switch between sync/async modes, press TAB key in the output window" << std::endl;
@@ -254,7 +254,7 @@ int main(int argc, char *argv[]) {
             }
 
             auto t1 = std::chrono::high_resolution_clock::now();
-            ocv_decode_time = std::chrono::duration_cast<ms>(t1 - t0).count();
+            double ocv_decode_time = std::chrono::duration_cast<ms>(t1 - t0).count();
 
             t0 = std::chrono::high_resolution_clock::now();
             // Main sync point:

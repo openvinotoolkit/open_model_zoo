@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
         typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
         auto total_t0 = std::chrono::high_resolution_clock::now();
         auto wallclock = std::chrono::high_resolution_clock::now();
-        double decode_time = 0, render_time = 0;
+        double render_time = 0;
 
         while (true) {
             auto t0 = std::chrono::high_resolution_clock::now();
@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
                 estimator.frameToBlobCurr(curr_frame);
             }
             auto t1 = std::chrono::high_resolution_clock::now();
-            decode_time = std::chrono::duration_cast<ms>(t1 - t0).count();
+            double decode_time = std::chrono::duration_cast<ms>(t1 - t0).count();
 
             t0 = std::chrono::high_resolution_clock::now();
             // Main sync point:
