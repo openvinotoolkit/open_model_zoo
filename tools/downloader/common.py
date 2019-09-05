@@ -286,6 +286,7 @@ class PostprocUnpackArchive(Postproc):
         reporter.print_section_heading('Unpacking {}', postproc_file)
 
         shutil.unpack_archive(str(postproc_file), str(output_dir), self.format)
+        postproc_file.unlink()  # Remove the archive
 
 Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
