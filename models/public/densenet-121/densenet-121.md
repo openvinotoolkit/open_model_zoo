@@ -3,7 +3,8 @@
 ## Use Case and High-Level Description
 
 The `densenet-121` model is one of the [DenseNet*](https://arxiv.org/pdf/1608.06993)
-group of models designed to perform image classification. The authors originally trained the models on Torch\*, but then converted them into Caffe\* format. All the DenseNet models have
+group of models designed to perform image classification. The authors originally trained the models 
+on Torch\*, but then converted them into Caffe\* format. All DenseNet models have
 been pretrained on the ImageNet image database. For details about this family of
 models, check out the [repository](https://github.com/shicai/DenseNet-Caffe).
 
@@ -28,8 +29,8 @@ See [https://github.com/shicai/DenseNet-Caffe]()
 ## Input
 
 The model input is a blob that consists of a single image of 1x3x224x224 in BGR
-order. Before passing the image blob into the network, substract BGR mean values as follows: [103.94, 116.78, 123.68].
-In addition, values must be divided by 0.017.
+order. Before passing the image blob into the network, subtract BGR mean values 
+as follows: [103.94, 116.78, 123.68]. In addition, values must be divided by 0.017.
 
 ### Original Model
 
@@ -56,7 +57,8 @@ Channel order is `BGR`.
 
 ## Output
 
-The model output for `densenet-121` is a typical object classifier output for 1000 different classifications matching those in the ImageNet database.
+The model output for `densenet-121` is a typical object classifier output for 1000 different 
+classifications matching those in the ImageNet database.
 
 ### Original Model
 

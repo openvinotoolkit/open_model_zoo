@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `octave-resnet-26-0.25` model is a modification of [`resnet-26`](https://arxiv.org/pdf/1512.03385.pdf) with Octave convolutions from [Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution](https://arxiv.org/abs/1904.05049) with `alpha=0.25`. The model is originally designed for image classification. For details about family of Octave Convolution models, check out the  [repository](https://github.com/facebookresearch/OctConv).
+The `octave-resnet-26-0.25` model is a modification of [`resnet-26`](https://arxiv.org/pdf/1512.03385.pdf) with Octave convolutions from [Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution](https://arxiv.org/abs/1904.05049) with `alpha=0.25`. Like the original model, this model is designed for image classification. For details about family of Octave Convolution models, check out the [repository](https://github.com/facebookresearch/OctConv).
 
 
 ## Example

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-`mobilenet-v2-1.0-224` is one of MobileNet\* models, which are small, low-latency, low-power, and parameterized to meet the resource constraints of a variety of use cases. They can be used for classification, detection, embeddings, and segmentation like other popular large-scale models. For details, see a [paper](https://arxiv.org/abs/1704.04861).
+`mobilenet-v2-1.0-224` is one of MobileNet\* models, which are small, low-latency, low-power, and parameterized to meet the resource constraints of a variety of use cases. They can be used for classification, detection, embeddings, and segmentation like other popular large-scale models. For details, see the [paper](https://arxiv.org/abs/1704.04861).
 
 ## Example
 

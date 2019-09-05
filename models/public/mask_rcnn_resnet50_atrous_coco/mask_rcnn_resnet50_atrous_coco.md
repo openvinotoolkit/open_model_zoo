@@ -2,7 +2,8 @@
 
 ## Use Case and High-Level Description
 
-Mask R-CNN Resnet50 Atrous is trained on COCO dataset and used for object instance segmentation. For details, see a [paper](https://arxiv.org/pdf/1703.06870.pdf).
+Mask R-CNN Resnet50 Atrous trained on COCO dataset. It is used for object instance segmentation.
+For details, see the [paper](https://arxiv.org/pdf/1703.06870.pdf).
 
 ## Example
 

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Faster R-CNN Resnet-50 model. Used for object detection. For details, see [paper](https://arxiv.org/pdf/1801.04381.pdf).
+Faster R-CNN Resnet-50 model. Used for object detection. For details, see the [paper](https://arxiv.org/pdf/1801.04381.pdf).
 
 ## Example
 
@@ -13,7 +13,7 @@ Faster R-CNN Resnet-50 model. Used for object detection. For details, see [paper
 | Type                            | Object detection                          |
 | GFlops                          | 57.203                                    |
 | MParams                         | 29.162                                    |
-| Source framework                | Tensorflow\*                              |
+| Source framework                | TensorFlow\*                              |
 
 ## Performance
 

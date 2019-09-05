@@ -13,7 +13,7 @@
 | Type                            | Classification                            |
 | GFlops                          | 0.304                                     |
 | MParams                         | 1.327                                     |
-| Source framework                | Tensorflow\*                              |
+| Source framework                | TensorFlow\*                              |
 
 ## Performance
 

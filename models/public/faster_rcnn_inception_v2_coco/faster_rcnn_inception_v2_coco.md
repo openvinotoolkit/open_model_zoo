@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Faster R-CNN with Inception v2. Used for object detection. For details, see [paper](https://arxiv.org/pdf/1801.04381.pdf).
+Faster R-CNN with Inception v2. Used for object detection. For details, see the [paper](https://arxiv.org/pdf/1801.04381.pdf).
 
 ## Example
 
@@ -13,7 +13,7 @@ Faster R-CNN with Inception v2. Used for object detection. For details, see [pap
 | Type                            | Object detection                          |
 | GFlops                          | 30.687                                    |
 | MParams                         | 13.307                                    |
-| Source framework                | Tensorflow\*                              |
+| Source framework                | TensorFlow\*                              |
 
 ## Performance
 

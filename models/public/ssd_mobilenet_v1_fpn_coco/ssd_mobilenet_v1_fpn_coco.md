@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-MobileNetV1 FPN is used for object detection. For details, see a [paper](https://arxiv.org/pdf/1807.03284.pdf).
+MobileNetV1 FPN is used for object detection. For details, see the [paper](https://arxiv.org/pdf/1807.03284.pdf).
 
 ## Example
 
@@ -49,10 +49,10 @@ Image, name: `image_tensor`, shape: [1x3x640x640], format: [BxCxHxW],
 
 ### Original Model
 
-- Classifier, name: `detection_classes`. Contains predicted bounding-boxes classes in range [1, 91]. The model was trained on Microsoft\* COCO dataset version with 90 categories of object, 0 class is for background.
-- Probability, name: `detection_scores`. Contains probability of detected bounding boxes.
-- Detection box, name: `detection_boxes`. Contains detection-boxes coordinates in the following format: `[y_min, x_min, y_max, x_max]`, where(`x_min`, `y_min`) are coordinates of the top left corner, (`x_max`, `y_max`) are coordinates of the right bottom corner.Coordinates are rescaled to an input image size.
-- Detections number, name: `num_detections`. Contains the number of predicted detection boxes.
+1. Classifier, name: `detection_classes`. Contains predicted bounding-boxes classes in range [1, 91]. The model was trained on Microsoft\* COCO dataset version with 90 categories of object, 0 class is for background.
+2. Probability, name: `detection_scores`. Contains probability of detected bounding boxes.
+3. Detection box, name: `detection_boxes`. Contains detection-boxes coordinates in the following format: `[y_min, x_min, y_max, x_max]`, where(`x_min`, `y_min`) are coordinates of the top left corner, (`x_max`, `y_max`) are coordinates of the right bottom corner.Coordinates are rescaled to an input image size.
+4. Detections number, name: `num_detections`. Contains the number of predicted detection boxes.
 
 ### Converted Model
 
