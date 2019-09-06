@@ -100,9 +100,13 @@ class ModelEvaluator:
             check_progress=False,
             **kwargs
     ):
-        def _process_ready_predictions(batch_predictions, batch_identifiers, batch_meta, adapter):
+        def _process_ready_predictions(batch_predictions, batch_identifiers, batch_meta, adapter, raw_outputs_callback):
             if self.stat_collector:
                 self.stat_collector.process_batch(batch_predictions)
+            if raw_outputs_callback:
+                raw_outputs_callback(
+                    [batch_predictions], network=self.launcher.network, exec_network=self.launcher.exec_network
+                )
             if adapter:
                 batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
 
@@ -142,7 +146,7 @@ class ModelEvaluator:
                 wait_time = 0.01
                 for batch_id, batch_annotation, batch_identifiers, batch_meta, batch_predictions, ir in ready_irs:
                     batch_predictions = _process_ready_predictions(
-                        batch_predictions, batch_identifiers, batch_meta, self.adapter
+                        batch_predictions, batch_identifiers, batch_meta, self.adapter, kwargs.get('output_callback')
                     )
                     free_irs.append(ir)
                     annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions)
