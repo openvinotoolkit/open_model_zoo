@@ -195,7 +195,7 @@ private:
     bool greedy_;
 };
 
-KuhnMunkres::KuhnMunkres(bool greedy) { impl_ = std::make_shared<Impl>(greedy); }
+KuhnMunkres::KuhnMunkres(bool greedy) : impl_(std::make_shared<Impl>(greedy)) {}
 
 std::vector<size_t> KuhnMunkres::Solve(const cv::Mat &dissimilarity_matrix) {
     CV_Assert(impl_ != nullptr);

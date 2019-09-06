@@ -64,7 +64,7 @@ struct BaseDetection {
     std::string inputName;
     std::string outputName;
 
-    BaseDetection(std::string &commandLineFlag, std::string topoName)
+    BaseDetection(std::string &commandLineFlag, const std::string &topoName)
             : commandLineFlag(commandLineFlag), topoName(topoName) {}
 
     ExecutableNetwork * operator ->() {
