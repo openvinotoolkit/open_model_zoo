@@ -8,6 +8,7 @@ This repository includes optimized deep learning models and a set of demos to ex
 
 ## Repository Components:
 * [Pre-Trained Models](models/intel/index.md)
+* [Public Models Description](models/public/index.md)
 * [Model Downloader](tools/downloader/README.md) and other automation tools
 * [Demos](demos/README.md) that demonstrate models usage with Deep Learning Deployment Toolkit
 * [Accuracy Checker](tools/accuracy_checker/README.md) tool for models accuracy validation
