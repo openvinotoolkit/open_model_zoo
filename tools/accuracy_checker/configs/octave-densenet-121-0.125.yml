@@ -45,16 +45,16 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        model:   public/densenet-121-0.125/FP32/octave-densenet-121-0.125.xml
-        weights: public/densenet-121-0.125/FP32/octave-densenet-121-0.125.bin
+        model:   public/octave-densenet-121-0.125/FP32/octave-densenet-121-0.125.xml
+        weights: public/octave-densenet-121-0.125/FP32/octave-densenet-121-0.125.bin
         adapter: classification
         cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
           - FP16
-        model:   public/densenet-121-0.125/FP16/octave-densenet-121-0.125.xml
-        weights: public/densenet-121-0.125/FP16/octave-densenet-121-0.125.bin
+        model:   public/octave-densenet-121-0.125/FP16/octave-densenet-121-0.125.xml
+        weights: public/octave-densenet-121-0.125/FP16/octave-densenet-121-0.125.bin
         adapter: classification
 
     datasets:
