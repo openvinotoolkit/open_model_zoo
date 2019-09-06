@@ -19,20 +19,20 @@ description: >-
 task_type: detection
 files:
   - name: FP32/text-detection-0004.xml
-    size: 71896
-    sha256: 247291f9adcb443130d8343398c3e45191c5a98a788fcebf46bc93f27f83447f
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-detection-0004/FP32/text-detection-0004.xml
+    size: 71958
+    sha256: 216e8c1124ef2bfe42c59db24c31402843f121d57a183b8c8e3c4e0dddb992ba
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-detection-0004/FP32/text-detection-0004.xml
   - name: FP32/text-detection-0004.bin
     size: 17312120
     sha256: f6b58bf15c43cc017bd5f979b46b3159969968e47d3827de866d76d537931e1a
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-detection-0004/FP32/text-detection-0004.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-detection-0004/FP32/text-detection-0004.bin
   - name: FP16/text-detection-0004.xml
-    size: 71801
-    sha256: 83b472a3f0b89bc3fb0b4d55ec51931ba218f56309ae35004a0543b33ec8939b
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-detection-0004/FP16/text-detection-0004.xml
+    size: 71863
+    sha256: 049402345031d086583621e59f3ed5b913823589158c35f1115fb1cbb6bfdbcd
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-detection-0004/FP16/text-detection-0004.xml
   - name: FP16/text-detection-0004.bin
     size: 8655952
     sha256: 25b12925d0695af246ae68fbdf2ca1b61ac5b1f6b4b368386c2d82c880c93b70
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-detection-0004/FP16/text-detection-0004.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-detection-0004/FP16/text-detection-0004.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

@@ -28,20 +28,20 @@ description: >-
 task_type: classification
 files:
   - name: FP32/inceptionv3-int8-tf-0001.xml
-    size: 611975
-    sha256: 5df7f99641007d61ef12f6cffb1ab00d17e00abe1ca7059315a4d06f389db296
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/inceptionv3-int8-tf-0001/FP32/inceptionv3-int8-tf-0001.xml
+    size: 612437
+    sha256: 079b9fabee7796875b3e5bc8cadf868780280df1a9cc681387bb41da1b014d27
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/inceptionv3-int8-tf-0001/FP32/inceptionv3-int8-tf-0001.xml
   - name: FP32/inceptionv3-int8-tf-0001.bin
     size: 95277636
-    sha256: db5aa42bd86e072235b1fc1b822d8b53f2f9f6710fbb8a18c8047158afef26f8
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/inceptionv3-int8-tf-0001/FP32/inceptionv3-int8-tf-0001.bin
+    sha256: 5f1a34c4e1d925b5ec196e23c33a16df173e2f7788339b9b1390cd82a45cf488
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/inceptionv3-int8-tf-0001/FP32/inceptionv3-int8-tf-0001.bin
   - name: FP16/inceptionv3-int8-tf-0001.xml
-    size: 611876
-    sha256: d798e6e35c16efe5cfe220bb02f3ec79d107f67f77ded99f713c44d215ec1f20
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/inceptionv3-int8-tf-0001/FP16/inceptionv3-int8-tf-0001.xml
+    size: 612338
+    sha256: 0b9f55351e66e5b3d70e88a3b060601c37891868b70a6c84aa3a6be722c136a6
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/inceptionv3-int8-tf-0001/FP16/inceptionv3-int8-tf-0001.xml
   - name: FP16/inceptionv3-int8-tf-0001.bin
     size: 47638822
-    sha256: 2321c645c5a633d4afd8dff3d7ce358a7654c3c579afd1a3a0e07d6b8f87f328
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/inceptionv3-int8-tf-0001/FP16/inceptionv3-int8-tf-0001.bin
+    sha256: da2daa50ad511e3b29e7645528536ebb32636df630f3dc1d927eed0922cec60e
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/inceptionv3-int8-tf-0001/FP16/inceptionv3-int8-tf-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
