@@ -24,6 +24,18 @@ datasets:
     dataset_meta: mscoco_det_91.json
     data_source: val2017
 
+  - name: ms_coco_keypoints
+    data_source: val2017
+    annotation_conversion:
+      converter: mscoco_keypoints
+      annotation_file: person_keypoints_val2017.json
+    annotation: mscoco_keypoints.pickle
+    dataset_meta: mscoco_keypoints.json
+    metrics:
+      - name: AP
+        type: coco_precision
+        max_detections: 20
+
   - name: imagenet_1000_classes
     annotation_conversion:
       converter: imagenet
