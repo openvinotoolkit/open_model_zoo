@@ -104,9 +104,7 @@ class ModelEvaluator:
             if self.stat_collector:
                 self.stat_collector.process_batch(batch_predictions)
             if raw_outputs_callback:
-                raw_outputs_callback(
-                    [batch_predictions], network=self.launcher.network, exec_network=self.launcher.exec_network
-                )
+                raw_outputs_callback(batch_predictions)
             if adapter:
                 batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
 
