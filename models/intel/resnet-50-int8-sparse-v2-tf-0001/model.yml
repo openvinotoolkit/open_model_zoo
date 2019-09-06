@@ -30,20 +30,20 @@ description: >-
 task_type: classification
 files:
   - name: FP32/resnet-50-int8-sparse-v2-tf-0001.xml
-    size: 1436498
-    sha256: 5345acb93bd379b4daf807d6675c02c41689aec085f0860b3339092df82ea341
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/resnet-50-int8-sparse-v2-tf-0001/FP32/resnet-50-int8-sparse-v2-tf-0001.xml
+    size: 1452432
+    sha256: 1dad39da1dc2a0b0ca75e396ad4574e98dafdff9388c7338293c31b4d95d6cdf
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/resnet-50-int8-sparse-v2-tf-0001/FP32/resnet-50-int8-sparse-v2-tf-0001.xml
   - name: FP32/resnet-50-int8-sparse-v2-tf-0001.bin
     size: 102121952
-    sha256: 9858ddf582f225518fb106514b81ffdb0cf8db61d31a848f8e3994c492cb10ff
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/resnet-50-int8-sparse-v2-tf-0001/FP32/resnet-50-int8-sparse-v2-tf-0001.bin
+    sha256: 4566cf3a3124ff98a911ac4c3092cd4198d83cf94e7fd5003d36a2e764c2319a
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/resnet-50-int8-sparse-v2-tf-0001/FP32/resnet-50-int8-sparse-v2-tf-0001.bin
   - name: FP16/resnet-50-int8-sparse-v2-tf-0001.xml
-    size: 1436439
-    sha256: 069809548c4767df2449f55d95d59bd5850321f0ebc8cdfa7910a165bcf23a03
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/resnet-50-int8-sparse-v2-tf-0001/FP16/resnet-50-int8-sparse-v2-tf-0001.xml
+    size: 1452373
+    sha256: 29aa5eb3d85f2b14ac148c8aac4349ba7d0a89c857646b749b9a2b74310ba460
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/resnet-50-int8-sparse-v2-tf-0001/FP16/resnet-50-int8-sparse-v2-tf-0001.xml
   - name: FP16/resnet-50-int8-sparse-v2-tf-0001.bin
     size: 51060996
-    sha256: d52cd898a3cdadd32700a29342a956cca50dd0d11985470cbe6c4d8fbc29f8b2
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/resnet-50-int8-sparse-v2-tf-0001/FP16/resnet-50-int8-sparse-v2-tf-0001.bin
+    sha256: c9f0d85a863e6d9c4db9be390862c2530535dd67016a3b96f764f9e07715738f
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/resnet-50-int8-sparse-v2-tf-0001/FP16/resnet-50-int8-sparse-v2-tf-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
