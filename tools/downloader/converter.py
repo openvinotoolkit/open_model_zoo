@@ -155,6 +155,10 @@ def main():
             if not convert_to_onnx(model, output_dir, args, stdout_prefix):
                 return False
             model_format = 'onnx'
+        if model.caffe2_to_onnx_args:
+            if not convert_to_onnx(model, output_dir, args, stdout_prefix):
+                return False
+            model_format = 'onnx'
 
         expanded_mo_args = [
             string.Template(arg).substitute(dl_dir=args.download_dir / model.subdirectory,
