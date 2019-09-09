@@ -33,7 +33,7 @@ caffe2_to_onnx:
   - --model-name=densenet-121-cf2
   - --predict-net-path=$dl_dir/predict_net.pb
   - --init-net-path=$dl_dir/init_net.pb
-  - --input-shape=1,3,224,224
+  - --input-shape=[1,3,224,224]
   - --input-names=data
   - --output-file=$conv_dir/densenet-121-cf2.onnx
 model_optimizer_args:
