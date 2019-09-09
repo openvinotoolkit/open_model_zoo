@@ -136,16 +136,15 @@ IMAGE_SEQUENCES = {
         image_net_arg('00048316'),
     ],
 
-    '500x375x3': [
+    'smart-classroom-demo': [
+        image_net_arg('00000074'),
+        image_net_arg('00000141'),
+        image_net_arg('00000141'),
+        image_net_arg('00000164'),
+        image_net_arg('00000181'),
+        image_net_arg('00000164'),
+        image_net_arg('00000181'),
         image_net_arg('00000001'),
-        image_net_arg('00000002'),
-        image_net_arg('00000003'),
-        image_net_arg('00000004'),
-        image_net_arg('00000008'),
-        image_net_arg('00000010'),
-        image_net_arg('00000017'),
-        image_net_arg('00000019'),
-        image_net_arg('00000020'),
-        image_net_arg('00000024'),
+        image_net_arg('00000074'),
     ],
 }

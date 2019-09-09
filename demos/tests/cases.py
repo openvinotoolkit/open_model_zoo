@@ -185,7 +185,7 @@ NATIVE_DEMOS = [
 
     NativeDemo(name='smart_classroom_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
-            '-i': ImagePatternArg('500x375x3'),
+            '-i': ImagePatternArg('smart-classroom-demo'),
             '-m_fd': ModelArg('face-detection-adas-0001')}),
         device_cases('-d_act', '-d_fd', '-d_lm', '-d_reid'),
         single_option_cases('-m_act', ModelArg('person-detection-action-recognition-0005'),
