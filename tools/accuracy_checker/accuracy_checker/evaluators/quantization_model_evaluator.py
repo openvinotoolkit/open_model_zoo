@@ -228,7 +228,7 @@ class ModelEvaluator:
         free_indexes = []
         for ir_id, (batch_id, batch_annotation, batch_identifiers, batch_meta, ir) in enumerate(irs):
             if ir.wait(0) == 0:
-                result.append((batch_id, batch_annotation, batch_identifiers, batch_meta, [ir.outputs], ir))
+                result.append((batch_id, batch_annotation, batch_identifiers, batch_meta, ir.outputs, ir))
                 free_indexes.append(ir_id)
         irs = [ir for ir_id, ir in enumerate(irs) if ir_id not in free_indexes]
         return result, irs
