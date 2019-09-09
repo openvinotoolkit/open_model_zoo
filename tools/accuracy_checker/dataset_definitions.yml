@@ -141,27 +141,27 @@ datasets:
     data_source: val2017
     annotattion_conversion:
       converter: cvat_attributes_recognition
-      annotation_file: 3631_OMZ_task2_emotions_recognition.xml
+      annotation_file: 3634_OMZ_task8_vehicle_attributes_recognition_barrier_0039.xml
       label: vehicle
-    annotattion: vehicle_attributes.pickle
+    annotation: vehicle_attributes.pickle
     dataset_meta: vehicle_attributes.json
 
   - name: person_8_attributes
     data_source: ILSVRC2012_img_val
     annotation_conversion:
       converter: cvat_multilabel_binary_attributes_recognition
-      annotattion_file: 3640_OMZ_task6_person_attributes_recognition_crossroad_0230.xml
+      annotation_file: 3640_OMZ_task6_person_attributes_recognition_crossroad_0230.xml
       label: person
     annotation: person_8_attributes.pickle
     dataset_meta: person_8_attributes.json
 
   - name: vehicle_license_plate_detection
     data_source: ILSVRC2012_img_val
-    annotattion_conversion:
+    annotation_conversion:
       converter: cvat_object_detection
-      annotattion_file: 3638_OMZ_task13_vehicle_license_plate_detection_barrier_0106.xml
+      annotation_file: 3638_OMZ_task13_vehicle_license_plate_detection_barrier_0106.xml
       has_background: True
-    annotattion: vlpd.pickle
+    annotation: vlpd.pickle
     dataset_meta: vlpd.json
 
   - name: action_detection_dataset_3_classes
@@ -170,7 +170,7 @@ datasets:
       converter: cvat_person_detection_action_recognition
       use_case: common_3_actions
       annotation_file: 3766_OMZ_task14_person-detection-raisinghand-recognition-0001.xml
-    annotattion: action_detection_3classes.pickle
+    annotation: action_detection_3classes.pickle
     dataset_meta: action_detection_3classes.json
 
   - name: action_detection_dataset_6_classes
@@ -179,7 +179,7 @@ datasets:
       converter: cvat_person_detection_action_recognition
       use_case: common_6_actions
       annotation_file: 3766_OMZ_task14_person-detection-raisinghand-recognition-0001.xml
-    annotattion: action_detection_6classes.pickle
+    annotation: action_detection_6classes.pickle
     dataset_meta: action_detection_6classes.json
 
   - name: action_detection_dataset_teacher
@@ -188,7 +188,7 @@ datasets:
       converter: cvat_person_detection_action_recognition
       use_case: teacher
       annotation_file: 3766_OMZ_task14_person-detection-raisinghand-recognition-0001.xml
-    annotattion: action_detection_teacher.pickle
+    annotation: action_detection_teacher.pickle
     dataset_meta: action_detection_teacher.json
 
   - name: action_detection_dataset_raising_hand
@@ -197,7 +197,7 @@ datasets:
       converter: cvat_person_detection_action_recognition
       use_case: raising_hand
       annotation_file: 3766_OMZ_task14_person-detection-raisinghand-recognition-0001.xml
-    annotattion: action_detection_raising_hand.pickle
+    annotation: action_detection_raising_hand.pickle
     dataset_meta: action_detection_raising_hand.json
 
   - name: person_detection
@@ -208,6 +208,6 @@ datasets:
       has_background: True
       sort_annotations: True
       use_full_label_map: True
-    annotattion: mscoco_person_detection.pickle
+    annotation: mscoco_person_detection.pickle
     dataset_meta: mscoco_person_detection.json
 
