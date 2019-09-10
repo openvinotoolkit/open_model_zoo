@@ -114,7 +114,7 @@ datasets:
       - type: resize
         size: 60
     postprocessing:
-      - type: normaliza_landmarks_points
+      - type: normalize_landmarks_points
 
   - name: emotions_recognition
     data_source: VOCdevkit/VOC2012/JPEGImages
@@ -139,9 +139,9 @@ datasets:
     annotation: age_gender.pickle
     dataset_meta: age_gender.json
 
-  - name: vahicle_attributes
+  - name: vehicle_attributes
     data_source: val2017
-    annotattion_conversion:
+    annotation_conversion:
       converter: cvat_attributes_recognition
       annotation_file: 3634_OMZ_task8_vehicle_attributes_recognition_barrier_0039.xml
       label: vehicle
@@ -168,7 +168,7 @@ datasets:
 
   - name: action_detection_dataset_3_classes
     data_source: WIDER_val/images/44--Aerobics
-    annotattion_conversion:
+    annotation_conversion:
       converter: cvat_person_detection_action_recognition
       use_case: common_3_actions
       annotation_file: 3766_OMZ_task14_person-detection-raisinghand-recognition-0001.xml
@@ -177,7 +177,7 @@ datasets:
 
   - name: action_detection_dataset_6_classes
     data_source: WIDER_val/images/44--Aerobics
-    annotattion_conversion:
+    annotation_conversion:
       converter: cvat_person_detection_action_recognition
       use_case: common_6_actions
       annotation_file: 3766_OMZ_task14_person-detection-raisinghand-recognition-0001.xml
@@ -186,7 +186,7 @@ datasets:
 
   - name: action_detection_dataset_teacher
     data_source: WIDER_val/images/44--Aerobics
-    annotattion_conversion:
+    annotation_conversion:
       converter: cvat_person_detection_action_recognition
       use_case: teacher
       annotation_file: 3766_OMZ_task14_person-detection-raisinghand-recognition-0001.xml
@@ -195,7 +195,7 @@ datasets:
 
   - name: action_detection_dataset_raising_hand
     data_source: WIDER_val/images/44--Aerobics
-    annotattion_conversion:
+    annotation_conversion:
       converter: cvat_person_detection_action_recognition
       use_case: raising_hand
       annotation_file: 3766_OMZ_task14_person-detection-raisinghand-recognition-0001.xml
@@ -204,7 +204,7 @@ datasets:
 
   - name: person_detection
     data_source: val2017
-    annotattion_conversion:
+    annotation_conversion:
       converter: mscoco_detection
       annotation_file: person_keypoints_val2017.json
       has_background: True

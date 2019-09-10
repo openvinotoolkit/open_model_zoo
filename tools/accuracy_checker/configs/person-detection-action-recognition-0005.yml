@@ -97,3 +97,4 @@ models:
             annotation_source: action_annotation
             prediction_source: action_prediction
             label_map: action_label_map
+            ignore_label: 3
