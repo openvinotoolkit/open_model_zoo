@@ -29,11 +29,11 @@ static const char performance_counter_message[] = "Optional. Enables per-layer p
 
 /// @brief message for clDNN custom kernels desc
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "\
-"Absolute path to the .xml file with the kernels descriptions.";
+"Absolute path to the .xml file with the kernel descriptions.";
 
 /// @brief message for user library argument
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. " \
-"Absolute path to a shared library with the kernels implementations.";
+"Absolute path to a shared library with the kernel implementations.";
 
 /// @brief message for probability threshold argument
 static const char thresh_output_message[] = "Optional. Probability threshold for detections.";
