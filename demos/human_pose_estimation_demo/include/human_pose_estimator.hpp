@@ -15,9 +15,17 @@
 namespace human_pose_estimation {
 class HumanPoseEstimator {
 public:
-    static const size_t keypointsNumber;
+
+	enum ModelType {
+		COCO = 18,
+		MPI = 15,
+		BODY_25 = 25,
+		FACE = 70,
+		HAND = 21
+	};
 
     HumanPoseEstimator(const std::string& modelPath,
+					   const std::string& modeltype,
                        const std::string& targetDeviceName,
                        bool enablePerformanceReport = false);
     std::vector<HumanPose> estimate(const cv::Mat& image);
@@ -58,5 +66,6 @@ private:
     std::string heatmapsBlobName;
     bool enablePerformanceReport;
     std::string modelPath;
+	size_t keypointsNumber;
 };
 }  // namespace human_pose_estimation
