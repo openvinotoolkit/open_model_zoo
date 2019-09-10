@@ -46,6 +46,8 @@ static const char raw_output_message[] = "Optional. Output inference results raw
 /// @brief Message resizable input flag
 static const char input_resizable_message[] = "Optional. Enable resizable input with support of ROI crop and auto resize.";
 
+/// @brief Message do not show processed video
+static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 
 /// \brief Defines flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
@@ -88,6 +90,9 @@ DEFINE_double(iou_t, 0.4, iou_thresh_output_message);
 /// It is an optional parameter
 DEFINE_bool(auto_resize, false, input_resizable_message);
 
+/// \brief Define a flag to disable showing processed video<br>
+/// It is an optional parameter
+DEFINE_bool(no_show, false, no_show_processed_video);
 
 /**
 * \brief This function shows a help message
@@ -109,4 +114,5 @@ static void showUsage() {
     std::cout << "    -t                        " << thresh_output_message << std::endl;
     std::cout << "    -iou_t                    " << iou_thresh_output_message << std::endl;
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
+    std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
 }
