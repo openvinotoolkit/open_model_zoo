@@ -74,10 +74,11 @@ models:
            prediction_source: class_agnostic_prediction
            label_map: person_label_map
 
-          - type: detection_accuracy
-            use_normalization: True
-            annotation_source: action_annotation
-            prediction_source: action_prediction
-            label_map: action_label_map
-            fast_match: True
+         - type: detection_accuracy
+           use_normalization: True
+           annotation_source: action_annotation
+           prediction_source: action_prediction
+           label_map: action_label_map
+           fast_match: True
+           ignore_label: 3
 

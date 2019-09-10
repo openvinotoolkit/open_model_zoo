@@ -12,7 +12,7 @@ models:
         tags:
           - FP32
         model:   public/face-detection-retail-0044/FP32/face-detection-retail-0044.xml
-        weights: public/face-detection-retail-0044/FP32/face-detection-retail-0044.xml
+        weights: public/face-detection-retail-0044/FP32/face-detection-retail-0044.bin
         adapter: ssd
         cpu_extensions: AUTO
 
@@ -20,7 +20,7 @@ models:
         tags:
           - FP16
         model:   public/face-detection-retail-0044/FP16/face-detection-retail-0044.xml
-        weights: public/face-detection-retail-0044/FP16/face-detection-retail-0044.xml
+        weights: public/face-detection-retail-0044/FP16/face-detection-retail-0044.bin
         adapter: ssd
         mo_params:
             data_type: FP16

@@ -6,7 +6,7 @@ models:
         tags:
           - FP32
         model:   intel/person-detection-retail-0013/FP32/person-detection-retail-0013.xml
-        weights: person-detection-retail-0013/FP32/person-detection-retail-0013.bin
+        weights: intel/person-detection-retail-0013/FP32/person-detection-retail-0013.bin
         adapter: ssd
         cpu_extensions: AUTO
 

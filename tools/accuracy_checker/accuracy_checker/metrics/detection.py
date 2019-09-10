@@ -376,6 +376,8 @@ def fast_match_detections_class_agnostic(predicted_data, gt_data, min_iou, overl
 
         matches = []
         for _ in gt_bboxes:
+            if not matches:
+                continue
             best_match_pos = np.unravel_index(similarity_matrix.argmax(), similarity_matrix.shape)
             best_match_value = similarity_matrix[best_match_pos]
 

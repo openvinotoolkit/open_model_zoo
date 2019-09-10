@@ -496,7 +496,7 @@ class CropRect(Preprocessor):
         width = min(start_width + (rect_x_max - rect_x_min), cols)
         height = min(start_height + (rect_y_max - rect_y_min), rows)
 
-        image.data = image.data[start_height:height, start_width:width]
+        image.data = image.data[int(start_height):int(height), int(start_width):int(width)]
         image.metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop_rect', {}))
         return image
 

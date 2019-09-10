@@ -18,14 +18,6 @@ models:
         adapter: landmarks_regression
         cpu_extensions: AUTO
 
-      - framework: dlsdk
-        tags:
-          - INT8
-        model:   intel/facial-landmarks-35-adas-0002/INT8/facial-landmarks-35-adas-0002.xml
-        weights: intel/facial-landmarks-35-adas-0002/INT8/facial-landmarks-35-adas-0002.bin
-        adapter: landmarks_regression
-        cpu_extensions: AUTO
-
     datasets:
       - name: facial_landmarks_35
 
