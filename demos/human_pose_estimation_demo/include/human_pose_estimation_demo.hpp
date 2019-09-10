@@ -13,8 +13,11 @@ static const char help_message[] = "Print a usage message.";
 /// @brief Message for video argument
 static const char video_message[] = "Required. Path to a video. Default value is \"cam\" to work with camera.";
 
-/// @brief Message for model argument
-static const char human_pose_estimation_model_message[] = "Required. Path to the Human Pose Estimation model (.xml) file.";
+/// @brief Message for openpose model argument
+static const char openpose_model_message[] = "Required. Path to the Human Pose Estimation model (.xml) file.";
+
+/// @brief Message for model type
+static const char model_type_message[] = "Required. Which model type is used (COCO\"MPI\"BODY_25\"FACE\"HAND).";
 
 /// @brief Message for assigning Human Pose Estimation inference to device
 static const char target_device_message[] = "Optional. Specify the target device for Human Pose Estimation "\
@@ -38,9 +41,13 @@ DEFINE_bool(h, false, help_message);
 /// It is a required parameter
 DEFINE_string(i, "cam", video_message);
 
-/// @brief Defines parameter for human pose estimation model file <br>
+/// @brief Defines parameter for openpose model file <br>
 /// It is a required parameter
-DEFINE_string(m, "", human_pose_estimation_model_message);
+DEFINE_string(m, "", openpose_model_message);
+
+/// @brief Defines parameter for model type <br>
+/// It is a required parameter
+DEFINE_string(t, "", model_type_message);
 
 /// @brief Defines parameter for the target device to infer on <br>
 /// It is an optional parameter
@@ -68,7 +75,8 @@ static void showUsage() {
     std::cout << std::endl;
     std::cout << "    -h                         " << help_message << std::endl;
     std::cout << "    -i \"<path>\"                " << video_message << std::endl;
-    std::cout << "    -m \"<path>\"                " << human_pose_estimation_model_message << std::endl;
+    std::cout << "    -m \"<path>\"                " << openpose_model_message << std::endl;
+	std::cout << "    -t \"<path>\"                " << model_type_message << std::endl;
     std::cout << "    -d \"<device>\"              " << target_device_message << std::endl;
     std::cout << "    -pc                        " << performance_counter_message << std::endl;
     std::cout << "    -no_show                   " << no_show_processed_video << std::endl;
