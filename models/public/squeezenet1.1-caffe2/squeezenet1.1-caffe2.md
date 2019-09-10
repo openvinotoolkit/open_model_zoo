@@ -1,11 +1,11 @@
-# squeezenet1.1-cf2
+# squeezenet1.1-caffe2
 
 ## Use Case and High-Level Description
 
-This is an Caffe2\* version of `squeezenet1.1` model, designed to perform image classification.
-This model was converted from Caffe\* to Caffe2\* fromat. 
+This is a Caffe2\* version of `squeezenet1.1` model, designed to perform image classification.
+This model was converted from Caffe\* to Caffe2\* format. 
 For details see repository <https://github.com/caffe2/models/tree/master/squeezenet>,
-paper <https://arxiv.org/pdf/1602.07360>
+paper <https://arxiv.org/pdf/1602.07360>.
 
 ## Example
 
@@ -16,7 +16,7 @@ paper <https://arxiv.org/pdf/1602.07360>
 | Type              | Classification|
 | GFLOPs            | 0.784         |
 | MParams           | 1.235         |
-| Source framework  | Caffe2\*         |
+| Source framework  | Caffe2\*      |
 
 ## Accuracy
 
@@ -34,7 +34,7 @@ Image, name - `data`, shape - `1,3,227,227`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `BGR`.
-Mean values - [103.96,116.78,123.68]
+Mean values - [103.96,116.78,123.68].
 
 ### Converted model
 
@@ -54,14 +54,14 @@ Channel order is `BGR`.
 Object classifier according to ImageNet classes, name - `softmaxout`, shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in  [0, 1] range
 
 ### Converted model
 
 Object classifier according to ImageNet classes, name - `softmaxout`, shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - Predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in  [0, 1] range
 
 ## Legal Information
 

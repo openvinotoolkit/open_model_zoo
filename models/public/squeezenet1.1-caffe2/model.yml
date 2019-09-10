@@ -13,31 +13,31 @@
 # limitations under the License.
 
 description: >-
-  This is an Caffe2\* version of `squeezenet1.1` model, designed to perform image classification.
-  This model was converted from Caffe\* to Caffe2\* fromat. 
+  This is a Caffe2\* version of `squeezenet1.1` model, designed to perform image classification.
+  This model was converted from Caffe\* to Caffe2\* format. 
   For details see repository <https://github.com/caffe2/models/tree/master/squeezenet>,
-  paper <https://arxiv.org/pdf/1602.07360>
+  paper <https://arxiv.org/pdf/1602.07360>.
 task_type: classification
 files:
   - name: predict_net.pb
     size: 6175
     sha256: d20be00eb448d3952265620357132916aba8744b027937b56c469b001b46472b
-    source: https://media.githubusercontent.com/media/caffe2/models/ad1087994835832df28f08d486b53abc4a92b183/squeezenet/predict_net.pb
+    source: https://s3.amazonaws.com/download.caffe2.ai/models/squeezenet/predict_net.pb
   - name: init_net.pb
     size: 6181001
     sha256: d8115221de899d081a1a83785bf0dbaeea19463cdf7dbddba662cc7abb4f32dc
-    source: https://media.githubusercontent.com/media/caffe2/models/ad1087994835832df28f08d486b53abc4a92b183/squeezenet/init_net.pb
+    source: https://s3.amazonaws.com/download.caffe2.ai/models/squeezenet/init_net.pb
 framework: caffe2
-caffe2_to_onnx:
-  - --model-name=squeezenet1.1-cf2
-  - --predict-net-path=$dl_dir/predict_net.pb
-  - --init-net-path=$dl_dir/init_net.pb
-  - --input-shape=[1,3,227,227]
+conversion_to_onnx_args:
+  - --model-path=$dl_dir/predict_net.pb
+  - --model-name=squeezenet1.1-caffe2
+  - --weights=$dl_dir/init_net.pb
+  - --input-shape=1,3,227,227
   - --input-names=data
-  - --output-file=$conv_dir/squeezenet1.1-cf2.onnx
+  - --output-file=$conv_dir/squeezenet1.1-caffe2.onnx
 model_optimizer_args:
   - --input_shape=[1,3,227,227]
   - --input=data
   - --mean_values=data[103.96,116.78,123.68]
-  - --input_model=$conv_dir/squeezenet1.1-cf2.onnx
+  - --input_model=$conv_dir/squeezenet1.1-caffe2.onnx
 license: https://raw.githubusercontent.com/caffe2/models/master/LICENSE
