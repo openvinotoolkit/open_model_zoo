@@ -88,6 +88,8 @@ datasets:
     data_source: VOCdevkit/VOC2012/JPEGImages
     annotation: voc12.pickle
     dataset_meta: voc12.json
+    postprocessing:
+    - type: resize_prediction_boxes
     metrics:
     - type: map
       integral: 11point
