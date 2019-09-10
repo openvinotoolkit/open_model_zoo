@@ -14,35 +14,10 @@
 #include "human_pose_estimator.hpp"
 #include "peak.hpp"
 
-#define COCO
-//#define MPI
-//#define BODY_25
-//#define FACE
-//#define HAND
-
 namespace human_pose_estimation {
-
-#ifdef COCO
-	const size_t HumanPoseEstimator::keypointsNumber = 18;
-#endif
-
-#ifdef MPI
-	const size_t HumanPoseEstimator::keypointsNumber = 15;
-#endif
-
-#ifdef BODY_25
-	const size_t HumanPoseEstimator::keypointsNumber = 25;
-#endif
-
-#ifdef FACE
-	const size_t HumanPoseEstimator::keypointsNumber = 70;
-#endif
-
-#ifdef HAND
-	const size_t HumanPoseEstimator::keypointsNumber = 21;
-#endif
-
+	
 HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
+									   const std::string& modeltype,
                                        const std::string& targetDeviceName_,
                                        bool enablePerformanceReport)
     : minJointsNumber(3),
@@ -57,7 +32,13 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
       upsampleRatio(4),
       targetDeviceName(targetDeviceName_),
       enablePerformanceReport(enablePerformanceReport),
-      modelPath(modelPath) {
+      modelPath(modelPath),
+	  keypointsNumber(modeltype == "COCO" ? COCO : 
+		  modeltype == "MPI" ? MPI :
+		  modeltype == "BODY_25" ? BODY_25 : 
+		  modeltype == "FACE" ? FACE : 
+		  modeltype == "HAND" ? HAND : 0){
+
     if (enablePerformanceReport) {
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_PERF_COUNT,
                        InferenceEngine::PluginConfigParams::YES}});
@@ -68,19 +49,23 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
     network = netReader.getNetwork();
     InferenceEngine::InputInfo::Ptr inputInfo = network.getInputsInfo().begin()->second;
     inputLayerSize = cv::Size(inputInfo->getTensorDesc().getDims()[3], inputInfo->getTensorDesc().getDims()[2]);
+	inputInfo->setPrecision(InferenceEngine::Precision::U8);
 
     InferenceEngine::OutputsDataMap outputInfo = network.getOutputsInfo();
     auto outputBlobsIt = outputInfo.begin();
 
-#if (defined MPI) || (defined COCO)
-	pafsBlobName = outputBlobsIt->first;
-	heatmapsBlobName = (++outputBlobsIt)->first;
-#endif
+	CV_Assert(keypointsNumber != 0);
 
-#if (defined BODY_25) || (defined FACE)|| (defined HAND)
-	pafsBlobName = outputBlobsIt->first;
-	heatmapsBlobName = outputBlobsIt->first;
-#endif
+	if ((keypointsNumber == COCO) || (keypointsNumber == MPI))
+	{
+		pafsBlobName = outputBlobsIt->first;
+		heatmapsBlobName = (++outputBlobsIt)->first;
+	}
+	else
+	{
+		pafsBlobName = outputBlobsIt->first;
+		heatmapsBlobName = outputBlobsIt->first;
+	}
 
     executableNetwork = ie.LoadNetwork(network, targetDeviceName);
     request = executableNetwork.CreateInferRequest();
@@ -103,17 +88,19 @@ std::vector<HumanPose> HumanPoseEstimator::estimate(const cv::Mat& image) {
         request = executableNetwork.CreateInferRequest();
     }
     InferenceEngine::Blob::Ptr input = request.GetBlob(network.getInputsInfo().begin()->first);
-    auto buffer = input->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
-    preprocess(image, static_cast<float*>(buffer));
+    auto buffer = input->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type *>();
+    preprocess(image, buffer);
 
     request.Infer();
 
     InferenceEngine::Blob::Ptr pafsBlob = request.GetBlob(pafsBlobName);
     InferenceEngine::Blob::Ptr heatMapsBlob = request.GetBlob(heatmapsBlobName);
 
-#if (defined MPI) || (defined COCO)
-    CV_Assert(heatMapsBlob->getTensorDesc().getDims()[1] == keypointsNumber + 1);
-#endif
+	if ((keypointsNumber == COCO) || (keypointsNumber == MPI))
+	{
+		CV_Assert(heatMapsBlob->getTensorDesc().getDims()[1] == keypointsNumber + 1);
+	}
+
 
     InferenceEngine::SizeVector heatMapDims =
             heatMapsBlob->getTensorDesc().getDims();
@@ -129,7 +116,7 @@ std::vector<HumanPose> HumanPoseEstimator::estimate(const cv::Mat& image) {
     return poses;
 }
 
-void HumanPoseEstimator::preprocess(const cv::Mat& image, float* buffer) const {
+void HumanPoseEstimator::preprocess(const cv::Mat& image, uint8_t* buffer) const {
     cv::Mat resizedImage;
     double scale = inputLayerSize.height / static_cast<double>(image.rows);
     cv::resize(image, resizedImage, cv::Size(), scale, scale, cv::INTER_CUBIC);
@@ -137,13 +124,12 @@ void HumanPoseEstimator::preprocess(const cv::Mat& image, float* buffer) const {
     cv::copyMakeBorder(resizedImage, paddedImage, pad(0), pad(2), pad(1), pad(3),
                        cv::BORDER_CONSTANT, meanPixel);
     std::vector<cv::Mat> planes(3);
-    cv::split(paddedImage, planes);
+
     for (size_t pId = 0; pId < planes.size(); pId++) {
-        cv::Mat dst(inputLayerSize.height, inputLayerSize.width, CV_32FC1,
-                    reinterpret_cast<void*>(
-                        buffer + pId * inputLayerSize.area()));
-        planes[pId].convertTo(dst, CV_32FC1);
+		planes[pId] = cv::Mat(inputLayerSize, CV_8UC1,
+			buffer + pId * inputLayerSize.area());
     }
+	cv::split(paddedImage, planes);
 }
 
 std::vector<HumanPose> HumanPoseEstimator::postprocess(
@@ -158,34 +144,37 @@ std::vector<HumanPose> HumanPoseEstimator::postprocess(
                               reinterpret_cast<void*>(
                                   const_cast<float*>(
                                       heatMapsData + i * heatMapOffset)));
+
     }
     resizeFeatureMaps(heatMaps);
 
-#if (defined MPI) || (defined COCO) || (defined FACE)|| (defined HAND)
-    std::vector<cv::Mat> pafs(nPafs);
-#endif
 
-#ifdef BODY_25
-	int np = nPafs - nHeatMaps - 1;
-	std::vector<cv::Mat> pafs(np);
+	std::vector<cv::Mat> pafs;
 
-#endif
+	if ((keypointsNumber == COCO) || (keypointsNumber == MPI) || (keypointsNumber == FACE) || (keypointsNumber == HAND))
+	{
+		pafs = std::vector<cv::Mat>(nPafs);
 
-    for (size_t i = 0; i < pafs.size(); i++) {
-#if (defined MPI) || (defined COCO) || (defined FACE)|| (defined HAND)
-		pafs[i] = cv::Mat(featureMapHeight, featureMapWidth, CV_32FC1,
-			reinterpret_cast<void*>(
-				const_cast<float*>(
-					pafsData + i * pafOffset)));
-#endif
+		for (size_t i = 0; i < pafs.size(); i++) {
+			pafs[i] = cv::Mat(featureMapHeight, featureMapWidth, CV_32FC1,
+				reinterpret_cast<void*>(
+					const_cast<float*>(
+						pafsData + i * pafOffset)));
+		}
+	}
+	else
+	{
+		int np = nPafs - nHeatMaps - 1;
+		pafs = std::vector<cv::Mat>(nPafs);
 
-#ifdef BODY_25
-        pafs[i] = cv::Mat(featureMapHeight, featureMapWidth, CV_32FC1,
-                          reinterpret_cast<void*>(
-                              const_cast<float*>(
-                                  pafsData + (i + nHeatMaps + 1) * pafOffset)));
-#endif
+		for (size_t i = 0; i < pafs.size(); i++) {
+			pafs[i] = cv::Mat(featureMapHeight, featureMapWidth, CV_32FC1,
+				reinterpret_cast<void*>(
+					const_cast<float*>(
+						pafsData + (i + nHeatMaps + 1) * pafOffset)));
+		}
     }
+
     resizeFeatureMaps(pafs);
 
     std::vector<HumanPose> poses = extractPoses(heatMaps, pafs);
@@ -229,7 +218,7 @@ std::vector<HumanPose> HumanPoseEstimator::extractPoses(
 
         }
     }
-
+	
     std::vector<HumanPose> poses = groupPeaksToPoses(
                 peaksFromHeatMap, pafs, keypointsNumber, midPointsScoreThreshold,
                 foundMidPointsRatioThreshold, minJointsNumber, minSubsetScore);
