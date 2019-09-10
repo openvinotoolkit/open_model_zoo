@@ -79,7 +79,7 @@ Options:
     -ss_t                          Optional. Number of frames to smooth actions.
 ```
 
-Running the application with the empty list of options yields the usage message given above and an error message.
+Running the application with the empty list of options yields an error message.
 
 To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
 
