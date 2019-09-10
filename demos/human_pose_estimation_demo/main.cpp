@@ -41,6 +41,10 @@ bool ParseAndCheckCommandLine(int argc, char* argv[]) {
         throw std::logic_error("Parameter -m is not set");
     }
 
+	if (FLAGS_t.empty()) {
+		throw std::logic_error("Parameter -t is not set");
+	}
+
     return true;
 }
 
@@ -53,15 +57,15 @@ int main(int argc, char* argv[]) {
             return EXIT_SUCCESS;
         }
 
-        HumanPoseEstimator estimator(FLAGS_m, FLAGS_d, FLAGS_pc);
+        HumanPoseEstimator estimator(FLAGS_m, FLAGS_t, FLAGS_d, FLAGS_pc);
         cv::VideoCapture cap;
         if (!(FLAGS_i == "cam" ? cap.open(0) : cap.open(FLAGS_i))) {
             throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);
         }
-
+		
         int delay = 33;
         double inferenceTime = 0.0;
-        cv::Mat image;
+		cv::Mat image = cv::imread(FLAGS_i);
         if (!cap.read(image)) {
             throw std::logic_error("Failed to get frame from cv::VideoCapture");
         }
@@ -99,7 +103,7 @@ int main(int argc, char* argv[]) {
                 continue;
             }
 
-            renderHumanPose(poses, image);
+			renderHumanPose(poses, image, FLAGS_t);
 
             cv::Mat fpsPane(35, 155, CV_8UC3);
             fpsPane.setTo(cv::Scalar(153, 119, 76));
@@ -129,5 +133,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << "Execution successful" << std::endl;
+
+	system("pause");
     return EXIT_SUCCESS;
 }
