@@ -8,12 +8,7 @@
 #include <iostream>
 
 #include "peak.hpp"
-
-#define COCO
-//#define MPI
-//#define BODY_25
-//#define FACE
-//#define HAND
+#include "human_pose_estimator.hpp"
 
 namespace human_pose_estimation {
 Peak::Peak(const int id, const cv::Point2f& pos, const float score)
@@ -114,97 +109,131 @@ void findPeaks(const std::vector<cv::Mat>& heatMaps,
 
 std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& allPeaks,
                                          const std::vector<cv::Mat>& pafs,
-                                         const size_t keypointsNumber,
+										 const size_t keypointsNumber,
                                          const float midPointsScoreThreshold,
                                          const float foundMidPointsRatioThreshold,
                                          const int minJointsNumber,
                                          const float minSubsetScore) {
-	const std::vector<std::pair<int, int> > limbIdsHeatmap = {
-	#ifdef COCO
-		{2, 3}, {2, 6}, {3, 4}, {4, 5}, {6, 7}, {7, 8}, {2, 9}, {9, 10}, {10, 11}, {2, 12}, {12, 13}, {13, 14},
-		{2, 1}, {1, 15}, {15, 17}, {1, 16}, {16, 18}, {3, 17}, {6, 18}
-	#endif
 
-	#ifdef MPI
-		{1,2}, {2,3}, {3,4},
-		{4,5}, {2,6}, {6,7},
-		{7,8}, {2,15}, {15,9}, {9,10},
-		{10,11}, {15,12}, {12,13}, {13,14}
-	#endif
+	const std::string modeltype = (keypointsNumber == HumanPoseEstimator::ModelType::COCO) ? "COCO" :
+								  (keypointsNumber == HumanPoseEstimator::ModelType::MPI) ? "MPI" :
+								  (keypointsNumber == HumanPoseEstimator::ModelType::BODY_25) ? "BODY_25" :
+								  (keypointsNumber == HumanPoseEstimator::ModelType::FACE) ? "FACE" :
+								  (keypointsNumber == HumanPoseEstimator::ModelType::HAND) ? "HAND" : "NULL";
+	CV_Assert(modeltype != "NULL");
 
-	#ifdef BODY_25
-		{2,9}, {2,3}, {2,6}, {3,4}, {4,5},
-		{6,7}, {7,8}, {9,10}, {10,11}, {11,12},
-		{9,13}, {13,14}, {14,15}, {2,1}, {1,16},
-		{16,18}, {1,17}, {17,19}, {15,20}, {20,21},
-		{15,22}, {12,23}, {23,24}, {12,25}
-	#endif
+	const std::vector<std::pair<int, int> > limbIdsHeatmap;
+	const std::vector<std::pair<int, int> > limbIdsPaf;
 
-	#ifdef FACE
-		{1,2}, {2,3}, {3,4}, {4,5}, {5,6},
-		{6,7}, {7,8}, {8,9}, {9,10}, {10,11},
-		{11,12}, {12,13}, {13,14}, {14,15}, {15,16},
-		{16,17}, {18,19}, {19,20}, {20,21}, {21,22}, 
-		{23,24}, {24,25}, {25,26}, {26,27}, {28,29},
-		{29,30}, {30,31}, {32,33}, {33,34}, {34,35},
-		{35,36}, {37,38}, {38,39}, {39,40}, {40,41},
-		{41,42}, {42,37}, {43,44}, {44,45}, {45,46},
-		{46,47}, {47,48}, {48,43}, {49,50}, {50,51},
-		{51,52}, {52,53}, {53,54}, {54,55}, {55,56},
-		{56,57}, {57,58}, {58,59}, {59,60}, {60,49},
-		{61,62}, {62,63}, {63,64}, {64,65}, {65,66},
-		{66,67}, {67,68}, {68,61}, {38,69}, {45,70}
-	#endif
+	if (modeltype == "COCO")
+	{
+		std::vector<std::pair<int, int> > *ptr_Heatmap = (std::vector<std::pair<int, int> >*)&limbIdsHeatmap;
+		*ptr_Heatmap = {
+			{2, 3}, {2, 6}, {3, 4}, {4, 5}, {6, 7}, {7, 8}, {2, 9}, {9, 10}, {10, 11}, {2, 12}, {12, 13}, {13, 14},
+			{2, 1}, {1, 15}, {15, 17}, {1, 16}, {16, 18}, {3, 17}, {6, 18}
+		};
 
-	#ifdef HAND
-		{1,2}, {2,3}, {3,4}, {4,5}, {1,6},
-		{6,7}, {7,8}, {8,9}, {1,10}, {10,11},
-		{11,12}, {12,13}, {1,14}, {14,15}, {15,16},
-		{16,17}, {1,18}, {18,19}, {19,20}, {20,21}
-	#endif
-    };
-    const std::vector<std::pair<int, int> > limbIdsPaf = {
-	#ifdef COCO
-        {31, 32}, {39, 40}, {33, 34}, {35, 36}, {41, 42}, {43, 44}, {19, 20}, {21, 22}, {23, 24}, {25, 26},
-        {27, 28}, {29, 30}, {47, 48}, {49, 50}, {53, 54}, {51, 52}, {55, 56}, {37, 38}, {45, 46}
-	#endif
+		std::vector<std::pair<int, int> > *ptr_paf = (std::vector<std::pair<int, int> >*)&limbIdsPaf;
+		*ptr_paf = {
+			{31, 32}, {39, 40}, {33, 34}, {35, 36}, {41, 42}, {43, 44}, {19, 20}, {21, 22}, {23, 24}, {25, 26},
+			{27, 28}, {29, 30}, {47, 48}, {49, 50}, {53, 54}, {51, 52}, {55, 56}, {37, 38}, {45, 46}
+		};
+	}
 
-	#ifdef MPI
-		{16, 17}, {18, 19}, {20, 21}, {22, 23}, {24, 25}, {26, 27}, {28, 29}, {30, 31},
-		{32, 33}, {34, 35}, {36, 37}, {38, 39}, {40, 41}, {42, 43}
-	#endif
+	else if (modeltype == "MPI")
+	{
+		std::vector<std::pair<int, int> > *ptr_Heatmap = (std::vector<std::pair<int, int> >*)&limbIdsHeatmap;
+		*ptr_Heatmap = {
+			{1,2}, {2,3}, {3,4},
+			{4,5}, {2,6}, {6,7},
+			{7,8}, {2,15}, {15,9}, {9,10},
+			{10,11}, {15,12}, {12,13}, {13,14} 
+		};
 
-	#ifdef BODY_25
-		{0,1}, {14,15}, {22,23}, {16,17}, {18,19}, 
-		{24,25}, {26,27}, {6,7}, {2,3}, {4,5}, 
-		{8,9}, {10,11}, {12,13}, {30,31}, {32,33},
-		{36,37}, {34,35}, {38,39}, {40,41}, {42,43},
-		{44,45}, {46,47}, {48,49}, {50,51}
-	#endif
+		std::vector<std::pair<int, int> > *ptr_paf = (std::vector<std::pair<int, int> >*)&limbIdsPaf;
+		*ptr_paf = {
+			{16, 17}, {18, 19}, {20, 21}, {22, 23}, {24, 25}, {26, 27}, {28, 29}, {30, 31},
+			{32, 33}, {34, 35}, {36, 37}, {38, 39}, {40, 41}, {42, 43}
+		};
+	}
 
-	#ifdef FACE
-		{0,1}, {1,2}, {1,3}, {3,4}, {4,5},
-		{5,6}, {6,7}, {7,8}, {8,9}, {9,10}, 
-		{10,11}, {11,12}, {13,14}, {14,15}, {15,16},
-		{16,17}, {17,18}, {18,19}, {19,20}, {20,21},
-		{21,22}, {22,23}, {23,24}, {24,25}, {25,26},
-		{27,28}, {28,29}, {29,30}, {31,32}, {32,33}, 
-		{33,34}, {34,35}, {36,37}, {37,38}, {38,39},
-	    {39,40}, {40,41}, {41,36}, {42,43}, {43,44}, 
-		{44,45}, {45,46}, {46,47}, {47,42}, {48,49}, 
-		{49,50}, {50,51}, {51,52}, {52,53}, {53,54}, 
-		{54,55}, {55,56}, {56,57}, {57,58}, {58,59}, 
-		{59,48}, {60,61}, {61,62}, {62,63}, {63,64}, 
-		{64,65}, {65,66}, {66,67}, {67,68}, {68,69}
-	#endif
+	else if (modeltype == "BODY_25")
+	{
+		std::vector<std::pair<int, int> > *ptr_Heatmap = (std::vector<std::pair<int, int> >*)&limbIdsHeatmap;
+		*ptr_Heatmap = {
+			{2,9}, {2,3}, {2,6}, {3,4}, {4,5},
+			{6,7}, {7,8}, {9,10}, {10,11}, {11,12},
+			{9,13}, {13,14}, {14,15}, {2,1}, {1,16},
+			{16,18}, {1,17}, {17,19}, {15,20}, {20,21},
+			{15,22}, {12,23}, {23,24}, {12,25}
+		};
 
-	#ifdef HAND
-		{0,1}, {1,2}, {2,3}, {3,4}, {4,5},
-		{5,6}, {6,7}, {7,8}, {8,9}, {9,10},
-		{10,11}, {11,12}, {12,13}, {13,14}, {14,15},
-		{15,16}, {16,17}, {17,18}, {18,19}, {19,20}
-	#endif
-    };
+		std::vector<std::pair<int, int> > *ptr_paf = (std::vector<std::pair<int, int> >*)&limbIdsPaf;
+		*ptr_paf = {
+			{0,1}, {14,15}, {22,23}, {16,17}, {18,19},
+			{24,25}, {26,27}, {6,7}, {2,3}, {4,5},
+			{8,9}, {10,11}, {12,13}, {30,31}, {32,33},
+			{36,37}, {34,35}, {38,39}, {40,41}, {42,43},
+			{44,45}, {46,47}, {48,49}, {50,51}
+		};
+	}
+
+	else if (modeltype == "FACE")
+	{
+		std::vector<std::pair<int, int> > *ptr_Heatmap = (std::vector<std::pair<int, int> >*)&limbIdsHeatmap;
+		*ptr_Heatmap = {
+			{1,2}, {2,3}, {3,4}, {4,5}, {5,6},
+			{6,7}, {7,8}, {8,9}, {9,10}, {10,11},
+			{11,12}, {12,13}, {13,14}, {14,15}, {15,16},
+			{16,17}, {18,19}, {19,20}, {20,21}, {21,22},
+			{23,24}, {24,25}, {25,26}, {26,27}, {28,29},
+			{29,30}, {30,31}, {32,33}, {33,34}, {34,35},
+			{35,36}, {37,38}, {38,39}, {39,40}, {40,41},
+			{41,42}, {42,37}, {43,44}, {44,45}, {45,46},
+			{46,47}, {47,48}, {48,43}, {49,50}, {50,51},
+			{51,52}, {52,53}, {53,54}, {54,55}, {55,56},
+			{56,57}, {57,58}, {58,59}, {59,60}, {60,49},
+			{61,62}, {62,63}, {63,64}, {64,65}, {65,66},
+			{66,67}, {67,68}, {68,61}, {38,69}, {45,70}
+		};
+
+		std::vector<std::pair<int, int> > *ptr_paf = (std::vector<std::pair<int, int> >*)&limbIdsPaf;
+		*ptr_paf = {
+			{0,1}, {1,2}, {1,3}, {3,4}, {4,5},
+			{5,6}, {6,7}, {7,8}, {8,9}, {9,10},
+			{10,11}, {11,12}, {13,14}, {14,15}, {15,16},
+			{16,17}, {17,18}, {18,19}, {19,20}, {20,21},
+			{21,22}, {22,23}, {23,24}, {24,25}, {25,26},
+			{27,28}, {28,29}, {29,30}, {31,32}, {32,33},
+			{33,34}, {34,35}, {36,37}, {37,38}, {38,39},
+			{39,40}, {40,41}, {41,36}, {42,43}, {43,44},
+			{44,45}, {45,46}, {46,47}, {47,42}, {48,49},
+			{49,50}, {50,51}, {51,52}, {52,53}, {53,54},
+			{54,55}, {55,56}, {56,57}, {57,58}, {58,59},
+			{59,48}, {60,61}, {61,62}, {62,63}, {63,64},
+			{64,65}, {65,66}, {66,67}, {67,68}, {68,69}
+		};
+	}
+
+	else if (modeltype == "HAND")
+	{
+		std::vector<std::pair<int, int> > *ptr_Heatmap = (std::vector<std::pair<int, int> >*)&limbIdsHeatmap;
+		*ptr_Heatmap = {
+			{1,2}, {2,3}, {3,4}, {4,5}, {1,6},
+			{6,7}, {7,8}, {8,9}, {1,10}, {10,11},
+			{11,12}, {12,13}, {1,14}, {14,15}, {15,16},
+			{16,17}, {1,18}, {18,19}, {19,20}, {20,21}
+		};
+
+		std::vector<std::pair<int, int> > *ptr_paf = (std::vector<std::pair<int, int> >*)&limbIdsPaf;
+		*ptr_paf = {
+			{0,1}, {1,2}, {2,3}, {3,4}, {4,5},
+			{5,6}, {6,7}, {7,8}, {8,9}, {9,10},
+			{10,11}, {11,12}, {12,13}, {13,14}, {14,15},
+			{15,16}, {16,17}, {17,18}, {18,19}, {19,20}
+		};
+	}
+
 
     std::vector<Peak> candidates;
     for (const auto& peaks : allPeaks) {
@@ -214,13 +243,14 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
     for (size_t k = 0; k < limbIdsPaf.size(); k++) {
         std::vector<TwoJointsConnection> connections;
 
-	#if (defined MPI) || (defined COCO)
-        const int mapIdxOffset = keypointsNumber + 1;
-	#endif
 
-	#if (defined BODY_25) || (defined FACE) || (defined HAND)
-		const int mapIdxOffset = 0;
-	#endif
+		const int mapIdxOffset = keypointsNumber + 1;
+
+		if ((modeltype == "BODY_25") || (modeltype == "FACE") || (modeltype == "HAND"))
+		{
+			int *ptr = (int*)(&mapIdxOffset);
+			*ptr = 0;
+		}
 
         std::pair<cv::Mat, cv::Mat> scoreMid = { pafs[limbIdsPaf[k].first - mapIdxOffset],
                                                  pafs[limbIdsPaf[k].second - mapIdxOffset] };
@@ -301,9 +331,13 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
                         cv::Point2f pred(scoreMid.first.at<float>(midPoint),
                                          scoreMid.second.at<float>(midPoint));
                         score = vec.x * pred.x + vec.y * pred.y;
-#if (defined FACE) || (defined HAND)
-						score = 1;
-#endif
+
+
+						if ((modeltype == "FACE") || (modeltype == "HAND"))
+						{
+							score = 1;
+						}
+
                         if (score > midPointsScoreThreshold) {
                             p_sum += score;
                             p_count++;
