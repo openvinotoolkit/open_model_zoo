@@ -64,8 +64,8 @@ def convert_to_onnx(predict_net, init_net, input_shape, input_names, output_file
 
     output_file.parent.mkdir(parents=True, exist_ok=True)
     value_info = {}
-    input_names = input_names[0].split(',')
-    for name, shape in zip(input_names, input_shape[0]):
+    input_names = input_names.split(',')
+    for name, shape in zip(input_names, input_shape):
         value_info[name] = [shape[0], shape]
     if predict_net.name == "":
         predict_net.name = model_name
