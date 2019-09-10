@@ -37,3 +37,5 @@ models:
         preprocessing:
           - type: resize
             size: 300
+        postprocessing:
+          - type: resize_prediction_boxes
