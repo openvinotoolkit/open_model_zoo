@@ -12,6 +12,8 @@ models:
             size: 512
           - type: normalization
             mean: 104, 117, 123
+        postprocessing:
+          - type: resize_prediction_boxes
 
   - name: ssd512
     launchers:

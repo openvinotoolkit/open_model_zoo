@@ -12,6 +12,8 @@ models:
             size: 300
           - type: normalization
             mean: 104, 117, 123
+        postprocessing:
+          - type: resize_prediction_boxes
 
   - name: ssd300
     launchers:
