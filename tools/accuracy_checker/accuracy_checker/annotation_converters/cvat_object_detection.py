@@ -17,7 +17,7 @@ limitations under the License.
 from .format_converter import FileBasedAnnotationConverter, ConverterReturn
 from ..representation import DetectionAnnotation
 from ..topology_types import ObjectDetection
-from ..utils import read_xml, check_file_existence
+from ..utils import read_xml, check_file_existence, read_json
 from ..config import PathField, ConfigError, BoolField
 
 
@@ -34,7 +34,8 @@ class CVATObjectDetectionConverter(FileBasedAnnotationConverter):
                 is_directory=True, optional=True,
                 description='path to dataset images, used only for content existence check'
             ),
-            'has_background': BoolField(optional=True, default=True, description='Dataset has background label or not')
+            'has_background': BoolField(optional=True, default=True, description='Dataset has background label or not'),
+            'labels_file': PathField(optional=True, description='path to label map in json format')
         })
         return parameters
 
@@ -42,17 +43,23 @@ class CVATObjectDetectionConverter(FileBasedAnnotationConverter):
         super().configure()
         self.has_background = self.get_value_from_config('has_background')
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
+        self.label_map_file = self.get_value_from_config('labels_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotation = read_xml(self.annotation_file)
         meta = annotation.find('meta')
         size = int(meta.find('task').find('size').text)
-        labels = [label.find('name').text for label in meta.iter('label') if label.find('name').text]
-        if not labels:
-            raise ConfigError('annotation file does not contains labels')
-        if self.has_background:
-            labels = ['background'] + labels
-        label_to_id = {label: idx for idx, label in enumerate(labels)}
+        if self.label_map_file:
+            label_to_id = read_json(self.label_map_file).get('labels')
+            if not label_to_id:
+                raise ConfigError('label_map_file does not contains labels key')
+        else:
+            labels = [label.find('name').text for label in meta.iter('label') if label.find('name').text]
+            if not labels:
+                raise ConfigError('annotation file does not contains labels')
+            if self.has_background:
+                labels = ['background'] + labels
+            label_to_id = {label: idx for idx, label in enumerate(labels)}
 
         annotations = []
         content_errors = None if not check_content else []
@@ -62,7 +69,7 @@ class CVATObjectDetectionConverter(FileBasedAnnotationConverter):
                 if not check_file_existence(self.images_dir / identifier):
                     content_errors.append('{}: does not exist'.format(self.images_dir / identifier))
             x_mins, y_mins, x_maxs, y_maxs, labels_ids, difficult = [], [], [], [], [], []
-            for bbox_id, bbox in enumerate(image):
+            for _, bbox in enumerate(image):
                 if 'label' not in bbox.attrib.keys() or bbox.attrib['label'] not in label_to_id:
                     continue
                 labels_ids.append(label_to_id[bbox.attrib['label']])
@@ -71,7 +78,7 @@ class CVATObjectDetectionConverter(FileBasedAnnotationConverter):
                 x_maxs.append(float(bbox.attrib['xbr']))
                 y_maxs.append(float(bbox.attrib['ybr']))
                 if 'occluded' in bbox.attrib and int(bbox.attrib['occluded']):
-                    difficult.append(bbox_id)
+                    difficult.append(len(labels_ids) - 1)
             detection_annotation = DetectionAnnotation(identifier, labels_ids, x_mins, y_mins, x_maxs, y_maxs)
             detection_annotation.metadata['difficult_boxes'] = difficult
             annotations.append(detection_annotation)
