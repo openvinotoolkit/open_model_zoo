@@ -14,7 +14,7 @@ static const char help_message[] = "Print a usage message.";
 static const char video_message[] = "Required. Path to a video. Default value is \"cam\" to work with camera.";
 
 /// @brief Message for pose estimation model argument
-static const char pose_estimation_model_message[] = "Required. Path to the Human Pose Estimation model (.xml) file.";
+static const char pose_estimation_model_message[] = "Required. Path to the Pose Estimation model (.xml) file.";
 
 /// @brief Message for model type
 static const char model_type_message[] = "Required. Which model type is used (COCO\"MPI\"BODY_25\"FACE\"HAND).";
