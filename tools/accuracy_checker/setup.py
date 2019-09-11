@@ -29,7 +29,7 @@ requirements = OrderedDict([
     ('ymlloader', 'yamlloader'),
     ('Pillow', 'pillow'),
     ('scikit-learn', 'scikit-learn'),
-    ('scipy', 'scipy<=0.19'),
+    ('scipy', 'scipy<1.2'),
     ('cpuinfo', 'py-cpuinfo<=4.0'),
     ('shapely', 'shapely'),
     ('nibabel', 'nibabel')
