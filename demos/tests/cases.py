@@ -55,6 +55,11 @@ class PythonDemo:
         return [sys.executable, str(source_dir / 'python_demos' / self._name / (self._name + '.py')),
             '-l', str(build_dir / 'lib/libcpu_extension.so')]
 
+class InstanceSegmentationPythonDemo(PythonDemo):
+    def fixed_args(self, source_dir, build_dir):
+        return super().fixed_args(source_dir, build_dir) \
+            + ['--labels', str(source_dir / 'python_demos' / self._name / ('coco_labels.txt'))]
+
 def join_cases(*args):
     options = {}
     for case in args: options.update(case.options)
@@ -119,11 +124,18 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    # TODO: mask_rcnn_demo
+    # TODO: mask_rcnn_demo: no models.lst
 
-    # TODO: multichannel demos
+    # TODO: multichannel demos: different path for demo and demo name,
+    # cant accept ImagePatternArg, fails for ImageDirectoryArg, does not stop for IMAGE_SEQUENCES[]
+    # face-detection-adas-0001
+    # INT1/face-detection-adas-binary-0001
+    # face-detection-retail-0004
+    # face-detection-retail-0005
+    # face-detection-retail-0044
+    # human-pose-estimation-0001
 
-    # TODO: object_detection_demo_faster_rcnn
+    # TODO: object_detection_demo_faster_rcnn: no models.lst
 
     NativeDemo(name='object_detection_demo_ssd_async', test_cases=combine_cases(
         TestCase(options={'-no_show': None}),
@@ -143,7 +155,7 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    # TODO: object_detection_demo_yolov3_async
+    # TODO: object_detection_demo_yolov3_async: no models.lst
 
     NativeDemo('pedestrian_tracker_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -222,11 +234,68 @@ NATIVE_DEMOS = [
 ]
 
 PYTHON_DEMOS = [
-    # TODO: 3d_segmentation_demo
-    # TODO: action_recognition
-    # TODO: instance_segmentation_demo
-    # TODO: object_detection_demo_ssd_async
-    # TODO: object_detection_demo_yolov3_async
+    # TODO: 3d_segmentation_demo: no input data
+
+    PythonDemo(name='action_recognition', test_cases=combine_cases(
+        TestCase(options={'--no_show': None, '-i': ImagePatternArg('action-recognition')}),
+        device_cases('-d'),
+        [
+            TestCase(options={
+                '-m_en': ModelArg('action-recognition-0001-encoder'),
+                '-m_de': ModelArg('action-recognition-0001-decoder'),
+            }),
+            TestCase(options={
+                '-m_en': ModelArg('driver-action-recognition-adas-0002-encoder'),
+                '-m_de': ModelArg('driver-action-recognition-adas-0002-decoder'),
+            }),
+        ],
+    )),
+
+    # TODO: face_recognition_demo: requires face gallery
+    # TODO: image_retrieval_demo: current images does not suit the usecase, requires user defined gallery
+
+    InstanceSegmentationPythonDemo(name='instance_segmentation_demo', test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            '-i': ImagePatternArg('instance-segmentation-demo'),
+            '--delay': '1',
+            '-d': 'CPU'}), # GPU is not supported
+        single_option_cases('-m', ModelArg('instance-segmentation-security-0010'),
+                                  ModelArg('instance-segmentation-security-0050'),
+                                  ModelArg('instance-segmentation-security-0083')),
+    )),
+
+    PythonDemo(name='multi_camera_multi_person_tracking', test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            # TODO: run_tests.py does not handle multiple ImagePatternArg
+            '-i': [ImagePatternArg('multi-camera-multi-person-tracking')],
+            '-m': ModelArg('person-detection-retail-0013')}),
+        device_cases('-d'),
+        single_option_cases('--m_reid',
+            ModelArg('person-reidentification-retail-0031'),
+            ModelArg('person-reidentification-retail-0076'),
+            ModelArg('person-reidentification-retail-0079')),
+    )),
+
+    PythonDemo(name='object_detection_demo_ssd_async', test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            '-i': ImagePatternArg('py/object-detection-demo-ssd-async')}),
+        device_cases('-d'),
+        single_option_cases('-m',
+            ModelArg('face-detection-adas-0001'),
+            ModelArg('face-detection-adas-binary-0001', "INT1"),
+            ModelArg('face-detection-retail-0004'),
+            ModelArg('face-detection-retail-0005'),
+            # TODO: face-detection-retail-0044
+            ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
+            ModelArg('pedestrian-detection-adas-0002'),
+            ModelArg('pedestrian-detection-adas-binary-0001', "INT1"),
+            ModelArg('person-detection-retail-0013'),
+            ModelArg('vehicle-detection-adas-0002'),
+            ModelArg('vehicle-detection-adas-binary-0001', "INT1"),
+            ModelArg('vehicle-license-plate-detection-barrier-0106')),
+    )),
+
+    # TODO: object_detection_demo_yolov3_async: no models.lst
 
     PythonDemo(name='segmentation_demo', test_cases=combine_cases(
         device_cases('-d'),
