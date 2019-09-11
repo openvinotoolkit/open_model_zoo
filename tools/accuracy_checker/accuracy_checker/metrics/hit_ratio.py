@@ -56,13 +56,12 @@ class BaseRecommenderMetric(FullDatasetEvaluationMetric):
             self.gt_items[annotation.user] = annotation.item
 
     def evaluate(self, annotations, predictions):
-        iter_num = len(self.pred_per_user[0])
-
         measure = []
         for user in range(self.users_num):
             if not self.pred_per_user[user]:
                 continue
             map_item_score = {}
+            iter_num = len(self.pred_per_user[user]) 
             for j in range(iter_num):
                 item = self.pred_per_user[user][j][0]
                 score = self.pred_per_user[user][j][1]
