@@ -116,7 +116,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 
 | Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
 | ------------------------- | -------------- | -------------- |------ | ------- |
-| FaceNet                   | [TensorFlow\*](./facenet-20180408-102900/facenet-20180408-102900.md) |f acenet-20180408-102900 | 2.846 | 23.469 |
+| FaceNet                   | [TensorFlow\*](./facenet-20180408-102900/facenet-20180408-102900.md) | facenet-20180408-102900 | 2.846 | 23.469 |
 | LResNet34E-IR,ArcFace@ms1m-refine-v1 | [MXNet\*](./face-recognition-resnet34-arcface/face-recognition-resnet34-arcface.md) | face-recognition-resnet34-arcface | 8.934 | 34.129 |
 | LResNet50E-IR,ArcFace@ms1m-refine-v1 | [MXNet\*](./face-recognition-resnet50-arcface/face-recognition-resnet50-arcface.md) | face-recognition-resnet50-arcface | 12.637 | 43.576 |
 | LResNet100E-IR,ArcFace@ms1m-refine-v2 | [MXNet\*](./face-recognition-resnet100-arcface/face-recognition-resnet100-arcface.md) | face-recognition-resnet100-arcface | 24.209 | 65.131 |
