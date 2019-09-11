@@ -70,6 +70,7 @@ Options:
   -pc, --perf_counts    Optional. Report performance counters.
   -r, --raw_output_message
                         Optional. Output inference results raw values.
+  --no_show             Optional. Don't show output
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.

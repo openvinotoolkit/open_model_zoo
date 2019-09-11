@@ -45,6 +45,7 @@ def build_argparser():
     args.add_argument("--labels", help="Optional. Path to labels mapping file", default=None, type=str)
     args.add_argument("-pt", "--prob_threshold", help="Optional. Probability threshold for detections filtering",
                       default=0.5, type=float)
+    args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
 
     return parser
 
@@ -98,14 +99,14 @@ def main():
         input_stream = 0
     else:
         input_stream = args.input
-        assert os.path.isfile(args.input), "Specified input file doesn't exist"
+    cap = cv2.VideoCapture(input_stream)
+    assert cap.isOpened(), "Can't open input"
+
     if args.labels:
         with open(args.labels, 'r') as f:
             labels_map = [x.strip() for x in f]
     else:
         labels_map = None
-
-    cap = cv2.VideoCapture(input_stream)
 
     cur_request_id = 0
     next_request_id = 1
@@ -178,7 +179,8 @@ def main():
 
         #
         render_start = time.time()
-        cv2.imshow("Detection Results", frame)
+        if not args.no_show:
+            cv2.imshow("Detection Results", frame)
         render_end = time.time()
         render_time = render_end - render_start
 

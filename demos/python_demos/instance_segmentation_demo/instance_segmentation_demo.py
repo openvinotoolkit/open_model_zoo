@@ -79,6 +79,9 @@ def build_argparser():
     args.add_argument('-r', '--raw_output_message',
                       help='Optional. Output inference results raw values.',
                       action='store_true')
+    args.add_argument("--no_show",
+                      help="Optional. Don't show output",
+                      action='store_true')
     return parser
 
 
@@ -259,8 +262,9 @@ def main():
                 print('{:<70} {:<15} {:<15} {:<15} {:<10}'.format(layer, stats['layer_type'], stats['exec_type'],
                                                                   stats['status'], stats['real_time']))
 
-        # Show resulting image.
-        cv2.imshow('Results', frame)
+        if not args.no_show:
+            # Show resulting image.
+            cv2.imshow('Results', frame)
         render_end = time.time()
         render_time = render_end - render_start
 
