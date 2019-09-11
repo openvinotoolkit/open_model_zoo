@@ -61,7 +61,7 @@ class BaseRecommenderMetric(FullDatasetEvaluationMetric):
             if not self.pred_per_user[user]:
                 continue
             map_item_score = {}
-            iter_num = len(self.pred_per_user[user]) 
+            iter_num = len(self.pred_per_user[user])
             for j in range(iter_num):
                 item = self.pred_per_user[user][j][0]
                 score = self.pred_per_user[user][j][1]
