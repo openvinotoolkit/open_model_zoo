@@ -134,6 +134,7 @@ def main():
         inf_start = time.time()
         if is_async_mode:
             in_frame = cv2.resize(next_frame, (w, h))
+            print(in_frame)
             in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
             in_frame = in_frame.reshape((n, c, h, w))
             feed_dict[input_blob] = in_frame
