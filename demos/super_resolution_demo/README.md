@@ -4,16 +4,17 @@ This topic demonstrates how to run Super Resolution demo application, which
 reconstructs the high resolution image from the original low resolution one.
 You can use the following pre-trained model with the demo:
 
-* `single-image-super-resolution-1033`, which is the primary and only model that
-  performs super resolution 4x upscale on a 200x200 image
+* `single-image-super-resolution-1032`, which is the model that performs super resolution 4x upscale on a 270x480 image
+* `single-image-super-resolution-1033`, which is the model that performs super resolution 3x upscale on a 360x640 image
+* `text-image-super-resolution-0001`, which is the model that performs super resolution 3x upscale on a 360x640 image
 
-For more information about the pre-trained models, refer to the [model documentation](../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
 ## How It Works
 
 On the start-up, the application reads command-line parameters and loads the
-specified network. After that, the application reads a 200x200 input image and
-performs 4x upscale using super resolution.
+specified network. After that, the application reads an input image and
+performs upscale using super resolution model.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
@@ -54,7 +55,7 @@ To do inference on CPU using a trained model, run the following command:
 The application outputs a reconstructed high-resolution image and saves it in
 the current working directory as `*.bmp` file with `sr` prefix.
 
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo is not supported with any of the Model Downloader available topologies. Other models may work incorrectly on these devices as well.
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo is not supported with any of the Model Downloader available topologies. Other models may produce unexpected results on these devices as well.
 
 ## See Also
 * [Using Open Model Zoo demos](../README.md)

@@ -1,0 +1,38 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is a network for text recognition scenario. It consists of VGG16-like backbone
+  and bidirectional LSTM encoder-decoder. The network is able to recognize case-insensitive
+  alpha-numeric text (36 unique symbols).
+task_type: optical_character_recognition
+files:
+  - name: FP32/text-recognition-0012.xml
+    size: 50415
+    sha256: e0f7979f11d7a7034ab60a66e83d6a48bb39a3f51987fd1aa942d90d11dd1f2d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-recognition-0012/FP32/text-recognition-0012.xml
+  - name: FP32/text-recognition-0012.bin
+    size: 47470764
+    sha256: df7426c3a16c005eda3c9efc6afeefe38259b36748819fc0b28f3d2a67c16239
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-recognition-0012/FP32/text-recognition-0012.bin
+  - name: FP16/text-recognition-0012.xml
+    size: 50395
+    sha256: c272907c678f637b7eea5c6b5a72c07564864fca2224a78756c6add527c0df87
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-recognition-0012/FP16/text-recognition-0012.xml
+  - name: FP16/text-recognition-0012.bin
+    size: 23735394
+    sha256: 657f2b3fdcab897980f976692bb0b93bd05f7b29b111bfe518726ef5c835c786
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-recognition-0012/FP16/text-recognition-0012.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

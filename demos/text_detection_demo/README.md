@@ -7,7 +7,7 @@ The demo shows an example of using neural networks to detect and recognize print
 * `text-recognition-0012`, which is a recognition network for recognizing text.
 * `handwritten-score-recognition-0001`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`.
 
-For more information about the pre-trained models, refer to the [model documentation](../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
 ## How It Works
 

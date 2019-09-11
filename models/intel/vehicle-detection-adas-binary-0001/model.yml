@@ -1,0 +1,30 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is a vehicle detection network based on an SSD framework with tuned MobileNet
+  v1 as a feature extractor and using binary layer for speedup. This detecector
+  was created by binarization the vehicle-detection-adas-0002
+task_type: detection
+files:
+  - name: INT1/vehicle-detection-adas-binary-0001.xml
+    size: 105969
+    sha256: c98bf5984895b1309861597ec36181446877407cd985bb490e14461f41312670
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.xml
+  - name: INT1/vehicle-detection-adas-binary-0001.bin
+    size: 2160500
+    sha256: afdd8a2f175b2f19c07083ff23b2e28105f3d1c7dc06a4b1a1d5c2c42b98294f
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

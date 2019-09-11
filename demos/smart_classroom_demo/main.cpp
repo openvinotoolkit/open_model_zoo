@@ -7,7 +7,9 @@
 #include <gflags/gflags.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
+#ifdef WITH_EXTENSIONS
 #include <ext_list.hpp>
+#endif
 #include <string>
 #include <memory>
 #include <limits>
@@ -80,16 +82,16 @@ public:
             return;
         }
 
-            frame_ = frame.clone();
-            rect_scale_x_ = 1;
-            rect_scale_y_ = 1;
-            cv::Size new_size = GetOutputSize(frame_.size());
-            if (new_size != frame_.size()) {
-                rect_scale_x_ = static_cast<float>(new_size.height) / frame_.size().height;
-                rect_scale_y_ = static_cast<float>(new_size.width) / frame_.size().width;
-                cv::resize(frame_, frame_, new_size);
-            }
+        frame_ = frame.clone();
+        rect_scale_x_ = 1;
+        rect_scale_y_ = 1;
+        cv::Size new_size = GetOutputSize(frame_.size());
+        if (new_size != frame_.size()) {
+            rect_scale_x_ = static_cast<float>(new_size.height) / frame_.size().height;
+            rect_scale_y_ = static_cast<float>(new_size.width) / frame_.size().width;
+            cv::resize(frame_, frame_, new_size);
         }
+    }
 
     void Show() const {
         if (enabled_) {
@@ -140,28 +142,28 @@ public:
             return;
         }
 
-            if (rect_scale_x_ != 1 || rect_scale_y_ != 1) {
-                rect.x = cvRound(rect.x * rect_scale_x_);
-                rect.y = cvRound(rect.y * rect_scale_y_);
+        if (rect_scale_x_ != 1 || rect_scale_y_ != 1) {
+            rect.x = cvRound(rect.x * rect_scale_x_);
+            rect.y = cvRound(rect.y * rect_scale_y_);
 
-                rect.height = cvRound(rect.height * rect_scale_y_);
-                rect.width = cvRound(rect.width * rect_scale_x_);
-            }
-            cv::rectangle(frame_, rect, bbox_color);
-
-            if (plot_bg && !label_to_draw.empty()) {
-                int baseLine = 0;
-                const cv::Size label_size =
-                    cv::getTextSize(label_to_draw, cv::FONT_HERSHEY_PLAIN, 1, 1, &baseLine);
-                cv::rectangle(frame_, cv::Point(rect.x, rect.y - label_size.height),
-                              cv::Point(rect.x + label_size.width, rect.y + baseLine),
-                              bbox_color, cv::FILLED);
-            }
-            if (!label_to_draw.empty()) {
-                cv::putText(frame_, label_to_draw, cv::Point(rect.x, rect.y), cv::FONT_HERSHEY_PLAIN, 1,
-                            text_color, 1, cv::LINE_AA);
-            }
+            rect.height = cvRound(rect.height * rect_scale_y_);
+            rect.width = cvRound(rect.width * rect_scale_x_);
         }
+        cv::rectangle(frame_, rect, bbox_color);
+
+        if (plot_bg && !label_to_draw.empty()) {
+            int baseLine = 0;
+            const cv::Size label_size =
+                cv::getTextSize(label_to_draw, cv::FONT_HERSHEY_PLAIN, 1, 1, &baseLine);
+            cv::rectangle(frame_, cv::Point(rect.x, rect.y - label_size.height),
+                            cv::Point(rect.x + label_size.width, rect.y + baseLine),
+                            bbox_color, cv::FILLED);
+        }
+        if (!label_to_draw.empty()) {
+            cv::putText(frame_, label_to_draw, cv::Point(rect.x, rect.y), cv::FONT_HERSHEY_PLAIN, 1,
+                        text_color, 1, cv::LINE_AA);
+        }
+    }
 
     void DrawFPS(const float fps, const cv::Scalar& color) {
         if (enabled_ && !writer_.isOpened()) {
@@ -417,6 +419,17 @@ std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_track
     return face_track_id_to_label;
 }
 
+bool checkDynamicBatchSupport(const Core& ie, const std::string& device)  {
+    try  {
+        if (ie.GetConfig(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != PluginConfigParams::YES)
+            return false;
+    }
+    catch(const std::exception& error)  {
+        return false;
+    }
+    return true;
+}
+
 }  // namespace
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -475,7 +488,7 @@ int main(int argc, char* argv[]) {
                                      ? ParseActionLabels(FLAGS_student_ac)
                                      : actions_type == TOP_K
                                          ? ParseActionLabels(FLAGS_top_ac)
-                                     : ParseActionLabels(FLAGS_teacher_ac);
+                                         : ParseActionLabels(FLAGS_teacher_ac);
         const auto num_top_persons = actions_type == TOP_K ? FLAGS_a_top : -1;
         const auto top_action_id = actions_type == TOP_K
                                    ? std::distance(actions_map.begin(), find(actions_map.begin(), actions_map.end(), FLAGS_top_id))
@@ -509,7 +522,9 @@ int main(int argc, char* argv[]) {
 
             /** Load extensions for the CPU device **/
             if ((device.find("CPU") != std::string::npos)) {
+#ifdef WITH_EXTENSIONS
                 ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
+#endif
 
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
@@ -571,9 +586,12 @@ int main(int argc, char* argv[]) {
 
         // Load face reid
         CnnConfig reid_config(fr_model_path, fr_weights_path);
-        reid_config.max_batch_size = 16;
         reid_config.enabled = face_config.enabled && !fr_model_path.empty() && !lm_model_path.empty();
         reid_config.deviceName = FLAGS_d_reid;
+        if (checkDynamicBatchSupport(ie, FLAGS_d_reid))
+            reid_config.max_batch_size = 16;
+        else
+            reid_config.max_batch_size = 1;
         reid_config.ie = ie;
         VectorCNN face_reid(reid_config);
 
@@ -582,6 +600,10 @@ int main(int argc, char* argv[]) {
         landmarks_config.max_batch_size = 16;
         landmarks_config.enabled = face_config.enabled && reid_config.enabled && !lm_model_path.empty();
         landmarks_config.deviceName = FLAGS_d_lm;
+        if (checkDynamicBatchSupport(ie, FLAGS_d_lm))
+            landmarks_config.max_batch_size = 16;
+        else
+            landmarks_config.max_batch_size = 1;
         landmarks_config.ie = ie;
         VectorCNN landmarks_detector(landmarks_config);
 
@@ -659,10 +681,10 @@ int main(int argc, char* argv[]) {
         }
 
         if (actions_type != TOP_K) {
-        action_detector.enqueue(frame);
-        action_detector.submitRequest();
-        face_detector.enqueue(frame);
-        face_detector.submitRequest();
+            action_detector.enqueue(frame);
+            action_detector.submitRequest();
+            face_detector.enqueue(frame);
+            face_detector.submitRequest();
         }
 
         prev_frame = frame.clone();
@@ -876,7 +898,7 @@ int main(int argc, char* argv[]) {
                         const auto& text_label = face_config.enabled ? "" : action_label;
                         sc_visualizer.DrawObject(action.rect, text_label, action_color, white_color, true);
                         logger.AddPersonToFrame(action.rect, action_label, "");
-                            logger.AddDetectionToFrame(action, work_num_frames);
+                        logger.AddDetectionToFrame(action, work_num_frames);
                     }
                     face_obj_id_to_action_maps.push_back(frame_face_obj_id_to_action);
                 } else if (teacher_track_id >= 0) {
@@ -891,7 +913,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 sc_visualizer.DrawFPS(1e3f / (work_time_ms / static_cast<float>(work_num_frames) + 1e-6f),
-                                    red_color);
+                                      red_color);
 
                 ++work_num_frames;
             }
@@ -911,7 +933,7 @@ int main(int argc, char* argv[]) {
         slog::info << slog::endl;
         if (work_num_frames > 0) {
             const float mean_time_ms = work_time_ms / static_cast<float>(work_num_frames);
-        slog::info << "Mean FPS: " << 1e3f / mean_time_ms << slog::endl;
+            slog::info << "Mean FPS: " << 1e3f / mean_time_ms << slog::endl;
         }
         slog::info << "Frames processed: " << total_num_frames << slog::endl;
         if (FLAGS_pc) {

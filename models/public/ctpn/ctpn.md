@@ -19,9 +19,9 @@ Detecting Text in Natural Image with Connectionist Text Proposal Network. For de
 
 ## Input
 
-### Original model
+### Original Model
 
-Image, name - `image_tensor`, shape - [1x300x300x3], format [BxHxWxC],
+Image, name: `image_tensor`, shape: [1x600x600x3], format: [BxHxWxC],
    where:
 
     - B - batch size
@@ -29,12 +29,12 @@ Image, name - `image_tensor`, shape - [1x300x300x3], format [BxHxWxC],
     - W - image width
     - C - number of channels
 
-   Expected color order - RGB.
-   Mean values - [102.9801, 115.9465, 122.7717].
+   Expected color order: BGR.
+   Mean values: [102.9801, 115.9465, 122.7717].
 
-### Converted model
+### Converted Model
 
-Image, name - `Placeholder`, shape - [1x3x600x600], format [BxCxHxW],
+Image, name: `Placeholder`, shape: [1x3x600x600], format: [BxCxHxW],
    where:
 
     - B - batch size
@@ -42,39 +42,39 @@ Image, name - `Placeholder`, shape - [1x3x600x600], format [BxCxHxW],
     - H - image height
     - W - image width
 
-   Expected color order - BGR.
+   Expected color order: BGR.
 
 ## Output
 
-### Original model
+### Original Model
 
-1. Detection boxes, name - `rpn_bbox_pred/Reshape_1`, contains predicted regions, in format [BxHxWxA], where:
-
-    - B - batch size
-    - H - image height
-    - W - image width
-    - A - vector of 4*N coordinates, where N is the number of detected anchors.
-
-2. Probability, name - `Reshape_2`, contains probabilities for predicted regions in [0,1] range in format [BxHxWxA], where:
+1. Detection boxes, name: `rpn_bbox_pred/Reshape_1`, contains predicted regions, in format [BxHxWxA], where:
 
     - B - batch size
     - H - image height
     - W - image width
-    - A - vector of 4*N coordinates, where N is the number of detected anchors.
+    - A - vector of 4\*N coordinates, where N is the number of detected anchors.
 
-### Converted model
-
-1. Detection boxes, name - `rpn_bbox_pred/Reshape_1/Transpose`, shape - [1x40x18x18] contains predicted regions, in format [BxAxHxW], where:
+2. Probability, name: `Reshape_2`, contains probabilities for predicted regions in a [0,1] range in format [BxHxWxA], where:
 
     - B - batch size
-    - A - vector of 4*N coordinates, where N is the number of detected anchors.
+    - H - image height
+    - W - image width
+    - A - vector of 4\*N coordinates, where N is the number of detected anchors.
+
+### Converted Model
+
+1. Detection boxes, name: `rpn_bbox_pred/Reshape_1/Transpose`, shape: [1x40x18x18] contains predicted regions, format: [BxAxHxW], where:
+
+    - B - batch size
+    - A - vector of 4\*N coordinates, where N is the number of detected anchors.
     - H - image height
     - W - image width
 
-2. Probability, name - `Reshape_2/Transpose`, shape - [1x20x18x18], contains probabilities for predicted regions in [0,1] range in format [BxAxHxW], where:
+2. Probability, name: `Reshape_2/Transpose`, shape: [1x20x18x18], contains probabilities for predicted regions in a[0,1] range in format [BxAxHxW], where:
 
     - B - batch size
-    - A - vector of 2*N class probabilities (0 class for background, 1 class for text), where N is the number of detected anchors.
+    - A - vector of 2\*N class probabilities (0 class for background, 1 class for text), where N is the number of detected anchors.
     - H - image height
     - W - image width
 

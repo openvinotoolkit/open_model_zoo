@@ -1,0 +1,45 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is a vehicle detection network based on an SSD framework with tuned MobileNet
+  v1 as a feature extractor.
+task_type: detection
+files:
+  - name: FP32/vehicle-detection-adas-0002.xml
+    size: 80175
+    sha256: 0b42cb57a28284801a671994fd90da5d2312a7ed7e0b120975ace706ea064e80
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.xml
+  - name: FP32/vehicle-detection-adas-0002.bin
+    size: 4314468
+    sha256: bafe8ad70bb232e2b35928a31b9a4d3c7d4a6d6995b6bf2012c0ba9674f9d66d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.bin
+  - name: FP16/vehicle-detection-adas-0002.xml
+    size: 80128
+    sha256: 87ce16187683eeec1bb623d1b936e1f7253588f4d7b9376eeb7f6a1b3a78f5a9
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.xml
+  - name: FP16/vehicle-detection-adas-0002.bin
+    size: 2157240
+    sha256: f2ce728a0140da04f1c7cb3726e73b8868055bc59518ed2bdd2de3a787dbf8cb
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.bin
+  - name: INT8/vehicle-detection-adas-0002.xml
+    size: 3811792
+    sha256: f630d81c9f05eb76f5e539d6026f45437af6b448ba5211bdff95431008249ea8
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-detection-adas-0002/INT8/vehicle-detection-adas-0002.xml
+  - name: INT8/vehicle-detection-adas-0002.bin
+    size: 4314468
+    sha256: a7bf4a5edbc278a2d25ef33541958170670f346baf9dd07e6b02fc5618ba4a63
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-detection-adas-0002/INT8/vehicle-detection-adas-0002.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

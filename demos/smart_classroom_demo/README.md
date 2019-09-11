@@ -12,7 +12,7 @@ a vector of features for each detected face.
 * `person-detection-raisinghand-recognition-0001`, which is a detection network for finding students and simultaneously predicting their current actions (in contrast with the previous model, predicts only if a student raising hand or not).
 * `person-detection-action-recognition-teacher-0002`, which is a detection network for finding persons and simultaneously predicting their current actions.
 
-For more information about the pre-trained models, refer to the [model documentation](../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
 ## How It Works
 
@@ -79,7 +79,7 @@ Options:
     -ss_t                          Optional. Number of frames to smooth actions.
 ```
 
-Running the application with the empty list of options yields the usage message given above and an error message.
+Running the application with the empty list of options yields an error message.
 
 To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
 
@@ -121,11 +121,11 @@ Example of a valid command line to run the application for recognizing first rai
 The demo uses OpenCV to display the resulting frame with labeled actions and faces.
 
 > **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
-* `face-detection-adas-0001`
-* `landmarks-regression-retail-0009`
-* `face-reidentification-retail-0095`
-* `person-detection-action-recognition-0005`
-All other models may work incorrectly on these devices.
+>* `face-detection-adas-0001`
+>* `face-reidentification-retail-0095`
+>* `landmarks-regression-retail-0009`
+>* `person-detection-action-recognition-0005`
+> Other models may produce unexpected results on these devices.
 
 ## See Also
 * [Using Open Model Zoo demos](../README.md)

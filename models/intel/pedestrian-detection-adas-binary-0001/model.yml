@@ -1,0 +1,29 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Pedestrian detection network based on SSD framework with tuned MobileNet v1
+  as a feature extractor. Some layers of MobileNet v1 are binary and use I1 arithm
+task_type: detection
+files:
+  - name: INT1/pedestrian-detection-adas-binary-0001.xml
+    size: 114635
+    sha256: e64e7ce32c87e1c698b50abb8f2cf1d96c7651d45fc20bac09c417e046afa7f4
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.xml
+  - name: INT1/pedestrian-detection-adas-binary-0001.bin
+    size: 2338004
+    sha256: 7c2761ca3859ef55a80d9ed924225df7ba363fcb151e4ec2f7d1061b70bdb374
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

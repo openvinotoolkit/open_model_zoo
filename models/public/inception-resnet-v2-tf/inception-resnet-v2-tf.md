@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `inception-resnet-v2` model is one of the Inception family of models designed to perform image classification.1 Like the other Inception models. For details about this family of models, check out the [paper](https://arxiv.org/pdf/1602.07261.pdf).
+The `inception-resnet-v2` model is one of the Inception family of models designed to perform image classification. For details about this family of models, check out the [paper](https://arxiv.org/pdf/1602.07261.pdf).
 
 ## Example
 
@@ -19,9 +19,9 @@ The `inception-resnet-v2` model is one of the Inception family of models designe
 
 ## Input
 
-### Original model
+### Original Model
 
-Image, name - `input` , shape - [1x299x299x3], format [BxHxWxC],
+Image, name: `input` , shape: [1x299x299x3], format: [BxHxWxC],
    where:
 
     - B - batch size
@@ -29,12 +29,12 @@ Image, name - `input` , shape - [1x299x299x3], format [BxHxWxC],
     - W - image width
     - C - number of channels
 
-   Expected color order - RGB.
-   Mean values - [127.5, 127.5, 127.5], scale factor for each channel - 127.5
+   Expected color order: RGB.
+   Mean values: [127.5, 127.5, 127.5], scale factor for each channel: 127.5
 
-### Converted model
+### Converted Model
 
-Image, name - `input`, shape - [1x3x299x299], format [BxCxHxW],
+Image, name: `input`, shape: [1x3x299x299], format: [BxCxHxW],
    where:
 
     - B - batch size
@@ -42,17 +42,17 @@ Image, name - `input`, shape - [1x3x299x299], format [BxCxHxW],
     - H - image height
     - W - image width
 
-   Expected color order - BGR.
+   Expected color order: BGR.
 
 ## Output
 
-### Original model
+### Original Model
 
-Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name - `InceptionResnetV2/AuxLogits/Logits/BiasAdd`.
+Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `InceptionResnetV2/AuxLogits/Logits/BiasAdd`.
 
-### Converted model
+### Converted Model
 
-Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name - `InceptionResnetV2/AuxLogits/Logits/MatMul`, shape - [1,1001] in [BxC] format,
+Probabilities for all dataset classes (0 class is background). Probabilities are represented in logits format. Name: `InceptionResnetV2/AuxLogits/Logits/MatMul`, shape: [1,1001] in [BxC] format,
     where:
 
     - B - batch size

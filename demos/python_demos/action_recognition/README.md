@@ -6,7 +6,7 @@ The following pre-trained models are delivered with the product:
 * `driver-action-recognition-adas-0002-encoder` + `driver-action-recognition-adas-0002-decoder`, which are models for driver monitoring scenario. They recognize actions like safe driving, talking to the phone and others
 * `action-recognition-0001-encoder` + `action-recognition-0001-decoder`, which are general-purpose action recognition (400 actions) models for Kinetics-400 dataset.
 
-For more information about the pre-trained models, refer to the [model documentation](../../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
 How It Works
 ------------
@@ -24,7 +24,7 @@ When two consequent steps occur in separate threads, they communicate via messag
 To ensure maximum performance, Inference Engine models are wrapped in `AsyncWrapper`
 that uses Inference Engine async API by scheduling infer requests in cyclical order
 (inference on every new input is started asynchronously, result of the longest working infer request is returned).
-You can change the value of `num_requests` in `demo.py` to find an optimal number of parallel working infer requests for your inference accelerators
+You can change the value of `num_requests` in `action_recognition.py` to find an optimal number of parallel working infer requests for your inference accelerators
 (Compute Sticks and GPUs benefit from higher number of infer requests).
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
@@ -34,31 +34,32 @@ Running
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: demo.py [-h] --encoder ENCODER --decoder DECODER [-v VIDEO]
-               [-vl VIDEO_LIST] [-e CPU_EXTENSION]
-               [-d DEVICE] [--fps FPS] [-l LABELS]
+usage: action_recognition.py [-h] -m_en M_ENCODER -m_de M_DECODER -i INPUT
+                             [-l CPU_EXTENSION] [-d DEVICE] [--fps FPS]
+                             [-lb LABELS]
 
 Options:
-  -h, --help            show this help message and exit
-  --encoder ENCODER     Required. Path to encoder model
-  --decoder DECODER     Required. Path to decoder model
-  -v VIDEO, --video VIDEO
-                        Optional. Path to a video or file. 'cam' for capturing
-                        video
-  -vl VIDEO_LIST, --video_list VIDEO_LIST
-                        Optional. Path to a list with video files (text file,
-                        one video per line)
-  -e CPU_EXTENSION, --cpu_extension CPU_EXTENSION
+  -h, --help            Show this help message and exit.
+  -m_en M_ENCODER, --m_encoder M_ENCODER
+                        Required. Path to encoder model
+  -m_de M_DECODER, --m_decoder M_DECODER
+                        Required. Path to decoder model
+  -i INPUT, --input INPUT
+                        Required. Id of the video capturing device to open (to
+                        open default camera just pass 0), path to a video or a
+                        .txt file with a list of ids or video files (one
+                        object per line)
+  -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         Optional. For CPU custom layers, if any. Absolute path
                         to a shared library with the kernels implementation.
   -d DEVICE, --device DEVICE
-                        Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is "
-                        acceptable. The demo will look for a suitable plugin for the device specified.
+                        Optional. Specify a target device to infer on. CPU,
+                        GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
+                        look for a suitable plugin for the device specified.
                         Default value is CPU
   --fps FPS             Optional. FPS for renderer
-  -l LABELS, --labels LABELS
+  -lb LABELS, --labels LABELS
                         Optional. Path to file with label names
-
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.
@@ -69,9 +70,10 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 **For example**, to run the demo for in-cabin driver monitoring scenario, please provide a path to the encoder and decoder models, an input video and a file with label names:
 ```bash
-python3 demo.py --encoder models/driver_action_recognition_tsd_0002_encoder.xml \
-    --decoder models/driver_action_recognition_tsd_0002_decoder.xml \
-    --labels driver_actions.txt
+python3 action_recognition.py -m_en models/driver_action_recognition_tsd_0002_encoder.xml \
+    -m_de models/driver_action_recognition_tsd_0002_decoder.xml \
+    -i <path_to_video>/inputVideo.mp4 \
+    -lb driver_actions.txt
 ```
 
 Demo Output

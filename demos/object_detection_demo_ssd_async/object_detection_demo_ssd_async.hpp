@@ -29,11 +29,11 @@ static const char performance_counter_message[] = "Optional. Enables per-layer p
 
 /// @brief message for clDNN custom kernels desc
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "\
-"Absolute path to the .xml file with the kernels descriptions.";
+"Absolute path to the .xml file with the kernel descriptions.";
 
 /// @brief message for user library argument
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. " \
-"Absolute path to a shared library with the kernels implementations.";
+"Absolute path to a shared library with the kernel implementations.";
 
 /// @brief message for probability threshold argument
 static const char thresh_output_message[] = "Optional. Probability threshold for detections.";
@@ -43,6 +43,8 @@ static const char raw_output_message[] = "Optional. Inference results as raw val
 /// @brief message resizable input flag
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 
+/// @brief Message do not show processed video
+static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 
 /// \brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
@@ -81,6 +83,9 @@ DEFINE_double(t, 0.5, thresh_output_message);
 /// It is an optional parameter
 DEFINE_bool(auto_resize, false, input_resizable_message);
 
+/// \brief Define a flag to disable showing processed video<br>
+/// It is an optional parameter
+DEFINE_bool(no_show, false, no_show_processed_video);
 
 /**
 * \brief This function show a help message
@@ -101,4 +106,5 @@ static void showUsage() {
     std::cout << "    -r                        " << raw_output_message << std::endl;
     std::cout << "    -t                        " << thresh_output_message << std::endl;
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
+    std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
 }

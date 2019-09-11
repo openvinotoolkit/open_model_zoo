@@ -1,0 +1,41 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is an Tensorflow\* version of `densenet-121` model, one of the DenseNet
+  group of models designed to perform image classification. The weights were converted
+  from DenseNet-Keras Models. For details see repository <https://github.com/pudae/tensorflow-densenet/>,
+  paper <https://arxiv.org/pdf/1608.06993.pdf>
+task_type: classification
+files:
+  - name: tf-densenet121.tar.gz
+    size: 30597420
+    sha256: b31ec840358f1d20e1c6364d05ce463cb0bc0480042e663ad54547189501852d
+    source:
+      $type: google_drive
+      id: 0B_fUSpodN0t0eW1sVk1aeWREaDA
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: tf-densenet121.tar.gz
+model_optimizer_args:
+  - --reverse_input_channels
+  - --input_shape=[1,224,224,3]
+  - --input=Placeholder
+  - --mean_values=Placeholder[123.68,116.78,103.94]
+  - --scale_values=Placeholder[58.8235294117647]
+  - --output=densenet121/predictions/Reshape_1
+  - --input_meta_graph=$dl_dir/tf-densenet121.ckpt.meta
+framework: tf
+license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE

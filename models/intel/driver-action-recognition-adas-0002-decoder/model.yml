@@ -1,0 +1,44 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is an action recognition model for the driver monitoring use case. The
+  model uses Video Transformer approach with MobileNetv2 encoder. It is able to
+  recognize the following actions: drinking, doing hair or making up, operating
+  the radio, reaching behind, safe driving, talking on the phone, texting.
+
+  This model is only decoder part of the whole pipeline. It accepts stack of frame
+  embeddings, computed by driver-action-recognition-adas-0002-encoder, and produces
+  prediction on input video. Video frames should be sampled to cover ~1 second
+  fragment (i.e. skip every second frame in 30 fps video).
+task_type: action_recognition
+files:
+  - name: FP32/driver-action-recognition-adas-0002-decoder.xml
+    size: 106382
+    sha256: 164547853128a841c710c0e8eefc09bb333ced22bf24fd0cbaf81c979c07078d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
+  - name: FP32/driver-action-recognition-adas-0002-decoder.bin
+    size: 29436112
+    sha256: 897732d7f276eabbe9f2ee8f510ce9772caad6e01a34527adef95b4fc9621058
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
+  - name: FP16/driver-action-recognition-adas-0002-decoder.xml
+    size: 106346
+    sha256: a4987c75564e5ae2a7a7be34c151c02c58a065ddbc8b265cd5458da969b3666f
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
+  - name: FP16/driver-action-recognition-adas-0002-decoder.bin
+    size: 14718142
+    sha256: 481760eaf84463bf8e4ca9034f1825d91658d79b946f796269dfb46e84461ce1
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

@@ -15,41 +15,46 @@ limitations under the License.
 """
 
 from .preprocessing_executor import PreprocessingExecutor
-from .preprocessors import (
-    Preprocessor,
-
+from .preprocessor import Preprocessor
+from .color_spece_conversion import BgrToRgb, BgrToGray, TfConvertImageDType
+from .normalization import Normalize, Normalize3d
+from .geometric_transformations import (
+    GeometricOperationMetadata,
     Resize,
     AutoResize,
     Flip,
-    Normalize,
     Crop,
-    BgrToRgb,
-    BgrToGray,
     CropRect,
     ExtendAroundRect,
     PointAligner,
     Tiling,
-    Crop3D,
-    Normalize3d,
-    TfConvertImageDType,
-    GeometricOperationMetadata
+    Crop3D
 )
+from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
 
 __all__ = [
     'PreprocessingExecutor',
 
     'Preprocessor',
+    'GeometricOperationMetadata',
+
     'Resize',
     'AutoResize',
     'Flip',
-    'Normalize',
     'Crop',
-    'BgrToRgb',
-    'BgrToGray',
     'CropRect',
     'ExtendAroundRect',
     'PointAligner',
     'Tiling',
     'Crop3D',
-    'Normalize3d'
+
+    'BgrToGray',
+    'BgrToRgb',
+    'TfConvertImageDType',
+
+    'Normalize3d',
+    'Normalize',
+
+    'DecodeByVocabulary',
+    'PadWithEOS'
 ]

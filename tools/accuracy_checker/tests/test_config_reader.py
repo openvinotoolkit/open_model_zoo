@@ -19,6 +19,7 @@ from pathlib import Path
 from argparse import Namespace
 
 import pytest
+from .common import mock_filesystem
 from accuracy_checker.config import ConfigReader, ConfigError
 
 
@@ -78,13 +79,13 @@ class TestConfigReader:
 
         self.module = 'accuracy_checker.config.ConfigReader'
         self.arguments = Namespace(**{
-            'models': Path('models'),
-            'extensions': Path('extensions'),
-            'source': Path('source'),
-            'annotations': Path('annotations'),
-            'converted_models': Path('converted_models'),
-            'model_optimizer': Path('model_optimizer'),
-            'bitstreams': Path('bitstreams'),
+            'models': Path('models/'),
+            'extensions': Path('extensions/'),
+            'source': Path('source/'),
+            'annotations': Path('annotations/'),
+            'converted_models': Path('converted_models/'),
+            'model_optimizer': Path('model_optimizer/'),
+            'bitstreams': Path('bitstreams/'),
             'definitions': None,
             'stored_predictions': None,
             'tf_custom_op_config': None,
@@ -218,18 +219,7 @@ class TestConfigReader:
             ConfigReader.merge(self.arguments)
 
         error_message = str(exception).split(sep=': ')[-1]
-        assert error_message == 'Each pipeline must specify {}'.format(', '.join(['name', 'device_info', 'stages']))
-
-    def test_missed_device_info_in_pipeline_raises_value_error_exception(self, mocker):
-        mocker.patch(self.module + '._read_configs', return_value=(
-            self.global_config, {'pipelines': [{'name': None, 'stages': None}]}
-        ))
-
-        with pytest.raises(ConfigError) as exception:
-            ConfigReader.merge(self.arguments)
-
-        error_message = str(exception).split(sep=': ')[-1]
-        assert error_message == 'Each pipeline must specify {}'.format(', '.join(['name', 'device_info', 'stages']))
+        assert error_message == 'Each pipeline must specify {}'.format(', '.join(['name', 'stages']))
 
     def test_missed_stages_in_pipeline_raises_value_error_exception(self, mocker):
         mocker.patch(self.module + '._read_configs', return_value=(
@@ -240,7 +230,7 @@ class TestConfigReader:
             ConfigReader.merge(self.arguments)
 
         error_message = str(exception).split(sep=': ')[-1]
-        assert error_message == 'Each pipeline must specify {}'.format(', '.join(['name', 'device_info', 'stages']))
+        assert error_message == 'Each pipeline must specify {}'.format(', '.join(['name', 'stages']))
 
     def test_invalid_pipeline_raises_value_error_exception(self, mocker):
         mocker.patch(self.module + '._read_configs', return_value=(
@@ -251,7 +241,7 @@ class TestConfigReader:
             ConfigReader.merge(self.arguments)
 
         error_message = str(exception).split(sep=': ')[-1]
-        assert error_message == 'Each pipeline must specify {}'.format(', '.join(['name', 'device_info', 'stages']))
+        assert error_message == 'Each pipeline must specify {}'.format(', '.join(['name', 'stages']))
 
     def test_pipeline_empty_stages_raises_value_error_exception(self, mocker):
         mocker.patch(self.module + '._read_configs', return_value=(
@@ -262,20 +252,9 @@ class TestConfigReader:
             ConfigReader.merge(self.arguments)
 
         error_message = str(exception).split(sep=': ')[-1]
-        assert error_message == 'Each pipeline must specify {}'.format(', '.join(['name', 'device_info', 'stages']))
+        assert error_message == 'Each pipeline must specify {}'.format(', '.join(['name', 'stages']))
 
-    def test_pipeline_empty_device_info_raises_value_error_exception(self, mocker):
-        mocker.patch(self.module + '._read_configs', return_value=(
-            self.global_config, {'pipelines': [{'name': 'stage1', 'device_info': [], 'stages': [{'stage1': {}}]}]}
-        ))
-
-        with pytest.raises(ConfigError) as exception:
-            ConfigReader.merge(self.arguments)
-
-        error_message = str(exception).split(sep=': ')[-1]
-        assert error_message == 'Each pipeline must specify {}'.format(', '.join(['name', 'device_info', 'stages']))
-
-    def test_pipeline_stage_does_not_contain_dataset_raises_value_error_exception(self, mocker):
+    def test_pipeline_first_stage_does_not_contain_dataset_raises_value_error_exception(self, mocker):
         mocker.patch(self.module + '._read_configs', return_value=(
             self.global_config, {
                 'pipelines': [{'name': 'stage1', 'device_info': [{'framework': 'caffe', 'device': 'CPU'}],
@@ -365,6 +344,8 @@ class TestConfigReader:
         ))
         arguments = copy.deepcopy(self.arguments)
         arguments.model_optimizer = None
+        arguments.extensions = None
+        arguments.bitstreams = None
 
         config = ConfigReader.merge(arguments)[0]
 
@@ -381,8 +362,11 @@ class TestConfigReader:
         mocker.patch(self.module + '._read_configs', return_value=(
             self.global_config, local_config
         ))
+        arguments = copy.deepcopy(self.arguments)
+        arguments.bitstreams = None
+        arguments.extensions = None
 
-        config = ConfigReader.merge(self.arguments)[0]
+        config = ConfigReader.merge(arguments)[0]
 
         assert config['models'][0]['datasets'][0] == expected
 
@@ -403,14 +387,21 @@ class TestConfigReader:
             None, local_config
         ))
         expected = copy.deepcopy(local_config['models'][0]['datasets'][0])
-        expected['annotation'] = self.arguments.annotations / 'relative_annotation_path'
-        expected['dataset_meta'] = self.arguments.annotations / 'relative_annotation_path'
-        expected['segmentation_masks_source'] = self.arguments.source / 'relative_source_path'
-        expected['data_source'] = self.arguments.source / 'relative_source_path'
+        with mock_filesystem(['source/', 'annotations/']) as prefix:
+            expected['annotation'] = prefix / self.arguments.annotations / 'relative_annotation_path'
+            expected['dataset_meta'] = prefix / self.arguments.annotations / 'relative_annotation_path'
+            expected['segmentation_masks_source'] = prefix / self.arguments.source / 'relative_source_path'
+            expected['data_source'] = prefix / self.arguments.source / 'relative_source_path'
 
-        config = ConfigReader.merge(self.arguments)[0]
+            arguments = copy.deepcopy(self.arguments)
+            arguments.bitstreams = None
+            arguments.extensions = None
+            arguments.annotations = prefix / self.arguments.annotations
+            arguments.source = prefix / self.arguments.source
 
-        assert config['models'][0]['datasets'][0] == expected
+            config = ConfigReader.merge(arguments)[0]
+
+            assert config['models'][0]['datasets'][0] == expected
 
     def test_not_modify_absolute_paths_in_datasets_config_using_command_line(self):
         local_config = {'models': [{
@@ -454,16 +445,22 @@ class TestConfigReader:
             None, {
                 'pipelines': pipelines_config}
         ))
-
         expected = copy.deepcopy(dataset_config)
-        expected['annotation'] = self.arguments.annotations / 'relative_annotation_path'
-        expected['dataset_meta'] = self.arguments.annotations / 'relative_annotation_path'
-        expected['segmentation_masks_source'] = self.arguments.source / 'relative_source_path'
-        expected['data_source'] = self.arguments.source / 'relative_source_path'
+        with mock_filesystem(['source/', 'annotations/']) as prefix:
+            expected['annotation'] = prefix / self.arguments.annotations / 'relative_annotation_path'
+            expected['dataset_meta'] = prefix / self.arguments.annotations / 'relative_annotation_path'
+            expected['segmentation_masks_source'] = prefix / self.arguments.source / 'relative_source_path'
+            expected['data_source'] = prefix / self.arguments.source / 'relative_source_path'
 
-        config = ConfigReader.merge(self.arguments)[0]
+            arguments = copy.deepcopy(self.arguments)
+            arguments.bitstreams = None
+            arguments.extensions = None
+            arguments.annotations = prefix / self.arguments.annotations
+            arguments.source = prefix / self.arguments.source
 
-        assert config['pipelines'][0]['stages'][0]['dataset'] == expected
+            config = ConfigReader.merge(arguments)[0]
+
+            assert config['pipelines'][0]['stages'][0]['dataset'] == expected
 
     def test_not_modify_absolute_paths_in_pipeline_stage_dataset_config_using_command_line(self, mocker):
         dataset_config = {
@@ -491,8 +488,11 @@ class TestConfigReader:
         expected['annotation'] = Path('/absolute_annotation_path')
         expected['dataset_meta'] = Path('/absolute_annotation_meta_path')
         expected['data_source'] = Path('/absolute_source_path')
+        arguments = copy.deepcopy(self.arguments)
+        arguments.bitstreams = None
+        arguments.extensions = None
 
-        config = ConfigReader.merge(self.arguments)[0]
+        config = ConfigReader.merge(arguments)[0]
 
         assert config['pipelines'][0]['stages'][0]['dataset'] == expected
 
@@ -522,6 +522,37 @@ class TestConfigReader:
         ))
 
         config = ConfigReader.merge(self.arguments)[0]
+
+        assert config['pipelines'][0]['stages'][1]['launcher'] == expected
+
+    def test_merge_launcher_with_target_deivce_in_pipeline(self, mocker):
+        dataset_config = {
+            'name': 'global_dataset',
+            'dataset_meta': '/absolute_annotation_meta_path',
+            'data_source': '/absolute_source_path',
+            'annotation': '/absolute_annotation_path'
+        }
+        launcher_config = {'framework': 'caffe', 'model': Path('/absolute_path'), 'weights': Path('/absolute_path')}
+        device_info = {'device': 'CPU'}
+        expected = copy.deepcopy(launcher_config)
+        expected.update(device_info)
+        pipelines_config = [
+            {
+                'name': 'pipeline',
+                'stages': [
+                    {'stage': 'stage1', 'dataset': dataset_config},
+                    {'stage': 'stage2', 'launcher': launcher_config, 'metrics': {}}
+                ]
+            }
+        ]
+        mocker.patch(self.module + '._read_configs', return_value=(
+            None, {
+                'pipelines': pipelines_config}
+        ))
+        args = copy.deepcopy(self.arguments)
+        args.target_devices = ['CPU']
+
+        config = ConfigReader.merge(args)[0]
 
         assert config['pipelines'][0]['stages'][1]['launcher'] == expected
 
@@ -556,6 +587,39 @@ class TestConfigReader:
         assert config['pipelines'][0]['stages'][1]['launcher'] == expected[0]
         assert config['pipelines'][1]['stages'][1]['launcher'] == expected[1]
 
+    def test_merge_launcher_with_2_target_devices(self, mocker):
+        dataset_config = {
+            'name': 'global_dataset',
+            'dataset_meta': '/absolute_annotation_meta_path',
+            'data_source': '/absolute_source_path',
+            'annotation': '/absolute_annotation_path'
+        }
+        launcher_config = {'framework': 'caffe', 'model': Path('/absolute_path'), 'weights': Path('/absolute_path')}
+        device_info = [{'device': 'CPU'}, {'device': 'GPU'}]
+        expected = [copy.deepcopy(launcher_config), copy.deepcopy(launcher_config)]
+        expected[0].update(device_info[0])
+        expected[1].update(device_info[1])
+        pipelines_config = [
+            {
+                'name': 'pipeline',
+                'stages': [
+                    {'stage': 'stage1', 'dataset': dataset_config},
+                    {'stage': 'stage2', 'launcher': launcher_config, 'metrics': {}}
+                ]
+            }
+        ]
+        args = copy.deepcopy(self.arguments)
+        args.target_devices = ['CPU', 'GPU']
+        mocker.patch(self.module + '._read_configs', return_value=(
+            None, {
+                'pipelines': pipelines_config}
+        ))
+
+        config = ConfigReader.merge(args)[0]
+        assert len(config['pipelines']) == 2
+        assert config['pipelines'][0]['stages'][1]['launcher'] == expected[0]
+        assert config['pipelines'][1]['stages'][1]['launcher'] == expected[1]
+
     def test_merge_launchers_with_definitions(self, mocker):
         local_config = {'models': [{
             'name': 'model',
@@ -566,16 +630,19 @@ class TestConfigReader:
             self.global_config, local_config
         ))
         expected = copy.deepcopy(self.get_global_launcher('dlsdk'))
-        expected['bitstream'] = self.arguments.bitstreams / expected['bitstream']
-        expected['cpu_extensions'] = self.arguments.extensions / expected['cpu_extensions']
-        args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
-        args.models = None
+        with mock_filesystem(['bitstreams/', 'extensions/']) as prefix:
+            expected['bitstream'] = prefix / self.arguments.bitstreams / expected['bitstream']
+            expected['cpu_extensions'] = prefix / self.arguments.extensions / expected['cpu_extensions']
+            args = copy.deepcopy(self.arguments)
+            args.model_optimizer = None
+            args.converted_models = None
+            args.models = None
+            args.bitstreams = prefix / self.arguments.bitstreams
+            args.extensions = prefix / self.arguments.extensions
 
-        config = ConfigReader.merge(args)[0]
+            config = ConfigReader.merge(args)[0]
 
-        assert config['models'][0]['launchers'][0] == expected
+            assert config['models'][0]['launchers'][0] == expected
 
     def test_merge_launchers_with_model_is_not_modified(self, mocker):
         local_config = {'models': [{
@@ -585,16 +652,20 @@ class TestConfigReader:
         }]}
         expected = copy.deepcopy(self.get_global_launcher('dlsdk'))
         expected['model'] = 'custom'
-        expected['bitstream'] = self.arguments.bitstreams / expected['bitstream']
-        expected['cpu_extensions'] = self.arguments.extensions / expected['cpu_extensions']
         mocker.patch(self.module + '._read_configs', return_value=(
             self.global_config, local_config
         ))
-        args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.models = None
-        args.converted_models = None
-        config = ConfigReader.merge(args)[0]
+        with mock_filesystem(['bitstreams/', 'extensions/']) as prefix:
+            expected['bitstream'] = prefix / self.arguments.bitstreams / expected['bitstream']
+            expected['cpu_extensions'] = prefix / self.arguments.extensions / expected['cpu_extensions']
+            args = copy.deepcopy(self.arguments)
+            args.model_optimizer = None
+            args.converted_models = None
+            args.models = None
+            args.bitstreams = prefix / self.arguments.bitstreams
+            args.extensions = prefix / self.arguments.extensions
+
+            config = ConfigReader.merge(args)[0]
 
         assert config['models'][0]['launchers'][0] == expected
 
@@ -616,24 +687,28 @@ class TestConfigReader:
             'datasets': [{'name': 'dataset'}]
         }]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
+        with mock_filesystem(['bitstreams/', 'extensions/', 'models/']) as prefix:
+            expected = copy.deepcopy(local_config['models'][0]['launchers'][0])
+            expected['model'] = prefix / self.arguments.models / 'relative_model_path'
+            expected['caffe_model'] = prefix / self.arguments.models / 'relative_model_path'
+            expected['tf_model'] = prefix / self.arguments.models / 'relative_model_path'
+            expected['weights'] = prefix / self.arguments.models / 'relative_weights_path'
+            expected['caffe_weights'] = prefix / self.arguments.models / 'relative_weights_path'
+            expected['mxnet_weights'] = prefix / self.arguments.models / 'relative_weights_path'
+            expected['cpu_extensions'] = prefix / self.arguments.extensions / 'relative_extensions_path'
+            expected['gpu_extensions'] = prefix / self.arguments.extensions / 'relative_extensions_path'
+            expected['bitstream'] = prefix / self.arguments.bitstreams / 'relative_bitstreams_path'
+            expected['_models_prefix'] = prefix / self.arguments.models
+            args = copy.deepcopy(self.arguments)
+            args.model_optimizer = None
+            args.converted_models = None
+            args.bitstreams = prefix / self.arguments.bitstreams
+            args.extensions = prefix / self.arguments.extensions
+            args.models = prefix / self.arguments.models
 
-        expected = copy.deepcopy(local_config['models'][0]['launchers'][0])
-        expected['model'] = self.arguments.models / 'relative_model_path'
-        expected['caffe_model'] = self.arguments.models / 'relative_model_path'
-        expected['tf_model'] = self.arguments.models / 'relative_model_path'
-        expected['weights'] = self.arguments.models / 'relative_weights_path'
-        expected['caffe_weights'] = self.arguments.models / 'relative_weights_path'
-        expected['mxnet_weights'] = self.arguments.models / 'relative_weights_path'
-        expected['cpu_extensions'] = self.arguments.extensions / 'relative_extensions_path'
-        expected['gpu_extensions'] = self.arguments.extensions / 'relative_extensions_path'
-        expected['bitstream'] = self.arguments.bitstreams / 'relative_bitstreams_path'
-        expected['_models_prefix'] = self.arguments.models
-        args = copy.deepcopy(self.arguments)
-        args.model_optimizer = None
-        args.converted_models = None
-        config = ConfigReader.merge(args)[0]
+            config = ConfigReader.merge(args)[0]
 
-        assert config['models'][0]['launchers'][0] == expected
+            assert config['models'][0]['launchers'][0] == expected
 
     def test_both_launchers_are_filtered_by_target_tags_if_tags_not_provided_in_config(self, mocker):
         config_launchers = [
@@ -653,15 +728,16 @@ class TestConfigReader:
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
-        self.arguments.target_tags = ['some_tag']
+        arguments = copy.deepcopy(self.arguments)
+        arguments.target_tags = ['some_tag']
+        arguments.extensions = None
+        arguments.bitstreams = None
 
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
 
         with pytest.warns(Warning):
-            config = ConfigReader.merge(self.arguments)[0]
-
-        launchers = config['models'][0]['launchers']
-        assert len(launchers) == 0
+            config = ConfigReader.merge(arguments)[0]
+        assert len(config['models']) == 0
 
     def test_launcher_is_not_filtered_by_the_same_tag(self, mocker):
         config_launchers = [{
@@ -754,8 +830,7 @@ class TestConfigReader:
         with pytest.warns(Warning):
             config = ConfigReader.merge(args)[0]
 
-        launchers = config['models'][0]['launchers']
-        assert len(launchers) == 0
+        assert len(config['models']) == 0
 
     def test_only_appropriate_launcher_is_filtered_by_another_tag(self, mocker):
         config_launchers = [
@@ -782,9 +857,14 @@ class TestConfigReader:
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
-        self.arguments.target_tags = ['tag2']
+        args = copy.deepcopy(self.arguments)
+        args.model_optimizer = None
+        args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
+        args.target_tags = ['tag2']
 
-        config = ConfigReader.merge(self.arguments)[0]
+        config = ConfigReader.merge(args)[0]
 
         launchers = config['models'][0]['launchers']
         assert len(launchers) == 1
@@ -815,9 +895,14 @@ class TestConfigReader:
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
-        self.arguments.target_tags = ['tag2', 'tag3']
+        args = copy.deepcopy(self.arguments)
+        args.model_optimizer = None
+        args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
+        args.target_tags = ['tag2', 'tag3']
 
-        config = ConfigReader.merge(self.arguments)[0]
+        config = ConfigReader.merge(args)[0]
 
         launchers = config['models'][0]['launchers']
         assert len(launchers) == 1
@@ -950,13 +1035,16 @@ class TestConfigReader:
         }]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
-        self.arguments.target_framework = 'caffe'
+        args = copy.deepcopy(self.arguments)
+        args.model_optimizer = None
+        args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
+        args.target_framework = 'caffe'
 
         with pytest.warns(Warning):
-            config = ConfigReader.merge(self.arguments)[0]
-
-        launchers = config['models'][0]['launchers']
-        assert len(launchers) == 0
+            config = ConfigReader.merge(args)[0]
+        assert len(config['models']) == 0
 
     def test_both_launchers_are_filtered_by_another_framework(self, mocker):
         config_launchers = [
@@ -981,13 +1069,17 @@ class TestConfigReader:
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
-        self.arguments.target_framework = 'caffe'
+        args = copy.deepcopy(self.arguments)
+        args.model_optimizer = None
+        args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
+        args.target_framework = 'caffe'
 
         with pytest.warns(Warning):
-            config = ConfigReader.merge(self.arguments)[0]
+            config = ConfigReader.merge(args)[0]
 
-        launchers = config['models'][0]['launchers']
-        assert len(launchers) == 0
+        assert len(config['models']) == 0
 
     def test_only_appropriate_launcher_is_filtered_by_another_framework(self, mocker):
         config_launchers = [
@@ -1010,9 +1102,14 @@ class TestConfigReader:
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
-        self.arguments.target_framework = 'caffe'
+        args = copy.deepcopy(self.arguments)
+        args.model_optimizer = None
+        args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
+        args.target_framework = 'caffe'
 
-        config = ConfigReader.merge(self.arguments)[0]
+        config = ConfigReader.merge(args)[0]
 
         launchers = config['models'][0]['launchers']
         assert len(launchers) == 1
@@ -1089,8 +1186,7 @@ class TestConfigReader:
         with pytest.warns(Warning):
             config = ConfigReader.merge(args)[0]
 
-        launchers = config['models'][0]['launchers']
-        assert len(launchers) == 0
+        assert len(config['models']) == 0
 
     def test_both_launchers_are_filtered_by_another_device(self, mocker):
         config_launchers = [
@@ -1113,13 +1209,17 @@ class TestConfigReader:
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
-        self.arguments.target_devices = ['GPU']
+        args = copy.deepcopy(self.arguments)
+        args.model_optimizer = None
+        args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
+        args.target_devices = ['GPU']
 
         with pytest.warns(Warning):
-            config = ConfigReader.merge(self.arguments)[0]
+            config = ConfigReader.merge(args)[0]
 
-        launchers = config['models'][0]['launchers']
-        assert len(launchers) == 0
+        assert len(config['models']) == 0
 
     def test_only_appropriate_launcher_is_filtered_by_another_device(self, mocker):
         config_launchers = [
@@ -1211,13 +1311,16 @@ class TestConfigReader:
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
-        self.arguments.target_devices = ['FPGA', 'MYRIAD']
+        args = copy.deepcopy(self.arguments)
+        args.converted_models = None
+        args.target_devices = ['FPGA', 'MYRIAD']
+        args.extensions = None
+        args.bitstreams = None
 
         with pytest.warns(Warning):
-            config = ConfigReader.merge(self.arguments)[0]
+            config = ConfigReader.merge(args)[0]
 
-        launchers = config['models'][0]['launchers']
-        assert len(launchers) == 0
+        assert len(config['models']) == 0
 
     def test_both_launchers_are_not_filtered_by_same_devices(self, mocker):
         config_launchers = [
@@ -1279,6 +1382,91 @@ class TestConfigReader:
         launchers = config['models'][0]['launchers']
         assert len(launchers) == 1
         assert launchers[0] == config_launchers[0]
+
+    def test_all_model_launchers_filtered_in_config_with_several_models(self, mocker):
+        model1_launchers = [
+            {
+                'framework': 'dlsdk',
+                'model': Path('/absolute_path1'),
+                'weights': Path('/absolute_path1'),
+                'adapter': 'classification',
+                'device': 'CPU',
+                '_model_optimizer': self.arguments.model_optimizer,
+                '_models_prefix': self.arguments.models
+            },
+            {
+                'framework': 'caffe',
+                'model': Path('/absolute_path2'),
+                'weights': Path('/absolute_path2'),
+                'adapter': 'classification',
+                'device': 'CPU'
+            }
+        ]
+        model2_launchers = [
+            {
+                'framework': 'tf',
+                'model': Path('/absolute_path3'),
+                'adapter': 'classification',
+                'device': 'CPU'
+            }
+        ]
+        local_config = {'models': [
+            {'name': 'model_1', 'launchers': model1_launchers, 'datasets': [{'name': 'dataset'}]},
+            {'name': 'model_2', 'launchers': model2_launchers, 'datasets': [{'name': 'dataset'}]}
+        ]}
+        mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
+        args = copy.deepcopy(self.arguments)
+        args.converted_models = None
+        args.target_framework = 'tf'
+        with pytest.warns(Warning):
+            config = ConfigReader.merge(args)[0]
+        assert len(config['models']) == 1
+        assert config['models'][0]['name'] == 'model_2'
+        assert config['models'][0]['launchers'] == model2_launchers
+
+    def test_replace_empty_device_by_target_in_models_mode(self, mocker):
+        local_config = {
+            'models': [{
+                'name': 'model',
+                'launchers': [{
+                    'framework': 'caffe',
+                    'model': Path('/absolute_path2'),
+                    'weights': Path('/absolute_path2'),
+                    'adapter': 'classification',
+            }],
+                'datasets': [{'name': 'dataset'}]}]
+        }
+        mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
+        args = copy.deepcopy(self.arguments)
+        args.target_devices = ['CPU']
+        config, _ = ConfigReader.merge(args)
+        launchers = config['models'][0]['launchers']
+        assert len(launchers) == 1
+        assert 'device' in launchers[0]
+        assert launchers[0]['device'].upper() == 'CPU'
+
+    def test_replace_empty_device_by_several_targets_in_models_mode(self, mocker):
+        local_config = {
+            'models': [{
+                'name': 'model',
+                'launchers': [{
+                    'framework': 'caffe',
+                    'model': Path('/absolute_path2'),
+                    'weights': Path('/absolute_path2'),
+                    'adapter': 'classification',
+            }],
+                'datasets': [{'name': 'dataset'}]}]
+        }
+        mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
+        args = copy.deepcopy(self.arguments)
+        args.target_devices = ['CPU', 'GPU']
+        config, _ = ConfigReader.merge(args)
+        launchers = config['models'][0]['launchers']
+        assert len(launchers) == 2
+        assert 'device' in launchers[0]
+        assert 'device' in launchers[1]
+        assert launchers[0]['device'].upper() == 'CPU'
+        assert launchers[1]['device'].upper() == 'GPU'
 
     def get_global_launcher(self, framework):
         for launcher in self.global_launchers:

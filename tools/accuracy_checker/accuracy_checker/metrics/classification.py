@@ -59,6 +59,9 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
     def evaluate(self, annotations, predictions):
         return self.accuracy.evaluate()
 
+    def reset(self):
+        self.accuracy.reset()
+
 
 class ClassificationAccuracyClasses(PerImageEvaluationMetric):
     """
@@ -109,6 +112,9 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
     def evaluate(self, annotations, predictions):
         return self.accuracy.evaluate()
 
+    def reset(self):
+        self.accuracy.reset()
+
 
 class AverageProbMeter(AverageMeter):
     def __init__(self):
@@ -149,3 +155,8 @@ class ClipAccuracy(PerImageEvaluationMetric):
     def evaluate(self, annotations, predictions):
         self.meta['names'] = ['clip_accuracy', 'video_accuracy']
         return [self.clip_accuracy.evaluate(), self.video_accuracy.evaluate()]
+
+    def reset(self):
+        self.clip_accuracy.reset()
+        self.video_accuracy.reset()
+        self.video_avg_prob.reset()

@@ -98,7 +98,7 @@ DEFINE_uint32(bs, 1, batch_size);
 
 /// \brief Flag to specify the number of infer requests<br>
 /// It is an optional parameter
-DEFINE_uint32(n_ir, 5, num_infer_requests);
+DEFINE_uint32(nireq, 5, num_infer_requests);
 
 /// \brief Flag to specify the number of expected input channels<br>
 /// It is an optional parameter

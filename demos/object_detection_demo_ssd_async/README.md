@@ -120,6 +120,7 @@ Options:
     -r                        Optional. Inference results as raw values.
     -t                        Optional. Probability threshold for detections.
     -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
+    -no_show                  Optional. Do not show processed video.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

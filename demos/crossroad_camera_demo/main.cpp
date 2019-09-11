@@ -26,7 +26,9 @@
 #include <samples/slog.hpp>
 #include <samples/ocv_common.hpp>
 #include "crossroad_camera_demo.hpp"
+#ifdef WITH_EXTENSIONS
 #include <ext_list.hpp>
+#endif
 
 using namespace InferenceEngine;
 
@@ -557,8 +559,10 @@ int main(int argc, char *argv[]) {
             std::cout << ie.GetVersions(flag) << std::endl;
 
             if ((flag.find("CPU") != std::string::npos)) {
+#ifdef WITH_EXTENSIONS
                 /** Load default extensions lib for the CPU device (e.g. SSD's DetectionOutput)**/
                 ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
+#endif
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
@@ -829,11 +833,15 @@ int main(int argc, char *argv[]) {
             std::cout << "Performance counts for person detection: " << std::endl;
             personDetection.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d));
 
-            std::cout << "Performance counts for person attributes: " << std::endl;
-            personAttribs.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_pa));
+            if (!FLAGS_m_pa.empty()) {
+                std::cout << "Performance counts for person attributes: " << std::endl;
+                personAttribs.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_pa));
+            }
 
-            std::cout << "Performance counts for person re-identification: " << std::endl;
-            personReId.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
+            if (!FLAGS_m_reid.empty()) {
+                std::cout << "Performance counts for person re-identification: " << std::endl;
+                personReId.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
+            }
         }
         // -----------------------------------------------------------------------------------------------------
     }

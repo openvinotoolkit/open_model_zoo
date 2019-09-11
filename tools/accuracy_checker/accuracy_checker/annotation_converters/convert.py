@@ -109,23 +109,25 @@ def main():
     out_dir = args.output_dir or Path.cwd()
 
     results = converter.convert()
-    if isinstance(results, tuple) and len(results) == 2:
-        result, meta = results
-    else:
-        result, meta = results, None
+    converted_annotation = results.annotations
+    meta = results.meta
+    errors = results.content_check_errors
+    if errors:
+        warnings.warn('Following problems were found during conversion:'
+                      '\n{}'.format('\n'.join(errors)))
 
     subsample = args.subsample
     if subsample:
         if subsample.endswith('%'):
             subsample_ratio = float(subsample[:-1]) / 100
-            subsample_size = int(len(result) * subsample_ratio)
+            subsample_size = int(len(converted_annotation) * subsample_ratio)
         else:
             subsample_size = int(args.subsample)
 
-        result = make_subset(result, subsample_size, args.subsample_seed)
+        converted_annotation = make_subset(converted_annotation, subsample_size, args.subsample_seed)
 
     if args.analyze_dataset:
-        analyze_dataset(result, meta)
+        analyze_dataset(converted_annotation, meta)
 
     converter_name = converter.get_name()
     annotation_name = args.annotation_name or "{}.pickle".format(converter_name)
@@ -134,7 +136,7 @@ def main():
     annotation_file = out_dir / annotation_name
     meta_file = out_dir / meta_name
 
-    save_annotation(result, meta, annotation_file, meta_file)
+    save_annotation(converted_annotation, meta, annotation_file, meta_file)
 
 
 def save_annotation(annotation, meta, annotation_file, meta_file):

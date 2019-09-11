@@ -24,7 +24,7 @@ public:
     ~HumanPoseEstimator();
 
 private:
-    void preprocess(const cv::Mat& image, float* buffer) const;
+    void preprocess(const cv::Mat& image, uint8_t* buffer) const;
     std::vector<HumanPose> postprocess(
             const float* heatMapsData, const int heatMapOffset, const int nHeatMaps,
             const float* pafsData, const int pafOffset, const int nPafs,

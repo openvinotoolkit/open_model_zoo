@@ -1,0 +1,48 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is a person reidentification model for a general scenario. It uses a whole
+  body image as an input and outputs an embedding vector to match a pair of images
+  by the Cosine distance. The model is based on RMNet backbone that was developed
+  for fast inference. A single reidentification head from the 1/16 scale feature
+  map outputs the embedding vector of 256 floats.
+task_type: object_attributes
+files:
+  - name: FP32/person-reidentification-retail-0031.xml
+    size: 66640
+    sha256: b2b23a9f79ed992081efd0dd9448074196f338af4b9dcaf9bac4c0b078a1446d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-reidentification-retail-0031/FP32/person-reidentification-retail-0031.xml
+  - name: FP32/person-reidentification-retail-0031.bin
+    size: 1120184
+    sha256: 8b9d349d330909815d2e75b57654c4cd6c27eb37c87d3280dfeaae03d166a4f4
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-reidentification-retail-0031/FP32/person-reidentification-retail-0031.bin
+  - name: FP16/person-reidentification-retail-0031.xml
+    size: 66578
+    sha256: 3f6c0946aab9911978e45b036278b275f02b2dd7444a0d20614193900ffbbd09
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.xml
+  - name: FP16/person-reidentification-retail-0031.bin
+    size: 560092
+    sha256: 833c136bcce82bcba6de6289fc21ee24f24d4597e52c41717c2602ee275b2f7d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.bin
+  - name: INT8/person-reidentification-retail-0031.xml
+    size: 264617
+    sha256: 9441b1128224dc60ee5e14cdb62ec1eb045d6fc7ef363fab014bd6f729f3be50
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-reidentification-retail-0031/INT8/person-reidentification-retail-0031.xml
+  - name: INT8/person-reidentification-retail-0031.bin
+    size: 1120184
+    sha256: 5533422c49746f6856dca186822a9a15c47b88dffced26401b374ba99e731f57
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-reidentification-retail-0031/INT8/person-reidentification-retail-0031.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

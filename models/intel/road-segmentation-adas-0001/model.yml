@@ -1,0 +1,37 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is a segmentation network to classify each pixel into four classes: BG,
+  road, curb, mark.
+task_type: semantic_segmentation
+files:
+  - name: FP32/road-segmentation-adas-0001.xml
+    size: 172322
+    sha256: 59de171ea5117d88fca37252bf614b15acb20424c7db09803f364a0a65a27309
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.xml
+  - name: FP32/road-segmentation-adas-0001.bin
+    size: 737136
+    sha256: e4ec8fa66deb6904b5b6faa109fa699098cc1f947bf5216c6e31595ec397c569
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.bin
+  - name: FP16/road-segmentation-adas-0001.xml
+    size: 172167
+    sha256: 2bbe4bdc357880b73d6f7968e85870fbae4f004196c87d5836f27f4c20e3db31
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.xml
+  - name: FP16/road-segmentation-adas-0001.bin
+    size: 368568
+    sha256: 292b8c8789d66f102ffb9b87104b39488bfa55293ef97e7d6a50439762cdd884
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

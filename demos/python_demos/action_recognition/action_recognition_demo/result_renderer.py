@@ -40,7 +40,7 @@ class ResultRenderer(object):
         self.output_height = output_height
         self.meters = defaultdict(partial(WindowAverageMeter, 16))
         self.postprocessing = [LabelPostprocessing(n_frames=30, history_size=100) for _ in range(number_of_predictions)]
-        print("To close the application, press 'CTRL+C' here or switch to the output window and press any key")
+        print("To close the application, press 'CTRL+C' here or switch to the output window and press Esc or Q")
 
     def update_timers(self, timers):
         self.meters['encoder'].update(timers['encoder'])
@@ -53,7 +53,7 @@ class ResultRenderer(object):
         if logits is not None:
             labels, probs = decode_output(logits, self.lables, top_k=self.number_of_predictions,
                                           label_postprocessing=self.postprocessing)
-            print("Frame {}: {} - {:.2f}% -- {:.2f} fps".format(frame_ind, labels[0], probs[0] * 100, inference_time))
+            print("Frame {}: {} - {:.2f}% -- {:.2f}ms".format(frame_ind, labels[0], probs[0] * 100, inference_time))
         else:
             labels = ['Preparing...']
             probs = [0.]
@@ -86,7 +86,8 @@ class ResultRenderer(object):
 
         cv2.imshow("Action Recognition", frame)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        key = cv2.waitKey(1) & 0xFF
+        if key in {ord('q'), ord('Q'), 27}:
             return -1
 
 

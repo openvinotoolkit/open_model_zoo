@@ -1,0 +1,43 @@
+models:
+  - name: inception-resnet-v2-tf
+    launchers:
+      - framework: tf
+        model: inception_resnet_v2.pb
+        inputs:
+          - name: input
+        adapter: classification
+    datasets:
+      - name: imagenet_1001_classes
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: crop
+            central_fraction: 0.875
+          - type: resize
+            size: 299
+          - type: normalization
+            mean: 127.5
+            std: 127.5
+
+  - name: inception-resnet-v2-tf
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/inception-resnet-v2-tf/FP32/inception-resnet-v2-tf.xml
+        weights: public/inception-resnet-v2-tf/FP32/inception-resnet-v2-tf.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/inception-resnet-v2-tf/FP16/inception-resnet-v2-tf.xml
+        weights: public/inception-resnet-v2-tf/FP16/inception-resnet-v2-tf.bin
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1001_classes
+        preprocessing:
+          - type: crop
+            central_fraction: 0.875
+          - type: resize
+            size: 299

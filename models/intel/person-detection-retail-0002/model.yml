@@ -1,0 +1,35 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: Person detection (HyperNet+RFCN+DetectionOutput).
+task_type: detection
+files:
+  - name: FP32/person-detection-retail-0002.xml
+    size: 132390
+    sha256: a5cc947c7594a749432cc5acf57a81f091ff35c58fb399e7b0fbb020246cad72
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-retail-0002/FP32/person-detection-retail-0002.xml
+  - name: FP32/person-detection-retail-0002.bin
+    size: 12976388
+    sha256: 78f600869517ee2a9ecc79505b5cfab9849c4c4494035041993c97cc7f4fb745
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-retail-0002/FP32/person-detection-retail-0002.bin
+  - name: FP16/person-detection-retail-0002.xml
+    size: 132266
+    sha256: 83726d14a07f4d73fab65a9a765c8e043aeced04cb2676a15920fc2d65d326ba
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-retail-0002/FP16/person-detection-retail-0002.xml
+  - name: FP16/person-detection-retail-0002.bin
+    size: 6488220
+    sha256: 04d28806b41709a01e803a1da0894c17d8033f93e6d38822a732f2ba2fe6ea1c
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-retail-0002/FP16/person-detection-retail-0002.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

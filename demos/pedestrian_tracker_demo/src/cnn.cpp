@@ -51,9 +51,10 @@ void CnnBase::Load() {
 
     for (auto&& item : outInfo_) {
         SizeVector outputDims = item.second->getTensorDesc().getDims();
+        auto outputLayout = item.second->getTensorDesc().getLayout();
         item.second->setPrecision(Precision::FP32);
         TBlob<float>::Ptr output =
-            make_shared_blob<float>(TensorDesc(Precision::FP32, outputDims, Layout::NC));
+            make_shared_blob<float>(TensorDesc(Precision::FP32, outputDims, outputLayout));
         output->allocate();
         outputs_[item.first] = output;
     }

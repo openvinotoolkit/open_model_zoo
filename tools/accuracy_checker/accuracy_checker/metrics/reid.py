@@ -175,6 +175,7 @@ class PairwiseAccuracy(FullDatasetEvaluationMetric):
 
         return float(accuracy) / len(pairs)
 
+
 class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
     __provider__ = 'pairwise_accuracy_subsets'
 

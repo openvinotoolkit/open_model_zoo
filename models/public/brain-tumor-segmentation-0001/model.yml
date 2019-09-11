@@ -1,0 +1,45 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This model was created for participation in the Brain Tumor Segmentation Challenge
+  <https://www.med.upenn.edu/sbia/brats2018.html> (BraTS) 2018.   The model is
+  based on the corresponding paper <https://arxiv.org/abs/1810.04008>, where authors
+  present deep cascaded approach for automatic brain tumor segmentation. The paper
+  describes modifications to 3D UNet architecture and specific augmentation strategy
+  to efficiently handle multimodal MRI input. Besides this, the approach to enhance
+  segmentation quality with context obtained from models of the same topology
+  operating on downscaled data is introduced.   Each input modality has its own
+  encoder which are later fused together to produce single output segmentation.
+task_type: semantic_segmentation
+files:
+  - name: brain-tumor-segmentation-0001-symbol.json
+    size: 100106
+    sha256: 2e75c659c6cab619bda9d5f039619eb12d71949c9c171b247faebe63d2ea7a39
+    source:
+      $type: google_drive
+      id: 1HaExnmHtF2nl2PkcLfKJDzA_7IMmLyKJ
+  - name: brain-tumor-segmentation-0001-0000.params
+    size: 152788159
+    sha256: d73acc63151f96341184ce54dd59c8285ee7cbb744a8ca9ffd7d3e181ffae417
+    source:
+      $type: google_drive
+      id: 1T2ldCISt5N2TEUfv6ggRB1dw0cucTqT2
+model_optimizer_args:
+  - --input_shape=[1,4,128,128,128]
+  - --input=data_crop
+  - --output=blockgrad7
+  - --input_model=$dl_dir/brain-tumor-segmentation-0001-0000.params
+framework: mxnet
+license: https://raw.githubusercontent.com/lachinov/brats2018-graphlabunn/master/LICENSE

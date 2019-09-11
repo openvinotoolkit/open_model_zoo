@@ -1,0 +1,38 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The `googlenet-v3` model is the first of the Inception family of models designed
+  to perform image classification. Like the other Inception models. For details
+  about this family of models, check out the paper <https://arxiv.org/pdf/1602.07261.pdf>.
+task_type: classification
+files:
+  - name: googlenet-v3.tar.gz
+    size: 88668554
+    sha256: 7045b72a954af4dce36346f478610acdccbf149168fa25c78e54e32f0c723d6d
+    source: https://storage.googleapis.com/download.tensorflow.org/models/inception_v3_2016_08_28_frozen.pb.tar.gz
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: googlenet-v3.tar.gz
+model_optimizer_args:
+  - --reverse_input_channels
+  - --input_shape=[1,299,299,3]
+  - --input=input
+  - --mean_values=input[127.5,127.5,127.5]
+  - --scale_values=input[127.50000414375013]
+  - --output=InceptionV3/Predictions/Softmax
+  - --input_model=$dl_dir/inception_v3_2016_08_28_frozen.pb
+framework: tf
+license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

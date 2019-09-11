@@ -56,7 +56,7 @@ void showUsage() {
     std::cout << "    -d \"<device>\"                " << target_device_message << std::endl;
     std::cout << "    -nc                          " << num_cameras << std::endl;
     std::cout << "    -bs                          " << batch_size << std::endl;
-    std::cout << "    -n_ir                        " << num_infer_requests << std::endl;
+    std::cout << "    -nireq                       " << num_infer_requests << std::endl;
     std::cout << "    -n_iqs                       " << input_queue_size << std::endl;
     std::cout << "    -fps_sp                      " << fps_sampling_period << std::endl;
     std::cout << "    -n_sp                        " << num_sampling_periods << std::endl;
@@ -95,7 +95,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         slog::info << "\tCLDNN custom kernels map:  " << FLAGS_c << slog::endl;
     }
     slog::info << "\tBatch size:                " << FLAGS_bs << slog::endl;
-    slog::info << "\tNumber of infer requests:  " << FLAGS_n_ir << slog::endl;
+    slog::info << "\tNumber of infer requests:  " << FLAGS_nireq << slog::endl;
     slog::info << "\tNumber of input web cams:  "  << FLAGS_nc << slog::endl;
 
     return true;
@@ -228,7 +228,7 @@ int main(int argc, char* argv[]) {
 
         IEGraph::InitParams graphParams;
         graphParams.batchSize       = FLAGS_bs;
-        graphParams.maxRequests     = FLAGS_n_ir;
+        graphParams.maxRequests     = FLAGS_nireq;
         graphParams.collectStats    = FLAGS_show_stats;
         graphParams.reportPerf      = FLAGS_pc;
         graphParams.modelPath       = modelPath;
