@@ -19,7 +19,7 @@ from pathlib import Path
 
 from ..config import PathField
 from ..representation import ReIdentificationClassificationAnnotation
-from ..utils import read_txt, check_file_existence
+from ..utils import read_txt, check_file_existence, OrderedSet
 
 from .format_converter import BaseFormatConverter, ConverterReturn
 
@@ -68,7 +68,7 @@ class LFWConverter(BaseFormatConverter):
         return image_path_pattern.format(person, person, '0' * (4 - len(image_id)), image_id)
 
     def convert_positive(self, pairs, all_images):
-        positives = defaultdict(set)
+        positives = defaultdict(OrderedSet)
         for data in pairs:
             image1 = self.get_image_name(data[0], data[1])
             image2 = self.get_image_name(data[0], data[2])
@@ -79,7 +79,7 @@ class LFWConverter(BaseFormatConverter):
         return positives, all_images
 
     def convert_negative(self, pairs, all_images):
-        negatives = defaultdict(set)
+        negatives = defaultdict(OrderedSet)
         for data in pairs:
             image1 = self.get_image_name(data[0], data[1])
             image2 = self.get_image_name(data[2], data[3])
@@ -103,7 +103,7 @@ class LFWConverter(BaseFormatConverter):
             elif len(pair) == 4:
                 negative_pairs.append(pair)
 
-        all_images = set()
+        all_images = OrderedSet()
         positive_data, all_images = self.convert_positive(positive_pairs, all_images)
         negative_data, all_images = self.convert_negative(negative_pairs, all_images)
 
