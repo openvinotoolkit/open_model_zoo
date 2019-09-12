@@ -68,6 +68,8 @@ class Adapter(ClassProvider):
 
     @staticmethod
     def _extract_predictions(outputs_list, meta):
+        if isinstance(outputs_list, dict):
+            return outputs_list
         return outputs_list[0]
 
 
