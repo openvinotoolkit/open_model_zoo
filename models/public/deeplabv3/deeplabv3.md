@@ -31,7 +31,7 @@ Image, name: `ImageTensor`, shape: [1x513x513x3], format: [BxHxWxC],
     - W - image width
     - C - number of channels
 
-   Expected color order: BGR.
+   Expected color order: RGB.
 
 ### Converted Model
 
@@ -43,7 +43,7 @@ Image, name: `mul_1/placeholder_port_1`, shape: [1x3x513x513], format: [BxCxHxW]
     - H - image height
     - W - image width
 
-   Expected color order: BGR.
+   Expected color order: RGB.
 
 ## Output
 

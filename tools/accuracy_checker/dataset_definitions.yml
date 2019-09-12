@@ -96,6 +96,16 @@ datasets:
       ignore_difficult: True
       presenter: print_scalar
 
+  - name: VOC2012_Segmentation
+    annotation_converstion:
+      converter: voc_segmentation
+      imageset_file: VOC/VOCdevkit/VOC2007/ImageSets/Segmentation/val.txt
+      images_dir: VOC/VOCdevkit/VOC2007/JPEGImages/
+      mask_dir: VOC/VOCdevkit/VOC2007/SegmentationClass/
+    data_source: VOCdevkit/VOC2012/JPEGImages
+    annotation: voc2012_segmentation.pickle
+    dataset_meta: voc2012_segmentation.json
+
   - name: wider
     data_source: WIDER_val/images
     annotation_conversion:
