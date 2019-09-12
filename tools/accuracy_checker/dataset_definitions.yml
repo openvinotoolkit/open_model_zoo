@@ -13,6 +13,16 @@ datasets:
     dataset_meta: mscoco_mask_rcnn.json
     data_source: val2017
 
+  - name: ms_coco_mask_rcnn_short
+    annotation_conversion:
+      converter: mscoco_mask_rcnn
+      annotation_file: instances_val2017_short.json
+      has_background: True
+      sort_annotations: True
+    annotation: mscoco_mask_rcnn_short.pickle
+    dataset_meta: mscoco_mask_rcnn_short.json
+    data_source: val2017
+
   - name: ms_coco_detection_91_class
     annotation_conversion:
       converter: mscoco_detection
