@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-CaffeNet model. Used for classification. For details see [paper](https://arxiv.org/abs/1408.5093).
+CaffeNet\* model is used for classification. For details see [paper](https://arxiv.org/abs/1408.5093).
 
 ## Example
 
@@ -30,7 +30,7 @@ Image, name: `data`, shape: [1x3x227x227], format: [BxCxHxW]
     - W - image width
 
    Expected color order: BGR.
-   Mean values - [104.0, 117.0, 123.0]
+   Mean values: [104.0, 117.0, 123.0].
 
 ### Converted Model
 
@@ -48,12 +48,12 @@ Image, name: `data`, shape: [1x3x227x227], format: [BxCxHxW]
 
 ### Original Model
 
-Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, contains predicted
+Object classifier according to ImageNet classes, name: `prob`,  shape: `1,1000`. Contains predicted
 probability for each class.
 
 ### Converted model
 
-Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000`, contains predicted
+Object classifier according to ImageNet classes, name: `prob`,  shape: `1,1000`. Contains predicted
 probability for each class.
 
 ## Legal Information

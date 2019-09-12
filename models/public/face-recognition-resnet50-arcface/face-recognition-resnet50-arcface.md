@@ -1,6 +1,6 @@
 # face-recognition-resnet50-arcface
 
-This model is originally named LResNet50E-IR,ArcFace@ms1m-refine-v1 [source](https://github.com/deepinsight/insightface/wiki/Model-Zoo)
+The original name of the model is [LResNet50E-IR,ArcFace@ms1m-refine-v1](https://github.com/deepinsight/insightface/wiki/Model-Zoo).
 
 ## Use Case and High-Level Description
 
@@ -23,9 +23,9 @@ This model is originally named LResNet50E-IR,ArcFace@ms1m-refine-v1 [source](htt
 
 ## Input
 
-### Original model
+### Original Model
 
-Image, name - `data`,  shape - `1,3,112,112`, format is `B,C,H,W` where:
+Image, name: `data`,  shape: `1,3,112,112`, format: `B,C,H,W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -34,9 +34,9 @@ Image, name - `data`,  shape - `1,3,112,112`, format is `B,C,H,W` where:
 
 Channel order is `RGB`.
 
-### Converted model
+### Converted Model
 
-Image, name - `data`,  shape - `1,3,112,112`, format is `B,C,H,W` where:
+Image, name: `data`,  shape: `1,3,112,112`, format: `B,C,H,W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -47,18 +47,18 @@ Channel order is `BGR`.
 
 ## Output
 
-### Original model
+### Original Model
 
-Face embedings, name - `pre_fc1`,  shape - `1,512`, output data format  - `B,C`, where:
+Face embeddings, name: `pre_fc1`,  shape: `1,512`, output data format: `B,C`, where:
 
 - `B` - batch size
 - `C` - row-vector of 512 floating points values, face embeddings
 
 The net outputs on different images are comparable in cosine distance.
 
-### Converted model
+### Converted Model
 
-Face embedings, name - `pre_fc1`,  shape - `1,512`, output data format  - `B,C`, where:
+Face embeddings, name: `pre_fc1`,  shape: `1,512`, output data format: `B,C`, where:
 
 - `B` - batch size
 - `C` - row-vector of 512 floating points values, face embeddings

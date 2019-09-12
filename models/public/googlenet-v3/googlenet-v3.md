@@ -13,7 +13,7 @@ The `googlenet-v3` model is the first of the Inception family of models designed
 | Type              | Classification|
 | GFLOPs            | 11.469        |
 | MParams           | 23.819        |
-| Source framework  | Tensorflow\*  |
+| Source framework  | TensorFlow\*  |
 
 ## Accuracy
 
