@@ -189,6 +189,7 @@ class YoloV2Adapter(Adapter):
 
         return result
 
+
 class YoloV3Adapter(Adapter):
     """
     Class for converting output of YOLO v3 family models to DetectionPrediction representation
@@ -379,6 +380,7 @@ class SSDAdapter(Adapter):
         m = ind_[0] if ind_.size else prediction_blob.shape[0]
 
         return prediction_blob[:m, :]
+
 
 class PyTorchSSDDecoder(Adapter):
     """

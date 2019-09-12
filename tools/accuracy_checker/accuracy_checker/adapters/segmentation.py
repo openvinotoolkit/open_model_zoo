@@ -53,7 +53,8 @@ class SegmentationAdapter(Adapter):
 
     def _extract_predictions(self, outputs_list, meta):
         if not 'tiles_shape' in (meta[-1] or {}):
-            return outputs_list[0]
+            return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
+
         tiles_shapes = [meta['tiles_shape'] for meta in meta]
         restore_output = []
         offset = 0
@@ -85,7 +86,7 @@ class BrainTumorSegmentationAdapter(Adapter):
 
     def _extract_predictions(self, outputs_list, meta):
         if not (meta[-1] or {}).get('multi_infer', False):
-            return outputs_list[0]
+            return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
 
         output_keys = list(outputs_list[0].keys())
         output_map = {}
