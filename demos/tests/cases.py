@@ -215,13 +215,13 @@ NATIVE_DEMOS = [
     #     }),
     # )),
 
-    # NativeDemo(name='text_detection_demo', test_cases=combine_cases(
-    #     TestCase(options={'-no_show': None, '-dt': 'video',
-    #         '-i': ImagePatternArg('text-detection')}),
-    #     device_cases('-d_td', '-d_tr'),
-    #     single_option_cases('-m_td', ModelArg('text-detection-0003'), ModelArg('text-detection-0004')),
-    #     single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
-    # )),
+    NativeDemo(name='text_detection_demo', test_cases=combine_cases(
+        TestCase(options={'-no_show': None, '-dt': 'video',
+            '-i': ImagePatternArg('object-detection-demo-ssd-async')}),
+        device_cases('-d_td', '-d_tr'),
+        single_option_cases('-m_td', ModelArg('text-detection-0003'), ModelArg('text-detection-0004')),
+        # single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),
+    )),
 ]
 
 PYTHON_DEMOS = [
@@ -255,32 +255,32 @@ PYTHON_DEMOS = [
     #                               ModelArg('instance-segmentation-security-0083')),
     # )),
 
-    # PythonDemo(name='multi_camera_multi_person_tracking', test_cases=combine_cases(
-    #     TestCase(options={'--no_show': None,
-    #         '-i': ImagePatternArg('multi-camera-multi-person-tracking'),
-    #         '-m': ModelArg('person-detection-retail-0013')}),
-    #     device_cases('-d'),
-    #     single_option_cases('--m_reid',
-    #         ModelArg('person-reidentification-retail-0031'),
-    #         ModelArg('person-reidentification-retail-0076'),
-    #         ModelArg('person-reidentification-retail-0079')),
-    # )),
+    PythonDemo(name='multi_camera_multi_person_tracking', test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            '-i': ImagePatternArg('object-detection-demo-ssd-async'),
+            '-m': ModelArg('person-detection-retail-0013')}),
+        device_cases('-d'),
+        single_option_cases('--m_reid',
+            # ModelArg('person-reidentification-retail-0031'),
+            # ModelArg('person-reidentification-retail-0076'),
+            ModelArg('person-reidentification-retail-0079')),
+    )),
 
     PythonDemo(name='object_detection_demo_ssd_async', test_cases=combine_cases(
         TestCase(options={'--no_show': None,
-            '-i': ImagePatternArg('object_detection_demo_ssd_async')}),
+            '-i': ImagePatternArg('object-detection-demo-ssd-async')}),
         device_cases('-d'),
         single_option_cases('-m',
-            ModelArg('face-detection-adas-0001'),
-            ModelArg('face-detection-adas-binary-0001', "INT1"),
-            ModelArg('face-detection-retail-0004'),
-            ModelArg('face-detection-retail-0005'),
-            # TODO: face-detection-retail-0044
-            ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
-            ModelArg('pedestrian-detection-adas-0002'),
-            ModelArg('pedestrian-detection-adas-binary-0001', "INT1"),
-            ModelArg('vehicle-detection-adas-0002'),
-            ModelArg('vehicle-detection-adas-binary-0001', "INT1"),
+            # ModelArg('face-detection-adas-0001'),
+            # ModelArg('face-detection-adas-binary-0001', "INT1"),
+            # ModelArg('face-detection-retail-0004'),
+            # ModelArg('face-detection-retail-0005'),
+            # # TODO: face-detection-retail-0044
+            # ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
+            # ModelArg('pedestrian-detection-adas-0002'),
+            # ModelArg('pedestrian-detection-adas-binary-0001', "INT1"),
+            # ModelArg('vehicle-detection-adas-0002'),
+            # ModelArg('vehicle-detection-adas-binary-0001', "INT1"),
             ModelArg('vehicle-license-plate-detection-barrier-0106')),
     )),
 
