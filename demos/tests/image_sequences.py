@@ -193,7 +193,7 @@ IMAGE_SEQUENCES = {
         image_net_arg('00000004'),
         image_net_arg('00000005'),
         image_net_arg('00000006'),
-        image_net_arg('00000014'),
+        image_net_arg('00000007'),
         image_net_arg('00000032'),
         image_net_arg('00000141'),
         image_net_arg('00000184')
