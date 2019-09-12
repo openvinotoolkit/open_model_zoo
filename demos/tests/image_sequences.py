@@ -187,22 +187,15 @@ IMAGE_SEQUENCES = {
     'multi-camera-multi-person-tracking': [image_net_arg('00000002')] * 11,
 
     'object_detection_demo_ssd_async': [
-        image_net_arg('00000001'),
-        image_net_arg('00000002'),
-        image_net_arg('00000003'),
-        image_net_arg('00000004'),
-        image_net_arg('00000005'),
-        image_net_arg('00000006'),
-        image_net_arg('00000007'),
-        # image_net_arg('00000008'),
+        # image_net_arg('00000001'),
+        # image_net_arg('00000002'),
+        # image_net_arg('00000003'),
+        # image_net_arg('00000004'),
+        # image_net_arg('00000005'),
+        # image_net_arg('00000006'),
+        # image_net_arg('00000007'),
+        image_net_arg('00000018'),
         # image_net_arg('00000141'),
-        # image_net_arg('00000184')
-        image_net_arg('00000001'),
-        image_net_arg('00000002'),
-        image_net_arg('00000003'),
-        image_net_arg('00000004'),
-        image_net_arg('00000005'),
-        image_net_arg('00000006'),
-        image_net_arg('00000007'),
+        # image_net_arg('00000184')18 22 23
     ]
 }
