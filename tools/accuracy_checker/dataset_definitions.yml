@@ -213,3 +213,52 @@ datasets:
     annotation: mscoco_person_detection.pickle
     dataset_meta: mscoco_person_detection.json
 
+  - name: crossroad_dataset_1016
+    data_source: val2017
+    annotation_conversion:
+      converter: cvat_object_detection
+      annotation_file: 3637_OMZ_task12_person_vehicle_bike_detection_crossroad_0078.xml
+      labels_file: person-vehicle-bike-detection-crossroad-1016-labels.json
+      has_background: True
+    annotation: crossroad-1016.pickle
+    dataset_meta: crossroad-1016.json
+
+  - name: crossroad_dataset_0078
+    data_source: val2017
+    annotation_conversion:
+      converter: cvat_object_detection
+      annotation_file: 3637_OMZ_task12_person_vehicle_bike_detection_crossroad_0078.xml
+      labels_file: person-vehicle-bike-detection-crossroad-0078-labels.json
+      has_background: True
+    annotation: crossroad-0078.pickle
+    dataset_meta: crossroad-0078.json
+
+  - name: pedestrian_and_vehicle_dataset
+    data_source: val2017
+    annotation_conversion:
+      converter: cvat_object_detection
+      annotation_file: 3636_OMZ_task11_pedestrian_and_vehicle_detector_adas_0001.xml
+      labels_file: pedestrian-and-vehicle-labels.json
+      has_background: True
+    annotation: pedestrian_and_vehicle.pickle
+    dataset_meta: pedestrian_and_vehicle.json
+
+  - name: pedestrian_detection_dataset
+    data_source: val2017
+    annotation_conversion:
+      converter: cvat_object_detection
+      annotation_file: 3636_OMZ_task11_pedestrian_and_vehicle_detector_adas_0001.xml
+      labels_file: pedestrian-detection-labels.json
+      has_background: True
+    annotation: pedestrian_detection.pickle
+    dataset_meta: pedestrian_detection.json
+
+  - name: vehicle_detection_dataset
+    data_source: val2017
+    annotation_conversion:
+      converter: cvat_object_detection
+      annotation_file: 3636_OMZ_task11_pedestrian_and_vehicle_detector_adas_0001.xml
+      labels_file: vehicle-detection-labels.json
+      has_background: True
+    annotation: vehicle_detection.pickle
+    dataset_meta: vehicle_detection.json
