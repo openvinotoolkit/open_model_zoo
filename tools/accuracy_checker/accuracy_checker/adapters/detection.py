@@ -590,6 +590,7 @@ class TFObjectDetectionAPIAdapter(Adapter):
 
         return result
 
+
 class FacePersonAdapter(Adapter):
     __provider__ = 'face_person_detection'
     prediction_types = (DetectionPrediction, )
@@ -639,7 +640,7 @@ class SSDAdapterMxNet(Adapter):
         """
         raw_outputs = self._extract_predictions(raw, frame_meta)
         result = []
-        for identifier, prediction_batch in enumerate(identifiers, raw_outputs[self.output_blob]):
+        for identifier, prediction_batch in zip(identifiers, raw_outputs[self.output_blob]):
             # Filter detections (get only detections with class_id >= 0)
             detections = prediction_batch[np.where(prediction_batch[:, 0] >= 0)]
             # Append detections to results
