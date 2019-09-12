@@ -197,6 +197,9 @@ IMAGE_SEQUENCES = {
         image_net_arg('00000018'),
         image_net_arg('00000141'),
         image_net_arg('00000184'),
+        ####
+        image_net_arg('00000022'),
+        image_net_arg('00000023'),
         image_net_arg('00000008'), # broken Image
     ],
 }

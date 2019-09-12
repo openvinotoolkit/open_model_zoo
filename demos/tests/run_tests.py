@@ -75,7 +75,7 @@ def main():
         print('Testing {}...'.format(demo.full_name))
         print()
 
-        with tempfile.TemporaryDirectory() as temp_dir:
+        with tempfile.TemporaryDirectory(dir='.') as temp_dir:
             dl_dir = Path(temp_dir) / 'models'
 
             print('Retrieving models...', flush=True)
