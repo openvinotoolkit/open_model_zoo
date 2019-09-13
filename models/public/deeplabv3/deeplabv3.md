@@ -45,6 +45,8 @@ Image, name: `mul_1/placeholder_port_1`, shape: [1x3x513x513], format: [BxCxHxW]
 
    Expected color order: RGB.
 
+> **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. Reverse input channels operation via Model Optimizer conversion can not be applied to this model in proper way. For running this model with Open Model Zoo demos, you need to manually rearrange the default channels order in the demo application.
+
 ## Output
 
 ### Original Model
