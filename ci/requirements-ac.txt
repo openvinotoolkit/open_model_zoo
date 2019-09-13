@@ -10,6 +10,3 @@ shapely==1.6.4.post2
 six==1.12.0               # via nibabel
 tqdm==4.33.0
 yamlloader==0.5.5
-cython==0.29.13           # via pycocotools
-matplotlib==3.0.3
-pycocotools==2.0.0
