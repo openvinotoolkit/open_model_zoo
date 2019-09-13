@@ -4,16 +4,16 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        model: public/deeplabv3/FP32/deeplabv3.xml
-        weights: public/ddeplabv3/FP32/deeplabv3.bin
+        model:   public/deeplabv3/FP32/deeplabv3.xml
+        weights: public/deeplabv3/FP32/deeplabv3.bin
         adapter: segmentation
         cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
           - FP16
-        model: public/deeplabv3/FP16/deeplabv3.xml
-        weights: public/ddeplabv3/FP16/deeplabv3.bin
+        model:   public/deeplabv3/FP16/deeplabv3.xml
+        weights: public/deeplabv3/FP16/deeplabv3.bin
         adapter: segmentation
         cpu_extensions: AUTO
 
