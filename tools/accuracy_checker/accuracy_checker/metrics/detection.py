@@ -366,32 +366,30 @@ def fast_match_detections_class_agnostic(predicted_data, gt_data, min_iou, overl
 
     for gt, prediction in zip(gt_data, predicted_data):
         gt_bboxes = np.stack((gt.x_mins, gt.y_mins, gt.x_maxs, gt.y_maxs), axis=-1)
-        predicted_bboxes = np.stack(
-            (prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs), axis=-1
-        )
-
-        total_gt_bbox_num += len(gt_bboxes)
-
-        similarity_matrix = calculate_similarity_matrix(gt_bboxes, predicted_bboxes, overlap_method)
-
         matches = []
-        for _ in gt_bboxes:
-            if not matches:
-                continue
-            best_match_pos = np.unravel_index(similarity_matrix.argmax(), similarity_matrix.shape)
-            best_match_value = similarity_matrix[best_match_pos]
+        total_gt_bbox_num += len(gt_bboxes)
+        if prediction.size:
+            predicted_bboxes = np.stack(
+                (prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs), axis=-1
+            )
 
-            if best_match_value <= min_iou:
-                break
+            similarity_matrix = calculate_similarity_matrix(gt_bboxes, predicted_bboxes, overlap_method)
 
-            gt_id = best_match_pos[0]
-            predicted_id = best_match_pos[1]
+            for _ in gt_bboxes:
+                best_match_pos = np.unravel_index(similarity_matrix.argmax(), similarity_matrix.shape)
+                best_match_value = similarity_matrix[best_match_pos]
 
-            similarity_matrix[gt_id, :] = 0.0
-            similarity_matrix[:, predicted_id] = 0.0
+                if best_match_value <= min_iou:
+                    break
 
-            matches.append((gt_id, predicted_id))
-            matched_gt_bbox_num += 1
+                gt_id = best_match_pos[0]
+                predicted_id = best_match_pos[1]
+
+                similarity_matrix[gt_id, :] = 0.0
+                similarity_matrix[:, predicted_id] = 0.0
+
+                matches.append((gt_id, predicted_id))
+                matched_gt_bbox_num += 1
 
         all_matches[gt.identifier] = matches
 
