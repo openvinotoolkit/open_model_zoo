@@ -46,6 +46,7 @@ def set_scores(prediction, scores):
 def set_box_scores(prediction, scores):
     prediction.bbox_scores = scores
 
+
 class NMS(Postprocessor):
     __provider__ = 'nms'
 
@@ -150,7 +151,7 @@ class SoftNMS(Postprocessor):
 
     def process_image(self, annotations, predictions):
         for prediction in predictions:
-            if len(prediction.scores) == 0:  # pylint: disable=len-as-condition
+            if not prediction.size:
                 continue
 
             scores = get_scores(prediction)
