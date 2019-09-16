@@ -134,6 +134,5 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Execution successful" << std::endl;
 
-	system("pause");
     return EXIT_SUCCESS;
 }
