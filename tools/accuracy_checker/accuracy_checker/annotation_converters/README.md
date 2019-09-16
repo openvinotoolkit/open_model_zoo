@@ -181,3 +181,6 @@ Accuracy Checker supports following list of annotation converters and specific f
     * `common_6_actions`(seating, writing, raising hand, standing, turned around, lie on the desk)
     * `teacher` (standing, writing, demonstrating)
     * `raising_hand` (seating, raising hand)
+* `lpr_txt` - converts annotation for license plate recognition task in txt format to `CharacterRecognitionAnnotation`.
+  * `annotation_file` - path to txt annotation.
+  * `decoding_dictionary` - path to file containing dictionary for output decoding.

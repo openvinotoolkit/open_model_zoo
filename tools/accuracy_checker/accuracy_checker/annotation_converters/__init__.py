@@ -36,6 +36,7 @@ from .mnist import MNISTCSVFormatConverter
 from .wmt import WMTConverter
 from .common_semantic_segmentation import CommonSegmentationConverter
 from .camvid import CamVidConverter
+from .lpr import LPRConverter
 from .cvat_object_detection import CVATObjectDetectionConverter
 from .cvat_attributes_recognition import CVATAttributesRecognitionConverter
 from .cvat_age_gender_recognition import CVATAgeGenderRecognitionConverter
@@ -74,6 +75,7 @@ __all__ = [
     'WMTConverter',
     'CommonSegmentationConverter',
     'CamVidConverter',
+    'LPRConverter',
     'CVATObjectDetectionConverter',
     'CVATAttributesRecognitionConverter',
     'CVATAgeGenderRecognitionConverter',
