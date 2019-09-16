@@ -97,12 +97,12 @@ datasets:
       presenter: print_scalar
 
   - name: VOC2012_Segmentation
-    annotation_converstion:
+    annotation_conversion:
       converter: voc_segmentation
-      imageset_file: VOC/VOCdevkit/VOC2007/ImageSets/Segmentation/val.txt
-      images_dir: VOC/VOCdevkit/VOC2007/JPEGImages/
-      mask_dir: VOC/VOCdevkit/VOC2007/SegmentationClass/
-    data_source: VOCdevkit/VOC2012/JPEGImages
+      imageset_file: VOCdevkit/VOC2012/ImageSets/Segmentation/val.txt
+      images_dir: VOCdevkit/VOC2012/JPEGImages/
+      mask_dir: VOCdevkit/VOC2012/SegmentationClass/
+    data_source: VOCdevkit/VOC2012
     annotation: voc2012_segmentation.pickle
     dataset_meta: voc2012_segmentation.json
 
