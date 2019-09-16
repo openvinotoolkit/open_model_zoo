@@ -24,7 +24,7 @@ models:
             value: [[1, 600, 600]]
 
     datasets:
-      - name: ms_coco_detection_91_class
+      - name: ms_coco_detection_91_classes
         preprocessing:
           - type: resize
             size: 600
