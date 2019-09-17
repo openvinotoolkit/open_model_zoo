@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ..utils import read_txt
+from ..utils import read_txt, check_file_existence
 from ..representation import ReIdentificationAnnotation
 from ..config import PathField
 from .format_converter import BaseFormatConverter, ConverterReturn
@@ -36,6 +36,7 @@ class ImageRetrievalConverter(BaseFormatConverter):
                 description='txt-file with gallery images and IDs concordance', optional=True
             )
         })
+        return params
 
     def configure(self):
         self.data_dir = self.get_value_from_config('data_dir')
@@ -46,25 +47,42 @@ class ImageRetrievalConverter(BaseFormatConverter):
             'gallery_annotation_file', self.data_dir / 'gallery' / 'list.txt'
         )
 
-    def convert(self,  *args, **kwargs):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+        content_errors = None if not check_content else []
         gallery = list()
         gallery_ids = set()
-        for line in read_txt(self.gallery_annotation_file):
-            identifier, id = line.split()
-            gallery_ids.add(id)
+        if progress_callback:
+            num_iteration = len(read_txt(self.gallery_annotation_file)) + len(read_txt(self.queries_annotation_file))
+        for line_id, line in enumerate(read_txt(self.gallery_annotation_file)):
+            identifier, image_id = line.split()
+            gallery_ids.add(image_id)
             if '/' not in identifier:
                 identifier = 'gallery/{}'.format(identifier)
-            gallery.append(ReIdentificationAnnotation(identifier, 0, id, False))
+            if check_content:
+                if not check_file_existence(self.data_dir / identifier):
+                    content_errors.append('{}: does not exist'.format(self.data_dir / identifier))
+
+            gallery.append(ReIdentificationAnnotation(identifier, 0, image_id, False))
+
+            if progress_callback and line_id % progress_interval == 0:
+                progress_callback(line_id * 100 / num_iteration)
 
         queries = list()
         queries_ids = set()
-        for line in read_txt(self.queries_annotation_file):
-            identifier, id = line.split()
-            queries_ids.add(id)
+        for line_id, line in enumerate(read_txt(self.queries_annotation_file)):
+            identifier, image_id = line.split()
+            queries_ids.add(image_id)
             if '/' not in identifier:
                 identifier = 'queries/{}'.format(identifier)
-            queries.append(ReIdentificationAnnotation(identifier, 1, id, True))
+            if check_content:
+                if not check_file_existence(self.data_dir / identifier):
+                    content_errors.append('{}: does not exist'.format(self.data_dir / identifier))
+
+            if progress_callback and line_id + len(gallery) % progress_interval == 0:
+                progress_callback((line_id + len(gallery)) * 100 / num_iteration)
+
+            queries.append(ReIdentificationAnnotation(identifier, 1, image_id, True))
 
         meta = {'num_identities': len(queries_ids | gallery_ids)}
 
-        return ConverterReturn(gallery + queries, meta, None)
+        return ConverterReturn(gallery + queries, meta, content_errors)
