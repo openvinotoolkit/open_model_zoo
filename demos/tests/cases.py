@@ -38,6 +38,10 @@ class NativeDemo:
     def fixed_args(self, source_dir, build_dir):
         return [str(build_dir / self._name)]
 
+class MultichannelNativeDemo(NativeDemo):
+    def models_lst_path(self, source_dir):
+        return source_dir / 'multichannel_demo' / 'models.lst'
+
 class PythonDemo:
     def __init__(self, name, test_cases):
         self._name = name
@@ -126,16 +130,24 @@ NATIVE_DEMOS = [
 
     # TODO: mask_rcnn_demo: no models.lst
 
-    # TODO: multichannel demos: different path for demo and demo name,
-    # cant accept ImagePatternArg, fails for ImageDirectoryArg, does not stop for IMAGE_SEQUENCES[]
-    # face-detection-adas-0001
-    # INT1/face-detection-adas-binary-0001
-    # face-detection-retail-0004
-    # face-detection-retail-0005
-    # face-detection-retail-0044
-    # human-pose-estimation-0001
+    MultichannelNativeDemo(name='multi-channel-face-detection-demo', test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            '-i': IMAGE_SEQUENCES['face-detection-adas']}),
+        device_cases('-d'),
+        single_option_cases('-m',
+            ModelArg('face-detection-adas-0001'),
+            ModelArg('face-detection-adas-binary-0001', "INT1"),
+            ModelArg('face-detection-retail-0004'),
+            ModelArg('face-detection-retail-0005')),
+            # TODO: face-detection-retail-0044
+    )),
 
-    # TODO: object_detection_demo_faster_rcnn: no models.lst
+    MultichannelNativeDemo(name='multi-channel-human-pose-estimation-demo', test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            '-i': IMAGE_SEQUENCES['human-pose-estimation'],
+            '-m': ModelArg('human-pose-estimation-0001')}),
+        device_cases('-d'),
+    )),
 
     NativeDemo(name='object_detection_demo_ssd_async', test_cases=combine_cases(
         TestCase(options={'-no_show': None}),

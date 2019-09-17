@@ -222,7 +222,8 @@ std::vector<std::shared_ptr<VideoFrame> > IEGraph::getBatchData(cv::Size frameSi
     {
         std::unique_lock<std::mutex> lock(mtxBusyRequests);
         condVarBusyRequests.wait(lock, [&]() {
-            return terminate || !busyBatchRequests.empty(); // wait until the pipeline is stopped or there are new InferRequests
+            // wait until the pipeline is stopped or there are new InferRequests
+            return terminate || !busyBatchRequests.empty();
         });
         if (busyBatchRequests.empty()) {
             return {}; // woke up because of termination, so leave if nothing to preces
