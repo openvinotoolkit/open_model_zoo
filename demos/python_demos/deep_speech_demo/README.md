@@ -59,6 +59,8 @@ python3 deepspeech_openvino_0.5.py -m models/deepspeech_0.5.0.xml \
     -a alphabet_b.txt
 ```
 
+Only 16-bit, 16 kHz, mono-channel WAVE audio files are supported. One example wave file can be downloaded from https://github.com/jcsilva/docker-kaldi-gstreamer-server/raw/master/audio/1272-128104-0000.wav.
+
 Demo Output
 ------------
 The application shows the text output for speech audio.
