@@ -13,7 +13,7 @@ datasets:
     dataset_meta: mscoco_mask_rcnn.json
     data_source: val2017
 
-  - name: ms_coco_mask_rcnn_short_80_classess
+  - name: ms_coco_mask_rcnn_short_80_classes
     annotation_conversion:
       converter: mscoco_mask_rcnn
       annotation_file: instances_val2017_short.json
@@ -295,7 +295,7 @@ datasets:
     dataset_meta: vehicle_detection.json
 
   - name: synthetic_chinese_license_plates
-    data_source: Synthetic_Chinese_License_Plates/crops
+    data_source: Synthetic_Chinese_License_Plates
     annotation_conversion:
       converter: lpr_txt
       annotation_file: Synthetic_Chinese_License_Plates/annotation
