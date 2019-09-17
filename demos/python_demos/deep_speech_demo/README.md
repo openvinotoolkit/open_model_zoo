@@ -38,7 +38,7 @@ Options:
   -h, --help            show this help message and exit
   -m  MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -i VIDEO, --input VIDEO
+  -i AUDIO, --input AUDIO
                         Required. Required. Path to an audio files.
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         Optional. For CPU custom layers, if any. Absolute path
