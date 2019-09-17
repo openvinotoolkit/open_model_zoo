@@ -31,7 +31,7 @@ models:
             type: IMAGE_INFO
 
     datasets:
-      - name: ms_coco_mask_rcnn_short_classes
+      - name: ms_coco_mask_rcnn_short_91_classes
         preprocessing:
           - type: resize
             size: 800
