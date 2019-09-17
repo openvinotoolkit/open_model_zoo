@@ -37,6 +37,7 @@ from .wmt import WMTConverter
 from .common_semantic_segmentation import CommonSegmentationConverter
 from .camvid import CamVidConverter
 from .lpr import LPRConverter
+from .image_retrieval import ImageRetrievalConverter
 from .cvat_object_detection import CVATObjectDetectionConverter
 from .cvat_attributes_recognition import CVATAttributesRecognitionConverter
 from .cvat_age_gender_recognition import CVATAgeGenderRecognitionConverter
@@ -76,6 +77,7 @@ __all__ = [
     'CommonSegmentationConverter',
     'CamVidConverter',
     'LPRConverter',
+    'ImageRetrievalConverter',
     'CVATObjectDetectionConverter',
     'CVATAttributesRecognitionConverter',
     'CVATAgeGenderRecognitionConverter',
