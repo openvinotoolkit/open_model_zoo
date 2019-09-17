@@ -13,7 +13,7 @@ datasets:
     dataset_meta: mscoco_mask_rcnn.json
     data_source: val2017
 
-  - name: ms_coco_mask_rcnn_short_80_classess
+  - name: ms_coco_mask_rcnn_short_80_classes
     annotation_conversion:
       converter: mscoco_mask_rcnn
       annotation_file: instances_val2017_short.json
