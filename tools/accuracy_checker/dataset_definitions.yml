@@ -295,7 +295,7 @@ datasets:
     dataset_meta: vehicle_detection.json
 
   - name: synthetic_chinese_license_plates
-    data_source: Synthetic_Chinese_License_Plates/crops
+    data_source: Synthetic_Chinese_License_Plates
     annotation_conversion:
       converter: lpr_txt
       annotation_file: Synthetic_Chinese_License_Plates/annotation
