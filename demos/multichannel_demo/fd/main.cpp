@@ -370,11 +370,15 @@ int main(int argc, char* argv[]) {
 
         size_t perfItersCounter = 0;
 
-        while (true) {
+        while (sources.isRunning() || network->isRunning()) {
             bool readData = true;
             while (readData) {
                 auto br = network->getBatchData(params.frameSize);
+                if (br.empty()) {
+                    break; // IEGraph::getBatchData had nothing to process and returned. That means it was stopped
+                }
                 for (size_t i = 0; i < br.size(); i++) {
+                // this approach waits for the next input image for sourceIdx. If you provide a single image, it may not show results, especially if -real_input_fps is enabled
                     auto val = static_cast<unsigned int>(br[i]->sourceIdx);
                     auto it = find_if(batchRes.begin(), batchRes.end(), [val] (const std::shared_ptr<VideoFrame>& vf) { return vf->sourceIdx == val; } );
                     if (it != batchRes.end()) {

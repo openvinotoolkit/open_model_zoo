@@ -40,7 +40,7 @@ void AsyncOutput::start() {
             condVar.wait(lock, [&]() {
                 return !queue.empty() || terminate;
             });
-            if (terminate) {
+            if (queue.empty()) {
                 break;
             }
 
@@ -61,7 +61,6 @@ void AsyncOutput::start() {
         }
     });
 }
-
 
 bool AsyncOutput::isAlive() const {
     return !terminate;
