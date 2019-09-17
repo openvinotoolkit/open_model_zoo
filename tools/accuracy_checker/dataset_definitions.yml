@@ -302,3 +302,16 @@ datasets:
       decoding_dictionary_file: dict
     annotation: lpr.pickle
     dataset_meta: lpr.json
+
+  - name: image_retrieval
+    data_source: textile_crops
+    annotattion_conversion:
+      converter: image_retrieval
+      data_dir: textile_crops
+      gallery_annotation_file: textile_crops/gallery/gallery.txt
+      queries_annotation_file: textile_crops/queries/quieries.txt
+    annotation: textile.pickle
+    dataset_meta: textile.json
+    preprocessing:
+      - type: resize
+        size: 224
