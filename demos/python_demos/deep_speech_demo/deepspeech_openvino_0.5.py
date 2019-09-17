@@ -37,7 +37,7 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model.", required=True,
                       type=str)
-    args.add_argument("-i", "--input", help="Required. Path to an audio files",
+    args.add_argument("-i", "--input", help="Required. Path to an audio file.",
                       required=True,
                       type=str)
     args.add_argument("-l", "--cpu_extension",
@@ -49,7 +49,7 @@ def build_argparser():
                            "acceptable. The sample will look for a suitable plugin for device specified. Default "
                            "value is CPU",
                       default="CPU", type=str)
-    args.add_argument("-a", "--alphabet", help="Path to a alphabet file", required=True, default="alphabet_b.txt", type=str)
+    args.add_argument("-a", "--alphabet", help="Required. Path to a alphabet file.", required=True, default="alphabet_b.txt", type=str)
 
     return parser
 
