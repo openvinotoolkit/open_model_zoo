@@ -329,6 +329,7 @@ datasets:
     annotation_conversion:
       converter: icdar_detection
       data_dir: ICDAR15_DET/gt
+    annotation: icdar15_detection.pickle
 
   - name: ICDAR2013
     annotation_conversion:
