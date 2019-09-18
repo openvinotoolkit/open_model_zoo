@@ -218,10 +218,9 @@ class ScipyImageReader(BaseReader):
                     image.putpalette(np.asarray(pal, dtype=np.uint8).tostring())
                     # Becomes a mode='P' automagically.
                 elif mode == 'P':  # default gray-scale
-                    pal = (
-                            np.arange(0, 256, 1, dtype=np.uint8)[:, np.newaxis] *
-                            np.ones((3,), dtype=np.uint8)[np.newaxis, :]
-                    )
+                    pal1 = np.arange(0, 256, 1, dtype=np.uint8)[:, np.newaxis]
+                    pal2 = np.ones((3,), dtype=np.uint8)[np.newaxis, :]
+                    pal = pal1 * pal2
                     image.putpalette(np.asarray(pal, dtype=np.uint8).tostring())
 
                 return image
@@ -246,10 +245,9 @@ class ScipyImageReader(BaseReader):
         # Check for 3 in datacube shape --- 'RGB' or 'YCbCr'
         if channel_axis is None:
             ca = np.flatnonzero(np.asarray(shape) == 3) if 3 in shape else np.flatnonzero(np.asarray(shape) == 4)
-            if np.size(ca):
-                ca = ca[0]
-            else:
+            if not np.size(ca):
                 raise ValueError("Could not find channel dimension.")
+            ca = ca[0]
         else:
             ca = channel_axis
 
@@ -258,30 +256,25 @@ class ScipyImageReader(BaseReader):
             raise ValueError("Channel axis dimension is not valid.")
 
         bytedata = ScipyImageReader._bytescale(data, high=high, low=low, cmin=cmin, cmax=cmax)
-        if ca == 2:
-            strdata = bytedata.tostring()
-            shape = (shape[1], shape[0])
-        elif ca == 1:
-            strdata = np.transpose(bytedata, (0, 2, 1)).tostring()
-            shape = (shape[2], shape[0])
-        elif ca == 0:
-            strdata = np.transpose(bytedata, (1, 2, 0)).tostring()
-            shape = (shape[2], shape[1])
+        channel_axis_mapping = {
+            0: ((1, 2, 0), (shape[1], shape[0])),
+            1: ((0, 2, 1), (shape[2], shape[0])),
+            2: ((0, 1, 2), (shape[1], shape[0]))
+        }
+        if ca in channel_axis_mapping:
+            transposition, shape = channel_axis_mapping[ca]
+            strdata = np.transpose(bytedata, transposition).tostring()
+
         if mode is None:
-            if numch == 3:
-                mode = 'RGB'
-            else:
-                mode = 'RGBA'
+            mode = 'RGB'if numch == 3 else 'RGBA'
 
         if mode not in ['RGB', 'RGBA', 'YCbCr', 'CMYK']:
             raise ValueError(_errstr)
 
-        if mode in ['RGB', 'YCbCr']:
-            if numch != 3:
-                raise ValueError("Invalid array shape for mode.")
-        if mode in ['RGBA', 'CMYK']:
-            if numch != 4:
-                raise ValueError("Invalid array shape for mode.")
+        if mode in ['RGB', 'YCbCr'] and numch != 3:
+            raise ValueError("Invalid array shape for mode.")
+        if mode in ['RGBA', 'CMYK'] and numch != 4:
+            raise ValueError("Invalid array shape for mode.")
 
         # Here we know data and mode is correct
         image = Image.frombytes(mode, shape, strdata)
@@ -311,7 +304,7 @@ class ScipyImageReader(BaseReader):
         cscale = cmax - cmin
         if cscale < 0:
             raise ValueError("`cmax` should be larger than `cmin`.")
-        elif cscale == 0:
+        if cscale == 0:
             cscale = 1
 
         scale = float(high - low) / cscale
