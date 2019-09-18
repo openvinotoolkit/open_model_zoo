@@ -195,86 +195,86 @@ class ScipyImageReader(BaseReader):
         return np.array(image)
 
     @staticmethod
-    def _to_image(arr, high=255, low=0, cmin=None, cmax=None, pal=None, mode=None, channel_axis=None):
-        _errstr = "Mode is unknown or incompatible with input array shape."
-
-        def process_2d(data, shape, pal, cmax, cmin):
-            shape = (shape[1], shape[0])  # columns show up first
-            if mode == 'F':
-                data32 = data.astype(np.float32)
-                image = Image.frombytes(mode, shape, data32.tostring())
-
-                return image
-            if mode in [None, 'L', 'P']:
-                bytedata = ScipyImageReader._bytescale(data, high=high, low=low, cmin=cmin, cmax=cmax)
-                image = Image.frombytes('L', shape, bytedata.tostring())
-                if pal is not None:
-                    image.putpalette(np.asarray(pal, dtype=np.uint8).tostring())
-                    # Becomes a mode='P' automagically.
-                elif mode == 'P':  # default gray-scale
-                    pal1 = np.arange(0, 256, 1, dtype=np.uint8)[:, np.newaxis]
-                    pal2 = np.ones((3,), dtype=np.uint8)[np.newaxis, :]
-                    pal = pal1 * pal2
-                    image.putpalette(np.asarray(pal, dtype=np.uint8).tostring())
-
-                return image
-            if mode == '1':  # high input gives threshold for 1
-                bytedata = (data > high)
-                image = Image.frombytes('1', shape, bytedata.tostring())
-
-                return image
-
-            cmin = cmin or np.amin(np.ravel(data))
-            cmax = cmax or np.amax(np.ravel(data))
-            data = (data * 1.0 - cmin) * (high - low) / (cmax - cmin) + low
-            if mode == 'I':
-                data32 = data.astype(np.uint32)
-                image = Image.frombytes(mode, shape, data32.tostring())
-            else:
-                raise ValueError(_errstr)
+    def _process_2d(data, shape, mode, pal, high, low, cmax, cmin):
+        shape = (shape[1], shape[0])  # columns show up first
+        if mode == 'F':
+            data32 = data.astype(np.float32)
+            image = Image.frombytes(mode, shape, data32.tostring())
 
             return image
-
-        def process_3d(data, shape, mode):
-            # if here then 3-d array with a 3 or a 4 in the shape length.
-            # Check for 3 in datacube shape --- 'RGB' or 'YCbCr'
-            if channel_axis is None:
-                ca = np.flatnonzero(np.asarray(shape) == 3) if 3 in shape else np.flatnonzero(np.asarray(shape) == 4)
-                if not np.size(ca):
-                    raise ValueError("Could not find channel dimension.")
-                ca = ca[0]
-            else:
-                ca = channel_axis
-
-            numch = shape[ca]
-            if numch not in [3, 4]:
-                raise ValueError("Channel axis dimension is not valid.")
-
+        if mode in [None, 'L', 'P']:
             bytedata = ScipyImageReader._bytescale(data, high=high, low=low, cmin=cmin, cmax=cmax)
-            channel_axis_mapping = {
-                0: ((1, 2, 0), (shape[1], shape[0])),
-                1: ((0, 2, 1), (shape[2], shape[0])),
-                2: ((0, 1, 2), (shape[1], shape[0]))
-            }
-            if ca in channel_axis_mapping:
-                transposition, shape = channel_axis_mapping[ca]
-                strdata = np.transpose(bytedata, transposition).tostring()
+            image = Image.frombytes('L', shape, bytedata.tostring())
+            if pal is not None:
+                image.putpalette(np.asarray(pal, dtype=np.uint8).tostring())
+                # Becomes a mode='P' automagically.
+            elif mode == 'P':  # default gray-scale
+                pal1 = np.arange(0, 256, 1, dtype=np.uint8)[:, np.newaxis]
+                pal2 = np.ones((3,), dtype=np.uint8)[np.newaxis, :]
+                pal = pal1 * pal2
+                image.putpalette(np.asarray(pal, dtype=np.uint8).tostring())
 
-            if mode is None:
-                mode = 'RGB' if numch == 3 else 'RGBA'
+            return image
+        if mode == '1':  # high input gives threshold for 1
+            bytedata = (data > high)
+            image = Image.frombytes('1', shape, bytedata.tostring())
 
-            if mode not in ['RGB', 'RGBA', 'YCbCr', 'CMYK']:
-                raise ValueError(_errstr)
-
-            if mode in ['RGB', 'YCbCr'] and numch != 3:
-                raise ValueError("Invalid array shape for mode.")
-            if mode in ['RGBA', 'CMYK'] and numch != 4:
-                raise ValueError("Invalid array shape for mode.")
-
-            # Here we know data and mode is correct
-            image = Image.frombytes(mode, shape, strdata)
             return image
 
+        cmin = cmin or np.amin(np.ravel(data))
+        cmax = cmax or np.amax(np.ravel(data))
+        data = (data * 1.0 - cmin) * (high - low) / (cmax - cmin) + low
+        if mode == 'I':
+            data32 = data.astype(np.uint32)
+            image = Image.frombytes(mode, shape, data32.tostring())
+        else:
+            raise ValueError("Mode is unknown or incompatible with input array shape.")
+
+        return image
+
+    @staticmethod
+    def _process_3d(data, shape, mode, channel_axis, high, low, cmin, cmax):
+        # if here then 3-d array with a 3 or a 4 in the shape length.
+        # Check for 3 in datacube shape --- 'RGB' or 'YCbCr'
+        if channel_axis is None:
+            ca = np.flatnonzero(np.asarray(shape) == 3) if 3 in shape else np.flatnonzero(np.asarray(shape) == 4)
+            if not np.size(ca):
+                raise ValueError("Could not find channel dimension.")
+            ca = ca[0]
+        else:
+            ca = channel_axis
+
+        numch = shape[ca]
+        if numch not in [3, 4]:
+            raise ValueError("Channel axis dimension is not valid.")
+
+        bytedata = ScipyImageReader._bytescale(data, high=high, low=low, cmin=cmin, cmax=cmax)
+        channel_axis_mapping = {
+            0: ((1, 2, 0), (shape[1], shape[0])),
+            1: ((0, 2, 1), (shape[2], shape[0])),
+            2: ((0, 1, 2), (shape[1], shape[0]))
+        }
+        if ca in channel_axis_mapping:
+            transposition, shape = channel_axis_mapping[ca]
+            strdata = np.transpose(bytedata, transposition).tostring()
+
+        if mode is None:
+            mode = 'RGB' if numch == 3 else 'RGBA'
+
+        if mode not in ['RGB', 'RGBA', 'YCbCr', 'CMYK']:
+            raise ValueError("Mode is unknown or incompatible with input array shape.")
+
+        if mode in ['RGB', 'YCbCr'] and numch != 3:
+            raise ValueError("Invalid array shape for mode.")
+        if mode in ['RGBA', 'CMYK'] and numch != 4:
+            raise ValueError("Invalid array shape for mode.")
+
+        # Here we know data and mode is correct
+        image = Image.frombytes(mode, shape, strdata)
+        return image
+
+    @staticmethod
+    def _to_image(arr, high=255, low=0, cmin=None, cmax=None, pal=None, mode=None, channel_axis=None):
         data = np.asarray(arr)
         if np.iscomplexobj(data):
             raise ValueError("Cannot convert a complex-valued array.")
@@ -283,8 +283,8 @@ class ScipyImageReader(BaseReader):
         if not valid:
             raise ValueError("'arr' does not have a suitable array shape for any mode.")
         if len(shape) == 2:
-            return process_2d(data, shape, pal, cmax, cmin)
-        return process_3d(data, shape, mode)
+            return ScipyImageReader._process_2d(data, shape, mode, pal, high, low, cmax, cmin)
+        return ScipyImageReader._process_3d(data, shape, mode, channel_axis, high, low, cmin, cmax)
 
     @staticmethod
     def _imread(name):
