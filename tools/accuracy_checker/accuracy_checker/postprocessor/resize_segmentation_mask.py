@@ -15,13 +15,14 @@ limitations under the License.
 """
 
 from functools import singledispatch
-import scipy.misc
 import numpy as np
 
 from ..config import NumberField
 from ..utils import get_size_from_config
 from .postprocessor import PostprocessorWithSpecificTargets
 from ..representation import SegmentationPrediction, SegmentationAnnotation
+from ..data_readers import ScipyImageReader
+
 
 class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
     __provider__ = 'resize_segmentation_mask'
@@ -61,7 +62,7 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
         def _(entry, height, width):
             entry_mask = []
             for class_mask in entry.mask:
-                resized_mask = scipy.misc.imresize(class_mask, (height, width), 'nearest')
+                resized_mask =  ScipyImageReader.imresize(class_mask, (height, width), 'nearest')
                 entry_mask.append(resized_mask)
             entry.mask = np.array(entry_mask)
 
@@ -69,7 +70,7 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
 
         @resize_segmentation_mask.register(SegmentationAnnotation)
         def _(entry, height, width):
-            entry.mask = scipy.misc.imresize(entry.mask, (height, width), 'nearest')
+            entry.mask = ScipyImageReader.imresize(entry.mask, (height, width), 'nearest')
             return entry
 
         for target in annotation:

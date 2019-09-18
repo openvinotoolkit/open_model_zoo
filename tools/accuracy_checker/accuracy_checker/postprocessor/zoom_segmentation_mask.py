@@ -21,6 +21,7 @@ from ..representation import SegmentationAnnotation, SegmentationPrediction
 from ..config import NumberField
 from ..logging import warning
 
+
 class ZoomSegMask(Postprocessor):
     """
     Zoom probabilities of segmentation prediction.
