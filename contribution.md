@@ -2,13 +2,13 @@
 
 From this document you will know how to contribute your model to OpenVINO&trade; Open Model Zoo. Almost any model from supported frameworks (see list below) can be added. To do this do next few steps.
 
-1. [Model location]
-2. [Model conversion]
-3. [Demo]
-4. [Accuracy validation]
-5. [Documentation]
-6. [Configuration file]
-7. [Pull request requirements]
+1. [Model location](#model-location)
+2. [Model conversion](#model-conversion)
+3. [Demo](#demo)
+4. [Accuracy validation](#accuracy-validation)
+5. [Documentation](#documentation)
+6. [Configuration file](#configuration-file)
+7. [Pull request requirements](#pull-request-requirements)
 
 List of supported frameworks:
 * Caffe\*
@@ -27,11 +27,11 @@ Upload your model to any Internet file storage with easy and direct access to it
 
 ## Model conversion
 
-OpenVINO&trade; supports models in its own format IR. Model from any supported framework can be easily converted to IR using Model Optimizer tool included in OpenVINO&trade; package. More information about conversion you can learn [here](). After successful conversion you will get model in IR format `*.xml` representing net graph and `*.bin` containing net parameters. 
+OpenVINO&trade; supports models in its own format IR. Model from any supported framework can be easily converted to IR using Model Optimizer tool included in OpenVINO&trade; package. More information about conversion you can learn [here](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After successful conversion you will get model in IR format `*.xml` representing net graph and `*.bin` containing net parameters. 
 
-> **NOTE 1**: due OpenVINO&trade paradigms, mean and scale values are built-in converted model.
+> **NOTE 1**: due OpenVINO&trade; paradigms, mean and scale values are built-in converted model.
 
-> **NOTE 2**: due OpenVINO&trade paradigms, if model take colored image as input, color channel order supposed to be `BGR`.
+> **NOTE 2**: due OpenVINO&trade; paradigms, if model take colored image as input, color channel order supposed to be `BGR`.
 
 *After this step you`ll get conversion parameters for Model Optimizer.*
 
@@ -41,15 +41,16 @@ Demo will show main idea of how work with yout model. If your model solves one o
 
 ## Accuracy validation
 
-To run accuracy validation, use [Accuracy Checker]() tool, provided with repository. Doing this very simple if model task from supported. You must only create accuracy validation configuration file in this case. Most information about Accuracy Checker you can find [here](https://github.com/opencv/open_model_zoo/blob/develop/tools/accuracy_checker/README.md). 
+To run accuracy validation, use [Accuracy Checker](./tools/accuracy_checker/README.md) tool, provided with repository. Doing this very simple if model task from supported. You must only create accuracy validation configuration file in this case. 
 
-When the configuration file is ready, you must run Accuracy Checker to obtain metric results. If they match your results, that means that conversion was fully successful and Accuracy Checker fully supports your model, metric and dataset. If no - recheck [conversion][Model conversion] parameters.
+When the configuration file is ready, you must run Accuracy Checker to obtain metric results. If they match your results, that means that conversion was fully successful and Accuracy Checker fully supports your model, metric and dataset. If no - recheck [conversion][#model-conversion] parameters.
 
 ## Pull request requirements
 
 Contribution to OpenVINO&trade; Open Model Zoo comes down to creating pull request in this repository. This pull request is strictly formalized and must contains changes:
-* configuration file  - model.yml
+* configuration file  - `model.yml`
 * documentation of model in markdown format
+* accuracy validation configuration file (see [Accuracy validation](#accuracy-validation))
 * license
 
 Configuration and documentation files must be located in `models/public` directory in subfolder, which name will represent model name in Open Model Zoo and will be used by downloader and converter tools. Also, please add suffix to model name, according to origin framework (e.g. `cf`, `cf2`, `tf`, `mx` or `pt`).
@@ -184,14 +185,21 @@ license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICE
 
 ### Documentation
 
-Documentation if very important part of model contribution, it helps to better understand possible usage of the model. Documentation must be named after suggested models name.
-Doucmentation must contain:
-* description of model, where you describe main purpose of the model and its features, add some links to paper or/and source code of original model and so on
+Documentation is very important part of model contribution, it helps to better understand possible usage of the model. Documentation must be named after suggested models name.
+Documentation must contain:
+* description of model
+	* main purpose
+	* features
+	* links to paper or/and source
 * model specification, e.g. type, source framework, GFLOPs and number of parameters
+	* type
+	* framework
+	* GFLOPs
+	* number of parameters
 * main accuracy values (also description of metric)
 * detailed description of input and output for original and converted models
 
-Detailed structure and headers naming convention you can learn from any other model, e.g. [alexnet](https://github.com/opencv/open_model_zoo/blob/develop/models/public/alexnet/alexnet.md).
+Detailed structure and headers naming convention you can learn from any other model, e.g. [alexnet](./models/public/alexnet/alexnet.md).
 
 ### License
 
@@ -199,4 +207,14 @@ Add your models license to `tools/downloader/license.txt` file
 
 ## Legal Information
 
-[*]
+[*] Other names and brands may be claimed as the property of others.
+
+OpenVINO is a trademark of Intel Corporation or its subsidiaries in the U.S. and/or other countries.
+
+Copyright &copy; 2018-2019 Intel Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+```
+http://www.apache.org/licenses/LICENSE-2.0
+```
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
