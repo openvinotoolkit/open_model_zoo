@@ -138,8 +138,8 @@ NATIVE_DEMOS = [
             ModelArg('face-detection-adas-0001'),
             ModelArg('face-detection-adas-binary-0001', "INT1"),
             ModelArg('face-detection-retail-0004'),
-            ModelArg('face-detection-retail-0005')),
-            # TODO: face-detection-retail-0044
+            ModelArg('face-detection-retail-0005'),
+            ModelArg('face-detection-retail-0044')),
     )),
 
     MultichannelNativeDemo(name='multi-channel-human-pose-estimation-demo', test_cases=combine_cases(
@@ -278,8 +278,8 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='multi_camera_multi_person_tracking', test_cases=combine_cases(
         TestCase(options={'--no_show': None,
-            # TODO: run_tests.py does not handle multiple ImagePatternArg
-            '-i': [ImagePatternArg('multi-camera-multi-person-tracking')],
+            '-i': [ImagePatternArg('multi-camera-multi-person-tracking-1'),
+                ImagePatternArg('multi-camera-multi-person-tracking-2')],
             '-m': ModelArg('person-detection-retail-0013')}),
         device_cases('-d'),
         single_option_cases('--m_reid',
@@ -297,7 +297,7 @@ PYTHON_DEMOS = [
             ModelArg('face-detection-adas-binary-0001', "INT1"),
             ModelArg('face-detection-retail-0004'),
             ModelArg('face-detection-retail-0005'),
-            # TODO: face-detection-retail-0044
+            ModelArg('face-detection-retail-0044'),
             ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
             ModelArg('pedestrian-detection-adas-0002'),
             ModelArg('pedestrian-detection-adas-binary-0001', "INT1"),

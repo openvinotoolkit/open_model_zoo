@@ -94,6 +94,19 @@ def main():
                 num_failures += len(demo.test_cases)
                 continue
 
+            try:
+                subprocess.check_output(
+                    [
+                        sys.executable, '--', str(auto_tools_dir / 'converter.py'),
+                        '--download_dir', str(dl_dir), '--list', str(demo.models_lst_path(demos_dir)),
+                    ],
+                    stderr=subprocess.STDOUT, universal_newlines=True)
+            except subprocess.CalledProcessError as e:
+                print(e.output)
+                print('Exit code:', e.returncode)
+                num_failures += len(demo.test_cases)
+                continue
+
             print()
 
             arg_context = ArgContext(

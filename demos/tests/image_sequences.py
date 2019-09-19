@@ -184,7 +184,21 @@ IMAGE_SEQUENCES = {
         image_net_arg('00000020'),
     ],
 
-    'multi-camera-multi-person-tracking': [image_net_arg('00000002')] * 11,
+    'multi-camera-multi-person-tracking-1': [image_net_arg('00000002')] * 11,
+
+    'multi-camera-multi-person-tracking-2': [
+        image_net_arg('00000002'),
+        image_net_arg('00000032'),
+        image_net_arg('00017291'),
+        image_net_arg('00017293'),
+        image_net_arg('00040547'),
+        image_net_arg('00000002'),
+        image_net_arg('00000032'),
+        image_net_arg('00017291'),
+        image_net_arg('00017293'),
+        image_net_arg('00040547'),
+        image_net_arg('00000002'),
+    ],
 
     'py/object-detection-demo-ssd-async': [
         image_net_arg('00000001'),
