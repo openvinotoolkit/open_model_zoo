@@ -134,7 +134,7 @@ class ModelEvaluator:
                     free_irs.append(ir)
                     annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions)
 
-                    if not self.postprocessor.has_dataset_processors and self.metric_executor:
+                    if self.metric_executor:
                         self.metric_executor.update_metrics_on_batch(annotations, predictions)
 
                     self._annotations.extend(annotations)
@@ -146,13 +146,8 @@ class ModelEvaluator:
                 time.sleep(wait_time)
                 wait_time = max(wait_time * 2, .16)
 
-        if self.postprocessor.has_dataset_processors:
-            self.metric_executor.update_metrics_on_batch(self._annotations, self._predictions)
-
         if progress_reporter:
             progress_reporter.finish()
-
-        return self.postprocessor.process_dataset(self._annotations, self._predictions)
 
     def process_dataset(
             self,
@@ -193,7 +188,7 @@ class ModelEvaluator:
                 batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
 
             annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions, batch_meta)
-            if not self.postprocessor.has_dataset_processors and self.metric_executor:
+            if self.metric_executor:
                 self.metric_executor.update_metrics_on_batch(annotations, predictions)
 
             self._annotations.extend(annotations)
@@ -202,13 +197,8 @@ class ModelEvaluator:
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_predictions))
 
-        if self.postprocessor.has_dataset_processors and self.metric_executor:
-            self.metric_executor.update_metrics_on_batch(self._annotations, self._predictions)
-
         if progress_reporter:
             progress_reporter.finish()
-
-        return self.postprocessor.process_dataset(self._annotations, self._predictions)
 
     @staticmethod
     def _wait_for_any(irs):
