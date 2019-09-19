@@ -32,16 +32,17 @@ from ..progress_reporters import ProgressReporter
 
 class ModelEvaluator:
     def __init__(
-            self, launcher, input_feeder, adapter, dataset, preprocessor, postprocessor, metric
+            self, launcher, adapter, dataset_config
     ):
         self.launcher = launcher
-        self.input_feeder = input_feeder
+        self.input_feeder = None
         self.adapter = adapter
-        self.dataset = dataset
-        self.preprocessor = preprocessor
-        self.postprocessor = postprocessor
-        self.metric_executor = metric
+        self.dataset_config = dataset_config
         self.stat_collector = None
+        self.preprocessor = None
+        self.dataset = None
+        self.postprocessor = None
+        self.metric_executor = None
 
         self._annotations = []
         self._predictions = []
@@ -50,38 +51,14 @@ class ModelEvaluator:
     @classmethod
     def from_configs(cls, config):
         model_config = config['models'][0]
-        dataset_config = model_config['datasets'][0]
+        dataset_config = model_config['datasets']
         launcher_config = model_config['launchers'][0]
-        dataset_name = dataset_config['name']
-        data_reader_config = dataset_config.get('reader', 'opencv_imread')
-        data_source = dataset_config.get('data_source')
-
-        if isinstance(data_reader_config, str):
-            data_reader = BaseReader.provide(data_reader_config, data_source)
-        elif isinstance(data_reader_config, dict):
-            data_reader = BaseReader.provide(data_reader_config['type'], data_source, data_reader_config)
-        else:
-            raise ConfigError('reader should be dict or string')
-        annotation_reader = None
-        dataset_meta = {}
-        metric_dispatcher = None
-        if contains_any(dataset_config, ['annotation', 'annotation_conversion']):
-            annotation_reader = Dataset(dataset_config)
-            dataset_meta = annotation_reader.metadata
-        dataset = DatasetWrapper(data_reader, annotation_reader)
         launcher = create_launcher(launcher_config, delayed_model_loading=True)
         config_adapter = launcher_config.get('adapter')
-        adapter = None if not config_adapter else create_adapter(config_adapter, None, annotation_reader)
-        preprocessor = PreprocessingExecutor(
-            dataset_config.get('preprocessing'), dataset_name, dataset_meta
-        )
-        postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset_meta)
-        if 'metrics' in dataset_config:
-            metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), annotation_reader)
+        adapter = None if not config_adapter else create_adapter(config_adapter, None, None)
 
         return cls(
-            launcher, None, adapter, dataset,
-            preprocessor, postprocessor, metric_dispatcher
+            launcher, adapter, dataset_config
         )
 
     def _get_batch_input(self, batch_input, batch_annotation):
@@ -98,8 +75,10 @@ class ModelEvaluator:
             subset=None,
             num_images=None,
             check_progress=False,
+            dataset_tag='',
             **kwargs
     ):
+
         def _process_ready_predictions(batch_predictions, batch_identifiers, batch_meta, adapter, raw_outputs_callback):
             if self.stat_collector:
                 self.stat_collector.process_batch(batch_predictions)
@@ -115,6 +94,12 @@ class ModelEvaluator:
                 self.dataset.make_subset(ids=subset)
             elif num_images is not None:
                 self.dataset.make_subset(end=num_images)
+
+        if self.dataset is None or self.dataset.tag != dataset_tag:
+            dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
+            self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
+            if self.dataset.annotation_reader:
+                self.adapter.label_map = self.dataset.annotation_reader.metadata.get('label_map')
 
         self.dataset.batch = self.launcher.batch
         self.stat_collector = None
@@ -175,8 +160,14 @@ class ModelEvaluator:
             subset=None,
             num_images=None,
             check_progress=False,
+            dataset_tag='',
             **kwargs
     ):
+        if self.dataset is None or self.dataset.tag != dataset_tag:
+            dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
+            self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
+            if self.dataset.annotation_reader:
+                self.adapter.label_map = self.dataset.annotation_reader.metadata.get('label_map')
         self.dataset.batch = self.launcher.batch
         progress_reporter = None
 
@@ -314,3 +305,40 @@ class ModelEvaluator:
 
     def release(self):
         self.launcher.release()
+
+
+def create_dataset_attributes(config, tag):
+    if isinstance(config, list):
+        dataset_config = config[0]
+    elif isinstance(config, dict):
+        dataset_config = config.get(tag)
+        if not dataset_config:
+            raise ConfigError('suitable dataset for *{}* not found'.format(tag))
+    else:
+        raise TypeError('unknown type for config, dictionary or list must be')
+
+    dataset_name = dataset_config['name']
+    data_reader_config = dataset_config.get('reader', 'opencv_imread')
+    data_source = dataset_config.get('data_source')
+
+    if isinstance(data_reader_config, str):
+        data_reader = BaseReader.provide(data_reader_config, data_source)
+    elif isinstance(data_reader_config, dict):
+        data_reader = BaseReader.provide(data_reader_config['type'], data_source, data_reader_config)
+    else:
+        raise ConfigError('reader should be dict or string')
+    annotation_reader = None
+    dataset_meta = {}
+    metric_dispatcher = None
+    if contains_any(dataset_config, ['annotation', 'annotation_conversion']):
+        annotation_reader = Dataset(dataset_config)
+        dataset_meta = annotation_reader.metadata
+    dataset = DatasetWrapper(data_reader, annotation_reader)
+    preprocessor = PreprocessingExecutor(
+        dataset_config.get('preprocessing'), dataset_name, dataset_meta
+    )
+    postprocessor = PostprocessingExecutor(dataset_config.get('postprocessing'), dataset_name, dataset_meta)
+    if 'metrics' in dataset_config:
+        metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), annotation_reader)
+
+    return dataset, metric_dispatcher, preprocessor, postprocessor
