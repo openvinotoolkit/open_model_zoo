@@ -114,6 +114,10 @@ class Dataset:
             return len(self.subset)
         return len(self._annotation)
 
+    @property
+    def full_size(self):
+        return len(self._annotation)
+
     def __call__(self, context, *args, **kwargs):
         batch_annotation = self.__getitem__(self.iteration)
         self.iteration += 1
@@ -241,6 +245,12 @@ class DatasetWrapper:
             self.subset = None
         if self.annotation_reader:
             self.annotation_reader.subset = None
+
+    @property
+    def full_size(self):
+        if self.annotation_reader:
+            return self.annotation_reader.full_size
+        return len(self._identifiers)
 
     @property
     def size(self):
