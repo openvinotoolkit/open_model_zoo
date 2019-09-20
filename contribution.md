@@ -6,8 +6,8 @@ From this document you will know how to contribute your model to OpenVINO&trade;
 2. [Model conversion](#model-conversion)
 3. [Demo](#demo)
 4. [Accuracy validation](#accuracy-validation)
-5. [Documentation](#documentation)
-6. [Configuration file](#configuration-file)
+7. [Configuration file](#configuration-file)
+6. [Documentation](#documentation)
 7. [Pull request requirements](#pull-request-requirements)
 
 List of supported frameworks:
@@ -23,7 +23,7 @@ List of supported frameworks:
 
 Upload your model to any Internet file storage with easy and direct access to it. It can be www.github.com, GoogleDrive\*, or any other.
 
-*After this step you got links to the model, which will be used later.*
+*After this step you will get **links** to the model*
 
 ## Model conversion
 
@@ -33,29 +33,30 @@ OpenVINO&trade; supports models in its own format IR. Model from any supported f
 
 > **NOTE 2**: due OpenVINO&trade; paradigms, if model take colored image as input, color channel order supposed to be `BGR`.
 
-*After this step you`ll get conversion parameters for Model Optimizer.*
+*After this step you`ll get **conversion parameters** for Model Optimizer.*
 
 ## Demo
 
-Demo will show main idea of how work with yout model. If your model solves one of the supported by Open Model Zoo task, try find appropriate option from [demos](https://docs.openvinotoolkit.org/latest/_demos_README.html) or [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html).
+Demo will show main idea of how work with your model. If your model solves one of the supported by Open Model Zoo task, try find appropriate option from [demos](https://docs.openvinotoolkit.org/latest/_demos_README.html) or [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html).
+
+If appropriate demo or sample are absent, you must provide your own demo (C++ or Python). Demo's input requires next options:
+```
+    -i "<path>"              Optional. Path to a input file or directory (for multiple inferences). By default input must be generated randomly.
+    -m "<path>"              Required. Path to an .xml file with a trained model
+    -d "<device>"            Optional. Target device for model inference. Usually CPU and GPU. By default CPU
+    -no_show                 Optional. Do not show inference result.
+```
+Also you can add all necessary parameters for inference your model.
 
 ## Accuracy validation
 
 To run accuracy validation, use [Accuracy Checker](./tools/accuracy_checker/README.md) tool, provided with repository. Doing this very simple if model task from supported. You must only create accuracy validation configuration file in this case. 
 
-When the configuration file is ready, you must run Accuracy Checker to obtain metric results. If they match your results, that means that conversion was fully successful and Accuracy Checker fully supports your model, metric and dataset. If no - recheck [conversion][#model-conversion] parameters.
+When the configuration file is ready, you must run Accuracy Checker to obtain metric results. If they match your results, that means  conversion was fully successful and Accuracy Checker fully supports your model, metric and dataset. If no - recheck [conversion][#model-conversion] parameters or validation configuration.
 
-## Pull request requirements
+*After this step you will get accuracy validation configuration file - **<model_name>.yml***
 
-Contribution to OpenVINO&trade; Open Model Zoo comes down to creating pull request in this repository. This pull request is strictly formalized and must contains changes:
-* configuration file  - `model.yml`
-* documentation of model in markdown format
-* accuracy validation configuration file (see [Accuracy validation](#accuracy-validation))
-* license
-
-Configuration and documentation files must be located in `models/public` directory in subfolder, which name will represent model name in Open Model Zoo and will be used by downloader and converter tools. Also, please add suffix to model name, according to origin framework (e.g. `cf`, `cf2`, `tf`, `mx` or `pt`).
-
-### Configuration file
+## Configuration file
 
 Models configuration file contains information about model: what it is, how to download it and how to convert it to IR format. This information must be specified in `model.yml` file, which must be in the models subfolder. Let look closer to the file content.
 
@@ -78,7 +79,7 @@ This tag describes on of the task that model solves:
 - `optical_character_recognition`
 - `semantic_segmentation`
 
-If your model solves another task, you can freely add it with modification of [tools/downloader/common.py](https://github.com/opencv/open_model_zoo/blob/develop/tools/downloader/common.py) file list `KNOWN_TASK_TYPES`
+If your model solves another task, you can freely add it with modification of [tools/downloader/common.py](tools/downloader/common.py) file list `KNOWN_TASK_TYPES`
 
 **`files`**
 
@@ -96,7 +97,7 @@ If file is located on GoogleDrive\*, section `source` must contain:
 ```
 **`postprocessing`** (*optional*)
 
-Sometimes right after downloading model are not readty for conversion, or conversion may be incorrect or failure. It may be avoided by some manipulation with original files, such as unpacking, replacing or deleting some part of file. This manipulation must be described in this section.
+Sometimes right after downloading model are not ready for conversion, or conversion may be incorrect or failure. It may be avoided by some manipulation with original files, such as unpacking, replacing or deleting some part of file. This manipulation must be described in this section.
 
 For unpacking archive:
 
@@ -132,9 +133,14 @@ List of caffe2-to-onnx conversion parameters, see `model_optimizer_args` for det
 
 **`model_optimizer_args`**
 
-Conversion parameter, obtained [early][Model Conversion], must be specified in this section like this:
+Conversion parameter, obtained [earlier](#model-conversion), must be specified in this section, e.g.:
 ```
-    - --shape=[1,3,224,224]
+  - --input=data
+  - --mean_values=data[127.5]
+  - --scale_values=data[127.5]
+  - --reverse_input_channels
+  - --output=prob
+  - --input_model=$conv_dir/googlenet-v3.onnx
 ```
 > **NOTE:**  no need to specify `framework`, `data_type`, `model_name` and `output_dir` parameters since them are deduced automatically.
 
@@ -144,14 +150,14 @@ Framework of original model (`caffe`, `dldt`, `mxnet`, `pytorch`, `tf`)
 
 **`license`**
 
-Path to license
+Path to model's license.
 
 ----
-*Congratulation! You've got configuration file!*
+*After this step you will obtain **model.yml** file*
 
-#### Example
+### Example
 
-In this [example](https://github.com/opencv/open_model_zoo/blob/develop/models/public/densenet-121-tf/model.yml) classificational model DenseNet-121\*, pretrained in TensorFlow\*, is downloading from GoogleDrive\* as archive.
+In this [example](models/public/densenet-121-tf/model.yml) classificational model DenseNet-121\*, pretrained in TensorFlow\*, is downloading from GoogleDrive\* as archive.
 
 ```
 description: >-
@@ -183,7 +189,7 @@ framework: tf
 license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE
 ```
 
-### Documentation
+## Documentation
 
 Documentation is very important part of model contribution, it helps to better understand possible usage of the model. Documentation must be named after suggested models name.
 Documentation must contain:
@@ -201,13 +207,24 @@ Documentation must contain:
 
 Detailed structure and headers naming convention you can learn from any other model, e.g. [alexnet](./models/public/alexnet/alexnet.md).
 
-### License
+---
+*After this step you will obtain **<model_name>.md** - documentation file*
 
-Add your models license to `tools/downloader/license.txt` file
+## Pull request requirements
+
+Contribution to OpenVINO&trade; Open Model Zoo comes down to creating pull request in this repository. This pull request is strictly formalized and must contains changes:
+* configuration file  - `model.yml` [from here](#configuration-file)
+* documentation of model in markdown format [from here](#documentation)
+* accuracy validation configuration file [from here](#accuracy-validation)
+* license added to [tools/downloader/license.txt](tools/downloader/license.txt)
+
+Configuration and documentation files must be located in `models/public` directory in subfolder, which name will represent model name in Open Model Zoo and will be used by downloader and converter tools. Also, please add suffix to model name, according to origin framework (e.g. `cf`, `cf2`, `tf`, `mx` or `pt`). 
+
+Validation configuration file must be located in [tools/accuracy_checker/configs](tools/accuracy_checker/configs).
 
 ## Legal Information
 
-[*] Other names and brands may be claimed as the property of others.
+[\*] Other names and brands may be claimed as the property of others.
 
 OpenVINO is a trademark of Intel Corporation or its subsidiaries in the U.S. and/or other countries.
 
