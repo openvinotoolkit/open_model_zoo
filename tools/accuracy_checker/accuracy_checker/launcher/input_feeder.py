@@ -192,7 +192,7 @@ class InputFeeder:
             for tile in layer_data:
                 tile_shape = np.shape(tile)
                 padded_tile = tile
-                if tile_shape != shape:
+                if tile_shape != tuple(shape):
                     padding_shape = (common_dim - tile_dim for common_dim, tile_dim in zip(shape, tile_shape))
                     pading = np.zeros(padding_shape)
                     padded_tile = np.concatenate((tile, pading))
