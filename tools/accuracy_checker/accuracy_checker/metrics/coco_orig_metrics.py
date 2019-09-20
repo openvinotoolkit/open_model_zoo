@@ -74,6 +74,7 @@ def keypoints_to_coco(prediction_data_to_store, pred):
 
     return prediction_data_to_store
 
+
 iou_specific_processing = {
     'bbox': box_to_coco,
     'segm': segm_to_coco,
