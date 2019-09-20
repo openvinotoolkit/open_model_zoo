@@ -43,6 +43,7 @@ KNOWN_TASK_TYPES = {
     'object_attributes',
     'optical_character_recognition',
     'semantic_segmentation',
+    'speech_recognition',
 }
 
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')
