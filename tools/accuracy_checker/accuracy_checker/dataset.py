@@ -98,7 +98,9 @@ class Dataset:
         return deepcopy(self._config) #read-only
 
     def __len__(self):
-        return self.size
+        if self.subset:
+            return len(self.subset)
+        return len(self._annotation)
 
     @property
     def metadata(self):
@@ -110,9 +112,7 @@ class Dataset:
 
     @property
     def size(self):
-        if self.subset:
-            return len(self.subset)
-        return len(self._annotation)
+        return self.__len__()
 
     @property
     def full_size(self):
@@ -220,6 +220,13 @@ class DatasetWrapper:
 
         return batch_annotation, batch_input, batch_identifiers
 
+    def __len__(self):
+        if self.annotation_reader:
+            return self.annotation_reader.size
+        if self.subset:
+            return len(self.subset)
+        return len(self._identifiers)
+
     def make_subset(self, ids=None, start=0, step=1, end=None):
         if self.annotation_reader:
             self.annotation_reader.make_subset(ids, start, step, end)
@@ -254,8 +261,4 @@ class DatasetWrapper:
 
     @property
     def size(self):
-        if self.annotation_reader:
-            return self.annotation_reader.size
-        if self.subset:
-            return len(self.subset)
-        return len(self._identifiers)
+        return self.__len__()
