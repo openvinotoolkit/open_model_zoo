@@ -95,11 +95,8 @@ class ModelEvaluator:
             elif num_images is not None:
                 self.dataset.make_subset(end=num_images)
 
-        if self.dataset is None or self.dataset.tag != dataset_tag:
-            dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
-            self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
-            if self.dataset.annotation_reader:
-                self.adapter.label_map = self.dataset.annotation_reader.metadata.get('label_map')
+        if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
+            self.select_dataset(dataset_tag)
 
         self.dataset.batch = self.launcher.batch
         self.stat_collector = None
@@ -149,6 +146,12 @@ class ModelEvaluator:
         if progress_reporter:
             progress_reporter.finish()
 
+    def select_dataset(self, dataset_tag):
+        dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
+        self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
+        if self.dataset.annotation_reader and self.dataset.annotation_reader.metadata:
+            self.adapter.label_map = self.dataset.annotation_reader.metadata.get('label_map')
+
     def process_dataset(
             self,
             statistics_functors_maping=None,
@@ -158,11 +161,8 @@ class ModelEvaluator:
             dataset_tag='',
             **kwargs
     ):
-        if self.dataset is None or self.dataset.tag != dataset_tag:
-            dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
-            self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
-            if self.dataset.annotation_reader:
-                self.adapter.label_map = self.dataset.annotation_reader.metadata.get('label_map')
+        if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
+            self.select_dataset(dataset_tag)
         self.dataset.batch = self.launcher.batch
         progress_reporter = None
 
@@ -291,7 +291,8 @@ class ModelEvaluator:
         self._annotations = []
         self._predictions = []
         self._metrics_results = []
-        self.dataset.reset()
+        if self.dataset:
+            self.dataset.reset()
 
     def release(self):
         self.launcher.release()
