@@ -179,7 +179,7 @@ class InputFeeder:
             return grouped_data
 
         def calculate_max_shape(layer_data):
-            common_shape = list(layer_data[0].shape)
+            common_shape = list(np.shape(layer_data[0]))
             for tile in layer_data:
                 shape = np.shape(tile)
                 for dim_id, dim, in enumerate(shape):
