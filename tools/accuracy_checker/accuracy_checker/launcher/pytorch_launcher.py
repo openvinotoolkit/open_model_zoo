@@ -64,7 +64,7 @@ class PyTorchLauncher(Launcher):
 
     @property
     def inputs(self):
-       return self._inputs
+        return self._inputs
 
     @property
     def batch(self):
@@ -99,7 +99,7 @@ class PyTorchLauncher(Launcher):
         with torch.no_grad():
             return Variable(tensor)
 
-    def predict(self,inputs, metadata=None, **kwargs):
+    def predict(self, inputs, metadata=None, **kwargs):
         results = []
         for batch_input in inputs:
             outputs = list(self.module(*batch_input.values()))
@@ -110,6 +110,9 @@ class PyTorchLauncher(Launcher):
             results.append(result_dict)
 
         return results
+
+    def predict_async(self, *args, **kwargs):
+        raise ValueError('MxNet Launcher does not support async mode yet')
 
     def release(self):
         del self.module
