@@ -1,6 +1,6 @@
 # How to contribute to OMZ
 
-From this document you will know how to contribute your model to OpenVINO&trade; Open Model Zoo. Almost any model from supported frameworks (see list below) can be added. To do this do next few steps.
+From this document you will know how to contribute your model to OpenVINO&trade; Open Model Zoo. Almost any model from supported frameworks (see list below) can be added. It could be done in few simple steps.
 
 1. [Model location](#model-location)
 2. [Model conversion](#model-conversion)
@@ -17,8 +17,6 @@ List of supported frameworks:
 * MXNet\*
 * PyTorch\* (by conversion to ONNX\*)
 
-
-
 ## Model location
 
 Upload your model to any Internet file storage with easy and direct access to it. It can be www.github.com, GoogleDrive\*, or any other.
@@ -29,9 +27,9 @@ Upload your model to any Internet file storage with easy and direct access to it
 
 OpenVINO&trade; supports models in its own format IR. Model from any supported framework can be easily converted to IR using Model Optimizer tool included in OpenVINO&trade; package. More information about conversion you can learn [here](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After successful conversion you will get model in IR format `*.xml` representing net graph and `*.bin` containing net parameters. 
 
-> **NOTE 1**: due OpenVINO&trade; paradigms, mean and scale values are built-in converted model.
+> **NOTE 1**: due to OpenVINO&trade; paradigm, image pre-processing parameters (mean and scale) should be built into converted model to simplify model usage.
 
-> **NOTE 2**: due OpenVINO&trade; paradigms, if model take colored image as input, color channel order supposed to be `BGR`.
+> **NOTE 2**: due to OpenVINO&trade; paradigms, if model input is a colored image, color channel order should be `BGR`.
 
 *After this step you`ll get **conversion parameters** for Model Optimizer.*
 
@@ -43,14 +41,14 @@ If appropriate demo or sample are absent, you must provide your own demo (C++ or
 ```
     -i "<path>"              Optional. Path to a input file or directory (for multiple inferences). By default input must be generated randomly.
     -m "<path>"              Required. Path to an .xml file with a trained model
-    -d "<device>"            Optional. Target device for model inference. Usually CPU and GPU. By default CPU
-    -no_show                 Optional. Do not show inference result.
+    -d "<device>"            Optional. Target device for model inference. By default CPU
+    -no_show                 Optional. Do not launch GUI window to visualize inference results. Needed for demo CI tests automation.
 ```
 Also you can add all necessary parameters for inference your model.
 
 ## Accuracy validation
 
-To run accuracy validation, use [Accuracy Checker](./tools/accuracy_checker/README.md) tool, provided with repository. Doing this very simple if model task from supported. You must only create accuracy validation configuration file in this case. 
+To run accuracy validation, use [Accuracy Checker](./tools/accuracy_checker#testing-new-models) tool, provided with repository. It is simple if model task already supported by Accuracy Checker. You need only create Accuracy Checker configuration file, which contain necessary parameters to do accuracy validation (specify dataset and annotation, pre- and post processing parameters, accuracy metric to compute and so on).
 
 When the configuration file is ready, you must run Accuracy Checker to obtain metric results. If they match your results, that means  conversion was fully successful and Accuracy Checker fully supports your model, metric and dataset. If no - recheck [conversion][#model-conversion] parameters or validation configuration.
 
@@ -58,15 +56,15 @@ When the configuration file is ready, you must run Accuracy Checker to obtain me
 
 ## Configuration file
 
-Models configuration file contains information about model: what it is, how to download it and how to convert it to IR format. This information must be specified in `model.yml` file, which must be in the models subfolder. Let look closer to the file content.
+Models configuration file contains information about model: what it is, how to download it and how to convert it to IR format. This information must be specified in `model.yml` file, which must be located in the model subfolder. Let look closer to the file content.
 
 **`description`**
 
-This tag must contain description of model.
+This tag contains description of model.
 
 **`task_type`**
 
-This tag describes on of the task that model solves:
+This tag describes task that model solves:
 - `action_recognition`
 - `classification`
 - `detection`
@@ -79,11 +77,11 @@ This tag describes on of the task that model solves:
 - `optical_character_recognition`
 - `semantic_segmentation`
 
-If your model solves another task, you can freely add it with modification of [tools/downloader/common.py](tools/downloader/common.py) file list `KNOWN_TASK_TYPES`
+If task, that your model solve, is not listed here, please add new type of task to [tools/downloader/common.py](tools/downloader/common.py) file list `KNOWN_TASK_TYPES`
 
 **`files`**
 
-You must describe all files, which must be downloaded, in this section. Each file must is described in few tags:
+You describe all files, which need to be downloaded, in this section. Each file is described in few tags:
 
 * `name` sets file name after downloading
 * `size` sets file size
@@ -97,7 +95,7 @@ If file is located on GoogleDrive\*, section `source` must contain:
 ```
 **`postprocessing`** (*optional*)
 
-Sometimes right after downloading model are not ready for conversion, or conversion may be incorrect or failure. It may be avoided by some manipulation with original files, such as unpacking, replacing or deleting some part of file. This manipulation must be described in this section.
+Sometimes right after downloading model is not ready for conversion by Model Optimizer and some additional preprocessing needed, such as unpacking, replacing or deleting some part of file. This manipulation is described in this section.
 
 For unpacking archive:
 
@@ -133,7 +131,7 @@ List of caffe2-to-onnx conversion parameters, see `model_optimizer_args` for det
 
 **`model_optimizer_args`**
 
-Conversion parameter, obtained [earlier](#model-conversion), must be specified in this section, e.g.:
+Conversion parameters, obtained [earlier](#model-conversion), is specified in this section, e.g.:
 ```
   - --input=data
   - --mean_values=data[127.5]
@@ -146,7 +144,7 @@ Conversion parameter, obtained [earlier](#model-conversion), must be specified i
 
 **`framework`**
 
-Framework of original model (`caffe`, `dldt`, `mxnet`, `pytorch`, `tf`)
+Framework of original model (`caffe`, `dldt`, `mxnet`, `pytorch`, `tf`).
 
 **`license`**
 
@@ -157,7 +155,7 @@ Path to model's license.
 
 ### Example
 
-In this [example](models/public/densenet-121-tf/model.yml) classificational model DenseNet-121\*, pretrained in TensorFlow\*, is downloading from GoogleDrive\* as archive.
+In this [example](models/public/densenet-121-tf/model.yml) classification model DenseNet-121\*, pretrained in TensorFlow\*, is downloading from GoogleDrive\* as archive.
 
 ```
 description: >-
@@ -192,16 +190,16 @@ license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICE
 ## Documentation
 
 Documentation is very important part of model contribution, it helps to better understand possible usage of the model. Documentation must be named after suggested models name.
-Documentation must contain:
+Documentation should contain:
 * description of model
 	* main purpose
 	* features
 	* links to paper or/and source
-* model specification, e.g. type, source framework, GFLOPs and number of parameters
+* model specification
 	* type
 	* framework
-	* GFLOPs
-	* number of parameters
+	* GFLOPs (*if available*)
+	* number of parameters (*if available*)
 * main accuracy values (also description of metric)
 * detailed description of input and output for original and converted models
 
@@ -212,15 +210,25 @@ Detailed structure and headers naming convention you can learn from any other mo
 
 ## Pull request requirements
 
-Contribution to OpenVINO&trade; Open Model Zoo comes down to creating pull request in this repository. This pull request is strictly formalized and must contains changes:
-* configuration file  - `model.yml` [from here](#configuration-file)
-* documentation of model in markdown format [from here](#documentation)
-* accuracy validation configuration file [from here](#accuracy-validation)
+Contribution to OpenVINO&trade; Open Model Zoo comes down to creating pull request in this repository. Please use `develop` branch when creating your PR. Pull request is strictly formalized and must contains changes:
+* configuration file  - `model.yml` from [here](#configuration-file)
+* documentation of model in markdown format from [here](#documentation)
+* accuracy validation configuration file from [here](#accuracy-validation)
 * license added to [tools/downloader/license.txt](tools/downloader/license.txt)
+
+> If model uses your own demo, add it to [demos](/demos) folder.
+
+> If you made any other changes, that make auto downloading and conversion possible, add it too.
 
 Configuration and documentation files must be located in `models/public` directory in subfolder, which name will represent model name in Open Model Zoo and will be used by downloader and converter tools. Also, please add suffix to model name, according to origin framework (e.g. `cf`, `cf2`, `tf`, `mx` or `pt`). 
 
 Validation configuration file must be located in [tools/accuracy_checker/configs](tools/accuracy_checker/configs).
+
+This PR must pass next tests:
+* model is downloadable by `tools/downloader/downloader.py` script
+* model is convertible by `tools/downloader/converter.py` script
+* model can be used by demo or sample and provides adequate results
+* model passes accuracy validation
 
 ## Legal Information
 
