@@ -238,6 +238,7 @@ class DLSDKLauncher(Launcher):
         # whole network should be recreated during reshape
         # it can not be used in case delayed initialization
         self.reload_network = not delayed_model_loading
+        self._start_inference = False
 
     @property
     def inputs(self):
@@ -263,6 +264,7 @@ class DLSDKLauncher(Launcher):
         Returns:
             raw data from network.
         """
+        self._start_inference = True
         results = []
         for infer_inputs in inputs:
             if self._do_reshape:
@@ -291,6 +293,7 @@ class DLSDKLauncher(Launcher):
         return results
 
     def predict_async(self, ir, inputs, metadata=None, **kwargs):
+        self._start_inference = True
         infer_inputs = inputs[0]
         benchmark = kwargs.get('benchmark')
         if benchmark:
@@ -517,6 +520,10 @@ class DLSDKLauncher(Launcher):
             filled_part = [data[-1]] * diff_number
             data = np.concatenate([data, filled_part])
 
+        if data_batch_size > input_batch_size and not self._start_inference:
+            self._set_batch_size(data_batch_size)
+            self.load_network(self.network)
+
         if len(data.shape) > 1 and len(input_shape) > 1 and data.shape[1] != input_shape[1]:
             data = data[:, :input_shape[1]]
 
@@ -668,6 +675,9 @@ class DLSDKLauncher(Launcher):
                 return data
 
         return self._align_data_shape(data, layer_name)
+
+    def finish(self):
+        self._start_inference = False
 
     def release(self):
         if 'network' in self.__dict__:

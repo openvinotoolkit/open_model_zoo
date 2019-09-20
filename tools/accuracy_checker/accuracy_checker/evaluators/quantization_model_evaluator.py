@@ -167,6 +167,9 @@ class ModelEvaluator:
         if progress_reporter:
             progress_reporter.finish()
 
+        if hasattr(self.launcher, 'finish'):
+            self.launcher.finish()
+
         return self.postprocessor.process_dataset(self._annotations, self._predictions)
 
     def process_dataset(
@@ -216,6 +219,9 @@ class ModelEvaluator:
 
         if progress_reporter:
             progress_reporter.finish()
+
+        if hasattr(self.launcher, 'finish'):
+            self.launcher.finish()
 
         return self.postprocessor.process_dataset(self._annotations, self._predictions)
 
@@ -279,7 +285,8 @@ class ModelEvaluator:
         self.launcher.load_network(network)
         self.input_feeder = InputFeeder(
             self.launcher.config.get('inputs', []), self.launcher.inputs,
-            self.launcher.fit_to_input, self.launcher.default_layout
+            self.launcher.fit_to_input, self.launcher.default_layout,
+            multi_infer_allowed=False
         )
         if self.adapter:
             self.adapter.output_blob = self.launcher.output_blob
@@ -288,7 +295,8 @@ class ModelEvaluator:
         self.launcher.load_ir(xml_path, bin_path)
         self.input_feeder = InputFeeder(
             self.launcher.config.get('inputs', []), self.launcher.inputs,
-            self.launcher.fit_to_input, self.launcher.default_layout
+            self.launcher.fit_to_input, self.launcher.default_layout,
+            multi_infer_allowed=False
         )
         if self.adapter:
             self.adapter.output_blob = self.launcher.output_blob
@@ -311,6 +319,8 @@ class ModelEvaluator:
         self._predictions = []
         self._metrics_results = []
         self.dataset.reset()
+        if hasattr(self.launcher, 'finish'):
+            self.launcher.finish()
 
     def release(self):
         self.launcher.release()

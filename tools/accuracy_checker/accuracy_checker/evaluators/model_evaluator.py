@@ -155,6 +155,9 @@ class ModelEvaluator:
         if self.postprocessor.has_dataset_processors:
             self.metric_executor.update_metrics_on_batch(self._annotations, self._predictions)
 
+        if hasattr(self.launcher, 'finish'):
+            self.launcher.finish()
+
         return self.postprocessor.process_dataset(self._annotations, self._predictions)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
@@ -195,6 +198,9 @@ class ModelEvaluator:
 
         if self.postprocessor.has_dataset_processors:
             self.metric_executor.update_metrics_on_batch(self._annotations, self._predictions)
+
+        if hasattr(self.launcher, 'finish'):
+            self.launcher.finish()
 
         return self.postprocessor.process_dataset(self._annotations, self._predictions)
 
@@ -302,6 +308,8 @@ class ModelEvaluator:
         self._annotations = []
         self._predictions = []
         self._metrics_results = []
+        if hasattr(self.launcher, 'finish'):
+            self.launcher.finish()
 
     def release(self):
         self.launcher.release()

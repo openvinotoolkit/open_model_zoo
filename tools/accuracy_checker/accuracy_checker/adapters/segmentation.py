@@ -87,9 +87,18 @@ class BrainTumorSegmentationAdapter(Adapter):
     def _extract_predictions(self, outputs_list, meta):
         if not (meta[-1] or {}).get('multi_infer', False):
             return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
+        if isinstance(outputs_list, dict):
+            outputs_map = outputs_list
+            if len(outputs_map[self.output_blob]) != len(meta):
+                for output_key, output_value in outputs_map.items():
+                    output_shape = np.shape(output_value)
+                    outputs_map[output_key] = np.reshape(
+                        output_value, (len(meta), output_shape[0] // len(meta), *output_shape[0:])
+                    )
+            return outputs_map
 
-        output_keys = list(outputs_list[0].keys())
         output_map = {}
+        output_keys = list(outputs_list[0].keys())
         for output_key in output_keys:
             output_data = [[output[output_key] for output in outputs_list]]
             output_map[output_key] = output_data

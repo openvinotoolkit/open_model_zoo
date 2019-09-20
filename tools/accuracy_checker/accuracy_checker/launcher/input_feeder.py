@@ -29,7 +29,10 @@ LAYER_LAYOUT_TO_IMAGE_LAYOUT = {
 
 
 class InputFeeder:
-    def __init__(self, inputs_config, network_inputs, prepare_input_data=None, default_layout='NCHW'):
+    def __init__(
+            self, inputs_config, network_inputs, prepare_input_data=None, default_layout='NCHW',
+            multi_infer_allowed=True
+    ):
         def fit_to_input(data, input_layer_name, layout):
             if len(np.shape(data)) == 4:
                 return np.transpose(data, layout)
@@ -39,6 +42,7 @@ class InputFeeder:
         self.network_inputs = network_inputs
         self.default_layout = default_layout
         self.configure(inputs_config)
+        self.multi_infer_allowed = multi_infer_allowed
 
     def __call__(self, context, *args, **kwargs):
         data_batch = context.data_batch
@@ -174,18 +178,44 @@ class InputFeeder:
                     grouped_data[split_id % num_splits].append(data_split)
             return grouped_data
 
+        def calculate_max_shape(layer_data):
+            common_shape = list(layer_data[0].shape)
+            for tile in layer_data:
+                shape = np.shape(tile)
+                for dim_id, dim, in enumerate(shape):
+                    if dim > common_shape[dim_id]:
+                        common_shape[dim_id] = dim
+            return common_shape
+
+        def pad_tiles(layer_data, shape):
+            new_data = []
+            for tile in layer_data:
+                tile_shape = np.shape(tile)
+                padded_tile = tile
+                if tile_shape != shape:
+                    padding_shape = (common_dim - tile_dim for common_dim, tile_dim in zip(shape, tile_shape))
+                    pading = np.zeros(padding_shape)
+                    padded_tile = np.concatenate((tile, pading))
+                new_data.append(padded_tile)
+            return new_data
+
         batch_size = len(meta)
         if meta[0].get('multi_infer', False):
-            num_splits = calculate_num_splits(batch_data, batch_size)
-            infers_data = [{} for _ in range(num_splits)]
+            if self.multi_infer_allowed:
+                num_splits = calculate_num_splits(batch_data, batch_size)
+                infers_data = [{} for _ in range(num_splits)]
+                for layer_name, layer_data in batch_data.items():
+                    batch_for_all_infers = separate_data(layer_data, num_splits)
+                    for infer_id, on_infer_batch in enumerate(batch_for_all_infers):
+                        infers_data[infer_id][layer_name] = self.input_transform_func(
+                            on_infer_batch, layer_name,
+                            self.layouts_mapping.get(layer_name, LAYER_LAYOUT_TO_IMAGE_LAYOUT[self.default_layout])
+                        )
+                return infers_data
+
             for layer_name, layer_data in batch_data.items():
-                batch_for_all_infers = separate_data(layer_data, num_splits)
-                for infer_id, on_infer_batch in enumerate(batch_for_all_infers):
-                    infers_data[infer_id][layer_name] = self.input_transform_func(
-                        on_infer_batch, layer_name,
-                        self.layouts_mapping.get(layer_name, LAYER_LAYOUT_TO_IMAGE_LAYOUT[self.default_layout])
-                    )
-            return infers_data
+                shape = calculate_max_shape(layer_data)
+                batch_data[layer_name] = pad_tiles(layer_data, shape)
 
         for layer_name, layer_data in batch_data.items():
             batch_data[layer_name] = self.input_transform_func(
