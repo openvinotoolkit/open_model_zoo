@@ -70,7 +70,14 @@ def build_argparser():
                         help="Path to the Facial Landmarks Regression model XML file")
     models.add_argument('-m_reid', metavar="PATH", default="", required=True,
                         help="Path to the Face Reidentification model XML file")
-
+    models.add_argument('-fd_iw', '--fd_input_width', default=0, type=int,
+                         help="(optional) specified the input shape of detection model " \
+                         "(default: use default input shape of model). Both -fd_iw and -fd_ih parameters " \
+                         "should be specified for reshape.")
+    models.add_argument('-fd_ih', '--fd_input_height', default=0, type=int,
+                         help="(optional) specified the input shape of detection model " \
+                         "(default: use default input shape of model). Both -fd_iw and -fd_ih parameters " \
+                         "should be specified for reshape.")
     infer = parser.add_argument_group('Inference options')
     infer.add_argument('-d_fd', default='CPU', choices=DEVICE_KINDS,
                        help="(optional) Target device for the " \
@@ -122,12 +129,16 @@ class FrameProcessor:
 
         log.info("Loading models")
         face_detector_net = self.load_model(args.m_fd)
+        if args.fd_input_height and args.fd_input_width :
+            face_detector_net.reshape({"data": [1, 3, args.fd_input_height,args.fd_input_width]})
         landmarks_net = self.load_model(args.m_lm)
         face_reid_net = self.load_model(args.m_reid)
 
         self.face_detector = FaceDetector(face_detector_net,
                                           confidence_threshold=args.t_fd,
-                                          roi_scale_factor=args.exp_r_fd)
+                                          roi_scale_factor=args.exp_r_fd,
+                                          input_h = args.fd_input_height,
+                                          input_w = args.fd_input_width)
         self.landmarks_detector = LandmarksDetector(landmarks_net)
         self.face_identifier = FaceIdentifier(face_reid_net,
                                               match_threshold=args.t_id)
