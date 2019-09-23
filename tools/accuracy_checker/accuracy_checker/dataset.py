@@ -190,7 +190,8 @@ def read_annotation(annotation_file: Path):
 
 
 class DatasetWrapper:
-    def __init__(self, data_reader, annotation_reader=None):
+    def __init__(self, data_reader, annotation_reader=None, tag=''):
+        self.tag = tag
         self.data_reader = data_reader
         self.annotation_reader = annotation_reader
         self._batch = 1
