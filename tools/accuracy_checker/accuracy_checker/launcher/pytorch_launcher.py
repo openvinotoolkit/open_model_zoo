@@ -8,10 +8,11 @@ import torch
 from torch.autograd import Variable
 
 from ..config import PathField, StringField, DictField, NumberField, ListField
-from .launcher import Launcher
+from .launcher import Launcher, LauncherConfigValidator
 
 MODULE_REGEX = r'(?:\w+)(?:(?:.\w+)*)'
 DEVICE_REGEX = r'(?P<device>cpu$|cuda)?'
+
 
 class PyTorchLauncher(Launcher):
     __provider__ = 'pytorch'
@@ -26,7 +27,7 @@ class PyTorchLauncher(Launcher):
             'module_args': ListField(optional=True),
             'module_kwargs':  DictField(key_type=str, validate_values=False, optional=True, default={}),
             'device': StringField(default='cpu', regex=DEVICE_REGEX),
-            'batch': NumberField(value_type=float, min_value=1, optional=True, description="Batch size."),
+            'batch': NumberField(value_type=float, min_value=1, optional=True, description="Batch size.", default=1),
             'output_names': ListField(
                 optional=True, value_type=str, description='output tensor names'
             )
@@ -35,6 +36,8 @@ class PyTorchLauncher(Launcher):
 
     def __init__(self, config_entry: dict, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
+        pytorch_launcher_config = LauncherConfigValidator('Pytorch_Launcher', fields=self.parameters())
+        pytorch_launcher_config.validate(self.config)
         module_args = config_entry.get("module_args", ())
         module_kwargs = config_entry.get("module_kwargs", {})
         self.cuda = 'cuda' in self.get_value_from_config('device')
@@ -69,6 +72,7 @@ class PyTorchLauncher(Launcher):
     @property
     def batch(self):
         return self._batch
+
     @property
     def output_blob(self):
         return next(iter(self.output_names))
@@ -108,11 +112,13 @@ class PyTorchLauncher(Launcher):
                 for output_name, res in zip(self.output_names, outputs)
             }
             results.append(result_dict)
+            for meta_ in metadata:
+                meta_['input_shape'] = {key: list(data.shape) for key, data in batch_input.items()}
 
         return results
 
     def predict_async(self, *args, **kwargs):
-        raise ValueError('MxNet Launcher does not support async mode yet')
+        raise ValueError('Pytorch Launcher does not support async mode yet')
 
     def release(self):
         del self.module
@@ -121,9 +127,9 @@ class PyTorchLauncher(Launcher):
 @contextmanager
 def append_to_path(path):
     if path:
-        sys.path.append(path)
+        sys.path.append(str(path))
 
     yield
 
     if path:
-        sys.path.remove(path)
+        sys.path.remove(str(path))

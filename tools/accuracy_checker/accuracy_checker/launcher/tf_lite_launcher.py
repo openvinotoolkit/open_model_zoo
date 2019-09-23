@@ -47,7 +47,7 @@ class TFLiteLauncher(Launcher):
         self._inputs = {input_layer['name']: input_layer for input_layer in self._input_details}
         self.device = '/{}:0'.format(self.config.get('device', 'cpu').lower())
 
-    def predict(self, inputs, metadata, *args, **kwargs):
+    def predict(self, inputs, metadata=None, **kwargs):
         """
         Args:
             inputs: dictionary where keys are input layers names and values are data for them.
