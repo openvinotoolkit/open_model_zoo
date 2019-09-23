@@ -110,6 +110,18 @@ IMAGE_SEQUENCES = {
         image_net_arg('00005409'),
     ],
 
+    'smart-classroom-demo': [
+        image_net_arg('00000074'),
+        image_net_arg('00000141'),
+        image_net_arg('00000141'),
+        image_net_arg('00000164'),
+        image_net_arg('00000181'),
+        image_net_arg('00000164'),
+        image_net_arg('00000181'),
+        image_net_arg('00000001'),
+        image_net_arg('00000074'),
+    ],
+
     'text-detection': [
         image_net_arg('00000032'),
         image_net_arg('00001893'),
@@ -136,19 +148,7 @@ IMAGE_SEQUENCES = {
         image_net_arg('00048316'),
     ],
 
-    'smart-classroom-demo': [
-        image_net_arg('00000074'),
-        image_net_arg('00000002'),
-        image_net_arg('00000002'),
-        image_net_arg('00000164'),
-        image_net_arg('00000181'),
-        image_net_arg('00000164'),
-        image_net_arg('00000181'),
-        image_net_arg('00000001'),
-        image_net_arg('00000074'),
-    ],
-
-    'action-recognition': [
+    'py/action-recognition': [
         image_net_arg('00000001'),
         image_net_arg('00000002'),
         image_net_arg('00000003'),
@@ -171,7 +171,7 @@ IMAGE_SEQUENCES = {
         image_net_arg('00000020'),
     ],
 
-    'instance-segmentation-demo': [
+    'py/instance-segmentation-demo': [
         image_net_arg('00000001'),
         image_net_arg('00000002'),
         image_net_arg('00000002'), # the demo has simple reid
@@ -184,9 +184,9 @@ IMAGE_SEQUENCES = {
         image_net_arg('00000020'),
     ],
 
-    'multi-camera-multi-person-tracking-1': [image_net_arg('00000002')] * 11,
+    'py/multi-camera-multi-person-tracking-1': [image_net_arg('00000002')] * 11,
 
-    'multi-camera-multi-person-tracking-2': [
+    'py/multi-camera-multi-person-tracking-2': [
         image_net_arg('00000002'),
         image_net_arg('00000032'),
         image_net_arg('00017291'),

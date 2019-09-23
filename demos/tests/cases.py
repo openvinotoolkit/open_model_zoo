@@ -249,7 +249,7 @@ PYTHON_DEMOS = [
     # TODO: 3d_segmentation_demo: no input data
 
     PythonDemo(name='action_recognition', test_cases=combine_cases(
-        TestCase(options={'--no_show': None, '-i': ImagePatternArg('action-recognition')}),
+        TestCase(options={'--no_show': None, '-i': ImagePatternArg('py/action-recognition')}),
         device_cases('-d'),
         [
             TestCase(options={
@@ -268,7 +268,7 @@ PYTHON_DEMOS = [
 
     InstanceSegmentationPythonDemo(name='instance_segmentation_demo', test_cases=combine_cases(
         TestCase(options={'--no_show': None,
-            '-i': ImagePatternArg('instance-segmentation-demo'),
+            '-i': ImagePatternArg('py/instance-segmentation-demo'),
             '--delay': '1',
             '-d': 'CPU'}), # GPU is not supported
         single_option_cases('-m', ModelArg('instance-segmentation-security-0010'),
