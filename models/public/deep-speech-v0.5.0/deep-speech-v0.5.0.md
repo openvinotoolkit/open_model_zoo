@@ -46,12 +46,12 @@ DeepSpeech is an open source Speech-To-Text engine, using a model trained by mac
 
 ### Original Model
 
-The output contain predicted sentence for audio(speech) which decode from ctc beam search decoder. The model was trained on the IMIT Acoustic-Phonetic Continuous Speech Corpus for 16-bit, 16 kHz, mono-channel WAVE audio files.
+The output contain predicted sentence for audio(speech) which decode from ctc beam search decoder. The model was trained on the LibriSpeech clean test corpus for 16-bit, 16 kHz, mono-channel WAVE audio files.
 
 
 ### Converted Model
 
-The output contain predicted sentence for audio(speech) which decode from ctc beam search decoder. The model was trained on the IMIT Acoustic-Phonetic Continuous Speech Corpus for 16-bit, 16 kHz, mono-channel WAVE audio files.
+The output contain predicted sentence for audio(speech) which decode from ctc beam search decoder. The model was trained on the LibriSpeech clean test corpus for 16-bit, 16 kHz, mono-channel WAVE audio files.
 
 ## Legal Information
 
