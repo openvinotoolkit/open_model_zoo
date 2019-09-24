@@ -1,0 +1,56 @@
+models:
+  - name: MobileNet-v1-1_0-224
+
+    launchers:
+      - framework: opencv
+        device: CPU
+        tags:
+          - FP32
+        model:   public/mobilenet-v1-1.0-224/mobilenet-v1-1.0-224.prototxt
+        weights: public/mobilenet-v1-1.0-224/mobilenet-v1-1.0-224.caffemodel
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 224, 224
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP32
+        model:   public/mobilenet-v1-1.0-224/mobilenet-v1-1.0-224.prototxt
+        weights: public/mobilenet-v1-1.0-224/mobilenet-v1-1.0-224.caffemodel
+        backend: OCV
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 224, 224
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP16
+        model:   public/mobilenet-v1-1.0-224/mobilenet-v1-1.0-224.prototxt
+        weights: public/mobilenet-v1-1.0-224/mobilenet-v1-1.0-224.caffemodel
+        backend: OCV
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 224, 224
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        data_source: ImageNet
+
+        preprocessing:
+          - type: resize
+            size: 256
+
+          - type: crop
+            size: 224
+
+          - type: normalization
+            mean: 103.94, 116.78, 123.68
+            std:  58.8235294
