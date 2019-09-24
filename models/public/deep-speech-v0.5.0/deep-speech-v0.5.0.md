@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-DeepSpeech is an open source Speech-To-Text engine, using a model trained by machine learning techniques based on [Baidu's Deep Speech research paper](https://arxiv.org/abs/1412.5567). Project DeepSpeech uses Google's [TensorFlow](https://www.tensorflow.org/) to make the implementation easier.
+DeepSpeech is an open source Speech-To-Text engine, using a model trained by machine learning techniques based on [Baidu's Deep Speech research paper](https://arxiv.org/abs/1412.5567). The model was trained on the LibriSpeech clean test corpus for 16-bit, 16 kHz, mono-channel WAVE audio files. Project DeepSpeech uses Google's [TensorFlow](https://www.tensorflow.org/) to make the implementation easier. 
 
 ## Example
 
@@ -78,19 +78,75 @@ DeepSpeech is an open source Speech-To-Text engine, using a model trained by mac
 
 ### Original Model
 
-Output text, name: `Softmax`, Contains predicted sentence for audio(speech) which decode from ctc beam search decoder. The model was trained on the LibriSpeech clean test corpus for 16-bit, 16 kHz, mono-channel WAVE audio files.
+1. Text, name: `Softmax`, shape: [Nx1xM], format: [IxBxL]
+   where: 
+    
+    - I - number of iteration
+    - B - batch size
+    - L - number of label
+    
+    > Note: The number of iteration is depend on the feature length. To make the model can execute with different length of input feature, the model will be iterated since the input shape was fixed.
+    
+2. Hidden state `h`, name: `lstm_fused_cell/BlockLSTM:6`, shape: [1x2048], format: [BxF],
+   where: 
+    
+    - B - batch size
+    - F - number of features in the hidden state `h`
+    
+    > Note: The previous hidden state will be the initial state for next iteration.  
+    
+3. Hidden state `c`, name: `lstm_fused_cell/BlockLSTM:1`, shape: [1x2048], format: [BxF],
+   where: 
+    
+    - B - batch size
+    - F - number of features in the hidden state `c`
+    
+    > Note: The previous hidden state will be the initial state for next iteration.  
+    
 
-Hidden state `h`, name: `lstm_fused_cell/BlockLSTM:6`, Contains hidden state feature from lstm for next iteration.
+4. Output text, name: `null`, shape: [1xN], format: [BxT],
+   where: 
+    
+    - B - batch size
+    - T - number of output text
 
-Hidden state `c`, name: `lstm_fused_cell/BlockLSTM:1`, Contains hidden state feature from lstm for next iteration.
+    > Note: The length of output text is depend on the result of ctc beam search decoder.
 
 ### Converted Model
 
-Output text, name: `Softmax`, Contains predicted sentence for audio(speech) which decode from ctc beam search decoder. The model was trained on the LibriSpeech clean test corpus for 16-bit, 16 kHz, mono-channel WAVE audio files.
+1. Text, name: `Softmax`, shape: [Nx1xM], format: [IxBxL]
+   where: 
+    
+    - I - number of iteration
+    - B - batch size
+    - L - number of label
+    
+    > Note: The number of iteration is depend on the feature length. To make the model can execute with different length of input feature, the model will be iterated since the input shape was fixed.
+    
+2. Hidden state `h`, name: `lstm_fused_cell/BlockLSTM/TensorIterator.1`, shape: [1x2048], format: [BxF],
+   where: 
+    
+    - B - batch size
+    - F - number of features in the hidden state `h`
+    
+    > Note: The previous hidden state will be the initial state for next iteration.  
+    
+3. Hidden state `c`, name: `lstm_fused_cell/BlockLSTM/TensorIterator.2`, shape: [1x2048], format: [BxF],
+   where: 
+    
+    - B - batch size
+    - F - number of features in the hidden state `c`
+    
+    > Note: The previous hidden state will be the initial state for next iteration.  
+    
 
-Hidden state `h`, name: `lstm_fused_cell/BlockLSTM/TensorIterator.1`, Contains hidden state feature from lstm for next iteration.
+4. Output text, name: `null`, shape: [1xN], format: [BxT],
+   where: 
+    
+    - B - batch size
+    - T - number of output text
 
-Hidden state `c`, name: `lstm_fused_cell/BlockLSTM/TensorIterator.2`, Contains hidden state feature from lstm for next iteration.
+    > Note: The length of output text is depend on the result of ctc beam search decoder.
 
 ## Legal Information
 
