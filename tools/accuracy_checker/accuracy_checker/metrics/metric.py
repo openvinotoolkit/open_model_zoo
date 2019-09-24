@@ -94,13 +94,13 @@ class Metric(ClassProvider):
     def submit(self, annotation, prediction):
         self.update(annotation, prediction)
 
-    def submit_all(self, annotations, predictions):
-        return self.evaluate(annotations, predictions)
+    def submit_all(self, annotations, predictions, latency=None):
+        return self.evaluate(annotations, predictions, latency)
 
     def update(self, annotation, prediction):
         pass
 
-    def evaluate(self, annotations, predictions):
+    def evaluate(self, annotations, predictions, latency=None):
         raise NotImplementedError
 
     def configure(self):
@@ -184,14 +184,19 @@ class PerImageEvaluationMetric(Metric):
         annotation_, prediction_ = self._resolve_representation_containers(annotation, prediction)
         self.update(annotation_, prediction_)
 
-    def evaluate(self, annotations, predictions):
+    def evaluate(self, annotations, predictions, latency=None):
         raise NotImplementedError
 
 
 class FullDatasetEvaluationMetric(Metric):
-    def submit_all(self, annotations, predictions):
+    def submit_all(self, annotations, predictions, latency=None):
         annotations_, predictions_ = zipped_transform(self._resolve_representation_containers, annotations, predictions)
         return self.evaluate(annotations_, predictions_)
 
-    def evaluate(self, annotations, predictions):
+    def evaluate(self, annotations, predictions, latency=None):
+        raise NotImplementedError
+class PerInferenceMetric(Metric):
+    def submit(self, annotations, predictions):
+        pass
+    def evaluate(self, annotations, predictions, latency=None):
         raise NotImplementedError

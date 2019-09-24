@@ -21,6 +21,7 @@ from ..config import NumberField, StringField
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
 
+from .metric import PerInferenceMetric 
 
 class ClassificationAccuracy(PerImageEvaluationMetric):
     """
@@ -56,7 +57,7 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
     def update(self, annotation, prediction):
         self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
 
-    def evaluate(self, annotations, predictions):
+    def evaluate(self, annotations, predictions, latency=None):
         return self.accuracy.evaluate()
 
     def reset(self):
@@ -90,7 +91,6 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
         self.top_k = self.get_value_from_config('top_k')
         label_map = self.get_value_from_config('label_map')
         self.labels = self.dataset.metadata.get(label_map)
-        self.meta['names'] = list(self.labels.values())
 
         def loss(annotation_label, prediction_top_k_labels):
             result = np.zeros_like(list(self.labels.keys()))
@@ -109,7 +109,8 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
     def update(self, annotation, prediction):
         self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
 
-    def evaluate(self, annotations, predictions):
+    def evaluate(self, annotations, predictions, latency=None):
+        self.meta['names'] = list(self.labels.values())
         return self.accuracy.evaluate()
 
     def reset(self):
@@ -152,7 +153,7 @@ class ClipAccuracy(PerImageEvaluationMetric):
         self.previous_video_id = video_id
         self.previous_video_label = annotation.label
 
-    def evaluate(self, annotations, predictions):
+    def evaluate(self, annotations, predictions, latency=None):
         self.meta['names'] = ['clip_accuracy', 'video_accuracy']
         return [self.clip_accuracy.evaluate(), self.video_accuracy.evaluate()]
 
@@ -160,3 +161,37 @@ class ClipAccuracy(PerImageEvaluationMetric):
         self.clip_accuracy.reset()
         self.video_accuracy.reset()
         self.video_avg_prob.reset()
+class LatencyMeter(PerInferenceMetric):
+    __provider__ = 'latency'
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'filter': NumberField(
+                value_type=float, min_value=1.0, optional=True, default=1.05,
+                description="The number of classes with the highest probability, which will be used to decide "
+                            "if prediction is correct."
+            )
+        })
+        return parameters
+    def configure(self):
+        self.name = str(self.get_value_from_config('name') )
+        self.filter = self.get_value_from_config('filter')
+        if self.filter is None:
+            self.filter = 1.02
+        self.latency=[]
+    def mean_without_noise(self, plt_show = False):
+        t = np.array(self.latency)
+        m = t.mean()
+        b = t[t < m*self.filter]
+        m2 = b.mean()
+        return m2
+    def evaluate(self, annotations, predictions, latency=None):
+        self.latency = latency
+        if self.name == 'latency@minimum_ms':
+            t = np.array(self.latency)
+            return t.min()
+        else:
+            return self.mean_without_noise()
+    def reset(self):
+        self.latency=[]

@@ -94,7 +94,7 @@ class MetricsExecutor:
         context.annotations.extend(context.annotation_batch)
         context.predictions.extend(context.prediction_batch)
 
-    def update_metrics_on_object(self, annotation, prediction):
+    def update_metrics_on_object(self, annotation, prediction, latency=None):
         """
         Updates metric value corresponding given annotation and prediction objects.
         """
@@ -102,7 +102,7 @@ class MetricsExecutor:
         for metric in self.metrics:
             metric.metric_fn.submit(annotation, prediction)
 
-    def update_metrics_on_batch(self, annotation, prediction):
+    def update_metrics_on_batch(self, annotation, prediction, latency=None):
         """
         Updates metric value corresponding given batch.
 
@@ -113,12 +113,12 @@ class MetricsExecutor:
 
         zipped_transform(self.update_metrics_on_object, annotation, prediction)
 
-    def iterate_metrics(self, annotations, predictions):
+    def iterate_metrics(self, annotations, predictions, latency=None):
         for name, metric_type, functor, reference, threshold, presenter in self.metrics:
             yield presenter, EvaluationResult(
                 name=name,
                 metric_type=metric_type,
-                evaluated_value=functor(annotations, predictions),
+                evaluated_value=functor(annotations, predictions, latency),
                 reference_value=reference,
                 threshold=threshold,
                 meta=functor.meta,

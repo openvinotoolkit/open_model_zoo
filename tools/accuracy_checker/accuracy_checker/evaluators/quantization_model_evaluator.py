@@ -46,6 +46,7 @@ class ModelEvaluator:
         self._annotations = []
         self._predictions = []
         self._metrics_results = []
+        self._ir_latency = []
 
     @classmethod
     def from_configs(cls, config):
@@ -146,6 +147,7 @@ class ModelEvaluator:
                     batch_predictions = _process_ready_predictions(
                         batch_predictions, batch_identifiers, batch_meta, self.adapter, kwargs.get('output_callback')
                     )
+                    self._ir_latency.append(ir.latency)
                     free_irs.append(ir)
                     annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions)
 
@@ -254,10 +256,13 @@ class ModelEvaluator:
             self._metrics_results = []
 
         for result_presenter, evaluated_metric in self.metric_executor.iterate_metrics(
-                self._annotations, self._predictions):
+                self._annotations, self._predictions, self._ir_latency):
             self._metrics_results.append(evaluated_metric)
             if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting=ignore_results_formatting)
+                if str(evaluated_metric.metric_type) =='latency':
+                    result_presenter.write_result(evaluated_metric, ignore_results_formatting=True)
+                else:
+                    result_presenter.write_result(evaluated_metric, ignore_results_formatting=ignore_results_formatting)
         return self._metrics_results
 
     def print_metrics_results(self, ignore_results_formatting=False):
@@ -310,6 +315,7 @@ class ModelEvaluator:
         self._annotations = []
         self._predictions = []
         self._metrics_results = []
+        self._ir_latency = []
         self.dataset.reset()
 
     def release(self):
