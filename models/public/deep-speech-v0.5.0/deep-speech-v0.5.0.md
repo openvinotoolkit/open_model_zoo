@@ -22,17 +22,31 @@ DeepSpeech is an open source Speech-To-Text engine, using a model trained by mac
 ### Original Model
 
 1. Audio, name: `input_samples`, a WAVE file.
-2. Audio Feature, name: `image_node`, shape: [1x16x19x26], format: [BxSxCxI],
+2. Audio Feature, name: `input_node`, shape: [1x16x19x26], format: [BxSxCxI],
    where:
 
     - B - batch size
     - S - number of steps
     - C - number of context
     - I - number of input
+    
+3. Hidden state, name: `previous_state_h/read`, shape: [1x2048], format: [BxF],
+   where: 
+    
+    - B - batch size
+    - F - number of features in the hidden state `h`
+    * Note: The initial value of hidden state `h` is zero.
+
+4. Hidden state, name: `previous_state_c/read`, shape: [1x2048], format: [BxF], 
+   where: 
+   
+    - B - batch size
+    - F - number of features in the hidden state `c`
+    * Note: The initial value of hidden state `c` is zero.
 
 ### Converted Model
 
-1. Audio Feature, name: `image_node`, shape: [1x16x19x26], format: [BxSxCxI],
+1. Audio Feature, name: `input_node`, shape: [1x16x19x26], format: [BxSxCxI],
    where:
 
     - B - batch size
@@ -41,17 +55,36 @@ DeepSpeech is an open source Speech-To-Text engine, using a model trained by mac
     - I - number of input
 
     * Note: Needs to acquire the mfcc feature for audio.
+    
+2. Hidden state, name: `previous_state_h/read/placeholder_port_0`, shape: [1x2048], format: [BxF],
+   where: 
+    
+    - B - batch size
+    - F - number of features in the hidden state `h`
+
+3. Hidden state, name: `previous_state_c/read/placeholder_port_0`, shape: [1x2048], format: [BxF], 
+   where: 
+   
+    - B - batch size
+    - F - number of features in the hidden state `c`
 
 ## Output
 
 ### Original Model
 
-The output contain predicted sentence for audio(speech) which decode from ctc beam search decoder. The model was trained on the LibriSpeech clean test corpus for 16-bit, 16 kHz, mono-channel WAVE audio files.
+Output text, name: `Softmax`, Contains predicted sentence for audio(speech) which decode from ctc beam search decoder. The model was trained on the LibriSpeech clean test corpus for 16-bit, 16 kHz, mono-channel WAVE audio files.
 
+Hidden state `h`, name: `lstm_fused_cell/BlockLSTM:6`, Contains hidden state feature from lstm for next iteration.
+
+Hidden state `c`, name: `lstm_fused_cell/BlockLSTM:1`, Contains hidden state feature from lstm for next iteration.
 
 ### Converted Model
 
-The output contain predicted sentence for audio(speech) which decode from ctc beam search decoder. The model was trained on the LibriSpeech clean test corpus for 16-bit, 16 kHz, mono-channel WAVE audio files.
+Output text, name: `Softmax`, Contains predicted sentence for audio(speech) which decode from ctc beam search decoder. The model was trained on the LibriSpeech clean test corpus for 16-bit, 16 kHz, mono-channel WAVE audio files.
+
+Hidden state `h`, name: `lstm_fused_cell/BlockLSTM/TensorIterator.1`, Contains hidden state feature from lstm for next iteration.
+
+Hidden state `c`, name: `lstm_fused_cell/BlockLSTM/TensorIterator.2`, Contains hidden state feature from lstm for next iteration.
 
 ## Legal Information
 
