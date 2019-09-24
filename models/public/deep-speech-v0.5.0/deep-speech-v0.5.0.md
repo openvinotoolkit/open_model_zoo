@@ -35,14 +35,16 @@ DeepSpeech is an open source Speech-To-Text engine, using a model trained by mac
     
     - B - batch size
     - F - number of features in the hidden state `h`
-    * Note: The initial value of hidden state `h` is zero.
+    
+    > Note: The initial value of hidden state `h` is zero.
 
 4. Hidden state, name: `previous_state_c/read`, shape: [1x2048], format: [BxF], 
    where: 
    
     - B - batch size
     - F - number of features in the hidden state `c`
-    * Note: The initial value of hidden state `c` is zero.
+    
+    > Note: The initial value of hidden state `c` is zero.
 
 ### Converted Model
 
@@ -61,12 +63,16 @@ DeepSpeech is an open source Speech-To-Text engine, using a model trained by mac
     
     - B - batch size
     - F - number of features in the hidden state `h`
+    
+    > Note: The initial value of hidden state `h` is zero.
 
 3. Hidden state, name: `previous_state_c/read/placeholder_port_0`, shape: [1x2048], format: [BxF], 
    where: 
    
     - B - batch size
     - F - number of features in the hidden state `c`
+    
+    > Note: The initial value of hidden state `c` is zero.
 
 ## Output
 
