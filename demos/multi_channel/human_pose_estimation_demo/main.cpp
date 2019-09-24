@@ -297,7 +297,7 @@ int main(int argc, char* argv[]) {
             auto camIdx = currentFrame / duplicateFactor;
             currentFrame = (currentFrame + 1) % numberOfInputs;
             return sources.getFrame(camIdx, img);
-        }, [](InferenceEngine::InferRequest::Ptr req, const std::vector<std::string>& outputDataBlobNames, cv::Size frameSize) {
+        }, [](InferenceEngine::InferRequest::Ptr req, const std::vector<std::string>& outputDataBlobNames, cv::Size frameSize, InferenceEngine::CNNNetReader netReader) {
             auto pafsBlobIt   = req->GetBlob(outputDataBlobNames[0]);
             auto pafsDesc     = pafsBlobIt->getTensorDesc();
             auto pafsWidth    = getTensorWidth(pafsDesc);
