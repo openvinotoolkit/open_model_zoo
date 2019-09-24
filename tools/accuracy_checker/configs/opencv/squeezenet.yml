@@ -1,0 +1,111 @@
+models:
+  - name: Squeezenet1-0
+
+    launchers:
+      - framework: opencv
+        device: CPU
+        tags:
+          - FP32
+        model:   public/squeezenet1.0/squeezenet1.0.prototxt
+        weights: public/squeezenet1.0/squeezenet1.0.caffemodel
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 227, 227
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP32
+        model:   public/squeezenet1.0/squeezenet1.0.prototxt
+        weights: public/squeezenet1.0/squeezenet1.0.caffemodel
+        backend: OCV
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 227, 227
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP16
+        model:   public/squeezenet1.0/squeezenet1.0.prototxt
+        weights: public/squeezenet1.0/squeezenet1.0.caffemodel
+        backend: OCV
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 227, 227
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        data_source: ImageNet
+
+        preprocessing:
+          - type: resize
+            size: 256
+
+          - type: crop
+            size: 227
+
+          - type: normalization
+            mean: 104, 117, 123
+
+
+  - name: Squeezenet1-1
+
+    launchers:
+      - framework: opencv
+        device: CPU
+        tags:
+          - FP32
+        model:   public/squeezenet1.1/squeezenet1.1.prototxt
+        weights: public/squeezenet1.1/squeezenet1.1.caffemodel
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 227, 227
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP32
+        model:   public/squeezenet1.1/squeezenet1.1.prototxt
+        weights: public/squeezenet1.1/squeezenet1.1.caffemodel
+        backend: OCV
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 227, 227
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP16
+        model:   public/squeezenet1.1/squeezenet1.1.prototxt
+        weights: public/squeezenet1.1/squeezenet1.1.caffemodel
+        backend: OCV
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 227, 227
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        data_source: ImageNet
+
+        preprocessing:
+          - type: resize
+            size: 256
+
+          - type: crop
+            size: 227
+
+          - type: normalization
+            mean: 104, 117, 123
