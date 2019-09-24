@@ -1,0 +1,56 @@
+models:
+  - name: SE-Inception
+
+    launchers:
+      - framework: opencv
+        device: CPU
+        tags:
+          - FP32
+        model:   public/se-inception/se-inception.prototxt
+        weights: public/se-inception/se-inception.caffemodel
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 224, 224
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP32
+        model:   public/se-inception/se-inception.prototxt
+        weights: public/se-inception/se-inception.caffemodel
+        backend: OCV
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 224, 224
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP16
+        model:   public/se-inception/se-inception.prototxt
+        weights: public/se-inception/se-inception.caffemodel
+        backend: OCV
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 224, 224
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes_2015
+        data_source: ImageNet
+
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+
+          - type: crop
+            size: 224
+
+          - type: normalization
+            mean: 104, 117, 123
