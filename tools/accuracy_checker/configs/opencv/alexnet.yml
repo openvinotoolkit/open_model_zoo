@@ -1,0 +1,64 @@
+models:
+  - name: AlexNet
+
+    launchers:
+      - framework: opencv
+        device: CPU
+        tags:
+          - FP32
+        model:   public/alexnet/alexnet.prototxt
+        weights: public/alexnet/alexnet.caffemodel
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 227, 227
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP32
+        model:   public/alexnet/alexnet.prototxt
+        weights: public/alexnet/alexnet.caffemodel
+        backend: OCV
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 227, 227
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP16
+        model:   public/alexnet/alexnet.prototxt
+        weights: public/alexnet/alexnet.caffemodel
+        backend: OCV
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 227, 227
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        data_source: ImageNet
+
+        preprocessing:
+          - type: resize
+            size: 256
+
+          - type: crop
+            size: 227
+
+          - type: normalization
+            mean: 104, 117, 123
+
+        metrics:
+          - name: accuracy@top_1
+            type: accuracy
+            top_k: 1
+
+          - name: accuracy@top_5
+            type: accuracy
+            top_k: 5
