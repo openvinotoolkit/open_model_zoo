@@ -66,9 +66,9 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `labels_file` - path to file with word description of labels (synset_words).
   * `has_background` - allows to add background label to original labels and convert dataset for 1001 classes instead 1000 (default value is False).
 * `voc_detection` - converts Pascal VOC annotation for detection task to `DetectionAnnotation`.
-   * `imageset_file` - path to file with validation image list.
-   * `annotations_dir` - path to directory with annotation files.
-   * `images_dir` - path to directory with images related to devkit root (default JPEGImages).
+  * `imageset_file` - path to file with validation image list.
+  * `annotations_dir` - path to directory with annotation files.
+  * `images_dir` - path to directory with images related to devkit root (default JPEGImages).
   * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is True) 
 * `voc_segmentation` - converts Pascal VOC annotation for semantic segmentation task to `SegmentationAnnotation`.
   * `imageset_file` - path to file with validation image list.
