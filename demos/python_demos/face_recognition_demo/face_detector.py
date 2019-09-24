@@ -53,12 +53,7 @@ class FaceDetector(Module):
         assert len(model.outputs) == 1, "Expected 1 output blob"
         self.input_blob = next(iter(model.inputs))
         self.output_blob = next(iter(model.outputs))
-        #add reshape function to detect more small faces in image
-        if (input_h and input_w ):
-            self.input_shape = [1, 3, input_h, input_w]
-        else:
-            self.input_shape = model.inputs[self.input_blob].shape
-        print("face detector input shape:", self.input_shape)
+        self.input_shape = model.inputs[self.input_blob].shape
         self.output_shape = model.outputs[self.output_blob].shape
 
         assert len(self.output_shape) == 4 and \
