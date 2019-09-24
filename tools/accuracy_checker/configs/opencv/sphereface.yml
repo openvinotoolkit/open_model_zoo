@@ -1,0 +1,57 @@
+models:
+  - name: sphereface
+
+    launchers:
+      - framework: opencv
+        device: CPU
+        tags:
+          - FP32
+        model:   public/Sphereface/Sphereface.prototxt
+        weights: public/Sphereface/Sphereface.caffemodel
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 112, 96
+        adapter: reid
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP32
+        model:   public/Sphereface/Sphereface.prototxt
+        weights: public/Sphereface/Sphereface.caffemodel
+        backend: OCV
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 112, 96
+        adapter: reid
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP16
+        model:   public/Sphereface/Sphereface.prototxt
+        weights: public/Sphereface/Sphereface.caffemodel
+        backend: OCV
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 112, 96
+        adapter: reid
+
+    datasets:
+      - name: lfw
+        data_source: LFW/lfw
+
+        preprocessing:
+          - type: resize
+            dst_width: 96
+            dst_height: 112
+
+          - type: normalization
+            mean: 127.5
+            std:  128
+
+        metrics:
+          - type: pairwise_accuracy_subsets

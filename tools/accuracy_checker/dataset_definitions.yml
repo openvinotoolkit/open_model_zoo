@@ -330,3 +330,10 @@ datasets:
       annotation_file: AffectNet/image_list_5emo.txt
     annotation: affectnet.pickle
     dataset_meta: affectnet.json
+
+  - name: lfw
+    annotation_conversion:
+     converter: lfw
+     pairs_file: LFW/annotation/pairs.txt
+     landmarks_file: LFW/annotation/lfw_landmark.txt
+    annotation: lfw.pickle
