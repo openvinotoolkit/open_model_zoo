@@ -1,0 +1,194 @@
+models:
+  - name: face-detection-adas-0001
+
+    launchers:
+      - framework: opencv
+        model:   intel/face-detection-adas-0001/FP32/face-detection-adas-0001.xml
+        weights: intel/face-detection-adas-0001/FP32/face-detection-adas-0001.bin
+        device: CPU
+        tags:
+          - FP32
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 384, 672
+        adapter: ssd
+
+      - framework: opencv
+        model:   intel/face-detection-adas-0001/FP32/face-detection-adas-0001.xml
+        weights: intel/face-detection-adas-0001/FP32/face-detection-adas-0001.bin
+        device: GPU
+        tags:
+          - FP32
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 384, 672
+        adapter: ssd
+
+      - framework: opencv
+        model:   intel/face-detection-adas-0001/FP16/face-detection-adas-0001.xml
+        weights: intel/face-detection-adas-0001/FP16/face-detection-adas-0001.bin
+        device: GPU
+        tags:
+          - FP16
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 384, 672
+        adapter: ssd
+
+    datasets:
+      - name: wider_label_start_1
+        data_source: WiderFace/WIDER_val/images
+        annotation: widerface_label_start_1.pickle
+        dataset_meta: widerface_label_start_1.json
+
+        preprocessing:
+          - type: resize
+            dst_width: 672
+            dst_height: 384
+
+        postprocessing:
+          - type: resize_prediction_boxes
+
+          - type: filter
+            height_range: 100
+            apply_to: annotation
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False
+            allow_multiple_matches_per_ignored: True
+            use_filtered_tp: True
+
+
+  - name: face-detection-adas-int8-0001
+
+    launchers:
+      - framework: opencv
+        model:   intel/face-detection-adas-0001/INT8/face-detection-adas-0001.xml
+        weights: intel/face-detection-adas-0001/INT8/face-detection-adas-0001.bin
+        device: CPU
+        tags:
+          - FP32
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 384, 672
+        adapter: ssd
+
+      - framework: opencv
+        model:   intel/face-detection-adas-0001/INT8/face-detection-adas-0001.xml
+        weights: intel/face-detection-adas-0001/INT8/face-detection-adas-0001.bin
+        device: GPU
+        tags:
+          - FP32
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 384, 672
+        adapter: ssd
+
+      - framework: opencv
+        model:   intel/face-detection-adas-0001/INT8/face-detection-adas-0001.xml
+        weights: intel/face-detection-adas-0001/INT8/face-detection-adas-0001.bin
+        device: GPU
+        tags:
+          - FP16
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 384, 672
+        adapter: ssd
+
+    datasets:
+      - name: wider_label_start_1
+        data_source: WiderFace/WIDER_val/images
+        annotation: widerface_label_start_1.pickle
+        dataset_meta: widerface_label_start_1.json
+
+        preprocessing:
+          - type: resize
+            dst_width: 672
+            dst_height: 384
+
+        postprocessing:
+          - type: resize_prediction_boxes
+
+          - type: filter
+            height_range: 100
+            apply_to: annotation
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False
+            allow_multiple_matches_per_ignored: True
+            use_filtered_tp: True
+
+
+  - name: face-detection-adas-binary-0001
+
+    launchers:
+      - framework: opencv
+        model:   intel/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.xml
+        weights: intel/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.bin
+        device: CPU
+        tags:
+          - FP32
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 384, 672
+        adapter: ssd
+
+      - framework: opencv
+        model:   intel/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.xml
+        weights: intel/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.bin
+        device: GPU
+        tags:
+          - FP32
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 384, 672
+        adapter: ssd
+
+      - framework: opencv
+        model:   intel/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.xml
+        weights: intel/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.bin
+        device: GPU
+        tags:
+          - FP16
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 384, 672
+        adapter: ssd
+
+    datasets:
+      - name: wider_label_start_1
+        data_source: WiderFace/WIDER_val/images
+        annotation: widerface_label_start_1.pickle
+        dataset_meta: widerface_label_start_1.json
+
+        preprocessing:
+          - type: resize
+            dst_width: 672
+            dst_height: 384
+
+        postprocessing:
+          - type: resize_prediction_boxes
+
+          - type: filter
+            height_range: 100
+            apply_to: annotation
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False
+            allow_multiple_matches_per_ignored: True
+            use_filtered_tp: True
