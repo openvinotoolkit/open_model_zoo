@@ -55,15 +55,6 @@ models:
             mean: 103.94, 116.78, 123.68
             std:  58.8235294
 
-        metrics:
-          - name: accuracy@top1
-            type: accuracy
-            top_k: 1
-
-          - name: accuracy@top5
-            type: accuracy
-            top_k: 5
-
 
   - name: Densenet-161
 
@@ -120,15 +111,6 @@ models:
           - type: normalization
             mean: 103.94, 116.78, 123.68
             std:  58.8235294
-
-        metrics:
-          - name: accuracy@top1
-            type: accuracy
-            top_k: 1
-
-          - name: accuracy@top5
-            type: accuracy
-            top_k: 5
 
 
   - name: Densenet-169
@@ -187,15 +169,6 @@ models:
             mean: 103.94, 116.78, 123.68
             std:  58.8235294
 
-        metrics:
-          - name: accuracy@top1
-            type: accuracy
-            top_k: 1
-
-          - name: accuracy@top5
-            type: accuracy
-            top_k: 5
-
 
   - name: Densenet-201
 
@@ -252,12 +225,3 @@ models:
           - type: normalization
             mean: 103.94, 116.78, 123.68
             std:  58.8235294
-
-        metrics:
-          - name: accuracy@top1
-            type: accuracy
-            top_k: 1
-
-          - name: accuracy@top5
-            type: accuracy
-            top_k: 5

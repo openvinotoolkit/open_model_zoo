@@ -53,12 +53,3 @@ models:
 
           - type: normalization
             mean: 104, 117, 123
-
-        metrics:
-          - name: accuracy@top_1
-            type: accuracy
-            top_k: 1
-
-          - name: accuracy@top_5
-            type: accuracy
-            top_k: 5

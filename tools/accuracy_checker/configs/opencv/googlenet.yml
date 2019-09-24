@@ -54,15 +54,6 @@ models:
           - type: normalization
             mean: 104, 117, 123
 
-        metrics:
-          - name: accuracy@top1
-            type: accuracy
-            top_k: 1
-
-          - name: accuracy@top5
-            type: accuracy
-            top_k: 5
-
 
   - name: GoogleNet_v2
 
@@ -119,15 +110,6 @@ models:
           - type: normalization
             mean: 104, 117, 123
 
-        metrics:
-          - name: accuracy@top1
-            type: accuracy
-            top_k: 1
-
-          - name: accuracy@top5
-            type: accuracy
-            top_k: 5
-
 
   - name: GoogleNet_v4
 
@@ -183,12 +165,3 @@ models:
 
           - type: normalization
             std: 255
-
-        metrics:
-          - name: accuracy@top1
-            type: accuracy
-            top_k: 1
-
-          - name: accuracy@top5
-            type: accuracy
-            top_k: 5

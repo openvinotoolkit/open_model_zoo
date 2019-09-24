@@ -60,6 +60,8 @@ models:
         inputs:
           - name: "data"
             type: INPUT
+
+  - name: Densenet-201
             shape: 3, 224, 224
         adapter: classification
 

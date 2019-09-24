@@ -1,0 +1,55 @@
+models:
+  - name: GoogleNet_v3
+
+    launchers:
+      - framework: opencv
+        model: public/googlenet-v3/inception_v3_2016_08_28_frozen.pb
+        device: CPU
+        tags:
+          - FP32
+        inputs:
+            - name: "input"
+              type: INPUT
+              shape: 3, 299, 299
+        adapter: classification
+
+      - framework: opencv
+        model: public/googlenet-v3/inception_v3_2016_08_28_frozen.pb
+        device: GPU
+        tags:
+          - FP32
+        backend: OCV
+        inputs:
+            - name: "input"
+              type: INPUT
+              shape: 3, 299, 299
+        adapter: classification
+
+      - framework: opencv
+        model: public/googlenet-v3/inception_v3_2016_08_28_frozen.pb
+        device: GPU
+        tags:
+          - FP16
+        backend: OCV
+        inputs:
+          - name: "input"
+            type: INPUT
+            shape: 3, 299, 299
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1001_classes
+        data_source: ImageNet
+
+        preprocessing:
+          - type: bgr_to_rgb
+
+          - type: resize
+            size: 320
+
+          - type: crop
+            size: 299
+
+          - type: normalization
+            mean: 127.5
+            std:  127.5
