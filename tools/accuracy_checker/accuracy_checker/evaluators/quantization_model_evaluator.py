@@ -316,7 +316,8 @@ class ModelEvaluator:
         self._predictions = []
         self._metrics_results = []
         self._ir_latency = []
-        self.dataset.reset()
+        if self.dataset.reset()
+            self.dataset.reset()
 
     def release(self):
         self.launcher.release()
