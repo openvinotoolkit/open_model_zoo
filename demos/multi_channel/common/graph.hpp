@@ -75,7 +75,8 @@ private:
 
     using GetterFunc = std::function<bool(VideoFrame&)>;
     GetterFunc getter;
-    using PostprocessingFunc = std::function<std::vector<Detections>(InferenceEngine::InferRequest::Ptr, const std::vector<std::string>&, cv::Size)>;
+    // using PostprocessingFunc = std::function<std::vector<Detections>(InferenceEngine::InferRequest::Ptr, const std::vector<std::string>&, cv::Size)>;
+    using PostprocessingFunc = std::function<std::vector<Detections>(InferenceEngine::InferRequest::Ptr, const std::vector<std::string>&, cv::Size, InferenceEngine::CNNNetReader netReader)>;
     PostprocessingFunc postprocessing;
     std::thread getterThread;
 
@@ -118,5 +119,7 @@ public:
     Stats getStats() const;
 
     void printPerformanceCounts(std::string fullDeviceName);
+    
+    InferenceEngine::CNNNetReader netReader;
 };
 

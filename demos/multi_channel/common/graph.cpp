@@ -38,7 +38,7 @@ void loadImgToIEGraph(const cv::Mat& img, size_t batch, void* ieBuffer) {
 }  // namespace
 
 void IEGraph::initNetwork(const std::string& deviceName) {
-    InferenceEngine::CNNNetReader  netReader;
+    // InferenceEngine::CNNNetReader  netReader;
 
     netReader.ReadNetwork(modelPath);
     netReader.ReadWeights(weightsPath);
@@ -235,7 +235,8 @@ std::vector<std::shared_ptr<VideoFrame> > IEGraph::getBatchData(cv::Size frameSi
     }
 
     if (nullptr != req && InferenceEngine::OK == req->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY)) {
-        auto detections = postprocessing(req, outputDataBlobNames, frameSize);
+        // auto detections = postprocessing(req, outputDataBlobNames, frameSize);
+        auto detections = postprocessing(req, outputDataBlobNames, frameSize, netReader);
         for (decltype(detections.size()) i = 0; i < detections.size(); i ++) {
             vframes[i]->detections = std::move(detections[i]);
         }
