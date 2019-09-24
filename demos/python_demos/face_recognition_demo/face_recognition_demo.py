@@ -71,13 +71,14 @@ def build_argparser():
     models.add_argument('-m_reid', metavar="PATH", default="", required=True,
                         help="Path to the Face Reidentification model XML file")
     models.add_argument('-fd_iw', '--fd_input_width', default=0, type=int,
-                         help="(optional) specified the input shape of detection model " \
-                         "(default: use default input shape of model). Both -fd_iw and -fd_ih parameters " \
+                         help="(optional) specify the input width of detection model " \
+                         "(default: use default input width of model). Both -fd_iw and -fd_ih parameters " \
                          "should be specified for reshape.")
     models.add_argument('-fd_ih', '--fd_input_height', default=0, type=int,
-                         help="(optional) specified the input shape of detection model " \
-                         "(default: use default input shape of model). Both -fd_iw and -fd_ih parameters " \
+                         help="(optional) specify the input height of detection model " \
+                         "(default: use default input height of model). Both -fd_iw and -fd_ih parameters " \
                          "should be specified for reshape.")
+    
     infer = parser.add_argument_group('Inference options')
     infer.add_argument('-d_fd', default='CPU', choices=DEVICE_KINDS,
                        help="(optional) Target device for the " \
@@ -129,6 +130,11 @@ class FrameProcessor:
 
         log.info("Loading models")
         face_detector_net = self.load_model(args.m_fd)
+        
+        assert (args.fd_input_height and args.fd_input_width) or \
+               (args.fd_input_height==0 and args.fd_input_width==0), \
+            "Both -fd_iw and -fd_ih parameters should be specified for reshape"
+        
         if args.fd_input_height and args.fd_input_width :
             face_detector_net.reshape({"data": [1, 3, args.fd_input_height,args.fd_input_width]})
         landmarks_net = self.load_model(args.m_lm)
