@@ -14,6 +14,9 @@ static const char help_message[] = "Print a usage message";
 /// @brief Message for model argument
 static const char face_detection_model_message[] = "Required. Path to an .xml file with a trained model.";
 
+/// @brief Message for model argument
+static const char yolo_model_message[] = "Required. Path to an .xml file with a trained model.";
+
 /// @brief Message for assigning face detection calculation to a device
 static const char target_device_message[] = "Optional. Specify the target device for a network (the list of available devices is shown below). " \
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
