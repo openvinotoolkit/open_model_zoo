@@ -6,7 +6,7 @@ The `efficientnet-b0-pt` model is one of the [efficientnet](https://arxiv.org/ab
 
 The model input is a blob that consists of a single image of 1x3x224x224 in RGB
 order. The BGR mean values need to be subtracted as follows: [123.675,116.28,103.53]
-before passing the image blob into the network. In addition, values must be multiplied
+before passing the image blob into the network. In addition, values must be divided
 by [58.395,57.12,57.375].
 
 The model output for `efficientnet-b0-pt` is the typical object classifier output for
