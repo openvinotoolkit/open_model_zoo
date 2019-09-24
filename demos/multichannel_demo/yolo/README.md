@@ -1,19 +1,16 @@
-# Multi-Channel Face Detection C++ Demo
+# Multi-Channel Yolo v3 C++ Demo
 
-This demo provides an inference pipeline for multi-channel face detection. The demo uses Face Detection network. You can use the following pre-trained model with the demo:
-* `face-detection-retail-0004`, which is a primary detection network for finding faces
-
-For more information about the pre-trained models, refer to the [model documentation](../../../intel_models/index.md).
+This demo provides an inference pipeline for multi-channel yolo v3. The demo uses Yolo v3 Object Detection network. You can follow [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page convert the YOLO V3 and tiny YOLO V3 into IR model and execute the this demo with converted IR model.
 
 Other demo objectives are:
 
 * Up to 16 cameras as inputs, via OpenCV*
-* Visualization of detected faces from all channels on a single screen
+* Visualization of detected objects from all channels on a single screen
 
 
 ## How It Works
 
-On the start-up, the application reads command line parameters and loads the specified networks. The Face Detection network is required.
+On the start-up, the application reads command line parameters and loads the specified networks. The Yolo v3 Object Detection network is required.
 
 > **NOTES**:
 > * Running the demo requires using at least one web camera attached to your machine.
@@ -23,38 +20,39 @@ On the start-up, the application reads command line parameters and loads the spe
 
 Running the application with the `-h` option yields the following usage message:
 ```sh
-./multi-channel-face-detection-demo -h
+cd <samples_build_folder>/intel64/Release
+./multi-channel-yolo-v3-demo -h
 
-multi-channel-face-detection-demo [OPTION]
+multichannel_yolo_v3 [OPTION]
 Options:
 
-    -h                           Print a usage message
-    -m "<path>"                  Required. Path to an .xml file with a trained model.
-      -l "<absolute_path>"       Required for CPU custom layers. Absolute path to a shared library with the kernel implementations
+    -h                           Print a usage message.
+    -m "<path>"                  Required. Path to an .xml file with a trained yolo v3 or tiny yolo v3 model.
+      -l "<absolute_path>"       Required for MKLDNN (CPU)-targeted custom layers. Absolute path to a shared library with the kernels impl.
           Or
-      -c "<absolute_path>"       Required for GPU custom kernels. Absolute path to an .xml file with the kernel descriptions
-    -d "<device>"                Optional. Specify the target device for a network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo looks for a suitable plugin for a specified device.
-    -nc                          Optional. Maximum number of processed camera inputs (web cameras)
-    -bs                          Optional. Batch size for processing (the number of frames processed per infer request)
-    -n_ir                        Optional. Number of infer requests
-    -n_iqs                       Optional. Frame queue size for input channels
-    -fps_sp                      Optional. FPS measurement sampling period between timepoints in msec
-    -n_sp                        Optional. Number of sampling periods
-    -pc                          Optional. Enable per-layer performance report
-    -t                           Optional. Probability threshold for detections
-    -no_show                     Optional. Do not show processed video
-    -show_stats                  Optional. Enable statistics report
-    -duplicate_num               Optional. Enable and specify the number of channels additionally copied from real sources
-    -real_input_fps              Optional. Disable input frames caching for maximum throughput pipeline
-    -i                           Optional. Specify full path to input video files
+      -c "<absolute_path>"       Required for clDNN (GPU)-targeted custom kernels. Absolute path to the xml file with the kernels desc.
+    -d "<device>"                Specify the target device for Face Detection (CPU, GPU, FPGA, HDDL or MYRIAD). The demo will look for a suitable plugin for a specified device.
+    -nc                          Maximum number of processed camera inputs (web cams)
+    -bs                          Processing batch size, number of frames processed per infer request
+    -n_ir                        Number of infer requests
+    -n_iqs                       Frame queue size for input channels
+    -fps_sp                      FPS measurement sampling period. Duration between timepoints, msec
+    -n_sp                        Number of sampling periods
+    -pc                          Enables per-layer performance report.
+    -t                           Probability threshold for detections.
+    -no_show                     No show processed video.
+    -show_stats                  Enable statictics output
+    -duplicate_num               Enable and specify number of channel additionally copied from real sources
+    -real_input_fps              Disable input frames caching, for maximum throughput pipeline
+    -i                           Specify full path to input video files
 
 ```
 
-To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
+To run the demo, you can use publiced pre-train model and follow [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page convert it into IR model. 
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
-For example, to run the demo with the pre-trained face detection model on FPGA with fallback on CPU, with one single camera, use the following command:
+For example, to run the demo using two recorded video files, use the following command:
 ```sh
 ./multi-channel-face-detection-demo -m face-detection-retail-0004.xml
 -l <demos_build_folder>/intel64/Release/lib/libcpu_extension.so -d HETERO:FPGA,CPU -nc 1
@@ -62,13 +60,18 @@ For example, to run the demo with the pre-trained face detection model on FPGA w
 
 To run the demo using two recorded video files, use the following command:
 ```sh
-./multi-channel-face-detection-demo -m face-detection-retail-0004.xml
--l <demos_build_folder>/intel64/Release/lib/libcpu_extension.so -d HETERO:FPGA,CPU -i /path/to/file1 /path/to/file2
+./multi-channel-yolo-v3-demo -m $PATH_OF_YOLO_V3_MODEL -l <samples_build_folder>/intel64/Release/lib/libcpu_extension.so -d HDDL -i /path/to/file1 /path/to/file2
 ```
 Video files will be processed repeatedly.
 
-You can also run the demo on web cameras and video files simultaneously by specifying both parameters: `-nc <number_of_cams> -i <video_file1> <video_file2>` with paths to video files separated by a space.
-To run the demo with a single input source (a web camera or a video file), but several channels, specify an additional parameter: `-duplicate_num 3`. You will see four channels: one real and three duplicated. With several input sources, the `-duplicate_num` parameter will duplicate each of them.
+To achieve 100% utilization of one Myriad X, the thumb rule is to run 4 infer requests on each Myriad X. Option “-n_ir 32” can be added to above command to use 100% of HDDL-R card. The 32 here is 8 (Myriad X on HDDL-R card) x 4 (infer requests), such as following command:
+
+```sh
+./multi-channel-yolo-v3-demo -m $PATH_OF_YOLO_V3_MODEL -l <samples_build_folder>/intel64/Release/lib/libcpu_extension.so -d HDDL -i /path/to/file1 /path/to/file2 /path/to/file3 /path/to/file4 -n_ir 32
+```
+
+You can also run the demo on web cameras and video files simultaneously by specifying both parameters: `-nc <number of cams> -i <video files sequentially, separated by space>`.
+To run the demo with a single input source(a web camera or a video file), but several channels, specify an additional parameter: `-duplicate_num 3`. You will see four channels: one real and three duplicated. With several input sources, the `-duplicate_num` parameter will duplicate each of them.
 
 ## Demo Output
 
@@ -107,4 +110,3 @@ IP-cameras through RSTP URI interface are not supported.
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
