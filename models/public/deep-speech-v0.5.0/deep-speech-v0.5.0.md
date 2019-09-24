@@ -94,4 +94,4 @@ Hidden state `c`, name: `lstm_fused_cell/BlockLSTM/TensorIterator.2`, Contains h
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/tensorflow/models/master/LICENSE]()
+[https://raw.githubusercontent.com/mozilla/DeepSpeech/v0.5.0/LICENSE]()
