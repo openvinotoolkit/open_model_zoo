@@ -48,9 +48,9 @@ Also you can add all necessary parameters for inference your model.
 
 ## Accuracy validation
 
-To run accuracy validation, use [Accuracy Checker](./tools/accuracy_checker#testing-new-models) tool, provided with repository. It is simple if model task already supported by Accuracy Checker. You need only create Accuracy Checker configuration file, which contain necessary parameters to do accuracy validation (specify dataset and annotation, pre- and post processing parameters, accuracy metric to compute and so on).
+Accuracy validation can be performed by [Accuracy Checker](./tools/accuracy_checker) tool, provided with repository. This tool can use OpenVINO&trade; Inference Engine to run converted model or original framework to run original model. OpenVINO&trade; Accuracy Checker supports lot of datasets, metrics and preprocessing options, what makes validation quite simple (if task is supported by tool). You need only create Accuracy Checker configuration file, which contain necessary parameters to do accuracy validation (specify dataset and annotation, pre- and post processing parameters, accuracy metric to compute and so on). More details you can find [here](./tools/accuracy_checker#resting-new-models)
 
-When the configuration file is ready, you must run Accuracy Checker to obtain metric results. If they match your results, that means  conversion was fully successful and Accuracy Checker fully supports your model, metric and dataset. If no - recheck [conversion][#model-conversion] parameters or validation configuration.
+When the configuration file is ready, you must run Accuracy Checker to obtain metric results. If they match your results, that means  conversion was fully successful and Accuracy Checker fully supports your model, metric and dataset. If no - recheck [conversion](#model-conversion) parameters or validation configuration file.
 
 *After this step you will get accuracy validation configuration file - **<model_name>.yml***
 
