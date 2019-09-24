@@ -54,7 +54,7 @@ DeepSpeech is an open source Speech-To-Text engine, using a model trained by mac
     - C - number of context
     - I - number of input
 
-    * Note: Needs to acquire the mfcc feature for audio.
+    > Note: Needs to acquire the mfcc feature for audio.
     
 2. Hidden state, name: `previous_state_h/read/placeholder_port_0`, shape: [1x2048], format: [BxF],
    where: 
