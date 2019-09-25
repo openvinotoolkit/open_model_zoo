@@ -12,7 +12,6 @@ This repository includes optimized deep learning models and a set of demos to ex
 * [Model Downloader](tools/downloader/README.md) and other automation tools
 * [Demos](demos/README.md) that demonstrate models usage with Deep Learning Deployment Toolkit
 * [Accuracy Checker](tools/accuracy_checker/README.md) tool for models accuracy validation
-* [Model Contribution Guide](contribution.md)
 
 ## License
 Open Model Zoo is licensed under [Apache License Version 2.0](LICENSE).
@@ -34,6 +33,8 @@ We welcome community contributions to the Open Model Zoo repository. If you have
 * Make sure you can build the product and run all the demos with your patch.
 * In case of a larger feature, provide a relevant demo.
 * Submit a pull request at https://github.com/opencv/open_model_zoo/pulls
+
+Additional information about contributing your model to Open Model Zoo you can find [here](CONTRIBUTING.md).
 
 We will review your contribution and, if any additional fixes or modifications are needed, may give you feedback to guide you. When accepted, your pull request will be merged into the GitHub* repositories.
 
