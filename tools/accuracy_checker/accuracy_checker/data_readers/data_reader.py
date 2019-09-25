@@ -180,101 +180,50 @@ class ScipyImageReader(BaseReader):
     __provider__ = 'scipy_imread'
 
     @staticmethod
-    def _from_image(image, flatten=False, mode=None):
-        if mode is not None:
-            if mode != image.mode:
-                image = image.convert(mode)
-        elif image.mode == 'P':
+    def _from_image(image):
+        if image.mode == 'P':
             image = image.convert('RGBA') if 'transparency' in image.info else image.convert('RGB')
-
-        if flatten:
-            image = image.convert('F')
-        elif image.mode == '1':
-            image = image.convert('L')
 
         return np.array(image)
 
     @staticmethod
-    def _process_2d(data, shape, mode, pal, high, low, cmax, cmin):
+    def _process_2d(data, shape):
         shape = (shape[1], shape[0])  # columns show up first
-        if mode == 'F':
-            data32 = data.astype(np.float32)
-            image = Image.frombytes(mode, shape, data32.tostring())
-
-            return image
-        if mode in [None, 'L', 'P']:
-            bytedata = ScipyImageReader._bytescale(data, high=high, low=low, cmin=cmin, cmax=cmax)
-            image = Image.frombytes('L', shape, bytedata.tostring())
-            if pal is not None:
-                image.putpalette(np.asarray(pal, dtype=np.uint8).tostring())
-                # Becomes a mode='P' automagically.
-            elif mode == 'P':  # default gray-scale
-                pal1 = np.arange(0, 256, 1, dtype=np.uint8)[:, np.newaxis]
-                pal2 = np.ones((3,), dtype=np.uint8)[np.newaxis, :]
-                pal = pal1 * pal2
-                image.putpalette(np.asarray(pal, dtype=np.uint8).tostring())
-
-            return image
-        if mode == '1':  # high input gives threshold for 1
-            bytedata = (data > high)
-            image = Image.frombytes('1', shape, bytedata.tostring())
-
-            return image
-
-        cmin = cmin or np.amin(np.ravel(data))
-        cmax = cmax or np.amax(np.ravel(data))
-        data = (data * 1.0 - cmin) * (high - low) / (cmax - cmin) + low
-        if mode == 'I':
-            data32 = data.astype(np.uint32)
-            image = Image.frombytes(mode, shape, data32.tostring())
-        else:
-            raise ValueError("Mode is unknown or incompatible with input array shape.")
+        bytedata = ScipyImageReader._bytescale(data)
+        image = Image.frombytes('L', shape, bytedata.tostring())
 
         return image
 
     @staticmethod
-    def _process_3d(data, shape, mode, channel_axis, high, low, cmin, cmax):
+    def _process_3d(data, shape):
         # if here then 3-d array with a 3 or a 4 in the shape length.
         # Check for 3 in datacube shape --- 'RGB' or 'YCbCr'
-        if channel_axis is None:
-            ca = np.flatnonzero(np.asarray(shape) == 3) if 3 in shape else np.flatnonzero(np.asarray(shape) == 4)
-            if not np.size(ca):
-                raise ValueError("Could not find channel dimension.")
-            ca = ca[0]
-        else:
-            ca = channel_axis
+        ca = np.flatnonzero(np.asarray(shape) == 3) if 3 in shape else np.flatnonzero(np.asarray(shape) == 4)
+        if not np.size(ca):
+            raise ValueError("Could not find channel dimension.")
+        ca = ca[0]
 
         numch = shape[ca]
         if numch not in [3, 4]:
             raise ValueError("Channel axis dimension is not valid.")
 
-        bytedata = ScipyImageReader._bytescale(data, high=high, low=low, cmin=cmin, cmax=cmax)
+        bytedata = ScipyImageReader._bytescale(data)
         channel_axis_mapping = {
             0: ((1, 2, 0), (shape[1], shape[0])),
             1: ((0, 2, 1), (shape[2], shape[0])),
             2: ((0, 1, 2), (shape[1], shape[0]))
         }
-        if ca in channel_axis_mapping:
-            transposition, shape = channel_axis_mapping[ca]
-            strdata = np.transpose(bytedata, transposition).tostring()
+        transposition, shape = channel_axis_mapping[ca]
+        strdata = np.transpose(bytedata, transposition).tostring()
 
-        if mode is None:
-            mode = 'RGB' if numch == 3 else 'RGBA'
-
-        if mode not in ['RGB', 'RGBA', 'YCbCr', 'CMYK']:
-            raise ValueError("Mode is unknown or incompatible with input array shape.")
-
-        if mode in ['RGB', 'YCbCr'] and numch != 3:
-            raise ValueError("Invalid array shape for mode.")
-        if mode in ['RGBA', 'CMYK'] and numch != 4:
-            raise ValueError("Invalid array shape for mode.")
-
+        mode = 'RGB' if numch == 3 else 'RGBA'
         # Here we know data and mode is correct
         image = Image.frombytes(mode, shape, strdata)
+
         return image
 
     @staticmethod
-    def _to_image(arr, high=255, low=0, cmin=None, cmax=None, pal=None, mode=None, channel_axis=None):
+    def _to_image(arr):
         data = np.asarray(arr)
         if np.iscomplexobj(data):
             raise ValueError("Cannot convert a complex-valued array.")
@@ -283,8 +232,8 @@ class ScipyImageReader(BaseReader):
         if not valid:
             raise ValueError("'arr' does not have a suitable array shape for any mode.")
         if len(shape) == 2:
-            return ScipyImageReader._process_2d(data, shape, mode, pal, high, low, cmax, cmin)
-        return ScipyImageReader._process_3d(data, shape, mode, channel_axis, high, low, cmin, cmax)
+            return ScipyImageReader._process_2d(data, shape)
+        return ScipyImageReader._process_3d(data, shape)
 
     @staticmethod
     def _imread(name):
@@ -294,43 +243,25 @@ class ScipyImageReader(BaseReader):
         return ScipyImageReader._from_image(image)
 
     @staticmethod
-    def _bytescale(data, cmin=None, cmax=None, high=255, low=0):
+    def _bytescale(data):
         if data.dtype == np.uint8:
             return data
-
-        if high > 255:
-            raise ValueError("`high` should be less than or equal to 255.")
-        if low < 0:
-            raise ValueError("`low` should be greater than or equal to 0.")
-        if high < low:
-            raise ValueError("`high` should be greater than or equal to `low`.")
-        cmin = cmin or data.min()
-        cmax = cmax or data.max()
-
+        cmin = data.min()
+        cmax = data.max()
         cscale = cmax - cmin
-        if cscale < 0:
-            raise ValueError("`cmax` should be larger than `cmin`.")
         if cscale == 0:
             cscale = 1
 
-        scale = float(high - low) / cscale
-        bytedata = (data - cmin) * scale + low
+        scale = float(255) / cscale
+        bytedata = (data - cmin) * scale
 
-        return (bytedata.clip(low, high) + 0.5).astype(np.uint8)
+        return (bytedata.clip(0, 255) + 0.5).astype(np.uint8)
 
     @staticmethod
-    def imresize(arr, size, interp='bilinear', mode=None):
-        im = ScipyImageReader._to_image(arr, mode=mode)
-        ts = type(size)
-        if np.issubdtype(ts, np.signedinteger):
-            percent = size / 100.0
-            size = tuple((np.array(im.size) * percent).astype(int))
-        elif np.issubdtype(type(size), np.floating):
-            size = tuple((np.array(im.size) * size).astype(int))
-        else:
-            size = (size[1], size[0])
-        func = {'nearest': 0, 'lanczos': 1, 'bilinear': 2, 'bicubic': 3, 'cubic': 3}
-        imnew = im.resize(size, resample=func[interp])
+    def imresize(arr, size):
+        im = ScipyImageReader._to_image(arr)
+        size = (size[1], size[0])
+        imnew = im.resize(size, resample=0)
 
         return ScipyImageReader._from_image(imnew)
 

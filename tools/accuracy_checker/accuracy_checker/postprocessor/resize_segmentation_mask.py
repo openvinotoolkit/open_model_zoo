@@ -62,7 +62,7 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
         def _(entry, height, width):
             entry_mask = []
             for class_mask in entry.mask:
-                resized_mask = ScipyImageReader.imresize(class_mask, (height, width), 'nearest')
+                resized_mask = ScipyImageReader.imresize(class_mask, (height, width))
                 entry_mask.append(resized_mask)
             entry.mask = np.array(entry_mask)
 
@@ -70,7 +70,7 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
 
         @resize_segmentation_mask.register(SegmentationAnnotation)
         def _(entry, height, width):
-            entry.mask = ScipyImageReader.imresize(entry.mask, (height, width), 'nearest')
+            entry.mask = ScipyImageReader.imresize(entry.mask, (height, width))
             return entry
 
         for target in annotation:
