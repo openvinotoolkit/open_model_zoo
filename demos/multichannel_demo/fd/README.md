@@ -104,7 +104,9 @@ If your cameras are connected to PC with indexes gap (for example, `0,1,3`), use
 
 IP-cameras through RSTP URI interface are supported, use below format for giving input as ip cameras.
 
+```
 -i rtsp://.. rtsp://.. rtsp://..
+```
 
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)
