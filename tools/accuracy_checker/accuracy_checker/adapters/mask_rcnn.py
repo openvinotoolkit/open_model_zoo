@@ -16,6 +16,10 @@ limitations under the License.
 
 import cv2
 import numpy as np
+try:
+    import pycocotools.mask as mask_util
+except ImportError:
+    mask_util = None
 from .adapter import Adapter
 from ..config import StringField, ConfigError
 from ..representation import CoCocInstanceSegmentationPrediction, DetectionPrediction, ContainerPrediction
@@ -27,11 +31,9 @@ class MaskRCNNAdapter(Adapter):
 
     def __init__(self, launcher_config, label_map=None, output_blob=None):
         super().__init__(launcher_config, label_map, output_blob)
-        try:
-            import pycocotools.mask as mask_util
-            self.encoder = mask_util.encode
-        except ImportError:
+        if mask_util is None:
             raise ImportError('pycocotools is not installed. Please install it before using mask_rcnn adapter.')
+        self.encoder = mask_util.encode
 
     @classmethod
     def parameters(cls):
