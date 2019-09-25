@@ -1,6 +1,6 @@
-# How to contribute to OMZ
+# How to contribute model to Open Model Zoo
 
-From this document you will know how to contribute your model to OpenVINO&trade; Open Model Zoo. Almost any model from supported frameworks (see list below) can be added. It could be done in few simple steps.
+From this document you will learn how to contribute your model to OpenVINO&trade; Open Model Zoo (OMZ). It could be done in few steps.
 
 1. [Model location](#model-location)
 2. [Model conversion](#model-conversion)
@@ -19,17 +19,17 @@ List of supported frameworks:
 
 ## Model location
 
-Upload your model to any Internet file storage with easy and direct access to it. It can be www.github.com, GoogleDrive\*, or any other.
+Upload your model to any Internet file storage. The main requirements are that the model must either be downloadable from a direct HTTP(S) link or from Google Drive\*.
 
 *After this step you will get **links** to the model*
 
 ## Model conversion
 
-OpenVINO&trade; supports models in its own format IR. Model from any supported framework can be easily converted to IR using Model Optimizer tool included in OpenVINO&trade; package. More information about conversion you can learn [here](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After successful conversion you will get model in IR format `*.xml` representing net graph and `*.bin` containing net parameters. 
+Deep Learning Inference Engine (IE) supports models in Intermediate Representation (IR) format. Model from any supported framework can be  converted to IR using Model Optimizer tool included in OpenVINO&trade; package. More information about conversion you can learn [here](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After successful conversion you will get model in IR format `*.xml` representing net graph and `*.bin` containing net parameters. 
 
-> **NOTE 1**: due to OpenVINO&trade; paradigm, image pre-processing parameters (mean and scale) should be built into converted model to simplify model usage.
+> **NOTE 1**: due to OpenVINO&trade; paradigms, image pre-processing parameters (mean and scale) should be built into converted model to simplify model usage.
 
-> **NOTE 2**: due to OpenVINO&trade; paradigms, if model input is a colored image, color channel order should be `BGR`.
+> **NOTE 2**: due to OpenVINO&trade; paradigms, if model input is a color image, color channel order should be `BGR`.
 
 *After this step you`ll get **conversion parameters** for Model Optimizer.*
 
@@ -38,17 +38,19 @@ OpenVINO&trade; supports models in its own format IR. Model from any supported f
 Demo will show main idea of how work with your model. If your model solves one of the supported by Open Model Zoo task, try find appropriate option from [demos](https://docs.openvinotoolkit.org/latest/_demos_README.html) or [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html).
 
 If appropriate demo or sample are absent, you must provide your own demo (C++ or Python). Demo's input requires next options:
-```
-    -i "<path>"              Optional. Path to a input file or directory (for multiple inferences). By default input must be generated randomly.
-    -m "<path>"              Required. Path to an .xml file with a trained model
-    -d "<device>"            Optional. Target device for model inference. By default CPU
-    -no_show                 Optional. Do not launch GUI window to visualize inference results. Needed for demo CI tests automation.
-```
-Also you can add all necessary parameters for inference your model.
+
+-    `-i "<path>"`              Optional. Path to a input file or directory (for multiple inferences).
+-    `-m "<path>"`              Required. Path to an .xml file with a trained model
+-    `-d "<device>"`            Optional. Target device for model inference. By default CPU
+-    `-no_show`                 Optional. Do not launch GUI window to visualize inference results. Needed for demo CI tests automation.
+
+Also you can add any other necessary parameters.
+
+*After this step you'll get **demo** for your model (if no demo was available)*
 
 ## Accuracy validation
 
-Accuracy validation can be performed by [Accuracy Checker](./tools/accuracy_checker) tool, provided with repository. This tool can use OpenVINO&trade; Inference Engine to run converted model or original framework to run original model. OpenVINO&trade; Accuracy Checker supports lot of datasets, metrics and preprocessing options, what makes validation quite simple (if task is supported by tool). You need only create Accuracy Checker configuration file, which contain necessary parameters to do accuracy validation (specify dataset and annotation, pre- and post processing parameters, accuracy metric to compute and so on). More details you can find [here](./tools/accuracy_checker#resting-new-models)
+Accuracy validation can be performed by [Accuracy Checker](./tools/accuracy_checker) tool, provided with repository. This tool can use IE to run converted model or original framework to run original model. Accuracy Checker supports lot of datasets, metrics and preprocessing options, what makes validation quite simple (if task is supported by tool). You need only create configuration file, which contain necessary parameters to do accuracy validation (specify dataset and annotation, pre- and post processing parameters, accuracy metric to compute and so on). More details you can find [here](./tools/accuracy_checker#resting-new-models)
 
 When the configuration file is ready, you must run Accuracy Checker to obtain metric results. If they match your results, that means  conversion was fully successful and Accuracy Checker fully supports your model, metric and dataset. If no - recheck [conversion](#model-conversion) parameters or validation configuration file.
 
@@ -88,38 +90,25 @@ You describe all files, which need to be downloaded, in this section. Each file 
 * `sha256` sets file hash sum
 * `source` sets direct link to file *OR* describes file access parameters
 
-If file is located on GoogleDrive\*, section `source` must contain:
-```
- - $type: google_drive
-   id: <file id>
-```
+If file is located on Google Drive\*, section `source` must contain:
+- `$type: google_drive`
+- `id` file ID on Google Drive\*
+
 **`postprocessing`** (*optional*)
 
 Sometimes right after downloading model is not ready for conversion by Model Optimizer and some additional preprocessing needed, such as unpacking, replacing or deleting some part of file. This manipulation is described in this section.
 
 For unpacking archive:
-
-```
-  - $type: unpack_archive
-    file: <file name>
-    format: zip | tar | gztar | bztar | xztar
-```
+- `$type: unpack_archive`
+- `file` archive file name
+- `format` archive format (zip | tar | gztar | bztar | xztar)
 
 For replacement operations:
-
-```
-  - $type: regex_replace
-    file: 
-    pattern:
-    replacement:
-    count: 
-```
-where
+- `$type: regex_replace`
 - `file` name of file where replacement must be executed
 - `pattern` string or regexp ([learn more](https://docs.python.org/2/library/re.html)) to find
 - `replacement` replacement string
 - `count` (*optional*)  maximum number of pattern occurrences to be replaced
-
 
 **`pytorch_to_onnx`** (*optional*)
 
@@ -155,7 +144,7 @@ Path to model's license.
 
 ### Example
 
-In this [example](models/public/densenet-121-tf/model.yml) classification model DenseNet-121\*, pretrained in TensorFlow\*, is downloading from GoogleDrive\* as archive.
+In this [example](models/public/densenet-121-tf/model.yml) classification model DenseNet-121\*, pretrained in TensorFlow\*, is downloading from Google Drive\* as archive.
 
 ```
 description: >-
