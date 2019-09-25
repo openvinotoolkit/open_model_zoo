@@ -1,5 +1,5 @@
 models:
-  - name: MobileNet-v1-1_0-224
+  - name: mobilenet-v1-1-0-224
 
     launchers:
       - framework: opencv
