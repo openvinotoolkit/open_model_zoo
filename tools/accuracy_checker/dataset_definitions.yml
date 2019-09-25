@@ -135,14 +135,6 @@ datasets:
     annotation: wider.pickle
     dataset_meta: wider.json
 
-  - name: wider_label_start_1
-    annotation_conversion:
-      converter: wider
-      annotation_file: WiderFace/wider_face_split/wider_face_val_bbx_gt.txt
-      label_start: 1
-    annotation: widerface_label_start_1.pickle
-    dataset_meta: widerface_label_start_1.json
-
   - name: facial_landmarks_35
     data_source: VOCdevkit/VOC2012/JPEGImages
     annotation_conversion:
@@ -323,17 +315,3 @@ datasets:
     preprocessing:
       - type: resize
         size: 224
-
-  - name: affectnet
-    annotation_conversion:
-      converter: emotion_recognition
-      annotation_file: AffectNet/image_list_5emo.txt
-    annotation: affectnet.pickle
-    dataset_meta: affectnet.json
-
-  - name: lfw
-    annotation_conversion:
-     converter: lfw
-     pairs_file: LFW/annotation/pairs.txt
-     landmarks_file: LFW/annotation/lfw_landmark.txt
-    annotation: lfw.pickle
