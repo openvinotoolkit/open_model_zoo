@@ -1,0 +1,48 @@
+models:
+  - name: emotions-recognition-retail-0003
+
+    launchers:
+      - framework: opencv
+        device: CPU
+        tags:
+          - FP32
+        model:   intel/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
+        weights: intel/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 224, 224
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP32
+        model:   intel/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
+        weights: intel/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 224, 224
+        adapter: classification
+
+      - framework: opencv
+        device: GPU
+        tags:
+          - FP16
+        model:   intel/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
+        weights: intel/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
+        inputs:
+          - name: "data"
+            type: INPUT
+            shape: 3, 224, 224
+        adapter: classification
+
+    datasets:
+      - name: affectnet
+        data_source: AffectNet
+        annotation: affectnet.pickle
+        dataset_meta: affectnet.json
+
+        metrics:
+          - type: accuracy
