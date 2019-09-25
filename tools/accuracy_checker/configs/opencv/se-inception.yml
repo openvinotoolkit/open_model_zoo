@@ -1,5 +1,5 @@
 models:
-  - name: SE-Inception
+  - name: se-inception
 
     launchers:
       - framework: opencv
