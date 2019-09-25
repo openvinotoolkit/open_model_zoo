@@ -1,5 +1,5 @@
 models:
-  - name: GoogleNet_v3
+  - name: googlenet-v3
 
     launchers:
       - framework: opencv
