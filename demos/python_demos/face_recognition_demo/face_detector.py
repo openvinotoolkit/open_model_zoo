@@ -46,7 +46,7 @@ class FaceDetector(Module):
             self.position[:] = clip(self.position, min, max)
             self.size[:] = clip(self.size, min, max)
 
-    def __init__(self, model, confidence_threshold=0.5, roi_scale_factor=1.15,input_h=0, input_w=0):
+    def __init__(self, model, confidence_threshold=0.5, roi_scale_factor=1.15):
         super(FaceDetector, self).__init__(model)
 
         assert len(model.inputs) == 1, "Expected 1 input blob"

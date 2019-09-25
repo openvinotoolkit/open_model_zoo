@@ -142,9 +142,8 @@ class FrameProcessor:
 
         self.face_detector = FaceDetector(face_detector_net,
                                           confidence_threshold=args.t_fd,
-                                          roi_scale_factor=args.exp_r_fd,
-                                          input_h = args.fd_input_height,
-                                          input_w = args.fd_input_width)
+                                          roi_scale_factor=args.exp_r_fd)
+
         self.landmarks_detector = LandmarksDetector(landmarks_net)
         self.face_identifier = FaceIdentifier(face_reid_net,
                                               match_threshold=args.t_id)
