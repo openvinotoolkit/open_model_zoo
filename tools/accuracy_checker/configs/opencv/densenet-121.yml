@@ -1,5 +1,5 @@
 models:
-  - name: Densenet-121
+  - name: densenet-121
 
     launchers:
       - framework: opencv

@@ -1,43 +1,43 @@
 models:
-  - name: alexnet
+  - name: resnet-50
 
     launchers:
       - framework: opencv
         device: CPU
         tags:
           - FP32
-        model:   public/alexnet/alexnet.prototxt
-        weights: public/alexnet/alexnet.caffemodel
+        model:   public/resnet-50/resnet-50.prototxt
+        weights: public/resnet-50/resnet-50.caffemodel
         inputs:
           - name: "data"
             type: INPUT
-            shape: 3, 227, 227
+            shape: 3, 224, 224
         adapter: classification
 
       - framework: opencv
         device: GPU
         tags:
           - FP32
-        model:   public/alexnet/alexnet.prototxt
-        weights: public/alexnet/alexnet.caffemodel
+        model:   public/resnet-50/resnet-50.prototxt
+        weights: public/resnet-50/resnet-50.caffemodel
         backend: OCV
         inputs:
           - name: "data"
             type: INPUT
-            shape: 3, 227, 227
+            shape: 3, 224, 224
         adapter: classification
 
       - framework: opencv
         device: GPU
         tags:
           - FP16
-        model:   public/alexnet/alexnet.prototxt
-        weights: public/alexnet/alexnet.caffemodel
+        model:   public/resnet-50/resnet-50.prototxt
+        weights: public/resnet-50/resnet-50.caffemodel
         backend: OCV
         inputs:
           - name: "data"
             type: INPUT
-            shape: 3, 227, 227
+            shape: 3, 224, 224
         adapter: classification
 
     datasets:
@@ -47,9 +47,10 @@ models:
         preprocessing:
           - type: resize
             size: 256
+            aspect_ratio_scale: greater
 
           - type: crop
-            size: 227
+            size: 224
 
           - type: normalization
             mean: 104, 117, 123

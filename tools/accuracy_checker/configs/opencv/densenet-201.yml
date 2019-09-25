@@ -1,5 +1,5 @@
 models:
-  - name: Densenet-201
+  - name: densenet-201
 
     launchers:
       - framework: opencv

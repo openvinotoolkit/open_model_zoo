@@ -1,5 +1,5 @@
 models:
-  - name: Densenet-169
+  - name: densenet-169
 
     launchers:
       - framework: opencv
