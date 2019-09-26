@@ -577,7 +577,7 @@ VideoSources::~VideoSources() {
 
 bool VideoSources::isRunning() const {
     // when one of VideoSources will be out of frames, it will stop IEGraph,
-    // so this isRunning() requires that all inpus were running
+    // so this isRunning() requires that all inputs were running
     return std::all_of(inputs.begin(), inputs.end(),
         [](const std::unique_ptr<VideoSource>& input){return input->isRunning();});
 }

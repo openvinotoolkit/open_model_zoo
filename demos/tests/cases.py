@@ -38,9 +38,13 @@ class NativeDemo:
     def fixed_args(self, source_dir, build_dir):
         return [str(build_dir / self._name)]
 
-class MultichannelNativeDemo(NativeDemo):
+class MultichannelFaceDetectionNativeDemo(NativeDemo):
     def models_lst_path(self, source_dir):
-        return source_dir / 'multichannel_demo' / 'models.lst'
+        return source_dir / 'multichannel_demo' / 'face_detection' / 'models.lst'
+
+class MultichannelHumanPoseEstimationNativeDemo(NativeDemo):
+    def models_lst_path(self, source_dir):
+        return source_dir / 'multichannel_demo' / 'human_pose_estimation' / 'models.lst'
 
 class PythonDemo:
     def __init__(self, name, test_cases):
@@ -130,7 +134,7 @@ NATIVE_DEMOS = [
 
     # TODO: mask_rcnn_demo: no models.lst
 
-    MultichannelNativeDemo(name='multi-channel-face-detection-demo', test_cases=combine_cases(
+    MultichannelFaceDetectionNativeDemo(name='multi-channel-face-detection-demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             '-i': IMAGE_SEQUENCES['face-detection-adas']}),
         device_cases('-d'),
@@ -142,7 +146,7 @@ NATIVE_DEMOS = [
             ModelArg('face-detection-retail-0044')),
     )),
 
-    MultichannelNativeDemo(name='multi-channel-human-pose-estimation-demo', test_cases=combine_cases(
+    MultichannelHumanPoseEstimationNativeDemo(name='multi-channel-human-pose-estimation-demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             '-i': IMAGE_SEQUENCES['human-pose-estimation'],
             '-m': ModelArg('human-pose-estimation-0001')}),
@@ -271,9 +275,10 @@ PYTHON_DEMOS = [
             '-i': ImagePatternArg('py/instance-segmentation-demo'),
             '--delay': '1',
             '-d': 'CPU'}), # GPU is not supported
-        single_option_cases('-m', ModelArg('instance-segmentation-security-0010'),
-                                  ModelArg('instance-segmentation-security-0050'),
-                                  ModelArg('instance-segmentation-security-0083')),
+        single_option_cases('-m',
+            ModelArg('instance-segmentation-security-0010'),
+            ModelArg('instance-segmentation-security-0050'),
+            ModelArg('instance-segmentation-security-0083')),
     )),
 
     PythonDemo(name='multi_camera_multi_person_tracking', test_cases=combine_cases(

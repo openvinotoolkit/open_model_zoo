@@ -100,7 +100,7 @@ def main():
                 subprocess.check_output(
                     [
                         sys.executable, '--', str(auto_tools_dir / 'converter.py'),
-                        '--download_dir', str(dl_dir), '--list', str(demo.models_lst_path(demos_dir)), '--jobs', 'auto'
+                        '--download_dir', str(dl_dir), '--list', str(demo.models_lst_path(demos_dir)), '--jobs', 'auto',
                     ] + ([] if args.mo is None else ['--mo', str(args.mo)]),
                     stderr=subprocess.STDOUT, universal_newlines=True)
             except subprocess.CalledProcessError as e:
