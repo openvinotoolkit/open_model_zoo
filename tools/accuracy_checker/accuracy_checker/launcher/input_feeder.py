@@ -19,6 +19,7 @@ import numpy as np
 
 from ..config import ConfigError
 from ..utils import extract_image_representations
+from ..data_readers import MultiFramesInputIdentifier
 
 LAYER_LAYOUT_TO_IMAGE_LAYOUT = {
     'NCHW': [0, 3, 1, 2],
@@ -96,6 +97,11 @@ class InputFeeder:
                 if not input_regex:
                     raise ConfigError('Impossible to choose correct data for layer {}.'
                                       'Please provide regular expression for matching in config.'.format(input_layer))
+                if isinstance(identifiers, MultiFramesInputIdentifier):
+                    input_id_order = {
+                        input_index: frame_id for frame_id, input_index in enumerate(identifiers.input_id)
+                    }
+                    input_data = data[input_id_order[input_regex]]
                 data = [data] if np.isscalar(identifiers) else data
                 identifiers = [identifiers] if np.isscalar(identifiers) else identifiers
                 for identifier, data_value in zip(identifiers, data):
@@ -139,7 +145,7 @@ class InputFeeder:
             else:
                 config_non_constant_inputs.append(name)
                 if value:
-                    value = re.compile(value)
+                    value = re.compile(value) if not isinstance(value, int) else value
                     non_constant_inputs_mapping[name] = value
                 layout = input_.get('layout', default_layout)
                 layouts[name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]

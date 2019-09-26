@@ -46,6 +46,7 @@ class DataRepresentation:
 
 
 ClipIdentifier = namedtuple('ClipIdentifier', ['video', 'clip_id', 'frames'])
+MultiFramesInputIdentifier = namedtuple('MultiFrames', ['input_id', 'frames'])
 
 
 def create_reader(config):
@@ -83,6 +84,7 @@ class BaseReader(ClassProvider):
         self.read_dispatcher = singledispatch(self.read)
         self.read_dispatcher.register(list, self._read_list)
         self.read_dispatcher.register(ClipIdentifier, self._read_clip)
+        self.read_dispatcher.register(MultiFramesInputIdentifier, self._read_frames_multi_input)
 
         self.validate_config()
         self.configure()
@@ -119,6 +121,9 @@ class BaseReader(ClassProvider):
         video = Path(data_id.video)
         frames_identifiers = [video / frame for frame in data_id.frames]
         return self.read_dispatcher(frames_identifiers)
+
+    def _read_frames_multi_input(self, data_id):
+        return self.read_dispatcher(data_id.frames)
 
     def read_item(self, data_id):
         return DataRepresentation(self.read_dispatcher(data_id), identifier=data_id)

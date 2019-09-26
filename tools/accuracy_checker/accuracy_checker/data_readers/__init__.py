@@ -29,6 +29,7 @@ from .data_reader import (
 
     DataRepresentation,
     ClipIdentifier,
+    MultiFramesInputIdentifier,
     create_reader
 )
 
@@ -48,5 +49,6 @@ __all__ = [
 
     'DataRepresentation',
     'ClipIdentifier',
+    'MultiFramesInputIdentifier',
     'create_reader'
 ]
