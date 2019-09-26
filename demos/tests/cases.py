@@ -283,8 +283,8 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='multi_camera_multi_person_tracking', test_cases=combine_cases(
         TestCase(options={'--no_show': None,
-            '-i': [ImagePatternArg('multi-camera-multi-person-tracking-1'),
-                ImagePatternArg('multi-camera-multi-person-tracking-2')],
+            '-i': [ImagePatternArg('py/multi-camera-multi-person-tracking-1'),
+                ImagePatternArg('py/multi-camera-multi-person-tracking-2')],
             '-m': ModelArg('person-detection-retail-0013')}),
         device_cases('-d'),
         single_option_cases('--m_reid',
