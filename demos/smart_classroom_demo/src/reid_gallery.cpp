@@ -104,7 +104,7 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
         std::vector<cv::Mat> embeddings;
 
         // Please, note that the case when there are more than one image in gallery
-        // for a person might not be supported in the current implementation
+        // for a person might not work properly with the current implementation
         // of the demo.
         // Remove this assert by your own risk.
         CV_Assert(item.size() == 1);
