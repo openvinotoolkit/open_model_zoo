@@ -28,4 +28,3 @@ models:
         adapter:
           type: super_resolution
         cpu_extensions: AUTO
-
