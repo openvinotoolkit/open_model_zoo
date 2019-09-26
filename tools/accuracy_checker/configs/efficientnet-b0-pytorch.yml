@@ -1,0 +1,96 @@
+models:
+  - name: efficientnet-b0-pytorch
+
+    launchers:
+      - framework: onnx_runtime
+        model: efficientnet-b0-pytorch/efficientnet-b0.onnx
+        adapytorcher: classification
+        cpu_extensions: AUTO
+        inputs:
+          - name: data
+            type: INPUT
+            shape: 1,3,224,224
+
+
+    datasets:
+      - name: imagenet_1000_classes
+        data_source: ImageNet
+        reader: pillow_imread
+
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            use_pillow: True
+            interpolation: BICUBIC
+
+          - type: crop
+            use_pillow: True
+            size: 224
+
+          - type: normalization
+            mean: (123.675,116.28,103.53)
+            std: (58.395,57.12,57.375)
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 76.91
+            threshold: 0.05
+
+          - name: acciracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 93.21
+            threshold: 0.05
+
+  - name: efficientnet-b0-pytorch
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model: efficientnet-b0-pytorch/FP32/efficientnet-b0-pytorch.xml
+        weights: efficientnet-b0-pytorch/FP32/efficientnet-b0-pytorch.bin
+        adapytorcher: classification
+        cpu_extensions: AUTO
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model: efficientnet-b0-pytorch/FP16/efficientnet-b0-pytorch.xml
+        weights: efficientnet-b0-pytorch/FP16/efficientnet-b0-pytorch.bin
+        adapytorcher: classification
+        cpu_extensions: AUTO
+
+
+    datasets:
+      - name: imagenet_1000_classes
+        data_source: ImageNet
+        reader: pillow_imread
+
+        preprocessing:
+          - type: bgr_to_rgb # Actually rgb->bgr
+
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+            use_pillow: True
+            interpolation: BICUBIC
+
+          - type: crop
+            use_pillow: True
+            size: 224
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+            reference: 76.91
+            threshold: 0.05
+          - name: acciracy@top5
+            type: accuracy
+            top_k: 5
+            reference: 93.21
+            threshold: 0.05
