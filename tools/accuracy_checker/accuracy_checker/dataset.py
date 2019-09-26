@@ -50,9 +50,12 @@ class Dataset:
         self.iteration = 0
         dataset_config = DatasetConfig('Dataset')
         dataset_config.validate(self._config)
+        self._images_dir = Path(self._config.get('data_source', ''))
+        self._load_annotation()
+
+    def _load_annotation(self):
         annotation, meta = None, None
         use_converted_annotation = True
-        self._images_dir = Path(self._config.get('data_source', ''))
         if 'annotation' in self._config:
             annotation_file = Path(self._config['annotation'])
             if annotation_file.exists():
@@ -114,6 +117,10 @@ class Dataset:
             return len(self.subset)
         return len(self._annotation)
 
+    @property
+    def full_size(self):
+        return len(self._annotation)
+
     def __call__(self, context, *args, **kwargs):
         batch_annotation = self.__getitem__(self.iteration)
         self.iteration += 1
@@ -170,6 +177,10 @@ class Dataset:
 
         return annotation, meta
 
+    def reset(self):
+        self.subset = None
+        self._load_annotation()
+
 
 def read_annotation(annotation_file: Path):
     annotation_file = get_path(annotation_file)
@@ -186,7 +197,8 @@ def read_annotation(annotation_file: Path):
 
 
 class DatasetWrapper:
-    def __init__(self, data_reader, annotation_reader=None):
+    def __init__(self, data_reader, annotation_reader=None, tag=''):
+        self.tag = tag
         self.data_reader = data_reader
         self.annotation_reader = annotation_reader
         self._batch = 1
@@ -240,7 +252,13 @@ class DatasetWrapper:
         if self.subset:
             self.subset = None
         if self.annotation_reader:
-            self.annotation_reader.subset = None
+            self.annotation_reader.reset()
+
+    @property
+    def full_size(self):
+        if self.annotation_reader:
+            return self.annotation_reader.full_size
+        return len(self._identifiers)
 
     @property
     def size(self):

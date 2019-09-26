@@ -127,6 +127,12 @@ class BaseDetectionMetricMixin(Metric):
     def evaluate(self, annotations, predictions):
         pass
 
+    def reset(self):
+        label_map = self.config.get('label_map', 'label_map')
+        dataset_labels = self.dataset.metadata.get(label_map, {})
+        valid_labels = list(filter(lambda x: x != self.dataset.metadata.get('background_label'), dataset_labels))
+        self.meta['names'] = [dataset_labels[name] for name in valid_labels]
+
 
 class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
     """

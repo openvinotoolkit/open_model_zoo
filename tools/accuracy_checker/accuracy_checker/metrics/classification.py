@@ -90,7 +90,6 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
         self.top_k = self.get_value_from_config('top_k')
         label_map = self.get_value_from_config('label_map')
         self.labels = self.dataset.metadata.get(label_map)
-        self.meta['names'] = list(self.labels.values())
 
         def loss(annotation_label, prediction_top_k_labels):
             result = np.zeros_like(list(self.labels.keys()))
@@ -110,6 +109,7 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
         self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
 
     def evaluate(self, annotations, predictions):
+        self.meta['names'] = list(self.labels.values())
         return self.accuracy.evaluate()
 
     def reset(self):

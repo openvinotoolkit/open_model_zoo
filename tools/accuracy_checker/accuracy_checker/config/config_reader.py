@@ -104,9 +104,8 @@ class ConfigReader:
             for model in models:
                 if _is_requirements_missed(model, required_model_entries):
                     raise ConfigError('Each model must specify {}'.format(', '.join(required_model_entries)))
-
-                if list(filter(lambda entry: _is_requirements_missed(entry, required_dataset_entries),
-                               model['datasets'])):
+                datasets = model['datasets'].values() if isinstance(model['datasets'], dict) else model['datasets']
+                if list(filter(lambda entry: _is_requirements_missed(entry, required_dataset_entries), datasets)):
                     raise ConfigError(required_dataset_error.format(model['name'], ', '.join(required_dataset_entries)))
 
         def _check_pipelines_config(config):
@@ -478,7 +477,6 @@ class ConfigReader:
         filtering_mode = functors_by_mode[mode]
         filtering_mode(config, target_devices)
 
-
     @staticmethod
     def convert_paths(config):
         def convert_launcher_paths(launcher_config):
@@ -513,7 +511,8 @@ class ConfigReader:
         for model in config['models']:
             for launcher_config in model['launchers']:
                 convert_launcher_paths(launcher_config)
-            for dataset_config in model['datasets']:
+            datasets = model['datasets'].values() if isinstance(model['datasets'], dict) else model['datasets']
+            for dataset_config in datasets:
                 convert_dataset_paths(dataset_config)
 
 
