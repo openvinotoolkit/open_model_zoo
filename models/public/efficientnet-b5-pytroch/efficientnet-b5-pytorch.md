@@ -1,15 +1,15 @@
-# efficientnet-b7-pt
+# efficientnet-b5-pytorch
 
 ## Use Case and High-Level Description
 
-The `efficientnet-b7-pt` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946) group of models designed to perform image classification. This model was pretrained in TensorFlow\*, then weights were converted to PyTorch\*. All the EfficientNet models have been pretrained on the ImageNet image database. For details about this family of models, check out the [repository](https://github.com/rwightman/gen-efficientnet-pytorch).
+The `efficientnet-b5-pytorch` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946) group of models designed to perform image classification. This model was pretrained in TensorFlow\*, then weights were converted to PyTorch\*. All the EfficientNet models have been pretrained on the ImageNet image database. For details about this family of models, check out the [repository](https://github.com/rwightman/gen-efficientnet-pytorch).
 
-The model input is a blob that consists of a single image 3x600x600 in RGB
+The model input is a blob that consists of a single image 3x456x456 in RGB
 order. The RGB mean values need to be subtracted as follows: [123.675,116.28,103.53]
 before passing the image blob into the network. In addition, values must be divided
 by [58.395,57.12,57.375].
 
-The model output for `efficientnet-b7-pt` is the typical object classifier output for
+The model output for `efficientnet-b5-pytorch` is the typical object classifier output for
 the 1000 different classifications matching those in the ImageNet database.
 
 ## Example
@@ -19,16 +19,16 @@ the 1000 different classifications matching those in the ImageNet database.
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Classification|
-| GFLOPs            | 77.618        |
-| MParams           | 66.193        |
+| GFLOPs            | 21.252        |
+| MParams           | 30.303        |
 | Source framework  | PyTorch\*     |
 
 ## Accuracy
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 84.42%         | 84.42%          |
-| Top 5  | 96.91%         | 96.91%          | 
+| Top 1  | 83.69          | 83.69           |
+| Top 5  | 96.71          | 96.71           | 
 
 ## Performance
 
@@ -36,7 +36,7 @@ the 1000 different classifications matching those in the ImageNet database.
 
 ### Original model
 
-Image, name - `data`,  shape - `1,3,600,600`, format is `B,C,H,W` where:
+Image, name - `data`,  shape - `1,3,456,456`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
@@ -48,7 +48,7 @@ Mean values - [123.675,116.28,103.53], scale values - [58.395,57.12,57.375].
 
 ### Converted model
 
-Image, name - `data`,  shape - `1,3,600,600`, format is `B,C,H,W` where:
+Image, name - `data`,  shape - `1,3,456,456`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel

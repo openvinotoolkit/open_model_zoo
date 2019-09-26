@@ -13,18 +13,18 @@
 # limitations under the License.
 
 description: >-
-  The `efficientnet-b7-pt` model is one of the EfficientNet <https://arxiv.org/abs/1905.11946>
+  The `efficientnet-b5-pytorch` model is one of the EfficientNet <https://arxiv.org/abs/1905.11946>
   group of models designed to perform image classification. This model was pretrained
   in TensorFlow\*, then weights were converted to PyTorch\*. All the EfficientNet models
   have been pretrained on the ImageNet image database. For details about this family
   of models, check out the repository <https://github.com/rwightman/gen-efficientnet-pytorch>.
 
-  The model input is a blob that consists of a single image 3x600x600 in RGB
+  The model input is a blob that consists of a single image 3x456x456 in RGB
   order. The RGB mean values need to be subtracted as follows: [123.675,116.28,103.53]
   before passing the image blob into the network. In addition, values must be multiplied
   by [58.395,57.12,57.375].
 
-  The model output for `efficientnet-b7-pt` is the typical object classifier output
+  The model output for `efficientnet-b5-pytorch` is the typical object classifier output
   for the 1000 different classifications matching those in the ImageNet database.
 task_type: classification
 files:
@@ -48,10 +48,10 @@ files:
     size: 32
     sha256: e0bedda5f5e949b8ace7d4f5cdf80e7e664c0b0a935486b6152078fa61c80c1b
     source: https://github.com/rwightman/gen-efficientnet-pytorch/raw/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/gen_efficientnet/__init__.py
-  - name: tf-efficientnet-b7.pth
-    size: 266843942
-    sha256: 076e3472fb198ec7c3091aecc73ff205bcca4a114f5862e2297a4c2720c91826
-    source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/tf_efficientnet_b7_aa-076e3472.pth
+  - name: tf-efficientnet-b5.pth
+    size: 122398414
+    sha256: 99018a74e61e5948a955ebfaa2b02ba9abe7bb2e6b7f3d2dfe100e07e103bbdb
+    source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/tf_efficientnet_b5_aa-99018a74.pth
 postprocessing:
   - $type: regex_replace
     file: model/conv2d_helpers.py
@@ -59,21 +59,21 @@ postprocessing:
     replacement: '_EXPORTABLE = True'
 pytorch_to_onnx:
   - --model-path=$dl_dir
-  - --model-name=tf_efficientnet_b7
+  - --model-name=tf_efficientnet_b5
   - --import-module=model
-  - --weights=$dl_dir/tf-efficientnet-b7.pth
-  - --input-shape=1,3,600,600
+  - --weights=$dl_dir/tf-efficientnet-b5.pth
+  - --input-shape=1,3,456,456
   - --input-names=data
   - --output-names=prob
-  - --output-file=$conv_dir/efficientnet-b7.onnx
+  - --output-file=$conv_dir/efficientnet-b5.onnx
   - --model-params=pretrained=False
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,3,600,600]
+  - --input_shape=[1,3,456,456]
   - --input=data
   - --mean_values=data[123.675,116.28,103.53]
   - --scale_values=data[58.395,57.12,57.375]
   - --output=prob
-  - --input_model=$conv_dir/efficientnet-b7.onnx
+  - --input_model=$conv_dir/efficientnet-b5.onnx
 framework: pytorch
 license: https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/LICENSE
