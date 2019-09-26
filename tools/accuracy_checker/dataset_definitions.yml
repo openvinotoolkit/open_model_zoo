@@ -316,6 +316,31 @@ datasets:
       - type: resize
         size: 224
 
+  - name: semantic_segmentation_adas
+    data_source: segmentation
+    annotation_conversion:
+      converter: common_semantic_segmentation
+      images_dir: segmentation/images
+      masks_dir: segmentation/mask_segmentation_adas
+      image_postfix: .JPEG
+      mask_postfix: .png
+      dataset_meta: segmentation/mask_segmentation_adas/dataset_meta.json
+    annotation: semantic_segmentation_adas.pickle
+    dataset_meta: semantic_segmentation_adas.json
+
+    preprocessing:
+      - type: resize
+        dst_height: 1024
+        dst_width: 2048
+
+    postprocessing:
+      - type: encode_segmentation_mask
+        apply_to: annotation
+      - type: resize_segmentation_mask
+        apply_to: annotation
+        dst_height: 1024
+        dst_width: 2048
+
   - name: road_segmentation
     data_source: segmentation
     annotation_conversion:
@@ -395,3 +420,12 @@ datasets:
       - type: psnr
         scale_border: 4
         presenter: print_vector
+
+  - name: head_pose
+    data_source: WIDER_val/images/16--Award_Ceremony
+    annotation: head_pose.pickle
+
+    preprocessing:
+      - type: crop_rect
+      - type: resize
+        size: 60
