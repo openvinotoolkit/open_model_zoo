@@ -46,7 +46,7 @@ class DataRepresentation:
 
 
 ClipIdentifier = namedtuple('ClipIdentifier', ['video', 'clip_id', 'frames'])
-MultiFramesInputIdentifier = namedtuple('MultiFrames', ['input_id', 'frames'])
+MultiFramesInputIdentifier = namedtuple('MultiFramesInputIdentifier', ['input_id', 'frames'])
 
 
 def create_reader(config):
