@@ -25,7 +25,7 @@ Upload your model to any Internet file storage. The main requirements are that t
 
 ## Model conversion
 
-Deep Learning Inference Engine (IE) supports models in Intermediate Representation (IR) format. Model from any supported framework can be  converted to IR using Model Optimizer tool included in OpenVINO&trade; package. More information about conversion you can learn [here](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After successful conversion you will get model in IR format `*.xml` representing net graph and `*.bin` containing net parameters. 
+Deep Learning Inference Engine (IE) supports models in Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using Model Optimizer tool included in OpenVINO&trade; package. Find more information about conversion in [[Model Optimizer Developer Guide](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After successful conversion you will get model in IR format `*.xml` representing net graph and `*.bin` containing net parameters. 
 
 > **NOTE 1**: due to OpenVINO&trade; paradigms, image pre-processing parameters (mean and scale) should be built into converted model to simplify model usage.
 
@@ -35,14 +35,14 @@ Deep Learning Inference Engine (IE) supports models in Intermediate Representati
 
 ## Demo
 
-Demo will show main idea of how work with your model. If your model solves one of the supported by Open Model Zoo task, try find appropriate option from [demos](https://docs.openvinotoolkit.org/latest/_demos_README.html) or [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html).
+The demo shows the main idea of model inference using IE. If your model solves one of the tasks supported by Open Model Zoo, find appropriate demo from [demos](https://docs.openvinotoolkit.org/latest/_demos_README.html) or sample from [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html).
 
-If appropriate demo or sample are absent, you must provide your own demo (C++ or Python). Demo's input requires next options:
+If appropriate demo or sample are absent, you must provide your own demo (C++ or Python). Demos are required to support the following keys:
 
--    `-i "<path>"`              Optional. Path to a input file or directory (for multiple inferences).
--    `-m "<path>"`              Required. Path to an .xml file with a trained model
--    `-d "<device>"`            Optional. Target device for model inference. By default CPU
--    `-no_show`                 Optional. Do not launch GUI window to visualize inference results. Needed for demo CI tests automation.
+-    `-i "<input>"`             Required. Input to process.
+-    `-m "<path>"`              Required. Path to an .xml file with a trained model.
+-    `-d "<device>"`            Optional. Target device for model inference. Default is CPU.
+-    `-no_show`                 Optional. Do not visualize inference results.
 
 Also you can add any other necessary parameters.
 
