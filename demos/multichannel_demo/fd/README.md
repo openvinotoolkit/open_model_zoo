@@ -102,12 +102,12 @@ Alternatively, you can just set `-nc 3`, which simplifies application usage.
 
 If your cameras are connected to PC with indexes gap (for example, `0,1,2`), use the `-i` parameter.
 
-IP сameras support: 
+IP сameras support:
 ```
 -i rtsp://camera_address_1/ rtsp://camera_address_2/
 ```
  note: set `-nc 0`, when web cam not configured/connected. 
- 
+
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
