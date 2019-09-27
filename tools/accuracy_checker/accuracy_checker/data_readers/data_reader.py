@@ -23,10 +23,6 @@ from PIL import Image
 import scipy.misc
 import numpy as np
 import nibabel as nib
-try:
-    import tensorflow as tf
-except ImportError as import_error:
-    tf = None
 
 from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
 from ..dependency import ClassProvider
@@ -283,8 +279,12 @@ class TensorflowImageReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
-        if tf is None:
-            raise ImportError('tf backend for image reading requires TensorFlow. Please install it before usage.')
+        try:
+            import tensorflow as tf
+        except ImportError as import_error:
+            raise ConfigError(
+                'tf_imread reader disabled.Please, install Tensorflow before using. \n{}'.format(import_error.msg)
+            )
 
         tf.enable_eager_execution()
 

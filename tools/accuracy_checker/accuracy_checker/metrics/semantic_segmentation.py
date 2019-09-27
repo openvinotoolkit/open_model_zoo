@@ -163,7 +163,7 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         self.mean = self.get_value_from_config('mean')
         self.median = self.get_value_from_config('median')
 
-        labels = self.dataset.labels.values() if self.dataset.metadata else ['overall']
+        labels = self.dataset.labels if self.dataset.metadata else ['overall']
         self.classes = len(labels)
 
         names_mean = ['mean@{}'.format(name) for name in labels] if self.mean else []

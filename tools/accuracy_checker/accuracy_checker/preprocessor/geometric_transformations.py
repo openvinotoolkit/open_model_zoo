@@ -20,10 +20,6 @@ from collections import namedtuple
 import cv2
 import numpy as np
 from PIL import Image
-try:
-    import tensorflow as tf
-except ImportError as import_error:
-    tf = None
 
 from ..config import ConfigError, NumberField, StringField, BoolField
 from ..dependency import ClassProvider
@@ -189,8 +185,12 @@ class _TFResizer(_Resizer):
     __provider__ = 'tf'
 
     def __init__(self, interpolation):
-        if tf is None:
-            raise ImportError('tf backend for resize operation requires TensorFlow. Please install it before usage.')
+        try:
+            import tensorflow as tf
+        except ImportError as import_error:
+            raise ImportError(
+                'tf resize disabled. Please, install Tensorflow before using. \n{}'.format(import_error.msg)
+            )
         tf.enable_eager_execution()
         self.supported_interpolations = {
             'BILINEAR': tf.image.ResizeMethod.BILINEAR,

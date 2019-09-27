@@ -74,7 +74,7 @@ def make_subset(annotation, size, seed=666):
 
         subsample_set = OrderedSet()
         potential_ann_ind = np.random.choice(len(annotation), size, replace=False)
-        for ann_ind in potential_ann_ind: # pylint: disable=E1133
+        for ann_ind in potential_ann_ind:
             annotation_for_subset = annotation[ann_ind]
             positive_pairs = annotation_for_subset.positive_pairs
             negative_pairs = annotation_for_subset.negative_pairs

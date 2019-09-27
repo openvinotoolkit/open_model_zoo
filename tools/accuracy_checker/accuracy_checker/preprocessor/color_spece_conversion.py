@@ -18,11 +18,6 @@ limitations under the License.
 import cv2
 import numpy as np
 
-try:
-    import tensorflow as tf
-except ImportError as import_error:
-    tf = None
-
 from .preprocessor import Preprocessor
 
 
@@ -51,8 +46,12 @@ class TfConvertImageDType(Preprocessor):
 
     def __init__(self, config, name, input_shapes=None):
         super().__init__(config, name, input_shapes)
-        if tf is None:
-            raise ImportError('*tf_convert_image_dtype* operation requires TensorFlow. Please install it before usage')
+        try:
+            import tensorflow as tf
+        except ImportError as import_error:
+            raise ImportError(
+                'tf_convert_image_dtype disabled.Please, install Tensorflow before using. \n{}'.format(import_error.msg)
+            )
         tf.enable_eager_execution()
         self.converter = tf.image.convert_image_dtype
         self.dtype = tf.float32

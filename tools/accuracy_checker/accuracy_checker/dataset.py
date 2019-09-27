@@ -50,12 +50,9 @@ class Dataset:
         self.iteration = 0
         dataset_config = DatasetConfig('Dataset')
         dataset_config.validate(self._config)
-        self._images_dir = Path(self._config.get('data_source', ''))
-        self._load_annotation()
-
-    def _load_annotation(self):
         annotation, meta = None, None
         use_converted_annotation = True
+        self._images_dir = Path(self._config.get('data_source', ''))
         if 'annotation' in self._config:
             annotation_file = Path(self._config['annotation'])
             if annotation_file.exists():
@@ -177,10 +174,6 @@ class Dataset:
 
         return annotation, meta
 
-    def reset(self):
-        self.subset = None
-        self._load_annotation()
-
 
 def read_annotation(annotation_file: Path):
     annotation_file = get_path(annotation_file)
@@ -252,7 +245,7 @@ class DatasetWrapper:
         if self.subset:
             self.subset = None
         if self.annotation_reader:
-            self.annotation_reader.reset()
+            self.annotation_reader.subset = None
 
     @property
     def full_size(self):
