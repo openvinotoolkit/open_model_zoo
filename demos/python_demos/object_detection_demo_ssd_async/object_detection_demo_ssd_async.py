@@ -114,8 +114,9 @@ def main():
     log.info("Starting inference in async mode...")
     is_async_mode = True
     render_time = 0
-    ret, frame = cap.read()
-    initial_frame_h, initial_frame_w = frame.shape[:2]
+    if is_async_mode:
+        ret, frame = cap.read()
+        initial_frame_h, initial_frame_w = frame.shape[:2]
 
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     print("To switch between sync/async modes, press TAB key in the output window")
@@ -123,12 +124,12 @@ def main():
     while cap.isOpened():
         if is_async_mode:
             ret, next_frame = cap.read()
-            if ret:
-                initial_next_frame_h, initial_next_frame_w = next_frame.shape[:2]
         else:
             ret, frame = cap.read()
+            if ret:
+                initial_frame_h, initial_frame_w = frame.shape[:2]
         if not ret:
-            break
+            break  # abandons the last frame in case of async_mode
         # Main sync point:
         # in the truly Async mode we start the NEXT infer request, while waiting for the CURRENT to complete
         # in the regular mode we start the CURRENT request and immediately wait for it's completion
@@ -188,7 +189,7 @@ def main():
         if is_async_mode:
             cur_request_id, next_request_id = next_request_id, cur_request_id
             frame = next_frame
-            initial_frame_h, initial_frame_w = initial_next_frame_h, initial_next_frame_w
+            initial_frame_h, initial_frame_w = frame.shape[:2]
 
         key = cv2.waitKey(1)
         if key == 27:
