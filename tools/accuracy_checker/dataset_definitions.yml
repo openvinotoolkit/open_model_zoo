@@ -480,3 +480,8 @@ datasets:
         ".*.json":
             type: json_reader
             key: head_pose_angles
+
+  - name: handwritten_score_recognition
+    data_source: ILSVRC2012_img_val
+    annotation: hadwritten_score_recognition.pickle
+    dataset_meta: hadwritten_score_recognition.json
