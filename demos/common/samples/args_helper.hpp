@@ -31,7 +31,6 @@
 * @param arg path to a file to be checked for existence
 * @return files updated vector of verified input files
 */
-//void readInputFilesArguments(std::vector<std::string> &files, const std::string& arg) {
 inline void readInputFilesArguments(std::vector<std::string> &files, const std::string& arg) {
     struct stat sb;
     if (stat(arg.c_str(), &sb) != 0) {
@@ -74,7 +73,6 @@ inline void readInputFilesArguments(std::vector<std::string> &files, const std::
 *        It's necessary to process multiple values for single key
 * @return files updated vector of verified input files
 */
-// void parseInputFilesArguments(std::vector<std::string> &files) {
 inline void parseInputFilesArguments(std::vector<std::string> &files) {
     std::vector<std::string> args = gflags::GetArgvs();
     bool readArguments = false;
@@ -118,7 +116,6 @@ inline std::vector<std::string> parseDevices(const std::string& device_string) {
 
 inline std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>& devices,
                                                     const std::string& values_string) {
-    //  Format: <device1>:<value1>,<device2>:<value2> or just <value>
     auto values_string_upper = values_string;
     std::transform(values_string_upper.begin(),
                    values_string_upper.end(),
