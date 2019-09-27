@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 /**
-* \brief The entry point for the Inference Engine multichannel_face_detection demo application
-* \file multichannel_face_detection/main.cpp
-* \example multichannel_face_detection/main.cpp
+* \brief The entry point for the Inference Engine multichannel_yolo_detection demo application
+* \file multichannel_yolo_detection/main.cpp
+* \example multichannel_yolo_detection/main.cpp
 */
 #include <iostream>
 #include <vector>
