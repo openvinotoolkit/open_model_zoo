@@ -63,7 +63,7 @@ For example, to run the demo with the pre-trained face detection model on FPGA w
 To run the demo using two recorded video files, use the following command:
 ```sh
 ./multi-channel-face-detection-demo -m face-detection-retail-0004.xml
--l <demos_build_folder>/intel64/Release/lib/libcpu_extension.so -d HETERO:FPGA,CPU -i /path/to/file1 /path/to/file2
+-l <demos_build_folder>/intel64/Release/lib/libcpu_extension.so -d HETERO:FPGA,CPU -i /path/to/file1 /path/to/file2 -nc 0
 ```
 Video files will be processed repeatedly.
 
@@ -100,13 +100,14 @@ You can use `-i` option to connect all the three web cameras:
 
 Alternatively, you can just set `-nc 3`, which simplifies application usage.
 
-If your cameras are connected to PC with indexes gap (for example, `0,1,3`), use the `-i` parameter.
+If your cameras are connected to PC with indexes gap (for example, `0,1,2`), use the `-i` parameter.
 
-IP сameras support:
+IP сameras support: 
 ```
 -i rtsp://camera_address_1/ rtsp://camera_address_2/
 ```
-
+ note: set `-nc 0`, when web cam not configured/connected. 
+ 
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
