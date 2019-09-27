@@ -2,6 +2,20 @@
 
 This demo provides an inference pipeline for multi-channel yolo v3. The demo uses Yolo v3 Object Detection network. You can follow [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page convert the YOLO V3 and tiny YOLO V3 into IR model and execute the this demo with converted IR model.
 
+> **NOTES**:
+> This demo is default for yolo v3 model, if you want to run with tiny yolo v3 model, please patch the `anchors` vector. 
+> 
+> From :
+> ```cpp
+> std::vector<float> anchors = {10.0, 13.0, 16.0, 30.0, 33.0, 23.0, 30.0, 61.0, 62.0, 45.0, 59.0, 119.0, 116.0, 90.0,
+>                               156.0, 198.0, 373.0, 326.0};
+> ```
+> To :
+> ```cpp
+> std::vector<float> anchors = {10.0, 14.0, 23.0, 27.0, 37.0, 58.0, 81.0, 82.0, 135.0, 169.0, 344.0, 319.0};
+> ```
+    
+    
 Other demo objectives are:
 
 * Up to 16 cameras as inputs, via OpenCV*
@@ -31,20 +45,20 @@ Options:
       -l "<absolute_path>"       Required for MKLDNN (CPU)-targeted custom layers. Absolute path to a shared library with the kernels impl.
           Or
       -c "<absolute_path>"       Required for clDNN (GPU)-targeted custom kernels. Absolute path to the xml file with the kernels desc.
-    -d "<device>"                Specify the target device for Face Detection (CPU, GPU, FPGA, HDDL or MYRIAD). The demo will look for a suitable plugin for a specified device.
-    -nc                          Maximum number of processed camera inputs (web cams)
-    -bs                          Processing batch size, number of frames processed per infer request
-    -n_ir                        Number of infer requests
-    -n_iqs                       Frame queue size for input channels
-    -fps_sp                      FPS measurement sampling period. Duration between timepoints, msec
-    -n_sp                        Number of sampling periods
-    -pc                          Enables per-layer performance report.
-    -t                           Probability threshold for detections.
-    -no_show                     No show processed video.
-    -show_stats                  Enable statictics output
-    -duplicate_num               Enable and specify number of channel additionally copied from real sources
-    -real_input_fps              Disable input frames caching, for maximum throughput pipeline
-    -i                           Specify full path to input video files
+    -d "<device>"                Optional. Specify the target device for Face Detection (CPU, GPU, FPGA, HDDL or MYRIAD). The demo will look for a suitable plugin for a specified device.
+    -nc                          Optional. Maximum number of processed camera inputs (web cams)
+    -bs                          Optional. Batch size for processing (the number of frames processed per infer request)
+    -n_ir                        Optional. Number of infer requests
+    -n_iqs                       Optional. Frame queue size for input channels
+    -fps_sp                      Optional. FPS measurement sampling period. Duration between timepoints, msec
+    -n_sp                        Optional. Number of sampling periods
+    -pc                          Optional. Enables per-layer performance report.
+    -t                           Optional. Probability threshold for detections.
+    -no_show                     Optional. No show processed video.
+    -show_stats                  Optional. Enable statistics report
+    -duplicate_num               Optional. Enable and specify number of channel additionally copied from real sources
+    -real_input_fps              Optional. Disable input frames caching, for maximum throughput pipeline
+    -i                           Optional. Specify full path to input video files
 
 ```
 
@@ -54,20 +68,23 @@ To run the demo, you can use publiced pre-train model and follow [this](https://
 
 For example, to run the demo using two recorded video files, use the following command:
 ```sh
-./multi-channel-face-detection-demo -m face-detection-retail-0004.xml
+./multi-channel-yolo-v3-demo -m $PATH_OF_YOLO_V3_MODEL
 -l <demos_build_folder>/intel64/Release/lib/libcpu_extension.so -d HETERO:FPGA,CPU -nc 1
 ```
 
 To run the demo using two recorded video files, use the following command:
 ```sh
-./multi-channel-yolo-v3-demo -m $PATH_OF_YOLO_V3_MODEL -l <samples_build_folder>/intel64/Release/lib/libcpu_extension.so -d HDDL -i /path/to/file1 /path/to/file2
+./multi-channel-yolo-v3-demo -m $PATH_OF_YOLO_V3_MODEL 
+-l <samples_build_folder>/intel64/Release/lib/libcpu_extension.so -d HDDL -i /path/to/file1 /path/to/file2
 ```
 Video files will be processed repeatedly.
 
 To achieve 100% utilization of one Myriad X, the thumb rule is to run 4 infer requests on each Myriad X. Option “-n_ir 32” can be added to above command to use 100% of HDDL-R card. The 32 here is 8 (Myriad X on HDDL-R card) x 4 (infer requests), such as following command:
 
 ```sh
-./multi-channel-yolo-v3-demo -m $PATH_OF_YOLO_V3_MODEL -l <samples_build_folder>/intel64/Release/lib/libcpu_extension.so -d HDDL -i /path/to/file1 /path/to/file2 /path/to/file3 /path/to/file4 -n_ir 32
+./multi-channel-yolo-v3-demo -m $PATH_OF_YOLO_V3_MODEL 
+-l <samples_build_folder>/intel64/Release/lib/libcpu_extension.so -d HDDL 
+-i /path/to/file1 /path/to/file2 /path/to/file3 /path/to/file4 -n_ir 32
 ```
 
 You can also run the demo on web cameras and video files simultaneously by specifying both parameters: `-nc <number of cams> -i <video files sequentially, separated by space>`.
