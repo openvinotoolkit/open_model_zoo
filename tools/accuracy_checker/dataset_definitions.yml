@@ -467,3 +467,16 @@ datasets:
       - type: crop_rect
       - type: resize
         size: 60
+
+  - name: gaze_estimation_dataset
+
+    data_source: gaze-estimation
+    annotation: gaze_estimation.pickle
+
+    reader:
+      type: combine_reader
+      scheme:
+        ".*.png": opencv_imread
+        ".*.json":
+            type: json_reader
+            key: head_pose_angles
