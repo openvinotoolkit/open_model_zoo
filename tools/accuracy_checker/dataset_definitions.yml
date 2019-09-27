@@ -315,6 +315,44 @@ datasets:
     preprocessing:
       - type: resize
         size: 224
+ 
+  - name: lfw
+    data_source: LFW/lfw
+    annotation_conversion:
+      converter: lfw
+      pairs_file: LFW/annotation/pairs.txt
+      landmarks_file: LFW/annotation/lfw_landmark.txt
+    annotation: lfw.pickle
+
+  - name: ICDAR2015
+    data_source: ICDAR15_DET/ch4_test_images
+    annotation_conversion:
+      converter: icdar_detection
+      data_dir: ICDAR15_DET/gt
+    annotation: icdar15_detection.pickle
+
+  - name: ICDAR2013
+    annotation_conversion:
+      converter: icdar13_recognition
+      annotation_file: ICDAR13_REC/gt/gt.txt.fixed.alfanumeric
+    annotation: icdar13_recognition.pickle
+    dataset_meta: icdar13_recognition.json
+
+  - name: market1501
+    data_source: Market-1501-v15.09.15
+    annotation_conversion:
+      converter: market1501_reid
+      data_dir: Market-1501-v15.09.15
+    annotation: market1501_reid.pickle
+
+  - name: vgg2face
+    data_source: VGGFaces2/test
+    annotation_conversion:
+      converter: vgg_face
+      landmarks_csv_file: VGGFaces2/bb_landmark/loose_landmark_test.csv
+      bbox_csv_file: VGGFaces2/bb_landmark/loose_bb_test.csv
+    annotation: vggfaces2.pickle
+    dataset_meta: vgfces2.json
 
   - name: semantic_segmentation_adas
     data_source: segmentation

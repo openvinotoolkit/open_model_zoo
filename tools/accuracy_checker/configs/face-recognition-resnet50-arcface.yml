@@ -12,12 +12,6 @@ models:
 
     datasets:
       - name: lfw
-        data_source: LFW/lfw
-        annotation_conversion:
-          converter: lfw
-          pairs_file: LFW/annotation/pairs.txt
-          landmarks_file: LFW/annotation/lfw_landmark.txt
-        annotation: lfw.pickle
 
         preprocessing:
           - type: bgr_to_rgb
@@ -49,12 +43,6 @@ models:
 
     datasets:
       - name: lfw
-        data_source: LFW/lfw
-        annotation_conversion:
-          converter: lfw
-          pairs_file: LFW/annotation/pairs.txt
-          landmarks_file: LFW/annotation/lfw_landmark.txt
-        annotation: lfw.pickle
 
         preprocessing:
           - type: point_alignment
