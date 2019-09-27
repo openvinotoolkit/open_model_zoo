@@ -31,6 +31,7 @@
 * @param arg path to a file to be checked for existence
 * @return files updated vector of verified input files
 */
+//void readInputFilesArguments(std::vector<std::string> &files, const std::string& arg) {
 inline void readInputFilesArguments(std::vector<std::string> &files, const std::string& arg) {
     struct stat sb;
     if (stat(arg.c_str(), &sb) != 0) {
@@ -73,6 +74,7 @@ inline void readInputFilesArguments(std::vector<std::string> &files, const std::
 *        It's necessary to process multiple values for single key
 * @return files updated vector of verified input files
 */
+// void parseInputFilesArguments(std::vector<std::string> &files) {
 inline void parseInputFilesArguments(std::vector<std::string> &files) {
     std::vector<std::string> args = gflags::GetArgvs();
     bool readArguments = false;
