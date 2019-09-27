@@ -4,7 +4,7 @@ models:
     launchers:
       - framework: onnx_runtime
         model: public/efficientnet-b0-pytorch/efficientnet-b0.onnx
-        adapytorcher: classification
+        adapter: classification
         cpu_extensions: AUTO
         inputs:
           - name: data
@@ -39,7 +39,7 @@ models:
           - FP32
         model: public/efficientnet-b0-pytorch/FP32/efficientnet-b0-pytorch.xml
         weights: public/efficientnet-b0-pytorch/FP32/efficientnet-b0-pytorch.bin
-        adapytorcher: classification
+        adapter: classification
         cpu_extensions: AUTO
 
       - framework: dlsdk
@@ -47,7 +47,7 @@ models:
           - FP16
         model: public/efficientnet-b0-pytorch/FP16/efficientnet-b0-pytorch.xml
         weights: public/efficientnet-b0-pytorch/FP16/efficientnet-b0-pytorch.bin
-        adapytorcher: classification
+        adapter: classification
         cpu_extensions: AUTO
 
 
