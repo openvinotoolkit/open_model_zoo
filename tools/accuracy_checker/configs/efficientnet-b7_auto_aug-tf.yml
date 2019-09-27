@@ -5,7 +5,7 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        model: public/efficientnet-b7_auto_aug-tf/FP32/efficientnet-b7_auto_aug-tf.xml
+        model:   public/efficientnet-b7_auto_aug-tf/FP32/efficientnet-b7_auto_aug-tf.xml
         weights: public/efficientnet-b7_auto_aug-tf/FP32/efficientnet-b7_auto_aug-tf.bin
         adapter: classification
         cpu_extensions: AUTO
@@ -13,7 +13,7 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        model: public/efficientnet-b7_auto_aug-tf/FP16/efficientnet-b7_auto_aug-tf.xml
+        model:   public/efficientnet-b7_auto_aug-tf/FP16/efficientnet-b7_auto_aug-tf.xml
         weights: public/efficientnet-b7_auto_aug-tf/FP16/efficientnet-b7_auto_aug-tf.bin
         adapter: classification
         cpu_extensions: AUTO
