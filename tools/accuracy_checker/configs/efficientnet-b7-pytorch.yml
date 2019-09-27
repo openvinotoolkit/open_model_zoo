@@ -3,7 +3,7 @@ models:
 
     launchers:
       - framework: onnx_runtime
-        model: efficientnet-b7-pytorch/efficientnet-b7-pytorch.onnx
+        model: public/efficientnet-b7-pytorch/efficientnet-b7-pytorch.onnx
         adapytorcher: classification
         cpu_extensions: AUTO
         inputs:
@@ -14,7 +14,6 @@ models:
 
     datasets:
       - name: imagenet_1000_classes
-        data_source: ImageNet
         reader: pillow_imread
 
         preprocessing:
@@ -32,26 +31,14 @@ models:
             mean: (123.675,116.28,103.53)
             std: (58.395,57.12,57.375)
 
-        metrics:
-          - name: accuracy@top1
-            type: accuracy
-            top_k: 1
-            reference: 84.42
-            threshold: 0.05
-          - name: acciracy@top5
-            type: accuracy
-            top_k: 5
-            reference: 96.91
-            threshold: 0.05
-
   - name: efficientnet-b7-pytorch
 
     launchers:
       - framework: dlsdk
         tags:
           - FP32
-        model: efficientnet-b7-pytorch/FP32/efficientnet-b7-pytorch.xml
-        weights: efficientnet-b7-pytorch/FP32/efficientnet-b7-pytorch.bin
+        model: public/efficientnet-b7-pytorch/FP32/efficientnet-b7-pytorch.xml
+        weights: public/efficientnet-b7-pytorch/FP32/efficientnet-b7-pytorch.bin
         adapytorcher: classification
         cpu_extensions: AUTO
 
@@ -59,18 +46,17 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        model: efficientnet-b7-pytorch/FP16/efficientnet-b7-pytorch.xml
-        weights: efficientnet-b7-pytorch/FP16/efficientnet-b7-pytorch.bin
+        model: public/efficientnet-b7-pytorch/FP16/efficientnet-b7-pytorch.xml
+        weights: public/efficientnet-b7-pytorch/FP16/efficientnet-b7-pytorch.bin
         adapytorcher: classification
         cpu_extensions: AUTO
 
     datasets:
       - name: imagenet_1000_classes
-        data_source: ImageNet
         reader: pillow_imread
 
         preprocessing:
-          - type: brg_to_rgb # Actually rgb->bgr
+          - type: bgr_to_rgb # Actually rgb->bgr
 
           - type: resize
             size: 632
@@ -81,15 +67,3 @@ models:
           - type: crop
             use_pillow: True
             size: 600
-
-        metrics:
-          - name: accuracy@top1
-            type: accuracy
-            top_k: 1
-            reference: 84.42
-            threshold: 0.05
-          - name: acciracy@top5
-            type: accuracy
-            top_k: 5
-            reference: 96.91
-            threshold: 0.05
