@@ -305,7 +305,7 @@ datasets:
 
   - name: image_retrieval
     data_source: textile_crops
-    annotattion_conversion:
+    annotation_conversion:
       converter: image_retrieval
       data_dir: textile_crops
       gallery_annotation_file: textile_crops/gallery/gallery.txt
@@ -315,3 +315,117 @@ datasets:
     preprocessing:
       - type: resize
         size: 224
+
+  - name: semantic_segmentation_adas
+    data_source: segmentation
+    annotation_conversion:
+      converter: common_semantic_segmentation
+      images_dir: segmentation/images
+      masks_dir: segmentation/mask_segmentation_adas
+      image_postfix: .JPEG
+      mask_postfix: .png
+      dataset_meta: segmentation/mask_segmentation_adas/dataset_meta.json
+    annotation: semantic_segmentation_adas.pickle
+    dataset_meta: semantic_segmentation_adas.json
+
+    preprocessing:
+      - type: resize
+        dst_height: 1024
+        dst_width: 2048
+
+    postprocessing:
+      - type: encode_segmentation_mask
+        apply_to: annotation
+      - type: resize_segmentation_mask
+        apply_to: annotation
+        dst_height: 1024
+        dst_width: 2048
+
+  - name: road_segmentation
+    data_source: segmentation
+    annotation_conversion:
+      converter: common_semantic_segmentation
+      images_dir: segmentation/images
+      masks_dir: segmentation/mask_road_segmentation
+      image_postfix: .JPEG
+      mask_postfix: .png
+      dataset_meta: segmentation/mask_road_segmentation/dataset_meta.json
+    annotation: road_segmentation.pickle
+    dataset_meta: road_segmentation.json
+
+    preprocessing:
+      - type: resize
+        dst_height: 512
+        dst_width: 896
+
+    postprocessing:
+      - type: encode_segmentation_mask
+        apply_to: annotation
+      - type: resize_segmentation_mask
+        apply_to: annotation
+        dst_height: 512
+        dst_width: 896
+
+    metrics:
+      - type: mean_iou
+        presenter: print_vector
+      - type: mean_accuracy
+        presenter: print_vector
+
+  - name: super_resolution_x3
+    data_source: super_resolution
+    annotation_conversion:
+      converter: super_resolution
+      data_dir: super_resolution
+      lr_suffix: lr_x3
+      upsample_suffix: upsample_x3
+      hr_suffix: hr
+      two_streams: True
+    annotation: super_resolution_x3.pickle
+
+    metrics:
+      - type: psnr
+        scale_border: 4
+        presenter: print_vector
+
+  - name: super_resolution_x4
+    data_source: super_resolution
+    annotation_conversion:
+      converter: super_resolution
+      data_dir: super_resolution
+      lr_suffix: lr_x4
+      upsample_suffix: upsample_x4
+      hr_suffix: hr
+      two_streams: True
+    annotation: super_resolution_x4.pickle
+
+    metrics:
+      - type: psnr
+        scale_border: 4
+        presenter: print_vector
+
+  - name: text_super_resolution_x3
+    data_source: super_resolution
+    annotation_conversion:
+      converter: super_resolution
+      data_dir: super_resolution
+      lr_suffix: lr_x3
+      hr_suffix: hr_gray
+    annotation: text_super_resolution_x3.pickle
+
+    preprocessing:
+      - type: bgr_to_gray
+
+    metrics:
+      - type: psnr
+        scale_border: 4
+        presenter: print_vector
+
+  - name: head_pose
+    data_source: WIDER_val/images/16--Award_Ceremony
+    annotation: head_pose.pickle
+
+    preprocessing:
+      - type: crop_rect
+      - type: resize
+        size: 60

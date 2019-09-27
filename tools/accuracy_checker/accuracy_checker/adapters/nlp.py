@@ -42,9 +42,7 @@ class MachineTranslationAdapter(Adapter):
 
     def configure(self):
         vocab_file = self.get_value_from_config('vocabulary_file')
-        self.encoding_vocab = {
-            idx: word for idx, word in enumerate(read_txt(vocab_file, encoding='utf-8'))
-        }
+        self.encoding_vocab = dict(enumerate(read_txt(vocab_file, encoding='utf-8')))
         self.eos_index = self.get_value_from_config('eos_index')
         self.subword_option = vocab_file.name.split('.')[1] if len(vocab_file.name.split('.')) > 1 else None
 
