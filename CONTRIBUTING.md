@@ -1,60 +1,38 @@
 # How to contribute model to Open Model Zoo
 
-From this document you will learn how to contribute your model to OpenVINO&trade; Open Model Zoo (OMZ). It could be done in few steps.
+## Pull request requirements
 
-1. [Model location](#model-location)
-2. [Model conversion](#model-conversion)
-3. [Demo](#demo)
-4. [Accuracy validation](#accuracy-validation)
-7. [Configuration file](#configuration-file)
-6. [Documentation](#documentation)
-7. [Pull request requirements](#pull-request-requirements)
+Contribution to OpenVINO&trade; Open Model Zoo (OMZ) comes down to creating pull request (PR) in this repository. Please use `develop` branch when creating your PR. Pull request is strictly formalized and must contains:
+* configuration file  - `model.yml` (learn more in [Configuration file](#configuration-file) section)
+* documentation of model in markdown format (learn more in [Documentation](#documentation) section)
+* accuracy validation configuration file (learn more in [Accuracy Validation](#accuracy-validation) section)
+* license added to [tools/downloader/license.txt](tools/downloader/license.txt)
+* (*optional*) demo (learn more about it in [Demo](#demo) section)
 
-List of supported frameworks:
-* Caffe\*
-* Caffe2\* (by conversion to ONNX\*)
-* TensorFlow\*
-* MXNet\*
-* PyTorch\* (by conversion to ONNX\*)
+Name your model in OMZ using next rules:
+- name must be consistent with name given by authors, but full match not necessary
+- use lowercase
+- spaces are not allowed in the name, use `-` or `_` (`-` is preferable) as delimiters instead
+- if necessary, add suffix to model name, according to origin framework (see **`framework`** description in [configuration file](#configuration-file) section)
 
-## Model location
+This name will be used for downloading, converting, etc.
+Example:
+```
+resnet-50-pytorch
+mobilenet-v2-1.0-224
+```
 
-Upload your model to any Internet file storage. The main requirements are that the model must either be downloadable from a direct HTTP(S) link or from Google Drive\*.
+Configuration and documentation files must be located in `models/public/<model_name>` directory. 
 
-*After this step you will get **links** to the model*
+Validation configuration file must be located in [`tools/accuracy_checker/configs`](tools/accuracy_checker/configs).
 
-## Model conversion
+If you adding demo, it must be locate it in [demos](/demos) folder. Learn more about it in [Demo](#demo) section.
 
-Deep Learning Inference Engine (IE) supports models in Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using Model Optimizer tool included in OpenVINO&trade; package. Find more information about conversion in [[Model Optimizer Developer Guide](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After successful conversion you will get model in IR format `*.xml` representing net graph and `*.bin` containing net parameters. 
-
-> **NOTE 1**: due to OpenVINO&trade; paradigms, image pre-processing parameters (mean and scale) should be built into converted model to simplify model usage.
-
-> **NOTE 2**: due to OpenVINO&trade; paradigms, if model input is a color image, color channel order should be `BGR`.
-
-*After this step you`ll get **conversion parameters** for Model Optimizer.*
-
-## Demo
-
-The demo shows the main idea of model inference using IE. If your model solves one of the tasks supported by Open Model Zoo, find appropriate demo from [demos](https://docs.openvinotoolkit.org/latest/_demos_README.html) or sample from [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html).
-
-If appropriate demo or sample are absent, you must provide your own demo (C++ or Python). Demos are required to support the following keys:
-
--    `-i "<input>"`             Required. Input to process.
--    `-m "<path>"`              Required. Path to an .xml file with a trained model.
--    `-d "<device>"`            Optional. Target device for model inference. Default is CPU.
--    `-no_show`                 Optional. Do not visualize inference results.
-
-Also you can add any other necessary parameters.
-
-*After this step you'll get **demo** for your model (if no demo was available)*
-
-## Accuracy validation
-
-Accuracy validation can be performed by [Accuracy Checker](./tools/accuracy_checker) tool, provided with repository. This tool can use IE to run converted model or original framework to run original model. Accuracy Checker supports lot of datasets, metrics and preprocessing options, what makes validation quite simple (if task is supported by tool). You need only create configuration file, which contain necessary parameters to do accuracy validation (specify dataset and annotation, pre- and post processing parameters, accuracy metric to compute and so on). More details you can find [here](./tools/accuracy_checker#resting-new-models)
-
-When the configuration file is ready, you must run Accuracy Checker to obtain metric results. If they match your results, that means  conversion was fully successful and Accuracy Checker fully supports your model, metric and dataset. If no - recheck [conversion](#model-conversion) parameters or validation configuration file.
-
-*After this step you will get accuracy validation configuration file - **<model_name>.yml***
+This PR must pass next tests:
+* model is downloadable by `tools/downloader/downloader.py` script (see [Configuration file](#configuration-file) for details)
+* model is convertible by `tools/downloader/converter.py` script (see [Model conversion](#model-conversion) for details)
+* model can be used by demo or sample and provides adequate results (see [Demo](#demo) for details)
+* model passes accuracy validation (see [Accuracy validation](#accuracy-validation) for details)
 
 ## Configuration file
 
@@ -83,6 +61,8 @@ If task, that your model solve, is not listed here, please add new type of task 
 
 **`files`**
 
+> Before filling this section, you must ensure that a model is downloadable either from a direct HTTP(S) link or from Google Drive\*.
+
 You describe all files, which need to be downloaded, in this section. Each file is described in few tags:
 
 * `name` sets file name after downloading
@@ -93,6 +73,8 @@ You describe all files, which need to be downloaded, in this section. Each file 
 If file is located on Google Drive\*, section `source` must contain:
 - `$type: google_drive`
 - `id` file ID on Google Drive\*
+
+> **NOTE:** if file is located on GitHub\* the version of the file must be fixed.
 
 **`postprocessing`** (*optional*)
 
@@ -106,17 +88,13 @@ For unpacking archive:
 For replacement operations:
 - `$type: regex_replace`
 - `file` name of file where replacement must be executed
-- `pattern` string or regexp ([learn more](https://docs.python.org/2/library/re.html)) to find
+- `pattern` string or regexp ([learn more](https://docs.python.org/2/library/re.html))
 - `replacement` replacement string
 - `count` (*optional*)  maximum number of pattern occurrences to be replaced
 
-**`pytorch_to_onnx`** (*optional*)
+**`conversion_to_onnx_args`** (*optional*)
 
-List of pytorch-to-onnx conversion parameters, see `model_optimizer_args` for details.
-
-**`caffe2_to_onnx`** (*optional*)
-
-List of caffe2-to-onnx conversion parameters, see `model_optimizer_args` for details.
+List of onnx conversion parameters, see `model_optimizer_args` for details. Applicable for Caffe2\* and PyTorch\* frameworks.
 
 **`model_optimizer_args`**
 
@@ -141,6 +119,39 @@ Path to model's license.
 
 ----
 *After this step you will obtain **model.yml** file*
+
+## Model conversion
+
+Deep Learning Inference Engine (IE) supports models in Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using Model Optimizer tool included in OpenVINO&trade; package. Find more information about conversion in [[Model Optimizer Developer Guide](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After successful conversion you will get model in IR format `*.xml` representing net graph and `*.bin` containing net parameters. 
+
+> **NOTE 1**: due to OpenVINO&trade; paradigms, image pre-processing parameters (mean and scale) should be built into converted model to simplify model usage.
+
+> **NOTE 2**: due to OpenVINO&trade; paradigms, if model input is a color image, color channel order should be `BGR`.
+
+*After this step you`ll get **conversion parameters** for Model Optimizer.*
+
+## Demo
+
+The demo shows the main idea of model inference using IE. If your model solves one of the tasks supported by Open Model Zoo, find appropriate demo from [demos](https://docs.openvinotoolkit.org/latest/_demos_README.html) or sample from [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html).
+
+If appropriate demo or sample are absent, you must provide your own demo (C++ or Python). Demos are required to support the following keys:
+
+-    `-i "<input>"`             Required. Input to process.
+-    `-m "<path>"`              Required. Path to an .xml file with a trained model.
+-    `-d "<device>"`            Optional. Target device for model inference. Default is CPU.
+-    `-no_show`                 Optional. Do not visualize inference results.
+
+Also you can add any other necessary parameters.
+
+*After this step you'll get **demo** for your model (if no demo was available)*
+
+## Accuracy validation
+
+Accuracy validation can be performed by [Accuracy Checker](./tools/accuracy_checker) tool, provided with repository. This tool can use IE to run converted model or original framework to run original model. Accuracy Checker supports lot of datasets, metrics and preprocessing options, what makes validation quite simple (if task is supported by tool). You need only create configuration file, which contain necessary parameters to do accuracy validation (specify dataset and annotation, pre- and post processing parameters, accuracy metric to compute and so on). More details you can find [here](./tools/accuracy_checker#resting-new-models).
+
+When the configuration file is ready, you must run Accuracy Checker to obtain metric results. If they match your results, that means  conversion was fully successful and Accuracy Checker fully supports your model, metric and dataset. If no - recheck [conversion](#model-conversion) parameters or validation configuration file.
+
+*After this step you will get accuracy validation configuration file - **<model_name>.yml***
 
 ### Example
 
@@ -196,28 +207,6 @@ Detailed structure and headers naming convention you can learn from any other mo
 
 ---
 *After this step you will obtain **<model_name>.md** - documentation file*
-
-## Pull request requirements
-
-Contribution to OpenVINO&trade; Open Model Zoo comes down to creating pull request in this repository. Please use `develop` branch when creating your PR. Pull request is strictly formalized and must contains changes:
-* configuration file  - `model.yml` from [here](#configuration-file)
-* documentation of model in markdown format from [here](#documentation)
-* accuracy validation configuration file from [here](#accuracy-validation)
-* license added to [tools/downloader/license.txt](tools/downloader/license.txt)
-
-> If model uses your own demo, add it to [demos](/demos) folder.
-
-> If you made any other changes, that make auto downloading and conversion possible, add it too.
-
-Configuration and documentation files must be located in `models/public` directory in subfolder, which name will represent model name in Open Model Zoo and will be used by downloader and converter tools. Also, please add suffix to model name, according to origin framework (e.g. `cf`, `cf2`, `tf`, `mx` or `pt`). 
-
-Validation configuration file must be located in [tools/accuracy_checker/configs](tools/accuracy_checker/configs).
-
-This PR must pass next tests:
-* model is downloadable by `tools/downloader/downloader.py` script
-* model is convertible by `tools/downloader/converter.py` script
-* model can be used by demo or sample and provides adequate results
-* model passes accuracy validation
 
 ## Legal Information
 
