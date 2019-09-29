@@ -144,7 +144,13 @@ cd build
 ```sh
 make
 ```
-
+or  
+Use this simple command which takes default build type `Release`:
+```sh
+mkdir build & cd build  
+cmake ..  
+make
+```
 For the release configuration, the demo application binaries are in `<path_to_build_directory>/intel64/Release/`;
 for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
 
