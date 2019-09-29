@@ -147,7 +147,7 @@ make
 or  
 Use this simple command which takes default build type `Release`:
 ```sh
-mkdir build & cd build  
+mkdir build && cd build  
 cmake ..  
 make
 ```
