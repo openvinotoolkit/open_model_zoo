@@ -101,7 +101,11 @@ Alternatively, you can just set `-nc 3`, which simplifies application usage.
 
 If your cameras are connected to PC with indexes gap (for example, `0,1,3`), use the `-i` parameter.
 
-IP-cameras through RSTP URI interface are not supported.
+Added support for IP-cameras through RSTP URI interface.
+
+```
+-i   rtsp://camera_ip_add1/stream_no rtsp://camera_ip_add1/stream_no
+```
 
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)
