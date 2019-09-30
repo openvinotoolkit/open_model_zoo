@@ -292,7 +292,7 @@ Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
 class Model:
     def __init__(self, name, subdirectory, files, postprocessing, mo_args, framework,
-            description, license_url, precisions, task_type, pytorch_to_onnx_args):
+                 description, license_url, precisions, task_type, conversion_to_onnx_args):
         self.name = name
         self.subdirectory = subdirectory
         self.files = files
@@ -303,7 +303,7 @@ class Model:
         self.license_url = license_url
         self.precisions = precisions
         self.task_type = task_type
-        self.pytorch_to_onnx_args = pytorch_to_onnx_args
+        self.conversion_to_onnx_args = conversion_to_onnx_args
 
     @classmethod
     def deserialize(cls, model, name, subdirectory):
@@ -328,10 +328,10 @@ class Model:
                 with deserialization_context('"postprocessing" #{}'.format(i)):
                     postprocessing.append(Postproc.deserialize(postproc))
 
-            pytorch_to_onnx_args = None
-            if model.get('pytorch_to_onnx', None):
-                pytorch_to_onnx_args = [validate_string('"pytorch_to_onnx" #{}'.format(i), arg)
-                                        for i, arg in enumerate(model['pytorch_to_onnx'])]
+            conversion_to_onnx_args = None
+            if model.get('conversion_to_onnx_args', None):
+                conversion_to_onnx_args = [validate_string('"conversion_to_onnx_args" #{}'.format(i), arg)
+                                           for i, arg in enumerate(model['conversion_to_onnx_args'])]
 
             framework = validate_string_enum('"framework"', model['framework'], KNOWN_FRAMEWORKS)
 
@@ -372,7 +372,7 @@ class Model:
             task_type = validate_string_enum('"task_type"', model['task_type'], KNOWN_TASK_TYPES)
 
             return cls(name, subdirectory, files, postprocessing, mo_args, framework,
-                description, license_url, precisions, task_type, pytorch_to_onnx_args)
+                description, license_url, precisions, task_type, conversion_to_onnx_args)
 
 def load_models(args):
     models = []
