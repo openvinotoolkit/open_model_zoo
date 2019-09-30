@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import cv2
+import numpy as np
 from ..config import PathField, StringField, BoolField, ConfigError, NumberField
 from ..representation import SuperResolutionAnnotation
 from ..representation.super_resolution_representation import GTLoader
@@ -132,9 +133,6 @@ class SRMultiFrameConverter(BaseFormatConverter):
             'number_input_frames': NumberField(
                 description='number inputs per inference', value_type=int,
             ),
-            'max_frame_id': NumberField(
-                description='the last frame index', optional=True, value_type=int,
-            ),
             'annotation_loader': StringField(
                 optional=True, choices=LOADERS_MAPPING.keys(), default='pillow',
                 description="Which library will be used for ground truth image reading. "
@@ -154,21 +152,23 @@ class SRMultiFrameConverter(BaseFormatConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         content_errors = [] if check_content else None
         frames_ids = []
+        frame_names = []
         annotations = []
-        if not self.max_frame_id:
-            for file_in_dir in self.data_dir.iterdir():
-                image_name = file_in_dir.parts[-1]
-                if self.lr_suffix in image_name and self.hr_suffix not in image_name:
-                    frames_ids.append(int(image_name.split(self.lr_suffix)))
-                    frames_ids.sort()
-        else:
-            frames_ids = list(range(self.max_frame_id))
+        for file_in_dir in self.data_dir.iterdir():
+            image_name = file_in_dir.parts[-1]
+            if self.lr_suffix in image_name and self.hr_suffix not in image_name:
+                frame_names.append(image_name)
+                frames_ids.append(int(image_name.split(self.lr_suffix)[0]))
+        sorted_frames = np.argsort(frames_ids)
+        frames_ids.sort()
+        sorted_frame_names = [frame_names[idx] for idx in sorted_frames]
+
         num_iterations = len(frames_ids)
         for idx, _ in enumerate(frames_ids):
             if len(frames_ids) - idx < self.num_frames:
                 break
             input_ids = list(range(self.num_frames))
-            input_frames = ['{}{}'.format(idx + shift, self.lr_suffix)for shift in input_ids]
+            input_frames = [sorted_frame_names[idx + shift] for shift in input_ids]
             hr_name = self.hr_suffix.join(input_frames[0].split(self.lr_suffix))
             if check_content and not check_file_existence(self.data_dir / hr_name):
                 content_errors.append('{}: does not exist'.format(self.data_dir / hr_name))
