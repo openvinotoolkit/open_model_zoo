@@ -115,7 +115,7 @@ class NMS(Postprocessor):
             union = (areas[i] + areas[order[1:]] - intersection)
             overlap = np.divide(intersection, union, out=np.zeros_like(intersection, dtype=float), where=union != 0)
 
-            order = order[np.where(overlap <= thresh)[0] + 1]
+            order = order[np.where(overlap <= thresh)[0] + 1] # pylint: disable=W0143
 
         return keep
 

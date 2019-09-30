@@ -144,9 +144,7 @@ class OpenCVLauncher(Launcher):
             for blob_name in self._inputs_shapes:
                 self.network.setInput(input_blobs[blob_name].astype(np.float32), blob_name)
             list_prediction = self.network.forward(self.output_names)
-            dict_result = {
-                output_name: output_value for output_name, output_value in zip(self.output_names, list_prediction)
-            }
+            dict_result = dict(zip(self.output_names, list_prediction))
             results.append(dict_result)
 
         if metadata is not None:
