@@ -179,94 +179,13 @@ class PillowImageReader(BaseReader):
 class ScipyImageReader(BaseReader):
     __provider__ = 'scipy_imread'
 
-    @staticmethod
-    def _from_image(image):
+    def read(self, data_id):
+        # reimplementation scipy.misc.imread
+        image = Image.open(str(get_path(self.data_source / data_id)))
         if image.mode == 'P':
             image = image.convert('RGBA') if 'transparency' in image.info else image.convert('RGB')
 
         return np.array(image)
-
-    @staticmethod
-    def _process_2d(data, shape):
-        shape = (shape[1], shape[0])  # columns show up first
-        bytedata = ScipyImageReader._bytescale(data)
-        image = Image.frombytes('L', shape, bytedata.tostring())
-
-        return image
-
-    @staticmethod
-    def _process_3d(data, shape):
-        # if here then 3-d array with a 3 or a 4 in the shape length.
-        # Check for 3 in datacube shape --- 'RGB' or 'YCbCr'
-        ca = np.flatnonzero(np.asarray(shape) == 3) if 3 in shape else np.flatnonzero(np.asarray(shape) == 4)
-        if not np.size(ca):
-            raise ValueError("Could not find channel dimension.")
-        ca = ca[0]
-
-        numch = shape[ca]
-        if numch not in [3, 4]:
-            raise ValueError("Channel axis dimension is not valid.")
-
-        bytedata = ScipyImageReader._bytescale(data)
-        channel_axis_mapping = {
-            0: ((1, 2, 0), (shape[1], shape[0])),
-            1: ((0, 2, 1), (shape[2], shape[0])),
-            2: ((0, 1, 2), (shape[1], shape[0]))
-        }
-        transposition, shape = channel_axis_mapping[ca]
-        strdata = np.transpose(bytedata, transposition).tostring()
-
-        mode = 'RGB' if numch == 3 else 'RGBA'
-        # Here we know data and mode is correct
-        image = Image.frombytes(mode, shape, strdata)
-
-        return image
-
-    @staticmethod
-    def _to_image(arr):
-        data = np.asarray(arr)
-        if np.iscomplexobj(data):
-            raise ValueError("Cannot convert a complex-valued array.")
-        shape = list(data.shape)
-        valid = len(shape) == 2 or ((len(shape) == 3) and ((3 in shape) or (4 in shape)))
-        if not valid:
-            raise ValueError("'arr' does not have a suitable array shape for any mode.")
-        if len(shape) == 2:
-            return ScipyImageReader._process_2d(data, shape)
-        return ScipyImageReader._process_3d(data, shape)
-
-    @staticmethod
-    def _imread(name):
-        # reimplementation scipy.misc.imread
-        image = Image.open(name)
-
-        return ScipyImageReader._from_image(image)
-
-    @staticmethod
-    def _bytescale(data):
-        if data.dtype == np.uint8:
-            return data
-        cmin = data.min()
-        cmax = data.max()
-        cscale = cmax - cmin
-        if cscale == 0:
-            cscale = 1
-
-        scale = float(255) / cscale
-        bytedata = (data - cmin) * scale
-
-        return (bytedata.clip(0, 255) + 0.5).astype(np.uint8)
-
-    @staticmethod
-    def imresize(arr, size):
-        im = ScipyImageReader._to_image(arr)
-        size = (size[1], size[0])
-        imnew = im.resize(size, resample=0)
-
-        return ScipyImageReader._from_image(imnew)
-
-    def read(self, data_id):
-        return ScipyImageReader._imread(str(get_path(self.data_source / data_id)))
 
 
 class OpenCVFrameReader(BaseReader):
