@@ -61,7 +61,12 @@ from .super_resolution_representation import SuperResolutionAnnotation, SuperRes
 from .text_detection_representation import TextDetectionAnnotation, TextDetectionPrediction
 from .pose_estimation_representation import PoseEstimationAnnotation, PoseEstimationPrediction
 from .hit_ratio_representation import HitRatio, HitRatioAnnotation, HitRatioPrediction
-from .nlp_representation import MachineTranslationAnnotation, MachineTranslationPrediction
+from .nlp_representation import (
+    MachineTranslationAnnotation,
+    MachineTranslationPrediction,
+    QuestionAnsweringAnnotation,
+    QuestionAnsweringPrediction
+)
 
 __all__ = [
     'BaseRepresentation',
@@ -124,5 +129,7 @@ __all__ = [
     'HitRatioPrediction',
 
     'MachineTranslationAnnotation',
-    'MachineTranslationPrediction'
+    'MachineTranslationPrediction',
+    'QuestionAnsweringAnnotation',
+    'QuestionAnsweringPrediction'
 ]

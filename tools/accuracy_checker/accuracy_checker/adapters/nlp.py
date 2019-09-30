@@ -1,7 +1,7 @@
 import re
 import numpy as np
 from .adapter import Adapter
-from ..representation import MachineTranslationPrediction
+from ..representation import MachineTranslationPrediction, QuestionAnsweringPrediction
 from ..config import PathField, NumberField
 from ..utils import read_txt
 
@@ -69,3 +69,40 @@ class MachineTranslationAdapter(Adapter):
             results.append(MachineTranslationPrediction(identifier, _clean(encoded_words, self.subword_option)))
 
         return results
+
+
+class QuestionAnsweringAdapter(Adapter):
+    __provider__ = 'question_answering'
+    prediction_types = (QuestionAnsweringPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update(
+            {
+                'max_answer': NumberField(
+                    optional=True, value_type=int, default=30, description="Maximum length of answer"
+                ),
+                'n_best_size': NumberField(
+                    optional=True, value_type=int, default=20, description="The total number of n-best predictions."
+                )
+            }
+        )
+        return params
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        predictions = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        result = []
+        batch_size, seq_length, hidden_size = predictions.shape
+        seq_length = frame_meta[0]['image_size']
+        output_weights = np.random.normal(scale=0.02, size=(2, hidden_size))
+        output_bias = np.zeros(2)
+        prediction_matrix = predictions.reshape((batch_size * seq_length, hidden_size))
+        predictions = np.matmul(prediction_matrix, output_weights.T)
+        predictions = predictions + output_bias
+        predictions = predictions.reshape((batch_size, seq_length, 2))
+        for identifier, prediction in zip(identifiers, predictions):
+            prediction = np.transpose(prediction, (1, 0))
+            result.append(QuestionAnsweringPrediction(identifier, prediction[0], prediction[1]))
+
+        return result
