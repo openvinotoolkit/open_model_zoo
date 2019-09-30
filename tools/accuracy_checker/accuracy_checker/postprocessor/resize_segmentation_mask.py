@@ -81,27 +81,25 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
 
         return annotation, prediction
 
-    def to_image(self, arr):
+    def _to_image(self, arr):
         data = np.asarray(arr)
         if np.iscomplexobj(data):
             raise ValueError("Cannot convert a complex-valued array.")
         shape = list(data.shape)
         if len(shape) == 2:
             return self._process_2d(data, shape)
-        if len(shape) == 3 and ((3 in shape) or (4 in shape)):
+        if len(shape) == 3 and shape[2] in (3, 4):
             return self._process_3d(data, shape)
         raise ValueError("'arr' does not have a suitable array shape for any mode.")
 
     def _process_2d(self, data, shape):
-        shape = (shape[1], shape[0])  # columns show up first
+        height, width = shape
         bytedata = self._bytescale(data)
-        image = Image.frombytes('L', shape, bytedata.tostring())
+        image = Image.frombytes('L', (width, height), bytedata.tostring())
 
         return image
 
     def _process_3d(self, data, shape):
-        # if here then 3-d array with a 3 or a 4 in the shape length.
-        # Check for 3 in datacube shape --- 'RGB' or 'YCbCr'
         bytedata = self._bytescale(data)
         height, width, channels = shape
         mode = 'RGB' if channels == 3 else 'RGBA'
@@ -125,7 +123,7 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
         return (bytedata.clip(0, 255) + 0.5).astype(np.uint8)
 
     def resize(self, mask, width, height):
-        image = self.to_image(mask)
+        image = self._to_image(mask)
         image_new = image.resize((width, height), resample=0)
 
         return np.array(image_new)
