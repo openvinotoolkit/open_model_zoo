@@ -114,9 +114,7 @@ inline std::vector<std::string> parseDevices(const std::string& device_string) {
     return devices;
 }
 
-inline std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>& devices,
-                                                    const std::string& values_string) {
-    //  Format: <device1>:<value1>,<device2>:<value2> or just <value>
+inline std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>& devices, const std::string& values_string) {
     auto values_string_upper = values_string;
     std::transform(values_string_upper.begin(),
                    values_string_upper.end(),
