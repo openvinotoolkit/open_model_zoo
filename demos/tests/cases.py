@@ -147,7 +147,7 @@ NATIVE_DEMOS = [
 
     NativeDemo('pedestrian_tracker_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
-            '-i': ImageDirectoryArg('person-detection-retail')}),
+            '-i': ImagePatternArg('person-detection-retail')}),
         device_cases('-d_det', '-d_reid'),
         [
             TestCase(options={'-m_det': ModelArg('person-detection-retail-0002')}),
