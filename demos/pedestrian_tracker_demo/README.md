@@ -50,7 +50,7 @@ Options:
     -no_show                     Optional. Do not show processed video.
     -delay                       Optional. Delay between frames used for visualization. If negative, the visualization is turned off (like with the option 'no_show'). If zero, the visualization is made frame-by-frame.
     -out "<path>"                Optional. The file name to write output log file with results of pedestrian tracking. The format of the log file is compatible with MOTChallenge format.
-    -first                       Optional. The index of the first frame of video sequence to process. This has effect only if it is positive.
+    -first                       Optional. The index of the first frame of video sequence to process. This has effect only if it is positive. The actual first frame captured depends on cv::VideoCapture implementation and may have slightly different number.
     -last                        Optional. The index of the last frame of video sequence to process. This has effect only if it is positive.
 ```
 

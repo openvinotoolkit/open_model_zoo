@@ -57,8 +57,10 @@ static const char output_log_message[] = "Optional. The file name to write outpu
                                           "The format of the log file is compatible with MOTChallenge format.";
 
 /// @brief message for the first frame
-static const char first_frame_message[] = "Optional. The index of the first frame of video sequence to process. "\
-                                           "This has effect only if it is positive.";
+static const char first_frame_message[] = "Optional. The index of the first frame of video sequence to process. "
+                                           "This has effect only if it is positive. The actual first frame captured "
+                                           "depends on cv::VideoCapture implementation and may have slightly different "
+                                           "number.";
 /// @brief message for the last frame
 static const char last_frame_message[] = "Optional. The index of the last frame of video sequence to process. "\
                                           "This has effect only if it is positive.";
