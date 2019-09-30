@@ -1,5 +1,30 @@
 models:
-  - name: efficientnet-b7_auto_aug
+  - name: efficientnet-b7_auto_aug-tf
+
+    launchers:
+      - framework: tf
+        model: public/efficientnet-b7_auto_aug-tf/efficientnet-b7/model.ckpt.meta
+        adapter: classification
+        output_names:
+          - logits
+        inputs:
+           - name: IteratorGetNext
+             type: INPUT
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+        - type: bgr_to_rgb
+        - type: crop
+          central_fraction: 0.875
+          use_pillow: True
+        - type: resize
+          size: 600
+          use_pillow: True
+          interpolation: BICUBIC
+
+
+  - name: efficientnet-b7_auto_aug-tf
 
     launchers:
       - framework: dlsdk

@@ -39,7 +39,7 @@ Image, name - `image`,  shape - `[1x456x456x3]`, format is `[BxHxWxC]` where:
 - `W` - width
 - `C` - channel
 
-Channel order is `BGR`.
+Channel order is `RGB`.
 
 ### Converted model
 

@@ -1,5 +1,30 @@
 models:
-  - name: efficientnet-b0
+  - name: efficientnet-b0-tf
+
+    launchers:
+      - framework: tf
+        model: public/efficientnet-b0-tf/efficientnet-b0/model.ckpt.meta
+        adapter: classification
+        output_names:
+          - logits
+        inputs:
+           - name: IteratorGetNext
+             type: INPUT
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+        - type: bgr_to_rgb
+        - type: crop
+          central_fraction: 0.875
+          use_pillow: True
+        - type: resize
+          size: 224
+          use_pillow: True
+          interpolation: BICUBIC
+
+
+  - name: efficientnet-b0-tf
 
     launchers:
       - framework: dlsdk
