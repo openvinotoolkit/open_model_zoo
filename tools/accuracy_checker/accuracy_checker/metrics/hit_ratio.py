@@ -20,10 +20,10 @@ import math
 import numpy as np
 
 from ..representation import HitRatioAnnotation, HitRatioPrediction
-from .metric import FullDatasetEvaluationMetric
+from .metric import PerImageEvaluationMetric
 from ..config import NumberField
 
-class BaseRecommenderMetric(FullDatasetEvaluationMetric):
+class BaseRecommenderMetric(PerImageEvaluationMetric):
     annotation_types = (HitRatioAnnotation, )
     prediction_types = (HitRatioPrediction, )
 
