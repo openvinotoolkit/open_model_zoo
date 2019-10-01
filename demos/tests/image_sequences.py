@@ -148,7 +148,7 @@ IMAGE_SEQUENCES = {
         image_net_arg('00048316'),
     ],
 
-    'py/action-recognition': [
+    'action-recognition': [
         image_net_arg('00000001'),
         image_net_arg('00000002'),
         image_net_arg('00000003'),
@@ -171,7 +171,7 @@ IMAGE_SEQUENCES = {
         image_net_arg('00000020'),
     ],
 
-    'py/instance-segmentation-demo': [
+    'instance-segmentation': [
         image_net_arg('00000001'),
         image_net_arg('00000002'),
         image_net_arg('00000002'), # the demo has simple reid
@@ -184,9 +184,7 @@ IMAGE_SEQUENCES = {
         image_net_arg('00000020'),
     ],
 
-    'py/multi-camera-multi-person-tracking-1': [image_net_arg('00000002')] * 11,
-
-    'py/multi-camera-multi-person-tracking-2': [
+    'multi-camera-multi-person-tracking': [
         image_net_arg('00000002'),
         image_net_arg('00000032'),
         image_net_arg('00017291'),
@@ -200,7 +198,9 @@ IMAGE_SEQUENCES = {
         image_net_arg('00000002'),
     ],
 
-    'py/object-detection-demo-ssd-async': [
+    'multi-camera-multi-person-tracking/repeated': [image_net_arg('00000002')] * 11,
+
+    'object-detection-demo-ssd-async': [
         image_net_arg('00000001'),
         image_net_arg('00000002'),
         image_net_arg('00000003'),

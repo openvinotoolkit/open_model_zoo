@@ -70,7 +70,7 @@ def run(params, capture, detector, reid):
     else:
         output_video = None
 
-    while cv.waitKey(1) != 27 and thread_body.process:
+    while thread_body.process:
         start = time.time()
         try:
             frames = thread_body.frames_queue.get_nowait()
@@ -93,6 +93,8 @@ def run(params, capture, detector, reid):
         vis = visualize_multicam_detections(frames, tracked_objects, fps)
         if not params.no_show:
             cv.imshow(win_name, vis)
+            if cv.waitKey(1) == 27:
+                break
         if output_video:
             output_video.write(cv.resize(vis, video_output_size))
 

@@ -116,7 +116,7 @@ def main():
     render_time = 0
     if is_async_mode:
         ret, frame = cap.read()
-        initial_frame_h, initial_frame_w = frame.shape[:2]
+        frame_h, frame_w = frame.shape[:2]
 
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     print("To switch between sync/async modes, press TAB key in the output window")
@@ -127,7 +127,7 @@ def main():
         else:
             ret, frame = cap.read()
             if ret:
-                initial_frame_h, initial_frame_w = frame.shape[:2]
+                frame_h, frame_w = frame.shape[:2]
         if not ret:
             break  # abandons the last frame in case of async_mode
         # Main sync point:
@@ -155,10 +155,10 @@ def main():
             for obj in res[0][0]:
                 # Draw only objects when probability more than specified threshold
                 if obj[2] > args.prob_threshold:
-                    xmin = int(obj[3] * initial_frame_w)
-                    ymin = int(obj[4] * initial_frame_h)
-                    xmax = int(obj[5] * initial_frame_w)
-                    ymax = int(obj[6] * initial_frame_h)
+                    xmin = int(obj[3] * frame_w)
+                    ymin = int(obj[4] * frame_h)
+                    xmax = int(obj[5] * frame_w)
+                    ymax = int(obj[6] * frame_h)
                     class_id = int(obj[1])
                     # Draw box and label\class_id
                     color = (min(class_id * 12.5, 255), min(class_id * 7, 255), min(class_id * 5, 255))
@@ -176,7 +176,7 @@ def main():
 
             cv2.putText(frame, inf_time_message, (15, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (200, 10, 10), 1)
             cv2.putText(frame, render_time_message, (15, 30), cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
-            cv2.putText(frame, async_mode_message, (10, int(initial_frame_h - 20)), cv2.FONT_HERSHEY_COMPLEX, 0.5,
+            cv2.putText(frame, async_mode_message, (10, int(frame_h - 20)), cv2.FONT_HERSHEY_COMPLEX, 0.5,
                         (10, 10, 200), 1)
 
         #
@@ -189,14 +189,15 @@ def main():
         if is_async_mode:
             cur_request_id, next_request_id = next_request_id, cur_request_id
             frame = next_frame
-            initial_frame_h, initial_frame_w = frame.shape[:2]
+            frame_h, frame_w = frame.shape[:2]
 
-        key = cv2.waitKey(1)
-        if key == 27:
-            break
-        if (9 == key):
-            is_async_mode = not is_async_mode
-            log.info("Switched to {} mode".format("async" if is_async_mode else "sync"))
+        if not args.no_show:
+            key = cv2.waitKey(1)
+            if key == 27:
+                break
+            if (9 == key):
+                is_async_mode = not is_async_mode
+                log.info("Switched to {} mode".format("async" if is_async_mode else "sync"))
 
     cv2.destroyAllWindows()
 

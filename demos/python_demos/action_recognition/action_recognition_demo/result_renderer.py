@@ -88,9 +88,9 @@ class ResultRenderer(object):
         if not self.no_show:
             cv2.imshow("Action Recognition", frame)
 
-        key = cv2.waitKey(1) & 0xFF
-        if key in {ord('q'), ord('Q'), 27}:
-            return -1
+            key = cv2.waitKey(1) & 0xFF
+            if key in {ord('q'), ord('Q'), 27}:
+                return -1
 
 
 class LabelPostprocessing:

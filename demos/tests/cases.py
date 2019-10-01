@@ -23,8 +23,12 @@ ALL_DEVICES = ['CPU', 'GPU']
 TestCase = collections.namedtuple('TestCase', ['options'])
 
 class NativeDemo:
-    def __init__(self, name, test_cases):
+    def __init__(self, name, test_cases, subdirectory=None):
         self._name = name
+        if subdirectory is None:
+            self._subdirectory = name
+        else:
+            self._subdirectory = subdirectory
 
         self.test_cases = test_cases
 
@@ -32,23 +36,23 @@ class NativeDemo:
     def full_name(self):
         return self._name
 
+    @property
+    def subdirectory(self):
+        return Path(self._subdirectory)
+
     def models_lst_path(self, source_dir):
         return source_dir / self._name / 'models.lst'
 
     def fixed_args(self, source_dir, build_dir):
         return [str(build_dir / self._name)]
 
-class MultichannelFaceDetectionNativeDemo(NativeDemo):
-    def models_lst_path(self, source_dir):
-        return source_dir / 'multichannel_demo' / 'face_detection' / 'models.lst'
-
-class MultichannelHumanPoseEstimationNativeDemo(NativeDemo):
-    def models_lst_path(self, source_dir):
-        return source_dir / 'multichannel_demo' / 'human_pose_estimation' / 'models.lst'
-
 class PythonDemo:
-    def __init__(self, name, test_cases):
+    def __init__(self, name, test_cases, subdirectory=None):
         self._name = name
+        if subdirectory is None:
+            self._subdirectory = name
+        else:
+            self._subdirectory = subdirectory
 
         self.test_cases = test_cases
 
@@ -56,17 +60,16 @@ class PythonDemo:
     def full_name(self):
         return 'py/' + self._name
 
+    @property
+    def subdirectory(self):
+        return Path('python_demos') / self._subdirectory
+
     def models_lst_path(self, source_dir):
         return source_dir / 'python_demos' / self._name / 'models.lst'
 
     def fixed_args(self, source_dir, build_dir):
         return [sys.executable, str(source_dir / 'python_demos' / self._name / (self._name + '.py')),
             '-l', str(build_dir / 'lib/libcpu_extension.so')]
-
-class InstanceSegmentationPythonDemo(PythonDemo):
-    def fixed_args(self, source_dir, build_dir):
-        return super().fixed_args(source_dir, build_dir) \
-            + ['--labels', str(source_dir / 'python_demos' / self._name / ('coco_labels.txt'))]
 
 def join_cases(*args):
     options = {}
@@ -134,7 +137,9 @@ NATIVE_DEMOS = [
 
     # TODO: mask_rcnn_demo: no models.lst
 
-    MultichannelFaceDetectionNativeDemo(name='multi-channel-face-detection-demo', test_cases=combine_cases(
+    NativeDemo(name='multi-channel-face-detection-demo',
+        subdirectory='multichannel_demo/face_detection',
+        test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             '-i': IMAGE_SEQUENCES['face-detection-adas']}),
         device_cases('-d'),
@@ -146,7 +151,9 @@ NATIVE_DEMOS = [
             ModelArg('face-detection-retail-0044')),
     )),
 
-    MultichannelHumanPoseEstimationNativeDemo(name='multi-channel-human-pose-estimation-demo', test_cases=combine_cases(
+    NativeDemo(name='multi-channel-human-pose-estimation-demo',
+        subdirectory='multichannel_demo/human_pose_estimation',
+        test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             '-i': IMAGE_SEQUENCES['human-pose-estimation'],
             '-m': ModelArg('human-pose-estimation-0001')}),
@@ -253,7 +260,7 @@ PYTHON_DEMOS = [
     # TODO: 3d_segmentation_demo: no input data
 
     PythonDemo(name='action_recognition', test_cases=combine_cases(
-        TestCase(options={'--no_show': None, '-i': ImagePatternArg('py/action-recognition')}),
+        TestCase(options={'--no_show': None, '-i': ImagePatternArg('action-recognition')}),
         device_cases('-d'),
         [
             TestCase(options={
@@ -270,11 +277,12 @@ PYTHON_DEMOS = [
     # TODO: face_recognition_demo: requires face gallery
     # TODO: image_retrieval_demo: current images does not suit the usecase, requires user defined gallery
 
-    InstanceSegmentationPythonDemo(name='instance_segmentation_demo', test_cases=combine_cases(
+    PythonDemo(name='instance_segmentation_demo', test_cases=combine_cases(
         TestCase(options={'--no_show': None,
-            '-i': ImagePatternArg('py/instance-segmentation-demo'),
+            '-i': ImagePatternArg('instance-segmentation'),
             '--delay': '1',
-            '-d': 'CPU'}), # GPU is not supported
+            '-d': 'CPU',  # GPU is not supported
+            '--labels': DemoFileArg('coco_labels.txt')}),
         single_option_cases('-m',
             ModelArg('instance-segmentation-security-0010'),
             ModelArg('instance-segmentation-security-0050'),
@@ -283,8 +291,8 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='multi_camera_multi_person_tracking', test_cases=combine_cases(
         TestCase(options={'--no_show': None,
-            '-i': [ImagePatternArg('py/multi-camera-multi-person-tracking-1'),
-                ImagePatternArg('py/multi-camera-multi-person-tracking-2')],
+            '-i': [ImagePatternArg('multi-camera-multi-person-tracking'),
+                ImagePatternArg('multi-camera-multi-person-tracking/repeated')],
             '-m': ModelArg('person-detection-retail-0013')}),
         device_cases('-d'),
         single_option_cases('--m_reid',
@@ -295,7 +303,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(name='object_detection_demo_ssd_async', test_cases=combine_cases(
         TestCase(options={'--no_show': None,
-            '-i': ImagePatternArg('py/object-detection-demo-ssd-async')}),
+            '-i': ImagePatternArg('object-detection-demo-ssd-async')}),
         device_cases('-d'),
         single_option_cases('-m',
             ModelArg('face-detection-adas-0001'),
