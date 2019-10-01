@@ -367,7 +367,7 @@ int main(int argc, char* argv[]) {
             throw std::logic_error("Number of inputs exceed maximum value [25]");
         }
 
-        _ratio = ceil(sqrt(numberOfInputs));
+        _ratio = static_cast<int>(ceil(sqrt(numberOfInputs)));
 
         VideoSources::InitParams vsParams;
         vsParams.queueSize            = FLAGS_n_iqs;
