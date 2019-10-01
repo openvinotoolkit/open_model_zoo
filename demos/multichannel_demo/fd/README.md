@@ -106,6 +106,7 @@ IP сameras support:
 ```
 -i rtsp://camera_address_1/ rtsp://camera_address_2/
 ```
+
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
