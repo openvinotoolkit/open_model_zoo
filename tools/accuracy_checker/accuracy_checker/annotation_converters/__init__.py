@@ -33,6 +33,19 @@ from .ncf_converter import MovieLensConverter
 from .brats import BratsConverter, BratsNumpyConverter
 from .cifar10 import Cifar10FormatConverter
 from .mnist import MNISTCSVFormatConverter
+from .wmt import WMTConverter
+from .common_semantic_segmentation import CommonSegmentationConverter
+from .camvid import CamVidConverter
+from .lpr import LPRConverter
+from .image_retrieval import ImageRetrievalConverter
+from .cvat_object_detection import CVATObjectDetectionConverter
+from .cvat_attributes_recognition import CVATAttributesRecognitionConverter
+from .cvat_age_gender_recognition import CVATAgeGenderRecognitionConverter
+from .cvat_facial_landmarks import CVATFacialLandmarksRecognitionConverter
+from .cvat_text_recognition import CVATTextRecognitionConverter
+from .cvat_multilabel_recognition import CVATMultilabelAttributesRecognitionConverter
+from .cvat_human_pose import CVATPoseEstimationConverter
+from .cvat_person_detection_action_recognition import CVATPersonDetectionActionRecognitionConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -59,5 +72,18 @@ __all__ = [
     'BratsConverter',
     'BratsNumpyConverter',
     'Cifar10FormatConverter',
-    'MNISTCSVFormatConverter'
+    'MNISTCSVFormatConverter',
+    'WMTConverter',
+    'CommonSegmentationConverter',
+    'CamVidConverter',
+    'LPRConverter',
+    'ImageRetrievalConverter',
+    'CVATObjectDetectionConverter',
+    'CVATAttributesRecognitionConverter',
+    'CVATAgeGenderRecognitionConverter',
+    'CVATFacialLandmarksRecognitionConverter',
+    'CVATTextRecognitionConverter',
+    'CVATMultilabelAttributesRecognitionConverter',
+    'CVATPoseEstimationConverter',
+    'CVATPersonDetectionActionRecognitionConverter'
 ]

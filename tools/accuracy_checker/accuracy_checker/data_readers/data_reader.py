@@ -24,9 +24,9 @@ import scipy.misc
 import numpy as np
 import nibabel as nib
 
-from ..utils import get_path, read_json, zipped_transform, set_image_metadata
+from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
 from ..dependency import ClassProvider
-from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField
+from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField
 
 
 class DataRepresentation:
@@ -74,7 +74,7 @@ class DataReaderField(BaseField):
 class BaseReader(ClassProvider):
     __provider_type__ = 'reader'
 
-    def __init__(self, data_source, config=None):
+    def __init__(self, data_source, config=None, **kwargs):
         self.config = config
         self.data_source = data_source
         self.read_dispatcher = singledispatch(self.read)
@@ -166,8 +166,8 @@ class OpenCVImageReader(BaseReader):
 class PillowImageReader(BaseReader):
     __provider__ = 'pillow_imread'
 
-    def __init__(self, config=None):
-        super().__init__(config)
+    def __init__(self, data_source, config=None, **kwargs):
+        super().__init__(data_source, config)
         self.convert_to_rgb = True
 
     def read(self, data_id):
@@ -187,7 +187,7 @@ class ScipyImageReader(BaseReader):
 class OpenCVFrameReader(BaseReader):
     __provider__ = 'opencv_capture'
 
-    def __init__(self, data_source, config=None):
+    def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
         self.current = -1
 
@@ -277,8 +277,8 @@ class NumPyReader(BaseReader):
 class TensorflowImageReader(BaseReader):
     __provider__ = 'tf_imread'
 
-    def __init__(self, config=None):
-        super().__init__(config)
+    def __init__(self, data_source, config=None, **kwargs):
+        super().__init__(data_source, config)
         try:
             import tensorflow as tf
         except ImportError as import_error:
@@ -297,3 +297,36 @@ class TensorflowImageReader(BaseReader):
 
     def read(self, data_id):
         return self.read_realisation(self.data_source / data_id)
+
+
+class AnnotationFeaturesConfig(ConfigValidator):
+    type = StringField()
+    features = ListField(allow_empty=False, value_type=StringField)
+
+
+class AnnotationFeaturesReader(BaseReader):
+    __provider__ = 'annotation_features_extractor'
+
+    def __init__(self, data_source, config=None, annotations=None):
+        super().__init__(annotations, config)
+        self.counter = 0
+        self.data_source = annotations
+
+    def configure(self):
+        self.feature_list = self.config['features']
+        if not contains_all(self.data_source[0].__dict__, self.feature_list):
+            raise ConfigError(
+                'annotation_class prototype does not contain provided features {}'.format(', '.join(self.feature_list))
+            )
+        self.single = len(self.feature_list) == 1
+
+    def read(self, data_id):
+        relevant_annotation = self.data_source[self.counter]
+        self.counter += 1
+        features = [getattr(relevant_annotation, feature) for feature in self.feature_list]
+        if self.single:
+            return features[0]
+        return features
+
+    def _read_list(self, data_id):
+        return self.read(data_id)

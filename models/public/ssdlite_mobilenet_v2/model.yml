@@ -1,0 +1,37 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  MobileNetV2: Inverted Residuals and Linear Bottlenecks. Used for object detection.
+  For details see paper <https://arxiv.org/pdf/1801.04381.pdf>.
+task_type: detection
+files:
+  - name: ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz
+    size: 51025348
+    sha256: 542445cce834dbfbb7df1991425d475e85a2d7ec68c60a4f262bb18aac10c8b2
+    source: http://download.tensorflow.org/models/object_detection/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz
+model_optimizer_args:
+  - --reverse_input_channels
+  - --input_shape=[1,300,300,3]
+  - --input=image_tensor
+  - --output=detection_scores,detection_boxes,num_detections
+  - --tensorflow_use_custom_operations_config=$mo_dir/extensions/front/tf/ssd_v2_support.json
+  - --tensorflow_object_detection_api_pipeline_config=$dl_dir/ssdlite_mobilenet_v2_coco_2018_05_09/pipeline.config
+  - --input_model=$dl_dir/ssdlite_mobilenet_v2_coco_2018_05_09/frozen_inference_graph.pb
+framework: tf
+license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

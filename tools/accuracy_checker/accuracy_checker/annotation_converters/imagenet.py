@@ -18,10 +18,11 @@ import numpy as np
 
 from ..config import PathField, BoolField
 from ..representation import ClassificationAnnotation
-from ..utils import read_txt, get_path
+from ..utils import read_txt, get_path, check_file_existence
 
 from ..topology_types import ImageClassification
-from .format_converter import BaseFormatConverter
+from .format_converter import BaseFormatConverter, ConverterReturn
+
 
 class ImageNetFormatConverter(BaseFormatConverter):
     __provider__ = 'imagenet'
@@ -41,6 +42,10 @@ class ImageNetFormatConverter(BaseFormatConverter):
                 optional=True, default=False,
                 description="Allows to add background label to original labels and"
                             " convert dataset for 1001 classes instead 1000."
+            ),
+            'images_dir': PathField(
+                is_directory=True, optional=True,
+                description='path to dataset images, used only for content existence check'
             )
         })
         return parameters
@@ -49,16 +54,27 @@ class ImageNetFormatConverter(BaseFormatConverter):
         self.annotation_file = self.get_value_from_config('annotation_file')
         self.labels_file = self.get_value_from_config('labels_file')
         self.has_background = self.get_value_from_config('has_background')
+        self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
 
-    def convert(self):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotation = []
-        for image in read_txt(get_path(self.annotation_file)):
+        content_errors = [] if check_content else None
+        original_annotation = read_txt(get_path(self.annotation_file))
+        num_iterations = len(original_annotation)
+        for image_id, image in enumerate(original_annotation):
             image_name, label = image.split()
+            if check_content:
+                if not check_file_existence(self.images_dir / image_name):
+                    content_errors.append('{}: does not exist'.format(self.images_dir / image_name))
+
             label = np.int64(label) if not self.has_background else np.int64(label) + 1
             annotation.append(ClassificationAnnotation(image_name, label))
+            if progress_callback is not None and image_id % progress_interval == 0:
+                progress_callback(image_id / num_iterations * 100)
+
         meta = self._create_meta(self.labels_file, self.has_background) if self.labels_file else None
 
-        return annotation, meta
+        return ConverterReturn(annotation, meta, content_errors)
 
     @staticmethod
     def _create_meta(labels_file, has_background=False):

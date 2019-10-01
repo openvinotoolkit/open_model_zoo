@@ -14,7 +14,9 @@
 
 #include <format_reader_ptr.h>
 #include <inference_engine.hpp>
+#ifdef WITH_EXTENSIONS
 #include <ext_list.hpp>
+#endif
 
 #include <samples/slog.hpp>
 #include <samples/args_helper.hpp>
@@ -23,11 +25,6 @@
 #include "super_resolution_demo.h"
 
 using namespace InferenceEngine;
-
-template <typename T>
-T clip(const T& n, const T& lower, const T& upper) {
-  return std::max(lower, std::min(n, upper));
-}
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
@@ -73,6 +70,7 @@ int main(int argc, char *argv[]) {
         slog::info << "Device info: " << slog::endl;
         std::cout << ie.GetVersions(FLAGS_d) << std::endl;
 
+#ifdef WITH_EXTENSIONS
         /** Loading default extensions **/
         if (FLAGS_d.find("CPU") != std::string::npos) {
             /**
@@ -82,6 +80,7 @@ int main(int argc, char *argv[]) {
             **/
             ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
         }
+#endif
 
         if (!FLAGS_l.empty()) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
@@ -125,7 +124,7 @@ int main(int argc, char *argv[]) {
         /** Collect images**/
         std::vector<cv::Mat> inputImages;
         for (const auto &i : imageNames) {
-            cv::Mat img = cv::imread(i);
+            cv::Mat img = cv::imread(i, cv::IMREAD_UNCHANGED);
             if (img.empty()) {
                 slog::warn << "Image " + i + " cannot be read!" << slog::endl;
                 continue;
@@ -135,9 +134,14 @@ int main(int argc, char *argv[]) {
             auto lrInputInfoItem = inputInfo[lrInputBlobName];
             int w = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[3]);
             int h = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[2]);
+            int c = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[1]);
 
             if (w != img.cols || h != img.rows) {
                 slog::warn << "Size of the image " << i << " is not equal to WxH = " << w << "x" << h << slog::endl;
+                continue;
+            }
+            if (c != img.channels()) {
+                slog::warn << "Number of channels of the image " << i << " is not equal to " << c <<slog::endl;
                 continue;
             }
 
@@ -225,9 +229,19 @@ int main(int argc, char *argv[]) {
         slog::info << "Output size [N,C,H,W]: " << numOfImages << ", " << numOfChannels << ", " << h << ", " << w << slog::endl;
 
         for (size_t i = 0; i < numOfImages; ++i) {
-            std::vector<cv::Mat> imgPlanes{cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels])),
-                                           cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels + nunOfPixels])),
-                                           cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels + nunOfPixels * 2]))};
+            std::vector<cv::Mat> imgPlanes;
+            if (numOfChannels == 3) {
+                imgPlanes = std::vector<cv::Mat>{
+                      cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels])),
+                      cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels + nunOfPixels])),
+                      cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels + nunOfPixels * 2]))};
+            } else {
+                imgPlanes = std::vector<cv::Mat>{cv::Mat(h, w, CV_32FC1, &(outputData[i * nunOfPixels * numOfChannels]))};
+
+                // Post-processing for text-image-super-resolution models
+                cv::threshold(imgPlanes[0], imgPlanes[0], 0.5f, 1.0f, cv::THRESH_BINARY);
+            };
+
             for (auto & img : imgPlanes)
                 img.convertTo(img, CV_8UC1, 255);
 

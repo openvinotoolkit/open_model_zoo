@@ -6,18 +6,13 @@ models:
         tags:
           - INT1
         device: CPU
-        model:   PublicCompressed/classification/resnet50_binary/dldt/INT1/resnet50-binary-0001.xml
-        weights: PublicCompressed/classification/resnet50_binary/dldt/INT1/resnet50-binary-0001.bin
+        model:   intel/resnet50-binary-0001/INT1/resnet50-binary-0001.xml
+        weights: intel/resnet50-binary-0001/INT1/resnet50-binary-0001.bin
         adapter: classification
 
 
     datasets:
       - name: imagenet_1000_classes
-        data_source: ImageNet
-        annotation_conversion:
-          converter: imagenet
-          annotation_file: val.txt
-        annotation: imagenet1000.pickle
         reader: pillow_imread
 
         preprocessing:

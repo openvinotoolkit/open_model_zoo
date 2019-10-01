@@ -1,0 +1,48 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is a multi-person 2D pose estimation network (based on the OpenPose approach)
+  with tuned MobileNet v1 as a feature extractor. It finds a human pose: body
+  skeleton, which consists of keypoints and connections between them, for every
+  person inside image. The pose may contain up to 18 keypoints: ears, eyes, nose,
+  neck, shoulders, elbows, wrists, hips, knees and ankles.
+task_type: human_pose_estimation
+files:
+  - name: FP32/human-pose-estimation-0001.xml
+    size: 66630
+    sha256: 48c77d491a52b2c08f107a5acdb3093293081de37fc5e5fd827a8c905e56e342
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/human-pose-estimation-0001/FP32/human-pose-estimation-0001.xml
+  - name: FP32/human-pose-estimation-0001.bin
+    size: 16394720
+    sha256: 9790da47abf072c509ff843695a7b9b96283729731ba4d711fb50201f376b2fc
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/human-pose-estimation-0001/FP32/human-pose-estimation-0001.bin
+  - name: FP16/human-pose-estimation-0001.xml
+    size: 66557
+    sha256: 6ccb526cfe58f6f05abb0997831eb24d8dd8cb3bd07791387bcd55aedc5e4a66
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/human-pose-estimation-0001/FP16/human-pose-estimation-0001.xml
+  - name: FP16/human-pose-estimation-0001.bin
+    size: 8197360
+    sha256: 48c607a55b22b540c38b6ed295eba211aaa6cd4acd47776f0a1259829cb51196
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/human-pose-estimation-0001/FP16/human-pose-estimation-0001.bin
+  - name: INT8/human-pose-estimation-0001.xml
+    size: 610556
+    sha256: 1bd2a7c8e36fd7a5ae7ea9f3489d0b995b666407cff3883217235900a1078330
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/human-pose-estimation-0001/INT8/human-pose-estimation-0001.xml
+  - name: INT8/human-pose-estimation-0001.bin
+    size: 16394720
+    sha256: 0d252f0fd98c598fb38eaa907fa8b3d15cf2d420d743649b4b6c5dbdbbe5f1ac
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/human-pose-estimation-0001/INT8/human-pose-estimation-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

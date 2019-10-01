@@ -1,0 +1,47 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Face detector based on SqueezeNet light (half-channels) as a backbone with a
+  single SSD for indoor/outdoor scenes shot by a front-facing camera. The backbone
+  consists of fire modules to reduce the number of computations. The single SSD
+  head from 1/16 scale feature map has nine clustered prior boxes.
+task_type: detection
+files:
+  - name: FP32/face-detection-retail-0004.xml
+    size: 48102
+    sha256: 4c818c7db9672318f77d1b86e36858ed46880d2c04808348903854b467de9280
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/face-detection-retail-0004/FP32/face-detection-retail-0004.xml
+  - name: FP32/face-detection-retail-0004.bin
+    size: 2352892
+    sha256: a066b383f7b59055326f4facaef34c6669d8cb2cb817f98b8517fa6cebfb6f41
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/face-detection-retail-0004/FP32/face-detection-retail-0004.bin
+  - name: FP16/face-detection-retail-0004.xml
+    size: 48060
+    sha256: 89ef76b87feed5663dc16d8975bee55fa59c6ac89dd6e58199ee42256ee4302e
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/face-detection-retail-0004/FP16/face-detection-retail-0004.xml
+  - name: FP16/face-detection-retail-0004.bin
+    size: 1176452
+    sha256: d20f133227037747343eb635c004679cb25f10acf5e823de72888f64d99ff77a
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/face-detection-retail-0004/FP16/face-detection-retail-0004.bin
+  - name: INT8/face-detection-retail-0004.xml
+    size: 738371
+    sha256: e961e827f8535eea607691382204569214162fa844f3e5ba4380e6ca0e874098
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/face-detection-retail-0004/INT8/face-detection-retail-0004.xml
+  - name: INT8/face-detection-retail-0004.bin
+    size: 2352892
+    sha256: ea68f90c1b55b70fe0c4e356b5469177a08981c4c71ad27532a1151ee7407430
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/face-detection-retail-0004/INT8/face-detection-retail-0004.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

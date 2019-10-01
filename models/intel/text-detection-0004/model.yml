@@ -1,0 +1,38 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Text detector based on PixelLink <https://arxiv.org/pdf/1801.01315.pdf> architecture
+  with MobileNetV2, depth_multiplier=1.4 <(https://arxiv.org/pdf/1801.04381.pdf>
+  as a backbone for indoor/outdoor scenes.
+task_type: detection
+files:
+  - name: FP32/text-detection-0004.xml
+    size: 71958
+    sha256: 216e8c1124ef2bfe42c59db24c31402843f121d57a183b8c8e3c4e0dddb992ba
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-detection-0004/FP32/text-detection-0004.xml
+  - name: FP32/text-detection-0004.bin
+    size: 17312120
+    sha256: f6b58bf15c43cc017bd5f979b46b3159969968e47d3827de866d76d537931e1a
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-detection-0004/FP32/text-detection-0004.bin
+  - name: FP16/text-detection-0004.xml
+    size: 71863
+    sha256: 049402345031d086583621e59f3ed5b913823589158c35f1115fb1cbb6bfdbcd
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-detection-0004/FP16/text-detection-0004.xml
+  - name: FP16/text-detection-0004.bin
+    size: 8655952
+    sha256: 25b12925d0695af246ae68fbdf2ca1b61ac5b1f6b4b368386c2d82c880c93b70
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-detection-0004/FP16/text-detection-0004.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

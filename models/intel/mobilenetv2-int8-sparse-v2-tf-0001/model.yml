@@ -1,0 +1,37 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Mobilenet v2 INT8 quantized and pruned to 53.01% weights sparsity rate in TensorFlow.
+  Acc@top-1 on ImageNet is 70.856.
+task_type: classification
+files:
+  - name: FP32/mobilenetv2-int8-sparse-v2-tf-0001.xml
+    size: 592355
+    sha256: 1217995dd07bf053492ccd2a79f6154475fb12d8c5ea6ffe6fa4c4b1f6c07c46
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/mobilenetv2-int8-sparse-v2-tf-0001/FP32/mobilenetv2-int8-sparse-v2-tf-0001.xml
+  - name: FP32/mobilenetv2-int8-sparse-v2-tf-0001.bin
+    size: 13956420
+    sha256: 91da07cc56585c55d0906d23f0b549abb737ea07dac3fc0b37b1f3dc761c03e2
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/mobilenetv2-int8-sparse-v2-tf-0001/FP32/mobilenetv2-int8-sparse-v2-tf-0001.bin
+  - name: FP16/mobilenetv2-int8-sparse-v2-tf-0001.xml
+    size: 592294
+    sha256: 6ff8be98e1afaa5261b281a713142cc1b68401d4a0bb00c1773cd85294bc64b8
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/mobilenetv2-int8-sparse-v2-tf-0001/FP16/mobilenetv2-int8-sparse-v2-tf-0001.xml
+  - name: FP16/mobilenetv2-int8-sparse-v2-tf-0001.bin
+    size: 6978214
+    sha256: 8315739354de5a429f806dc507d2e9f66256fe6e533fcfddcc2f3f6ac82c4992
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/mobilenetv2-int8-sparse-v2-tf-0001/FP16/mobilenetv2-int8-sparse-v2-tf-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

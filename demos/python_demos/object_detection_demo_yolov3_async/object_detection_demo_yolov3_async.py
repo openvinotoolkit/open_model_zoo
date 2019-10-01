@@ -58,7 +58,7 @@ def build_argparser():
     return parser
 
 
-class YoloV3Params:
+class YoloParams:
     # ------------------------------------------- Extracting layer parameters ------------------------------------------
     # Magic numbers are copied from yolo samples
     def __init__(self, param, side):
@@ -79,6 +79,7 @@ class YoloV3Params:
             self.anchors = maskedAnchors
 
         self.side = side
+        self.isYoloV3 = 'mask' in param  # Weak way to determine but the only one.
 
 
     def log_params(self):
@@ -125,16 +126,19 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
             if scale < threshold:
                 continue
             box_index = entry_index(params.side, params.coords, params.classes, n * side_square + i, 0)
-            x = (col + predictions[box_index + 0 * side_square]) / params.side * resized_image_w
-            y = (row + predictions[box_index + 1 * side_square]) / params.side * resized_image_h
+            # Network produces location predictions in absolute coordinates of feature maps.
+            # Scale it to relative coordinates.
+            x = (col + predictions[box_index + 0 * side_square]) / params.side
+            y = (row + predictions[box_index + 1 * side_square]) / params.side
             # Value for exp is very big number in some cases so following construction is using here
             try:
                 w_exp = exp(predictions[box_index + 2 * side_square])
                 h_exp = exp(predictions[box_index + 3 * side_square])
             except OverflowError:
                 continue
-            w = w_exp * params.anchors[2 * n]
-            h = h_exp * params.anchors[2 * n + 1]
+            # Depends on topology we need to normalize sizes by feature maps (up to YOLOv3) or by input shape (YOLOv3)
+            w = w_exp * params.anchors[2 * n] / (resized_image_w if params.isYoloV3 else params.side)
+            h = h_exp * params.anchors[2 * n + 1] / (resized_image_h if params.isYoloV3 else params.side)
             for j in range(params.classes):
                 class_index = entry_index(params.side, params.coords, params.classes, n * side_square + i,
                                           params.coords + 1 + j)
@@ -142,7 +146,7 @@ def parse_yolo_region(blob, resized_image_shape, original_im_shape, params, thre
                 if confidence < threshold:
                     continue
                 objects.append(scale_bbox(x=x, y=y, h=h, w=w, class_id=j, confidence=confidence,
-                                          h_scale=orig_im_h / resized_image_h, w_scale=orig_im_w / resized_image_w))
+                                          h_scale=orig_im_h, w_scale=orig_im_w))
     return objects
 
 
@@ -269,7 +273,8 @@ def main():
 
             start_time = time()
             for layer_name, out_blob in output.items():
-                layer_params = YoloV3Params(net.layers[layer_name].params, out_blob.shape[2])
+                out_blob = out_blob.reshape(net.layers[net.layers[layer_name].parents[0]].shape)
+                layer_params = YoloParams(net.layers[layer_name].params, out_blob.shape[2])
                 log.info("Layer {} parameters: ".format(layer_name))
                 layer_params.log_params()
                 objects += parse_yolo_region(out_blob, in_frame.shape[2:],

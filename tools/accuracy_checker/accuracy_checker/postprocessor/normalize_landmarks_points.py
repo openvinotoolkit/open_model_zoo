@@ -20,6 +20,7 @@ from ..config import BoolField
 from ..postprocessor.postprocessor import Postprocessor
 from ..representation import FacialLandmarksAnnotation, FacialLandmarksPrediction
 
+
 class NormalizeLandmarksPoints(Postprocessor):
     __provider__ = 'normalize_landmarks_points'
 

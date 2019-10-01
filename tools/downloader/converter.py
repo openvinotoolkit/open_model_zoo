@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import argparse
+import concurrent.futures
 import os
 import platform
 import re
@@ -22,6 +23,7 @@ import shlex
 import string
 import subprocess
 import sys
+import threading
 
 from pathlib import Path
 
@@ -38,26 +40,73 @@ if platform.system() == 'Windows':
 else:
     quote_arg = shlex.quote
 
+def prefixed_printf(prefix, format, *args, **kwargs):
+    if prefix is None:
+        print(format.format(*args), **kwargs)
+    else:
+        print(prefix + ': ' + format.format(*args), **kwargs)
+
+def prefixed_subprocess(prefix, args):
+    if prefix is None:
+        return subprocess.run(args).returncode == 0
+
+    with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            universal_newlines=True) as p:
+        for line in p.stdout:
+            sys.stdout.write(prefix + ': ' + line)
+        return p.wait() == 0
+
+def convert_to_onnx(model, output_dir, args, stdout_prefix):
+    pytorch_converter = Path(__file__).absolute().parent / 'pytorch_to_onnx.py'
+    prefixed_printf(stdout_prefix, '========= {}Converting {} to ONNX',
+        '(DRY RUN) ' if args.dry_run else '', model.name)
+
+    pytorch_to_onnx_args = [string.Template(arg).substitute(conv_dir=output_dir / model.subdirectory,
+                                                            dl_dir=args.download_dir / model.subdirectory)
+                            for arg in model.pytorch_to_onnx_args]
+    cmd = [str(args.python), str(pytorch_converter), *pytorch_to_onnx_args]
+    prefixed_printf(stdout_prefix, 'Conversion to ONNX command: {}', ' '.join(map(quote_arg, cmd)))
+
+    return True if args.dry_run else prefixed_subprocess(stdout_prefix, cmd)
+
+def num_jobs_arg(value_str):
+    if value_str == 'auto':
+        return os.cpu_count() or 1
+
+    try:
+        value = int(value_str)
+        if value > 0: return value
+    except ValueError:
+        pass
+
+    raise argparse.ArgumentTypeError('must be a positive integer or "auto" (got {!r})'.format(value_str))
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=Path, metavar='CONFIG.YML',
-        default=common.get_default_config_path(), help='topology configuration file')
+        help='model configuration file (deprecated)')
     parser.add_argument('-d', '--download_dir', type=Path, metavar='DIR',
-        default=Path.cwd(), help='root of the directory tree with downloaded topology files')
+        default=Path.cwd(), help='root of the directory tree with downloaded model files')
     parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',
         help='root of the directory tree to place converted files into')
     parser.add_argument('--name', metavar='PAT[,PAT...]',
-        help='convert only topologies whose names match at least one of the specified patterns')
+        help='convert only models whose names match at least one of the specified patterns')
     parser.add_argument('--list', type=Path, metavar='FILE.LST',
-        help='convert only topologies whose names match at least one of the patterns in the specified file')
-    parser.add_argument('--all', action='store_true', help='convert all topologies from the configuration file')
-    parser.add_argument('--print_all', action='store_true', help='print all available topologies')
+        help='convert only models whose names match at least one of the patterns in the specified file')
+    parser.add_argument('--all', action='store_true', help='convert all available models')
+    parser.add_argument('--print_all', action='store_true', help='print all available models')
+    parser.add_argument('--precisions', metavar='PREC[,PREC...]',
+        help='run only conversions that produce models with the specified precisions')
     parser.add_argument('-p', '--python', type=Path, metavar='PYTHON', default=sys.executable,
         help='Python executable to run Model Optimizer with')
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
         help='Model Optimizer entry point script')
+    parser.add_argument('--add-mo-arg', dest='extra_mo_args', metavar='ARG', action='append',
+        help='Extra argument to pass to Model Optimizer')
     parser.add_argument('--dry-run', action='store_true',
         help='Print the conversion commands without running them')
+    parser.add_argument('-j', '--jobs', type=num_jobs_arg, default=1,
+        help='number of conversions to run concurrently')
     args = parser.parse_args()
 
     mo_path = args.mo
@@ -68,44 +117,83 @@ def main():
             sys.exit('Unable to locate Model Optimizer. '
                 + 'Use --mo or run setupvars.sh/setupvars.bat from the OpenVINO toolkit.')
 
-    topologies = common.load_topologies_from_args(parser, args)
+    extra_mo_args = args.extra_mo_args or []
+
+    if args.precisions is None:
+        requested_precisions = common.KNOWN_PRECISIONS
+    else:
+        requested_precisions = set(args.precisions.split(','))
+        unknown_precisions = requested_precisions - common.KNOWN_PRECISIONS
+        if unknown_precisions:
+            sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
+
+    models = common.load_models_from_args(parser, args)
 
     output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
-    failed_topologies = set()
+    def convert(model, do_prefix_stdout=True):
+        stdout_prefix = None
+        if do_prefix_stdout:
+            stdout_prefix = threading.current_thread().name
 
-    for top in topologies:
-        if top.mo_args is None:
-            print('========= Skipping {} (no conversion defined)'.format(top.name))
-            print()
-            continue
+        if model.mo_args is None:
+            prefixed_printf(stdout_prefix, '========= Skipping {} (no conversions defined)', model.name)
+            prefixed_printf(stdout_prefix, '')
+            return True
+
+        model_precisions = requested_precisions & model.precisions
+        if not model_precisions:
+            prefixed_printf(stdout_prefix, '========= Skipping {} (all conversions skipped)', model.name)
+            prefixed_printf(stdout_prefix, '')
+            return True
+
+        model_format = model.framework
+
+        if model.pytorch_to_onnx_args:
+            if not convert_to_onnx(model, output_dir, args, stdout_prefix):
+                return False
+            model_format = 'onnx'
 
         expanded_mo_args = [
-            string.Template(arg).substitute(dl_dir=args.download_dir / top.subdirectory, mo_dir=mo_path.parent)
-            for arg in top.mo_args]
+            string.Template(arg).substitute(dl_dir=args.download_dir / model.subdirectory,
+                                            mo_dir=mo_path.parent,
+                                            conv_dir=output_dir / model.subdirectory)
+            for arg in model.mo_args]
 
-        assert len(top.precisions) == 1 # only one precision per model is supported at the moment
+        for model_precision in model_precisions:
+            mo_cmd = [str(args.python), '--', str(mo_path),
+                '--framework={}'.format(model_format),
+                '--data_type={}'.format(model_precision),
+                '--output_dir={}'.format(output_dir / model.subdirectory / model_precision),
+                '--model_name={}'.format(model.name),
+                *expanded_mo_args, *extra_mo_args]
 
-        mo_cmd = [str(args.python), '--', str(mo_path),
-            '--output_dir={}'.format(output_dir / top.subdirectory / next(iter(top.precisions))),
-            '--model_name={}'.format(top.name),
-            *expanded_mo_args]
+            prefixed_printf(stdout_prefix, '========= {}Converting {} to IR ({})',
+                '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
 
-        print('========= {}Converting {}'.format('(DRY RUN) ' if args.dry_run else '', top.name))
+            prefixed_printf(stdout_prefix, 'Conversion command: {}', ' '.join(map(quote_arg, mo_cmd)))
 
-        print('Conversion command:', ' '.join(map(quote_arg, mo_cmd)))
+            if not args.dry_run:
+                prefixed_printf(stdout_prefix, '', flush=True)
 
-        if not args.dry_run:
-            print(flush=True)
+                if not prefixed_subprocess(stdout_prefix, mo_cmd):
+                    return False
 
-            if subprocess.run(mo_cmd).returncode != 0:
-                failed_topologies.add(top.name)
+            prefixed_printf(stdout_prefix, '')
 
-        print()
+        return True
 
-    if failed_topologies:
+    if args.jobs == 1 or args.dry_run:
+        results = [convert(model, do_prefix_stdout=False) for model in models]
+    else:
+        with concurrent.futures.ThreadPoolExecutor(args.jobs) as executor:
+            results = list(executor.map(convert, models))
+
+    failed_models = [model.name for model, successful in zip(models, results) if not successful]
+
+    if failed_models:
         print('FAILED:')
-        print(*sorted(failed_topologies), sep='\n')
+        print(*sorted(failed_models), sep='\n')
         sys.exit(1)
 
 if __name__ == '__main__':

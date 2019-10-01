@@ -1,0 +1,38 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Fully convolutional network for simultaneous Age/Gender recognition. The network
+  is able to recognize age of people in [18, 75] years old range, it is not applicable
+  for children since their faces were not in the training set.
+task_type: object_attributes
+files:
+  - name: FP32/age-gender-recognition-retail-0013.xml
+    size: 14883
+    sha256: 9accd7693ca200340b9651e333517bbceee68c3b11c1d3be0413eb667909aea5
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.xml
+  - name: FP32/age-gender-recognition-retail-0013.bin
+    size: 8552076
+    sha256: 4dab79cfedebd628f3327367a91c9736a32fbf9cc733cbbf1629d16910d4ace7
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.bin
+  - name: FP16/age-gender-recognition-retail-0013.xml
+    size: 14873
+    sha256: 6d5c05b968c1b68f1bbf3ee9b36dc53f01dee1b396936864dd7265fc074ea357
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.xml
+  - name: FP16/age-gender-recognition-retail-0013.bin
+    size: 4276038
+    sha256: 401101e0a01b3d68add39deae833bcf9f54238d37dd13e3fb1534aa8fbe4719d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

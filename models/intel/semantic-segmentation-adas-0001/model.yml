@@ -1,0 +1,76 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is a segmentation network to classify each pixel into 20 classes:
+
+  - road
+
+  - sidewalk
+
+  - building
+
+  - wall
+
+  - fence
+
+  - pole
+
+  - traffic light
+
+  - traffic sign
+
+  - vegetation
+
+  - terrain
+
+  - sky
+
+  - person
+
+  - rider
+
+  - car
+
+  - truck
+
+  - bus
+
+  - train
+
+  - motorcycle
+
+  - bicycle
+
+  - ego-vehicle
+task_type: semantic_segmentation
+files:
+  - name: FP32/semantic-segmentation-adas-0001.xml
+    size: 90871
+    sha256: 1b39f23ab44725db2da4641a6500bfd913017a1b9f4ae919abd25bde75ae937f
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.xml
+  - name: FP32/semantic-segmentation-adas-0001.bin
+    size: 26743560
+    sha256: 5a616b105fa42f574e4d23cfc227c10b8bdcc0ba0e66864d7aa4b8a269b7cc76
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.bin
+  - name: FP16/semantic-segmentation-adas-0001.xml
+    size: 90790
+    sha256: 5ef7a87d2ca428b95811023964a49ed3f90dc1905e79c9701b4d43e607ebcc1c
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.xml
+  - name: FP16/semantic-segmentation-adas-0001.bin
+    size: 13371780
+    sha256: 8c39dcb0d3569003264165eda163833eef2d0803121147ab06f46697e4f8b4c4
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

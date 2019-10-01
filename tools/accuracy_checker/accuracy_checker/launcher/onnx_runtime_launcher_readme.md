@@ -4,7 +4,7 @@ For enabling ONNX Runtime launcher you need to add `framework: onnx_runtime` in 
 
 * `device` - specifies which device will be used for infer (`cpu`, `gpu` and so on).
 * `model`- path to the network file in ONNX format.
-* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here][adapters].
+* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
 
 # Specifying model inputs in config.
 
@@ -26,5 +26,3 @@ launchers:
     model: path_to_model/alexnet.onnx
     adapter: classification
 ```
-
-[adapters]: ../adapters/README.md

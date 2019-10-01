@@ -16,6 +16,7 @@ limitations under the License.
 
 import itertools
 import math
+import re
 
 import numpy as np
 
@@ -187,6 +188,7 @@ class YoloV2Adapter(Adapter):
             result.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
 
         return result
+
 
 class YoloV3Adapter(Adapter):
     """
@@ -378,6 +380,7 @@ class SSDAdapter(Adapter):
         m = ind_[0] if ind_.size else prediction_blob.shape[0]
 
         return prediction_blob[:m, :]
+
 
 class PyTorchSSDDecoder(Adapter):
     """
@@ -587,6 +590,7 @@ class TFObjectDetectionAPIAdapter(Adapter):
 
         return result
 
+
 class FacePersonAdapter(Adapter):
     __provider__ = 'face_person_detection'
     prediction_types = (DetectionPrediction, )
@@ -636,10 +640,66 @@ class SSDAdapterMxNet(Adapter):
         """
         raw_outputs = self._extract_predictions(raw, frame_meta)
         result = []
-        for identifier, prediction_batch in enumerate(identifiers, raw_outputs[self.output_blob]):
+        for identifier, prediction_batch in zip(identifiers, raw_outputs[self.output_blob]):
             # Filter detections (get only detections with class_id >= 0)
             detections = prediction_batch[np.where(prediction_batch[:, 0] >= 0)]
             # Append detections to results
             result.append(DetectionPrediction(identifier, *zip(*detections)))
 
         return result
+
+
+class SSDONNXAdapter(Adapter):
+    __provider__ = 'ssd_onnx'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update(
+            {
+                'labels_out': StringField(description='name (or regex for it) of output layer with labels'),
+                'scores_out': StringField(description='name (or regex for it) of output layer with scores'),
+                'bboxes_out': StringField(description='name (or regex for it) of output layer with bboxes')
+            }
+        )
+        return parameters
+
+    def configure(self):
+        self.labels_out = self.get_value_from_config('labels_out')
+        self.scores_out = self.get_value_from_config('scores_out')
+        self.bboxes_out = self.get_value_from_config('bboxes_out')
+        self.outputs_verified = False
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        results = []
+        if not self.outputs_verified:
+            self._get_output_names(raw_outputs)
+        for identifier, bboxes, scores, labels in zip(
+                identifiers, raw_outputs[self.bboxes_out], raw_outputs[self.scores_out], raw_outputs[self.labels_out]
+        ):
+            x_mins, y_mins, x_maxs, y_maxs = bboxes.T
+            results.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
+
+        return results
+
+    def _get_output_names(self, raw_outputs):
+        labels_regex = re.compile(self.labels_out)
+        scores_regex = re.compile(self.scores_out)
+        bboxes_regex = re.compile(self.bboxes_out)
+
+        def find_layer(regex, output_name, all_outputs):
+            suitable_layers = [layer_name for layer_name in all_outputs if regex.match(layer_name)]
+            if not suitable_layers:
+                raise ValueError('suitable layer for {} output is not found'.format(output_name))
+
+            if len(suitable_layers) > 1:
+                raise ValueError('more than 1 layers matched to regular expression, please specify more detailed regex')
+
+            return suitable_layers[0]
+
+        self.labels_out = find_layer(labels_regex, 'labels', raw_outputs)
+        self.scores_out = find_layer(scores_regex, 'scores', raw_outputs)
+        self.bboxes_out = find_layer(bboxes_regex, 'bboxes', raw_outputs)
+
+        self.outputs_verified = True

@@ -12,7 +12,7 @@ a vector of features for each detected face.
 * `person-detection-raisinghand-recognition-0001`, which is a detection network for finding students and simultaneously predicting their current actions (in contrast with the previous model, predicts only if a student raising hand or not).
 * `person-detection-action-recognition-teacher-0002`, which is a detection network for finding persons and simultaneously predicting their current actions.
 
-For more information about the pre-trained models, refer to the [model documentation](../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
 ## How It Works
 
@@ -23,7 +23,7 @@ On the start-up, the application reads command line parameters and loads four ne
 ## Creating a Gallery for Face Recognition
 
 To recognize faces on a frame, the demo needs a gallery of reference images. Each image should contain a tight crop of face. You can create the gallery from an arbitrary list of images:
-1. Put images containing tight crops of frontal-oriented faces to a separate empty folder. Each identity could have multiple images. Name images as `id_name.0.png, id_name.1.png, ...`.
+1. Put images containing tight crops of frontal-oriented faces (or use `-crop_gallery` key for the demo) to a separate empty folder. Each identity must have only one image. Name images as `id_name0.png, id_name1.png, ...`.
 2. Run the `create_list.py <path_to_folder_with_images>` command to get a list of files and identities in `.json` format.
 
 ## Running
@@ -79,7 +79,7 @@ Options:
     -ss_t                          Optional. Number of frames to smooth actions.
 ```
 
-Running the application with the empty list of options yields the usage message given above and an error message.
+Running the application with the empty list of options yields an error message.
 
 To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
 

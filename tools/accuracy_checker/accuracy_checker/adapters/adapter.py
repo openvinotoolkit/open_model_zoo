@@ -19,6 +19,7 @@ from ..config import BaseField, ConfigValidator, StringField, ConfigError
 from ..dependency import ClassProvider
 from ..utils import get_parameter_value_from_config
 
+
 class Adapter(ClassProvider):
     """
     Interface that describes converting raw output to appropriate representation.
@@ -63,12 +64,12 @@ class Adapter(ClassProvider):
     def validate_config(self, **kwargs):
         if 'on_extra_argument' not in kwargs:
             kwargs['on_extra_argument'] = ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
-        ConfigValidator(self.__class__.__name__,
-                        fields=self.parameters(),
-                        **kwargs).validate(self.launcher_config)
+        ConfigValidator(self.__class__.__name__, fields=self.parameters(), **kwargs).validate(self.launcher_config)
 
     @staticmethod
     def _extract_predictions(outputs_list, meta):
+        if isinstance(outputs_list, dict):
+            return outputs_list
         return outputs_list[0]
 
 
@@ -93,18 +94,22 @@ class AdapterField(BaseField):
             self.raise_error(entry, field_uri_, 'adapter must be either string or dictionary')
 
 
-def create_adapter(adapter_config, launcher, dataset=None):
+def create_adapter(adapter_config, launcher=None, dataset=None):
     label_map = None
     if dataset:
         metadata = dataset.metadata
         if metadata:
             label_map = dataset.metadata.get('label_map')
+    launcher_config = launcher.config if launcher else None
     if isinstance(adapter_config, str):
-        adapter = Adapter.provide(adapter_config, launcher.config, label_map=label_map)
+        if not launcher_config:
+            launcher_config = {'type': adapter_config}
+        adapter = Adapter.provide(adapter_config, launcher_config, label_map=label_map)
     elif isinstance(adapter_config, dict):
         adapter = Adapter.provide(adapter_config['type'], adapter_config, label_map=label_map)
     else:
         raise ConfigError('Unknown type for adapter configuration')
-    adapter.output_blob = launcher.output_blob
+    if launcher:
+        adapter.output_blob = launcher.output_blob
 
     return adapter

@@ -1,0 +1,48 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The `mobilenet-ssd` model is a Single-Shot multibox Detection (SSD) network
+  intended to perform object detection. This model is implemented using the Caffe\*
+  framework. For details about this model, check out the repository <https://github.com/chuanqi305/MobileNet-SSD>.
+
+  The model input is a blob that consists of a single image of 1x3x300x300 in
+  BGR order, also like the `densenet-121` model. The BGR mean values need to be
+  subtracted as follows: [127.5, 127.5, 127.5] before passing the image blob into
+  the network. In addition, values must be divided by 0.007843.
+
+  The model output is a typical vector containing the tracked object data, as
+  previously described.
+task_type: detection
+files:
+  - name: mobilenet-ssd.prototxt
+    size: 29353
+    sha256: e781559c4f5beaec2a486ccd952af5b6fa408e9498761bf5f4fb80b4e9f0d25e
+    source: https://raw.githubusercontent.com/chuanqi305/MobileNet-SSD/ba00fc987b3eb0ba87bb99e89bf0298a2fd10765/MobileNetSSD_deploy.prototxt
+  - name: mobilenet-ssd.caffemodel
+    size: 23147564
+    sha256: 761c86fbae3d8361dd454f7c740a964f62975ed32f4324b8b85994edec30f6af
+    source:
+      $type: google_drive
+      id: 0B3gersZ2cHIxRm5PMWRoTkdHdHc
+model_optimizer_args:
+  - --input_shape=[1,3,300,300]
+  - --input=data
+  - --mean_values=data[127.5,127.5,127.5]
+  - --scale_values=data[127.50223128904757]
+  - --output=detection_out
+  - --input_model=$dl_dir/mobilenet-ssd.caffemodel
+  - --input_proto=$dl_dir/mobilenet-ssd.prototxt
+framework: caffe
+license: https://raw.githubusercontent.com/chuanqi305/MobileNet-SSD/master/LICENSE

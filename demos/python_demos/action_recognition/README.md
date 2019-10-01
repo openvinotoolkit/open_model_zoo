@@ -6,7 +6,7 @@ The following pre-trained models are delivered with the product:
 * `driver-action-recognition-adas-0002-encoder` + `driver-action-recognition-adas-0002-decoder`, which are models for driver monitoring scenario. They recognize actions like safe driving, talking to the phone and others
 * `action-recognition-0001-encoder` + `action-recognition-0001-decoder`, which are general-purpose action recognition (400 actions) models for Kinetics-400 dataset.
 
-For more information about the pre-trained models, refer to the [model documentation](../../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
 How It Works
 ------------
@@ -34,29 +34,32 @@ Running
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: action_recognition.py [-h] -m_en ENCODER -m_de DECODER -i VIDEO
-               [-l CPU_EXTENSION]
-               [-d DEVICE] [--fps FPS] [-lb LABELS]
+usage: action_recognition.py [-h] -m_en M_ENCODER -m_de M_DECODER -i INPUT
+                             [-l CPU_EXTENSION] [-d DEVICE] [--fps FPS]
+                             [-lb LABELS]
 
 Options:
-  -h, --help            show this help message and exit
-  -m_en  ENCODER, --m_encoder ENCODER
+  -h, --help            Show this help message and exit.
+  -m_en M_ENCODER, --m_encoder M_ENCODER
                         Required. Path to encoder model
-  -m_de DECODER, --m_decoder DECODER
+  -m_de M_DECODER, --m_decoder M_DECODER
                         Required. Path to decoder model
-  -i VIDEO, --input VIDEO
-                        Required. Path to a video or a .txt file with a list of video files (one video per line)
+  -i INPUT, --input INPUT
+                        Required. Id of the video capturing device to open (to
+                        open default camera just pass 0), path to a video or a
+                        .txt file with a list of ids or video files (one
+                        object per line)
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         Optional. For CPU custom layers, if any. Absolute path
                         to a shared library with the kernels implementation.
   -d DEVICE, --device DEVICE
-                        Optional. Specify a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is
-                        acceptable. The demo will look for a suitable plugin for the device specified.
+                        Optional. Specify a target device to infer on. CPU,
+                        GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
+                        look for a suitable plugin for the device specified.
                         Default value is CPU
   --fps FPS             Optional. FPS for renderer
   -lb LABELS, --labels LABELS
                         Optional. Path to file with label names
-
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.

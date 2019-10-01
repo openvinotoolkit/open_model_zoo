@@ -1,0 +1,33 @@
+models:
+  - name: emotions-recognition-retail-0003
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   intel/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
+        weights: intel/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
+        adapter: classification
+        cpu_extensions: AUTO
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   intel/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
+        weights: intel/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
+        adapter: classification
+        cpu_extensions: AUTO
+
+      - framework: dlsdk
+        tags:
+          - INT8
+        model:   intel/emotions-recognition-retail-0003/INT8/emotions-recognition-retail-0003.xml
+        weights: intel/emotions-recognition-retail-0003/INT8/emotions-recognition-retail-0003.bin
+        adapter: classification
+        cpu_extensions: AUTO
+
+    datasets:
+      - name: emotions_recognition
+
+        metrics:
+          - type: accuracy

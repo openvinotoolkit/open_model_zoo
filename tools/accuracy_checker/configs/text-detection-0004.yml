@@ -5,11 +5,10 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        device: CPU
-        model:   Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/FP32/text-detection-0004.xml
-        weights: Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/FP32/text-detection-0004.bin
+        model:   intel/text-detection-0004/FP32/text-detection-0004.xml
+        weights: intel/text-detection-0004/FP32/text-detection-0004.bin
         adapter:
-          type: text_detection
+          type: pixel_link_text_detection
           pixel_link_out: model/link_logits_/add
           pixel_class_out: model/segm_logits/add
           pixel_class_confidence_threshold: 0.8
@@ -21,11 +20,10 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        device: CPU
-        model:   Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/FP16/text-detection-0004.xml
-        weights: Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/FP16/text-detection-0004.bin
+        model:   intel/text-detection-0004/FP16/text-detection-0004.xml
+        weights: intel/text-detection-0004/dldt/FP16/text-detection-0004.bin
         adapter:
-          type: text_detection
+          type: pixel_link_text_detection
           pixel_link_out: model/link_logits_/add
           pixel_class_out: model/segm_logits/add
           pixel_class_confidence_threshold: 0.8
@@ -38,42 +36,10 @@ models:
         tags:
           - INT8
         device: CPU
-        model:   Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/INT8/text-detection-0004.xml
-        weights: Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/INT8/text-detection-0004.bin
+        model:   intel/text-detection-0004/INT8/text-detection-0004.xml
+        weights: intel/text-detection-0004/INT8/text-detection-0004.bin
         adapter:
-          type: text_detection
-          pixel_link_out: model/link_logits_/add
-          pixel_class_out: model/segm_logits/add
-          pixel_class_confidence_threshold: 0.8
-          pixel_link_confidence_threshold: 0.8
-          min_area: 300
-          min_height: 10
-        cpu_extensions: AUTO
-
-      - framework: dlsdk
-        tags:
-          - FP32
-        device: GPU
-        model:   Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/FP32/text-detection-0004.xml
-        weights: Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/FP32/text-detection-0004.bin
-        adapter:
-          type: text_detection
-          pixel_link_out: model/link_logits_/add
-          pixel_class_out: model/segm_logits/add
-          pixel_class_confidence_threshold: 0.8
-          pixel_link_confidence_threshold: 0.8
-          min_area: 300
-          min_height: 10
-
-
-      - framework: dlsdk
-        tags:
-          - FP16
-        device: GPU
-        model:  Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/FP16/text-detection-0004.xml
-        weights: Retail/object_detection/text/pixel_link_mobilenet_v2/dldt/FP16/text-detection-0004.bin
-        adapter:
-          type: text_detection
+          type: pixel_link_text_detection
           pixel_link_out: model/link_logits_/add
           pixel_class_out: model/segm_logits/add
           pixel_class_confidence_threshold: 0.8
@@ -86,7 +52,7 @@ models:
 
         data_source: ICDAR15_DET_validation/ch4_test_images
         annotation_conversion:
-          converter: icdar15_detection
+          converter: icdar_detection
           data_dir: ICDAR15_DET_validation/gt
 
         preprocessing:
@@ -106,6 +72,6 @@ models:
             apply_to: prediction
 
         metrics:
-          - type: text_detection
+          - type: incidental_text_hmean
             name: f-measure
             ignore_difficult: True

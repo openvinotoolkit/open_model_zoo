@@ -1,0 +1,37 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is a custom-architecture convolutional neural network for 35 facial landmarks
+  estimation.
+task_type: object_attributes
+files:
+  - name: FP32/facial-landmarks-35-adas-0002.xml
+    size: 110860
+    sha256: e3eee579bf6c46ba8120e97bd824052f813bd08667b6ec64873a34a4feb1d6b4
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml
+  - name: FP32/facial-landmarks-35-adas-0002.bin
+    size: 18381136
+    sha256: 232b1a25de480227f36428fdb11a7a1f623acf37eb4232ced5fabac9b7dd2ad7
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
+  - name: FP16/facial-landmarks-35-adas-0002.xml
+    size: 110724
+    sha256: c9527dc629e02544858a1cd05feb5bed9fcba48e67d8d34a6ddf4f6481fd8e31
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.xml
+  - name: FP16/facial-landmarks-35-adas-0002.bin
+    size: 9190568
+    sha256: b8945ba897072289c8cb44357bd211e728ecd1c093c1d4777b79d118a19ab58a
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

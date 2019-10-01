@@ -33,6 +33,7 @@ from .metric import PerImageEvaluationMetric
 from ..config import BaseField, NumberField, BoolField, ConfigError, StringField
 from ..utils import string_to_tuple, finalize_metric_result
 
+
 class BaseRegressionMetric(PerImageEvaluationMetric):
     annotation_types = (RegressionAnnotation, )
     prediction_types = (RegressionPrediction, )
@@ -50,6 +51,9 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
 
     def evaluate(self, annotations, predictions):
         return np.mean(self.magnitude), np.std(self.magnitude)
+
+    def reset(self):
+        self.magnitude = []
 
 
 class BaseRegressionOnIntervals(PerImageEvaluationMetric):
@@ -133,6 +137,9 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
             result.append(0)
 
         return result
+
+    def reset(self):
+        self.magnitude = [[] for _ in range(len(self.intervals) + 1)]
 
 
 class MeanAbsoluteError(BaseRegressionMetric):
@@ -218,10 +225,14 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
         num_points = np.shape(self.magnitude)[1]
         point_result_name_pattern = 'point_{}_normed_error'
         self.meta['names'] = [point_result_name_pattern.format(point_id) for point_id in range(num_points)]
-        per_point_rmse = np.mean(self.magnitude, axis=1)
+        per_point_rmse = np.mean(self.magnitude, axis=0)
         per_point_rmse, self.meta['names'] = finalize_metric_result(per_point_rmse, self.meta['names'])
 
         return per_point_rmse
+
+    def reset(self):
+        self.magnitude = []
+
 
 class FacialLandmarksNormedError(PerImageEvaluationMetric):
     __provider__ = 'normed_error'
@@ -278,6 +289,9 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
             self.meta['names'].append('{}th percentile'.format(self.percentile))
 
         return result
+
+    def reset(self):
+        self.magnitude = []
 
 
 def calculate_distance(x_coords, y_coords, selected_points):
