@@ -60,7 +60,7 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
     def configure(self):
         self.max_detections = self.get_value_from_config('max_detections')
         self.thresholds = get_or_parse_value(self.get_value_from_config('threshold'), COCO_THRESHOLDS)
-        label_map = self.dataset.metadata.get('label_map', [])
+        label_map = self.dataset.metadata.get('label_map', {})
         self.labels = [
             label for label in label_map
             if label != self.dataset.metadata.get('background_label')
@@ -92,6 +92,8 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
 
     def reset(self):
         self.matching_results = [[] for _ in self.labels]
+        label_map = self.dataset.metadata.get('label_map', {})
+        self.meta['names'] = [label_map[label] for label in self.labels]
 
 
 class MSCOCOAveragePrecision(MSCOCOBaseMetric):

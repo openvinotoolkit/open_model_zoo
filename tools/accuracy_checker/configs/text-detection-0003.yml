@@ -48,11 +48,6 @@ models:
     datasets:
       - name: ICDAR2015
 
-        data_source: ICDAR15_DET_validation/ch4_test_images
-        annotation_conversion:
-          converter: icdar_detection
-          data_dir: ICDAR15_DET_validation/gt
-
         preprocessing:
           - type: resize
             dst_width: 1280

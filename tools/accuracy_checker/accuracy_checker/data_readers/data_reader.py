@@ -20,9 +20,12 @@ from collections import OrderedDict, namedtuple
 import re
 import cv2
 from PIL import Image
-import scipy.misc
 import numpy as np
 import nibabel as nib
+try:
+    import tensorflow as tf
+except ImportError as import_error:
+    tf = None
 
 from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
 from ..dependency import ClassProvider
@@ -181,7 +184,12 @@ class ScipyImageReader(BaseReader):
     __provider__ = 'scipy_imread'
 
     def read(self, data_id):
-        return np.array(scipy.misc.imread(str(get_path(self.data_source / data_id))))
+        # reimplementation scipy.misc.imread
+        image = Image.open(str(get_path(self.data_source / data_id)))
+        if image.mode == 'P':
+            image = image.convert('RGBA') if 'transparency' in image.info else image.convert('RGB')
+
+        return np.array(image)
 
 
 class OpenCVFrameReader(BaseReader):
@@ -279,12 +287,8 @@ class TensorflowImageReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
-        try:
-            import tensorflow as tf
-        except ImportError as import_error:
-            raise ConfigError(
-                'tf_imread reader disabled.Please, install Tensorflow before using. \n{}'.format(import_error.msg)
-            )
+        if tf is None:
+            raise ImportError('tf backend for image reading requires TensorFlow. Please install it before usage.')
 
         tf.enable_eager_execution()
 

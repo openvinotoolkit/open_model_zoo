@@ -108,18 +108,7 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
 
         self.intervals = np.unique(self.intervals)
         self.magnitude = [[] for _ in range(len(self.intervals) + 1)]
-
-        self.meta['names'] = ([])
-        if not self.ignore_out_of_range:
-            self.meta['names'] = (['mean: < ' + str(self.intervals[0]), 'std: < ' + str(self.intervals[0])])
-
-        for index in range(len(self.intervals) - 1):
-            self.meta['names'].append('mean: <= ' + str(self.intervals[index]) + ' < ' + str(self.intervals[index + 1]))
-            self.meta['names'].append('std: <= ' + str(self.intervals[index]) + ' < ' + str(self.intervals[index + 1]))
-
-        if not self.ignore_out_of_range:
-            self.meta['names'].append('mean: > ' + str(self.intervals[-1]))
-            self.meta['names'].append('std: > ' + str(self.intervals[-1]))
+        self._create_meta()
 
     def update(self, annotation, prediction):
         index = find_interval(annotation.value, self.intervals)
@@ -138,8 +127,22 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
 
         return result
 
+    def _create_meta(self):
+        self.meta['names'] = ([])
+        if not self.ignore_out_of_range:
+            self.meta['names'] = (['mean: < ' + str(self.intervals[0]), 'std: < ' + str(self.intervals[0])])
+
+        for index in range(len(self.intervals) - 1):
+            self.meta['names'].append('mean: <= ' + str(self.intervals[index]) + ' < ' + str(self.intervals[index + 1]))
+            self.meta['names'].append('std: <= ' + str(self.intervals[index]) + ' < ' + str(self.intervals[index + 1]))
+
+        if not self.ignore_out_of_range:
+            self.meta['names'].append('mean: > ' + str(self.intervals[-1]))
+            self.meta['names'].append('std: > ' + str(self.intervals[-1]))
+
     def reset(self):
         self.magnitude = [[] for _ in range(len(self.intervals) + 1)]
+        self._create_meta()
 
 
 class MeanAbsoluteError(BaseRegressionMetric):
@@ -263,7 +266,6 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
             'postfix': ' ',
             'calculate_mean': not self.calculate_std or not self.percentile,
             'data_format': '{:.4f}',
-            'names': ['mean']
         })
         self.magnitude = []
 
@@ -276,6 +278,7 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
         self.magnitude.append(avg_result)
 
     def evaluate(self, annotations, predictions):
+        self.meta['names'] = ['mean']
         result = [np.mean(self.magnitude)]
 
         if self.calculate_std:

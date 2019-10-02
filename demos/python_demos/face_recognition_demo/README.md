@@ -76,8 +76,9 @@ python ./face_recognition_demo.py -h
 
 usage: face_recognition_demo.py [-h] [-i PATH] [-o PATH] [--no_show] [-tl]
                                 [-cw CROP_WIDTH] [-ch CROP_HEIGHT] -fg PATH
-                                [--run_detector] -m_fd PATH -m_lm PATH -m_reid
-                                PATH [-d_fd {CPU,GPU,FPGA,MYRIAD,HETERO}]
+                                [--run_detector] -m_fd PATH -m_lm PATH -m_reid PATH
+                                [-fd_iw FD_INPUT_WIDTH] [-fd_ih FD_INPUT_HEIGHT]
+                                [-d_fd {CPU,GPU,FPGA,MYRIAD,HETERO}]
                                 [-d_lm {CPU,GPU,FPGA,MYRIAD,HETERO}]
                                 [-d_reid {CPU,GPU,FPGA,MYRIAD,HETERO}]
                                 [-l PATH] [-c PATH] [-v] [-pc] [-t_fd [0..1]]
@@ -122,6 +123,16 @@ Models:
   -m_fd PATH            Path to the Face Detection model XML file
   -m_lm PATH            Path to the Facial Landmarks Regression model XML file
   -m_reid PATH          Path to the Face Reidentification model XML file
+  -fd_iw FD_INPUT_WIDTH, --fd_input_width FD_INPUT_WIDTH
+                        (optional) specify the input width of detection model
+                        (default: use default input width of model).
+                        Both -fd_iw and -fd_ih parameters should be specified
+                        for reshape.
+  -fd_ih FD_INPUT_HEIGHT, --fd_input_height FD_INPUT_HEIGHT
+                        (optional) specify the input height of detection model
+                        (default: use default input height of model). 
+                        Both -fd_iw and -fd_ih parameters should be specified
+                        for reshape.
 
 Inference options:
   -d_fd {CPU,GPU,FPGA,MYRIAD,HETERO}

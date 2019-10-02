@@ -18,6 +18,11 @@ limitations under the License.
 import cv2
 import numpy as np
 
+try:
+    import tensorflow as tf
+except ImportError as import_error:
+    tf = None
+
 from .preprocessor import Preprocessor
 
 
@@ -40,18 +45,33 @@ class BgrToGray(Preprocessor):
         image.data = np.expand_dims(cv2.cvtColor(image.data, cv2.COLOR_BGR2GRAY).astype(np.float32), -1)
         return image
 
+class RgbToBgr(Preprocessor):
+    __provider__ = 'rgb_to_bgr'
+
+    def process(self, image, annotation_meta=None):
+        def process_data(data):
+            return cv2.cvtColor(data, cv2.COLOR_RGB2BGR)
+        image.data = process_data(image.data) if not isinstance(image.data, list) else [
+            process_data(fragment) for fragment in image.data
+        ]
+        return image
+
+
+class RgbToGray(Preprocessor):
+    __provider__ = 'rgb_to_gray'
+
+    def process(self, image, annotation_meta=None):
+        image.data = np.expand_dims(cv2.cvtColor(image.data, cv2.COLOR_RGB2GRAY).astype(np.float32), -1)
+        return image
+
 
 class TfConvertImageDType(Preprocessor):
     __provider__ = 'tf_convert_image_dtype'
 
     def __init__(self, config, name, input_shapes=None):
         super().__init__(config, name, input_shapes)
-        try:
-            import tensorflow as tf
-        except ImportError as import_error:
-            raise ImportError(
-                'tf_convert_image_dtype disabled.Please, install Tensorflow before using. \n{}'.format(import_error.msg)
-            )
+        if tf is None:
+            raise ImportError('*tf_convert_image_dtype* operation requires TensorFlow. Please install it before usage')
         tf.enable_eager_execution()
         self.converter = tf.image.convert_image_dtype
         self.dtype = tf.float32

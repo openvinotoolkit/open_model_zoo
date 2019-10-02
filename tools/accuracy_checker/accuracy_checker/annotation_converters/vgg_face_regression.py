@@ -76,7 +76,7 @@ class VGGFaceRegressionConverter(BaseFormatConverter):
         if self.bbox_csv:
             for index, row in enumerate(read_csv(self.bbox_csv)):
                 annotations[index].metadata['rect'] = convert_bboxes_xywh_to_x1y1x2y2(
-                    int(row["X"]), int(row["Y"]), int(row["W"]), int(row["H"])
+                    max(int(row["X"]), 0), max(int(row["Y"]), 0), max(int(row["W"]), 0), max(int(row["H"]), 0)
                 )
 
         meta = {
