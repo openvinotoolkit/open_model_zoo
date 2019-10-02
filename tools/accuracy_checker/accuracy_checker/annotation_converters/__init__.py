@@ -92,6 +92,5 @@ __all__ = [
     'CVATPersonDetectionActionRecognitionConverter',
     'SQUADConverter',
     'XNLIDatasetConverter',
-    'CVATMultilabelAttributesRecognitionConverter',
     'ActionRecognitionConverter'
 ]
