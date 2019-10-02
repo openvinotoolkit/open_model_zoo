@@ -20,7 +20,6 @@ from collections import OrderedDict, namedtuple
 import re
 import cv2
 from PIL import Image
-import scipy.misc
 import numpy as np
 import nibabel as nib
 try:
@@ -185,7 +184,12 @@ class ScipyImageReader(BaseReader):
     __provider__ = 'scipy_imread'
 
     def read(self, data_id):
-        return np.array(scipy.misc.imread(str(get_path(self.data_source / data_id))))
+        # reimplementation scipy.misc.imread
+        image = Image.open(str(get_path(self.data_source / data_id)))
+        if image.mode == 'P':
+            image = image.convert('RGBA') if 'transparency' in image.info else image.convert('RGB')
+
+        return np.array(image)
 
 
 class OpenCVFrameReader(BaseReader):
