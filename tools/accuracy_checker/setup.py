@@ -22,27 +22,6 @@ from setuptools import find_packages, setup
 from setuptools.command.test import test as test_command
 from pathlib import Path
 
-requirements = OrderedDict([
-    ('NumPy', 'numpy'),
-    ('tqdm', 'tqdm'),
-    ('PyYAML', 'PyYAML'),
-    ('ymlloader', 'yamlloader'),
-    ('Pillow', 'pillow'),
-    ('scikit-learn', 'scikit-learn'),
-    ('scipy', 'scipy'),
-    ('cpuinfo', 'py-cpuinfo<=4.0'),
-    ('shapely', 'shapely'),
-    ('nibabel', 'nibabel')
-])
-
-try:
-    importlib.import_module('cv2')
-except ImportError:
-    requirements['opencv'] = 'opencv-python'
-
-tests_requirements = OrderedDict([("PyTest", 'pytest==4.0.0'), ("PyTest Mock", 'pytest-mock==1.10.4')])
-
-
 class PyTest(test_command):
     user_options = [('pytest-args=', 'a', "Arguments to pass to pytest")]
 
@@ -77,6 +56,15 @@ def find_version(*path):
 long_description = read("README.md")
 version = find_version("accuracy_checker", "__init__.py")
 
+requirements = [read("requirements.in")]
+
+try:
+    importlib.import_module('cv2')
+except ImportError:
+    requirements.append('opencv-python')
+
+tests_requirements = ['pytest==4.0.0', 'pytest-mock==1.10.4']
+
 setup(
     name="accuracy_checker",
     description="Deep Learning Accuracy validation framework",
@@ -90,7 +78,7 @@ setup(
     ]},
     zip_safe=False,
     python_requires='>=3.5',
-    install_requires=list(requirements.values()),
-    tests_require=list(tests_requirements.values()),
+    install_requires=requirements,
+    tests_require=tests_requirements,
     cmdclass={'test': PyTest}
 )
