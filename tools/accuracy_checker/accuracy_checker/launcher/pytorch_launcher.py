@@ -21,11 +21,19 @@ class PyTorchLauncher(Launcher):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'module': StringField(regex=MODULE_REGEX),
-            'checkpoint': PathField(check_exists=True, is_directory=False, optional=True),
-            'python_path': PathField(check_exists=True, is_directory=True, optional=True),
-            'module_args': ListField(optional=True),
-            'module_kwargs':  DictField(key_type=str, validate_values=False, optional=True, default={}),
+            'module': StringField(regex=MODULE_REGEX, description='Network module for loading'),
+            'checkpoint': PathField(
+                check_exists=True, is_directory=False, optional=True, description='pre-trained model checkpoint'
+            ),
+            'python_path': PathField(
+                check_exists=True, is_directory=True, optional=True,
+                description='appendix for PYTHONPATH for making network module visible in current python environment'
+            ),
+            'module_args': ListField(optional=True, description='positional arguments for network module'),
+            'module_kwargs':  DictField(
+                key_type=str, validate_values=False, optional=True, default={},
+                description='keyword arguments for network module'
+            ),
             'device': StringField(default='cpu', regex=DEVICE_REGEX),
             'batch': NumberField(value_type=float, min_value=1, optional=True, description="Batch size.", default=1),
             'output_names': ListField(
