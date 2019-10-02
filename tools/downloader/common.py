@@ -29,8 +29,13 @@ import yaml
 DOWNLOAD_TIMEOUT = 5 * 60
 
 # make sure to update the documentation if you modify these
-KNOWN_FRAMEWORKS = {'caffe', 'dldt', 'mxnet', 'pytorch', 'tf'}
-KNOWN_ONNX_SUPPORT = {'pytorch'}
+KNOWN_FRAMEWORKS = {
+    'caffe': None,
+    'dldt': None,
+    'mxnet': None,
+    'pytorch': 'pytorch_to_onnx.py',
+    'tf': None,
+}
 KNOWN_PRECISIONS = {'FP16', 'FP32', 'INT1', 'INT8'}
 KNOWN_TASK_TYPES = {
     'action_recognition',
@@ -305,6 +310,7 @@ class Model:
         self.precisions = precisions
         self.task_type = task_type
         self.conversion_to_onnx_args = conversion_to_onnx_args
+        self.converter_to_onnx = KNOWN_FRAMEWORKS[framework]
 
     @classmethod
     def deserialize(cls, model, name, subdirectory):
@@ -329,14 +335,19 @@ class Model:
                 with deserialization_context('"postprocessing" #{}'.format(i)):
                     postprocessing.append(Postproc.deserialize(postproc))
 
-            framework = validate_string_enum('"framework"', model['framework'], KNOWN_FRAMEWORKS)
+            framework = validate_string_enum('"framework"', model['framework'], KNOWN_FRAMEWORKS.keys())
 
-            conversion_to_onnx_args = None
-            if model.get('conversion_to_onnx_args', None):
-                if framework not in KNOWN_ONNX_SUPPORT:
-                    raise DeserializationError('Conversion to ONNX not supported for "{}" framework!'.format(framework))
+            conversion_to_onnx_args = model.get('conversion_to_onnx_args', None)
+            if KNOWN_FRAMEWORKS[framework]:
+                if not conversion_to_onnx_args:
+                    raise DeserializationError('"conversion_to_onnx_args" is absent. '
+                                               'Framework "{}" is supported only by conversion to ONNX.'
+                                               .format(framework))
                 conversion_to_onnx_args = [validate_string('"conversion_to_onnx_args" #{}'.format(i), arg)
                                            for i, arg in enumerate(model['conversion_to_onnx_args'])]
+            else:
+                if conversion_to_onnx_args:
+                    raise DeserializationError('Conversion to ONNX not supported for "{}" framework'.format(framework))
 
             if 'model_optimizer_args' in model:
                 mo_args = [validate_string('"model_optimizer_args" #{}'.format(i), arg)
