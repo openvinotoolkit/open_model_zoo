@@ -245,6 +245,8 @@ void ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat& main_conf
     /** Variable to store all detection candidates**/
     DetectedActions valid_detections;
 
+    std::cout << "next frame\n";
+
     /** Iterate over all candidate bboxes**/
     for (int p = 0; p < num_candidates_; ++p) {
         /** Parse detection confidence from the SSD Detection output **/
@@ -279,6 +281,7 @@ void ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat& main_conf
         int action_label = -1;
         float action_max_exp_value = 0.f;
         float action_sum_exp_values = 0.f;
+        std::cout << "next candidate\n";
         for (int c = 0; c < config_.num_action_classes; ++c) {
             float action_exp_value =
                 std::exp(scale * anchor_conf_data[action_conf_idx_shift + c * action_conf_step]);
