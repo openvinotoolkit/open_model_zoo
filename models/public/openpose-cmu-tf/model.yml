@@ -1,0 +1,32 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is TensoFlow version of OpenPose algorithm, used for multi-person
+  human pose estimation. The model is based on VGG pretrained network,
+  which described in the original paper <https://arxiv.org/pdf/1812.08008.pdf>.
+  For details see repository <https://github.com/ildoonet/tf-pose-estimation>.
+task_type: human_pose_estimation
+files:
+  - name: graph_opt.pb
+    size: 209299198
+    sha256: 1fc81fff68d2351dba0bf206ae4431a760a202151ff539feaefdaab534d79aeb
+    source: http://download686.mediafire.com/by7ktb6ue5ag/qlzzr20mpocnpa3/graph_opt.pb
+model_optimizer_args:
+  - --input_shape=[1,368,432,3]
+  - --input=image
+  - --output=Mconv7_stage6_L2/Conv2D,Mconv7_stage6_L1/Conv2D
+  - --input_model=$dl_dir/graph_opt.pb
+framework: tf
+license: https://raw.githubusercontent.com/ildoonet/tf-pose-estimation/master/LICENSE

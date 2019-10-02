@@ -1,0 +1,54 @@
+models:
+  - name: openpose-cmu-tf
+
+    launchers:
+      - framework: tf
+        model: public/openpose-cmu-tf/opt_graph.pb
+        adapter:
+          type: human_pose_estimation
+          part_affinity_fields_out: Mconv7_stage6_L1/Conv2D
+          keypoints_heatmap_out: Mconv7_stage6_L2/Conv2D
+
+    datasets:
+      - name: ms_coco_keypoints
+        preprocessing:
+          - type: resize
+            size: 368
+            interpolation: CUBIC
+            aspect_ratio_scale: width
+          - type: padding
+            stride: 8
+
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/openpose-cmu-tf/FP32/opt_graph.bin
+        weights: public/openpose-cmu-tf/FP32/opt_graph.xml
+        allow_reshape_input: True
+        adapter:
+          type: human_pose_estimation
+          part_affinity_fields_out: Mconv7_stage6_L1/Conv2D
+          keypoints_heatmap_out: Mconv7_stage6_L2/Conv2D
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/openpose-cmu-tf/FP16/opt_graph.bin
+        weights: public/openpose-cmu-tf/FP16/opt_graph.xml
+        allow_reshape_input: True
+        adapter:
+          type: human_pose_estimation
+          part_affinity_fields_out: Mconv7_stage6_L1/Conv2D
+          keypoints_heatmap_out: Mconv7_stage6_L2/Conv2D
+
+    datasets:
+      - name: ms_coco_keypoints
+        preprocessing:
+          - type: resize
+            size: 368
+            interpolation: CUBIC
+            aspect_ratio_scale: width
+          - type: padding
+            stride: 8
