@@ -45,6 +45,25 @@ class BgrToGray(Preprocessor):
         image.data = np.expand_dims(cv2.cvtColor(image.data, cv2.COLOR_BGR2GRAY).astype(np.float32), -1)
         return image
 
+class RgbToBgr(Preprocessor):
+    __provider__ = 'rgb_to_bgr'
+
+    def process(self, image, annotation_meta=None):
+        def process_data(data):
+            return cv2.cvtColor(data, cv2.COLOR_RGB2BGR)
+        image.data = process_data(image.data) if not isinstance(image.data, list) else [
+            process_data(fragment) for fragment in image.data
+        ]
+        return image
+
+
+class RgbToGray(Preprocessor):
+    __provider__ = 'rgb_to_gray'
+
+    def process(self, image, annotation_meta=None):
+        image.data = np.expand_dims(cv2.cvtColor(image.data, cv2.COLOR_RGB2GRAY).astype(np.float32), -1)
+        return image
+
 
 class TfConvertImageDType(Preprocessor):
     __provider__ = 'tf_convert_image_dtype'
