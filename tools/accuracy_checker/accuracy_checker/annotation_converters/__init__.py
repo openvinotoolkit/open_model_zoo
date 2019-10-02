@@ -24,7 +24,7 @@ from .wider import WiderFormatConverter
 from .detection_opencv_storage import DetectionOpenCVStorageFormatConverter
 from .lfw import LFWConverter
 from .vgg_face_regression import VGGFaceRegressionConverter
-from .super_resolution_converter import SRConverter
+from .super_resolution_converter import SRConverter, SRMultiFrameConverter
 from .imagenet import ImageNetFormatConverter
 from .icdar import ICDAR13RecognitionDatasetConverter, ICDAR15DetectionDatasetConverter
 from .ms_coco import MSCocoDetectionConverter, MSCocoKeypointsConverter
@@ -63,6 +63,7 @@ __all__ = [
     'LFWConverter',
     'VGGFaceRegressionConverter',
     'SRConverter',
+    'SRMultiFrameConverter',
     'ICDAR13RecognitionDatasetConverter',
     'ICDAR15DetectionDatasetConverter',
     'MSCocoKeypointsConverter',
