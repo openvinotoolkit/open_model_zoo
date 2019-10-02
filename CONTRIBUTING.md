@@ -1,8 +1,17 @@
 # How to contribute model to Open Model Zoo
 
+We appreciate your intention to contribute model to OpenVINO&trade; Open Model Zoo (OMZ). This guide would help you and explain main issues. OMZ is licensed under Apache License, Version 2.0. By contributing to the project, you agree to the license and copyright terms therein and release your contribution under these terms. Please note, that we accept models under permissive license: **MIT**, **Apache 2.0**, **BSD-3-Clause**. In other case it may take longer time to get approval (or even denial) for your model.
+
+Nowadays OMZ supports models from frameworks: 
+* Caffe\*
+* Caffe2\* (via conversion to ONNX\*)
+* TensorFlow\*
+* PyTorch\* (via conversion to ONNX\*)
+* MXNet\*
+
 ## Pull request requirements
 
-Contribution to OpenVINO&trade; Open Model Zoo (OMZ) comes down to creating pull request (PR) in this repository. Please use `develop` branch when creating your PR. Pull request is strictly formalized and must contains:
+Contribution to OMZ comes down to creating pull request (PR) in this repository. Please use `develop` branch when creating your PR. Pull request is strictly formalized and must contains:
 * configuration file  - `model.yml` (learn more in [Configuration file](#configuration-file) section)
 * documentation of model in markdown format (learn more in [Documentation](#documentation) section)
 * accuracy validation configuration file (learn more in [Accuracy Validation](#accuracy-validation) section)
@@ -33,6 +42,13 @@ This PR must pass next tests:
 * model is convertible by `tools/downloader/converter.py` script (see [Model conversion](#model-conversion) for details)
 * model can be used by demo or sample and provides adequate results (see [Demo](#demo) for details)
 * model passes accuracy validation (see [Accuracy validation](#accuracy-validation) for details)
+
+After the end, your PR will be review by OpenVINO&trade;'s team for consistence and legal.
+
+Your PR can be denied in case:
+* inappropriate license (e.g. GPL-like licenses)
+* inaccessible dataset
+* PR fails one of the test above
 
 ## Configuration file
 
@@ -70,6 +86,8 @@ You describe all files, which need to be downloaded, in this section. Each file 
 * `sha256` sets file hash sum
 * `source` sets direct link to file *OR* describes file access parameters
 
+> You may obtain hash sum using `sha256sum <file_name>` command on Linux\*.
+ 
 If file is located on Google Drive\*, section `source` must contain:
 - `$type: google_drive`
 - `id` file ID on Google Drive\*
@@ -149,6 +167,8 @@ Also you can add any other necessary parameters.
 
 Accuracy validation can be performed by [Accuracy Checker](./tools/accuracy_checker) tool, provided with repository. This tool can use IE to run converted model or original framework to run original model. Accuracy Checker supports lot of datasets, metrics and preprocessing options, what makes validation quite simple (if task is supported by tool). You need only create configuration file, which contain necessary parameters to do accuracy validation (specify dataset and annotation, pre- and post processing parameters, accuracy metric to compute and so on). More details you can find [here](./tools/accuracy_checker#resting-new-models).
 
+If model uses dataset which is unsupported by Accuracy Checker, you also must provide link to it. Please notice this issue in PR description. Don't forget about dataset license too (see [above](#how-to-contribute-model-to-open-model-zoo)).
+
 When the configuration file is ready, you must run Accuracy Checker to obtain metric results. If they match your results, that means  conversion was fully successful and Accuracy Checker fully supports your model, metric and dataset. If no - recheck [conversion](#model-conversion) parameters or validation configuration file.
 
 *After this step you will get accuracy validation configuration file - **<model_name>.yml***
@@ -200,6 +220,7 @@ Documentation should contain:
 	* framework
 	* GFLOPs (*if available*)
 	* number of parameters (*if available*)
+* validation dataset description/link
 * main accuracy values (also description of metric)
 * detailed description of input and output for original and converted models
 
