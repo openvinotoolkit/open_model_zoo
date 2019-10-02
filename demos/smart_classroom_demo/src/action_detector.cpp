@@ -283,6 +283,7 @@ void ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat& main_conf
             float action_exp_value =
                 std::exp(scale * anchor_conf_data[action_conf_idx_shift + c * action_conf_step]);
             action_sum_exp_values += action_exp_value;
+            std::cout << "ln(" << action_exp_value << ")=" << scale << '*' << anchor_conf_data[action_conf_idx_shift + c * action_conf_step] << '\n';
             if (action_exp_value > action_max_exp_value && ((c > 0 && binary_task_) || !binary_task_)) {
                 action_max_exp_value = action_exp_value;
                 action_label = c;
