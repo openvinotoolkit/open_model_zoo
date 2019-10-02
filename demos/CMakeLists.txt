@@ -212,7 +212,8 @@ else()
 endif()
 
 # collect all samples subdirectories
-file(GLOB samples_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
+# file(GLOB samples_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
+set(samples_dirs smart_classroom_demo;)
 # skip building of unnecessary subdirectories
 list(REMOVE_ITEM samples_dirs common thirdparty)
 add_samples_to_build(${samples_dirs})
