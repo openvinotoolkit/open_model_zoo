@@ -30,6 +30,7 @@ DOWNLOAD_TIMEOUT = 5 * 60
 
 # make sure to update the documentation if you modify these
 KNOWN_FRAMEWORKS = {'caffe', 'dldt', 'mxnet', 'pytorch', 'tf'}
+KNOWN_ONNX_SUPPORT = {'pytorch'}
 KNOWN_PRECISIONS = {'FP16', 'FP32', 'INT1', 'INT8'}
 KNOWN_TASK_TYPES = {
     'action_recognition',
@@ -328,12 +329,14 @@ class Model:
                 with deserialization_context('"postprocessing" #{}'.format(i)):
                     postprocessing.append(Postproc.deserialize(postproc))
 
+            framework = validate_string_enum('"framework"', model['framework'], KNOWN_FRAMEWORKS)
+
             conversion_to_onnx_args = None
             if model.get('conversion_to_onnx_args', None):
+                if framework not in KNOWN_ONNX_SUPPORT:
+                    raise DeserializationError('Conversion to ONNX not supported for "{}" framework!'.format(framework))
                 conversion_to_onnx_args = [validate_string('"conversion_to_onnx_args" #{}'.format(i), arg)
                                            for i, arg in enumerate(model['conversion_to_onnx_args'])]
-
-            framework = validate_string_enum('"framework"', model['framework'], KNOWN_FRAMEWORKS)
 
             if 'model_optimizer_args' in model:
                 mo_args = [validate_string('"model_optimizer_args" #{}'.format(i), arg)

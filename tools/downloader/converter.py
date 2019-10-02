@@ -58,21 +58,19 @@ def prefixed_subprocess(prefix, args):
 
 
 def convert_to_onnx(model, output_dir, args, stdout_prefix):
+    script_dir = Path(__file__).absolute().parent
     converters = {
-        'pytorch': Path(__file__).absolute().parent / 'pytorch_to_onnx.py'
+        'pytorch': 'pytorch_to_onnx.py',
     }
-    prefixed_printf(stdout_prefix, '========= {}Converting {} to ONNX from {}',
-                    '(DRY RUN) ' if args.dry_run else '', model.name, model.framework)
+    prefixed_printf(stdout_prefix, '========= {}Converting {} to ONNX ',
+                    '(DRY RUN) ' if args.dry_run else '', model.name)
 
+    converter = converters[model.framework]
     conversion_to_onnx_args = [string.Template(arg).substitute(conv_dir=output_dir / model.subdirectory,
                                                                dl_dir=args.download_dir / model.subdirectory)
                                for arg in model.conversion_to_onnx_args]
-    converter = converters.get(model.framework)
-    if converter is None:
-        prefixed_printf(stdout_prefix, 'Conversion to ONNX not supported for {} framework', model.framework)
-        return False
+    cmd = [str(args.python), str(script_dir / converter), *conversion_to_onnx_args]
 
-    cmd = [str(args.python), str(converter), *conversion_to_onnx_args]
     prefixed_printf(stdout_prefix, 'Conversion to ONNX command: {}', ' '.join(map(quote_arg, cmd)))
 
     return True if args.dry_run else prefixed_subprocess(stdout_prefix, cmd)
