@@ -343,62 +343,6 @@ std::vector<std::string> ParseActionLabels(const std::string& in_str) {
     return labels;
 }
 
-std::string GetActionTextLabel(const unsigned label, const std::vector<std::string>& actions_map) {
-    if (label < actions_map.size()) {
-        return actions_map[label];
-    }
-    return "__undefined__";
-}
-
-cv::Scalar GetActionTextColor(const unsigned label) {
-    static std::vector<cv::Scalar> actions_map = {
-        cv::Scalar(0, 255, 0), cv::Scalar(255, 0, 0), cv::Scalar(0, 0, 255), cv::Scalar(0, 255, 255)};
-    if (label < actions_map.size()) {
-        return actions_map[label];
-    }
-    return cv::Scalar(0, 0, 0);
-}
-
-float CalculateIoM(const cv::Rect& rect1, const cv::Rect& rect2) {
-  int area1 = rect1.area();
-  int area2 = rect2.area();
-
-  float area_min = static_cast<float>(std::min(area1, area2));
-  float area_intersect = static_cast<float>((rect1 & rect2).area());
-
-  return area_intersect / area_min;
-}
-
-cv::Rect DecreaseRectByRelBorders(const cv::Rect& r) {
-    float w = static_cast<float>(r.width);
-    float h = static_cast<float>(r.height);
-
-    float left = std::ceil(w * 0.0f);
-    float top = std::ceil(h * 0.0f);
-    float right = std::ceil(w * 0.0f);
-    float bottom = std::ceil(h * .7f);
-
-    cv::Rect res;
-    res.x = r.x + static_cast<int>(left);
-    res.y = r.y + static_cast<int>(top);
-    res.width = static_cast<int>(r.width - left - right);
-    res.height = static_cast<int>(r.height - top - bottom);
-    return res;
-}
-
-int GetIndexOfTheNearestPerson(const TrackedObject& face, const std::vector<TrackedObject>& tracked_persons) {
-    int argmax = -1;
-    float max_iom = std::numeric_limits<float>::lowest();
-    for (size_t i = 0; i < tracked_persons.size(); i++) {
-        float iom = CalculateIoM(face.rect, DecreaseRectByRelBorders(tracked_persons[i].rect));
-        if ((iom > 0) && (iom > max_iom)) {
-            max_iom = iom;
-            argmax = i;
-        }
-    }
-    return argmax;
-}
-
 std::map<int, int> GetMapFaceTrackIdToLabel(const std::vector<Track>& face_tracks) {
     std::map<int, int> face_track_id_to_label;
     for (const auto& track : face_tracks) {
@@ -659,19 +603,14 @@ int main(int argc, char* argv[]) {
         detection::DetectedObjects faces;
 
         float work_time_ms = 0.f;
-        float wait_time_ms = 0.f;
         size_t work_num_frames = 0;
-        size_t wait_num_frames = 0;
         size_t total_num_frames = 0;
         const char ESC_KEY = 27;
-        const char SPACE_KEY = 32;
         const cv::Scalar green_color(0, 255, 0);
         const cv::Scalar red_color(0, 0, 255);
         const cv::Scalar white_color(255, 255, 255);
         std::vector<std::map<int, int>> face_obj_id_to_action_maps;
         std::map<int, int> top_k_obj_ids;
-
-        int teacher_track_id = -1;
 
         if (cap.GrabNext()) {
             cap.Retrieve(frame);
@@ -690,7 +629,6 @@ int main(int argc, char* argv[]) {
         prev_frame = frame.clone();
 
         bool is_last_frame = false;
-        bool is_monitoring_enabled = false;
         auto prev_frame_path = cap.GetVideoPath();
 
         cv::VideoWriter vid_writer;
@@ -712,105 +650,19 @@ int main(int argc, char* argv[]) {
 
         while (!is_last_frame) {
             logger.CreateNextFrameRecord(cap.GetVideoPath(), work_num_frames, prev_frame.cols, prev_frame.rows);
-            auto started = std::chrono::high_resolution_clock::now();
 
             is_last_frame = !cap.GrabNext();
             if (!is_last_frame)
                 cap.Retrieve(frame);
 
-            char key = cv::waitKey(1);
+            char key = cv::waitKey(500);
             if (key == ESC_KEY) {
                 break;
             }
 
             sc_visualizer.SetFrame(prev_frame);
 
-            if (actions_type == TOP_K) {
-                if ( (is_monitoring_enabled && key == SPACE_KEY) ||
-                     (!is_monitoring_enabled && key != SPACE_KEY) ) {
-                    if (key == SPACE_KEY) {
-                        action_detector.wait();
-                        action_detector.fetchResults();
-
-                        tracker_action.Reset();
-                        top_k_obj_ids.clear();
-
-                        is_monitoring_enabled = false;
-
-                        sc_visualizer.ClearTopWindow();
-                    }
-
-                    auto elapsed = std::chrono::high_resolution_clock::now() - started;
-                    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
-
-                    wait_time_ms += elapsed_ms;
-                    ++wait_num_frames;
-
-                    sc_visualizer.DrawFPS(1e3f / (wait_time_ms / static_cast<float>(wait_num_frames) + 1e-6f),
-                                          green_color);
-                } else {
-                    if (key == SPACE_KEY) {
-                        is_monitoring_enabled = true;
-
-                        action_detector.enqueue(prev_frame);
-                        action_detector.submitRequest();
-                    }
-
-                    action_detector.wait();
-                    action_detector.fetchResults();
-                    actions = action_detector.results;
-
-                    if (!is_last_frame) {
-                        prev_frame_path = cap.GetVideoPath();
-                        action_detector.enqueue(frame);
-                        action_detector.submitRequest();
-                    }
-
-                    TrackedObjects tracked_action_objects;
-                    for (const auto& action : actions) {
-                        tracked_action_objects.emplace_back(action.rect, action.detection_conf, action.label);
-                    }
-
-                    tracker_action.Process(prev_frame, tracked_action_objects, total_num_frames);
-                    const auto tracked_actions = tracker_action.TrackedDetectionsWithLabels();
-
-                    if (static_cast<int>(top_k_obj_ids.size()) < FLAGS_a_top) {
-                        for (const auto& action : tracked_actions) {
-                            if (action.label == top_action_id && top_k_obj_ids.count(action.object_id) == 0) {
-                                const int action_id_in_top = top_k_obj_ids.size();
-                                top_k_obj_ids.emplace(action.object_id, action_id_in_top);
-
-                                sc_visualizer.DrawCrop(action.rect, action_id_in_top, red_color);
-
-                                if (static_cast<int>(top_k_obj_ids.size()) >= FLAGS_a_top) {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    auto elapsed = std::chrono::high_resolution_clock::now() - started;
-                    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
-
-                    work_time_ms += elapsed_ms;
-                    ++work_num_frames;
-
-                    sc_visualizer.DrawFPS(1e3f / (work_time_ms / static_cast<float>(work_num_frames) + 1e-6f),
-                                          red_color);
-
-                    for (const auto& action : tracked_actions) {
-                        auto box_color = white_color;
-                        std::string box_caption = "";
-
-                        if (top_k_obj_ids.count(action.object_id) > 0) {
-                            box_color = red_color;
-                            box_caption = std::to_string(top_k_obj_ids[action.object_id] + 1);
-                        }
-
-                        sc_visualizer.DrawObject(action.rect, box_caption, white_color, box_color, true);
-                    }
-                }
-            } else {
+            {
                 face_detector.wait();
                 face_detector.fetchResults();
                 faces = face_detector.results;
@@ -826,94 +678,6 @@ int main(int argc, char* argv[]) {
                     action_detector.enqueue(frame);
                     action_detector.submitRequest();
                 }
-
-                std::vector<cv::Mat> face_rois, landmarks, embeddings;
-                TrackedObjects tracked_face_objects;
-
-                for (const auto& face : faces) {
-                    face_rois.push_back(prev_frame(face.rect));
-                }
-                landmarks_detector.Compute(face_rois, &landmarks, cv::Size(2, 5));
-                AlignFaces(&face_rois, &landmarks);
-                face_reid.Compute(face_rois, &embeddings);
-                auto ids = face_gallery.GetIDsByEmbeddings(embeddings);
-
-                for (size_t i = 0; i < faces.size(); i++) {
-                    int label = ids.empty() ? EmbeddingsGallery::unknown_id : ids[i];
-                    tracked_face_objects.emplace_back(faces[i].rect, faces[i].confidence, label);
-                }
-                tracker_reid.Process(prev_frame, tracked_face_objects, work_num_frames);
-
-                const auto tracked_faces = tracker_reid.TrackedDetectionsWithLabels();
-
-                TrackedObjects tracked_action_objects;
-                for (const auto& action : actions) {
-                    tracked_action_objects.emplace_back(action.rect, action.detection_conf, action.label);
-                }
-
-                tracker_action.Process(prev_frame, tracked_action_objects, work_num_frames);
-                const auto tracked_actions = tracker_action.TrackedDetectionsWithLabels();
-
-                auto elapsed = std::chrono::high_resolution_clock::now() - started;
-                auto elapsed_ms =
-                        std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
-
-                work_time_ms += elapsed_ms;
-
-                std::map<int, int> frame_face_obj_id_to_action;
-                for (size_t j = 0; j < tracked_faces.size(); j++) {
-                    const auto& face = tracked_faces[j];
-                    std::string label_to_draw;
-                    if (face.label != EmbeddingsGallery::unknown_id)
-                        label_to_draw += face_gallery.GetLabelByID(face.label);
-
-                    int person_ind = GetIndexOfTheNearestPerson(face, tracked_actions);
-                    int action_ind = default_action_index;
-                    if (person_ind >= 0) {
-                        action_ind = tracked_actions[person_ind].label;
-                    }
-
-                    if (actions_type == STUDENT) {
-                        if (action_ind != default_action_index) {
-                            label_to_draw += "[" + GetActionTextLabel(action_ind, actions_map) + "]";
-                        }
-                        frame_face_obj_id_to_action[face.object_id] = action_ind;
-                        sc_visualizer.DrawObject(face.rect, label_to_draw, red_color, white_color, true);
-                        logger.AddFaceToFrame(face.rect, face_gallery.GetLabelByID(face.label), "");
-                    }
-
-                    if ((actions_type == TEACHER) && (person_ind >= 0)) {
-                        if (face_gallery.GetLabelByID(face.label) == teacher_id) {
-                            teacher_track_id = tracked_actions[person_ind].object_id;
-                        } else if (teacher_track_id == tracked_actions[person_ind].object_id) {
-                            teacher_track_id = -1;
-                        }
-                    }
-                }
-
-                if (actions_type == STUDENT) {
-                    for (const auto& action : tracked_actions) {
-                        const auto& action_label = GetActionTextLabel(action.label, actions_map);
-                        const auto& action_color = GetActionTextColor(action.label);
-                        const auto& text_label = face_config.enabled ? "" : action_label;
-                        sc_visualizer.DrawObject(action.rect, text_label, action_color, white_color, true);
-                        logger.AddPersonToFrame(action.rect, action_label, "");
-                        logger.AddDetectionToFrame(action, work_num_frames);
-                    }
-                    face_obj_id_to_action_maps.push_back(frame_face_obj_id_to_action);
-                } else if (teacher_track_id >= 0) {
-                    auto res_find = std::find_if(tracked_actions.begin(), tracked_actions.end(),
-                                [teacher_track_id](const TrackedObject& o){ return o.object_id == teacher_track_id; });
-                    if (res_find != tracked_actions.end()) {
-                        const auto& track_action = *res_find;
-                        const auto& action_label = GetActionTextLabel(track_action.label, actions_map);
-                        sc_visualizer.DrawObject(track_action.rect, action_label, red_color, white_color, true);
-                        logger.AddPersonToFrame(track_action.rect, action_label, teacher_id);
-                    }
-                }
-
-                sc_visualizer.DrawFPS(1e3f / (work_time_ms / static_cast<float>(work_num_frames) + 1e-6f),
-                                      red_color);
 
                 ++work_num_frames;
             }
@@ -994,5 +758,5 @@ int main(int argc, char* argv[]) {
 
     slog::info << "Execution successful" << slog::endl;
 
-    return 0;
+    return 1;
 }
