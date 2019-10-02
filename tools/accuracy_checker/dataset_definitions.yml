@@ -352,7 +352,7 @@ datasets:
       landmarks_csv_file: VGGFaces2/bb_landmark/loose_landmark_test.csv
       bbox_csv_file: VGGFaces2/bb_landmark/loose_bb_test.csv
     annotation: vggfaces2.pickle
-    dataset_meta: vgfces2.json
+    dataset_meta: vggfaces2.json
 
   - name: semantic_segmentation_adas
     data_source: segmentation
