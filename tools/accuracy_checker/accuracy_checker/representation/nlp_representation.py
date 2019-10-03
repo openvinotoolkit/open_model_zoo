@@ -1,4 +1,5 @@
 from .base_representation import BaseRepresentation
+from .classification_representation import ClassificationAnnotation
 
 
 class MachineTranslationRepresentation(BaseRepresentation):
@@ -43,3 +44,12 @@ class QuestionAnsweringPrediction(QuestionAnswering):
         self.start_index = start_index if start_index is not None else []
         self.end_index = end_index if end_index is not None else []
         self.tokens = tokens if tokens is not None else []
+
+
+class TextClassificationAnnotation(ClassificationAnnotation):
+    def __init__(self, identifier, label, input_ids, input_mask, segment_ids, tokens):
+        super().__init__(identifier, label)
+        self.input_ids = input_ids
+        self.input_mask = input_mask
+        self.segment_ids = segment_ids
+        self.tokens = tokens
