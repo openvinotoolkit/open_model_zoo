@@ -22,7 +22,7 @@ files:
   - name: graph_opt.pb
     size: 209299198
     sha256: 1fc81fff68d2351dba0bf206ae4431a760a202151ff539feaefdaab534d79aeb
-    source: http://download686.mediafire.com/by7ktb6ue5ag/qlzzr20mpocnpa3/graph_opt.pb
+    source: http://download686.mediafire.com/xk527xyl3r6g/qlzzr20mpocnpa3/graph_opt.pb
 model_optimizer_args:
   - --input_shape=[1,368,432,3]
   - --input=image

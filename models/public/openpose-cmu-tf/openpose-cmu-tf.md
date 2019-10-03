@@ -63,7 +63,7 @@ name - `Openpose/concat_stage7`, output data format is `B,H,W,C` where:
    output data format is `B,C,H,W` where:
 
 - `B` - batch size
-- `C` - number of predicted body parts according to MSCOCO kepoints classification
+- `C` - number of predicted body parts
 - `H` - height of heatmap
 - `W` - width of heatmap
 
