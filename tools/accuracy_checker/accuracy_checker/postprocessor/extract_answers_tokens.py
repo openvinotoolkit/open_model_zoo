@@ -50,9 +50,10 @@ class ExtractSQUADPrediction(Postprocessor):
 
     def process_image(self, annotation, prediction):
         def _get_best_indexes(logits, n_best_size):
-            index_and_score = sorted(enumerate(logits), key=lambda x: x[1], reverse=True)
-            best_indexes_mask = [np.arange(len(index_and_score)) < n_best_size]
-            best_indexes = np.array(index_and_score, dtype=np.int32)[tuple(best_indexes_mask)][..., 0]
+            indexes = np.argsort(logits)[::-1]
+            score = np.array(logits)[indexes]
+            best_indexes_mask = np.arange(len(score)) < n_best_size
+            best_indexes = indexes[best_indexes_mask]
             return best_indexes
 
         def _check_indexes(start, end, length, max_answer):
@@ -63,39 +64,37 @@ class ExtractSQUADPrediction(Postprocessor):
             return True
 
         for annotation_, prediction_ in zip(annotation, prediction):
-            start_indexes = [_get_best_indexes(logits, self.n_best_size) for logits in prediction_.start_logits]
-            end_indexes = [_get_best_indexes(logits, self.n_best_size) for logits in prediction_.end_logits]
-            for i, _ in enumerate(start_indexes):
-                start_indexes_ = []
-                end_indexes_ = []
-                tokens_ = []
+            start_indexes = _get_best_indexes(prediction_.start_logits, self.n_best_size)
+            end_indexes = _get_best_indexes(prediction_.end_logits, self.n_best_size)
+            valid_start_indexes = []
+            valid_end_indexes = []
+            tokens = []
 
-                for start_index_ in start_indexes[i]:
-                    for end_index_ in end_indexes[i]:
-                        if _check_indexes(start_index_, end_index_, len(annotation_.tokens), self.max_answer):
-                            start_indexes_.append(start_index_)
-                            end_indexes_.append(end_index_)
-                            tokens_.append(annotation_.tokens[start_index_:(end_index_ + 1)])
+            for start_index in start_indexes:
+                for end_index in end_indexes:
+                    if _check_indexes(start_index, end_index, len(annotation_.tokens), self.max_answer):
+                        valid_start_indexes.append(start_index)
+                        valid_end_indexes.append(end_index)
+                        tokens.append(annotation_.tokens[start_index:(end_index + 1)])
 
-                start_logits_ = prediction_.start_logits[i][start_indexes_]
-                end_logits_ = prediction_.end_logits[i][end_indexes_]
+            start_logits = prediction_.start_logits[valid_start_indexes]
+            end_logits = prediction_.end_logits[valid_end_indexes]
 
-                start_indexes_ = [val for _, val in
-                                  sorted(zip(start_logits_+end_logits_, start_indexes_), reverse=True)]
-                if not start_indexes_:
-                    continue
-                start_indexes_ = start_indexes_[0]
-                end_indexes_ = [val for _, val in sorted(zip(start_logits_+end_logits_, end_indexes_), reverse=True)]
-                end_indexes_ = end_indexes_[0]
+            start_indexes = [val for _, val in sorted(zip(start_logits+end_logits, start_indexes), reverse=True)]
+            if not start_indexes:
+                continue
+            start_indexes_ = start_indexes[0]
+            end_indexes_ = [val for _, val in sorted(zip(start_logits+end_logits, end_indexes), reverse=True)]
+            end_indexes_ = end_indexes_[0]
 
-                prediction_.start_index.append(start_indexes_)
-                prediction_.end_index.append(end_indexes_)
+            prediction_.start_index.append(start_indexes_)
+            prediction_.end_index.append(end_indexes_)
 
-                tokens_ = [" ".join(tok) for _, tok in sorted(zip(start_logits_+end_logits_, tokens_), reverse=True)]
-                tokens_ = tokens_[0]
-                tokens_ = tokens_.replace(" ##", "")
-                tokens_ = tokens_.replace("##", "")
-                tokens_ = tokens_.strip()
-                prediction_.tokens.append(tokens_)
+            tokens_ = [" ".join(tok) for _, tok in sorted(zip(start_logits+end_logits, tokens), reverse=True)]
+            tokens_ = tokens_[0]
+            tokens_ = tokens_.replace(" ##", "")
+            tokens_ = tokens_.replace("##", "")
+            tokens_ = tokens_.strip()
+            prediction_.tokens.append(tokens_)
 
         return annotation, prediction

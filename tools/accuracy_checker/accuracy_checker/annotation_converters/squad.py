@@ -17,11 +17,14 @@ limitations under the License.
 from collections import namedtuple
 import unicodedata
 
+import numpy as np
+
 from ..representation import QuestionAnsweringAnnotation
 from ..utils import read_json
 from ..config import PathField, NumberField
 
-from .format_converter import BaseFormatConverter
+from .format_converter import BaseFormatConverter, ConverterReturn
+
 
 class SQUADConverter(BaseFormatConverter):
     __provider__ = "squad"
@@ -157,16 +160,16 @@ class SQUADConverter(BaseFormatConverter):
                 identifier = ['input_ids_{}'.format(idx), 'input_mask_{}'.format(idx), 'segment_ids_{}'.format(idx)]
                 annotation = QuestionAnsweringAnnotation(
                     identifier,
-                    unique_id,
-                    input_ids,
-                    input_mask,
-                    segment_ids,
+                    np.array(unique_id),
+                    np.array(input_ids),
+                    np.array(input_mask),
+                    np.array(segment_ids),
                     tokens,
                     answers[example_index],
                 )
                 annotations.append(annotation)
                 unique_id += 1
-        return annotations
+        return ConverterReturn(annotations, None, None)
 
     @staticmethod
     def _is_max_context(doc_spans, cur_span_index, position):

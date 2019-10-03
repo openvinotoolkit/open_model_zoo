@@ -94,7 +94,6 @@ class QuestionAnsweringAdapter(Adapter):
         predictions = self._extract_predictions(raw, frame_meta)[self.output_blob]
         result = []
         batch_size, seq_length, hidden_size = predictions.shape
-        seq_length = frame_meta[0]['image_size']
         output_weights = np.random.normal(scale=0.02, size=(2, hidden_size))
         output_bias = np.zeros(2)
         prediction_matrix = predictions.reshape((batch_size * seq_length, hidden_size))
