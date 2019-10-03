@@ -101,7 +101,7 @@ Alternatively, you can just set `-nc 3`, which simplifies application usage.
 
 If your cameras are connected to PC with indexes gap (for example, `0,1,3`), use the `-i` parameter.
 
-Added support for IP-cameras through RSTP URI interface.
+IP cameras are supported via the RTSP URI interface
 
 ```
 -i   rtsp://camera_ip_add1/stream_no rtsp://camera_ip_add2/stream_no
