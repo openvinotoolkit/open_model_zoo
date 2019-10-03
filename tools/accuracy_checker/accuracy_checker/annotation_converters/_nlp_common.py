@@ -1,8 +1,10 @@
 import unicodedata
 
+
 class Tokenizer:
-    def __init__(self, vocab_file):
-        self.vocab = load_vocab(vocab_file)
+    def __init__(self, vocab_file, lower_case=True):
+        self.vocab = self.load_vocab(vocab_file)
+        self.lower_case = lower_case
 
     @staticmethod
     def _run_strip_accents(text):
@@ -52,8 +54,9 @@ class Tokenizer:
         tokens = text.split() if text else []
         split_tokens = []
         for token in tokens:
-            token = token.lower()
-            token = self._run_strip_accents(token)
+            if self.lower_case:
+                token = token.lower()
+                token = self._run_strip_accents(token)
             split_tokens.extend(self._run_split_on_punc(token))
 
         output_tokens = " ".join(split_tokens)

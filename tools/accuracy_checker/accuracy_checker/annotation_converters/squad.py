@@ -20,7 +20,7 @@ import numpy as np
 
 from ..representation import QuestionAnsweringAnnotation
 from ..utils import read_json
-from ..config import PathField, NumberField
+from ..config import PathField, NumberField, BoolField
 
 from .format_converter import BaseFormatConverter, ConverterReturn
 from ._nlp_common import Tokenizer
@@ -47,7 +47,8 @@ class SQUADConverter(BaseFormatConverter):
             'doc_stride': NumberField(
                 description="When splitting up a long document into chunks, how much stride to take between chunks.",
                 optional=True, default=128
-            )
+            ),
+            'lower_case': BoolField(optional=True, default=True, description='Switch tokens to lower case register')
         })
 
         return parameters
@@ -58,6 +59,7 @@ class SQUADConverter(BaseFormatConverter):
         self.max_seq_length = self.get_value_from_config('max_seq_length')
         self.max_query_length = self.get_value_from_config('max_query_length')
         self.doc_stride = self.get_value_from_config('doc_stride')
+        self.lower_case = self.get_value_from_config('lower_case')
 
     @staticmethod
     def _load_examples(file):
@@ -106,7 +108,7 @@ class SQUADConverter(BaseFormatConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         examples, answers = self._load_examples(self.testing_file)
         annotations = []
-        tokenizer = Tokenizer(self.vocab_file)
+        tokenizer = Tokenizer(self.vocab_file, self.lower_case)
         unique_id = 1000000000
         DocSpan = namedtuple("DocSpan", ["start", "length"])
 

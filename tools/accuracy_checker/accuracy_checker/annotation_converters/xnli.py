@@ -1,7 +1,7 @@
 from collections import namedtuple
 import csv
 
-from ..config import PathField, StringField, NumberField
+from ..config import PathField, StringField, NumberField, BoolField
 from ..representation import TextClassificationAnnotation
 from ..utils import string_to_list
 from .format_converter import BaseFormatConverter, ConverterReturn
@@ -22,21 +22,21 @@ class XNLIDatasetConverter(BaseFormatConverter):
     @classmethod
     def parameters(cls):
         params = super().parameters()
-        params.update(
-            {
-                'annotation_file': PathField(description='path to annotation file in json or tsv format'),
-                'language_filter': StringField(
-                    description='comma-separated list of languages for selection only appropriate annotations.'
-                                ' If not provided full dataset used',
-                    optional=True
+        params.update({
+            'annotation_file': PathField(description='path to annotation file in json or tsv format'),
+            'language_filter': StringField(
+                description='comma-separated list of languages for selection only appropriate annotations.'
+                'If not provided full dataset used',
+                optional=True
                 ),
-                'vocab_file': PathField(description='Path to vocabulary file.'),
-                'max_seq_length': NumberField(
-                    description='The maximum total input sequence length after WordPiece tokenization.',
-                    optional=True, default=128
-                ),
-            }
-        )
+            'vocab_file': PathField(description='Path to vocabulary file.'),
+            'max_seq_length': NumberField(
+                description='The maximum total input sequence length after WordPiece tokenization.',
+                optional=True, default=128
+            ),
+            'lower_case': BoolField(optional=True, default=True, description='Switch tokens to lower case register')
+        })
+
         return params
 
     def configure(self):
@@ -46,7 +46,8 @@ class XNLIDatasetConverter(BaseFormatConverter):
             self.language_filter = string_to_list(self.language_filter)
         self.vocab_file = self.get_value_from_config('vocab_file')
         self.max_seq_length = self.get_value_from_config('max_seq_length')
-        self.tokenizer = Tokenizer(self.vocab_file)
+        self.lower_case = self.get_value_from_config('lower_case')
+        self.tokenizer = Tokenizer(self.vocab_file, self.lower_case)
 
     def read_tsv(self):
         lines = []
