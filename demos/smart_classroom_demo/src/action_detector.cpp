@@ -77,7 +77,6 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
 
         for (auto&& item : outputInfo) {
             item.second->setPrecision(Precision::FP32);
-            item.second->setLayout(InferenceEngine::TensorDesc::getLayoutByDims(item.second->getDims()));
         }
 
         new_network_ = outputInfo.find(config_.new_loc_blob_name) != outputInfo.end();
@@ -108,6 +107,11 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
                 const auto anchor_dims = outputInfo[glob_anchor_name]->getDims();
                 anchor_height = new_network_ ? anchor_dims[2] : anchor_dims[1];
                 anchor_width = new_network_ ? anchor_dims[3] : anchor_dims[2];
+                decltype(anchor_dims.size()) action_dimention_idx = new_network_ ? 1 : 3;
+                if (anchor_dims[action_dimention_idx] != config_.num_action_classes) {
+                    throw std::logic_error("The number of specified actions and the number of actions predicted by "
+                        "the Person/Action Detection Retail model must match");
+                }
 
                 const int anchor_size = anchor_height * anchor_width;
                 head_shift += anchor_size;
@@ -279,7 +283,7 @@ void ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat& main_conf
         int action_label = -1;
         float action_max_exp_value = 0.f;
         float action_sum_exp_values = 0.f;
-        for (int c = 0; c < config_.num_action_classes; ++c) {
+        for (size_t c = 0; c < config_.num_action_classes; ++c) {
             float action_exp_value =
                 std::exp(scale * anchor_conf_data[action_conf_idx_shift + c * action_conf_step]);
             action_sum_exp_values += action_exp_value;
