@@ -104,7 +104,7 @@ If your cameras are connected to PC with indexes gap (for example, `0,1,3`), use
 Added support for IP-cameras through RSTP URI interface.
 
 ```
--i   rtsp://camera_ip_add1/stream_no rtsp://camera_ip_add1/stream_no
+-i   rtsp://camera_ip_add1/stream_no rtsp://camera_ip_add2/stream_no
 ```
 
 ## See Also
