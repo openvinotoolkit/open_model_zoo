@@ -22,31 +22,18 @@ if (NOT(BIN_FOLDER))
     set (BIN_FOLDER ${ARCH})
 endif()
 
-if (NOT(IE_MAIN_SOURCE_DIR))
-    # in case if samples are built out of IE repo
-    set (IE_MAIN_SAMPLES_DIR ${CMAKE_CURRENT_BINARY_DIR})
-else()
-    # in case if samples are built from IE repo
-    set (IE_MAIN_SAMPLES_DIR ${IE_MAIN_SOURCE_DIR})
-endif()
-
 if(NOT(UNIX))
-    set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
-    set (CMAKE_LIBRARY_PATH ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
-    set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
-    set (CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
-    set (CMAKE_PDB_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
-    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
-    set (LIBRARY_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER})
-    set (LIBRARY_OUTPUT_PATH ${LIBRARY_OUTPUT_DIRECTORY}) # compatibility issue: linux uses LIBRARY_OUTPUT_PATH, windows uses LIBRARY_OUTPUT_DIRECTORY
+    set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${BIN_FOLDER})
+    set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${BIN_FOLDER})
+    set (CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${BIN_FOLDER})
+    set (CMAKE_PDB_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${BIN_FOLDER})
+    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${BIN_FOLDER})
 else ()
-    set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE}/lib)
-    set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE}/lib)
-    set (CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE})
-    set (CMAKE_PDB_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE})
-    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE})
-    set (LIBRARY_OUTPUT_DIRECTORY ${IE_MAIN_SAMPLES_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE}/lib)
-    set (LIBRARY_OUTPUT_PATH ${LIBRARY_OUTPUT_DIRECTORY}/lib)
+    set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE}/lib)
+    set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE}/lib)
+    set (CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE})
+    set (CMAKE_PDB_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE})
+    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE})
 endif()
 
 if (WIN32)
@@ -63,7 +50,7 @@ if (WIN32)
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX") #treating warnings as errors
     endif ()
 
-    if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+    if (CMAKE_CXX_COMPILER_ID MATCHES MSVC)
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251 /wd4275 /wd4267") #disable some warnings
     endif()
 else()
@@ -72,7 +59,7 @@ else()
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=unused-command-line-argument")
     elseif(UNIX)
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wuninitialized -Winit-self")
-        if(NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
+        if(NOT CMAKE_CXX_COMPILER_ID STREQUAL Clang)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wmaybe-uninitialized")
         endif()
     endif()
@@ -82,7 +69,7 @@ endif()
 ## to use C++11
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
+if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
     set (CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 endif()
 ####################################
@@ -93,16 +80,23 @@ set (HAVE_INTTYPES_H 1)
 
 add_subdirectory(thirdparty/gflags)
 
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
+if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 endif()
 
-add_subdirectory(common/format_reader)
-
-# samples build can be switched off during whole IE build
-if (IE_MAIN_SOURCE_DIR AND NOT ENABLE_SAMPLES)
-    return()
+if(IE_NOT_FOUND_MESSAGE)
+    # the flag is used to throw a custom message in case if the IE package is not found.
+    find_package(InferenceEngine 2.1 QUIET)
+    if (NOT(InferenceEngine_FOUND))
+        message(FATAL_ERROR ${IE_NOT_FOUND_MESSAGE})
+    endif()
+else()
+    find_package(InferenceEngine 2.1 REQUIRED)
 endif()
+# format reader must be added after find_package(InferenceEngine)
+# to get exactly the same OpenCV_DIR path which was used for the
+# local InferenceEngine build from the original DLDT repo
+add_subdirectory(common/format_reader)
 
 function(add_samples_to_build)
     # check each passed sample subdirectory
@@ -134,7 +128,7 @@ include(CMakeParseArguments)
 #               [HEADERS <header files>]
 #               [INCLUDE_DIRECTORIES <include dir>]
 #               [DEPENDENCIES <dependencies>]
-#               [OPENCV_DENENDENCIES <opencv modules>]
+#               [OPENCV_DEPENDENCIES <opencv modules>]
 #               [EXCLUDE_CPPLINT]
 #
 macro(ie_add_sample)
@@ -150,13 +144,7 @@ macro(ie_add_sample)
         if(NOT OpenCV_FOUND)
             message(WARNING "OPENCV is disabled or not found, " ${IE_SAMPLE_NAME} " skipped")
             return()
-        else()
-            add_definitions(-DUSE_OPENCV)
         endif()
-    endif()
-
-    if(TARGET IE::ie_cpu_extension)
-        add_definitions(-DWITH_EXTENSIONS)
     endif()
 
     # Create named folders for the sources within the .vcproj
@@ -168,6 +156,9 @@ macro(ie_add_sample)
 
     # Create executable file from sources
     add_executable(${IE_SAMPLE_NAME} ${IE_SAMPLE_SOURCES} ${IE_SAMPLES_HEADERS})
+    if(IE_SAMPLE_OPENCV_DEPENDENCIES)
+        target_compile_definitions(${IE_SAMPLE_NAME} PRIVATE USE_OPENCV)
+    endif()
 
     if(WIN32)
         set_target_properties(${IE_SAMPLE_NAME} PROPERTIES COMPILE_PDB_NAME ${IE_SAMPLE_NAME})
@@ -178,15 +169,12 @@ macro(ie_add_sample)
     endif()
     target_include_directories(${IE_SAMPLE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../common")
 
-    if(TARGET IE::ie_cpu_extension)
-        target_link_libraries(${IE_SAMPLE_NAME} PRIVATE IE::ie_cpu_extension)
-    endif()
-
     target_link_libraries(${IE_SAMPLE_NAME} PRIVATE ${OpenCV_LIBRARIES} ${InferenceEngine_LIBRARIES}
                                                     ${IE_SAMPLE_DEPENDENCIES} gflags)
 
     if(UNIX)
-        target_link_libraries(${IE_SAMPLE_NAME} PRIVATE pthread)
+        find_package(Threads REQUIRED)
+        target_link_libraries(${IE_SAMPLE_NAME} PRIVATE Threads::Threads)
     endif()
 
     # create global target with all samples / demo apps
@@ -199,17 +187,6 @@ macro(ie_add_sample)
         add_cpplint_target(${IE_SAMPLE_NAME}_cpplint FOR_TARGETS ${IE_SAMPLE_NAME})
     endif()
 endmacro()
-
-
-# use this flag if you need to throw custom message in case if the IE package is not found.
-if (IE_NOT_FOUND_MESSAGE)
-    find_package(InferenceEngine 2.0 QUIET)
-    if (NOT(InferenceEngine_FOUND))
-        message(FATAL_ERROR ${IE_NOT_FOUND_MESSAGE})
-    endif()
-else()
-    find_package(InferenceEngine 2.0 REQUIRED)
-endif()
 
 # collect all samples subdirectories
 file(GLOB samples_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)

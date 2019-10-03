@@ -94,17 +94,12 @@ Notice that the FPGA support comes through a [heterogeneous execution](https://d
 
 ## Build the Demo Applications
 
-To be able to build demos you need to source _InferenceEngine_ and _OpenCV_ environment from a binary package which is available as [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution.
+To be able to build demos automatically using build scripts you need to source _InferenceEngine_ and
+_OpenCV_ environment from a binary package which is available as [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution.
 Please run the following command before the demos build (assuming that the binary package was installed to `<INSTALL_DIR>`):
 ```sh
 source <INSTALL_DIR>/deployment_tools/bin/setupvars.sh
 ```
-You can also build demos manually using Inference Engine binaries from the
-[dldt](https://github.com/opencv/dldt/tree/master) repo. In this case please set `InferenceEngine_DIR` to a CMake folder you built the dldt project from, for example `<dldt_repo>/inference-engine/build`.
-Please also set the `OpenCV_DIR` variable pointing to the required OpenCV package. The same OpenCV
-version should be used both for the inference engine and demos build.
-Please refer to the Inference Engine [build instructions](https://github.com/opencv/dldt/tree/master/inference-engine/README.md)
-for details. Please also add path to built Inference Engine libraries to `LD_LIBRARY_PATH` (Linux*) or `PATH` (Windows*) variable before building the demos.
 
 ### <a name="build_demos_linux"></a>Build the Demo Applications on Linux*
 
@@ -140,6 +135,17 @@ cd build
   ```sh
   cmake -DCMAKE_BUILD_TYPE=Debug <open_model_zoo>/demos
   ```
+
+You can also build demos manually using Inference Engine binaries from the
+[dldt](https://github.com/opencv/dldt/tree/master) repo. In this case please set `InferenceEngine_DIR` to a CMake folder you built the dldt project from, for example `<dldt_repo>/build`:
+```sh
+cmake -DInferenceEngine_DIR=<dldt_repo>/build
+```
+In this case the OpenCV_DIR variable which was used for the dldt build is propagated automatically and
+used during the demos build. Please refer to the Inference Engine
+[build instructions](https://github.com/opencv/dldt/tree/master/inference-engine/README.md) for details.
+
+
 4. Run `make` to build the demos:
 ```sh
 make
@@ -187,8 +193,9 @@ run the `setupvars` script to set all necessary environment variables:
 ```sh
 source <INSTALL_DIR>/bin/setupvars.sh
 ```
-If you use your own Inference Engine and OpenCV binaries to build the demos please make sure you have added them
-to the `LD_LIBRARY_PATH` environment variable.
+If you use your own Inference Engine build with disabled RPATH please make sure you have added
+Inference Engine binaries and its dependencies (e.g. OpenCV, TBB) to the `LD_LIBRARY_PATH` environment
+variable.
 
 **(Optional)**: The OpenVINO environment variables are removed when you close the
 shell. As an option, you can permanently set the environment variables as follows:
@@ -218,8 +225,8 @@ run the `setupvars` script to set all necessary environment variables:
 ```sh
 <INSTALL_DIR>\bin\setupvars.bat
 ```
-If you use your own Inference Engine and OpenCV binaries to build the demos please make sure you have added
-to the `PATH` environment variable.
+If you use your own Inference Engine build with disabled RPATH please make sure you have added
+Inference Engine binaries and its dependencies (e.g. OpenCV, TBB) to the `PATH` environment variable.
 
 To debug or run the demos on Windows in Microsoft Visual Studio, make sure you
 have properly configured **Debugging** environment settings for the **Debug**
