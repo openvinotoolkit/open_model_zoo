@@ -81,7 +81,7 @@ NATIVE_DEMOS = [
                                       #ModelArg('person-detection-action-recognition-0006'),
                                       ModelArg('person-detection-raisinghand-recognition-0001')),
                                       #ModelArg('person-detection-action-recognition-teacher-0002')),
-        single_option_cases('-m_lm', ModelArg('landmarks-regression-retail-0009')),
+        # single_option_cases('-m_lm', ModelArg('landmarks-regression-retail-0009')),
     )),
 
 ]
