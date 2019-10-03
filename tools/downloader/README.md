@@ -39,6 +39,20 @@ conversion to ONNX format. To use automatic conversion install additional depend
 python3 -mpip install --user -r ./requirements-pytorch.in
 ```
 
+When running the model downloader with Python 3.5.x on macOS, you may encounter
+an error similar to the following:
+
+> requests.exceptions.SSLError: [...] (Caused by SSLError(SSLError(1, '[SSL: TLSV1_ALERT_PROTOCOL_VERSION]
+tlsv1 alert protocol version (_ssl.c:719)'),))
+
+You can work around this by installing additional packages:
+
+```sh
+python3 -mpip install --user 'requests[security]'
+```
+
+Alternatively, upgrade to Python 3.6 or a later version.
+
 Model downloader usage
 ----------------------
 
