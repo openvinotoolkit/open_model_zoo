@@ -63,7 +63,7 @@ class ONNXLauncher(Launcher):
     def batch(self):
         return 1
 
-    def predict(self, inputs, metadata, *args, **kwargs):
+    def predict(self, inputs, metadata=None, **kwargs):
         results = []
         for infer_input in inputs:
             prediction_list = self._inference_session.run(self.output_names, infer_input)

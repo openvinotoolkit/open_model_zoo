@@ -49,6 +49,7 @@ In order to evaluate some models required frameworks have to be installed. Accur
 - [OpenCV DNN](https://docs.opencv.org/4.1.0/d2/de6/tutorial_py_setup_in_ubuntu.html).
 - [TensorFlow](https://www.tensorflow.org/).
 - [ONNX Runtime](https://github.com/microsoft/onnxruntime/blob/master/README.md).
+- [Pytorch](https://pytorch.org/)
 
 You can use any of them or several at a time.
 
@@ -124,6 +125,7 @@ Please view:
 - [how to configure TensorFlow Launcher](accuracy_checker/launcher/tf_launcher_readme.md).
 - [how to configure TensorFlow Lite Launcher](accuracy_checker/launcher/tf_lite_launcher_readme.md).
 - [how to configure ONNX Runtime Launcher](accuracy_checker/launcher/onnx_runtime_launcher_readme.md).
+- [how to configure Pytorch Launcher](accuracy_checker/launcher/pytorch_launcher_readme.md)
 
 ### Datasets
 
