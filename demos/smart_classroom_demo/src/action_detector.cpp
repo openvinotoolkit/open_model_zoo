@@ -107,7 +107,7 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
                 const auto anchor_dims = outputInfo[glob_anchor_name]->getDims();
                 anchor_height = new_network_ ? anchor_dims[2] : anchor_dims[1];
                 anchor_width = new_network_ ? anchor_dims[3] : anchor_dims[2];
-                decltype(anchor_dims.size()) action_dimention_idx = new_network_ ? 1 : 3;
+                std::size_t action_dimention_idx = new_network_ ? 1 : 3;
                 if (anchor_dims[action_dimention_idx] != config_.num_action_classes) {
                     throw std::logic_error("The number of specified actions and the number of actions predicted by "
                         "the Person/Action Detection Retail model must match");
