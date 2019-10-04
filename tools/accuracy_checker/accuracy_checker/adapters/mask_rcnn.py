@@ -164,10 +164,18 @@ class MaskRCNNAdapter(Adapter):
             boxes[:, 1::2] /= im_scale_y
             classes = classes.astype(np.uint32)
             masks = []
-            for box, cls, raw_mask in zip(boxes, classes, raw_masks):
-                raw_cls_mask = raw_mask[cls, ...]
+            raw_mask_for_all_classes = np.shape(raw_masks)[1] != len(identifiers)
+            if raw_mask_for_all_classes:
+                per_obj_raw_masks = []
+                for cls, raw_mask in zip(classes, raw_masks):
+                    per_obj_raw_masks.append(raw_mask[cls, ...])
+            else:
+                per_obj_raw_masks = np.squeeze(raw_masks, axis=1)
+
+            for box, raw_cls_mask in zip(boxes, per_obj_raw_masks):
                 mask = self.segm_postprocess(box, raw_cls_mask, *original_image_size, True, True)
                 masks.append(mask)
+
             x_mins, y_mins, x_maxs, y_maxs = boxes.T
             detection_prediction = DetectionPrediction(identifier, classes, scores, x_mins, y_mins, x_maxs, y_maxs)
             instance_segmentation_prediction = CoCocInstanceSegmentationPrediction(identifier, masks, classes, scores)
