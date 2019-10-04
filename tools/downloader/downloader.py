@@ -269,6 +269,7 @@ def main():
         reporter.print('FAILED:')
         for failed_model_name in failed_models:
             reporter.print(failed_model_name)
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
