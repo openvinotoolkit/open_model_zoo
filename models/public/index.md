@@ -128,6 +128,21 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | MobileFaceNet,ArcFace@ms1m-refine-v1 | [MXNet\*](./face-recognition-mobilefacenet-arcface/face-recognition-mobilefacenet-arcface.md) | face-recognition-mobilefacenet-arcface | 0.449 | 0.993 |
 | SphereFace                | [Caffe\*](./Sphereface/Sphereface.md) | Sphereface | 3.504 | 22.671 |
 
+## Human Pose Estimation
+
+Human pose estimation task is to predict a pose: body skeleton, which consists
+of keypoints and connections between them, for every person in an input image or
+video. Keypoints are body joints, i.e. ears, eyes, nose, shoulders, knees, etc.
+There are two major groups of such metods: top-down and bottom-up.  The first
+detects persons in a given frame, crops or rescales detections, then runs pose
+estimation network for every detection. These methods are very accurate. The
+second finds all keypoints in a given frame, then groups them by person
+instances, thus faster than previous, because network runs once.
+
+| Model Name                    | Implementation                                                                            | OMZ Model Name                | GFlops | mParams |
+|------------------------------ | ----------------------------------------------------------------------------------------- | ----------------------------- | ------ | ------- |
+| human-pose-estimation-3d-0001 | [PyTorch\*](./human-pose-estimation-3d-0001/description/human-pose-estimation-3d-0001.md) | human-pose-estimation-3d-0001 | 18.998 |  5.074  |
+
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.
