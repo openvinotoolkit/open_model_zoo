@@ -1,7 +1,7 @@
 import re
 import numpy as np
 from .adapter import Adapter
-from ..representation import MachineTranslationPrediction, QuestionAnsweringPrediction
+from ..representation import MachineTranslationPrediction, QuestionAnsweringPrediction, ClassificationPrediction
 from ..config import PathField, NumberField
 from ..utils import read_txt
 
@@ -103,5 +103,22 @@ class QuestionAnsweringAdapter(Adapter):
         for identifier, prediction in zip(identifiers, predictions):
             prediction = np.transpose(prediction, (1, 0))
             result.append(QuestionAnsweringPrediction(identifier, prediction[0], prediction[1]))
+
+        return result
+
+
+class BertTextClassification(Adapter):
+    __provider__ = 'bert_classification'
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        outputs = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        _, hidden_size = outputs.shape
+        output_weights = np.random.normal(scale=0.02, size=(3, hidden_size))
+        output_bias = np.zeros(3)
+        predictions = np.matmul(outputs, output_weights.T)
+        predictions += output_bias
+        result = []
+        for identifier, output in zip(identifiers, predictions):
+            result.append(ClassificationPrediction(identifier, output))
 
         return result

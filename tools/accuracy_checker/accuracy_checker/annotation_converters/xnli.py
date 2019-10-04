@@ -1,5 +1,6 @@
 from collections import namedtuple
 import csv
+import numpy as np
 
 from ..config import PathField, StringField, NumberField, BoolField
 from ..representation import TextClassificationAnnotation
@@ -118,7 +119,9 @@ class XNLIDatasetConverter(BaseFormatConverter):
             input_mask.extend(padding)
             segment_ids.extend(padding)
 
-        return TextClassificationAnnotation(identifier, example.label, input_ids, input_mask, segment_ids, tokens)
+        return TextClassificationAnnotation(
+            identifier, example.label, np.array(input_ids), np.array(input_mask), np.array(segment_ids), tokens
+        )
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         examples = self.read_tsv()
