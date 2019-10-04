@@ -116,7 +116,7 @@ List of onnx conversion parameters, see `model_optimizer_args` for details. Appl
 
 **`model_optimizer_args`**
 
-Conversion parameters, obtained [earlier](#model-conversion), is specified in this section, e.g.:
+Conversion parameters (learn more in [Model conversion](#model-conversion) section) is specified in this section, e.g.:
 ```
   - --input=data
   - --mean_values=data[127.5]
@@ -140,7 +140,7 @@ Path to model's license.
 
 ## Model conversion
 
-Deep Learning Inference Engine (IE) supports models in Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using Model Optimizer tool included in OpenVINO&trade; package. Find more information about conversion in [[Model Optimizer Developer Guide](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After successful conversion you will get model in IR format `*.xml` representing net graph and `*.bin` containing net parameters. 
+Deep Learning Inference Engine (IE) supports models in Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using Model Optimizer tool included in OpenVINO&trade; package. Find more information about conversion in [Model Optimizer Developer Guide](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After successful conversion you will get model in IR format `*.xml` representing net graph and `*.bin` containing net parameters. 
 
 > **NOTE 1**: due to OpenVINO&trade; paradigms, image pre-processing parameters (mean and scale) should be built into converted model to simplify model usage.
 
