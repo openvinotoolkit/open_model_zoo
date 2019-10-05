@@ -48,6 +48,7 @@ from .cvat_human_pose import CVATPoseEstimationConverter
 from .cvat_person_detection_action_recognition import CVATPersonDetectionActionRecognitionConverter
 from .squad import SQUADConverter
 from .xnli import XNLIDatasetConverter
+from .cmu_panoptic import CmuPanopticKeypointsConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -90,5 +91,6 @@ __all__ = [
     'CVATPoseEstimationConverter',
     'CVATPersonDetectionActionRecognitionConverter',
     'SQUADConverter',
-    'XNLIDatasetConverter'
+    'XNLIDatasetConverter',
+    'CmuPanopticKeypointsConverter'
 ]

@@ -49,7 +49,7 @@ You may refer to `-h, --help` to full list of command line options. Some optiona
 * `-a, --annotation_name` - annotation file name.
 * `-m, --meta_name` - meta info file name.
 
-### Supported converters 
+### Supported converters
 
 Accuracy Checker supports following list of annotation converters and specific for them parameters:
 * `cifar10` - converts CIFAR 10 classification dataset to `ClassificationAnnotation`
@@ -69,7 +69,7 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `imageset_file` - path to file with validation image list.
   * `annotations_dir` - path to directory with annotation files.
   * `images_dir` - path to directory with images related to devkit root (default JPEGImages).
-  * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is True) 
+  * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is True)
 * `voc_segmentation` - converts Pascal VOC annotation for semantic segmentation task to `SegmentationAnnotation`.
   * `imageset_file` - path to file with validation image list.
   * `images_dir` - path to directory with images related to devkit root (default JPEGImages).
@@ -211,3 +211,5 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `max_seq_length` - maximum total input sequence length after word-piece tokenization (Optional, default value is 128).
   * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
   * `language_filter` - comma-separated list of used in annotation language tags for selecting records for specific languages only. (Optional, if not used full annotation will be converted).
+* `cmu_panoptic_keypoints` - converts CMU Panoptic dataset to `PoseEstimation3dAnnotation` format.
+  * `data_dir` - dataset root directory, which contain subdirectories with validation scenes data.

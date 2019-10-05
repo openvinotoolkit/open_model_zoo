@@ -315,7 +315,7 @@ datasets:
     preprocessing:
       - type: resize
         size: 224
- 
+
   - name: lfw
     data_source: LFW/lfw
     annotation_conversion:
@@ -489,3 +489,10 @@ datasets:
     data_source: ILSVRC2012_img_val
     annotation: hadwritten_score_recognition.pickle
     dataset_meta: hadwritten_score_recognition.json
+
+  - name: cmu_panoptic_keypoints
+    data_source: cmu_panoptic_subset
+    annotation_conversion:
+      converter: cmu_panoptic_keypoints
+      data_dir: cmu_panoptic_subset
+    annotation: cmu_panoptic_keypoints.pickle

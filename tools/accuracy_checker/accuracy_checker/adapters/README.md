@@ -27,14 +27,14 @@ AccuracyChecker supports following set of adapters:
   * `grn_workaround` - enabling processing output with adding Global Region Normalization layer.
 * `yolo_v2` - converting output of YOLO v2 family models to `DetectionPrediction` representation.
   * `classes` - number of detection classes (default 20).
-  * `anchors` - anchor values provided as comma-separated list or one of precomputed: 
+  * `anchors` - anchor values provided as comma-separated list or one of precomputed:
     - `yolo_v2` - `[1.3221, 1.73145, 3.19275, 4.00944, 5.05587, 8.09892, 9.47112, 4.84053, 11.2364, 10.0071]`,
     - `tiny_yolo_v2` - `[1.08, 1.19, 3.42, 4.41, 6.63, 11.38, 9.42, 5.11, 16.62, 10.52]`
   * `coords` - number of bbox coordinates (default 4).
   * `num` - num parameter from DarkNet configuration file (default 5).
 * `yolo_v3` - converting output of YOLO v3 family models to `DetectionPrediction` representation.
   * `classes` - number of detection classes (default 80).
-  * `anchors` - anchor values provided as comma-separited list or precomputed: 
+  * `anchors` - anchor values provided as comma-separited list or precomputed:
     - `yolo_v3` - `[10.0, 13.0, 16.0, 30.0, 33.0, 23.0, 30.0, 61.0, 62.0, 45.0, 59.0, 119.0, 116.0, 90.0, 156.0, 198.0, 373.0, 326.0]`
     - `tiny_yolo_v3` - `[10.0, 14.0, 23.0, 27.0, 37.0, 58.0, 81.0, 82.0, 135.0, 169.0, 344.0, 319.0]`
   * `coords` - number of bbox coordinates (default 4).
@@ -60,15 +60,15 @@ AccuracyChecker supports following set of adapters:
   * `boxes_out` - name of output layer with predicted boxes coordinates in format [y0, x0, y1, x1].
   *  `scores_out` - name of output layer with detection scores.
   * `num_detections_out` - name of output layer which contains the number of valid detections.
-* `face_person_detection` - converting face person detection model output with 2 detection outputs to `ContainerPredition`, where value of parameters `face_out`and `person_out` are used for identification `DetectionPrediction` in container. 
+* `face_person_detection` - converting face person detection model output with 2 detection outputs to `ContainerPredition`, where value of parameters `face_out`and `person_out` are used for identification `DetectionPrediction` in container.
   * `face_out` -  face detection output layer name.
   * `person_out` - person detection output layer name.
 * `person_attributes` - converting person attributes recognition model output to `MultiLabelRecognitionPrediction`.
   * `attributes_recognition_out` - output layer name with attributes scores. (optional, used if your model has more than one outputs).
-* `vehicle_attributes`  - converting vehicle attributes recognition model output to `ContainerPrediction` where value of parameters `color_out`and `type_out` are used for identification `ClassificationPrediction` in container. 
+* `vehicle_attributes`  - converting vehicle attributes recognition model output to `ContainerPrediction` where value of parameters `color_out`and `type_out` are used for identification `ClassificationPrediction` in container.
   * `color_out` - vehicle color attribute output layer name.
   * `type_out`- vehicle type attribute output layer name.
-* `head_pose` - converting head pose estimation model output to `ContainerPrediction` where names of parameters `angle_pitch`, `angle_yaw` and `angle_roll` are used for identification `RegressionPrediction` in container. 
+* `head_pose` - converting head pose estimation model output to `ContainerPrediction` where names of parameters `angle_pitch`, `angle_yaw` and `angle_roll` are used for identification `RegressionPrediction` in container.
   * `angle_pitch` - output layer name for pitch angle.
   * `angle_yaw`- output layer name for yaw angle.
   * `angle_roll` - output layer name for roll angle.
@@ -128,3 +128,7 @@ AccuracyChecker supports following set of adapters:
 * `bert_question_answering` - converting output of BERT model trained to solve question answering task to `QuestionAnsweringPrediction`.
 * `bert_classification` - converting output of BERT model trained for classification task to `ClassificationPrediction`.
   * `num_classes` - number of predicted classes.
+* `human_pose_estimation_3d` - converting output of model for 3d human pose estimation to `PoseEstimation3dPrediction`.
+  * `features_3d_out` - name of output layer with 3d coordinates maps.
+  * `keypoints_heatmap_out` - name of output layer with keypoints heatmaps.
+  * `part_affinity_fields_out` - name of output layer with keypoints pairwise relations (part affinity fields).

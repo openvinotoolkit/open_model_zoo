@@ -44,6 +44,7 @@ from .clip_segmentation_mask import ClipSegmentationMask
 from .normalize_boxes import NormalizeBoxes
 from .resample_segmentation_prediction import SegmentationPredictionResample
 from .extract_answers_tokens import ExtractSQUADPrediction
+from .translate_3d_poses import Translate3dPoses
 
 __all__ = [
     'Postprocessor',
@@ -76,5 +77,7 @@ __all__ = [
 
     'NormalizeLandmarksPoints',
 
-    'ExtractSQUADPrediction'
+    'ExtractSQUADPrediction',
+
+    'Translate3dPoses'
 ]
