@@ -194,7 +194,7 @@ NATIVE_DEMOS = [
                     TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-0006'),
                         '-student_ac': 'sitting,writing,raising_hand,standing,turned_around,lie_on_the_desk'}),
                     # person-detection-action-recognition-teacher-0002 is supposed to be provided with -teacher_id, but
-                    # this would require providing a gallery file with -fg key. Unless -teqcher_id is provided
+                    # this would require providing a gallery file with -fg key. Unless -teacher_id is provided
                     # -teacher_ac is ignored thus run the test just with default actions pretending it's about students
                     TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-teacher-0002')}),
                 ],
