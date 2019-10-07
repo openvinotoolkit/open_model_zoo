@@ -25,7 +25,7 @@ void matU8ToBlob(const cv::Mat& orig_image, InferenceEngine::Blob::Ptr& blob, in
     const size_t height = blobSize[2];
     const size_t channels = blobSize[1];
     if (static_cast<size_t>(orig_image.channels()) != channels) {
-        THROW_IE_EXCEPTION << "A number of channels for net input and image must match";
+        THROW_IE_EXCEPTION << "The number of channels for net input and image must match";
     }
     T* blob_data = blob->buffer().as<T*>();
 
