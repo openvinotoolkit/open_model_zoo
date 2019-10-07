@@ -133,7 +133,7 @@ int main_work(int argc, char **argv) {
 
     if ((FLAGS_last >= 0) && (FLAGS_first > FLAGS_last)) {
         throw std::runtime_error("The first frame index (" + std::to_string(FLAGS_first) + ") must be greater than the "
-        "last frame index (" + std::to_string(FLAGS_last) + ')');
+            "last frame index (" + std::to_string(FLAGS_last) + ')');
     }
 
     std::vector<std::string> devices{detector_mode, reid_mode};
