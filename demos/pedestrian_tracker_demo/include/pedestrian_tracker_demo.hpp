@@ -116,11 +116,11 @@ DEFINE_string(out, "", output_log_message);
 
 /// @brief Define the first frame to process <br>
 /// It is an optional parameter
-DEFINE_uint32(first, 0, first_frame_message);
+DEFINE_int32(first, -1, first_frame_message);
 
 /// @brief Define the last frame to process <br>
 /// It is an optional parameter
-DEFINE_uint32(last, 0, last_frame_message);
+DEFINE_int32(last, -1, last_frame_message);
 
 
 /**

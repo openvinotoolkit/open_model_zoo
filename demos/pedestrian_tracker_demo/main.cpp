@@ -82,8 +82,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         return false;
     }
 
-    std::cout << "Parsing input parameters" << std::endl;
-
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
     }
@@ -133,10 +131,10 @@ int main_work(int argc, char **argv) {
 
     bool should_save_det_log = !detlog_out.empty();
 
-    if (FLAGS_first != 0)
-        std::cout << "first_frame = " << FLAGS_first << std::endl;
-    if (FLAGS_last != 0)
-        std::cout << "last_frame = " << FLAGS_last << std::endl;
+    if ((FLAGS_last >= 0) && (FLAGS_first > FLAGS_last)) {
+        throw std::runtime_error("The first frame index (" + std::to_string(FLAGS_first) + ") must be greater than the "
+        "last frame index (" + std::to_string(FLAGS_last) + ')');
+    }
 
     std::vector<std::string> devices{detector_mode, reid_mode};
     InferenceEngine::Core ie =
@@ -172,7 +170,7 @@ int main_work(int argc, char **argv) {
         // the default frame rate for DukeMTMC dataset
         video_fps = 60.0;
     }
-    if (0 != FLAGS_first && !cap.set(cv::CAP_PROP_POS_FRAMES, FLAGS_first)) {
+    if (0 >= FLAGS_first && !cap.set(cv::CAP_PROP_POS_FRAMES, FLAGS_first)) {
         throw std::runtime_error("Can't set the frame to begin with");
     }
 
@@ -182,7 +180,7 @@ int main_work(int argc, char **argv) {
     }
     std::cout << std::endl;
 
-    for (uint32_t frame_idx = FLAGS_first; 0 == FLAGS_last || frame_idx <= FLAGS_last; ++frame_idx) {
+    for (int32_t frame_idx = std::max(0, FLAGS_first); 0 > FLAGS_last || frame_idx <= FLAGS_last; ++frame_idx) {
         cv::Mat frame;
         if (!cap.read(frame)) {
             break;
