@@ -269,7 +269,10 @@ class DLSDKLauncher(Launcher):
 
     @property
     def output_blob(self):
-        return next(iter(self.original_outputs))
+        if (self._run_audio):
+            return self._audio_output[0]
+        else:
+            return next(iter(self.original_outputs))
 
     def predict(self, inputs, metadata=None, **kwargs):
         """
