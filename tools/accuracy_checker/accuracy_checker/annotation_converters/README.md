@@ -181,3 +181,8 @@ Accuracy Checker supports following list of annotation converters and specific f
     * `common_6_actions`(seating, writing, raising hand, standing, turned around, lie on the desk)
     * `teacher` (standing, writing, demonstrating)
     * `raising_hand` (seating, raising hand)
+
+* `libriSpeech` converts dataset with [LibriSpeech ASR corpus](http://www.openslr.org/12) for automatic speech recognition task `CharacterRecognitionAnnotation`.
+  * `data_dir` - path to data directory, where audio files (`.wav`) and `subtitle` are located.
+  
+    > Note: You can using [`librispeech.py`](https://github.com/SeanNaren/deepspeech.pytorch/blob/master/data/librispeech.py) which from this [repo](https://github.com/SeanNaren/deepspeech.pytorch) download the dataset and convert the `.flac` into `.wav`.
