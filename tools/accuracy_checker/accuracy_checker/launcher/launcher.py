@@ -86,6 +86,9 @@ class Launcher(ClassProvider):
             ),
             '_list_image_infos': ListField(
                 allow_empty=True, optional=True, default=[], description="List of image information inputs."
+            ),
+            '_list_hidden_states': ListField(
+                allow_empty=True, optional=True, default=[], description="List of hidden states."
             )
         }
 
