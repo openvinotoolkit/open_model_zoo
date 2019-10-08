@@ -136,6 +136,8 @@ class InputFeeder:
                 if isinstance(value, list):
                     value = np.array(value)
                 constant_inputs[name] = value
+            elif input_['type'] == 'HIDDEN_STATE':
+                constant_inputs[name] = np.zeros(tuple(input_['shape']))
             else:
                 config_non_constant_inputs.append(name)
                 if value:
