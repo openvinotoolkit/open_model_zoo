@@ -32,6 +32,3 @@ models:
             size: 400
           - type: resize
             size: 128
-
-        metrics:
-          - type: pairwise_accuracy_subsets
