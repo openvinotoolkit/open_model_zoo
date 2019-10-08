@@ -324,6 +324,10 @@ datasets:
       landmarks_file: LFW/annotation/lfw_landmark.txt
     annotation: lfw.pickle
 
+    metrics:
+      - type: pairwise_accuracy_subsets
+        subset_number: 2
+
   - name: ICDAR2015
     data_source: ICDAR15_DET/ch4_test_images
     annotation_conversion:
@@ -339,10 +343,10 @@ datasets:
     dataset_meta: icdar13_recognition.json
 
   - name: market1501
-    data_source: Market-1501-v15.09.15
+    data_source: Market1501-person-reidentification/Market-1501-v15.09.15
     annotation_conversion:
       converter: market1501_reid
-      data_dir: Market-1501-v15.09.15
+      data_dir: Market1501-person-reidentification/Market-1501-v15.09.15
     annotation: market1501_reid.pickle
 
   - name: vgg2face
