@@ -44,6 +44,7 @@ from .cvat_text_recognition import CVATTextRecognitionConverter
 from .cvat_multilabel_recognition import CVATMultilabelAttributesRecognitionConverter
 from .cvat_human_pose import CVATPoseEstimationConverter
 from .cvat_person_detection_action_recognition import CVATPersonDetectionActionRecognitionConverter
+from .libriSpeech import LibriSpeechFormatConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -81,5 +82,6 @@ __all__ = [
     'CVATTextRecognitionConverter',
     'CVATMultilabelAttributesRecognitionConverter',
     'CVATPoseEstimationConverter',
-    'CVATPersonDetectionActionRecognitionConverter'
+    'CVATPersonDetectionActionRecognitionConverter',
+    'LibriSpeechFormatConverter'
 ]
