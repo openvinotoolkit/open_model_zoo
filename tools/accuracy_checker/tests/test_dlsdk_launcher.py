@@ -214,6 +214,7 @@ class TestDLSDKLauncherMultiDevice:
 class TestDLSDKLauncherBitstreamProgramming:
     def test_program_bitsream_when_device_is_fpga(self, mocker):
         subprocess_mock = mocker.patch('subprocess.run')
+        mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
         config = {
             'framework': 'dlsdk',
             'weights': 'custom_weights',
@@ -230,6 +231,7 @@ class TestDLSDKLauncherBitstreamProgramming:
 
     def test_program_bitsream_when_fpga_in_hetero_device(self, mocker):
         subprocess_mock = mocker.patch('subprocess.run')
+        mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
         config = {
             'framework': 'dlsdk',
             'weights': 'custom_weights',
@@ -246,6 +248,7 @@ class TestDLSDKLauncherBitstreamProgramming:
 
     def test_does_not_program_bitsream_when_device_is_not_fpga(self, mocker):
         subprocess_mock = mocker.patch('subprocess.run')
+        mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
         config = {
             'framework': 'dlsdk',
             'weights': 'custom_weights',
@@ -261,7 +264,7 @@ class TestDLSDKLauncherBitstreamProgramming:
 
     def test_does_not_program_bitsream_when_hetero_without_fpga(self, mocker):
         subprocess_mock = mocker.patch('subprocess.run')
-
+        mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
         config = {
             'framework': 'dlsdk',
             'weights': 'custom_weights',
@@ -278,7 +281,7 @@ class TestDLSDKLauncherBitstreamProgramming:
     def test_does_not_program_bitstream_if_compiler_mode_3_in_env_when_fpga_in_hetero_device(self, mocker):
         subprocess_mock = mocker.patch('subprocess.run')
         mocker.patch('os.environ.get', return_value='3')
-
+        mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
         config = {
             'framework': 'dlsdk',
             'weights': 'custom_weights',
@@ -296,6 +299,7 @@ class TestDLSDKLauncherBitstreamProgramming:
     def test_does_not_program_bitstream_if_compiler_mode_3_in_env_when_fpga_in_device(self, mocker):
         subprocess_mock = mocker.patch('subprocess.run')
         mocker.patch('os.environ.get', return_value='3')
+        mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
 
         config = {
             'framework': 'dlsdk',
@@ -313,6 +317,7 @@ class TestDLSDKLauncherBitstreamProgramming:
 
     def test_sets_dla_aocx_when_device_is_fpga(self, mocker):
         mocker.patch('os.environ')
+        mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
 
         config = {
             'framework': 'dlsdk',
@@ -329,6 +334,7 @@ class TestDLSDKLauncherBitstreamProgramming:
 
     def test_sets_dla_aocx_when_fpga_in_hetero_device(self, mocker):
         mocker.patch('os.environ')
+        mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
 
         config = {
             'framework': 'dlsdk',
@@ -344,6 +350,7 @@ class TestDLSDKLauncherBitstreamProgramming:
 
     def test_does_not_set_dla_aocx_when_device_is_not_fpga(self, mocker):
         mocker.patch('os.environ')
+        mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
 
         config = {
             'framework': 'dlsdk',
@@ -360,6 +367,7 @@ class TestDLSDKLauncherBitstreamProgramming:
 
     def test_does_not_set_dla_aocx_when_hetero_without_fpga(self, mocker):
         mocker.patch('os.environ')
+        mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
 
         config = {
             'framework': 'dlsdk',
@@ -377,6 +385,7 @@ class TestDLSDKLauncherBitstreamProgramming:
     def test_does_not_set_dla_aocx_if_compiler_mode_3_in_env_when_fpga_in_hetero_device(self, mocker):
         mocker.patch('os.environ')
         mocker.patch('os.environ.get', return_value='3')
+        mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
 
         config = {
             'framework': 'dlsdk',
@@ -394,6 +403,7 @@ class TestDLSDKLauncherBitstreamProgramming:
     def test_does_not_set_dla_aocx_if_compiler_mode_3_in_env_when_fpga_in_device(self, mocker):
         mocker.patch('os.environ')
         mocker.patch('os.environ.get', return_value='3')
+        mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
 
         config = {
             'framework': 'dlsdk',

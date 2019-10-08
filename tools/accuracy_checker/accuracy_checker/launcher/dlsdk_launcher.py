@@ -306,7 +306,7 @@ class DLSDKLauncher(Launcher):
         return [platform_.upper().strip() for platform_ in device.split(',')]
 
     def _set_affinity(self, affinity_map_path):
-        automatic_affinity = ie_core.query_network(self.network, self._device)
+        automatic_affinity = self.ie_core.query_network(self.network, self._device)
         layers = self.network.layers
         for layer, device in read_yaml(affinity_map_path).items():
             if layer not in layers:
@@ -615,7 +615,13 @@ class DLSDKLauncher(Launcher):
                 print_info('    {} - {}'.format(device, nreq))
 
     def _log_versions(self):
-        pass
+        versions = ie_core.get_versions(self._device)
+        print_info("Loaded {} plugin version:".format(self._device))
+        for device_name, device_version in versions.items():
+            print_info("    {device_name} - {descr}: {maj}.{min}.{num}".format(
+                device_name=device_name, descr=device_version.description, maj=device_version.major,
+                min=device_version.minor, num=device_version.build_number
+            ))
 
     def _create_network(self, input_shapes=None):
         self.network = ie.IENetwork(model=str(self._model), weights=str(self._weights))
@@ -699,5 +705,7 @@ class DLSDKLauncher(Launcher):
             del self.network
         if 'exec_network' in self.__dict__:
             del self.exec_network
+        if 'ie_core' in self.__dict__:
+            del self.ie_core
         if self._set_variable:
             del os.environ[FPGA_COMPILER_MODE_VAR]
