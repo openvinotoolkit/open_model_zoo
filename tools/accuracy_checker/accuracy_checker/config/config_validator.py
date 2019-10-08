@@ -265,7 +265,7 @@ class ListField(BaseField):
 
 
 class InputField(BaseField):
-    INPUTS_TYPES = ('CONST_INPUT', 'INPUT', 'IMAGE_INFO')
+    INPUTS_TYPES = ('CONST_INPUT', 'INPUT', 'IMAGE_INFO', 'HIDDEN_STATE')
     LAYOUT_TYPES = ['NCHW', 'NHWC', 'NCWH', 'NWHC']
 
     def __init__(self, **kwargs):
