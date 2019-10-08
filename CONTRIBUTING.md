@@ -159,7 +159,13 @@ If appropriate demo or sample are absent, you must provide your own demo (C++ or
 -    `-d "<device>"`            Optional. Target device for model inference. Default is CPU.
 -    `-no_show`                 Optional. Do not visualize inference results.
 
+> Note: For Python is preferable to use `-` instead of `_` as word separators (e.g. `-no-show`)
+
 Also you can add any other necessary parameters.
+
+If you adding new demo, please provide auto-testing support too:
+- add demo launch parameters in [demos/tests/cases.py](demos/tests/cases.py)
+- prepare list of input images in [demos/tests/image_sequences.py](demos/tests/image_sequences.py)
 
 *After this step you'll get **demo** for your model (if no demo was available)*
 
