@@ -222,6 +222,7 @@ class DLSDKLauncher(Launcher):
         self._device = self.config['device'].upper()
         self._set_variable = False
         self._prepare_bitstream_firmware(self.config)
+        self.ie_core = ie_core
         self._prepare_ie()
         self._delayed_model_loading = delayed_model_loading
 
@@ -457,7 +458,9 @@ class DLSDKLauncher(Launcher):
             self._num_requests = num_ireq
             if hasattr(self, 'exec_network'):
                 del self.exec_network
-                self.exec_network = ie_core.load_network(self.network, self._device, num_requests=self._num_requests)
+                self.exec_network = self.ie_core.load_network(
+                    self.network, self._device, num_requests=self._num_requests
+                )
 
     @property
     def infer_requests(self):
@@ -473,7 +476,7 @@ class DLSDKLauncher(Launcher):
             del self.exec_network
             self.network.reshape(shapes)
 
-        self.exec_network = ie_core.load_network(self.network, self._device, num_requests=self._num_requests)
+        self.exec_network = self.ie_core.load_network(self.network, self._device, num_requests=self._num_requests)
         self._do_reshape = False
 
     def _set_batch_size(self, batch_size):
@@ -550,14 +553,14 @@ class DLSDKLauncher(Launcher):
         if cpu_extensions and 'CPU' in self._devices_list():
             selection_mode = self.config.get('_cpu_extensions_mode')
             cpu_extensions = DLSDKLauncher.get_cpu_extension(cpu_extensions, selection_mode)
-            ie_core.add_extension(str(cpu_extensions), 'CPU')
+            self.ie_core.add_extension(str(cpu_extensions), 'CPU')
         gpu_extensions = self.config.get('gpu_extensions')
         if gpu_extensions and 'GPU' in self._devices_list():
-            ie_core.add_extension(str(gpu_extensions), 'GPU')
+            self.ie_core.add_extension(str(gpu_extensions), 'GPU')
         if self._is_vpu():
             log_level = self.config.get('_vpu_log_level')
             if log_level:
-                ie_core.set_config({'VPU_LOG_LEVEL': log_level}, self._device)
+                self.ie_core.set_config({'VPU_LOG_LEVEL': log_level}, self._device)
 
     def auto_num_requests(self):
         concurrency_device = {
@@ -647,9 +650,7 @@ class DLSDKLauncher(Launcher):
             self._create_network()
         else:
             self.network = network
-        self.exec_network = ie_core.load_network(
-           self.network, self._device, num_requests=self.num_requests
-        )
+        self.exec_network = self.ie_core.load_network(self.network, self._device, num_requests=self.num_requests)
 
     def load_ir(self, xml_path, bin_path):
         self._model = xml_path
