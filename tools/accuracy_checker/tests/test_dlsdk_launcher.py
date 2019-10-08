@@ -36,22 +36,18 @@ from accuracy_checker.utils import contains_all
 
 
 def check_no_gpu():
-    try:
-        import openvino.inference_engine as ie
-        gpu_plugin = ie.IEPlugin('GPU')
-        del gpu_plugin
-        return False
-    except (ImportError, RuntimeError):
-        return True
+    from openvino.inference_engine import IECore
+    ie = IECore()
+    return 'GPU' not in ie.available_devices
 
 
 @pytest.fixture()
 def mock_inference_engine(mocker):
     try:
-        mocker.patch('openvino.inference_engine.IEPlugin')
+        mocker.patch('openvino.inference_engine.IECore')
         mocker.patch('openvino.inference_engine.IENetwork')
     except ImportError:
-        mocker.patch('inference_engine.IEPlugin')
+        mocker.patch('inference_engine.IECore')
         mocker.patch('inference_engine.IENetwork')
 
 
@@ -152,7 +148,7 @@ class TestDLSDKLauncherMultiDevice:
         launcher_config = {
             'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'device': 'MULTI:CPU,GPU', 'async_mode': True
         }
-        launcher = create_launcher(launcher_config)
+        launcher = create_launcher(launcher_config, delayed_model_loading=True)
         assert launcher.async_mode
         assert launcher.num_requests == 4
 
@@ -161,7 +157,7 @@ class TestDLSDKLauncherMultiDevice:
             'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'device': 'MULTI:CPU,GPU', 'async_mode': True,
             'num_requests': 2
         }
-        launcher = create_launcher(launcher_config)
+        launcher = create_launcher(launcher_config, delayed_model_loading=True)
         assert launcher.async_mode
         assert launcher.num_requests == 8
 
@@ -170,7 +166,7 @@ class TestDLSDKLauncherMultiDevice:
             'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'device': 'MULTI:CPU,GPU', 'async_mode': True,
             'num_requests': '1,2'
         }
-        launcher = create_launcher(launcher_config)
+        launcher = create_launcher(launcher_config, delayed_model_loading=True)
         assert launcher.async_mode
         assert launcher.num_requests == 6
 
@@ -185,7 +181,7 @@ class TestDLSDKLauncherMultiDevice:
             'async_mode': True,
         }
         with pytest.raises(ConfigError):
-            create_launcher(launcher_config_1)
+            create_launcher(launcher_config_1, delayed_model_loading=True)
 
         with pytest.raises(ConfigError):
             create_launcher(launcher_config_2)
@@ -195,7 +191,7 @@ class TestDLSDKLauncherMultiDevice:
             'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'device': 'MULTI:CPU,GPU'
         }
         with pytest.warns(None) as warnings:
-            launcher = create_launcher(launcher_config)
+            launcher = create_launcher(launcher_config, delayed_model_loading=True)
             assert len(warnings) == 1
             assert warnings[0].message.args[0] == 'Using multi device in sync mode non-applicable. Async mode will be used.'
             assert launcher.async_mode
@@ -207,7 +203,7 @@ class TestDLSDKLauncherMultiDevice:
             'async_mode': True, 'num_requests': 2
         }
         with pytest.warns(None) as warnings:
-            launcher = create_launcher(launcher_config)
+            launcher = create_launcher(launcher_config, delayed_model_loading=True)
             assert len(warnings) == 1
             assert warnings[0].message.args[0] == "number requests already provided in device name specification. 'num_requests' option will be ignored."
             assert launcher.async_mode
@@ -228,7 +224,7 @@ class TestDLSDKLauncherBitstreamProgramming:
             '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
-        launcher = create_launcher(config)
+        launcher = create_launcher(config, delayed_model_loading=True)
         subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
         launcher.release()
 
@@ -244,7 +240,7 @@ class TestDLSDKLauncherBitstreamProgramming:
             '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
-        launcher = create_launcher(config)
+        launcher = create_launcher(config, delayed_model_loading=True)
         subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
         launcher.release()
 
@@ -260,7 +256,7 @@ class TestDLSDKLauncherBitstreamProgramming:
             '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, delayed_model_loading=True)
         subprocess_mock.assert_not_called()
 
     def test_does_not_program_bitsream_when_hetero_without_fpga(self, mocker):
@@ -276,7 +272,7 @@ class TestDLSDKLauncherBitstreamProgramming:
             '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, delayed_model_loading=True)
         subprocess_mock.assert_not_called()
 
     def test_does_not_program_bitstream_if_compiler_mode_3_in_env_when_fpga_in_hetero_device(self, mocker):
@@ -293,7 +289,7 @@ class TestDLSDKLauncherBitstreamProgramming:
             '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, delayed_model_loading=True)
 
         subprocess_mock.assert_not_called()
 
@@ -311,7 +307,7 @@ class TestDLSDKLauncherBitstreamProgramming:
             '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, delayed_model_loading=True)
 
         subprocess_mock.assert_not_called()
 
@@ -327,7 +323,7 @@ class TestDLSDKLauncherBitstreamProgramming:
             'adapter': 'classification',
             '_models_prefix': 'prefix'
         }
-        create_launcher(config)
+        create_launcher(config, delayed_model_loading=True)
 
         os.environ.__setitem__.assert_called_once_with('DLA_AOCX', 'custom_bitstream')
 
@@ -343,7 +339,7 @@ class TestDLSDKLauncherBitstreamProgramming:
             'adapter': 'classification',
             '_models_prefix': 'prefix'
         }
-        create_launcher(config)
+        create_launcher(config, delayed_model_loading=True)
         os.environ.__setitem__.assert_called_once_with('DLA_AOCX', 'custom_bitstream')
 
     def test_does_not_set_dla_aocx_when_device_is_not_fpga(self, mocker):
@@ -358,7 +354,7 @@ class TestDLSDKLauncherBitstreamProgramming:
             'adapter': 'classification',
             '_models_prefix': 'prefix'
         }
-        create_launcher(config)
+        create_launcher(config, delayed_model_loading=True)
 
         os.environ.__setitem__.assert_not_called()
 
@@ -374,7 +370,7 @@ class TestDLSDKLauncherBitstreamProgramming:
             'adapter': 'classification',
             '_models_prefix': 'prefix'
         }
-        create_launcher(config)
+        create_launcher(config, delayed_model_loading=True)
 
         os.environ.__setitem__.assert_not_called()
 
@@ -391,7 +387,7 @@ class TestDLSDKLauncherBitstreamProgramming:
             'adapter': 'classification',
             '_models_prefix': 'prefix'
         }
-        create_launcher(config)
+        create_launcher(config, delayed_model_loading=True)
 
         os.environ.__setitem__.assert_not_called()
 
@@ -408,7 +404,7 @@ class TestDLSDKLauncherBitstreamProgramming:
             'adapter': 'classification',
             '_models_prefix': 'prefix'
         }
-        create_launcher(config)
+        create_launcher(config, delayed_model_loading=True)
 
         os.environ.__setitem__.assert_not_called()
 
@@ -431,7 +427,7 @@ class TestDLSDKLauncherModels:
             'adapter': 'classification',
             'should_log_cmd': False
         }
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
 
         mock.assert_called_once_with(
             'custom_model', '/path/to/source_models/custom_model', '/path/to/source_models/custom_weights', '',
@@ -456,7 +452,7 @@ class TestDLSDKLauncherModels:
             'adapter': 'classification',
             'should_log_cmd': False
         }
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
 
         mock.assert_called_once_with(
             'custom_model', '/path/to/source_models/custom_model', '/path/to/source_models/custom_weights', '',
@@ -482,7 +478,7 @@ class TestDLSDKLauncherModels:
             'should_log_cmd': False
         }
 
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
 
         mock.assert_called_once_with(
             'custom_model', '/path/to/source_models/custom_model', '/path/to/source_models/custom_weights', '',
@@ -512,7 +508,7 @@ class TestDLSDKLauncherModels:
             'accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
         prepare_args_patch.assert_called_once_with('ModelOptimizer', flag_options=[], value_options=args)
 
     def test_model_converted_from_tf(self, mocker):
@@ -529,7 +525,7 @@ class TestDLSDKLauncherModels:
             'adapter': 'classification',
             'should_log_cmd': False
         }
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
 
         mock.assert_called_once_with(
             'custom_model', '/path/to/source_models/custom_model', '', '',
@@ -551,7 +547,7 @@ class TestDLSDKLauncherModels:
             'adapter': 'classification',
             'should_log_cmd': False
         }
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
 
         mock.assert_called_once_with(
             'custom_model', '', '', '/path/to/source_models/custom_model',
@@ -583,7 +579,7 @@ class TestDLSDKLauncherModels:
             'accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
         prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
 
     def test_model_converted_from_tf_with_default_path_to_custom_tf_config(self, mocker):
@@ -609,7 +605,7 @@ class TestDLSDKLauncherModels:
             'accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
         prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
 
     def test_model_converted_from_tf_with_default_path_to_obj_detection_api_config(self, mocker):
@@ -636,7 +632,7 @@ class TestDLSDKLauncherModels:
             'accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
         prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
 
     def test_model_converted_from_tf_with_arg_path_to_obj_detection_api_config(self, mocker):
@@ -664,7 +660,7 @@ class TestDLSDKLauncherModels:
             'accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
         prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
 
     def test_model_converted_from_tf_checkpoint_with_arg_path_to_custom_tf_config(self, mocker):
@@ -691,7 +687,7 @@ class TestDLSDKLauncherModels:
             'accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
         prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
 
     def test_model_converted_from_tf_checkpoint_with_default_path_to_custom_tf_config(self, mocker):
@@ -717,7 +713,7 @@ class TestDLSDKLauncherModels:
             'accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
         prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
 
     def test_model_converted_from_tf_checkpoint_with_default_path_to_obj_detection_api_config(self, mocker):
@@ -744,7 +740,7 @@ class TestDLSDKLauncherModels:
             'accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
         prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
 
     def test_model_converted_from_tf_checkpoint_with_arg_path_to_obj_detection_api_config(self, mocker):
@@ -772,7 +768,7 @@ class TestDLSDKLauncherModels:
             'accuracy_checker.launcher.model_conversion.exec_mo_binary',
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
         prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
 
     def test_model_converted_from_mxnet(self, mocker):
@@ -789,7 +785,7 @@ class TestDLSDKLauncherModels:
             'adapter': 'classification',
             'should_log_cmd': False
         }
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
 
         mock.assert_called_once_with(
             'custom_weights', '', '/path/to/source_models/custom_weights', '',
@@ -811,7 +807,7 @@ class TestDLSDKLauncherModels:
             'adapter': 'classification',
             'should_log_cmd': False
         }
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
 
         mock.assert_called_once_with(
             'custom_model', '/path/to/source_models/custom_model', '', '',
@@ -833,7 +829,7 @@ class TestDLSDKLauncherModels:
             'adapter': 'classification',
             'should_log_cmd': False
         }
-        DLSDKLauncher(config)
+        DLSDKLauncher.convert_model(config)
 
         mock.assert_called_once_with(
             'custom_model', '/path/to/source_models/custom_model', '', '',
@@ -853,7 +849,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_tf_dlsdk(self):
         config = {
@@ -866,7 +862,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_mxnet_dlsdk(self):
         config = {
@@ -879,7 +875,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_onnx_dlsdk(self):
         config = {
@@ -892,7 +888,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_kaldi_dlsdk(self):
         config = {
@@ -905,7 +901,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_mxnet_caffe(self):
         config = {
@@ -918,7 +914,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_tf_caffe(self):
 
@@ -932,7 +928,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_onnx_caffe(self):
 
@@ -946,7 +942,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_mxnet_tf(self):
         config = {
@@ -958,7 +954,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_onnx_tf(self):
         config = {
@@ -970,7 +966,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_mxnet_caffe_tf(self):
         config = {
@@ -984,7 +980,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_dlsdk_caffe_tf(self):
         config = {
@@ -999,7 +995,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_dlsdk_caffe_onnx(self):
         config = {
@@ -1014,7 +1010,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_dlsdk_caffe_mxnet(self):
         config = {
@@ -1029,7 +1025,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_dlsdk_tf_mxnet(self):
         config = {
@@ -1043,7 +1039,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_dlsdk_tf_onnx(self):
         config = {
@@ -1057,7 +1053,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_dlsdk_tf_mxnet_caffe(self):
         config = {
@@ -1073,7 +1069,7 @@ class TestDLSDKLauncherModels:
             '_models_prefix': 'prefix'
         }
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_multiple_models_dlsdk_tf_mxnet_caffe_onnx(self):
         config = {
@@ -1089,7 +1085,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
     def test_raises_with_tf_model_and_tf_meta_both_provided(self):
         config = {
@@ -1106,7 +1102,7 @@ class TestDLSDKLauncherModels:
         }
 
         with pytest.raises(ConfigError):
-            DLSDKLauncher(config)
+            DLSDKLauncher.convert_model(config)
 
 
 @pytest.mark.usefixtures('mock_path_exists', 'mock_inputs', 'mock_inference_engine')
@@ -1193,47 +1189,12 @@ class TestDLSDKLauncherConfig:
         with pytest.raises(ConfigError):
             create_launcher(launcher)
 
-    def test_missed_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
-        launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom'}
-
-        with pytest.raises(ConfigError):
-            create_launcher(launcher_config)
-
-    def test_undefined_str_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
-        launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': 'undefined_str'}
-
-        with pytest.raises(ConfigError):
-            create_launcher(launcher_config)
-
-    def test_empty_dict_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
-        launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': {}}
-
-        with pytest.raises(ConfigError):
-            create_launcher(launcher_config)
-
-    def test_missed_type_in_dict_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
-        launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': {'key': 'val'}}
-
-        with pytest.raises(ConfigError):
-            create_launcher(launcher_config)
-
-    def test_undefined_type_in_dict_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
-        launcher_config = {
-            'framework': 'dlsdk',
-            'model': 'custom',
-            'weights': 'custom',
-            'adapter': {'type': 'undefined'}
-        }
-
-        with pytest.raises(ConfigError):
-            create_launcher(launcher_config)
-
     def test_dlsdk_launcher(self):
         launcher = {
             'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': 'ssd', 'device': 'cpu',
             '_models_prefix': 'models'
         }
-        create_launcher(launcher)
+        create_launcher(launcher, delayed_model_loading=True)
 
     def test_dlsdk_launcher_model_with_several_image_inputs_raise_value_error(self, mocker):
         launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': {'key': 'val'}}

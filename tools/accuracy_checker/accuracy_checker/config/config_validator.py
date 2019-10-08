@@ -60,6 +60,7 @@ class _ExtraArgumentBehaviour(enum.Enum):
 def _is_dict_like(entry):
     return hasattr(entry, '__iter__') and hasattr(entry, '__getitem__')
 
+
 class ConfigValidator(BaseValidator):
     WARN_ON_EXTRA_ARGUMENT = _ExtraArgumentBehaviour.WARN
     ERROR_ON_EXTRA_ARGUMENT = _ExtraArgumentBehaviour.ERROR

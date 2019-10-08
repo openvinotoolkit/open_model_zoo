@@ -39,7 +39,7 @@ from .launcher import Launcher, LauncherConfigValidator
 from .model_conversion import convert_model, FrameworkParameters
 from ..logging import print_info
 
-
+ie_core = ie.IECore()
 HETERO_KEYWORD = 'HETERO:'
 MULTI_DEVICE_KEYWORD = 'MULTI:'
 FPGA_COMPILER_MODE_VAR = 'CL_CONTEXT_COMPILER_MODE_INTELFPGA'
@@ -222,6 +222,7 @@ class DLSDKLauncher(Launcher):
         self._device = self.config['device'].upper()
         self._set_variable = False
         self._prepare_bitstream_firmware(self.config)
+        self._prepare_ie()
         self._delayed_model_loading = delayed_model_loading
 
         if not delayed_model_loading:
@@ -304,7 +305,7 @@ class DLSDKLauncher(Launcher):
         return [platform_.upper().strip() for platform_ in device.split(',')]
 
     def _set_affinity(self, affinity_map_path):
-        self.plugin.set_initial_affinity(self.network)
+        automatic_affinity = ie_core.query_network(self.network, self._device)
         layers = self.network.layers
         for layer, device in read_yaml(affinity_map_path).items():
             if layer not in layers:
@@ -316,7 +317,10 @@ class DLSDKLauncher(Launcher):
                         device=device, layer=layer, configuration=self._device
                     )
                 )
-            layers[layer].affinity = device
+            automatic_affinity[layer] = device
+
+        for layer, device in automatic_affinity.items():
+            self.network.layers[layer].affinity = device
 
     def _is_fpga(self):
         return 'FPGA' in self._devices_list()
@@ -453,7 +457,7 @@ class DLSDKLauncher(Launcher):
             self._num_requests = num_ireq
             if hasattr(self, 'exec_network'):
                 del self.exec_network
-                self.exec_network = self.plugin.load(self.network, num_requests=self._num_requests)
+                self.exec_network = ie_core.load_network(self.network, self._device, num_requests=self._num_requests)
 
     @property
     def infer_requests(self):
@@ -469,7 +473,7 @@ class DLSDKLauncher(Launcher):
             del self.exec_network
             self.network.reshape(shapes)
 
-        self.exec_network = self.plugin.load(network=self.network, num_requests=self._num_requests)
+        self.exec_network = ie_core.load_network(self.network, self._device, num_requests=self._num_requests)
         self._do_reshape = False
 
     def _set_batch_size(self, batch_size):
@@ -509,6 +513,7 @@ class DLSDKLauncher(Launcher):
 
         return data.reshape(input_shape)
 
+<<<<<<< 4eb8c1df2479e2dcc35a7e76ec2c7ba8086dfa10
     def create_ie_plugin(self, log=True):
         def set_nireq():
             num_requests = self.config.get('num_requests')
@@ -527,30 +532,32 @@ class DLSDKLauncher(Launcher):
 
         if hasattr(self, 'plugin'):
             del self.plugin
+=======
+    def _prepare_ie(self, log=True):
+>>>>>>> AC: moving on IECore API
         if log:
             print_info('IE version: {}'.format(ie.get_version()))
         if self._is_multi():
-            self._create_multi_device_plugin(log)
+            self._prepare_multi_device(log)
         else:
-            self.plugin = ie.IEPlugin(self._device)
             self.async_mode = self.get_value_from_config('async_mode')
             set_nireq()
 
             if log:
-                print_info('Loaded {} plugin version: {}'.format(self.plugin.device, self.plugin.version))
+                self._log_versions()
 
         cpu_extensions = self.config.get('cpu_extensions')
         if cpu_extensions and 'CPU' in self._devices_list():
             selection_mode = self.config.get('_cpu_extensions_mode')
             cpu_extensions = DLSDKLauncher.get_cpu_extension(cpu_extensions, selection_mode)
-            self.plugin.add_cpu_extension(str(cpu_extensions))
+            ie_core.add_extension(str(cpu_extensions), 'CPU')
         gpu_extensions = self.config.get('gpu_extensions')
         if gpu_extensions and 'GPU' in self._devices_list():
-            self.plugin.set_config('CONFIG_FILE', str(gpu_extensions))
+            ie_core.add_extension(str(gpu_extensions), 'GPU')
         if self._is_vpu():
             log_level = self.config.get('_vpu_log_level')
             if log_level:
-                self.plugin.set_config({'VPU_LOG_LEVEL': log_level})
+                ie_core.set_config({'VPU_LOG_LEVEL': log_level}, self._device)
 
     def auto_num_requests(self):
         concurrency_device = {
@@ -574,7 +581,7 @@ class DLSDKLauncher(Launcher):
             concurrency += concurrency_device.get(device, 1)
         return concurrency
 
-    def _create_multi_device_plugin(self, log=True):
+    def _prepare_multi_device(self, log=True):
         async_mode = self.get_value_from_config('async_mode')
         if not async_mode:
             warning('Using multi device in sync mode non-applicable. Async mode will be used.')
@@ -597,21 +604,17 @@ class DLSDKLauncher(Launcher):
 
         if num_devices != len(num_per_device_requests):
             raise ConfigError('num requests for all {} should be specified'.format(num_devices))
-        device_strings = [
-            '{device}({nreq})'.format(device=device, nreq=nreq)
-            for device, nreq in zip(device_list, num_per_device_requests)
-        ]
-        self.plugin = ie.IEPlugin('MULTI:{}'.format(','.join(device_strings)))
         self._num_requests = sum(num_per_device_requests)*2
         if log:
-            print_info('Loaded {} plugin version: {}'.format(self.plugin.device, self.plugin.version))
+            self._log_versions()
             print_info('Request number for each device:')
             for device, nreq in zip(device_list, num_per_device_requests):
                 print_info('    {} - {}'.format(device, nreq))
 
-    def _create_network(self, input_shapes=None):
-        assert self.plugin, "create_ie_plugin should be called before _create_network"
+    def _log_versions(self):
+        pass
 
+    def _create_network(self, input_shapes=None):
         self.network = ie.IENetwork(model=str(self._model), weights=str(self._weights))
 
         self.original_outputs = self.network.outputs
@@ -640,13 +643,13 @@ class DLSDKLauncher(Launcher):
     def load_network(self, network=None):
         if hasattr(self, 'exec_network'):
             del self.exec_network
-        if not hasattr(self, 'plugin'):
-            self.create_ie_plugin()
         if network is None:
             self._create_network()
         else:
             self.network = network
-        self.exec_network = self.plugin.load(network=self.network, num_requests=self.num_requests)
+        self.exec_network = ie_core.load_network(
+           self.network, self._device, num_requests=self.num_requests
+        )
 
     def load_ir(self, xml_path, bin_path):
         self._model = xml_path
@@ -695,7 +698,5 @@ class DLSDKLauncher(Launcher):
             del self.network
         if 'exec_network' in self.__dict__:
             del self.exec_network
-        if 'plugin' in self.__dict__:
-            del self.plugin
         if self._set_variable:
             del os.environ[FPGA_COMPILER_MODE_VAR]
