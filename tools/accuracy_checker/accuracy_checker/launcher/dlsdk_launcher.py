@@ -283,23 +283,53 @@ class DLSDKLauncher(Launcher):
             raw data from network.
         """
         results = []
-        for infer_inputs in inputs:
-            if self._do_reshape:
-                input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
-                self._reshape_input(input_shapes)
+        if (self._run_audio):
+            for infer_inputs in inputs:
+                audio_ftr = infer_inputs[self.config['_list_inputs'][0]]
+                hidden_state = []
+                __res = np.empty([0, 1, self._alphabet])
+                for __node in self.config['_list_hidden_states']:
+                    hidden_state.append(infer_inputs[__node])
+                for __itr in range(len(audio_ftr)):
+                    network_inputs_data = {self.config['_list_inputs'][0] : [audio_ftr[__itr]], 
+                                           self.config['_list_hidden_states'][0] : hidden_state[0], 
+                                           self.config['_list_hidden_states'][1] : hidden_state[1]}
 
-            benchmark = kwargs.get('benchmark')
+                    benchmark = kwargs.get('benchmark')
+                    if benchmark:
+                        benchmark(network_inputs_data)
 
-            if benchmark:
-                benchmark(infer_inputs)
+                    result = self.exec_network.infer(network_inputs_data)
 
-            result = self.exec_network.infer(infer_inputs)
+                    raw_outputs_callback = kwargs.get('output_callback')
+                    if raw_outputs_callback:
+                        raw_outputs_callback(result)
 
-            raw_outputs_callback = kwargs.get('output_callback')
+                    for __ih, __h in enumerate(self._audio_hidden_state):
+                        hidden_state[__ih] = result[__h]
+                    
+                    __res = np.concatenate((__res, result[self._audio_output[0]]))
 
-            if raw_outputs_callback:
-                raw_outputs_callback(result, network=self.network, exec_network=self.exec_network)
-            results.append(result)
+                results.append({self._audio_output[0] :__res})
+
+        else :
+            for infer_inputs in inputs:
+                if self._do_reshape:
+                    input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
+                    self._reshape_input(input_shapes)
+
+                benchmark = kwargs.get('benchmark')
+
+                if benchmark:
+                    benchmark(infer_inputs)
+
+                result = self.exec_network.infer(infer_inputs)
+
+                raw_outputs_callback = kwargs.get('output_callback')
+
+                if raw_outputs_callback:
+                    raw_outputs_callback(result, network=self.network, exec_network=self.exec_network)
+                results.append(result)
 
         if metadata is not None:
             for image_meta in metadata:
