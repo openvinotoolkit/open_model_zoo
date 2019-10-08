@@ -21,6 +21,7 @@ from .detection import (DetectionMAP, MissRate, Recall, DetectionAccuracyMetric)
 from .reid import CMCScore, ReidMAP, PairwiseAccuracy, PairwiseAccuracySubsets
 from .semantic_segmentation import SegmentationAccuracy, SegmentationIOU, SegmentationMeanAccuracy, SegmentationFWAcc
 from .character_recognition import CharacterRecognitionAccuracy
+from .speech_recognition import SpeechRecognitionAccuracy
 from .regression import (
     MeanAbsoluteErrorOnInterval,
     MeanSquaredErrorOnInterval,
@@ -117,5 +118,6 @@ __all__ = [
     'HitRatioMetric',
     'NDSGMetric',
 
-    'BilingualEvaluationUnderstudy'
+    'BilingualEvaluationUnderstudy',
+    'SpeechRecognitionAccuracy'
 ]
