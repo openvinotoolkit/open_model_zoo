@@ -205,6 +205,16 @@ class DLSDKLauncher(Launcher):
             '_aocl': PathField(optional=True, description="path to aocl (FPGA only)"),
             '_vpu_log_level': StringField(
                 optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
+            ),
+            '_run_audio': BoolField(
+                optional=True, default=False, 
+                description="The specific flag for speech recognition to run the predict function(deep speech only)."
+            ),
+            '_audio_hidden_state': ListField(optional=True, description="audio hidden state(deep speech only)."),
+            '_audio_output': ListField(optional=True, description="audio output(deep speech only)."),
+            '_alphabet': NumberField(
+                value_type=int, optional=True, min_value=29, default=29,
+                description="Number of _alphabet label(deep speech only)."
             )
         })
 
@@ -238,6 +248,12 @@ class DLSDKLauncher(Launcher):
         # whole network should be recreated during reshape
         # it can not be used in case delayed initialization
         self.reload_network = not delayed_model_loading
+
+        self._run_audio = get_parameter_value_from_config(self.config, DLSDKLauncher.parameters(), '_run_audio')
+        self._audio_hidden_state = get_parameter_value_from_config(self.config, DLSDKLauncher.parameters(), '_audio_hidden_state')
+        self._audio_output = get_parameter_value_from_config(self.config, DLSDKLauncher.parameters(), '_audio_output')
+        self._alphabet = get_parameter_value_from_config(self.config, DLSDKLauncher.parameters(), '_alphabet')
+
 
     @property
     def inputs(self):
