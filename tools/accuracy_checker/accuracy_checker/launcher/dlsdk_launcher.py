@@ -554,22 +554,29 @@ class DLSDKLauncher(Launcher):
 
     def _align_data_shape(self, data, input_blob):
         input_shape = self.network.inputs[input_blob].shape
-        data_batch_size = data.shape[0]
-        input_batch_size = input_shape[0]
 
-        if data_batch_size < input_batch_size:
-            warning_message = 'data batch {} is not equal model input batch_size {}.'.format(
-                data_batch_size, input_batch_size
-            )
-            warning(warning_message)
-            diff_number = input_batch_size - data_batch_size
-            filled_part = [data[-1]] * diff_number
-            data = np.concatenate([data, filled_part])
+        if (self._run_audio):
+            if (data.shape[1:] != input_shape[1:]): 
+                warning_message = 'data shape {} is not equal model input shape {}. '.format(
+                        data.shape[1:], input_shape[1:]
+                    )
+            return data
+        else:
+            data_batch_size = data.shape[0]
+            input_batch_size = input_shape[0]
+            if data_batch_size < input_batch_size:
+                warning_message = 'data batch {} is not equal model input batch_size {}.'.format(
+                    data_batch_size, input_batch_size
+                )
+                warning(warning_message)
+                diff_number = input_batch_size - data_batch_size
+                filled_part = [data[-1]] * diff_number
+                data = np.concatenate([data, filled_part])
 
-        if len(data.shape) > 1 and len(input_shape) > 1 and data.shape[1] != input_shape[1]:
-            data = data[:, :input_shape[1]]
+            if len(data.shape) > 1 and len(input_shape) > 1 and data.shape[1] != input_shape[1]:
+                data = data[:, :input_shape[1]]
 
-        return data.reshape(input_shape)
+            return data.reshape(input_shape)
 
     def create_ie_plugin(self, log=True):
         if hasattr(self, 'plugin'):
