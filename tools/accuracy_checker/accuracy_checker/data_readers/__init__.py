@@ -29,7 +29,8 @@ from .data_reader import (
 
     DataRepresentation,
     ClipIdentifier,
-    create_reader
+    create_reader,
+    AudioReader
 )
 
 __all__ = [
@@ -48,5 +49,6 @@ __all__ = [
 
     'DataRepresentation',
     'ClipIdentifier',
-    'create_reader'
+    'create_reader',
+    'audio_reader'
 ]
