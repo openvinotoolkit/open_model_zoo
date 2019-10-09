@@ -270,7 +270,7 @@ class DLSDKLauncher(Launcher):
 
     @property
     def output_blob(self):
-        if (self._run_audio):
+        if(self._run_audio):
             return self._audio_output[0]
         else:
             return next(iter(self.original_outputs))
@@ -284,7 +284,7 @@ class DLSDKLauncher(Launcher):
             raw data from network.
         """
         results = []
-        if (self._run_audio):
+        if(self._run_audio):
             for infer_inputs in inputs:
                 audio_ftr = infer_inputs[self.config['_list_inputs'][0]]
                 hidden_state = []
@@ -556,8 +556,8 @@ class DLSDKLauncher(Launcher):
     def _align_data_shape(self, data, input_blob):
         input_shape = self.network.inputs[input_blob].shape
 
-        if (self._run_audio):
-            if (data.shape[1:] != input_shape[1:]):
+        if(self._run_audio):
+            if(data.shape[1:] != input_shape[1:]):
                 warning_message = 'data shape {} is not equal model input shape {}. '.format(
                         data.shape[1:], input_shape[1:]
                     )
