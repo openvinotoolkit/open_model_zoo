@@ -173,7 +173,7 @@ class AudioReader(BaseReader):
 
     ##################################################
     #
-    # John Feng, 2019/09/06 
+    # John Feng, 2019/09/06
     #
     ##################################################
 
@@ -181,26 +181,26 @@ class AudioReader(BaseReader):
         # window_size, #=(16000 * (32 / 1000)), #Config.audio_window_samples,
         # stride, # =(16000 * (20 / 1000)), #(Config.audio_step_samples,
         # magnitude_squared) : # =True) :
-        if (len(samples.shape) != 2) :
+        if (len(samples.shape) != 2):
             raise ConfigError ("input must be 2-dimensional")
-    
+
         window_size = int(window_size)
         stride = int(stride)
 
         sample_count = samples.shape[0]
         channel_count = samples.shape[1] # == 1
 
-        def output_frequency_channels(n) :
+        def output_frequency_channels(n):
             _log = np.floor(np.log2(n))
             _log = _log if ((n == (n & ~(n - 1)))) else _log + 1
-            
+
             fft_length = 1 << _log.astype(np.int32)
 
             return 1 + fft_length / 2, fft_length.astype(np.int32)
 
         output_width, fft_length  = output_frequency_channels(window_size)
         output_width = output_width.astype(np.int32)
-        
+
         length_minus_windows = sample_count - window_size
 
         output_height = 0 if length_minus_windows < 0 else (1 + (length_minus_windows / stride))
@@ -210,25 +210,25 @@ class AudioReader(BaseReader):
         __output = np.zeros((output_slices, output_height, output_width))
         hann_window = np.hanning(window_size)
 
-        for i in range(channel_count) :
+        for i in range(channel_count):
             input_for_channel = samples[:, i]
-    
+
             input_for_compute = np.zeros(stride)
             spectrogram = np.zeros((output_height, output_width))
-            
+
             fft_input_output = np.zeros(fft_length)
 
-            for j in range (output_height) :
+            for j in range (output_height):
                 start = j * stride
                 end = start + window_size
-                if (end < sample_count) :
+                if (end < sample_count):
                     input_for_compute = input_for_channel[start: end]
 
                     fft_input_output[0 :window_size] = input_for_compute * hann_window
-                    fft_input_output[window_size:] = 0 
-                    
+                    fft_input_output[window_size:] = 0
+
                     _f = np.fft.rfft(fft_input_output.astype(np.float32), n=fft_length)
-        
+
                     spectrogram[j] = np.real(_f) ** 2 +  np.imag(_f) ** 2
 
             __output = spectrogram if (magnitude_squared) else np.sqrt(spectrogram)
@@ -242,14 +242,14 @@ class AudioReader(BaseReader):
     #
     ##################################################
 
-    def mfcc(self, spectrogram, sample_rate, dct_coefficient_count) :
-        def mfcc_mel_filiterbank_init(sample_rate, input_length) :
+    def mfcc(self, spectrogram, sample_rate, dct_coefficient_count):
+        def mfcc_mel_filiterbank_init(sample_rate, input_length):
             # init
             filterbank_channel_count_ = 40
             lower_frequency_limit_ = 20
             upper_frequency_limit_ = 4000
 
-            def freq2mel(freq) :
+            def freq2mel(freq):
                 return 1127.0 * np.log1p(freq / 700)
 
             center_frequencies = np.zeros((filterbank_channel_count_ + 1))
