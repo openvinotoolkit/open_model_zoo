@@ -375,7 +375,8 @@ class AudioReader(BaseReader):
         audio = audio/np.float32(32768) # normalize to -1 to 1, int 16 to float32
         audio = audio.reshape(-1, 1)
         spectrogram = self.audio_spectrogram(audio, (16000 * 32 / 1000), (16000 * 20 / 1000), True)
-        features = self.mfcc(spectrogram.reshape(1, spectrogram.shape[0], -1), fs, 26)
+        spectrogram = np.expand_dims(spectrogram, axis=0)
+        features = self.mfcc(spectrogram, fs, 26)
 
         return features 
 
