@@ -22,7 +22,7 @@ Name your model in OMZ using next rules:
 - name must be consistent with name given by authors, but full match not necessary
 - use lowercase
 - spaces are not allowed in the name, use `-` or `_` (`-` is preferable) as delimiters instead
-- if necessary, add suffix to model name, according to origin framework (see **`framework`** description in [configuration file](#configuration-file) section)
+- suffix to model name, according to origin framework (see **`framework`** description in [configuration file](#configuration-file) section), if you adding reimplementation of existing model in OMZ from another framework
 
 This name will be used for downloading, converting, etc.
 Example:
@@ -43,7 +43,7 @@ This PR must pass next tests:
 * model can be used by demo or sample and provides adequate results (see [Demo](#demo) for details)
 * model passes accuracy validation (see [Accuracy validation](#accuracy-validation) for details)
 
-After the end, your PR will be review by OpenVINO&trade;'s team for consistence and legal.
+After the end, your PR will be reviewed our team for consistence and legal compliance.
 
 Your PR can be denied in case:
 * inappropriate license (e.g. GPL-like licenses)
@@ -56,11 +56,11 @@ Models configuration file contains information about model: what it is, how to d
 
 **`description`**
 
-This tag contains description of model.
+Description of model.
 
 **`task_type`**
 
-This tag describes task that model solves:
+Model task class:
 - `action_recognition`
 - `classification`
 - `detection`
@@ -79,7 +79,7 @@ If task, that your model solve, is not listed here, please add new type of task 
 
 > Before filling this section, you must ensure that a model is downloadable either from a direct HTTP(S) link or from Google Drive\*.
 
-You describe all files, which need to be downloaded, in this section. Each file is described in few tags:
+You describe all files, which need to be downloaded, in this section. Each file is described by:
 
 * `name` sets file name after downloading
 * `size` sets file size
@@ -106,7 +106,7 @@ For unpacking archive:
 For replacement operations:
 - `$type: regex_replace`
 - `file` name of file where replacement must be executed
-- `pattern` string or regexp ([learn more](https://docs.python.org/2/library/re.html))
+- `pattern` regular expression ([learn more](https://docs.python.org/3/library/re.html))
 - `replacement` replacement string
 - `count` (*optional*)  maximum number of pattern occurrences to be replaced
 
@@ -134,50 +134,6 @@ Framework of original model (`caffe`, `dldt`, `mxnet`, `pytorch`, `tf`).
 **`license`**
 
 Path to model's license.
-
-----
-*After this step you will obtain **model.yml** file*
-
-## Model conversion
-
-Deep Learning Inference Engine (IE) supports models in Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using Model Optimizer tool included in OpenVINO&trade; package. Find more information about conversion in [Model Optimizer Developer Guide](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After successful conversion you will get model in IR format `*.xml` representing net graph and `*.bin` containing net parameters. 
-
-> **NOTE 1**: due to OpenVINO&trade; paradigms, image pre-processing parameters (mean and scale) should be built into converted model to simplify model usage.
-
-> **NOTE 2**: due to OpenVINO&trade; paradigms, if model input is a color image, color channel order should be `BGR`.
-
-*After this step you`ll get **conversion parameters** for Model Optimizer.*
-
-## Demo
-
-The demo shows the main idea of model inference using IE. If your model solves one of the tasks supported by Open Model Zoo, find appropriate demo from [demos](https://docs.openvinotoolkit.org/latest/_demos_README.html) or sample from [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html).
-
-If appropriate demo or sample are absent, you must provide your own demo (C++ or Python). Demos are required to support the following keys:
-
--    `-i "<input>"`             Required. Input to process.
--    `-m "<path>"`              Required. Path to an .xml file with a trained model.
--    `-d "<device>"`            Optional. Target device for model inference. Default is CPU.
--    `-no_show`                 Optional. Do not visualize inference results.
-
-> Note: For Python is preferable to use `-` instead of `_` as word separators (e.g. `-no-show`)
-
-Also you can add any other necessary parameters.
-
-If you adding new demo, please provide auto-testing support too:
-- add demo launch parameters in [demos/tests/cases.py](demos/tests/cases.py)
-- prepare list of input images in [demos/tests/image_sequences.py](demos/tests/image_sequences.py)
-
-*After this step you'll get **demo** for your model (if no demo was available)*
-
-## Accuracy validation
-
-Accuracy validation can be performed by [Accuracy Checker](./tools/accuracy_checker) tool, provided with repository. This tool can use IE to run converted model or original framework to run original model. Accuracy Checker supports lot of datasets, metrics and preprocessing options, what makes validation quite simple (if task is supported by tool). You need only create configuration file, which contain necessary parameters to do accuracy validation (specify dataset and annotation, pre- and post processing parameters, accuracy metric to compute and so on). More details you can find [here](./tools/accuracy_checker#resting-new-models).
-
-If model uses dataset which is unsupported by Accuracy Checker, you also must provide link to it. Please notice this issue in PR description. Don't forget about dataset license too (see [above](#how-to-contribute-model-to-open-model-zoo)).
-
-When the configuration file is ready, you must run Accuracy Checker to obtain metric results. If they match your results, that means  conversion was fully successful and Accuracy Checker fully supports your model, metric and dataset. If no - recheck [conversion](#model-conversion) parameters or validation configuration file.
-
-*After this step you will get accuracy validation configuration file - **<model_name>.yml***
 
 ### Example
 
@@ -212,6 +168,105 @@ model_optimizer_args:
 framework: tf
 license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE
 ```
+----
+*After this step you will obtain **model.yml** file*
+
+## Model conversion
+
+Deep Learning Inference Engine (IE) supports models in Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using Model Optimizer tool included in OpenVINO&trade; toolkit. Find more information about conversion in [Model Optimizer Developer Guide](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After successful conversion you will get model in IR format `*.xml` representing net graph and `*.bin` containing net parameters. 
+
+> **NOTE 1**: image pre-processing parameters (mean and scale) should be built into converted model to simplify model usage.
+
+> **NOTE 2**: if model input is a color image, color channel order should be `BGR`.
+
+*After this step you`ll get **conversion parameters** for Model Optimizer.*
+
+## Demo
+
+The demo shows the main idea of model inference using IE. If your model solves one of the tasks supported by Open Model Zoo, find appropriate demo from [demos](https://docs.openvinotoolkit.org/latest/_demos_README.html) or sample from [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html).
+
+If appropriate demo or sample are absent, you must provide your own demo (C++ or Python). Demos are required to support the following keys:
+
+-    `-i "<input>"`             Required. Input to process.
+-    `-m "<path>"`              Required. Path to an .xml file with a trained model.
+-    `-d "<device>"`            Optional. Target device for model inference. Default is CPU.
+-    `-no_show`                 Optional. Do not visualize inference results.
+
+> Note: For Python is preferable to use `-` instead of `_` as word separators (e.g. `-no-show`)
+
+Also you can add any other necessary parameters.
+
+If you adding new demo, please provide auto-testing support too:
+- add demo launch parameters in [demos/tests/cases.py](demos/tests/cases.py)
+- prepare list of input images in [demos/tests/image_sequences.py](demos/tests/image_sequences.py)
+
+*After this step you'll get **demo** for your model (if no demo was available)*
+
+## Accuracy validation
+
+Accuracy validation can be performed by [Accuracy Checker](./tools/accuracy_checker) tool, provided with repository. This tool can use IE to run converted model or original framework to run original model. Accuracy Checker supports lot of datasets, metrics and preprocessing options, what makes validation quite simple (if task is supported by tool). You need only create configuration file, which contain necessary parameters to do accuracy validation (specify dataset and annotation, pre- and post processing parameters, accuracy metric to compute and so on). More details you can find [here](./tools/accuracy_checker#testing-new-models).
+
+If model uses dataset which is unsupported by Accuracy Checker, you also must provide link to it. Please notice this issue in PR description. Don't forget about dataset license too (see [above](#how-to-contribute-model-to-open-model-zoo)).
+
+When the configuration file is ready, you must run Accuracy Checker to obtain metric results. If they match your results, that means  conversion was fully successful and Accuracy Checker fully supports your model, metric and dataset. If no - recheck [conversion](#model-conversion) parameters or validation configuration file.
+
+*After this step you will get accuracy validation configuration file - **<model_name>.yml***
+
+### Example
+
+Let use one of the file from `tools/accuracy_checker/configs`, for example, this is validation configuration file for [AlexNet](tools/accuracy_checker/configs/alexnet.yml):
+
+```
+models:
+  - name: alexnet-cf
+    launchers:
+      - framework: caffe
+        model:   public/alexnet/alexnet.prototxt
+        weights: public/alexnet/alexnet.caffemodel
+        adapter: classification
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 227
+          - type: normalization
+            mean: 104, 117, 123
+
+  - name: alexnet
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/alexnet/FP32/alexnet.xml
+        weights: public/alexnet/FP32/alexnet.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/alexnet/FP16/alexnet.xml
+        weights: public/alexnet/FP16/alexnet.bin
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 227
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+          - name: acciracy@top5
+            type: accuracy
+            top_k: 5
+```
+
 
 ## Documentation
 
