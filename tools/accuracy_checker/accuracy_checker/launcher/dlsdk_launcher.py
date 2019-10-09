@@ -313,7 +313,7 @@ class DLSDKLauncher(Launcher):
 
                 results.append({self._audio_output[0] :__res})
 
-        else :
+        else:
             for infer_inputs in inputs:
                 if self._do_reshape:
                     input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
@@ -559,7 +559,7 @@ class DLSDKLauncher(Launcher):
         if(self._run_audio):
             if(data.shape[1:] != input_shape[1:]):
                 warning_message = 'data shape {} is not equal model input shape {}. '.format(
-                        data.shape[1:], input_shape[1:]
+                    data.shape[1:], input_shape[1:]
                     )
             return data
         else:

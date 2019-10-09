@@ -274,8 +274,8 @@ class AudioReader(BaseReader):
                 if ((i < start_index) or (i > end_index)):
                     band_mapper[i] = -2
                 else:
-                    while((center_frequencies[int(channel)] < melf) and
-                        (channel < filterbank_channel_count_)):
+                    while ((center_frequencies[int(channel)] < melf) and
+                           (channel < filterbank_channel_count_)):
                         channel += 1
                     band_mapper[i] = channel - 1
 
@@ -287,10 +287,10 @@ class AudioReader(BaseReader):
                 else:
                     if(channel >= 0):
                         weights[i] = ((center_frequencies[int(channel) + 1] - freq2mel(i * hz_per_sbin)) /
-                                    (center_frequencies[int(channel) + 1] - center_frequencies[int(channel)]))
+                                      (center_frequencies[int(channel) + 1] - center_frequencies[int(channel)]))
                     else:
                         weights[i] = ((center_frequencies[0] - freq2mel(i * hz_per_sbin)) /
-                                    (center_frequencies[0] - mel_low))
+                                      (center_frequencies[0] - mel_low))
 
             return start_index, end_index, weights, band_mapper
 
@@ -353,8 +353,8 @@ class AudioReader(BaseReader):
                 mfcc_input = spectrogram[i, j, :]
 
                 mel_filiter = mfcc_mel_filiterbank_compute(mfcc_input, spectrogram_channels,
-                                                        start_index, end_index,
-                                                        weights, band_mapper)
+                                                           start_index, end_index,
+                                                           weights, band_mapper)
                 for k in range(mel_filiter.shape[0]):
                     val = mel_filiter[k]
                     if(val < kFilterbankFloor):
@@ -363,9 +363,9 @@ class AudioReader(BaseReader):
                     mel_filiter[k] = np.log(val)
 
                 mfcc_output[j, :] = dct_compute(mel_filiter,
-                                            filterbank_channel_count,
-                                            dct_coefficient_count,
-                                            cosine)
+                                                filterbank_channel_count,
+                                                dct_coefficient_count,
+                                                cosine)
 
         return mfcc_output
 
