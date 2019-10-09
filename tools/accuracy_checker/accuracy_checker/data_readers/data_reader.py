@@ -29,7 +29,6 @@ except ImportError as import_error:
 
 # For audio:
 import scipy.io.wavfile as wav
-import codecs
 
 from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
 from ..dependency import ClassProvider
