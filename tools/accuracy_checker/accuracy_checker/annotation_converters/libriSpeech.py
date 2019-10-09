@@ -2,7 +2,7 @@
 #
 # Create by John Feng
 # Contact: john.feng@intel.com
-# 
+#
 ###############################################
 
 from ..config import PathField
@@ -14,7 +14,7 @@ from .format_converter import BaseFormatConverter
 
 class LibriSpeechFormatConverter(BaseFormatConverter):
     __provider__ = 'libriSpeech'
-    
+
     annotation_types = (CharacterRecognitionAnnotation, )
     supported_symbols = " abcdefghijklmnopqrstuvwxyz'"
 
@@ -39,7 +39,7 @@ class LibriSpeechFormatConverter(BaseFormatConverter):
                 label = read_txt(str_file_in_dir)[0].lower()
                 audio_name = str_file_in_dir[:-3] + 'wav'
                 annotation.append(CharacterRecognitionAnnotation(audio_name, label))
-    
+
         label_map = {ind: str(key) for ind, key in enumerate(self.supported_symbols)}
 
         return annotation, {'label_map': label_map, 'blank_label': len(label_map)}

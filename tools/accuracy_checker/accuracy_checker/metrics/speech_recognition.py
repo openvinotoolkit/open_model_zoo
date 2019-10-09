@@ -3,7 +3,7 @@
 #   John Feng, john.feng@intel.com
 #
 #   using word error rate to evaluate
-#   deep speech 
+#   deep speech
 #
 ######################################
 

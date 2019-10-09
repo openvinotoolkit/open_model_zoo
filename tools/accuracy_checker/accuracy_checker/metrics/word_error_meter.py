@@ -23,7 +23,7 @@ class WordErrorMeter:
 
         anno_nump1 = len(anno_words) + 1
         pred_nump1 = len(pred_words) + 1
-        
+
         dist = np.zeros((anno_nump1, pred_nump1), dtype=np.uint8)
 
         for i in range(anno_nump1):
@@ -44,7 +44,7 @@ class WordErrorMeter:
                     dist[i][j] = min(_sub, _ins, _del)
 
         _WER = float(dist[anno_nump1 -1][pred_nump1 - 1]) / (anno_nump1 -1) * 100
-        
+
         loss = int(_WER <= self.threshold)
 
         increment = self.counter(annotation_val)
