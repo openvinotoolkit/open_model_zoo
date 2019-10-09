@@ -250,7 +250,8 @@ class DLSDKLauncher(Launcher):
         self.reload_network = not delayed_model_loading
 
         self._run_audio = get_parameter_value_from_config(self.config, DLSDKLauncher.parameters(), '_run_audio')
-        self._audio_hidden_state = get_parameter_value_from_config(self.config, DLSDKLauncher.parameters(), '_audio_hidden_state')
+        self._audio_hidden_state = get_parameter_value_from_config(self.config, DLSDKLauncher.parameters(),
+                                                                   '_audio_hidden_state')
         self._audio_output = get_parameter_value_from_config(self.config, DLSDKLauncher.parameters(), '_audio_output')
         self._alphabet = get_parameter_value_from_config(self.config, DLSDKLauncher.parameters(), '_alphabet')
 
