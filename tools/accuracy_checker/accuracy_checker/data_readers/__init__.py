@@ -50,9 +50,7 @@ __all__ = [
 
     'DataRepresentation',
     'ClipIdentifier',
-    'create_reader',
-    'audio_reader'
     'MultiFramesInputIdentifier',
     'create_reader',
-    'audio_reader'
+    'AudioReader'
 ]
