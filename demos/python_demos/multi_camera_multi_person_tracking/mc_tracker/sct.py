@@ -317,7 +317,7 @@ class SingleCameraTracker:
                     reid_sim_avg = 1 - cosine(track_avg_feat, features[j])
                     reid_sim_curr = 1 - cosine(self.tracks[idx]['features'][-1], features[j])
                     reid_sim_clust = 1 - clusters_vec_distance(self.tracks[idx]['f_cluster'], features[j])
-                    reid_sim = min(reid_sim_avg, reid_sim_curr, reid_sim_clust)
+                    reid_sim = max(reid_sim_avg, reid_sim_curr, reid_sim_clust)
                 else:
                     reid_sim = 0.5
                 affinity_matrix[j, i] = iou * reid_sim
@@ -325,7 +325,7 @@ class SingleCameraTracker:
 
     @staticmethod
     def _area(box):
-        return max((box[2] - box[0]) * (box[3] - box[1]), 0)
+        return max(box[2] - box[0], 0) * max(box[3] - box[1], 0)
 
     def _giou(self, b1, b2, a1=None, a2=None):
         if a1 is None:

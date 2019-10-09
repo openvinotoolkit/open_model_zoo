@@ -1,0 +1,42 @@
+models:
+  - name: googlenet-v4-cf
+    launchers:
+      - framework: caffe
+        model:   public/googlenet-v4/googlenet-v4.prototxt
+        weights: public/googlenet-v4/googlenet-v4.caffemodel
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 320
+          - type: crop
+            size: 299
+          - type: normalization
+            mean: 128
+            std:  128
+
+  - name: googlenet-v4
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/googlenet-v4/FP32/googlenet-v4.xml
+        weights: public/googlenet-v4/FP32/googlenet-v4.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/googlenet-v4/FP16/googlenet-v4.xml
+        weights: public/googlenet-v4/FP16/googlenet-v4.bin
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes
+        preprocessing:
+          - type: resize
+            size: 320
+          - type: crop
+            size: 299

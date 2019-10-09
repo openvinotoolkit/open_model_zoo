@@ -20,7 +20,7 @@ models:
       - name: vgg2face
         data_source: VGGFaces2/test
         annotation_conversion:
-          converter: landmarks_regression
+          converter: vgg_face
           landmarks_csv_file: VGGFaces2/bb_landmark/loose_landmark_test.csv
           bbox_csv_file: VGGFaces2/bb_landmark/loose_bb_test.csv
 

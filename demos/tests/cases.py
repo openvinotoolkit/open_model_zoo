@@ -125,24 +125,23 @@ NATIVE_DEMOS = [
 
     # TODO: object_detection_demo_faster_rcnn
 
-    # disabled because -no_show is not supported
-#    NativeDemo(name='object_detection_demo_ssd_async', test_cases=combine_cases(
-#        TestCase(options={'-no_show': None}),
-#        [
-#            TestCase(options={
-#                '-m': ModelArg('face-detection-adas-0001'),
-#                '-i': ImagePatternArg('face-detection-adas-0001'),
-#            }),
-#            TestCase(options={
-#                '-m': ModelArg('person-detection-retail-0002'),
-#                '-i': ImagePatternArg('person-detection-retail-0002'),
-#            }),
-#            TestCase(options={
-#                '-m': ModelArg('person-detection-retail-0013'),
-#                '-i': ImagePatternArg('person-detection-retail-0013'),
-#            }),
-#        ],
-#    )),
+    NativeDemo(name='object_detection_demo_ssd_async', test_cases=combine_cases(
+        TestCase(options={'-no_show': None}),
+        [
+            TestCase(options={
+                '-m': ModelArg('face-detection-adas-0001'),
+                '-i': ImagePatternArg('face-detection-adas'),
+            }),
+            TestCase(options={
+                '-m': ModelArg('person-detection-retail-0002'),
+                '-i': ImagePatternArg('person-detection-retail'),
+            }),
+            TestCase(options={
+                '-m': ModelArg('person-detection-retail-0013'),
+                '-i': ImagePatternArg('person-detection-retail'),
+            }),
+        ],
+    )),
 
     # TODO: object_detection_demo_yolov3_async
 
@@ -183,7 +182,18 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    # TODO: smart_classroom_demo
+    NativeDemo(name='smart_classroom_demo', test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            '-i': ImagePatternArg('smart-classroom-demo'),
+            '-m_fd': ModelArg('face-detection-adas-0001')}),
+        device_cases('-d_act', '-d_fd', '-d_lm', '-d_reid'),
+        single_option_cases('-m_act', ModelArg('person-detection-action-recognition-0005'),
+                                      ModelArg('person-detection-action-recognition-0006'),
+                                      ModelArg('person-detection-raisinghand-recognition-0001'),
+                                      ModelArg('person-detection-action-recognition-teacher-0002')),
+        single_option_cases('-m_lm', None, ModelArg('landmarks-regression-retail-0009')),
+        single_option_cases('-m_reid', None, ModelArg('face-reidentification-retail-0095')),
+    )),
 
     NativeDemo(name='super_resolution_demo', test_cases=combine_cases(
         TestCase(options={'-i': ImageDirectoryArg('single-image-super-resolution')}),

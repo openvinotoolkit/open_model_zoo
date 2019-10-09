@@ -22,6 +22,30 @@ import warnings
 from ..utils import read_yaml, to_lower_register, contains_any
 from .config_validator import ConfigError
 
+ENTRIES_PATHS = {
+    'launchers': {
+        'model': 'models',
+        'weights': 'models',
+        'caffe_model': 'models',
+        'caffe_weights': 'models',
+        'tf_model': 'models',
+        'tf_meta': 'models',
+        'mxnet_weights': 'models',
+        'onnx_model': 'models',
+        'kaldi_model': 'models',
+        'cpu_extensions': 'extensions',
+        'gpu_extensions': 'extensions',
+        'bitstream': 'bitstreams',
+        'affinity_map': 'affinity_map'
+    },
+    'datasets': {
+        'segmentation_masks_source': 'source',
+        'annotation': 'annotations',
+        'dataset_meta': 'annotations',
+        'data_source': 'source',
+    },
+}
+
 
 class ConfigReader:
     """
@@ -41,16 +65,21 @@ class ConfigReader:
         if not local_config:
             raise ConfigError('Missing local config')
 
-        mode = ConfigReader._check_local_config(local_config)
+        mode = ConfigReader.check_local_config(local_config)
         ConfigReader._prepare_global_configs(global_config)
 
         config = ConfigReader._merge_configs(global_config, local_config, arguments, mode)
+        ConfigReader.process_config(config, mode, arguments)
 
+        return config, mode
+
+    @staticmethod
+    def process_config(config, mode='models', arguments=None):
+        if arguments is None:
+            arguments = dict()
         ConfigReader._provide_cmd_arguments(arguments, config, mode)
         ConfigReader._merge_paths_with_prefixes(arguments, config, mode)
         ConfigReader._filter_launchers(config, arguments, mode)
-
-        return config, mode
 
     @staticmethod
     def _read_configs(arguments):
@@ -60,7 +89,7 @@ class ConfigReader:
         return global_config, local_config
 
     @staticmethod
-    def _check_local_config(config):
+    def check_local_config(config):
         def _is_requirements_missed(target, requirements):
             return list(filter(lambda entry: not target.get(entry), requirements))
 
@@ -223,29 +252,6 @@ class ConfigReader:
     @staticmethod
     def _merge_paths_with_prefixes(arguments, config, mode='models'):
         args = arguments if isinstance(arguments, dict) else vars(arguments)
-        entries_paths = {
-            'launchers': {
-                'model': 'models',
-                'weights': 'models',
-                'caffe_model': 'models',
-                'caffe_weights': 'models',
-                'tf_model': 'models',
-                'tf_meta': 'models',
-                'mxnet_weights': 'models',
-                'onnx_model': 'models',
-                'kaldi_model': 'models',
-                'cpu_extensions': 'extensions',
-                'gpu_extensions': 'extensions',
-                'bitstream': 'bitstreams',
-                'affinity_map': 'affinity_map'
-            },
-            'datasets': {
-                'segmentation_masks_source': 'source',
-                'annotation': 'annotations',
-                'dataset_meta': 'annotations',
-                'data_source': 'source',
-            },
-        }
 
         def merge_entry_paths(keys, value):
             for field, argument in keys.items():
@@ -257,7 +263,7 @@ class ConfigReader:
                     value[field] = Path(value[field])
                     continue
 
-                if not argument in args or not args[argument]:
+                if argument not in args or not args[argument]:
                     continue
 
                 if not args[argument].is_dir():
@@ -266,7 +272,7 @@ class ConfigReader:
 
         def process_config(
                 config_item, entries_paths, dataset_identifier='datasets',
-                launchers_idenitfier='launchers', identifers_mapping=None
+                launchers_identifier='launchers', identifiers_mapping=None
         ):
 
             def process_dataset(datasets_configs):
@@ -294,21 +300,21 @@ class ConfigReader:
                     merge_entry_paths(command_line_adapter, adapter_config)
 
             for entry, command_line_arg in entries_paths.items():
-                entry_id = entry if not identifers_mapping else identifers_mapping[entry]
+                entry_id = entry if not identifiers_mapping else identifiers_mapping[entry]
                 if entry_id not in config_item:
                     continue
 
                 if entry_id == dataset_identifier:
                     process_dataset(config_item[entry_id])
 
-                if entry_id == launchers_idenitfier:
+                if entry_id == launchers_identifier:
                     launchers_configs = config_item[entry_id]
                     process_launchers(launchers_configs)
 
-                config_entires = config_item[entry_id]
-                if not isinstance(config_entires, list):
-                    config_entires = [config_entires]
-                for config_entry in config_entires:
+                config_entries = config_item[entry_id]
+                if not isinstance(config_entries, list):
+                    config_entries = [config_entries]
+                for config_entry in config_entries:
                     merge_entry_paths(command_line_arg, config_entry)
 
         def process_models(config, entries_paths):
@@ -328,7 +334,7 @@ class ConfigReader:
         }
 
         processing_func = functors_by_mode[mode]
-        processing_func(config, entries_paths)
+        processing_func(config, ENTRIES_PATHS.copy())
 
     @staticmethod
     def _provide_cmd_arguments(arguments, config, mode):
@@ -345,7 +351,7 @@ class ConfigReader:
                 return launcher_entry
 
             launcher_entry.update(update_launcher_entry)
-            models_prefix = arguments.models
+            models_prefix = arguments.models if 'models' in arguments else None
             if models_prefix:
                 launcher_entry['_models_prefix'] = models_prefix
 
@@ -471,6 +477,44 @@ class ConfigReader:
         target_devices = to_lower_register(args.get('target_devices') or [])
         filtering_mode = functors_by_mode[mode]
         filtering_mode(config, target_devices)
+
+
+    @staticmethod
+    def convert_paths(config):
+        def convert_launcher_paths(launcher_config):
+            for key, path in launcher_config.items():
+                if key not in ENTRIES_PATHS['launchers']:
+                    continue
+                launcher_config[key] = Path(path)
+            adapter_config = launcher_config.get('adapter')
+            if isinstance(adapter_config, dict):
+                command_line_adapter = (create_command_line_mapping(adapter_config, None))
+                for arg in command_line_adapter:
+                    adapter_config[arg] = Path(adapter_config[arg])
+
+        def convert_dataset_paths(dataset_config):
+            conversion_config = dataset_config.get('annotation_conversion')
+            if conversion_config:
+                command_line_conversion = (create_command_line_mapping(conversion_config, None))
+                for conversion_path in command_line_conversion:
+                    conversion_config[conversion_path] = Path(conversion_config[conversion_path])
+
+            if 'preprocessing' in dataset_config:
+                for preprocessor in dataset_config['preprocessing']:
+                    path_preprocessing = (create_command_line_mapping(preprocessor, None))
+                    for path in path_preprocessing:
+                        preprocessor[path] = Path(path_preprocessing[path])
+
+            for key, path in dataset_config.items():
+                if key not in ENTRIES_PATHS['datasets']:
+                    continue
+                dataset_config[key] = Path(path)
+
+        for model in config['models']:
+            for launcher_config in model['launchers']:
+                convert_launcher_paths(launcher_config)
+            for dataset_config in model['datasets']:
+                convert_dataset_paths(dataset_config)
 
 
 def create_command_line_mapping(config, value):

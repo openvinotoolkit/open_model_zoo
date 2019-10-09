@@ -13,7 +13,7 @@ The `inception-resnet-v2` model is one of the Inception family of models designe
 | Type                            | Classification                            |
 | GFlops                          | 22.227                                    |
 | MParams                         | 30.223                                    |
-| Source framework                | Tensorflow\*                              |
+| Source framework                | TensorFlow\*                              |
 
 ## Performance
 

@@ -12,10 +12,6 @@ models:
 
     datasets:
       - name: wider
-        data_source: WIDER_val/images
-        annotation_conversion:
-          converter: wider
-          annotation_file: wider_face_split/wider_face_val_bbx_gt.txt
 
         preprocessing:
           - type: resize

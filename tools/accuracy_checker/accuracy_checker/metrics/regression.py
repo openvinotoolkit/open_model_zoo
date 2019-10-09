@@ -225,7 +225,7 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
         num_points = np.shape(self.magnitude)[1]
         point_result_name_pattern = 'point_{}_normed_error'
         self.meta['names'] = [point_result_name_pattern.format(point_id) for point_id in range(num_points)]
-        per_point_rmse = np.mean(self.magnitude, axis=1)
+        per_point_rmse = np.mean(self.magnitude, axis=0)
         per_point_rmse, self.meta['names'] = finalize_metric_result(per_point_rmse, self.meta['names'])
 
         return per_point_rmse

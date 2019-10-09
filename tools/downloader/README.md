@@ -36,7 +36,7 @@ If you using models from PyTorch framework, you will also need to use intermedia
 conversion to ONNX format. To use automatic conversion install additional dependencies:
 
 ```sh
-python3 -mpip install --user -r ./requirements-pytorch.in 
+python3 -mpip install --user -r ./requirements-pytorch.in
 ```
 
 Model downloader usage
@@ -58,6 +58,13 @@ option:
 
 The `--all` option can be replaced with other filter options to download only
 a subset of models. See the "Shared options" section.
+
+You may use `--precisions` flag to specify comma separated precisions of weights
+to be downloaded.
+
+```sh
+./downloader.py --name face-detection-retail-0004 --precisions FP16,INT8
+```
 
 By default, the script will attempt to download each file only once. You can use
 the `--num_attempts` option to change that and increase the robustness of the
@@ -192,7 +199,7 @@ The basic usage is to run the script like this:
 ```
 
 This will convert all models into the Inference Engine IR format. Models that
-were originally in that format are ignored. Models in PyTorch's format will be 
+were originally in that format are ignored. Models in PyTorch's format will be
 converted in ONNX format first.
 
 The current directory must be the root of a download tree created by the model

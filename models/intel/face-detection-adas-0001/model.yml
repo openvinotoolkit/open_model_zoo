@@ -19,28 +19,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/face-detection-adas-0001.xml
-    size: 89578
-    sha256: f29f1db2ef2bff608c3623732a785aee31288efcea75e8b67379ffaac038421b
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/face-detection-adas-0001/FP32/face-detection-adas-0001.xml
+    size: 89640
+    sha256: 4a567a086ce60e87868469161cb99e4a50d436a6eeb93c689a676a8bc268c8c6
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/face-detection-adas-0001/FP32/face-detection-adas-0001.xml
   - name: FP32/face-detection-adas-0001.bin
     size: 4211988
     sha256: 0e8fd765cfac0dc369373d456cad17aab0b6c1534f6de33398f89946aa04c673
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/face-detection-adas-0001/FP32/face-detection-adas-0001.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/face-detection-adas-0001/FP32/face-detection-adas-0001.bin
   - name: FP16/face-detection-adas-0001.xml
-    size: 89541
-    sha256: d066b2dad66f7e526eb00ede41b9015a449e77b95ae740e2d3e0d4c67789dfde
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/face-detection-adas-0001/FP16/face-detection-adas-0001.xml
+    size: 89603
+    sha256: 00297f4b8a79d36142784dd3ee442ee5867c163b14fbe6b2c6e74cabc48a7e41
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/face-detection-adas-0001/FP16/face-detection-adas-0001.xml
   - name: FP16/face-detection-adas-0001.bin
     size: 2106000
     sha256: e4d1ca072f26173321e580168d6b066eac5123cee136093fca492b2a0cf18cbc
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/face-detection-adas-0001/FP16/face-detection-adas-0001.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/face-detection-adas-0001/FP16/face-detection-adas-0001.bin
   - name: INT8/face-detection-adas-0001.xml
-    size: 3357738
-    sha256: c55aab573f63c47e4a176e733b78a52247f634ac366d79abca1b9a4da37147de
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/face-detection-adas-0001/INT8/face-detection-adas-0001.xml
+    size: 3357740
+    sha256: 64b64a2180b3d9bf8619adc0fb173c045ead6bcf043aa56a9f0703c67bea77fa
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/face-detection-adas-0001/INT8/face-detection-adas-0001.xml
   - name: INT8/face-detection-adas-0001.bin
     size: 4211988
     sha256: 69650c48ce9ab68928397eb15f6fd8a41f0f9259098623c962720bbfaeb906a1
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/face-detection-adas-0001/INT8/face-detection-adas-0001.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/face-detection-adas-0001/INT8/face-detection-adas-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

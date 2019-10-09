@@ -100,9 +100,11 @@ class ModelEvaluator:
             check_progress=False,
             **kwargs
     ):
-        def _process_ready_predictions(batch_predictions, batch_identifiers, batch_meta, adapter):
+        def _process_ready_predictions(batch_predictions, batch_identifiers, batch_meta, adapter, raw_outputs_callback):
             if self.stat_collector:
                 self.stat_collector.process_batch(batch_predictions)
+            if raw_outputs_callback:
+                raw_outputs_callback(batch_predictions)
             if adapter:
                 batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
 
@@ -128,7 +130,7 @@ class ModelEvaluator:
             self.launcher.num_requests = nreq
 
         if statistics_functors_maping:
-            self.stat_collector = StatisticsCollector(statistics_functors_maping)
+            self.stat_collector = StatisticsCollector(statistics_functors_maping, self.launcher.batch)
         free_irs = self.launcher.infer_requests
         queued_irs = []
         wait_time = 0.01
@@ -142,7 +144,7 @@ class ModelEvaluator:
                 wait_time = 0.01
                 for batch_id, batch_annotation, batch_identifiers, batch_meta, batch_predictions, ir in ready_irs:
                     batch_predictions = _process_ready_predictions(
-                        batch_predictions, batch_identifiers, batch_meta, self.adapter
+                        batch_predictions, batch_identifiers, batch_meta, self.adapter, kwargs.get('output_callback')
                     )
                     free_irs.append(ir)
                     annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions)
@@ -179,7 +181,7 @@ class ModelEvaluator:
         progress_reporter = None
 
         if statistics_functors_maping:
-            self.stat_collector = StatisticsCollector(statistics_functors_maping)
+            self.stat_collector = StatisticsCollector(statistics_functors_maping, self.launcher.batch)
 
         if subset is not None:
             self.dataset.make_subset(ids=subset)
@@ -226,7 +228,7 @@ class ModelEvaluator:
         free_indexes = []
         for ir_id, (batch_id, batch_annotation, batch_identifiers, batch_meta, ir) in enumerate(irs):
             if ir.wait(0) == 0:
-                result.append((batch_id, batch_annotation, batch_identifiers, batch_meta, [ir.outputs], ir))
+                result.append((batch_id, batch_annotation, batch_identifiers, batch_meta, ir.outputs, ir))
                 free_indexes.append(ir_id)
         irs = [ir for ir_id, ir in enumerate(irs) if ir_id not in free_indexes]
         return result, irs

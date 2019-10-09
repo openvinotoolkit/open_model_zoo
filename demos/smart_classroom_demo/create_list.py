@@ -31,7 +31,7 @@ labels = []
 objects = {}
 
 for file in files_list:
-    label = file.split(os.sep)[-1].split('.')[0]
+    label = file.rpartition(os.sep)[2].rpartition('.')[0]
     path = os.path.abspath(file)
 
     if label in labels:

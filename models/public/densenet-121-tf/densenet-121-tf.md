@@ -14,7 +14,7 @@ group of models designed to perform image classification. The weights were conve
 | Type                            | Classification                            |
 | GFlops                          | 5.289                                     |
 | MParams                         | 7.971                                     |
-| Source framework                | Tensorflow\*                              |
+| Source framework                | TensorFlow\*                              |
 
 ## Performance
 

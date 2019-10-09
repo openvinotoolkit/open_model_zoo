@@ -156,7 +156,13 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `mask_loader` - the way how GT mask should be loaded. Supported methods: `pillow`, `opencv`, `nifti`, `numpy`, `scipy`.
   * `dataset_meta` - path to json file with prepared dataset meta info. It should contains `label_map` key with dictionary in format class_id: class_name and optionally `segmentation_colors` (if your dataset uses color encoding). Segmentation colors is a list of channel-wise values for each class. (e.g. if your dataset has 3 classes in BGR colors, segmentation colors for it will looks like: `[[255, 0, 0], [0, 255, 0], [0, 0, 255]]`). (Optional, you can provide self-created file as `dataset_meta` in your config).
 * `camvid` - converts CamVid dataset format to `SegmentationAnnotation`.
-  * `annotation_file` - file in txt format which contains list of validation pairs (`<path_to_image>` `<path_to_annotation>` separated by space).
+  * `annotation_file` - file in txt format which contains list of validation pairs (`<path_to_image>` `<path_to_annotation>` separated by space)
+* `image_retrieval` - converts dataset for image retrieval task to `ReidentificationAnnotation`. Dataset should have following structure:
+   1. the dataset root directory contains 2 subdirectory named `gallery` and `queries` for gallery images and query images respectively.
+   2. Every of these subdirectories should contains text file with list of pairs: `<path_to_image>` `<image_ID>` (image_path and image_ID should be separated by space),  where `<path_to_image>` is path to the image related dataset root, `<image_ID>` is the number which represent image id in the gallery.
+   * `data_dir` - path to dataset root directory.
+   * `gallery_annotation_file` - file with gallery images and IDs concordance in txt format (Optional, default value is `<data_dir>/gallery/list.txt`)
+   * `queries_annotation_file` - file with queries images and IDs concordance in txt format (Optional, default value is `<data_dir>/queries/list.txt`)
 * `cvat_object_detection` - converts [CVAT XML annotation version 1.1](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `DetectionAnnotation`.
   * `annotation_file` - path to xml file in appropriate format.
   * `has_background` - allows prepend original labels with special class represented background and convert dataset for n+1 classes instead n (default value is True).
@@ -181,3 +187,6 @@ Accuracy Checker supports following list of annotation converters and specific f
     * `common_6_actions`(seating, writing, raising hand, standing, turned around, lie on the desk)
     * `teacher` (standing, writing, demonstrating)
     * `raising_hand` (seating, raising hand)
+* `lpr_txt` - converts annotation for license plate recognition task in txt format to `CharacterRecognitionAnnotation`.
+  * `annotation_file` - path to txt annotation.
+  * `decoding_dictionary` - path to file containing dictionary for output decoding.

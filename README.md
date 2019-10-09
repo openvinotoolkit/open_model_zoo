@@ -1,6 +1,6 @@
 # [OpenVINO™ Toolkit](https://01.org/openvinotoolkit) - Open Model Zoo repository
 [![Build Status](http://134.191.240.124/buildStatus/icon?job=omz/2018/trigger)](http://134.191.240.124/job/omz/job/2018/job/trigger/)
-[![Stable release](https://img.shields.io/badge/version-2019_R2-green.svg)](https://github.com/opencv/open_model_zoo/releases/tag/2019_R2)
+[![Stable release](https://img.shields.io/badge/version-2019_R3-green.svg)](https://github.com/opencv/open_model_zoo/releases/tag/2019_R3)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/open_model_zoo/community)
 [![Apache License Version 2.0](https://img.shields.io/badge/license-Apache_2.0-green.svg)](LICENSE)
 
@@ -8,6 +8,7 @@ This repository includes optimized deep learning models and a set of demos to ex
 
 ## Repository Components:
 * [Pre-Trained Models](models/intel/index.md)
+* [Public Models Description](models/public/index.md)
 * [Model Downloader](tools/downloader/README.md) and other automation tools
 * [Demos](demos/README.md) that demonstrate models usage with Deep Learning Deployment Toolkit
 * [Accuracy Checker](tools/accuracy_checker/README.md) tool for models accuracy validation

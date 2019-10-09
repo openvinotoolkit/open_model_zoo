@@ -17,7 +17,7 @@ models:
         tags:
           - FP16
         model:   intel/human-pose-estimation-0001/FP16/human-pose-estimation-0001.xml
-        weights: intel/human-pose-estimation-0001/dldt/FP16/human-pose-estimation-0001.bin
+        weights: intel/human-pose-estimation-0001/FP16/human-pose-estimation-0001.bin
         allow_reshape_input: True
         adapter:
           type: human_pose_estimation
@@ -29,7 +29,7 @@ models:
           - INT8
         device: CPU
         model:   intel/human-pose-estimation-0001/INT8/human-pose-estimation-0001.xml
-        weights: intel/human-pose-estimation-0001t/INT8/human-pose-estimation-0001.bin
+        weights: intel/human-pose-estimation-0001/INT8/human-pose-estimation-0001.bin
         allow_reshape_input: True
         adapter:
           type: human_pose_estimation
@@ -38,10 +38,6 @@ models:
 
     datasets:
       - name: ms_coco_keypoints
-        data_source: val2017
-        annotation_conversion:
-          converter: mscoco_keypoints
-          annotation_file: person_keypoints_val2017.json
 
         preprocessing:
           - type: resize
