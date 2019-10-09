@@ -75,12 +75,14 @@ any arguments yields the following message:
 python ./face_recognition_demo.py -h
 
 usage: face_recognition_demo.py [-h] [-i PATH] [-o PATH] [--no_show] [-tl]
-                                [-cw CROP_WIDTH] [-ch CROP_HEIGHT] -fg PATH
-                                [--run_detector] -m_fd PATH -m_lm PATH -m_reid PATH
-                                [-fd_iw FD_INPUT_WIDTH] [-fd_ih FD_INPUT_HEIGHT]
-                                [-d_fd {CPU,GPU,FPGA,MYRIAD,HETERO}]
-                                [-d_lm {CPU,GPU,FPGA,MYRIAD,HETERO}]
-                                [-d_reid {CPU,GPU,FPGA,MYRIAD,HETERO}]
+                                [-cw CROP_WIDTH] [-ch CROP_HEIGHT]
+                                [-match_algo {HUNGARIAN,MIN_DIST}] -fg PATH
+                                [--run_detector] -m_fd PATH -m_lm PATH -m_reid
+                                PATH [-fd_iw FD_INPUT_WIDTH]
+                                [-fd_ih FD_INPUT_HEIGHT]
+                                [-d_fd {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
+                                [-d_lm {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
+                                [-d_reid {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
                                 [-l PATH] [-c PATH] [-v] [-pc] [-t_fd [0..1]]
                                 [-t_id [0..1]] [-exp_r_fd NUMBER]
 
@@ -103,6 +105,9 @@ General:
                         (optional) Crop the input stream to this height
                         (default: no crop). Both -cw and -ch parameters should
                         be specified to use crop.
+  -match_algo {HUNGARIAN,MIN_DIST}
+                        (optional)algorithm for face matching(default:
+                        HUNGARIAN)
 
 Faces database:
   -fg PATH              Path to the face images directory
