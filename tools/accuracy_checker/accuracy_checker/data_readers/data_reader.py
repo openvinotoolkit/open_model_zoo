@@ -266,7 +266,7 @@ class AudioReader(BaseReader):
             end_index = int(upper_frequency_limit_ / hz_per_sbin)
 
             band_mapper = np.zeros(input_length)
-            channel = 0        
+            channel = 0
 
             for i in range(input_length) :
                 melf = freq2mel(i * hz_per_sbin)
@@ -274,7 +274,7 @@ class AudioReader(BaseReader):
                 if ((i < start_index) or (i > end_index)) :
                     band_mapper[i] = -2
                 else :
-                    while ((center_frequencies[int(channel)] < melf) and 
+                    while ((center_frequencies[int(channel)] < melf) and
                         (channel < filterbank_channel_count_)) :
                         channel += 1
                     band_mapper[i] = channel - 1
@@ -286,10 +286,10 @@ class AudioReader(BaseReader):
                     weights[i] = 0.0
                 else :
                     if (channel >= 0) :
-                        weights[i] = ((center_frequencies[int(channel) + 1] - freq2mel(i * hz_per_sbin)) / 
+                        weights[i] = ((center_frequencies[int(channel) + 1] - freq2mel(i * hz_per_sbin)) /
                                     (center_frequencies[int(channel) + 1] - center_frequencies[int(channel)]))
                     else :
-                        weights[i] = ((center_frequencies[0] - freq2mel(i * hz_per_sbin)) / 
+                        weights[i] = ((center_frequencies[0] - freq2mel(i * hz_per_sbin)) /
                                     (center_frequencies[0] - mel_low))
 
             return start_index, end_index, weights, band_mapper
@@ -339,21 +339,21 @@ class AudioReader(BaseReader):
                 output_dct[i] = _sum
 
             return output_dct
-        
+
         audio_channels, spectrogram_samples, spectrogram_channels  = spectrogram.shape
         kFilterbankFloor = 1e-12
-        filterbank_channel_count = 40   
+        filterbank_channel_count = 40
 
         mfcc_output = np.zeros((spectrogram_samples, dct_coefficient_count))
         for i in range(audio_channels) :
-            start_index, end_index, weights, band_mapper = mfcc_mel_filiterbank_init(sample_rate, 
-                                                                                     spectrogram_channels) 
-            cosine = dct_init(filterbank_channel_count, dct_coefficient_count) 
+            start_index, end_index, weights, band_mapper = mfcc_mel_filiterbank_init(sample_rate,
+                                                                                     spectrogram_channels)
+            cosine = dct_init(filterbank_channel_count, dct_coefficient_count)
             for j in range(spectrogram_samples) :
                 mfcc_input = spectrogram[i, j, :]
-                
-                mel_filiter = mfcc_mel_filiterbank_compute(mfcc_input, spectrogram_channels, 
-                                                        start_index, end_index, 
+
+                mel_filiter = mfcc_mel_filiterbank_compute(mfcc_input, spectrogram_channels,
+                                                        start_index, end_index,
                                                         weights, band_mapper)
                 for k in range(mel_filiter.shape[0]) :
                     val = mel_filiter[k]
@@ -362,23 +362,23 @@ class AudioReader(BaseReader):
 
                     mel_filiter[k] = np.log(val)
 
-                mfcc_output[j, :] = dct_compute(mel_filiter, 
-                                            filterbank_channel_count, 
-                                            dct_coefficient_count, 
+                mfcc_output[j, :] = dct_compute(mel_filiter,
+                                            filterbank_channel_count,
+                                            dct_coefficient_count,
                                             cosine)
 
         return mfcc_output
 
     def read(self, data_id):
         fs, audio = wav.read(str(get_path(self.data_source / data_id)))
-        
+
         audio = audio/np.float32(32768) # normalize to -1 to 1, int 16 to float32
         audio = audio.reshape(-1, 1)
         spectrogram = self.audio_spectrogram(audio, (16000 * 32 / 1000), (16000 * 20 / 1000), True)
         spectrogram = np.expand_dims(spectrogram, axis=0)
         features = self.mfcc(spectrogram, fs, 26)
 
-        return features 
+        return features
 
 
 class OpenCVImageReader(BaseReader):
