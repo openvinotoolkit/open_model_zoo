@@ -314,7 +314,7 @@ class AudioReader(BaseReader):
         def dct_init(input_length, dct_coefficient_count) :
             # init
             if (input_length < dct_coefficient_count) :
-                print ("Error input_length need to larger than dct_coefficient_count")
+                raise ConfigError ("Error input_length need to larger than dct_coefficient_count")
 
             cosine = np.zeros((dct_coefficient_count, input_length))
             fnorm = np.sqrt(2.0 / input_length)
