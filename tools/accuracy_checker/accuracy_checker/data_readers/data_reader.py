@@ -276,7 +276,7 @@ class AudioReader(BaseReader):
                 band_mapper[i] = -2
             else:
                 while ((center_frequencies[int(channel)] < melf) and
-                        (channel < filterbank_channel_count_)):
+                       (channel < filterbank_channel_count_)):
                     channel += 1
                 band_mapper[i] = channel - 1
 
@@ -288,10 +288,10 @@ class AudioReader(BaseReader):
             else:
                 if channel >= 0:
                     weights[i] = ((center_frequencies[int(channel) + 1] - freq2mel(i * hz_per_sbin)) /
-                                    (center_frequencies[int(channel) + 1] - center_frequencies[int(channel)]))
+                                  (center_frequencies[int(channel) + 1] - center_frequencies[int(channel)]))
                 else:
                     weights[i] = ((center_frequencies[0] - freq2mel(i * hz_per_sbin)) /
-                                    (center_frequencies[0] - mel_low))
+                                  (center_frequencies[0] - mel_low))
 
         return start_index, end_index, weights, band_mapper
 
