@@ -177,6 +177,7 @@ class AudioReader(BaseReader):
     #
     ##################################################
 
+    @classmethod
     def audio_spectrogram(self, samples, window_size, stride, magnitude_squared):
         # window_size, #=(16000 * (32 / 1000)), #Config.audio_window_samples,
         # stride, # =(16000 * (20 / 1000)), #(Config.audio_step_samples,
@@ -242,6 +243,7 @@ class AudioReader(BaseReader):
     #
     ##################################################
 
+    @classmethod
     def mfcc(self, spectrogram, sample_rate, dct_coefficient_count):
         def mfcc_mel_filiterbank_init(sample_rate, input_length):
             # init
