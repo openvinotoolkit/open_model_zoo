@@ -71,7 +71,7 @@ class Prepare_audio_package(Preprocessor):
         _length, c, i = data.shape
 
         _p_pad = _length % self.step
-        if(_p_pad != 0):
+        if _p_pad != 0:
             data = np.pad(data, ((0, self.step - _p_pad), (0, 0), (0, 0)), mode='constant', constant_values=0)
 
         image.data = np.transpose(data.reshape((-1, self.step, c, i)), (0, 2, 3, 1))
