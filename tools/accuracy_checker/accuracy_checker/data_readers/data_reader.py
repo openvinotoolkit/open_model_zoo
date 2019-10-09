@@ -245,9 +245,9 @@ class AudioReader(BaseReader):
     def mfcc(self, spectrogram, sample_rate, dct_coefficient_count) :
         def mfcc_mel_filiterbank_init(sample_rate, input_length) :
             # init
-            filterbank_channel_count_   = 40
-            lower_frequency_limit_      = 20
-            upper_frequency_limit_      = 4000
+            filterbank_channel_count_ = 40
+            lower_frequency_limit_ = 20
+            upper_frequency_limit_ = 4000
 
             def freq2mel(freq) :
                 return 1127.0 * np.log1p(freq / 700)
@@ -258,7 +258,7 @@ class AudioReader(BaseReader):
             mel_span = mel_hi - mel_low
             mel_sapcing = mel_span / (filterbank_channel_count_ + 1)
 
-            for i in range((filterbank_channel_count_ + 1)) :
+            for i in range((filterbank_channel_count_ + 1)):
                 center_frequencies[i] = mel_low + (mel_sapcing * (1 + i))
 
             hz_per_sbin = 0.5 * sample_rate / (input_length - 1)
@@ -268,96 +268,96 @@ class AudioReader(BaseReader):
             band_mapper = np.zeros(input_length)
             channel = 0
 
-            for i in range(input_length) :
+            for i in range(input_length):
                 melf = freq2mel(i * hz_per_sbin)
 
-                if ((i < start_index) or (i > end_index)) :
+                if ((i < start_index) or (i > end_index)):
                     band_mapper[i] = -2
-                else :
+                else:
                     while ((center_frequencies[int(channel)] < melf) and
-                        (channel < filterbank_channel_count_)) :
+                        (channel < filterbank_channel_count_)):
                         channel += 1
                     band_mapper[i] = channel - 1
 
             weights = np.zeros(input_length)
-            for i in range(input_length) :
+            for i in range(input_length):
                 channel = band_mapper[i]
-                if ((i < start_index) or (i > end_index)) :
+                if ((i < start_index) or (i > end_index)):
                     weights[i] = 0.0
                 else :
-                    if (channel >= 0) :
+                    if (channel >= 0):
                         weights[i] = ((center_frequencies[int(channel) + 1] - freq2mel(i * hz_per_sbin)) /
                                     (center_frequencies[int(channel) + 1] - center_frequencies[int(channel)]))
-                    else :
+                    else:
                         weights[i] = ((center_frequencies[0] - freq2mel(i * hz_per_sbin)) /
                                     (center_frequencies[0] - mel_low))
 
             return start_index, end_index, weights, band_mapper
 
-        def mfcc_mel_filiterbank_compute(mfcc_input, input_length, start_index, end_index, weights, band_mapper) :
-            filterbank_channel_count_   = 40
+        def mfcc_mel_filiterbank_compute(mfcc_input, input_length, start_index, end_index, weights, band_mapper):
+            filterbank_channel_count_ = 40
             # Compute
             output_channels = np.zeros(filterbank_channel_count_)
-            for i in range(start_index, (end_index + 1)) :
+            for i in range(start_index, (end_index + 1)):
                 spec_val = np.sqrt(mfcc_input[i])
                 weighted = spec_val * weights[i]
                 channel = band_mapper[i]
-                if (channel >= 0) :
+                if (channel >= 0):
                     output_channels[int(channel)] += weighted
                 channel += 1
-                if (channel < filterbank_channel_count_) :
+                if (channel < filterbank_channel_count_):
                     output_channels[int(channel)] += (spec_val - weighted)
 
             return output_channels
 
-        def dct_init(input_length, dct_coefficient_count) :
+        def dct_init(input_length, dct_coefficient_count):
             # init
-            if (input_length < dct_coefficient_count) :
+            if(input_length < dct_coefficient_count):
                 raise ConfigError ("Error input_length need to larger than dct_coefficient_count")
 
             cosine = np.zeros((dct_coefficient_count, input_length))
             fnorm = np.sqrt(2.0 / input_length)
             arg = np.pi / input_length
-            for i in range(dct_coefficient_count) :
-                for j in range (input_length) :
+            for i in range(dct_coefficient_count):
+                for j in range (input_length):
                     cosine[i][j] = fnorm * np.cos(i * arg * (j + 0.5))
 
             return cosine
 
-        def dct_compute(worked_filiter, input_length, dct_coefficient_count, cosine) :
+        def dct_compute(worked_filiter, input_length, dct_coefficient_count, cosine):
             # compute
             output_dct = np.zeros(dct_coefficient_count)
             worked_length = worked_filiter.shape[0]
 
-            if (worked_length > input_length) :
+            if(worked_length > input_length):
                 worked_length = input_length
 
-            for i in range(dct_coefficient_count) :
+            for i in range(dct_coefficient_count):
                 _sum = 0.0
-                for j in range(worked_length) :
+                for j in range(worked_length):
                     _sum += cosine[i][j] * worked_filiter[j]
                 output_dct[i] = _sum
 
             return output_dct
 
-        audio_channels, spectrogram_samples, spectrogram_channels  = spectrogram.shape
+        audio_channels, spectrogram_samples, spectrogram_channels = spectrogram.shape
         kFilterbankFloor = 1e-12
         filterbank_channel_count = 40
 
         mfcc_output = np.zeros((spectrogram_samples, dct_coefficient_count))
-        for i in range(audio_channels) :
+        for i in range(audio_channels):
             start_index, end_index, weights, band_mapper = mfcc_mel_filiterbank_init(sample_rate,
                                                                                      spectrogram_channels)
             cosine = dct_init(filterbank_channel_count, dct_coefficient_count)
-            for j in range(spectrogram_samples) :
+            for j in range(spectrogram_samples):
                 mfcc_input = spectrogram[i, j, :]
 
                 mel_filiter = mfcc_mel_filiterbank_compute(mfcc_input, spectrogram_channels,
                                                         start_index, end_index,
                                                         weights, band_mapper)
-                for k in range(mel_filiter.shape[0]) :
+                for k in range(mel_filiter.shape[0]):
                     val = mel_filiter[k]
-                    if (val < kFilterbankFloor) :
+                    if (val < kFilterbankFloor):
                         val = kFilterbankFloor
 
                     mel_filiter[k] = np.log(val)
