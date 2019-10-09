@@ -5,12 +5,10 @@
 # 
 ###############################################
 
-import numpy as np
-
-from ..config import PathField, BoolField
+from ..config import PathField
 # from ..representation import SpeechRecognitionAnnotation
 from ..representation import CharacterRecognitionAnnotation
-from ..utils import read_txt, get_path
+from ..utils import read_txt
 
 from .format_converter import BaseFormatConverter
 
