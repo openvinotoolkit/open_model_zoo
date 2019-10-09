@@ -1,6 +1,6 @@
 ######################################
 #
-#   John Feng, john.feng@intel.com 
+#   John Feng, john.feng@intel.com
 #
 ######################################
 
@@ -40,12 +40,12 @@ class Create_overlap_windows(Preprocessor):
         num_strides = len(audio) - (self.context * 2)
         window_size = 2 * self.context + 1
 
-        audio = np.lib.stride_tricks.as_strided(audio, 
+        audio = np.lib.stride_tricks.as_strided(audio,
                                                 (num_strides, window_size, self.input),
                                                 (audio.strides[0], audio.strides[0], audio.strides[1]),
                                                 writeable=False)
         image.data = audio
-        
+
         return image
 
 class Prepare_audio_package(Preprocessor):
@@ -64,14 +64,14 @@ class Prepare_audio_package(Preprocessor):
 
     def configure(self):
         self.step = self.get_value_from_config('step')
-        
+
     def process(self, image, annotation_meta=None):
         data = image.data
-        
+
         _length, c, i = data.shape
 
         _p_pad = _length % self.step
-        if (_p_pad != 0):
+        if(_p_pad != 0):
             data = np.pad(data, ((0, self.step - _p_pad), (0, 0), (0, 0)), mode='constant', constant_values=0)
 
         image.data = np.transpose(data.reshape((-1, self.step, c, i)), (0, 2, 3, 1))
