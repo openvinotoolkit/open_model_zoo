@@ -177,8 +177,8 @@ class AudioReader(BaseReader):
     #
     ##################################################
 
-    @classmethod
-    def audio_spectrogram(self, samples, window_size, stride, magnitude_squared):
+    @staticmethod
+    def audio_spectrogram(samples, window_size, stride, magnitude_squared):
         # window_size, #=(16000 * (32 / 1000)), #Config.audio_window_samples,
         # stride, # =(16000 * (20 / 1000)), #(Config.audio_step_samples,
         # magnitude_squared) : # =True) :
@@ -243,8 +243,8 @@ class AudioReader(BaseReader):
     #
     ##################################################
 
-    @classmethod
-    def mfcc_mel_filiterbank_init(self, sample_rate, input_length):
+    @staticmethod
+    def mfcc_mel_filiterbank_init(sample_rate, input_length):
         # init
         filterbank_channel_count_ = 40
         lower_frequency_limit_ = 20
@@ -295,8 +295,8 @@ class AudioReader(BaseReader):
 
         return start_index, end_index, weights, band_mapper
 
-    @classmethod
-    def mfcc_mel_filiterbank_compute(self, mfcc_input, input_length, start_index, end_index, weights, band_mapper):
+    @staticmethod
+    def mfcc_mel_filiterbank_compute(mfcc_input, input_length, start_index, end_index, weights, band_mapper):
         filterbank_channel_count_ = 40
         # Compute
         output_channels = np.zeros(filterbank_channel_count_)
@@ -312,8 +312,8 @@ class AudioReader(BaseReader):
 
         return output_channels
 
-    @classmethod
-    def dct_init(self, input_length, dct_coefficient_count):
+    @staticmethod
+    def dct_init(input_length, dct_coefficient_count):
         # init
         if input_length < dct_coefficient_count :
             raise ConfigError("Error input_length need to larger than dct_coefficient_count")
@@ -327,8 +327,8 @@ class AudioReader(BaseReader):
 
         return cosine
 
-    @classmethod
-    def dct_compute(self, worked_filiter, input_length, dct_coefficient_count, cosine):
+    @staticmethod
+    def dct_compute(worked_filiter, input_length, dct_coefficient_count, cosine):
         # compute
         output_dct = np.zeros(dct_coefficient_count)
         worked_length = worked_filiter.shape[0]
@@ -344,8 +344,8 @@ class AudioReader(BaseReader):
 
         return output_dct
 
-    @classmethod
-    def mfcc(self, spectrogram, sample_rate, dct_coefficient_count):
+    @staticmethod
+    def mfcc(spectrogram, sample_rate, dct_coefficient_count):
         audio_channels, spectrogram_samples, spectrogram_channels = spectrogram.shape
         kFilterbankFloor = 1e-12
         filterbank_channel_count = 40
