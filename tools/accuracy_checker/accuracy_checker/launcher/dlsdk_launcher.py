@@ -291,7 +291,7 @@ class DLSDKLauncher(Launcher):
                 for __node in self.config['_list_hidden_states']:
                     hidden_state.append(infer_inputs[__node])
                 for __audio_ftr in enumerate(audio_ftrs):
-                    network_inputs_data = {self.config['_list_inputs'][0] : [__audio_ftr],
+                    network_inputs_data = {self.config['_list_inputs'][0] : [__audio_ftr[1]],
                                            self.config['_list_hidden_states'][0] : hidden_state[0],
                                            self.config['_list_hidden_states'][1] : hidden_state[1]}
 
