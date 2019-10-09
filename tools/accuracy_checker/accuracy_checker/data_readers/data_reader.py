@@ -183,7 +183,7 @@ class AudioReader(BaseReader):
         # stride, # =(16000 * (20 / 1000)), #(Config.audio_step_samples,
         # magnitude_squared) : # =True) :
         if (len(samples.shape) != 2) :
-            print ("input must be 2-dimensional")
+            raise ConfigError ("input must be 2-dimensional")
     
         window_size = int(window_size)
         stride = int(stride)
