@@ -39,7 +39,6 @@ from .launcher import Launcher, LauncherConfigValidator
 from .model_conversion import convert_model, FrameworkParameters
 from ..logging import print_info
 
-ie_core = ie.IECore()
 HETERO_KEYWORD = 'HETERO:'
 MULTI_DEVICE_KEYWORD = 'MULTI:'
 FPGA_COMPILER_MODE_VAR = 'CL_CONTEXT_COMPILER_MODE_INTELFPGA'
@@ -222,7 +221,7 @@ class DLSDKLauncher(Launcher):
         self._device = self.config['device'].upper()
         self._set_variable = False
         self._prepare_bitstream_firmware(self.config)
-        self.ie_core = ie_core
+        self.ie_core = ie.IECore()
         self._prepare_ie()
         self._delayed_model_loading = delayed_model_loading
 
@@ -615,7 +614,7 @@ class DLSDKLauncher(Launcher):
                 print_info('    {} - {}'.format(device, nreq))
 
     def _log_versions(self):
-        versions = ie_core.get_versions(self._device)
+        versions = self.ie_core.get_versions(self._device)
         print_info("Loaded {} plugin version:".format(self._device))
         for device_name, device_version in versions.items():
             print_info("    {device_name} - {descr}: {maj}.{min}.{num}".format(
