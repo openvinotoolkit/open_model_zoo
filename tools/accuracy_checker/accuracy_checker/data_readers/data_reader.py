@@ -347,8 +347,8 @@ class AudioReader(BaseReader):
 
         mfcc_output = np.zeros((spectrogram_samples, dct_coefficient_count))
         for i in range(audio_channels) :
-            start_index, end_index, weights, band_mapper = \
-                mfcc_mel_filiterbank_init(sample_rate, spectrogram_channels) 
+            start_index, end_index, weights, band_mapper = mfcc_mel_filiterbank_init(sample_rate, 
+                                                                                     spectrogram_channels) 
             cosine = dct_init(filterbank_channel_count, dct_coefficient_count) 
             for j in range(spectrogram_samples) :
                 mfcc_input = spectrogram[i, j, :]
