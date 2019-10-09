@@ -182,7 +182,7 @@ class AudioReader(BaseReader):
         # stride, # =(16000 * (20 / 1000)), #(Config.audio_step_samples,
         # magnitude_squared) : # =True) :
         if(len(samples.shape) != 2):
-            raise ConfigError ("input must be 2-dimensional")
+            raise ConfigError("input must be 2-dimensional")
 
         window_size = int(window_size)
         stride = int(stride)
@@ -198,7 +198,7 @@ class AudioReader(BaseReader):
 
             return 1 + fft_length / 2, fft_length.astype(np.int32)
 
-        output_width, fft_length  = output_frequency_channels(window_size)
+        output_width, fft_length = output_frequency_channels(window_size)
         output_width = output_width.astype(np.int32)
 
         length_minus_windows = sample_count - window_size
@@ -218,7 +218,7 @@ class AudioReader(BaseReader):
 
             fft_input_output = np.zeros(fft_length)
 
-            for j in range (output_height):
+            for j in range(output_height):
                 start = j * stride
                 end = start + window_size
                 if(end < sample_count):
@@ -274,7 +274,7 @@ class AudioReader(BaseReader):
                 if ((i < start_index) or (i > end_index)):
                     band_mapper[i] = -2
                 else:
-                    while ((center_frequencies[int(channel)] < melf) and
+                    while((center_frequencies[int(channel)] < melf) and
                         (channel < filterbank_channel_count_)):
                         channel += 1
                     band_mapper[i] = channel - 1
@@ -284,7 +284,7 @@ class AudioReader(BaseReader):
                 channel = band_mapper[i]
                 if((i < start_index) or (i > end_index)):
                     weights[i] = 0.0
-                else :
+                else:
                     if(channel >= 0):
                         weights[i] = ((center_frequencies[int(channel) + 1] - freq2mel(i * hz_per_sbin)) /
                                     (center_frequencies[int(channel) + 1] - center_frequencies[int(channel)]))
@@ -313,13 +313,13 @@ class AudioReader(BaseReader):
         def dct_init(input_length, dct_coefficient_count):
             # init
             if(input_length < dct_coefficient_count):
-                raise ConfigError ("Error input_length need to larger than dct_coefficient_count")
+                raise ConfigError("Error input_length need to larger than dct_coefficient_count")
 
             cosine = np.zeros((dct_coefficient_count, input_length))
             fnorm = np.sqrt(2.0 / input_length)
             arg = np.pi / input_length
             for i in range(dct_coefficient_count):
-                for j in range (input_length):
+                for j in range(input_length):
                     cosine[i][j] = fnorm * np.cos(i * arg * (j + 0.5))
 
             return cosine
