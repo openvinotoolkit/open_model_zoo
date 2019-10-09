@@ -48,7 +48,7 @@ Options:
     -d "<device>"                Optional. Specify the target device for Face Detection (CPU, GPU, FPGA, HDDL or MYRIAD). The demo will look for a suitable plugin for a specified device.
     -nc                          Optional. Maximum number of processed camera inputs (web cams)
     -bs                          Optional. Batch size for processing (the number of frames processed per infer request)
-    -n_ir                        Optional. Number of infer requests
+    -nireq                       Optional. Number of infer requests
     -n_iqs                       Optional. Frame queue size for input channels
     -fps_sp                      Optional. FPS measurement sampling period. Duration between timepoints, msec
     -n_sp                        Optional. Number of sampling periods
@@ -79,12 +79,12 @@ To run the demo using two recorded video files, use the following command:
 ```
 Video files will be processed repeatedly.
 
-To achieve 100% utilization of one Myriad X, the thumb rule is to run 4 infer requests on each Myriad X. Option “-n_ir 32” can be added to above command to use 100% of HDDL-R card. The 32 here is 8 (Myriad X on HDDL-R card) x 4 (infer requests), such as following command:
+To achieve 100% utilization of one Myriad X, the thumb rule is to run 4 infer requests on each Myriad X. Option `-nireq 32` can be added to above command to use 100% of HDDL-R card. The 32 here is 8 (Myriad X on HDDL-R card) x 4 (infer requests), such as following command:
 
 ```sh
 ./multi-channel-yolo-v3-demo -m $PATH_OF_YOLO_V3_MODEL 
 -l <samples_build_folder>/intel64/Release/lib/libcpu_extension.so -d HDDL 
--i /path/to/file1 /path/to/file2 /path/to/file3 /path/to/file4 -n_ir 32
+-i /path/to/file1 /path/to/file2 /path/to/file3 /path/to/file4 -nireq 32
 ```
 
 You can also run the demo on web cameras and video files simultaneously by specifying both parameters: `-nc <number of cams> -i <video files sequentially, separated by space>`.
