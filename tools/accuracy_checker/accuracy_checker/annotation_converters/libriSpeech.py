@@ -43,13 +43,3 @@ class LibriSpeechFormatConverter(BaseFormatConverter):
         label_map = {ind: str(key) for ind, key in enumerate(self.supported_symbols)}
 
         return annotation, {'label_map': label_map, 'blank_label': len(label_map)}
-
-
-
-
-
-
-
-
-
-
