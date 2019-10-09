@@ -5,7 +5,7 @@
 ######################################
 
 
-from ..config import ConfigError, NumberField, StringField, BoolField
+from ..config import NumberField
 from .preprocessor import Preprocessor
 
 class Create_overlap_windows(Preprocessor):
@@ -67,8 +67,6 @@ class Prepare_audio_package(Preprocessor):
         
     def process(self, image, annotation_meta=None):
         data = image.data
-
-        package = []
         
         _length, c, i = data.shape
 
