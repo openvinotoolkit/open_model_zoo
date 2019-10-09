@@ -266,26 +266,22 @@ class AudioReader(BaseReader):
         start_index = int(1.5 + (lower_frequency_limit_ / hz_per_sbin))
         end_index = int(upper_frequency_limit_ / hz_per_sbin)
 
-        band_mapper = np.zeros(input_length)
+        band_mapper = np.ones(input_length) * -2
         channel = 0
 
         for i in range(input_length):
             melf = freq2mel(i * hz_per_sbin)
-
-            if((i < start_index) or (i > end_index)):
-                band_mapper[i] = -2
-            else:
+            if((i >= start_index) and (i <= end_index)):
                 while ((center_frequencies[int(channel)] < melf) and
                        (channel < filterbank_channel_count_)):
                     channel += 1
                 band_mapper[i] = channel - 1
 
-        weights = np.zeros(input_length)
+        weights = np.zeros(input_length, dtype=np.float32)
+
         for i in range(input_length):
             channel = band_mapper[i]
-            if((i < start_index) or (i > end_index)):
-                weights[i] = 0.0
-            else:
+            if((i >= start_index) and (i <= end_index)):
                 if channel >= 0:
                     weights[i] = ((center_frequencies[int(channel) + 1] - freq2mel(i * hz_per_sbin)) /
                                   (center_frequencies[int(channel) + 1] - center_frequencies[int(channel)]))
