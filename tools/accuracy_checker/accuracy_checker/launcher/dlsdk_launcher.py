@@ -207,7 +207,7 @@ class DLSDKLauncher(Launcher):
                 optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
             ),
             '_run_audio': BoolField(
-                optional=True, default=False, 
+                optional=True, default=False,
                 description="The specific flag for speech recognition to run the predict function(deep speech only)."
             ),
             '_audio_hidden_state': ListField(optional=True, description="audio hidden state(deep speech only)."),
@@ -292,8 +292,8 @@ class DLSDKLauncher(Launcher):
                 for __node in self.config['_list_hidden_states']:
                     hidden_state.append(infer_inputs[__node])
                 for __itr in range(len(audio_ftr)):
-                    network_inputs_data = {self.config['_list_inputs'][0] : [audio_ftr[__itr]], 
-                                           self.config['_list_hidden_states'][0] : hidden_state[0], 
+                    network_inputs_data = {self.config['_list_inputs'][0] : [audio_ftr[__itr]],
+                                           self.config['_list_hidden_states'][0] : hidden_state[0],
                                            self.config['_list_hidden_states'][1] : hidden_state[1]}
 
                     benchmark = kwargs.get('benchmark')
