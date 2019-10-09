@@ -308,7 +308,7 @@ class DLSDKLauncher(Launcher):
 
                     for __ih, __h in enumerate(self._audio_hidden_state):
                         hidden_state[__ih] = result[__h]
-                    
+
                     __res = np.concatenate((__res, result[self._audio_output[0]]))
 
                 results.append({self._audio_output[0] :__res})
@@ -557,7 +557,7 @@ class DLSDKLauncher(Launcher):
         input_shape = self.network.inputs[input_blob].shape
 
         if (self._run_audio):
-            if (data.shape[1:] != input_shape[1:]): 
+            if (data.shape[1:] != input_shape[1:]):
                 warning_message = 'data shape {} is not equal model input shape {}. '.format(
                         data.shape[1:], input_shape[1:]
                     )
