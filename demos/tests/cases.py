@@ -147,7 +147,7 @@ NATIVE_DEMOS = [
 
     NativeDemo('pedestrian_tracker_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
-            '-i': ImageDirectoryArg('person-detection-retail')}),
+            '-i': ImagePatternArg('person-detection-retail')}),
         device_cases('-d_det', '-d_reid'),
         [
             TestCase(options={'-m_det': ModelArg('person-detection-retail-0002')}),
@@ -187,12 +187,21 @@ NATIVE_DEMOS = [
             '-i': ImagePatternArg('smart-classroom-demo'),
             '-m_fd': ModelArg('face-detection-adas-0001')}),
         device_cases('-d_act', '-d_fd', '-d_lm', '-d_reid'),
-        single_option_cases('-m_act', ModelArg('person-detection-action-recognition-0005'),
-                                      ModelArg('person-detection-action-recognition-0006'),
-                                      ModelArg('person-detection-raisinghand-recognition-0001'),
-                                      ModelArg('person-detection-action-recognition-teacher-0002')),
-        single_option_cases('-m_lm', None, ModelArg('landmarks-regression-retail-0009')),
-        single_option_cases('-m_reid', None, ModelArg('face-reidentification-retail-0095')),
+        [
+            *combine_cases(
+                [
+                    TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-0005')}),
+                    TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-0006'),
+                        '-student_ac': 'sitting,writing,raising_hand,standing,turned_around,lie_on_the_desk'}),
+                    # person-detection-action-recognition-teacher-0002 is supposed to be provided with -teacher_id, but
+                    # this would require providing a gallery file with -fg key. Unless -teacher_id is provided
+                    # -teacher_ac is ignored thus run the test just with default actions pretending it's about students
+                    TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-teacher-0002')}),
+                ],
+                single_option_cases('-m_lm', None, ModelArg('landmarks-regression-retail-0009')),
+                single_option_cases('-m_reid', None, ModelArg('face-reidentification-retail-0095'))),
+            TestCase(options={'-m_act': ModelArg('person-detection-raisinghand-recognition-0001'), '-a_top': '5'}),
+        ],
     )),
 
     NativeDemo(name='super_resolution_demo', test_cases=combine_cases(

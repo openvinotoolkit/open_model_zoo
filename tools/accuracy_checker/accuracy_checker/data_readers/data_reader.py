@@ -20,9 +20,12 @@ from collections import OrderedDict, namedtuple
 import re
 import cv2
 from PIL import Image
-import scipy.misc
 import numpy as np
 import nibabel as nib
+try:
+    import tensorflow as tf
+except ImportError as import_error:
+    tf = None
 
 # For audio:
 import scipy.io.wavfile as wav
@@ -48,6 +51,7 @@ class DataRepresentation:
 
 
 ClipIdentifier = namedtuple('ClipIdentifier', ['video', 'clip_id', 'frames'])
+MultiFramesInputIdentifier = namedtuple('MultiFramesInputIdentifier', ['input_id', 'frames'])
 
 
 def create_reader(config):
@@ -85,6 +89,7 @@ class BaseReader(ClassProvider):
         self.read_dispatcher = singledispatch(self.read)
         self.read_dispatcher.register(list, self._read_list)
         self.read_dispatcher.register(ClipIdentifier, self._read_clip)
+        self.read_dispatcher.register(MultiFramesInputIdentifier, self._read_frames_multi_input)
 
         self.validate_config()
         self.configure()
@@ -121,6 +126,9 @@ class BaseReader(ClassProvider):
         video = Path(data_id.video)
         frames_identifiers = [video / frame for frame in data_id.frames]
         return self.read_dispatcher(frames_identifiers)
+
+    def _read_frames_multi_input(self, data_id):
+        return self.read_dispatcher(data_id.frames)
 
     def read_item(self, data_id):
         return DataRepresentation(self.read_dispatcher(data_id), identifier=data_id)
@@ -399,7 +407,12 @@ class ScipyImageReader(BaseReader):
     __provider__ = 'scipy_imread'
 
     def read(self, data_id):
-        return np.array(scipy.misc.imread(str(get_path(self.data_source / data_id))))
+        # reimplementation scipy.misc.imread
+        image = Image.open(str(get_path(self.data_source / data_id)))
+        if image.mode == 'P':
+            image = image.convert('RGBA') if 'transparency' in image.info else image.convert('RGB')
+
+        return np.array(image)
 
 
 class OpenCVFrameReader(BaseReader):
@@ -497,12 +510,8 @@ class TensorflowImageReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
-        try:
-            import tensorflow as tf
-        except ImportError as import_error:
-            raise ConfigError(
-                'tf_imread reader disabled.Please, install Tensorflow before using. \n{}'.format(import_error.msg)
-            )
+        if tf is None:
+            raise ImportError('tf backend for image reading requires TensorFlow. Please install it before usage.')
 
         tf.enable_eager_execution()
 

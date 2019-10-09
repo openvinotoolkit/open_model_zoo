@@ -155,6 +155,7 @@ class Launcher(ClassProvider):
     def name(self):
         return self.__provider__
 
+
 def unsupported_launcher(name, error_message=None):
     class UnsupportedLauncher(Launcher):
         __provider__ = name

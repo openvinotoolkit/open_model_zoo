@@ -23,6 +23,7 @@ from ..utils import read_txt, get_path, check_file_existence
 from ..topology_types import ImageClassification
 from .format_converter import BaseFormatConverter, ConverterReturn
 
+
 class ImageNetFormatConverter(BaseFormatConverter):
     __provider__ = 'imagenet'
     annotation_types = (ClassificationAnnotation, )

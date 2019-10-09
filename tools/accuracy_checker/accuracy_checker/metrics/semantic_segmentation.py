@@ -144,8 +144,8 @@ class SegmentationDSCAcc(PerImageEvaluationMetric):
 
 class SegmentationDIAcc(PerImageEvaluationMetric):
     __provider__ = 'dice_index'
-    annotation_types = (BrainTumorSegmentationAnnotation,)
-    prediction_types = (BrainTumorSegmentationPrediction,)
+    annotation_types = (BrainTumorSegmentationAnnotation, SegmentationAnnotation)
+    prediction_types = (BrainTumorSegmentationPrediction, SegmentationPrediction)
 
     overall_metric = []
 
@@ -154,7 +154,8 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         parameters = super().parameters()
         parameters.update({
             'mean': BoolField(optional=True, default=True, description='Allows calculation mean value.'),
-            'median': BoolField(optional=True, default=False, description='Allows calculation median value.')
+            'median': BoolField(optional=True, default=False, description='Allows calculation median value.'),
+            'use_argmax': BoolField(optional=True, default=True, description="Allows to use argmax for prediction mask")
         })
 
         return parameters
@@ -162,8 +163,9 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
     def configure(self):
         self.mean = self.get_value_from_config('mean')
         self.median = self.get_value_from_config('median')
+        self.use_argmax = self.get_value_from_config('use_argmax')
 
-        labels = self.dataset.labels if self.dataset.metadata else ['overall']
+        labels = self.dataset.labels.values() if self.dataset.metadata else ['overall']
         self.classes = len(labels)
 
         names_mean = ['mean@{}'.format(name) for name in labels] if self.mean else []
@@ -178,7 +180,7 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         result = np.zeros(shape=self.classes)
 
         annotation_data = annotation.mask
-        prediction_data = np.argmax(prediction.mask, axis=0)
+        prediction_data = np.argmax(prediction.mask, axis=0) if self.use_argmax else prediction.mask.astype('int64')
 
         for c in range(1, self.classes):
             annotation_data_ = (annotation_data == c)
@@ -206,4 +208,10 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         return result
 
     def reset(self):
+        labels = self.dataset.labels.values() if self.dataset.metadata else ['overall']
+        self.classes = len(labels)
+        names_mean = ['mean@{}'.format(name) for name in labels] if self.mean else []
+        names_median = ['median@{}'.format(name) for name in labels] if self.median else []
+        self.meta['names'] = names_mean + names_median
+        self.meta['calculate_mean'] = False
         self.overall_metric = []

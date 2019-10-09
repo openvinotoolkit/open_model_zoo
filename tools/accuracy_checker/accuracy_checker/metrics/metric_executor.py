@@ -19,7 +19,7 @@ from collections import namedtuple
 from ..presenters import BasePresenter, EvaluationResult
 from ..config import StringField
 from ..utils import zipped_transform
-from .metric import Metric
+from .metric import Metric, FullDatasetEvaluationMetric
 from ..config import ConfigValidator, ConfigError
 
 MetricInstance = namedtuple(
@@ -47,6 +47,7 @@ class MetricsExecutor:
         reference = 'reference'
         threshold = 'threshold'
         presenter = 'presenter'
+        self.need_store_predictions = False
         for metric_config_entry in metrics_config:
             metric_config = ConfigValidator(
                 "metrics", on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT,
@@ -70,6 +71,8 @@ class MetricsExecutor:
                 metric_config_entry.get(threshold),
                 metric_presenter
             ))
+            if isinstance(metric_fn, FullDatasetEvaluationMetric):
+                self.need_store_predictions = True
 
     @classmethod
     def parameters(cls):

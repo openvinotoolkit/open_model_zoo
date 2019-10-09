@@ -30,7 +30,7 @@ files:
     size: 102502400
     source: https://download.pytorch.org/models/resnet50-19c8e357.pth
 framework: pytorch
-pytorch_to_onnx:
+conversion_to_onnx_args:
   - --model-name=resnet50
   - --weights=$dl_dir/resnet50-19c8e357.pth
   - --from-torchvision

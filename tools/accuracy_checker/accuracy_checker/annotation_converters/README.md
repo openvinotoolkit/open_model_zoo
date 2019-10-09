@@ -66,9 +66,9 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `labels_file` - path to file with word description of labels (synset_words).
   * `has_background` - allows to add background label to original labels and convert dataset for 1001 classes instead 1000 (default value is False).
 * `voc_detection` - converts Pascal VOC annotation for detection task to `DetectionAnnotation`.
-   * `imageset_file` - path to file with validation image list.
-   * `annotations_dir` - path to directory with annotation files.
-   * `images_dir` - path to directory with images related to devkit root (default JPEGImages).
+  * `imageset_file` - path to file with validation image list.
+  * `annotations_dir` - path to directory with annotation files.
+  * `images_dir` - path to directory with images related to devkit root (default JPEGImages).
   * `has_background` - allows convert dataset with/without adding background_label. Accepted values are True or False. (default is True) 
 * `voc_segmentation` - converts Pascal VOC annotation for semantic segmentation task to `SegmentationAnnotation`.
   * `imageset_file` - path to file with validation image list.
@@ -118,11 +118,19 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `data_dir` - path to data directory, where gallery (`bbox_test`) and `query` subdirectories are located.
 * `market1501_reid` - converts Market1501 person reidentification dataset to `ReidentificationAnnotation`.
   * `data_dir` - path to data directory, where gallery (`bounding_box_test`) and `query` subdirectories are located.
-* `super_resolution` - converts dataset for super resolution task to `SuperResolutionAnnotation`.
+* `super_resolution` - converts dataset for single image super resolution task to `SuperResolutionAnnotation`.
   * `data_dir` - path to folder, where images in low and high resolution are located.
   * `lr_suffix` - low resolution file name's suffix (default lr).
   * `hr_suffix` - high resolution file name's suffix (default hr).
   * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+  * `two_streams` - enable 2 input streams where usually first for original image and second for upsampled image. (Optional, default False).
+  * `upsample_suffix` - upsample images file name's suffix (default upsample).
+* `multi_frame_super_resolution` - converts dataset for super resolution task with multiple input frames usage.
+    * `data_dir` - path to folder, where images in low and high resolution are located.
+    * `lr_suffix` - low resolution file name's suffix (default lr).
+    * `hr_suffix` - high resolution file name's suffix (default hr).
+    * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
+    * `number_input_frames` - the number of input frames per inference.
 * `icdar_detection` - converts ICDAR13 and ICDAR15 datasets for text detection challenge to `TextDetectionAnnotation`.
   * `data_dir` - path to folder with annotations on txt format.
 * `icdar13_recognition` - converts ICDAR13 dataset for text recognition task to `CharecterRecognitionAnnotation`.
@@ -156,7 +164,13 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `mask_loader` - the way how GT mask should be loaded. Supported methods: `pillow`, `opencv`, `nifti`, `numpy`, `scipy`.
   * `dataset_meta` - path to json file with prepared dataset meta info. It should contains `label_map` key with dictionary in format class_id: class_name and optionally `segmentation_colors` (if your dataset uses color encoding). Segmentation colors is a list of channel-wise values for each class. (e.g. if your dataset has 3 classes in BGR colors, segmentation colors for it will looks like: `[[255, 0, 0], [0, 255, 0], [0, 0, 255]]`). (Optional, you can provide self-created file as `dataset_meta` in your config).
 * `camvid` - converts CamVid dataset format to `SegmentationAnnotation`.
-  * `annotation_file` - file in txt format which contains list of validation pairs (`<path_to_image>` `<path_to_annotation>` separated by space).
+  * `annotation_file` - file in txt format which contains list of validation pairs (`<path_to_image>` `<path_to_annotation>` separated by space)
+* `image_retrieval` - converts dataset for image retrieval task to `ReidentificationAnnotation`. Dataset should have following structure:
+   1. the dataset root directory contains 2 subdirectory named `gallery` and `queries` for gallery images and query images respectively.
+   2. Every of these subdirectories should contains text file with list of pairs: `<path_to_image>` `<image_ID>` (image_path and image_ID should be separated by space),  where `<path_to_image>` is path to the image related dataset root, `<image_ID>` is the number which represent image id in the gallery.
+   * `data_dir` - path to dataset root directory.
+   * `gallery_annotation_file` - file with gallery images and IDs concordance in txt format (Optional, default value is `<data_dir>/gallery/list.txt`)
+   * `queries_annotation_file` - file with queries images and IDs concordance in txt format (Optional, default value is `<data_dir>/queries/list.txt`)
 * `cvat_object_detection` - converts [CVAT XML annotation version 1.1](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `DetectionAnnotation`.
   * `annotation_file` - path to xml file in appropriate format.
   * `has_background` - allows prepend original labels with special class represented background and convert dataset for n+1 classes instead n (default value is True).
@@ -181,8 +195,10 @@ Accuracy Checker supports following list of annotation converters and specific f
     * `common_6_actions`(seating, writing, raising hand, standing, turned around, lie on the desk)
     * `teacher` (standing, writing, demonstrating)
     * `raising_hand` (seating, raising hand)
-
 * `libriSpeech` converts dataset with [LibriSpeech ASR corpus](http://www.openslr.org/12) for automatic speech recognition task `CharacterRecognitionAnnotation`.
   * `data_dir` - path to data directory, where audio files (`.wav`) and `subtitle` are located.
   
     > Note: You can using [`librispeech.py`](https://github.com/SeanNaren/deepspeech.pytorch/blob/master/data/librispeech.py) which from this [repo](https://github.com/SeanNaren/deepspeech.pytorch) download the dataset and convert the `.flac` into `.wav`.
+* `lpr_txt` - converts annotation for license plate recognition task in txt format to `CharacterRecognitionAnnotation`.
+  * `annotation_file` - path to txt annotation.
+  * `decoding_dictionary` - path to file containing dictionary for output decoding.

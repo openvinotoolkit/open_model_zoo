@@ -109,7 +109,7 @@ class MxNetLauncher(Launcher):
     def inputs(self):
         return self._inputs
 
-    def predict(self, inputs, metadata, *args, **kwargs):
+    def predict(self, inputs, metadata=None, **kwargs):
         """
         Args:
             inputs: dictionary where keys are input layers names and values are data for them.

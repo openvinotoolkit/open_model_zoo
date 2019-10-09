@@ -13,8 +13,7 @@
 static const char help_message[] = "Print a usage message.";
 
 /// @brief message for images argument
-static const char video_message[] = "Required. Path to a video file or a folder with images "\
-                                     "(all images should have names 0000000001.jpg, 0000000002.jpg, etc).";
+static const char video_message[] = "Required. Video sequence to process.";
 
 /// @brief message for model arguments
 static const char pedestrian_detection_model_message[] = "Required. Path to the Pedestrian Detection Retail model (.xml) file.";
@@ -58,11 +57,13 @@ static const char output_log_message[] = "Optional. The file name to write outpu
                                           "The format of the log file is compatible with MOTChallenge format.";
 
 /// @brief message for the first frame
-static const char first_frame_message[] = "Optional. The index of the first frame of video sequence to process. "\
-                                           "This has effect only if it is positive and the source video sequence is an image folder.";
+static const char first_frame_message[] = "Optional. The index of the first frame of video sequence to process. "
+                                           "This has effect only if it is positive. The actual first frame captured "
+                                           "depends on cv::VideoCapture implementation and may have slightly different "
+                                           "number.";
 /// @brief message for the last frame
 static const char last_frame_message[] = "Optional. The index of the last frame of video sequence to process. "\
-                                          "This has effect only if it is positive and the source video sequence is an image folder.";
+                                          "This has effect only if it is positive.";
 
 
 /// @brief Define flag for showing help message <br>

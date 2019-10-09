@@ -26,10 +26,6 @@ models:
 
     datasets:
       - name: ICDAR2013
-        data_source: ICDAR13_REC_validation/Challenge2_Test_Task3_Images
-        annotation_conversion:
-          converter: icdar13_recognition
-          annotation_file: ICDAR13_REC_validation/gt/gt.txt.fixed.alfanumeric
 
         preprocessing:
           - type: bgr_to_gray

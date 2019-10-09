@@ -54,6 +54,8 @@ class ClassificationAdapter(Adapter):
             list of ClassificationPrediction objects
         """
         prediction = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        if len(np.shape(prediction)) == 1:
+            prediction = np.expand_dims(prediction, axis=0)
         prediction = np.reshape(prediction, (prediction.shape[0], -1))
 
         result = []

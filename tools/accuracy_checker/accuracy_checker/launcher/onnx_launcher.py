@@ -63,13 +63,11 @@ class ONNXLauncher(Launcher):
     def batch(self):
         return 1
 
-    def predict(self, inputs, metadata, *args, **kwargs):
+    def predict(self, inputs, metadata=None, **kwargs):
         results = []
         for infer_input in inputs:
             prediction_list = self._inference_session.run(self.output_names, infer_input)
-            results.append(
-                {output_name: prediction for output_name, prediction in zip(self.output_names, prediction_list)}
-            )
+            results.append(dict(zip(self.output_names, prediction_list)))
             for meta_ in metadata:
                 meta_['input_shape'] = self.inputs_info_for_meta()
 

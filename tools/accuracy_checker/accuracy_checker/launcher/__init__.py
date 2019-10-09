@@ -62,6 +62,13 @@ except ImportError as import_error:
         'onnx_runtime', "ONNX Runtime isn't installed. Please, install it before using. \n{}".format(import_error.msg)
     )
 
+try:
+    from  .pytorch_launcher import PyTorchLauncher
+except ImportError as import_error:
+    PyTorchLauncher = unsupported_launcher(
+        'pytorch', "PyTorch isn't installed. Please, install it before using. \n{}".format(import_error.msg)
+    )
+
 __all__ = [
     'create_launcher',
     'Launcher',
@@ -72,6 +79,7 @@ __all__ = [
     'DLSDKLauncher',
     'OpenCVLauncher',
     'ONNXLauncher',
+    'PyTorchLauncher',
     'DummyLauncher',
     'InputFeeder'
 ]

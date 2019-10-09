@@ -56,15 +56,15 @@ IMAGE_SEQUENCES = {
 
     'person-detection-retail': [
         image_net_arg('00000002'),
+        image_net_arg('00000002'),
+        image_net_arg('00000002'),
+        image_net_arg('00000002'),
+        image_net_arg('00000002'),
         image_net_arg('00000032'),
-        image_net_arg('00000184'),
-        image_net_arg('00000442'),
-        image_net_arg('00008165'),
+        image_net_arg('00000002'),
         image_net_arg('00017291'),
         image_net_arg('00017293'),
         image_net_arg('00040547'),
-        image_net_arg('00040548'),
-        image_net_arg('00040554'),
     ],
 
     'person-vehicle-bike-detection-crossroad': [
@@ -138,8 +138,8 @@ IMAGE_SEQUENCES = {
 
     'smart-classroom-demo': [
         image_net_arg('00000074'),
-        image_net_arg('00000141'),
-        image_net_arg('00000141'),
+        image_net_arg('00000002'),
+        image_net_arg('00000002'),
         image_net_arg('00000164'),
         image_net_arg('00000181'),
         image_net_arg('00000164'),

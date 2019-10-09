@@ -63,8 +63,8 @@ To run the demo, please provide paths to the model in the IR format, to a file w
 ```bash
 python image_retrieval_demo.py \
 -m /home/user/image-retrieval-0001.xml \
--v /home/user/video.dav.mp4 \
--i /home/user/list.txt \
+-i /home/user/video.dav.mp4 \
+-g /home/user/list.txt \
 -l /opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension_avx512.so \
 --ground_truth text_label
 ```
