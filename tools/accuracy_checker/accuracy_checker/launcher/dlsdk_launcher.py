@@ -283,15 +283,17 @@ class DLSDKLauncher(Launcher):
             raw data from network.
         """
         results = []
-        if self._run_audio:
-            for infer_inputs in inputs:
+        for infer_inputs in inputs:
+            if self._run_audio:
                 audio_ftrs = infer_inputs[self.config['_list_inputs'][0]]
                 hidden_state = []
                 __res = np.empty([0, 1, self._alphabet])
-                for __node in self.config['_list_hidden_states']:
-                    hidden_state.append(infer_inputs[__node])
-                for __audio_ftr in enumerate(audio_ftrs):
-                    network_inputs_data = {self.config['_list_inputs'][0] : [__audio_ftr[1]],
+
+                hidden_state.append(infer_inputs[self.config['_list_hidden_states'][0]])
+                hidden_state.append(infer_inputs[self.config['_list_hidden_states'][1]])
+
+                for __idx, __audio_ftr in enumerate(audio_ftrs):
+                    network_inputs_data = {self.config['_list_inputs'][0] : [__audio_ftr],
                                            self.config['_list_hidden_states'][0] : hidden_state[0],
                                            self.config['_list_hidden_states'][1] : hidden_state[1]}
 
@@ -303,17 +305,18 @@ class DLSDKLauncher(Launcher):
 
                     raw_outputs_callback = kwargs.get('output_callback')
                     if raw_outputs_callback:
-                        raw_outputs_callback(result)
+                        raw_outputs_callback(result, network=self.network, exec_network=self.exec_network)
 
-                    for __ih, __h in enumerate(self._audio_hidden_state):
-                        hidden_state[__ih] = result[__h]
+                    # for __ih, __h in enumerate(self._audio_hidden_state):
+                        # hidden_state[__ih] = result[__h]
+                    hidden_state[0] = result[self._audio_hidden_state[0]]
+                    hidden_state[1] = result[self._audio_hidden_state[1]]
 
                     __res = np.concatenate((__res, result[self._audio_output[0]]))
 
                 results.append({self._audio_output[0] :__res})
 
-        else:
-            for infer_inputs in inputs:
+            else:
                 if self._do_reshape:
                     input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
                     self._reshape_input(input_shapes)
