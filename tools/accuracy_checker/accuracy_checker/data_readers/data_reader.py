@@ -271,7 +271,7 @@ class AudioReader(BaseReader):
 
         for i in range(input_length):
             melf = freq2mel(i * hz_per_sbin)
-            if((i >= start_index) and (i <= end_index)):
+            if start_index <= i <= end_index:
                 while ((center_frequencies[int(channel)] < melf) and
                        (channel < filterbank_channel_count_)):
                     channel += 1
@@ -281,7 +281,7 @@ class AudioReader(BaseReader):
 
         for i in range(input_length):
             channel = band_mapper[i]
-            if((i >= start_index) and (i <= end_index)):
+            if start_index <= i <= end_index:
                 if channel >= 0:
                     weights[i] = ((center_frequencies[int(channel) + 1] - freq2mel(i * hz_per_sbin)) /
                                   (center_frequencies[int(channel) + 1] - center_frequencies[int(channel)]))
@@ -311,7 +311,7 @@ class AudioReader(BaseReader):
     @staticmethod
     def dct_init(input_length, dct_coefficient_count):
         # init
-        if input_length < dct_coefficient_count :
+        if input_length < dct_coefficient_count:
             raise ConfigError("Error input_length need to larger than dct_coefficient_count")
 
         cosine = np.zeros((dct_coefficient_count, input_length))
