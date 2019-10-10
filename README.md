@@ -34,7 +34,7 @@ We welcome community contributions to the Open Model Zoo repository. If you have
 * In case of a larger feature, provide a relevant demo.
 * Submit a pull request at https://github.com/opencv/open_model_zoo/pulls
 
-Additional information about contributing your model to Open Model Zoo you can find [here](CONTRIBUTING.md).
+You can find additional information about model contribution [here](CONTRIBUTING.md).
 
 We will review your contribution and, if any additional fixes or modifications are needed, may give you feedback to guide you. When accepted, your pull request will be merged into the GitHub* repositories.
 

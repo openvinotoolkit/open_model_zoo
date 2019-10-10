@@ -1,6 +1,6 @@
 # How to contribute model to Open Model Zoo
 
-We appreciate your intention to contribute model to OpenVINO&trade; Open Model Zoo (OMZ). This guide would help you and explain main issues. OMZ is licensed under Apache License, Version 2.0. By contributing to the project, you agree to the license and copyright terms therein and release your contribution under these terms. Please note, that we accept models under permissive license: **MIT**, **Apache 2.0**, **BSD-3-Clause**. In other case it may take longer time to get approval (or even denial) for your model.
+We appreciate your intention to contribute model to OpenVINO&trade; Open Model Zoo (OMZ). This guide would help you and explain main issues. OMZ is licensed under the Apache License, Version 2.0. By contributing to the project, you agree to the license and copyright terms therein and release your contribution under these terms. Please note, that we accept models under permissive licenses, as **MIT**, **Apache 2.0**, **BSD-3-Clause**, etc. Otherwise, it may take longer time to get approve (or even refuse) for your model.
 
 Nowadays OMZ supports models from frameworks: 
 * Caffe\*
@@ -11,15 +11,15 @@ Nowadays OMZ supports models from frameworks:
 
 ## Pull request requirements
 
-Contribution to OMZ comes down to creating pull request (PR) in this repository. Please use `develop` branch when creating your PR. Pull request is strictly formalized and must contains:
-* configuration file  - `model.yml` (learn more in [Configuration file](#configuration-file) section)
+Contribution to OMZ comes down to creating pull request (PR) in this repository. Please use `develop` branch when creating your PR. Pull request is strictly formalized and must contain:
+* configuration file `model.yml` (learn more in [Configuration file](#configuration-file) section)
 * documentation of model in markdown format (learn more in [Documentation](#documentation) section)
 * accuracy validation configuration file (learn more in [Accuracy Validation](#accuracy-validation) section)
 * license added to [tools/downloader/license.txt](tools/downloader/license.txt)
 * (*optional*) demo (learn more about it in [Demo](#demo) section)
 
-Name your model in OMZ using next rules:
-- name must be consistent with name given by authors, but full match not necessary
+Name your model in OMZ according to the following rules:
+- name must be consistent with original name, but complete match is not necessary
 - use lowercase
 - spaces are not allowed in the name, use `-` or `_` (`-` is preferable) as delimiters instead
 - suffix to model name, according to origin framework (see **`framework`** description in [configuration file](#configuration-file) section), if you adding reimplementation of existing model in OMZ from another framework
@@ -31,11 +31,10 @@ resnet-50-pytorch
 mobilenet-v2-1.0-224
 ```
 
-Configuration and documentation files must be located in `models/public/<model_name>` directory. 
-
-Validation configuration file must be located in [`tools/accuracy_checker/configs`](tools/accuracy_checker/configs).
-
-If you adding demo, it must be locate it in [demos](/demos) folder. Learn more about it in [Demo](#demo) section.
+Files location:
+* the configuration and documentation files must be in the `models/public/<model_name>` directory
+* the validation configuration file must be in the `tools/accuracy_checker/configs` directory
+* the demo must be in the `demos` directory
 
 This PR must pass next tests:
 * model is downloadable by `tools/downloader/downloader.py` script (see [Configuration file](#configuration-file) for details)
@@ -43,20 +42,20 @@ This PR must pass next tests:
 * model can be used by demo or sample and provides adequate results (see [Demo](#demo) for details)
 * model passes accuracy validation (see [Accuracy validation](#accuracy-validation) for details)
 
-After the end, your PR will be reviewed our team for consistence and legal compliance.
+At the end, your PR will be reviewed by OMZ maintainers for consistence and legal compliance.
 
-Your PR can be denied in case:
+Your PR can be rejected in some cases, e.g.:
 * inappropriate license (e.g. GPL-like licenses)
 * inaccessible dataset
 * PR fails one of the test above
 
 ## Configuration file
 
-Models configuration file contains information about model: what it is, how to download it and how to convert it to IR format. This information must be specified in `model.yml` file, which must be located in the model subfolder. Let look closer to the file content.
+The model configuration file contains information about model: what it is, how to download it and how to convert it to IR format. This information must be specified in `model.yml` file, which must be located in the model subfolder. Let's look closer to the file content.
 
 **`description`**
 
-Description of model.
+Description of the model. Must match with the description from model [documentation](#documentation).
 
 **`task_type`**
 
@@ -73,18 +72,18 @@ Model task class:
 - `optical_character_recognition`
 - `semantic_segmentation`
 
-If task, that your model solve, is not listed here, please add new type of task to [tools/downloader/common.py](tools/downloader/common.py) file list `KNOWN_TASK_TYPES`
+If the task, that your model solves, is not listed here, please add new it to the list `KNOWN_TASK_TYPES` of the [tools/downloader/common.py](tools/downloader/common.py) file.
 
 **`files`**
 
-> Before filling this section, you must ensure that a model is downloadable either from a direct HTTP(S) link or from Google Drive\*.
+> Before filling this section, make sure that the model can be downloaded either via the direct HTTP(S) link or from Google Drive\*.
 
-You describe all files, which need to be downloaded, in this section. Each file is described by:
+Downlodable files. Each file is described by:
 
-* `name` sets file name after downloading
-* `size` sets file size
-* `sha256` sets file hash sum
-* `source` sets direct link to file *OR* describes file access parameters
+* `name` - sets file name after downloading
+* `size` - sets file size
+* `sha256`  - sets file hash sum
+* `source` - sets direct link to file *OR* describes file access parameters
 
 > You may obtain hash sum using `sha256sum <file_name>` command on Linux\*.
  
@@ -92,18 +91,18 @@ If file is located on Google Drive\*, section `source` must contain:
 - `$type: google_drive`
 - `id` file ID on Google Drive\*
 
-> **NOTE:** if file is located on GitHub\* the version of the file must be fixed.
+> **NOTE:** if file is on GitHub\*, use the specific file version.
 
 **`postprocessing`** (*optional*)
 
-Sometimes right after downloading model is not ready for conversion by Model Optimizer and some additional preprocessing needed, such as unpacking, replacing or deleting some part of file. This manipulation is described in this section.
+Post processing of the downloaded files.
 
 For unpacking archive:
 - `$type: unpack_archive`
 - `file` archive file name
 - `format` archive format (zip | tar | gztar | bztar | xztar)
 
-For replacement operations:
+For replacement operation:
 - `$type: regex_replace`
 - `file` name of file where replacement must be executed
 - `pattern` regular expression ([learn more](https://docs.python.org/3/library/re.html))
@@ -116,7 +115,7 @@ List of onnx conversion parameters, see `model_optimizer_args` for details. Appl
 
 **`model_optimizer_args`**
 
-Conversion parameters (learn more in [Model conversion](#model-conversion) section) is specified in this section, e.g.:
+Conversion parameters (learn more in [Model conversion](#model-conversion) section), e.g.:
 ```
   - --input=data
   - --mean_values=data[127.5]
@@ -125,15 +124,15 @@ Conversion parameters (learn more in [Model conversion](#model-conversion) secti
   - --output=prob
   - --input_model=$conv_dir/googlenet-v3.onnx
 ```
-> **NOTE:**  no need to specify `framework`, `data_type`, `model_name` and `output_dir` parameters since them are deduced automatically.
+> **NOTE:** no need to specify `framework`, `data_type`, `model_name` and `output_dir`, since they are deduced automatically.
 
 **`framework`**
 
-Framework of original model (`caffe`, `dldt`, `mxnet`, `pytorch`, `tf`).
+Framework of the original model (`caffe`, `dldt`, `mxnet`, `pytorch`, `tf`, etc.).
 
 **`license`**
 
-Path to model's license.
+Path to the model license.
 
 ### Example
 
@@ -173,7 +172,7 @@ license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICE
 
 ## Model conversion
 
-Deep Learning Inference Engine (IE) supports models in Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using Model Optimizer tool included in OpenVINO&trade; toolkit. Find more information about conversion in [Model Optimizer Developer Guide](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After successful conversion you will get model in IR format `*.xml` representing net graph and `*.bin` containing net parameters. 
+Deep Learning Inference Engine (IE) supports models in the Intermediate Representation (IR) format. A model from any supported framework can be converted to IR using Model Optimizer tool included in the OpenVINO&trade; toolkit. Find more information about conversion in the [Model Optimizer Developer Guide](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html). After successful conversion you will get model in IR format `*.xml` representing net graph and `*.bin` containing net parameters. 
 
 > **NOTE 1**: image pre-processing parameters (mean and scale) should be built into converted model to simplify model usage.
 
@@ -183,20 +182,20 @@ Deep Learning Inference Engine (IE) supports models in Intermediate Representati
 
 ## Demo
 
-The demo shows the main idea of model inference using IE. If your model solves one of the tasks supported by Open Model Zoo, find appropriate demo from [demos](https://docs.openvinotoolkit.org/latest/_demos_README.html) or sample from [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html).
+A demo shows the main idea of how to infer a model using IE. If your model solves one of the tasks supported by Open Model Zoo, try to find an appropriate option from [demos](https://docs.openvinotoolkit.org/latest/_demos_README.html) or [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html). Otherwise, you must provide your own demo (C++ or Python).
 
-If appropriate demo or sample are absent, you must provide your own demo (C++ or Python). Demos are required to support the following keys:
+Demos are required to support the following keys:
 
 -    `-i "<input>"`             Required. Input to process.
--    `-m "<path>"`              Required. Path to an .xml file with a trained model.
--    `-d "<device>"`            Optional. Target device for model inference. Default is CPU.
+-    `-m "<path>"`              Required. Path to an .xml file with a trained model. If the demo uses several models at the same time, use other keys prefixed with `-m`.
+-    `-d "<device>"`            Optional. Default is CPU.
 -    `-no_show`                 Optional. Do not visualize inference results.
 
 > Note: For Python is preferable to use `-` instead of `_` as word separators (e.g. `-no-show`)
 
 Also you can add any other necessary parameters.
 
-If you adding new demo, please provide auto-testing support too:
+If you add new demo, please provide auto-testing support too:
 - add demo launch parameters in [demos/tests/cases.py](demos/tests/cases.py)
 - prepare list of input images in [demos/tests/image_sequences.py](demos/tests/image_sequences.py)
 
@@ -204,18 +203,17 @@ If you adding new demo, please provide auto-testing support too:
 
 ## Accuracy validation
 
-Accuracy validation can be performed by [Accuracy Checker](./tools/accuracy_checker) tool, provided with repository. This tool can use IE to run converted model or original framework to run original model. Accuracy Checker supports lot of datasets, metrics and preprocessing options, what makes validation quite simple (if task is supported by tool). You need only create configuration file, which contain necessary parameters to do accuracy validation (specify dataset and annotation, pre- and post processing parameters, accuracy metric to compute and so on). More details you can find [here](./tools/accuracy_checker#testing-new-models).
+Accuracy validation can be performed by the [Accuracy Checker](./tools/accuracy_checker) tool. This tool can use IE to run converted model or original framework to run original model. Accuracy Checker supports lots of datasets, metrics and preprocessing options, what makes validation quite simple (if task is supported by tool). You need only create configuration file, which contain necessary parameters to do accuracy validation (specify dataset and annotation, pre and post processing parameters, accuracy metric to compute and so on). Find more details [here](./tools/accuracy_checker#testing-new-models).
 
 If model uses dataset which is unsupported by Accuracy Checker, you also must provide link to it. Please notice this issue in PR description. Don't forget about dataset license too (see [above](#how-to-contribute-model-to-open-model-zoo)).
 
-When the configuration file is ready, you must run Accuracy Checker to obtain metric results. If they match your results, that means  conversion was fully successful and Accuracy Checker fully supports your model, metric and dataset. If no - recheck [conversion](#model-conversion) parameters or validation configuration file.
+When the configuration file is ready, you must run Accuracy Checker to obtain metric results. If they match your results, that means conversion was successful and Accuracy Checker fully supports your model, metric and dataset. If no - recheck [conversion](#model-conversion) parameters or validation configuration file.
 
 *After this step you will get accuracy validation configuration file - **<model_name>.yml***
 
 ### Example
 
-Let use one of the file from `tools/accuracy_checker/configs`, for example, this is validation configuration file for [AlexNet](tools/accuracy_checker/configs/alexnet.yml):
-
+Let use one of the files from `tools/accuracy_checker/configs`, for example, validation configuration file for [AlexNet](tools/accuracy_checker/configs/alexnet.yml):
 ```
 models:
   - name: alexnet-cf
@@ -270,22 +268,22 @@ models:
 
 ## Documentation
 
-Documentation is very important part of model contribution, it helps to better understand possible usage of the model. Documentation must be named after suggested models name.
-Documentation should contain:
+Documentation is very important part of model contribution, it helps to better understand possible use of the model. Documentation must be named after the name of the model.
+The documentation should contain:
 * description of model
 	* main purpose
 	* features
-	* links to paper or/and source
+	* references to paper or/and source
 * model specification
 	* type
 	* framework
 	* GFLOPs (*if available*)
 	* number of parameters (*if available*)
-* validation dataset description/link
+* validation dataset description and/or link
 * main accuracy values (also description of metric)
 * detailed description of input and output for original and converted models
 
-Detailed structure and headers naming convention you can learn from any other model, e.g. [alexnet](./models/public/alexnet/alexnet.md).
+Learn the detailed structure and headers naming convention from any model documentation, e.g. [alexnet](./models/public/alexnet/alexnet.md).
 
 ---
 *After this step you will obtain **<model_name>.md** - documentation file*
