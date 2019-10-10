@@ -51,7 +51,7 @@ files:
     size: 21376958
     sha256: d6904d92f92ccdca67c9717f9d119392d658577f99e5ce021b57d157985783db
     source: https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/efficientnet_b0-d6904d92.pth
-pytorch_to_onnx:
+conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=efficientnet_b0
   - --import-module=model

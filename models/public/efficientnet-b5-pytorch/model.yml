@@ -57,7 +57,7 @@ postprocessing:
     file: model/conv2d_helpers.py
     pattern: '_EXPORTABLE = False'
     replacement: '_EXPORTABLE = True'
-pytorch_to_onnx:
+conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=tf_efficientnet_b5
   - --import-module=model
