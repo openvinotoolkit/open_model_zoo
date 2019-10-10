@@ -37,6 +37,8 @@ class AverageMeter:
             self.accumulator += loss
             self.total_count += increment
 
+        return loss
+
     def evaluate(self):
         if self.total_count is None:
             return 0.0
