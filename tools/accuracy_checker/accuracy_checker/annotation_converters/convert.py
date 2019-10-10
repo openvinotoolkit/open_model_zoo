@@ -147,14 +147,14 @@ def main():
 
 def save_annotation(annotation, meta, annotation_file, meta_file):
     if annotation_file:
-        annotation_dir = annotation_file.resolve().parent
+        annotation_dir = annotation_file.parent
         if not annotation_dir.exists():
             annotation_dir.mkdir(parents=True)
         with annotation_file.open('wb') as file:
             for representation in annotation:
                 representation.dump(file)
     if meta_file and meta:
-        meta_dir = meta_file.resolve().parent
+        meta_dir = meta_file.parent
         if not meta_dir.exists():
             meta_dir.mkdir(parents=True)
         with meta_file.open('wt') as file:
