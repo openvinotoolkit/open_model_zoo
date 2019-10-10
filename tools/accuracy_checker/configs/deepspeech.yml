@@ -1,5 +1,5 @@
 models:
-  - name: crnn
+  - name: deepspeech
     # list of launchers for your topology.
     launchers:
         # launcher framework (e.g. caffe, dlsdk)
