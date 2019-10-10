@@ -175,7 +175,7 @@ def main():
                                       
         # Processing output blob
         #log.info("Processing output blob")
-        logits = np.concatenate((logits, res['Softmax']))
+        logits = np.concatenate((logits, res['raw_logits']))
         state_h = res['lstm_fused_cell/BlockLSTM/TensorIterator.1']
         state_c = res['lstm_fused_cell/BlockLSTM/TensorIterator.2']
         
