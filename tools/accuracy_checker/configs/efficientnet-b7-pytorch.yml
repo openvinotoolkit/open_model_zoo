@@ -5,12 +5,10 @@ models:
       - framework: onnx_runtime
         model: public/efficientnet-b7-pytorch/efficientnet-b7-pytorch.onnx
         adapter: classification
-        cpu_extensions: AUTO
         inputs:
           - name: data
             type: INPUT
             shape: 1,3,600,600
-
 
     datasets:
       - name: imagenet_1000_classes
@@ -37,7 +35,7 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        model: public/efficientnet-b7-pytorch/FP32/efficientnet-b7-pytorch.xml
+        model:   public/efficientnet-b7-pytorch/FP32/efficientnet-b7-pytorch.xml
         weights: public/efficientnet-b7-pytorch/FP32/efficientnet-b7-pytorch.bin
         adapter: classification
         cpu_extensions: AUTO
@@ -46,7 +44,7 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        model: public/efficientnet-b7-pytorch/FP16/efficientnet-b7-pytorch.xml
+        model:   public/efficientnet-b7-pytorch/FP16/efficientnet-b7-pytorch.xml
         weights: public/efficientnet-b7-pytorch/FP16/efficientnet-b7-pytorch.bin
         adapter: classification
         cpu_extensions: AUTO
@@ -56,7 +54,7 @@ models:
         reader: pillow_imread
 
         preprocessing:
-          - type: bgr_to_rgb # Actually rgb->bgr
+          - type: rgb_to_bgr
 
           - type: resize
             size: 632
