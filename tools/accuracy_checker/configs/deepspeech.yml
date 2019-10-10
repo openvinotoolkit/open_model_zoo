@@ -22,20 +22,21 @@ models:
           - name: 'previous_state_c/read/placeholder_port_0'
             type: HIDDEN_STATE
             shape: [1, 2048]
-        model:   0.5.0.xml
+        model:   output_graph.xml
         # topology weights binary (*.caffemodel for caffe, *.bin for InferenceEngine)
-        weights: 0.5.0.bin
+        weights: output_graph.bin
         # launcher returns raw result, so it should be converted
         # to an appropriate representation with adapter
         adapter: 
           type: beam_search_decoder
-          softmaxed_probabilities: True
+          # softmaxed_probabilities: True
         cpu_extensions: AUTO
         # batch size
         batch: 1
         _run_audio: True
         _audio_hidden_state: ['lstm_fused_cell/BlockLSTM/TensorIterator.1', 'lstm_fused_cell/BlockLSTM/TensorIterator.2']
-        _audio_output: ['Softmax']
+        # _audio_output: ['Softmax']
+        _audio_output: ['raw_logits']
         _alphabet: 29
 
     # metrics, preprocessing and postprocessing are typically dataset specific, so dataset field
