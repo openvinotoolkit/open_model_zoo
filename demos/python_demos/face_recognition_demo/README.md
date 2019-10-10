@@ -76,7 +76,7 @@ python ./face_recognition_demo.py -h
 
 usage: face_recognition_demo.py [-h] [-i PATH] [-o PATH] [--no_show] [-tl]
                                 [-cw CROP_WIDTH] [-ch CROP_HEIGHT]
-                                [-match_algo {HUNGARIAN,MIN_DIST}] -fg PATH
+                                [--match_algo {HUNGARIAN,MIN_DIST}] -fg PATH
                                 [--run_detector] -m_fd PATH -m_lm PATH -m_reid
                                 PATH [-fd_iw FD_INPUT_WIDTH]
                                 [-fd_ih FD_INPUT_HEIGHT]
@@ -105,7 +105,7 @@ General:
                         (optional) Crop the input stream to this height
                         (default: no crop). Both -cw and -ch parameters should
                         be specified to use crop.
-  -match_algo {HUNGARIAN,MIN_DIST}
+  --match_algo {HUNGARIAN,MIN_DIST}
                         (optional)algorithm for face matching(default:
                         HUNGARIAN)
 

@@ -164,7 +164,7 @@ class FacesDatabase:
         if match_algo == 'MIN_DIST':
             for i in range(len(descriptors)):
                 id = np.argmin(distances[i])
-                min_dist = np.min(distances[i])
+                min_dist = distances[i][id]
                 matches.append((id, min_dist))
         else:
             # Find best assignments, prevent repeats, assuming faces can not repeat

@@ -56,7 +56,7 @@ def build_argparser():
                          help="(optional) Crop the input stream to this height " \
                          "(default: no crop). Both -cw and -ch parameters " \
                          "should be specified to use crop.")
-    general.add_argument('-match_algo', default='HUNGARIAN', choices=MATCH_ALGO,
+    general.add_argument('--match_algo', default='HUNGARIAN', choices=MATCH_ALGO,
                          help="(optional)algorithm for face matching(default: %(default)s)")
 
     gallery = parser.add_argument_group('Faces database')
