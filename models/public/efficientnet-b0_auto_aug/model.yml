@@ -13,8 +13,9 @@
 # limitations under the License.
 
 description: >-
-  The `efficientnet-b0-tf` model is one of the EfficientNet <https://arxiv.org/abs/1905.11946>
-  group of models designed to perform image classification. This model was pretrained
+  The `efficientnet-b0_auto_aug` model is one of the EfficientNet <https://arxiv.org/abs/1905.11946>
+  group of models designed to perform image classification, trained with AutoAugmentation preprocessing
+  <https://arxiv.org/abs/1805.09501>. This model was pretrained
   in TensorFlow\*. All the EfficientNet models have been pretrained on the ImageNet image
   database.
   For details about this family of models, check out the repository
@@ -22,9 +23,9 @@ description: >-
 task_type: classification
 files:
   - name: efficientnet-b0.tar.gz
-    size: 47390720
-    sha256: b82d670255bd48b0a122d571e5766091048a503209caf15e2cda58a41118c613
-    source: https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/ckpts/efficientnet-b0.tar.gz
+    size: 39302973
+    sha256: c1109c4842c2294d9df2de9fcebc28692d1fe48ff4447e265a5d8e2f74e0fe65
+    source: https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/ckptsaug/efficientnet-b0.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar

@@ -1,9 +1,9 @@
 models:
-  - name: efficientnet-b0-tf
+  - name: efficientnet-b7_auto_aug
 
     launchers:
       - framework: tf
-        model: public/efficientnet-b0-tf/efficientnet-b0/model.ckpt.meta
+        model: public/efficientnet-b7_auto_aug/efficientnet-b7/model.ckpt.meta
         adapter: classification
         output_names:
           - logits
@@ -19,27 +19,27 @@ models:
           central_fraction: 0.875
           use_pillow: True
         - type: resize
-          size: 224
+          size: 600
           use_pillow: True
           interpolation: BICUBIC
 
 
-  - name: efficientnet-b0-tf
+  - name: efficientnet-b7_auto_aug
 
     launchers:
       - framework: dlsdk
         tags:
           - FP32
-        model:   public/efficientnet-b0-tf/FP32/efficientnet-b0-tf.xml
-        weights: public/efficientnet-b0-tf/FP32/efficientnet-b0-tf.bin
+        model:   public/efficientnet-b7_auto_aug/FP32/efficientnet-b7_auto_aug.xml
+        weights: public/efficientnet-b7_auto_aug/FP32/efficientnet-b7_auto_aug.bin
         adapter: classification
         cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
           - FP16
-        model:   public/efficientnet-b0-tf/FP16/efficientnet-b0-tf.xml
-        weights: public/efficientnet-b0-tf/FP16/efficientnet-b0-tf.bin
+        model:   public/efficientnet-b7_auto_aug/FP16/efficientnet-b7_auto_aug.xml
+        weights: public/efficientnet-b7_auto_aug/FP16/efficientnet-b7_auto_aug.bin
         adapter: classification
         cpu_extensions: AUTO
 
@@ -50,6 +50,6 @@ models:
           central_fraction: 0.875
           use_pillow: True
         - type: resize
-          size: 224
+          size: 600
           use_pillow: True
           interpolation: BICUBIC

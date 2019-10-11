@@ -1,9 +1,9 @@
 models:
-  - name: efficientnet-b0_auto_aug-tf
+  - name: efficientnet-b0_auto_aug
 
     launchers:
       - framework: tf
-        model: public/efficientnet-b0_auto_aug-tf/efficientnet-b0/model.ckpt.meta
+        model: public/efficientnet-b0_auto_aug/efficientnet-b0/model.ckpt.meta
         adapter: classification
         output_names:
           - logits
@@ -24,22 +24,22 @@ models:
           interpolation: BICUBIC
 
 
-  - name: efficientnet-b0_auto_aug-tf
+  - name: efficientnet-b0_auto_aug
 
     launchers:
       - framework: dlsdk
         tags:
           - FP32
-        model:   public/efficientnet-b0_auto_aug-tf/FP32/efficientnet-b0_auto_aug-tf.xml
-        weights: public/efficientnet-b0_auto_aug-tf/FP32/efficientnet-b0_auto_aug-tf.bin
+        model:   public/efficientnet-b0_auto_aug/FP32/efficientnet-b0_auto_aug.xml
+        weights: public/efficientnet-b0_auto_aug/FP32/efficientnet-b0_auto_aug.bin
         adapter: classification
         cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
           - FP16
-        model:   public/efficientnet-b0_auto_aug-tf/FP16/efficientnet-b0_auto_aug-tf.xml
-        weights: public/efficientnet-b0_auto_aug-tf/FP16/efficientnet-b0_auto_aug-tf.bin
+        model:   public/efficientnet-b0_auto_aug/FP16/efficientnet-b0_auto_aug.xml
+        weights: public/efficientnet-b0_auto_aug/FP16/efficientnet-b0_auto_aug.bin
         adapter: classification
         cpu_extensions: AUTO
 

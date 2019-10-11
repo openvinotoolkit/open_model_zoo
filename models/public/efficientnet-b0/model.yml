@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  The `efficientnet-b0-tf` model is one of the EfficientNet <https://arxiv.org/abs/1905.11946>
+  The `efficientnet-b0` model is one of the EfficientNet <https://arxiv.org/abs/1905.11946>
   group of models designed to perform image classification. This model was pretrained
   in TensorFlow\*. All the EfficientNet models have been pretrained on the ImageNet image
   database.
@@ -21,19 +21,19 @@ description: >-
   <https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet>.
 task_type: classification
 files:
-  - name: efficientnet-b7.tar.gz
-    size: 492077218
-    sha256: b5705cc53da6fa3e953f8509063695ed50f7adebb2488144783e20df71d0fca8
-    source: https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/ckptsaug/efficientnet-b7.tar.gz
+  - name: efficientnet-b0.tar.gz
+    size: 47390720
+    sha256: b82d670255bd48b0a122d571e5766091048a503209caf15e2cda58a41118c613
+    source: https://storage.googleapis.com/cloud-tpu-checkpoints/efficientnet/ckpts/efficientnet-b0.tar.gz
 postprocessing:
   - $type: unpack_archive
     format: gztar
-    file: efficientnet-b7.tar.gz
+    file: efficientnet-b0.tar.gz
 model_optimizer_args:
-  - --input_shape=[1,600,600,3]
+  - --input_shape=[1,224,224,3]
   - --input=0:sub
   - --output=logits
-  - --input_meta_graph=$dl_dir/efficientnet-b7/model.ckpt.meta
+  - --input_meta_graph=$dl_dir/efficientnet-b0/model.ckpt.meta
   - --reverse_input_channels
 framework: tf
 license: https://raw.githubusercontent.com/tensorflow/tpu/master/LICENSE

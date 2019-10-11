@@ -1,8 +1,8 @@
-# efficientnet-b0_auto_aug-tf
+# efficientnet-b0_auto_aug
 
 ## Use Case and High-Level Description
 
-The `efficientnet-b0_auto_aug-tf` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946)
+The `efficientnet-b0_auto_aug` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946)
 group of models designed to perform image classification, trained with
 [AutoAugmentation preprocessing](https://arxiv.org/abs/1805.09501).
 This model was pretrainedin TensorFlow\*.

@@ -36,7 +36,7 @@ License terms:
 
 ==================================================================================================
 
-* efficientnet-b0-tf, efficientnet-b0_auto_aug-tf, efficientnet-b5-tf, efficientnet-b7_auto_aug-tf - EfficientNet https://arxiv.org/abs/1905.11946
+* efficientnet-b0, efficientnet-b0_auto_aug, efficientnet-b5, efficientnet-b7_auto_aug - EfficientNet https://arxiv.org/abs/1905.11946
 
 Copyright 2017 The TensorFlow Authors.  All rights reserved.
 

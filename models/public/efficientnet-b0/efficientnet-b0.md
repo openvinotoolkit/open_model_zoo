@@ -1,8 +1,8 @@
-# efficientnet-b0-tf
+# efficientnet-b0
 
 ## Use Case and High-Level Description
 
-The `efficientnet-b0-tf` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946)
+The `efficientnet-b0` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946)
 group of models designed to perform image classification.
 This model was pretrained in TensorFlow\*.
 All the EfficientNet models have been pretrained on the ImageNet image database.

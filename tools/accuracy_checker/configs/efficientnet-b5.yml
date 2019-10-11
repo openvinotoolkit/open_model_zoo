@@ -1,9 +1,9 @@
 models:
-  - name: efficientnet-b5-tf
+  - name: efficientnet-b5
 
     launchers:
       - framework: tf
-        model: public/efficientnet-b5-tf/efficientnet-b5/model.ckpt.meta
+        model: public/efficientnet-b5/efficientnet-b5/model.ckpt.meta
         adapter: classification
         output_names:
           - logits
@@ -24,22 +24,22 @@ models:
           interpolation: BICUBIC
 
 
-  - name: efficientnet-b5-tf
+  - name: efficientnet-b5
 
     launchers:
       - framework: dlsdk
         tags:
           - FP32
-        model:   public/efficientnet-b5-tf/FP32/efficientnet-b5-tf.xml
-        weights: public/efficientnet-b5-tf/FP32/efficientnet-b5-tf.bin
+        model:   public/efficientnet-b5/FP32/efficientnet-b5.xml
+        weights: public/efficientnet-b5/FP32/efficientnet-b5.bin
         adapter: classification
         cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
           - FP16
-        model:   public/efficientnet-b5-tf/FP16/efficientnet-b5-tf.xml
-        weights: public/efficientnet-b5-tf/FP16/efficientnet-b5-tf.bin
+        model:   public/efficientnet-b5/FP16/efficientnet-b5.xml
+        weights: public/efficientnet-b5/FP16/efficientnet-b5.bin
         adapter: classification
         cpu_extensions: AUTO
 
