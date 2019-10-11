@@ -59,20 +59,7 @@ Description of the model. Must match with the description from model [documentat
 
 **`task_type`**
 
-Model task class:
-- `action_recognition`
-- `classification`
-- `detection`
-- `face_recognition`
-- `head_pose_estimation`
-- `human_pose_estimation`
-- `image_processing`
-- `instance_segmentation`
-- `object_attributes`
-- `optical_character_recognition`
-- `semantic_segmentation`
-
-If the task, that your model solves, is not listed here, please add new it to the list `KNOWN_TASK_TYPES` of the [tools/downloader/common.py](tools/downloader/common.py) file.
+Model task class, see [here](tools/downloader/README.md#model-information-dumper-usage) for details. If the task class of your model is absent, please add new to the list `KNOWN_TASK_TYPES` of the [tools/downloader/common.py](tools/downloader/common.py) file.
 
 **`files`**
 
