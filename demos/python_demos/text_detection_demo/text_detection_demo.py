@@ -13,21 +13,20 @@ limitations under the License.
 """
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 import argparse
 import sys
 
 
 class PixelLinkDecoder():
-    """ Decoder for Intel's version of PixelLink "text-detection-0001".
+    """ Decoder for Intel's version of PixelLink "text-detection-0003" or "text-detection-0004".
 
         You will need OpenCV compiled with Inference Engine to use this.
 
         ** Example of usage:**
         .. code-block:: python
 
-            td = cv2.dnn.readNet('./text-detection-0001.xml',
-                                 './text-detection-0001.bin')
+            td = cv2.dnn.readNet('./text-detection-0003.xml',
+                                 './text-detection-0003.bin')
             img = cv2.imread('tmp.jpg')
             blob = cv2.dnn.blobFromImage(img, 1, (1280,768))
             td.setInput(blob)
@@ -236,20 +235,12 @@ class PixelLinkDecoder():
         if cv2.waitKey():
             cv2.destroyAllWindows()
 
-    def plot_result_pyplot(self, image):
-        "Plot and show decoded results via matplotlib"
-        img_tmp = image.copy()
-        for box in self.bboxes:
-            cv2.drawContours(img_tmp, [box], 0, (0, 0, 255), 2)
-        plt.imshow(img_tmp[::, ::, ::-1])
-        plt.show()
-
 
 def main():
     if args.model_path.endswith('.xml'):
         td = cv2.dnn.readNet(args.model_path, args.model_path[:-3] + 'bin')
     else:
-        print("Not valid model's XML file name (should be something liike 'foo.xml')")
+        print("Not valid model's XML file name (should be something like 'foo.xml')")
         sys.exit()
     img = cv2.imread(args.image_path)
     blob = cv2.dnn.blobFromImage(img, 1, (1280, 768))
@@ -258,11 +249,7 @@ def main():
     dcd = PixelLinkDecoder()
     dcd.load(img, a, b)
     dcd.decode()  # results are in dcd.bboxes
-    try:
-        dcd.plot_result_cvgui(img)
-    except cv2.error as e:
-        if 'Rebuild the library with Windows, GTK+ 2.x or Cocoa' in str(e):
-            dcd.plot_result_pyplot(img)
+    dcd.plot_result_cvgui(img)
 
 
 if __name__ == '__main__':
