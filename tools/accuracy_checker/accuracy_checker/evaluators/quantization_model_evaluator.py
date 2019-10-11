@@ -115,7 +115,8 @@ class ModelEvaluator:
             ready_irs, queued_irs = self._wait_for_any(queued_irs)
             if ready_irs:
                 wait_time = 0.01
-                for batch_id, batch_annotation, batch_identifiers, batch_meta, batch_predictions, ir in ready_irs:
+                while ready_irs:
+                    batch_id, batch_annotation, batch_identifiers, batch_meta, batch_predictions, ir = ready_irs.pop(0)
                     batch_predictions = _process_ready_predictions(
                         batch_predictions, batch_identifiers, batch_meta, self.adapter, kwargs.get('output_callback')
                     )
