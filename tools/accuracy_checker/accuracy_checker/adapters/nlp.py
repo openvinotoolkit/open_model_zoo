@@ -1,7 +1,7 @@
 import re
 import numpy as np
 from .adapter import Adapter
-from ..representation import MachineTranslationPrediction
+from ..representation import MachineTranslationPrediction, QuestionAnsweringPrediction, ClassificationPrediction
 from ..config import PathField, NumberField
 from ..utils import read_txt
 
@@ -69,3 +69,53 @@ class MachineTranslationAdapter(Adapter):
             results.append(MachineTranslationPrediction(identifier, _clean(encoded_words, self.subword_option)))
 
         return results
+
+
+class QuestionAnsweringAdapter(Adapter):
+    __provider__ = 'bert_question_answering'
+    prediction_types = (QuestionAnsweringPrediction, )
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        predictions = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        result = []
+        batch_size, seq_length, hidden_size = predictions.shape
+        output_weights = np.random.normal(scale=0.02, size=(2, hidden_size))
+        output_bias = np.zeros(2)
+        prediction_matrix = predictions.reshape((batch_size * seq_length, hidden_size))
+        predictions = np.matmul(prediction_matrix, output_weights.T)
+        predictions = predictions + output_bias
+        predictions = predictions.reshape((batch_size, seq_length, 2))
+        for identifier, prediction in zip(identifiers, predictions):
+            prediction = np.transpose(prediction, (1, 0))
+            result.append(QuestionAnsweringPrediction(identifier, prediction[0], prediction[1]))
+
+        return result
+
+
+class BertTextClassification(Adapter):
+    __provider__ = 'bert_classification'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({"num_classes": (
+            NumberField(value_type=int, min_value=1, description='number of classes for classification')
+        )})
+
+        return params
+
+    def configure(self):
+        self.num_classes = self.get_value_from_config('num_classes')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        outputs = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        _, hidden_size = outputs.shape
+        output_weights = np.random.normal(scale=0.02, size=(self.num_classes, hidden_size))
+        output_bias = np.zeros(self.num_classes)
+        predictions = np.matmul(outputs, output_weights.T)
+        predictions += output_bias
+        result = []
+        for identifier, output in zip(identifiers, predictions):
+            result.append(ClassificationPrediction(identifier, output))
+
+        return result

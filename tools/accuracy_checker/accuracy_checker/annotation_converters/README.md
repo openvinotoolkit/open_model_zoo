@@ -198,3 +198,16 @@ Accuracy Checker supports following list of annotation converters and specific f
 * `lpr_txt` - converts annotation for license plate recognition task in txt format to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to txt annotation.
   * `decoding_dictionary` - path to file containing dictionary for output decoding.
+* `squad` - converts the Stanford Question Answering Dataset ([SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)) to `Question Answering Annotation`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+  * `testing_file` - path to testing file.
+  * `vocab_file` - path to model co vocabulary file.
+  * `max_seq_length` - maximum total input sequence length after word-piece tokenization (Optional, default value is 128).
+  * `max_query_length` - maximum number of tokens for the question (Optional, default value is 64).
+  * `doc_stride` -stride size between chunks for splitting up long document (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False)
+* `xnli` - converts The Cross-lingual Natural Language Inference Corpus ([XNLI](https://github.com/facebookresearch/XNLI)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+  * `annotation_file` - path to dataset annotation file in tsv format.
+  * `vocab_file` - path to model co vocabulary file.
+  * `max_seq_length` - maximum total input sequence length after word-piece tokenization (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+  * `language_filter` - comma-separated list of used in annotation language tags for selecting records for specific languages only. (Optional, if not used full annotation will be converted).

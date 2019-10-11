@@ -57,7 +57,7 @@ from .coco_orig_metrics import (
 )
 from .hit_ratio import HitRatioMetric, NDSGMetric
 from .machine_translation import BilingualEvaluationUnderstudy
-
+from .question_answering import ExactMatchScore, ScoreF1
 
 __all__ = [
     'Metric',
@@ -117,5 +117,8 @@ __all__ = [
     'HitRatioMetric',
     'NDSGMetric',
 
-    'BilingualEvaluationUnderstudy'
+    'BilingualEvaluationUnderstudy',
+
+    'ScoreF1',
+    'ExactMatchScore'
 ]

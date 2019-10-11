@@ -43,6 +43,7 @@ from .crop_segmentation_mask import CropSegmentationMask
 from .clip_segmentation_mask import ClipSegmentationMask
 from .normalize_boxes import NormalizeBoxes
 from .resample_segmentation_prediction import SegmentationPredictionResample
+from .extract_answers_tokens import ExtractSQUADPrediction
 
 __all__ = [
     'Postprocessor',
@@ -73,5 +74,7 @@ __all__ = [
     'ClipSegmentationMask',
     'SegmentationPredictionResample',
 
-    'NormalizeLandmarksPoints'
+    'NormalizeLandmarksPoints',
+
+    'ExtractSQUADPrediction'
 ]
