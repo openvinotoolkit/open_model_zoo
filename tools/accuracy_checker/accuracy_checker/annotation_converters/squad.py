@@ -48,7 +48,7 @@ class SQUADConverter(BaseFormatConverter):
                 description="When splitting up a long document into chunks, how much stride to take between chunks.",
                 optional=True, default=128
             ),
-            'lower_case': BoolField(optional=True, default=True, description='Switch tokens to lower case register')
+            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register')
         })
 
         return parameters

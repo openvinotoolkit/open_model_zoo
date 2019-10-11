@@ -72,23 +72,8 @@ class MachineTranslationAdapter(Adapter):
 
 
 class QuestionAnsweringAdapter(Adapter):
-    __provider__ = 'question_answering'
+    __provider__ = 'bert_question_answering'
     prediction_types = (QuestionAnsweringPrediction, )
-
-    @classmethod
-    def parameters(cls):
-        params = super().parameters()
-        params.update(
-            {
-                'max_answer': NumberField(
-                    optional=True, value_type=int, default=30, description="Maximum length of answer"
-                ),
-                'n_best_size': NumberField(
-                    optional=True, value_type=int, default=20, description="The total number of n-best predictions."
-                )
-            }
-        )
-        return params
 
     def process(self, raw, identifiers=None, frame_meta=None):
         predictions = self._extract_predictions(raw, frame_meta)[self.output_blob]
@@ -113,9 +98,11 @@ class BertTextClassification(Adapter):
     @classmethod
     def parameters(cls):
         params = super().parameters()
-        params.update({
-            "num_classes": NumberField(optional=True, defailt=3, description='number of classes for classification')
-        })
+        params.update({"num_classes": (
+            NumberField(value_type=int, min_value=1, description='number of classes for classification')
+        )})
+
+        return params
 
     def configure(self):
         self.num_classes = self.get_value_from_config('num_classes')

@@ -35,7 +35,7 @@ class XNLIDatasetConverter(BaseFormatConverter):
                 description='The maximum total input sequence length after WordPiece tokenization.',
                 optional=True, default=128
             ),
-            'lower_case': BoolField(optional=True, default=True, description='Switch tokens to lower case register')
+            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register')
         })
 
         return params

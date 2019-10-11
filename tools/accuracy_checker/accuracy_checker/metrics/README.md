@@ -13,7 +13,7 @@ Every metric has parameters available for configuration.
 Accuracy Checker supports following set of metrics:
 
 * `accuracy` - classification accuracy metric, defined as the number of correct predictions divided by the total number of predictions.
-Supported representation: `ClassificationAnnotation`, `ClassificationPrediction`
+Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
 * `accuracy_per_class` - classification accuracy metric which represents results for each class. Supported representation: `ClassificationAnnotation`, `ClassificationPrediction`.
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
@@ -160,3 +160,5 @@ More detailed information about calculation segmentation metrics you can find [h
 * `bleu` - [Bilingual Evaluation Understudy](https://en.wikipedia.org/wiki/BLEU). Supperted representations: `MachineTranslationAnnotation`, `MachineTranslationPrediction`.
   * `smooth` - Whether or not to apply Lin et al. 2004 smoothing.
   *  `max_order` - Maximum n-gram order to use when computing BLEU score. (Optional, default 4).
+* `f1` - F1-score for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
+* `exact_match` - Exact matching (EM) metric for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
