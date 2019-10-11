@@ -266,6 +266,7 @@ class ConfigReader:
                     continue
 
                 if not args[argument].is_dir():
+                    print(config_path)
                     raise ConfigError('argument: {} should be a directory'.format(argument))
                 value[field] = args[argument] / config_path
 
@@ -375,6 +376,7 @@ class ConfigReader:
             if 'cpu_extensions' not in launcher_entry and 'extensions' in arguments and arguments.extensions:
                 extensions = arguments.extensions
                 if not extensions.is_dir() or extensions.name == 'AUTO':
+                    print('extensions.name == AUTO')
                     launcher_entry['cpu_extensions'] = arguments.extensions
 
             if 'affinity_map' not in launcher_entry and 'affinity_map' in arguments and arguments.affinity_map:
