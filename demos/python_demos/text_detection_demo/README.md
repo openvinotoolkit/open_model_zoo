@@ -19,27 +19,6 @@ optional arguments:
   -m MODEL_PATH  path to model's XML file
 ```
 
-**Example of in code usage:**
-
-```python
-import cv2
-from text_detection_demo import PixelLinkDecoder
-
-
-dcd = PixelLinkDecoder()
-td = cv2.dnn.readNet('./text-detection-0001.xml','./text-detection-0001.bin')
-
-img = cv2.imread('tmp.jpg')
-blob = cv2.dnn.blobFromImage(img, 1, (1280,768))
-
-td.setInput(blob)
-a, b = td.forward(td.getUnconnectedOutLayersNames())
-
-dcd.load(img, a, b)
-dcd.decode()  # results are in dcd.bboxes
-dcd.plot_result_pyplot(img)
-```
-
 ## Demo output
 
 Image with plotted bounding boxes around a text fields.
