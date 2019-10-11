@@ -543,7 +543,6 @@ class DLSDKLauncher(Launcher):
                 print_info('Loaded {} plugin version: {}'.format(self.plugin.device, self.plugin.version))
 
         cpu_extensions = self.config.get('cpu_extensions')
-        print(cpu_extensions)
         if cpu_extensions and 'CPU' in self._devices_list():
             selection_mode = self.config.get('_cpu_extensions_mode')
             cpu_extensions = DLSDKLauncher.get_cpu_extension(cpu_extensions, selection_mode)
