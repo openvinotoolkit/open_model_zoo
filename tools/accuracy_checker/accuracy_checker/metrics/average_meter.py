@@ -37,7 +37,7 @@ class AverageMeter:
             self.accumulator += loss
             self.total_count += increment
 
-        return loss
+        return np.divide(loss, increment, out=np.zeros_like(loss), where=self.total_count != 0)
 
     def evaluate(self):
         if self.total_count is None:

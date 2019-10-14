@@ -102,10 +102,14 @@ class MetricsExecutor:
         Updates metric value corresponding given annotation and prediction objects.
         """
 
-        for metric in self.metrics:
-            metric.metric_fn.submit(annotation, prediction)
+        metric_results = []
 
-    def update_metrics_on_batch(self, annotation, prediction):
+        for metric in self.metrics:
+            metric_results.append(metric.metric_fn.submit(annotation, prediction))
+
+        return metric_results
+
+    def update_metrics_on_batch(self, batch_ids, annotation, prediction):
         """
         Updates metric value corresponding given batch.
 
@@ -114,7 +118,12 @@ class MetricsExecutor:
             prediction: list of batch number of prediction objects.
         """
 
-        zipped_transform(self.update_metrics_on_object, annotation, prediction)
+        results = {}
+
+        for input_id, single_annotation, single_prediction in zip(batch_ids, annotation, prediction):
+            results[input_id] = self.update_metrics_on_object(annotation, prediction)
+
+        return results
 
     def iterate_metrics(self, annotations, predictions):
         for name, metric_type, functor, reference, threshold, presenter in self.metrics:

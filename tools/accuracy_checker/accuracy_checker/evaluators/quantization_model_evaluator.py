@@ -76,13 +76,11 @@ class ModelEvaluator:
             **kwargs
     ):
 
-        def _process_ready_predictions(batch_predictions, batch_identifiers, batch_meta, adapter, raw_outputs_callback):
-            if raw_outputs_callback:
-                raw_outputs_callback(batch_predictions)
+        def _process_ready_predictions(batch_raw_predictions, batch_identifiers, batch_meta, adapter):
             if adapter:
-                batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
+                return self.adapter.process(batch_raw_predictions, batch_identifiers, batch_meta)
 
-            return batch_predictions
+            return batch_raw_predictions
 
         def _create_subset(subset, num_images):
             if subset is not None:
@@ -116,18 +114,30 @@ class ModelEvaluator:
             if ready_irs:
                 wait_time = 0.01
                 while ready_irs:
-                    batch_id, batch_annotation, batch_identifiers, batch_meta, batch_predictions, ir = ready_irs.pop(0)
+                    ready_data = ready_irs.pop(0)
+                    (
+                        batch_id,
+                        batch_input_ids,
+                        batch_annotation,
+                        batch_identifiers,
+                        batch_meta,
+                        batch_raw_predictions,
+                        ir
+                    ) = ready_data
                     batch_predictions = _process_ready_predictions(
-                        batch_predictions, batch_identifiers, batch_meta, self.adapter, kwargs.get('output_callback')
+                        batch_raw_predictions, batch_identifiers, batch_meta, self.adapter
                     )
                     free_irs.append(ir)
                     annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions)
 
+                    metrics_result = None
                     if self.metric_executor:
-                        self.metric_executor.update_metrics_on_batch(annotations, predictions)
+                        metrics_result = self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
                         if self.metric_executor.need_store_predictions:
                             self._annotations.extend(annotations)
                             self._predictions.extend(predictions)
+                    output_callback = kwargs.get('output_callback')
+                    output_callback(batch_raw_predictions, metrics_result=metrics_result)
 
                     if progress_reporter:
                         progress_reporter.update(batch_id, len(batch_predictions))
@@ -166,7 +176,7 @@ class ModelEvaluator:
         if check_progress:
             progress_reporter = ProgressReporter.provide('print', self.dataset.size)
 
-        for batch_id, (batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
+        for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta = self._get_batch_input(batch_inputs, batch_annotation)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
             if self.adapter:
@@ -175,7 +185,7 @@ class ModelEvaluator:
 
             annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions, batch_meta)
             if self.metric_executor:
-                self.metric_executor.update_metrics_on_batch(annotations, predictions)
+                self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
 
             self._annotations.extend(annotations)
             self._predictions.extend(predictions)
@@ -193,9 +203,11 @@ class ModelEvaluator:
 
         result = []
         free_indexes = []
-        for ir_id, (batch_id, batch_annotation, batch_identifiers, batch_meta, ir) in enumerate(irs):
+        for ir_id, (batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta, ir) in enumerate(irs):
             if ir.wait(0) == 0:
-                result.append((batch_id, batch_annotation, batch_identifiers, batch_meta, ir.outputs, ir))
+                result.append(
+                    (batch_id,  batch_input_ids, batch_annotation, batch_identifiers, batch_meta, ir.outputs, ir)
+                )
                 free_indexes.append(ir_id)
         irs = [ir for ir_id, ir in enumerate(irs) if ir_id not in free_indexes]
         return result, irs
@@ -203,13 +215,13 @@ class ModelEvaluator:
     def _fill_free_irs(self, free_irs, queued_irs, dataset_iterator, **kwargs):
         for ir in free_irs:
             try:
-                batch_id, (batch_annotation, batch_inputs, batch_identifiers) = next(dataset_iterator)
+                batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) = next(dataset_iterator)
             except StopIteration:
                 break
 
             batch_input, batch_meta = self._get_batch_input(batch_inputs, batch_annotation)
             self.launcher.predict_async(ir, batch_input, batch_meta, **kwargs)
-            queued_irs.append((batch_id, batch_annotation, batch_identifiers, batch_meta, ir))
+            queued_irs.append((batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta, ir))
 
         return free_irs, queued_irs
 
