@@ -28,7 +28,7 @@ from ..representation import (
     DetectionAnnotation, DetectionPrediction,
     ActionDetectionPrediction, ActionDetectionAnnotation
 )
-from .metric import Metric, FullDatasetEvaluationMetric
+from .metric import Metric, FullDatasetEvaluationMetric, PerImageEvaluationMetric
 
 
 class APIntegralType(enum.Enum):
@@ -134,7 +134,7 @@ class BaseDetectionMetricMixin(Metric):
         self.meta['names'] = [dataset_labels[name] for name in valid_labels]
 
 
-class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
+class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEvaluationMetric):
     """
     Class for evaluating mAP metric of detection models.
     """
@@ -162,6 +162,22 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
         super().configure()
         self.integral = APIntegralType(self.get_value_from_config('integral'))
 
+    def update(self, annotation, prediction):
+        valid_labels = get_valid_labels(self.labels, self.dataset.metadata.get('background_label'))
+        labels_stat = self.per_class_detection_statistics([annotation], [prediction], valid_labels)
+
+        average_precisions = []
+        for label in labels_stat:
+            label_precision = labels_stat[label]['precision']
+            label_recall = labels_stat[label]['recall']
+            if label_recall.size:
+                ap = average_precision(label_precision, label_recall, self.integral)
+                average_precisions.append(ap)
+            else:
+                average_precisions.append(np.nan)
+
+        return average_precisions
+
     def evaluate(self, annotations, predictions):
         valid_labels = get_valid_labels(self.labels, self.dataset.metadata.get('background_label'))
         labels_stat = self.per_class_detection_statistics(annotations, predictions, valid_labels)
@@ -184,7 +200,7 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
         return average_precisions
 
 
-class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
+class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEvaluationMetric):
     """
     Class for evaluating Miss Rate metric of detection models.
     """
@@ -206,6 +222,21 @@ class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
         super().configure()
         self.fppi_level = self.get_value_from_config('fppi_level')
 
+    def update(self, annotation, prediction):
+        valid_labels = get_valid_labels(self.labels, self.dataset.metadata.get('background_label'))
+        labels_stat = self.per_class_detection_statistics([annotation], [prediction], valid_labels)
+        miss_rates = []
+        for label in labels_stat:
+            label_miss_rate = 1.0 - labels_stat[label]['recall']
+            label_fppi = labels_stat[label]['fppi']
+
+            position = bisect.bisect_left(label_fppi, self.fppi_level)
+            m0 = max(0, position - 1)
+            m1 = position if position < len(label_miss_rate) else m0
+            miss_rates.append(0.5 * (label_miss_rate[m0] + label_miss_rate[m1]))
+
+        return miss_rates
+
     def evaluate(self, annotations, predictions):
         valid_labels = get_valid_labels(self.labels, self.dataset.metadata.get('background_label'))
         labels_stat = self.per_class_detection_statistics(annotations, predictions, valid_labels)
@@ -223,7 +254,7 @@ class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
         return miss_rates
 
 
-class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
+class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEvaluationMetric):
     """
     Class for evaluating recall metric of detection models.
     """
@@ -232,6 +263,20 @@ class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
 
     annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
     prediction_types = (DetectionPrediction, ActionDetectionPrediction)
+
+    def update(self, annotation, prediction):
+        valid_labels = get_valid_labels(self.labels, self.dataset.metadata.get('background_label'))
+        labels_stat = self.per_class_detection_statistics(annotations, predictions, valid_labels)
+        recalls = []
+        for label in labels_stat:
+            label_recall = labels_stat[label]['recall']
+            if label_recall.size:
+                max_recall = label_recall[-1]
+                recalls.append(max_recall)
+            else:
+                recalls.append(np.nan)
+
+        return recalls
 
     def evaluate(self, annotations, predictions):
         valid_labels = get_valid_labels(self.labels, self.dataset.metadata.get('background_label'))

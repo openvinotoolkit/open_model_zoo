@@ -24,7 +24,7 @@ from ..config import ConfigValidator, NumberField, StringField
 from ..dependency import ClassProvider
 from ..utils import zipped_transform, get_parameter_value_from_config, contains_any
 
-PerImageMetricResult = namedtuple('PerImageMetricResult', ['metric_name', 'metric_type', 'result', 'meta'])
+PerImageMetricResult = namedtuple('PerImageMetricResult', ['metric_name', 'metric_type', 'result'])
 
 
 
@@ -97,7 +97,7 @@ class Metric(ClassProvider):
 
     def submit(self, annotation, prediction):
         metric_result = self.update(annotation, prediction)
-        return PerImageMetricResult(self.name, self.config['type'], metric_result, None)
+        return PerImageMetricResult(self.name, self.config['type'], metric_result)
 
     def submit_all(self, annotations, predictions):
         return self.evaluate(annotations, predictions)
@@ -188,7 +188,7 @@ class PerImageEvaluationMetric(Metric):
     def submit(self, annotation, prediction):
         annotation_, prediction_ = self._resolve_representation_containers(annotation, prediction)
         metric_result = self.update(annotation_, prediction_)
-        return PerImageMetricResult(self.name, self.config['type'], metric_result, None)
+        return PerImageMetricResult(self.name, self.config['type'], metric_result)
 
     def evaluate(self, annotations, predictions):
         raise NotImplementedError
