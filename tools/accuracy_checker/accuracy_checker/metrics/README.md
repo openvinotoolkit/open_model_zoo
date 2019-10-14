@@ -160,3 +160,5 @@ More detailed information about calculation segmentation metrics you can find [h
 * `bleu` - [Bilingual Evaluation Understudy](https://en.wikipedia.org/wiki/BLEU). Supperted representations: `MachineTranslationAnnotation`, `MachineTranslationPrediction`.
   * `smooth` - Whether or not to apply Lin et al. 2004 smoothing.
   *  `max_order` - Maximum n-gram order to use when computing BLEU score. (Optional, default 4).
+* `speech_recognition_accuracy` - accuracy metric for speech recognition task. Supported representation: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
+  * `threshold` - which for word error rate to evaluate the task is success or not.
