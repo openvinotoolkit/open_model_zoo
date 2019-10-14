@@ -14,8 +14,7 @@ def __bestBeam(beam, beamdwidth):
     return (sorted_beam[:beamwidth])
 
 def CTCBeamSearchDecoder(input_tensor, text_label, blank, beamwidth):
-    # pred = input_tensor.squeeze()
-    pred = softmax_layer(input_tensor).squeeze()
+    pred = input_tensor.squeeze()
 
     t_step = pred.shape[0]
     idx_b = text_label.index(blank)
