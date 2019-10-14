@@ -29,7 +29,7 @@ models:
         # to an appropriate representation with adapter
         adapter: 
           type: beam_search_decoder
-          # softmaxed_probabilities: True
+          softmaxed_probabilities: True
         cpu_extensions: AUTO
         # batch size
         batch: 1
