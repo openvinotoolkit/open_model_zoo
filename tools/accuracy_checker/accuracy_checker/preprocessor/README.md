@@ -82,4 +82,9 @@ Accuracy Checker supports following set of preprocessors:
 *  `pad_with_eos` - supplement the input sequence to a specific size using a line terminator character or index.
   * `eos_symbol` or `eos_index` - line terminator symbol or index of this symbol in vocab for encoded sequence respectively.
   *  `sequence_len` - length of sequence after supplement.
-
+*  `overlap_creator` - create a view into features with overlapping strides of size.
+  * `step` - number of step lenght.
+  * `context` - number of context length.
+  * `input` - number of input size.
+* `audio_package` - reshape the audio features for inference.
+  * `step` - number of step length.
