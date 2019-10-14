@@ -28,7 +28,7 @@ class TestPresenter:
         predictions = [ClassificationPrediction('identifier', [1.0, 1.0, 1.0, 4.0])]
         config = [{'type': 'accuracy', 'top_k': 1}]
         dispatcher = MetricsExecutor(config, None)
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for presenter, _ in dispatcher.iterate_metrics(annotations, predictions):
             assert isinstance(presenter, ScalarPrintPresenter)
@@ -38,7 +38,7 @@ class TestPresenter:
         predictions = [ClassificationPrediction('identifier', [1.0, 1.0, 1.0, 4.0])]
         config = [{'type': 'accuracy', 'top_k': 1, 'presenter': 'print_scalar'}]
         dispatcher = MetricsExecutor(config, None)
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for presenter, _ in dispatcher.iterate_metrics(annotations, predictions):
             assert isinstance(presenter, ScalarPrintPresenter)
@@ -48,7 +48,7 @@ class TestPresenter:
         predictions = [ClassificationPrediction('identifier', [1.0, 1.0, 1.0, 4.0])]
         config = [{'type': 'accuracy', 'top_k': 1, 'presenter': 'print_vector'}]
         dispatcher = MetricsExecutor(config, None)
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for presenter, _ in dispatcher.iterate_metrics(annotations, predictions):
             assert isinstance(presenter, VectorPrintPresenter)

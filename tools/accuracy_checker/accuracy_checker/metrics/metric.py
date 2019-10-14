@@ -95,9 +95,9 @@ class Metric(ClassProvider):
     def get_value_from_config(self, key):
         return get_parameter_value_from_config(self.config, self.parameters(), key)
 
-    def submit(self,annotation, prediction):
+    def submit(self, annotation, prediction):
         metric_result = self.update(annotation, prediction)
-        return PerImageEvaluationMetric(self.name, self.config['type'], metric_result, None)
+        return PerImageMetricResult(self.name, self.config['type'], metric_result, None)
 
     def submit_all(self, annotations, predictions):
         return self.evaluate(annotations, predictions)
@@ -187,7 +187,8 @@ class Metric(ClassProvider):
 class PerImageEvaluationMetric(Metric):
     def submit(self, annotation, prediction):
         annotation_, prediction_ = self._resolve_representation_containers(annotation, prediction)
-        return self.update(annotation_, prediction_)
+        metric_result = self.update(annotation_, prediction_)
+        return PerImageMetricResult(self.name, self.config['type'], metric_result, None)
 
     def evaluate(self, annotations, predictions):
         raise NotImplementedError

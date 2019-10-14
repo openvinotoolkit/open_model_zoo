@@ -132,7 +132,9 @@ class ModelEvaluator:
 
                     metrics_result = None
                     if self.metric_executor:
-                        metrics_result = self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
+                        metrics_result = self.metric_executor.update_metrics_on_batch(
+                            batch_input_ids, annotations, predictions
+                        )
                         if self.metric_executor.need_store_predictions:
                             self._annotations.extend(annotations)
                             self._predictions.extend(predictions)
@@ -206,7 +208,7 @@ class ModelEvaluator:
         for ir_id, (batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta, ir) in enumerate(irs):
             if ir.wait(0) == 0:
                 result.append(
-                    (batch_id,  batch_input_ids, batch_annotation, batch_identifiers, batch_meta, ir.outputs, ir)
+                    (batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta, ir.outputs, ir)
                 )
                 free_indexes.append(ir_id)
         irs = [ir for ir_id, ir in enumerate(irs) if ir_id not in free_indexes]

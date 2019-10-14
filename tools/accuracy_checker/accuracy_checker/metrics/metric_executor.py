@@ -18,7 +18,6 @@ from collections import namedtuple
 
 from ..presenters import BasePresenter, EvaluationResult
 from ..config import StringField
-from ..utils import zipped_transform
 from .metric import Metric, FullDatasetEvaluationMetric
 from ..config import ConfigValidator, ConfigError
 
@@ -93,7 +92,9 @@ class MetricsExecutor:
             metric.metric_fn.dataset = dataset
 
     def __call__(self, context, *args, **kwargs):
-        self.update_metrics_on_batch(context.annotation_batch, context.prediction_batch)
+        self.update_metrics_on_batch(
+            range(len(context.annotation_batch)), context.annotation_batch, context.prediction_batch
+        )
         context.annotations.extend(context.annotation_batch)
         context.predictions.extend(context.prediction_batch)
 
@@ -121,7 +122,7 @@ class MetricsExecutor:
         results = {}
 
         for input_id, single_annotation, single_prediction in zip(batch_ids, annotation, prediction):
-            results[input_id] = self.update_metrics_on_object(annotation, prediction)
+            results[input_id] = self.update_metrics_on_object(single_annotation, single_prediction)
 
         return results
 

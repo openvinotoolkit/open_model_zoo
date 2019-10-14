@@ -38,7 +38,7 @@ class TestRegressionMetric:
         )
         dispatcher = MetricsExecutor(config, None)
 
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
@@ -57,7 +57,7 @@ class TestRegressionMetric:
         )
         dispatcher = MetricsExecutor(config, None)
 
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
@@ -76,7 +76,7 @@ class TestRegressionMetric:
         )
         dispatcher = MetricsExecutor(config, None)
 
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
@@ -95,7 +95,7 @@ class TestRegressionMetric:
         )
         dispatcher = MetricsExecutor(config, None)
 
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
@@ -114,7 +114,7 @@ class TestRegressionMetric:
         )
         dispatcher = MetricsExecutor(config, None)
 
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
@@ -133,7 +133,7 @@ class TestRegressionMetric:
         )
         dispatcher = MetricsExecutor(config, None)
 
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
@@ -157,7 +157,7 @@ class TestRegressionMetric:
         )
         dispatcher = MetricsExecutor(config, None)
 
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         with pytest.warns(UserWarning) as warnings:
             for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
@@ -183,7 +183,7 @@ class TestRegressionMetric:
         config = [{'type': 'mae_on_interval', 'end': 1, 'ignore_values_not_in_interval': False}]
         dispatcher = MetricsExecutor(config, None)
 
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
@@ -202,7 +202,7 @@ class TestRegressionMetric:
         )
         dispatcher = MetricsExecutor(config, None)
 
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
@@ -241,7 +241,7 @@ class TestRegressionMetric:
         )
         dispatcher = MetricsExecutor(config, None)
 
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
@@ -273,7 +273,7 @@ class TestRegressionMetric:
         )
         dispatcher = MetricsExecutor(config, None)
 
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
@@ -305,7 +305,7 @@ class TestRegressionMetric:
         )
         dispatcher = MetricsExecutor(config, None)
 
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
@@ -336,7 +336,7 @@ class TestRegressionMetric:
         )
         dispatcher = MetricsExecutor(config, None)
 
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected

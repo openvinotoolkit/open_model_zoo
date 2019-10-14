@@ -124,7 +124,8 @@ class ModelEvaluator:
             if ready_irs:
                 wait_time = 0.01
                 while ready_irs:
-                    batch_id, batch_input_ids, batch_annotation, batch_meta, batch_raw_predictions, ir = ready_irs.pop(0)
+                    ready_data = ready_irs.pop(0)
+                    batch_id, batch_input_ids, batch_annotation, batch_meta, batch_raw_predictions, ir = ready_data
                     batch_identifiers = [annotation.identifier for annotation in batch_annotation]
                     batch_predictions = _process_ready_predictions(
                         batch_raw_predictions, batch_identifiers, batch_meta, self.adapter,
@@ -156,7 +157,9 @@ class ModelEvaluator:
             self.store_predictions(stored_predictions, predictions_to_store)
 
         if self.postprocessor.has_dataset_processors:
-            self.metric_executor.update_metrics_on_batch(range(self._annotations), self._annotations, self._predictions)
+            self.metric_executor.update_metrics_on_batch(
+                range(len(self._annotations)), self._annotations, self._predictions
+            )
 
         return self.postprocessor.process_dataset(self._annotations, self._predictions)
 
@@ -165,12 +168,14 @@ class ModelEvaluator:
             self._annotations, self._predictions = self.load(stored_predictions, progress_reporter)
             self._annotations, self._predictions = self.postprocessor.full_process(self._annotations, self._predictions)
 
-            self.metric_executor.update_metrics_on_batch(range(self._annotations), self._annotations, self._predictions)
+            self.metric_executor.update_metrics_on_batch(
+                range(len(self._annotations)), self._annotations, self._predictions
+            )
             return self._annotations, self._predictions
 
         self.dataset.batch = self.launcher.batch
         predictions_to_store = []
-        for batch_id, batch_input_ids, batch_annotation in enumerate(self.dataset):
+        for batch_id, (batch_input_ids, batch_annotation) in enumerate(self.dataset):
             filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
             if self.adapter:
@@ -197,7 +202,9 @@ class ModelEvaluator:
             self.store_predictions(stored_predictions, predictions_to_store)
 
         if self.postprocessor.has_dataset_processors:
-            self.metric_executor.update_metrics_on_batch(range(self._annotations), self._annotations, self._predictions)
+            self.metric_executor.update_metrics_on_batch(
+                range(len(self._annotations)), self._annotations, self._predictions
+            )
 
         return self.postprocessor.process_dataset(self._annotations, self._predictions)
 
@@ -215,7 +222,9 @@ class ModelEvaluator:
     def _load_stored_predictions(self, stored_predictions, progress_reporter):
         self._annotations, self._predictions = self.load(stored_predictions, progress_reporter)
         self._annotations, self._predictions = self.postprocessor.full_process(self._annotations, self._predictions)
-        self.metric_executor.update_metrics_on_batch(self._annotations, self._predictions)
+        self.metric_executor.update_metrics_on_batch(
+            range(len(self._annotations)), self._annotations, self._predictions
+        )
 
         return self._annotations, self._predictions
 
@@ -236,7 +245,7 @@ class ModelEvaluator:
     def _fill_free_irs(self, free_irs, queued_irs, dataset_iterator):
         for ir in free_irs:
             try:
-                batch_id, batch_input_ids, batch_annotation = next(dataset_iterator)
+                batch_id, (batch_input_ids, batch_annotation) = next(dataset_iterator)
             except StopIteration:
                 break
 
