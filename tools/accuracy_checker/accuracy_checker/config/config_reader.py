@@ -77,8 +77,8 @@ class ConfigReader:
     def process_config(config, mode='models', arguments=None):
         if arguments is None:
             arguments = dict()
-        ConfigReader._provide_cmd_arguments(arguments, config, mode)
         ConfigReader._merge_paths_with_prefixes(arguments, config, mode)
+        ConfigReader._provide_cmd_arguments(arguments, config, mode)
         ConfigReader._filter_launchers(config, arguments, mode)
 
     @staticmethod

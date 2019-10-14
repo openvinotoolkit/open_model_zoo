@@ -62,12 +62,7 @@ except ImportError as import_error:
         'onnx_runtime', "ONNX Runtime isn't installed. Please, install it before using. \n{}".format(import_error.msg)
     )
 
-try:
-    from  .pytorch_launcher import PyTorchLauncher
-except ImportError as import_error:
-    PyTorchLauncher = unsupported_launcher(
-        'pytorch', "PyTorch isn't installed. Please, install it before using. \n{}".format(import_error.msg)
-    )
+from .pytorch_launcher import PyTorchLauncher
 
 __all__ = [
     'create_launcher',

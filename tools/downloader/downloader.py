@@ -140,7 +140,7 @@ def try_retrieve_from_cache(reporter, cache, files):
 
     return False
 
-def try_update_cache(cache, hash, source):
+def try_update_cache(reporter, cache, hash, source):
     try:
         cache.put(hash, source)
     except Exception:
@@ -160,7 +160,7 @@ def try_retrieve(reporter, name, destination, model_file, cache, num_attempts, s
         if try_download(reporter, f, num_attempts, start_download, model_file.size):
             f.seek(0)
             if verify_hash(reporter, f, model_file.sha256, destination, name):
-                try_update_cache(cache, model_file.sha256, destination)
+                try_update_cache(reporter, cache, model_file.sha256, destination)
                 success = True
 
     reporter.print()

@@ -4,9 +4,6 @@ import importlib
 from collections import OrderedDict
 
 import numpy as np
-import torch
-from torch.autograd import Variable
-
 from ..config import PathField, StringField, DictField, NumberField, ListField
 from .launcher import Launcher, LauncherConfigValidator
 
@@ -44,6 +41,13 @@ class PyTorchLauncher(Launcher):
 
     def __init__(self, config_entry: dict, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
+        try:
+            # Pytorch import affects performance of common pipeline
+            # it is the reason, why it is imported only when it used
+            import torch # pylint: disable=C0415
+        except ImportError as import_error:
+            raise ValueError("PyTorch isn't installed. Please, install it before using. \n{}".format(import_error.msg))
+        self._torch = torch
         pytorch_launcher_config = LauncherConfigValidator('Pytorch_Launcher', fields=self.parameters())
         pytorch_launcher_config.validate(self.config)
         module_args = config_entry.get("module_args", ())
@@ -93,7 +97,7 @@ class PyTorchLauncher(Launcher):
             model_cls = importlib.import_module(model_path).__getattribute__(model_cls)
             module = model_cls(*module_args, **module_kwargs)
             if checkpoint:
-                checkpoint = torch.load(checkpoint)
+                checkpoint = self._torch.load(checkpoint)
                 state = checkpoint if not state_key else checkpoint[state_key]
                 module.load_state_dict(state)
             if self.cuda:
@@ -105,11 +109,11 @@ class PyTorchLauncher(Launcher):
 
     def fit_to_input(self, data, layer_name, layout):
         data = np.transpose(data, layout)
-        tensor = torch.from_numpy(data.astype(np.float32))
+        tensor = self._torch.from_numpy(data.astype(np.float32))
         if self.cuda:
             tensor = tensor.cuda()
-        with torch.no_grad():
-            return Variable(tensor)
+        with self._torch.no_grad():
+            return self._torch.autograd.Variable(tensor)
 
     def predict(self, inputs, metadata=None, **kwargs):
         results = []

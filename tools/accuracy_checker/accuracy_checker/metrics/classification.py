@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 
-from ..representation import ClassificationAnnotation, ClassificationPrediction
+from ..representation import ClassificationAnnotation, ClassificationPrediction, TextClassificationAnnotation
 from ..config import NumberField, StringField
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
@@ -29,7 +29,7 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
 
     __provider__ = 'accuracy'
 
-    annotation_types = (ClassificationAnnotation, )
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
     prediction_types = (ClassificationPrediction, )
 
     @classmethod
@@ -70,7 +70,7 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
 
     __provider__ = 'accuracy_per_class'
 
-    annotation_types = (ClassificationAnnotation, )
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
     prediction_types = (ClassificationPrediction, )
 
     @classmethod

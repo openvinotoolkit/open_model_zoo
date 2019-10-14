@@ -13,7 +13,7 @@ The models can be downloaded via Model Downloader
 | ----------------- | ---------------| -------------- | -------- | ------ | ------- |
 | AlexNet           | [Caffe\*](./alexnet/alexnet.md)       | alexnet   | | 1.5 | 60.965 |
 | CaffeNet          | [Caffe\*](./caffenet/caffenet.md)     | caffenet  | | 1.5 | 60.965 |
-| DenseNet 121      | [Caffe\*](./densenet-121/densenet-121.md)<br>[TensorFlow\*](./densenet-121-tf/densenet-121-tf.md)  | densenet-121<br>densenet-121-tf | | 5.289~5.724    | 7.971 |
+| DenseNet 121      | [Caffe\*](./densenet-121/densenet-121.md)<br>[TensorFlow\*](./densenet-121-tf/densenet-121-tf.md)<br>[Caffe2\*](./densenet-121-caffe2/densenet-121-caffe2.md)  | densenet-121<br>densenet-121-tf<br>densenet-121-caffe2 | | 5.289~5.724    | 7.971 |
 | DenseNet 161      | [Caffe\*](./densenet-161/densenet-161.md)<br> [TensorFlow\*](./densenet-161-tf/densenet-161-tf.md) | densenet-161<br>densenet-161-tf | | 14.128~15.561  | 28.666 |
 | DenseNet 169      | [Caffe\*](./densenet-169/densenet-169.md)<br>[TensorFlow\*](./densenet-169-tf/densenet-169-tf.md)  | densenet-169<br>densenet-169-tf | | 6.16~6.788 | 14.139 |
 | DenseNet 201      | [Caffe\*](./densenet-201/densenet-201.md) | densenet-201 | | 8.673  | 20.001  |
@@ -28,7 +28,7 @@ The models can be downloaded via Model Downloader
 | MobileNet V1 1.0 224 | [Caffe\*](./mobilenet-v1-1.0-224/mobilenet-v1-1.0-224.md)<br>[TensorFlow\*](./mobilenet-v1-1.0-224-tf/mobilenet-v1-1.0-224-tf.md) | mobilenet-v1-1.0-224 <br> mobilenet-v1-1.0-224-tf | | 1.148 | 4.221 |
 | MobileNet V2 1.0 224 | [Caffe\*](./mobilenet-v2/mobilenet-v2.md)<br>[TensorFlow\*](./mobilenet-v2-1.0-224/mobilenet-v2-1.0-224.md)<br>[PyTorch\*](./mobilenet-v2-pytorch/mobilenet-v2-pytorch.md) | mobilenet-v2 <br>  mobilenet-v2-1.0-224 <br> mobilenet-v2-pytorch | | 0.615~0.876 | 3.489 |
 | MobileNet V2 1.4 224 | [TensorFlow\*](./mobilenet-v2-1.4-224/mobilenet-v2-1.4-224.md)  | mobilenet-v2-1.4-224 | | 1.183  | 6.087 |
-| ResNet 50            | [Caffe\*](./resnet-50/resnet-50.md) <br> [PyTorch\*](./resnet-50-pytorch/resnet-50-pytorch.md) | resnet-50 <br> resnet-50-pytorch | | 6.996~8.216 | 25.53 |
+| ResNet 50            | [Caffe\*](./resnet-50/resnet-50.md) <br> [PyTorch\*](./resnet-50-pytorch/resnet-50-pytorch.md)<br>[Caffe2\*](./resnet-50-caffe2/resnet-50-caffe2.md) | resnet-50 <br> resnet-50-pytorch<br>resnet-50-caffe2 | | 6.996~8.216 | 25.53 |
 | ResNet 101           | [Caffe\*](./resnet-101/resnet-101.md) | resnet-101 | | 14.441 | 44.496 |
 | ResNet 152           | [Caffe\*](./resnet-152/resnet-152.md) | resnet-152 | | 21.89 | 60.117 |
 | SE-Inception         | [Caffe\*](./se-inception/se-inception.md)      | se-inception | | 4.091 | 11.922 |
@@ -38,9 +38,9 @@ The models can be downloaded via Model Downloader
 | SE-ResNeXt 50        | [Caffe\*](./se-resnext-50/se-resnext-50.md)    | se-resnext-50 | | 8.533 | 27.526|
 | SE-ResNeXt 101       | [Caffe\*](./se-resnext-101/se-resnext-101.md)  | se-resnext-101 | | 16.054 | 48.886 |
 | SqueezeNet v1.0      | [Caffe\*](./squeezenet1.0/squeezenet1.0.md)    | squeezenet1.0| | 1.737 | 1.248 |
-| SqueezeNet v1.1      | [Caffe\*](./squeezenet1.1/squeezenet1.1.md)    | squeezenet1.1| | 0.785 | 1.236 |
+| SqueezeNet v1.1      | [Caffe\*](./squeezenet1.1/squeezenet1.1.md)<br>[Caffe2\*](./squeezenet1.1-caffe2/squeezenet1.1-caffe2.md)    | squeezenet1.1<br>squeezenet1.1-caffe2| | 0.785 | 1.236 |
 | VGG 16               | [Caffe\*](./vgg16/vgg16.md) | vgg16 | | 30.974 | 138.358 |
-| VGG 19               | [Caffe\*](./vgg19/vgg19.md) | vgg19 | | 39.3 | 143.667  |
+| VGG 19               | [Caffe\*](./vgg19/vgg19.md)<br>[Caffe2\*](./vgg19-caffe2/vgg19-caffe2.md) | vgg19<br>vgg19-caffe2 | | 39.3 | 143.667  |
 
 **Octave Convolutions Networks**
 

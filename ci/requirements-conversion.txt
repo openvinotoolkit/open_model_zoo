@@ -4,6 +4,7 @@ certifi==2019.9.11        # via requests
 chardet==3.0.4            # via requests
 decorator==4.4.0          # via networkx
 defusedxml==0.6.0
+future==0.17.1
 gast==0.3.2               # via tensorflow
 google-pasta==0.1.7       # via tensorflow
 graphviz==0.8.4           # via mxnet
