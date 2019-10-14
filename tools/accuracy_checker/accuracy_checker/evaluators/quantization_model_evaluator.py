@@ -26,7 +26,6 @@ from ..preprocessor import PreprocessingExecutor
 from ..adapters import create_adapter
 from ..config import ConfigError
 from ..data_readers import BaseReader
-from ..statistics_collector import StatisticsCollector
 from ..progress_reporters import ProgressReporter
 
 
@@ -38,7 +37,6 @@ class ModelEvaluator:
         self.input_feeder = None
         self.adapter = adapter
         self.dataset_config = dataset_config
-        self.stat_collector = None
         self.preprocessor = None
         self.dataset = None
         self.postprocessor = None
@@ -71,7 +69,6 @@ class ModelEvaluator:
     def process_dataset_async(
             self,
             nreq=2,
-            statistics_functors_maping=None,
             subset=None,
             num_images=None,
             check_progress=False,
@@ -80,8 +77,6 @@ class ModelEvaluator:
     ):
 
         def _process_ready_predictions(batch_predictions, batch_identifiers, batch_meta, adapter, raw_outputs_callback):
-            if self.stat_collector:
-                self.stat_collector.process_batch(batch_predictions)
             if raw_outputs_callback:
                 raw_outputs_callback(batch_predictions)
             if adapter:
@@ -99,7 +94,6 @@ class ModelEvaluator:
             self.select_dataset(dataset_tag)
 
         self.dataset.batch = self.launcher.batch
-        self.stat_collector = None
         progress_reporter = None
 
         _create_subset(subset, num_images)
@@ -110,9 +104,6 @@ class ModelEvaluator:
         dataset_iterator = iter(enumerate(self.dataset))
         if self.launcher.num_requests != nreq:
             self.launcher.num_requests = nreq
-
-        if statistics_functors_maping:
-            self.stat_collector = StatisticsCollector(statistics_functors_maping, self.launcher.batch)
         free_irs = self.launcher.infer_requests
         queued_irs = []
         wait_time = 0.01
@@ -124,7 +115,8 @@ class ModelEvaluator:
             ready_irs, queued_irs = self._wait_for_any(queued_irs)
             if ready_irs:
                 wait_time = 0.01
-                for batch_id, batch_annotation, batch_identifiers, batch_meta, batch_predictions, ir in ready_irs:
+                while ready_irs:
+                    batch_id, batch_annotation, batch_identifiers, batch_meta, batch_predictions, ir = ready_irs.pop(0)
                     batch_predictions = _process_ready_predictions(
                         batch_predictions, batch_identifiers, batch_meta, self.adapter, kwargs.get('output_callback')
                     )
@@ -154,7 +146,6 @@ class ModelEvaluator:
 
     def process_dataset(
             self,
-            statistics_functors_maping=None,
             subset=None,
             num_images=None,
             check_progress=False,
@@ -165,9 +156,6 @@ class ModelEvaluator:
             self.select_dataset(dataset_tag)
         self.dataset.batch = self.launcher.batch
         progress_reporter = None
-
-        if statistics_functors_maping:
-            self.stat_collector = StatisticsCollector(statistics_functors_maping, self.launcher.batch)
 
         if subset is not None:
             self.dataset.make_subset(ids=subset)
@@ -181,8 +169,6 @@ class ModelEvaluator:
         for batch_id, (batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta = self._get_batch_input(batch_inputs, batch_annotation)
             batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
-            if self.stat_collector:
-                self.stat_collector.process_batch(batch_predictions)
             if self.adapter:
                 self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
                 batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
@@ -276,11 +262,6 @@ class ModelEvaluator:
 
     def get_network(self):
         return self.launcher.network
-
-    def get_statistics(self):
-        if not self.stat_collector:
-            return None
-        return self.stat_collector.get_statistics()
 
     def reset(self):
         if self.metric_executor:

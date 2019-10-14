@@ -32,6 +32,7 @@ from faces_database import FacesDatabase
 from face_identifier import FaceIdentifier
 
 DEVICE_KINDS = ['CPU', 'GPU', 'FPGA', 'MYRIAD', 'HETERO', 'HDDL']
+MATCH_ALGO = ['HUNGARIAN', 'MIN_DIST']
 
 
 def build_argparser():
@@ -55,6 +56,8 @@ def build_argparser():
                          help="(optional) Crop the input stream to this height " \
                          "(default: no crop). Both -cw and -ch parameters " \
                          "should be specified to use crop.")
+    general.add_argument('--match_algo', default='HUNGARIAN', choices=MATCH_ALGO,
+                         help="(optional)algorithm for face matching(default: %(default)s)")
 
     gallery = parser.add_argument_group('Faces database')
     gallery.add_argument('-fg', metavar="PATH", required=True,
@@ -146,7 +149,8 @@ class FrameProcessor:
 
         self.landmarks_detector = LandmarksDetector(landmarks_net)
         self.face_identifier = FaceIdentifier(face_reid_net,
-                                              match_threshold=args.t_id)
+                                              match_threshold=args.t_id,
+                                              match_algo = args.match_algo)
 
         self.face_detector.deploy(args.d_fd, context)
         self.landmarks_detector.deploy(args.d_lm, context,

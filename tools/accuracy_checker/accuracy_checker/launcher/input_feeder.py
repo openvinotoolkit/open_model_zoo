@@ -78,8 +78,10 @@ class InputFeeder:
         return image_infos
 
     def fill_non_constant_inputs(self, data_representation_batch):
-        image_info_inputs = self._fill_image_info_inputs(data_representation_batch)
-        filled_inputs = {**image_info_inputs}
+        filled_inputs = {}
+        if self.image_info_inputs:
+            image_info_inputs = self._fill_image_info_inputs(data_representation_batch)
+            filled_inputs = {**image_info_inputs}
         for input_layer in self.non_constant_inputs:
             input_regex = None
             input_batch = []

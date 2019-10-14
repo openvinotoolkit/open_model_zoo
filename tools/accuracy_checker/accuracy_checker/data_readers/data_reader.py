@@ -46,7 +46,7 @@ class DataRepresentation:
         elif isinstance(data, list) and np.isscalar(data[0]):
             self.metadata['image_size'] = len(data)
         else:
-            self.metadata['image_size'] = data.shape if not isinstance(data, list) else data[0].shape
+            self.metadata['image_size'] = data.shape if not isinstance(data, list) else np.shape(data[0])
 
 
 ClipIdentifier = namedtuple('ClipIdentifier', ['video', 'clip_id', 'frames'])
