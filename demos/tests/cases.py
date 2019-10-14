@@ -321,6 +321,20 @@ PYTHON_DEMOS = [
             }),
         ],
     )),
+    
+    PythonDemo(name='text_detection_demo', test_cases=combine_cases(
+        device_cases('-d'),
+        [
+            TestCase(options={
+                '-i': IMAGE_SEQUENCES['text-detection'],
+                '-m': ModelArg('text-detection-0003'),
+            }),
+            TestCase(options={
+                '-i': IMAGE_SEQUENCES['text-detection'],
+                '-m': ModelArg('text-detection-0004'),
+            }),
+        ],
+    )),
 ]
 
 DEMOS = NATIVE_DEMOS + PYTHON_DEMOS
