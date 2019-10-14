@@ -35,6 +35,11 @@ Additionally you can provide device specific parameters:
 * `gpu_extensions` (path to extension *.xml file with OpenCL kernel description for gpu).
 * `bitstream` for running on FPGA.
 
+* `_run_audio` - flag, which allows to infer the audio file (default value is False).
+* `_audio_hidden_state` - nodes of hidden state of output, which allow launcher can acquire the correct hidden state of output node during processing an audio file.
+* `_audio_output` - node of the output, which allow launcher can acquire the correct output node during processing an audio file.
+* `_alphabet` - number of alphabet which used. 
+
 Beside that, you can launch model in `async_mode`, enable this option and provide the number of infer requests (`num_requests`), which will be used in evaluation process. 
 For multi device configuration async mode used automatically. You can provide number requests for each device as part device specification: `MULTI:device_1(num_req_1),device_2(num_req_2)` or in `num_requests` config section (for this case comma-separated list of integer numbers or one value if number requests for all devices equal can be used).
 
@@ -48,6 +53,7 @@ Each input description should has following info:
     * `IMAGE_INFO` - specific key for setting information about input shape to layer (used in Faster RCNN based topologies). You do not need provide `value`, because it will be calculated in runtime. Format value is `Nx[H, W, S]`, where `N` is batch size, `H` - original image height, `W` - original image width, `S` - scale of original image (default 1).
     * `INPUT` - network input for main data stream (e. g. images). If you have several data inputs, you should provide regular expression for identifier as `value` for specifying which one data should be provided in specific input.
     Optionally you can determine `shape` of input (actually does not used, DLSDK launcher uses info given from network) and `layout` in case when your model was trained with non-standard data layout (For DLSDK default layout is `NCHW`).
+    * `HIDDEN_STATE` - network input for hidden state which initailize by tuple as an all zeros array.
 
 OpenVINO™ launcher config example:
 
