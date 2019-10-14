@@ -73,6 +73,7 @@ class ModelEvaluator:
             num_images=None,
             check_progress=False,
             dataset_tag='',
+            output_callback=None,
             **kwargs
     ):
 
@@ -138,8 +139,9 @@ class ModelEvaluator:
                         if self.metric_executor.need_store_predictions:
                             self._annotations.extend(annotations)
                             self._predictions.extend(predictions)
-                    output_callback = kwargs.get('output_callback')
-                    output_callback(batch_raw_predictions, metrics_result=metrics_result)
+
+                    if output_callback:
+                        output_callback(batch_raw_predictions, metrics_result=metrics_result)
 
                     if progress_reporter:
                         progress_reporter.update(batch_id, len(batch_predictions))
@@ -162,6 +164,7 @@ class ModelEvaluator:
             num_images=None,
             check_progress=False,
             dataset_tag='',
+            output_callback=None,
             **kwargs
     ):
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
@@ -180,17 +183,22 @@ class ModelEvaluator:
 
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta = self._get_batch_input(batch_inputs, batch_annotation)
-            batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
+            batch_raw_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
             if self.adapter:
                 self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
-                batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
+                batch_predictions = self.adapter.process(batch_raw_predictions, batch_identifiers, batch_meta)
+            else:
+                batch_predictions = batch_raw_predictions
 
             annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions, batch_meta)
+            metrics_result = None
             if self.metric_executor:
-                self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
+                metrics_result = self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
+                if self.metric_executor.need_store_predictions:
+                    self._annotations.extend(annotations)
+                    self._predictions.extend(predictions)
 
-            self._annotations.extend(annotations)
-            self._predictions.extend(predictions)
+            output_callback(batch_raw_predictions, metrics_result=metrics_result)
 
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_predictions))
