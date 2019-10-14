@@ -93,7 +93,7 @@ class MetricsExecutor:
 
     def __call__(self, context, *args, **kwargs):
         self.update_metrics_on_batch(
-            range(len(context.annotation_batch)), context.annotation_batch, context.prediction_batch
+            context.input_ids_batch, context.annotation_batch, context.prediction_batch
         )
         context.annotations.extend(context.annotation_batch)
         context.predictions.extend(context.prediction_batch)

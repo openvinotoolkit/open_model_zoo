@@ -122,10 +122,11 @@ class Dataset:
         return len(self._annotation)
 
     def __call__(self, context, *args, **kwargs):
-        batch_annotation = self.__getitem__(self.iteration)
+        batch_input_ids, batch_annotation = self.__getitem__(self.iteration)
         self.iteration += 1
         context.annotation_batch = batch_annotation
         context.identifiers_batch = [annotation.identifier for annotation in batch_annotation]
+        context.input_ids_batch = batch_input_ids
 
     def __getitem__(self, item):
         if self.size <= item * self.batch:
