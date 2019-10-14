@@ -19,7 +19,7 @@ The models can be downloaded via Model Downloader
 | DenseNet 201      | [Caffe\*](./densenet-201/densenet-201.md) | densenet-201 | | 8.673  | 20.001  |
 | EfficientNet B0   | [TensorFlow\*](./efficientnet-b0/efficientnet-b0.md)<br>[PyTorch\*](./efficientnet-b0-pytorch/efficientnet-b0-pytorch.md) | efficientnet-b0<br>efficientnet-b0-pytorch | 75.70/92.76<br>76.91/93.21 | 0.819 | 5.268 |
 | EfficientNet B0 AutoAugment  | [TensorFlow\*](./efficientnet-b0_auto_aug/efficientnet-b0_auto_aug.md) | efficientnet-b0_auto_aug | 76.43/93.04 | 0.819 | 5.268 |
-| EfficientNet B5   | [TensorFlow\*](./efficientnet-b5/efficientnet-b5.md)<br>[PyTorch\*](./efficientnet-b5-pytorch/efficientnet-b5-pytorch.md) | efficientnet-b5<br>efficientnet-b5-pytorch | 83.69/96.71 | 21.252 | 30.303 | 
+| EfficientNet B5   | [TensorFlow\*](./efficientnet-b5/efficientnet-b5.md)<br>[PyTorch\*](./efficientnet-b5-pytorch/efficientnet-b5-pytorch.md) | efficientnet-b5<br>efficientnet-b5-pytorch | 83.33/96.67<br>83.69/96.71 | 21.252 | 30.303 | 
 | EfficientNet B7   | [PyTorch\*](./efficientnet-b7-pytorch/efficientnet-b7-pytorch.md) | efficientnet-b7-pytorch | 84.42/96.91 | 77.618  | 66.193 |
 | EfficientNet B7 AutoAugment  | [TensorFlow\*](./efficientnet-b7_auto_aug/efficientnet-b7_auto_aug.md) | efficientnet-b7_auto_aug | 84.68/97.09 | 77.618  | 66.193 |
 | Inception (GoogleNet) V1 | [Caffe\*](./googlenet-v1/googlenet-v1.md) | googlenet-v1 | | 3.266 | 6.999 |

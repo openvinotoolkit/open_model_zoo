@@ -1,4 +1,4 @@
-# efficientnet-b7
+# efficientnet-b7_auto_aug
 
 ## Use Case and High-Level Description
 
