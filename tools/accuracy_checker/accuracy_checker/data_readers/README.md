@@ -40,3 +40,4 @@ Note: since 1.3.0 version the image processing module is not a part of scipy lib
   * `key` - key for reading from stored in json dictionary.
 * `annotation_features_extractor` - read features from annotation.
   * `features` - list of features. All features should be fields of annotation representation.
+* `audio_reader` - read  wave format audio file to mfcc feature.
