@@ -30,6 +30,9 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import re
+import timeit
+import csv
 
 from pathlib import Path
 
@@ -50,6 +53,17 @@ def parse_args():
         help='list of demos to run tests for (by default, every demo is tested)')
     return parser.parse_args()
 
+def parce_result(demo_name, device, pipline, execution_time):
+    if device == "":
+        device = "CPU"
+    csv_path = Path("demo_execution_time_report.csv")
+    first_time = not csv_path.exists()
+    with csv_path.open('a+', newline='') as csvfile:
+        testwriter = csv.writer(csvfile)
+        if first_time:
+            testwriter.writerow(["DemoName", "Device", "ModelsInPipline", "ExecutionTime"])
+        testwriter.writerow([demo_name, device, ", ".join(pipline), execution_time])
+
 def main():
     args = parse_args()
 
@@ -68,7 +82,8 @@ def main():
         demos_to_test = {demo.full_name for demo in DEMOS}
 
     num_failures = 0
-
+    
+    
     for demo in DEMOS:
         if demo.full_name not in demos_to_test: continue
 
@@ -117,7 +132,7 @@ def main():
 
             print('Fixed arguments:', ' '.join(map(shlex.quote, fixed_args)))
             print()
-
+            
             for test_case_index, test_case in enumerate(demo.test_cases):
                 case_args = [demo_arg
                     for key, value in sorted(test_case.options.items())
@@ -140,15 +155,17 @@ def main():
                         pipline.append(model.group(1) if model else option_to_args(key, value)[1])
                 pipline.sort()
                 try:
+                    start_time = timeit.default_timer()
                     subprocess.check_output(fixed_args + case_args,
                         stderr=subprocess.STDOUT, universal_newlines=True)
+                    execution_time = timeit.default_timer() - start_time
                 except subprocess.CalledProcessError as e:
                     print(e.output)
                     print('Exit code:', e.returncode)
                     num_failures += 1
+                parce_result(demo.full_name, device, pipline, execution_time)
 
         print()
-
     print("Failures: {}".format(num_failures))
 
     sys.exit(0 if num_failures == 0 else 1)
