@@ -227,10 +227,9 @@ class PixelLinkDecoder():
 
     def plot_result_cvgui(self, image):
         "Plot and show decoded results via OpenCV's GUI"
-        img_tmp = image.copy()
         for box in self.bboxes:
-            cv2.drawContours(img_tmp, [box], 0, (0, 0, 255), 2)
-        cv2.imshow('Detected text', img_tmp)
+            cv2.drawContours(image, [box], 0, (0, 0, 255), 2)
+        cv2.imshow('Detected text', image)
         cv2.waitKey(0)
         if cv2.waitKey():
             cv2.destroyAllWindows()
