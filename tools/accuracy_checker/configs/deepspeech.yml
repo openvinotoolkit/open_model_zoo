@@ -35,8 +35,7 @@ models:
         batch: 1
         _run_audio: True
         _audio_hidden_state: ['lstm_fused_cell/BlockLSTM/TensorIterator.1', 'lstm_fused_cell/BlockLSTM/TensorIterator.2']
-        # _audio_output: ['Softmax']
-        _audio_output: ['raw_logits']
+        _audio_output: ['Softmax']
         _alphabet: 29
 
     # metrics, preprocessing and postprocessing are typically dataset specific, so dataset field
