@@ -43,6 +43,13 @@ class TestPixelAccuracy:
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
 
+    def test_one_class_update_metric_result(self):
+        annotations = make_segmentation_representation(np.array([[0, 0], [0, 0]]), True)
+        predictions = make_segmentation_representation(np.array([[0, 0], [0, 0]]), False)
+        dispatcher = MetricsExecutor(create_config(self.name), single_class_dataset())
+        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        assert metric_result[0][0].result == 1
+
     def test_multi_class_not_matched(self):
         annotations = make_segmentation_representation(np.array([[0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]), True)
         predictions = make_segmentation_representation(np.array([[1, 1, 1, 1, 1], [1, 1, 1, 1, 1]]), False)
@@ -60,6 +67,13 @@ class TestPixelAccuracy:
         expected = generate_expected_result((5.0+1.0+1.0)/(8.0+1.0+1.0), self.name)
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
+
+    def test_multi_class_update_metric_result(self):
+        annotations = make_segmentation_representation(np.array([[1, 0, 3, 0, 0], [0, 0, 0, 0, 0]]), True)
+        predictions = make_segmentation_representation(np.array([[1, 2, 3, 2, 3], [0, 0, 0, 0, 0]]), False)
+        dispatcher = MetricsExecutor(create_config(self.name), multi_class_dataset())
+        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        assert metric_result[0][0].result == 0.7
 
 
 class TestMeanAccuracy:
@@ -95,6 +109,15 @@ class TestMeanAccuracy:
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
 
+    def test_update_metric_result(self):
+        dataset = multi_class_dataset()
+        annotations = make_segmentation_representation(np.array([[1, 2, 3, 2, 3], [0, 0, 0, 0, 0]]), True)
+        predictions = make_segmentation_representation(np.array([[1, 0, 3, 0, 0], [0, 0, 0, 0, 0]]), False)
+        dispatcher = MetricsExecutor(create_config(self.name), dataset)
+        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        for class_result, expected_class_result in zip(metric_result[0][0].result, [1.0, 1.0, 0.0, 0.5]):
+            assert class_result == expected_class_result
+
 
 class TestMeanIOU:
     name = 'mean_iou'
@@ -129,6 +152,15 @@ class TestMeanIOU:
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
 
+    def test_update_metric_result(self):
+        dataset = multi_class_dataset()
+        annotations = make_segmentation_representation(np.array([[1, 2, 3, 2, 3], [0, 0, 0, 0, 0]]), True)
+        predictions = make_segmentation_representation(np.array([[1, 0, 3, 0, 0], [0, 0, 0, 0, 0]]), False)
+        dispatcher = MetricsExecutor(create_config(self.name), dataset)
+        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        for class_result, expected_class_result in zip(metric_result[0][0].result, [0.625, 1.0, 0.0, 0.5]):
+            assert class_result == expected_class_result
+
 
 class TestSegmentationFWAcc:
     name = 'frequency_weighted_accuracy'
@@ -162,3 +194,11 @@ class TestSegmentationFWAcc:
         expected = generate_expected_result(0.5125, self.name)
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
+
+    def test_update_metric_result(self):
+        dataset = multi_class_dataset()
+        annotations = make_segmentation_representation(np.array([[1, 2, 3, 2, 3], [0, 0, 0, 0, 0]]), True)
+        predictions = make_segmentation_representation(np.array([[1, 0, 3, 0, 0], [0, 0, 0, 0, 0]]), False)
+        dispatcher = MetricsExecutor(create_config(self.name), dataset)
+        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        assert metric_result[0][0].result == 0.5125

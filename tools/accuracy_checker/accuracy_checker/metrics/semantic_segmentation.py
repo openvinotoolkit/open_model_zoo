@@ -89,16 +89,16 @@ class SegmentationIOU(SegmentationMetric):
 
     def update(self, annotation, prediction):
         cm = super().update(annotation, prediction)
-        union = cm.sum(axis=1) + cm.sum(axis=0) - np.diag(cm)
         diagonal = np.diag(cm).astype(float)
+        union = cm.sum(axis=1) + cm.sum(axis=0) - diagonal
         iou = np.divide(diagonal, union, out=np.zeros_like(diagonal), where=union != 0)
 
         return iou
 
     def evaluate(self, annotations, predictions):
         confusion_matrix = self.state[self.CONFUSION_MATRIX_KEY]
-        union = confusion_matrix.sum(axis=1) + confusion_matrix.sum(axis=0) - np.diag(confusion_matrix)
         diagonal = np.diag(confusion_matrix)
+        union = confusion_matrix.sum(axis=1) + confusion_matrix.sum(axis=0) - diagonal
         iou = np.divide(diagonal, union, out=np.zeros_like(diagonal), where=union != 0)
 
         values, names = finalize_metric_result(iou, list(self.dataset.labels.values()))
@@ -133,11 +133,19 @@ class SegmentationMeanAccuracy(SegmentationMetric):
 class SegmentationFWAcc(SegmentationMetric):
     __provider__ = 'frequency_weighted_accuracy'
 
+    def update(self, annotation, prediction):
+        cm = super().update(annotation, prediction)
+        diagonal = np.diag(cm).astype(float)
+        union = cm.sum(axis=1) + cm.sum(axis=0) - diagonal
+        iou = np.divide(diagonal, union, out=np.zeros_like(diagonal), where=union != 0)
+        freq = cm.sum(axis=1) / cm.sum()
+
+        return (freq[freq > 0] * iou[freq > 0]).sum()
+
     def evaluate(self, annotations, predictions):
         confusion_matrix = self.state[self.CONFUSION_MATRIX_KEY]
-
-        union = (confusion_matrix.sum(axis=1) + confusion_matrix.sum(axis=0) - np.diag(confusion_matrix))
         diagonal = np.diag(confusion_matrix)
+        union = confusion_matrix.sum(axis=1) + confusion_matrix.sum(axis=0) - diagonal
         iou = np.divide(diagonal, union, out=np.zeros_like(diagonal), where=union != 0)
         freq = confusion_matrix.sum(axis=1) / confusion_matrix.sum()
 
@@ -151,14 +159,15 @@ class SegmentationDSCAcc(PerImageEvaluationMetric):
     overall_metric = []
 
     def update(self, annotation, prediction):
-        cnt = 0
+        result = []
         for prediction_mask, annotation_mask in zip(prediction.mask, annotation.mask):
             annotation_mask = np.transpose(annotation_mask, (2, 0, 1))
             annotation_mask = np.expand_dims(annotation_mask, 0)
             numerator = np.sum(prediction_mask * annotation_mask) * 2.0 + 1.0
             denominator = np.sum(annotation_mask) + np.sum(prediction_mask) + 1.0
-            self.overall_metric.append(numerator / denominator)
-            cnt += 1
+            result.append(numerator / denominator)
+        self.overall_metric.extend(result)
+        return np.mean(result)
 
     def evaluate(self, annotations, predictions):
         return sum(self.overall_metric) / len(self.overall_metric)
