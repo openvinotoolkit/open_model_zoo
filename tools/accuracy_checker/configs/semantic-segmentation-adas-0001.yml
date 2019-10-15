@@ -18,14 +18,6 @@ models:
         adapter: segmentation
         cpu_extensions: AUTO
 
-      - framework: dlsdk
-        tags:
-          - INT8
-        model:   intel/semantic-segmentation-adas-0001/INT8/semantic-segmentation-adas-0001.xml
-        weights: intel/semantic-segmentation-adas-0001/INT8/semantic-segmentation-adas-0001.bin
-        adapter: segmentation
-        cpu_extensions: AUTO
-
     datasets:
       - name: semantic_segmentation_adas
 

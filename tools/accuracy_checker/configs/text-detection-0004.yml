@@ -21,7 +21,7 @@ models:
         tags:
           - FP16
         model:   intel/text-detection-0004/FP16/text-detection-0004.xml
-        weights: intel/text-detection-0004/dldt/FP16/text-detection-0004.bin
+        weights: intel/text-detection-0004/FP16/text-detection-0004.bin
         adapter:
           type: pixel_link_text_detection
           pixel_link_out: model/link_logits_/add
