@@ -312,10 +312,12 @@ PYTHON_DEMOS = [
         device_cases('-d'),
         [
             TestCase(options={
+                '--no_show': None,
                 '-m': ModelArg('road-segmentation-adas-0001'),
                 '-i': IMAGE_SEQUENCES['road-segmentation-adas'],
             }),
             TestCase(options={
+                '--no_show': None,
                 '-m': ModelArg('semantic-segmentation-adas-0001'),
                 '-i': IMAGE_SEQUENCES['semantic-segmentation-adas'],
             }),
