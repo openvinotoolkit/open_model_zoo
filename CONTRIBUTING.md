@@ -39,6 +39,7 @@ Examples of model names:
 ### Files Location
 
 Place your files as shown in the table below:
+
 File | Directory
 ---|---
 configuration file<br>documentation file |`models/public/<model_name>`
