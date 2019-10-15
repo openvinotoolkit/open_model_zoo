@@ -25,7 +25,6 @@ Image with plotted bounding boxes around a text fields.
 
 ## See Also
 
-* [Using Open Model Zoo demos](../README.md)
 * [PixelLink original paper](https://arxiv.org/pdf/1801.01315.pdf)
 * [PixelLink original code](https://github.com/ZJULearning/pixel_link)
 * [PixelLink in Keras](https://github.com/opconty/pixellink_keras)
