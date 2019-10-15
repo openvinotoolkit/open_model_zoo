@@ -35,10 +35,8 @@ Additionally you can provide device specific parameters:
 * `gpu_extensions` (path to extension *.xml file with OpenCL kernel description for gpu).
 * `bitstream` for running on FPGA.
 
-* `_run_audio` - flag, which allows to infer the audio file (default value is False).
-* `_audio_hidden_state` - nodes of hidden state of output, which allow launcher can acquire the correct hidden state of output node during processing an audio file.
-* `_audio_output` - node of the output, which allow launcher can acquire the correct output node during processing an audio file.
-* `_alphabet` - number of alphabet which used. 
+* `run_audio` - flag, which allows to infer the audio file (default value is False).
+* `audio_hidden_state` - nodes of hidden state of output, which allow launcher can acquire the correct hidden state of output node during processing an audio file.
 
 Beside that, you can launch model in `async_mode`, enable this option and provide the number of infer requests (`num_requests`), which will be used in evaluation process. 
 For multi device configuration async mode used automatically. You can provide number requests for each device as part device specification: `MULTI:device_1(num_req_1),device_2(num_req_2)` or in `num_requests` config section (for this case comma-separated list of integer numbers or one value if number requests for all devices equal can be used).
