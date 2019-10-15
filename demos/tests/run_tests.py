@@ -77,8 +77,6 @@ def main():
         print('Testing {}...'.format(demo.full_name))
         print()
 
-        demo_source_dir = demos_dir / demo.subdirectory
-
         with tempfile.TemporaryDirectory() as temp_dir:
             dl_dir = Path(temp_dir) / 'models'
 
@@ -89,7 +87,7 @@ def main():
                     [
                         sys.executable, '--', str(auto_tools_dir / 'downloader.py'),
                         '--output_dir', str(dl_dir), '--cache_dir', str(args.downloader_cache_dir),
-                        '--list', str(demo_source_dir / 'models.lst'),
+                        '--list', str(demo.models_lst_path(demos_dir)),
                     ],
                     stderr=subprocess.STDOUT, universal_newlines=True)
             except subprocess.CalledProcessError as e:
@@ -102,7 +100,7 @@ def main():
                 subprocess.check_output(
                     [
                         sys.executable, '--', str(auto_tools_dir / 'converter.py'),
-                        '--download_dir', str(dl_dir), '--list', str(demo_source_dir / 'models.lst'), '--jobs', 'auto',
+                        '--download_dir', str(dl_dir), '--list', str(demo.models_lst_path(demos_dir)), '--jobs', 'auto',
                     ] + ([] if args.mo is None else ['--mo', str(args.mo)]),
                     stderr=subprocess.STDOUT, universal_newlines=True)
             except subprocess.CalledProcessError as e:
@@ -114,7 +112,7 @@ def main():
             print()
 
             arg_context = ArgContext(
-                source_dir=demo_source_dir,
+                source_dir=demos_dir / demo.subdirectory,
                 dl_dir=dl_dir,
                 image_sequence_dir=Path(temp_dir) / 'image_seq',
                 image_sequences=IMAGE_SEQUENCES,
