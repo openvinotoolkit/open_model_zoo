@@ -125,7 +125,7 @@ NATIVE_DEMOS = [
 
     # TODO: mask_rcnn_demo: no models.lst
 
-    NativeDemo(subdirectory='multi_channel/face_detection', test_cases=combine_cases(
+    NativeDemo(subdirectory='multi_channel/face_detection_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             '-i': IMAGE_SEQUENCES['face-detection-adas']}),
         device_cases('-d'),
@@ -137,7 +137,7 @@ NATIVE_DEMOS = [
             ModelArg('face-detection-retail-0044')),
     )),
 
-    NativeDemo(subdirectory='multi_channel/human_pose_estimation', test_cases=combine_cases(
+    NativeDemo(subdirectory='multi_channel/human_pose_estimation_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             '-i': IMAGE_SEQUENCES['human-pose-estimation'],
             '-m': ModelArg('human-pose-estimation-0001')}),

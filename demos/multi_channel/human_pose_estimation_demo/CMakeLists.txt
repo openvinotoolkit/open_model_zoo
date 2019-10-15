@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(TARGET_NAME "multi_channel_human_pose_estimation")
+set(TARGET_NAME "multi_channel_human_pose_estimation_demo")
 
 if( BUILD_DEMO_NAME AND NOT ${BUILD_DEMO_NAME} STREQUAL ${TARGET_NAME} )
     message(STATUS "DEMO ${TARGET_NAME} SKIPPED")

@@ -21,5 +21,5 @@ if(MULTICHANNEL_DEMO_USE_NATIVE_CAM)
 endif()
 
 add_subdirectory(common)
-add_subdirectory(face_detection)
-add_subdirectory(human_pose_estimation)
+add_subdirectory(face_detection_demo)
+add_subdirectory(human_pose_estimation_demo)
