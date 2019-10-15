@@ -39,14 +39,14 @@ class PixelLinkDecoder():
     def __init__(self):
         pass
 
-    def load(self, image: 'np.ndarray', pixel_scores: 'np.ndarray',
-             link_scores: 'np.ndarray', pixel_conf_threshold=0.8,
+    def load(self, image: np.ndarray, pixel_scores: np.ndarray,
+             link_scores: np.ndarray, pixel_conf_threshold=0.8,
              link_conf_threshold=0.8, four_neighbours=False):
         """ Load data to decoder
 
             :param image: BGR image
-            :param pixel_scores: first output of text-detection-0001 model
-            :param link_scores: second output of text-detection-0001 model
+            :param pixel_scores: first output of text-detection-0003 or text-detection-0004 model
+            :param link_scores: second output of text-detection-0003 or text-detection-0004 model
             :param float pixel_conf_threshold: threshold value for pixels
             :param float link_conf_threshold: threshold value for links
             :param bool four_neighbours: use 4 or 8 neighbours comparsion algorythm
@@ -74,7 +74,7 @@ class PixelLinkDecoder():
     def _softmax(self, x, axis=None):
         return np.exp(x - self._logsumexp(x, axis=axis, keepdims=True))
 
-    def _logsumexp(self, a, axis=None, b=None, keepdims=False, return_sign=False):
+    def _logsumexp(self, a, axis=None, keepdims=False):
         if b is not None:
             a, b = np.broadcast_arrays(a, b)
             if np.any(b == 0):
@@ -230,7 +230,6 @@ class PixelLinkDecoder():
         for box in self.bboxes:
             cv2.drawContours(image, [box], 0, (0, 0, 255), 2)
         cv2.imshow('Detected text', image)
-        cv2.waitKey(0)
         if cv2.waitKey():
             cv2.destroyAllWindows()
 
@@ -240,8 +239,13 @@ def main():
         td = cv2.dnn.readNet(args.model_path, args.model_path[:-3] + 'bin')
     else:
         print("Not valid model's XML file name (should be something like 'foo.xml')")
-        sys.exit()
+        sys.exit([1])
+        
     img = cv2.imread(args.image_path)
+    if img is None:
+        print("Failed to load image")
+        sys.exit([1])
+        
     blob = cv2.dnn.blobFromImage(img, 1, (1280, 768))
     td.setInput(blob)
     a, b = td.forward(td.getUnconnectedOutLayersNames())
