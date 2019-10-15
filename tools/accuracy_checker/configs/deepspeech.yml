@@ -29,14 +29,13 @@ models:
         # to an appropriate representation with adapter
         adapter: 
           type: beam_search_decoder
+          output_node: 'Softmax'
           softmaxed_probabilities: True
         cpu_extensions: AUTO
         # batch size
         batch: 1
         _run_audio: True
         _audio_hidden_state: ['lstm_fused_cell/BlockLSTM/TensorIterator.1', 'lstm_fused_cell/BlockLSTM/TensorIterator.2']
-        _audio_output: ['Softmax']
-        _alphabet: 29
 
     # metrics, preprocessing and postprocessing are typically dataset specific, so dataset field
     # specifies data and all other steps required to validate topology
@@ -60,6 +59,13 @@ models:
             # resize input image to topology input size
             # you may specify size to which image should be resized
             # via dst_width, dst_height fields
+          - type: audio_normalizer
+          - type: audio_spectrogram
+            rate: 16000
+            window_length: 32
+            window_step: 20
+          - type: mfcc_feature
+            rate: 16000
           - type: overlap_creator
             step: 16
             context: 9
