@@ -198,7 +198,8 @@ class ModelEvaluator:
                     self._annotations.extend(annotations)
                     self._predictions.extend(predictions)
 
-            output_callback(batch_raw_predictions, metrics_result=metrics_result)
+            if output_callback:
+                output_callback(batch_raw_predictions, metrics_result=metrics_result)
 
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_predictions))
