@@ -515,35 +515,13 @@ class DLSDKLauncher(Launcher):
 
         return data.reshape(input_shape)
 
-<<<<<<< 4eb8c1df2479e2dcc35a7e76ec2c7ba8086dfa10
-    def create_ie_plugin(self, log=True):
-        def set_nireq():
-            num_requests = self.config.get('num_requests')
-            if num_requests is not None:
-                num_requests = get_or_parse_value(num_requests, casting_type=int)
-                if len(num_requests) != 1:
-                    raise ConfigError('Several values for _num_requests specified')
-                self._num_requests = num_requests[0]
-                if self._num_requests != 1 and not self.async_mode:
-                    warning('{} infer requests in sync mode is not supported. Only 1 infer request will be used.')
-                    self._num_requests = 1
-            elif not self.async_mode:
-                self._num_requests = 1
-            else:
-                self._num_requests = self.auto_num_requests()
-
-        if hasattr(self, 'plugin'):
-            del self.plugin
-=======
     def _prepare_ie(self, log=True):
->>>>>>> AC: moving on IECore API
         if log:
             print_info('IE version: {}'.format(ie.get_version()))
         if self._is_multi():
             self._prepare_multi_device(log)
         else:
             self.async_mode = self.get_value_from_config('async_mode')
-            set_nireq()
 
             if log:
                 self._log_versions()

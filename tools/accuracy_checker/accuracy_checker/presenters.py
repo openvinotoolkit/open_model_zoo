@@ -31,14 +31,14 @@ EvaluationResult = namedtuple(
 class BasePresenter(ClassProvider):
     __provider_type__ = "presenter"
 
-    def write_result(self, evaluation_result, output_callback=None, ignore_results_formatting=False):
+    def write_result(self, evaluation_result, ignore_results_formatting=False):
         raise NotImplementedError
 
 
 class ScalarPrintPresenter(BasePresenter):
     __provider__ = "print_scalar"
 
-    def write_result(self, evaluation_result: EvaluationResult, output_callback=None, ignore_results_formatting=False):
+    def write_result(self, evaluation_result: EvaluationResult, ignore_results_formatting=False):
         value, reference, name, _, threshold, meta = evaluation_result
         value = np.mean(value)
         postfix, scale, result_format = get_result_format_parameters(meta, ignore_results_formatting)
@@ -54,7 +54,7 @@ class ScalarPrintPresenter(BasePresenter):
 class VectorPrintPresenter(BasePresenter):
     __provider__ = "print_vector"
 
-    def write_result(self, evaluation_result: EvaluationResult, output_callback=None, ignore_results_formatting=False):
+    def write_result(self, evaluation_result: EvaluationResult, ignore_results_formatting=False):
         value, reference, name, _, threshold, meta = evaluation_result
         if threshold:
             threshold = float(threshold)
@@ -120,14 +120,6 @@ def write_scalar_result(
 
 def compare_with_ref(reference, res_value, scale):
     return abs(reference - (res_value * scale))
-
-
-class ReturnValuePresenter(BasePresenter):
-    __provider__ = "return_value"
-
-    def write_result(self, evaluation_result: EvaluationResult, output_callback=None, ignore_results_formatting=False):
-        if output_callback:
-            output_callback(evaluation_result)
 
 
 def get_result_format_parameters(meta, use_default_formatting):
