@@ -82,6 +82,13 @@ Accuracy Checker supports following set of preprocessors:
 *  `pad_with_eos` - supplement the input sequence to a specific size using a line terminator character or index.
   * `eos_symbol` or `eos_index` - line terminator symbol or index of this symbol in vocab for encoded sequence respectively.
   *  `sequence_len` - length of sequence after supplement.
+* `audio_normalizer` - normailize audio data from `(0, 32767)` to `(0, 1)`.
+* `audio_spectrogram` - compute the spectrogram
+  * `rate` - sample rate.
+  * `window_length` - audio window length for feature extration.
+  * `window_step` - window step length for feature extration.
+* `mfcc_feature` - generate the mfcc feature for spectrogram
+  * `rate` - sample rate.
 *  `overlap_creator` - create a view into features with overlapping strides of size.
   * `step` - number of step lenght.
   * `context` - number of context length.
