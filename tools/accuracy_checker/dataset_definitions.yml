@@ -344,10 +344,10 @@ datasets:
     dataset_meta: icdar13_recognition.json
 
   - name: market1501
-    data_source: Market1501-person-reidentification/Market-1501-v15.09.15
+    data_source: Market-1501-v15.09.15
     annotation_conversion:
       converter: market1501_reid
-      data_dir: Market1501-person-reidentification/Market-1501-v15.09.15
+      data_dir: Market-1501-v15.09.15
     annotation: market1501_reid.pickle
 
   - name: vgg2face
@@ -474,7 +474,6 @@ datasets:
         size: 60
 
   - name: gaze_estimation_dataset
-
     data_source: gaze_estimation
     annotation: gaze_estimation.pickle
 
@@ -488,5 +487,5 @@ datasets:
 
   - name: handwritten_score_recognition
     data_source: ILSVRC2012_img_val
-    annotation: hadwritten_score_recognition.pickle
-    dataset_meta: hadwritten_score_recognition.json
+    annotation: handwritten_score_recognition.pickle
+    dataset_meta: handwritten_score_recognition.json
