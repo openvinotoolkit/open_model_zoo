@@ -31,7 +31,13 @@ from .geometric_transformations import (
     Crop3D
 )
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
-from .audio_preprocessors import Create_overlap_windows, Prepare_audio_package
+from .audio_preprocessors import (
+    AudioNormalizer,
+    AudioSpectrogram,
+    MfccFeature,
+    CreateOverlapWindows,
+    PrepareAudioPackage
+)
 
 __all__ = [
     'PreprocessingExecutor',
@@ -61,6 +67,9 @@ __all__ = [
     'DecodeByVocabulary',
     'PadWithEOS',
 
-    'Create_overlap_windows',
-    'Prepare_audio_package'
+    'AudioNormalizer',
+    'AudioSpectrogram',
+    'MfccFeature',
+    'CreateOverlapWindows',
+    'PrepareAudioPackage'
 ]
