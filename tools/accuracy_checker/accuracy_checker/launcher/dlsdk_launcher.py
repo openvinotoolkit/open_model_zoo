@@ -206,16 +206,11 @@ class DLSDKLauncher(Launcher):
             '_vpu_log_level': StringField(
                 optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
             ),
-            '_run_audio': BoolField(
+            'run_audio': BoolField(
                 optional=True, default=False,
                 description="The specific flag for speech recognition to run the predict function(deep speech only)."
             ),
-            '_audio_hidden_state': ListField(optional=True, description="audio hidden state(deep speech only)."),
-            '_audio_output': ListField(optional=True, description="audio output(deep speech only)."),
-            '_alphabet': NumberField(
-                value_type=int, optional=True, min_value=29, default=29,
-                description="Number of _alphabet label(deep speech only)."
-            )
+            'audio_hidden_state': ListField(optional=True, description="audio hidden state(deep speech only).")
         })
 
         return parameters
@@ -249,11 +244,9 @@ class DLSDKLauncher(Launcher):
         # it can not be used in case delayed initialization
         self.reload_network = not delayed_model_loading
 
-        self._run_audio = get_parameter_value_from_config(self.config, DLSDKLauncher.parameters(), '_run_audio')
-        self._audio_hidden_state = get_parameter_value_from_config(self.config, DLSDKLauncher.parameters(),
-                                                                   '_audio_hidden_state')
-        self._audio_output = get_parameter_value_from_config(self.config, DLSDKLauncher.parameters(), '_audio_output')
-        self._alphabet = get_parameter_value_from_config(self.config, DLSDKLauncher.parameters(), '_alphabet')
+        self.run_audio = get_parameter_value_from_config(self.config, DLSDKLauncher.parameters(), 'run_audio')
+        self.audio_hidden_state = get_parameter_value_from_config(self.config, DLSDKLauncher.parameters(),
+                                                                   'audio_hidden_state')
 
 
     @property
@@ -270,8 +263,6 @@ class DLSDKLauncher(Launcher):
 
     @property
     def output_blob(self):
-        if self._run_audio:
-            return self._audio_output[0]
         return next(iter(self.original_outputs))
 
     def predict(self, inputs, metadata=None, **kwargs):
@@ -287,12 +278,13 @@ class DLSDKLauncher(Launcher):
             if self._run_audio:
                 audio_ftrs = infer_inputs[self.config['_list_inputs'][0]]
                 hidden_state = []
-                __res = np.empty([0, 1, self._alphabet])
+                __res = None
+                output_node = None
 
                 hidden_state.append(infer_inputs[self.config['_list_hidden_states'][0]])
                 hidden_state.append(infer_inputs[self.config['_list_hidden_states'][1]])
 
-                for __idx, __audio_ftr in enumerate(audio_ftrs):
+                for _, __audio_ftr in enumerate(audio_ftrs):
                     network_inputs_data = {self.config['_list_inputs'][0] : [__audio_ftr],
                                            self.config['_list_hidden_states'][0] : hidden_state[0],
                                            self.config['_list_hidden_states'][1] : hidden_state[1]}
@@ -307,14 +299,19 @@ class DLSDKLauncher(Launcher):
                     if raw_outputs_callback:
                         raw_outputs_callback(result, network=self.network, exec_network=self.exec_network)
 
-                    # for __ih, __h in enumerate(self._audio_hidden_state):
-                        # hidden_state[__ih] = result[__h]
-                    hidden_state[0] = result[self._audio_hidden_state[0]]
-                    hidden_state[1] = result[self._audio_hidden_state[1]]
+                    if not output_node:
+                        output_nodes = list(result.keys())
+                        output_nodes.remove(self.audio_hidden_state[0])
+                        output_nodes.remove(self.audio_hidden_state[1])
+                        output_node = output_nodes[0]
+                        __res = np.empty([0, 1, result[output_node].shape[-1]])
 
-                    __res = np.concatenate((__res, result[self._audio_output[0]]))
+                    hidden_state[0] = result[self.audio_hidden_state[0]]
+                    hidden_state[1] = result[self.audio_hidden_state[1]]
 
-                results.append({self._audio_output[0] :__res})
+                    __res = np.concatenate((__res, result[output_node]))
+
+                results.append({output_node :__res})
 
             else:
                 if self._do_reshape:
@@ -558,7 +555,7 @@ class DLSDKLauncher(Launcher):
     def _align_data_shape(self, data, input_blob):
         input_shape = self.network.inputs[input_blob].shape
 
-        if self._run_audio:
+        if self.run_audio:
             if data.shape[1:] != input_shape[1:]:
                 warning_message = 'data shape {} is not equal model input shape {}. '.format(
                     data.shape[1:], input_shape[1:]
