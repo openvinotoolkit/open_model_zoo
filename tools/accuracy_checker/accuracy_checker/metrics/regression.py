@@ -171,6 +171,10 @@ class RootMeanSquaredError(BaseRegressionMetric):
     def __init__(self, *args, **kwargs):
         super().__init__(mse_differ, *args, **kwargs)
 
+    def update(self, annotation, prediction):
+        mse = super().update(annotation, prediction)
+        return np.sqrt(mse)
+
     def evaluate(self, annotations, predictions):
         return np.sqrt(np.mean(self.magnitude)), np.sqrt(np.std(self.magnitude))
 
@@ -194,6 +198,10 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
 
     def __init__(self, *args, **kwargs):
         super().__init__(mse_differ, *args, **kwargs)
+
+    def update(self, annotation, prediction):
+        mse = super().update(annotation, prediction)
+        return np.sqrt(mse)
 
     def evaluate(self, annotations, predictions):
         if self.ignore_out_of_range:

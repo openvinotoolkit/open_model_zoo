@@ -103,7 +103,7 @@ class Metric(ClassProvider):
         return self.evaluate(annotations, predictions)
 
     def update(self, annotation, prediction):
-        pass
+        return None
 
     def evaluate(self, annotations, predictions):
         raise NotImplementedError
