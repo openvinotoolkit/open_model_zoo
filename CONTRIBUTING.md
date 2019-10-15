@@ -14,7 +14,7 @@ Frameworks supported by the Open Model Zoo:
 To contribute to OMZ, create a pull request (PR) in this repository using the `develop` branch.
 Pull requests are strictly formalized and are reviewed by the OMZ maintainers for consistence and legal compliance.
 
-Each PR must contain:
+Each PR contributing a model must contain:
 * [configuration file `model.yml`](#configuration-file)
 * [documentation of model in markdown format](#documentation)
 * [accuracy validation configuration file](#accuracy-validation)
@@ -188,12 +188,10 @@ A demo shows the main idea of how to infer a model using IE. If your model solve
 
 Demos are required to support the following keys:
 
-Keys | Explanation
---|--
-  `-i "<input>"`      |       Required. Input to process.
-   `-m "<path>"`      |        Required. Path to an .xml file with a trained model. If the demo uses several models at the same time, use other keys prefixed with `-m`.
-   `-d "<device>"`    |        Optional. Default is CPU.
-   `-no_show`          |       Optional. Do not visualize inference results.
+ -  `-i "<input>"`: Required. Input to process.
+ -  `-m "<path>"`: Required. Path to an .xml file with a trained model. If the demo uses several models at the same time, use other keys prefixed with `-m`.
+ - `-d "<device>"`: Optional. Default is CPU.
+ - `-no_show`: Optional. Do not visualize inference results.
 
 > **TIP**: For Python, it is preferable to use `-` instead of `_` as word separators. Example: `-no-show`.
 
