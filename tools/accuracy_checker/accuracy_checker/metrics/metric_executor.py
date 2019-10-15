@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 
 from ..presenters import BasePresenter, EvaluationResult
 from ..config import StringField
@@ -119,7 +119,7 @@ class MetricsExecutor:
             prediction: list of batch number of prediction objects.
         """
 
-        results = {}
+        results = OrderedDict()
 
         for input_id, single_annotation, single_prediction in zip(batch_ids, annotation, prediction):
             results[input_id] = self.update_metrics_on_object(single_annotation, single_prediction)

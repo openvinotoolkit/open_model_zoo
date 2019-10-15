@@ -141,7 +141,12 @@ class ModelEvaluator:
                             self._predictions.extend(predictions)
 
                     if output_callback:
-                        output_callback(batch_raw_predictions, metrics_result=metrics_result)
+                        output_callback(
+                            batch_raw_predictions,
+                            metrics_result=metrics_result,
+                            element_identifiers=batch_identifiers,
+                            dataset_indices=batch_input_ids
+                        )
 
                     if progress_reporter:
                         progress_reporter.update(batch_id, len(batch_predictions))
@@ -199,7 +204,12 @@ class ModelEvaluator:
                     self._predictions.extend(predictions)
 
             if output_callback:
-                output_callback(batch_raw_predictions, metrics_result=metrics_result)
+                output_callback(
+                    batch_raw_predictions,
+                    metrics_result=metrics_result,
+                    element_identifiers=batch_identifiers,
+                    dataset_indices=batch_input_ids
+                )
 
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_predictions))
