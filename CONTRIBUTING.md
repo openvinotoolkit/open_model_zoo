@@ -74,7 +74,7 @@ Description of the model. Must match with the description from the model [docume
 
 **`task_type`**
 
-Model task class, see [Model information dumper usage](tools/downloader/README.md#model-information-dumper-usage) for details. If there is no task class of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [tools/downloader/common.py](tools/downloader/common.py) file.
+[Model task class](tools/downloader/README.md#model-information-dumper-usage). If there is no task class of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [tools/downloader/common.py](tools/downloader/common.py) file.
 
 **`files`**
 
