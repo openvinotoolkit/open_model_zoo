@@ -33,7 +33,7 @@ models:
           - type: resize
             dst_width: 48
             dst_height: 96
-            use_pil: True
+            use_pillow: True
             interpolation: ANTIALIAS
 
         metrics:

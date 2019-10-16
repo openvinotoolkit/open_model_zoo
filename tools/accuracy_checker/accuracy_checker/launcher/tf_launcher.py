@@ -46,35 +46,40 @@ class TFLauncher(Launcher):
     def __init__(self, config_entry, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
         self.default_layout = 'NHWC'
+        self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
-        tf_launcher_config = ConfigValidator('TF_Launcher', fields=self.parameters())
+        tf_launcher_config = ConfigValidator(
+            'TF_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
+        )
         tf_launcher_config.validate(self.config)
-        if not contains_any(self.config, ['model', 'saved_model_dir']):
-            raise ConfigError('model or saved model directory should be provided')
 
-        if contains_all(self.config, ['model', 'saved_model']):
-            raise ConfigError('only one option: model or saved_model_dir should be provided')
-        self._config_outputs = self.get_value_from_config('output_names')
+        if not self._delayed_model_loading:
+            if not contains_any(self.config, ['model', 'saved_model_dir']):
+                raise ConfigError('model or saved model directory should be provided')
 
-        if 'model' in self.config:
-            self._graph = self._load_graph(str(self.get_value_from_config('model')))
-        else:
-            self._graph = self._load_graph(str(self.get_value_from_config('saved_model_dir')), True)
+            if contains_all(self.config, ['model', 'saved_model']):
+                raise ConfigError('only one option: model or saved_model_dir should be provided')
 
-        self._outputs_names = self._get_outputs_names(self._graph, self._config_outputs)
+            self._config_outputs = self.get_value_from_config('output_names')
+            if 'model' in self.config:
+                self._graph = self._load_graph(str(self.get_value_from_config('model')))
+            else:
+                self._graph = self._load_graph(str(self.get_value_from_config('saved_model_dir')), True)
 
-        self._outputs_tensors = []
-        self.node_pattern = 'import/{}:0'
-        for output in self._outputs_names:
-            try:
-                tensor = self._graph.get_tensor_by_name('import/{}:0'.format(output))
-            except KeyError:
+            self._outputs_names = self._get_outputs_names(self._graph, self._config_outputs)
+
+            self._outputs_tensors = []
+            self.node_pattern = 'import/{}:0'
+            for output in self._outputs_names:
                 try:
-                    tensor = self._graph.get_tensor_by_name('{}:0'.format(output))
-                    self.node_pattern = '{}:0'
+                    tensor = self._graph.get_tensor_by_name('import/{}:0'.format(output))
                 except KeyError:
-                    raise ConfigError('model graph does not contains output {}'.format(output))
-            self._outputs_tensors.append(tensor)
+                    try:
+                        tensor = self._graph.get_tensor_by_name('{}:0'.format(output))
+                        self.node_pattern = '{}:0'
+                    except KeyError:
+                        raise ConfigError('model graph does not contains output {}'.format(output))
+                self._outputs_tensors.append(tensor)
 
         self.device = '/{}:0'.format(self.get_value_from_config('device').lower())
 

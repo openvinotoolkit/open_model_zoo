@@ -49,6 +49,7 @@ from .cvat_person_detection_action_recognition import CVATPersonDetectionActionR
 from .squad import SQUADConverter
 from .xnli import XNLIDatasetConverter
 from .cmu_panoptic import CmuPanopticKeypointsConverter
+from .action_recognition import ActionRecognitionConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -93,4 +94,5 @@ __all__ = [
     'SQUADConverter',
     'XNLIDatasetConverter',
     'CmuPanopticKeypointsConverter'
+    'ActionRecognitionConverter'
 ]

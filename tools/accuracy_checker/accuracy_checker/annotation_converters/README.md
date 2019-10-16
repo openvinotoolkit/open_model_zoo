@@ -213,3 +213,10 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `language_filter` - comma-separated list of used in annotation language tags for selecting records for specific languages only. (Optional, if not used full annotation will be converted).
 * `cmu_panoptic_keypoints` - converts CMU Panoptic dataset to `PoseEstimation3dAnnotation` format.
   * `data_dir` - dataset root directory, which contain subdirectories with validation scenes data.
+* `clip_action_recognition` - converts annotation video-based action recognition datasets. Before conversion validation set should be preprocessed using approach described [here](https://github.com/opencv/openvino_training_extensions/tree/develop/pytorch_toolkit/action_recognition#preparation).
+  * `annotation_file` - path to annotation file in json format.
+  * `data_dir` - path to directory with prepared data (e. g. data/kinetics/frames_data).
+  * `clips_per_video` - number of clips per video (Optional, default 3).
+  * `clip_duration` - clip duration (Optional, default 16)
+  * `temporal_stride` - temporal stride for frames selection (Optional, default 2).
+  * `subset` - dataset split: `train`, `validation` or `test` (Optional, default `validation`).

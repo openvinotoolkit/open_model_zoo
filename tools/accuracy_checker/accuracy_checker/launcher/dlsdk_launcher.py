@@ -269,32 +269,18 @@ class DLSDKLauncher(Launcher):
                 input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
                 self._reshape_input(input_shapes)
 
-            benchmark = kwargs.get('benchmark')
-
-            if benchmark:
-                benchmark(infer_inputs)
-
             result = self.exec_network.infer(infer_inputs)
-
-            raw_outputs_callback = kwargs.get('output_callback')
-
-            if raw_outputs_callback:
-                raw_outputs_callback(result, network=self.network, exec_network=self.exec_network)
             results.append(result)
 
         if metadata is not None:
-            for image_meta in metadata:
-                image_meta['input_shape'] = self.inputs_info_for_meta()
-
+            for meta_ in metadata:
+                meta_['input_shape'] = self.inputs_info_for_meta()
         self._do_reshape = False
 
         return results
 
     def predict_async(self, ir, inputs, metadata=None, **kwargs):
         infer_inputs = inputs[0]
-        benchmark = kwargs.get('benchmark')
-        if benchmark:
-            benchmark(infer_inputs)
         ir.async_infer(inputs=infer_inputs)
         if metadata is not None:
             for meta_ in metadata:

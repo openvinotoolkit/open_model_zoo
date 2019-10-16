@@ -70,22 +70,19 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
 
     def update(self, annotation, prediction):
         compute_iou, create_boxes = select_specific_parameters(annotation)
+        per_class_results = []
 
         for label_id, label in enumerate(self.labels):
             detections, scores, dt_difficult = prepare_predictions(prediction, label, self.max_detections)
             ground_truth, gt_difficult, iscrowd, boxes, areas = prepare_annotations(annotation, label, create_boxes)
             iou = compute_iou(ground_truth, detections, boxes, areas)
-            self.matching_results[label_id].append(
-                evaluate_image(
-                    ground_truth,
-                    gt_difficult,
-                    iscrowd,
-                    detections,
-                    dt_difficult,
-                    scores,
-                    iou,
-                    self.thresholds
-                    ))
+            eval_result = evaluate_image(
+                ground_truth, gt_difficult, iscrowd, detections, dt_difficult, scores, iou, self.thresholds
+            )
+            self.matching_results[label_id].append(eval_result)
+            per_class_results.append(eval_result)
+
+        return per_class_results
 
     def evaluate(self, annotations, predictions):
         pass
@@ -99,6 +96,12 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
 class MSCOCOAveragePrecision(MSCOCOBaseMetric):
     __provider__ = 'coco_precision'
 
+    def update(self, annotation, prediction):
+        per_class_matching = super().update(annotation, prediction)
+        return [
+            compute_precision_recall(self.thresholds, [per_class_matching[i]])[0] for i, _ in enumerate(self.labels)
+        ]
+
     def evaluate(self, annotations, predictions):
         precision = [
             compute_precision_recall(self.thresholds, self.matching_results[i])[0]
@@ -110,6 +113,12 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
 
 class MSCOCORecall(MSCOCOBaseMetric):
     __provider__ = 'coco_recall'
+
+    def update(self, annotation, prediction):
+        per_class_matching = super().update(annotation, prediction)
+        return [
+            compute_precision_recall(self.thresholds, [per_class_matching[i]])[1] for i, _ in enumerate(self.labels)
+        ]
 
     def evaluate(self, annotations, predictions):
         recalls = [

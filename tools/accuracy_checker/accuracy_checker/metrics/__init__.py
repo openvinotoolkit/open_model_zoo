@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from .metric_executor import MetricsExecutor, Metric
+from .metric_executor import MetricsExecutor
+from .metric import Metric, PerImageMetricResult
 
 from .classification import ClassificationAccuracy, ClassificationAccuracyClasses, ClipAccuracy
 from .detection import (DetectionMAP, MissRate, Recall, DetectionAccuracyMetric)
@@ -64,6 +65,7 @@ from .mpjpe_multiperson import MpjpeMultiperson
 __all__ = [
     'Metric',
     'MetricsExecutor',
+    'PerImageMetricResult',
 
     'ClassificationAccuracy',
     'ClassificationAccuracyClasses',

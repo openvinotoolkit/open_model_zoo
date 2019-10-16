@@ -218,3 +218,9 @@ Typical workflow for testing new model include:
 1. Choose one of *adapters* or write your own. Adapter converts raw output produced by framework to high level problem specific representation (e.g. *ClassificationPrediction*, *DetectionPrediction*, etc).
 1. Reproduce preprocessing, metrics and postprocessing from canonical paper.
 1. Create entry in config file and execute.
+
+### Customizing Evaluation
+
+Standard Accuracy Checker validation pipeline: Annotation Reading -> Data Reading -> Preprocessing -> Inference -> Postprocessing -> Metrics.
+In some cases it can be unsuitable (e.g. if you have sequence of models). You are able to customize validation pipeline using own evaluator.
+More details about custom evaluations can be found in [related section](custom_evaluators/README.md).

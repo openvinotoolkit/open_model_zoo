@@ -21,6 +21,7 @@ from ..config import PathField, StringField
 from .loaders import Loader
 from .launcher import Launcher, LauncherConfigValidator
 
+
 class DummyLauncher(Launcher):
     """
     Class for using predictions from another tool.
