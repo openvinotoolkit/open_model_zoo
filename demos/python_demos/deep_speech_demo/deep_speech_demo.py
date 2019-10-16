@@ -28,7 +28,7 @@ import wave, struct
 import codecs
 
 from speech_features import audio_spectrogram, mfcc 
-from ctc_beamsearch_decoder import CTCBeamSearchDecoder
+from ctc_beamsearch_decoder import ctc_beam_search_decoder
 
 
 def build_argparser():
@@ -185,7 +185,7 @@ def main():
         state_h = res['lstm_fused_cell/BlockLSTM/TensorIterator.1']
         state_c = res['lstm_fused_cell/BlockLSTM/TensorIterator.2']
         
-    print("\n>>>{}\n".format(CTCBeamSearchDecoder(logits, alphabet._label_to_str, alphabet.string_from_label(-1), beamwidth)))
+    print("\n>>>{}\n".format(ctc_beam_search_decoder(logits, alphabet._label_to_str, alphabet.string_from_label(-1), beamwidth)))
 
 if __name__ == '__main__':
     sys.exit(main() or 0)
