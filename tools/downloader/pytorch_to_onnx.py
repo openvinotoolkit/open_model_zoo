@@ -57,7 +57,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_model(model_name, weights, from_torchvision=True, model_path=None, module_name=None, model_params=None):
+def load_model(model_name, weights, from_torchvision, model_path, module_name, model_params):
     """Import model and load pretrained weights"""
 
     if from_torchvision:
