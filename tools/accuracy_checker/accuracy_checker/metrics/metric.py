@@ -96,14 +96,13 @@ class Metric(ClassProvider):
         return get_parameter_value_from_config(self.config, self.parameters(), key)
 
     def submit(self, annotation, prediction):
-        metric_result = self.update(annotation, prediction)
-        return PerImageMetricResult(self.name, self.config['type'], metric_result)
+        return PerImageMetricResult(self.name, self.config['type'], self.update(annotation, prediction))
 
     def submit_all(self, annotations, predictions):
         return self.evaluate(annotations, predictions)
 
     def update(self, annotation, prediction):
-        return None
+        pass
 
     def evaluate(self, annotations, predictions):
         raise NotImplementedError
