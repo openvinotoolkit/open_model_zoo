@@ -1,19 +1,6 @@
 import numpy as np
 
-def softmax_layer(input_tensor):
-    assert len(input_tensor.shape) == 3, "The dim of input tensor is not 3."
-
-    _exp = np.exp(input_tensor)
-    exp_sum = np.sum(_exp, 2).reshape((input_tensor.shape[0], input_tensor.shape[1], 1))
-
-    return _exp / exp_sum
-
-def __bestBeam(beam, beamdwidth):
-    sorted_beam = sorted(enumerate(beam), reverse=True, key=lambda x: x[1])
-
-    return (sorted_beam[:beamwidth])
-
-def CTCBeamSearchDecoder(input_tensor, text_label, blank, beamwidth):
+def ctc_beam_search_decoder(input_tensor, text_label, blank, beamwidth):
     pred = input_tensor.squeeze()
 
     t_step = pred.shape[0]
