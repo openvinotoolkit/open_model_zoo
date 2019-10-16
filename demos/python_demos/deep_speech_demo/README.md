@@ -1,36 +1,23 @@
 Deep Speech Python* Demo
 ===============================
 
-This is the demo application for Deep Speech algorithm, which make speech to text that are being performed on input speech audio.
-Following the below command download the pre-trained models:
- - For UNIX*-like systems, run the following command:
-    ```sh
-    wget -O - https://github.com/mozilla/DeepSpeech/releases/download/v0.5.0/deepspeech-0.5.0-models.tar.gz | tar xvfz -
-    ```
- - For Windows*-like systems:
-    1. Download the archive from the DeepSpeech project repository: https://github.com/mozilla/DeepSpeech/releases/download/v0.5.0/deepspeech-0.5.0-models.tar.gz.
-    2. Unzip it twice with a file archiver application.
+This is the demo application for Deep Speech algorithm, which make speech to text that are being performed on input speech audio. 
 
-To generate the DeepSpeech Intermediate Representation (IR), provide TensorFlow DeepSpeech model to the Model Optimizer with parameters:
+How It Works
+------------
+The demo expects deep speech models in the Intermediate Representation (IR) format:
 
-```sh
-python3 ./mo_tf.py
---input_model path_to_model/output_graph.pb                         \
---freeze_placeholder_with_value input_lengths->[16]                 \
---input input_node,previous_state_h/read,previous_state_c/read      \
---input_shape [1,16,19,26],[1,2048],[1,2048]                        \
---output raw_logits,lstm_fused_cell/GatherNd,lstm_fused_cell/GatherNd_1 \ 
---disable_nhwc_to_nchw
-```
-
-For more information about this, refer to the [Convert Tensorflow* DeepSpeech Model to the Intermediate Representation](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_DeepSpeech_From_Tensorflow.html).
+It can be your own models or pre-trained model from OpenVINO Open Model Zoo.
+In the `models.lst` are the list of appropriate models for this demo
+that can be obtained via `Model downloader`.
+Please see more information about `Model downloader` [here](../../../tools/downloader/README.md).
 
 Running
 -------
 Running the application with the `-h` option yields the following usage message:
 
 ```
-usage: deepspeech_openvino_0.5.py [-h] -m MODEL -i AUDIO -a ALPHABET
+usage: deep_speech_demo.py [-h] -m MODEL -i AUDIO -a ALPHABET
                                   [-l CPU_EXTENSION] 
                                   [-d DEVICE]
 
@@ -54,7 +41,7 @@ Options:
 Running Demo
 
 ```sh
-python3 deepspeech_openvino_0.5.py -m models/deepspeech_0.5.0.xml \
+python3 deep_speech_demo.py -m <path_to_model>/output_graph.xml \
     -i <path_to_audio>/audio.wav \
     -a alphabet_b.txt
 ```
