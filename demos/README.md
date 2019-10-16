@@ -6,6 +6,7 @@ The Open Model Zoo demo applications are console applications that demonstrate h
 The Open Model Zoo includes the following demos:
 
 - [Action Recognition Python* Demo](./python_demos/action_recognition/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
+- [CRNN Text Recognition Python* Demo] (./python_demos/crnn_text_recognition_demo/README.md) - Demo application for English text recognition based on CRNN (Convolutional Reccurent Neural Network) model.
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
 - [Human Pose Estimation C++ Demo](./human_pose_estimation_demo/README.md) - Human pose estimation demo.
