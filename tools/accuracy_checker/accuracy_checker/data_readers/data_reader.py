@@ -175,10 +175,7 @@ class AudioReader(BaseReader):
         _wave = wave.open(str(get_path(self.data_source / data_id)), 'rb')
 
         _length = _wave.getnframes()
-        audio = np.zeros(_length)
-
-        for i in range(_length):
-            audio[i] = int(struct.unpack("<h",_wave.readframes(1))[0])
+        audio = np.frombuffer(_wave.readframes(_length), dtype=np.dtype('<h'))
         audio = audio.reshape(-1, 1)
 
         return audio
