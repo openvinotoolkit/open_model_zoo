@@ -28,7 +28,7 @@ except ImportError as import_error:
     tf = None
 
 # For audio:
-import scipy.io.wavfile as wav
+import wave, struct
 
 from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
 from ..dependency import ClassProvider
@@ -172,7 +172,13 @@ class AudioReader(BaseReader):
     __provider__ = 'audio_reader'
 
     def read(self, data_id):
-        fs, audio = wav.read(str(get_path(self.data_source / data_id)))
+        _wave = wave.open(str(get_path(self.data_source / data_id)), 'rb')
+
+        _length = _wave.getnframes()
+        audio = np.zeros(_length)
+
+        for i in range(_length):
+            audio[i] = int(struct.unpack("<h",_wave.readframes(1))[0])
         audio = audio.reshape(-1, 1)
 
         return audio
