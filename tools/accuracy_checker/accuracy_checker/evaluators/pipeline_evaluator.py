@@ -145,6 +145,7 @@ class EvaluationContext:
         self.predictions = []
         self.annotation_batch = []
         self.prediction_batch = []
+        self.input_ids_batch = []
         self.data_batch = []
         self.metrics_results = []
         self.identifiers_batch = []
@@ -161,7 +162,8 @@ class EvaluationContext:
             'annotation_batch': self.annotation_batch,
             'prediction_batch': self.prediction_batch,
             'data_batch': self.data_batch,
-            'identifiers_batch': self.identifiers_batch
+            'identifiers_batch': self.identifiers_batch,
+            'input_ids_batch': self.input_ids_batch
         }
         return _shared_context
 
