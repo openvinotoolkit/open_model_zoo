@@ -24,7 +24,7 @@ from time import time
 from openvino.inference_engine import IENetwork, IECore
 
 # For Speech Feature
-import scipy.io.wavfile as wav
+import wave, struct
 import codecs
 
 from speech_features import audio_spectrogram, mfcc 
@@ -91,7 +91,13 @@ def main():
     alphabet = Alphabet(os.path.abspath(args.alphabet))
     
     # Speech feature extration
-    fs, audio = wav.read(args.input)
+    _wave = wave.open('1272-128104-0000.wav', 'rb')
+    fs = _wave.getnframes()
+    audio = np.zeros(fs)
+
+    for i in range(fs):
+        audio[i] = int(struct.unpack("<h",_wave.readframes(1))[0])
+
     audio = audio/np.float32(32768) # normalize to -1 to 1, int 16 to float32
  
     audio = audio.reshape(-1, 1)
