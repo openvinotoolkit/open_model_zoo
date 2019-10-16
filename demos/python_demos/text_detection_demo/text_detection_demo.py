@@ -214,9 +214,10 @@ class PixelLinkDecoder():
         "Plot and show decoded results via OpenCV's GUI"
         for box in self.bboxes:
             cv2.drawContours(image, [box], 0, (0, 0, 255), 2)
-        cv2.imshow('Detected text', image)
-        if cv2.waitKey():
-            cv2.destroyAllWindows()
+        if args.test is None:
+            cv2.imshow('Detected text', image)
+            if cv2.waitKey():
+                cv2.destroyAllWindows()
 
 
 def main():
@@ -244,6 +245,8 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument("-i", required=True, dest="image_path", help="path to input image")
     ap.add_argument("-m", required=True, dest="model_path", help="path to model's XML file")
+    ap.add_argument("--no_show", dest="test", action='store_true', help="disable imshow() and wwaitKey()")
+    ap.set_defaults(test=False)
     args = ap.parse_args()
 
     sys.exit(main() or 0)
