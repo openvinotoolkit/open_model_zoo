@@ -1,6 +1,6 @@
 # Text Detection Python3 demo
 
-Decoder for Intel's version of PixelLink -- [text-detection-0003](../../models/intel/text-detection-0003/description/text-detection-0003.md), [text-detection-0004](../../models/intel/text-detection-0003/description/text-detection-0004.md)
+Decoder for Intel's version of PixelLink -- [text-detection-0003](../../../models/intel/text-detection-0003/description/text-detection-0003.md), [text-detection-0004](../../../models/intel/text-detection-0003/description/text-detection-0004.md)
 
 ## How it works
 
