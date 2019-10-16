@@ -14,13 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-######################################
-#
-#   John Feng, john.feng@intel.com
-#
-######################################
-
-
 from ..config import NumberField
 from .preprocessor import Preprocessor
 

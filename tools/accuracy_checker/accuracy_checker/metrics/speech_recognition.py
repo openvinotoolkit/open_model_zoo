@@ -14,14 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-###################################################
-#
-#   John Feng, john.feng@intel.com
-#
-#   using word error rate to evaluate deep speech
-#
-####################################################
-
 from ..representation import CharacterRecognitionAnnotation, CharacterRecognitionPrediction
 from .metric import PerImageEvaluationMetric
 from .word_error_meter import WordErrorMeter
