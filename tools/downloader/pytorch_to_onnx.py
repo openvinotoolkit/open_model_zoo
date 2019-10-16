@@ -25,7 +25,16 @@ def positive_int_arg(values):
 def model_parameters(parameters):
     if not parameters:
         return dict()
-    return dict((param, eval(value)) for param, value in (element.split('=') for element in parameters.split(',')))
+    params = {}
+    for element in parameters.split(','):
+        param, value = element.split('=')
+        try:
+            value = eval(value, {}, {})
+        except:
+            pass
+        params[param] = value
+
+    return params
 
 
 def parse_args():
