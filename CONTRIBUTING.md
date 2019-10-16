@@ -184,7 +184,9 @@ Deep Learning Inference Engine (IE) supports models in the Intermediate Represen
 
 ## Demo
 
-A demo shows the main idea of how to infer a model using IE. If your model solves one of the tasks supported by the Open Model Zoo, try to find an appropriate option from [demos](https://docs.openvinotoolkit.org/latest/_demos_README.html) or [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html). Otherwise, you must provide your own demo (C++ or Python).
+A demo shows the main idea of how to infer a model using IE. If your model solves one of the tasks supported by the Open Model Zoo, try to find an appropriate option from [demos](https://docs.openvinotoolkit.org/latest/_demos_README.html) or [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html). Otherwise, you must provide your own demo (C++ or Python). 
+
+The demo's name should end with `_demo` suffix to follow the convention of the project.
 
 Demos are required to support the following keys:
 
@@ -201,6 +203,7 @@ If you add a new demo, provide autotesting support as well:
 - add demo launch parameters in [demos/tests/cases.py](demos/tests/cases.py)
 - prepare list of input images in [demos/tests/image_sequences.py](demos/tests/image_sequences.py)
 
+Update [demos' README.md](demos/README.md) adding your demo to the list.
 ___
 *After this step you get a **demo** for your model (if no demo was available).*
 
