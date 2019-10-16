@@ -98,7 +98,7 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
 
     def update(self, annotation, prediction):
         per_class_matching = super().update(annotation, prediction)
-        return [compute_precision_recall(self.thresholds, per_class_matching[i])[0] for i, _ in enumerate(self.labels)]
+        return [compute_precision_recall(self.thresholds, [per_class_matching[i]])[0] for i, _ in enumerate(self.labels)]
 
     def evaluate(self, annotations, predictions):
         precision = [
@@ -114,7 +114,7 @@ class MSCOCORecall(MSCOCOBaseMetric):
 
     def update(self, annotation, prediction):
         per_class_matching = super().update(annotation, prediction)
-        return [compute_precision_recall(self.thresholds, per_class_matching[i])[1] for i, _ in enumerate(self.labels)]
+        return [compute_precision_recall(self.thresholds, [per_class_matching[i]])[1] for i, _ in enumerate(self.labels)]
 
     def evaluate(self, annotations, predictions):
         recalls = [

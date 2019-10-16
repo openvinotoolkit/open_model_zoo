@@ -243,6 +243,7 @@ class ModelEvaluator:
             if ir.wait(0) == 0:
                 free_indexes.append(ir_id)
         result = []
+        free_indexes.sort(reverse=True)
         for idx in free_indexes:
             batch_id, batch_input_ids, batch_annotation, batch_meta, ir = irs.pop(idx)
             result.append((batch_id, batch_input_ids, batch_annotation, batch_meta, ir.outputs, ir))
