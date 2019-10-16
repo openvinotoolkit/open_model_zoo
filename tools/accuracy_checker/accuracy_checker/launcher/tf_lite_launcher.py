@@ -36,15 +36,18 @@ class TFLiteLauncher(Launcher):
     def __init__(self, config_entry, adapter, *args, **kwargs):
         super().__init__(config_entry, adapter, *args, **kwargs)
         self.default_layout = 'NHWC'
+        self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
-        tf_launcher_config = LauncherConfigValidator('TF_Lite_Launcher', fields=self.parameters())
+        tf_launcher_config = LauncherConfigValidator(
+            'TF_Lite_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
+        )
         tf_launcher_config.validate(self.config)
-
-        self._interpreter = tf.contrib.lite.Interpreter(model_path=str(self.config['model']))
-        self._interpreter.allocate_tensors()
-        self._input_details = self._interpreter.get_input_details()
-        self._output_details = self._interpreter.get_output_details()
-        self._inputs = {input_layer['name']: input_layer for input_layer in self._input_details}
+        if not self._delayed_model_loading:
+            self._interpreter = tf.contrib.lite.Interpreter(model_path=str(self.config['model']))
+            self._interpreter.allocate_tensors()
+            self._input_details = self._interpreter.get_input_details()
+            self._output_details = self._interpreter.get_output_details()
+            self._inputs = {input_layer['name']: input_layer for input_layer in self._input_details}
         self.device = '/{}:0'.format(self.config.get('device', 'cpu').lower())
 
     def predict(self, inputs, metadata=None, **kwargs):
@@ -63,6 +66,10 @@ class TFLiteLauncher(Launcher):
             self._interpreter.invoke()
             res = {output['name']: self._interpreter.get_tensor(output['index']) for output in self._output_details}
             results.append(res)
+
+            if metadata is not None:
+                for meta_ in metadata:
+                    meta_['input_shape'] = self.inputs_info_for_meta()
 
         return results
 

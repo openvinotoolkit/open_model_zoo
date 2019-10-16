@@ -142,7 +142,7 @@ class TestConfigReader:
             ConfigReader.merge(self.arguments)
 
         error_message = str(exception).split(sep=': ')[-1]
-        assert error_message == 'Missed "{}" in local config'.format('models')
+        assert error_message == 'Accuracy Checker not_models mode is not supported. Please select between evaluations, models, pipelines'
 
     def test_empty_models_in_local_config_raises_value_error_exception(self, mocker):
         mocker.patch(self.module + '._read_configs', return_value=(
@@ -794,7 +794,10 @@ class TestConfigReader:
 
         config = ConfigReader.merge(args)[0]
 
-        launchers = config['models'][0]['launchers']
+        assert len(config['models']) == 2
+        assert len(config['models'][0]['launchers']) == 1
+        assert len(config['models'][1]['launchers']) == 1
+        launchers = [config['models'][0]['launchers'][0], config['models'][1]['launchers'][0]]
         assert launchers == config_launchers
 
     def test_both_launchers_are_filtered_by_another_tag(self, mocker):
@@ -966,7 +969,10 @@ class TestConfigReader:
 
         config = ConfigReader.merge(args)[0]
 
-        launchers = config['models'][0]['launchers']
+        assert len(config['models']) == 2
+        assert len(config['models'][0]['launchers']) == 1
+        assert len(config['models'][1]['launchers']) == 1
+        launchers = [config['models'][0]['launchers'][0], config['models'][1]['launchers'][0]]
         assert launchers == config_launchers
 
     def test_launcher_is_not_filtered_by_the_same_framework(self, mocker):
@@ -1021,7 +1027,10 @@ class TestConfigReader:
 
         config = ConfigReader.merge(args)[0]
 
-        launchers = config['models'][0]['launchers']
+        assert len(config['models']) == 2
+        assert len(config['models'][0]['launchers']) == 1
+        assert len(config['models'][1]['launchers']) == 1
+        launchers = [config['models'][0]['launchers'][0], config['models'][1]['launchers'][0]]
         assert launchers == config_launchers
 
     def test_launcher_is_filtered_by_another_framework(self, mocker):
@@ -1164,7 +1173,10 @@ class TestConfigReader:
 
         config = ConfigReader.merge(args)[0]
 
-        launchers = config['models'][0]['launchers']
+        assert len(config['models']) == 2
+        assert len(config['models'][0]['launchers']) == 1
+        assert len(config['models'][1]['launchers']) == 1
+        launchers = [config['models'][0]['launchers'][0], config['models'][1]['launchers'][0]]
         assert launchers == config_launchers
 
     def test_launcher_is_filtered_by_another_device(self, mocker):
@@ -1289,7 +1301,10 @@ class TestConfigReader:
 
         config = ConfigReader.merge(args)[0]
 
-        launchers = config['models'][0]['launchers']
+        assert len(config['models']) == 2
+        assert len(config['models'][0]['launchers']) == 1
+        assert len(config['models'][1]['launchers']) == 1
+        launchers = [config['models'][0]['launchers'][0], config['models'][1]['launchers'][0]]
         assert launchers == [config_launchers[0], config_launchers[2]]
 
     def test_both_launchers_are_filtered_by_other_devices(self, mocker):
@@ -1349,7 +1364,10 @@ class TestConfigReader:
 
         config = ConfigReader.merge(args)[0]
 
-        launchers = config['models'][0]['launchers']
+        assert len(config['models']) == 2
+        assert len(config['models'][0]['launchers']) == 1
+        assert len(config['models'][1]['launchers']) == 1
+        launchers = [config['models'][0]['launchers'][0], config['models'][1]['launchers'][0]]
         assert launchers == config_launchers
 
     def test_launcher_is_not_filtered_by_device_with_tail(self, mocker):
@@ -1461,8 +1479,10 @@ class TestConfigReader:
         args = copy.deepcopy(self.arguments)
         args.target_devices = ['CPU', 'GPU']
         config, _ = ConfigReader.merge(args)
-        launchers = config['models'][0]['launchers']
-        assert len(launchers) == 2
+        assert len(config['models']) == 2
+        assert len(config['models'][0]['launchers']) == 1
+        assert len(config['models'][1]['launchers']) == 1
+        launchers = [config['models'][0]['launchers'][0], config['models'][1]['launchers'][0]]
         assert 'device' in launchers[0]
         assert 'device' in launchers[1]
         assert launchers[0]['device'].upper() == 'CPU'

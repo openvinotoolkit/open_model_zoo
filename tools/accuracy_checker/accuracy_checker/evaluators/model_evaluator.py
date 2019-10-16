@@ -29,9 +29,10 @@ from ..preprocessor import PreprocessingExecutor
 from ..adapters import create_adapter
 from ..config import ConfigError
 from ..data_readers import BaseReader
+from .base_evaluator import BaseEvaluator
 
 
-class ModelEvaluator:
+class ModelEvaluator(BaseEvaluator):
     def __init__(
             self, launcher, input_feeder, adapter, reader, preprocessor, postprocessor, dataset, metric, async_mode
     ):
@@ -50,10 +51,13 @@ class ModelEvaluator:
         self._metrics_results = []
 
     @classmethod
-    def from_configs(cls, launcher_config, dataset_config):
+    def from_configs(cls, model_config):
+        launcher_config = model_config['launchers'][0]
+        dataset_config = model_config['datasets'][0]
         dataset_name = dataset_config['name']
         data_reader_config = dataset_config.get('reader', 'opencv_imread')
         data_source = dataset_config.get('data_source')
+
         dataset = Dataset(dataset_config)
         if isinstance(data_reader_config, str):
             data_reader = BaseReader.provide(data_reader_config, data_source, annotations=dataset.annotation)
@@ -63,8 +67,6 @@ class ModelEvaluator:
             )
         else:
             raise ConfigError('reader should be dict or string')
-
-        dataset = Dataset(dataset_config)
         launcher = create_launcher(launcher_config)
         async_mode = launcher.async_mode if hasattr(launcher, 'async_mode') else False
         config_adapter = launcher_config.get('adapter')
@@ -81,6 +83,17 @@ class ModelEvaluator:
         return cls(
             launcher, input_feeder, adapter, data_reader,
             preprocessor, postprocessor, dataset, metric_dispatcher, async_mode
+        )
+
+    @staticmethod
+    def get_processing_info(config):
+        launcher_config = config['launchers'][0]
+        dataset_config = config['datasets'][0]
+
+        return (
+            config['name'],
+            launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
+            dataset_config['name']
         )
 
     def _get_batch_input(self, batch_annotation):
@@ -164,6 +177,8 @@ class ModelEvaluator:
         return self.postprocessor.process_dataset(self._annotations, self._predictions)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
+        if progress_reporter:
+            progress_reporter.reset(self.dataset.size)
         if self._is_stored(stored_predictions) or isinstance(self.launcher, DummyLauncher):
             self._annotations, self._predictions = self.load(stored_predictions, progress_reporter)
             self._annotations, self._predictions = self.postprocessor.full_process(self._annotations, self._predictions)
@@ -314,6 +329,9 @@ class ModelEvaluator:
             pickle.dump(predictions, content)
             print_info("prediction objects are save to {}".format(stored_predictions))
 
+    def reset_progress(self, progress_reporter):
+        progress_reporter.reset(self.dataset.size)
+
     def reset(self):
         self.metric_executor.reset()
         del self._annotations
@@ -322,6 +340,7 @@ class ModelEvaluator:
         self._annotations = []
         self._predictions = []
         self._metrics_results = []
+        self.dataset.reset()
 
     def release(self):
         self.launcher.release()
