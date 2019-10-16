@@ -91,15 +91,12 @@ def main():
     alphabet = Alphabet(os.path.abspath(args.alphabet))
     
     # Speech feature extration
-    _wave = wave.open('1272-128104-0000.wav', 'rb')
+    _wave = wave.open(args.input, 'rb')
     fs = _wave.getframerate()
     if fs is not 16000:
-        log.error("Please using 16kHz wave file, not {}\n".format(fs))
+        log.error("Please using 16kHz wave file, not {}Hz\n".format(fs))
     _length = _wave.getnframes()
-    audio = np.zeros(_length)
-
-    for i in range(_length):
-        audio[i] = int(struct.unpack("<h",_wave.readframes(1))[0])
+    audio = np.frombuffer(_wave.readframes(_length), dtype=np.dtype('<h'))
 
     audio = audio/np.float32(32768) # normalize to -1 to 1, int 16 to float32
  
