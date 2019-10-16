@@ -69,6 +69,10 @@ python image_retrieval_demo.py \
 --ground_truth text_label
 ```
 
+An example of file listing gallery images can be found [here](https://github.com/opencv/openvino_training_extensions/blob/develop/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
+
+Examples of videos can be found [here](https://github.com/19900531/test)
+
 ## Demo Output
 
 The application uses OpenCV to display gallery searching result and current inference performance.
