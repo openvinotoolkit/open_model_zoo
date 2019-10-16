@@ -6,7 +6,7 @@ models:
         tags:
           - FP32
         model:   intel/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.xml
-        weights: intel/ead-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
+        weights: intel/head-pose-estimation-adas-0001/FP32/head-pose-estimation-adas-0001.bin
         adapter:
           type: head_pose
           angle_yaw: angle_y_fc

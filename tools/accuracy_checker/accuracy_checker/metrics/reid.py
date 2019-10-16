@@ -184,17 +184,19 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        params = super().parameters()
+        params.update({
             'subset_number': NumberField(
                 optional=True, min_value=1, value_type=int, default=10, description="Number of subsets for separating."
             )
         })
-        return parameters
+        return params
 
     def configure(self):
         self.subset_num = self.get_value_from_config('subset_number')
-        self.accuracy_metric = PairwiseAccuracy(self.config, self.dataset)
+        config_copy = self.config.copy()
+        config_copy.pop('subset_number')
+        self.accuracy_metric = PairwiseAccuracy(config_copy, self.dataset)
 
     def evaluate(self, annotations, predictions):
         subset_results = []

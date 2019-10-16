@@ -77,8 +77,8 @@ class ConfigReader:
     def process_config(config, mode='models', arguments=None):
         if arguments is None:
             arguments = dict()
-        ConfigReader._provide_cmd_arguments(arguments, config, mode)
         ConfigReader._merge_paths_with_prefixes(arguments, config, mode)
+        ConfigReader._provide_cmd_arguments(arguments, config, mode)
         ConfigReader._filter_launchers(config, arguments, mode)
 
     @staticmethod
@@ -371,19 +371,16 @@ class ConfigReader:
             if 'bitstream' not in launcher_entry and 'bitstreams' in arguments and arguments.bitstreams:
                 if not arguments.bitstreams.is_dir():
                     launcher_entry['bitstream'] = arguments.bitstreams
-                    arguments.bitstreams = None
 
             if 'cpu_extensions' not in launcher_entry and 'extensions' in arguments and arguments.extensions:
                 extensions = arguments.extensions
                 if not extensions.is_dir() or extensions.name == 'AUTO':
                     launcher_entry['cpu_extensions'] = arguments.extensions
-                    arguments.extensions = None
 
             if 'affinity_map' not in launcher_entry and 'affinity_map' in arguments and arguments.affinity_map:
                 am = arguments.affinity_map
                 if not am.is_dir():
                     launcher_entry['affinity_map'] = arguments.affinity_map
-                    arguments.affinity_map = None
 
             return launcher_entry
 
