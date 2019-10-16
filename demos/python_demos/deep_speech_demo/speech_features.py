@@ -74,13 +74,6 @@ def audio_spectrogram(samples, window_size, stride, magnitude_squared):
 
         return __output
 
-
-##################################################
-#
-# John Feng, 2019/09/11
-#
-##################################################
-
 def mfcc_mel_filiterbank_init(sample_rate, input_length) :
     # init
     filterbank_channel_count_   = 40
