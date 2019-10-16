@@ -75,24 +75,12 @@ class PixelLinkDecoder():
         return np.exp(x - self._logsumexp(x, axis=axis, keepdims=True))
 
     def _logsumexp(self, a, axis=None, keepdims=False):
-        if b is not None:
-            a, b = np.broadcast_arrays(a, b)
-            if np.any(b == 0):
-                a = a + 0.  # promote to at least float
-                a[b == 0] = -np.inf
-
         a_max = np.amax(a, axis=axis, keepdims=True)
 
         if a_max.ndim > 0:
             a_max[~np.isfinite(a_max)] = 0
         elif not np.isfinite(a_max):
             a_max = 0
-
-        if b is not None:
-            b = np.asarray(b)
-            tmp = b * np.exp(a - a_max)
-        else:
-            tmp = np.exp(a - a_max)
 
         # suppress warnings about log of zero
         with np.errstate(divide='ignore'):
@@ -106,10 +94,7 @@ class PixelLinkDecoder():
             a_max = np.squeeze(a_max, axis=axis)
         out += a_max
 
-        if return_sign:
-            return out, sgn
-        else:
-            return out
+        return out
 
     def _set_pixel_scores(self, pixel_scores):
         "get softmaxed properly shaped pixel scores"
@@ -235,16 +220,16 @@ class PixelLinkDecoder():
 
 
 def main():
-    if args.model_path.endswith('.xml'):
+    if args.model_path.endswith('text-detection-0003.xml') or args.model_path.endswith('text-detection-0004.xml'):
         td = cv2.dnn.readNet(args.model_path, args.model_path[:-3] + 'bin')
     else:
-        print("Not valid model's XML file name (should be something like 'foo.xml')")
-        sys.exit([1])
+        print("Not valid model's XML file name (should be text-detection-0003.xml or text-detection-0003.xml)")
+        return 1
         
     img = cv2.imread(args.image_path)
     if img is None:
         print("Failed to load image")
-        sys.exit([1])
+        return 1
         
     blob = cv2.dnn.blobFromImage(img, 1, (1280, 768))
     td.setInput(blob)
