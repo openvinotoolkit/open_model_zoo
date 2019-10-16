@@ -1,2 +1,1 @@
 #deep speech demo specific requirements
-scipy
