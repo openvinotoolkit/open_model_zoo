@@ -17,9 +17,9 @@ limitations under the License.
 from ..config import PathField
 from ..representation import CharacterRecognitionAnnotation
 from ..utils import read_txt, check_file_existence
-from .format_converter import FileBasedAnnotationConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, ConverterReturn
 
-class LibriSpeechFormatConverter(FileBasedAnnotationConverter):
+class LibriSpeechFormatConverter(BaseFormatConverter):
     __provider__ = 'libri_speech'
 
     annotation_types = (CharacterRecognitionAnnotation, )
