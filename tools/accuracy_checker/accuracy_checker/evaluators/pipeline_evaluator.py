@@ -189,7 +189,7 @@ class PipeLineEvaluator(BaseEvaluator):
     @classmethod
     def from_configs(cls, pipeline_config):
         stages = OrderedDict()
-        for stage_config in pipeline_config:
+        for stage_config in pipeline_config['stages']:
             stage_name = stage_config['stage']
             evaluation_stage = PipeLineStage.from_configs(stage_name, stage_config)
             stages[stage_name] = evaluation_stage
