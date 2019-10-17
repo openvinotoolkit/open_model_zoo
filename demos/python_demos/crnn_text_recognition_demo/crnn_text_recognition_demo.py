@@ -39,7 +39,7 @@ def build_argparser():
                            default='CPU', type=str, metavar='"<device>"')
     args.add_argument('-l', '--cpu_extension',
                       help='Required for CPU custom layers. '
-                           'Absolute path to a shared library with the kernels implementation.',
+                           'Path to a shared library with the kernels implementation.',
                       default=None, type=str, metavar='"<absolute_path>"')
     return parser
 
@@ -81,7 +81,7 @@ def main():
         if len(not_supported_layers) != 0:
             log.error('Following layers are not supported by the plugin for specified device {}:\n {}'.
                       format(args.device, ', '.join(not_supported_layers)))
-            log.error("Please try to specify cpu extensions library path in sample's command line parameters using -l "
+            log.error("Please try to specify cpu extensions library path in demo's command line parameters using -l "
                       "or --cpu_extension command line argument")
             sys.exit(1)
 
