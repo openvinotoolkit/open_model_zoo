@@ -195,7 +195,8 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
     def configure(self):
         self.subset_num = self.get_value_from_config('subset_number')
         config_copy = self.config.copy()
-        config_copy.pop('subset_number')
+        if 'subset_number' in config_copy:
+            config_copy.pop('subset_number')
         self.accuracy_metric = PairwiseAccuracy(config_copy, self.dataset)
 
     def evaluate(self, annotations, predictions):
