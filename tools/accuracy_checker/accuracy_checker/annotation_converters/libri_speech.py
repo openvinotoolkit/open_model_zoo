@@ -14,13 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-###############################################
-#
-# Create by John Feng
-# Contact: john.feng@intel.com
-#
-###############################################
-
 from ..config import PathField
 from ..representation import CharacterRecognitionAnnotation
 from ..utils import read_txt, check_file_existence
