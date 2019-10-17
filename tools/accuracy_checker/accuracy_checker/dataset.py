@@ -54,6 +54,25 @@ class Dataset:
         self._load_annotation()
 
     def _load_annotation(self):
+        def create_subset(subsample_size, subsample_seed):
+            if isinstance(subsample_size, str):
+                if subsample_size.endswith('%'):
+                    try:
+                        subsample_size = float(subsample_size[:-1])
+                    except ValueError:
+                        raise ConfigError('invalid value for subsample_size: {}'.format(subsample_size))
+                    if subsample_size <= 0:
+                        raise ConfigError('subsample_size should be > 0')
+                    subsample_size *= len(annotation) / 100
+                    subsample_size = int(subsample_size) or 1
+            try:
+                subsample_size = int(subsample_size)
+            except ValueError:
+                raise ConfigError('invalid value for subsample_size: {}'.format(subsample_size))
+            if subsample_size < 1:
+                raise ConfigError('subsample_size should be > 0')
+            return make_subset(annotation, subsample_size, subsample_seed)
+
         annotation, meta = None, None
         use_converted_annotation = True
         if 'annotation' in self._config:
@@ -69,13 +88,10 @@ class Dataset:
             raise ConfigError('path to converted annotation or data for conversion should be specified')
 
         subsample_size = self._config.get('subsample_size')
-        if subsample_size:
+        if subsample_size is not None:
             subsample_seed = self._config.get('subsample_seed', 666)
-            if isinstance(subsample_size, str):
-                if subsample_size.endswith('%'):
-                    subsample_size = float(subsample_size[:-1]) / 100 * len(annotation)
-            subsample_size = int(subsample_size)
-            annotation = make_subset(annotation, subsample_size, subsample_seed)
+
+            annotation = create_subset(subsample_size, subsample_seed)
 
         if self._config.get('analyze_dataset', False):
             analyze_dataset(annotation, meta)
