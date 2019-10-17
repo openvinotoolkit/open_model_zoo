@@ -91,16 +91,30 @@ def main():
     
     #prepare input
     log.info("Preparing input blobs...")
+    if len(net.inputs)!= 1:
+        log.error("Model with only one input is expected")
+        sys.exit(1)
     input_blob = next(iter(net.inputs))
-    n, c, h, w = net.inputs[input_blob].shape
-    image = cv2.resize(input_image, (w, h))
+    if net.inputs[input_blob].shape != [1, 3, 32, 100]:
+        log.error("Unexpected input shape. Should be [1, 3, 32, 100]")
+        sys.exit(1)
+    image = cv2.resize(input_image, (100, 32))
     image = image.transpose((2, 0, 1))
     image = np.expand_dims(image,axis=0)
+    
+    #prepare output
+    log.info("Preparing output blobs...")
+    if len(net.outputs)!= 1:
+        log.error("Model with only one output is expected")
+        sys.exit(1)
+    out_blob = next(iter(net.outputs))
+    if net.outputs[out_blob].shape != [25, 1, 37]:
+        log.error("Unexpected output shape. Should be [25, 1, 37]")
+        sys.exit(1)
 
     #run inference
     log.info('Starting inference...')
     res = exec_net.infer(inputs={input_blob: image})
-    out_blob = next(iter(net.outputs))
     res = res[out_blob]
     
     #decode the inference result
