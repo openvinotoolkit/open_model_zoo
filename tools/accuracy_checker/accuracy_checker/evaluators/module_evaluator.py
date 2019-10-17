@@ -43,8 +43,8 @@ def load_module(model_cls, python_path=None):
     model_cls = module_parts[-1]
     model_path = ".".join(module_parts[:-1])
     with append_to_path(python_path):
-        moodule_cls = importlib.import_module(model_path).__getattribute__(model_cls)
-        return moodule_cls
+        module_cls = importlib.import_module(model_path).__getattribute__(model_cls)
+        return module_cls
 
 
 @contextmanager

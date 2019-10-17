@@ -492,7 +492,7 @@ class ConfigReader:
                     copy_evaluation['module_config'] = eval_config
                     eval_list.append(copy_evaluation)
 
-                modules_config['evaluations'] = eval_list
+            modules_config['evaluations'] = eval_list
 
         mode_func = {
             'models': _separate_models_evaluations,
