@@ -45,7 +45,7 @@ class TestModelEvaluator:
         self.annotations = [[annotation_container_0], [annotation_container_1]]
 
         self.dataset = MagicMock()
-        self.dataset.__iter__.return_value = self.annotations
+        self.dataset.__iter__.return_value = [(range(1), self.annotations[0]), (range(1), self.annotations[1])]
 
         self.postprocessor.process_batch = Mock(side_effect=[
             ([annotation_container_0], [annotation_container_0]), ([annotation_container_1], [annotation_container_1])
@@ -185,7 +185,7 @@ class TestModelEvaluatorAsync:
         self.annotations = [[annotation_container_0], [annotation_container_1]]
 
         self.dataset = MagicMock()
-        self.dataset.__iter__.return_value = self.annotations
+        self.dataset.__iter__.return_value = [(range(1), self.annotations[0]), (range(1), self.annotations[1])]
 
         self.postprocessor.process_batch = Mock(side_effect=[
             ([annotation_container_0], [annotation_container_0]), ([annotation_container_1], [annotation_container_1])

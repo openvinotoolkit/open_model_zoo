@@ -47,7 +47,10 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         self.magnitude = []
 
     def update(self, annotation, prediction):
-        self.magnitude.append(self.value_differ(annotation.value, prediction.value))
+        diff = self.value_differ(annotation.value, prediction.value)
+        self.magnitude.append(diff)
+
+        return diff
 
     def evaluate(self, annotations, predictions):
         return np.mean(self.magnitude), np.std(self.magnitude)
@@ -112,7 +115,10 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
 
     def update(self, annotation, prediction):
         index = find_interval(annotation.value, self.intervals)
-        self.magnitude[index].append(self.value_differ(annotation.value, prediction.value))
+        diff = self.value_differ(annotation.value, prediction.value)
+        self.magnitude[index].append(diff)
+
+        return diff
 
     def evaluate(self, annotations, predictions):
         if self.ignore_out_of_range:
@@ -165,6 +171,10 @@ class RootMeanSquaredError(BaseRegressionMetric):
     def __init__(self, *args, **kwargs):
         super().__init__(mse_differ, *args, **kwargs)
 
+    def update(self, annotation, prediction):
+        mse = super().update(annotation, prediction)
+        return np.sqrt(mse)
+
     def evaluate(self, annotations, predictions):
         return np.sqrt(np.mean(self.magnitude)), np.sqrt(np.std(self.magnitude))
 
@@ -188,6 +198,10 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
 
     def __init__(self, *args, **kwargs):
         super().__init__(mse_differ, *args, **kwargs)
+
+    def update(self, annotation, prediction):
+        mse = super().update(annotation, prediction)
+        return np.sqrt(mse)
 
     def evaluate(self, annotations, predictions):
         if self.ignore_out_of_range:
@@ -223,6 +237,8 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
         )
         result /= np.maximum(annotation.interocular_distance, np.finfo(np.float64).eps)
         self.magnitude.append(result)
+
+        return result
 
     def evaluate(self, annotations, predictions):
         num_points = np.shape(self.magnitude)[1]
@@ -276,6 +292,8 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
         avg_result = np.sum(per_point_result) / len(per_point_result)
         avg_result /= np.maximum(annotation.interocular_distance, np.finfo(np.float64).eps)
         self.magnitude.append(avg_result)
+
+        return avg_result
 
     def evaluate(self, annotations, predictions):
         self.meta['names'] = ['mean']

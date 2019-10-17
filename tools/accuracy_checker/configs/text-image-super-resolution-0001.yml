@@ -28,3 +28,6 @@ models:
         adapter:
           type: super_resolution
         cpu_extensions: AUTO
+
+    datasets:
+      - name: text_super_resolution_x3

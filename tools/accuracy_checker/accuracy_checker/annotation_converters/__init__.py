@@ -49,6 +49,7 @@ from .cvat_person_detection_action_recognition import CVATPersonDetectionActionR
 from .libri_speech import LibriSpeechFormatConverter
 from .squad import SQUADConverter
 from .xnli import XNLIDatasetConverter
+from .action_recognition import ActionRecognitionConverter
 
 
 __all__ = [
@@ -93,5 +94,6 @@ __all__ = [
     'CVATPersonDetectionActionRecognitionConverter',
     'LibriSpeechFormatConverter',
     'SQUADConverter',
-    'XNLIDatasetConverter'
+    'XNLIDatasetConverter',
+    'ActionRecognitionConverter'
 ]

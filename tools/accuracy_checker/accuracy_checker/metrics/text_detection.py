@@ -176,7 +176,7 @@ class FocusedTextLocalizationMetric(PerImageEvaluationMetric):
             precision = 0 if num_det > 0 else 1
             self.precision_sum += precision
             self.recall_sum += recall
-            return
+            return precision, recall, num_valid_gt, num_valid_pred
 
         recall_accum = 0
         precision_accum = 0
@@ -217,6 +217,8 @@ class FocusedTextLocalizationMetric(PerImageEvaluationMetric):
 
         self.recall_sum += recall
         self.precision_sum += precision
+
+        return precision, recall, num_valid_gt, num_valid_pred
 
     def evaluate(self, annotations, predictions):
         raise NotImplementedError()
@@ -362,6 +364,10 @@ class FocusedTextLocalizationMetric(PerImageEvaluationMetric):
 class FocusedTextLocalizationPrecision(FocusedTextLocalizationMetric):
     __provider__ = 'focused_text_precision'
 
+    def update(self, annotation, prediction):
+        precision, _, _, num_valid_dt = super().update(annotation, prediction)
+        return precision / num_valid_dt if num_valid_dt != 0 else 0
+
     def evaluate(self, annotations, predictions):
         return self.precision_sum / self.num_valid_detections if self.num_valid_detections != 0 else 0
 
@@ -369,12 +375,23 @@ class FocusedTextLocalizationPrecision(FocusedTextLocalizationMetric):
 class FocusedTextLocalizationRecall(FocusedTextLocalizationMetric):
     __provider__ = 'focused_text_recall'
 
+    def update(self, annotation, prediction):
+        precision, _, num_valid_gt, _ = super().update(annotation, prediction)
+        return precision / num_valid_gt if num_valid_gt != 0 else 0
+
     def evaluate(self, annotations, predictions):
         return self.recall_sum / self.num_valid_gt if self.num_valid_gt != 0 else 0
 
 
 class FocusedTextLocalizationHMean(FocusedTextLocalizationMetric):
     __provider__ = 'focused_text_hmean'
+
+    def update(self, annotation, prediction):
+        precision, recall, num_valid_gt, num_valid_dt = super().update(annotation, prediction)
+        overall_p = precision / num_valid_dt if num_valid_dt != 0 else 0
+        overall_r = recall / num_valid_gt if num_valid_gt != 0 else 0
+
+        return 2 * overall_r * overall_p / (overall_r + overall_p) if overall_r + overall_p != 0 else 0
 
     def evaluate(self, annotations, predictions):
         recall = self.recall_sum / self.num_valid_gt if self.num_valid_gt != 0 else 0
@@ -465,6 +482,8 @@ class IncidentalSceneTextLocalizationMetric(PerImageEvaluationMetric):
         self.number_valid_annotations += num_valid_gt
         self.number_valid_detections += num_valid_pred
 
+        return num_det_matched, num_valid_gt, num_valid_pred
+
     def evaluate(self, annotations, predictions):
         raise NotImplementedError()
 
@@ -476,6 +495,10 @@ class IncidentalSceneTextLocalizationMetric(PerImageEvaluationMetric):
 
 class IncidentalSceneTextLocalizationPrecision(IncidentalSceneTextLocalizationMetric):
     __provider__ = 'incidental_text_precision'
+
+    def update(self, annotation, prediction):
+        num_det_matched, _, num_valid_dt = super().update(annotation, prediction)
+        return 0 if num_valid_dt == 0 else float(num_det_matched) / num_valid_dt
 
     def evaluate(self, annotations, predictions):
         precision = (
@@ -489,6 +512,10 @@ class IncidentalSceneTextLocalizationPrecision(IncidentalSceneTextLocalizationMe
 class IncidentalSceneTextLocalizationRecall(IncidentalSceneTextLocalizationMetric):
     __provider__ = 'incidental_text_recall'
 
+    def update(self, annotation, prediction):
+        num_det_matched, num_valid_gt, _ = super().update(annotation, prediction)
+        return 0 if num_valid_gt == 0 else float(num_det_matched) / num_valid_gt
+
     def evaluate(self, annotations, predictions):
         recall = (
             0 if self.number_valid_annotations == 0
@@ -500,6 +527,13 @@ class IncidentalSceneTextLocalizationRecall(IncidentalSceneTextLocalizationMetri
 
 class IncidentalSceneTextLocalizationHMean(IncidentalSceneTextLocalizationMetric):
     __provider__ = 'incidental_text_hmean'
+
+    def update(self, annotation, prediction):
+        num_det_matched, num_valid_gt, num_valid_pred = super().update(annotation, prediction)
+        precision = 0 if num_valid_pred == 0 else num_det_matched / num_valid_pred
+        recall = 0 if num_valid_gt == 0 else num_det_matched / num_valid_gt
+
+        return 0 if precision + recall == 0 else 2 * recall * precision / (recall + precision)
 
     def evaluate(self, annotations, predictions):
         recall = (
