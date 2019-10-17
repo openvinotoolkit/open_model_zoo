@@ -16,6 +16,7 @@ limitations under the License.
 
 from ..config import NumberField
 from .preprocessor import Preprocessor
+import numpy as np
 
 class CreateOverlapWindows(Preprocessor):
     __provider__ = 'overlap_creator'

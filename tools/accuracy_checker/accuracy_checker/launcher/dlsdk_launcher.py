@@ -275,7 +275,7 @@ class DLSDKLauncher(Launcher):
         """
         results = []
         for infer_inputs in inputs:
-            if self._run_audio:
+            if self.run_audio:
                 audio_ftrs = infer_inputs[self.config['_list_inputs'][0]]
                 hidden_state = []
                 __res = None
