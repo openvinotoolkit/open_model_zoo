@@ -1,20 +1,11 @@
 models:
   - name: deepspeech
-    # list of launchers for your topology.
     launchers:
-        # launcher framework (e.g. caffe, dlsdk)
       - framework: dlsdk
-        # device for infer (e.g. for dlsdk cpu, gpu, hetero:cpu,gpu ...)
         device: CPU
-        # topology IR (*.prototxt for caffe, *.xml for InferenceEngine, etc)
-        # path to topology is prefixed with directory, specified in "-m/--models" option
-        # If you use dlsdk launcher, you can specify model in source framework format in this case Model Optimizer will be used for getting converted model.
         inputs:
-          # name of input layer
           - name: 'input_node'
-          # type for setting input data: INPUT for dynamic dataset input, CONST_INPUT for setting value from config, IMAGE_INFO for using image size as input.
             type: INPUT
-          # comma separated list of input dimensions without batch size.
             shape: 16, 19, 26
           - name: 'previous_state_h/read/placeholder_port_0'
             type: HIDDEN_STATE
@@ -23,42 +14,23 @@ models:
             type: HIDDEN_STATE
             shape: [1, 2048]
         model:   output_graph.xml
-        # topology weights binary (*.caffemodel for caffe, *.bin for InferenceEngine)
         weights: output_graph.bin
-        # launcher returns raw result, so it should be converted
-        # to an appropriate representation with adapter
         adapter: 
           type: beam_search_decoder
           output_node: 'Softmax'
           softmaxed_probabilities: True
         cpu_extensions: AUTO
-        # batch size
         batch: 1
-        _run_audio: True
-        _audio_hidden_state: ['lstm_fused_cell/BlockLSTM/TensorIterator.1', 'lstm_fused_cell/BlockLSTM/TensorIterator.2']
+        run_audio: True
+        audio_hidden_state: ['lstm_fused_cell/BlockLSTM/TensorIterator.1', 'lstm_fused_cell/BlockLSTM/TensorIterator.2']
 
-    # metrics, preprocessing and postprocessing are typically dataset specific, so dataset field
-    # specifies data and all other steps required to validate topology
-    # there is typically definitions file, which contains options for common datasets and which is merged
-    # during evaluation, but since "sample_dataset" is not used anywhere else, this config contains full definition
     datasets:
-        # uniquely distinguishable name for dataset
-        # note that all other steps are specific for this dataset only
-        # if you need to test topology on multiple datasets, you need to specify
-        # every step explicitly for each dataset
-      - name: libriSpeech
+      - name: libri_speech
         reader: audio_reader
-        annotation: libriSpeech.pickle
-        dataset_meta: libriSpeech.json
-        # directory where input images are searched.
-        # prefixed with directory specified in "-s/--source" option
+        annotation: libri_speech.pickle
+        dataset_meta: libri_speech.json
 
-        # list of preprocessing, applied to each image during validation
-        # order of entries matters
         preprocessing:
-            # resize input image to topology input size
-            # you may specify size to which image should be resized
-            # via dst_width, dst_height fields
           - type: audio_normalizer
           - type: audio_spectrogram
             rate: 16000
@@ -72,13 +44,8 @@ models:
             input: 26
           - type: audio_package
             step: 16
-            # topology is trained on RGB images, but OpenCV reads in BGR
-            # thence it must be converted to RGB
-            # dataset mean and standard deviation
 
-        # list of metrics, calculated on dataset
         metrics:
-          # - type: character_recognition_accuracy
           - type: speech_recognition_accuracy
             threshold: 20
 
