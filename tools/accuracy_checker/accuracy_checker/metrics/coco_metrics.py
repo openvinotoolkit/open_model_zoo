@@ -23,7 +23,7 @@ from ..representation import (
     PoseEstimationPrediction,
     PoseEstimationAnnotation
 )
-from ..utils import get_or_parse_value
+from ..utils import get_or_parse_value, finalize_metric_result
 from .overlap import Overlap
 from .metric import PerImageEvaluationMetric
 
@@ -107,6 +107,7 @@ class MSCOCOAveragePrecision(MSCOCOBaseMetric):
             compute_precision_recall(self.thresholds, self.matching_results[i])[0]
             for i, _ in enumerate(self.labels)
         ]
+        precision, self.meta['names'] = finalize_metric_result(precision, self.meta['names'])
 
         return precision
 
@@ -125,6 +126,7 @@ class MSCOCORecall(MSCOCOBaseMetric):
             compute_precision_recall(self.thresholds, self.matching_results[i])[1]
             for i, _ in enumerate(self.labels)
         ]
+        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['names'])
 
         return recalls
 
@@ -216,6 +218,8 @@ def compute_precision_recall(thresholds, matching_results):
     fps = np.logical_and(np.logical_not(dtm), np.logical_not(dt_ignored))
     tp_sum = np.cumsum(tps, axis=1).astype(dtype=np.float)
     fp_sum = np.cumsum(fps, axis=1).astype(dtype=np.float)
+    if npig == 0:
+        return np.nan, np.nan
     for t, (tp, fp) in enumerate(zip(tp_sum, fp_sum)):
         tp = np.array(tp)
         fp = np.array(fp)
@@ -223,7 +227,6 @@ def compute_precision_recall(thresholds, matching_results):
         rc = tp / npig
         pr = tp / (fp + tp + np.spacing(1))
         q = np.zeros(num_rec_thresholds)
-
         if num_detections:
             recall[t] = rc[-1]
         else:
