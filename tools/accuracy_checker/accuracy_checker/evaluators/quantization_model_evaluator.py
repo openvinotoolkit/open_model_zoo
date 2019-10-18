@@ -333,18 +333,21 @@ def create_dataset_attributes(config, tag):
     data_reader_config = dataset_config.get('reader', 'opencv_imread')
     data_source = dataset_config.get('data_source')
 
-    if isinstance(data_reader_config, str):
-        data_reader = BaseReader.provide(data_reader_config, data_source)
-    elif isinstance(data_reader_config, dict):
-        data_reader = BaseReader.provide(data_reader_config['type'], data_source, data_reader_config)
-    else:
-        raise ConfigError('reader should be dict or string')
     annotation_reader = None
     dataset_meta = {}
     metric_dispatcher = None
+
     if contains_any(dataset_config, ['annotation', 'annotation_conversion']):
         annotation_reader = Dataset(dataset_config)
         dataset_meta = annotation_reader.metadata
+
+    if isinstance(data_reader_config, str):
+        data_reader = BaseReader.provide(data_reader_config, data_source)
+    elif isinstance(data_reader_config, dict) and annotation_reader:
+        data_reader = BaseReader.provide(data_reader_config['type'], data_source, data_reader_config, annotation_reader.annotation)
+    else:
+        raise ConfigError('reader should be dict or string')
+
     dataset = DatasetWrapper(data_reader, annotation_reader)
     preprocessor = PreprocessingExecutor(
         dataset_config.get('preprocessing'), dataset_name, dataset_meta
