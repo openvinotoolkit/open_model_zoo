@@ -54,6 +54,25 @@ class Dataset:
         self._load_annotation()
 
     def _load_annotation(self):
+        def create_subset(subsample_size, subsample_seed):
+            if isinstance(subsample_size, str):
+                if subsample_size.endswith('%'):
+                    try:
+                        subsample_size = float(subsample_size[:-1])
+                    except ValueError:
+                        raise ConfigError('invalid value for subsample_size: {}'.format(subsample_size))
+                    if subsample_size <= 0:
+                        raise ConfigError('subsample_size should be > 0')
+                    subsample_size *= len(annotation) / 100
+                    subsample_size = int(subsample_size) or 1
+            try:
+                subsample_size = int(subsample_size)
+            except ValueError:
+                raise ConfigError('invalid value for subsample_size: {}'.format(subsample_size))
+            if subsample_size < 1:
+                raise ConfigError('subsample_size should be > 0')
+            return make_subset(annotation, subsample_size, subsample_seed)
+
         annotation, meta = None, None
         use_converted_annotation = True
         if 'annotation' in self._config:
@@ -69,13 +88,10 @@ class Dataset:
             raise ConfigError('path to converted annotation or data for conversion should be specified')
 
         subsample_size = self._config.get('subsample_size')
-        if subsample_size:
+        if subsample_size is not None:
             subsample_seed = self._config.get('subsample_seed', 666)
-            if isinstance(subsample_size, str):
-                if subsample_size.endswith('%'):
-                    subsample_size = float(subsample_size[:-1]) / 100 * len(annotation)
-            subsample_size = int(subsample_size)
-            annotation = make_subset(annotation, subsample_size, subsample_seed)
+
+            annotation = create_subset(subsample_size, subsample_seed)
 
         if self._config.get('analyze_dataset', False):
             analyze_dataset(annotation, meta)
@@ -122,10 +138,11 @@ class Dataset:
         return len(self._annotation)
 
     def __call__(self, context, *args, **kwargs):
-        batch_annotation = self.__getitem__(self.iteration)
+        batch_input_ids, batch_annotation = self.__getitem__(self.iteration)
         self.iteration += 1
         context.annotation_batch = batch_annotation
         context.identifiers_batch = [annotation.identifier for annotation in batch_annotation]
+        context.input_ids_batch = batch_input_ids
 
     def __getitem__(self, item):
         if self.size <= item * self.batch:
@@ -134,9 +151,11 @@ class Dataset:
         batch_start = item * self.batch
         batch_end = min(self.size, batch_start + self.batch)
         if self.subset:
-            return [self._annotation[idx] for idx in self.subset[batch_start:batch_end]]
+            batch_ids = self.subset[batch_start:batch_end]
+            return batch_ids, [self._annotation[idx] for idx in batch_ids]
+        batch_ids = range(batch_start, batch_end)
 
-        return self._annotation[batch_start:batch_end]
+        return batch_ids, self._annotation[batch_start:batch_end]
 
     def make_subset(self, ids=None, start=0, step=1, end=None):
         if ids:
@@ -211,22 +230,20 @@ class DatasetWrapper:
             raise IndexError
         batch_annotation = []
         if self.annotation_reader:
-            batch_annotation = self.annotation_reader[item]
+            batch_annotation_ids, batch_annotation = self.annotation_reader[item]
             batch_identifiers = [annotation.identifier for annotation in batch_annotation]
             batch_input = [self.data_reader(identifier=identifier) for identifier in batch_identifiers]
             for annotation, input_data in zip(batch_annotation, batch_input):
                 set_image_metadata(annotation, input_data)
                 annotation.metadata['data_source'] = self.data_reader.data_source
-            return batch_annotation, batch_input, batch_identifiers
+            return batch_annotation_ids, batch_annotation, batch_input, batch_identifiers
         batch_start = item * self.batch
         batch_end = min(self.size, batch_start + self.batch)
-        if self.subset:
-            batch_identifiers = [self._identifiers[idx] for idx in self.subset[batch_start:batch_end]]
-        else:
-            batch_identifiers = self._identifiers[batch_start:batch_end]
+        batch_input_ids = self.subset[batch_start:batch_end] if self.subset else range(batch_start, batch_end)
+        batch_identifiers = [self._identifiers[idx] for idx in batch_input_ids]
         batch_input = [self.data_reader(identifier=identifier) for identifier in batch_identifiers]
 
-        return batch_annotation, batch_input, batch_identifiers
+        return batch_input_ids, batch_annotation, batch_input, batch_identifiers
 
     def __len__(self):
         if self.annotation_reader:

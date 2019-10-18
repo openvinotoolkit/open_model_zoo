@@ -274,6 +274,7 @@ def read_txt(file: Union[str, Path], sep='\n', **kwargs):
 def read_xml(file: Union[str, Path], *args, **kwargs):
     return et.parse(str(get_path(file)), *args, **kwargs).getroot()
 
+
 def read_json(file: Union[str, Path], *args, **kwargs):
     with get_path(file).open() as content:
         return json.load(content, *args, **kwargs)

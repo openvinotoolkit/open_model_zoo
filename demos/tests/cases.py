@@ -56,8 +56,10 @@ class PythonDemo:
         return source_dir / self.subdirectory / 'models.lst'
 
     def fixed_args(self, source_dir, build_dir):
-        return [sys.executable, str(source_dir / self.subdirectory / (self._name + '.py')),
-            '-l', str(build_dir / 'lib/libcpu_extension.so')]
+        cpu_extension_path = build_dir / 'lib/libcpu_extension.so'
+
+        return [sys.executable, str(source_dir / 'python_demos' / self._name / (self._name + '.py')),
+            *(['-l', str(cpu_extension_path)] if cpu_extension_path.exists() else [])]
 
 def join_cases(*args):
     options = {}
