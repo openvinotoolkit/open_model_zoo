@@ -3,6 +3,7 @@
 ## Use Case and High-Level Description
 
 Product detector based on SSD-lite architecture with [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf) as a backbone for Self-checkout Point of Sale related scenes.
+The detector is able to detect 12 classes of objects (sprite, kool-aid, extra, ocelo, finish, mtn_dew, best_foods, gatorade, heinz, ruffles, pringles, del_monte) and first labels 0 and 1 are related to `background_label` and `undefined` correspondingly.
 
 ## Example
 
