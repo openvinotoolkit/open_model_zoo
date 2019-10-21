@@ -18,13 +18,13 @@ import os
 import tempfile
 import json
 try:
-    from pycocotools.coco import COCO
+    from pycocotools.coco import COCO as COCO
 except ImportError:
     COCO = None
 try:
-    from pycocotools.cocoeval import COCOeval
+    from pycocotools.cocoeval import COCOeval as coco_eval
 except ImportError:
-    COCOEval = None
+    coco_eval = None
 from ..representation import (
     DetectionPrediction,
     DetectionAnnotation,
@@ -242,9 +242,9 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
 
     @staticmethod
     def _run_coco_evaluation(coco, coco_res, iou_type='bbox', threshold=None):
-        if COCOEval is None:
+        if coco_eval is None:
             raise ValueError('pycocotools is not installed, please install it before usage')
-        cocoeval = COCOeval(coco, coco_res, iouType=iou_type)
+        cocoeval = coco_eval(coco, coco_res, iouType=iou_type)
         if threshold is not None:
             cocoeval.params.iouThrs = threshold
         cocoeval.evaluate()
