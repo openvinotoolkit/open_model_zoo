@@ -109,11 +109,11 @@ For replacement operation:
 - `file` — Name of file to run replacement in
 - `pattern` — [Regular expression](https://docs.python.org/3/library/re.html)
 - `replacement` — Replacement string
-- `count` (*optional*)  — Maximum number of pattern occurrences to be replaced
+- `count` (*optional*)  — Exact number of replacements (if number of `pattern` occurrences less then this number, downloading will be aborted)
 
-**`conversion_to_onnx_args`** (*optional*)
+**`conversion_to_onnx_args`** (*only for Caffe2\*, PyTorch\* models*)
 
-List of ONNX\* conversion parameters, see `model_optimizer_args` for details. Applicable for Caffe2\* and PyTorch\* frameworks.
+List of ONNX\* conversion parameters, see `model_optimizer_args` for details.
 
 **`model_optimizer_args`**
 
@@ -193,9 +193,9 @@ Demos are required to support the following keys:
  -  `-i "<input>"`: Required. Input to process.
  -  `-m "<path>"`: Required. Path to an .xml file with a trained model. If the demo uses several models at the same time, use other keys prefixed with `-m`.
  - `-d "<device>"`: Optional. Default is CPU.
- - `-no_show`: Optional. Do not visualize inference results.
+ - `--no_show`: Optional. Do not visualize inference results.
 
-> **TIP**: For Python, it is preferable to use `-` instead of `_` as word separators. Example: `-no-show`.
+> **TIP**: For Python, it is preferable to use `-` instead of `_` as word separators. Example: `--no-show`.
 
 You can also add any other necessary parameters.
 
