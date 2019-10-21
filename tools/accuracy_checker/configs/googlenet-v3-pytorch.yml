@@ -71,3 +71,4 @@ models:
             use_pillow: true
 
         # Using accuracy metric, achieved result of public model - 77.45% and 93.56% (top 1 and top 5 respectively)
+global_definitions: ../dataset_definitions.yml

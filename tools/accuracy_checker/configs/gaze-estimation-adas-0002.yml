@@ -63,3 +63,4 @@ models:
         metrics:
           - type: angle_error
             presenter: print_vector
+global_definitions: ../dataset_definitions.yml
