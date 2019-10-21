@@ -305,12 +305,18 @@ class ConfigReader:
     @staticmethod
     def _merge_paths_with_prefixes(arguments, config, mode='models'):
         args = arguments if isinstance(arguments, dict) else vars(arguments)
-        if 'source' not in args or args['source'] is None:
-            source = os.environ.get('DATA_DIR')
-            args['source'] = Path(source) if source is not None else source
-        if 'annotations' not in args or args['annotations'] is None:
-            annotations_dir = os.environ.get('ANNOTATIONS_DIR')
-            args['annotations'] = Path(annotations_dir) if annotations_dir is not None else annotations_dir
+        commandline_arg_to_env_var = {
+            'source': 'DATA_DIR',
+            'annotations': 'ANNOTATIONS_DIR',
+            'bitstreams': 'BITSTREAMS_DIR',
+            'models': 'MODELS_DIR',
+            'extensions': 'EXTENSIONS_DIR'
+        }
+        for argument, env_var in commandline_arg_to_env_var.items():
+            if argument not in args or args[argument] is None:
+                env_var_value = os.environ.get(env_var)
+                if env_var_value is not None:
+                    args[argument] = Path(env_var_value)
 
         def process_models(config, entries_paths):
             for model in config['models']:
