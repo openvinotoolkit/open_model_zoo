@@ -17,10 +17,10 @@ limitations under the License.
 import importlib
 import re
 import sys
-from collections import OrderedDict
 from setuptools import find_packages, setup
 from setuptools.command.test import test as test_command
 from pathlib import Path
+
 
 class PyTest(test_command):
     user_options = [('pytest-args=', 'a', "Arguments to pass to pytest")]
