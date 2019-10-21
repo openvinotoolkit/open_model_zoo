@@ -169,8 +169,6 @@ model_optimizer_args:
 framework: tf
 license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE
 ```
-----
-*After this step you get the **model.yml** file.*
 
 ## Model Conversion
 
@@ -179,8 +177,6 @@ Deep Learning Inference Engine (IE) supports models in the Intermediate Represen
 > **NOTE 1**: Image preprocessing parameters (mean and scale) must be built into a converted model to simplify model usage.
 
 > **NOTE 2**: If a model input is a color image, color channel order should be `BGR`.
-
-*After this step you get **conversion parameters** for the Model Optimizer.*
 
 ## Demo
 
@@ -204,8 +200,6 @@ If you add a new demo, provide autotesting support as well:
 - prepare list of input images in [demos/tests/image_sequences.py](demos/tests/image_sequences.py)
 
 Update [demos' README.md](demos/README.md) adding your demo to the list.
-___
-*After this step you get a **demo** for your model (if no demo was available).*
 
 ## Accuracy Validation
 
@@ -214,9 +208,6 @@ Accuracy validation can be performed by the [Accuracy Checker](./tools/accuracy_
 If a model uses a dataset which is not supported by the Accuracy Checker, you also must provide the license and the link to it and mention it in the PR description. 
 
 When the configuration file is ready, you must run the Accuracy Checker to obtain metric results. If they match your results, that means conversion was successful and the Accuracy Checker fully supports your model, metric and dataset. Otherwise, recheck the[conversion](#model-conversion) parameters or the validation configuration file.
-
-___
-*After this step you get the accuracy validation configuration file  **<model_name>.yml**.*
 
 ### Example
 
@@ -291,9 +282,6 @@ The documentation should contain:
 * detailed description of input and output for original and converted models
 
 Learn the detailed structure and headers naming convention from any model documentation (for example, [alexnet](./models/public/alexnet/alexnet.md)).
-
----
-*After this step you get **<model_name>.md** — the documentation file.*
 
 ## Legal Information
 
