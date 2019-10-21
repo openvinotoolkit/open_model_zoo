@@ -403,6 +403,76 @@ class TestConfigReader:
 
             assert config['models'][0]['datasets'][0] == expected
 
+    def test_expand_relative_paths_in_datasets_config_using_env_variable(self, mocker):
+        local_config = {'models': [{
+            'name': 'model',
+            'launchers': [{'framework': 'caffe'}],
+            'datasets': [{
+                'name': 'global_dataset',
+                'dataset_meta': 'relative_annotation_path',
+                'data_source': 'relative_source_path',
+                'segmentation_masks_source': 'relative_source_path',
+                'annotation': 'relative_annotation_path'
+            }]
+        }]}
+
+        mocker.patch(self.module + '._read_configs', return_value=(
+            None, local_config
+        ))
+        expected = copy.deepcopy(local_config['models'][0]['datasets'][0])
+        with mock_filesystem(['source_2/']) as env_prefix:
+            mocker.patch('os.environ.get', return_value=str(env_prefix))
+        with mock_filesystem(['source/', 'annotations/']) as prefix:
+            expected['annotation'] = prefix / self.arguments.annotations / 'relative_annotation_path'
+            expected['dataset_meta'] = prefix / self.arguments.annotations / 'relative_annotation_path'
+            expected['segmentation_masks_source'] = prefix / self.arguments.source / 'relative_source_path'
+            expected['data_source'] = prefix / self.arguments.source / 'relative_source_path'
+
+            arguments = copy.deepcopy(self.arguments)
+            arguments.bitstreams = None
+            arguments.extensions = None
+            arguments.source = prefix / arguments.source
+            arguments.annotations = prefix / self.arguments.annotations
+
+            config = ConfigReader.merge(arguments)[0]
+
+            assert config['models'][0]['datasets'][0] == expected
+
+    def test_not_overwrite_relative_paths_in_datasets_config_using_env_variable_if_commandline_provided(self, mocker):
+        local_config = {'models': [{
+            'name': 'model',
+            'launchers': [{'framework': 'caffe'}],
+            'datasets': [{
+                'name': 'global_dataset',
+                'dataset_meta': 'relative_annotation_path',
+                'data_source': 'relative_source_path',
+                'segmentation_masks_source': 'relative_source_path',
+                'annotation': 'relative_annotation_path'
+            }]
+        }]}
+
+        mocker.patch(self.module + '._read_configs', return_value=(
+            None, local_config
+        ))
+        expected = copy.deepcopy(local_config['models'][0]['datasets'][0])
+        with mock_filesystem(['source/']) as prefix:
+            mocker.patch('os.environ.get', return_value=str(prefix))
+            expected['dataset_meta'] = prefix / 'relative_annotation_path'
+            expected['segmentation_masks_source'] = prefix / 'relative_source_path'
+            expected['data_source'] = prefix / 'relative_source_path'
+            expected['annotation'] = prefix / 'relative_annotation_path'
+            expected['dataset_meta'] = prefix / 'relative_annotation_path'
+
+            arguments = copy.deepcopy(self.arguments)
+            arguments.bitstreams = None
+            arguments.extensions = None
+            arguments.source = None
+            arguments.annotations = None
+
+            config = ConfigReader.merge(arguments)[0]
+
+            assert config['models'][0]['datasets'][0] == expected
+
     def test_not_modify_absolute_paths_in_datasets_config_using_command_line(self):
         local_config = {'models': [{
             'name': 'model',
