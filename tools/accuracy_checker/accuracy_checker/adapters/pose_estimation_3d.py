@@ -53,7 +53,7 @@ class HumanPose3dAdapter(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'features_3d_out': StringField(description="Name of output layer with 3d features."),
+            'features_3d_out': StringField(description="Name of output layer with 3D features."),
             'keypoints_heatmap_out': StringField(description="Name of output layer with keypoints heatmaps."),
             'part_affinity_fields_out': StringField(
                 description="Name of output layer with keypoints pairwise relations (part affinity fields)."

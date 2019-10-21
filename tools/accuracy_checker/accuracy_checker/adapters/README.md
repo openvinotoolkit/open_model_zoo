@@ -128,7 +128,7 @@ AccuracyChecker supports following set of adapters:
 * `bert_question_answering` - converting output of BERT model trained to solve question answering task to `QuestionAnsweringPrediction`.
 * `bert_classification` - converting output of BERT model trained for classification task to `ClassificationPrediction`.
   * `num_classes` - number of predicted classes.
-* `human_pose_estimation_3d` - converting output of model for 3d human pose estimation to `PoseEstimation3dPrediction`.
-  * `features_3d_out` - name of output layer with 3d coordinates maps.
+* `human_pose_estimation_3d` - converting output of model for 3D human pose estimation to `PoseEstimation3dPrediction`.
+  * `features_3d_out` - name of output layer with 3D coordinates maps.
   * `keypoints_heatmap_out` - name of output layer with keypoints heatmaps.
   * `part_affinity_fields_out` - name of output layer with keypoints pairwise relations (part affinity fields).
