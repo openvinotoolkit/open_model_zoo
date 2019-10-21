@@ -489,3 +489,14 @@ datasets:
     data_source: ILSVRC2012_img_val
     annotation: handwritten_score_recognition.pickle
     dataset_meta: handwritten_score_recognition.json
+
+  - name: BraTS
+    data_source: BraTS
+    reader: numpy_reader
+    annotation_conversion:
+      converter: brats_numpy
+      data_dir: BraTS
+      ids_file: BraTS/val_ids.p
+      labels_file: BraTS/labels
+    annotation: brats.pickle
+    dataset_meta: brats.json
