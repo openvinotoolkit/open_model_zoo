@@ -489,3 +489,21 @@ datasets:
     data_source: ILSVRC2012_img_val
     annotation: handwritten_score_recognition.pickle
     dataset_meta: handwritten_score_recognition.json
+
+  - name: kinetics-400
+    data_source: kinetics/frames_val
+    annotation_conversion:
+      converter: clip_action_recognition
+      annotation_file: kinetics/kinetics_400.json
+      data_dir: kinetics/frames_val
+    annotation: kinetics_action_recognition.pickle
+    dataset_meta: kinetics_action_recognition.json
+
+  - name: driver_action_recognition_dataset
+    data_source: kinetics/frames_val
+    annotation_conversion:
+      converter: clip_action_recognition
+      annotation_file: kinetics/driver_action_recognition.json
+      data_dir: kinetics/frames_val
+    annotation: driver_action_recognition.pickle
+    dataset_meta: driver_action_recognition.json
