@@ -68,7 +68,7 @@ class ModelEvaluator:
 
     def process_dataset_async(
             self,
-            nreq=2,
+            nreq=None,
             subset=None,
             num_images=None,
             check_progress=False,
@@ -101,6 +101,8 @@ class ModelEvaluator:
             progress_reporter = ProgressReporter.provide('print', self.dataset.size)
 
         dataset_iterator = iter(enumerate(self.dataset))
+        if nreq is None:
+            nreq = self.launcher.auto_num_requests()
         if self.launcher.num_requests != nreq:
             self.launcher.num_requests = nreq
         free_irs = self.launcher.infer_requests
