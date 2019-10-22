@@ -29,7 +29,7 @@ Name your model in OMZ according to the following rules:
 - Use a name that is consistent with an original name, but complete match is not necessary
 - Use lowercase
 - Use `-`(preferable) or `_` as delimiters, for spaces are not allowed
-- Include a suffix according to an original framework (see **`framework`** description in the [configuration file](#configuration-file) section for examples), if you add a reimplementation of an existing model in OMZ from another framework
+- Add a suffix according to framework identifier (see **`framework`** description in the [configuration file](#configuration-file) section for examples), if the model is a reimplementation of an existing model from another framework
 
 This name will be used for downloading, converting, and other operations.
 Examples of model names:
@@ -40,11 +40,12 @@ Examples of model names:
 
 Place your files as shown in the table below:
 
-File | Directory
+File | Destination
 ---|---
-configuration file<br>documentation file |`models/public/<model_name>`
-validation configuration file|`tools/accuracy_checker/configs`
-demo file|`demos`
+configuration file | `models/public/<model_name>/<model_name>.yml`
+documentation file | `models/public/<model_name>/<model_name>.md`
+validation configuration file|`tools/accuracy_checker/configs/<model_name>.yml`
+demo|`demos/<demo_name>`<br>or<br>`demos/python_demos/<demo_name>`
 
 ### Tests
 
@@ -74,7 +75,7 @@ Description of the model. Must match with the description from the model [docume
 
 **`task_type`**
 
-[Model task class](tools/downloader/README.md#model-information-dumper-usage). If there is no task class of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [tools/downloader/common.py](tools/downloader/common.py) file.
+[Model task type](tools/downloader/README.md#model-information-dumper-usage). If there is no task class of your model, add a new one to the list `KNOWN_TASK_TYPES` of the [tools/downloader/common.py](tools/downloader/common.py) file.
 
 **`files`**
 
@@ -180,16 +181,16 @@ Deep Learning Inference Engine (IE) supports models in the Intermediate Represen
 
 ## Demo
 
-A demo shows the main idea of how to infer a model using IE. If your model solves one of the tasks supported by the Open Model Zoo, try to find an appropriate option from [demos](https://docs.openvinotoolkit.org/latest/_demos_README.html) or [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html). Otherwise, you must provide your own demo (C++ or Python). 
+A demo shows the main idea of how to infer a model using IE. If your model solves one of the tasks supported by the Open Model Zoo, try to find an appropriate option from [demos](demos/README.md) or [samples](https://docs.openvinotoolkit.org/latest/_docs_IE_DG_Samples_Overview.html). Otherwise, you must provide your own demo (C++ or Python). 
 
 The demo's name should end with `_demo` suffix to follow the convention of the project.
 
 Demos are required to support the following keys:
 
  -  `-i "<input>"`: Required. Input to process.
- -  `-m "<path>"`: Required. Path to an .xml file with a trained model. If the demo uses several models at the same time, use other keys prefixed with `-m`.
- - `-d "<device>"`: Optional. Default is CPU.
- - `--no_show`: Optional. Do not visualize inference results.
+ -  `-m "<path>"`: Required. Path to an .xml file with a trained model. If the demo uses several models at the same time, use other keys prefixed with `-m_`.
+ -  `-d "<device>"`: Optional. Specifies a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. Default must be CPU. If the demo uses several models at the same time, use keys prefixed with `d_` (just like keys `m_*` above) to specify device for each model.
+ -  `-no_show`: Optional. Do not visualize inference results.
 
 > **TIP**: For Python, it is preferable to use `-` instead of `_` as word separators. Example: `--no-show`.
 
@@ -199,15 +200,15 @@ If you add a new demo, provide autotesting support as well:
 - add demo launch parameters in [demos/tests/cases.py](demos/tests/cases.py)
 - prepare list of input images in [demos/tests/image_sequences.py](demos/tests/image_sequences.py)
 
-Update [demos' README.md](demos/README.md) adding your demo to the list.
+Add `reamde.md` file, which describes demo usage. Update [demos' README.md](demos/README.md) adding your demo to the list.
 
 ## Accuracy Validation
 
-Accuracy validation can be performed by the [Accuracy Checker](./tools/accuracy_checker) tool. This tool can use either IE to run a converted model, or an original framework to run an original model. Accuracy Checker supports lots of datasets, metrics and preprocessing options, what simplifies validation if a task is supported by the tool. You only need to create a configuration file that contains necessary parameters for accuracy validation (specify a dataset and annotation, pre- and post-processing parameters, accuracy metrics to compute and so on). For details, refer to [Testing new models](./tools/accuracy_checker#testing-new-models).
+Accuracy validation can be performed by the [Accuracy Checker](./tools/accuracy_checker) tool. This tool can use either IE to run a converted model, or an original framework to run an original model. Accuracy Checker supports lots of datasets, metrics and preprocessing options, which simplifies validation if a task is supported by the tool. You only need to create a configuration file that contains necessary parameters for accuracy validation (specify a dataset and annotation, pre- and post-processing parameters, accuracy metrics to compute and so on). For details, refer to [Testing new models](./tools/accuracy_checker#testing-new-models).
 
 If a model uses a dataset which is not supported by the Accuracy Checker, you also must provide the license and the link to it and mention it in the PR description. 
 
-When the configuration file is ready, you must run the Accuracy Checker to obtain metric results. If they match your results, that means conversion was successful and the Accuracy Checker fully supports your model, metric and dataset. Otherwise, recheck the[conversion](#model-conversion) parameters or the validation configuration file.
+When the configuration file is ready, you must run the Accuracy Checker to obtain metric results. If they match your results, that means conversion was successful and the Accuracy Checker fully supports your model, metric and dataset. Otherwise, recheck the [conversion](#model-conversion) parameters or the validation configuration file.
 
 ### Example
 
@@ -258,7 +259,7 @@ models:
           - name: accuracy@top1
             type: accuracy
             top_k: 1
-          - name: acciracy@top5
+          - name: accuracy@top5
             type: accuracy
             top_k: 5
 ```
