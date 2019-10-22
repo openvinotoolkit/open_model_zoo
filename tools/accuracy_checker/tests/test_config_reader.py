@@ -102,12 +102,12 @@ class TestConfigReader:
     def test_read_configs_without_global_config(self, mocker):
         config = {'models': [{
             'name': 'model',
-            'launchers': [{'framework': 'dlsdk', 'model': Path('/absolute_path'), 'weights': Path('/absolute_path')}],
+            'launchers': [{'framework': 'dlsdk', 'model': Path('/absolute_path'), 'weights': Path('/absolute_path'), '_models_prefix': Path.cwd()}],
             'datasets': [{'name': 'global_dataset'}]
         }]}
         empty_args = Namespace(**{
-            'models': None, 'extensions': None, 'source': None, 'annotations': None,
-            'converted_models': None, 'model_optimizer': None, 'bitstreams': None,
+            'models': Path.cwd(), 'extensions': Path.cwd(), 'source': Path.cwd(), 'annotations': Path.cwd(),
+            'converted_models': None, 'model_optimizer': None, 'bitstreams': Path.cwd(),
             'definitions': None, 'config': None, 'stored_predictions': None, 'tf_custom_op_config': None,
             'progress': 'bar', 'target_framework': None, 'target_devices': None, 'log_file': None,
             'tf_obj_detection_api_pipeline_config_path': None, 'target_tags': None, 'cpu_extensions_mode': None,
@@ -700,6 +700,7 @@ class TestConfigReader:
             self.global_config, local_config
         ))
         expected = copy.deepcopy(self.get_global_launcher('dlsdk'))
+        expected['_models_prefix'] = Path.cwd()
         with mock_filesystem(['bitstreams/', 'extensions/']) as prefix:
             expected['bitstream'] = prefix / self.arguments.bitstreams / expected['bitstream']
             expected['cpu_extensions'] = prefix / self.arguments.extensions / expected['cpu_extensions']
@@ -717,11 +718,12 @@ class TestConfigReader:
     def test_merge_launchers_with_model_is_not_modified(self, mocker):
         local_config = {'models': [{
             'name': 'model',
-            'launchers': [{'framework': 'dlsdk', 'model': 'custom'}],
+            'launchers': [{'framework': 'dlsdk', 'model': '/custom'}],
             'datasets': [{'name': 'global_dataset'}]
         }]}
         expected = copy.deepcopy(self.get_global_launcher('dlsdk'))
-        expected['model'] = 'custom'
+        expected['model'] = Path('/custom')
+        expected['_models_prefix'] = Path.cwd()
         mocker.patch(self.module + '._read_configs', return_value=(
             self.global_config, local_config
         ))
