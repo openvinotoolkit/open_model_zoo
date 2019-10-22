@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(TARGET_NAME "multi-channel-human-pose-estimation-demo")
+set(TARGET_NAME "multi_channel_face_detection_demo")
 
 if( BUILD_DEMO_NAME AND NOT ${BUILD_DEMO_NAME} STREQUAL ${TARGET_NAME} )
     message(STATUS "DEMO ${TARGET_NAME} SKIPPED")
@@ -63,7 +63,9 @@ endif()
 if(TARGET IE::ie_cpu_extension)
     add_definitions(-DWITH_EXTENSIONS)
 endif()
+
 target_link_libraries(${TARGET_NAME} ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} common)
+
 if(TARGET IE::ie_cpu_extension)
     target_link_libraries(${TARGET_NAME} IE::ie_cpu_extension)
 endif()
@@ -72,12 +74,12 @@ if(UNIX)
     target_link_libraries( ${TARGET_NAME} pthread)
 endif()
 
-if(NOT TARGET ie_samples)
-    add_custom_target(ie_samples ALL)
-endif()
-
 if(COMMAND add_cpplint_target)
     add_cpplint_target(${TARGET_NAME}_cpplint FOR_TARGETS ${TARGET_NAME})
+endif()
+
+if(NOT TARGET ie_samples)
+    add_custom_target(ie_samples ALL)
 endif()
 
 add_dependencies(ie_samples ${TARGET_NAME})

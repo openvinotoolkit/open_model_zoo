@@ -18,7 +18,7 @@ import shutil
 from pathlib import Path
 
 ArgContext = collections.namedtuple('ArgContext',
-    ['test_data_dir', 'dl_dir', 'model_info', 'image_sequences', 'image_sequence_dir'])
+    ['source_dir', 'test_data_dir', 'dl_dir', 'model_info', 'image_sequences', 'image_sequence_dir'])
 
 class TestDataArg:
     def __init__(self, rel_path):
@@ -67,3 +67,10 @@ class ImageDirectoryArg:
     def resolve(self, context):
         pattern = self.backend.resolve(context)
         return str(Path(pattern).parent)
+
+class DemoFileArg:
+    def __init__(self, file_name):
+        self.file_name = file_name
+
+    def resolve(self, context):
+        return str(context.source_dir / self.file_name)

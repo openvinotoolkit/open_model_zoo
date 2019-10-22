@@ -31,8 +31,9 @@ TEXT_LEFT_MARGIN = 15
 
 
 class ResultRenderer(object):
-    def __init__(self, display_fps=False, display_confidence=True, number_of_predictions=1, labels=None,
+    def __init__(self, no_show, display_fps=False, display_confidence=True, number_of_predictions=1, labels=None,
                  output_height=720):
+        self.no_show = no_show
         self.number_of_predictions = number_of_predictions
         self.display_confidence = display_confidence
         self.display_fps = display_fps
@@ -84,11 +85,12 @@ class ResultRenderer(object):
             cv2.putText(frame, "Inference time: {:.2f}ms ({:.2f} FPS)".format(inference_time, fps),
                         text_loc, FONT_STYLE, FONT_SIZE, FONT_COLOR)
 
-        cv2.imshow("Action Recognition", frame)
+        if not self.no_show:
+            cv2.imshow("Action Recognition", frame)
 
-        key = cv2.waitKey(1) & 0xFF
-        if key in {ord('q'), ord('Q'), 27}:
-            return -1
+            key = cv2.waitKey(1) & 0xFF
+            if key in {ord('q'), ord('Q'), 27}:
+                return -1
 
 
 class LabelPostprocessing:
