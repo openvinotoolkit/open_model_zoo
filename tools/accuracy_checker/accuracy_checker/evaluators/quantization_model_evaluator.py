@@ -68,7 +68,7 @@ class ModelEvaluator:
 
     def process_dataset_async(
             self,
-            nreq=2,
+            nreq=None,
             subset=None,
             num_images=None,
             check_progress=False,
@@ -89,6 +89,12 @@ class ModelEvaluator:
             elif num_images is not None:
                 self.dataset.make_subset(end=num_images)
 
+        def _set_number_infer_requests(nreq):
+            if nreq is None:
+                nreq = self.launcher.auto_num_requests()
+            if self.launcher.num_requests != nreq:
+                self.launcher.num_requests = nreq
+
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
 
@@ -96,13 +102,12 @@ class ModelEvaluator:
         progress_reporter = None
 
         _create_subset(subset, num_images)
+        _set_number_infer_requests(nreq)
 
         if check_progress:
             progress_reporter = ProgressReporter.provide('print', self.dataset.size)
 
         dataset_iterator = iter(enumerate(self.dataset))
-        if self.launcher.num_requests != nreq:
-            self.launcher.num_requests = nreq
         free_irs = self.launcher.infer_requests
         queued_irs = []
         wait_time = 0.01
