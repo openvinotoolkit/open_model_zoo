@@ -42,3 +42,4 @@ models:
             size: 400
           - type: resize
             size: 112
+global_definitions: ../dataset_definitions.yml

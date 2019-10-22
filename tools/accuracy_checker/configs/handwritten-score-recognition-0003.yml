@@ -29,3 +29,4 @@ models:
 
         metrics:
           - type: character_recognition_accuracy
+global_definitions: ../dataset_definitions.yml

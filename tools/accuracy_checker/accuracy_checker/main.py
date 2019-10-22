@@ -51,21 +51,18 @@ def build_arguments_parser():
         '-m', '--models',
         help='prefix path to the models and weights',
         type=partial(get_path, is_directory=True),
-        default=Path.cwd(),
         required=False
     )
     parser.add_argument(
         '-s', '--source',
         help='prefix path to the data source',
         type=partial(get_path, is_directory=True),
-        default=Path.cwd(),
         required=False
     )
     parser.add_argument(
         '-a', '--annotations',
         help='prefix path to the converted annotations and datasets meta data',
         type=partial(get_path, is_directory=True),
-        default=Path.cwd(),
         required=False
     )
     parser.add_argument(
@@ -85,7 +82,6 @@ def build_arguments_parser():
         '-b', '--bitstreams',
         help='prefix path to bitstreams folder',
         type=partial(get_path, file_or_directory=True),
-        default=Path.cwd(),
         required=False
     )
     parser.add_argument(

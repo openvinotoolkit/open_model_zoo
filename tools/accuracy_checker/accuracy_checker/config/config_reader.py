@@ -16,6 +16,7 @@ limitations under the License.
 
 import copy
 from pathlib import Path
+import os
 
 import warnings
 
@@ -84,8 +85,11 @@ class ConfigReader:
 
     @staticmethod
     def _read_configs(arguments):
-        global_config = read_yaml(arguments.definitions) if arguments.definitions else None
         local_config = read_yaml(arguments.config)
+        definitions = local_config.get('global_definitions')
+        if definitions:
+            definitions = read_yaml(arguments.config.parent / definitions)
+        global_config = read_yaml(arguments.definitions) if arguments.definitions else definitions
 
         return global_config, local_config
 
@@ -301,6 +305,17 @@ class ConfigReader:
     @staticmethod
     def _merge_paths_with_prefixes(arguments, config, mode='models'):
         args = arguments if isinstance(arguments, dict) else vars(arguments)
+        commandline_arg_to_env_var = {
+            'source': 'DATA_DIR',
+            'annotations': 'ANNOTATIONS_DIR',
+            'bitstreams': 'BITSTREAMS_DIR',
+            'models': 'MODELS_DIR',
+            'extensions': 'EXTENSIONS_DIR'
+        }
+        for argument, env_var in commandline_arg_to_env_var.items():
+            if argument not in args or args[argument] is None:
+                env_var_value = os.environ.get(env_var)
+                args[argument] = Path(env_var_value) if env_var_value is not None else Path.cwd()
 
         def process_models(config, entries_paths):
             for model in config['models']:

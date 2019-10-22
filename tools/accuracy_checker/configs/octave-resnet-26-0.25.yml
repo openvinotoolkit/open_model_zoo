@@ -73,3 +73,4 @@ models:
             size: 224
 
         # Using accuracy metric, achieved result of public model - 76.1 / 92.6 (top 1 and top 5 respectively)
+global_definitions: ../dataset_definitions.yml

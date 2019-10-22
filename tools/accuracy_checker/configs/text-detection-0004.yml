@@ -55,3 +55,4 @@ models:
           - type: incidental_text_hmean
             name: f-measure
             ignore_difficult: True
+global_definitions: ../dataset_definitions.yml

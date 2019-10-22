@@ -53,3 +53,4 @@ models:
           size: 600
           use_pillow: True
           interpolation: BICUBIC
+global_definitions: ../dataset_definitions.yml

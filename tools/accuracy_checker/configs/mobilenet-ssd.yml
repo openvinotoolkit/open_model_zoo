@@ -41,3 +41,4 @@ models:
             size: 300
         postprocessing:
           - type: resize_prediction_boxes
+global_definitions: ../dataset_definitions.yml

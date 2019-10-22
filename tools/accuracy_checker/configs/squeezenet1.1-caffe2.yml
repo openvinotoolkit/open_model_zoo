@@ -42,3 +42,4 @@ models:
           aspect_ratio_scale: greater
         - type: crop
           size: 227
+global_definitions: ../dataset_definitions.yml

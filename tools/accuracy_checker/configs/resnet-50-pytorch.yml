@@ -74,3 +74,4 @@ models:
             size: 224
             use_pillow: True
         # Reference metric from PyTorch (pytorch v1.0.1, torchvision v0.2.2) top-1 76.13% top-5 92.862%
+global_definitions: ../dataset_definitions.yml
