@@ -315,8 +315,7 @@ class ConfigReader:
         for argument, env_var in commandline_arg_to_env_var.items():
             if argument not in args or args[argument] is None:
                 env_var_value = os.environ.get(env_var)
-                if env_var_value is not None:
-                    args[argument] = Path(env_var_value)
+                args[argument] = Path(env_var_value) if env_var_value is not None else Path.cwd()
 
         def process_models(config, entries_paths):
             for model in config['models']:
