@@ -98,6 +98,8 @@ public:
 
     void start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc);
 
+    bool isRunning();
+
     InferenceEngine::SizeVector getInputDims() const;
 
     std::vector<std::shared_ptr<VideoFrame>> getBatchData(cv::Size windowSize);

@@ -34,7 +34,7 @@
 
 class VideoSource {
 public:
-    virtual bool init() = 0;
+    virtual bool isRunning() const = 0;
 
     virtual void start() = 0;
 
@@ -142,7 +142,7 @@ class VideoSourceStreamFile : public VideoSource {
 
     VideoStream stream;
 
-    std::atomic_bool terminate = {false};
+    std::atomic_bool running = {false};
     std::atomic_bool is_decoding = {false};
 
     std::mutex mutex;
@@ -170,12 +170,14 @@ public:
         queueSize(queueSize_),
         perfTimer(collectStats_ ? PerfTimer::DefaultIterationsCount : 0) { }
 
-    bool init() { return true; }
+    bool isRunning() const override {
+        return running;
+    }
 
     void start() {
-        terminate = false;
+        running = true;
         workThread = std::thread([&]() {
-            while (!terminate) {
+            while (running) {
                 {
                     cv::Mat frame;
                     {
@@ -203,7 +205,7 @@ public:
 
                     std::unique_lock<std::mutex> lock(mutex);
                     condVar.wait(lock, [&]() {
-                        return !is_decoding && (frameQueue.size() < queueSize || terminate);
+                        return !is_decoding && (frameQueue.size() < queueSize || !running);
                     });
                 }
                 hasFrame.notify_one();
@@ -212,7 +214,7 @@ public:
     }
 
     void stop() {
-        terminate = true;
+        running = false;
         condVar.notify_one();
         if (workThread.joinable()) {
             workThread.join();
@@ -222,13 +224,13 @@ public:
     bool read(VideoFrame& frame)  {
         queue_elem_t elem;
 
-        if (terminate)
+        if (!running)
             return false;
 
         {
             std::unique_lock<std::mutex> lock(mutex);
             hasFrame.wait(lock, [&]() {
-                return !frameQueue.empty() || terminate;
+                return !frameQueue.empty() || !running;
             });
             elem = std::move(frameQueue.front());
             frameQueue.pop();
@@ -236,7 +238,7 @@ public:
         condVar.notify_one();
         frame.frame = std::move(elem.second);
 
-        return elem.first && !terminate;
+        return elem.first && running;
     }
 
     float getAvgReadTime() const {
@@ -250,7 +252,7 @@ class VideoSourceOCV : public VideoSource {
     PerfTimer perfTimer;
     std::thread workThread;
     const bool isAsync = false;
-    std::atomic_bool terminate = {false};
+    std::atomic_bool running = {true};
     std::string videoName;
 
     std::mutex mutex;
@@ -269,9 +271,6 @@ class VideoSourceOCV : public VideoSource {
     bool readFrame(cv::Mat& frame);
 
     template<bool CollectStats>
-    bool readFrameImpl(cv::Mat& frame);
-
-    template<bool CollectStats>
     void startImpl();
 
 public:
@@ -282,7 +281,7 @@ public:
 
     void start();
 
-    bool init();
+    bool isRunning() const override;
 
     void stop();
 
@@ -331,7 +330,7 @@ public:
 
     void start();
 
-    bool init();
+    bool isRunning() const override;
 
     bool read(VideoFrame& frame);
 
@@ -364,8 +363,7 @@ void VideoSourceNative::start() {
     // nothing
 }
 
-bool VideoSourceNative::init() {
-    // nothing
+bool VideoSourceNative::isRunning() const override {
     return true;
 }
 
@@ -440,38 +438,8 @@ bool isNumeric(const std::string& str) {
 }
 }  // namespace
 
-bool VideoSourceOCV::init() {
-    static std::mutex initMutex;  // HACK: opencv camera init is not thread-safe
-    std::unique_lock<std::mutex> lock(initMutex);
-    bool res = false;
-    if (isNumeric(videoName)) {
-#ifdef __linux__
-        res = source.open("/dev/video" + videoName);
-#else
-        res = source.open(std::stoi(videoName));
-#endif
-    } else {
-        res = source.open(videoName);
-    }
-    if (res) {
-        source.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
-    }
-    return res;
-}
-
 template<bool CollectStats>
 bool VideoSourceOCV::readFrame(cv::Mat& frame) {
-    if (!source.isOpened() && !init()) {
-        return false;
-    }
-    if (!readFrameImpl<CollectStats>(frame)) {
-        return init() && readFrameImpl<CollectStats>(frame);
-    }
-    return true;
-}
-
-template<bool CollectStats>
-bool VideoSourceOCV::readFrameImpl(cv::Mat& frame) {
     if (CollectStats) {
         ScopedTimer st(perfTimer);
         return source.read(frame);
@@ -483,38 +451,40 @@ bool VideoSourceOCV::readFrameImpl(cv::Mat& frame) {
 VideoSourceOCV::VideoSourceOCV(bool async, bool collectStats_,
                          const std::string& name, size_t queueSize_,
                          size_t pollingTimeMSec_, bool realFps_):
-    perfTimer(collectStats_ ? PerfTimer::DefaultIterationsCount : 0),
-    isAsync(async), videoName(name),
-    realFps(realFps_),
-    queueSize(queueSize_),
-    pollingTimeMSec(pollingTimeMSec_) {}
+        perfTimer(collectStats_ ? PerfTimer::DefaultIterationsCount : 0),
+        isAsync(async), videoName(name),
+        realFps(realFps_),
+        queueSize(queueSize_),
+        pollingTimeMSec(pollingTimeMSec_) {
+    if (isNumeric(videoName)) {
+        if (!source.open(std::stoi(videoName))) {
+            throw std::runtime_error("Can't open " + videoName + " with cv::VideoCapture::open(int)");
+        }
+    } else {
+        if (!source.open(videoName)) {
+            throw std::runtime_error("Can't open " + videoName + " with cv::VideoCapture::open(std::string)");
+        }
+    }
+    source.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
+}
 
 VideoSourceOCV::~VideoSourceOCV() {
     stop();
 }
 
+bool VideoSourceOCV::isRunning() const {
+    return running;
+}
+
 template<bool CollectStats>
 void VideoSourceOCV::thread_fn(VideoSourceOCV *vs) {
-    while (!vs->terminate) {
+    while (vs->running) {
         cv::Mat frame;
-        bool result = false;
-        while (!((result = vs->readFrame<CollectStats>(frame)) || vs->terminate)) {
-            std::unique_lock<std::mutex> lock(vs->mutex);
-            if (vs->queue.empty() || vs->queue.back().first) {
-                vs->queue.push({false, frame});
-                lock.unlock();
-                vs->hasFrame.notify_one();
-                lock.lock();
-            }
-            std::chrono::milliseconds timeout(vs->pollingTimeMSec);
-            vs->condVar.wait_for(lock,
-                             timeout,
-                             [&]() {
-                                 return vs->terminate.load();
-                             });
+        const bool result = vs->readFrame<CollectStats>(frame);
+        if (!result) {
+            vs->running = false; // stop() also affects running, so override it only when out of frames
         }
-
-        if (vs->queue.size() < vs->queueSize) {
+        if (vs->queue.size() < vs->queueSize || !result) { // queue has space or source run out of frames
             std::unique_lock<std::mutex> lock(vs->mutex);
             vs->queue.push({result, frame});
         }
@@ -525,7 +495,7 @@ void VideoSourceOCV::thread_fn(VideoSourceOCV *vs) {
 template<bool CollectStats>
 void VideoSourceOCV::startImpl() {
     if (isAsync) {
-        terminate = false;
+        running = true;
         workThread = std::thread(&VideoSourceOCV::thread_fn<CollectStats>, this);
     }
 }
@@ -540,7 +510,7 @@ void VideoSourceOCV::start() {
 
 void VideoSourceOCV::stop() {
     if (isAsync) {
-        terminate = true;
+        running = false;
         condVar.notify_one();
         if (workThread.joinable()) {
             workThread.join();
@@ -550,20 +520,17 @@ void VideoSourceOCV::stop() {
 
 bool VideoSourceOCV::read(cv::Mat& frame) {
     if (isAsync) {
-        size_t count = 0;
-        bool res = false;
+        bool res;
         {
             std::unique_lock<std::mutex> lock(mutex);
             hasFrame.wait(lock, [&]() {
-                return !queue.empty() || terminate;
+                return !queue.empty() || !running;
             });
             res = queue.front().first;
             frame = queue.front().second;
             if (realFps || queue.size() > 1 || queueSize == 1) {
                 queue.pop();
             }
-            count = queue.size();
-            (void)count;
         }
         condVar.notify_one();
         return res;
@@ -608,6 +575,13 @@ VideoSources::~VideoSources() {
     // nothing
 }
 
+bool VideoSources::isRunning() const {
+    // when one of VideoSources will be out of frames, it will stop IEGraph,
+    // so this isRunning() requires that all inputs were running
+    return std::all_of(inputs.begin(), inputs.end(),
+        [](const std::unique_ptr<VideoSource>& input){return input->isRunning();});
+}
+
 void VideoSources::openVideo(const std::string& source, bool native) {
 #ifdef USE_NATIVE_CAMERA_API
     if (native) {
@@ -643,11 +617,7 @@ void VideoSources::openVideo(const std::string& source, bool native) {
         std::unique_ptr<VideoSource> newSrc(new VideoSourceOCV(isAsync, collectStats, source,
                                             queueSize, pollingTimeMSec, realFps));
 #endif
-        if (newSrc->init()) {
-            inputs.emplace_back(std::move(newSrc));
-        } else {
-            throw std::runtime_error("Cannot open cv::VideoCapture");
-        }
+        inputs.emplace_back(std::move(newSrc));
     }
 }
 
