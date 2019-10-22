@@ -108,6 +108,7 @@ class ModelEvaluator:
             progress_reporter = ProgressReporter.provide('print', self.dataset.size)
 
         dataset_iterator = iter(enumerate(self.dataset))
+
         free_irs = self.launcher.infer_requests
         queued_irs = []
         wait_time = 0.01

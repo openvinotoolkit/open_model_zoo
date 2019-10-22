@@ -523,7 +523,7 @@ class DLSDKLauncher(Launcher):
             elif not self.async_mode:
                 self._num_requests = 1
             else:
-                self._num_requests = self.auto_nreq()
+                self._num_requests = self.auto_num_requests()
 
         if hasattr(self, 'plugin'):
             del self.plugin
@@ -552,7 +552,7 @@ class DLSDKLauncher(Launcher):
             if log_level:
                 self.plugin.set_config({'VPU_LOG_LEVEL': log_level})
 
-    def auto_nreq(self):
+    def auto_num_requests(self):
         concurrency_device = {
             'CPU': 1,
             'GPU': 1,
