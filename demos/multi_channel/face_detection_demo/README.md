@@ -23,9 +23,9 @@ On the start-up, the application reads command line parameters and loads the spe
 
 Running the application with the `-h` option yields the following usage message:
 ```sh
-./multi-channel-face-detection-demo -h
+./multi_channel_face_detection_demo -h
 
-multi-channel-face-detection-demo [OPTION]
+multi_channel_face_detection_demo [OPTION]
 Options:
 
     -h                           Print a usage message
@@ -56,13 +56,13 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 For example, to run the demo with the pre-trained face detection model on FPGA with fallback on CPU, with one single camera, use the following command:
 ```sh
-./multi-channel-face-detection-demo -m face-detection-retail-0004.xml
+./multi_channel_face_detection_demo -m face-detection-retail-0004.xml
 -l <demos_build_folder>/intel64/Release/lib/libcpu_extension.so -d HETERO:FPGA,CPU -nc 1
 ```
 
 To run the demo using two recorded video files, use the following command:
 ```sh
-./multi-channel-face-detection-demo -m face-detection-retail-0004.xml
+./multi_channel_face_detection_demo -m face-detection-retail-0004.xml
 -l <demos_build_folder>/intel64/Release/lib/libcpu_extension.so -d HETERO:FPGA,CPU -i /path/to/file1 /path/to/file2
 ```
 Video files will be processed repeatedly.
