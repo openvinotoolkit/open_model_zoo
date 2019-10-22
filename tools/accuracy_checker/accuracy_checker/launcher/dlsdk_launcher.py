@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import subprocess
+import multiprocessing
 from pathlib import Path
 import os
 import platform
@@ -509,6 +510,21 @@ class DLSDKLauncher(Launcher):
         return data.reshape(input_shape)
 
     def create_ie_plugin(self, log=True):
+        def set_nireq():
+            num_requests = self.config.get('num_requests')
+            if num_requests is not None:
+                num_requests = get_or_parse_value(num_requests, casting_type=int)
+                if len(num_requests) != 1:
+                    raise ConfigError('Several values for _num_requests specified')
+                self._num_requests = num_requests[0]
+                if self._num_requests != 1 and not self.async_mode:
+                    warning('{} infer requests in sync mode is not supported. Only 1 infer request will be used.')
+                    self._num_requests = 1
+            elif not self.async_mode:
+                self._num_requests = 1
+            else:
+                self._num_requests = self.auto_nreq()
+
         if hasattr(self, 'plugin'):
             del self.plugin
         if log:
@@ -518,13 +534,8 @@ class DLSDKLauncher(Launcher):
         else:
             self.plugin = ie.IEPlugin(self._device)
             self.async_mode = self.get_value_from_config('async_mode')
-            num_requests = get_or_parse_value(self.config.get('num_requests', 1), casting_type=int)
-            if len(num_requests) != 1:
-                raise ConfigError('Several values for _num_requests specified')
-            self._num_requests = num_requests[0]
-            if self._num_requests != 1 and not self.async_mode:
-                warning('{} infer requests in sync mode is not supported. Only 1 infer request will be used.')
-                self._num_requests = 1
+            set_nireq()
+
             if log:
                 print_info('Loaded {} plugin version: {}'.format(self.plugin.device, self.plugin.version))
 
@@ -540,6 +551,28 @@ class DLSDKLauncher(Launcher):
             log_level = self.config.get('_vpu_log_level')
             if log_level:
                 self.plugin.set_config({'VPU_LOG_LEVEL': log_level})
+
+    def auto_nreq(self):
+        concurrency_device = {
+            'CPU': 1,
+            'GPU': 1,
+            'HDDL': 100,
+            'MYRIAD': 4,
+            'FPGA': 3
+        }
+        platform_list = self._devices_list()
+        if 'CPU' in platform_list and len(platform_list) == 1:
+            min_requests = [4, 5, 3]
+            cpu_count = multiprocessing.cpu_count()
+            for min_request in min_requests:
+                if cpu_count % min_request == 0:
+                    return max(min_request, cpu_count / min_request)
+        if 'GPU' in platform_list and len(platform_list) == 1:
+            return 2
+        concurrency = 0
+        for device in platform_list:
+            concurrency += concurrency_device.get(device, 1)
+        return concurrency
 
     def _create_multi_device_plugin(self, log=True):
         async_mode = self.get_value_from_config('async_mode')
