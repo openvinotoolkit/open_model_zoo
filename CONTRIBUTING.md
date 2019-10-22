@@ -67,7 +67,7 @@ Your PR may be rejected in some cases, for example:
 
 The model configuration file contains information about model: what it is, how to download it, and how to convert it to the IR format. This information must be specified in the `model.yml` file that must be located in the model subfolder. 
 
-Refer to the detailed descriptions of each file provided below.
+The detailed descriptions of file entries provided below.
 
 **`description`**
 
@@ -127,7 +127,10 @@ Conversion parameters (learn more in the [Model conversion](#model-conversion) s
   - --output=prob
   - --input_model=$conv_dir/googlenet-v3.onnx
 ```
+
 > **NOTE:** Do not specify `framework`, `data_type`, `model_name` and `output_dir`, since they are deduced automatically.
+
+> **NOTE:** `$dl_dir` used to substitute download directory (key `-o` or `--output_dir` in `downloader.py` script) and `$conv_dir` used to substitute converter directory (key `-o` or `--output_dir` in `converter.py` script)
 
 **`framework`**
 
@@ -139,7 +142,7 @@ Path to the model license.
 
 ### Example
 
-This example shows how to download  the [classification model DenseNet-121*](models/public/densenet-121-tf/model.yml) pretrained in TensorFlow\*  from Google Drive\* as an archive.
+This example shows how to download the classification model [DenseNet-121*](models/public/densenet-121-tf/model.yml) pretrained in TensorFlow\* from Google Drive\* as an archive.
 
 ```
 description: >-
@@ -192,7 +195,7 @@ Demos are required to support the following keys:
  -  `-d "<device>"`: Optional. Specifies a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. Default must be CPU. If the demo uses several models at the same time, use keys prefixed with `d_` (just like keys `m_*` above) to specify device for each model.
  -  `-no_show`: Optional. Do not visualize inference results.
 
-> **TIP**: For Python, it is preferable to use `-` instead of `_` as word separators. Example: `--no-show`.
+> **TIP**: For Python, it is preferable to use `-` instead of `_` as word separators.
 
 You can also add any other necessary parameters.
 
@@ -212,39 +215,23 @@ When the configuration file is ready, you must run the Accuracy Checker to obtai
 
 ### Example
 
-This example uses one of the files from `tools/accuracy_checker/configs`  — validation configuration file for [AlexNet](tools/accuracy_checker/configs/alexnet.yml)\*:
+This example uses one of the files from `tools/accuracy_checker/configs` — validation configuration file for [DenseNet-121](tools/accuracy_checker/configs/densenet-121-tf.yml)\* from TensorFlow\*:
 ```
 models:
-  - name: alexnet-cf
-    launchers:
-      - framework: caffe
-        model:   public/alexnet/alexnet.prototxt
-        weights: public/alexnet/alexnet.caffemodel
-        adapter: classification
-    datasets:
-      - name: imagenet_1000_classes
-        preprocessing:
-          - type: resize
-            size: 256
-          - type: crop
-            size: 227
-          - type: normalization
-            mean: 104, 117, 123
-
-  - name: alexnet
+  - name: densenet-121-tf
     launchers:
       - framework: dlsdk
         tags:
           - FP32
-        model:   public/alexnet/FP32/alexnet.xml
-        weights: public/alexnet/FP32/alexnet.bin
+        model:   public/densenet-121-tf/FP32/densenet-121-tf.xml
+        weights: public/densenet-121-tf/FP32/densenet-121-tf.bin
         adapter: classification
 
       - framework: dlsdk
         tags:
           - FP16
-        model:   public/alexnet/FP16/alexnet.xml
-        weights: public/alexnet/FP16/alexnet.bin
+        model:   public/densenet-121-tf/FP16/densenet-121-tf.xml
+        weights: public/densenet-121-tf/FP16/densenet-121-tf.bin
         adapter: classification
 
     datasets:
@@ -253,15 +240,7 @@ models:
           - type: resize
             size: 256
           - type: crop
-            size: 227
-
-        metrics:
-          - name: accuracy@top1
-            type: accuracy
-            top_k: 1
-          - name: accuracy@top5
-            type: accuracy
-            top_k: 5
+            size: 224
 ```
 
 
