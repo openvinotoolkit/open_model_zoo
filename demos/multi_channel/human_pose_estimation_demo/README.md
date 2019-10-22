@@ -54,14 +54,12 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 For example, to run the demo with the pre-trained Human Pose Estimation model on FPGA with fallback on CPU with one camera, use the following command:
 ```sh
-./multi_channel_human_pose_estimation_demo -m <path_to_model>/human-pose-estimation-0001.xml
--l <demos_build_folder>/intel64/Release/lib/libcpu_extension.so -d HETERO:FPGA,CPU -nc 1
+./multi_channel_human_pose_estimation_demo -m <path_to_model>/human-pose-estimation-0001.xml -d HETERO:FPGA,CPU -nc 1
 ```
 
 To run the demo using two recorded video files, use the following command:
 ```sh
-./multi_channel_human_pose_estimation_demo -m <path_to_model>/human-pose-estimation-0001.xml
--l <demos_build_folder>/intel64/Release/lib/libcpu_extension.so -d HETERO:FPGA,CPU -i /path/to/file1 /path/to/file2
+./multi_channel_human_pose_estimation_demo -m <path_to_model>/human-pose-estimation-0001.xml -d HETERO:FPGA,CPU -i /path/to/file1 /path/to/file2
 ```
 
 Video files will be processed repeatedly.
