@@ -381,10 +381,15 @@ def get_embedding_distances(annotation, prediction, train=False):
         if train != image1.metadata.get("train", False):
             continue
 
+        if image1.identifier not in image_indexes:
+            continue
+
         for image2 in image1.positive_pairs:
-            pairs.append(PairDesc(image_indexes[image1.identifier], image_indexes[image2], True))
+            if image2 in image_indexes:
+                pairs.append(PairDesc(image_indexes[image1.identifier], image_indexes[image2], True))
         for image2 in image1.negative_pairs:
-            pairs.append(PairDesc(image_indexes[image1.identifier], image_indexes[image2], False))
+            if image2 in image_indexes:
+                pairs.append(PairDesc(image_indexes[image1.identifier], image_indexes[image2], False))
 
     embed1 = np.asarray([prediction[idx].embedding for idx, _, _ in pairs])
     embed2 = np.asarray([prediction[idx].embedding for _, idx, _ in pairs])
