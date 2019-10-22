@@ -20,8 +20,8 @@ import warnings
 
 from .annotation_converters import BaseFormatConverter, save_annotation, make_subset, analyze_dataset
 from .config import ConfigValidator, StringField, PathField, ListField, DictField, BaseField, NumberField, ConfigError
-from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata
-from .representation import BaseRepresentation
+from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet
+from .representation import BaseRepresentation, ReIdentificationClassificationAnnotation
 from .data_readers import DataReaderField
 
 
@@ -158,12 +158,34 @@ class Dataset:
         return batch_ids, self._annotation[batch_start:batch_end]
 
     def make_subset(self, ids=None, start=0, step=1, end=None):
+        pairwise_subset = isinstance(self._annotation[0], ReIdentificationClassificationAnnotation)
         if ids:
-            self.subset = ids
+            self.subset = ids if not pairwise_subset else self.make_subset_pairwise(ids)
             return
         if not end:
             end = self.size
-        self.subset = range(start, end, step)
+            ids = range(start, end, step)
+        self.subset = ids if not pairwise_subset else self.make_subset_pairwise(ids)
+
+    def make_subset_pairwise(self, ids, cut_to_final_size=True):
+        final_size = len(ids)
+        subsample_set = OrderedSet()
+        identifier_to_index = {annotation.identifier: index for index, annotation in enumerate(self._annotation)}
+        for idx in ids:
+            subsample_set.add(idx)
+            current_annotation = self._annotation[idx]
+            positive_pairs = [
+                identifier_to_index[pair_identifier] for pair_identifier in current_annotation.positive_pairs
+            ]
+            subsample_set |= positive_pairs
+            negative_pairs = [
+                identifier_to_index[pair_identifier] for pair_identifier in current_annotation.positive_pairs
+            ]
+            subsample_set |= negative_pairs
+        subsample_set = list(subsample_set)
+        if cut_to_final_size:
+            subsample_set = subsample_set[:final_size]
+        return subsample_set
 
     @staticmethod
     def set_image_metadata(annotation, images):
