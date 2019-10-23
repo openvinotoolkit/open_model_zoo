@@ -93,6 +93,6 @@ __all__ = [
     'CVATPersonDetectionActionRecognitionConverter',
     'SQUADConverter',
     'XNLIDatasetConverter',
-    'CmuPanopticKeypointsConverter'
+    'CmuPanopticKeypointsConverter',
     'ActionRecognitionConverter'
 ]
