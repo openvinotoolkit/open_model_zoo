@@ -126,7 +126,19 @@ def main():
                 print('Test case #{}:'.format(test_case_index + 1),
                     ' '.join(shlex.quote(str(arg)) for arg in case_args))
                 print(flush=True)
-
+                execution_time = -1
+                device = ""
+                pipline = []
+                for key , value in test_case.options.items():
+                    match = re.search(r'-d.*', key)
+                    if match and device == "":
+                        device = value
+                    match = re.search(r'-m.*', key)
+                    if match:
+                        model_path = option_to_args(key, value)[1]
+                        model = re.search(r'.*/(models/.*).xml', model_path)
+                        pipline.append(model.group(1) if model else option_to_args(key, value)[1])
+                pipline.sort()
                 try:
                     subprocess.check_output(fixed_args + case_args,
                         stderr=subprocess.STDOUT, universal_newlines=True)
