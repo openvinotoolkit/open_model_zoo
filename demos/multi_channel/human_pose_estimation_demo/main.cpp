@@ -1,6 +1,18 @@
+/*
 // Copyright (C) 2018-2019 Intel Corporation
-// SPDX-License-Identifier: Apache-2.0
 //
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+*/
 /**
 * \brief The entry point for the Inference Engine multichannel_face_detection demo application
 * \file multichannel_face_detection/main.cpp
@@ -10,7 +22,6 @@
 #include <vector>
 #include <utility>
 
-#include <algorithm>
 #include <mutex>
 #include <condition_variable>
 #include <thread>
@@ -33,19 +44,24 @@
 
 #include "input.hpp"
 #include "multichannel_params.hpp"
-#include "multichannel_face_detection_params.hpp"
 #include "output.hpp"
 #include "threading.hpp"
 #include "graph.hpp"
 
+#include "human_pose.hpp"
+#include "peak.hpp"
+#include "postprocessor.hpp"
+#include "render_human_pose.hpp"
+#include "postprocess.hpp"
+
 namespace {
 
 /**
-* \brief This function show a help message
+* \brief This function shows a help message
 */
 void showUsage() {
     std::cout << std::endl;
-    std::cout << "multichannel_face_detection [OPTION]" << std::endl;
+    std::cout << "multi-channel-human-pose-estimation-demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                           " << help_message << std::endl;
@@ -61,7 +77,6 @@ void showUsage() {
     std::cout << "    -fps_sp                      " << fps_sampling_period << std::endl;
     std::cout << "    -n_sp                        " << num_sampling_periods << std::endl;
     std::cout << "    -pc                          " << performance_counter_message << std::endl;
-    std::cout << "    -t                           " << thresh_output_message << std::endl;
     std::cout << "    -no_show                     " << no_show_processed_video << std::endl;
     std::cout << "    -show_stats                  " << show_statistics << std::endl;
     std::cout << "    -duplicate_num               " << duplication_channel_number << std::endl;
@@ -86,7 +101,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Please specify at least one video source(web cam or video file)");
     }
     slog::info << "\tDetection model:           " << FLAGS_m << slog::endl;
-    slog::info << "\tDetection threshold:       " << FLAGS_t << slog::endl;
     slog::info << "\tUtilizing device:          " << FLAGS_d << slog::endl;
     if (!FLAGS_l.empty()) {
         slog::info << "\tCPU extension library:     " << FLAGS_l << slog::endl;
@@ -99,22 +113,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     slog::info << "\tNumber of input web cams:  "  << FLAGS_nc << slog::endl;
 
     return true;
-}
-
-struct Face {
-    cv::Rect2f rect;
-    float confidence;
-    unsigned char age;
-    unsigned char gender;
-    Face(cv::Rect2f r, float c, unsigned char a, unsigned char g): rect(r), confidence(c), age(a), gender(g) {}
-};
-
-void drawDetections(cv::Mat& img, const std::vector<Face> detections) {
-    for (const Face& f : detections) {
-        cv::Rect ri(static_cast<int>(f.rect.x*img.cols), static_cast<int>(f.rect.y*img.rows),
-                    static_cast<int>(f.rect.width*img.cols), static_cast<int>(f.rect.height*img.rows));
-        cv::rectangle(img, ri, cv::Scalar(255, 0, 0), 2);
-    }
 }
 
 const size_t DISP_WIDTH  = 1920;
@@ -159,7 +157,7 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
             cv::Rect rectFrame = cv::Rect(params.points[i], params.frameSize);
             cv::Mat windowPart = windowImage(rectFrame);
             cv::resize(elem->frame, windowPart, params.frameSize);
-            drawDetections(windowPart, elem->detections.get<std::vector<Face>>());
+            renderHumanPose(elem->detections.get<std::vector<HumanPose>>(), windowPart);
         }
     };
 
@@ -300,38 +298,38 @@ int main(int argc, char* argv[]) {
             currentFrame = (currentFrame + 1) % numberOfInputs;
             return sources.getFrame(camIdx, img);
         }, [](InferenceEngine::InferRequest::Ptr req, const std::vector<std::string>& outputDataBlobNames, cv::Size frameSize) {
-            auto output = req->GetBlob(outputDataBlobNames[0]);
+            auto pafsBlobIt   = req->GetBlob(outputDataBlobNames[0]);
+            auto pafsDesc     = pafsBlobIt->getTensorDesc();
+            auto pafsWidth    = getTensorWidth(pafsDesc);
+            auto pafsHeight   = getTensorHeight(pafsDesc);
+            auto pafsChannels = getTensorChannels(pafsDesc);
+            auto pafsBatch    = getTensorBatch(pafsDesc);
 
-            float* dataPtr = output->buffer();
-            InferenceEngine::SizeVector svec = output->getTensorDesc().getDims();
-            size_t total = 1;
-            for (auto v : svec) {
-                total *= v;
-            }
+            auto heatMapsBlobIt   = req->GetBlob(outputDataBlobNames[1]);
+            auto heatMapsDesc     = heatMapsBlobIt->getTensorDesc();
+            auto heatMapsWidth    = getTensorWidth(heatMapsDesc);
+            auto heatMapsHeight   = getTensorHeight(heatMapsDesc);
+            auto heatMapsChannels = getTensorChannels(heatMapsDesc);
+            std::vector<Detections> detections(pafsBatch);
 
 
-            std::vector<Detections> detections(getTensorHeight(output->getTensorDesc()) / 200);
-            for (auto& d : detections) {
-                d.set(new std::vector<Face>);
-            }
+            for (size_t i = 0; i < pafsBatch; i++) {
+                std::vector<HumanPose> poses = postprocess(
+                static_cast<float*>(heatMapsBlobIt->buffer()) + i * heatMapsWidth * heatMapsHeight * heatMapsChannels,
+                heatMapsWidth * heatMapsHeight,
+                keypointsNumber,
+                static_cast<float*>(pafsBlobIt->buffer()) + i * pafsWidth * pafsHeight * pafsChannels,
+                pafsWidth * pafsHeight,
+                pafsChannels,
+                heatMapsWidth, heatMapsHeight, frameSize);
 
-            for (size_t i = 0; i < total; i+=7) {
-                float conf = dataPtr[i + 2];
-                if (conf > FLAGS_t) {
-                    int idxInBatch = static_cast<int>(dataPtr[i]);
-                    float x0 = std::min(std::max(0.0f, dataPtr[i + 3]), 1.0f);
-                    float y0 = std::min(std::max(0.0f, dataPtr[i + 4]), 1.0f);
-                    float x1 = std::min(std::max(0.0f, dataPtr[i + 5]), 1.0f);
-                    float y1 = std::min(std::max(0.0f, dataPtr[i + 6]), 1.0f);
-
-                    cv::Rect2f rect = {x0 , y0, x1-x0, y1-y0};
-                    detections[idxInBatch].get<std::vector<Face>>().emplace_back(rect, conf, 0, 0);
+                detections[i].set(new std::vector<HumanPose>(poses.size()));
+                for (decltype(poses.size()) j = 0; j < poses.size(); j++) {
+                    detections[i].get<std::vector<HumanPose>>()[j] = std::move(poses[j]);
                 }
             }
             return detections;
         });
-
-        network->setDetectionConfidence(static_cast<float>(FLAGS_t));
 
         std::atomic<float> averageFps = {0.0f};
 
@@ -370,11 +368,16 @@ int main(int argc, char* argv[]) {
 
         size_t perfItersCounter = 0;
 
-        while (true) {
+        while (sources.isRunning() || network->isRunning()) {
             bool readData = true;
             while (readData) {
                 auto br = network->getBatchData(params.frameSize);
+                if (br.empty()) {
+                    break; // IEGraph::getBatchData had nothing to process and returned. That means it was stopped
+                }
                 for (size_t i = 0; i < br.size(); i++) {
+                    // this approach waits for the next input image for sourceIdx. If provided a single image,
+                    // it may not show results, especially if -real_input_fps is enabled
                     auto val = static_cast<unsigned int>(br[i]->sourceIdx);
                     auto it = find_if(batchRes.begin(), batchRes.end(), [val] (const std::shared_ptr<VideoFrame>& vf) { return vf->sourceIdx == val; } );
                     if (it != batchRes.end()) {

@@ -510,15 +510,7 @@ class DLSDKLauncher(Launcher):
         return data.reshape(input_shape)
 
     def create_ie_plugin(self, log=True):
-        if hasattr(self, 'plugin'):
-            del self.plugin
-        if log:
-            print_info('IE version: {}'.format(ie.get_version()))
-        if self._is_multi():
-            self._create_multi_device_plugin(log)
-        else:
-            self.plugin = ie.IEPlugin(self._device)
-            self.async_mode = self.get_value_from_config('async_mode')
+        def set_nireq():
             num_requests = self.config.get('num_requests')
             if num_requests is not None:
                 num_requests = get_or_parse_value(num_requests, casting_type=int)
@@ -531,7 +523,18 @@ class DLSDKLauncher(Launcher):
             elif not self.async_mode:
                 self._num_requests = 1
             else:
-                self._num_requests = self.auto_nreq()
+                self._num_requests = self.auto_num_requests()
+
+        if hasattr(self, 'plugin'):
+            del self.plugin
+        if log:
+            print_info('IE version: {}'.format(ie.get_version()))
+        if self._is_multi():
+            self._create_multi_device_plugin(log)
+        else:
+            self.plugin = ie.IEPlugin(self._device)
+            self.async_mode = self.get_value_from_config('async_mode')
+            set_nireq()
 
             if log:
                 print_info('Loaded {} plugin version: {}'.format(self.plugin.device, self.plugin.version))
@@ -549,7 +552,7 @@ class DLSDKLauncher(Launcher):
             if log_level:
                 self.plugin.set_config({'VPU_LOG_LEVEL': log_level})
 
-    def auto_nreq(self):
+    def auto_num_requests(self):
         concurrency_device = {
             'CPU': 1,
             'GPU': 1,

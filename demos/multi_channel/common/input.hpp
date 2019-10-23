@@ -90,6 +90,8 @@ public:
 
     void start();
 
+    virtual bool isRunning() const;
+
     bool getFrame(size_t index, VideoFrame& frame);
 
     struct Stats {
