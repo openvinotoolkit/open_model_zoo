@@ -197,10 +197,9 @@ class SequentialModel(BaseModel):
 
     def save_encoder_predictions(self):
         if self._encoder_predictions is not None:
-            prediction_file = self.network_info['encoder'].get('predictions', Path('encoder_predictions.pickle'))
+            prediction_file = Path(self.network_info['encoder'].get('predictions', 'encoder_predictions.pickle'))
             with prediction_file.open('wb') as file:
-                for representation in self._encoder_predictions:
-                    pickle.dump(representation, file)
+                pickle.dump(self._encoder_predictions, file)
 
 
 class EncoderModelDLSDKL(BaseModel):
@@ -243,7 +242,11 @@ class DecoderModelDLSDKL(BaseModel):
             model_bin = str(network_info['weights'])
 
         self.network = launcher.create_ie_network(model_xml, model_bin)
-        self.exec_network = launcher.plugin.load(self.network)
+        if hasattr(launcher, 'plugin'):
+            self.exec_network = launcher.plugin.load(self.network)
+        else:
+            launcher.load_network(self.network)
+            self.exec_network = launcher.exec_network
         self.input_blob = next(iter(self.network.inputs))
         self.output_blob = next(iter(self.network.outputs))
         self.adapter = create_adapter('classification')

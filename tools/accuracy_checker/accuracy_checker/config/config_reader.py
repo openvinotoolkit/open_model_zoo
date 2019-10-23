@@ -37,7 +37,8 @@ ENTRIES_PATHS = {
         'cpu_extensions': 'extensions',
         'gpu_extensions': 'extensions',
         'bitstream': 'bitstreams',
-        'affinity_map': 'affinity_map'
+        'affinity_map': 'affinity_map',
+        'predictions': 'source'
     },
     'datasets': {
         'segmentation_masks_source': 'source',
