@@ -700,7 +700,6 @@ class TestConfigReader:
             self.global_config, local_config
         ))
         expected = copy.deepcopy(self.get_global_launcher('dlsdk'))
-        expected['_models_prefix'] = Path.cwd()
         with mock_filesystem(['bitstreams/', 'extensions/']) as prefix:
             expected['bitstream'] = prefix / self.arguments.bitstreams / expected['bitstream']
             expected['cpu_extensions'] = prefix / self.arguments.extensions / expected['cpu_extensions']
@@ -723,7 +722,6 @@ class TestConfigReader:
         }]}
         expected = copy.deepcopy(self.get_global_launcher('dlsdk'))
         expected['model'] = Path('/custom')
-        expected['_models_prefix'] = Path.cwd()
         mocker.patch(self.module + '._read_configs', return_value=(
             self.global_config, local_config
         ))
