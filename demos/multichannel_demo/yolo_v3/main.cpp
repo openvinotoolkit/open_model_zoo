@@ -45,7 +45,7 @@ namespace {
 */
 void showUsage() {
     std::cout << std::endl;
-    std::cout << "multichannel_yolo [OPTION]" << std::endl;
+    std::cout << "multichannel_yolo_v3 [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                           " << help_message << std::endl;
@@ -56,7 +56,7 @@ void showUsage() {
     std::cout << "    -d \"<device>\"                " << target_device_message << std::endl;
     std::cout << "    -nc                          " << num_cameras << std::endl;
     std::cout << "    -bs                          " << batch_size << std::endl;
-    std::cout << "    -nireq                        " << num_infer_requests << std::endl;
+    std::cout << "    -nireq                       " << num_infer_requests << std::endl;
     std::cout << "    -n_iqs                       " << input_queue_size << std::endl;
     std::cout << "    -fps_sp                      " << fps_sampling_period << std::endl;
     std::cout << "    -n_sp                        " << num_sampling_periods << std::endl;
