@@ -30,6 +30,9 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import re
+import timeit
+import csv
 
 from pathlib import Path
 
@@ -51,6 +54,17 @@ def parse_args():
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
         help='Model Optimizer entry point script')
     return parser.parse_args()
+
+def parce_result(demo_name, device, pipline, execution_time):
+    if device == "":
+        device = "CPU"
+    csv_path = Path("demo_execution_time_report.csv")
+    first_time = not csv_path.exists()
+    with csv_path.open('a+', newline='') as csvfile:
+        testwriter = csv.writer(csvfile)
+        if first_time:
+            testwriter.writerow(["DemoName", "Device", "ModelsInPipline", "ExecutionTime"])
+        testwriter.writerow([demo_name, device, ", ".join(pipline), execution_time])
 
 def main():
     args = parse_args()
@@ -143,13 +157,29 @@ def main():
                     ' '.join(shlex.quote(str(arg)) for arg in case_args))
                 print(flush=True)
 
+                execution_time = -1
+                device = ""
+                pipline = []
+                for key , value in test_case.options.items():
+                    match = re.search(r'-d.*', key)
+                    if match and device == "":
+                        device = value
+                    match = re.search(r'-m.*', key)
+                    if match:
+                        model_path = option_to_args(key, value)[1]
+                        model = re.search(r'.*/(models/.*).xml', model_path)
+                        pipline.append(model.group(1) if model else option_to_args(key, value)[1])
+                pipline.sort()
                 try:
+                    start_time = timeit.default_timer()
                     subprocess.check_output(fixed_args + case_args,
                         stderr=subprocess.STDOUT, universal_newlines=True)
+                    execution_time = timeit.default_timer() - start_time
                 except subprocess.CalledProcessError as e:
                     print(e.output)
                     print('Exit code:', e.returncode)
                     num_failures += 1
+                parce_result(demo.full_name, device, pipline, execution_time)
 
         print()
 
