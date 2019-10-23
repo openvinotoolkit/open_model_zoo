@@ -310,12 +310,13 @@ class ConfigReader:
             'annotations': 'ANNOTATIONS_DIR',
             'bitstreams': 'BITSTREAMS_DIR',
             'models': 'MODELS_DIR',
-            'extensions': 'EXTENSIONS_DIR'
+            'extensions': 'EXTENSIONS_DIR',
         }
         for argument, env_var in commandline_arg_to_env_var.items():
             if argument not in args or args[argument] is None:
                 env_var_value = os.environ.get(env_var)
-                args[argument] = Path(env_var_value) if env_var_value is not None else Path.cwd()
+                if env_var_value is not None:
+                    args[argument] = Path(env_var_value)
 
         def process_models(config, entries_paths):
             for model in config['models']:
