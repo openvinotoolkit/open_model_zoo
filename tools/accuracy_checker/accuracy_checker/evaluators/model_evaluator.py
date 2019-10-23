@@ -28,7 +28,7 @@ from ..postprocessor import PostprocessingExecutor
 from ..preprocessor import PreprocessingExecutor
 from ..adapters import create_adapter
 from ..config import ConfigError
-from ..data_readers import BaseReader
+from ..data_readers import BaseReader, REQUIRES_ANNOTATIONS
 from .base_evaluator import BaseEvaluator
 
 
@@ -60,13 +60,15 @@ class ModelEvaluator(BaseEvaluator):
 
         dataset = Dataset(dataset_config)
         if isinstance(data_reader_config, str):
-            data_reader = BaseReader.provide(data_reader_config, data_source, annotations=dataset.annotation)
+            data_reader_type = data_reader_config
+            data_reader_config = None
         elif isinstance(data_reader_config, dict):
-            data_reader = BaseReader.provide(
-                data_reader_config['type'], data_source, data_reader_config, annotations=dataset.annotation
-            )
+            data_reader_type = data_reader_config['type']
         else:
             raise ConfigError('reader should be dict or string')
+        if data_reader_type in REQUIRES_ANNOTATIONS:
+            data_source = dataset.annotation
+        data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
         launcher = create_launcher(launcher_config)
         async_mode = launcher.async_mode if hasattr(launcher, 'async_mode') else False
         config_adapter = launcher_config.get('adapter')

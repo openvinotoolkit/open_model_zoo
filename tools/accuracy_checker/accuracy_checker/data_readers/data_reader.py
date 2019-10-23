@@ -31,6 +31,8 @@ from ..utils import get_path, read_json, zipped_transform, set_image_metadata, c
 from ..dependency import ClassProvider
 from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField
 
+REQUIRES_ANNOTATIONS = ['annotation_features_extractor', ]
+
 
 class DataRepresentation:
     def __init__(self, data, meta=None, identifier=''):
@@ -127,6 +129,10 @@ class BaseReader(ClassProvider):
 
     def read_item(self, data_id):
         return DataRepresentation(self.read_dispatcher(data_id), identifier=data_id)
+
+    @property
+    def name(self):
+        return self.__provider__
 
 
 class ReaderCombinerConfig(ConfigValidator):
@@ -316,11 +322,6 @@ class AnnotationFeaturesConfig(ConfigValidator):
 class AnnotationFeaturesReader(BaseReader):
     __provider__ = 'annotation_features_extractor'
 
-    def __init__(self, data_source, config=None, annotations=None):
-        super().__init__(annotations, config)
-        self.counter = 0
-        self.data_source = annotations
-
     def configure(self):
         self.feature_list = self.config['features']
         if not contains_all(self.data_source[0].__dict__, self.feature_list):
@@ -328,9 +329,11 @@ class AnnotationFeaturesReader(BaseReader):
                 'annotation_class prototype does not contain provided features {}'.format(', '.join(self.feature_list))
             )
         self.single = len(self.feature_list) == 1
+        self.counter = 0
+        self.subset = range(len(self.data_source))
 
     def read(self, data_id):
-        relevant_annotation = self.data_source[self.counter]
+        relevant_annotation = self.data_source[self.subset[self.counter]]
         self.counter += 1
         features = [getattr(relevant_annotation, feature) for feature in self.feature_list]
         if self.single:

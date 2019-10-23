@@ -25,7 +25,7 @@ from ..postprocessor import PostprocessingExecutor
 from ..preprocessor import PreprocessingExecutor
 from ..adapters import create_adapter
 from ..config import ConfigError
-from ..data_readers import BaseReader
+from ..data_readers import BaseReader, REQUIRES_ANNOTATIONS
 from ..progress_reporters import ProgressReporter
 
 
@@ -332,19 +332,25 @@ def create_dataset_attributes(config, tag):
     dataset_name = dataset_config['name']
     data_reader_config = dataset_config.get('reader', 'opencv_imread')
     data_source = dataset_config.get('data_source')
-
-    if isinstance(data_reader_config, str):
-        data_reader = BaseReader.provide(data_reader_config, data_source)
-    elif isinstance(data_reader_config, dict):
-        data_reader = BaseReader.provide(data_reader_config['type'], data_source, data_reader_config)
-    else:
-        raise ConfigError('reader should be dict or string')
     annotation_reader = None
     dataset_meta = {}
-    metric_dispatcher = None
     if contains_any(dataset_config, ['annotation', 'annotation_conversion']):
         annotation_reader = Dataset(dataset_config)
         dataset_meta = annotation_reader.metadata
+    if isinstance(data_reader_config, str):
+        data_reader_type = data_reader_config
+        data_reader_config = None
+    elif isinstance(data_reader_config, dict):
+        data_reader_type = data_reader_config['type']
+    else:
+        raise ConfigError('reader should be dict or string')
+    if data_reader_type in REQUIRES_ANNOTATIONS:
+        if annotation_reader is None:
+            raise ConfigError('data reader *{}* requires annotation'.format(data_reader_type))
+        data_source = annotation_reader.annotation
+    data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
+
+    metric_dispatcher = None
     dataset = DatasetWrapper(data_reader, annotation_reader)
     preprocessor = PreprocessingExecutor(
         dataset_config.get('preprocessing'), dataset_name, dataset_meta
