@@ -161,8 +161,8 @@ void ParseYOLOV3Output(const InferenceEngine::CNNLayerPtr &layer, const Inferenc
     auto num = layer->GetParamAsInt("num");
     auto coords = layer->GetParamAsInt("coords");
     auto classes = layer->GetParamAsInt("classes");
-    std::vector<float> anchors = {10.0, 13.0, 16.0, 30.0, 33.0, 23.0, 30.0, 61.0, 62.0, 45.0, 59.0, 119.0, 116.0, 90.0,
-                                  156.0, 198.0, 373.0, 326.0};
+    std::vector<float> anchors;
+
     try { anchors = layer->GetParamAsFloats("anchors"); } catch (...) {}
     try {
         auto mask = layer->GetParamAsInts("mask");
