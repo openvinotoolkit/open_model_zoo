@@ -134,6 +134,9 @@ class BaseReader(ClassProvider):
     def name(self):
         return self.__provider__
 
+    def reset(self):
+        pass
+
 
 class ReaderCombinerConfig(ConfigValidator):
     type = StringField()
@@ -232,6 +235,9 @@ class OpenCVFrameReader(BaseReader):
     def configure(self):
         self.data_source = get_path(self.data_source)
         self.videocap = cv2.VideoCapture(str(self.data_source))
+
+    def reset(self):
+        self.current = -1
 
 
 class JSONReaderConfig(ConfigValidator):
@@ -342,3 +348,7 @@ class AnnotationFeaturesReader(BaseReader):
 
     def _read_list(self, data_id):
         return self.read(data_id)
+
+    def reset(self):
+        self.subset = range(len(self.data_source))
+        self.counter = 0

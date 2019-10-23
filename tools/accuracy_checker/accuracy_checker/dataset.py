@@ -301,6 +301,7 @@ class DatasetWrapper:
             self.subset = None
         if self.annotation_reader:
             self.annotation_reader.reset()
+        self.data_reader.reset()
 
     @property
     def full_size(self):

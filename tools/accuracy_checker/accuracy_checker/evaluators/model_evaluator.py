@@ -343,6 +343,7 @@ class ModelEvaluator(BaseEvaluator):
         self._predictions = []
         self._metrics_results = []
         self.dataset.reset()
+        self.reader.reset()
 
     def release(self):
         self.launcher.release()
