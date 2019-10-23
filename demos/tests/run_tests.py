@@ -23,13 +23,16 @@ subdirectory with the ILSVRC2012 dataset.
 
 import argparse
 import collections
+import csv
 import itertools
 import json
+import re
 import shlex
 import shutil
 import subprocess
 import sys
 import tempfile
+import timeit
 
 from pathlib import Path
 
@@ -50,7 +53,25 @@ def parse_args():
         help='list of demos to run tests for (by default, every demo is tested)')
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
         help='Model Optimizer entry point script')
+    parser.add_argument('--device_list', required=False, default="CPU, GPU",
+        help='List of devices to test')
+    parser.add_argument('--report_file', type=Path, required=False, default="demo_execution_time_report.csv",
+        help='Path to report file')
     return parser.parse_args()
+
+def collect_result(demo_name, device, pipeline, execution_time, report_file):
+    csv_path = report_file
+    first_time = not csv_path.exists()
+    models = []
+    for p in pipeline:
+        model = re.search(r'/(models/.*).xml', p)
+        models.append(model.group(1) if model else p)
+
+    with csv_path.open('a+', newline='') as csvfile:
+        testwriter = csv.writer(csvfile)
+        if first_time:
+            testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "ExecutionTime"])
+        testwriter.writerow([demo_name, device, ", ".join(models), execution_time])
 
 def main():
     args = parse_args()
@@ -133,23 +154,33 @@ def main():
 
             print('Fixed arguments:', ' '.join(map(shlex.quote, fixed_args)))
             print()
-
-            for test_case_index, test_case in enumerate(demo.test_cases):
+            case_index = 0
+            device_args = demo.device_args(args.device_list.split(', '))
+            for test_case in demo.test_cases:
                 case_args = [demo_arg
                     for key, value in sorted(test_case.options.items())
                     for demo_arg in option_to_args(key, value)]
 
-                print('Test case #{}:'.format(test_case_index + 1),
-                    ' '.join(shlex.quote(str(arg)) for arg in case_args))
-                print(flush=True)
-
-                try:
-                    subprocess.check_output(fixed_args + case_args,
-                        stderr=subprocess.STDOUT, universal_newlines=True)
-                except subprocess.CalledProcessError as e:
-                    print(e.output)
-                    print('Exit code:', e.returncode)
-                    num_failures += 1
+                pipeline = [option_to_args(key, value)[1] for key, value in test_case.options.items() if "-m" in key]
+                if len(device_args) == 0:
+                    device_args['CPU']=[]
+                for device, dev_arg in device_args.items():
+                    case_index +=1
+                    print('Test case #{}:'.format(case_index),
+                        ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
+                    print(flush=True)
+                    try:
+                        start_time = timeit.default_timer()
+                        subprocess.check_output(fixed_args + dev_arg + case_args,
+                            stderr=subprocess.STDOUT, universal_newlines=True)
+                        execution_time = timeit.default_timer() - start_time
+                    except subprocess.CalledProcessError as e:
+                        print(e.output)
+                        print('Exit code:', e.returncode)
+                        num_failures += 1
+                        execution_time = -1
+                        
+                    collect_result(demo.full_name, device, pipeline, execution_time, args.report_file)
 
         print()
 
