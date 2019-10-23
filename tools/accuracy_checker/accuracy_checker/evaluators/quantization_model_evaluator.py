@@ -344,7 +344,8 @@ def create_dataset_attributes(config, tag):
     if isinstance(data_reader_config, str):
         data_reader = BaseReader.provide(data_reader_config, data_source)
     elif isinstance(data_reader_config, dict) and annotation_reader:
-        data_reader = BaseReader.provide(data_reader_config['type'], data_source, data_reader_config, annotation_reader.annotation)
+        data_reader = BaseReader.provide(data_reader_config['type'], data_source, data_reader_config,
+                                         annotation_reader.annotation)
     else:
         raise ConfigError('reader should be dict or string')
 
