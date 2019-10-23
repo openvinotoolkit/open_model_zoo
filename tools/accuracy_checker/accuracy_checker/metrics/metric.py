@@ -27,7 +27,6 @@ from ..utils import zipped_transform, get_parameter_value_from_config, contains_
 PerImageMetricResult = namedtuple('PerImageMetricResult', ['metric_name', 'metric_type', 'result'])
 
 
-
 class Metric(ClassProvider):
     """
     Interface for evaluating metrics.
