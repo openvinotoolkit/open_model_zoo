@@ -131,6 +131,7 @@ Options:
   -pt PROB_THRESHOLD, --prob_threshold PROB_THRESHOLD
                         Optional. Probability threshold for detections
                         filtering
+  --no_show             Optional. Don't show output
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

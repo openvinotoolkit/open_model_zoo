@@ -15,6 +15,29 @@
 from args import image_net_arg
 
 IMAGE_SEQUENCES = {
+    'action-recognition': [
+        image_net_arg('00000001'),
+        image_net_arg('00000002'),
+        image_net_arg('00000003'),
+        image_net_arg('00000004'),
+        image_net_arg('00000005'),
+        image_net_arg('00000006'),
+        image_net_arg('00000007'),
+        image_net_arg('00000008'),
+        image_net_arg('00000009'),
+        image_net_arg('00000010'),
+        image_net_arg('00000011'),
+        image_net_arg('00000012'),
+        image_net_arg('00000013'),
+        image_net_arg('00000014'),
+        image_net_arg('00000015'),
+        image_net_arg('00000016'),
+        image_net_arg('00000017'),
+        image_net_arg('00000018'),
+        image_net_arg('00000019'),
+        image_net_arg('00000020'),
+    ],
+
     'face-detection-adas': [
         image_net_arg('00000002'),
         image_net_arg('00000032'),
@@ -52,6 +75,51 @@ IMAGE_SEQUENCES = {
         image_net_arg('00043066'),
         image_net_arg('00045630'),
         image_net_arg('00048311'),
+    ],
+
+    'instance-segmentation': [
+        image_net_arg('00000001'),
+        image_net_arg('00000002'),
+        image_net_arg('00000002'), # the demo has simple reid
+        image_net_arg('00000003'),
+        image_net_arg('00000004'),
+        image_net_arg('00000008'),
+        image_net_arg('00000010'),
+        image_net_arg('00000017'),
+        image_net_arg('00000019'),
+        image_net_arg('00000020'),
+    ],
+
+    'multi-camera-multi-person-tracking': [
+        image_net_arg('00000002'),
+        image_net_arg('00000032'),
+        image_net_arg('00017291'),
+        image_net_arg('00017293'),
+        image_net_arg('00040547'),
+        image_net_arg('00000002'),
+        image_net_arg('00000032'),
+        image_net_arg('00017291'),
+        image_net_arg('00017293'),
+        image_net_arg('00040547'),
+        image_net_arg('00000002'),
+    ],
+
+    'multi-camera-multi-person-tracking/repeated': [image_net_arg('00000002')] * 11,
+
+    'object-detection-demo-ssd-async': [
+        image_net_arg('00000001'),
+        image_net_arg('00000002'),
+        image_net_arg('00000003'),
+        image_net_arg('00000004'),
+        image_net_arg('00000005'),
+        image_net_arg('00000006'),
+        image_net_arg('00000007'),
+        image_net_arg('00000008'),
+        image_net_arg('00000014'),
+        image_net_arg('00000018'),
+        image_net_arg('00000022'),
+        image_net_arg('00000023'),
+        image_net_arg('00000032'),
     ],
 
     'person-detection-retail': [
@@ -110,6 +178,16 @@ IMAGE_SEQUENCES = {
         image_net_arg('00005409'),
     ],
 
+    'smart-classroom-demo': [
+        image_net_arg('00000074'),
+        image_net_arg('00000164'),
+        image_net_arg('00000181'),
+        image_net_arg('00000164'),
+        image_net_arg('00000181'),
+        image_net_arg('00000001'),
+        image_net_arg('00000074'),
+    ],
+
     'text-detection': [
         image_net_arg('00000032'),
         image_net_arg('00001893'),
@@ -134,17 +212,5 @@ IMAGE_SEQUENCES = {
         image_net_arg('00028190'),
         image_net_arg('00037128'),
         image_net_arg('00048316'),
-    ],
-
-    'smart-classroom-demo': [
-        image_net_arg('00000074'),
-        image_net_arg('00000002'),
-        image_net_arg('00000002'),
-        image_net_arg('00000164'),
-        image_net_arg('00000181'),
-        image_net_arg('00000164'),
-        image_net_arg('00000181'),
-        image_net_arg('00000001'),
-        image_net_arg('00000074'),
     ],
 }

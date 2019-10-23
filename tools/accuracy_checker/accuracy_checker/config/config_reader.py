@@ -89,7 +89,7 @@ class ConfigReader:
         local_config = read_yaml(arguments.config)
         definitions = local_config.get('global_definitions')
         if definitions:
-            definitions = read_yaml(arguments.config.parent / definitions)
+            definitions = read_yaml(Path(arguments.config).parent / definitions)
         global_config = read_yaml(arguments.definitions) if arguments.definitions else definitions
 
         return global_config, local_config

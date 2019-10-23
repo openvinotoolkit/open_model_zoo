@@ -119,9 +119,8 @@ void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc
                     vframes.push_back(std::make_shared<VideoFrame>(vframe));
                     ++b;
                 } else {
-                    if (terminate) {
-                        break;
-                    }
+                    terminate = true;
+                    break;
                 }
             }
 
@@ -188,6 +187,7 @@ void IEGraph::start(GetterFunc getterFunc, PostprocessingFunc postprocessingFunc
             }
             condVarBusyRequests.notify_one();
         }
+        condVarBusyRequests.notify_one(); // notify that there will be no new InferRequests
     });
 }
 
@@ -204,6 +204,11 @@ IEGraph::IEGraph(const InitParams& p):
     initNetwork(p.deviceName);
 }
 
+bool IEGraph::isRunning() {
+    std::lock_guard<std::mutex> lock(mtxBusyRequests);
+    return !terminate || !busyBatchRequests.empty();
+}
+
 InferenceEngine::SizeVector IEGraph::getInputDims() const {
     assert(!availableRequests.empty());
     auto inputBlob = availableRequests.front()->GetBlob(inputDataBlobName);
@@ -217,8 +222,12 @@ std::vector<std::shared_ptr<VideoFrame> > IEGraph::getBatchData(cv::Size frameSi
     {
         std::unique_lock<std::mutex> lock(mtxBusyRequests);
         condVarBusyRequests.wait(lock, [&]() {
-            return !busyBatchRequests.empty();
+            // wait until the pipeline is stopped or there are new InferRequests
+            return terminate || !busyBatchRequests.empty();
         });
+        if (busyBatchRequests.empty()) {
+            return {}; // woke up because of termination, so leave if nothing to preces
+        }
         vframes = std::move(busyBatchRequests.front().vfPtrVec);
         req = std::move(busyBatchRequests.front().req);
         startTime = std::move(busyBatchRequests.front().startTime);

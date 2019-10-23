@@ -23,8 +23,10 @@ ALL_DEVICES = ['CPU', 'GPU']
 TestCase = collections.namedtuple('TestCase', ['options'])
 
 class NativeDemo:
-    def __init__(self, name, test_cases):
-        self._name = name
+    def __init__(self, subdirectory, test_cases):
+        self.subdirectory = subdirectory
+
+        self._name = subdirectory.replace('/', '_')
 
         self.test_cases = test_cases
 
@@ -33,14 +35,16 @@ class NativeDemo:
         return self._name
 
     def models_lst_path(self, source_dir):
-        return source_dir / self._name / 'models.lst'
+        return source_dir / self.subdirectory / 'models.lst'
 
     def fixed_args(self, source_dir, build_dir):
         return [str(build_dir / self._name)]
 
 class PythonDemo:
-    def __init__(self, name, test_cases):
-        self._name = name
+    def __init__(self, subdirectory, test_cases):
+        self.subdirectory = 'python_demos/' + subdirectory
+
+        self._name = subdirectory.replace('/', '_')
 
         self.test_cases = test_cases
 
@@ -49,7 +53,7 @@ class PythonDemo:
         return 'py/' + self._name
 
     def models_lst_path(self, source_dir):
-        return source_dir / 'python_demos' / self._name / 'models.lst'
+        return source_dir / self.subdirectory / 'models.lst'
 
     def fixed_args(self, source_dir, build_dir):
         cpu_extension_path = build_dir / 'lib/libcpu_extension.so'
@@ -73,7 +77,7 @@ def device_cases(*args):
     return [TestCase(options={opt: device for opt in args}) for device in ALL_DEVICES]
 
 NATIVE_DEMOS = [
-    NativeDemo(name='crossroad_camera_demo', test_cases=combine_cases(
+    NativeDemo(subdirectory='crossroad_camera_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             '-i': ImagePatternArg('person-vehicle-bike-detection-crossroad')}),
         device_cases('-d', '-d_pa', '-d_reid'),
@@ -82,7 +86,7 @@ NATIVE_DEMOS = [
         single_option_cases('-m_reid', None, ModelArg('person-reidentification-retail-0079')),
     )),
 
-    NativeDemo(name='gaze_estimation_demo', test_cases=combine_cases(
+    NativeDemo(subdirectory='gaze_estimation_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             '-i': ImagePatternArg('gaze-estimation-adas')}),
         device_cases('-d', '-d_fd', '-d_hp', '-d_lm'),
@@ -94,14 +98,14 @@ NATIVE_DEMOS = [
         }),
     )),
 
-    NativeDemo(name='human_pose_estimation_demo', test_cases=combine_cases(
+    NativeDemo(subdirectory='human_pose_estimation_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             '-i': ImagePatternArg('human-pose-estimation')}),
         device_cases('-d'),
         TestCase(options={'-m': ModelArg('human-pose-estimation-0001')}),
     )),
 
-    NativeDemo(name='interactive_face_detection_demo', test_cases=combine_cases(
+    NativeDemo(subdirectory='interactive_face_detection_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             '-i': ImagePatternArg('face-detection-adas')}),
         device_cases('-d', '-d_ag', '-d_em', '-d_lm', '-d_hp'),
@@ -121,13 +125,28 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    # TODO: mask_rcnn_demo
+    # TODO: mask_rcnn_demo: no models.lst
 
-    # TODO: multichannel demos
+    NativeDemo(subdirectory='multi_channel/face_detection_demo', test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            '-i': IMAGE_SEQUENCES['face-detection-adas']}),
+        device_cases('-d'),
+        single_option_cases('-m',
+            ModelArg('face-detection-adas-0001'),
+            ModelArg('face-detection-adas-binary-0001', "INT1"),
+            ModelArg('face-detection-retail-0004'),
+            ModelArg('face-detection-retail-0005'),
+            ModelArg('face-detection-retail-0044')),
+    )),
 
-    # TODO: object_detection_demo_faster_rcnn
+    NativeDemo(subdirectory='multi_channel/human_pose_estimation_demo', test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            '-i': IMAGE_SEQUENCES['human-pose-estimation'],
+            '-m': ModelArg('human-pose-estimation-0001')}),
+        device_cases('-d'),
+    )),
 
-    NativeDemo(name='object_detection_demo_ssd_async', test_cases=combine_cases(
+    NativeDemo(subdirectory='object_detection_demo_ssd_async', test_cases=combine_cases(
         TestCase(options={'-no_show': None}),
         [
             TestCase(options={
@@ -145,7 +164,7 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    # TODO: object_detection_demo_yolov3_async
+    # TODO: object_detection_demo_yolov3_async: no models.lst
 
     NativeDemo('pedestrian_tracker_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
@@ -161,7 +180,7 @@ NATIVE_DEMOS = [
             ModelArg('person-reidentification-retail-0079')),
     )),
 
-    NativeDemo(name='security_barrier_camera_demo', test_cases=combine_cases(
+    NativeDemo(subdirectory='security_barrier_camera_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             '-i': ImageDirectoryArg('vehicle-license-plate-detection-barrier')}),
         device_cases('-d', '-d_lpr', '-d_va'),
@@ -170,7 +189,7 @@ NATIVE_DEMOS = [
         single_option_cases('-m_va', None, ModelArg('vehicle-attributes-recognition-barrier-0039')),
     )),
 
-    NativeDemo(name='segmentation_demo', test_cases=combine_cases(
+    NativeDemo(subdirectory='segmentation_demo', test_cases=combine_cases(
         device_cases('-d'),
         [
             TestCase(options={
@@ -184,7 +203,7 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    NativeDemo(name='smart_classroom_demo', test_cases=combine_cases(
+    NativeDemo(subdirectory='smart_classroom_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             '-i': ImagePatternArg('smart-classroom-demo'),
             '-m_fd': ModelArg('face-detection-adas-0001')}),
@@ -206,7 +225,7 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    NativeDemo(name='super_resolution_demo', test_cases=combine_cases(
+    NativeDemo(subdirectory='super_resolution_demo', test_cases=combine_cases(
         TestCase(options={'-i': ImageDirectoryArg('single-image-super-resolution')}),
         device_cases('-d'),
         TestCase(options={
@@ -214,7 +233,7 @@ NATIVE_DEMOS = [
         }),
     )),
 
-    NativeDemo(name='text_detection_demo', test_cases=combine_cases(
+    NativeDemo(subdirectory='text_detection_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None, '-dt': 'video',
             '-i': ImagePatternArg('text-detection')}),
         device_cases('-d_td', '-d_tr'),
@@ -224,13 +243,72 @@ NATIVE_DEMOS = [
 ]
 
 PYTHON_DEMOS = [
-    # TODO: 3d_segmentation_demo
-    # TODO: action_recognition
-    # TODO: instance_segmentation_demo
-    # TODO: object_detection_demo_ssd_async
-    # TODO: object_detection_demo_yolov3_async
+    # TODO: 3d_segmentation_demo: no input data
 
-    PythonDemo(name='segmentation_demo', test_cases=combine_cases(
+    PythonDemo(subdirectory='action_recognition', test_cases=combine_cases(
+        TestCase(options={'--no_show': None, '-i': ImagePatternArg('action-recognition')}),
+        device_cases('-d'),
+        [
+            TestCase(options={
+                '-m_en': ModelArg('action-recognition-0001-encoder'),
+                '-m_de': ModelArg('action-recognition-0001-decoder'),
+            }),
+            TestCase(options={
+                '-m_en': ModelArg('driver-action-recognition-adas-0002-encoder'),
+                '-m_de': ModelArg('driver-action-recognition-adas-0002-decoder'),
+            }),
+        ],
+    )),
+
+    # TODO: face_recognition_demo: requires face gallery
+    # TODO: image_retrieval_demo: current images does not suit the usecase, requires user defined gallery
+
+    PythonDemo(subdirectory='instance_segmentation_demo', test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            '-i': ImagePatternArg('instance-segmentation'),
+            '--delay': '1',
+            '-d': 'CPU',  # GPU is not supported
+            '--labels': DemoFileArg('coco_labels.txt')}),
+        single_option_cases('-m',
+            ModelArg('instance-segmentation-security-0010'),
+            ModelArg('instance-segmentation-security-0050'),
+            ModelArg('instance-segmentation-security-0083')),
+    )),
+
+    PythonDemo(subdirectory='multi_camera_multi_person_tracking', test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            '-i': [ImagePatternArg('multi-camera-multi-person-tracking'),
+                ImagePatternArg('multi-camera-multi-person-tracking/repeated')],
+            '-m': ModelArg('person-detection-retail-0013')}),
+        device_cases('-d'),
+        single_option_cases('--m_reid',
+            ModelArg('person-reidentification-retail-0031'),
+            ModelArg('person-reidentification-retail-0076'),
+            ModelArg('person-reidentification-retail-0079')),
+    )),
+
+    PythonDemo(subdirectory='object_detection_demo_ssd_async', test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            '-i': ImagePatternArg('object-detection-demo-ssd-async')}),
+        device_cases('-d'),
+        single_option_cases('-m',
+            ModelArg('face-detection-adas-0001'),
+            ModelArg('face-detection-adas-binary-0001', "INT1"),
+            ModelArg('face-detection-retail-0004'),
+            ModelArg('face-detection-retail-0005'),
+            ModelArg('face-detection-retail-0044'),
+            ModelArg('pedestrian-and-vehicle-detector-adas-0001'),
+            ModelArg('pedestrian-detection-adas-0002'),
+            ModelArg('pedestrian-detection-adas-binary-0001', "INT1"),
+            ModelArg('person-detection-retail-0013'),
+            ModelArg('vehicle-detection-adas-0002'),
+            ModelArg('vehicle-detection-adas-binary-0001', "INT1"),
+            ModelArg('vehicle-license-plate-detection-barrier-0106')),
+    )),
+
+    # TODO: object_detection_demo_yolov3_async: no models.lst
+
+    PythonDemo(subdirectory='segmentation_demo', test_cases=combine_cases(
         device_cases('-d'),
         [
             TestCase(options={

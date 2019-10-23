@@ -667,11 +667,9 @@ class LPRAdapter(Adapter):
     __provider__ = 'lpr'
     prediction_types = (CharacterRecognitionPrediction,)
 
-    def configure(self):
+    def process(self, raw, identifiers=None, frame_meta=None):
         if not self.label_map:
             raise ConfigError('LPR adapter requires dataset label map for correct decoding.')
-
-    def process(self, raw, identifiers=None, frame_meta=None):
         raw_output = self._extract_predictions(raw, frame_meta)
         predictions = raw_output[self.output_blob]
         result = []
