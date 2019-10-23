@@ -3,19 +3,8 @@
 This demo provides an inference pipeline for multi-channel yolo v3. The demo uses Yolo v3 Object Detection network. You can follow [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page convert the YOLO V3 and tiny YOLO V3 into IR model and execute this demo with converted IR model.
 
 > **NOTES**:
-> This demo is default for yolo v3 model, if you want to run with tiny yolo v3 model, please patch the `anchors` vector. 
-> 
-> From :
-> ```cpp
-> std::vector<float> anchors = {10.0, 13.0, 16.0, 30.0, 33.0, 23.0, 30.0, 61.0, 62.0, 45.0, 59.0, 119.0, 116.0, 90.0,
->                               156.0, 198.0, 373.0, 326.0};
-> ```
-> To :
-> ```cpp
-> std::vector<float> anchors = {10.0, 14.0, 23.0, 27.0, 37.0, 58.0, 81.0, 82.0, 135.0, 169.0, 344.0, 319.0};
-> ```
-    
-    
+> If you don't use [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page to convert the model, it may not work. 
+
 Other demo objectives are:
 
 * Up to 16 cameras as inputs, via OpenCV*
