@@ -207,19 +207,15 @@ void ParseYOLOV3Output(const InferenceEngine::CNNLayerPtr &layer, const Inferenc
     }
 }
 
-struct Object {
-    cv::Rect2f rect;
-    float confidence;
-    unsigned char age;
-    unsigned char gender;
-    Object(cv::Rect2f r, float c, unsigned char a, unsigned char g): rect(r), confidence(c), age(a), gender(g) {}
-};
-
-void drawDetections(cv::Mat& img, const std::vector<Object> detections) {
-    for (const Object& f : detections) {
-        cv::Rect ri(static_cast<int>(f.rect.x), static_cast<int>(f.rect.y),
-                    static_cast<int>(f.rect.width), static_cast<int>(f.rect.height));
-        cv::rectangle(img, ri, cv::Scalar(255, 0, 0), 2);
+void drawDetections(cv::Mat& img, const std::vector<DetectionObject> detections) {
+    for (const DetectionObject& f : detections) {
+        cv::rectangle(img, 
+                      cv::Rect2f((float)f.xmin,
+                                  (float)f.ymin,
+                                  (float)(f.xmax-f.xmin),
+                                  (float)(f.ymax-f.ymin)), 
+                      cv::Scalar(255, 0, 0), 
+                      2);
     }
 }
 
@@ -265,7 +261,7 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
             cv::Rect rectFrame = cv::Rect(params.points[i], params.frameSize);
             cv::Mat windowPart = windowImage(rectFrame);
             cv::resize(elem->frame, windowPart, params.frameSize);
-            drawDetections(windowPart, elem->detections.get<std::vector<Object>>());
+            drawDetections(windowPart, elem->detections.get<std::vector<DetectionObject>>());
         }
     };
 
@@ -424,7 +420,7 @@ int main(int argc, char* argv[]) {
                 InferenceEngine::Blob::Ptr blob = req->GetBlob(output_name);
                 ParseYOLOV3Output(layer, blob, resized_im_h, resized_im_w, 1080 / _ratio, 1920 / _ratio, FLAGS_t, objects);
             }
-            // Filtering overlapping boxes
+            // Filtering overlapping boxes and lower confidence object
             std::sort(objects.begin(), objects.end(), std::greater<DetectionObject>());
             for (size_t i = 0; i < objects.size(); ++i) {
                 if (objects[i].confidence == 0)
@@ -435,18 +431,12 @@ int main(int argc, char* argv[]) {
             }
 
             std::vector<Detections> detections(1);
-            for (auto& d : detections) {
-                d.set(new std::vector<Object>);
-            }
-
+            detections[0].set(new std::vector<DetectionObject>);
+            
             for (auto &object : objects) {
                 if (object.confidence < FLAGS_t)
                     continue;
-                cv::Rect2f rect = { (float)object.xmin, 
-                                    (float)object.ymin, 
-                                    (float)(object.xmax-object.xmin), 
-                                    (float)(object.ymax-object.ymin)};
-                detections[0].get<std::vector<Object>>().emplace_back(rect, object.confidence, 0, 0);
+                detections[0].get<std::vector<DetectionObject>>().push_back(object);
             }
 
             return detections;
