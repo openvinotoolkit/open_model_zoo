@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(TARGET_NAME "multi-channel-yolo-v3-demo")
+set(TARGET_NAME "multi_channel_yolo_v3_demo")
 
 if( BUILD_DEMO_NAME AND NOT ${BUILD_DEMO_NAME} STREQUAL ${TARGET_NAME} )
     message(STATUS "DEMO ${TARGET_NAME} SKIPPED")
