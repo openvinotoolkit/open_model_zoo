@@ -553,6 +553,13 @@ class DLSDKLauncher(Launcher):
                 self.plugin.set_config({'VPU_LOG_LEVEL': log_level})
 
     def auto_num_requests(self):
+        def _get_threads():
+            """ Returns the number of available threads on a posix/win based system """
+            if platform.system() == 'Windows':
+                return (int)(os.environ['NUMBER_OF_PROCESSORS'])
+            else:
+                return (int)(os.popen('grep -c cores /proc/cpuinfo').read())
+
         concurrency_device = {
             'CPU': 1,
             'GPU': 1,
@@ -563,7 +570,7 @@ class DLSDKLauncher(Launcher):
         platform_list = self._devices_list()
         if 'CPU' in platform_list and len(platform_list) == 1:
             min_requests = [4, 5, 3]
-            cpu_count = multiprocessing.cpu_count()
+            cpu_count = _get_threads()
             for min_request in min_requests:
                 if cpu_count % min_request == 0:
                     return max(min_request, cpu_count / min_request)
