@@ -22,7 +22,7 @@ from .annotation_converters import BaseFormatConverter, save_annotation, make_su
 from .config import ConfigValidator, StringField, PathField, ListField, DictField, BaseField, NumberField, ConfigError
 from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet
 from .representation import BaseRepresentation, ReIdentificationClassificationAnnotation
-from .data_readers import DataReaderField
+from .data_readers import DataReaderField, REQUIRES_ANNOTATIONS
 
 
 class DatasetConfig(ConfigValidator):
@@ -283,6 +283,8 @@ class DatasetWrapper:
         if not end:
             end = self.size
         self.subset = range(start, end, step)
+        if self.data_reader.name in REQUIRES_ANNOTATIONS:
+            self.data_reader.subset = self.subset
 
     @property
     def batch(self):
@@ -299,6 +301,7 @@ class DatasetWrapper:
             self.subset = None
         if self.annotation_reader:
             self.annotation_reader.reset()
+        self.data_reader.reset()
 
     @property
     def full_size(self):
