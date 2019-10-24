@@ -33,7 +33,7 @@
 
 #include "input.hpp"
 #include "multichannel_params.hpp"
-#include "multichannel_yolo_v3_params.hpp"
+#include "multichannel_object_detection_demo_yolov3_params.hpp"
 #include "output.hpp"
 #include "threading.hpp"
 #include "graph.hpp"
