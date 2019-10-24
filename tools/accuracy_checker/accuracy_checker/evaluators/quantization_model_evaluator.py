@@ -105,7 +105,11 @@ class ModelEvaluator:
         _set_number_infer_requests(nreq)
 
         if check_progress:
-            progress_reporter = ProgressReporter.provide('print', self.dataset.size)
+            pr_kwargs = {}
+            if isinstance(check_progress, int) and not isinstance(check_progress, bool):
+                pr_kwargs = {"print_interval": check_progress}
+            progress_reporter = ProgressReporter.provide('print', self.dataset.size,
+                                                         **pr_kwargs)
 
         dataset_iterator = iter(enumerate(self.dataset))
 
@@ -190,7 +194,11 @@ class ModelEvaluator:
             self.dataset.make_subset(end=num_images)
 
         if check_progress:
-            progress_reporter = ProgressReporter.provide('print', self.dataset.size)
+            pr_kwargs = {}
+            if isinstance(check_progress, int) and not isinstance(check_progress, bool):
+                pr_kwargs = {"print_interval": check_progress}
+            progress_reporter = ProgressReporter.provide('print', self.dataset.size,
+                                                         **pr_kwargs)
 
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta = self._get_batch_input(batch_inputs, batch_annotation)
