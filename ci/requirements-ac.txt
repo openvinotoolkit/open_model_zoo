@@ -1,7 +1,7 @@
 joblib==0.13.2            # via scikit-learn
 nibabel==2.5.0
 numpy==1.17.0
-pillow==6.1.0
+pillow==6.2.0
 py-cpuinfo==4.0.0
 pyyaml==5.1.2
 scikit-learn==0.21.3
