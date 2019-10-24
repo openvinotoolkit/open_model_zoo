@@ -16,7 +16,6 @@ Other demo objectives are:
 On the start-up, the application reads command line parameters and loads the specified networks. The Yolo v3 Object Detection network is required.
 
 > **NOTES**:
-> * Running the demo requires using at least one web camera attached to your machine.
 > * By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
 ## Running
@@ -26,7 +25,7 @@ Running the application with the `-h` option yields the following usage message:
 cd <samples_build_folder>/intel64/Release
 ./multi-channel-yolo-v3-demo -h
 
-multichannel_yolo_v3 [OPTION]
+multi_channel_yolo_v3_demo [OPTION]
 Options:
 
     -h                           Print a usage message.

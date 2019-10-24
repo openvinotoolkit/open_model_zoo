@@ -45,7 +45,7 @@ namespace {
 */
 void showUsage() {
     std::cout << std::endl;
-    std::cout << "multichannel_yolo_v3 [OPTION]" << std::endl;
+    std::cout << "multi_channel_yolo_v3_demo [OPTION]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                           " << help_message << std::endl;
