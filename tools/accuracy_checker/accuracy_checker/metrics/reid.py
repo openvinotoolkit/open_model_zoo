@@ -155,6 +155,8 @@ class PairwiseAccuracy(FullDatasetEvaluationMetric):
 
     def evaluate(self, annotations, predictions):
         embed_distances, pairs = get_embedding_distances(annotations, predictions)
+        if not pairs:
+            return np.nan
 
         min_score = self.min_score
         if min_score == 'train_median':
@@ -214,9 +216,10 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
             train_subset = self.mark_subset(train_subset)
 
             subset_result = self.accuracy_metric.evaluate(test_subset+train_subset, predictions)
-            subset_results.append(subset_result)
+            if not np.isnan(subset_result):
+                subset_results.append(subset_result)
 
-        return np.mean(subset_results)
+        return np.mean(subset_results) if subset_results else 0
 
     @staticmethod
     def make_subsets(subset_num, dataset_size):
@@ -391,10 +394,11 @@ def get_embedding_distances(annotation, prediction, train=False):
             if image2 in image_indexes:
                 pairs.append(PairDesc(image_indexes[image1.identifier], image_indexes[image2], False))
 
-    embed1 = np.asarray([prediction[idx].embedding for idx, _, _ in pairs])
-    embed2 = np.asarray([prediction[idx].embedding for _, idx, _ in pairs])
-
-    return 0.5 * (1 - np.sum(embed1 * embed2, axis=1)), pairs
+    if pairs:
+        embed1 = np.asarray([prediction[idx].embedding for idx, _, _ in pairs])
+        embed2 = np.asarray([prediction[idx].embedding for _, idx, _ in pairs])
+        return 0.5 * (1 - np.sum(embed1 * embed2, axis=1)), pairs
+    return None, pairs
 
 
 def binary_average_precision(y_true, y_score, interpolated_auc=True):
