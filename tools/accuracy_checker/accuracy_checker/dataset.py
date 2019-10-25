@@ -21,7 +21,7 @@ import warnings
 from .annotation_converters import BaseFormatConverter, save_annotation, make_subset, analyze_dataset
 from .config import ConfigValidator, StringField, PathField, ListField, DictField, BaseField, NumberField, ConfigError
 from .utils import JSONDecoderWithAutoConversion, read_json, get_path, contains_all, set_image_metadata, OrderedSet
-from .representation import BaseRepresentation, ReIdentificationClassificationAnnotation
+from .representation import BaseRepresentation, ReIdentificationClassificationAnnotation, ReIdentificationAnnotation
 from .data_readers import DataReaderField, REQUIRES_ANNOTATIONS
 
 
@@ -158,33 +158,48 @@ class Dataset:
         return batch_ids, self._annotation[batch_start:batch_end]
 
     def make_subset(self, ids=None, start=0, step=1, end=None):
-        pairwise_subset = isinstance(self._annotation[0], ReIdentificationClassificationAnnotation)
+        pairwise_subset = isinstance(
+            self._annotation[0], (ReIdentificationAnnotation, ReIdentificationClassificationAnnotation)
+        )
         if ids:
-            self.subset = ids if not pairwise_subset else self.make_subset_pairwise(ids)
+            self.subset = ids if not pairwise_subset else self._make_subset_pairwise(ids)
             return
         if not end:
             end = self.size
-            ids = range(start, end, step)
-        self.subset = ids if not pairwise_subset else self.make_subset_pairwise(ids)
+        ids = range(start, end, step)
+        self.subset = ids if not pairwise_subset else self._make_subset_pairwise(ids)
 
-    def make_subset_pairwise(self, ids, cut_to_final_size=True):
+    def _make_subset_pairwise(self, ids, cut_to_final_size=True):
         final_size = len(ids)
         subsample_set = OrderedSet()
-        identifier_to_index = {annotation.identifier: index for index, annotation in enumerate(self._annotation)}
-        for idx in ids:
-            subsample_set.add(idx)
-            current_annotation = self._annotation[idx]
-            positive_pairs = [
-                identifier_to_index[pair_identifier] for pair_identifier in current_annotation.positive_pairs
-            ]
-            subsample_set |= positive_pairs
-            negative_pairs = [
-                identifier_to_index[pair_identifier] for pair_identifier in current_annotation.positive_pairs
-            ]
-            subsample_set |= negative_pairs
+        if isinstance(self._annotation[0], ReIdentificationClassificationAnnotation):
+            identifier_to_index = {annotation.identifier: index for index, annotation in enumerate(self._annotation)}
+            for idx in ids:
+                subsample_set.add(idx)
+                current_annotation = self._annotation[idx]
+                positive_pairs = [
+                    identifier_to_index[pair_identifier] for pair_identifier in current_annotation.positive_pairs
+                ]
+                subsample_set |= positive_pairs
+                negative_pairs = [
+                    identifier_to_index[pair_identifier] for pair_identifier in current_annotation.positive_pairs
+                ]
+                subsample_set |= negative_pairs
+        else:
+            for idx in ids:
+                selected_annotation = self._annotation[idx]
+                if not selected_annotation.query:
+                    continue
+                gallery_for_person = [
+                    idx for idx, annotation in enumerate(self._annotation)
+                    if annotation.person_id == selected_annotation.person_id
+                ]
+                subsample_set |= OrderedSet(gallery_for_person)
+
         subsample_set = list(subsample_set)
-        if cut_to_final_size:
+        if cut_to_final_size and len(subsample_set) > final_size:
             subsample_set = subsample_set[:final_size]
+
         return subsample_set
 
     @staticmethod
