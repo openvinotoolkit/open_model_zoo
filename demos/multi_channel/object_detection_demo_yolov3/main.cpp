@@ -214,8 +214,18 @@ void drawDetections(cv::Mat& img, const std::vector<DetectionObject> detections)
                                   (float)f.ymin,
                                   (float)(f.xmax-f.xmin),
                                   (float)(f.ymax-f.ymin)), 
-                      cv::Scalar(255, 0, 0), 
+                      colors[(int)f.class_id], 
                       2);
+        // std::cout<< coco_label[(int)f.class_id] << "\n";
+        // slog::info << "class: " << coco_label[(int)f.class_id] << slog::endl;
+        cv::putText(img, 
+                    coco_labels[(int)f.class_id], 
+                    cv::Point((float)f.xmin,
+                              (float)f.ymin),
+                    cv::FONT_HERSHEY_COMPLEX,
+                    1,
+                    colors[(int)f.class_id],
+                    1);
     }
 }
 
@@ -398,6 +408,12 @@ int main(int argc, char* argv[]) {
         sources.start();
 
         size_t currentFrame = 0;
+        
+        for (int i = 0; i < (int)colors.size(); ++i)
+            colors[i] = cv::Scalar(rand() % 256,
+                                   rand() % 256,
+                                   rand() % 256
+                                   );
 
         network->start([&](VideoFrame& img) {
             img.sourceIdx = currentFrame;
