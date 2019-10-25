@@ -101,8 +101,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
-int _ratio;
-
 static int EntryIndex(int side, int lcoords, int lclasses, int location, int entry) {
     int n = location / (side * side);
     int loc = location % (side * side);
@@ -216,8 +214,6 @@ void drawDetections(cv::Mat& img, const std::vector<DetectionObject> detections)
                                   (float)(f.ymax-f.ymin)), 
                       colors[(int)f.class_id], 
                       2);
-        // std::cout<< coco_label[(int)f.class_id] << "\n";
-        // slog::info << "class: " << coco_label[(int)f.class_id] << slog::endl;
         cv::putText(img, 
                     coco_labels[(int)f.class_id], 
                     cv::Point((float)f.xmin,
@@ -373,8 +369,6 @@ int main(int argc, char* argv[]) {
             throw std::logic_error("Number of inputs exceed maximum value [25]");
         }
 
-        _ratio = static_cast<int>(ceil(sqrt(numberOfInputs)));
-
         VideoSources::InitParams vsParams;
         vsParams.queueSize            = FLAGS_n_iqs;
         vsParams.collectStats         = FLAGS_show_stats;
@@ -425,7 +419,6 @@ int main(int argc, char* argv[]) {
                 cv::Size frameSize, 
                 InferenceEngine::CNNNetReader netReader 
                 ) {
-
             unsigned long resized_im_h = 416;
             unsigned long resized_im_w = 416;
 
@@ -434,7 +427,7 @@ int main(int argc, char* argv[]) {
             for (auto &output_name :outputDataBlobNames) {
                 InferenceEngine::CNNLayerPtr layer = netReader.getNetwork().getLayerByName(output_name.c_str());
                 InferenceEngine::Blob::Ptr blob = req->GetBlob(output_name);
-                ParseYOLOV3Output(layer, blob, resized_im_h, resized_im_w, 1080 / _ratio, 1920 / _ratio, FLAGS_t, objects);
+                ParseYOLOV3Output(layer, blob, resized_im_h, resized_im_w, frameSize.height, frameSize.width, FLAGS_t, objects);
             }
             // Filtering overlapping boxes and lower confidence object
             std::sort(objects.begin(), objects.end(), std::greater<DetectionObject>());
