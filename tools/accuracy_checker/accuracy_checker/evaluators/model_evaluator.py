@@ -342,7 +342,7 @@ class ModelEvaluator(BaseEvaluator):
         self._annotations = []
         self._predictions = []
         self._metrics_results = []
-        self.dataset.reset()
+        self.dataset.reset(self.postprocessor.has_processors)
         self.reader.reset()
 
     def release(self):
