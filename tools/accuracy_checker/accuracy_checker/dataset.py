@@ -218,9 +218,10 @@ class Dataset:
 
         return annotation, meta
 
-    def reset(self):
+    def reset(self, reload_annotation=False):
         self.subset = None
-        self._load_annotation()
+        if reload_annotation:
+            self._load_annotation()
 
 
 def read_annotation(annotation_file: Path):
@@ -296,11 +297,11 @@ class DatasetWrapper:
             self.annotation_reader.batch = batch
         self._batch = batch
 
-    def reset(self):
+    def reset(self, reload_annotation=False):
         if self.subset:
             self.subset = None
         if self.annotation_reader:
-            self.annotation_reader.reset()
+            self.annotation_reader.reset(reload_annotation)
         self.data_reader.reset()
 
     @property

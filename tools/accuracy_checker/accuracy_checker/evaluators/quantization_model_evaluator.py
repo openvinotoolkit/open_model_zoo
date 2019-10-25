@@ -16,6 +16,7 @@ limitations under the License.
 
 import time
 import copy
+import numpy as np
 
 from ..utils import extract_image_representations, contains_any
 from ..dataset import Dataset, DatasetWrapper
@@ -44,6 +45,7 @@ class ModelEvaluator:
 
         self._annotations = []
         self._predictions = []
+        self._input_ids = []
         self._metrics_results = []
 
     @classmethod
@@ -164,6 +166,8 @@ class ModelEvaluator:
             progress_reporter.finish()
 
     def select_dataset(self, dataset_tag):
+        if self.dataset is not None and isinstance(self.dataset_config, list):
+            return
         dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
         self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
         if self.dataset.annotation_reader and self.dataset.annotation_reader.metadata:
@@ -259,6 +263,12 @@ class ModelEvaluator:
         if self._metrics_results:
             del self._metrics_results
             self._metrics_results = []
+        if self._input_ids:
+            indexes = np.argsort(self._input_ids)
+            annotations = [self._annotations[idx] for idx in indexes]
+            predictions = [self._predictions[idx] for idx in indexes]
+            self._annotations = annotations
+            self._predictions = predictions
 
         for result_presenter, evaluated_metric in self.metric_executor.iterate_metrics(
                 self._annotations, self._predictions):
@@ -308,12 +318,14 @@ class ModelEvaluator:
             self.metric_executor.reset()
         del self._annotations
         del self._predictions
+        del self._input_ids
         del self._metrics_results
         self._annotations = []
         self._predictions = []
+        self._input_ids = []
         self._metrics_results = []
         if self.dataset:
-            self.dataset.reset()
+            self.dataset.reset(self.postprocessor.has_processors)
 
     def release(self):
         self.launcher.release()
