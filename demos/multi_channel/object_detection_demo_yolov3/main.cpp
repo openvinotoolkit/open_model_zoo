@@ -253,7 +253,7 @@ DisplayParams prepareDisplayParams(size_t count) {
 void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
                      float time,
                      const std::string& stats,
-                     DisplayParams params) {
+                     const DisplayParams params) {
     cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
     auto loopBody = [&](size_t i) {
         auto& elem = data[i];
