@@ -221,10 +221,10 @@ class PixelLinkDecoder():
 
 
 def main():
-    if args.model_path.endswith('text-detection-0003.xml') or args.model_path.endswith('text-detection-0004.xml'):
+    if args.model_path.endswith('.xml'):
         td = cv2.dnn.readNet(args.model_path, args.model_path[:-3] + 'bin')
     else:
-        print("Not valid model's XML file name (should be text-detection-0003.xml or text-detection-0003.xml)")
+        print("Model's XML file expected")
         return 1
         
     img = cv2.imread(args.image_path)
