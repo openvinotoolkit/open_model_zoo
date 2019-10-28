@@ -21,6 +21,7 @@ import numpy as np
 from ..utils import extract_image_representations, contains_any
 from ..dataset import Dataset, DatasetWrapper
 from ..launcher import create_launcher, InputFeeder
+from ..logging import warning
 from ..metrics import MetricsExecutor
 from ..postprocessor import PostprocessingExecutor
 from ..preprocessor import PreprocessingExecutor
@@ -100,11 +101,15 @@ class ModelEvaluator:
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
 
+        if self.launcher.allow_reshape_input or self.preprocessor.has_multi_infer_transformations:
+            warning('Model can not to be processed in async mode. Switched to sync.')
+            return self.process_dataset(subset, num_images, check_progress, dataset_tag, output_callback, **kwargs)
+        _set_number_infer_requests(nreq)
+
         self.dataset.batch = self.launcher.batch
         progress_reporter = None
 
         _create_subset(subset, num_images)
-        _set_number_infer_requests(nreq)
 
         if check_progress:
             progress_reporter = ProgressReporter.provide('print', self.dataset.size)

@@ -22,7 +22,7 @@ from ..utils import get_path, set_image_metadata, extract_image_representations
 from ..dataset import Dataset
 from ..launcher import create_launcher, DummyLauncher, InputFeeder
 from ..launcher.loaders import PickleLoader
-from ..logging import print_info
+from ..logging import print_info, warning
 from ..metrics import MetricsExecutor
 from ..postprocessor import PostprocessingExecutor
 from ..preprocessor import PreprocessingExecutor
@@ -121,10 +121,14 @@ class ModelEvaluator(BaseEvaluator):
 
             return batch_predictions
 
+        self.dataset.batch = self.launcher.batch
+        if self.launcher.allow_reshape_input or self.preprocessor.has_multi_infer_transformations:
+            warning('Model can not to be processed in async mode. Switched to sync.')
+            return self.process_dataset(stored_predictions, progress_reporter, *args, **kwargs)
+
         if self._is_stored(stored_predictions) or isinstance(self.launcher, DummyLauncher):
             self._annotations, self._predictions = self._load_stored_predictions(stored_predictions, progress_reporter)
 
-        self.dataset.batch = self.launcher.batch
         predictions_to_store = []
         dataset_iterator = iter(enumerate(self.dataset))
         free_irs = self.launcher.infer_requests

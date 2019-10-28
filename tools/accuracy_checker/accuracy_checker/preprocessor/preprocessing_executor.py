@@ -15,7 +15,7 @@ limitations under the License.
 """
 
 from ..config import ConfigValidator, StringField
-from .preprocessor import Preprocessor
+from .preprocessor import Preprocessor, MULTI_INFER_PREPROCESSORS
 
 
 class PreprocessingExecutor:
@@ -23,6 +23,7 @@ class PreprocessingExecutor:
         self.processors = []
         self.dataset_meta = dataset_meta
         self.input_shapes = input_shapes
+        self._multi_infer_transformations = False
 
         if not processors:
             return
@@ -38,6 +39,8 @@ class PreprocessingExecutor:
             preprocessor = Preprocessor.provide(
                 processor[identifier], config=processor, name=type_, input_shapes=input_shapes
             )
+            if processor[identifier] in MULTI_INFER_PREPROCESSORS:
+                self._multi_infer_transformations = True
 
             self.processors.append(preprocessor)
 
@@ -55,6 +58,9 @@ class PreprocessingExecutor:
 
         return images
 
+    @property
+    def has_multi_infer_transformations(self):
+        return self._multi_infer_transformations
 
 class PreprocessorConfig(ConfigValidator):
     type = StringField(choices=Preprocessor.providers)
