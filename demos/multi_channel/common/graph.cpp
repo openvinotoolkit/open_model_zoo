@@ -95,7 +95,6 @@ void IEGraph::initNetwork(const std::string& deviceName) {
         availableRequests.push(req);
     }
 
-    // auto params = postLoad(outputDataBlobNames, netReader);
     if (postLoad != nullptr)
         postLoad(outputDataBlobNames, netReader);
 

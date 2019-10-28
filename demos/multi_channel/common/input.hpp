@@ -39,10 +39,8 @@ struct YoloParams {
     int coords;
 
     std::vector<float> anchors;
-    // std::map<std::string, std::vector<float>> anchors;
 
     YoloParams(int num, int classes, int coords, std::vector<float>anchors) {
-    // YoloParams(int num, int classes, int coords, std::map<std::string, std::vector<float>> anchors) {
         this->num = num;
         this->classes = classes;
         this->coords = coords;
