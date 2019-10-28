@@ -112,7 +112,7 @@ class ModelEvaluator:
         _create_subset(subset, num_images)
 
         if check_progress:
-            progress_reporter = ProgressReporter.provide('print', self.dataset.size)
+            progress_reporter = self._create_progress_reporter(check_progress, self.dataset.size)
 
         dataset_iterator = iter(enumerate(self.dataset))
 
@@ -199,7 +199,7 @@ class ModelEvaluator:
             self.dataset.make_subset(end=num_images)
 
         if check_progress:
-            progress_reporter = ProgressReporter.provide('print', self.dataset.size)
+            progress_reporter = self._create_progress_reporter(check_progress, self.dataset.size)
 
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta = self._get_batch_input(batch_inputs, batch_annotation)
@@ -261,6 +261,14 @@ class ModelEvaluator:
             queued_irs.append((batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta, ir))
 
         return free_irs, queued_irs
+
+    @staticmethod
+    def _create_progress_reporter(check_progress, dataset_size):
+        pr_kwargs = {}
+        if isinstance(check_progress, int) and not isinstance(check_progress, bool):
+            pr_kwargs = {"print_interval": check_progress}
+
+        return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
 
     def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if not self.metric_executor:
