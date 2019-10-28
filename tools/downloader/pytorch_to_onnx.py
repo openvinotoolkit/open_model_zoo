@@ -22,19 +22,15 @@ def positive_int_arg(values):
     return result
 
 
-def model_parameters(parameters):
-    if not parameters:
-        return dict()
-    params = {}
-    for element in parameters.split(','):
-        param, value = element.split('=')
-        try:
-            value = eval(value, {}, {})
-        except:
-            pass
-        params[param] = value
-
-    return params
+def model_parameter(parameter):
+    param, value = parameter.split('=', 1)
+    try:
+        value = eval(value, {}, {})
+    except NameError as err:
+        print('Cannot evaluate {!r} value in {}. For string values use "{}=\'{}\'" (with all quotes).'
+              .format(value, parameter, param, value))
+        sys.exit(err)
+    return param, value
 
 
 def parse_args():
@@ -61,8 +57,8 @@ def parse_args():
                         help='Space separated names of the input layers')
     parser.add_argument('--output-names', type=str, metavar='L[,L...]',
                         help='Space separated names of the output layers')
-    parser.add_argument('--model-params', type=model_parameters, default='',
-                        help='Pairs "name"="value" of model constructor comma-separeted parameters')
+    parser.add_argument('--model-param', type=model_parameter, default=[], action='append',
+                        help='Pair "name"="value" of model constructor parameter')
     return parser.parse_args()
 
 
@@ -127,7 +123,8 @@ def convert_to_onnx(model, input_shape, output_file, input_names, output_names):
 def main():
     args = parse_args()
     model = load_model(args.model_name, args.weights, args.from_torchvision,
-                       args.model_path, args.import_module, args.model_params)
+                       args.model_path, args.import_module, dict(args.model_param))
+
     convert_to_onnx(model, args.input_shape, args.output_file, args.input_names, args.output_names)
 
 
