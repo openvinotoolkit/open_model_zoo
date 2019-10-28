@@ -435,8 +435,7 @@ int main(int argc, char* argv[]) {
             return sources.getFrame(camIdx, img);
         }, [&yoloParams](InferenceEngine::InferRequest::Ptr req, 
                 const std::vector<std::string>& outputDataBlobNames, 
-                cv::Size frameSize, 
-                InferenceEngine::CNNNetReader netReader 
+                cv::Size frameSize 
                 ) {
             unsigned long resized_im_h = 416;
             unsigned long resized_im_w = 416;

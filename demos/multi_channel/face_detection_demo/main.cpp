@@ -299,7 +299,7 @@ int main(int argc, char* argv[]) {
             auto camIdx = currentFrame / duplicateFactor;
             currentFrame = (currentFrame + 1) % numberOfInputs;
             return sources.getFrame(camIdx, img);
-        }, [](InferenceEngine::InferRequest::Ptr req, const std::vector<std::string>& outputDataBlobNames, cv::Size frameSize, InferenceEngine::CNNNetReader netReader) {
+        }, [](InferenceEngine::InferRequest::Ptr req, const std::vector<std::string>& outputDataBlobNames, cv::Size frameSize) {
             auto output = req->GetBlob(outputDataBlobNames[0]);
 
             float* dataPtr = output->buffer();
