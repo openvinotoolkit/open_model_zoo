@@ -154,9 +154,7 @@ class ModelEvaluator(BaseEvaluator):
                     if stored_predictions:
                         predictions_to_store.extend(copy.deepcopy(batch_predictions))
                     annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions)
-
-                    if not self.postprocessor.has_dataset_processors:
-                        self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
+                    self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
 
                     if self.metric_executor.need_store_predictions:
                         self._annotations.extend(annotations)
@@ -174,13 +172,6 @@ class ModelEvaluator(BaseEvaluator):
 
         if stored_predictions:
             self.store_predictions(stored_predictions, predictions_to_store)
-
-        if self.postprocessor.has_dataset_processors:
-            self.metric_executor.update_metrics_on_batch(
-                range(len(self._annotations)), self._annotations, self._predictions
-            )
-
-        return self.postprocessor.process_dataset(self._annotations, self._predictions)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
         if progress_reporter:
