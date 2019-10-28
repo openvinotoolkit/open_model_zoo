@@ -218,6 +218,8 @@ class TestModelEvaluatorAsync:
 
     def test_process_dataset_without_storing_predictions_and_dataset_processors(self):
         self.postprocessor.has_dataset_processors = False
+        self.launcher.allow_reshape_input = False
+        self.preprocessor.has_multi_infer_transformations = False
 
         self.evaluator.dataset_processor(None, None)
 
@@ -226,20 +228,11 @@ class TestModelEvaluatorAsync:
         assert not self.launcher.predict.called
         assert self.launcher.predict_async.called
         assert self.metric.update_metrics_on_batch.call_count == len(self.annotations)
-
-    def test_process_dataset_without_storing_predictions_and_with_dataset_processors(self):
-        self.postprocessor.has_dataset_processors = True
-
-        self.evaluator.dataset_processor(None, None)
-
-        assert not self.evaluator.store_predictions.called
-        assert not self.evaluator.load.called
-        assert not self.launcher.predict.called
-        assert self.launcher.predict_async.called
-        assert self.metric.update_metrics_on_batch.call_count == 1
 
     def test_process_dataset_with_storing_predictions_and_without_dataset_processors(self):
         self.postprocessor.has_dataset_processors = False
+        self.launcher.allow_reshape_input = False
+        self.preprocessor.has_multi_infer_transformations = False
 
         self.evaluator.dataset_processor('path', None)
 
@@ -249,20 +242,6 @@ class TestModelEvaluatorAsync:
         assert self.launcher.predict_async.called
         assert self.postprocessor.process_batch.called
         assert self.metric.update_metrics_on_batch.call_count == len(self.annotations)
-
-    def test_process_dataset_with_storing_predictions_and_with_dataset_processors(self):
-        self.postprocessor.has_dataset_processors = True
-
-        self.evaluator.dataset_processor('path', None)
-
-        assert self.evaluator.store_predictions.called
-        assert not self.evaluator.load.called
-        assert not self.launcher.predict.called
-        assert self.launcher.predict_async.called
-        assert self.postprocessor.process_batch.called
-        assert self.metric.update_metrics_on_batch.call_count == 1
-        assert self.postprocessor.process_dataset.called
-        assert not self.postprocessor.full_process.called
 
     def test_process_dataset_with_loading_predictions_and_without_dataset_processors(self, mocker):
         mocker.patch('accuracy_checker.evaluators.model_evaluator.get_path')
@@ -277,3 +256,29 @@ class TestModelEvaluatorAsync:
         assert self.metric.update_metrics_on_batch.call_count == 1
         assert not self.postprocessor.process_dataset.called
         assert self.postprocessor.full_process.called
+
+    def test_switch_to_sync_predict_if_need_reshaping(self):
+        self.postprocessor.has_dataset_processors = False
+        self.launcher.allow_reshape_input = True
+        self.preprocessor.has_multi_infer_transformations = False
+
+        self.evaluator.process_dataset(None, None)
+
+        assert not self.evaluator.store_predictions.called
+        assert not self.evaluator.load.called
+        assert self.launcher.predict.called
+        assert not self.launcher.predict_async.called
+        assert self.metric.update_metrics_on_batch.call_count == len(self.annotations)
+
+    def test_switch_to_sync_predict_if_need_multi_infer(self):
+        self.postprocessor.has_dataset_processors = False
+        self.launcher.allow_reshape_input = False
+        self.preprocessor.has_multi_infer_transformations = True
+
+        self.evaluator.process_dataset(None, None)
+
+        assert not self.evaluator.store_predictions.called
+        assert not self.evaluator.load.called
+        assert self.launcher.predict.called
+        assert not self.launcher.predict_async.called
+        assert self.metric.update_metrics_on_batch.call_count == len(self.annotations)
