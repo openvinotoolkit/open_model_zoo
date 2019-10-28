@@ -31,8 +31,8 @@ class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update(
+        configuration_parameters = super().parameters()
+        configuration_parameters.update(
             {
                 'images_dir': PathField(
                     is_directory=True, optional=True,
@@ -40,7 +40,7 @@ class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
                 )
             }
         )
-        return parameters
+        return configuration_parameters
 
     def configure(self):
         super().configure()

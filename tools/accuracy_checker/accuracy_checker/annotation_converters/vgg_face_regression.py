@@ -29,8 +29,8 @@ class VGGFaceRegressionConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
             'landmarks_csv_file': PathField(description="Path to csv file with coordinates of landmarks points."),
             'bbox_csv_file': PathField(
                 optional=True, description="Path to cvs file which contains bounding box coordinates for faces."
@@ -41,7 +41,7 @@ class VGGFaceRegressionConverter(BaseFormatConverter):
             )
         })
 
-        return parameters
+        return configuration_parameters
 
     def configure(self):
         self.landmarks_csv = self.get_value_from_config('landmarks_csv_file')
