@@ -42,6 +42,7 @@ from .detection import (
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter
 from .pose_estimation import HumanPoseAdapter
+from .pose_estimation_3d import HumanPose3dAdapter
 
 from .dummy_adapters import XML2DetectionAdapter
 
@@ -89,6 +90,7 @@ __all__ = [
     'LPRAdapter',
 
     'HumanPoseAdapter',
+    'HumanPose3dAdapter',
 
     'ActionDetection',
 
