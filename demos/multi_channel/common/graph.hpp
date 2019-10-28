@@ -77,6 +77,9 @@ private:
     GetterFunc getter;
     using PostprocessingFunc = std::function<std::vector<Detections>(InferenceEngine::InferRequest::Ptr, const std::vector<std::string>&, cv::Size, InferenceEngine::CNNNetReader netReader)>;
     PostprocessingFunc postprocessing;
+    // using PostLoadFunc = std::function<std::map<std::string, YoloParams>(const std::vector<std::string>&, InferenceEngine::CNNNetReader &netReader)>;
+    using PostLoadFunc = std::function<void (const std::vector<std::string>&, InferenceEngine::CNNNetReader&)>;
+    PostLoadFunc postLoad;
     std::thread getterThread;
 
     void initNetwork(const std::string& deviceName);
@@ -92,6 +95,7 @@ public:
         std::string cpuExtPath;
         std::string cldnnConfigPath;
         std::string deviceName;
+        PostLoadFunc postLoadFunc = nullptr;
     };
 
     explicit IEGraph(const InitParams& p);

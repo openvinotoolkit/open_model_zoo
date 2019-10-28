@@ -142,37 +142,25 @@ double IntersectionOverUnion(const DetectionObject &box_1, const DetectionObject
     return area_of_overlap / area_of_union;
 }
 
-void ParseYOLOV3Output(const InferenceEngine::CNNLayerPtr &layer, const InferenceEngine::Blob::Ptr &blob, const unsigned long resized_im_h,
+void ParseYOLOV3Output(InferenceEngine::InferRequest::Ptr req, 
+                       const std::string outputName,
+                       const YoloParams yoloParams, const unsigned long resized_im_h,
                        const unsigned long resized_im_w, const unsigned long original_im_h,
                        const unsigned long original_im_w,
                        const double threshold, std::vector<DetectionObject> &objects) {
-    // --------------------------- Validating output parameters -------------------------------------
-    if (layer->type != "RegionYolo")
-        throw std::runtime_error("Invalid output type: " + layer->type + ". RegionYolo expected");
+    InferenceEngine::Blob::Ptr blob = req->GetBlob(outputName);
+
     const int out_blob_h = static_cast<int>(blob->getTensorDesc().getDims()[2]);
     const int out_blob_w = static_cast<int>(blob->getTensorDesc().getDims()[3]);
     if (out_blob_h != out_blob_w)
-        throw std::runtime_error("Invalid size of output " + layer->name +
-        " It should be in NCHW layout and H should be equal to W. Current H = " + std::to_string(out_blob_h) +
+        throw std::runtime_error("Invalid size of output. It should be in NCHW layout and H should be equal to W. Current H = " + std::to_string(out_blob_h) +
         ", current W = " + std::to_string(out_blob_h));
-    // --------------------------- Extracting layer parameters -------------------------------------
-    auto num = layer->GetParamAsInt("num");
-    auto coords = layer->GetParamAsInt("coords");
-    auto classes = layer->GetParamAsInt("classes");
-    std::vector<float> anchors;
 
-    try { anchors = layer->GetParamAsFloats("anchors"); } catch (...) {}
-    try {
-        auto mask = layer->GetParamAsInts("mask");
-        num = mask.size();
+    auto num = yoloParams.num;
+    auto coords = yoloParams.coords;
+    auto classes = yoloParams.classes;
 
-        std::vector<float> maskedAnchors(num * 2);
-        for (int i = 0; i < num; ++i) {
-            maskedAnchors[i * 2] = anchors[mask[i] * 2];
-            maskedAnchors[i * 2 + 1] = anchors[mask[i] * 2 + 1];
-        }
-        anchors = maskedAnchors;
-    } catch (...) {}
+    auto anchors = yoloParams.anchors;
 
     auto side = out_blob_h;
     auto side_square = side * side;
@@ -205,7 +193,7 @@ void ParseYOLOV3Output(const InferenceEngine::CNNLayerPtr &layer, const Inferenc
     }
 }
 
-void drawDetections(cv::Mat& img, const std::vector<DetectionObject> detections) {
+void drawDetections(cv::Mat& img, const std::vector<DetectionObject>& detections, const std::vector<cv::Scalar>& colors) {
     for (const DetectionObject& f : detections) {
         cv::rectangle(img, 
                       cv::Rect2f((float)f.xmin,
@@ -214,14 +202,6 @@ void drawDetections(cv::Mat& img, const std::vector<DetectionObject> detections)
                                   (float)(f.ymax-f.ymin)), 
                       colors[(int)f.class_id], 
                       2);
-        cv::putText(img, 
-                    coco_labels[(int)f.class_id], 
-                    cv::Point((float)f.xmin,
-                              (float)f.ymin),
-                    cv::FONT_HERSHEY_COMPLEX,
-                    1,
-                    colors[(int)f.class_id],
-                    1);
     }
 }
 
@@ -256,10 +236,44 @@ DisplayParams prepareDisplayParams(size_t count) {
     return params;
 }
 
+std::map<std::string, YoloParams> GetYoloParams(const std::vector<std::string>& outputDataBlobNames, 
+                                                InferenceEngine::CNNNetReader &netReader) {
+    std::map<std::string, YoloParams> __yoloParams;
+
+    for (auto &output_name :outputDataBlobNames) {
+        InferenceEngine::CNNLayerPtr layer = netReader.getNetwork().getLayerByName(output_name.c_str());
+
+        if (layer->type != "RegionYolo")
+            throw std::runtime_error("Invalid output type: " + layer->type + ". RegionYolo expected");
+
+        auto num = layer->GetParamAsInt("num");
+        auto coords = layer->GetParamAsInt("coords");
+        auto classes = layer->GetParamAsInt("classes");
+    
+        std::vector<float> anchors = layer->GetParamAsFloats("anchors");
+
+        auto mask = layer->GetParamAsInts("mask");
+        num = mask.size();
+
+        std::vector<float> maskedAnchors(num * 2);
+        for (int i = 0; i < num; ++i) {
+            maskedAnchors[i * 2] = anchors[mask[i] * 2];
+            maskedAnchors[i * 2 + 1] = anchors[mask[i] * 2 + 1];
+        }
+        anchors = maskedAnchors;
+
+        YoloParams param(num, classes, coords, anchors);
+        __yoloParams.insert(std::pair<std::string, YoloParams>(output_name.c_str(), param));
+    }
+
+    return __yoloParams;
+}
+
 void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
                      float time,
                      const std::string& stats,
-                     const DisplayParams params) {
+                     const DisplayParams& params,
+                     const std::vector<cv::Scalar> colors) {
     cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
     auto loopBody = [&](size_t i) {
         auto& elem = data[i];
@@ -267,7 +281,7 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
             cv::Rect rectFrame = cv::Rect(params.points[i], params.frameSize);
             cv::Mat windowPart = windowImage(rectFrame);
             cv::resize(elem->frame, windowPart, params.frameSize);
-            drawDetections(windowPart, elem->detections.get<std::vector<DetectionObject>>());
+            drawDetections(windowPart, elem->detections.get<std::vector<DetectionObject>>(), colors);
         }
     };
 
@@ -335,6 +349,8 @@ int main(int argc, char* argv[]) {
         slog::info << "Model   path: " << modelPath << slog::endl;
         slog::info << "Weights path: " << weightsPath << slog::endl;
 
+        std::map<std::string, YoloParams> yoloParams;
+
         IEGraph::InitParams graphParams;
         graphParams.batchSize       = FLAGS_bs;
         graphParams.maxRequests     = FLAGS_nireq;
@@ -345,6 +361,10 @@ int main(int argc, char* argv[]) {
         graphParams.cpuExtPath      = FLAGS_l;
         graphParams.cldnnConfigPath = FLAGS_c;
         graphParams.deviceName      = FLAGS_d;
+        graphParams.postLoadFunc    = [&yoloParams](const std::vector<std::string>& outputDataBlobNames, 
+                                                    InferenceEngine::CNNNetReader &reader) {
+                                                        yoloParams = GetYoloParams(outputDataBlobNames, reader);
+                                                    };
 
         std::shared_ptr<IEGraph> network(new IEGraph(graphParams));
         auto inputDims = network->getInputDims();
@@ -402,19 +422,18 @@ int main(int argc, char* argv[]) {
         sources.start();
 
         size_t currentFrame = 0;
-        
-        for (int i = 0; i < (int)colors.size(); ++i)
-            colors[i] = cv::Scalar(rand() % 256,
-                                   rand() % 256,
-                                   rand() % 256
-                                   );
+
+        std::vector<cv::Scalar> colors;
+        if (yoloParams.size() > 0)
+            for (int i = 0; i < (int)yoloParams.begin()->second.classes; ++i)
+                colors.push_back(cv::Scalar(rand() % 256, rand() % 256, rand() % 256));
 
         network->start([&](VideoFrame& img) {
             img.sourceIdx = currentFrame;
             auto camIdx = currentFrame / duplicateFactor;
             currentFrame = (currentFrame + 1) % numberOfInputs;
             return sources.getFrame(camIdx, img);
-        }, [](InferenceEngine::InferRequest::Ptr req, 
+        }, [&yoloParams](InferenceEngine::InferRequest::Ptr req, 
                 const std::vector<std::string>& outputDataBlobNames, 
                 cv::Size frameSize, 
                 InferenceEngine::CNNNetReader netReader 
@@ -425,9 +444,7 @@ int main(int argc, char* argv[]) {
             std::vector<DetectionObject> objects;
             // Parsing outputs
             for (auto &output_name :outputDataBlobNames) {
-                InferenceEngine::CNNLayerPtr layer = netReader.getNetwork().getLayerByName(output_name.c_str());
-                InferenceEngine::Blob::Ptr blob = req->GetBlob(output_name);
-                ParseYOLOV3Output(layer, blob, resized_im_h, resized_im_w, frameSize.height, frameSize.width, FLAGS_t, objects);
+                ParseYOLOV3Output(req, output_name, yoloParams.find(output_name.c_str())->second, resized_im_h, resized_im_w, frameSize.height, frameSize.width, FLAGS_t, objects);
             }
             // Filtering overlapping boxes and lower confidence object
             std::sort(objects.begin(), objects.end(), std::greater<DetectionObject>());
@@ -474,7 +491,7 @@ int main(int argc, char* argv[]) {
                 std::unique_lock<std::mutex> lock(statMutex);
                 str = statStream.str();
             }
-            displayNSources(result, averageFps, str, params);
+            displayNSources(result, averageFps, str, params, colors);
 
             return (cv::waitKey(1) != 27);
         });

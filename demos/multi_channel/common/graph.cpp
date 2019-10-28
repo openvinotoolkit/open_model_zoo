@@ -95,6 +95,10 @@ void IEGraph::initNetwork(const std::string& deviceName) {
         availableRequests.push(req);
     }
 
+    // auto params = postLoad(outputDataBlobNames, netReader);
+    if (postLoad != nullptr)
+        postLoad(outputDataBlobNames, netReader);
+
     availableRequests.front()->StartAsync();
     availableRequests.front()->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
 }
@@ -199,6 +203,7 @@ IEGraph::IEGraph(const InitParams& p):
     maxRequests(p.maxRequests) {
     assert(p.maxRequests > 0);
 
+    postLoad = p.postLoadFunc;
     initNetwork(p.deviceName);
 }
 
