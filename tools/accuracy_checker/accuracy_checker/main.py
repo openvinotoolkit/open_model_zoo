@@ -51,21 +51,18 @@ def build_arguments_parser():
         '-m', '--models',
         help='prefix path to the models and weights',
         type=partial(get_path, is_directory=True),
-        default=Path.cwd(),
         required=False
     )
     parser.add_argument(
         '-s', '--source',
         help='prefix path to the data source',
         type=partial(get_path, is_directory=True),
-        default=Path.cwd(),
         required=False
     )
     parser.add_argument(
         '-a', '--annotations',
         help='prefix path to the converted annotations and datasets meta data',
         type=partial(get_path, is_directory=True),
-        default=Path.cwd(),
         required=False
     )
     parser.add_argument(
@@ -85,7 +82,6 @@ def build_arguments_parser():
         '-b', '--bitstreams',
         help='prefix path to bitstreams folder',
         type=partial(get_path, file_or_directory=True),
-        default=Path.cwd(),
         required=False
     )
     parser.add_argument(
@@ -208,9 +204,9 @@ def main():
     if not evaluator_class:
         raise ValueError('Unknown evaluation mode')
     for config_entry in config[mode]:
-        evaluator = evaluator_class.from_configs(config_entry)
-        processing_info = evaluator.get_processing_info(config_entry)
+        processing_info = evaluator_class.get_processing_info(config_entry)
         print_processing_info(*processing_info)
+        evaluator = evaluator_class.from_configs(config_entry)
         evaluator.process_dataset(args.stored_predictions, progress_reporter=progress_reporter)
         evaluator.compute_metrics(ignore_results_formatting=args.ignore_result_formatting)
         evaluator.release()

@@ -22,13 +22,13 @@ from ..utils import get_path, set_image_metadata, extract_image_representations
 from ..dataset import Dataset
 from ..launcher import create_launcher, DummyLauncher, InputFeeder
 from ..launcher.loaders import PickleLoader
-from ..logging import print_info
+from ..logging import print_info, warning
 from ..metrics import MetricsExecutor
 from ..postprocessor import PostprocessingExecutor
 from ..preprocessor import PreprocessingExecutor
 from ..adapters import create_adapter
 from ..config import ConfigError
-from ..data_readers import BaseReader
+from ..data_readers import BaseReader, REQUIRES_ANNOTATIONS
 from .base_evaluator import BaseEvaluator
 
 
@@ -60,13 +60,15 @@ class ModelEvaluator(BaseEvaluator):
 
         dataset = Dataset(dataset_config)
         if isinstance(data_reader_config, str):
-            data_reader = BaseReader.provide(data_reader_config, data_source, annotations=dataset.annotation)
+            data_reader_type = data_reader_config
+            data_reader_config = None
         elif isinstance(data_reader_config, dict):
-            data_reader = BaseReader.provide(
-                data_reader_config['type'], data_source, data_reader_config, annotations=dataset.annotation
-            )
+            data_reader_type = data_reader_config['type']
         else:
             raise ConfigError('reader should be dict or string')
+        if data_reader_type in REQUIRES_ANNOTATIONS:
+            data_source = dataset.annotation
+        data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
         launcher = create_launcher(launcher_config)
         async_mode = launcher.async_mode if hasattr(launcher, 'async_mode') else False
         config_adapter = launcher_config.get('adapter')
@@ -119,10 +121,14 @@ class ModelEvaluator(BaseEvaluator):
 
             return batch_predictions
 
+        self.dataset.batch = self.launcher.batch
+        if self.launcher.allow_reshape_input or self.preprocessor.has_multi_infer_transformations:
+            warning('Model can not to be processed in async mode. Switched to sync.')
+            return self.process_dataset(stored_predictions, progress_reporter, *args, **kwargs)
+
         if self._is_stored(stored_predictions) or isinstance(self.launcher, DummyLauncher):
             self._annotations, self._predictions = self._load_stored_predictions(stored_predictions, progress_reporter)
 
-        self.dataset.batch = self.launcher.batch
         predictions_to_store = []
         dataset_iterator = iter(enumerate(self.dataset))
         free_irs = self.launcher.infer_requests
@@ -148,9 +154,7 @@ class ModelEvaluator(BaseEvaluator):
                     if stored_predictions:
                         predictions_to_store.extend(copy.deepcopy(batch_predictions))
                     annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions)
-
-                    if not self.postprocessor.has_dataset_processors:
-                        self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
+                    self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
 
                     if self.metric_executor.need_store_predictions:
                         self._annotations.extend(annotations)
@@ -168,13 +172,6 @@ class ModelEvaluator(BaseEvaluator):
 
         if stored_predictions:
             self.store_predictions(stored_predictions, predictions_to_store)
-
-        if self.postprocessor.has_dataset_processors:
-            self.metric_executor.update_metrics_on_batch(
-                range(len(self._annotations)), self._annotations, self._predictions
-            )
-
-        return self.postprocessor.process_dataset(self._annotations, self._predictions)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
         if progress_reporter:
@@ -340,7 +337,8 @@ class ModelEvaluator(BaseEvaluator):
         self._annotations = []
         self._predictions = []
         self._metrics_results = []
-        self.dataset.reset()
+        self.dataset.reset(self.postprocessor.has_processors)
+        self.reader.reset()
 
     def release(self):
         self.launcher.release()

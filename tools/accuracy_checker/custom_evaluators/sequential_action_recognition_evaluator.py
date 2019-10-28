@@ -60,13 +60,13 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
 
-        for batch_id, batch_annotation in enumerate(self.dataset):
+        for batch_id, (dataset_indices, batch_annotation) in enumerate(self.dataset):
             batch_identifiers = [annotation.identifier for annotation in batch_annotation]
             batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
             batch_input = self.preprocessing_executor.process(batch_input, batch_annotation)
             batch_input, _ = extract_image_representations(batch_input)
             batch_prediction = self.model.predict(batch_identifiers, batch_input)
-            self.metric_executor.update_metrics_on_batch(batch_annotation, batch_prediction)
+            self.metric_executor.update_metrics_on_batch(dataset_indices, batch_annotation, batch_prediction)
             if self.metric_executor.need_store_predictions:
                 self._annotations.extend(batch_annotation)
                 self._predictions.extend(batch_prediction)
@@ -107,7 +107,8 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
         self.metric_executor.reset()
         self.model.reset()
 
-    def get_processing_info(self, config):
+    @staticmethod
+    def get_processing_info(config):
         module_specific_params = config.get('module_config')
         model_name = config['name']
         dataset_config = module_specific_params['datasets'][0]
@@ -196,10 +197,9 @@ class SequentialModel(BaseModel):
 
     def save_encoder_predictions(self):
         if self._encoder_predictions is not None:
-            prediction_file = self.network_info['encoder'].get('predictions', Path('encoder_predictions.pickle'))
+            prediction_file = Path(self.network_info['encoder'].get('predictions', 'encoder_predictions.pickle'))
             with prediction_file.open('wb') as file:
-                for representation in self._encoder_predictions:
-                    pickle.dump(representation, file)
+                pickle.dump(self._encoder_predictions, file)
 
 
 class EncoderModelDLSDKL(BaseModel):
@@ -242,7 +242,11 @@ class DecoderModelDLSDKL(BaseModel):
             model_bin = str(network_info['weights'])
 
         self.network = launcher.create_ie_network(model_xml, model_bin)
-        self.exec_network = launcher.plugin.load(self.network)
+        if hasattr(launcher, 'plugin'):
+            self.exec_network = launcher.plugin.load(self.network)
+        else:
+            launcher.load_network(self.network)
+            self.exec_network = launcher.exec_network
         self.input_blob = next(iter(self.network.inputs))
         self.output_blob = next(iter(self.network.outputs))
         self.adapter = create_adapter('classification')

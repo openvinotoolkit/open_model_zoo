@@ -16,16 +16,18 @@ limitations under the License.
 
 import time
 import copy
+import numpy as np
 
 from ..utils import extract_image_representations, contains_any
 from ..dataset import Dataset, DatasetWrapper
 from ..launcher import create_launcher, InputFeeder
+from ..logging import warning
 from ..metrics import MetricsExecutor
 from ..postprocessor import PostprocessingExecutor
 from ..preprocessor import PreprocessingExecutor
 from ..adapters import create_adapter
 from ..config import ConfigError
-from ..data_readers import BaseReader
+from ..data_readers import BaseReader, REQUIRES_ANNOTATIONS
 from ..progress_reporters import ProgressReporter
 
 
@@ -44,6 +46,7 @@ class ModelEvaluator:
 
         self._annotations = []
         self._predictions = []
+        self._input_ids = []
         self._metrics_results = []
 
     @classmethod
@@ -68,7 +71,7 @@ class ModelEvaluator:
 
     def process_dataset_async(
             self,
-            nreq=2,
+            nreq=None,
             subset=None,
             num_images=None,
             check_progress=False,
@@ -89,8 +92,19 @@ class ModelEvaluator:
             elif num_images is not None:
                 self.dataset.make_subset(end=num_images)
 
+        def _set_number_infer_requests(nreq):
+            if nreq is None:
+                nreq = self.launcher.auto_num_requests()
+            if self.launcher.num_requests != nreq:
+                self.launcher.num_requests = nreq
+
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
+
+        if self.launcher.allow_reshape_input or self.preprocessor.has_multi_infer_transformations:
+            warning('Model can not to be processed in async mode. Switched to sync.')
+            return self.process_dataset(subset, num_images, check_progress, dataset_tag, output_callback, **kwargs)
+        _set_number_infer_requests(nreq)
 
         self.dataset.batch = self.launcher.batch
         progress_reporter = None
@@ -101,8 +115,7 @@ class ModelEvaluator:
             progress_reporter = ProgressReporter.provide('print', self.dataset.size)
 
         dataset_iterator = iter(enumerate(self.dataset))
-        if self.launcher.num_requests != nreq:
-            self.launcher.num_requests = nreq
+
         free_irs = self.launcher.infer_requests
         queued_irs = []
         wait_time = 0.01
@@ -158,6 +171,8 @@ class ModelEvaluator:
             progress_reporter.finish()
 
     def select_dataset(self, dataset_tag):
+        if self.dataset is not None and isinstance(self.dataset_config, list):
+            return
         dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
         self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
         if self.dataset.annotation_reader and self.dataset.annotation_reader.metadata:
@@ -253,6 +268,12 @@ class ModelEvaluator:
         if self._metrics_results:
             del self._metrics_results
             self._metrics_results = []
+        if self._input_ids:
+            indexes = np.argsort(self._input_ids)
+            annotations = [self._annotations[idx] for idx in indexes]
+            predictions = [self._predictions[idx] for idx in indexes]
+            self._annotations = annotations
+            self._predictions = predictions
 
         for result_presenter, evaluated_metric in self.metric_executor.iterate_metrics(
                 self._annotations, self._predictions):
@@ -302,12 +323,14 @@ class ModelEvaluator:
             self.metric_executor.reset()
         del self._annotations
         del self._predictions
+        del self._input_ids
         del self._metrics_results
         self._annotations = []
         self._predictions = []
+        self._input_ids = []
         self._metrics_results = []
         if self.dataset:
-            self.dataset.reset()
+            self.dataset.reset(self.postprocessor.has_processors)
 
     def release(self):
         self.launcher.release()
@@ -326,19 +349,25 @@ def create_dataset_attributes(config, tag):
     dataset_name = dataset_config['name']
     data_reader_config = dataset_config.get('reader', 'opencv_imread')
     data_source = dataset_config.get('data_source')
-
-    if isinstance(data_reader_config, str):
-        data_reader = BaseReader.provide(data_reader_config, data_source)
-    elif isinstance(data_reader_config, dict):
-        data_reader = BaseReader.provide(data_reader_config['type'], data_source, data_reader_config)
-    else:
-        raise ConfigError('reader should be dict or string')
     annotation_reader = None
     dataset_meta = {}
-    metric_dispatcher = None
     if contains_any(dataset_config, ['annotation', 'annotation_conversion']):
         annotation_reader = Dataset(dataset_config)
         dataset_meta = annotation_reader.metadata
+    if isinstance(data_reader_config, str):
+        data_reader_type = data_reader_config
+        data_reader_config = None
+    elif isinstance(data_reader_config, dict):
+        data_reader_type = data_reader_config['type']
+    else:
+        raise ConfigError('reader should be dict or string')
+    if data_reader_type in REQUIRES_ANNOTATIONS:
+        if annotation_reader is None:
+            raise ConfigError('data reader *{}* requires annotation'.format(data_reader_type))
+        data_source = annotation_reader.annotation
+    data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
+
+    metric_dispatcher = None
     dataset = DatasetWrapper(data_reader, annotation_reader)
     preprocessor = PreprocessingExecutor(
         dataset_config.get('preprocessing'), dataset_name, dataset_meta

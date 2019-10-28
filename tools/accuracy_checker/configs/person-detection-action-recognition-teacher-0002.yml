@@ -81,4 +81,4 @@ models:
            label_map: action_label_map
            fast_match: True
            ignore_label: 3
-
+global_definitions: ../dataset_definitions.yml

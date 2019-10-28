@@ -16,6 +16,7 @@ limitations under the License.
 
 import copy
 from pathlib import Path
+import os
 
 import warnings
 
@@ -36,7 +37,8 @@ ENTRIES_PATHS = {
         'cpu_extensions': 'extensions',
         'gpu_extensions': 'extensions',
         'bitstream': 'bitstreams',
-        'affinity_map': 'affinity_map'
+        'affinity_map': 'affinity_map',
+        'predictions': 'source'
     },
     'datasets': {
         'segmentation_masks_source': 'source',
@@ -84,8 +86,11 @@ class ConfigReader:
 
     @staticmethod
     def _read_configs(arguments):
-        global_config = read_yaml(arguments.definitions) if arguments.definitions else None
         local_config = read_yaml(arguments.config)
+        definitions = os.environ.get('DEFINITIONS_FILE') or local_config.get('global_definitions')
+        if definitions:
+            definitions = read_yaml(Path(arguments.config).parent / definitions)
+        global_config = read_yaml(arguments.definitions) if arguments.definitions else definitions
 
         return global_config, local_config
 
@@ -301,6 +306,18 @@ class ConfigReader:
     @staticmethod
     def _merge_paths_with_prefixes(arguments, config, mode='models'):
         args = arguments if isinstance(arguments, dict) else vars(arguments)
+        commandline_arg_to_env_var = {
+            'source': 'DATA_DIR',
+            'annotations': 'ANNOTATIONS_DIR',
+            'bitstreams': 'BITSTREAMS_DIR',
+            'models': 'MODELS_DIR',
+            'extensions': 'EXTENSIONS_DIR',
+        }
+        for argument, env_var in commandline_arg_to_env_var.items():
+            if argument not in args or args[argument] is None:
+                env_var_value = os.environ.get(env_var)
+                if env_var_value is not None:
+                    args[argument] = Path(env_var_value)
 
         def process_models(config, entries_paths):
             for model in config['models']:
@@ -492,7 +509,7 @@ class ConfigReader:
                     copy_evaluation['module_config'] = eval_config
                     eval_list.append(copy_evaluation)
 
-                modules_config['evaluations'] = eval_list
+            modules_config['evaluations'] = eval_list
 
         mode_func = {
             'models': _separate_models_evaluations,

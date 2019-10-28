@@ -53,3 +53,4 @@ models:
             include_boundaries: True
             allow_multiple_matches_per_ignored: True
             use_filtered_tp: False
+global_definitions: ../dataset_definitions.yml

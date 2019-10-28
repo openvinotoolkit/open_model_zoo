@@ -45,3 +45,4 @@ models:
             presenter: print_vector
             annotation_source: roll
             prediction_source: angle_roll
+global_definitions: ../dataset_definitions.yml

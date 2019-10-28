@@ -667,11 +667,9 @@ class LPRAdapter(Adapter):
     __provider__ = 'lpr'
     prediction_types = (CharacterRecognitionPrediction,)
 
-    def configure(self):
+    def process(self, raw, identifiers=None, frame_meta=None):
         if not self.label_map:
             raise ConfigError('LPR adapter requires dataset label map for correct decoding.')
-
-    def process(self, raw, identifiers=None, frame_meta=None):
         raw_output = self._extract_predictions(raw, frame_meta)
         predictions = raw_output[self.output_blob]
         result = []
@@ -714,16 +712,13 @@ class BeamSearchDecoder(Adapter):
 
     def validate_config(self):
         super().validate_config(on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT)
-
-    def configure(self):
-        if not self.label_map:
-            raise ConfigError('Beam Search Decoder requires dataset label map for correct decoding.')
-
         self.beam_size = self.get_value_from_config('beam_size')
         self.blank_label = self.launcher_config.get('blank_label', len(self.label_map))
         self.softmaxed_probabilities = self.get_value_from_config('softmaxed_probabilities')
 
     def process(self, raw, identifiers=None, frame_meta=None):
+        if not self.label_map:
+            raise ConfigError('Beam Search Decoder requires dataset label map for correct decoding.')
         raw_output = self._extract_predictions(raw, frame_meta)
         output = raw_output[self.output_blob]
         output = np.swapaxes(output, 0, 1)

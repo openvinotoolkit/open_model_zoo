@@ -26,3 +26,4 @@ models:
             calculate_std: True
             percentile: 90
             presenter: print_vector
+global_definitions: ../dataset_definitions.yml

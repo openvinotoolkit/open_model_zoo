@@ -64,3 +64,4 @@ models:
           - type: crop
             use_pillow: True
             size: 224
+global_definitions: ../dataset_definitions.yml

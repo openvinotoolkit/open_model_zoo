@@ -496,3 +496,32 @@ datasets:
       converter: cmu_panoptic_keypoints
       data_dir: cmu_panoptic_subset
     annotation: cmu_panoptic_keypoints.pickle
+
+  - name: kinetics-400
+    data_source: kinetics/frames_val
+    annotation_conversion:
+      converter: clip_action_recognition
+      annotation_file: kinetics/kinetics_400.json
+      data_dir: kinetics/frames_val
+    annotation: kinetics_action_recognition.pickle
+    dataset_meta: kinetics_action_recognition.json
+
+  - name: driver_action_recognition_dataset
+    data_source: kinetics/frames_val
+    annotation_conversion:
+      converter: clip_action_recognition
+      annotation_file: kinetics/driver_action_recognition.json
+      data_dir: kinetics/frames_val
+    annotation: driver_action_recognition.pickle
+    dataset_meta: driver_action_recognition.json
+
+  - name: BraTS
+    data_source: BraTS
+    reader: numpy_reader
+    annotation_conversion:
+      converter: brats_numpy
+      data_dir: BraTS
+      ids_file: BraTS/val_ids.p
+      labels_file: BraTS/labels
+    annotation: brats.pickle
+    dataset_meta: brats.json

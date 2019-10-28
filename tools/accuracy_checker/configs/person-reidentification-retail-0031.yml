@@ -42,3 +42,4 @@ models:
             top_k: 1
 
           - type: reid_map
+global_definitions: ../dataset_definitions.yml

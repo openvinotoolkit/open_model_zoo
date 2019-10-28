@@ -31,3 +31,4 @@ models:
           - type: mean_iou
             use_argmax: false
             presenter: print_scalar
+global_definitions: ../dataset_definitions.yml

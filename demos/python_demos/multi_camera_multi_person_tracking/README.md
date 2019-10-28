@@ -66,6 +66,7 @@ optional arguments:
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         MKLDNN (CPU)-targeted custom layers.Absolute path to a
                         shared library with the kernels impl.
+  --no_show             Optional. Don't show output
 ```
 Minimum command examples to run the demo:
 
