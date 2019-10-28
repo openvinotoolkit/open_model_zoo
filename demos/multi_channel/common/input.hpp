@@ -33,21 +33,6 @@ private:
     std::shared_ptr<void> detections;
 };
 
-struct YoloParams {
-    int num;
-    int classes;
-    int coords;
-
-    std::vector<float> anchors;
-
-    YoloParams(int num, int classes, int coords, std::vector<float>anchors) {
-        this->num = num;
-        this->classes = classes;
-        this->coords = coords;
-        this->anchors = anchors;
-    }
-};
-
 class VideoFrame final {
 public:
     cv::Mat frame;

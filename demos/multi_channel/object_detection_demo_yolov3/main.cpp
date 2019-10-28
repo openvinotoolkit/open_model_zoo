@@ -107,6 +107,21 @@ static int EntryIndex(int side, int lcoords, int lclasses, int location, int ent
     return n * side * side * (lcoords + lclasses + 1) + entry * side * side + loc;
 }
 
+struct YoloParams {
+    int num;
+    int classes;
+    int coords;
+
+    std::vector<float> anchors;
+
+    YoloParams(int num, int classes, int coords, std::vector<float>anchors) {
+        this->num = num;
+        this->classes = classes;
+        this->coords = coords;
+        this->anchors = anchors;
+    }
+};
+
 struct DetectionObject {
     int xmin, ymin, xmax, ymax, class_id;
     float confidence;
