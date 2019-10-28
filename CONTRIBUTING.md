@@ -195,7 +195,7 @@ Demos are required to support the following keys:
  -  `-d "<device>"`: Optional. Specifies a target device to infer on. CPU, GPU, FPGA, HDDL or MYRIAD is acceptable. Default must be CPU. If the demo uses several models at the same time, use keys prefixed with `d_` (just like keys `m_*` above) to specify device for each model.
  -  `-no_show`: Optional. Do not visualize inference results.
 
-> **TIP**: For Python, it is preferable to use `-` instead of `_` as word separators.
+> **TIP**: For Python, it is preferable to use `--` instead of `-` for long keys.
 
 You can also add any other necessary parameters.
 
