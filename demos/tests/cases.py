@@ -187,12 +187,16 @@ NATIVE_DEMOS = [
             '-i': ImagePatternArg('smart-classroom-demo'),
             '-m_fd': ModelArg('face-detection-adas-0001')}),
         device_cases('-d_act', '-d_fd', '-d_lm', '-d_reid'),
-        single_option_cases('-m_act', ModelArg('person-detection-action-recognition-0005'),
-                                      ModelArg('person-detection-action-recognition-0006'),
-                                      ModelArg('person-detection-raisinghand-recognition-0001'),
-                                      ModelArg('person-detection-action-recognition-teacher-0002')),
-        single_option_cases('-m_lm', None, ModelArg('landmarks-regression-retail-0009')),
-        single_option_cases('-m_reid', None, ModelArg('face-reidentification-retail-0095')),
+        [
+            *combine_cases(
+                single_option_cases('-m_act',
+                    ModelArg('person-detection-action-recognition-0005'),
+                    ModelArg('person-detection-action-recognition-0006'),
+                    ModelArg('person-detection-action-recognition-teacher-0002')),
+                single_option_cases('-m_lm', None, ModelArg('landmarks-regression-retail-0009')),
+                single_option_cases('-m_reid', None, ModelArg('face-reidentification-retail-0095'))),
+            TestCase(options={'-m_act': ModelArg('person-detection-raisinghand-recognition-0001'), '-a_top': '5'}),
+        ],
     )),
 
     NativeDemo(name='super_resolution_demo', test_cases=combine_cases(
