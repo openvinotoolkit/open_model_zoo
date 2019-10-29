@@ -187,16 +187,18 @@ class ModelEvaluator:
             output_callback=None,
             **kwargs
     ):
+        def _create_subset(subset, num_images):
+            if subset is not None:
+                self.dataset.make_subset(ids=subset)
+            elif num_images is not None:
+                self.dataset.make_subset(end=num_images)
+
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
         self.dataset.batch = self.launcher.batch
         progress_reporter = None
 
-        if subset is not None:
-            self.dataset.make_subset(ids=subset)
-
-        elif num_images is not None:
-            self.dataset.make_subset(end=num_images)
+        _create_subset(subset, num_images)
 
         if check_progress:
             progress_reporter = self._create_progress_reporter(check_progress, self.dataset.size)
@@ -219,6 +221,8 @@ class ModelEvaluator:
                     self._predictions.extend(predictions)
 
             if output_callback:
+                if isinstance(batch_raw_predictions, list) and len(batch_raw_predictions) == 1:
+                    batch_raw_predictions = batch_raw_predictions[0]
                 output_callback(
                     batch_raw_predictions,
                     metrics_result=metrics_result,
