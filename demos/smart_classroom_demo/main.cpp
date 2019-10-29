@@ -608,8 +608,10 @@ int main(int argc, char* argv[]) {
         VectorCNN landmarks_detector(landmarks_config);
 
         // Create face gallery
+        bool use_greedy_matcher = false;
         EmbeddingsGallery face_gallery(FLAGS_fg, FLAGS_t_reid, FLAGS_min_size_fr, FLAGS_crop_gallery,
-                                       face_detector_for_registration, landmarks_detector, face_reid);
+                                       face_detector_for_registration, landmarks_detector, face_reid,
+                                       use_greedy_matcher);
 
         if (!reid_config.enabled) {
             slog::warn << "Face recognition models are disabled!"  << slog::endl;
