@@ -162,20 +162,28 @@ class _OpenCVResizer(_Resizer):
 
 class _PillowResizer(_Resizer):
     __provider__ = 'pillow'
-
     supported_interpolations = {
         'NEAREST': Image.NEAREST,
         'NONE': Image.NONE,
-        'BOX': Image.BOX,
         'BILINEAR': Image.BILINEAR,
         'LINEAR': Image.LINEAR,
-        'HAMMING': Image.HAMMING,
         'BICUBIC': Image.BICUBIC,
         'CUBIC': Image.CUBIC,
-        'LANCZOS': Image.LANCZOS,
-        'ANTIALIAS': Image.ANTIALIAS
+        'ANTIALIAS': Image.ANTIALIAS,
     }
     default_interpolation = 'BILINEAR'
+
+    def __init__(self, interpolation):
+        try:
+            optional_interpolations = {
+                'BOX': Image.BOX,
+                'LANCZOS': Image.LANCZOS,
+                'HAMMING': Image.HAMMING,
+            }
+            self.supported_interpolations.update(optional_interpolations)
+        except AttributeError:
+            pass
+        super().__init__(interpolation)
 
     def resize(self, data, new_height, new_width):
         data = Image.fromarray(data)
