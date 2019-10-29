@@ -600,10 +600,10 @@ void VideoSources::openVideo(const std::string& source, bool native) {
         std::unique_ptr<VideoSource> newSrc(new VideoSourceNative(*this, controller, dev, camSettings,
                                                                      queueSize, realFps, collectStats));
         inputs.emplace_back(std::move(newSrc));
-#else
-    if (false) {
-#endif
     } else {
+#else
+    {
+#endif
 #if defined(USE_LIBVA)
         const std::string extension = ".mjpeg";
         std::unique_ptr<VideoSource> newSrc;
