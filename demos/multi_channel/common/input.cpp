@@ -251,7 +251,7 @@ public:
 class VideoSourceOCV : public VideoSource {
     PerfTimer perfTimer;
     std::thread workThread;
-    const bool isAsync = false;
+    const bool isAsync;
     std::atomic_bool running = {true};
     std::string videoName;
 
