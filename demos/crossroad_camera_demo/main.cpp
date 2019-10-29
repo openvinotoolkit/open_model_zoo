@@ -282,18 +282,15 @@ struct PersonAttribsDetection : BaseDetection {
                     10, cv::KMEANS_RANDOM_CENTERS, centers);
         centers.convertTo(centers, CV_8U);
         centers = centers.reshape(0, clusterCount);
-        std::map<int, cv::Vec3b, std::greater<int>> max_color;
         std::vector<int> freq(clusterCount);
 
         for (int i = 0; i < labels.rows * labels.cols; ++i) {
             freq[labels.at<int>(i)]++;
         }
 
-        for (size_t i = 0; i < freq.size(); ++i) {
-            max_color[freq[i]] = centers.at<cv::Vec3b>(i);
-        }
+        auto freqArgmax = std::max_element(freq.begin(), freq.end()) - freq.begin();
 
-        return max_color.begin()->second;
+        return centers.at<cv::Vec3b>(freqArgmax);
     }
 
     AttributesAndColorPoints GetPersonAttributes() {
