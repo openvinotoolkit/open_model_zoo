@@ -10,8 +10,8 @@ models:
         adapter:
           type: action_detection
           priorbox_out: mbox/priorbox
-          loc_out: mbox_loc1/out/conv/flat
-          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat
+          loc_out: mbox_loc1/out/conv/flat/Reshape
+          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat/Reshape
           add_conf_out_prefix: out/anchor
           add_conf_out_count: 4
           num_action_classes: 2
@@ -28,8 +28,8 @@ models:
         adapter:
           type: action_detection
           priorbox_out: mbox/priorbox
-          loc_out: mbox_loc1/out/conv/flat
-          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat
+          loc_out: mbox_loc1/out/conv/flat/Reshape
+          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat/Reshape
           add_conf_out_prefix: out/anchor
           add_conf_out_count: 4
           num_action_classes: 2
