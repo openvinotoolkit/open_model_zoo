@@ -40,7 +40,7 @@ public:
     Detections detections;
     VideoFrame() = default;
 
-    void operator =(VideoFrame const& vf) = delete;
+    VideoFrame& operator =(VideoFrame const& vf) = delete;
 };
 
 class VideoSource;

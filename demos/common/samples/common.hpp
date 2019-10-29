@@ -681,8 +681,6 @@ public:
         : objectType(_objectType), xmin(_xmin), xmax(_xmax), ymin(_ymin), ymax(_ymax), prob(_prob), difficult(_difficult) {
     }
 
-    DetectedObject(const DetectedObject& other) = default;
-
     static float ioU(const DetectedObject& detectedObject1_, const DetectedObject& detectedObject2_) {
         // Add small space to eliminate empty squares
         float epsilon = 0;  // 1e-5f;
