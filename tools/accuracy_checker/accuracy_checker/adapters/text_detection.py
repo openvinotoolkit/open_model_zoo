@@ -713,12 +713,14 @@ class BeamSearchDecoder(Adapter):
     def validate_config(self):
         super().validate_config(on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT)
         self.beam_size = self.get_value_from_config('beam_size')
-        self.blank_label = self.launcher_config.get('blank_label', len(self.label_map))
+        self.blank_label = self.launcher_config.get('blank_label')
         self.softmaxed_probabilities = self.get_value_from_config('softmaxed_probabilities')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         if not self.label_map:
             raise ConfigError('Beam Search Decoder requires dataset label map for correct decoding.')
+        if self.blank_label is None:
+            self.blank_label = len(self.label_map)
         raw_output = self._extract_predictions(raw, frame_meta)
         output = raw_output[self.output_blob]
         output = np.swapaxes(output, 0, 1)
