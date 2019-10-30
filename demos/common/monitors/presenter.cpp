@@ -9,8 +9,8 @@
 #include "presenter.h"
 
 namespace {
-std::unordered_set<MonitorType> strKeysToMonitorSet(const std::string& keys) {
-    std::unordered_set<MonitorType> enabledMonitors;
+std::unordered_set<MonitorType, std::hash<int>> strKeysToMonitorSet(const std::string& keys) {
+    std::unordered_set<MonitorType, std::hash<int>> enabledMonitors;
     for (unsigned char key: keys) {
         switch(std::toupper(key)) {
             case 'C': enabledMonitors.insert(MonitorType::CpuAverage);
@@ -26,7 +26,7 @@ std::unordered_set<MonitorType> strKeysToMonitorSet(const std::string& keys) {
 }
 }
 
-Presenter::Presenter(std::unordered_set<MonitorType> enabledMonitors,
+Presenter::Presenter(std::unordered_set<MonitorType, std::hash<int>> enabledMonitors,
         int yPos,
         cv::Size graphSize,
         std::size_t historySize) :
