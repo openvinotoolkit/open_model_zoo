@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
         Core ie;
 
         std::set<std::string> loadedDevices;
-        std::vector<std::pair<std::string, std::string>> cmdOptions = {
+        std::pair<std::string, std::string> cmdOptions[] = {
             {FLAGS_d, FLAGS_m},
             {FLAGS_d_ag, FLAGS_m_ag},
             {FLAGS_d_hp, FLAGS_m_hp},

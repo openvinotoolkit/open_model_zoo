@@ -274,7 +274,7 @@ public:
     }
 
     std::string getResults(InferenceEngine::InferRequest& inferRequest) {
-        static const std::vector<std::string> items = {
+        static const char *const items[] = {
                 "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
                 "<Anhui>", "<Beijing>", "<Chongqing>", "<Fujian>",
                 "<Gansu>", "<Guangdong>", "<Guangxi>", "<Guizhou>",
@@ -297,7 +297,7 @@ public:
             if (data[i] == -1) {
                 break;
             }
-            result += items[static_cast<std::vector<std::string>::size_type>(data[i])];
+            result += items[std::size_t(data[i])];
         }
         return result;
     }
