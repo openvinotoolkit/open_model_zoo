@@ -203,7 +203,7 @@ If you add a new demo, provide autotesting support as well:
 - add demo launch parameters in [demos/tests/cases.py](demos/tests/cases.py)
 - prepare list of input images in [demos/tests/image_sequences.py](demos/tests/image_sequences.py)
 
-Add `reamde.md` file, which describes demo usage. Update [demos' README.md](demos/README.md) adding your demo to the list.
+Add `README.md` file, which describes demo usage. Update [demos' README.md](demos/README.md) adding your demo to the list.
 
 ## Accuracy Validation
 
