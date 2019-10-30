@@ -42,7 +42,7 @@ Place your files as shown in the table below:
 
 File | Destination
 ---|---
-configuration file | `models/public/<model_name>/<model_name>.yml`
+configuration file | `models/public/<model_name>/model.yml`
 documentation file | `models/public/<model_name>/<model_name>.md`
 validation configuration file|`tools/accuracy_checker/configs/<model_name>.yml`
 demo|`demos/<demo_name>`<br>or<br>`demos/python_demos/<demo_name>`
@@ -207,7 +207,7 @@ Add `README.md` file, which describes demo usage. Update [demos' README.md](demo
 
 ## Accuracy Validation
 
-Accuracy validation can be performed by the [Accuracy Checker](./tools/accuracy_checker) tool. This tool can use either IE to run a converted model, or an original framework to run an original model. Accuracy Checker supports lots of datasets, metrics and preprocessing options, which simplifies validation if a task is supported by the tool. You only need to create a configuration file that contains necessary parameters for accuracy validation (specify a dataset and annotation, pre- and post-processing parameters, accuracy metrics to compute and so on). For details, refer to [Testing new models](./tools/accuracy_checker#testing-new-models).
+Accuracy validation can be performed by the [Accuracy Checker](./tools/accuracy_checker) tool. This tool can use either IE to run a converted model, or an original framework to run an original model. Accuracy Checker supports lots of datasets, metrics and preprocessing options, which simplifies validation if a task is supported by the tool. You only need to create a configuration file that contains necessary parameters for accuracy validation (specify a dataset and annotation, pre- and post-processing parameters, accuracy metrics to compute and so on) of converted model. For details, refer to [Testing new models](./tools/accuracy_checker#testing-new-models).
 
 If a model uses a dataset which is not supported by the Accuracy Checker, you also must provide the license and the link to it and mention it in the PR description. 
 
