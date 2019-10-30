@@ -221,7 +221,7 @@ add_samples_to_build(${samples_dirs})
 
 if(ENABLE_PYTHON)
     find_package(PythonInterp 3.5 REQUIRED)
-    find_package(PythonLibs 3.5 REQUIRED)
+    find_package(PythonLibs "${PYTHON_VERSION_STRING}" EXACT REQUIRED)
 
     add_subdirectory(python_demos/human_pose_estimation_3d_demo/pose_extractor)
 endif()
