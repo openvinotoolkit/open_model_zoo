@@ -1,6 +1,6 @@
 nibabel
 numpy
-pillow
+pillow>=2.6.1
 py-cpuinfo<=4.0
 PyYAML
 scikit-learn
