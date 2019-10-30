@@ -1,0 +1,6 @@
+# Copyright (C) 2018-2019 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+#
+
+add_subdirectory(format_reader)
+add_subdirectory(monitors)
