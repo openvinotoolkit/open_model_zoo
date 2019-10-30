@@ -525,3 +525,11 @@ datasets:
       labels_file: BraTS/labels
     annotation: brats.pickle
     dataset_meta: brats.json
+
+  - name: product_detection
+    annotation: product_detection.pickle
+    dataset_meta: product_detection.json
+    data_source: product_detection
+
+    metrics:
+      - type: coco_precision
