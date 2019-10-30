@@ -34,6 +34,7 @@ public:
 
     explicit Decoder(const Settings& s);
     Decoder(const Decoder&) = delete;
+    Decoder& operator =(const Decoder&) = delete;
     ~Decoder();
 
     struct Stats {

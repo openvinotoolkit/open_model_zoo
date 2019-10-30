@@ -424,7 +424,7 @@ bool checkDynamicBatchSupport(const Core& ie, const std::string& device)  {
         if (ie.GetConfig(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != PluginConfigParams::YES)
             return false;
     }
-    catch(const std::exception& error)  {
+    catch(const std::exception&)  {
         return false;
     }
     return true;

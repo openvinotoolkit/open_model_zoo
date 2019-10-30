@@ -40,7 +40,7 @@ public:
     Detections detections;
     VideoFrame() = default;
 
-    void operator =(VideoFrame const& vf) = delete;
+    VideoFrame& operator =(VideoFrame const& vf) = delete;
 };
 
 class VideoSource;
@@ -58,8 +58,8 @@ private:
     std::mutex decode_mutex;  // hardware decoding enqueue lock
 
     std::vector<std::unique_ptr<VideoSource>> inputs;
-    const bool isAsync = false;
-    const bool collectStats = false;
+    const bool isAsync;
+    const bool collectStats;
 
     bool realFps;
 

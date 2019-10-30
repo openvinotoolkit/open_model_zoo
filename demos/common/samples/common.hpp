@@ -681,8 +681,6 @@ public:
         : objectType(_objectType), xmin(_xmin), xmax(_xmax), ymin(_ymin), ymax(_ymax), prob(_prob), difficult(_difficult) {
     }
 
-    DetectedObject(const DetectedObject& other) = default;
-
     static float ioU(const DetectedObject& detectedObject1_, const DetectedObject& detectedObject2_) {
         // Add small space to eliminate empty squares
         float epsilon = 0;  // 1e-5f;
@@ -950,70 +948,6 @@ public:
         return res;
     }
 };
-
-/**
-* @brief Adds colored rectangles to the image
-* @param data - data where rectangles are put
-* @param height - height of the rectangle
-* @param width - width of the rectangle
-* @param detectedObjects - vector of detected objects
-*/
-static UNUSED void addRectangles(unsigned char *data, size_t height, size_t width, std::vector<DetectedObject> detectedObjects) {
-    std::vector<Color> colors = {
-        { 128, 64,  128 },
-        { 232, 35,  244 },
-        { 70,  70,  70 },
-        { 156, 102, 102 },
-        { 153, 153, 190 },
-        { 153, 153, 153 },
-        { 30,  170, 250 },
-        { 0,   220, 220 },
-        { 35,  142, 107 },
-        { 152, 251, 152 },
-        { 180, 130, 70 },
-        { 60,  20,  220 },
-        { 0,   0,   255 },
-        { 142, 0,   0 },
-        { 70,  0,   0 },
-        { 100, 60,  0 },
-        { 90,  0,   0 },
-        { 230, 0,   0 },
-        { 32,  11,  119 },
-        { 0,   74,  111 },
-        { 81,  0,   81 }
-    };
-
-    for (size_t i = 0; i < detectedObjects.size(); i++) {
-        int cls = detectedObjects[i].objectType % colors.size();
-
-        int xmin = static_cast<int>(detectedObjects[i].xmin * width);
-        int xmax = static_cast<int>(detectedObjects[i].xmax * width);
-        int ymin = static_cast<int>(detectedObjects[i].ymin * height);
-        int ymax = static_cast<int>(detectedObjects[i].ymax * height);
-
-        size_t shift_first = ymin*width * 3;
-        size_t shift_second = ymax*width * 3;
-        for (int x = xmin; x < xmax; x++) {
-            data[shift_first + x * 3] = colors.at(cls).red();
-            data[shift_first + x * 3 + 1] = colors.at(cls).green();
-            data[shift_first + x * 3 + 2] = colors.at(cls).blue();
-            data[shift_second + x * 3] = colors.at(cls).red();
-            data[shift_second + x * 3 + 1] = colors.at(cls).green();
-            data[shift_second + x * 3 + 2] = colors.at(cls).blue();
-        }
-
-        shift_first = xmin * 3;
-        shift_second = xmax * 3;
-        for (int y = ymin; y < ymax; y++) {
-            data[shift_first + y*width * 3] = colors.at(cls).red();
-            data[shift_first + y*width * 3 + 1] = colors.at(cls).green();
-            data[shift_first + y*width * 3 + 2] = colors.at(cls).blue();
-            data[shift_second + y*width * 3] = colors.at(cls).red();
-            data[shift_second + y*width * 3 + 1] = colors.at(cls).green();
-            data[shift_second + y*width * 3 + 2] = colors.at(cls).blue();
-        }
-    }
-}
 
 inline std::size_t getTensorWidth(const InferenceEngine::TensorDesc& desc) {
     const auto& layout = desc.getLayout();
