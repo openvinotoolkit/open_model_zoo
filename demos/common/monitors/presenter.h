@@ -13,9 +13,14 @@
 
 enum class MonitorType: int {CpuAverage, DistributionCpu, Memory};
 
+struct MonitorTypeHash {
+    std::size_t operator()(MonitorType monitorType) const;
+    std::hash<int> hash;
+};
+
 class Presenter {
 public:
-    explicit Presenter(std::unordered_set<MonitorType, std::hash<int>> enabledMonitors = {},
+    explicit Presenter(std::unordered_set<MonitorType, MonitorTypeHash> enabledMonitors = {},
         int yPos = 20,
         cv::Size graphSize = {150, 60},
         std::size_t historySize = 20);
