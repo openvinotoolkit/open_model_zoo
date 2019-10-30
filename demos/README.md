@@ -180,6 +180,18 @@ build binaries in Debug configuration. Run the appropriate version of the
 Microsoft Visual Studio and open the generated solution file from the `C:\Users\<username>\Documents\Intel\OpenVINO\omz_demos_build\Demos.sln`
 directory.
 
+### <a name="build_python_extensions"></a>Build the Native Python* Extension Modules
+
+Some of the Python demo applications require native Python extension modules to be built before they can be run.
+This requires you to have Python development files (headers and import libraries) installed.
+To build these modules, follow the instructions for building the demo applications above,
+but add `-DENABLE_PYTHON=ON` to the `cmake` command.
+For example:
+
+```sh
+cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_PYTHON=ON <open_model_zoo>/demos
+```
+
 ## Get Ready for Running the Demo Applications
 
 ### Get Ready for Running the Demo Applications on Linux*
@@ -209,6 +221,14 @@ source <INSTALL_DIR>/bin/setupvars.sh
 3. Save and close the file: press the **Esc** key, type `:wq` and press the **Enter** key.
 4. To test your change, open a new terminal. You will see `[setupvars.sh] OpenVINO environment initialized`.
 
+To run Python demo applications that require native Python extension modules, you must additionally
+set up the `PYTHONPATH` environment variable as follows, where `<bin_dir>` is the directory with
+the built demo applications:
+
+```sh
+export PYTHONPATH="$PYTHONPATH:<bin_dir>/lib"
+```
+
 You are ready to run the demo applications. To learn about how to run a particular
 demo, read the demo documentation by clicking the demo name in the demo
 list above.
@@ -223,6 +243,14 @@ run the `setupvars` script to set all necessary environment variables:
 ```
 If you use your own Inference Engine and OpenCV binaries to build the demos please make sure you have added
 to the `PATH` environment variable.
+
+To run Python demo applications that require native Python extension modules, you must additionally
+set up the `PYTHONPATH` environment variable as follows, where `<bin_dir>` is the directory with
+the built demo applications:
+
+```bat
+set PYTHONPATH=%PYTHONPATH%;<bin_dir>
+```
 
 To debug or run the demos on Windows in Microsoft Visual Studio, make sure you
 have properly configured **Debugging** environment settings for the **Debug**

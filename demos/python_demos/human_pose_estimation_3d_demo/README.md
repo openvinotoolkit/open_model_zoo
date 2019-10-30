@@ -23,15 +23,8 @@ The demo workflow is the following:
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 ## Prerequisites
 
-Before running it is necessary to build `pose_extractor` module. Your system should have installed:
-* Python 3.5 (or above)
-* CMake 3.10 (or above)
-* C++ Compiler (g++ or MSVC)
-
-To build `pose_extractor` module, please run in command line:
-`python setup.py build_ext`
-Then add build folder to `PYTHONPATH`:
-`export PYTHONPATH=pose_extractor/build/:$PYTHONPATH`
+This demo application requires a native Python extension module to be built before you can run it.
+Refer to [Using Open Model Zoo demos](../../README.md), for instructions on how to build it and prepare the environment for running the demo.
 
 ## Running
 
