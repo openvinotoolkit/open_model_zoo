@@ -11,7 +11,7 @@
 #include "cpu_monitor.h"
 #include "memory_monitor.h"
 
-enum class MonitorType {CpuAverage, DistributionCpu, Memory};
+enum class MonitorType: int {CpuAverage, DistributionCpu, Memory};
 
 class Presenter {
 public:
