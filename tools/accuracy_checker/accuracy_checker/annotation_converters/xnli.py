@@ -1,8 +1,13 @@
 from collections import namedtuple
 import csv
 import numpy as np
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 
-from ..config import PathField, StringField, NumberField, BoolField
+
+from ..config import PathField, StringField, NumberField, BoolField, ConfigError
 from ..representation import TextClassificationAnnotation
 from ..utils import string_to_list
 from .format_converter import BaseFormatConverter, ConverterReturn
@@ -133,3 +138,61 @@ class XNLIDatasetConverter(BaseFormatConverter):
                 progress_callback(example_id * 100 / num_iter)
 
         return ConverterReturn(annotations, {'label_map': label_map}, None)
+
+
+class BertXNLITFRecordConverter(BaseFormatConverter):
+    __provider__ = 'bert_xnli_tf_record'
+    annotation_types = (TextClassificationAnnotation, )
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'annotation_file': PathField(description='path to predict.tf_record format'),
+        })
+
+        return params
+
+    def configure(self):
+        if tf is None:
+            raise ConfigError(
+                'bert_xnli_tf_record converter requires Tensorflow installation. Please install it first.'
+            )
+        self.annotation_file = self.get_value_from_config('annotation_file')
+
+    def read_tf_record(self):
+        record_iterator = tf.python_io.tf_record_iterator(path=str(self.annotation_file))
+        record_list = []
+        for string_record in record_iterator:
+            example = tf.train.Example()
+            example.ParseFromString(string_record)
+            input_ids = example.features.feature['input_ids'].int64_list.value
+            input_mask = example.features.feature['input_mask'].int64_list.value
+            label_ids = example.features.feature['label_ids'].int64_list.value
+            segment_ids = example.features.feature['segment_ids'].int64_list.value
+            record_list.append([input_ids, input_mask, segment_ids, label_ids])
+        return record_list
+
+    @staticmethod
+    def convert_single_example(example, guid):
+        identifier = [
+            'input_ids_{}'.format(guid),
+            'input_mask_{}'.format(guid),
+            'segment_ids_{}'.format(guid)
+        ]
+
+        return TextClassificationAnnotation(
+            identifier, np.array(example[3]), np.array(example[0]), np.array(example[1]), np.array(example[2]), None
+        )
+
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+        examples = self.read_tf_record()
+        annotations = []
+        num_iter = len(examples)
+
+        for idx, example in enumerate(examples):
+            annotations.append(self.convert_single_example(example, idx))
+            if progress_callback and idx % progress_interval == 0:
+                progress_callback(idx * 100 / num_iter)
+
+        return ConverterReturn(annotations, None, None)
