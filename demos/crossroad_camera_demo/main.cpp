@@ -294,7 +294,7 @@ struct PersonAttribsDetection : BaseDetection {
     }
 
     AttributesAndColorPoints GetPersonAttributes() {
-        static const std::vector<std::string> attributesVec = {
+        static const char *const attributeStrings[] = {
                 "is male", "has_bag", "has_backpack" , "has hat", "has longsleeves", "has longpants", "has longhair", "has coat_jacket"
         };
 
@@ -305,10 +305,10 @@ struct PersonAttribsDetection : BaseDetection {
         size_t numOfTCPointChannels = topColorPointBlob->getTensorDesc().getDims().at(1);
         size_t numOfBCPointChannels = bottomColorPointBlob->getTensorDesc().getDims().at(1);
 
-        if (numOfAttrChannels != attributesVec.size()) {
+        if (numOfAttrChannels != arraySize(attributeStrings)) {
             throw std::logic_error("Output size (" + std::to_string(numOfAttrChannels) + ") of the "
-                                   "Person Attributes Recognition network is not equal to used person "
-                                   "attributes vector size (" + std::to_string(attributesVec.size()) + ")");
+                                   "Person Attributes Recognition network is not equal to expected "
+                                   "number of attributes (" + std::to_string(arraySize(attributeStrings)) + ")");
         }
         if (numOfTCPointChannels != 2) {
             throw std::logic_error("Output size (" + std::to_string(numOfTCPointChannels) + ") of the "
@@ -331,8 +331,8 @@ struct PersonAttribsDetection : BaseDetection {
         returnValue.bottom_color_point.x = outputBCPointValues[0];
         returnValue.bottom_color_point.y = outputBCPointValues[1];
 
-        for (size_t i = 0; i < attributesVec.size(); i++) {
-            returnValue.attributes_strings.push_back(attributesVec[i]);
+        for (size_t i = 0; i < arraySize(attributeStrings); i++) {
+            returnValue.attributes_strings.push_back(attributeStrings[i]);
             returnValue.attributes_indicators.push_back(outputAttrValues[i] > 0.5);
         }
 

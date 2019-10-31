@@ -538,8 +538,6 @@ void EmotionsDetection::enqueue(const cv::Mat &face) {
 }
 
 std::map<std::string, float> EmotionsDetection::operator[] (int idx) const {
-    // Vector of supported emotions
-    static const std::vector<std::string> emotionsVec = {"neutral", "happy", "sad", "surprise", "anger"};
     auto emotionsVecSize = emotionsVec.size();
 
     Blob::Ptr emotionsBlob = request->GetBlob(outputEmotions);

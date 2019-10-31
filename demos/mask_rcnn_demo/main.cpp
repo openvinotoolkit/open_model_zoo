@@ -271,7 +271,7 @@ int main(int argc, char *argv[]) {
         size_t box_stride = W * H * C;
 
         // some colours
-        std::vector<std::vector<short>> colors = {
+        const unsigned char colors[][3] = {
             {128, 64,  128},
             {232, 35,  244},
             {70,  70,  70},

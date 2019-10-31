@@ -14,8 +14,6 @@
 #include "peak.hpp"
 
 namespace human_pose_estimation {
-const size_t HumanPoseEstimator::keypointsNumber = 18;
-
 HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
                                        const std::string& targetDeviceName_,
                                        bool enablePerformanceReport)
