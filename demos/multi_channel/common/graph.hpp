@@ -121,7 +121,5 @@ public:
     Stats getStats() const;
 
     void printPerformanceCounts(std::string fullDeviceName);
-    
-    InferenceEngine::CNNNetReader netReader;
 };
 

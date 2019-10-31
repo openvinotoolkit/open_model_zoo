@@ -38,6 +38,8 @@ void loadImgToIEGraph(const cv::Mat& img, size_t batch, void* ieBuffer) {
 }  // namespace
 
 void IEGraph::initNetwork(const std::string& deviceName) {
+    InferenceEngine::CNNNetReader netReader;
+
     netReader.ReadNetwork(modelPath);
     netReader.ReadWeights(weightsPath);
 
