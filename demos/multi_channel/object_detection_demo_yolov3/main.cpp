@@ -450,7 +450,7 @@ int main(int argc, char* argv[]) {
             std::vector<DetectionObject> objects;
             // Parsing outputs
             for (auto &output_name :outputDataBlobNames) {
-                ParseYOLOV3Output(req, output_name, yoloParams.find(output_name.c_str())->second, resized_im_h, resized_im_w, frameSize.height, frameSize.width, FLAGS_t, objects);
+                ParseYOLOV3Output(req, output_name, yoloParams[output_name], resized_im_h, resized_im_w, frameSize.height, frameSize.width, FLAGS_t, objects);
             }
             // Filtering overlapping boxes and lower confidence object
             std::sort(objects.begin(), objects.end(), std::greater<DetectionObject>());
