@@ -203,11 +203,11 @@ void ParseYOLOV3Output(InferenceEngine::InferRequest::Ptr req,
 void drawDetections(cv::Mat& img, const std::vector<DetectionObject>& detections, const std::vector<cv::Scalar>& colors) {
     for (const DetectionObject& f : detections) {
         cv::rectangle(img, 
-                      cv::Rect2f((float)f.xmin,
-                                  (float)f.ymin,
-                                  (float)(f.xmax-f.xmin),
-                                  (float)(f.ymax-f.ymin)), 
-                      colors[(int)f.class_id], 
+                      cv::Rect2f(static_cast<float>(f.xmin),
+                                 static_cast<float>(f.ymin),
+                                 static_cast<float>((f.xmax-f.xmin)),
+                                 static_cast<float>((f.ymax-f.ymin))), 
+                      colors[static_cast<int>(f.class_id)], 
                       2);
     }
 }
@@ -432,7 +432,7 @@ int main(int argc, char* argv[]) {
 
         std::vector<cv::Scalar> colors;
         if (yoloParams.size() > 0)
-            for (int i = 0; i < (int)yoloParams.begin()->second.classes; ++i)
+            for (int i = 0; i < static_cast<int>(yoloParams.begin()->second.classes); ++i)
                 colors.push_back(cv::Scalar(rand() % 256, rand() % 256, rand() % 256));
 
         network->start([&](VideoFrame& img) {
