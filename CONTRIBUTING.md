@@ -199,10 +199,6 @@ Demos are required to support the following keys:
 
 You can also add any other necessary parameters.
 
-If you add a new demo, provide autotesting support as well:
-- add demo launch parameters in [demos/tests/cases.py](demos/tests/cases.py)
-- prepare list of input images in [demos/tests/image_sequences.py](demos/tests/image_sequences.py)
-
 Add `README.md` file, which describes demo usage. Update [demos' README.md](demos/README.md) adding your demo to the list.
 
 ## Accuracy Validation
