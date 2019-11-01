@@ -269,7 +269,7 @@ std::map<std::string, YoloParams> GetYoloParams(const std::vector<std::string>& 
         }
         anchors = maskedAnchors;
 
-        YoloParams param{.num = num, .classes = classes, .coords = coords, .anchors = anchors};
+        YoloParams param{num, classes, coords, anchors};
         __yoloParams.insert(std::pair<std::string, YoloParams>(output_name.c_str(), param));
     }
 
