@@ -113,13 +113,6 @@ struct YoloParams {
     int coords;
 
     std::vector<float> anchors;
-
-    YoloParams(int num, int classes, int coords, std::vector<float>anchors) {
-        this->num = num;
-        this->classes = classes;
-        this->coords = coords;
-        this->anchors = anchors;
-    }
 };
 
 struct DetectionObject {
@@ -277,7 +270,7 @@ std::map<std::string, YoloParams> GetYoloParams(const std::vector<std::string>& 
         }
         anchors = maskedAnchors;
 
-        YoloParams param(num, classes, coords, anchors);
+        YoloParams param{.num = num, .classes = classes, .coords = coords, .anchors = anchors};
         __yoloParams.insert(std::pair<std::string, YoloParams>(output_name.c_str(), param));
     }
 
