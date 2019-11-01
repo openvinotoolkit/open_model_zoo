@@ -65,7 +65,7 @@ void showUsage() {
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                           " << help_message << std::endl;
-    std::cout << "    -m \"<path>\"                  " << face_detection_model_message<< std::endl;
+    std::cout << "    -m \"<path>\"                  " << model_path_message<< std::endl;
     std::cout << "      -l \"<absolute_path>\"       " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"       " << custom_cldnn_message << std::endl;
