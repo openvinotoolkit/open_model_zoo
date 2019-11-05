@@ -134,11 +134,11 @@ Conversion parameters (learn more in the [Model conversion](#model-conversion) s
 
 **`framework`**
 
-Framework of the original model. Examples: `caffe`, `dldt`, `mxnet`, `pytorch`, `tf`.
+Framework of the original model (see [here](tools/downloader/README.md#model-information-dumper-usage) for details).
 
 **`license`**
 
-Path to the model license.
+URL of the model license.
 
 ### Example
 
