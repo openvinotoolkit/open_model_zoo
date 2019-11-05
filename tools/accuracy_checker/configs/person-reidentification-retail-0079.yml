@@ -20,8 +20,8 @@ models:
         tags:
           - INT8
         device: CPU
-        model:   intel/person-reidentification-retail-0079/dldt/INT8/person-reidentification-retail-0079.xml
-        weights: intel/person-reidentification-retail-0079/0079/dldt/INT8/person-reidentification-retail-0079.bin
+        model:   intel/person-reidentification-retail-0079/INT8/person-reidentification-retail-0079.xml
+        weights: intel/person-reidentification-retail-0079/INT8/person-reidentification-retail-0079.bin
         adapter: reid
 
     datasets:
@@ -38,3 +38,4 @@ models:
             top_k: 1
 
           - type: reid_map
+global_definitions: ../dataset_definitions.yml

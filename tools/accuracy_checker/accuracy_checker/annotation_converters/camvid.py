@@ -1,6 +1,8 @@
 from .format_converter import FileBasedAnnotationConverter, ConverterReturn
 from ..utils import read_txt, check_file_existence
 from ..representation import SegmentationAnnotation
+from ..config import PathField
+from ..utils import read_json
 
 
 class CamVidConverter(FileBasedAnnotationConverter):
@@ -28,6 +30,19 @@ class CamVidConverter(FileBasedAnnotationConverter):
         )
     }
 
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'dataset_meta_file': PathField(
+                description='path to json file with dataset meta (e.g. label_map, color_encoding', optional=True
+            )})
+        return params
+
+    def configure(self):
+        super().configure()
+        self.dataset_meta = self.get_value_from_config('dataset_meta_file')
+
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotation = read_txt(self.annotation_file)
         annotations = []
@@ -45,5 +60,10 @@ class CamVidConverter(FileBasedAnnotationConverter):
             annotations.append(SegmentationAnnotation(identifier, gt_file))
             if progress_callback is not None and line_id % progress_interval == 0:
                 progress_callback(line_id * 100 / num_iterations)
+        meta = self.meta
+        if self.dataset_meta:
+            meta = read_json(self.dataset_meta)
+            if 'labels' in meta and 'label_map' not in meta:
+                meta['label_map'] = dict(enumerate(meta['labels']))
 
-        return ConverterReturn(annotations, self.meta, content_errors)
+        return ConverterReturn(annotations, meta, content_errors)

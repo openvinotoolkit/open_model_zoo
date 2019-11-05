@@ -17,9 +17,11 @@ The models can be downloaded via Model Downloader
 | DenseNet 161      | [Caffe\*](./densenet-161/densenet-161.md)<br> [TensorFlow\*](./densenet-161-tf/densenet-161-tf.md) | densenet-161<br>densenet-161-tf | | 14.128~15.561  | 28.666 |
 | DenseNet 169      | [Caffe\*](./densenet-169/densenet-169.md)<br>[TensorFlow\*](./densenet-169-tf/densenet-169-tf.md)  | densenet-169<br>densenet-169-tf | | 6.16~6.788 | 14.139 |
 | DenseNet 201      | [Caffe\*](./densenet-201/densenet-201.md) | densenet-201 | | 8.673  | 20.001  |
-| EfficientNet B0   | [PyTorch\*](./efficientnet-b0-pytorch/efficientnet-b0-pytorch.md) | efficientnet-b0-pytorch | 76.91/93.21 | 0.819 | 5.268 | 
-| EfficientNet B5   | [PyTorch\*](./efficientnet-b5-pytorch/efficientnet-b5-pytorch.md) | efficientnet-b5-pytorch | 83.69/96.71 | 21.252 | 30.303 | 
-| EfficientNet B7   | [PyTorch\*](./efficientnet-b7-pytorch/efficientnet-b7-pytorch.md) | efficientnet-b7-pytorch | 84.42/96.91 | 77.618  | 66.193 | 
+| EfficientNet B0   | [TensorFlow\*](./efficientnet-b0/efficientnet-b0.md)<br>[PyTorch\*](./efficientnet-b0-pytorch/efficientnet-b0-pytorch.md) | efficientnet-b0<br>efficientnet-b0-pytorch | 75.70/92.76<br>76.91/93.21 | 0.819 | 5.268 |
+| EfficientNet B0 AutoAugment  | [TensorFlow\*](./efficientnet-b0_auto_aug/efficientnet-b0_auto_aug.md) | efficientnet-b0_auto_aug | 76.43/93.04 | 0.819 | 5.268 |
+| EfficientNet B5   | [TensorFlow\*](./efficientnet-b5/efficientnet-b5.md)<br>[PyTorch\*](./efficientnet-b5-pytorch/efficientnet-b5-pytorch.md) | efficientnet-b5<br>efficientnet-b5-pytorch | 83.33/96.67<br>83.69/96.71 | 21.252 | 30.303 | 
+| EfficientNet B7   | [PyTorch\*](./efficientnet-b7-pytorch/efficientnet-b7-pytorch.md) | efficientnet-b7-pytorch | 84.42/96.91 | 77.618  | 66.193 |
+| EfficientNet B7 AutoAugment  | [TensorFlow\*](./efficientnet-b7_auto_aug/efficientnet-b7_auto_aug.md) | efficientnet-b7_auto_aug | 84.68/97.09 | 77.618  | 66.193 |
 | Inception (GoogleNet) V1 | [Caffe\*](./googlenet-v1/googlenet-v1.md) | googlenet-v1 | | 3.266 | 6.999 |
 | Inception (GoogleNet) V2 | [Caffe\*](./googlenet-v2/googlenet-v2.md) | googlenet-v2 | | 4.058 | 11.185 |
 | Inception (GoogleNet) V3 | [Caffe\*](./googlenet-v3/googlenet-v3.md)<br>[PyTorch\*](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | googlenet-v3 <br> googlenet-v3-pytorch |  | 11.469 | 23.817 |
@@ -125,6 +127,21 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | LResNet100E-IR,ArcFace@ms1m-refine-v2 | [MXNet\*](./face-recognition-resnet100-arcface/face-recognition-resnet100-arcface.md) | face-recognition-resnet100-arcface | 24.209 | 65.131 |
 | MobileFaceNet,ArcFace@ms1m-refine-v1 | [MXNet\*](./face-recognition-mobilefacenet-arcface/face-recognition-mobilefacenet-arcface.md) | face-recognition-mobilefacenet-arcface | 0.449 | 0.993 |
 | SphereFace                | [Caffe\*](./Sphereface/Sphereface.md) | Sphereface | 3.504 | 22.671 |
+
+## Human Pose Estimation
+
+Human pose estimation task is to predict a pose: body skeleton, which consists
+of keypoints and connections between them, for every person in an input image or
+video. Keypoints are body joints, i.e. ears, eyes, nose, shoulders, knees, etc.
+There are two major groups of such metods: top-down and bottom-up.  The first
+detects persons in a given frame, crops or rescales detections, then runs pose
+estimation network for every detection. These methods are very accurate. The
+second finds all keypoints in a given frame, then groups them by person
+instances, thus faster than previous, because network runs once.
+
+| Model Name                    | Implementation                                                                            | OMZ Model Name                | GFlops | mParams |
+|------------------------------ | ----------------------------------------------------------------------------------------- | ----------------------------- | ------ | ------- |
+| human-pose-estimation-3d-0001 | [PyTorch\*](./human-pose-estimation-3d-0001/description/human-pose-estimation-3d-0001.md) | human-pose-estimation-3d-0001 | 18.998 |  5.074  |
 
 ## Legal Information
 

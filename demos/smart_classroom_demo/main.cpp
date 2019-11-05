@@ -351,10 +351,10 @@ std::string GetActionTextLabel(const unsigned label, const std::vector<std::stri
 }
 
 cv::Scalar GetActionTextColor(const unsigned label) {
-    static std::vector<cv::Scalar> actions_map = {
+    static const cv::Scalar label_colors[] = {
         cv::Scalar(0, 255, 0), cv::Scalar(255, 0, 0), cv::Scalar(0, 0, 255), cv::Scalar(0, 255, 255)};
-    if (label < actions_map.size()) {
-        return actions_map[label];
+    if (label < arraySize(label_colors)) {
+        return label_colors[label];
     }
     return cv::Scalar(0, 0, 0);
 }
@@ -424,7 +424,7 @@ bool checkDynamicBatchSupport(const Core& ie, const std::string& device)  {
         if (ie.GetConfig(device, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != PluginConfigParams::YES)
             return false;
     }
-    catch(const std::exception& error)  {
+    catch(const std::exception&)  {
         return false;
     }
     return true;

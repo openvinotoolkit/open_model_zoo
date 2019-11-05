@@ -16,14 +16,6 @@ models:
         weights: intel/text-recognition-0012/FP16/text-recognition-0012.bin
         adapter: beam_search_decoder
 
-      - framework: dlsdk
-        tags:
-          - INT8
-        device: CPU
-        model:   intel/text-recognition-0012/INT8/text-recognition-0012.xml
-        weights: intel/text-recognition-0012/INT8/text-recognition-0012.bin
-        adapter: beam_search_decoder
-
     datasets:
       - name: ICDAR2013
 
@@ -35,3 +27,4 @@ models:
 
         metrics:
           - type: character_recognition_accuracy
+global_definitions: ../dataset_definitions.yml

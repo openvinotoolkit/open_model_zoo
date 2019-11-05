@@ -24,3 +24,4 @@ models:
           - type: resize_prediction_boxes
         metrics:
           - type: coco_precision
+global_definitions: ../dataset_definitions.yml

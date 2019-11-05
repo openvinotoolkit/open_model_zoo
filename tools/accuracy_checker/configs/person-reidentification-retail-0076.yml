@@ -5,23 +5,23 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        model:   intel/person-reidentification-retail-0031/FP32/person-reidentification-retail-0076.xml
-        weights: intel/person-reidentification-retail-0031/FP32/person-reidentification-retail-0076.bin
+        model:   intel/person-reidentification-retail-0076/FP32/person-reidentification-retail-0076.xml
+        weights: intel/person-reidentification-retail-0076/FP32/person-reidentification-retail-0076.bin
         adapter: reid
 
       - framework: dlsdk
         tags:
           - FP16
-        model:   intel/person-reidentification-retail-0031/FP16/person-reidentification-retail-0076.xml
-        weights: intel/person-reidentification-retail-0031/FP16/person-reidentification-retail-0076.bin
+        model:   intel/person-reidentification-retail-0076/FP16/person-reidentification-retail-0076.xml
+        weights: intel/person-reidentification-retail-0076/FP16/person-reidentification-retail-0076.bin
         adapter: reid
 
       - framework: dlsdk
         tags:
           - INT8
         device: CPU
-        model:   intel/person-reidentification-retail-0031/INT8/person-reidentification-retail-0076.xml
-        weights: intel/person-reidentification-retail-0031/INT8/person-reidentification-retail-0076.bin
+        model:   intel/person-reidentification-retail-0076/INT8/person-reidentification-retail-0076.xml
+        weights: intel/person-reidentification-retail-0076/INT8/person-reidentification-retail-0076.bin
         adapter: reid
 
     datasets:
@@ -38,3 +38,4 @@ models:
             top_k: 1
 
           - type: reid_map
+global_definitions: ../dataset_definitions.yml

@@ -32,8 +32,8 @@ class SQUADConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
             'testing_file': PathField(description="Path to testing file."),
             'vocab_file': PathField(description='Path to vocabulary file.'),
             'max_seq_length': NumberField(
@@ -51,7 +51,7 @@ class SQUADConverter(BaseFormatConverter):
             'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register')
         })
 
-        return parameters
+        return configuration_parameters
 
     def configure(self):
         self.testing_file = self.get_value_from_config('testing_file')

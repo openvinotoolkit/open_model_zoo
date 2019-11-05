@@ -1,14 +1,14 @@
 # Metrics
 
-For correct work metrics require specific representation format. 
-(e. g. map expects detection annotation and detection prediction for evaluation). 
+For correct work metrics require specific representation format.
+(e. g. map expects detection annotation and detection prediction for evaluation).
 
 In case when you use complicated representation located in representation container, you need to add options `annotation_source` and `prediction_source` in configuration file to
 select specific representation, another way metric calculation possible only if container has only one suitable representation and will be resolved automatically.
 `annotation_source` and `prediction_source` should contain only one annotation identifier and output layer name respectively.
 You may optionally provide `reference` field for metric, if you want calculated metric tested against specific value (i.e. reported in canonical paper) and acceptable `threshold` for metric deviation from reference value.
 
-Every metric has parameters available for configuration. 
+Every metric has parameters available for configuration.
 
 Accuracy Checker supports following set of metrics:
 
@@ -71,7 +71,7 @@ More detailed information about calculation segmentation metrics you can find [h
 * `pairwise_accuracy` - pairwise accuracy for object reidentification. Supported representations: `ReIdentificationClassificationAnnotation`, `ReIdentificationPrediction`.
   * `min_score` - min score for determining that objects are different. You can provide value or use `train_median` value which will be calculated if annotations has training subset.
 * `pairwise_accuracy_subsets` - object reidentification pairwise accuracy with division dataset on test and train subsets for calculation mean score. Supported representations: `ReIdentificationClassificationAnnotation`, `ReIdentificationPrediction`.
-  * `subset_number` - number of subsets for separating. 
+  * `subset_number` - number of subsets for separating.
 * `mae` - [Mean Absolute Error](https://en.wikipedia.org/wiki/Mean_absolute_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
 * `mae_on_intervals` - Mean Absolute Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
@@ -92,7 +92,7 @@ More detailed information about calculation segmentation metrics you can find [h
   * `calculate_std` - allows calculation of standard deviation (default value: `False`)
   * `percentile` - calculate error rate for given percentile.
 * `psnr` - [Peak signal to noise ratio](https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio). Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`.
-  * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB). 
+  * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB).
 * `angle_error` - Mean angle error and Standard deviation of angle error for gaze estimation. Supported representations: `GazeVectorAnnotation`, `GazeVectorPrediction`.
 * `multi_accuracy` - accuracy for multilabel recognition task. Supported representations: `MultiLabelRecognitionAnnotation`, `MultiLabelRecognitionPrediction`.
   * `label_map` - the field in annotation metadata, which contains dataset label map.
@@ -162,3 +162,4 @@ More detailed information about calculation segmentation metrics you can find [h
   *  `max_order` - Maximum n-gram order to use when computing BLEU score. (Optional, default 4).
 * `f1` - F1-score for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
 * `exact_match` - Exact matching (EM) metric for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
+* `mpjpe_multiperson` - [Mean Per Joint Position Error](http://vision.imar.ro/human3.6m/pami-h36m.pdf) extended for multi-person case. Supported representations: `PoseEstimation3dAnnotation`, `PoseEstimation3dPrediction`. As the first step, correspondence between ground truth and prediction skeletons is established for each image. Then MPJPE is computed for each ground truth and prediction pair. The error is averaged over poses in each frame, then over all frames.

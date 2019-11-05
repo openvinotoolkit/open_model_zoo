@@ -20,3 +20,4 @@ models:
 
     datasets:
       - name: road_segmentation
+global_definitions: ../dataset_definitions.yml

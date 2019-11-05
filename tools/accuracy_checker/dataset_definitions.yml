@@ -315,7 +315,7 @@ datasets:
     preprocessing:
       - type: resize
         size: 224
- 
+
   - name: lfw
     data_source: LFW/lfw
     annotation_conversion:
@@ -336,6 +336,7 @@ datasets:
     annotation: icdar15_detection.pickle
 
   - name: ICDAR2013
+    data_source: ICDAR13_REC/Challenge2_Test_Task3_Images
     annotation_conversion:
       converter: icdar13_recognition
       annotation_file: ICDAR13_REC/gt/gt.txt.fixed.alfanumeric
@@ -343,10 +344,10 @@ datasets:
     dataset_meta: icdar13_recognition.json
 
   - name: market1501
-    data_source: Market1501-person-reidentification/Market-1501-v15.09.15
+    data_source: Market-1501-v15.09.15
     annotation_conversion:
       converter: market1501_reid
-      data_dir: Market1501-person-reidentification/Market-1501-v15.09.15
+      data_dir: Market-1501-v15.09.15
     annotation: market1501_reid.pickle
 
   - name: vgg2face
@@ -473,8 +474,7 @@ datasets:
         size: 60
 
   - name: gaze_estimation_dataset
-
-    data_source: gaze-estimation
+    data_source: gaze_estimation
     annotation: gaze_estimation.pickle
 
     reader:
@@ -487,5 +487,49 @@ datasets:
 
   - name: handwritten_score_recognition
     data_source: ILSVRC2012_img_val
-    annotation: hadwritten_score_recognition.pickle
-    dataset_meta: hadwritten_score_recognition.json
+    annotation: handwritten_score_recognition.pickle
+    dataset_meta: handwritten_score_recognition.json
+
+  - name: cmu_panoptic_keypoints
+    data_source: cmu_panoptic_subset
+    annotation_conversion:
+      converter: cmu_panoptic_keypoints
+      data_dir: cmu_panoptic_subset
+    annotation: cmu_panoptic_keypoints.pickle
+
+  - name: kinetics-400
+    data_source: kinetics/frames_val
+    annotation_conversion:
+      converter: clip_action_recognition
+      annotation_file: kinetics/kinetics_400.json
+      data_dir: kinetics/frames_val
+    annotation: kinetics_action_recognition.pickle
+    dataset_meta: kinetics_action_recognition.json
+
+  - name: driver_action_recognition_dataset
+    data_source: kinetics/frames_val
+    annotation_conversion:
+      converter: clip_action_recognition
+      annotation_file: kinetics/driver_action_recognition.json
+      data_dir: kinetics/frames_val
+    annotation: driver_action_recognition.pickle
+    dataset_meta: driver_action_recognition.json
+
+  - name: BraTS
+    data_source: BraTS
+    reader: numpy_reader
+    annotation_conversion:
+      converter: brats_numpy
+      data_dir: BraTS
+      ids_file: BraTS/val_ids.p
+      labels_file: BraTS/labels
+    annotation: brats.pickle
+    dataset_meta: brats.json
+
+  - name: product_detection
+    annotation: product_detection.pickle
+    dataset_meta: product_detection.json
+    data_source: product_detection
+
+    metrics:
+      - type: coco_precision

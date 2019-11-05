@@ -34,6 +34,7 @@ from tests.common import update_dict
 from accuracy_checker.data_readers import DataRepresentation
 from accuracy_checker.utils import contains_all
 
+
 def check_no_gpu():
     try:
         import openvino.inference_engine as ie
@@ -42,6 +43,7 @@ def check_no_gpu():
         return False
     except (ImportError, RuntimeError):
         return True
+
 
 @pytest.fixture()
 def mock_inference_engine(mocker):
@@ -107,6 +109,7 @@ class TestDLSDKLauncherInfer:
         dlsdk_test_model = get_dlsdk_test_model(models_dir, {'batch': 2})
         assert dlsdk_test_model.batch == 2
 
+
 @pytest.mark.skipif(check_no_gpu(), reason="GPU is not installed")
 @pytest.mark.usefixtures('mock_path_exists')
 class TestDLSDKLauncherAffinity:
@@ -117,7 +120,7 @@ class TestDLSDKLauncherAffinity:
             'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
-        dlsdk_test_model = get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,GPU', 'affinity_map': './affinity_map.yml'})
+        dlsdk_test_model = get_dlsdk_test_model(models_dir, {'device': 'HETERO:CPU,GPU', 'affinity_map': './affinity_map.yml'})
         layers = dlsdk_test_model.network.layers
         for key, value in affinity_map.items():
             assert layers[key].affinity == value
@@ -130,17 +133,17 @@ class TestDLSDKLauncherAffinity:
         )
 
         with pytest.raises(ConfigError):
-            get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,CPU', 'affinity_map' : './affinity_map.yml'})
+            get_dlsdk_test_model(models_dir, {'device': 'HETERO:CPU,CPU', 'affinity_map': './affinity_map.yml'})
 
     def test_dlsdk_launcher_affinity_map_invalid_layer(self, mocker, models_dir):
-        affinity_map = {'none-existing-layer' : 'CPU'}
+        affinity_map = {'none-existing-layer': 'CPU'}
 
         mocker.patch(
             'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
         with pytest.raises(ConfigError):
-            get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,CPU', 'affinity_map' : './affinity_map.yml'})
+            get_dlsdk_test_model(models_dir, {'device': 'HETERO:CPU,CPU', 'affinity_map': './affinity_map.yml'})
 
 
 @pytest.mark.usefixtures('mock_path_exists', 'mock_inference_engine', 'mock_inputs')

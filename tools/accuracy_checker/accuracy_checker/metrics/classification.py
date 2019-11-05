@@ -54,7 +54,7 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
         self.accuracy = AverageMeter(loss)
 
     def update(self, annotation, prediction):
-        self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
+        return self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
 
     def evaluate(self, annotations, predictions):
         return self.accuracy.evaluate()
@@ -106,7 +106,7 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
         self.accuracy = AverageMeter(loss, counter)
 
     def update(self, annotation, prediction):
-        self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
+        return self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
 
     def evaluate(self, annotations, predictions):
         self.meta['names'] = list(self.labels.values())
@@ -145,12 +145,14 @@ class ClipAccuracy(PerImageEvaluationMetric):
             self.video_accuracy.update(video_top_label, self.previous_video_label)
             self.video_avg_prob = AverageProbMeter()
 
-        self.video_avg_prob.update(annotation.label, prediction.scores)
+        video_avg = self.video_avg_prob.update(annotation.label, prediction.scores)
 
-        self.clip_accuracy.update(annotation.label, prediction.label)
+        clip_accuracy = self.clip_accuracy.update(annotation.label, prediction.label)
 
         self.previous_video_id = video_id
         self.previous_video_label = annotation.label
+
+        return [clip_accuracy, video_avg]
 
     def evaluate(self, annotations, predictions):
         self.meta['names'] = ['clip_accuracy', 'video_accuracy']

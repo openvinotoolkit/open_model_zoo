@@ -15,7 +15,7 @@
 namespace human_pose_estimation {
 class HumanPoseEstimator {
 public:
-    static const size_t keypointsNumber;
+    static const size_t keypointsNumber = 18;
 
     HumanPoseEstimator(const std::string& modelPath,
                        const std::string& targetDeviceName,

@@ -35,8 +35,8 @@ class SRConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
             'data_dir': PathField(
                 is_directory=True, description="Path to folder, where images in low and high resolution are located."
             ),
@@ -64,7 +64,7 @@ class SRConverter(BaseFormatConverter):
             )
         })
 
-        return parameters
+        return configuration_parameters
 
     def configure(self):
         self.data_dir = self.get_value_from_config('data_dir')

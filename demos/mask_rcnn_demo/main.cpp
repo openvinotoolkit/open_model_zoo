@@ -271,7 +271,7 @@ int main(int argc, char *argv[]) {
         size_t box_stride = W * H * C;
 
         // some colours
-        std::vector<std::vector<short>> colors = {
+        const unsigned char colors[][3] = {
             {128, 64,  128},
             {232, 35,  244},
             {70,  70,  70},
@@ -318,9 +318,8 @@ int main(int argc, char *argv[]) {
             int box_height = std::min(static_cast<int>(std::max(0.0f, y2 - y1)), images_cv[batch].size().height);
             auto class_id = static_cast<size_t>(box_info[1] + 1e-6f);
             if (prob > PROBABILITY_THRESHOLD) {
-                if (class_color.find(class_id) == class_color.end())
-                    class_color[class_id] = class_color.size();
-                auto& color = colors[class_color[class_id]];
+                size_t color_index = class_color.emplace(class_id, class_color.size()).first->second;
+                auto& color = colors[color_index % arraySize(colors)];
                 float* mask_arr = masks_data + box_stride * box + H * W * (class_id - 1);
                 slog::info << "Detected class " << class_id << " with probability " << prob << " from batch " << batch
                            << ": [" << x1 << ", " << y1 << "], [" << x2 << ", " << y2 << "]" << slog::endl;

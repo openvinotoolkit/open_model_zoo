@@ -60,3 +60,4 @@ models:
           - type: psnr
             scale_border: 4
             presenter: print_vector
+global_definitions: ../dataset_definitions.yml

@@ -2,7 +2,7 @@ import re
 import numpy as np
 from .adapter import Adapter
 from ..representation import MachineTranslationPrediction, QuestionAnsweringPrediction, ClassificationPrediction
-from ..config import PathField, NumberField
+from ..config import PathField, NumberField, StringField
 from ..utils import read_txt
 
 
@@ -98,22 +98,32 @@ class BertTextClassification(Adapter):
     @classmethod
     def parameters(cls):
         params = super().parameters()
-        params.update({"num_classes": (
-            NumberField(value_type=int, min_value=1, description='number of classes for classification')
-        )})
+        params.update({
+            "num_classes": NumberField(value_type=int, min_value=1, description='number of classes for classification'),
+            'classification_out': StringField(
+                optional=True,
+                description='Classification output layer name. If not provided, first output will be used.'
+            )
+        })
 
         return params
 
     def configure(self):
         self.num_classes = self.get_value_from_config('num_classes')
+        self.classification_out = self.get_value_from_config('classification_out')
 
     def process(self, raw, identifiers=None, frame_meta=None):
-        outputs = self._extract_predictions(raw, frame_meta)[self.output_blob]
-        _, hidden_size = outputs.shape
-        output_weights = np.random.normal(scale=0.02, size=(self.num_classes, hidden_size))
-        output_bias = np.zeros(self.num_classes)
-        predictions = np.matmul(outputs, output_weights.T)
-        predictions += output_bias
+        if self.classification_out is None:
+            self.classification_out = self.output_blob
+        outputs = self._extract_predictions(raw, frame_meta)[self.classification_out]
+        if outputs.shape[1] != self.num_classes:
+            _, hidden_size = outputs.shape
+            output_weights = np.random.normal(scale=0.02, size=(self.num_classes, hidden_size))
+            output_bias = np.zeros(self.num_classes)
+            predictions = np.matmul(outputs, output_weights.T)
+            predictions += output_bias
+        else:
+            predictions = outputs
         result = []
         for identifier, output in zip(identifiers, predictions):
             result.append(ClassificationPrediction(identifier, output))
