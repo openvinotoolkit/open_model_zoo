@@ -38,7 +38,7 @@ if [ -z "$INTEL_OPENVINO_DIR" ]; then
         printf "Error: Failed to set the environment variables automatically. To fix, run the following command:\n source <INSTALL_DIR>/bin/setupvars.sh\n where INSTALL_DIR is the OpenVINO installation directory.\n\n"
         exit 1
     fi
-    if ! source $setvars_path ; then
+    if ! source "$setvars_path"; then
         printf "Unable to run ./setupvars.sh. Please check its presence. \n\n"
         exit 1
     fi
@@ -57,17 +57,17 @@ build_dir=$HOME/omz_demos_build
 OS_PATH=$(uname -m)
 NUM_THREADS="-j2"
 
-if [ $OS_PATH == "x86_64" ]; then
+if [ "$OS_PATH" == "x86_64" ]; then
     OS_PATH="intel64"
     NUM_THREADS="-j8"
 fi
 
-if [ -e $build_dir/CMakeCache.txt ]; then
-    rm -rf $build_dir/CMakeCache.txt
+if [ -e "$build_dir/CMakeCache.txt" ]; then
+    rm -rf "$build_dir/CMakeCache.txt"
 fi
-mkdir -p $build_dir
-cd $build_dir
-cmake -DCMAKE_BUILD_TYPE=Release $DEMOS_PATH
-make $NUM_THREADS
+mkdir -p "$build_dir"
 
-printf "\nBuild completed, you can find binaries for all demos in the $build_dir/${OS_PATH}/Release subfolder.\n\n"
+(cd "$build_dir" && cmake -DCMAKE_BUILD_TYPE=Release "$DEMOS_PATH")
+make -C "$build_dir" "$NUM_THREADS"
+
+printf "\nBuild completed, you can find binaries for all demos in the %s subfolder.\n\n" "$build_dir/$OS_PATH/Release"
