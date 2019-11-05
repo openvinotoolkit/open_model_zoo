@@ -37,7 +37,7 @@ public:
 
     void printPerlayerPerformance() const;
 
-    const std::map<std::string, std::vector<unsigned long>>& getIputBlobDimsInfo() const;
+    const std::map<std::string, std::vector<unsigned long>>& getInputBlobDimsInfo() const;
     const std::map<std::string, std::vector<unsigned long>>& getOutputBlobDimsInfo() const;
 
     void reshape(const std::map<std::string, std::vector<unsigned long>>& newBlobsDimsInfo);

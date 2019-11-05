@@ -126,7 +126,7 @@ void IEWrapper::getOutputBlob(std::vector<float>& output) {
     }
 }
 
-const std::map<std::string, std::vector<unsigned long>>& IEWrapper::getIputBlobDimsInfo() const {
+const std::map<std::string, std::vector<unsigned long>>& IEWrapper::getInputBlobDimsInfo() const {
     return inputBlobsDimsInfo;
 }
 const std::map<std::string, std::vector<unsigned long>>& IEWrapper::getOutputBlobDimsInfo() const {

@@ -19,7 +19,7 @@ void LandmarksEstimator::estimate(const cv::Mat& image,
     auto faceBoundingBox = outputResults.faceBoundingBox;
     auto faceCrop(cv::Mat(image, faceBoundingBox));
 
-    auto inputBlobName = ieWrapper.getIputBlobDimsInfo().begin()->first;
+    auto inputBlobName = ieWrapper.getInputBlobDimsInfo().begin()->first;
 
     ieWrapper.setInputBlob(inputBlobName, faceCrop);
     ieWrapper.infer();

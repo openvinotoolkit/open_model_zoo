@@ -45,7 +45,7 @@ void FaceDetector::adjustBoundingBox(cv::Rect& boundingBox) const {
 std::vector<FaceInferenceResults> FaceDetector::detect(const cv::Mat& image) {
     std::vector<FaceInferenceResults> detectionResult;
 
-    auto ieInputBlobInfo = ieWrapper.getIputBlobDimsInfo().begin();
+    auto ieInputBlobInfo = ieWrapper.getInputBlobDimsInfo().begin();
     auto inputBlobName = ieInputBlobInfo->first;
     auto inputBlobDims = ieInputBlobInfo->second;
 
