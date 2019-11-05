@@ -17,14 +17,14 @@ class CpuMonitor {
 public:
     CpuMonitor();
     void enableHistory(std::size_t historySize); // makes getLastHistory() store at least historySize
-    bool isHistoryEnabled();
+    bool isHistoryEnabled() const;
     void disableHistory();
     void enableLast();
-    bool isLastEnabled();
+    bool isLastEnabled() const;
     void disableLast();
     void collectData();
-    std::deque<std::vector<double>> getLastHistory();
-    std::vector<double> getMeanCpuLoad(); // can be empty if monitor didn't collect any data
+    std::deque<std::vector<double>> getLastHistory() const;
+    std::vector<double> getMeanCpuLoad() const; // can be empty if monitor didn't collect any data
 
     const std::size_t nCores;
 private:

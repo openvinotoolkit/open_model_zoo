@@ -30,6 +30,45 @@ std::size_t MonitorTypeHash::operator()(MonitorType monitorType) const {
     return hash(static_cast<int>(monitorType));
 }
 
+void meansToOstream(const std::map<MonitorType, std::vector<double>> means, std::ostream& stream) {
+    std::ostringstream tmpStream; // create tmp stream to avoid affecting provided stream`s settings
+    const auto cpuAverageMean = means.find(MonitorType::CpuAverage);
+    if (means.end() != cpuAverageMean) {
+        if (cpuAverageMean->second.empty()) {
+            tmpStream << "No data collected for CPU utilization\n";
+        } else {
+            assert (1 == cpuAverageMean.second.size());
+            tmpStream << "Mean CPU utilization: " << std::fixed << std::setprecision(1)
+                << cpuAverageMean->second.front() * 100 << "%\n";
+        }
+    }
+    const auto distributionCpuMean = means.find(MonitorType::DistributionCpu);
+    if (means.end() != distributionCpuMean) {
+        if (distributionCpuMean->second.empty()) {
+            tmpStream << "No data collected per core utilization\n";
+        } else {
+            tmpStream << "Mean core utilization: " << std::fixed << std::setprecision(1);
+            for (double mean : distributionCpuMean->second) {
+                tmpStream << mean * 100 << "% ";
+            }
+            tmpStream << '\n';
+        }
+    }
+    const auto memoryMean = means.find(MonitorType::Memory);
+        if (means.end() != memoryMean) {
+            if (memoryMean->second.empty()) {
+                tmpStream << "No data collected for memory ans swap usage\n";
+            } else {
+                assert (2 == memoryMean.second.size());
+                tmpStream << "Mean memory usage: " << std::fixed << std::setprecision(1) << memoryMean->second.front()
+                    << "GiB\n";
+                tmpStream << "Mean swap usage: " << std::fixed << std::setprecision(1) << memoryMean->second.back()
+                    << "GiB\n";
+            }
+        }
+    stream << tmpStream.str();
+}
+
 Presenter::Presenter(std::unordered_set<MonitorType, MonitorTypeHash> enabledMonitors,
         int yPos,
         cv::Size graphSize,
@@ -258,4 +297,20 @@ void Presenter::drawGraphs(cv::Mat& frame) {
             textGraphSplittingLine * 0.04,
             {0, 255, 255});
     }
+}
+
+std::map<MonitorType, std::vector<double>> Presenter::getMeans() const {
+    std::map<MonitorType, std::vector<double>> means;
+    if (cpuMonitor.isHistoryEnabled()) {
+        means.emplace(MonitorType::DistributionCpu, cpuMonitor.getMeanCpuLoad());
+    }
+    if (cpuMonitor.isLastEnabled()) {
+        std::vector<double> meanCpuLoad = cpuMonitor.getMeanCpuLoad();
+        double mean = std::accumulate(meanCpuLoad.begin(), meanCpuLoad.end(), 0.0) / meanCpuLoad.size();
+        means.emplace(MonitorType::CpuAverage, std::vector<double>{mean});
+    }
+    if (memoryMonitor.isEnabled()) {
+        means.emplace(MonitorType::Memory, std::vector<double>{memoryMonitor.getMeanMem(), memoryMonitor.getMeanSwap()});
+    }
+    return means;
 }

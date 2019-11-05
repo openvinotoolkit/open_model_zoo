@@ -91,7 +91,7 @@ void CpuMonitor::enableLast() {
     }
 }
 
-bool CpuMonitor::isLastEnabled() {
+bool CpuMonitor::isLastEnabled() const {
     return lastEnabled;
 }
 
@@ -142,11 +142,11 @@ void CpuMonitor::collectData() {
     }
 }
 
-std::deque<std::vector<double>> CpuMonitor::getLastHistory() {
+std::deque<std::vector<double>> CpuMonitor::getLastHistory() const {
     return cpuLoadHistory;
 }
 
-std::vector<double> CpuMonitor::getMeanCpuLoad() {
+std::vector<double> CpuMonitor::getMeanCpuLoad() const {
     return meanCpuLoad;
 }
 #else
@@ -214,7 +214,7 @@ void CpuMonitor::enableHistory(std::size_t historySize) {
     }
 }
 
-bool CpuMonitor::isHistoryEnabled() {
+bool CpuMonitor::isHistoryEnabled() const {
     return historyEnabled;
 }
 
@@ -230,7 +230,7 @@ void CpuMonitor::enableLast() {
     }
 }
 
-bool CpuMonitor::isLastEnabled() {
+bool CpuMonitor::isLastEnabled() const {
     return lastEnabled;
 }
 
@@ -264,11 +264,11 @@ void CpuMonitor::collectData() {
     }
 }
 
-std::deque<std::vector<double>> CpuMonitor::getLastHistory() {
+std::deque<std::vector<double>> CpuMonitor::getLastHistory() const {
     return cpuLoadHistory;
 }
 
-std::vector<double> CpuMonitor::getMeanCpuLoad() {
+std::vector<double> CpuMonitor::getMeanCpuLoad() const {
     return meanCpuLoad;
 }
 #endif

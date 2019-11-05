@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <map>
+#include <ostream>
 #include <unordered_set>
 
 #include <opencv2/imgproc.hpp>
@@ -18,6 +20,8 @@ struct MonitorTypeHash {
     std::hash<int> hash;
 };
 
+void meansToOstream(const std::map<MonitorType, std::vector<double>>, std::ostream& stream);
+
 class Presenter {
 public:
     explicit Presenter(std::unordered_set<MonitorType, MonitorTypeHash> enabledMonitors = {},
@@ -31,7 +35,7 @@ public:
     void addRemoveMonitor(MonitorType monitor);
     void addRemoveMonitor(int key); // handles c, d, m, h keys
     void drawGraphs(cv::Mat& frame);
-    // std::map<MonitorType, Values> getMean() const TODO
+    std::map<MonitorType, std::vector<double>> getMeans() const;
 
     const int yPos;
     const cv::Size graphSize;
