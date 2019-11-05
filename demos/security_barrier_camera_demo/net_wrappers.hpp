@@ -282,7 +282,7 @@ public:
             // it should have the leading 0.0f and rest 1.0f
             float* blob_data = seqBlob->buffer().as<float*>();
             blob_data[0] = 0.0f;
-            std::fill(blob_data + 1, blob_data + maxSequenceSizePerPlate, 1.0f);
+            std::fill(blob_data + 1, blob_data + seqBlob->getTensorDesc().getDims()[0], 1.0f);
         }
     }
 
