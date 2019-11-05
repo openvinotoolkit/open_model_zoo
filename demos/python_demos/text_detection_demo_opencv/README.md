@@ -1,4 +1,4 @@
-# Text Detection Python3 demo
+# Text Detection OpenCV Python3 demo
 
 Decoder for Intel's version of PixelLink -- [text-detection-0003](../../../models/intel/text-detection-0003/description/text-detection-0003.md), [text-detection-0004](../../../models/intel/text-detection-0003/description/text-detection-0004.md)
 
@@ -8,10 +8,10 @@ Upon the start-up the demo application reads command line parameters and loads a
 
 ## Running
 
-Running the `python3 text_detection_demo.py -h` yields the following usage message:
+Running the `python3 text_detection_demo_opencv.py -h` yields the following usage message:
 
 ```
-usage: text_detection_demo.py [-h] -i IMAGE_PATH -m MODEL_PATH
+usage: text_detection_demo_opencv.py [-h] -i IMAGE_PATH -m MODEL_PATH
 
 optional arguments:
   -h, --help     show this help message and exit

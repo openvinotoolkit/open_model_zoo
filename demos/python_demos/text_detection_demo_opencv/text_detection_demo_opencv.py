@@ -82,18 +82,16 @@ class PixelLinkDecoder():
         elif not np.isfinite(a_max):
             a_max = 0
 
+        tmp = np.exp(a - a_max)
+
         # suppress warnings about log of zero
         with np.errstate(divide='ignore'):
             s = np.sum(tmp, axis=axis, keepdims=keepdims)
-            if return_sign:
-                sgn = np.sign(s)
-                s *= sgn  # /= makes more sense but we need zero -> zero
             out = np.log(s)
 
         if not keepdims:
             a_max = np.squeeze(a_max, axis=axis)
         out += a_max
-
         return out
 
     def _set_pixel_scores(self, pixel_scores):
@@ -226,12 +224,12 @@ def main():
     else:
         print("Model's XML file expected")
         return 1
-        
+
     img = cv2.imread(args.image_path)
     if img is None:
         print("Failed to load image")
         return 1
-        
+
     blob = cv2.dnn.blobFromImage(img, 1, (1280, 768))
     td.setInput(blob)
     a, b = td.forward(td.getUnconnectedOutLayersNames())
