@@ -130,7 +130,7 @@ Conversion parameters (learn more in the [Model conversion](#model-conversion) s
 
 > **NOTE:** Do not specify `framework`, `data_type`, `model_name` and `output_dir`, since they are deduced automatically.
 
-> **NOTE:** `$dl_dir` used to substitute download directory (key `-o` or `--output_dir` in `downloader.py` script) and `$conv_dir` used to substitute converter directory (key `-o` or `--output_dir` in `converter.py` script)
+> **NOTE:** `$dl_dir` used to substitute subdirectory of downloaded model and `$conv_dir` used to substitute subdirectory of converted model.
 
 **`framework`**
 
