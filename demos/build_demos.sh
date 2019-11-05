@@ -40,8 +40,8 @@ if [ -z "$INTEL_OPENVINO_DIR" ]; then
     fi
     if ! source $setvars_path ; then
         printf "Unable to run ./setupvars.sh. Please check its presence. \n\n"
-    exit 1
-fi
+        exit 1
+    fi
 else
     # case for run with `sudo -E`
     source "$INTEL_OPENVINO_DIR/bin/setupvars.sh"
@@ -58,8 +58,8 @@ OS_PATH=$(uname -m)
 NUM_THREADS="-j2"
 
 if [ $OS_PATH == "x86_64" ]; then
-  OS_PATH="intel64"
-  NUM_THREADS="-j8"
+    OS_PATH="intel64"
+    NUM_THREADS="-j8"
 fi
 
 if [ -e $build_dir/CMakeCache.txt ]; then
