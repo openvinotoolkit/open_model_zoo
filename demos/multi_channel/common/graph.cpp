@@ -38,7 +38,7 @@ void loadImgToIEGraph(const cv::Mat& img, size_t batch, void* ieBuffer) {
 }  // namespace
 
 void IEGraph::initNetwork(const std::string& deviceName) {
-    InferenceEngine::CNNNetReader  netReader;
+    InferenceEngine::CNNNetReader netReader;
 
     netReader.ReadNetwork(modelPath);
     netReader.ReadWeights(weightsPath);
@@ -96,6 +96,9 @@ void IEGraph::initNetwork(const std::string& deviceName) {
         auto req = network.CreateInferRequestPtr();
         availableRequests.push(req);
     }
+
+    if (postLoad != nullptr)
+        postLoad(outputDataBlobNames, netReader);
 
     availableRequests.front()->StartAsync();
     availableRequests.front()->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
@@ -201,6 +204,7 @@ IEGraph::IEGraph(const InitParams& p):
     maxRequests(p.maxRequests) {
     assert(p.maxRequests > 0);
 
+    postLoad = p.postLoadFunc;
     initNetwork(p.deviceName);
 }
 

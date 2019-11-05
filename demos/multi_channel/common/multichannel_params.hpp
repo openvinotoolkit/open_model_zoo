@@ -12,7 +12,7 @@
 static const char help_message[] = "Print a usage message";
 
 /// @brief Message for model argument
-static const char face_detection_model_message[] = "Required. Path to an .xml file with a trained model.";
+static const char model_path_message[] = "Required. Path to an .xml file with a trained model.";
 
 /// @brief Message for assigning face detection calculation to a device
 static const char target_device_message[] = "Optional. Specify the target device for a network (the list of available devices is shown below). " \
@@ -68,7 +68,7 @@ DEFINE_bool(h, false, help_message);
 
 /// \brief Define a parameter for a model file <br>
 /// It is a required parameter
-DEFINE_string(m, "", face_detection_model_message);
+DEFINE_string(m, "", model_path_message);
 
 /// \brief Define a target device parameter for a model <br>
 DEFINE_string(d, "CPU", target_device_message);
