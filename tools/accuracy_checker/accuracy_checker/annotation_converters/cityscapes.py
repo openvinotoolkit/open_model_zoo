@@ -19,7 +19,7 @@ from ..representation import SegmentationAnnotation
 from ..representation.segmentation_representation import GTMaskLoader
 from ..config import PathField, StringField, BoolField
 from .format_converter import BaseFormatConverter, ConverterReturn
-from ..utils import check_file_existence
+from ..utils import check_file_existence, read_json
 
 
 train_meta = {
@@ -66,8 +66,8 @@ class CityscapesConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
             'dataset_root_dir': PathField(is_directory=True, description="Path to dataset root."),
             'images_subfolder': StringField(
                 optional=True,
@@ -89,10 +89,13 @@ class CityscapesConverter(BaseFormatConverter):
                 optional=True,
                 default=False,
                 description="Allows to use full label map with 33 classes instead train label map with 18 classes."
+            ),
+            'dataset_meta_file': PathField(
+                description='path to json file with dataset meta (e.g. label_map, color_encoding', optional=True
             )
         })
 
-        return parameters
+        return configuration_parameters
 
     def configure(self):
         self.dataset_root = self.get_value_from_config('dataset_root_dir')
@@ -101,6 +104,7 @@ class CityscapesConverter(BaseFormatConverter):
         self.masks_suffix = self.get_value_from_config('masks_suffix')
         self.images_suffix = self.get_value_from_config('images_suffix')
         self.use_full_label_map = self.get_value_from_config('use_full_label_map')
+        self.dataset_meta_file = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         images = list(self.dataset_root.rglob(r'{}/*/*{}.png'.format(self.images_dir, self.images_suffix)))
@@ -118,6 +122,13 @@ class CityscapesConverter(BaseFormatConverter):
             annotations.append(SegmentationAnnotation(identifier, mask, mask_loader=GTMaskLoader.PILLOW))
             if progress_callback is not None and idx % progress_interval == 0:
                 progress_callback(idx / num_iterations * 100)
-        meta = full_dataset_meta if self.use_full_label_map else train_meta
 
-        return ConverterReturn(annotations, meta, content_errors)
+        return ConverterReturn(annotations, self.generate_meta(), content_errors)
+
+    def generate_meta(self):
+        if self.dataset_meta_file is not None:
+            meta = read_json(self.dataset_meta_file)
+            if 'labels' in meta:
+                meta['label_map'] = dict(enumerate(meta['labels']))
+            return meta
+        return full_dataset_meta if self.use_full_label_map else train_meta

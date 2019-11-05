@@ -28,8 +28,8 @@ class ActionRecognitionConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        params = super().parameters()
+        params.update({
             'annotation_file': PathField(description="Path to annotation file."),
             'data_dir': PathField(is_directory=True, description="Path to data directory."),
             'clips_per_video': NumberField(
@@ -44,10 +44,13 @@ class ActionRecognitionConverter(BaseFormatConverter):
             'subset': StringField(
                 choices=['train', 'test', 'validation'], default='validation',
                 optional=True, description="Subset: train, test or validation."
+            ),
+            'dataset_meta_file': PathField(
+                description='path to json file with dataset meta (e.g. label_map)', optional=True
             )
         })
 
-        return parameters
+        return params
 
     def configure(self):
         self.annotation_file = self.get_value_from_config('annotation_file')
@@ -56,10 +59,17 @@ class ActionRecognitionConverter(BaseFormatConverter):
         self.clip_duration = self.get_value_from_config('clip_duration')
         self.temporal_stride = self.get_value_from_config('temporal_stride')
         self.subset = self.get_value_from_config('subset')
+        self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         full_annotation = read_json(self.annotation_file)
         label_map = dict(enumerate(full_annotation['labels']))
+        if self.dataset_meta:
+            dataset_meta = read_json(self.dataset_meta)
+            if 'labels' in dataset_meta:
+                label_map = dict(enumerate(dataset_meta['labels']))
+            if 'label_map' in dataset_meta:
+                label_map = dataset_meta['label_map']
         video_names, annotation = self.get_video_names_and_annotations(full_annotation['database'], self.subset)
         class_to_idx = {v: k for k, v in label_map.items()}
 
