@@ -9,8 +9,8 @@
 #include "presenter.h"
 
 namespace {
-std::unordered_set<MonitorType, MonitorTypeHash> strKeysToMonitorSet(const std::string& keys) {
-    std::unordered_set<MonitorType, MonitorTypeHash> enabledMonitors;
+std::set<MonitorType> strKeysToMonitorSet(const std::string& keys) {
+    std::set<MonitorType> enabledMonitors;
     for (unsigned char key: keys) {
         switch(std::toupper(key)) {
             case 'C': enabledMonitors.insert(MonitorType::CpuAverage);
@@ -24,10 +24,6 @@ std::unordered_set<MonitorType, MonitorTypeHash> strKeysToMonitorSet(const std::
     }
     return enabledMonitors;
 }
-}
-
-std::size_t MonitorTypeHash::operator()(MonitorType monitorType) const {
-    return hash(static_cast<int>(monitorType));
 }
 
 void meansToOstream(const std::map<MonitorType, std::vector<double>> means, std::ostream& stream) {
@@ -69,7 +65,7 @@ void meansToOstream(const std::map<MonitorType, std::vector<double>> means, std:
     stream << tmpStream.str();
 }
 
-Presenter::Presenter(std::unordered_set<MonitorType, MonitorTypeHash> enabledMonitors,
+Presenter::Presenter(std::set<MonitorType> enabledMonitors,
         int yPos,
         cv::Size graphSize,
         std::size_t historySize) :

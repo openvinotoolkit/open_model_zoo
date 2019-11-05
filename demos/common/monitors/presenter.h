@@ -6,25 +6,20 @@
 
 #include <map>
 #include <ostream>
-#include <unordered_set>
+#include <set>
 
 #include <opencv2/imgproc.hpp>
 
 #include "cpu_monitor.h"
 #include "memory_monitor.h"
 
-enum class MonitorType: int {CpuAverage, DistributionCpu, Memory};
-
-struct MonitorTypeHash {
-    std::size_t operator()(MonitorType monitorType) const;
-    std::hash<int> hash;
-};
+enum class MonitorType{CpuAverage, DistributionCpu, Memory};
 
 void meansToOstream(const std::map<MonitorType, std::vector<double>>, std::ostream& stream);
 
 class Presenter {
 public:
-    explicit Presenter(std::unordered_set<MonitorType, MonitorTypeHash> enabledMonitors = {},
+    explicit Presenter(std::set<MonitorType> enabledMonitors = {},
         int yPos = 20,
         cv::Size graphSize = {150, 60},
         std::size_t historySize = 20);

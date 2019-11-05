@@ -72,7 +72,7 @@ void CpuMonitor::enableHistory(std::size_t historySize) {
     }
 }
 
-bool CpuMonitor::isHistoryEnabled() {
+bool CpuMonitor::isHistoryEnabled() const {
     return historyEnabled;
 }
 
