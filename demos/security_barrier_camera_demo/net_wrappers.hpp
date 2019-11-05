@@ -250,11 +250,11 @@ public:
             throw std::logic_error("LPR should have 1 output");
         }
         LprOutputName = LprOutputInfo.begin()->first;
-        auto lprOutputInput = (LprOutputInfo.begin());
+        auto lprOutputInfo = (LprOutputInfo.begin());
 
         // Shape of output tensor for model that converted from Caffe is [1,88,1,1], from TF [1,1,88,1]
         size_t indexOfSequenceSize = LprInputSeqName == "" ? 2 : 1;
-        maxSequenceSizePerPlate = lprOutputInput->second->getTensorDesc().getDims()[indexOfSequenceSize];
+        maxSequenceSizePerPlate = lprOutputInfo->second->getTensorDesc().getDims()[indexOfSequenceSize];
 
         net = ie_.LoadNetwork(LprNetReader.getNetwork(), deviceName, pluginConfig);
     }
