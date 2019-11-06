@@ -26,7 +26,9 @@ def create_config(metric_name, use_argmax=False):
 
 
 def generate_expected_result(values, metric_name, labels=None):
-    meta = {'names': list(labels.values())} if labels else {}
+    meta = {'target': 'higher-better'}
+    if labels:
+        meta.update({'names': list(labels.values())})
 
     return EvaluationResult(pytest.approx(values), None, metric_name, metric_name, None, meta)
 

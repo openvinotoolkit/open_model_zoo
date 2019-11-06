@@ -29,7 +29,8 @@ class MpjpeMultiperson(PerImageEvaluationMetric):
         self.per_image_mpjpe = []
         self.meta.update({
             'scale': 10,
-            'postfix': 'mm'
+            'postfix': 'mm',
+            'target': 'higher-worse',
         })
 
     def update(self, annotation, prediction):

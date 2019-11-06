@@ -140,6 +140,9 @@ class MetricsExecutor:
     def get_metric_presenters(self):
         return [metric.presenter for metric in self.metrics]
 
+    def get_metrics_direction(self):
+        return {metric.name: metric.metric_fn.meta.get('target', 'higher-better') for metric in self.metrics}
+
     def reset(self):
         for metric in self.metrics:
             metric.metric_fn.reset()
