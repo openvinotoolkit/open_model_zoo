@@ -23,7 +23,6 @@ models:
         model:   public/ssd512/FP32/ssd512.xml
         weights: public/ssd512/FP32/ssd512.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -31,7 +30,6 @@ models:
         model:   public/ssd512/FP16/ssd512.xml
         weights: public/ssd512/FP16/ssd512.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
     datasets:
       - name: VOC2012

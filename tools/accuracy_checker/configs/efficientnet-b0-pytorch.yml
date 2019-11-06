@@ -46,7 +46,6 @@ models:
         model:   public/efficientnet-b0-pytorch/FP16/efficientnet-b0-pytorch.xml
         weights: public/efficientnet-b0-pytorch/FP16/efficientnet-b0-pytorch.bin
         adapter: classification
-        cpu_extensions: AUTO
 
     datasets:
       - name: imagenet_1000_classes

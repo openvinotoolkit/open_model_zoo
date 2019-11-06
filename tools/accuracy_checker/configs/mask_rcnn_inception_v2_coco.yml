@@ -10,7 +10,6 @@ models:
           type: mask_rcnn
           detection_out: reshape_do_2d
           raw_masks_out: masks
-        cpu_extensions: AUTO
         inputs:
           - name: image_info
             type: IMAGE_INFO
@@ -24,7 +23,6 @@ models:
           type: mask_rcnn
           detection_out: reshape_do_2d
           raw_masks_out: masks
-        cpu_extensions: AUTO
         inputs:
           - name: image_info
             type: IMAGE_INFO

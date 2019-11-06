@@ -10,7 +10,6 @@ models:
         adapter:
           type: super_resolution
           reverse_channels: True
-        cpu_extensions: AUTO
         inputs:
           - name: "0"
             type: INPUT
@@ -27,7 +26,6 @@ models:
         adapter:
           type: super_resolution
           reverse_channels: True
-        cpu_extensions: AUTO
         inputs:
           - name: "0"
             type: INPUT
@@ -44,7 +42,6 @@ models:
         adapter:
           type: super_resolution
           reverse_channels: True
-        cpu_extensions: AUTO
         inputs:
           - name: "0"
             type: INPUT

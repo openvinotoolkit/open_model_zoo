@@ -6,7 +6,6 @@ models:
       - framework: mxnet
         model: public/octave-resnet-50-0.125/checkpoint-0-0000.params
         adapter: classification
-        cpu_extensions: AUTO
         inputs: 
           - name: 'data'
             type: INPUT

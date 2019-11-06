@@ -26,7 +26,6 @@ models:
         model:   public/resnet-50-caffe2/FP32/resnet-50-caffe2.xml
         weights: public/resnet-50-caffe2/FP32/resnet-50-caffe2.bin
         adapter: classification
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -34,7 +33,6 @@ models:
         model:   public/resnet-50-caffe2/FP16/resnet-50-caffe2.xml
         weights: public/resnet-50-caffe2/FP16/resnet-50-caffe2.bin
         adapter: classification
-        cpu_extensions: AUTO
 
     datasets:
       - name: imagenet_1000_classes

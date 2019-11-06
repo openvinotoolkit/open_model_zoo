@@ -8,7 +8,6 @@ models:
         model:   intel/image-retrieval-0001/FP32/image-retrieval-0001.xml
         weights: intel/image-retrieval-0001/FP32/image-retrieval-0001.bin
         adapter: reid
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -16,7 +15,6 @@ models:
         model:   intel/image-retrieval-0001/FP16/image-retrieval-0001.xml
         weights: intel/image-retrieval-0001/FP16/image-retrieval-0001.bin
         adapter: reid
-        cpu_extensions: AUTO
 
     datasets:
       - name: image_retrieval
