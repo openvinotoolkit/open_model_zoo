@@ -43,7 +43,9 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         self.value_differ = value_differ
 
     def configure(self):
-        self.meta.update({'names': ['mean', 'std'], 'scale': 1, 'postfix': ' ', 'calculate_mean': False})
+        self.meta.update({
+            'names': ['mean', 'std'], 'scale': 1, 'postfix': ' ', 'calculate_mean': False, 'target': 'higher-worse'
+        })
         self.magnitude = []
 
     def update(self, annotation, prediction):
@@ -93,7 +95,7 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
         self.value_differ = value_differ
 
     def configure(self):
-        self.meta.update({'scale': 1, 'postfix': ' ', 'calculate_mean': False})
+        self.meta.update({'scale': 1, 'postfix': ' ', 'calculate_mean': False, 'target': 'higher-worse'})
         self.ignore_out_of_range = self.get_value_from_config('ignore_values_not_in_interval')
 
         self.intervals = self.get_value_from_config('intervals')
@@ -228,7 +230,9 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
     prediction_types = (FacialLandmarksPrediction, )
 
     def configure(self):
-        self.meta.update({'scale': 1, 'postfix': ' ', 'calculate_mean': True, 'data_format': '{:.4f}'})
+        self.meta.update({
+            'scale': 1, 'postfix': ' ', 'calculate_mean': True, 'data_format': '{:.4f}', 'target': 'higher-worse'
+        })
         self.magnitude = []
 
     def update(self, annotation, prediction):
@@ -282,6 +286,7 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
             'postfix': ' ',
             'calculate_mean': not self.calculate_std or not self.percentile,
             'data_format': '{:.4f}',
+            'target': 'higher-worse'
         })
         self.magnitude = []
 
