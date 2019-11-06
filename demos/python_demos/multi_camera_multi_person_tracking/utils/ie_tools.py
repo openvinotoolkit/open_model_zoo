@@ -59,12 +59,12 @@ class IEModel:
         return self.inputs_info[self.input_key]
 
 
-def load_ie_model(model_xml, device, plugin_dir, cpu_extension='', num_reqs=1):
+def load_ie_model(ie, model_xml, device, plugin_dir, cpu_extension='', num_reqs=1):
     """Loads a model in the Inference Engine format"""
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
     # Plugin initialization for specified device and load extensions library if specified
     log.info("Creating Inference Engine")
-    ie = IECore()
+
     if cpu_extension and 'CPU' in device:
         ie.add_extension(cpu_extension, 'CPU')
     # Read IR

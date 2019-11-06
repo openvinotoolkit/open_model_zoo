@@ -26,6 +26,7 @@ from mc_tracker.mct import MultiCameraTracker
 from utils.misc import read_py_config
 from utils.video import MulticamCapture
 from utils.visualization import visualize_multicam_detections
+from openvino.inference_engine import IECore # pylint: disable=import-error,E0611
 
 log.basicConfig(stream=sys.stdout, level=log.DEBUG)
 
@@ -132,12 +133,13 @@ def main():
     args = parser.parse_args()
 
     capture = MulticamCapture(args.i)
+    ie = IECore()
 
-    person_detector = Detector(args.m_detector, args.t_detector,
+    person_detector = Detector(ie, args.m_detector, args.t_detector,
                                args.device, args.cpu_extension,
                                capture.get_num_sources())
     if args.m_reid:
-        person_recognizer = VectorCNN(args.m_reid, args.device)
+        person_recognizer = VectorCNN(ie, args.m_reid, args.device)
     else:
         person_recognizer = None
     run(args, capture, person_detector, person_recognizer)
