@@ -20,10 +20,6 @@ from collections import namedtuple
 import cv2
 import numpy as np
 from PIL import Image
-try:
-    import tensorflow as tf
-except ImportError as import_error:
-    tf = None
 
 from ..config import ConfigError, NumberField, StringField, BoolField
 from ..dependency import ClassProvider
@@ -162,28 +158,20 @@ class _OpenCVResizer(_Resizer):
 
 class _PillowResizer(_Resizer):
     __provider__ = 'pillow'
+
     supported_interpolations = {
         'NEAREST': Image.NEAREST,
         'NONE': Image.NONE,
+        'BOX': Image.BOX,
         'BILINEAR': Image.BILINEAR,
         'LINEAR': Image.LINEAR,
+        'HAMMING': Image.HAMMING,
         'BICUBIC': Image.BICUBIC,
         'CUBIC': Image.CUBIC,
-        'ANTIALIAS': Image.ANTIALIAS,
+        'LANCZOS': Image.LANCZOS,
+        'ANTIALIAS': Image.ANTIALIAS
     }
     default_interpolation = 'BILINEAR'
-
-    def __init__(self, interpolation):
-        try:
-            optional_interpolations = {
-                'BOX': Image.BOX,
-                'LANCZOS': Image.LANCZOS,
-                'HAMMING': Image.HAMMING,
-            }
-            self.supported_interpolations.update(optional_interpolations)
-        except AttributeError:
-            pass
-        super().__init__(interpolation)
 
     def resize(self, data, new_height, new_width):
         data = Image.fromarray(data)
@@ -197,8 +185,12 @@ class _TFResizer(_Resizer):
     __provider__ = 'tf'
 
     def __init__(self, interpolation):
-        if tf is None:
-            raise ImportError('tf backend for resize operation requires TensorFlow. Please install it before usage.')
+        try:
+            import tensorflow as tf
+        except ImportError as import_error:
+            raise ImportError(
+                'tf resize disabled. Please, install Tensorflow before using. \n{}'.format(import_error.msg)
+            )
         tf.enable_eager_execution()
         self.supported_interpolations = {
             'BILINEAR': tf.image.ResizeMethod.BILINEAR,
@@ -873,3 +865,78 @@ class Crop3D(Preprocessor):
         endz = min(startz + cropz, z)
 
         return img[startz:endz, starty:endy, startx:endx, :]
+
+
+class AffineTransform(Preprocessor):
+    __provider__ = 'affine_transform'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'dst_width': NumberField(
+                value_type=int, optional=True, min_value=1, description="Width of heatmaps output."
+            ),
+            'dst_height': NumberField(
+                value_type=int, optional=True, min_value=1, description="Height of heatmaps output."
+            )
+        })
+
+        return parameters
+
+    def configure(self):
+        self.dst_height, self.dst_width = get_size_from_config(self.config)
+        self.input_height = 384
+        self.input_width = 288
+        self.stride = 8
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        center, scale = self.get_center_scale(annotation_meta['rects'][0], data.shape[1], data.shape[0])
+        trans = self.get_affine_transform(center, scale, [self.input_width, self.input_height])
+        rev_trans = self.get_affine_transform(center, scale, [self.input_width // self.stride, self.input_height // self.stride], key=1)
+        data = cv2.warpAffine(data, trans, (self.input_width, self.input_height), flags=cv2.INTER_LINEAR)
+        image.data = data
+        image.metadata.setdefault('rev_trans', rev_trans)
+        return image
+
+    def get_center_scale(self, bbox, image_w, image_h):
+        # x y w h
+        aspect_ratio = 0.75
+        bbox[0] = np.max((0, bbox[0]))
+        bbox[1] = np.max((0, bbox[1]))
+        x2 = np.min((image_w - 1, bbox[0] + np.max((0, bbox[2] - 1))))
+        y2 = np.min((image_h - 1, bbox[1] + np.max((0, bbox[3] - 1))))
+
+        if x2 >= bbox[0] and y2 >= bbox[1]:
+            bbox = [bbox[0], bbox[1], x2 - bbox[0], y2 - bbox[1]]
+
+        cx_bbox = bbox[0] + bbox[2] * 0.5
+        cy_bbox = bbox[1] + bbox[3] * 0.5
+        center = np.array([np.float32(cx_bbox), np.float32(cy_bbox)])
+
+        if bbox[2] > aspect_ratio * bbox[3]:
+            bbox[3] = bbox[2] * 1.0 / aspect_ratio
+        elif bbox[2] < aspect_ratio * bbox[3]:
+            bbox[2] = bbox[3] * aspect_ratio
+
+        s = np.array([bbox[2] / 200., bbox[3] / 200.], np.float32)
+        scale = s * 1.25
+
+        return center, scale
+
+    def get_affine_transform(self, center, scale, output_size, key=0):
+
+        w, h = scale * 200
+        shift_y = [0, -w * 0.5]
+        shift_x = [-w * 0.5, 0]
+        points = np.array([center, center + shift_x, center + shift_y], dtype=np.float32)
+        transformed_points = np.array([
+            [output_size[0] * 0.5, output_size[1] * 0.5],
+            [0, output_size[1] * 0.5],
+            [output_size[0] * 0.5, output_size[1] * 0.5 - output_size[0] * 0.5]], dtype=np.float32)
+        if key == 0:
+            trans = cv2.getAffineTransform(np.float32(points), np.float32(transformed_points))
+        else:
+            trans = cv2.getAffineTransform(np.float32(transformed_points), np.float32(points))
+        return trans

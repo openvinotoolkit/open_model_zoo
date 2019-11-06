@@ -1,0 +1,20 @@
+models:
+  - name: single-human-pose-estimation-0001
+
+    launchers:
+      - framework: dlsdk
+        device: CPU
+        cpu_extensions:
+        model:   intel/single-human-pose-estimation-0001/single-human-pose-estimation.xml
+        weights: intel/single-human-pose-estimation-0001/single-human-pose-estimation.bin
+        adapter:
+          type: single_human_pose_estimation
+          keypoints_heatmap_out: stage_4_output_1_heatmaps
+
+    datasets:
+      - name: ms_coco_single_keypoints
+        preprocessing:
+          - type: affine_transform
+        metrics:
+          - name: AP
+            type: coco_orig_keypoints_precision

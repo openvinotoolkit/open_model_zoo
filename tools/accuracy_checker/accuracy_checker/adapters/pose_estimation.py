@@ -337,3 +337,66 @@ class HumanPoseAdapter(Adapter):
         scores = np.array(scores)
 
         return persons_keypoints_x, persons_keypoints_y, persons_keypoints_v, scores
+
+
+class SingleHumanPoseAdapter(Adapter):
+    __provider__ = 'single_human_pose_estimation'
+    prediction_types = (PoseEstimationPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'keypoints_heatmap_out': StringField(description="Name of output layer with keypoints heatmaps."),
+        })
+
+        return parameters
+
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
+
+    def configure(self):
+        self.keypoints_heatmap = self.get_value_from_config('keypoints_heatmap_out')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        result = []
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+
+        heatmaps = np.transpose(raw_outputs[self.keypoints_heatmap][-1], (1, 2, 0))
+        sum_score = 0
+        sum_score_thr = 0
+        scores = []
+        x_values = []
+        y_values = []
+        num_kp_thr = 0
+        vis = [1] * raw_outputs[self.keypoints_heatmap].shape[1]
+        for kpt_idx in range(raw_outputs[self.keypoints_heatmap].shape[1]):
+            score, coord = self.extract_keypoints(heatmaps[:, :, kpt_idx])
+            scores.append(score)
+            x, y = self.affine_transform(coord, frame_meta[0]['rev_trans'])
+            x_values.append(x)
+            y_values.append(y)
+            if score > 0.2:
+                sum_score_thr += score
+                num_kp_thr += 1
+            sum_score += score
+        if num_kp_thr != 0:
+            pose_score = sum_score_thr / num_kp_thr
+        else:
+            pose_score = sum_score / raw_outputs[self.keypoints_heatmap].shape[1]
+        result.append(PoseEstimationPrediction(identifiers[0], np.array([x_values]), np.array([y_values]), np.array([vis]), np.array([pose_score])))
+
+        return result
+
+    def extract_keypoints(self, heatmap, min_confidence=-100):
+        ind = np.unravel_index(np.argmax(heatmap, axis=None), heatmap.shape)
+        if heatmap[ind] < min_confidence:
+            ind = (-1, -1)
+        else:
+            ind = (int(ind[1]), int(ind[0]))
+        return heatmap[ind[1]][ind[0]], ind
+
+    def affine_transform(self, pt, t):
+        new_pt = np.array([pt[0], pt[1], 1.])
+        new_pt = np.dot(t, new_pt)
+        return new_pt[:2]
