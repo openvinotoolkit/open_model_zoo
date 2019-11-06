@@ -166,7 +166,8 @@ class DLSDKLauncher(Launcher):
         parameters.update({
             'model': PathField(description="Path to model."),
             'weights': PathField(description="Path to model."),
-            'device': StringField(regex=SUPPORTED_DEVICE_REGEX, description="Device name."),
+            'ie_config': PathField(description='Path to Inference Engine config'),
+            'device': StringField(description="Device name."),
             'caffe_model': PathField(optional=True, description="Path to Caffe model file."),
             'caffe_weights': PathField(optional=True, description="Path to Caffe weights file."),
             'mxnet_weights': PathField(optional=True, description="Path to MxNet weights file."),
