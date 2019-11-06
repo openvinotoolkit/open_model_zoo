@@ -45,31 +45,18 @@ models:
 
     launchers:
       - framework: dlsdk
-        device: CPU
         tags:
           - FP32
         model:   public/octave-resnet-200-0.125/FP32/octave-resnet-200-0.125.xml
         weights: public/octave-resnet-200-0.125/FP32/octave-resnet-200-0.125.bin
         adapter: classification
-        cpu_extensions: AUTO
 
       - framework: dlsdk
-        device: GPU
-        tags:
-          - FP32
-        model: octave-resnet-200-0.125/FP32/octave-resnet-200-0.125.xml
-        weights: octave-resnet-200-0.125/FP32/octave-resnet-200-0.125.bin
-        adapter: classification
-        cpu_extensions: AUTO
-
-      - framework: dlsdk
-        device: GPU
         tags:
           - FP16
         model: octave-resnet-200-0.125/FP16/octave-resnet-200-0.125.xml
         weights: octave-resnet-200-0.125/FP16/octave-resnet-200-0.125.bin
         adapter: classification
-        cpu_extensions: AUTO
 
     datasets:
       - name: imagenet_1000_classes

@@ -25,7 +25,6 @@ models:
         model:   public/vgg19-caffe2/FP32/vgg19-caffe2.xml
         weights: public/vgg19-caffe2/FP32/vgg19-caffe2.bin
         adapter: classification
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -33,7 +32,6 @@ models:
         model:   public/vgg19-caffe2/FP16/vgg19-caffe2.xml
         weights: public/vgg19-caffe2/FP16/vgg19-caffe2.bin
         adapter: classification
-        cpu_extensions: AUTO
 
     datasets:
       - name: imagenet_1000_classes

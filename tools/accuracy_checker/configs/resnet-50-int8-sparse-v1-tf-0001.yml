@@ -8,8 +8,6 @@ models:
         model:   intel/resnet-50-int8-sparse-v1-tf-0001/FP32/resnet-50-int8-sparse-v1-tf-0001.xml
         weights: intel/resnet-50-int8-sparse-v1-tf-0001/FP32/resnet-50-int8-sparse-v1-tf-0001.bin
         adapter: classification
-        cpu_extensions: AUTO
-
 
     datasets:
       - name: imagenet_1000_classes

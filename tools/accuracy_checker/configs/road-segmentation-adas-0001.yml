@@ -8,7 +8,6 @@ models:
         model:   intel/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.xml
         weights: intel/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.bin
         adapter: segmentation
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -16,7 +15,6 @@ models:
         model:   intel/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.xml
         weights: intel/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.bin
         adapter: segmentation
-        cpu_extensions: AUTO
 
     datasets:
       - name: road_segmentation

@@ -15,7 +15,6 @@ models:
           pixel_link_confidence_threshold: 0.8
           min_area: 300
           min_height: 10
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -30,7 +29,6 @@ models:
           pixel_link_confidence_threshold: 0.8
           min_area: 300
           min_height: 10
-        cpu_extensions: AUTO
 
     datasets:
       - name: ICDAR2015

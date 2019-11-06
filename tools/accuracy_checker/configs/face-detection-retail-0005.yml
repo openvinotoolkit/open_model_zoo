@@ -8,7 +8,6 @@ models:
         model:   intel/face-detection-retail-0005/FP32/face-detection-retail-0005.xml
         weights: intel/face-detection-retail-0005/FP32/face-detection-retail-0005.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -16,7 +15,6 @@ models:
         model:   intel/face-detection-retail-0005/FP16/face-detection-retail-0005.xml
         weights: intel/face-detection-retail-0005/FP16/face-detection-retail-0005.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -24,7 +22,6 @@ models:
         model:   intel/face-detection-retail-0005/INT8/face-detection-retail-0005.xml
         weights: intel/face-detection-retail-0005/INT8/face-detection-retail-0005.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
     datasets:
       - name: wider

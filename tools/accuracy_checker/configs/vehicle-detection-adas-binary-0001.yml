@@ -8,7 +8,6 @@ models:
         model:   intel/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.xml
         weights: intel/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
     datasets:
       - name: vehicle_detection_dataset

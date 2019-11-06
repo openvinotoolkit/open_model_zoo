@@ -49,7 +49,6 @@ models:
         model:   public/octave-resnet-26-0.25/FP32/octave-resnet-26-0.25.xml
         weights: public/octave-resnet-26-0.25/FP32/octave-resnet-26-0.25.bin
         adapter: classification
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -57,7 +56,6 @@ models:
         model:   public/octave-resnet-26-0.25/FP16/octave-resnet-26-0.25.xml
         weights: public/octave-resnet-26-0.25/FP16/octave-resnet-26-0.25.bin
         adapter: classification
-        cpu_extensions: AUTO
 
     datasets:
       - name: imagenet_1000_classes

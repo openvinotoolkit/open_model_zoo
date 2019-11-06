@@ -23,7 +23,6 @@ models:
         model:   public/ssd300/FP32/ssd300.xml
         weights: public/ssd300/FP32/ssd300.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -31,7 +30,6 @@ models:
         model:   public/ssd300/FP16/ssd300.xml
         weights: public/ssd300/FP16/ssd300.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
     datasets:
       - name: VOC2012

@@ -19,7 +19,6 @@ models:
             type: INPUT
             value: ".*.json"
         adapter: gaze_estimation
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -37,7 +36,6 @@ models:
             type: INPUT
             value: ".*.json"
         adapter: gaze_estimation
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -55,7 +53,6 @@ models:
             type: INPUT
             value: ".*.json"
         adapter: gaze_estimation
-        cpu_extensions: AUTO
 
     datasets:
       - name: gaze_estimation_dataset
