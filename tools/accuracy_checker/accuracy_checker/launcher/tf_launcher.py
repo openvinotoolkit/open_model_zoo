@@ -18,8 +18,8 @@ import re
 from pathlib import Path
 import tensorflow as tf
 from tensorflow.python.saved_model import tag_constants
-from .launcher import Launcher
-from ..config import BaseField, ListField, PathField, StringField, ConfigError, ConfigValidator
+from .launcher import Launcher, LauncherConfigValidator
+from ..config import BaseField, ListField, PathField, StringField, ConfigError
 from ..utils import contains_any, contains_all
 
 
@@ -48,7 +48,7 @@ class TFLauncher(Launcher):
         self.default_layout = 'NHWC'
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
-        tf_launcher_config = ConfigValidator(
+        tf_launcher_config = LauncherConfigValidator(
             'TF_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
         )
         tf_launcher_config.validate(self.config)
