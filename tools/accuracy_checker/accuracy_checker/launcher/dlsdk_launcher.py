@@ -43,16 +43,6 @@ HETERO_KEYWORD = 'HETERO:'
 MULTI_DEVICE_KEYWORD = 'MULTI:'
 FPGA_COMPILER_MODE_VAR = 'CL_CONTEXT_COMPILER_MODE_INTELFPGA'
 NIREQ_REGEX = r"(\(\d+\))"
-HETERO_MODE_REGEX = r"(?:^{hetero}(?P<devices>(?:{devices})(?:,(?:{devices}))*)$)".format(
-    hetero=HETERO_KEYWORD, devices="|".join(ie.known_plugins)
-)
-MULTI_DEVICE_MODE_REGEX = r"(?:^{multi}(?P<devices_ireq>(?:{devices_ireq})(?:,(?:{devices_ireq}))*)$)".format(
-    multi=MULTI_DEVICE_KEYWORD, devices_ireq="{}?|".format(NIREQ_REGEX).join(ie.known_plugins)
-)
-DEVICE_REGEX = r"(?:^(?P<device>{devices})$)".format(devices="|".join(ie.known_plugins))
-SUPPORTED_DEVICE_REGEX = r"{multi}|{hetero}|{regular}".format(
-    multi=MULTI_DEVICE_MODE_REGEX, hetero=HETERO_MODE_REGEX, regular=DEVICE_REGEX
-)
 VPU_PLUGINS = ('HDDL', "MYRIAD")
 VPU_LOG_LEVELS = ('LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG')
 
@@ -86,9 +76,25 @@ class CPUExtensionPathField(PathField):
 
 
 class DLSDKLauncherConfigValidator(LauncherConfigValidator):
-    def __init__(self, config_uri, **kwargs):
-        super().__init__(config_uri, **kwargs)
+    def __init__(
+            self, config_uri, fields=None, delayed_model_loading=False, available_devices=ie.known_plugins, **kwargs
+    ):
+        super().__init__(config_uri, fields, delayed_model_loading, **kwargs)
         self.need_conversion = None
+        self.create_device_regex(available_devices)
+
+    def create_device_regex(self, available_devices):
+        self.regular_device_regex = r"(?:^(?P<device>{devices})$)".format(devices="|".join(available_devices))
+        self.hetero_regex = r"(?:^{hetero}(?P<devices>(?:{devices})(?:,(?:{devices}))*)$)".format(
+            hetero=HETERO_KEYWORD, devices="|".join(available_devices)
+        )
+        self.multi_device_regex = r"(?:^{multi}(?P<devices_ireq>(?:{devices_ireq})(?:,(?:{devices_ireq}))*)$)".format(
+            multi=MULTI_DEVICE_KEYWORD, devices_ireq="{}?|".format(NIREQ_REGEX).join(available_devices)
+        )
+        self.supported_device_regex = r"{multi}|{hetero}|{regular}".format(
+            multi=self.multi_device_regex, hetero=self.hetero_regex, regular=self.regular_device_regex
+        )
+        self.fields['device'].set_regex(self.supported_device_regex)
 
     def validate(self, entry, field_uri=None):
         """
@@ -166,7 +172,7 @@ class DLSDKLauncher(Launcher):
         parameters.update({
             'model': PathField(description="Path to model."),
             'weights': PathField(description="Path to model."),
-            'ie_config': PathField(description='Path to Inference Engine config'),
+            'ie_config': PathField(description='Path to Inference Engine xml config', optional=True),
             'device': StringField(description="Device name."),
             'caffe_model': PathField(optional=True, description="Path to Caffe model file."),
             'caffe_weights': PathField(optional=True, description="Path to Caffe weights file."),
@@ -213,19 +219,18 @@ class DLSDKLauncher(Launcher):
 
     def __init__(self, config_entry, delayed_model_loading=False):
         super().__init__(config_entry)
-
+        self._set_variable = False
+        self.ie_config = self.config.get('ie_config')
+        self.ie_core = ie.IECore(xml_config_file=str(self.ie_config)) if self.ie_config is not None else ie.IECore()
+        self._delayed_model_loading = delayed_model_loading
         dlsdk_launcher_config = DLSDKLauncherConfigValidator(
-            'DLSDK_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading
+            'DLSDK_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading,
+            available_devices=self.ie_core.available_devices
         )
         dlsdk_launcher_config.validate(self.config)
-
         self._device = self.config['device'].upper()
-        self._set_variable = False
         self._prepare_bitstream_firmware(self.config)
-        self.ie_core = ie.IECore()
         self._prepare_ie()
-        self._delayed_model_loading = delayed_model_loading
-
         if not delayed_model_loading:
             if dlsdk_launcher_config.need_conversion:
                 self._model, self._weights = DLSDKLauncher.convert_model(self.config, dlsdk_launcher_config.framework)
@@ -517,12 +522,27 @@ class DLSDKLauncher(Launcher):
         return data.reshape(input_shape)
 
     def _prepare_ie(self, log=True):
+        def set_nireq():
+            num_requests = self.config.get('num_requests')
+            if num_requests is not None:
+                num_requests = get_or_parse_value(num_requests, casting_type=int)
+                if len(num_requests) != 1:
+                    raise ConfigError('Several values for _num_requests specified')
+                self._num_requests = num_requests[0]
+                if self._num_requests != 1 and not self.async_mode:
+                    warning('{} infer requests in sync mode is not supported. Only 1 infer request will be used.')
+                    self._num_requests = 1
+            elif not self.async_mode:
+                self._num_requests = 1
+            else:
+                self._num_requests = self.auto_num_requests()
         if log:
             print_info('IE version: {}'.format(ie.get_version()))
         if self._is_multi():
             self._prepare_multi_device(log)
         else:
             self.async_mode = self.get_value_from_config('async_mode')
+            set_nireq()
 
             if log:
                 self._log_versions()

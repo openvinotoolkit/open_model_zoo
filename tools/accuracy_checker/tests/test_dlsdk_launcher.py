@@ -1134,6 +1134,7 @@ class TestDLSDKLauncherConfig:
 
     def test_hetero_endswith_comma(self):
         with pytest.raises(ConfigError):
+            self.config.create_device_regex(['CPU', 'FPGA'])
             self.config.validate(update_dict(self.launcher, device='HETERO:CPU,FPGA,'))
 
     def test_multi_device_correct(self):
@@ -1143,20 +1144,25 @@ class TestDLSDKLauncherConfig:
 
     def test_multi_device_endswith_comma(self):
         with pytest.raises(ConfigError):
+            self.config.create_device_regex(['CPU', 'FPGA'])
             self.config.validate(update_dict(self.launcher, device='MULTI:CPU,FPGA,'))
 
     def test_multi_device_empty_brackets(self):
         with pytest.raises(ConfigError):
+            self.config.create_device_regex(['CPU', 'FPGA'])
             self.config.validate(update_dict(self.launcher, device='MULTI:CPU,FPGA()'))
 
     def test_multi_device_n_requests_without_brackets(self):
         with pytest.raises(ConfigError):
+            self.config.create_device_regex(['CPU', 'FPGA'])
             self.config.validate(update_dict(self.launcher, device='MULTI:CPU(42),FPGA666'))
 
         with pytest.raises(ConfigError):
+            self.config.create_device_regex(['CPU', 'FPGA'])
             self.config.validate(update_dict(self.launcher, device='MULTI:CPU42,FPGA(666)'))
 
         with pytest.raises(ConfigError):
+            self.config.create_device_regex(['CPU', 'FPGA'])
             self.config.validate(update_dict(self.launcher, device='MULTI:CPU42,FPGA666'))
 
     def test_multi_device_missed_bracket(self):

@@ -171,8 +171,13 @@ class StringField(BaseField):
         super().__init__(**kwargs)
         self.choices = choices if case_sensitive or not choices else list(map(str.lower, choices))
         self.allow_own_choice = allow_own_choice
-        self._regex = re.compile(regex, flags=re.IGNORECASE if not case_sensitive else 0) if regex else None
         self.case_sensitive = case_sensitive
+        self.set_regex(regex)
+
+    def set_regex(self, regex):
+        if regex is None:
+            self._regex = regex
+        self._regex = re.compile(regex, flags=re.IGNORECASE if not self.case_sensitive else 0) if regex else None
 
     def validate(self, entry, field_uri=None):
         super().validate(entry, field_uri)
