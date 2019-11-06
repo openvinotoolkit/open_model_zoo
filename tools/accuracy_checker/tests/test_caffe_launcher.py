@@ -49,7 +49,7 @@ class TestCaffeLauncher:
         input_blob = np.transpose([img_resized], (0, 3, 1, 2))
         res = caffe_test_model.predict([{'data': input_blob.astype(np.float32)}], [{}])
 
-        assert np.argmax(res[0]['fc3']) == 6
+        assert np.argmax(res[0]['fc3']) == 7
 
     def test_caffe_launcher_provide_input_shape_to_adapter(self, mocker, models_dir):
         mocker.patch('caffe.Net.forward', return_value={'fc3': 0})
