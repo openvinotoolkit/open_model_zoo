@@ -33,7 +33,7 @@ void meansToOstream(const std::map<MonitorType, std::vector<double>> means, std:
         if (cpuAverageMean->second.empty()) {
             tmpStream << "No data collected for CPU utilization\n";
         } else {
-            assert (1 == cpuAverageMean.second.size());
+            assert (1 == cpuAverageMean->second.size());
             tmpStream << "Mean CPU utilization: " << std::fixed << std::setprecision(1)
                 << cpuAverageMean->second.front() * 100 << "%\n";
         }
@@ -55,7 +55,7 @@ void meansToOstream(const std::map<MonitorType, std::vector<double>> means, std:
             if (memoryMean->second.empty()) {
                 tmpStream << "No data collected for memory ans swap usage\n";
             } else {
-                assert (2 == memoryMean.second.size());
+                assert (2 == memoryMean->second.size());
                 tmpStream << "Mean memory usage: " << std::fixed << std::setprecision(1) << memoryMean->second.front()
                     << "GiB\n";
                 tmpStream << "Mean swap usage: " << std::fixed << std::setprecision(1) << memoryMean->second.back()
@@ -162,7 +162,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
 
     if (cpuMonitor.isHistoryEnabled() && --numberOfEnabledMonitors >= 0) {
         std::deque<std::vector<double>> lastHistory = cpuMonitor.getLastHistory();
-        cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize});
+        cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize} & cv::Rect(0, 0, frame.cols, frame.rows));
         graph *= 1.3;
 
         int lineXPos = graph.cols - 1;
@@ -203,7 +203,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
 
     if (cpuMonitor.isLastEnabled() && --numberOfEnabledMonitors >= 0) {
         std::deque<std::vector<double>> lastHistory = cpuMonitor.getLastHistory();
-        cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize});
+        cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize} & cv::Rect(0, 0, frame.cols, frame.rows));
         graph *= 1.3;
 
         if (!lastHistory.empty()) {
@@ -248,7 +248,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
 
     if (memoryMonitor.isEnabled() && --numberOfEnabledMonitors >= 0) {
         std::deque<std::pair<double, double>> lastHistory = memoryMonitor.getLastHistory();
-        cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize});
+        cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize} & cv::Rect(0, 0, frame.cols, frame.rows));
         graph *= 1.3;
         int histxPos = graph.cols - 1;
         double range = std::min(memoryMonitor.memTotal + memoryMonitor.swapTotal,

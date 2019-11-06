@@ -20,6 +20,8 @@ from image_sequences import IMAGE_SEQUENCES
 
 ALL_DEVICES = ['CPU', 'GPU']
 
+MONITORS = 'cdm'
+
 TestCase = collections.namedtuple('TestCase', ['options'])
 
 class NativeDemo:
@@ -79,6 +81,7 @@ def device_cases(*args):
 NATIVE_DEMOS = [
     NativeDemo(subdirectory='crossroad_camera_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
+            '-u': MONITORS,
             '-i': ImagePatternArg('person-vehicle-bike-detection-crossroad')}),
         device_cases('-d', '-d_pa', '-d_reid'),
         TestCase(options={'-m': ModelArg('person-vehicle-bike-detection-crossroad-0078')}),
@@ -88,6 +91,7 @@ NATIVE_DEMOS = [
 
     NativeDemo(subdirectory='gaze_estimation_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
+            '-u': MONITORS,
             '-i': ImagePatternArg('gaze-estimation-adas')}),
         device_cases('-d', '-d_fd', '-d_hp', '-d_lm'),
         TestCase(options={
@@ -100,6 +104,7 @@ NATIVE_DEMOS = [
 
     NativeDemo(subdirectory='human_pose_estimation_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
+            '-u': MONITORS,
             '-i': ImagePatternArg('human-pose-estimation')}),
         device_cases('-d'),
         TestCase(options={'-m': ModelArg('human-pose-estimation-0001')}),
@@ -107,6 +112,7 @@ NATIVE_DEMOS = [
 
     NativeDemo(subdirectory='interactive_face_detection_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
+            '-u': MONITORS,
             '-i': ImagePatternArg('face-detection-adas')}),
         device_cases('-d', '-d_ag', '-d_em', '-d_lm', '-d_hp'),
         TestCase(options={'-m': ModelArg('face-detection-adas-0001')}),
@@ -129,6 +135,7 @@ NATIVE_DEMOS = [
 
     NativeDemo(subdirectory='multi_channel/face_detection_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
+            '-u': MONITORS,
             '-i': IMAGE_SEQUENCES['face-detection-adas']}),
         device_cases('-d'),
         single_option_cases('-m',
@@ -141,13 +148,14 @@ NATIVE_DEMOS = [
 
     NativeDemo(subdirectory='multi_channel/human_pose_estimation_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
+            '-u': MONITORS,
             '-i': IMAGE_SEQUENCES['human-pose-estimation'],
             '-m': ModelArg('human-pose-estimation-0001')}),
         device_cases('-d'),
     )),
 
     NativeDemo(subdirectory='object_detection_demo_ssd_async', test_cases=combine_cases(
-        TestCase(options={'-no_show': None}),
+        TestCase(options={'-no_show': None, '-u': MONITORS}),
         [
             TestCase(options={
                 '-m': ModelArg('face-detection-adas-0001'),
@@ -168,6 +176,7 @@ NATIVE_DEMOS = [
 
     NativeDemo('pedestrian_tracker_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
+            '-u': MONITORS,
             '-i': ImagePatternArg('person-detection-retail')}),
         device_cases('-d_det', '-d_reid'),
         [
@@ -182,6 +191,7 @@ NATIVE_DEMOS = [
 
     NativeDemo(subdirectory='security_barrier_camera_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
+            '-u': MONITORS,
             '-i': ImageDirectoryArg('vehicle-license-plate-detection-barrier')}),
         device_cases('-d', '-d_lpr', '-d_va'),
         TestCase(options={'-m': ModelArg('vehicle-license-plate-detection-barrier-0106')}),
@@ -205,6 +215,7 @@ NATIVE_DEMOS = [
 
     NativeDemo(subdirectory='smart_classroom_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
+            '-u': MONITORS,
             '-i': ImagePatternArg('smart-classroom-demo'),
             '-m_fd': ModelArg('face-detection-adas-0001')}),
         device_cases('-d_act', '-d_fd', '-d_lm', '-d_reid'),
@@ -235,6 +246,7 @@ NATIVE_DEMOS = [
 
     NativeDemo(subdirectory='text_detection_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None, '-dt': 'video',
+            '-u': MONITORS,
             '-i': ImagePatternArg('text-detection')}),
         device_cases('-d_td', '-d_tr'),
         single_option_cases('-m_td', ModelArg('text-detection-0003'), ModelArg('text-detection-0004')),
