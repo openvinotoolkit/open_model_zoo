@@ -231,8 +231,9 @@ def main():
         return 1
 
     out_layer_names = td.getUnconnectedOutLayersNames()
-    expected_out_layer_names = ['pixel_cls/add_2', 'pixel_link/add_2']
-    if out_layer_names != expected_out_layer_names:
+    expected_out_layer_names = (['model/link_logits_/add', 'model/segm_logits/add'],
+                                ['pixel_cls/add_2', 'pixel_link/add_2'])
+    if out_layer_names not in expected_out_layer_names:
         print("Net has unexpected output layer names, please check model files")
         print(f"Expected: '{expected_out_layer_names}', returned: '{out_layer_names}'")
         return 1
