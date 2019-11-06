@@ -244,7 +244,6 @@ NATIVE_DEMOS = [
 
 PYTHON_DEMOS = [
     # TODO: 3d_segmentation_demo: no input data
-
     PythonDemo(subdirectory='action_recognition', test_cases=combine_cases(
         TestCase(options={'--no_show': None, '-i': ImagePatternArg('action-recognition')}),
         device_cases('-d'),
@@ -307,22 +306,7 @@ PYTHON_DEMOS = [
     )),
 
     # TODO: object_detection_demo_yolov3_async: no models.lst
-
-    PythonDemo(subdirectory='segmentation_demo', test_cases=combine_cases(
-        device_cases('-d'),
-        [
-            TestCase(options={
-                '-m': ModelArg('road-segmentation-adas-0001'),
-                '-i': IMAGE_SEQUENCES['road-segmentation-adas'],
-            }),
-            TestCase(options={
-                '-m': ModelArg('semantic-segmentation-adas-0001'),
-                '-i': IMAGE_SEQUENCES['semantic-segmentation-adas'],
-            }),
-        ],
-    )),
-    
-    PythonDemo(name='text_detection_demo', test_cases=combine_cases(
+    PythonDemo(subdirectory='text_detection_demo_opencv', test_cases=combine_cases(
         device_cases('-d'),
         [
             TestCase(options={
