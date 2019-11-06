@@ -47,7 +47,7 @@ Options:
     -duplicate_num               Optional. Enable and specify number of channel additionally copied from real sources
     -real_input_fps              Optional. Disable input frames caching, for maximum throughput pipeline
     -i                           Optional. Specify full path to input video files
-
+    -u                           Optional. List of monitors to show.
 ```
 
 To run the demo, you can use public pre-train model and follow [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page for instruction of how to convert it to IR model. 

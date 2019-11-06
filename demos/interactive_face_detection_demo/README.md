@@ -83,6 +83,7 @@ Options:
     -loop_video                Optional. Enable playing video on a loop
     -no_smooth                 Optional. Do not smooth person attributes
     -no_show_emotion_bar       Optional. Do not show emotion bar
+    -u                         Optional. List of monitors to show.
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.

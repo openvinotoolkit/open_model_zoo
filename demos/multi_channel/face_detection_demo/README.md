@@ -47,7 +47,7 @@ Options:
     -duplicate_num               Optional. Enable and specify the number of channels additionally copied from real sources
     -real_input_fps              Optional. Disable input frames caching for maximum throughput pipeline
     -i                           Optional. Specify full path to input video files
-
+    -u                           Optional. List of monitors to show.
 ```
 
 To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
