@@ -330,7 +330,7 @@ class ModelEvaluator:
     def get_network(self):
         return self.launcher.network
 
-    def get_metrics_growth_direction(self):
+    def get_metrics_direction(self):
         if not self.metric_executor:
             return {}
         return self.metric_executor.get_metrics_direction()
