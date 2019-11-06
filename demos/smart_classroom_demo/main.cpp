@@ -5,6 +5,7 @@
 #include <chrono>  // NOLINT
 
 #include <gflags/gflags.h>
+#include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 #ifdef WITH_EXTENSIONS
@@ -169,7 +170,7 @@ public:
         if (enabled_ && !writer_.isOpened()) {
             cv::putText(frame_,
                         std::to_string(static_cast<int>(fps)) + " fps",
-                        cv::Point(10, 50), cv::FONT_HERSHEY_SIMPLEX, 2,
+                        cv::Point(10, 50), cv::FONT_HERSHEY_SIMPLEX, 1,
                         color, 2, cv::LINE_AA);
         }
     }
@@ -206,7 +207,7 @@ public:
             const int text_shift = (crop_width_ - label_size.width) / 2;
             cv::putText(top_persons_, label_to_draw,
                         cv::Point(shift + text_shift, label_size.height + baseLine / 2),
-                        cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
+                        cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
         }
 
         cv::imshow(top_window_name_, top_persons_);
@@ -710,6 +711,9 @@ int main(int argc, char* argv[]) {
         }
         std::cout << std::endl;
 
+        cv::Size graphSize{static_cast<int>(frame.cols / 4), 60};
+        Presenter presenter(FLAGS_u, frame.rows - graphSize.height - 10, graphSize);
+
         while (!is_last_frame) {
             logger.CreateNextFrameRecord(cap.GetVideoPath(), work_num_frames, prev_frame.cols, prev_frame.rows);
             auto started = std::chrono::high_resolution_clock::now();
@@ -721,7 +725,11 @@ int main(int argc, char* argv[]) {
             char key = cv::waitKey(1);
             if (key == ESC_KEY) {
                 break;
+            } else {
+                presenter.addRemoveMonitor(key);
             }
+
+            presenter.drawGraphs(prev_frame);
 
             sc_visualizer.SetFrame(prev_frame);
 

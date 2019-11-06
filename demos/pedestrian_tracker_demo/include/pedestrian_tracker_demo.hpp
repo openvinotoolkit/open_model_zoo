@@ -65,6 +65,9 @@ static const char first_frame_message[] = "Optional. The index of the first fram
 static const char last_frame_message[] = "Optional. The index of the last frame of video sequence to process. "\
                                           "This has effect only if it is positive.";
 
+/// @brief Message list of monitors to show
+static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+
 
 /// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
@@ -122,6 +125,10 @@ DEFINE_int32(first, -1, first_frame_message);
 /// It is an optional parameter
 DEFINE_int32(last, -1, last_frame_message);
 
+/// \brief Define a flag to show monitors<br>
+/// It is an optional parameter
+DEFINE_string(u, "", utilization_monitors_message);
+
 
 /**
  * @brief This function show a help message
@@ -147,4 +154,5 @@ static void showUsage() {
     std::cout << "    -out \"<path>\"                " << output_log_message << std::endl;
     std::cout << "    -first                       " << first_frame_message << std::endl;
     std::cout << "    -last                        " << last_frame_message << std::endl;
+    std::cout << "    -u                           " << utilization_monitors_message << std::endl;
 }

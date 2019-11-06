@@ -130,6 +130,9 @@ static const char no_smooth_output_message[] = "Optional. Do not smooth person a
 /// @brief Message for smooth argument
 static const char no_show_emotion_bar_message[] = "Optional. Do not show emotion bar";
 
+/// @brief Message list of monitors to show
+static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+
 /// \brief Define flag for showing help message<br>
 DEFINE_bool(h, false, help_message);
 
@@ -259,6 +262,10 @@ DEFINE_bool(no_smooth, false, no_smooth_output_message);
 /// It is an optional parameter
 DEFINE_bool(no_show_emotion_bar, false, no_show_emotion_bar_message);
 
+/// \brief Define a flag to show monitors<br>
+/// It is an optional parameter
+DEFINE_string(u, "", utilization_monitors_message);
+
 
 /**
 * \brief This function shows a help message
@@ -306,4 +313,5 @@ static void showUsage() {
     std::cout << "    -loop_video                " << loop_video_output_message << std::endl;
     std::cout << "    -no_smooth                 " << no_smooth_output_message << std::endl;
     std::cout << "    -no_show_emotion_bar       " << no_show_emotion_bar_message << std::endl;
+    std::cout << "    -u                         " << utilization_monitors_message << std::endl;
 }

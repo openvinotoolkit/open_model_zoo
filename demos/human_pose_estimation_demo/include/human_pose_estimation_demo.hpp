@@ -31,6 +31,9 @@ static const char no_show_processed_video[] = "Optional. Do not show processed v
 /// @brief Message for raw output
 static const char raw_output_message[] = "Optional. Output inference results as raw values.";
 
+/// @brief Message list of monitors to show
+static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+
 /// @brief Defines flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
@@ -58,6 +61,10 @@ DEFINE_bool(no_show, false, no_show_processed_video);
 /// It is an optional parameter
 DEFINE_bool(r, false, raw_output_message);
 
+/// \brief Define a flag to show monitors<br>
+/// It is an optional parameter
+DEFINE_string(u, "", utilization_monitors_message);
+
 /**
 * @brief This function shows a help message
 */
@@ -73,4 +80,5 @@ static void showUsage() {
     std::cout << "    -pc                        " << performance_counter_message << std::endl;
     std::cout << "    -no_show                   " << no_show_processed_video << std::endl;
     std::cout << "    -r                         " << raw_output_message << std::endl;
+    std::cout << "    -u                         " << utilization_monitors_message << std::endl;
 }

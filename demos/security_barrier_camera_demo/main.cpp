@@ -19,6 +19,7 @@
 #ifdef WITH_EXTENSIONS
 #include <ext_list.hpp>
 #endif
+#include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/args_helper.hpp>
 
@@ -97,7 +98,7 @@ struct Context {  // stores all global data for tasks
             const Detector& detector, const std::weak_ptr<Worker>& inferTasksWorker,
             const VehicleAttributesClassifier& vehicleAttributesClassifier, const Lpr& lpr, const std::weak_ptr<Worker>& detectionsProcessorsWorker,
             int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
-                const std::weak_ptr<Worker>& drawersWorker,
+                const std::weak_ptr<Worker>& drawersWorker, const std::string& monitorsStr,
             uint64_t lastFrameId,
             const std::weak_ptr<Worker> resAggregatorsWorker,
             uint64_t nireq,
@@ -106,7 +107,7 @@ struct Context {  // stores all global data for tasks
         readersContext{inputChannels, readersWorker, std::vector<int64_t>(inputChannels.size(), -1), std::vector<std::mutex>(inputChannels.size())},
         inferTasksContext{detector, inferTasksWorker},
         detectionsProcessorsContext{vehicleAttributesClassifier, lpr, detectionsProcessorsWorker},
-        drawersContext{pause, gridParam, displayResolution, showPeriod, drawersWorker},
+        drawersContext{pause, gridParam, displayResolution, showPeriod, drawersWorker, monitorsStr},
         videoFramesContext{std::vector<uint64_t>(inputChannels.size(), lastFrameId), std::vector<std::mutex>(inputChannels.size())},
         resAggregatorsWorker{resAggregatorsWorker},
         nireq{nireq},
@@ -149,9 +150,12 @@ struct Context {  // stores all global data for tasks
     } detectionsProcessorsContext;
     struct DrawersContext {
         DrawersContext(int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
-                       const std::weak_ptr<Worker>& drawersWorker):
+                       const std::weak_ptr<Worker>& drawersWorker, const std::string& monitorsStr):
             pause{pause}, gridParam{gridParam}, displayResolution{displayResolution}, showPeriod{showPeriod}, drawersWorker{drawersWorker},
-            lastShownframeId{0}, prevShow{std::chrono::steady_clock::time_point()}, framesAfterUpdate{0}, updateTime{std::chrono::steady_clock::time_point()} {}
+            lastShownframeId{0}, prevShow{std::chrono::steady_clock::time_point()}, framesAfterUpdate{0}, updateTime{std::chrono::steady_clock::time_point()},
+            presenter{monitorsStr,
+                GridMat(gridParam, displayResolution).outimg.rows - 70,
+                cv::Size{GridMat(gridParam, displayResolution).outimg.cols / 4, 60}} {}
         int pause;
         std::vector<cv::Size> gridParam;
         cv::Size displayResolution;
@@ -164,6 +168,7 @@ struct Context {  // stores all global data for tasks
         std::ostringstream outThroughput;
         unsigned framesAfterUpdate;
         std::chrono::steady_clock::time_point updateTime;
+        Presenter presenter;
     } drawersContext;
     struct {
         std::vector<uint64_t> lastframeIds;
@@ -360,6 +365,8 @@ void Drawer::process() {
         }
         cv::putText(mat, context.drawersContext.outThroughput.str(), cv::Point2f(15, 35), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
 
+        context.drawersContext.presenter.drawGraphs(mat);
+
         cv::imshow("Detection results", firstGridIt->second.getMat());
         context.drawersContext.prevShow = std::chrono::steady_clock::now();
         const int key = cv::waitKey(context.drawersContext.pause);
@@ -369,6 +376,8 @@ void Drawer::process() {
             } catch (const std::bad_weak_ptr&) {}
         } else if (key == 32) {
             context.drawersContext.pause = (context.drawersContext.pause + 1) & 1;
+        } else {
+            context.drawersContext.presenter.addRemoveMonitor(key);
         }
         firstGridIt->second.clear();
         gridMats.emplace((--gridMats.end())->first + 1, firstGridIt->second);
@@ -816,7 +825,7 @@ int main(int argc, char* argv[]) {
         Context context{inputChannels, worker,
                         detector, worker,
                         vehicleAttributesClassifier, lpr, worker,
-                        pause, gridParam, displayResolution, showPeriod, worker,
+                        pause, gridParam, displayResolution, showPeriod, worker, FLAGS_u,
                         FLAGS_n_iqs - 1,
                         worker,
                         nireq,

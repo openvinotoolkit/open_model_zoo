@@ -299,6 +299,9 @@ int main(int argc, char *argv[]) {
                 wallclock = t0;
 
                 t0 = std::chrono::high_resolution_clock::now();
+
+                presenter.drawGraphs(curr_frame);
+
                 std::ostringstream out;
                 out << "OpenCV cap/render time: " << std::fixed << std::setprecision(2)
                     << (ocv_decode_time + ocv_render_time) << " ms";
@@ -351,7 +354,7 @@ int main(int argc, char *argv[]) {
                     }
                 }
             }
-            presenter.drawGraphs(curr_frame);
+
             if (!FLAGS_no_show) {
                 cv::imshow("Detection results", curr_frame);
             }

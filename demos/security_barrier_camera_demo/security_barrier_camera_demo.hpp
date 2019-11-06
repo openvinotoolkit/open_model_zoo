@@ -105,6 +105,9 @@ static const char infer_num_threads_message[] = "Optional. Number of threads to 
 static const char infer_num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode "
                                                 "(for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 
+/// @brief Message list of monitors to show
+static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+
 /// \brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
@@ -206,6 +209,10 @@ DEFINE_uint32(nthreads, 0, infer_num_threads_message);
 /// @brief Number of streams to use for inference on the CPU (also affects Hetero cases)
 DEFINE_string(nstreams, "", infer_num_streams_message);
 
+/// \brief Define a flag to show monitors<br>
+/// It is an optional parameter
+DEFINE_string(u, "", utilization_monitors_message);
+
 /**
 * \brief This function show a help message
 */
@@ -242,4 +249,5 @@ void showUsage() {
     std::cout << "    -tag                       " << use_tag_scheduler_message << std::endl;
     std::cout << "    -nstreams \"<integer>\"      " << infer_num_streams_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"      " << infer_num_threads_message << std::endl;
+    std::cout << "    -u                         " << utilization_monitors_message << std::endl;
 }

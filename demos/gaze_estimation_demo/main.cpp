@@ -28,6 +28,7 @@
 
 #include <inference_engine.hpp>
 
+#include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
@@ -154,6 +155,8 @@ int main(int argc, char *argv[]) {
         int delay = 1;
         std::string windowName = "Gaze estimation demo";
         double overallTime = 0., inferenceTime = 0.;
+        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
+        Presenter presenter(FLAGS_u, cap.get(cv::CAP_PROP_FRAME_HEIGHT) - graphSize.height - 10, graphSize);
         auto tIterationBegins = cv::getTickCount();
         do {
             if (flipImage) {
@@ -196,6 +199,8 @@ int main(int argc, char *argv[]) {
                 continue;
             }
 
+            presenter.drawGraphs(frame);
+
             // Display the results
             for (auto const& inferenceResult : inferenceResults) {
                 resultsMarker.mark(frame, inferenceResult);
@@ -213,6 +218,8 @@ int main(int argc, char *argv[]) {
                 break;
             else if (key == 'f')
                 flipImage = !flipImage;
+            else
+                presenter.addRemoveMonitor(key);
         } while (cap.read(frame));
     }
     catch (const std::exception& error) {

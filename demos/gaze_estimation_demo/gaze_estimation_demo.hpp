@@ -70,6 +70,9 @@ static const char fd_reshape_message[] = "Optional. Reshape Face Detector networ
 /// @brief Message do not show processed video
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 
+/// @brief Message list of monitors to show
+static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+
 /// \brief Define flag for showing help message<br>
 DEFINE_bool(h, false, help_message);
 
@@ -129,6 +132,10 @@ DEFINE_double(t, 0.5, thresh_output_message);
 /// It is an optional parameter
 DEFINE_bool(no_show, false, no_show_processed_video);
 
+/// \brief Define a flag to show monitors<br>
+/// It is an optional parameter
+DEFINE_string(u, "", utilization_monitors_message);
+
 /**
 * \brief This function shows a help message
 */
@@ -154,4 +161,5 @@ static void showUsage() {
     std::cout << "    -pc                      " << performance_counter_message << std::endl;
     std::cout << "    -r                       " << raw_output_message << std::endl;
     std::cout << "    -t                       " << thresh_output_message << std::endl;
+    std::cout << "    -u                       " << utilization_monitors_message << std::endl;
 }

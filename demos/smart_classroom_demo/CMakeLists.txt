@@ -9,5 +9,5 @@ ie_add_sample(NAME smart_classroom_demo
               SOURCES ${SOURCES}
               HEADERS ${HEADERS}
               INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
-              DEPENDENCIES format_reader
+              DEPENDENCIES format_reader monitors
               OPENCV_DEPENDENCIES highgui)

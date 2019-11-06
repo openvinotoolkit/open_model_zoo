@@ -80,6 +80,9 @@ static const char input_data_type_message[] = "Required. Input data type: \"imag
                                               "\"video\" (for a saved video), "
                                               "\"webcam\" (for a webcamera device). By default, it is \"image\".";
 
+/// @brief Message list of monitors to show
+static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+
 /// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
@@ -153,6 +156,10 @@ DEFINE_bool(no_show, false, no_show_message);
 /// It is an optional parameter
 DEFINE_bool(r, false, raw_output_message);
 
+/// \brief Define a flag to show monitors<br>
+/// It is an optional parameter
+DEFINE_string(u, "", utilization_monitors_message);
+
 /**
 * @brief This function shows a help message
 */
@@ -180,4 +187,5 @@ static void showUsage() {
     std::cout << "    -c \"<absolute_path>\"         " << custom_gpu_library_message << std::endl;
     std::cout << "    -no_show                     " << no_show_message << std::endl;
     std::cout << "    -r                           " << raw_output_message << std::endl;
+    std::cout << "    -u                           " << utilization_monitors_message << std::endl;
 }

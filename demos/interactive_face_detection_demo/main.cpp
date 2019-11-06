@@ -25,6 +25,7 @@
 
 #include <inference_engine.hpp>
 
+#include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
@@ -211,9 +212,14 @@ int main(int argc, char *argv[]) {
 
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press any key";
+            std::cout << " or switch to the output window and press Q, q or Esc";
         }
         std::cout << std::endl;
+
+        const cv::Point THROUGHPUT_METRIC_POSITION{10, 45};
+
+        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
+        Presenter presenter(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, graphSize);
 
         while (true) {
             timer.start("total");
@@ -330,12 +336,14 @@ int main(int argc, char *argv[]) {
                 faces.push_back(face);
             }
 
+            presenter.drawGraphs(prev_frame);
+
             //  Visualizing results
             if (!FLAGS_no_show || !FLAGS_o.empty()) {
                 out.str("");
                 out << "Total image throughput: " << std::fixed << std::setprecision(2)
                     << 1000.f / (timer["total"].getSmoothedDuration()) << " fps";
-                cv::putText(prev_frame, out.str(), cv::Point2f(10, 45), cv::FONT_HERSHEY_TRIPLEX, 1.2,
+                cv::putText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_TRIPLEX, 1,
                             cv::Scalar(255, 0, 0), 2);
 
                 // drawing faces
@@ -367,8 +375,13 @@ int main(int argc, char *argv[]) {
                     cv::waitKey(0);
                 }
                 break;
-            } else if (!FLAGS_no_show && -1 != cv::waitKey(delay)) {
-                break;
+            } else if (!FLAGS_no_show) {
+                int key = cv::waitKey(delay);
+                if (27 == key || 'Q' == key || 'q' == key) {
+                    break;
+                } else {
+                    presenter.addRemoveMonitor(key);
+                }
             }
         }
 

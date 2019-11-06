@@ -135,6 +135,9 @@ static const char act_det_output_message[] = "Optional. Output file name to save
 /// @brief Message for number of frames for action tracker
 static const char tracker_smooth_size_message[] = "Optional. Number of frames to smooth actions.";
 
+/// @brief Message list of monitors to show
+static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+
 /// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
@@ -285,6 +288,10 @@ DEFINE_string(al, "", act_det_output_message);
 /// It is an optional parameter
 DEFINE_int32(ss_t, -1, tracker_smooth_size_message);
 
+/// \brief Define a flag to show monitors<br>
+/// It is an optional parameter
+DEFINE_string(u, "", utilization_monitors_message);
+
 /**
 * @brief This function show a help message
 */
@@ -333,4 +340,5 @@ static void showUsage() {
     std::cout << "    -min_size_fr                   " << min_size_fr_reg_output_message << std::endl;
     std::cout << "    -al                            " << act_det_output_message << std::endl;
     std::cout << "    -ss_t                          " << tracker_smooth_size_message << std::endl;
+    std::cout << "    -u                             " << utilization_monitors_message << std::endl;
 }

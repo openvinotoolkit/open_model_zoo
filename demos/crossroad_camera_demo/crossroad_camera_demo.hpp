@@ -64,6 +64,9 @@ static const char no_show_processed_video[] = "Optional. No show processed video
 /// @brief message resizable input flag
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 
+/// @brief Message list of monitors to show
+static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+
 
 /// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
@@ -124,6 +127,10 @@ DEFINE_bool(no_show, false, no_show_processed_video);
 /// It is an optional parameter
 DEFINE_bool(auto_resize, false, input_resizable_message);
 
+/// \brief Define a flag to show monitors<br>
+/// It is an optional parameter
+DEFINE_string(u, "", utilization_monitors_message);
+
 
 /**
 * @brief This function show a help message
@@ -150,4 +157,5 @@ static void showUsage() {
     std::cout << "    -t_reid                      " << threshold_output_message_person_reid << std::endl;
     std::cout << "    -no_show                     " << no_show_processed_video << std::endl;
     std::cout << "    -auto_resize                 " << input_resizable_message << std::endl;
+    std::cout << "    -u                           " << utilization_monitors_message << std::endl;
 }
