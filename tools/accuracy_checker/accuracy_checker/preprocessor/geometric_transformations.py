@@ -29,7 +29,8 @@ from ..config import ConfigError, NumberField, StringField, BoolField
 from ..dependency import ClassProvider
 from ..logging import warning
 from ..preprocessor import Preprocessor
-from ..utils import contains_all, get_size_from_config, string_to_tuple, get_size_3d_from_config
+from ..utils import contains_all, get_size_from_config, string_to_tuple, get_size_3d_from_config,
+                    get_stride_from_config
 
 
 # The field .type should be string, the field .parameters should be dict
@@ -887,28 +888,32 @@ class AffineTransform(Preprocessor):
             ),
             'dst_height': NumberField(
                 value_type=int, optional=True, min_value=1, description="Height of heatmaps output."
+            ),
+            'stride': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Stride for network. It is input size of heatmaps / output size of heatmaps."
             )
         })
 
         return parameters
 
     def configure(self):
-        self.dst_height, self.dst_width = get_size_from_config(self.config)
-        self.input_height = 384
-        self.input_width = 288
-        self.stride = 8
+        self.input_height, self.input_width = get_size_from_config(self.config)
+        self.stride = get_stride_from_config(self.config)
 
     def process(self, image, annotation_meta=None):
         data = image.data
         center, scale = self.get_center_scale(annotation_meta['rects'][0], data.shape[1], data.shape[0])
         trans = self.get_affine_transform(center, scale, [self.input_width, self.input_height])
-        rev_trans = self.get_affine_transform(center, scale, [self.input_width // self.stride, self.input_height // self.stride], key=1)
+        rev_trans = self.get_affine_transform(center, scale, [self.input_width // self.stride,
+                                                              self.input_height // self.stride], key=1)
         data = cv2.warpAffine(data, trans, (self.input_width, self.input_height), flags=cv2.INTER_LINEAR)
         image.data = data
         image.metadata.setdefault('rev_trans', rev_trans)
         return image
-
-    def get_center_scale(self, bbox, image_w, image_h):
+    
+    @staticmethod
+    def get_center_scale(bbox, image_w, image_h):
         # x y w h
         aspect_ratio = 0.75
         bbox[0] = np.max((0, bbox[0]))
@@ -932,10 +937,11 @@ class AffineTransform(Preprocessor):
         scale = s * 1.25
 
         return center, scale
+    
+    @staticmethod
+    def get_affine_transform(center, scale, output_size, key=0):
 
-    def get_affine_transform(self, center, scale, output_size, key=0):
-
-        w, h = scale * 200
+        w, _ = scale * 200
         shift_y = [0, -w * 0.5]
         shift_x = [-w * 0.5, 0]
         points = np.array([center, center + shift_x, center + shift_y], dtype=np.float32)

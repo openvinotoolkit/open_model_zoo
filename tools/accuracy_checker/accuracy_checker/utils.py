@@ -489,3 +489,11 @@ def check_file_existence(file):
         return True
     except (FileNotFoundError, IsADirectoryError):
         return False
+
+def get_stride_from_config(config, allow_none=False):
+    if 'stride' in config:
+        return config['stride']
+    if not allow_none:
+        raise ValueError('Parameter stride required')
+
+    return None, None

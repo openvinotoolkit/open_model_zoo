@@ -384,19 +384,22 @@ class SingleHumanPoseAdapter(Adapter):
             pose_score = sum_score_thr / num_kp_thr
         else:
             pose_score = sum_score / raw_outputs[self.keypoints_heatmap].shape[1]
-        result.append(PoseEstimationPrediction(identifiers[0], np.array([x_values]), np.array([y_values]), np.array([vis]), np.array([pose_score])))
+        result.append(PoseEstimationPrediction(identifiers[0], np.array([x_values]),
+                      np.array([y_values]), np.array([vis]), np.array([pose_score])))
 
         return result
-
-    def extract_keypoints(self, heatmap, min_confidence=-100):
+    
+    @staticmethod
+    def extract_keypoints(heatmap, min_confidence=-100):
         ind = np.unravel_index(np.argmax(heatmap, axis=None), heatmap.shape)
         if heatmap[ind] < min_confidence:
             ind = (-1, -1)
         else:
             ind = (int(ind[1]), int(ind[0]))
         return heatmap[ind[1]][ind[0]], ind
-
-    def affine_transform(self, pt, t):
+    
+    @staticmethod
+    def affine_transform(pt, t):
         new_pt = np.array([pt[0], pt[1], 1.])
         new_pt = np.dot(t, new_pt)
         return new_pt[:2]

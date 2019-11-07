@@ -355,4 +355,3 @@ class MSCocoSingleKeypointsConverter(FileBasedAnnotationConverter):
                     progress_callback(image_id / num_iterations * 100)
 
         return ConverterReturn(keypoints_annotations, {'label_map': label_map}, None)
-
