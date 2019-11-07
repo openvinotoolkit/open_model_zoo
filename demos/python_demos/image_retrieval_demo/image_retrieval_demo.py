@@ -59,7 +59,7 @@ def build_argparser():
                            "a shared library with the kernels implementations.", type=str,
                       default=None)
     args.add_argument('--no_show', action='store_true',
-                      help='Optional. Disable display output')
+                      help='Optional. Do not display output.')
 
     return parser
 
