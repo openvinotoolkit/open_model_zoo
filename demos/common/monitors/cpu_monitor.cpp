@@ -162,34 +162,32 @@ std::vector<std::pair<unsigned long, unsigned long>> getIdleNonIdleCpuStat(std::
     std::ifstream proc_stat("/proc/stat");
     std::string line;
     std::smatch match;
-    std::getline(proc_stat, line);
-    while (proc_stat.good())
+    std::regex coreJiffies("^cpu(\\d+)\\s+"
+        "(\\d+)\\s+" // user
+        "(\\d+)\\s+" // nice
+        "(\\d+)\\s+" // system
+        "(\\d+)\\s+" // idle
+        "(\\d+)\\s+" // iowait
+        "(\\d+)\\s+" // irq
+        "(\\d+)\\s+" // softirq
+        "(\\d+)\\s+" // steal
+        "(\\d+)\\s+" // guest
+        "(\\d+)$");  // guest_nice
+    while (std::getline(proc_stat, line))
     {
-        std::regex core_jiffies("^cpu(\\d+)\\s+"
-            "(\\d+)\\s+" // user
-            "(\\d+)\\s+" // nice
-            "(\\d+)\\s+" // system
-            "(\\d+)\\s+" // idle
-            "(\\d+)\\s+" // iowait
-            "(\\d+)\\s+" // irq
-            "(\\d+)\\s+" // softirq
-            "(\\d+)\\s+" // steal
-            "(\\d+)\\s+" // guest
-            "(\\d+)$");  // guest_nice
-        if (std::regex_match(line, match, core_jiffies))
+        if (std::regex_match(line, match, coreJiffies))
         {
             unsigned long idleInfo = stoul(match[5]) + stoul(match[6]),
-                non_idleinfo = stoul(match[2])
+                nonIdleInfo = stoul(match[2])
                     + stoul(match[3])
                     + stoul(match[4])
                     + stoul(match[7])
                     + stoul(match[8])
-                    + stoul(match[9]), // it doesn't handle overflows and overflows of /proc/stat values
+                    + stoul(match[9]), // it doesn't handle overflow of sum and overflows of /proc/stat values
                 core_id = stoul(match[1]);
             idleNonIdleCpuStat[core_id].first = idleInfo;
-            idleNonIdleCpuStat[core_id].second = non_idleinfo;
+            idleNonIdleCpuStat[core_id].second = nonIdleInfo;
         }
-        std::getline(proc_stat, line);
     }
     return idleNonIdleCpuStat;
 }
@@ -244,7 +242,15 @@ void CpuMonitor::collectData() {
     for (std::size_t i = 0; i < idleNonIdleCpuStat.size(); ++i) {
         unsigned long idleDiff = idleNonIdleCpuStat[i].first - prevIdleNonIdleCpuStat[i].first;
         unsigned long nonIdleDiff = idleNonIdleCpuStat[i].second - prevIdleNonIdleCpuStat[i].second;
-        cpuLoad[i] = static_cast<double>(nonIdleDiff) / (idleDiff + nonIdleDiff);
+        if (0 == idleDiff + nonIdleDiff) {
+            if (cpuLoadHistory.empty()) {
+                cpuLoad[i] = 0;
+            } else {
+                cpuLoad[i] = cpuLoadHistory.back()[i];
+            }
+        } else {
+            cpuLoad[i] = static_cast<double>(nonIdleDiff) / (idleDiff + nonIdleDiff);
+        }
     }
     prevIdleNonIdleCpuStat = std::move(idleNonIdleCpuStat);
 
