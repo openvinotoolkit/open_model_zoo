@@ -248,7 +248,7 @@ def main():
         print("Net has returned outputs of different shape, please check model files")
         print("Expected shapes: ({ea}, {eb}), returned: ({ra}, {rb})".format(ea=expected_a_shape,
                                                                              eb=expected_b_shape,
-                                                                             ra=a, rb=b))
+                                                                             ra=a.shape, rb=b.shape))
         return 1
 
     dcd = PixelLinkDecoder()
