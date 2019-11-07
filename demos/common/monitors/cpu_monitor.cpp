@@ -154,14 +154,9 @@ std::vector<double> CpuMonitor::getMeanCpuLoad() const {
 #include <utility>
 #include <fstream>
 
-namespace {
-std::size_t getNCores() {
-    std::ifstream cpuinfo("/proc/cpuinfo");
-    return std::count(std::istream_iterator<std::string>(cpuinfo),
-        std::istream_iterator<std::string>(),
-        std::string("processor"));
-}
+#include <unistd.h>
 
+namespace {
 std::vector<std::pair<unsigned long, unsigned long>> getIdleNonIdleCpuStat(std::size_t nCores) {
     std::vector<std::pair<unsigned long, unsigned long>> idleNonIdleCpuStat(nCores);
     std::ifstream proc_stat("/proc/stat");
@@ -200,7 +195,11 @@ std::vector<std::pair<unsigned long, unsigned long>> getIdleNonIdleCpuStat(std::
 }
 }
 
-CpuMonitor::CpuMonitor() : nCores{getNCores()}, lastEnabled{false}, historyEnabled{false}, samplesNumber{0} {};
+CpuMonitor::CpuMonitor() :
+    nCores{static_cast<std::size_t>(sysconf(_SC_NPROCESSORS_CONF))},
+    lastEnabled{false},
+    historyEnabled{false},
+    samplesNumber{0} {};
 
 void CpuMonitor::enableHistory(std::size_t historySize) {
     if (0 == historySize) {
