@@ -51,7 +51,7 @@ Options:
                         Optional. Required for CPU custom layers. Absolute
                         path to a shared library with the kernels
                         implementations.
-  --no_show             Optional. Do not display output.
+  --no_show             Optional. Do not visualize inference results.
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.

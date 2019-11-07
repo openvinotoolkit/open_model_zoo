@@ -59,7 +59,7 @@ def build_argparser():
                            "a shared library with the kernels implementations.", type=str,
                       default=None)
     args.add_argument('--no_show', action='store_true',
-                      help='Optional. Do not display output.')
+                      help='Optional. Do not visualize inference results.')
 
     return parser
 
@@ -139,15 +139,14 @@ def main():
             else:
                 log.info("ROI detected, found: %s", sorted_classes[0])
 
-        if not args.no_show:
-            key = visualize(view_frame, position,
-                            [img_retrieval.impaths[i] for i in sorted_indexes],
-                            distances[sorted_indexes] if position is not None else None,
-                            img_retrieval.input_size, np.mean(compute_embeddings_times),
-                            np.mean(search_in_gallery_times), imshow_delay=3)
+        key = visualize(view_frame, position,
+                        [img_retrieval.impaths[i] for i in sorted_indexes],
+                        distances[sorted_indexes] if position is not None else None,
+                        img_retrieval.input_size, np.mean(compute_embeddings_times),
+                        np.mean(search_in_gallery_times), imshow_delay=3, no_show=args.no_show)
 
-            if key == 27:
-                break
+        if key == 27:
+            break
 
     if positions:
         compute_metrics(positions)
