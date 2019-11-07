@@ -142,12 +142,13 @@ class Cifar10FormatConverter(BaseFormatConverter):
 
     def generate_meta(self, labels_offset):
         labels = CIFAR10_LABELS_LIST
+        meta = {}
         if self.dataset_meta:
             meta = read_json(self.dataset_meta)
             if 'label_map' in meta:
                 return meta
             labels = meta.get('labels', CIFAR10_LABELS_LIST)
-        meta = {'label_map': {label_id + labels_offset: label_name for label_id, label_name in enumerate(labels)}}
+        meta.update({'label_map': {label_id + labels_offset: label_name for label_id, label_name in enumerate(labels)}})
         if self.has_background:
             meta['label_map'][0] = 'background'
             meta['background_label'] = 0

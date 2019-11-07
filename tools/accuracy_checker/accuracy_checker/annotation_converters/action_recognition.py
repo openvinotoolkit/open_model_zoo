@@ -66,10 +66,10 @@ class ActionRecognitionConverter(BaseFormatConverter):
         label_map = dict(enumerate(full_annotation['labels']))
         if self.dataset_meta:
             dataset_meta = read_json(self.dataset_meta)
-            if 'labels' in dataset_meta:
-                label_map = dict(enumerate(dataset_meta['labels']))
             if 'label_map' in dataset_meta:
                 label_map = dataset_meta['label_map']
+            elif 'labels' in dataset_meta:
+                label_map = dict(enumerate(dataset_meta['labels']))
         video_names, annotation = self.get_video_names_and_annotations(full_annotation['database'], self.subset)
         class_to_idx = {v: k for k, v in label_map.items()}
 

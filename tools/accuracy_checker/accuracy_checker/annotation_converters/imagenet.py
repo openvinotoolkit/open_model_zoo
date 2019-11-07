@@ -83,9 +83,10 @@ class ImageNetFormatConverter(BaseFormatConverter):
     @staticmethod
     def _create_meta(labels_file, dataset_meta, has_background=False):
         meta = {}
+        label_map = {}
         if dataset_meta:
             meta = read_json(dataset_meta)
-            if 'labels' in dataset_meta:
+            if 'labels' in dataset_meta and 'label_map' not in meta:
                 labels = ['background'] + meta['labels'] if has_background else meta['labels']
                 label_map = dict(enumerate(labels))
                 meta['label_map'] = label_map
@@ -100,10 +101,10 @@ class ImageNetFormatConverter(BaseFormatConverter):
                 label = line[line.find(' ') + 1:]
                 label_map[index_for_label] = label
 
-            if has_background:
-                label_map[0] = 'background'
-                meta['background_label'] = 0
-
             meta['label_map'] = label_map
+
+        if has_background:
+            label_map[0] = 'background'
+            meta['background_label'] = 0
 
         return meta
