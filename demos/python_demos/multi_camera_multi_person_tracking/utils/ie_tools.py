@@ -63,7 +63,7 @@ def load_ie_model(ie, model_xml, device, plugin_dir, cpu_extension='', num_reqs=
     """Loads a model in the Inference Engine format"""
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
     # Plugin initialization for specified device and load extensions library if specified
-    log.info("Creating Inference Engine")
+    log.info("Initializing Inference Engine plugin for %s ", device)
 
     if cpu_extension and 'CPU' in device:
         ie.add_extension(cpu_extension, 'CPU')
