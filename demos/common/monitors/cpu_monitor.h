@@ -7,7 +7,7 @@
 #include <iostream> // TODO remove
 #include <deque>
 #include <vector>
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #include <Sysinfoapi.h>
 #include <pdh.h>
@@ -35,7 +35,7 @@ private:
     std::deque<std::vector<double>> cpuLoadHistory;
     std::vector<std::pair<unsigned long, unsigned long>> prevIdleNonIdleCpuStat;
 
-#ifdef WIN32
+#ifdef _WIN32
     void openQuery();
     void closeQuery();
 

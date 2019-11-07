@@ -4,7 +4,7 @@
 
 #include "memory_monitor.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <algorithm>
 
 #define PSAPI_VERSION 1 // for psapi
