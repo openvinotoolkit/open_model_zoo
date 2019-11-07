@@ -21,7 +21,7 @@ from functools import partial
 import cv2
 
 from .config import ConfigReader
-from .logging import print_info, add_file_handler
+from .logging import print_info, add_file_handler, exception
 from .evaluators import ModelEvaluator, PipeLineEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
 from .utils import get_path, cast_to_bool
@@ -204,12 +204,16 @@ def main():
     if not evaluator_class:
         raise ValueError('Unknown evaluation mode')
     for config_entry in config[mode]:
-        processing_info = evaluator_class.get_processing_info(config_entry)
-        print_processing_info(*processing_info)
-        evaluator = evaluator_class.from_configs(config_entry)
-        evaluator.process_dataset(args.stored_predictions, progress_reporter=progress_reporter)
-        evaluator.compute_metrics(ignore_results_formatting=args.ignore_result_formatting)
-        evaluator.release()
+        try:
+            processing_info = evaluator_class.get_processing_info(config_entry)
+            print_processing_info(*processing_info)
+            evaluator = evaluator_class.from_configs(config_entry)
+            evaluator.process_dataset(args.stored_predictions, progress_reporter=progress_reporter)
+            evaluator.compute_metrics(ignore_results_formatting=args.ignore_result_formatting)
+            evaluator.release()
+        except Exception as e:
+            exception(e)
+            continue
 
 
 def print_processing_info(model, launcher, device, tags, dataset):

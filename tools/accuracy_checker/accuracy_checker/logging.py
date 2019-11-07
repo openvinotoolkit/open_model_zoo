@@ -101,6 +101,9 @@ def get_logger(logger_name: str):
 def error(msg, *args, **kwargs):
     _default_logger.error(msg, *args, **kwargs)
 
+def exception(msg, *args, **kwargs):
+    _default_logger.exception(msg, args, kwargs)
+
 
 def warning(msg, *args, raise_warning=True, **kwargs):
     if raise_warning:
