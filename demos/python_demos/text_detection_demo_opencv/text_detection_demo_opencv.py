@@ -235,7 +235,7 @@ def main():
                                 ['pixel_cls/add_2', 'pixel_link/add_2'])
     if out_layer_names not in expected_out_layer_names:
         print("Net has unexpected output layer names, please check model files")
-        print(f"Expected: '{expected_out_layer_names}', returned: '{out_layer_names}'")
+        print("Expected: '{e}', returned: '{r}'".format(e=expected_out_layer_names, r=out_layer_names))
         return 1
 
     blob = cv2.dnn.blobFromImage(img, 1, (1280, 768))
@@ -246,7 +246,9 @@ def main():
     expected_b_shape = (1, 16, 192, 320)
     if a.shape != expected_a_shape or b.shape != expected_b_shape:
         print("Net has returned outputs of different shape, please check model files")
-        print(f"Expected shapes: ({expected_a_shape}, {expected_b_shape}), returned: ({a}, {b})")
+        print("Expected shapes: ({ea}, {eb}), returned: ({ra}, {rb})".format(ea=expected_a_shape,
+                                                                             eb=expected_b_shape,
+                                                                             ra=a, rb=b))
         return 1
 
     dcd = PixelLinkDecoder()

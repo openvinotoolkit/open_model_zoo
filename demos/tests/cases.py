@@ -305,7 +305,22 @@ PYTHON_DEMOS = [
             ModelArg('vehicle-license-plate-detection-barrier-0106')),
     )),
 
-    # TODO: object_detection_demo_yolov3_async: no models.lst
+       # TODO: object_detection_demo_yolov3_async: no models.lst
+
+    PythonDemo(subdirectory='segmentation_demo', test_cases=combine_cases(
+        device_cases('-d'),
+        [
+            TestCase(options={
+                '-m': ModelArg('road-segmentation-adas-0001'),
+                '-i': IMAGE_SEQUENCES['road-segmentation-adas'],
+            }),
+            TestCase(options={
+                '-m': ModelArg('semantic-segmentation-adas-0001'),
+                '-i': IMAGE_SEQUENCES['semantic-segmentation-adas'],
+            }),
+        ],
+    )),
+
     PythonDemo(subdirectory='text_detection_demo_opencv', test_cases=combine_cases(
         device_cases('-d'),
         [
