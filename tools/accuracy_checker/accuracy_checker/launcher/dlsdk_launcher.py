@@ -228,7 +228,8 @@ class DLSDKLauncher(Launcher):
             available_devices=self.ie_core.available_devices
         )
         dlsdk_launcher_config.validate(self.config)
-        self._device = self.config['device'].upper()
+        device = self.config['device'].split('.')
+        self._device = '.'.join((device[0].upper(), device[1])) if len(device) > 1 else device[0].upper()
         self._prepare_bitstream_firmware(self.config)
         self._prepare_ie()
         if not delayed_model_loading:
