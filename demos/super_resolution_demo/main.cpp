@@ -136,6 +136,10 @@ int main(int argc, char *argv[]) {
             int h = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[2]);
             int c = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[1]);
 
+            /** Convert to 3-channels image for case when image was saved with alpha channel **/
+            if (img.channels() == 4)
+                cv::cvtColor(img, img, cv::COLOR_BGRA2BGR);
+
             if (w != img.cols || h != img.rows) {
                 slog::warn << "Size of the image " << i << " is not equal to WxH = " << w << "x" << h << slog::endl;
                 continue;
