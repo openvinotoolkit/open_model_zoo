@@ -264,6 +264,10 @@ class DLSDKLauncher(Launcher):
     def output_blob(self):
         return next(iter(self.original_outputs))
 
+    @property
+    def device(self):
+        return self._device
+
     def predict(self, inputs, metadata=None, **kwargs):
         """
         Args:

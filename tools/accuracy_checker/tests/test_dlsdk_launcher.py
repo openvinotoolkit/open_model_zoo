@@ -212,7 +212,7 @@ class TestDLSDKLauncherMultiDevice:
 
 @pytest.mark.usefixtures('mock_path_exists', 'mock_inference_engine', 'mock_inputs')
 class TestDLSDKLauncherBitstreamProgramming:
-    def test_program_bitsream_when_device_is_fpga(self, mocker):
+    def test_program_bitstream_when_device_is_fpga(self, mocker):
         subprocess_mock = mocker.patch('subprocess.run')
         mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
         config = {
@@ -229,7 +229,25 @@ class TestDLSDKLauncherBitstreamProgramming:
         subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
         launcher.release()
 
-    def test_program_bitsream_when_fpga_in_hetero_device(self, mocker):
+    def test_program_bitstream_when_device_is_fpga_and_multiple_fpga_available(self, mocker):
+        subprocess_mock = mocker.patch('subprocess.run')
+        mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
+        mocker.patch('openvino.inference_engine.IECore.available_devices', new_callable=PropertyMock(return_value=['FPGA.1', 'FPGA.2']))
+        config = {
+            'framework': 'dlsdk',
+            'weights': 'custom_weights',
+            'model': 'custom_model',
+            'device': 'fpga.1',
+            'bitstream': Path('custom_bitstream'),
+            'adapter': 'classification',
+            '_models_prefix': 'prefix',
+            '_aocl': Path('aocl')
+        }
+        launcher = create_launcher(config, delayed_model_loading=True)
+        subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
+        launcher.release()
+
+    def test_program_bitstream_when_fpga_in_hetero_device(self, mocker):
         subprocess_mock = mocker.patch('subprocess.run')
         mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
         config = {
@@ -246,7 +264,25 @@ class TestDLSDKLauncherBitstreamProgramming:
         subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
         launcher.release()
 
-    def test_does_not_program_bitsream_when_device_is_not_fpga(self, mocker):
+    def test_program_bitstream_when_fpga_in_hetero_device_and_multiple_fpga_available(self, mocker):
+        subprocess_mock = mocker.patch('subprocess.run')
+        mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
+        mocker.patch('openvino.inference_engine.IECore.available_devices', new_callable=PropertyMock(return_value=['CPU', 'FPGA.1', 'FPGA.2']))
+        config = {
+            'framework': 'dlsdk',
+            'weights': 'custom_weights',
+            'model': 'custom_model',
+            'device': 'hetero:fpga.2,cpu',
+            'bitstream': Path('custom_bitstream'),
+            'adapter': 'classification',
+            '_models_prefix': 'prefix',
+            '_aocl': Path('aocl')
+        }
+        launcher = create_launcher(config, delayed_model_loading=True)
+        subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
+        launcher.release()
+
+    def test_does_not_program_bitstream_when_device_is_not_fpga(self, mocker):
         subprocess_mock = mocker.patch('subprocess.run')
         mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
         config = {
@@ -262,7 +298,7 @@ class TestDLSDKLauncherBitstreamProgramming:
         create_launcher(config, delayed_model_loading=True)
         subprocess_mock.assert_not_called()
 
-    def test_does_not_program_bitsream_when_hetero_without_fpga(self, mocker):
+    def test_does_not_program_bitstream_when_hetero_without_fpga(self, mocker):
         subprocess_mock = mocker.patch('subprocess.run')
         mocker.patch('accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher._log_versions')
         config = {
