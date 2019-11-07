@@ -144,7 +144,7 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
     def generate_meta(self, root):
         if self.dataset_meta:
             meta = read_json(self.dataset_meta)
-            if 'labels' in meta:
+            if 'labels' in meta and 'label_map' not in meta:
                 labels_set = meta['labels']
                 class_to_ind = dict(
                     zip(labels_set, list(range(self.label_start, len(labels_set) + self.label_start + 1)))

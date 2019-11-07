@@ -128,7 +128,7 @@ class CityscapesConverter(BaseFormatConverter):
     def generate_meta(self):
         if self.dataset_meta_file is not None:
             meta = read_json(self.dataset_meta_file)
-            if 'labels' in meta:
+            if 'labels' in meta and 'label_map' not in meta:
                 meta['label_map'] = dict(enumerate(meta['labels']))
             return meta
         return full_dataset_meta if self.use_full_label_map else train_meta
