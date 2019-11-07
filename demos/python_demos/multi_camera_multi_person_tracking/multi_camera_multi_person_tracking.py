@@ -133,6 +133,8 @@ def main():
     args = parser.parse_args()
 
     capture = MulticamCapture(args.i)
+
+    log.info("Creating Inference Engine")
     ie = IECore()
 
     person_detector = Detector(ie, args.m_detector, args.t_detector,
