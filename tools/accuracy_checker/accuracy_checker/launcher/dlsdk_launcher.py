@@ -330,10 +330,12 @@ class DLSDKLauncher(Launcher):
             self.network.layers[layer].affinity = device
 
     def _is_fpga(self):
-        return 'FPGA' in self._devices_list()
+        device_list = map(lambda device: device.split('.')[0], self._devices_list())
+        return 'FPGA' in device_list
 
     def _is_vpu(self):
-        return contains_any(self._devices_list(), VPU_PLUGINS)
+        device_list = map(lambda device: device.split('.')[0], self._devices_list())
+        return contains_any(device_list, VPU_PLUGINS)
 
     def _prepare_bitstream_firmware(self, config):
         if not self._is_fpga():
