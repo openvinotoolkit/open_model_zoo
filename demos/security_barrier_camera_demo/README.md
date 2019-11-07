@@ -5,7 +5,7 @@ of the detection results. You can use a set of the following pre-trained models 
 * `vehicle-license-plate-detection-barrier-0106`, which is a primary detection network to find the vehicles and license plates
 * `vehicle-attributes-recognition-barrier-0039`, which is executed on top of the results from the first network and
 reports general vehicle attributes, for example, vehicle type (car/van/bus/track) and color
-* `license-plate-recognition-barrier-0001` and `license-plate-recognition-barrier-0007`, which is executed on top of the results from the first network
+* `license-plate-recognition-barrier-0001` or `license-plate-recognition-barrier-0007`, which is executed on top of the results from the first network
 and reports a string per recognized license plate
 
 For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
