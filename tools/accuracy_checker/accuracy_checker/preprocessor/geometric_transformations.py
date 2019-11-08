@@ -906,8 +906,8 @@ class CropProvidedBbox(Preprocessor):
         data = image.data
         center, scale = self.get_center_scale(annotation_meta['rects'][0], data.shape[1], data.shape[0])
         trans = self.get_transformation_matrix(center, scale, [self.input_width, self.input_height])
-        rev_trans = self.get_transformation_matrix(center, scale,[self.input_width // self.stride,
-                                                                  self.input_height // self.stride], key=1)
+        rev_trans = self.get_transformation_matrix(center, scale, [self.input_width // self.stride,
+                                                                   self.input_height // self.stride], key=1)
         data = cv2.warpAffine(data, trans, (self.input_width, self.input_height), flags=cv2.INTER_LINEAR)
         image.data = data
         image.metadata.setdefault('rev_trans', rev_trans)
