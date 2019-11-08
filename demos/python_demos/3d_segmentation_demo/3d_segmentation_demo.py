@@ -72,6 +72,18 @@ NIFTI_FILE = 1
 TIFF_FILE = 2
 
 
+def mri_sequence(arg):
+    sequence = tuple(int(k) for k in arg.split(','))
+    if len(sequence) != 4:
+        raise AttributeError("The MRI-sequence should contain exactly 4 values, but contains {}.".format(len(sequence)))
+    if len(set(sequence)) != 4:
+        raise AttributeError("The MRI-sequence has repeating scan types - {}. "
+                             "The MRI-sequence must contains "
+                             "native T1, native T2, T2-FLAIR, post-Gadolinium contrast T1 scans in that order".
+                             format(sequence))
+    return sequence
+
+
 def parse_arguments():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
@@ -97,6 +109,9 @@ def parse_arguments():
     args.add_argument('-c', '--path_to_cldnn_config', type=str, required=False,
                         help="Required for GPU custom kernels. "
                              "Absolute path to an .xml file with the kernels description.")
+    args.add_argument('-ms', '--mri_sequence', type=mri_sequence, metavar='N1,N2,N3,N4', default=(2, 0, 3, 1),
+                      help='Optional. Set MRI-sequence, if data is in single NIFTI file.'
+                           'Input order is: native T1, native T2, T2-FLAIR, post-Gadolinium contrast T1')
     return parser.parse_args()
 
 
@@ -168,7 +183,7 @@ def resample_np(data, output_shape, order):
     return interpolation.zoom(data, zoom=factor, order=order)
 
 
-def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True):
+def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True, mri_sequence_order=(1, 3, 0, 2)):
     images_list = []
     original_shape = ()
     bboxes = np.zeros(shape=(len(DATA_SUFFIXES),) + (2, 3))
@@ -192,7 +207,7 @@ def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True)
         assert len(data.shape) == 4, 'Wrong data dimensions - {}, must be 4'.format(len(data.shape))
         assert data.shape[3] == 4, 'Wrong data shape - {}, must be (:,:,:,4)'.format(data.shape)
         # Reading order is specified for data from http://medicaldecathlon.com/
-        for j in (1, 3, 0, 2):
+        for j in mri_sequence_order:
             image = data[:, :, :, j]
             mask = image > 0
             bboxes[j] = bbox3(mask)
@@ -289,7 +304,8 @@ def main():
 
     elif input_type == NIFTI_FILE:
         original_data, data_crop, affine, original_size, bbox = \
-            read_image(args.path_to_input_data, data_name=args.path_to_input_data, sizes=(h, w, d), is_series=False)
+            read_image(args.path_to_input_data, data_name=args.path_to_input_data, sizes=(h, w, d),
+                       is_series=False, mri_sequence_order=args.mri_sequence)
     else:
         data_crop = np.zeros(shape=(n, c, d, h, w), dtype=np.float)
         im_seq = ImageSequence.Iterator(Image.open(args.path_to_input_data))
