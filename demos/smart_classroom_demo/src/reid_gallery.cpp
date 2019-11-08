@@ -84,8 +84,10 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
                                      double threshold, int min_size_fr,
                                      bool crop_gallery, detection::FaceDetection& detector,
                                      const VectorCNN& landmarks_det,
-                                     const VectorCNN& image_reid)
-    : reid_threshold(threshold) {
+                                     const VectorCNN& image_reid,
+                                     bool use_greedy_matcher)
+    : reid_threshold(threshold),
+      use_greedy_matcher(use_greedy_matcher) {
     if (ids_list.empty()) {
         return;
     }
@@ -147,7 +149,7 @@ std::vector<int> EmbeddingsGallery::GetIDsByEmbeddings(const std::vector<cv::Mat
             }
         }
     }
-    KuhnMunkres matcher;
+    KuhnMunkres matcher(use_greedy_matcher);
     auto matched_idx = matcher.Solve(distances);
     std::vector<int> output_ids;
     for (auto col_idx : matched_idx) {

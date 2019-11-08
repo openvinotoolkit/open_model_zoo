@@ -609,7 +609,8 @@ int main(int argc, char* argv[]) {
 
         // Create face gallery
         EmbeddingsGallery face_gallery(FLAGS_fg, FLAGS_t_reid, FLAGS_min_size_fr, FLAGS_crop_gallery,
-                                       face_detector_for_registration, landmarks_detector, face_reid);
+                                       face_detector_for_registration, landmarks_detector, face_reid,
+                                       FLAGS_greedy_reid_matching);
 
         if (!reid_config.enabled) {
             slog::warn << "Face recognition models are disabled!"  << slog::endl;

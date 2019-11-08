@@ -40,7 +40,10 @@ using TrackedObjects = std::vector<TrackedObject>;
 ///
 class KuhnMunkres {
 public:
-    KuhnMunkres();
+    ///
+    /// \brief Initializes the class for assignment problem solving.
+    /// \param[in] greedy If a faster greedy matching algorithm should be used.
+    KuhnMunkres(bool greedy = false);
 
     ///
     /// \brief Solves the assignment problem for given dissimilarity matrix.
