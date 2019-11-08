@@ -85,29 +85,27 @@ public:
             if (_num_priors * _num_classes != static_cast<int>(conf_size))
                 THROW_IE_EXCEPTION << "Number of priors must match number of confidence predictions.";
 
-            _num = static_cast<int>(conf_size);
-
-            SizeVector bboxes_size{static_cast<size_t>(_num),
+            SizeVector bboxes_size{conf_size,
                                                     static_cast<size_t>(_num_classes),
                                                     static_cast<size_t>(_num_priors),
                                                     4};
             _decoded_bboxes = make_shared_blob<float>({Precision::FP32, bboxes_size, NCHW});
             _decoded_bboxes->allocate();
 
-            SizeVector buf_size{static_cast<size_t>(_num),
+            SizeVector buf_size{conf_size,
                                                  static_cast<size_t>(_num_classes),
                                                  static_cast<size_t>(_num_priors)};
             _buffer = make_shared_blob<int>({Precision::I32, buf_size, {buf_size, {0, 1, 2}}});
             _buffer->allocate();
 
-            SizeVector indices_size{static_cast<size_t>(_num),
+            SizeVector indices_size{conf_size,
                                                      static_cast<size_t>(_num_classes),
                                                      static_cast<size_t>(_num_priors)};
             _indices = make_shared_blob<int>(
                     {Precision::I32, indices_size, {indices_size, {0, 1, 2}}});
             _indices->allocate();
 
-            SizeVector detections_size{static_cast<size_t>(_num * _num_classes)};
+            SizeVector detections_size{conf_size * static_cast<size_t>(_num_classes)};
             _detections_count = make_shared_blob<int>({Precision::I32, detections_size, C});
             _detections_count->allocate();
 
@@ -115,14 +113,14 @@ public:
             _reordered_conf = make_shared_blob<float>({Precision::FP32, conf_size1, ANY});
             _reordered_conf->allocate();
 
-            SizeVector decoded_bboxes_size{static_cast<size_t>(_num),
+            SizeVector decoded_bboxes_size{conf_size,
                                                             static_cast<size_t>(_num_priors),
                                                             static_cast<size_t>(_num_classes)};
             _bbox_sizes = make_shared_blob<float>(
                     {Precision::FP32, decoded_bboxes_size, {decoded_bboxes_size, {0, 1, 2}}});
             _bbox_sizes->allocate();
 
-            SizeVector num_priors_actual_size{static_cast<size_t>(_num)};
+            SizeVector num_priors_actual_size{conf_size};
             _num_priors_actual = make_shared_blob<int>({Precision::I32, num_priors_actual_size, C});
             _num_priors_actual->allocate();
         } catch (const InferenceEngineException& ex) {
@@ -321,7 +319,6 @@ private:
     float _nms_threshold = 0.0f;
     float _confidence_threshold = 0.0f;
 
-    int _num = 0;
     int _num_loc_classes = 0;
     int _num_priors = 0;
 
