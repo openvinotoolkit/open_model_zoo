@@ -4,15 +4,15 @@ models:
     launchers:
       - framework: dlsdk
         device: CPU
-        model:   intel/single-human-pose-estimation-0001/FP32/single-human-pose-estimation.xml
-        weights: intel/single-human-pose-estimation-0001/FP32/single-human-pose-estimation.bin
+        model:   public/single-human-pose-estimation-0001/FP32/single-human-pose-estimation-0001.xml
+        weights: public/single-human-pose-estimation-0001/FP32/single-human-pose-estimation-0001.bin
         adapter:
           type: single_human_pose_estimation
 
     datasets:
       - name: ms_coco_single_keypoints
         preprocessing:
-          - type: affine_transform
+          - type: crop_provided_bbox
             dst_height: 384
             dst_width: 288
             stride: 8
