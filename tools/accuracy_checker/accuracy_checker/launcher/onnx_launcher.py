@@ -82,6 +82,8 @@ class ONNXLauncher(Launcher):
     def fit_to_input(data, layer_name, layout):
         if len(np.shape(data)) == 4:
             return np.transpose(data, layout).astype(np.float32)
+        if len(np.shape(data)) == 5 and len(layout) == 5:
+            return np.transpose(data, layout).astype(np.float32)
         return np.array(data).astype(np.float32)
 
     def predict_async(self, *args, **kwargs):
