@@ -211,7 +211,7 @@ def main():
             evaluator.process_dataset(args.stored_predictions, progress_reporter=progress_reporter)
             evaluator.compute_metrics(ignore_results_formatting=args.ignore_result_formatting)
             evaluator.release()
-        except Exception as e:
+        except Exception as e:  # pylint:disable=W0703
             exception(e)
             continue
 
