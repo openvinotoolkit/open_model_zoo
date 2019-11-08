@@ -213,4 +213,17 @@ IMAGE_SEQUENCES = {
         image_net_arg('00037128'),
         image_net_arg('00048316'),
     ],
+
+    'image-retrieval-gallery': [
+        image_retrieval_arg('gallery.txt'),
+    ],
+
+    'image-retrieval-video': [
+        image_retrieval_arg('4946fb41-9da0-4af7-a858-b443bee6d0f6.dav'),
+        image_retrieval_arg('7f8bd393-0f04-43fe-8cb8-4e0cde7305e6.dav'),
+        image_retrieval_arg('d0c460d0-4d75-4315-98a8-a0116d3dfb81.dav'),
+        image_retrieval_arg('636e91cc-4829-40bd-a8bc-18505b943a9b.dav'),
+        image_retrieval_arg('add09613-b45c-432f-94c0-f785d3ae2a7e.dav'),
+
+    ]
 }

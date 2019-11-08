@@ -279,7 +279,14 @@ PYTHON_DEMOS = [
     )),
 
     # TODO: face_recognition_demo: requires face gallery
-    # TODO: image_retrieval_demo: current images does not suit the usecase, requires user defined gallery
+    
+    PythonDemo(subdirectory='image_retrieval_demo', test_cases=combine_cases(
+        TestCase(options={'--no_show':None,
+                          '-m': ModelArg('image-retrieval-0001')}),
+        device_cases('-d'),
+        single_option_cases('-i', *IMAGE_SEQUENCES['image-retrieval-video']),
+        single_option_cases('-g', *IMAGE_SEQUENCES['image-retrieval-gallery']),
+    )),
 
     PythonDemo(subdirectory='instance_segmentation_demo', device_keys=[], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
