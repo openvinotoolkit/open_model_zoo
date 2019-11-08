@@ -185,7 +185,10 @@ NATIVE_DEMOS = [
             '-i': ImageDirectoryArg('vehicle-license-plate-detection-barrier')}),
         device_cases('-d', '-d_lpr', '-d_va'),
         TestCase(options={'-m': ModelArg('vehicle-license-plate-detection-barrier-0106')}),
-        single_option_cases('-m_lpr', None, ModelArg('license-plate-recognition-barrier-0001')),
+        single_option_cases('-m_lpr',
+            None,
+            ModelArg('license-plate-recognition-barrier-0001'),
+            ModelArg('license-plate-recognition-barrier-0007')),
         single_option_cases('-m_va', None, ModelArg('vehicle-attributes-recognition-barrier-0039')),
     )),
 
