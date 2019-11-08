@@ -30,7 +30,7 @@ from ..dependency import ClassProvider
 from ..logging import warning
 from ..preprocessor import Preprocessor
 from ..utils import (
-contains_all, get_size_from_config, string_to_tuple, get_size_3d_from_config, get_stride_from_config
+    contains_all, get_size_from_config, string_to_tuple, get_size_3d_from_config, get_stride_from_config
 )
 
 
@@ -906,13 +906,15 @@ class CropProvidedBbox(Preprocessor):
         data = image.data
         center, scale = self.get_center_scale(annotation_meta['rects'][0], data.shape[1], data.shape[0])
         trans = self.get_transformation_matrix(center, scale, [self.input_width, self.input_height])
-        rev_trans = self.get_transformation_matrix(center, scale, [self.input_width // self.stride, self.input_height // self.stride], key=1)
+        rev_trans = self.get_transformation_matrix(center, scale,[self.input_width // self.stride,
+                                                                  self.input_height // self.stride], key=1)
         data = cv2.warpAffine(data, trans, (self.input_width, self.input_height), flags=cv2.INTER_LINEAR)
         image.data = data
         image.metadata.setdefault('rev_trans', rev_trans)
         return image
 
-    def get_center_scale(self, bbox, image_w, image_h):
+    @staticmethod
+    def get_center_scale(bbox, image_w, image_h):
         # x y w h
         aspect_ratio = 0.75
         bbox[0] = np.max((0, bbox[0]))
@@ -937,8 +939,10 @@ class CropProvidedBbox(Preprocessor):
 
         return center, scale
 
-    def get_transformation_matrix(self, center, scale, output_size, key=0):
-        w, h = scale * 200
+
+    @staticmethod
+    def get_transformation_matrix(center, scale, output_size, key=0):
+        w, _ = scale * 200
         shift_y = [0, -w * 0.5]
         shift_x = [-w * 0.5, 0]
         points = np.array([center, center + shift_x, center + shift_y], dtype=np.float32)
