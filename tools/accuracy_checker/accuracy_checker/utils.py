@@ -20,6 +20,7 @@ import itertools
 import json
 import os
 import pickle
+from enum import Enum
 
 from pathlib import Path
 from typing import Union
@@ -490,6 +491,7 @@ def check_file_existence(file):
     except (FileNotFoundError, IsADirectoryError):
         return False
 
+
 def get_stride_from_config(config, allow_none=False):
     if 'stride' in config:
         return config['stride']
@@ -497,3 +499,14 @@ def get_stride_from_config(config, allow_none=False):
         raise ValueError('Parameter stride required')
 
     return None
+
+
+class Color(Enum):
+    PASSED = 0
+    FAILED = 1
+
+
+def color_format(s, color=Color.PASSED):
+    if color == Color.PASSED:
+        return "\x1b[0;32m{}\x1b[0m".format(s)
+    return "\x1b[0;31m{}\x1b[0m".format(s)

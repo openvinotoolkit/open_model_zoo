@@ -9,11 +9,42 @@
 #include "gaze_estimator.hpp"
 
 namespace gaze_estimation {
+
+const char BLOB_HEAD_POSE_ANGLES[] = "head_pose_angles";
+const char BLOB_LEFT_EYE_IMAGE[] = "left_eye_image";
+const char BLOB_RIGHT_EYE_IMAGE[] = "right_eye_image";
+
 GazeEstimator::GazeEstimator(InferenceEngine::Core& ie,
                              const std::string& modelPath,
                              const std::string& deviceName,
                              bool doRollAlign):
                ieWrapper(ie, modelPath, deviceName), rollAlign(doRollAlign) {
+    const auto& inputInfo = ieWrapper.getInputBlobDimsInfo();
+
+    for (const auto& blobName: {BLOB_HEAD_POSE_ANGLES, BLOB_LEFT_EYE_IMAGE, BLOB_RIGHT_EYE_IMAGE}) {
+        if (inputInfo.find(blobName) == inputInfo.end())
+            throw std::runtime_error(modelPath + ": expected to have input named \"" + blobName + "\"");
+    }
+
+    auto expectAngles = [&modelPath](const std::string& blobName, const std::vector<unsigned long>& dims) {
+        bool is1Dim = !dims.empty()
+            && std::all_of(dims.begin(), dims.end() - 1, [](unsigned long n) { return n == 1; });
+
+        if (!is1Dim || dims.back() != 3) {
+            throw std::runtime_error(modelPath + ": expected \"" + blobName + "\" to have dimensions [1x...]3");
+        }
+    };
+
+    expectAngles(BLOB_HEAD_POSE_ANGLES, inputInfo.at(BLOB_HEAD_POSE_ANGLES));
+
+    for (const auto& blobName: {BLOB_LEFT_EYE_IMAGE, BLOB_RIGHT_EYE_IMAGE}) {
+        ieWrapper.expectImageInput(blobName);
+    }
+
+    const auto& outputInfo = ieWrapper.getOutputBlobDimsInfo();
+
+    outputBlobName = ieWrapper.expectSingleOutput();
+    expectAngles(outputBlobName, outputInfo.at(outputBlobName));
 }
 
 cv::Rect GazeEstimator::createEyeBoundingBox(const cv::Point2i& p1,
@@ -82,15 +113,15 @@ void GazeEstimator::estimate(const cv::Mat& image,
         rightEyeImage = rightEyeImageRotated;
     }
 
-    ieWrapper.setInputBlob("head_pose_angles", headPoseAngles);
-    ieWrapper.setInputBlob("left_eye_image", leftEyeImage);
-    ieWrapper.setInputBlob("right_eye_image", rightEyeImage);
+    ieWrapper.setInputBlob(BLOB_HEAD_POSE_ANGLES, headPoseAngles);
+    ieWrapper.setInputBlob(BLOB_LEFT_EYE_IMAGE, leftEyeImage);
+    ieWrapper.setInputBlob(BLOB_RIGHT_EYE_IMAGE, rightEyeImage);
 
     ieWrapper.infer();
 
     std::vector<float> rawResults;
 
-    ieWrapper.getOutputBlob(rawResults);
+    ieWrapper.getOutputBlob(outputBlobName, rawResults);
 
     cv::Point3f gazeVector;
     gazeVector.x = rawResults[0];

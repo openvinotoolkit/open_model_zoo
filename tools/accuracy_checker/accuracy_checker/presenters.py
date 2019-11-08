@@ -15,9 +15,9 @@ limitations under the License.
 """
 
 from collections import namedtuple
-from enum import Enum
 import numpy as np
 
+from .utils import Color, color_format
 from .dependency import ClassProvider
 from .logging import print_info
 
@@ -26,17 +26,6 @@ EvaluationResult = namedtuple(
         'evaluated_value', 'reference_value', 'name', 'metric_type', 'threshold', 'meta'
     ]
 )
-
-
-class Color(Enum):
-    PASSED = 0
-    FAILED = 1
-
-
-def color_format(s, color=Color.PASSED):
-    if color == Color.PASSED:
-        return "\x1b[0;32m{}\x1b[0m".format(s)
-    return "\x1b[0;31m{}\x1b[0m".format(s)
 
 
 class BasePresenter(ClassProvider):
