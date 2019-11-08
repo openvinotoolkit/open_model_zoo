@@ -124,21 +124,17 @@ int main(int argc, char *argv[]) {
         /** Collect images**/
         std::vector<cv::Mat> inputImages;
         for (const auto &i : imageNames) {
-            cv::Mat img = cv::imread(i, cv::IMREAD_UNCHANGED);
-            if (img.empty()) {
-                slog::warn << "Image " + i + " cannot be read!" << slog::endl;
-                continue;
-            }
-
             /** Get size of low resolution input **/
             auto lrInputInfoItem = inputInfo[lrInputBlobName];
             int w = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[3]);
             int h = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[2]);
             int c = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[1]);
 
-            /** Convert to 3-channels image for case when image was saved with alpha channel **/
-            if (img.channels() == 4)
-                cv::cvtColor(img, img, cv::COLOR_BGRA2BGR);
+            cv::Mat img = cv::imread(i, c == 1 ? cv::IMREAD_UNCHANGED : cv::IMREAD_COLOR);
+            if (img.empty()) {
+                slog::warn << "Image " + i + " cannot be read!" << slog::endl;
+                continue;
+            }
 
             if (w != img.cols || h != img.rows) {
                 slog::warn << "Size of the image " << i << " is not equal to WxH = " << w << "x" << h << slog::endl;
