@@ -97,6 +97,7 @@ def visualize(image, target_pos, impaths, distances, input_size, compute_embeddi
 
     if not no_show:
         cv2.imshow('demo_image', demo_image)
-        return cv2.waitKey(imshow_delay) & 0xff
+        key_pressed = cv2.waitKey(imshow_delay)
+        return key_pressed & 0xff if key_pressed != 1 else -1
 
     return -1
