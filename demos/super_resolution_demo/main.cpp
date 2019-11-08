@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
             int h = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[2]);
             int c = static_cast<int>(lrInputInfoItem->getTensorDesc().getDims()[1]);
 
-            cv::Mat img = cv::imread(i, c == 1 ? cv::IMREAD_UNCHANGED : cv::IMREAD_COLOR);
+            cv::Mat img = cv::imread(i, c == 1 ? cv::IMREAD_GRAYSCALE : cv::IMREAD_COLOR);
             if (img.empty()) {
                 slog::warn << "Image " + i + " cannot be read!" << slog::endl;
                 continue;
