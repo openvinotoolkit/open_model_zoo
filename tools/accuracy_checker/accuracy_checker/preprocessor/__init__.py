@@ -29,7 +29,7 @@ from .geometric_transformations import (
     PointAligner,
     Tiling,
     Crop3D,
-    AffineTransform
+    CropProvidedBbox
 )
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
 
@@ -48,7 +48,7 @@ __all__ = [
     'PointAligner',
     'Tiling',
     'Crop3D',
-    'AffineTransform',
+    'CropProvidedBbox',
 
     'BgrToGray',
     'BgrToRgb',

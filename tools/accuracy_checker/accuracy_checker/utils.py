@@ -496,4 +496,4 @@ def get_stride_from_config(config, allow_none=False):
     if not allow_none:
         raise ValueError('Parameter stride required')
 
-    return None, None
+    return None

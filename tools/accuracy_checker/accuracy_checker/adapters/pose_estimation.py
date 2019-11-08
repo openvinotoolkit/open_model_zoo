@@ -343,34 +343,22 @@ class SingleHumanPoseAdapter(Adapter):
     __provider__ = 'single_human_pose_estimation'
     prediction_types = (PoseEstimationPrediction, )
 
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'keypoints_heatmap_out': StringField(description="Name of output layer with keypoints heatmaps."),
-        })
-
-        return parameters
-
     def validate_config(self):
         super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
-
-    def configure(self):
-        self.keypoints_heatmap = self.get_value_from_config('keypoints_heatmap_out')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
 
-        heatmaps = np.transpose(raw_outputs[self.keypoints_heatmap][-1], (1, 2, 0))
+        heatmaps = np.transpose(raw_outputs[self.output_blob][-1], (1, 2, 0))
         sum_score = 0
         sum_score_thr = 0
         scores = []
         x_values = []
         y_values = []
         num_kp_thr = 0
-        vis = [1] * raw_outputs[self.keypoints_heatmap].shape[1]
-        for kpt_idx in range(raw_outputs[self.keypoints_heatmap].shape[1]):
+        vis = [1] * raw_outputs[self.output_blob].shape[1]
+        for kpt_idx in range(raw_outputs[self.output_blob].shape[1]):
             score, coord = self.extract_keypoints(heatmaps[:, :, kpt_idx])
             scores.append(score)
             x, y = self.affine_transform(coord, frame_meta[0]['rev_trans'])
@@ -383,7 +371,7 @@ class SingleHumanPoseAdapter(Adapter):
         if num_kp_thr != 0:
             pose_score = sum_score_thr / num_kp_thr
         else:
-            pose_score = sum_score / raw_outputs[self.keypoints_heatmap].shape[1]
+            pose_score = sum_score / raw_outputs[self.output_blob].shape[1]
         result.append(PoseEstimationPrediction(identifiers[0], np.array([x_values]),
                       np.array([y_values]), np.array([vis]), np.array([pose_score])))
 
