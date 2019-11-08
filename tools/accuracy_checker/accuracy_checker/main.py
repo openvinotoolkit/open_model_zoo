@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import sys
 from pathlib import Path
 from argparse import ArgumentParser
 from functools import partial
@@ -193,6 +194,7 @@ def build_arguments_parser():
 
 
 def main():
+    return_code = 0
     args = build_arguments_parser().parse_args()
     progress_bar_provider = args.progress if ':' not in args.progress else args.progress.split(':')[0]
     progress_reporter = ProgressReporter.provide(progress_bar_provider, None, print_interval=args.progress_interval)
@@ -213,7 +215,9 @@ def main():
             evaluator.release()
         except Exception as e:  # pylint:disable=W0703
             exception(e)
+            return_code = 1
             continue
+    sys.exit(return_code)
 
 
 def print_processing_info(model, launcher, device, tags, dataset):
