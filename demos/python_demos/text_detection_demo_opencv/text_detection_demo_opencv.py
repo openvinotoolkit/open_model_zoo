@@ -212,7 +212,7 @@ class PixelLinkDecoder():
         "Plot and show decoded results via OpenCV's GUI"
         for box in self.bboxes:
             cv2.drawContours(image, [box], 0, (0, 0, 255), 2)
-        if args.test is None:
+        if not args.test:
             cv2.imshow('Detected text', image)
             if cv2.waitKey():
                 cv2.destroyAllWindows()
@@ -242,8 +242,8 @@ def main():
     td.setInput(blob)
     a, b = td.forward(out_layer_names)
 
-    expected_a_shape = (1, 2, 192, 320)
-    expected_b_shape = (1, 16, 192, 320)
+    expected_a_shape = (1, 16, 192, 320)
+    expected_b_shape = (1, 2, 192, 320)
     if a.shape != expected_a_shape or b.shape != expected_b_shape:
         print("Net has returned outputs of different shape, please check model files")
         print("Expected shapes: ({ea}, {eb}), returned: ({ra}, {rb})".format(ea=expected_a_shape,
