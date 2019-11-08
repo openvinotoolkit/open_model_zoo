@@ -30,6 +30,11 @@ class TestDataArg:
 def image_net_arg(id):
     return TestDataArg('ILSVRC2012_img_val/ILSVRC2012_val_{}.JPEG'.format(id))
 
+
+def image_retrieval_arg(id):
+    return TestDataArg('test-master/{}'.format(id))
+
+
 class ModelArg:
     def __init__(self, name, precision='FP32'):
         self.name = name
