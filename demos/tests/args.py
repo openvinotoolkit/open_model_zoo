@@ -31,6 +31,10 @@ def image_net_arg(id):
     return TestDataArg('ILSVRC2012_img_val/ILSVRC2012_val_{}.JPEG'.format(id))
 
 
+def brats_arg(id):
+    return TestDataArg('HGG_LGG/{}'.format(id))
+
+
 def image_retrieval_arg(id):
     return TestDataArg('test-master/{}'.format(id))
 

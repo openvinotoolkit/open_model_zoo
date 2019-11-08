@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from args import image_net_arg
+from args import image_net_arg, brats_arg, image_retrieval_arg
 
 IMAGE_SEQUENCES = {
     'action-recognition': [
@@ -212,6 +212,12 @@ IMAGE_SEQUENCES = {
         image_net_arg('00028190'),
         image_net_arg('00037128'),
         image_net_arg('00048316'),
+    ],
+
+    'brain-tumor-nifti': [
+        brats_arg('BRATS_485.nii.gz'),
+        brats_arg('BRATS_501.nii.gz'),
+        brats_arg('BRATS_750.nii,gz'),
     ],
 
     'image-retrieval-gallery': [

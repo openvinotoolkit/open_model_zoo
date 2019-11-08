@@ -262,7 +262,12 @@ NATIVE_DEMOS = [
 ]
 
 PYTHON_DEMOS = [
-    # TODO: 3d_segmentation_demo: no input data
+    PythonDemo(subdirectory='3d_segmentation_demo', test_cases=combine_cases(
+        TestCase(options={'-m': ModelArg('brain-tumor-segmentation-0001'),
+                          '-o': '.'}),
+        device_cases('-d'),
+        single_option_cases('-i', *IMAGE_SEQUENCES['brain-tumor-nifti']),
+    )),
 
     PythonDemo(subdirectory='action_recognition', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None, '-i': ImagePatternArg('action-recognition')}),
