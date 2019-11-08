@@ -99,4 +99,4 @@ def visualize(image, target_pos, impaths, distances, input_size, compute_embeddi
         cv2.imshow('demo_image', demo_image)
         return cv2.waitKey(imshow_delay) & 0xff
 
-    return 0
+    return -1
