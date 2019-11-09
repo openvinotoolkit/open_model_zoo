@@ -39,8 +39,8 @@ class PixelLinkDecoder():
     def __init__(self):
         pass
 
-    def load(self, image: np.ndarray, pixel_scores: np.ndarray,
-             link_scores: np.ndarray, pixel_conf_threshold=0.8,
+    def load(self, image: np.ndarray, link_scores: np.ndarray,
+             pixel_scores: np.ndarray, pixel_conf_threshold=0.8,
              link_conf_threshold=0.8, four_neighbours=False):
         """ Load data to decoder
 
