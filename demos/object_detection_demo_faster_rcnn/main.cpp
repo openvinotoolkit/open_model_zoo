@@ -10,13 +10,16 @@
 #include <vector>
 #include <limits>
 
-#include <format_reader_ptr.h>
 #include <inference_engine.hpp>
 #ifdef WITH_EXTENSIONS
 #include <ext_list.hpp>
 #endif
 
-#include <samples/common.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+
+#include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 #include <samples/args_helper.hpp>
 #include "object_detection_demo_faster_rcnn.h"
@@ -65,9 +68,9 @@ int main(int argc, char *argv[]) {
         }
 
         /** This vector stores paths to the processed images **/
-        std::vector<std::string> images;
-        parseInputFilesArguments(images);
-        if (images.empty()) throw std::logic_error("No suitable images were found");
+        std::vector<std::string> imagePaths;
+        parseInputFilesArguments(imagePaths);
+        if (imagePaths.empty()) throw std::logic_error("No suitable images were found");
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 1. Load inference engine -------------------------------------
@@ -283,56 +286,32 @@ int main(int argc, char *argv[]) {
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 6. Prepare input --------------------------------------------------------
-        /** Collect images data ptrs **/
-        std::vector<std::shared_ptr<unsigned char>> imagesData, originalImagesData;
-        std::vector<size_t> imageWidths, imageHeights;
-        for (auto & i : images) {
-            FormatReader::ReaderPtr reader(i.c_str());
-            if (reader.get() == nullptr) {
-                slog::warn << "Image " + i + " cannot be read!" << slog::endl;
+        /** Collect images **/
+        std::vector<cv::Mat> images;
+        for (auto &path: imagePaths) {
+            cv::Mat image = cv::imread(path, cv::IMREAD_COLOR);
+            if (image.empty()) {
+                slog::warn << "Image " + path + " cannot be read!" << slog::endl;
                 continue;
             }
-            /** Store image data **/
-            std::shared_ptr<unsigned char> originalData(reader->getData());
-            std::shared_ptr<unsigned char> data(reader->getData(inputInfo->getTensorDesc().getDims()[3], inputInfo->getTensorDesc().getDims()[2]));
-            if (data.get() != nullptr) {
-                originalImagesData.push_back(originalData);
-                imagesData.push_back(data);
-                imageWidths.push_back(reader->width());
-                imageHeights.push_back(reader->height());
-            }
+            images.push_back(image);
         }
-        if (imagesData.empty()) throw std::logic_error("Valid input images were not found!");
+        if (images.empty()) throw std::logic_error("Valid input images were not found!");
 
         size_t batchSize = network.getBatchSize();
         slog::info << "Batch size is " << std::to_string(batchSize) << slog::endl;
-        if (batchSize != imagesData.size()) {
-            slog::warn << "Number of images " + std::to_string(imagesData.size()) + \
+        if (batchSize != images.size()) {
+            slog::warn << "Number of images " + std::to_string(images.size()) + \
                 " doesn't match batch size " + std::to_string(batchSize) << slog::endl;
-            batchSize = std::min(batchSize, imagesData.size());
+            batchSize = std::min(batchSize, images.size());
             slog::warn << "Number of images to be processed is "<< std::to_string(batchSize) << slog::endl;
         }
 
-        /** Creating input blob **/
+        /** Filling input tensor with images **/
         Blob::Ptr imageInput = infer_request.GetBlob(imageInputName);
 
-        /** Filling input tensor with images. First b channel, then g and r channels **/
-        size_t num_channels = imageInput->getTensorDesc().getDims()[1];
-        size_t image_size = imageInput->getTensorDesc().getDims()[3] * imageInput->getTensorDesc().getDims()[2];
-
-        unsigned char* data = static_cast<unsigned char*>(imageInput->buffer());
-
-        /** Iterate over all input images **/
-        for (size_t image_id = 0; image_id < std::min(imagesData.size(), batchSize); ++image_id) {
-            /** Iterate over all pixel in image (b,g,r) **/
-            for (size_t pid = 0; pid < image_size; pid++) {
-                /** Iterate over all channels **/
-                for (size_t ch = 0; ch < num_channels; ++ch) {
-                    /**          [images stride + channels stride + pixel id ] all in bytes            **/
-                    data[image_id * image_size * num_channels + ch * image_size + pid] = imagesData.at(image_id).get()[pid*num_channels + ch];
-                }
-            }
-        }
+        for (size_t image_id = 0; image_id < std::min(images.size(), batchSize); ++image_id)
+            matU8ToBlob<unsigned char>(images[image_id], imageInput, image_id);
 
         if (!imInfoInputName.empty()) {
             Blob::Ptr input2 = infer_request.GetBlob(imInfoInputName);
@@ -341,7 +320,7 @@ int main(int argc, char *argv[]) {
             /** Fill input tensor with values **/
             float *p = input2->buffer().as<PrecisionTrait<Precision::FP32>::value_type*>();
 
-            for (size_t image_id = 0; image_id < std::min(imagesData.size(), batchSize); ++image_id) {
+            for (size_t image_id = 0; image_id < std::min(images.size(), batchSize); ++image_id) {
                 p[image_id * imInfoDim + 0] = static_cast<float>(inputsInfo[imageInputName]->getTensorDesc().getDims()[2]);
                 p[image_id * imInfoDim + 1] = static_cast<float>(inputsInfo[imageInputName]->getTensorDesc().getDims()[3]);
                 for (size_t k = 2; k < imInfoDim; k++) {
@@ -373,9 +352,6 @@ int main(int argc, char *argv[]) {
 
         const float* detection = static_cast<PrecisionTrait<Precision::FP32>::value_type*>(output_blob->buffer());
 
-        std::vector<std::vector<int> > boxes(batchSize);
-        std::vector<std::vector<int> > classes(batchSize);
-
         /* Each detection has image_id that denotes processed image */
         for (int curProposal = 0; curProposal < maxProposalCount; curProposal++) {
             auto image_id = static_cast<int>(detection[curProposal * objectSize + 0]);
@@ -385,30 +361,30 @@ int main(int argc, char *argv[]) {
 
             float confidence = detection[curProposal * objectSize + 2];
             auto label = static_cast<int>(detection[curProposal * objectSize + 1]);
-            auto xmin = static_cast<int>(detection[curProposal * objectSize + 3] * imageWidths[image_id]);
-            auto ymin = static_cast<int>(detection[curProposal * objectSize + 4] * imageHeights[image_id]);
-            auto xmax = static_cast<int>(detection[curProposal * objectSize + 5] * imageWidths[image_id]);
-            auto ymax = static_cast<int>(detection[curProposal * objectSize + 6] * imageHeights[image_id]);
+            auto xmin = static_cast<int>(detection[curProposal * objectSize + 3] * images[image_id].cols);
+            auto ymin = static_cast<int>(detection[curProposal * objectSize + 4] * images[image_id].rows);
+            auto xmax = static_cast<int>(detection[curProposal * objectSize + 5] * images[image_id].cols);
+            auto ymax = static_cast<int>(detection[curProposal * objectSize + 6] * images[image_id].rows);
 
             std::cout << "[" << curProposal << "," << label << "] element, prob = " << confidence <<
                 "    (" << xmin << "," << ymin << ")-(" << xmax << "," << ymax << ")" << " batch id : " << image_id;
 
             if (confidence > 0.5) {
                 /** Drawing only objects with >50% probability **/
-                classes[image_id].push_back(label);
-                boxes[image_id].push_back(xmin);
-                boxes[image_id].push_back(ymin);
-                boxes[image_id].push_back(xmax - xmin);
-                boxes[image_id].push_back(ymax - ymin);
                 std::cout << " WILL BE PRINTED!";
+
+                const auto &color = CITYSCAPES_COLORS[label % arraySize(CITYSCAPES_COLORS)];
+                cv::rectangle(images[image_id],
+                    cv::Point(xmin, ymin), cv::Point(xmax, ymax),
+                    cv::Scalar(color.blue(), color.green(), color.red()));
             }
             std::cout << std::endl;
         }
 
         for (size_t batch_id = 0; batch_id < batchSize; ++batch_id) {
-            addRectangles(originalImagesData[batch_id].get(), imageHeights[batch_id], imageWidths[batch_id], boxes[batch_id], classes[batch_id]);
             const std::string image_path = "out_" + std::to_string(batch_id) + ".bmp";
-            if (writeOutputBmp(image_path, originalImagesData[batch_id].get(), imageHeights[batch_id], imageWidths[batch_id])) {
+
+            if (cv::imwrite(image_path, images[batch_id])) {
                 slog::info << "Image " + image_path + " created!" << slog::endl;
             } else {
                 throw std::logic_error(std::string("Can't create a file: ") + image_path);

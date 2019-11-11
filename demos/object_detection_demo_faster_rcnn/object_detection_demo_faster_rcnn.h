@@ -14,11 +14,6 @@
 #include <limits>
 #include <chrono>
 
-#include <format_reader_ptr.h>
-#include <inference_engine.hpp>
-
-#include "samples/common.hpp"
-
 /// @brief message for help argument
 static const char help_message[] = "Print a usage message.";
 
