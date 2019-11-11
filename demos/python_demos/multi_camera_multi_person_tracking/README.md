@@ -40,8 +40,14 @@ pip3 install -r requirements.txt
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: multi_camera_multi_person_tracking.py [-h] -i I [I ...] -m M_DETECTOR
+usage: multi_camera_multi_person_tracking.py [-h] -i I [I ...]
+                                             [--detections DETECTIONS [DETECTIONS ...]]
+                                             -m M_DETECTOR
                                              [--t_detector T_DETECTOR]
+                                             [--m_segmentation M_SEGMENTATION]
+                                             [--t_segmentation T_SEGMENTATION]
+                                             [--m_orientation M_ORIENTATION]
+                                             [--t_orientation T_ORIENTATION]
                                              --m_reid M_REID
                                              [--output_video OUTPUT_VIDEO]
                                              [--config CONFIG]
@@ -54,10 +60,19 @@ optional arguments:
   -h, --help            show this help message and exit
   -i I [I ...]          Input sources (indexes of cameras or paths to video
                         files)
+  --detections DETECTIONS [DETECTIONS ...]
+                        Json files with detections
   -m M_DETECTOR, --m_detector M_DETECTOR
                         Path to the person detection model
   --t_detector T_DETECTOR
                         Threshold for the person detection model
+  --m_segmentation M_SEGMENTATION
+  --t_segmentation T_SEGMENTATION
+                        Threshold for person instance segmentation model
+  --m_orientation M_ORIENTATION
+                        Path to the people orientation classification model
+  --t_orientation T_ORIENTATION
+                        Confidence threshold for people orientation clissifier
   --m_reid M_REID       Path to the person reidentification model
   --output_video OUTPUT_VIDEO
   --config CONFIG

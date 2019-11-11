@@ -21,10 +21,12 @@ import sys
 
 import cv2 as cv
 
-from utils.network_wrappers import Detector, VectorCNN
+from utils.network_wrappers import Detector, VectorCNN, MaskRCNN, \
+                                   DetectionsFromFileReader, ReIDWithOrientationWrapper
 from mc_tracker.mct import MultiCameraTracker
-from utils.misc import read_py_config
-from utils.video import MulticamCapture
+from utils.analyzer import save_embeddings
+from utils.misc import read_py_config, check_pressed_keys, AverageEstimator
+from utils.video import MulticamCapture, NormalizerCLAHE
 from utils.visualization import visualize_multicam_detections
 
 log.basicConfig(stream=sys.stdout, level=log.DEBUG)
@@ -51,11 +53,19 @@ class FramesThreadBody:
 
 def run(params, capture, detector, reid):
     win_name = 'Multi camera tracking'
+    frame_number = 0
+    avg_latency = AverageEstimator()
+    key = -1
     config = {}
     if len(params.config):
         config = read_py_config(params.config)
 
-    tracker = MultiCameraTracker(capture.get_num_sources(), reid, **config)
+    if config['normalizer_config']['enabled']:
+        del config['normalizer_config']['enabled']
+        capture.add_transform(NormalizerCLAHE(**config['normalizer_config']))
+
+    tracker = MultiCameraTracker(capture.get_num_sources(), reid, config['sct_config'], **config['mct_config'],
+                                 visual_analyze=config['analyzer'])
 
     thread_body = FramesThreadBody(capture, max_queue_length=len(capture.captures) * 2)
     frames_thread = Thread(target=thread_body)
@@ -70,7 +80,10 @@ def run(params, capture, detector, reid):
     else:
         output_video = None
 
-    while cv.waitKey(1) != 27 and thread_body.process:
+    while thread_body.process:
+        key = check_pressed_keys(key)
+        if key == 27:
+            break
         start = time.time()
         try:
             frames = thread_body.frames_queue.get_nowait()
@@ -80,7 +93,10 @@ def run(params, capture, detector, reid):
         if frames is None:
             continue
 
-        all_detections = detector.get_detections(frames)
+        if params.detections:
+            all_detections = detector.get_detections(frame_number)
+        else:
+            all_detections = detector.get_detections(frames)
         all_masks = [[] for _ in range(len(all_detections))]
         for i, detections in enumerate(all_detections):
             all_detections[i] = [det[0] for det in detections]
@@ -89,11 +105,19 @@ def run(params, capture, detector, reid):
         tracker.process(frames, all_detections, all_masks)
         tracked_objects = tracker.get_tracked_objects()
 
-        fps = round(1 / (time.time() - start), 1)
-        vis = visualize_multicam_detections(frames, tracked_objects, fps)
+        latency = time.time() - start
+        avg_latency.update(latency)
+        fps = round(1. / latency, 1)
+
+        vis = visualize_multicam_detections(frames, tracked_objects, fps, **config['visualization_config'])
         cv.imshow(win_name, vis)
         if output_video:
             output_video.write(cv.resize(vis, video_output_size))
+
+        print('\rProcessing frame: {}, fps = {} (avg_fps = {:.3})'.format(
+                            frame_number, fps, 1. / avg_latency.get()), end="")
+        frame_number += 1
+    print('')
 
     thread_body.process = False
     frames_thread.join()
@@ -103,6 +127,9 @@ def run(params, capture, detector, reid):
         with open(params.history_file, 'w') as outfile:
             json.dump(history, outfile)
 
+    if len(config['embeddings']['save_path']):
+        save_embeddings(tracker.scts, **config['embeddings'])
+
 
 def main():
     """Prepares data for the person recognition demo"""
@@ -110,11 +137,22 @@ def main():
                                                   tracking live demo script')
     parser.add_argument('-i', type=str, nargs='+', help='Input sources (indexes \
                         of cameras or paths to video files)', required=True)
+    parser.add_argument('--detections', type=str, nargs='+',
+                        help='Json files with detections')
 
     parser.add_argument('-m', '--m_detector', type=str, required=True,
                         help='Path to the person detection model')
     parser.add_argument('--t_detector', type=float, default=0.6,
                         help='Threshold for the person detection model')
+
+    parser.add_argument('--m_segmentation', type=str, required=False)
+    parser.add_argument('--t_segmentation', type=float, default=0.6,
+                        help='Threshold for person instance segmentation model')
+
+    parser.add_argument('--m_orientation', type=str, required=False,
+                        help='Path to the people orientation classification model')
+    parser.add_argument('--t_orientation', type=float, default=0.7,
+                        help='Confidence threshold for people orientation clissifier')
 
     parser.add_argument('--m_reid', type=str, required=True,
                         help='Path to the person reidentification model')
@@ -133,13 +171,27 @@ def main():
 
     capture = MulticamCapture(args.i)
 
-    person_detector = Detector(args.m_detector, args.t_detector,
-                               args.device, args.cpu_extension,
-                               capture.get_num_sources())
+    if args.detections:
+        person_detector = DetectionsFromFileReader(args.detections, args.t_detector)
+    else:
+        if args.m_segmentation:
+            person_detector = MaskRCNN(args.m_segmentation, args.t_segmentation,
+                                       args.device, args.cpu_extension,
+                                       capture.get_num_sources())
+        else:
+            person_detector = Detector(args.m_detector, args.t_detector,
+                                       args.device, args.cpu_extension,
+                                       capture.get_num_sources())
+
+    orientation_classifier = VectorCNN(args.po_model, args.device) if args.m_orientation else None
+
     if args.m_reid:
         person_recognizer = VectorCNN(args.m_reid, args.device)
+        person_recognizer = ReIDWithOrientationWrapper(person_recognizer,
+                                                       orientation_classifier, args.t_orientation)
     else:
         person_recognizer = None
+
     run(args, capture, person_detector, person_recognizer)
     log.info('Demo finished successfully')
 

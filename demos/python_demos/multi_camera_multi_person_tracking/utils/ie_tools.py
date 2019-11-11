@@ -1,5 +1,5 @@
 """
- Copyright (c) 2019 Intel Corporation
+ Copyright (c) 2018 Intel Corporation
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 import sys
 import os
 
-import logging as log
+import glog as log
 import numpy as np
 from openvino.inference_engine import IENetwork, IECore # pylint: disable=import-error,E0611
 import cv2 as cv
@@ -83,8 +83,8 @@ def load_ie_model(model_xml, device, plugin_dir, cpu_extension='', num_reqs=1):
 
     assert len(net.inputs.keys()) == 1 or len(net.inputs.keys()) == 2, \
         "Supports topologies with only 1 or 2 inputs"
-    assert len(net.outputs) == 1 or len(net.outputs) == 5, \
-        "Supports topologies with only 1 or 5 outputs"
+    assert len(net.outputs) == 1 or len(net.outputs) == 4 or len(net.outputs) == 5, \
+        "Supports topologies with only 1, 4 or 5 outputs"
 
     log.info("Preparing input blobs")
     input_blob = next(iter(net.inputs))

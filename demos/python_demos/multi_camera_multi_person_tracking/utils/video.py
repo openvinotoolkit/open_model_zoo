@@ -11,14 +11,15 @@
  limitations under the License.
 """
 
-import logging as log
 import cv2 as cv
+import glog as log
 
 
 class MulticamCapture:
     def __init__(self, sources):
         assert sources
         self.captures = []
+        self.transforms = []
 
         try:
             sources = [int(src) for src in sources]
@@ -43,14 +44,30 @@ class MulticamCapture:
                 assert cap.isOpened()
                 self.captures.append(cap)
 
+    def add_transform(self, t):
+        self.transforms.append(t)
+
     def get_frames(self):
         frames = []
         for capture in self.captures:
             has_frame, frame = capture.read()
             if has_frame:
+                for t in self.transforms:
+                    frame = t(frame)
                 frames.append(frame)
 
         return len(frames) == len(self.captures), frames
 
     def get_num_sources(self):
         return len(self.captures)
+
+
+class NormalizerCLAHE:
+    def __init__(self, clip_limit=.5, tile_size=16):
+        self.clahe = cv.createCLAHE(clipLimit=clip_limit,
+                                    tileGridSize=(tile_size, tile_size))
+
+    def __call__(self, frame):
+        for i in range(frame.shape[2]):
+            frame[:, :, i] = self.clahe.apply(frame[:, :, i])
+        return frame
