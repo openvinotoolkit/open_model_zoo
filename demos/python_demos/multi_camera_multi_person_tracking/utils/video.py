@@ -11,8 +11,8 @@
  limitations under the License.
 """
 
+import logging as log
 import cv2 as cv
-import glog as log
 
 
 class MulticamCapture:
