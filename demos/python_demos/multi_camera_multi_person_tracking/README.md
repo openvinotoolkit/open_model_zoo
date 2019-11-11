@@ -32,7 +32,7 @@ and then for each detected object it extracts embeddings using re-identification
 To install required dependencies run
 
 ```bash
-pip3 install -r requirements.txt
+cat requirements.txt | xargs -n 1 -L 1 pip3 install
 ```
 
 ### Command line arguments
