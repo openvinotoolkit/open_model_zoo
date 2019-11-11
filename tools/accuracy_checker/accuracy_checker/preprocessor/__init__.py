@@ -34,6 +34,7 @@ from .resize import Resize, AutoResize
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
 from .centernet_preprocessing import CenterNetAffineTransformation
 from .brats_preprocessing import Resize3D, NormalizeBrats, CropBraTS, SwapModalitiesBrats
+from .inpainting_preprocessor import FreeFormMask, RectMask, CustomMask
 
 __all__ = [
     'PreprocessingExecutor',
@@ -71,5 +72,9 @@ __all__ = [
     'DecodeByVocabulary',
     'PadWithEOS',
 
-    'CenterNetAffineTransformation'
+    'CenterNetAffineTransformation',
+
+    'FreeFormMask',
+    'RectMask',
+    'CustomMask'
 ]

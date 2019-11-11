@@ -111,48 +111,50 @@ class Crop(Preprocessor):
         is_simple_case = not isinstance(image.data, list) # otherwise -- pyramid, tiling, etc
         data = image.data
 
-        def process_data(data, dst_height, dst_width, central_fraction, use_pillow):
-            height, width = data.shape[:2]
-            if not central_fraction:
-                new_height = dst_height
-                new_width = dst_width
-            else:
-                new_height = int(height * central_fraction)
-                new_width = int(width * central_fraction)
-
-            if use_pillow:
-                i = int(round((height - new_height) / 2.))
-                j = int(round((width - new_width) / 2.))
-                cropped_data = Image.fromarray(data).crop((j, i, j + new_width, i + new_height))
-                return np.array(cropped_data)
-
-            if width < new_width or height < new_height:
-                resized = np.array([width, height])
-                if resized[0] < new_width:
-                    resized = resized * new_width / resized[0]
-                if resized[1] < new_height:
-                    resized = resized * new_height / resized[1]
-                data = cv2.resize(data, tuple(np.ceil(resized).astype(int)))
-
-            height, width = data.shape[:2]
-            start_height = (height - new_height) // 2
-            start_width = (width - new_width) // 2
-
-            if is_simple_case:
-                # support GeometricOperationMetadata array for simple case only -- without tiling, pyramids, etc
-                image.metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop', {}))
-
-            return data[start_height:start_height + new_height, start_width:start_width + new_width]
-
-        image.data = process_data(
-            data, self.dst_height, self.dst_width, self.central_fraction, self.use_pillow
+        image.data = self.process_data(
+            data, self.dst_height, self.dst_width, self.central_fraction,
+            self.use_pillow, is_simple_case, image.metadata
         ) if not isinstance(data, list) else [
-            process_data(
-                fragment, self.dst_height, self.dst_width, self.central_fraction, self.use_pillow
+            self.process_data(
+                fragment, self.dst_height, self.dst_width, self.central_fraction,
+                self.use_pillow, is_simple_case, image.metadata
             ) for fragment in image.data
         ]
 
         return image
+
+    @staticmethod
+    def process_data(data, dst_height, dst_width, central_fraction, use_pillow, is_simple_case, metadata):
+        height, width = data.shape[:2]
+        if not central_fraction:
+            new_height = dst_height
+            new_width = dst_width
+        else:
+            new_height = int(height * central_fraction)
+            new_width = int(width * central_fraction)
+
+        if use_pillow:
+            i = int(round((height - new_height) / 2.))
+            j = int(round((width - new_width) / 2.))
+            cropped_data = Image.fromarray(data).crop((j, i, j + new_width, i + new_height))
+            return np.array(cropped_data)
+
+        if width < new_width or height < new_height:
+            resized = np.array([width, height])
+            if resized[0] < new_width:
+                resized = resized * new_width / resized[0]
+            if resized[1] < new_height:
+                resized = resized * new_height / resized[1]
+            data = cv2.resize(data, tuple(np.ceil(resized).astype(int)))
+
+        height, width = data.shape[:2]
+        start_height = (height - new_height) // 2
+        start_width = (width - new_width) // 2
+        if is_simple_case:
+            # support GeometricOperationMetadata array for simple case only -- without tiling, pyramids, etc
+            metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop', {}))
+
+        return data[start_height:start_height + new_height, start_width:start_width + new_width]
 
 
 class CropRect(Preprocessor):

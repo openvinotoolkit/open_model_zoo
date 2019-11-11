@@ -66,6 +66,8 @@ from .centernet import CTDETAdapter
 
 from .mono_depth import MonoDepthAdapter
 
+from .image_inpainting import ImageInpaintingAdapter
+
 __all__ = [
     'Adapter',
     'AdapterField',
@@ -121,4 +123,6 @@ __all__ = [
     'QuestionAnsweringAdapter',
 
     'MonoDepthAdapter',
+
+    'ImageInpaintingAdapter'
 ]
