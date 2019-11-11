@@ -4,6 +4,8 @@
 
 #include "cpu_monitor.h"
 #ifdef _WIN32
+#include <windows.h>
+#include <Sysinfoapi.h>
 #include <tchar.h>
 
 namespace {

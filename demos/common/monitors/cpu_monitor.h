@@ -8,8 +8,6 @@
 #include <deque>
 #include <vector>
 #ifdef _WIN32
-#include <windows.h>
-#include <Sysinfoapi.h>
 #include <pdh.h>
 #endif
 
