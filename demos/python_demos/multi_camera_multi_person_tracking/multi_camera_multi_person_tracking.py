@@ -145,7 +145,8 @@ def main():
     parser.add_argument('--t_detector', type=float, default=0.6,
                         help='Threshold for the person detection model')
 
-    parser.add_argument('--m_segmentation', type=str, required=False)
+    parser.add_argument('--m_segmentation', type=str, required=False,
+                        help='Path to the instance segmentation model')
     parser.add_argument('--t_segmentation', type=float, default=0.6,
                         help='Threshold for person instance segmentation model')
 

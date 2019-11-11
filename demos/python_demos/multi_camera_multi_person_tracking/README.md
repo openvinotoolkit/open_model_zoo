@@ -67,6 +67,7 @@ optional arguments:
   --t_detector T_DETECTOR
                         Threshold for the person detection model
   --m_segmentation M_SEGMENTATION
+                        Path to the instance segmentation model
   --t_segmentation T_SEGMENTATION
                         Threshold for person instance segmentation model
   --m_orientation M_ORIENTATION
