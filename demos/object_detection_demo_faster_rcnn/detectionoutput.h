@@ -75,7 +75,7 @@ public:
             }
             auto conf_dims = conf_ptr->getTensorDesc().getDims();
             IE_ASSERT(2 <= conf_dims.size());
-            uint32_t conf_size = conf_dims[0]*conf_dims[1];
+            size_t conf_size = conf_dims[0]*conf_dims[1];
 
             _num_priors = static_cast<int>(priors_size / _prior_size);
 
