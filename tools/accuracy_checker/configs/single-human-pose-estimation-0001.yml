@@ -12,7 +12,7 @@ models:
     datasets:
       - name: ms_coco_single_keypoints
         preprocessing:
-          - type: crop_provided_bbox
+          - type: transformed_crop_with_auto_scale
             dst_height: 384
             dst_width: 288
             stride: 8

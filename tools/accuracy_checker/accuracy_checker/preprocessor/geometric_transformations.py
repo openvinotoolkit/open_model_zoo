@@ -877,8 +877,8 @@ class Crop3D(Preprocessor):
         return img[startz:endz, starty:endy, startx:endx, :]
 
 
-class CropProvidedBbox(Preprocessor):
-    __provider__ = 'crop_provided_bbox'
+class TransformedCropWithAutoScale(Preprocessor):
+    __provider__ = 'transformed_crop_with_auto_scale'
 
     @classmethod
     def parameters(cls):
