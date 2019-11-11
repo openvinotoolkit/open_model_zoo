@@ -1038,4 +1038,5 @@ inline void showAvailableDevices() {
     for (const auto& device : devices) {
         std::cout << "  " << device;
     }
+    std::cout << std::endl;
 }
