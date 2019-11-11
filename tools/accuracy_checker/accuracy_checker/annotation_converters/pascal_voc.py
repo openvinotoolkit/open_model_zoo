@@ -98,8 +98,7 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
         self.image_set_file = self.get_value_from_config('imageset_file')
         self.image_dir = self.get_value_from_config('images_dir')
         dataset_meta_file = self.get_value_from_config('dataset_meta_file')
-        if dataset_meta_file:
-            self.dataset_meta = {}
+        self.dataset_meta = {} if not dataset_meta_file else read_json(dataset_meta_file)
         if not self.image_dir:
             self.image_dir = get_path(self.image_set_file.parents[-2] / 'JPEGImages', is_directory=True)
 
