@@ -7,7 +7,6 @@ models:
         device: CPU
         model: public/octave-se-resnet-50-0.125/checkpoint-0-0000.params
         adapter: classification
-        cpu_extensions: AUTO
         inputs: 
           - name: 'data'
             type: INPUT
@@ -37,31 +36,18 @@ models:
 
     launchers:
       - framework: dlsdk
-        device: CPU
         tags:
           - FP32
         model:   public/octave-se-resnet-50-0.125/FP32/octave-se-resnet-50-0.125.xml
         weights: public/octave-se-resnet-50-0.125/FP32/octave-se-resnet-50-0.125.bin
         adapter: classification
-        cpu_extensions: AUTO
 
       - framework: dlsdk
-        device: GPU
-        tags:
-          - FP32
-        model:   public/octave-se-resnet-50-0.125/FP32/octave-se-resnet-50-0.125.xml
-        weights: public/octave-se-resnet-50-0.125/FP32/octave-se-resnet-50-0.125.bin
-        adapter: classification
-        cpu_extensions: AUTO
-
-      - framework: dlsdk
-        device: GPU
         tags:
           - FP16
         model:   public/octave-se-resnet-50-0.125/FP16/octave-se-resnet-50-0.125.xml
         weights: public/octave-se-resnet-50-0.125/FP16/octave-se-resnet-50-0.125.bin
         adapter: classification
-        cpu_extensions: AUTO
 
     datasets:
       - name: imagenet_1000_classes
@@ -76,3 +62,4 @@ models:
             size: 224
 
         # Using accuracy metric, achieved result of public model - 78.2 / 93.9 (top 1 and top 5 respectively)
+global_definitions: ../dataset_definitions.yml

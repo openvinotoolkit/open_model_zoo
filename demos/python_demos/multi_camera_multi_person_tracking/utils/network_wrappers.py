@@ -25,8 +25,8 @@ from .segm_postrocess import postprocess
 class Detector:
     """Wrapper class for detector"""
 
-    def __init__(self, model_path, conf=.6, device='CPU', ext_path='', max_num_frames=1):
-        self.net = load_ie_model(model_path, device, None, ext_path, num_reqs=max_num_frames)
+    def __init__(self, ie, model_path, conf=.6, device='CPU', ext_path='', max_num_frames=1):
+        self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=max_num_frames)
         self.confidence = conf
         self.expand_ratio = (1., 1.)
         self.max_num_frames = max_num_frames
@@ -78,9 +78,9 @@ class Detector:
 class VectorCNN:
     """Wrapper class for a network returning a vector"""
 
-    def __init__(self, model_path, device='CPU', max_reqs=100):
+    def __init__(self, ie, model_path, device='CPU', max_reqs=100):
         self.max_reqs = max_reqs
-        self.net = load_ie_model(model_path, device, None, num_reqs=self.max_reqs)
+        self.net = load_ie_model(ie, model_path, device, None, num_reqs=self.max_reqs)
 
     def forward(self, batch):
         """Performs forward of the underlying network on a given batch"""
@@ -133,11 +133,11 @@ class ReIDWithOrientationWrapper:
 class MaskRCNN:
     """Wrapper class for a network returning masks of objects"""
 
-    def __init__(self, model_path, conf=.6, device='CPU', ext_path='',
+    def __init__(self, ie, model_path, conf=.6, device='CPU', ext_path='',
                  max_reqs=100, mean_pixel=(102.9801, 115.9465, 122.7717)):
         self.max_reqs = max_reqs
         self.confidence = conf
-        self.net = load_ie_model(model_path, device, None, ext_path, num_reqs=self.max_reqs)
+        self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
 
         required_input_keys = [{'im_info', 'im_data'}, {'im_data', 'im_info'}]
         current_input_keys = set(self.net.inputs_info.keys())

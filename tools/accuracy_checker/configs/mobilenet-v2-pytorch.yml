@@ -76,3 +76,4 @@ models:
             use_pillow: true
 
         # Using accuracy metric, achieved result of public model - 71.8
+global_definitions: ../dataset_definitions.yml

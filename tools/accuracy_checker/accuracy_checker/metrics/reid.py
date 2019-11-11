@@ -155,6 +155,8 @@ class PairwiseAccuracy(FullDatasetEvaluationMetric):
 
     def evaluate(self, annotations, predictions):
         embed_distances, pairs = get_embedding_distances(annotations, predictions)
+        if not pairs:
+            return np.nan
 
         min_score = self.min_score
         if min_score == 'train_median':
@@ -184,17 +186,20 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        params = super().parameters()
+        params.update({
             'subset_number': NumberField(
                 optional=True, min_value=1, value_type=int, default=10, description="Number of subsets for separating."
             )
         })
-        return parameters
+        return params
 
     def configure(self):
         self.subset_num = self.get_value_from_config('subset_number')
-        self.accuracy_metric = PairwiseAccuracy(self.config, self.dataset)
+        config_copy = self.config.copy()
+        if 'subset_number' in config_copy:
+            config_copy.pop('subset_number')
+        self.accuracy_metric = PairwiseAccuracy(config_copy, self.dataset)
 
     def evaluate(self, annotations, predictions):
         subset_results = []
@@ -211,9 +216,10 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
             train_subset = self.mark_subset(train_subset)
 
             subset_result = self.accuracy_metric.evaluate(test_subset+train_subset, predictions)
-            subset_results.append(subset_result)
+            if not np.isnan(subset_result):
+                subset_results.append(subset_result)
 
-        return np.mean(subset_results)
+        return np.mean(subset_results) if subset_results else 0
 
     @staticmethod
     def make_subsets(subset_num, dataset_size):
@@ -378,15 +384,21 @@ def get_embedding_distances(annotation, prediction, train=False):
         if train != image1.metadata.get("train", False):
             continue
 
+        if image1.identifier not in image_indexes:
+            continue
+
         for image2 in image1.positive_pairs:
-            pairs.append(PairDesc(image_indexes[image1.identifier], image_indexes[image2], True))
+            if image2 in image_indexes:
+                pairs.append(PairDesc(image_indexes[image1.identifier], image_indexes[image2], True))
         for image2 in image1.negative_pairs:
-            pairs.append(PairDesc(image_indexes[image1.identifier], image_indexes[image2], False))
+            if image2 in image_indexes:
+                pairs.append(PairDesc(image_indexes[image1.identifier], image_indexes[image2], False))
 
-    embed1 = np.asarray([prediction[idx].embedding for idx, _, _ in pairs])
-    embed2 = np.asarray([prediction[idx].embedding for _, idx, _ in pairs])
-
-    return 0.5 * (1 - np.sum(embed1 * embed2, axis=1)), pairs
+    if pairs:
+        embed1 = np.asarray([prediction[idx].embedding for idx, _, _ in pairs])
+        embed2 = np.asarray([prediction[idx].embedding for _, idx, _ in pairs])
+        return 0.5 * (1 - np.sum(embed1 * embed2, axis=1)), pairs
+    return None, pairs
 
 
 def binary_average_precision(y_true, y_score, interpolated_auc=True):

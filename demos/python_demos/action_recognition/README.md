@@ -60,6 +60,7 @@ Options:
   --fps FPS             Optional. FPS for renderer
   -lb LABELS, --labels LABELS
                         Optional. Path to file with label names
+  --no_show             Optional. Don't show output
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.

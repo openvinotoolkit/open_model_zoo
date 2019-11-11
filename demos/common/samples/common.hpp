@@ -48,6 +48,11 @@ class ConsoleErrorListener : public InferenceEngine::IErrorListener {
     }
 };
 
+template <typename T, std::size_t N>
+constexpr std::size_t arraySize(const T (&)[N]) noexcept {
+    return N;
+}
+
 /**
  * @brief Trims from both ends (in place)
  * @param s - string to trim
@@ -199,6 +204,31 @@ public:
     }
 };
 
+// Known colors for training classes from the Cityscapes dataset
+static UNUSED const Color CITYSCAPES_COLORS[] = {
+    { 128, 64,  128 },
+    { 232, 35,  244 },
+    { 70,  70,  70 },
+    { 156, 102, 102 },
+    { 153, 153, 190 },
+    { 153, 153, 153 },
+    { 30,  170, 250 },
+    { 0,   220, 220 },
+    { 35,  142, 107 },
+    { 152, 251, 152 },
+    { 180, 130, 70 },
+    { 60,  20,  220 },
+    { 0,   0,   255 },
+    { 142, 0,   0 },
+    { 70,  0,   0 },
+    { 100, 60,  0 },
+    { 90,  0,   0 },
+    { 230, 0,   0 },
+    { 32,  11,  119 },
+    { 0,   74,  111 },
+    { 81,  0,   81 }
+};
+
 // TODO : keep only one version of writeOutputBMP
 
 /**
@@ -210,30 +240,7 @@ public:
  */
 static UNUSED void writeOutputBmp(std::vector<std::vector<size_t>> data, size_t classesNum, std::ostream &outFile) {
     unsigned int seed = (unsigned int) time(NULL);
-    // Known colors for training classes from Cityscape dataset
-    static std::vector<Color> colors = {
-        {128, 64,  128},
-        {232, 35,  244},
-        {70,  70,  70},
-        {156, 102, 102},
-        {153, 153, 190},
-        {153, 153, 153},
-        {30,  170, 250},
-        {0,   220, 220},
-        {35,  142, 107},
-        {152, 251, 152},
-        {180, 130, 70},
-        {60,  20,  220},
-        {0,   0,   255},
-        {142, 0,   0},
-        {70,  0,   0},
-        {100, 60,  0},
-        {90,  0,   0},
-        {230, 0,   0},
-        {32,  11,  119},
-        {0,   74,  111},
-        {81,  0,   81}
-    };
+    static std::vector<Color> colors(std::begin(CITYSCAPES_COLORS), std::end(CITYSCAPES_COLORS));
 
     while (classesNum > colors.size()) {
         static std::mt19937 rng(seed);
@@ -408,29 +415,6 @@ static UNUSED bool writeOutputBmp(std::string name, unsigned char *data, size_t 
 * @param thickness - thickness of a line (in pixels) to be used for bounding boxes
 */
 static UNUSED void addRectangles(unsigned char *data, size_t height, size_t width, std::vector<int> rectangles, std::vector<int> classes, int thickness = 1) {
-    std::vector<Color> colors = {  // colors to be used for bounding boxes
-        { 128, 64,  128 },
-        { 232, 35,  244 },
-        { 70,  70,  70 },
-        { 156, 102, 102 },
-        { 153, 153, 190 },
-        { 153, 153, 153 },
-        { 30,  170, 250 },
-        { 0,   220, 220 },
-        { 35,  142, 107 },
-        { 152, 251, 152 },
-        { 180, 130, 70 },
-        { 60,  20,  220 },
-        { 0,   0,   255 },
-        { 142, 0,   0 },
-        { 70,  0,   0 },
-        { 100, 60,  0 },
-        { 90,  0,   0 },
-        { 230, 0,   0 },
-        { 32,  11,  119 },
-        { 0,   74,  111 },
-        { 81,  0,   81 }
-    };
     if (rectangles.size() % 4 != 0 || rectangles.size() / 4 != classes.size()) {
         return;
     }
@@ -441,7 +425,7 @@ static UNUSED void addRectangles(unsigned char *data, size_t height, size_t widt
         int w = rectangles.at(i * 4 + 2);
         int h = rectangles.at(i * 4 + 3);
 
-        int cls = classes.at(i) % colors.size();  // color of a bounding box line
+        Color color = CITYSCAPES_COLORS[classes.at(i) % arraySize(CITYSCAPES_COLORS)]; // color of a bounding box line
 
         if (x < 0) x = 0;
         if (y < 0) y = 0;
@@ -462,12 +446,12 @@ static UNUSED void addRectangles(unsigned char *data, size_t height, size_t widt
             shift_first = (y + t) * width * 3;
             shift_second = (y + h - t) * width * 3;
             for (int ii = x; ii < x + w + 1; ii++) {
-                data[shift_first + ii * 3] = colors.at(cls).red();
-                data[shift_first + ii * 3 + 1] = colors.at(cls).green();
-                data[shift_first + ii * 3 + 2] = colors.at(cls).blue();
-                data[shift_second + ii * 3] = colors.at(cls).red();
-                data[shift_second + ii * 3 + 1] = colors.at(cls).green();
-                data[shift_second + ii * 3 + 2] = colors.at(cls).blue();
+                data[shift_first + ii * 3] = color.red();
+                data[shift_first + ii * 3 + 1] = color.green();
+                data[shift_first + ii * 3 + 2] = color.blue();
+                data[shift_second + ii * 3] = color.red();
+                data[shift_second + ii * 3 + 1] = color.green();
+                data[shift_second + ii * 3 + 2] = color.blue();
             }
         }
 
@@ -475,12 +459,12 @@ static UNUSED void addRectangles(unsigned char *data, size_t height, size_t widt
             shift_first = (x + t) * 3;
             shift_second = (x + w - t) * 3;
             for (int ii = y; ii < y + h + 1; ii++) {
-                data[shift_first + ii * width * 3] = colors.at(cls).red();
-                data[shift_first + ii * width * 3 + 1] = colors.at(cls).green();
-                data[shift_first + ii * width * 3 + 2] = colors.at(cls).blue();
-                data[shift_second + ii * width * 3] = colors.at(cls).red();
-                data[shift_second + ii * width * 3 + 1] = colors.at(cls).green();
-                data[shift_second + ii * width * 3 + 2] = colors.at(cls).blue();
+                data[shift_first + ii * width * 3] = color.red();
+                data[shift_first + ii * width * 3 + 1] = color.green();
+                data[shift_first + ii * width * 3 + 2] = color.blue();
+                data[shift_second + ii * width * 3] = color.red();
+                data[shift_second + ii * width * 3 + 1] = color.green();
+                data[shift_second + ii * width * 3 + 2] = color.blue();
             }
         }
     }
@@ -680,8 +664,6 @@ public:
     DetectedObject(int _objectType, float _xmin, float _ymin, float _xmax, float _ymax, float _prob, bool _difficult = false)
         : objectType(_objectType), xmin(_xmin), xmax(_xmax), ymin(_ymin), ymax(_ymax), prob(_prob), difficult(_difficult) {
     }
-
-    DetectedObject(const DetectedObject& other) = default;
 
     static float ioU(const DetectedObject& detectedObject1_, const DetectedObject& detectedObject2_) {
         // Add small space to eliminate empty squares
@@ -951,70 +933,6 @@ public:
     }
 };
 
-/**
-* @brief Adds colored rectangles to the image
-* @param data - data where rectangles are put
-* @param height - height of the rectangle
-* @param width - width of the rectangle
-* @param detectedObjects - vector of detected objects
-*/
-static UNUSED void addRectangles(unsigned char *data, size_t height, size_t width, std::vector<DetectedObject> detectedObjects) {
-    std::vector<Color> colors = {
-        { 128, 64,  128 },
-        { 232, 35,  244 },
-        { 70,  70,  70 },
-        { 156, 102, 102 },
-        { 153, 153, 190 },
-        { 153, 153, 153 },
-        { 30,  170, 250 },
-        { 0,   220, 220 },
-        { 35,  142, 107 },
-        { 152, 251, 152 },
-        { 180, 130, 70 },
-        { 60,  20,  220 },
-        { 0,   0,   255 },
-        { 142, 0,   0 },
-        { 70,  0,   0 },
-        { 100, 60,  0 },
-        { 90,  0,   0 },
-        { 230, 0,   0 },
-        { 32,  11,  119 },
-        { 0,   74,  111 },
-        { 81,  0,   81 }
-    };
-
-    for (size_t i = 0; i < detectedObjects.size(); i++) {
-        int cls = detectedObjects[i].objectType % colors.size();
-
-        int xmin = static_cast<int>(detectedObjects[i].xmin * width);
-        int xmax = static_cast<int>(detectedObjects[i].xmax * width);
-        int ymin = static_cast<int>(detectedObjects[i].ymin * height);
-        int ymax = static_cast<int>(detectedObjects[i].ymax * height);
-
-        size_t shift_first = ymin*width * 3;
-        size_t shift_second = ymax*width * 3;
-        for (int x = xmin; x < xmax; x++) {
-            data[shift_first + x * 3] = colors.at(cls).red();
-            data[shift_first + x * 3 + 1] = colors.at(cls).green();
-            data[shift_first + x * 3 + 2] = colors.at(cls).blue();
-            data[shift_second + x * 3] = colors.at(cls).red();
-            data[shift_second + x * 3 + 1] = colors.at(cls).green();
-            data[shift_second + x * 3 + 2] = colors.at(cls).blue();
-        }
-
-        shift_first = xmin * 3;
-        shift_second = xmax * 3;
-        for (int y = ymin; y < ymax; y++) {
-            data[shift_first + y*width * 3] = colors.at(cls).red();
-            data[shift_first + y*width * 3 + 1] = colors.at(cls).green();
-            data[shift_first + y*width * 3 + 2] = colors.at(cls).blue();
-            data[shift_second + y*width * 3] = colors.at(cls).red();
-            data[shift_second + y*width * 3 + 1] = colors.at(cls).green();
-            data[shift_second + y*width * 3 + 2] = colors.at(cls).blue();
-        }
-    }
-}
-
 inline std::size_t getTensorWidth(const InferenceEngine::TensorDesc& desc) {
     const auto& layout = desc.getLayout();
     const auto& dims = desc.getDims();
@@ -1120,4 +1038,5 @@ inline void showAvailableDevices() {
     for (const auto& device : devices) {
         std::cout << "  " << device;
     }
+    std::cout << std::endl;
 }

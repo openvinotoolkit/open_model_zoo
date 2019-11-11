@@ -18,7 +18,7 @@ from PIL import Image
 import numpy as np
 from ..config import PathField, BoolField
 from ..representation import ClassificationAnnotation
-from ..utils import read_pickle, check_file_existence
+from ..utils import read_pickle, check_file_existence, read_json
 
 from .format_converter import BaseFormatConverter, ConverterReturn
 
@@ -40,8 +40,8 @@ class Cifar10FormatConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
             'data_batch_file': PathField(description="Path to pickle file which contain dataset batch."),
             'convert_images': BoolField(
                 optional=True,
@@ -56,10 +56,13 @@ class Cifar10FormatConverter(BaseFormatConverter):
                 default=False,
                 description="Allows to add background label to original labels and convert dataset "
                             "for 11 classes instead 10"
+            ),
+            'dataset_meta_file': PathField(
+                description='path to json file with dataset meta (e.g. label_map, color_encoding', optional=True
             )
         })
 
-        return parameters
+        return configuration_parameters
 
     def configure(self):
         """
@@ -72,6 +75,7 @@ class Cifar10FormatConverter(BaseFormatConverter):
         if not self.converted_images_dir:
             self.converted_images_dir = self.data_batch_file.parent / 'converted_images'
         self.convert_images = self.get_value_from_config('convert_images')
+        self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         """
@@ -132,14 +136,21 @@ class Cifar10FormatConverter(BaseFormatConverter):
         # crete metadata for dataset. Provided additional information is task specific and can includes, for example
         # label_map, information about background, used class color representation (for semantic segmentation task)
         # If your dataset does not have additional meta, you can to not provide it.
-        meta = {
-            'label_map': {
-                label_id + labels_offset: label_name for label_id, label_name in enumerate(CIFAR10_LABELS_LIST)
-            }
-        }
+        meta = self.generate_meta(labels_offset)
 
+        return ConverterReturn(annotation, meta, content_errors)
+
+    def generate_meta(self, labels_offset):
+        labels = CIFAR10_LABELS_LIST
+        meta = {}
+        if self.dataset_meta:
+            meta = read_json(self.dataset_meta)
+            if 'label_map' in meta:
+                return meta
+            labels = meta.get('labels', CIFAR10_LABELS_LIST)
+        meta.update({'label_map': {label_id + labels_offset: label_name for label_id, label_name in enumerate(labels)}})
         if self.has_background:
             meta['label_map'][0] = 'background'
             meta['background_label'] = 0
 
-        return ConverterReturn(annotation, meta, content_errors)
+        return meta

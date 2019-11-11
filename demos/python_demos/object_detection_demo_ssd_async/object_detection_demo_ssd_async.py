@@ -45,6 +45,7 @@ def build_argparser():
     args.add_argument("--labels", help="Optional. Path to labels mapping file", default=None, type=str)
     args.add_argument("-pt", "--prob_threshold", help="Optional. Probability threshold for detections filtering",
                       default=0.5, type=float)
+    args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
 
     return parser
 
@@ -98,14 +99,14 @@ def main():
         input_stream = 0
     else:
         input_stream = args.input
-        assert os.path.isfile(args.input), "Specified input file doesn't exist"
+    cap = cv2.VideoCapture(input_stream)
+    assert cap.isOpened(), "Can't open " + input_stream
+
     if args.labels:
         with open(args.labels, 'r') as f:
             labels_map = [x.strip() for x in f]
     else:
         labels_map = None
-
-    cap = cv2.VideoCapture(input_stream)
 
     cur_request_id = 0
     next_request_id = 1
@@ -113,7 +114,9 @@ def main():
     log.info("Starting inference in async mode...")
     is_async_mode = True
     render_time = 0
-    ret, frame = cap.read()
+    if is_async_mode:
+        ret, frame = cap.read()
+        frame_h, frame_w = frame.shape[:2]
 
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     print("To switch between sync/async modes, press TAB key in the output window")
@@ -123,10 +126,10 @@ def main():
             ret, next_frame = cap.read()
         else:
             ret, frame = cap.read()
+            if ret:
+                frame_h, frame_w = frame.shape[:2]
         if not ret:
-            break
-        initial_w = cap.get(3)
-        initial_h = cap.get(4)
+            break  # abandons the last frame in case of async_mode
         # Main sync point:
         # in the truly Async mode we start the NEXT infer request, while waiting for the CURRENT to complete
         # in the regular mode we start the CURRENT request and immediately wait for it's completion
@@ -152,10 +155,10 @@ def main():
             for obj in res[0][0]:
                 # Draw only objects when probability more than specified threshold
                 if obj[2] > args.prob_threshold:
-                    xmin = int(obj[3] * initial_w)
-                    ymin = int(obj[4] * initial_h)
-                    xmax = int(obj[5] * initial_w)
-                    ymax = int(obj[6] * initial_h)
+                    xmin = int(obj[3] * frame_w)
+                    ymin = int(obj[4] * frame_h)
+                    xmax = int(obj[5] * frame_w)
+                    ymax = int(obj[6] * frame_h)
                     class_id = int(obj[1])
                     # Draw box and label\class_id
                     color = (min(class_id * 12.5, 255), min(class_id * 7, 255), min(class_id * 5, 255))
@@ -173,25 +176,28 @@ def main():
 
             cv2.putText(frame, inf_time_message, (15, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (200, 10, 10), 1)
             cv2.putText(frame, render_time_message, (15, 30), cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
-            cv2.putText(frame, async_mode_message, (10, int(initial_h - 20)), cv2.FONT_HERSHEY_COMPLEX, 0.5,
+            cv2.putText(frame, async_mode_message, (10, int(frame_h - 20)), cv2.FONT_HERSHEY_COMPLEX, 0.5,
                         (10, 10, 200), 1)
 
         #
         render_start = time.time()
-        cv2.imshow("Detection Results", frame)
+        if not args.no_show:
+            cv2.imshow("Detection Results", frame)
         render_end = time.time()
         render_time = render_end - render_start
 
         if is_async_mode:
             cur_request_id, next_request_id = next_request_id, cur_request_id
             frame = next_frame
+            frame_h, frame_w = frame.shape[:2]
 
-        key = cv2.waitKey(1)
-        if key == 27:
-            break
-        if (9 == key):
-            is_async_mode = not is_async_mode
-            log.info("Switched to {} mode".format("async" if is_async_mode else "sync"))
+        if not args.no_show:
+            key = cv2.waitKey(1)
+            if key == 27:
+                break
+            if (9 == key):
+                is_async_mode = not is_async_mode
+                log.info("Switched to {} mode".format("async" if is_async_mode else "sync"))
 
     cv2.destroyAllWindows()
 

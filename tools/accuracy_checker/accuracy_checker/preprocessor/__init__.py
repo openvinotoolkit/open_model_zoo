@@ -16,7 +16,7 @@ limitations under the License.
 
 from .preprocessing_executor import PreprocessingExecutor
 from .preprocessor import Preprocessor
-from .color_spece_conversion import BgrToRgb, BgrToGray, TfConvertImageDType
+from .color_space_conversion import BgrToRgb, RgbToBgr, BgrToGray, RgbToGray, TfConvertImageDType
 from .normalization import Normalize, Normalize3d
 from .geometric_transformations import (
     GeometricOperationMetadata,
@@ -50,6 +50,8 @@ __all__ = [
 
     'BgrToGray',
     'BgrToRgb',
+    'RgbToGray',
+    'RgbToBgr',
     'TfConvertImageDType',
 
     'Normalize3d',

@@ -79,6 +79,10 @@ class PostprocessingExecutor:
     def has_dataset_processors(self):
         return len(self._dataset_processors) != 0
 
+    @property
+    def has_processors(self):
+        return len(self._image_processors) + len(self._dataset_processors) != 0
+
     def __call__(self, context, *args, **kwargs):
         batch_annotation = context.annotation_batch
         batch_prediction = context.prediction_batch

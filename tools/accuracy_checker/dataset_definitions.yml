@@ -305,7 +305,7 @@ datasets:
 
   - name: image_retrieval
     data_source: textile_crops
-    annotattion_conversion:
+    annotation_conversion:
       converter: image_retrieval
       data_dir: textile_crops
       gallery_annotation_file: textile_crops/gallery/gallery.txt
@@ -315,3 +315,221 @@ datasets:
     preprocessing:
       - type: resize
         size: 224
+
+  - name: lfw
+    data_source: LFW/lfw
+    annotation_conversion:
+      converter: lfw
+      pairs_file: LFW/annotation/pairs.txt
+      landmarks_file: LFW/annotation/lfw_landmark.txt
+    annotation: lfw.pickle
+
+    metrics:
+      - type: pairwise_accuracy_subsets
+        subset_number: 2
+
+  - name: ICDAR2015
+    data_source: ICDAR15_DET/ch4_test_images
+    annotation_conversion:
+      converter: icdar_detection
+      data_dir: ICDAR15_DET/gt
+    annotation: icdar15_detection.pickle
+
+  - name: ICDAR2013
+    data_source: ICDAR13_REC/Challenge2_Test_Task3_Images
+    annotation_conversion:
+      converter: icdar13_recognition
+      annotation_file: ICDAR13_REC/gt/gt.txt.fixed.alfanumeric
+    annotation: icdar13_recognition.pickle
+    dataset_meta: icdar13_recognition.json
+
+  - name: market1501
+    data_source: Market-1501-v15.09.15
+    annotation_conversion:
+      converter: market1501_reid
+      data_dir: Market-1501-v15.09.15
+    annotation: market1501_reid.pickle
+
+  - name: vgg2face
+    data_source: VGGFaces2/test
+    annotation_conversion:
+      converter: vgg_face
+      landmarks_csv_file: VGGFaces2/bb_landmark/loose_landmark_test.csv
+      bbox_csv_file: VGGFaces2/bb_landmark/loose_bb_test.csv
+    annotation: vggfaces2.pickle
+    dataset_meta: vggfaces2.json
+
+  - name: semantic_segmentation_adas
+    data_source: segmentation
+    annotation_conversion:
+      converter: common_semantic_segmentation
+      images_dir: segmentation/images
+      masks_dir: segmentation/mask_segmentation_adas
+      image_postfix: .JPEG
+      mask_postfix: .png
+      dataset_meta: segmentation/mask_segmentation_adas/dataset_meta.json
+    annotation: semantic_segmentation_adas.pickle
+    dataset_meta: semantic_segmentation_adas.json
+
+    preprocessing:
+      - type: resize
+        dst_height: 1024
+        dst_width: 2048
+
+    postprocessing:
+      - type: encode_segmentation_mask
+        apply_to: annotation
+      - type: resize_segmentation_mask
+        apply_to: annotation
+        dst_height: 1024
+        dst_width: 2048
+
+  - name: road_segmentation
+    data_source: segmentation
+    annotation_conversion:
+      converter: common_semantic_segmentation
+      images_dir: segmentation/images
+      masks_dir: segmentation/mask_road_segmentation
+      image_postfix: .JPEG
+      mask_postfix: .png
+      dataset_meta: segmentation/mask_road_segmentation/dataset_meta.json
+    annotation: road_segmentation.pickle
+    dataset_meta: road_segmentation.json
+
+    preprocessing:
+      - type: resize
+        dst_height: 512
+        dst_width: 896
+
+    postprocessing:
+      - type: encode_segmentation_mask
+        apply_to: annotation
+      - type: resize_segmentation_mask
+        apply_to: annotation
+        dst_height: 512
+        dst_width: 896
+
+    metrics:
+      - type: mean_iou
+        presenter: print_vector
+      - type: mean_accuracy
+        presenter: print_vector
+
+  - name: super_resolution_x3
+    data_source: super_resolution
+    annotation_conversion:
+      converter: super_resolution
+      data_dir: super_resolution
+      lr_suffix: lr_x3
+      upsample_suffix: upsample_x3
+      hr_suffix: hr
+      two_streams: True
+    annotation: super_resolution_x3.pickle
+
+    metrics:
+      - type: psnr
+        scale_border: 4
+        presenter: print_vector
+
+  - name: super_resolution_x4
+    data_source: super_resolution
+    annotation_conversion:
+      converter: super_resolution
+      data_dir: super_resolution
+      lr_suffix: lr_x4
+      upsample_suffix: upsample_x4
+      hr_suffix: hr
+      two_streams: True
+    annotation: super_resolution_x4.pickle
+
+    metrics:
+      - type: psnr
+        scale_border: 4
+        presenter: print_vector
+
+  - name: text_super_resolution_x3
+    data_source: super_resolution
+    annotation_conversion:
+      converter: super_resolution
+      data_dir: super_resolution
+      lr_suffix: lr_x3
+      hr_suffix: hr_gray
+    annotation: text_super_resolution_x3.pickle
+
+    preprocessing:
+      - type: bgr_to_gray
+
+    metrics:
+      - type: psnr
+        scale_border: 4
+        presenter: print_vector
+
+  - name: head_pose
+    data_source: WIDER_val/images/16--Award_Ceremony
+    annotation: head_pose.pickle
+
+    preprocessing:
+      - type: crop_rect
+      - type: resize
+        size: 60
+
+  - name: gaze_estimation_dataset
+    data_source: gaze_estimation
+    annotation: gaze_estimation.pickle
+
+    reader:
+      type: combine_reader
+      scheme:
+        ".*.png": opencv_imread
+        ".*.json":
+            type: json_reader
+            key: head_pose_angles
+
+  - name: handwritten_score_recognition
+    data_source: ILSVRC2012_img_val
+    annotation: handwritten_score_recognition.pickle
+    dataset_meta: handwritten_score_recognition.json
+
+  - name: cmu_panoptic_keypoints
+    data_source: cmu_panoptic_subset
+    annotation_conversion:
+      converter: cmu_panoptic_keypoints
+      data_dir: cmu_panoptic_subset
+    annotation: cmu_panoptic_keypoints.pickle
+
+  - name: kinetics-400
+    data_source: kinetics/frames_val
+    annotation_conversion:
+      converter: clip_action_recognition
+      annotation_file: kinetics/kinetics_400.json
+      data_dir: kinetics/frames_val
+    annotation: kinetics_action_recognition.pickle
+    dataset_meta: kinetics_action_recognition.json
+
+  - name: driver_action_recognition_dataset
+    data_source: kinetics/frames_val
+    annotation_conversion:
+      converter: clip_action_recognition
+      annotation_file: kinetics/driver_action_recognition.json
+      data_dir: kinetics/frames_val
+    annotation: driver_action_recognition.pickle
+    dataset_meta: driver_action_recognition.json
+
+  - name: BraTS
+    data_source: BraTS
+    reader: numpy_reader
+    annotation_conversion:
+      converter: brats_numpy
+      data_dir: BraTS
+      ids_file: BraTS/val_ids.p
+      labels_file: BraTS/labels
+    annotation: brats.pickle
+    dataset_meta: brats.json
+
+  - name: product_detection
+    annotation: product_detection.pickle
+    dataset_meta: product_detection.json
+    data_source: product_detection
+
+    metrics:
+      - type: coco_precision

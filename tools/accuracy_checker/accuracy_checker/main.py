@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import sys
 from pathlib import Path
 from argparse import ArgumentParser
 from functools import partial
@@ -21,10 +22,16 @@ from functools import partial
 import cv2
 
 from .config import ConfigReader
-from .logging import print_info, add_file_handler
-from .evaluators import ModelEvaluator, PipeLineEvaluator, get_processing_info
+from .logging import print_info, add_file_handler, exception
+from .evaluators import ModelEvaluator, PipeLineEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
 from .utils import get_path, cast_to_bool
+
+EVALUATION_MODE = {
+    'models': ModelEvaluator,
+    'pipelines': PipeLineEvaluator,
+    'evaluations': ModuleEvaluator
+}
 
 
 def build_arguments_parser():
@@ -45,21 +52,18 @@ def build_arguments_parser():
         '-m', '--models',
         help='prefix path to the models and weights',
         type=partial(get_path, is_directory=True),
-        default=Path.cwd(),
         required=False
     )
     parser.add_argument(
         '-s', '--source',
         help='prefix path to the data source',
         type=partial(get_path, is_directory=True),
-        default=Path.cwd(),
         required=False
     )
     parser.add_argument(
         '-a', '--annotations',
         help='prefix path to the converted annotations and datasets meta data',
         type=partial(get_path, is_directory=True),
-        default=Path.cwd(),
         required=False
     )
     parser.add_argument(
@@ -79,7 +83,6 @@ def build_arguments_parser():
         '-b', '--bitstreams',
         help='prefix path to bitstreams folder',
         type=partial(get_path, file_or_directory=True),
-        default=Path.cwd(),
         required=False
     )
     parser.add_argument(
@@ -191,6 +194,7 @@ def build_arguments_parser():
 
 
 def main():
+    return_code = 0
     args = build_arguments_parser().parse_args()
     progress_bar_provider = args.progress if ':' not in args.progress else args.progress.split(':')[0]
     progress_reporter = ProgressReporter.provide(progress_bar_provider, None, print_interval=args.progress_interval)
@@ -198,39 +202,22 @@ def main():
         add_file_handler(args.log_file)
 
     config, mode = ConfigReader.merge(args)
-    if mode == 'models':
-        model_evaluation_mode(config, progress_reporter, args)
-    else:
-        pipeline_evaluation_mode(config, progress_reporter, args)
-
-
-def model_evaluation_mode(config, progress_reporter, args):
-    for model in config['models']:
-        for launcher_config in model['launchers']:
-            for dataset_config in model['datasets']:
-                print_processing_info(
-                    model['name'],
-                    launcher_config['framework'],
-                    launcher_config['device'],
-                    launcher_config.get('tags'),
-                    dataset_config['name']
-                )
-                model_evaluator = ModelEvaluator.from_configs(launcher_config, dataset_config)
-                progress_reporter.reset(model_evaluator.dataset.size)
-                model_evaluator.dataset_processor(args.stored_predictions, progress_reporter=progress_reporter)
-                model_evaluator.compute_metrics(ignore_results_formatting=args.ignore_result_formatting)
-
-                model_evaluator.release()
-
-
-def pipeline_evaluation_mode(config, progress_reporter, args):
-    for pipeline_config in config['pipelines']:
-        print_processing_info(*get_processing_info(pipeline_config))
-        evaluator = PipeLineEvaluator.from_configs(pipeline_config['stages'])
-        evaluator.process_dataset(args.stored_predictions, progress_reporter=progress_reporter)
-        evaluator.compute_metrics(ignore_results_formatting=args.ignore_result_formatting)
-
-        evaluator.release()
+    evaluator_class = EVALUATION_MODE.get(mode)
+    if not evaluator_class:
+        raise ValueError('Unknown evaluation mode')
+    for config_entry in config[mode]:
+        try:
+            processing_info = evaluator_class.get_processing_info(config_entry)
+            print_processing_info(*processing_info)
+            evaluator = evaluator_class.from_configs(config_entry)
+            evaluator.process_dataset(args.stored_predictions, progress_reporter=progress_reporter)
+            evaluator.compute_metrics(ignore_results_formatting=args.ignore_result_formatting)
+            evaluator.release()
+        except Exception as e:  # pylint:disable=W0703
+            exception(e)
+            return_code = 1
+            continue
+    sys.exit(return_code)
 
 
 def print_processing_info(model, launcher, device, tags, dataset):

@@ -16,6 +16,10 @@ limitations under the License.
 
 import cv2
 import numpy as np
+try:
+    import pycocotools.mask as mask_util
+except ImportError:
+    mask_util = None
 from .adapter import Adapter
 from ..config import StringField, ConfigError
 from ..representation import CoCocInstanceSegmentationPrediction, DetectionPrediction, ContainerPrediction
@@ -27,11 +31,9 @@ class MaskRCNNAdapter(Adapter):
 
     def __init__(self, launcher_config, label_map=None, output_blob=None):
         super().__init__(launcher_config, label_map, output_blob)
-        try:
-            import pycocotools.mask as mask_util
-            self.encoder = mask_util.encode
-        except ImportError:
+        if mask_util is None:
             raise ImportError('pycocotools is not installed. Please install it before using mask_rcnn adapter.')
+        self.encoder = mask_util.encode
 
     @classmethod
     def parameters(cls):
@@ -162,10 +164,18 @@ class MaskRCNNAdapter(Adapter):
             boxes[:, 1::2] /= im_scale_y
             classes = classes.astype(np.uint32)
             masks = []
-            for box, cls, raw_mask in zip(boxes, classes, raw_masks):
-                raw_cls_mask = raw_mask[cls, ...]
+            raw_mask_for_all_classes = np.shape(raw_masks)[1] != len(identifiers)
+            if raw_mask_for_all_classes:
+                per_obj_raw_masks = []
+                for cls, raw_mask in zip(classes, raw_masks):
+                    per_obj_raw_masks.append(raw_mask[cls, ...])
+            else:
+                per_obj_raw_masks = np.squeeze(raw_masks, axis=1)
+
+            for box, raw_cls_mask in zip(boxes, per_obj_raw_masks):
                 mask = self.segm_postprocess(box, raw_cls_mask, *original_image_size, True, True)
                 masks.append(mask)
+
             x_mins, y_mins, x_maxs, y_maxs = boxes.T
             detection_prediction = DetectionPrediction(identifier, classes, scores, x_mins, y_mins, x_maxs, y_maxs)
             instance_segmentation_prediction = CoCocInstanceSegmentationPrediction(identifier, masks, classes, scores)
@@ -220,7 +230,7 @@ class MaskRCNNAdapter(Adapter):
         raw_cls_mask = np.pad(raw_cls_mask, ((1, 1), (1, 1)), 'constant', constant_values=0)
         extended_box = self.expand_boxes(box[np.newaxis, :], raw_cls_mask.shape[0] / (raw_cls_mask.shape[0] - 2.0))[0]
         extended_box = extended_box.astype(int)
-        w, h = np.maximum(extended_box[2:] - extended_box[:2] + 1, 1)
+        w, h = np.maximum(extended_box[2:] - extended_box[:2] + 1, 1)  # pylint: disable=E0633
         x0, y0 = np.clip(extended_box[:2], a_min=0, a_max=[im_w, im_h])
         x1, y1 = np.clip(extended_box[2:] + 1, a_min=0, a_max=[im_w, im_h])
 

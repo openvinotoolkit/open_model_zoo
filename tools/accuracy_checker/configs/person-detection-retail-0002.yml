@@ -8,7 +8,6 @@ models:
         model:   intel/person-detection-retail-0002/FP32/person-detection-retail-0002.xml
         weights: intel/person-detection-retail-0002/FP32/person-detection-retail-0002.bin
         adapter: ssd
-        cpu_extensions: AUTO
         inputs:
           - name: im_info
             type: CONST_INPUT
@@ -20,7 +19,6 @@ models:
         model:   intel/person-detection-retail-0002/FP16/person-detection-retail-0002.xml
         weights: intel/person-detection-retail-0002/FP16/person-detection-retail-0002.bin
         adapter: ssd
-        cpu_extensions: AUTO
         inputs:
           - name: im_info
             type: CONST_INPUT
@@ -67,3 +65,4 @@ models:
             include_boundaries: False
             allow_multiple_matches_per_ignored: False
             distinct_conf: False
+global_definitions: ../dataset_definitions.yml

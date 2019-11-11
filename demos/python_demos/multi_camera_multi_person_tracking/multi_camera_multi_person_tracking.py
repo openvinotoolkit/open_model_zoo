@@ -28,6 +28,7 @@ from utils.analyzer import save_embeddings
 from utils.misc import read_py_config, check_pressed_keys, AverageEstimator
 from utils.video import MulticamCapture, NormalizerCLAHE
 from utils.visualization import visualize_multicam_detections
+from openvino.inference_engine import IECore # pylint: disable=import-error,E0611
 
 log.basicConfig(stream=sys.stdout, level=log.DEBUG)
 
@@ -167,27 +168,31 @@ def main():
                         help='MKLDNN (CPU)-targeted custom layers.Absolute \
                               path to a shared library with the kernels impl.',
                              type=str, default=None)
+    parser.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
 
     args = parser.parse_args()
 
     capture = MulticamCapture(args.i)
 
+    log.info("Creating Inference Engine")
+    ie = IECore()
+
     if args.detections:
         person_detector = DetectionsFromFileReader(args.detections, args.t_detector)
     else:
         if args.m_segmentation:
-            person_detector = MaskRCNN(args.m_segmentation, args.t_segmentation,
+            person_detector = MaskRCNN(ie, args.m_segmentation, args.t_segmentation,
                                        args.device, args.cpu_extension,
                                        capture.get_num_sources())
         else:
-            person_detector = Detector(args.m_detector, args.t_detector,
+            person_detector = Detector(ie, args.m_detector, args.t_detector,
                                        args.device, args.cpu_extension,
                                        capture.get_num_sources())
 
-    orientation_classifier = VectorCNN(args.po_model, args.device) if args.m_orientation else None
+    orientation_classifier = VectorCNN(ie, args.po_model, args.device) if args.m_orientation else None
 
     if args.m_reid:
-        person_recognizer = VectorCNN(args.m_reid, args.device)
+        person_recognizer = VectorCNN(ie, args.m_reid, args.device)
         person_recognizer = ReIDWithOrientationWrapper(person_recognizer,
                                                        orientation_classifier, args.t_orientation)
     else:

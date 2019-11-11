@@ -15,10 +15,12 @@ limitations under the License.
 """
 
 from .model_evaluator import ModelEvaluator
-from .pipeline_evaluator import PipeLineEvaluator, get_processing_info
+from .pipeline_evaluator import PipeLineEvaluator
+from .module_evaluator import ModuleEvaluator
+
 
 __all__ = [
     'ModelEvaluator',
     'PipeLineEvaluator',
-    'get_processing_info'
+    'ModuleEvaluator'
 ]

@@ -18,7 +18,6 @@ models:
           detection_threshold: 0.4
           action_confidence_threshold: 0.75
           action_scale: 3
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -36,7 +35,6 @@ models:
           detection_threshold: 0.4
           action_confidence_threshold: 0.75
           action_scale: 3
-        cpu_extensions: AUTO
 
     datasets:
       - name: action_detection_dataset_teacher
@@ -81,4 +79,4 @@ models:
            label_map: action_label_map
            fast_match: True
            ignore_label: 3
-
+global_definitions: ../dataset_definitions.yml

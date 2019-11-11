@@ -49,6 +49,7 @@ In order to evaluate some models required frameworks have to be installed. Accur
 - [OpenCV DNN](https://docs.opencv.org/4.1.0/d2/de6/tutorial_py_setup_in_ubuntu.html).
 - [TensorFlow](https://www.tensorflow.org/).
 - [ONNX Runtime](https://github.com/microsoft/onnxruntime/blob/master/README.md).
+- [Pytorch](https://pytorch.org/)
 
 You can use any of them or several at a time.
 
@@ -87,6 +88,13 @@ You may refer to `-h, --help` to full list of command line options. Some optiona
 - `-tf, --target_framework` framework for infer.
 - `-td, --target_devices` devices for infer. You can specify several devices using space as a delimiter.
 
+You are also able to replace some command line arguments with environment variables for path prefixing. Supported following list of variables:
+* `DATA_DIR` -  equivalent of `-s`, `--source`.
+* `MODELS_DIR` - equivalent of `-m`, `--models`.
+* `EXTENSIONS` - equivalent of `-e`, `--extensions`.
+* `ANNOTATIONS_DIR` - equivalent of `-a`, `--annotations`.
+* `BITSTREAMS_DIR` - equivalent of `-b`, `--bitstreams`.
+
 #### Configuration
 
 There is config file which declares validation process.
@@ -110,6 +118,10 @@ models:
   datasets:
     - name: dataset_name
 ```
+Optionally you can use global configuration. It can be useful for avoiding duplication if you have several models which should be run on the same dataset.
+Example of global definitions file can be found [here](dataset_definitions.yml). Global definitions will be merged with evaluation config in the runtime by dataset name. 
+Parameters of global configuration can be overwritten by local config (e.g. if in definitions specified resize with destination size 224 and in the local config used resize with size 227, the value in config - 227 will be used as resize parameter)
+You can use field `global_definitions` for specifying path to global definitions directly in the model config or via command line arguments (`-d`, `--definitions`).
 
 ### Launchers
 
@@ -124,6 +136,7 @@ Please view:
 - [how to configure TensorFlow Launcher](accuracy_checker/launcher/tf_launcher_readme.md).
 - [how to configure TensorFlow Lite Launcher](accuracy_checker/launcher/tf_lite_launcher_readme.md).
 - [how to configure ONNX Runtime Launcher](accuracy_checker/launcher/onnx_runtime_launcher_readme.md).
+- [how to configure Pytorch Launcher](accuracy_checker/launcher/pytorch_launcher_readme.md)
 
 ### Datasets
 
@@ -216,3 +229,9 @@ Typical workflow for testing new model include:
 1. Choose one of *adapters* or write your own. Adapter converts raw output produced by framework to high level problem specific representation (e.g. *ClassificationPrediction*, *DetectionPrediction*, etc).
 1. Reproduce preprocessing, metrics and postprocessing from canonical paper.
 1. Create entry in config file and execute.
+
+### Customizing Evaluation
+
+Standard Accuracy Checker validation pipeline: Annotation Reading -> Data Reading -> Preprocessing -> Inference -> Postprocessing -> Metrics.
+In some cases it can be unsuitable (e.g. if you have sequence of models). You are able to customize validation pipeline using own evaluator.
+More details about custom evaluations can be found in [related section](custom_evaluators/README.md).

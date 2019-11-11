@@ -1,19 +1,19 @@
 # Metrics
 
-For correct work metrics require specific representation format. 
-(e. g. map expects detection annotation and detection prediction for evaluation). 
+For correct work metrics require specific representation format.
+(e. g. map expects detection annotation and detection prediction for evaluation).
 
 In case when you use complicated representation located in representation container, you need to add options `annotation_source` and `prediction_source` in configuration file to
 select specific representation, another way metric calculation possible only if container has only one suitable representation and will be resolved automatically.
 `annotation_source` and `prediction_source` should contain only one annotation identifier and output layer name respectively.
 You may optionally provide `reference` field for metric, if you want calculated metric tested against specific value (i.e. reported in canonical paper) and acceptable `threshold` for metric deviation from reference value.
 
-Every metric has parameters available for configuration. 
+Every metric has parameters available for configuration.
 
 Accuracy Checker supports following set of metrics:
 
 * `accuracy` - classification accuracy metric, defined as the number of correct predictions divided by the total number of predictions.
-Supported representation: `ClassificationAnnotation`, `ClassificationPrediction`
+Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
 * `accuracy_per_class` - classification accuracy metric which represents results for each class. Supported representation: `ClassificationAnnotation`, `ClassificationPrediction`.
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
@@ -71,7 +71,7 @@ More detailed information about calculation segmentation metrics you can find [h
 * `pairwise_accuracy` - pairwise accuracy for object reidentification. Supported representations: `ReIdentificationClassificationAnnotation`, `ReIdentificationPrediction`.
   * `min_score` - min score for determining that objects are different. You can provide value or use `train_median` value which will be calculated if annotations has training subset.
 * `pairwise_accuracy_subsets` - object reidentification pairwise accuracy with division dataset on test and train subsets for calculation mean score. Supported representations: `ReIdentificationClassificationAnnotation`, `ReIdentificationPrediction`.
-  * `subset_number` - number of subsets for separating. 
+  * `subset_number` - number of subsets for separating.
 * `mae` - [Mean Absolute Error](https://en.wikipedia.org/wiki/Mean_absolute_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
 * `mae_on_intervals` - Mean Absolute Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
@@ -92,7 +92,7 @@ More detailed information about calculation segmentation metrics you can find [h
   * `calculate_std` - allows calculation of standard deviation (default value: `False`)
   * `percentile` - calculate error rate for given percentile.
 * `psnr` - [Peak signal to noise ratio](https://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio). Supported representations: `SuperResolutionAnnotation`, `SuperResolutionPrediction`.
-  * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB). 
+  * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB).
 * `angle_error` - Mean angle error and Standard deviation of angle error for gaze estimation. Supported representations: `GazeVectorAnnotation`, `GazeVectorPrediction`.
 * `multi_accuracy` - accuracy for multilabel recognition task. Supported representations: `MultiLabelRecognitionAnnotation`, `MultiLabelRecognitionPrediction`.
   * `label_map` - the field in annotation metadata, which contains dataset label map.
@@ -153,9 +153,13 @@ More detailed information about calculation segmentation metrics you can find [h
 * `ndcg` - [Normalized Discounted Cumulative Gain](https://en.wikipedia.org/wiki/Discounted_cumulative_gain). Supported representations: `HitRatioAnnotation`, `HitRatioPrediction`.
   * `top_k` - definition of number elements in rank list (optional, default 10).
 * `dice` - [Sørensen–Dice coefficient](https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient). Supported representations: `BrainTumorSegmentationAnnotation, BrainTumorSegmentationPrediction`.
-* `dice_index` - [Sørensen–Dice coefficient](https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient). Supported representations: `BrainTumorSegmentationAnnotation, BrainTumorSegmentationPrediction`. Supports result representation for multiple classes. Metric represents result for each class if `label_map` for used dataset is provided, otherwise it represents overall result. For `brats_numpy` converter file with labels set in `labels_file` tag.
-  * `mean` - allows calculation mean value (default - `True`)
-  * `median` - allows calculation median value (default - `False`)
+* `dice_index` - [Sørensen–Dice coefficient](https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient). Supported representations: `BrainTumorSegmentationAnnotation, BrainTumorSegmentationPrediction`, `SegmentationAnnotation, SegmentationPrediction`. Supports result representation for multiple classes. Metric represents result for each class if `label_map` for used dataset is provided, otherwise it represents overall result. For `brats_numpy` converter file with labels set in `labels_file` tag.
+  * `mean` - allows calculation mean value (default - `True`).
+  * `median` - allows calculation median value (default - `False`).
+  * `use_argmax` - allows to use argmax for prediction mask (default - `True`).
 * `bleu` - [Bilingual Evaluation Understudy](https://en.wikipedia.org/wiki/BLEU). Supperted representations: `MachineTranslationAnnotation`, `MachineTranslationPrediction`.
   * `smooth` - Whether or not to apply Lin et al. 2004 smoothing.
   *  `max_order` - Maximum n-gram order to use when computing BLEU score. (Optional, default 4).
+* `f1` - F1-score for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
+* `exact_match` - Exact matching (EM) metric for question answering task. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
+* `mpjpe_multiperson` - [Mean Per Joint Position Error](http://vision.imar.ro/human3.6m/pami-h36m.pdf) extended for multi-person case. Supported representations: `PoseEstimation3dAnnotation`, `PoseEstimation3dPrediction`. As the first step, correspondence between ground truth and prediction skeletons is established for each image. Then MPJPE is computed for each ground truth and prediction pair. The error is averaged over poses in each frame, then over all frames.

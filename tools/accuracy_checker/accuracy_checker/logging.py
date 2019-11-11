@@ -102,6 +102,10 @@ def error(msg, *args, **kwargs):
     _default_logger.error(msg, *args, **kwargs)
 
 
+def exception(exc, *args, **kwargs):
+    _default_logger.exception(str(exc), *args, **kwargs)
+
+
 def warning(msg, *args, raise_warning=True, **kwargs):
     if raise_warning:
         warnings.warn(msg)

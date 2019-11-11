@@ -19,17 +19,12 @@ models:
       - framework: dlsdk
         tags:
           - INT8
-        device: CPU
-        model:  intel/person-reidentification-retail-0079/dldt/INT8/person-reidentification-retail-0079.xml
-        weights: intel/person-reidentification-retail-0079/0079/dldt/INT8/person-reidentification-retail-0079.bin
+        model:   intel/person-reidentification-retail-0079/INT8/person-reidentification-retail-0079.xml
+        weights: intel/person-reidentification-retail-0079/INT8/person-reidentification-retail-0079.bin
         adapter: reid
 
     datasets:
       - name: market1501
-        data_source: Market-1501-v15.09.15
-        annotation_conversion:
-          converter: market1501_reid
-          data_dir: Market-1501-v15.09.15
 
         preprocessing:
           - type: resize
@@ -42,3 +37,4 @@ models:
             top_k: 1
 
           - type: reid_map
+global_definitions: ../dataset_definitions.yml

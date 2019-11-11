@@ -8,7 +8,6 @@ models:
         model:   intel/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.xml
         weights: intel/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -16,7 +15,6 @@ models:
         model:   intel/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.xml
         weights: intel/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -24,7 +22,6 @@ models:
         model:   intel/pedestrian-and-vehicle-detector-adas-0001/INT8/pedestrian-and-vehicle-detector-adas-0001.xml
         weights: intel/pedestrian-and-vehicle-detector-adas-0001/INT8/pedestrian-and-vehicle-detector-adas-0001.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
     datasets:
       - name: pedestrian_and_vehicle_dataset
@@ -53,3 +50,4 @@ models:
             include_boundaries: True
             allow_multiple_matches_per_ignored: True
             use_filtered_tp: True
+global_definitions: ../dataset_definitions.yml

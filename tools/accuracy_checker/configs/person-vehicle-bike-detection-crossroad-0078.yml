@@ -8,7 +8,6 @@ models:
         model:   intel/person-vehicle-bike-detection-crossroad-0078/FP32/person-vehicle-bike-detection-crossroad-0078.xml
         weights: intel/person-vehicle-bike-detection-crossroad-0078/FP32/person-vehicle-bike-detection-crossroad-0078.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -16,7 +15,6 @@ models:
         model:   intel/person-vehicle-bike-detection-crossroad-0078/FP16/person-vehicle-bike-detection-crossroad-0078.xml
         weights: intel/person-vehicle-bike-detection-crossroad-0078/FP16/person-vehicle-bike-detection-crossroad-0078.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -24,7 +22,6 @@ models:
         model:   intel/person-vehicle-bike-detection-crossroad-0078/INT8/person-vehicle-bike-detection-crossroad-0078.xml
         weights: intel/person-vehicle-bike-detection-crossroad-0078/INT8/person-vehicle-bike-detection-crossroad-0078.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
     datasets:
       - name: crossroad_dataset_0078
@@ -53,3 +50,4 @@ models:
             include_boundaries: True
             allow_multiple_matches_per_ignored: True
             use_filtered_tp: False
+global_definitions: ../dataset_definitions.yml

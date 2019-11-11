@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from .metric_executor import MetricsExecutor, Metric
+from .metric_executor import MetricsExecutor
+from .metric import Metric, PerImageMetricResult
 
 from .classification import ClassificationAccuracy, ClassificationAccuracyClasses, ClipAccuracy
 from .detection import (DetectionMAP, MissRate, Recall, DetectionAccuracyMetric)
@@ -57,11 +58,14 @@ from .coco_orig_metrics import (
 )
 from .hit_ratio import HitRatioMetric, NDSGMetric
 from .machine_translation import BilingualEvaluationUnderstudy
+from .question_answering import ExactMatchScore, ScoreF1
+from .mpjpe_multiperson import MpjpeMultiperson
 
 
 __all__ = [
     'Metric',
     'MetricsExecutor',
+    'PerImageMetricResult',
 
     'ClassificationAccuracy',
     'ClassificationAccuracyClasses',
@@ -117,5 +121,10 @@ __all__ = [
     'HitRatioMetric',
     'NDSGMetric',
 
-    'BilingualEvaluationUnderstudy'
+    'BilingualEvaluationUnderstudy',
+
+    'ScoreF1',
+    'ExactMatchScore',
+
+    'MpjpeMultiperson'
 ]

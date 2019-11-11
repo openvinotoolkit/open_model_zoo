@@ -29,7 +29,19 @@ def get_image_annotation(image_id, annotations_):
     return list(filter(lambda x: x['image_id'] == image_id, annotations_))
 
 
-def get_label_map(full_annotation, use_full_label_map=False, has_background=False):
+def get_label_map(dataset_meta, full_annotation, use_full_label_map=False, has_background=False):
+    if dataset_meta:
+        meta = read_json(dataset_meta)
+        label_map = meta.get('label_map')
+        if not label_map:
+            labels = meta.get('labels')
+            label_offset = int(has_background)
+            if labels:
+                label_map = {i + label_offset: label for i, label in enumerate(labels)}
+        if label_map:
+            label_id_to_label = {i: i for i in label_map}
+            return label_map, label_id_to_label
+
     labels = full_annotation['categories']
 
     if not use_full_label_map:
@@ -49,8 +61,8 @@ class MSCocoDetectionConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
             'annotation_file': PathField(description="Path to annotation file in json format."),
             'use_full_label_map': BoolField(
                 optional=True, default=False,
@@ -66,9 +78,12 @@ class MSCocoDetectionConverter(BaseFormatConverter):
             'images_dir': PathField(
                 is_directory=True, optional=True,
                 description='path to dataset images, used only for content existence check'
+            ),
+            'dataset_meta_file': PathField(
+                description='path to json file with dataset meta (e.g. label_map, color_encoding)', optional=True
             )
         })
-        return parameters
+        return configuration_parameters
 
     def configure(self):
         self.annotation_file = self.get_value_from_config('annotation_file')
@@ -76,6 +91,7 @@ class MSCocoDetectionConverter(BaseFormatConverter):
         self.use_full_label_map = self.get_value_from_config('use_full_label_map')
         self.sort_annotations = self.get_value_from_config('sort_annotations')
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
+        self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         full_annotation = read_json(self.annotation_file)
@@ -85,7 +101,9 @@ class MSCocoDetectionConverter(BaseFormatConverter):
             image_ids.sort(key=lambda value: value[0])
         annotations = full_annotation['annotations']
 
-        label_map, label_id_to_label = get_label_map(full_annotation, self.use_full_label_map, self.has_background)
+        label_map, label_id_to_label = get_label_map(
+            self.dataset_meta, full_annotation, self.use_full_label_map, self.has_background
+        )
 
         meta = {}
         if self.has_background:
@@ -150,6 +168,9 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
                 'images_dir': PathField(
                     is_directory=True, optional=True,
                     description='path to dataset images, used only for content existence check'
+                ),
+                'dataset_meta_file': PathField(
+                    description='path to json file with dataset meta (e.g. label_map, color_encoding)', optional=True
                 )
             }
         )
@@ -158,6 +179,7 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
     def configure(self):
         super().configure()
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
+        self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         keypoints_annotations = []
@@ -166,7 +188,7 @@ class MSCocoKeypointsConverter(FileBasedAnnotationConverter):
         full_annotation = read_json(self.annotation_file)
         image_info = full_annotation['images']
         annotations = full_annotation['annotations']
-        label_map, _ = get_label_map(full_annotation, True)
+        label_map, _ = get_label_map(self.dataset_meta, full_annotation, True)
         num_iterations = len(image_info)
         for image_id, image in enumerate(image_info):
             identifier = image['file_name']

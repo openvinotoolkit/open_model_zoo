@@ -44,7 +44,9 @@ Accuracy Checker supports following set of preprocessors:
      These parameters support work with precomputed values of frequently used datasets (e.g. `cifar10` or `imagenet`).
 
 * `bgr_to_rgb` - reversing image channels. Convert image in BGR format to RGB.
-* `bgr_to_gray` - converting image in BGR to grayscale color space.
+* `bgr_to_gray` - converting image in BGR to gray scale color space.
+* `rgb_to_bgr` - reversing image channels. Convert image in RGB format to BGR.
+* `rgb_to_gray` - converting image in RGB to gray scale color space.
 * `flip` - image mirroring around specified axis.
   * `mode` specifies the axis for flipping (`vertical` or `horizontal`).
 * `crop` - central cropping for image.

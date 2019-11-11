@@ -38,3 +38,4 @@ models:
             size: 256
           - type: crop
             size: 227
+global_definitions: ../dataset_definitions.yml

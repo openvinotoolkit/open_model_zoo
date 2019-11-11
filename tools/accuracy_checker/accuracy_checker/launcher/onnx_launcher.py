@@ -28,17 +28,17 @@ class ONNXLauncher(Launcher):
 
     def __init__(self, config_entry: dict, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
+        self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
-        onnx_launcher_config = LauncherConfigValidator('ONNX_Launcher', fields=self.parameters())
+        onnx_launcher_config = LauncherConfigValidator(
+            'ONNX_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading)
         onnx_launcher_config.validate(self.config)
-
-        self.model = str(self.get_value_from_config('model'))
-
-        device = re.match(DEVICE_REGEX, self.get_value_from_config('device').lower()).group('device')
-        beckend_rep = backend.prepare(model=self.model, device=device.upper())
-        self._inference_session = beckend_rep._session # pylint: disable=W0212
-        outputs = self._inference_session.get_outputs()
-        self.output_names = [output.name for output in outputs]
+        self.device = re.match(DEVICE_REGEX, self.get_value_from_config('device').lower()).group('device')
+        if not self._delayed_model_loading:
+            self.model = self.get_value_from_config('model')
+            self._inference_session = self.create_inference_session(self.model)
+            outputs = self._inference_session.get_outputs()
+            self.output_names = [output.name for output in outputs]
 
     @classmethod
     def parameters(cls):
@@ -63,21 +63,26 @@ class ONNXLauncher(Launcher):
     def batch(self):
         return 1
 
-    def predict(self, inputs, metadata, *args, **kwargs):
+    def create_inference_session(self, model):
+        beckend_rep = backend.prepare(model=str(model), device=self.device.upper())
+        return beckend_rep._session  # pylint: disable=W0212
+
+    def predict(self, inputs, metadata=None, **kwargs):
         results = []
         for infer_input in inputs:
             prediction_list = self._inference_session.run(self.output_names, infer_input)
-            results.append(
-                {output_name: prediction for output_name, prediction in zip(self.output_names, prediction_list)}
-            )
-            for meta_ in metadata:
-                meta_['input_shape'] = self.inputs_info_for_meta()
+            results.append(dict(zip(self.output_names, prediction_list)))
+            if metadata is not None:
+                for meta_ in metadata:
+                    meta_['input_shape'] = self.inputs_info_for_meta()
 
         return results
 
     @staticmethod
     def fit_to_input(data, layer_name, layout):
         if len(np.shape(data)) == 4:
+            return np.transpose(data, layout).astype(np.float32)
+        if len(np.shape(data)) == 5 and len(layout) == 5:
             return np.transpose(data, layout).astype(np.float32)
         return np.array(data).astype(np.float32)
 

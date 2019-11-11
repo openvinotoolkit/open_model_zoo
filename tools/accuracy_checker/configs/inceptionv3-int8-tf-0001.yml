@@ -8,8 +8,6 @@ models:
         model:   intel/inceptionv3-int8-tf-0001/FP32/inceptionv3-int8-tf-0001.xml
         weights: intel/inceptionv3-int8-tf-0001/FP32/inceptionv3-int8-tf-0001.bin
         adapter: classification
-        cpu_extensions: AUTO
-
 
     datasets:
       - name: imagenet_1001_classes
@@ -27,3 +25,4 @@ models:
           - name: accuracy@top5
             type: accuracy
             top_k: 5
+global_definitions: ../dataset_definitions.yml
