@@ -545,7 +545,7 @@ class ConfigReader:
                 for preprocessor in dataset_config['preprocessing']:
                     path_preprocessing = (create_command_line_mapping(preprocessor, None))
                     for path in path_preprocessing:
-                        preprocessor[path] = Path(path_preprocessing[path])
+                        preprocessor[path] = Path(preprocessor[path])
 
             for key, path in dataset_config.items():
                 if key not in ENTRIES_PATHS['datasets']:
