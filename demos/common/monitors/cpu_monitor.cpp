@@ -16,7 +16,12 @@ std::size_t getNCores() {
 }
 }
 
-CpuMonitor::CpuMonitor() : nCores{getNCores()}, lastEnabled{false}, historyEnabled{false}, samplesNumber{0} {};
+CpuMonitor::CpuMonitor() :
+    nCores{getNCores()},
+    lastEnabled{false},
+    historyEnabled{false},
+    samplesNumber{0},
+    meanCpuLoad(nCores, 0) {}
 
 void CpuMonitor::openQuery() {
     PDH_STATUS status;
@@ -129,15 +134,11 @@ void CpuMonitor::collectData() {
         cpuLoad[i] = static_cast<double>(idleNonIdleCpuStat[i].first);
     }
 
-    if (meanCpuLoad.empty()) {
-        meanCpuLoad = cpuLoad;
-        samplesNumber = 1;
-    } else {
-        for (std::size_t i = 0; i < meanCpuLoad.size(); ++i) {
-            meanCpuLoad[i] = (meanCpuLoad[i] * samplesNumber + cpuLoad[i]) / (samplesNumber + 1);
-        }
-        ++samplesNumber;
+    for (std::size_t i = 0; i < meanCpuLoad.size(); ++i) {
+        meanCpuLoad[i] = (meanCpuLoad[i] * samplesNumber + cpuLoad[i]) / (samplesNumber + 1);
     }
+    ++samplesNumber;
+
     cpuLoadHistory.push_back(std::move(cpuLoad));
     if (cpuLoadHistory.size() > historySize) {
         cpuLoadHistory.pop_front();
@@ -199,7 +200,8 @@ CpuMonitor::CpuMonitor() :
     nCores{static_cast<std::size_t>(sysconf(_SC_NPROCESSORS_CONF))},
     lastEnabled{false},
     historyEnabled{false},
-    samplesNumber{0} {};
+    samplesNumber{0},
+    meanCpuLoad(nCores, 0) {}
 
 void CpuMonitor::enableHistory(std::size_t historySize) {
     if (0 == historySize) {
@@ -256,15 +258,11 @@ void CpuMonitor::collectData() {
     }
     prevIdleNonIdleCpuStat = std::move(idleNonIdleCpuStat);
 
-    if (meanCpuLoad.empty()) {
-        meanCpuLoad = cpuLoad;
-        samplesNumber = 1;
-    } else {
-        for (std::size_t i = 0; i < meanCpuLoad.size(); ++i) {
-            meanCpuLoad[i] = (meanCpuLoad[i] * samplesNumber + cpuLoad[i]) / (samplesNumber + 1);
-        }
-        ++samplesNumber;
+    for (std::size_t i = 0; i < meanCpuLoad.size(); ++i) {
+        meanCpuLoad[i] = (meanCpuLoad[i] * samplesNumber + cpuLoad[i]) / (samplesNumber + 1);
     }
+    ++samplesNumber;
+
     cpuLoadHistory.push_back(std::move(cpuLoad));
     if (cpuLoadHistory.size() > historySize) {
         cpuLoadHistory.pop_front();

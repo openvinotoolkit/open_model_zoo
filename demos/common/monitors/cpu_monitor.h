@@ -22,7 +22,7 @@ public:
     void disableLast();
     void collectData();
     std::deque<std::vector<double>> getLastHistory() const;
-    std::vector<double> getMeanCpuLoad() const; // can be empty if monitor didn't collect any data
+    std::vector<double> getMeanCpuLoad() const;
 
     const std::size_t nCores;
 private:
