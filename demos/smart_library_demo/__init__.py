@@ -57,7 +57,7 @@ def createLibrary(libPath):
     with open(libPath, 'r', encoding='utf-8') as lib:
         data = json.load(lib)
     for book in data['books']:
-        BD.addBook(book['id'], book['title'],  book['author'],
+        DB.addBook(book['id'], book['title'],  book['author'],
                    book['publisher'], book['year'])
 
 def putText(img, text, pos, ix, iy, font, color, scale, thickness, rect = 1):
@@ -122,11 +122,11 @@ def recUser(img):
 def printInfo(count):
     os.system('cls')
     if count == 0:
-        BD.printUsers()
+        DB.printUsers()
     elif count == 1:
-        BD.printBooks()
+        DB.printBooks()
     elif count == 2:
-        BD.printBBooks()
+        DB.printBBooks()
 
 def recBook(img):
     data = bookRec.recognize(img)
@@ -142,7 +142,7 @@ brArgs = dict(name='')
 rdArgs = dict(name = '', rdXML = '', rdWidth= 0, rdHeight= 0, rdThreshold= 0,
 fdName = '', fdXML = '', fdWidth = 0, fdThreshold= 0,
 lmName = '', lmXML= 0, lmWidth= 0, lmHeight= 0)
-BD = DynamicBD()
+DB = DynamicDB()
 
 if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
     rdArgs ['name'] = args.rdDet
@@ -198,17 +198,17 @@ if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
                 bookID = recBook(img)
                 os.system('cls')
                 print(bookID)
-                BD.getRetBook(userID, bookID)
-                BD.printBBooks()
+                DB.getRetBook(userID, bookID)
+                DB.printBBooks()
             
         elif ch  == ord('r'):
             n = faceRec.register(img)
-            BD.addUser(n)
+            DB.addUser(n)
             text = 'You are user #' +  str(n)
             putText(img, text, (5,  25), 5, -5, cv.FONT_HERSHEY_SIMPLEX, 
                                            (22, 163, 245), 1, 2)
             os.system('cls')
-            BD.printUsers()
+            DB.printUsers()
             cv.imshow('window',  img)
             cv.waitKey(1000)
         

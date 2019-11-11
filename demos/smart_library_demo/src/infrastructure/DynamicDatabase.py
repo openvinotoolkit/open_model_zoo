@@ -11,7 +11,7 @@ class BorrowedBooks():
         self.bdate = bdate
         self.rdate = rdate
 
-class DynamicBD():
+class DynamicDB():
     
     def __init__(self):
         self.Users = []
