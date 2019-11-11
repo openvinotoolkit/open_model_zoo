@@ -54,8 +54,8 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        model: octave-resnet-200-0.125/FP16/octave-resnet-200-0.125.xml
-        weights: octave-resnet-200-0.125/FP16/octave-resnet-200-0.125.bin
+        model:   public/octave-resnet-200-0.125/FP16/octave-resnet-200-0.125.xml
+        weights: public/octave-resnet-200-0.125/FP16/octave-resnet-200-0.125.bin
         adapter: classification
 
     datasets:
