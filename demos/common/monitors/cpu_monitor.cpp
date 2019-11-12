@@ -21,7 +21,7 @@ CpuMonitor::CpuMonitor() :
     lastEnabled{false},
     historyEnabled{false},
     samplesNumber{0},
-    meanCpuLoad(nCores, 0) {}
+    cpuLoadSum(nCores, 0) {}
 
 void CpuMonitor::openQuery() {
     PDH_STATUS status;
@@ -134,8 +134,8 @@ void CpuMonitor::collectData() {
         cpuLoad[i] = static_cast<double>(idleNonIdleCpuStat[i].first);
     }
 
-    for (std::size_t i = 0; i < meanCpuLoad.size(); ++i) {
-        meanCpuLoad[i] = (meanCpuLoad[i] * samplesNumber + cpuLoad[i]) / (samplesNumber + 1);
+    for (std::size_t i = 0; i < cpuLoad.size(); ++i) {
+        cpuLoadSum[i] += cpuLoad[i];
     }
     ++samplesNumber;
 
@@ -150,6 +150,11 @@ std::deque<std::vector<double>> CpuMonitor::getLastHistory() const {
 }
 
 std::vector<double> CpuMonitor::getMeanCpuLoad() const {
+    std::vector<double> meanCpuLoad;
+    meanCpuLoad.reserve(cpuLoadSum.size());
+    for (double coreLoad : cpuLoadSum) {
+        meanCpuLoad.push_back(coreLoad / samplesNumber);
+    }
     return meanCpuLoad;
 }
 #else
@@ -201,7 +206,7 @@ CpuMonitor::CpuMonitor() :
     lastEnabled{false},
     historyEnabled{false},
     samplesNumber{0},
-    meanCpuLoad(nCores, 0) {}
+    cpuLoadSum(nCores, 0) {}
 
 void CpuMonitor::enableHistory(std::size_t historySize) {
     if (0 == historySize) {
@@ -258,8 +263,8 @@ void CpuMonitor::collectData() {
     }
     prevIdleNonIdleCpuStat = std::move(idleNonIdleCpuStat);
 
-    for (std::size_t i = 0; i < meanCpuLoad.size(); ++i) {
-        meanCpuLoad[i] = (meanCpuLoad[i] * samplesNumber + cpuLoad[i]) / (samplesNumber + 1);
+    for (std::size_t i = 0; i < cpuLoad.size(); ++i) {
+        cpuLoadSum[i] += cpuLoad[i];
     }
     ++samplesNumber;
 
@@ -274,6 +279,11 @@ std::deque<std::vector<double>> CpuMonitor::getLastHistory() const {
 }
 
 std::vector<double> CpuMonitor::getMeanCpuLoad() const {
+    std::vector<double> meanCpuLoad;
+    meanCpuLoad.reserve(cpuLoadSum.size());
+    for (double coreLoad : cpuLoadSum) {
+        meanCpuLoad.push_back(coreLoad / samplesNumber);
+    }
     return meanCpuLoad;
 }
 #endif

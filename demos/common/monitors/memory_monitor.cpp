@@ -34,8 +34,8 @@ double getSwapTotalOnly() {
 MemoryMonitor::MemoryMonitor() :
     enabled{false},
     samplesNumber{0},
-    meanMem{0},
-    meanSwap{0},
+    memSum{0},
+    swapSum{0},
     maxMem{0},
     maxSwap{0},
     memTotal{getMemTotalOnly()},
@@ -73,17 +73,12 @@ void MemoryMonitor::collectData() {
     maxMemTotal = std::max(maxMemTotal, memTotal);
     maxSwapTotal = std::max(maxSwapTotal, swapTotal);
 
-    if (0 == samplesNumber) {
-        maxMem = meanMem = usedMem;
-        maxSwap = meanSwap = usedSwap;
-        samplesNumber = 1;
-    } else {
-        meanMem = (meanMem * samplesNumber + usedMem) / (samplesNumber + 1);
-        meanSwap = (meanSwap * samplesNumber + usedSwap) / (samplesNumber + 1);
-        ++samplesNumber;
-        maxMem = std::max(maxMem, usedMem);
-        maxSwap = std::max(maxSwap, usedSwap);
-    }
+    memSum += usedMem;
+    swapSum += usedSwap;
+    ++samplesNumber;
+    maxMem = std::max(maxMem, usedMem);
+    maxSwap = std::max(maxSwap, usedSwap);
+
     memSwapUsageHistory.emplace_back(usedMem, usedSwap);
     if (memSwapUsageHistory.size() > historySize) {
         memSwapUsageHistory.pop_front();
@@ -95,11 +90,11 @@ std::deque<std::pair<double, double>> MemoryMonitor::getLastHistory() const {
 }
 
 double MemoryMonitor::getMeanMem() const {
-    return meanMem;
+    return memSum / samplesNumber;
 }
 
 double MemoryMonitor::getMeanSwap() const {
-    return meanSwap;
+    return swapSum / samplesNumber;
 }
 
 double MemoryMonitor::getMaxMem() const {
@@ -223,8 +218,8 @@ std::pair<std::pair<double, double>, std::pair<double, double>> getAvailableMemS
 MemoryMonitor::MemoryMonitor() :
     enabled{false},
     samplesNumber{0},
-    meanMem{0},
-    meanSwap{0},
+    memSum{0},
+    swapSum{0},
     maxMem{0},
     maxSwap{0},
     memTotal{getMemTotalOnly()},
@@ -255,17 +250,12 @@ void MemoryMonitor::collectData() {
     double usedMem = memTotal - availableMemSwapTotalMemSwap.first.first;
     double usedSwap = swapTotal - availableMemSwapTotalMemSwap.first.second;
 
-    if (0 == samplesNumber) {
-        maxMem = meanMem = usedMem;
-        maxSwap = meanSwap = usedSwap;
-        samplesNumber = 1;
-    } else {
-        meanMem = (meanMem * samplesNumber + usedMem) / (samplesNumber + 1);
-        meanSwap = (meanSwap * samplesNumber + usedSwap) / (samplesNumber + 1);
-        ++samplesNumber;
-        maxMem = std::max(maxMem, usedMem);
-        maxSwap = std::max(maxSwap, usedSwap);
-    }
+    memSum += usedMem;
+    swapSum += usedSwap;
+    ++samplesNumber;
+    maxMem = std::max(maxMem, usedMem);
+    maxSwap = std::max(maxSwap, usedSwap);
+
     memSwapUsageHistory.emplace_back(usedMem, usedSwap);
     if (memSwapUsageHistory.size() > historySize) {
         memSwapUsageHistory.pop_front();
@@ -277,11 +267,11 @@ std::deque<std::pair<double, double>> MemoryMonitor::getLastHistory() const {
 }
 
 double MemoryMonitor::getMeanMem() const {
-    return meanMem;
+    return memSum / samplesNumber;
 }
 
 double MemoryMonitor::getMeanSwap() const {
-    return meanSwap;
+    return swapSum / samplesNumber;
 }
 
 double MemoryMonitor::getMaxMem() const {

@@ -28,7 +28,7 @@ private:
     bool enabled;
     unsigned samplesNumber;
     std::size_t historySize;
-    double meanMem, meanSwap;
+    double memSum, swapSum;
     double maxMem, maxSwap;
     double memTotal, swapTotal;
     double maxMemTotal, maxSwapTotal;

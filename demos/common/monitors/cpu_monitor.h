@@ -29,7 +29,7 @@ private:
     bool lastEnabled, historyEnabled;
     unsigned samplesNumber;
     unsigned historySize;
-    std::vector<double> meanCpuLoad;
+    std::vector<double> cpuLoadSum;
     std::deque<std::vector<double>> cpuLoadHistory;
     std::vector<std::pair<unsigned long, unsigned long>> prevIdleNonIdleCpuStat;
 
