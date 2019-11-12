@@ -5,6 +5,7 @@ The Open Model Zoo demo applications are console applications that demonstrate h
 
 The Open Model Zoo includes the following demos:
 
+  [Single Human Pose Estimation Python* Demo](./python_demos/human_pose_estimation_demo/README.md) - 2D human pose estimation demo. 
 - [3D Human Pose Estimation Python* Demo](./python_demos/human_pose_estimation_3d_demo/README.md) - 3D human pose estimation demo.
 - [Action Recognition Python* Demo](./python_demos/action_recognition/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
@@ -45,6 +46,7 @@ The table below shows the correlation between models, demos, and supported plugi
 | Model                                            | Demos supported on the model                                                                                 | CPU       | GPU       | MYRIAD/HDDL | HETERO:FPGA,CPU |
 |--------------------------------------------------|----------------------------------------------------------------------------------------------------------------|-----------|-----------|-------------|-----------------|
 | human-pose-estimation-3d-0001                    | [3D Human Pose Estimation Python* Demo](./python_demos/human_pose_estimation_3d_demo/README.md)    | Supported | Supported |             |                 |
+| single-human-pose-estimation-0001                | [Human Pose Estimation Python* Demo](./python_demos/human_pose_estimation_demo/README.md)     | Supported | Supported |
 | action-recognition-0001-decoder                  | [Action Recognition Demo](./python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
 | action-recognition-0001-encoder                  | [Action Recognition Demo](./python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
 | driver-action-recognition-adas-0002-decoder      | [Action Recognition Demo](./python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
