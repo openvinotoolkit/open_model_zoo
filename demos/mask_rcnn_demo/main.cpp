@@ -250,30 +250,6 @@ int main(int argc, char *argv[]) {
 
         size_t box_stride = W * H * C;
 
-        // some colours
-        const unsigned char colors[][3] = {
-            {128, 64,  128},
-            {232, 35,  244},
-            {70,  70,  70},
-            {156, 102, 102},
-            {153, 153, 190},
-            {153, 153, 153},
-            {30,  170, 250},
-            {0,   220, 220},
-            {35,  142, 107},
-            {152, 251, 152},
-            {180, 130, 70},
-            {60,  20,  220},
-            {0,   0,   255},
-            {142, 0,   0},
-            {70,  0,   0},
-            {100, 60,  0},
-            {90,  0,   0},
-            {230, 0,   0},
-            {32,  11,  119},
-            {0,   74,  111},
-            {81,  0,   81}
-        };
         std::map<size_t, size_t> class_color;
 
         std::vector<cv::Mat> output_images;
@@ -299,7 +275,7 @@ int main(int argc, char *argv[]) {
             auto class_id = static_cast<size_t>(box_info[1] + 1e-6f);
             if (prob > PROBABILITY_THRESHOLD) {
                 size_t color_index = class_color.emplace(class_id, class_color.size()).first->second;
-                auto& color = colors[color_index % arraySize(colors)];
+                auto& color = CITYSCAPES_COLORS[color_index % arraySize(CITYSCAPES_COLORS)];
                 float* mask_arr = masks_data + box_stride * box + H * W * (class_id - 1);
                 slog::info << "Detected class " << class_id << " with probability " << prob << " from batch " << batch
                            << ": [" << x1 << ", " << y1 << "], [" << x2 << ", " << y2 << "]" << slog::endl;
@@ -312,13 +288,9 @@ int main(int argc, char *argv[]) {
                 cv::Mat resized_mask_mat(box_height, box_width, CV_32FC1);
                 cv::resize(mask_mat, resized_mask_mat, cv::Size(box_width, box_height));
 
-                cv::Mat uchar_resized_mask(box_height, box_width, images[batch].type());
-
-                for (int h = 0; h < resized_mask_mat.rows; ++h)
-                    for (int w = 0; w < resized_mask_mat.cols; ++w)
-                        for (int ch = 0; ch < uchar_resized_mask.channels(); ++ch)
-                            uchar_resized_mask.at<cv::Vec3b>(h, w)[ch] = resized_mask_mat.at<float>(h, w) > MASK_THRESHOLD ?
-                                                                            255 * color[ch]: roi_input_img.at<cv::Vec3b>(h, w)[ch];
+                cv::Mat uchar_resized_mask(box_height, box_width, CV_8UC3,
+                    cv::Scalar(color.blue(), color.green(), color.red()));
+                roi_input_img.copyTo(uchar_resized_mask, resized_mask_mat <= MASK_THRESHOLD);
 
                 cv::addWeighted(uchar_resized_mask, alpha, roi_input_img, 1.0f - alpha, 0.0f, roi_input_img);
                 cv::rectangle(output_images[batch], roi, cv::Scalar(0, 0, 1), 1);
