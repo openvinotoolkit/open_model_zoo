@@ -24,8 +24,6 @@ The model output for `resnet50-int8-sparse-v2-onnx-0001` is the usual object cla
 
 ## Accuracy
 
-The quality metrics calculated on ImageNet validation dataset is 75.19% accuracy top-1.
-
 | Metric                    | Value         |
 |---------------------------|---------------|
 | Accuracy top-1 (ImageNet) |         75.19% |

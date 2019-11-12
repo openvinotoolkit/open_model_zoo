@@ -23,8 +23,6 @@ The model output for `squeezenetv1.1-int8-onnx-0001` is the usual object classif
 
 ## Accuracy
 
-The quality metrics calculated on ImageNet validation dataset is 57.9% accuracy top-1.
-
 | Metric                    | Value         |
 |---------------------------|---------------|
 | Accuracy top-1 (ImageNet) |         57.9% |

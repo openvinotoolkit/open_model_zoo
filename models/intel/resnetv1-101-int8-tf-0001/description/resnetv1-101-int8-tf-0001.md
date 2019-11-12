@@ -50,3 +50,5 @@ Object classifier according to ImageNet classes, shape -`1,1000`, output data fo
 - `B` - batch size
 - `C` - predicted probabilities for each class in  [0, 1] range
 
+## Legal Information
+[*] Other names and brands may be claimed as the property of others.

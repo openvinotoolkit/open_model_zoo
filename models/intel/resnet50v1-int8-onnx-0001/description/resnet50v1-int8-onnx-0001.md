@@ -23,8 +23,6 @@ The model output for `resnet50v1-int8-onnx-0001` is the usual object classifier 
 
 ## Accuracy
 
-The quality metrics calculated on ImageNet validation dataset is 76.55% accuracy top-1.
-
 | Metric                    | Value         |
 |---------------------------|---------------|
 | Accuracy top-1 (ImageNet) |         76.55% |

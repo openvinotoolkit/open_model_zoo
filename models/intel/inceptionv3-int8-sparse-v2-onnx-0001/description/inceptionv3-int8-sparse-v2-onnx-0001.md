@@ -24,8 +24,6 @@ The model output for `inceptionv3-int8-sparse-v2-onnx-0001` is the usual object 
 
 ## Accuracy
 
-The quality metrics calculated on ImageNet validation dataset is 77.05% accuracy top-1.
-
 | Metric                    | Value         |
 |---------------------------|---------------|
 | Accuracy top-1 (ImageNet) |         77.05% |
@@ -50,3 +48,5 @@ Object classifier according to ImageNet classes, shape -`1,1000`, output data fo
 - `B` - batch size
 - `C` - predicted probabilities for each class in  [0, 1] range
 
+## Legal Information
+[*] Other names and brands may be claimed as the property of others.

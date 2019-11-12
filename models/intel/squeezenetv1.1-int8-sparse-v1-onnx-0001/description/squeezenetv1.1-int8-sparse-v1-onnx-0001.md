@@ -24,8 +24,6 @@ The model output for `squeezenetv1.1-int8-sparse-v1-onnx-0001` is the usual obje
 
 ## Accuracy
 
-The quality metrics calculated on ImageNet validation dataset is 56.76% accuracy top-1.
-
 | Metric                    | Value         |
 |---------------------------|---------------|
 | Accuracy top-1 (ImageNet) |         56.76% |
