@@ -21,8 +21,8 @@ class ModuleEvaluator(BaseEvaluator):
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
         self._internal_module.process_dataset(stored_predictions, progress_reporter, *args, **kwargs)
 
-    def compute_metrics(self, print_results=True, output_callback=None, ignore_results_formatting=False):
-        self._internal_module.compute_metrics(print_results, output_callback, ignore_results_formatting)
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
+        self._internal_module.compute_metrics(print_results, ignore_results_formatting)
 
     def release(self):
         self._internal_module.release()
