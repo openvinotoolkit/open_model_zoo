@@ -84,8 +84,10 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
                                      double threshold, int min_size_fr,
                                      bool crop_gallery, detection::FaceDetection& detector,
                                      const VectorCNN& landmarks_det,
-                                     const VectorCNN& image_reid)
-    : reid_threshold(threshold) {
+                                     const VectorCNN& image_reid,
+                                     bool use_greedy_matcher)
+    : reid_threshold(threshold),
+      use_greedy_matcher(use_greedy_matcher) {
     if (ids_list.empty()) {
         return;
     }
@@ -102,6 +104,11 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
         cv::FileNode item = *fit;
         std::string label = item.name();
         std::vector<cv::Mat> embeddings;
+
+        // Please, note that the case when there are more than one image in gallery
+        // for a person might not work properly with the current implementation
+        // of the demo.
+        // Remove this assert by your own risk.
         CV_Assert(item.size() == 1);
 
         for (size_t i = 0; i < item.size(); i++) {
@@ -142,7 +149,7 @@ std::vector<int> EmbeddingsGallery::GetIDsByEmbeddings(const std::vector<cv::Mat
             }
         }
     }
-    KuhnMunkres matcher;
+    KuhnMunkres matcher(use_greedy_matcher);
     auto matched_idx = matcher.Solve(distances);
     std::vector<int> output_ids;
     for (auto col_idx : matched_idx) {

@@ -17,9 +17,10 @@ limitations under the License.
 import re
 from pathlib import Path
 import tensorflow as tf
-
-from .launcher import Launcher
-from ..config import BaseField, ListField, PathField, StringField, ConfigError, ConfigValidator
+from tensorflow.python.saved_model import tag_constants
+from .launcher import Launcher, LauncherConfigValidator
+from ..config import BaseField, ListField, PathField, StringField, ConfigError
+from ..utils import contains_any, contains_all
 
 
 class TFLauncher(Launcher):
@@ -29,7 +30,10 @@ class TFLauncher(Launcher):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'model': PathField(is_directory=False, description="Path to model file."),
+            'model': PathField(
+                is_directory=False, description="Path to model file (frozen graph of checkpoint meta).", optional=True
+            ),
+            'saved_model_dir': PathField(is_directory=True, optional=True, description='Path to saved model directory'),
             'device': StringField(
                 choices=('cpu', 'gpu'), default='cpu', optional=True, description="Device name: cpu or gpu"),
             'inputs': BaseField(optional=True, description="Inputs."),
@@ -42,27 +46,40 @@ class TFLauncher(Launcher):
     def __init__(self, config_entry, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
         self.default_layout = 'NHWC'
+        self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
-        tf_launcher_config = ConfigValidator('TF_Launcher', fields=self.parameters())
+        tf_launcher_config = LauncherConfigValidator(
+            'TF_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
+        )
         tf_launcher_config.validate(self.config)
-        self._config_outputs = self.get_value_from_config('output_names')
 
-        self._graph = self._load_graph(str(self.get_value_from_config('model')))
+        if not self._delayed_model_loading:
+            if not contains_any(self.config, ['model', 'saved_model_dir']):
+                raise ConfigError('model or saved model directory should be provided')
 
-        self._outputs_names = self._get_outputs_names(self._graph, self._config_outputs)
+            if contains_all(self.config, ['model', 'saved_model']):
+                raise ConfigError('only one option: model or saved_model_dir should be provided')
 
-        self._outputs_tensors = []
-        self.node_pattern = 'import/{}:0'
-        for output in self._outputs_names:
-            try:
-                tensor = self._graph.get_tensor_by_name('import/{}:0'.format(output))
-            except KeyError:
+            self._config_outputs = self.get_value_from_config('output_names')
+            if 'model' in self.config:
+                self._graph = self._load_graph(str(self.get_value_from_config('model')))
+            else:
+                self._graph = self._load_graph(str(self.get_value_from_config('saved_model_dir')), True)
+
+            self._outputs_names = self._get_outputs_names(self._graph, self._config_outputs)
+
+            self._outputs_tensors = []
+            self.node_pattern = 'import/{}:0'
+            for output in self._outputs_names:
                 try:
-                    tensor = self._graph.get_tensor_by_name('{}:0'.format(output))
-                    self.node_pattern = '{}:0'
+                    tensor = self._graph.get_tensor_by_name('import/{}:0'.format(output))
                 except KeyError:
-                    raise ConfigError('model graph does not contains output {}'.format(output))
-            self._outputs_tensors.append(tensor)
+                    try:
+                        tensor = self._graph.get_tensor_by_name('{}:0'.format(output))
+                        self.node_pattern = '{}:0'
+                    except KeyError:
+                        raise ConfigError('model graph does not contains output {}'.format(output))
+                self._outputs_tensors.append(tensor)
 
         self.device = '/{}:0'.format(self.get_value_from_config('device').lower())
 
@@ -113,18 +130,14 @@ class TFLauncher(Launcher):
     def predict_async(self, *args, **kwargs):
         raise ValueError('TensorFlow Launcher does not support async mode yet')
 
-    def _load_graph(self, model):
+    def _load_graph(self, model, saved_model=False):
+        if saved_model:
+            return self._load_saved_model(model)
+
         if 'meta' in Path(model).suffix:
             return self._load_graph_using_meta(model)
 
-        with tf.gfile.GFile(model, 'rb') as file:
-            graph_def = tf.GraphDef()
-            graph_def.ParseFromString(file.read())
-
-        with tf.Graph().as_default() as graph:
-            tf.import_graph_def(graph_def)
-
-        return graph
+        return self._load_frozen_graph(model)
 
     def _load_graph_using_meta(self, model):
         tf.reset_default_graph()
@@ -143,6 +156,27 @@ class TFLauncher(Launcher):
 
         with graph.as_default():
             tf.import_graph_def(graph_def, name='')
+        return graph
+
+    @staticmethod
+    def _load_frozen_graph(model):
+        with tf.gfile.GFile(model, 'rb') as file:
+            graph_def = tf.GraphDef()
+            graph_def.ParseFromString(file.read())
+
+        with tf.Graph().as_default() as graph:
+            tf.import_graph_def(graph_def)
+
+        return graph
+
+    @staticmethod
+    def _load_saved_model(model_dir):
+        graph = tf.Graph()
+
+        with graph.as_default():
+            with tf.Session() as sess:
+                tf.saved_model.loader.load(sess, [tag_constants.SERVING], model_dir)
+
         return graph
 
     def _get_graph_inputs(self, graph, config_inputs=None):

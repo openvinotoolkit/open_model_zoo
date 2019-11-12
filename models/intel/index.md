@@ -135,6 +135,7 @@ increase the quality of the output.
 |---------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [single-image-super-resolution-1032](./single-image-super-resolution-1032/description/single-image-super-resolution-1032.md)                | 11.654               | 0.030      |
 | [single-image-super-resolution-1033](./single-image-super-resolution-1033/description/single-image-super-resolution-1033.md)                | 16.062               | 0.030      |
+| [text-image-super-resolution-0001](./text-image-super-resolution-0001/description/text-image-super-resolution-0001.md)                      | 1.379                | 0.003      |
 
 ## Text Detection
 

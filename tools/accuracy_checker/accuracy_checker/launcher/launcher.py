@@ -152,6 +152,7 @@ class Launcher(ClassProvider):
     def name(self):
         return self.__provider__
 
+
 def unsupported_launcher(name, error_message=None):
     class UnsupportedLauncher(Launcher):
         __provider__ = name
@@ -179,6 +180,7 @@ def create_launcher(launcher_config, delayed_model_loading=False):
     """
     Args:
         launcher_config: launcher configuration file entry.
+        delayed_model_loading: allows postpone model loading to the launcher
     Returns:
         framework-specific launcher object.
     """

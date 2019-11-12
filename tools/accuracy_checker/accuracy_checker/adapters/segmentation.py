@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 from ..adapters import Adapter
 from ..representation import SegmentationPrediction, BrainTumorSegmentationPrediction
-from ..config import ConfigValidator, BoolField
+from ..config import ConfigValidator, BoolField, NumberField
 
 
 class SegmentationAdapter(Adapter):
@@ -53,7 +53,8 @@ class SegmentationAdapter(Adapter):
 
     def _extract_predictions(self, outputs_list, meta):
         if not 'tiles_shape' in (meta[-1] or {}):
-            return outputs_list[0]
+            return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
+
         tiles_shapes = [meta['tiles_shape'] for meta in meta]
         restore_output = []
         offset = 0
@@ -68,6 +69,35 @@ class SegmentationAdapter(Adapter):
             offset = next_offset
 
         return {self.output_blob: restore_output}
+
+
+class SegmentationOneClassAdapter(Adapter):
+    __provider__ = 'segmentation_one_class'
+    prediction_types = (SegmentationPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'threshold': NumberField(
+                optional=True, value_type=float, min_value=0.0, default=0.5,
+                description='minimal probability threshold for separating predicted class from background'
+            )
+        })
+        return params
+
+    def configure(self):
+        self.threshold = self.get_value_from_config('threshold')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        result = []
+        frame_meta = frame_meta or [] * len(identifiers)
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
+            output = output > self.threshold
+            result.append(SegmentationPrediction(identifier, output))
+
+        return result
 
 
 class BrainTumorSegmentationAdapter(Adapter):
@@ -85,7 +115,7 @@ class BrainTumorSegmentationAdapter(Adapter):
 
     def _extract_predictions(self, outputs_list, meta):
         if not (meta[-1] or {}).get('multi_infer', False):
-            return outputs_list[0]
+            return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
 
         output_keys = list(outputs_list[0].keys())
         output_map = {}

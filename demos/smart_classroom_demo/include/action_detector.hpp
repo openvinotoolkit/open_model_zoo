@@ -95,7 +95,7 @@ struct ActionDetectorConfig : public CnnConfig {
     /** @brief Number of SSD anchors for the new network version */
     std::vector<int> new_anchors{1, 4};
     /** @brief Number of actions to detect */
-    int num_action_classes = 3;
+    size_t num_action_classes = 3;
     /** @brief Async execution flag */
     bool is_async = true;
     /** @brief  SSD bbox encoding variances */

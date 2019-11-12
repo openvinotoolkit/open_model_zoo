@@ -29,7 +29,8 @@ class CharacterRecognitionAccuracy(PerImageEvaluationMetric):
         self.accuracy = AverageMeter(lambda annotation, prediction: int(annotation == prediction))
 
     def update(self, annotation, prediction):
-        self.accuracy.update(annotation.label, prediction.label)
+        return self.accuracy.update(annotation.label, prediction.label)
+
 
     def evaluate(self, annotations, predictions):
         return self.accuracy.evaluate()

@@ -46,6 +46,7 @@ def set_scores(prediction, scores):
 def set_box_scores(prediction, scores):
     prediction.bbox_scores = scores
 
+
 class NMS(Postprocessor):
     __provider__ = 'nms'
 
@@ -114,7 +115,7 @@ class NMS(Postprocessor):
             union = (areas[i] + areas[order[1:]] - intersection)
             overlap = np.divide(intersection, union, out=np.zeros_like(intersection, dtype=float), where=union != 0)
 
-            order = order[np.where(overlap <= thresh)[0] + 1]
+            order = order[np.where(overlap <= thresh)[0] + 1] # pylint: disable=W0143
 
         return keep
 
@@ -150,7 +151,7 @@ class SoftNMS(Postprocessor):
 
     def process_image(self, annotations, predictions):
         for prediction in predictions:
-            if len(prediction.scores) == 0:  # pylint: disable=len-as-condition
+            if not prediction.size:
                 continue
 
             scores = get_scores(prediction)

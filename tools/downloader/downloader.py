@@ -140,7 +140,7 @@ def try_retrieve_from_cache(reporter, cache, files):
 
     return False
 
-def try_update_cache(cache, hash, source):
+def try_update_cache(reporter, cache, hash, source):
     try:
         cache.put(hash, source)
     except Exception:
@@ -160,7 +160,7 @@ def try_retrieve(reporter, name, destination, model_file, cache, num_attempts, s
         if try_download(reporter, f, num_attempts, start_download, model_file.size):
             f.seek(0)
             if verify_hash(reporter, f, model_file.sha256, destination, name):
-                try_update_cache(cache, model_file.sha256, destination)
+                try_update_cache(reporter, cache, model_file.sha256, destination)
                 success = True
 
     reporter.print()
@@ -191,6 +191,8 @@ def main():
         help='download only models whose names match at least one of the patterns in the specified file')
     parser.add_argument('--all',  action='store_true', help='download all available models')
     parser.add_argument('--print_all', action='store_true', help='print all available models')
+    parser.add_argument('--precisions', metavar='PREC[,PREC...]',
+                        help='download only models with the specified precisions (actual for DLDT networks)')
     parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',
         default=Path.cwd(), help='path where to save models')
     parser.add_argument('--cache_dir', type=Path, metavar='DIR',
@@ -211,6 +213,14 @@ def main():
 
     failed_models = set()
 
+    if args.precisions is None:
+        requested_precisions = common.KNOWN_PRECISIONS
+    else:
+        requested_precisions = set(args.precisions.split(','))
+        unknown_precisions = requested_precisions - common.KNOWN_PRECISIONS
+        if unknown_precisions:
+            sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
+
     reporter.print_group_heading('Downloading models')
     with requests.Session() as session:
         for model in models:
@@ -220,6 +230,11 @@ def main():
             output.mkdir(parents=True, exist_ok=True)
 
             for model_file in model.files:
+                if len(model_file.name.parts) == 2:
+                    p = model_file.name.parts[0]
+                    if p in common.KNOWN_PRECISIONS and p not in requested_precisions:
+                        continue
+
                 model_file_reporter = reporter.with_event_context(model=model.name, model_file=model_file.name.as_posix())
                 model_file_reporter.emit_event('model_file_download_begin', size=model_file.size)
 
@@ -254,6 +269,7 @@ def main():
         reporter.print('FAILED:')
         for failed_model_name in failed_models:
             reporter.print(failed_model_name)
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()

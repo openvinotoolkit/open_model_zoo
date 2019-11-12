@@ -39,7 +39,7 @@ class FaceIdentifier(Module):
             self.distance = distance
             self.descriptor = desc
 
-    def __init__(self, model, match_threshold=0.5):
+    def __init__(self, model, match_threshold=0.5, match_algo='HUNGARIAN'):
         super(FaceIdentifier, self).__init__(model)
 
         assert len(model.inputs) == 1, "Expected 1 input blob"
@@ -57,6 +57,7 @@ class FaceIdentifier(Module):
         self.faces_database = None
 
         self.match_threshold = match_threshold
+        self.match_algo = match_algo
 
     def set_faces_database(self, database):
         self.faces_database = database
@@ -89,7 +90,7 @@ class FaceIdentifier(Module):
 
         matches = []
         if len(descriptors) != 0:
-            matches = self.faces_database.match_faces(descriptors)
+            matches = self.faces_database.match_faces(descriptors, self.match_algo)
 
         results = []
         unknowns_list = []

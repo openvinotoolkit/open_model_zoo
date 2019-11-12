@@ -18,28 +18,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/vehicle-license-plate-detection-barrier-0106.xml
-    size: 97638
-    sha256: 6125e1ab15871fb5f3d99b125158cb38ab7796b66f348013fac0cdefd274f023
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.xml
+    size: 100057
+    sha256: d17983e551fa9f98227fb4374e59e360d5d3a0ffeb1e29e5eae0ef62c47b30e2
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.xml
   - name: FP32/vehicle-license-plate-detection-barrier-0106.bin
-    size: 2573260
-    sha256: 56fda262d99ef097cc95ede0c4b64516fc545b1694984174d45be3772903c0e7
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.bin
+    size: 2573296
+    sha256: 0d986cddcc0c497c4ffe03619967b1da8743bfa031357945377715c4ab7fae1d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.bin
   - name: FP16/vehicle-license-plate-detection-barrier-0106.xml
-    size: 97570
-    sha256: d45158ff83b8705ce43f752a824e5bde756f84b720e0109d5c784606cc080770
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.xml
+    size: 99989
+    sha256: 35c9d015243462de13410c5695d3d83533308a092dcef8c7a767ab60e75a8b1d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.xml
   - name: FP16/vehicle-license-plate-detection-barrier-0106.bin
-    size: 1286638
-    sha256: 8c4941114e9d3e1a5908b83fa3324362b7eb91b3ec9792df6cebfa720588dd80
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.bin
+    size: 1286674
+    sha256: c23eee855d2049c864e6e242bd73f0be38b7550cc92103df36ca04d1ca894d39
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.bin
   - name: INT8/vehicle-license-plate-detection-barrier-0106.xml
-    size: 890179
-    sha256: f9ca8aa2b68c67a27d8fa41d2a37bc2363a1ae6c9d0fcebc6dd5a75d067b00e4
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/vehicle-license-plate-detection-barrier-0106/INT8/vehicle-license-plate-detection-barrier-0106.xml
+    size: 893115
+    sha256: dbcccae712f53a6e1c18b196effc30d5a0b7900fbe040483802b466d42df1c6a
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-license-plate-detection-barrier-0106/INT8/vehicle-license-plate-detection-barrier-0106.xml
   - name: INT8/vehicle-license-plate-detection-barrier-0106.bin
-    size: 2573364
-    sha256: d41240cf81bd56c9e74e6eb88737898d90fa145bed1cc9284ef98892ca2e5a9d
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/vehicle-license-plate-detection-barrier-0106/INT8/vehicle-license-plate-detection-barrier-0106.bin
+    size: 2573400
+    sha256: e672e03e13630b9a5bceccaf149563c66c1915dc22aa0d613404cd30dec48274
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-license-plate-detection-barrier-0106/INT8/vehicle-license-plate-detection-barrier-0106.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

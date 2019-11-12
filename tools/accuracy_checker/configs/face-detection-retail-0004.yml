@@ -5,31 +5,27 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        model:   Retail/object_detection/face/sqnet1.0modif-ssd/0004/dldt/FP32/face-detection-retail-0004.xml
-        weights: Retail/object_detection/face/sqnet1.0modif-ssd/0004/dldt/FP32/face-detection-retail-0004.bin
+        model:   intel/face-detection-retail-0004/FP32/face-detection-retail-0004.xml
+        weights: intel/face-detection-retail-0004/FP32/face-detection-retail-0004.bin
         adapter: ssd
 
       - framework: dlsdk
         tags:
           - FP16
-        model:   Retail/object_detection/face/sqnet1.0modif-ssd/0004/dldt/FP16/face-detection-retail-0004.xml
-        weights: Retail/object_detection/face/sqnet1.0modif-ssd/0004/dldt/FP16/face-detection-retail-0004.bin
+        model:   intel/face-detection-retail-0004/FP16/face-detection-retail-0004.xml
+        weights: intel/face-detection-retail-0004/FP16/face-detection-retail-0004.bin
         adapter: ssd
 
       - framework: dlsdk
         tags:
           - INT8
         device: CPU
-        model:   Retail/object_detection/face/sqnet1.0modif-ssd/0004/dldt/INT8/face-detection-retail-0004.xml
-        weights: Retail/object_detection/face/sqnet1.0modif-ssd/0004/dldt/INT8/face-detection-retail-0004.bin
+        model:   intel/face-detection-retail-0004/INT8/face-detection-retail-0004.xml
+        weights: intel/face-detection-retail-0004/INT8/face-detection-retail-0004.bin
         adapter: ssd
 
     datasets:
       - name: wider
-        data_source: WIDER_val/images
-        annotation_conversion:
-          converter: wider
-          annotation_file: wider_face_split/wider_face_val_bbx_gt.txt
 
         preprocessing:
           - type: resize
@@ -52,3 +48,4 @@ models:
             include_boundaries: False
             allow_multiple_matches_per_ignored: False
             distinct_conf: False
+global_definitions: ../dataset_definitions.yml

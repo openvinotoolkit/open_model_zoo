@@ -29,7 +29,14 @@ import yaml
 DOWNLOAD_TIMEOUT = 5 * 60
 
 # make sure to update the documentation if you modify these
-KNOWN_FRAMEWORKS = {'caffe', 'dldt', 'mxnet', 'pytorch', 'tf'}
+KNOWN_FRAMEWORKS = {
+    'caffe': None,
+    'caffe2': 'caffe2_to_onnx.py',
+    'dldt': None,
+    'mxnet': None,
+    'pytorch': 'pytorch_to_onnx.py',
+    'tf': None,
+}
 KNOWN_PRECISIONS = {'FP16', 'FP32', 'INT1', 'INT8'}
 KNOWN_TASK_TYPES = {
     'action_recognition',
@@ -286,12 +293,13 @@ class PostprocUnpackArchive(Postproc):
         reporter.print_section_heading('Unpacking {}', postproc_file)
 
         shutil.unpack_archive(str(postproc_file), str(output_dir), self.format)
+        postproc_file.unlink()  # Remove the archive
 
 Postproc.types['unpack_archive'] = PostprocUnpackArchive
 
 class Model:
     def __init__(self, name, subdirectory, files, postprocessing, mo_args, framework,
-            description, license_url, precisions, task_type, pytorch_to_onnx_args):
+                 description, license_url, precisions, task_type, conversion_to_onnx_args):
         self.name = name
         self.subdirectory = subdirectory
         self.files = files
@@ -302,7 +310,8 @@ class Model:
         self.license_url = license_url
         self.precisions = precisions
         self.task_type = task_type
-        self.pytorch_to_onnx_args = pytorch_to_onnx_args
+        self.conversion_to_onnx_args = conversion_to_onnx_args
+        self.converter_to_onnx = KNOWN_FRAMEWORKS[framework]
 
     @classmethod
     def deserialize(cls, model, name, subdirectory):
@@ -327,12 +336,19 @@ class Model:
                 with deserialization_context('"postprocessing" #{}'.format(i)):
                     postprocessing.append(Postproc.deserialize(postproc))
 
-            pytorch_to_onnx_args = None
-            if model.get('pytorch_to_onnx', None):
-                pytorch_to_onnx_args = [validate_string('"pytorch_to_onnx" #{}'.format(i), arg)
-                                        for i, arg in enumerate(model['pytorch_to_onnx'])]
+            framework = validate_string_enum('"framework"', model['framework'], KNOWN_FRAMEWORKS.keys())
 
-            framework = validate_string_enum('"framework"', model['framework'], KNOWN_FRAMEWORKS)
+            conversion_to_onnx_args = model.get('conversion_to_onnx_args', None)
+            if KNOWN_FRAMEWORKS[framework]:
+                if not conversion_to_onnx_args:
+                    raise DeserializationError('"conversion_to_onnx_args" is absent. '
+                                               'Framework "{}" is supported only by conversion to ONNX.'
+                                               .format(framework))
+                conversion_to_onnx_args = [validate_string('"conversion_to_onnx_args" #{}'.format(i), arg)
+                                           for i, arg in enumerate(model['conversion_to_onnx_args'])]
+            else:
+                if conversion_to_onnx_args:
+                    raise DeserializationError('Conversion to ONNX not supported for "{}" framework'.format(framework))
 
             if 'model_optimizer_args' in model:
                 mo_args = [validate_string('"model_optimizer_args" #{}'.format(i), arg)
@@ -371,7 +387,7 @@ class Model:
             task_type = validate_string_enum('"task_type"', model['task_type'], KNOWN_TASK_TYPES)
 
             return cls(name, subdirectory, files, postprocessing, mo_args, framework,
-                description, license_url, precisions, task_type, pytorch_to_onnx_args)
+                description, license_url, precisions, task_type, conversion_to_onnx_args)
 
 def load_models(args):
     models = []

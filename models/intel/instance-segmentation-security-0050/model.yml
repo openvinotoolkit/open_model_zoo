@@ -19,20 +19,20 @@ description: >-
 task_type: instance_segmentation
 files:
   - name: FP32/instance-segmentation-security-0050.xml
-    size: 138959
-    sha256: 94d6a0543eaa8ab5255cbf42e78d4fb2841c376fd3f79b8edcb6c5f2aa718b14
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/instance-segmentation-security-0050/FP32/instance-segmentation-security-0050.xml
+    size: 139021
+    sha256: 950b288887e299f6767b2588dd0a4fa726e5f91407f897c0a899917238852cde
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/instance-segmentation-security-0050/FP32/instance-segmentation-security-0050.xml
   - name: FP32/instance-segmentation-security-0050.bin
     size: 121497328
     sha256: c923af7602592a17375e4dd7ba5b0869dc47022bd50d2558f58b1cca2ed6cfc9
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/instance-segmentation-security-0050/FP32/instance-segmentation-security-0050.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/instance-segmentation-security-0050/FP32/instance-segmentation-security-0050.bin
   - name: FP16/instance-segmentation-security-0050.xml
-    size: 138853
-    sha256: 4b8d567303e09af942274ce6ebb3b1606292cb91af6c1a9c6f93f3ee81003f6c
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/instance-segmentation-security-0050/FP16/instance-segmentation-security-0050.xml
+    size: 138915
+    sha256: 532d5c7cfc291c25609458fdf141f25b57dc5cd1db3a2994b98ea0ca3e88ae08
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/instance-segmentation-security-0050/FP16/instance-segmentation-security-0050.xml
   - name: FP16/instance-segmentation-security-0050.bin
     size: 60748674
     sha256: 743058892ecaac32a6d789bfa177e11d335bd9b12257367b2ceed1304bf96cda
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/instance-segmentation-security-0050/FP16/instance-segmentation-security-0050.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/instance-segmentation-security-0050/FP16/instance-segmentation-security-0050.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

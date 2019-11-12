@@ -48,6 +48,8 @@ def parse_args():
         help='directory to use as the cache for the model downloader')
     parser.add_argument('--demos', metavar='DEMO[,DEMO...]',
         help='list of demos to run tests for (by default, every demo is tested)')
+    parser.add_argument('--mo', type=Path, metavar='MO.PY',
+        help='Model Optimizer entry point script')
     return parser.parse_args()
 
 def main():
@@ -94,9 +96,23 @@ def main():
                 num_failures += len(demo.test_cases)
                 continue
 
+            try:
+                subprocess.check_output(
+                    [
+                        sys.executable, '--', str(auto_tools_dir / 'converter.py'),
+                        '--download_dir', str(dl_dir), '--list', str(demo.models_lst_path(demos_dir)), '--jobs', 'auto',
+                    ] + ([] if args.mo is None else ['--mo', str(args.mo)]),
+                    stderr=subprocess.STDOUT, universal_newlines=True)
+            except subprocess.CalledProcessError as e:
+                print(e.output)
+                print('Exit code:', e.returncode)
+                num_failures += len(demo.test_cases)
+                continue
+
             print()
 
             arg_context = ArgContext(
+                source_dir=demos_dir / demo.subdirectory,
                 dl_dir=dl_dir,
                 image_sequence_dir=Path(temp_dir) / 'image_seq',
                 image_sequences=IMAGE_SEQUENCES,

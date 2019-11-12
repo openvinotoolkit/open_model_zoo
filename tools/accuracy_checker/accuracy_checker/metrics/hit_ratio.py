@@ -20,10 +20,10 @@ import math
 import numpy as np
 
 from ..representation import HitRatioAnnotation, HitRatioPrediction
-from .metric import FullDatasetEvaluationMetric
+from .metric import PerImageEvaluationMetric
 from ..config import NumberField
 
-class BaseRecommenderMetric(FullDatasetEvaluationMetric):
+class BaseRecommenderMetric(PerImageEvaluationMetric):
     annotation_types = (HitRatioAnnotation, )
     prediction_types = (HitRatioPrediction, )
 
@@ -56,17 +56,19 @@ class BaseRecommenderMetric(FullDatasetEvaluationMetric):
             self.gt_items[annotation.user] = annotation.item
 
     def evaluate(self, annotations, predictions):
-        iter_num = len(self.pred_per_user[0])
-
         measure = []
         for user in range(self.users_num):
+            if not self.pred_per_user[user]:
+                continue
             map_item_score = {}
+            iter_num = len(self.pred_per_user[user])
             for j in range(iter_num):
                 item = self.pred_per_user[user][j][0]
                 score = self.pred_per_user[user][j][1]
                 map_item_score[item] = score
             ranklist = heapq.nlargest(10, map_item_score, key=map_item_score.get)
-            measure.append(self.discounter(self.gt_items[user], ranklist))
+            if user in self.gt_items.keys():
+                measure.append(self.discounter(self.gt_items[user], ranklist))
 
         return np.mean(measure)
 

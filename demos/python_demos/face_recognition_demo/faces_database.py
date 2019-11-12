@@ -149,7 +149,7 @@ class FacesDatabase:
         label = name if save else None
         return label
 
-    def match_faces(self, descriptors):
+    def match_faces(self, descriptors, match_algo='HUNGARIAN'):
         database = self.database
         distances = np.empty((len(descriptors), len(database)))
         for i, desc in enumerate(descriptors):
@@ -159,17 +159,25 @@ class FacesDatabase:
                     dist.append(FacesDatabase.Identity.cosine_dist(desc, id_desc))
                 distances[i][j] = dist[np.argmin(dist)]
 
-        # Find best assignments, prevent repeats, assuming faces can not repeat
-        _, assignments = linear_sum_assignment(distances)
         matches = []
-        for i in range(len(descriptors)):
-            if len(assignments) <= i: # assignment failure, too many faces
-                matches.append((0, 1.0))
-                continue
+        # if user specify MIN_DIST for face matching, face with minium cosine distance will be selected.
+        if match_algo == 'MIN_DIST':
+            for i in range(len(descriptors)):
+                id = np.argmin(distances[i])
+                min_dist = distances[i][id]
+                matches.append((id, min_dist))
+        else:
+            # Find best assignments, prevent repeats, assuming faces can not repeat
+            _, assignments = linear_sum_assignment(distances)
+            for i in range(len(descriptors)):
+                if len(assignments) <= i: # assignment failure, too many faces
+                    matches.append((0, 1.0))
+                    continue
 
-            id = assignments[i]
-            distance = distances[i, id]
-            matches.append((id, distance))
+                id = assignments[i]
+                distance = distances[i, id]
+                matches.append((id, distance))
+
         return matches
 
     def create_new_label(self, path, id):

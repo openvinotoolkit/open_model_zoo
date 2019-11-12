@@ -140,8 +140,8 @@ int main(int argc, char *argv[]) {
         LandmarksEstimator landmarksEstimator(ie, FLAGS_m_lm, FLAGS_d_lm);
         GazeEstimator gazeEstimator(ie, FLAGS_m, FLAGS_d);
 
-        // Put pointers to all estimators in a vector so that they could be processed uniformly in a loop
-        std::vector<BaseEstimator*> estimators = {&headPoseEstimator, &landmarksEstimator, &gazeEstimator};
+        // Put pointers to all estimators in an array so that they could be processed uniformly in a loop
+        BaseEstimator* estimators[] = {&headPoseEstimator, &landmarksEstimator, &gazeEstimator};
 
         // Each element of the vector contains inference results on one face
         std::vector<FaceInferenceResults> inferenceResults;

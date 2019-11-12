@@ -30,20 +30,20 @@ description: >-
 task_type: classification
 files:
   - name: FP32/inceptionv3-int8-sparse-v1-tf-0001.xml
-    size: 610877
-    sha256: a9188b81eb814cfadfe233792129fcdc2d0ecfec7612d4fe37ba735332152b91
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/inceptionv3-int8-sparse-v1-tf-0001/FP32/inceptionv3-int8-sparse-v1-tf-0001.xml
+    size: 613524
+    sha256: 87930652f040d2247ff866afcac33fdb7ec195752115742c7c0e3a281d468852
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/inceptionv3-int8-sparse-v1-tf-0001/FP32/inceptionv3-int8-sparse-v1-tf-0001.xml
   - name: FP32/inceptionv3-int8-sparse-v1-tf-0001.bin
     size: 95277636
-    sha256: 9e370db96022b379bc3d10bfa7f52290702c230108a0f3e798b3aad36b8da99f
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/inceptionv3-int8-sparse-v1-tf-0001/FP32/inceptionv3-int8-sparse-v1-tf-0001.bin
+    sha256: 0f6d02a75232a81cffe0ed86e2dec132bd92cf6f69f6bb61f5fcd1a7641ede6b
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/inceptionv3-int8-sparse-v1-tf-0001/FP32/inceptionv3-int8-sparse-v1-tf-0001.bin
   - name: FP16/inceptionv3-int8-sparse-v1-tf-0001.xml
-    size: 610778
-    sha256: 4e4531b08fc335188910b020536d8da50886e5ee35856d807cf5770bb29f812d
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/inceptionv3-int8-sparse-v1-tf-0001/FP16/inceptionv3-int8-sparse-v1-tf-0001.xml
+    size: 613425
+    sha256: c8475996cd397dfb391917981a4ed0da188a55a3ae1f0fb051ed29f1fbafd181
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/inceptionv3-int8-sparse-v1-tf-0001/FP16/inceptionv3-int8-sparse-v1-tf-0001.xml
   - name: FP16/inceptionv3-int8-sparse-v1-tf-0001.bin
     size: 47638822
-    sha256: a671e7b4eb18ea926861e01272af28d2d14a7738aa95fcbd53115682c1a9e290
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/inceptionv3-int8-sparse-v1-tf-0001/FP16/inceptionv3-int8-sparse-v1-tf-0001.bin
+    sha256: 242c61e090a4b5ee235084ddabe410a220feaddffefb5b9c40b99c56d27f51d5
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/inceptionv3-int8-sparse-v1-tf-0001/FP16/inceptionv3-int8-sparse-v1-tf-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

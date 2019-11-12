@@ -148,4 +148,4 @@ class BratsNumpyConverter(DirectoryBasedAnnotationConverter):
     def _get_meta(self):
         if not self.labels_file:
             return None
-        return {'label_map': [line for line in read_txt(self.labels_file)]}
+        return {'label_map': dict(enumerate(read_txt(self.labels_file)))}

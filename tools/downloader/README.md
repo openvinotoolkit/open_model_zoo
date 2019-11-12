@@ -32,12 +32,31 @@ For the model converter, you will also need to install the OpenVINO&trade;
 toolkit and the prerequisite libraries for Model Optimizer. See the
 [OpenVINO toolkit documentation](https://docs.openvinotoolkit.org/) for details.
 
-If you using models from PyTorch framework, you will also need to use intermediate
-conversion to ONNX format. To use automatic conversion install additional dependencies:
+If you using models from PyTorch or Caffe2 framework, you will also need to use intermediate
+conversion to ONNX format. To use automatic conversion install additional dependencies.
+
+For models from PyTorch:
+```sh
+python3 -mpip install --user -r ./requirements-pytorch.in
+```
+For models from Caffe2:
+```sh
+python3 -mpip install --user -r ./requirements-caffe2.in
+```
+
+When running the model downloader with Python 3.5.x on macOS, you may encounter
+an error similar to the following:
+
+> requests.exceptions.SSLError: [...] (Caused by SSLError(SSLError(1, '[SSL: TLSV1_ALERT_PROTOCOL_VERSION]
+tlsv1 alert protocol version (_ssl.c:719)'),))
+
+You can work around this by installing additional packages:
 
 ```sh
-python3 -mpip install --user -r ./requirements-pytorch.in 
+python3 -mpip install --user 'requests[security]'
 ```
+
+Alternatively, upgrade to Python 3.6 or a later version.
 
 Model downloader usage
 ----------------------
@@ -58,6 +77,13 @@ option:
 
 The `--all` option can be replaced with other filter options to download only
 a subset of models. See the "Shared options" section.
+
+You may use `--precisions` flag to specify comma separated precisions of weights
+to be downloaded.
+
+```sh
+./downloader.py --name face-detection-retail-0004 --precisions FP16,INT8
+```
 
 By default, the script will attempt to download each file only once. You can use
 the `--num_attempts` option to change that and increase the robustness of the
@@ -192,7 +218,7 @@ The basic usage is to run the script like this:
 ```
 
 This will convert all models into the Inference Engine IR format. Models that
-were originally in that format are ignored. Models in PyTorch's format will be 
+were originally in that format are ignored. Models in PyTorch and Caffe2 formats will be
 converted in ONNX format first.
 
 The current directory must be the root of a download tree created by the model
@@ -291,8 +317,8 @@ describing a single model. Each such object has the following keys:
 * `description`: text describing the model. Paragraphs are separated by line feed characters.
 
 * `framework`: a string identifying the framework whose format the model is downloaded in.
-  Current possible values are `dldt` (Inference Engine IR), `caffe`, `mxnet`, `pytorch` and `tf` (TensorFlow).
-  Additional possible values might be added in the future.
+  Current possible values are `dldt` (Inference Engine IR), `caffe`, `caffe2`, `mxnet`, `pytorch`
+  and `tf` (TensorFlow). Additional possible values might be added in the future.
 
 * `license_url`: an URL for the license that the model is distributed under.
 

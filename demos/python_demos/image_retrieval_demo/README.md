@@ -63,11 +63,15 @@ To run the demo, please provide paths to the model in the IR format, to a file w
 ```bash
 python image_retrieval_demo.py \
 -m /home/user/image-retrieval-0001.xml \
--v /home/user/video.dav.mp4 \
--i /home/user/list.txt \
+-i /home/user/video.dav.mp4 \
+-g /home/user/list.txt \
 -l /opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension_avx512.so \
 --ground_truth text_label
 ```
+
+An example of file listing gallery images can be found [here](https://github.com/opencv/openvino_training_extensions/blob/develop/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
+
+Examples of videos can be found [here](https://github.com/19900531/test).
 
 ## Demo Output
 

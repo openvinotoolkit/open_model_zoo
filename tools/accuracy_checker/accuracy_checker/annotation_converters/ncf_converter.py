@@ -18,7 +18,7 @@ from ..representation import HitRatioAnnotation
 from ..utils import read_txt, get_path
 from ..config import PathField, NumberField
 
-from .format_converter import BaseFormatConverter
+from .format_converter import BaseFormatConverter, ConverterReturn
 
 
 class MovieLensConverter(BaseFormatConverter):
@@ -27,8 +27,8 @@ class MovieLensConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
             'rating_file': PathField(description="Path to rating file."),
             'negative_file': PathField(description="Path to negative file."),
             'users_max_number': NumberField(
@@ -36,10 +36,10 @@ class MovieLensConverter(BaseFormatConverter):
             )
         })
 
-        return parameters
+        return configuration_parameters
 
     def configure(self):
-        self.rating_file = self.get_value_from_config('raiting_file')
+        self.rating_file = self.get_value_from_config('rating_file')
         self.negative_file = self.get_value_from_config('negative_file')
         self.users_max_number = self.get_value_from_config('users_max_number')
 
@@ -47,7 +47,7 @@ class MovieLensConverter(BaseFormatConverter):
         annotations = []
         users = []
 
-        for file_row in enumerate(read_txt(self.rating_file)):
+        for file_row in read_txt(self.rating_file):
             user_id, item_id, _ = file_row.split()
             users.append(user_id)
             identifier = ['u:'+user_id, 'i:' + item_id]
@@ -74,4 +74,4 @@ class MovieLensConverter(BaseFormatConverter):
                     identifier = ['u:' + user, 'i:' + item]
                     annotations.append(HitRatioAnnotation(identifier, False))
 
-        return annotations, {'users_number': len(users), 'item_numbers': item_numbers}
+        return ConverterReturn(annotations, {'users_number': len(users), 'item_numbers': item_numbers}, None)

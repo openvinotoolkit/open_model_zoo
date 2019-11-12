@@ -1,0 +1,46 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The tiny model to upscale scanned images with text. The model used `ConvTranspose2d`
+  layer instead of `PixelShuffle` as result the model can be launched on GPU and MYRIAD
+  devices and support `reshape` function.
+task_type: image_processing
+files:
+  - name: FP32/text-image-super-resolution-0001.xml
+    size: 5696
+    sha256: 7f5882d4e9c12d6a34ee79987489b0a72beaa192a613cdf4f7f73c89425a1c49
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-image-super-resolution-0001/FP32/text-image-super-resolution-0001.xml
+  - name: FP32/text-image-super-resolution-0001.bin
+    size: 10836
+    sha256: 033d58430a2744302a2729291d66d4c74ee6bce517b6ae36f1b5a0e8b27d82ff
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-image-super-resolution-0001/FP32/text-image-super-resolution-0001.bin
+  - name: FP16/text-image-super-resolution-0001.xml
+    size: 5686
+    sha256: 030c87cc1269536882fe26cc822382223e5da46de98d077b2a711a3c0788ad66
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-image-super-resolution-0001/FP16/text-image-super-resolution-0001.xml
+  - name: FP16/text-image-super-resolution-0001.bin
+    size: 5418
+    sha256: f203818d73b933e5004aff85aeb84783dbf0be9e5c296d2995fc0678ff719e9c
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-image-super-resolution-0001/FP16/text-image-super-resolution-0001.bin
+  - name: INT8/text-image-super-resolution-0001.xml
+    size: 5268
+    sha256: 6aec2e36d6e891ea4098a4a401bc048e770a43bfc169a6f80406d95eeeabbf67
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-image-super-resolution-0001/INT8/text-image-super-resolution-0001.xml
+  - name: INT8/text-image-super-resolution-0001.bin
+    size: 10836
+    sha256: 496b4c29fb9333fa0ced6ae3d60899b486b67dba9bf37d28b83c8acd03c2b004
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-image-super-resolution-0001/INT8/text-image-super-resolution-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

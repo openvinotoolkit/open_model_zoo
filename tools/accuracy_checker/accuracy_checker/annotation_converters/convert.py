@@ -25,7 +25,7 @@ from functools import partial
 import numpy as np
 
 from ..representation import ReIdentificationClassificationAnnotation
-from ..utils import get_path
+from ..utils import get_path, OrderedSet
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
 
@@ -59,7 +59,7 @@ def build_argparser():
 def make_subset(annotation, size, seed=666):
     def make_subset_pairwise(annotation, size):
         def get_pairs(pairs_list):
-            pairs_set = set()
+            pairs_set = OrderedSet()
             for identifier in pairs_list:
                 next_annotation = next(
                     pair_annotation for pair_annotation in annotation if pair_annotation.identifier == identifier
@@ -67,23 +67,29 @@ def make_subset(annotation, size, seed=666):
                 positive_pairs = get_pairs(next_annotation.positive_pairs)
                 negative_pairs = get_pairs(next_annotation.negative_pairs)
                 pairs_set.add(next_annotation)
-                pairs_set.update(positive_pairs)
-                pairs_set.update(negative_pairs)
+                pairs_set |= positive_pairs
+                pairs_set |= negative_pairs
+
             return pairs_set
 
-        subsample_set = set()
-        while len(subsample_set) < size:
-            ann_ind = np.random.choice(len(annotation), 1)
-            annotation_for_subset = annotation[ann_ind[0]]
+        subsample_set = OrderedSet()
+        potential_ann_ind = np.random.choice(len(annotation), size, replace=False)
+        for ann_ind in potential_ann_ind: # pylint: disable=E1133
+            annotation_for_subset = annotation[ann_ind]
             positive_pairs = annotation_for_subset.positive_pairs
             negative_pairs = annotation_for_subset.negative_pairs
             if len(positive_pairs) + len(negative_pairs) == 0:
                 continue
-            updated_pairs = set()
+            updated_pairs = OrderedSet()
             updated_pairs.add(annotation_for_subset)
-            updated_pairs.update(get_pairs(positive_pairs))
-            updated_pairs.update(get_pairs(negative_pairs))
-            subsample_set.update(updated_pairs)
+            updated_pairs |= get_pairs(positive_pairs)
+            updated_pairs |= get_pairs(negative_pairs)
+            subsample_set |= updated_pairs
+            if len(subsample_set) == size:
+                break
+            if len(subsample_set) > size:
+                subsample_set -= updated_pairs
+
         return list(subsample_set)
 
     np.random.seed(seed)
@@ -141,10 +147,16 @@ def main():
 
 def save_annotation(annotation, meta, annotation_file, meta_file):
     if annotation_file:
+        annotation_dir = annotation_file.parent
+        if not annotation_dir.exists():
+            annotation_dir.mkdir(parents=True)
         with annotation_file.open('wb') as file:
             for representation in annotation:
                 representation.dump(file)
     if meta_file and meta:
+        meta_dir = meta_file.parent
+        if not meta_dir.exists():
+            meta_dir.mkdir(parents=True)
         with meta_file.open('wt') as file:
             json.dump(meta, file)
 
