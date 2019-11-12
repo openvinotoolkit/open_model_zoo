@@ -21,8 +21,6 @@
 #include <ext_list.hpp>
 #endif
 
-#include <format_reader_ptr.h>
-
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 #include <samples/args_helper.hpp>
@@ -141,14 +139,12 @@ int main(int argc, char *argv[]) {
         const TensorDesc& inputDesc = inputInfo[imageInputName]->getTensorDesc();
         IE_ASSERT(inputDesc.getDims().size() == 4);
         size_t netBatchSize = getTensorBatch(inputDesc);
-        size_t netInputChannels = getTensorChannels(inputDesc);
         size_t netInputHeight = getTensorHeight(inputDesc);
         size_t netInputWidth = getTensorWidth(inputDesc);
 
         slog::info << "Network batch size is " << netBatchSize << slog::endl;
 
-        /** Collect images data ptrs **/
-        std::vector<std::shared_ptr<unsigned char>> imagesData;
+        /** Collect images **/
         std::vector<cv::Mat> images_cv;
 
         if (netBatchSize > images.size()) {
@@ -165,20 +161,16 @@ int main(int argc, char *argv[]) {
             }
             slog::info << "Prepare image " << images[inputIndex] << slog::endl;
 
-            images_cv.push_back(cv::imread(images[inputIndex], cv::IMREAD_COLOR));
+            cv::Mat image = cv::imread(images[inputIndex], cv::IMREAD_COLOR);
 
-            FormatReader::ReaderPtr reader(images[inputIndex].c_str());
-            if (reader.get() == nullptr) {
+            if (image.empty()) {
                 slog::warn << "Image " + images[inputIndex] + " cannot be read!" << slog::endl;
                 continue;
             }
-            /** Getting image data **/
-            std::shared_ptr<unsigned char> data(reader->getData(netInputWidth, netInputHeight));
-            if (data != nullptr) {
-                imagesData.push_back(data);
-            }
+
+            images_cv.push_back(image);
         }
-        if (imagesData.empty()) throw std::logic_error("Valid input images were not found!");
+        if (images_cv.empty()) throw std::logic_error("Valid input images were not found!");
 
         // -----------------------------------------------------------------------------------------------------
 
@@ -211,21 +203,9 @@ int main(int argc, char *argv[]) {
 
             /** Fill first input tensor with images. First b channel, then g and r channels **/
             if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {
-                auto data = input->buffer().as<PrecisionTrait<Precision::U8>::value_type *>();
-                size_t image_size = netInputHeight * netInputWidth;
-
                 /** Iterate over all input images **/
-                for (size_t image_id = 0; image_id < imagesData.size(); ++image_id) {
-                    /** Iterate over all pixels in image (b,g,r) **/
-                    for (size_t pid = 0; pid < image_size; pid++) {
-                        /** Iterate over all channels **/
-                        for (size_t ch = 0; ch < netInputChannels; ++ch) {
-                            /**          [images stride + channels stride + pixel id ] all in bytes            **/
-                            data[image_id * image_size * netInputChannels + ch * image_size + pid] = imagesData.at(
-                                    image_id).get()[pid * netInputChannels + ch];
-                        }
-                    }
-                }
+                for (size_t image_id = 0; image_id < images_cv.size(); ++image_id)
+                    matU8ToBlob<unsigned char>(images_cv[image_id], input, image_id);
             }
 
             /** Fill second input tensor with image info **/
