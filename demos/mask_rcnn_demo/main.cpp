@@ -61,9 +61,9 @@ int main(int argc, char *argv[]) {
         }
 
         /** This vector stores paths to the processed images **/
-        std::vector<std::string> images;
-        parseInputFilesArguments(images);
-        if (images.empty()) throw std::logic_error("No suitable images were found");
+        std::vector<std::string> imagePaths;
+        parseInputFilesArguments(imagePaths);
+        if (imagePaths.empty()) throw std::logic_error("No suitable images were found");
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------Load inference engine------------------------------------------------
@@ -145,32 +145,32 @@ int main(int argc, char *argv[]) {
         slog::info << "Network batch size is " << netBatchSize << slog::endl;
 
         /** Collect images **/
-        std::vector<cv::Mat> images_cv;
+        std::vector<cv::Mat> images;
 
-        if (netBatchSize > images.size()) {
-            slog::warn << "Network batch size is greater than number of images (" << images.size() <<
+        if (netBatchSize > imagePaths.size()) {
+            slog::warn << "Network batch size is greater than number of images (" << imagePaths.size() <<
                        "), some input files will be duplicated" << slog::endl;
-        } else if (netBatchSize < images.size()) {
-            slog::warn << "Network batch size is less than number of images (" << images.size() <<
+        } else if (netBatchSize < imagePaths.size()) {
+            slog::warn << "Network batch size is less than number of images (" << imagePaths.size() <<
                        "), some input files will be ignored" << slog::endl;
         }
 
         for (size_t i = 0, inputIndex = 0; i < netBatchSize; i++, inputIndex++) {
-            if (inputIndex >= images.size()) {
+            if (inputIndex >= imagePaths.size()) {
                 inputIndex = 0;
             }
-            slog::info << "Prepare image " << images[inputIndex] << slog::endl;
+            slog::info << "Prepare image " << imagePaths[inputIndex] << slog::endl;
 
-            cv::Mat image = cv::imread(images[inputIndex], cv::IMREAD_COLOR);
+            cv::Mat image = cv::imread(imagePaths[inputIndex], cv::IMREAD_COLOR);
 
             if (image.empty()) {
-                slog::warn << "Image " + images[inputIndex] + " cannot be read!" << slog::endl;
+                slog::warn << "Image " + imagePaths[inputIndex] + " cannot be read!" << slog::endl;
                 continue;
             }
 
-            images_cv.push_back(image);
+            images.push_back(image);
         }
-        if (images_cv.empty()) throw std::logic_error("Valid input images were not found!");
+        if (images.empty()) throw std::logic_error("Valid input images were not found!");
 
         // -----------------------------------------------------------------------------------------------------
 
@@ -204,8 +204,8 @@ int main(int argc, char *argv[]) {
             /** Fill first input tensor with images. First b channel, then g and r channels **/
             if (inputInfoItem.second->getTensorDesc().getDims().size() == 4) {
                 /** Iterate over all input images **/
-                for (size_t image_id = 0; image_id < images_cv.size(); ++image_id)
-                    matU8ToBlob<unsigned char>(images_cv[image_id], input, image_id);
+                for (size_t image_id = 0; image_id < images.size(); ++image_id)
+                    matU8ToBlob<unsigned char>(images[image_id], input, image_id);
             }
 
             /** Fill second input tensor with image info **/
@@ -277,7 +277,7 @@ int main(int argc, char *argv[]) {
         std::map<size_t, size_t> class_color;
 
         std::vector<cv::Mat> output_images;
-        for (const auto &img : images_cv) {
+        for (const auto &img : images) {
             output_images.push_back(img.clone());
         }
 
@@ -290,12 +290,12 @@ int main(int argc, char *argv[]) {
             if (batch >= static_cast<int>(netBatchSize))
                 throw std::logic_error("Invalid batch ID within detection output box");
             float prob = box_info[2];
-            float x1 = std::min(std::max(0.0f, box_info[3] * images_cv[batch].size().width), static_cast<float>(images_cv[batch].size().width));
-            float y1 = std::min(std::max(0.0f, box_info[4] * images_cv[batch].size().height), static_cast<float>(images_cv[batch].size().height));
-            float x2 = std::min(std::max(0.0f, box_info[5] * images_cv[batch].size().width), static_cast<float>(images_cv[batch].size().width));
-            float y2 = std::min(std::max(0.0f, box_info[6] * images_cv[batch].size().height), static_cast<float>(images_cv[batch].size().height));
-            int box_width = std::min(static_cast<int>(std::max(0.0f, x2 - x1)), images_cv[batch].size().width);
-            int box_height = std::min(static_cast<int>(std::max(0.0f, y2 - y1)), images_cv[batch].size().height);
+            float x1 = std::min(std::max(0.0f, box_info[3] * images[batch].size().width), static_cast<float>(images[batch].size().width));
+            float y1 = std::min(std::max(0.0f, box_info[4] * images[batch].size().height), static_cast<float>(images[batch].size().height));
+            float x2 = std::min(std::max(0.0f, box_info[5] * images[batch].size().width), static_cast<float>(images[batch].size().width));
+            float y2 = std::min(std::max(0.0f, box_info[6] * images[batch].size().height), static_cast<float>(images[batch].size().height));
+            int box_width = std::min(static_cast<int>(std::max(0.0f, x2 - x1)), images[batch].size().width);
+            int box_height = std::min(static_cast<int>(std::max(0.0f, y2 - y1)), images[batch].size().height);
             auto class_id = static_cast<size_t>(box_info[1] + 1e-6f);
             if (prob > PROBABILITY_THRESHOLD) {
                 size_t color_index = class_color.emplace(class_id, class_color.size()).first->second;
@@ -312,7 +312,7 @@ int main(int argc, char *argv[]) {
                 cv::Mat resized_mask_mat(box_height, box_width, CV_32FC1);
                 cv::resize(mask_mat, resized_mask_mat, cv::Size(box_width, box_height));
 
-                cv::Mat uchar_resized_mask(box_height, box_width, images_cv[batch].type());
+                cv::Mat uchar_resized_mask(box_height, box_width, images[batch].type());
 
                 for (int h = 0; h < resized_mask_mat.size().height; ++h)
                     for (int w = 0; w < resized_mask_mat.size().width; ++w)
