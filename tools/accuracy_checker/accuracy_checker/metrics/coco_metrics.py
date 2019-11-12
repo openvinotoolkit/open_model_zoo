@@ -131,6 +131,106 @@ class MSCOCORecall(MSCOCOBaseMetric):
         return recalls
 
 
+class MSCOCOKeypointsBaseMetric(MSCOCOBaseMetric):
+    annotation_types = (PoseEstimationAnnotation, )
+    prediction_types = (PoseEstimationPrediction, )
+
+    def update(self, annotation, prediction):
+        per_class_results = []
+        def _prepare_predictions(prediction, label, max_detections):
+            if prediction.size == 0:
+                return [], [], []
+            prediction_ids = prediction.labels == label
+            scores = prediction.scores[prediction_ids]
+            if np.size(scores) == 0:
+                return [], [], []
+            scores_ids = np.argsort(- scores, kind='mergesort')
+            difficult_box_mask = np.full(prediction.size, False)
+            difficult_box_mask[prediction.metadata.get('difficult_boxes', [])] = True
+            difficult_for_label = difficult_box_mask[prediction_ids]
+            if len(scores_ids) > max_detections:
+                scores_ids = scores_ids[:max_detections]
+            detections = prepare_keypoints(prediction, prediction_ids)
+            detections = detections[scores_ids]
+
+            return detections, scores[scores_ids], difficult_for_label[scores_ids]
+
+        def _prepare_annotations(annotation, label):
+            annotation_ids = annotation.labels == label
+            difficult_box_mask = np.full(annotation.size, False)
+            difficult_box_indices = annotation.metadata.get("difficult_boxes", [])
+            iscrowd = np.array(annotation.metadata.get('iscrowd', [0] * annotation.size))
+            difficult_box_mask[difficult_box_indices] = True
+            difficult_box_mask[iscrowd > 0] = True
+            difficult_label = difficult_box_mask[annotation_ids]
+            not_difficult_box_indices = np.argwhere(~difficult_label).reshape(-1)
+            difficult_box_indices = np.argwhere(difficult_label).reshape(-1)
+            iscrowd_label = iscrowd[annotation_ids]
+            order = np.hstack((not_difficult_box_indices, difficult_box_indices)).astype(int)
+            boxes = np.array(annotation.bboxes)
+            boxes = boxes[annotation_ids]
+            areas = np.array(annotation.areas)
+            areas = areas[annotation_ids] if np.size(areas) > 0 else np.array([])
+            boxes = boxes[order]
+            areas = areas[order]
+
+            return (
+                prepare_keypoints(annotation, annotation_ids)[order],
+                difficult_label[order],
+                iscrowd_label[order], boxes, areas
+            )
+
+        for label_id, label in enumerate(self.labels):
+            detections, scores, dt_difficult = _prepare_predictions(prediction, label, self.max_detections)
+            ground_truth, gt_difficult, iscrowd, boxes, areas = _prepare_annotations(annotation, label)
+            iou = compute_oks(ground_truth, detections, boxes, areas)
+            eval_result = evaluate_image(
+                ground_truth, gt_difficult, iscrowd, detections, dt_difficult, scores, iou, self.thresholds
+            )
+            self.matching_results[label_id].append(eval_result)
+            per_class_results.append(eval_result)
+
+        return per_class_results
+
+
+class MSCOCOKeypointsPrecision(MSCOCOKeypointsBaseMetric):
+    __provider__ = 'coco_keypoints_precision'
+
+    def update(self, annotation, prediction):
+        per_class_matching = super().update(annotation, prediction)
+        return [
+            compute_precision_recall(self.thresholds, [per_class_matching[i]])[0] for i, _ in enumerate(self.labels)
+        ]
+
+    def evaluate(self, annotations, predictions):
+        precision = [
+            compute_precision_recall(self.thresholds, self.matching_results[i])[0]
+            for i, _ in enumerate(self.labels)
+        ]
+        precision, self.meta['names'] = finalize_metric_result(precision, self.meta['names'])
+
+        return precision
+
+
+class MSCOCOKeypointsRecall(MSCOCOKeypointsBaseMetric):
+    __provider__ = 'coco_keypoints_precision'
+
+    def update(self, annotation, prediction):
+        per_class_matching = super().update(annotation, prediction)
+        return [
+            compute_precision_recall(self.thresholds, [per_class_matching[i]])[1] for i, _ in enumerate(self.labels)
+        ]
+
+    def evaluate(self, annotations, predictions):
+        recalls = [
+            compute_precision_recall(self.thresholds, self.matching_results[i])[1]
+            for i, _ in enumerate(self.labels)
+        ]
+        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['names'])
+
+        return recalls
+
+
 @singledispatch
 def select_specific_parameters(annotation):
     return compute_iou_boxes, False
