@@ -32,7 +32,7 @@ class BaseEvaluator:
         raise NotImplementedError
 
     # finalize and get metrics results
-    def compute_metrics(self, print_results=True, output_callback=None, ignore_results_formatting=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         raise NotImplementedError
 
     # destruction for entity, which can not be deleted automatically
