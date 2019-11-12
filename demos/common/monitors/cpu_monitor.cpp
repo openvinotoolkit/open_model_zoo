@@ -19,8 +19,8 @@ std::size_t getNCores() {
 CpuMonitor::CpuMonitor() :
     nCores{getNCores()},
     lastEnabled{false},
-    historyEnabled{false},
     samplesNumber{0},
+    historySize{0},
     cpuLoadSum(nCores, 0) {}
 
 void CpuMonitor::openQuery() {
@@ -67,12 +67,11 @@ void CpuMonitor::closeQuery() {
 }
 
 void CpuMonitor::enableHistory(std::size_t historySize) {
-    if (0 == historySize) {
+    if (historySize < 2) {
         disableHistory();
     }
     else {
         this->historySize = historySize;
-        historyEnabled = true;
         if (!lastEnabled) {
             openQuery();
         }
@@ -80,11 +79,11 @@ void CpuMonitor::enableHistory(std::size_t historySize) {
 }
 
 bool CpuMonitor::isHistoryEnabled() const {
-    return historyEnabled;
+    return historySize > 1;
 }
 
 void CpuMonitor::disableHistory() {
-    historyEnabled = false;
+    historySize = 1;
     if (!lastEnabled) {
         closeQuery();
     }
@@ -92,7 +91,7 @@ void CpuMonitor::disableHistory() {
 
 void CpuMonitor::enableLast() {
     lastEnabled = true;
-    if (!historyEnabled) {
+    if (!isHistoryEnabled()) {
         historySize = 1;
         openQuery();
     }
@@ -104,7 +103,7 @@ bool CpuMonitor::isLastEnabled() const {
 
 void CpuMonitor::disableLast() {
     lastEnabled = false;
-    if (!historyEnabled) {
+    if (!isHistoryEnabled()) {
         closeQuery();
     }
 }
@@ -204,16 +203,15 @@ std::vector<std::pair<unsigned long, unsigned long>> getIdleNonIdleCpuStat(std::
 CpuMonitor::CpuMonitor() :
     nCores{static_cast<std::size_t>(sysconf(_SC_NPROCESSORS_CONF))},
     lastEnabled{false},
-    historyEnabled{false},
     samplesNumber{0},
+    historySize{0},
     cpuLoadSum(nCores, 0) {}
 
 void CpuMonitor::enableHistory(std::size_t historySize) {
-    if (0 == historySize) {
+    if (historySize < 2) {
         disableHistory();
     } else {
         this->historySize = historySize;
-        historyEnabled = true;
         if (!lastEnabled) {
             prevIdleNonIdleCpuStat = getIdleNonIdleCpuStat(nCores);
         }
@@ -221,16 +219,16 @@ void CpuMonitor::enableHistory(std::size_t historySize) {
 }
 
 bool CpuMonitor::isHistoryEnabled() const {
-    return historyEnabled;
+    return historySize > 1;
 }
 
 void CpuMonitor::disableHistory() {
-    historyEnabled = false;
+    historySize = 1;
 }
 
 void CpuMonitor::enableLast() {
     lastEnabled = true;
-    if (!historyEnabled) {
+    if (!isHistoryEnabled()) {
         historySize = 1;
         prevIdleNonIdleCpuStat = getIdleNonIdleCpuStat(nCores);
     }

@@ -26,7 +26,7 @@ public:
 
     const std::size_t nCores;
 private:
-    bool lastEnabled, historyEnabled;
+    bool lastEnabled;
     unsigned samplesNumber;
     unsigned historySize;
     std::vector<double> cpuLoadSum;
