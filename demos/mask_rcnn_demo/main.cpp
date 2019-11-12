@@ -290,12 +290,12 @@ int main(int argc, char *argv[]) {
             if (batch >= static_cast<int>(netBatchSize))
                 throw std::logic_error("Invalid batch ID within detection output box");
             float prob = box_info[2];
-            float x1 = std::min(std::max(0.0f, box_info[3] * images[batch].size().width), static_cast<float>(images[batch].size().width));
-            float y1 = std::min(std::max(0.0f, box_info[4] * images[batch].size().height), static_cast<float>(images[batch].size().height));
-            float x2 = std::min(std::max(0.0f, box_info[5] * images[batch].size().width), static_cast<float>(images[batch].size().width));
-            float y2 = std::min(std::max(0.0f, box_info[6] * images[batch].size().height), static_cast<float>(images[batch].size().height));
-            int box_width = std::min(static_cast<int>(std::max(0.0f, x2 - x1)), images[batch].size().width);
-            int box_height = std::min(static_cast<int>(std::max(0.0f, y2 - y1)), images[batch].size().height);
+            float x1 = std::min(std::max(0.0f, box_info[3] * images[batch].cols), static_cast<float>(images[batch].cols));
+            float y1 = std::min(std::max(0.0f, box_info[4] * images[batch].rows), static_cast<float>(images[batch].rows));
+            float x2 = std::min(std::max(0.0f, box_info[5] * images[batch].cols), static_cast<float>(images[batch].cols));
+            float y2 = std::min(std::max(0.0f, box_info[6] * images[batch].rows), static_cast<float>(images[batch].rows));
+            int box_width = std::min(static_cast<int>(std::max(0.0f, x2 - x1)), images[batch].cols);
+            int box_height = std::min(static_cast<int>(std::max(0.0f, y2 - y1)), images[batch].rows);
             auto class_id = static_cast<size_t>(box_info[1] + 1e-6f);
             if (prob > PROBABILITY_THRESHOLD) {
                 size_t color_index = class_color.emplace(class_id, class_color.size()).first->second;
@@ -314,8 +314,8 @@ int main(int argc, char *argv[]) {
 
                 cv::Mat uchar_resized_mask(box_height, box_width, images[batch].type());
 
-                for (int h = 0; h < resized_mask_mat.size().height; ++h)
-                    for (int w = 0; w < resized_mask_mat.size().width; ++w)
+                for (int h = 0; h < resized_mask_mat.rows; ++h)
+                    for (int w = 0; w < resized_mask_mat.cols; ++w)
                         for (int ch = 0; ch < uchar_resized_mask.channels(); ++ch)
                             uchar_resized_mask.at<cv::Vec3b>(h, w)[ch] = resized_mask_mat.at<float>(h, w) > MASK_THRESHOLD ?
                                                                             255 * color[ch]: roi_input_img.at<cv::Vec3b>(h, w)[ch];
