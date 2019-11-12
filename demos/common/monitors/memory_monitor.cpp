@@ -12,7 +12,7 @@
 #include <psapi.h>
 
 namespace {
-double getMemTotal() {
+double getMemTotalOnly() {
     PERFORMANCE_INFORMATION performanceInformation;
     if (!GetPerformanceInfo(&performanceInformation, sizeof(performanceInformation))) {
         throw std::runtime_error("GetPerformanceInfo() failed");
@@ -20,7 +20,8 @@ double getMemTotal() {
     return static_cast<double>(performanceInformation.PhysicalTotal * performanceInformation.PageSize)
         / (1024 * 1024 * 1024);
 }
-double getSwapTotal() {
+
+double getSwapTotalOnly() {
     PERFORMANCE_INFORMATION performanceInformation;
     if (!GetPerformanceInfo(&performanceInformation, sizeof(performanceInformation))) {
         throw std::runtime_error("GetPerformanceInfo() failed");
@@ -31,14 +32,16 @@ double getSwapTotal() {
 }
 
 MemoryMonitor::MemoryMonitor() :
-    memTotal{getMemTotal()},
-    swapTotal{getSwapTotal()},
     enabled{false},
     samplesNumber{0},
     meanMem{0},
     meanSwap{0},
     maxMem{0},
-    maxSwap{0} {}
+    maxSwap{0},
+    memTotal{getMemTotalOnly()},
+    swapTotal{getSwapTotalOnly()},
+    maxMemTotal{memTotal},
+    maxSwapTotal{swapTotal} {}
 
 bool MemoryMonitor::isEnabled() const {
     return enabled;
@@ -63,6 +66,12 @@ void MemoryMonitor::collectData() {
         * performanceInformation.PageSize) / (1024 * 1024 * 1024);
     double usedSwap = static_cast<double>(performanceInformation.CommitTotal * performanceInformation.PageSize)
         / (1024 * 1024 * 1024);
+    memTotal = static_cast<double>(performanceInformation.PhysicalTotal * performanceInformation.PageSize)
+            / (1024 * 1024 * 1024),
+    swapTotal = static_cast<double>(performanceInformation.CommitLimit * performanceInformation.PageSize)
+            / (1024 * 1024 * 1024);
+    maxMemTotal = std::max(maxMemTotal, memTotal);
+    maxSwapTotal = std::max(maxSwapTotal, swapTotal);
 
     if (0 == samplesNumber) {
         maxMem = meanMem = usedMem;
@@ -100,6 +109,22 @@ double MemoryMonitor::getMaxMem() const {
 double MemoryMonitor::getMaxSwap() const {
     return maxSwap;
 }
+
+double MemoryMonitor::getMemTotal() const {
+    return memTotal;
+}
+
+double MemoryMonitor::getSwapTotal() const {
+    return swapTotal;
+}
+
+double MemoryMonitor::getMaxMemTotal() const {
+    return maxMemTotal;
+}
+
+double MemoryMonitor::getMaxSwapTotal() const {
+    return maxSwapTotal;
+}
 #else
 #include <fstream>
 #include <utility>
@@ -107,7 +132,7 @@ double MemoryMonitor::getMaxSwap() const {
 #include <regex>
 
 namespace {
-double getMemTotal() {
+double getMemTotalOnly() {
     double memTotal = 0;
     std::regex memRegex("^(.+):\\s+(\\d+) kB$");
     std::string line;
@@ -131,7 +156,7 @@ double getMemTotal() {
     }
 }
 
-double getSwapTotal() {
+double getSwapTotalOnly() {
     double swapTotal = 0;
     std::regex memRegex("^(.+):\\s+(\\d+) kB$");
     std::string line;
@@ -156,8 +181,8 @@ double getSwapTotal() {
 }
 }
 
-std::pair<double, double> getAvailableMemSwap() {
-    double availableMem = 0, availableSwap = 0;
+std::pair<std::pair<double, double>, std::pair<double, double>> getAvailableMemSwapTotalMemSwap() {
+    double availableMem = 0, availableSwap = 0, memTotal = 0, swapTotal = 0;
     unsigned long memfree = 0, buffers = 0, cached = 0, sReclaimable = 0, shmem = 0;
     std::regex memRegex("^(.+):\\s+(\\d+) kB$");
     std::string line;
@@ -180,6 +205,10 @@ std::pair<double, double> getAvailableMemSwap() {
                 shmem = stoul(match[2]);
             } else if ("SwapFree" == match[1]) {
                 availableSwap = stod(match[2]) / (1024 * 1024);
+            } else if ("MemTotal" == match[1]) {
+                memTotal = stod(match[2]) / (1024 * 1024);
+            } else if ("SwapTotal" == match[1]) {
+                swapTotal = stod(match[2]) / (1024 * 1024);
             }
         }
         std::getline(meminfo, line);
@@ -188,18 +217,20 @@ std::pair<double, double> getAvailableMemSwap() {
         throw std::runtime_error("Can't get available swap memory");
     }
     availableMem = static_cast<double>(memfree + buffers + cached + sReclaimable - shmem) / (1024 * 1024);
-    return {availableMem, availableSwap};
+    return {{availableMem, availableSwap}, {memTotal, swapTotal}};
 }
 
 MemoryMonitor::MemoryMonitor() :
-    memTotal{getMemTotal()},
-    swapTotal{getSwapTotal()},
     enabled{false},
     samplesNumber{0},
     meanMem{0},
     meanSwap{0},
     maxMem{0},
-    maxSwap{0} {}
+    maxSwap{0},
+    memTotal{getMemTotalOnly()},
+    swapTotal{getSwapTotalOnly()},
+    maxMemTotal{memTotal},
+    maxSwapTotal{swapTotal} {}
 
 bool MemoryMonitor::isEnabled() const {
     return enabled;
@@ -215,9 +246,14 @@ void MemoryMonitor::disable() {
 }
 
 void MemoryMonitor::collectData() {
-    std::pair<double, double> availableMemSwap = getAvailableMemSwap();
-    double usedMem = memTotal - availableMemSwap.first;
-    double usedSwap = swapTotal - availableMemSwap.second;
+    std::pair<std::pair<double, double>, std::pair<double, double>> availableMemSwapTotalMemSwap
+        = getAvailableMemSwapTotalMemSwap();
+    memTotal = availableMemSwapTotalMemSwap.second.first;
+    swapTotal = availableMemSwapTotalMemSwap.second.second;
+    maxMemTotal = std::max(maxMemTotal, memTotal);
+    maxSwapTotal = std::max(maxSwapTotal, swapTotal);
+    double usedMem = memTotal - availableMemSwapTotalMemSwap.first.first;
+    double usedSwap = swapTotal - availableMemSwapTotalMemSwap.first.second;
 
     if (0 == samplesNumber) {
         maxMem = meanMem = usedMem;
@@ -254,5 +290,21 @@ double MemoryMonitor::getMaxMem() const {
 
 double MemoryMonitor::getMaxSwap() const {
     return maxSwap;
+}
+
+double MemoryMonitor::getMemTotal() const {
+    return memTotal;
+}
+
+double MemoryMonitor::getSwapTotal() const {
+    return swapTotal;
+}
+
+double MemoryMonitor::getMaxMemTotal() const {
+    return maxMemTotal;
+}
+
+double MemoryMonitor::getMaxSwapTotal() const {
+    return maxSwapTotal;
 }
 #endif

@@ -251,13 +251,13 @@ void Presenter::drawGraphs(cv::Mat& frame) {
         cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize} & cv::Rect(0, 0, frame.cols, frame.rows));
         graph *= 1.3;
         int histxPos = graph.cols - 1;
-        double range = std::min(memoryMonitor.memTotal + memoryMonitor.swapTotal,
+        double range = std::min(memoryMonitor.getMaxMemTotal() + memoryMonitor.getMaxSwapTotal(),
             (memoryMonitor.getMaxMem() + memoryMonitor.getMaxSwap()) * 1.2);
         if (lastHistory.size() > 1) {
             for (auto memUsageIt = lastHistory.rbegin(); memUsageIt != lastHistory.rend() - 1; ++memUsageIt) {
                 constexpr double SWAP_TRESHOLD = 10.0 / 1024; // 10 MiB
                 cv::Vec3b color =
-                    (memoryMonitor.memTotal * 0.95 > memUsageIt->first) || (memUsageIt->second < SWAP_TRESHOLD) ?
+                    (memoryMonitor.getMemTotal() * 0.95 > memUsageIt->first) || (memUsageIt->second < SWAP_TRESHOLD) ?
                         cv::Vec3b{0, 255, 255} :
                         cv::Vec3b{0, 0, 255};
                 cv::Point right{histxPos,
