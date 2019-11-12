@@ -30,12 +30,6 @@ models:
 
     datasets:
       - name: ms_coco_mask_rcnn_short_91_classes
-        preprocessing:
-          - type: resize
-            size: 800
-        postprocessing:
-          - type: resize_prediction_boxes
-
         metrics:
           - type: coco_orig_segm_precision
           - type: coco_orig_precision

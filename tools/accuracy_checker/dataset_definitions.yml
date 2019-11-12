@@ -33,6 +33,11 @@ datasets:
     annotation: mscoco_mask_rcnn_short_91.pickle
     dataset_meta: mscoco_mask_rcnn_short_91.json
     data_source: val2017
+    preprocessing:
+      - type: resize
+        size: 800
+    postprocessing:
+      - type: resize_prediction_boxes
 
   - name: ms_coco_detection_91_classes
     annotation_conversion:
@@ -44,6 +49,11 @@ datasets:
     annotation: mscoco_det_91.pickle
     dataset_meta: mscoco_det_91.json
     data_source: val2017
+    preprocessing:
+      - type: resize
+        size: 600
+    postprocessing:
+      - type: resize_prediction_boxes
 
   - name: ms_coco_keypoints
     data_source: val2017

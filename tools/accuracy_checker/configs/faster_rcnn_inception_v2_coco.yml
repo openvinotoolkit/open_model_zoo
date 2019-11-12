@@ -9,9 +9,7 @@ models:
         adapter: ssd
         inputs:
           - name: image_info
-            type: CONST_INPUT
-            value: [[1, 600, 600]]
-
+            type: IMAGE_INFO
       - framework: dlsdk
         tags:
           - FP16
@@ -20,16 +18,10 @@ models:
         adapter: ssd
         inputs:
           - name: image_info
-            type: CONST_INPUT
-            value: [[1, 600, 600]]
+            type: IMAGE_INFO
 
     datasets:
       - name: ms_coco_detection_91_classes
-        preprocessing:
-          - type: resize
-            size: 600
-        postprocessing:
-          - type: resize_prediction_boxes
         metrics:
           - type: coco_precision
 global_definitions: ../dataset_definitions.yml
