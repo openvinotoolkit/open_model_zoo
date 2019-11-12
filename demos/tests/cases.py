@@ -23,23 +23,19 @@ TestCase = collections.namedtuple('TestCase', ['options'])
 class Demo:
 
     def device_args(self, device_list):
-        device_args = {}
-        if len(self.device_keys)>0:
-            for device in device_list:
-                device_args[device] = []
-                for dev in self.device_keys:
-                    device_args[device].extend([dev, device])
-        return device_args
+        if len(self.device_keys) == 0:
+            return {'CPU': []}
+        return {device: [arg for key in self.device_keys for arg in [key, device]] for device in device_list}
 
 class NativeDemo(Demo):
     def __init__(self, subdirectory, device_keys, test_cases):
         self.subdirectory = subdirectory
 
-        self._name = subdirectory.replace('/', '_')
+        self.device_keys = device_keys
 
         self.test_cases = test_cases
 
-        self.device_keys = device_keys
+        self._name = subdirectory.replace('/', '_')
 
     @property
     def full_name(self):
@@ -55,11 +51,11 @@ class PythonDemo(Demo):
     def __init__(self, subdirectory, device_keys, test_cases):
         self.subdirectory = 'python_demos/' + subdirectory
 
-        self._name = subdirectory.replace('/', '_')
+        self.device_keys = device_keys
 
         self.test_cases = test_cases
-        
-        self.device_keys = device_keys
+
+        self._name = subdirectory.replace('/', '_')
 
     @property
     def full_name(self):
@@ -89,13 +85,13 @@ def single_option_cases(key, *args):
 
 NATIVE_DEMOS = [
     NativeDemo(subdirectory='crossroad_camera_demo',
-                device_keys=['-d', '-d_pa', '-d_reid'],
-                test_cases=combine_cases(
-                    TestCase(options={'-no_show': None,
-                        '-i': ImagePatternArg('person-vehicle-bike-detection-crossroad')}),
-                    TestCase(options={'-m': ModelArg('person-vehicle-bike-detection-crossroad-0078')}),
-                    single_option_cases('-m_pa', None, ModelArg('person-attributes-recognition-crossroad-0230')),
-                    single_option_cases('-m_reid', None, ModelArg('person-reidentification-retail-0079')),
+            device_keys=['-d', '-d_pa', '-d_reid'],
+            test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            '-i': ImagePatternArg('person-vehicle-bike-detection-crossroad')}),
+        TestCase(options={'-m': ModelArg('person-vehicle-bike-detection-crossroad-0078')}),
+        single_option_cases('-m_pa', None, ModelArg('person-attributes-recognition-crossroad-0230')),
+        single_option_cases('-m_reid', None, ModelArg('person-reidentification-retail-0079')),
     )),
 
     NativeDemo(subdirectory='gaze_estimation_demo',
