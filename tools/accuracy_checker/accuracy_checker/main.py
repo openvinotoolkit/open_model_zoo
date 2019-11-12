@@ -189,6 +189,13 @@ def build_arguments_parser():
         choices=['LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG'],
         default='LOG_WARNING'
     )
+    parser.add_argument(
+        '--deprecated_ir_v7',
+        help='Allow generation IR v7 via Model Optimizer',
+        required=False,
+        default=False,
+        type=cast_to_bool
+    )
 
     return parser
 

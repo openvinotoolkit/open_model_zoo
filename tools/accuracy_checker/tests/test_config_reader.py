@@ -96,7 +96,8 @@ class TestConfigReader:
             'log_file': None,
             'target_tags': None,
             'cpu_extensions_mode': None,
-            'aocl': None
+            'aocl': None,
+            'deprecated_ir_v7': False
         })
 
     def test_read_configs_without_global_config(self, mocker):
@@ -111,7 +112,7 @@ class TestConfigReader:
             'definitions': None, 'config': None, 'stored_predictions': None, 'tf_custom_op_config': None,
             'progress': 'bar', 'target_framework': None, 'target_devices': None, 'log_file': None,
             'tf_obj_detection_api_pipeline_config_path': None, 'target_tags': None, 'cpu_extensions_mode': None,
-            'aocl': None
+            'aocl': None, 'deprecated_ir_v7': False
         })
         mocker.patch('accuracy_checker.utils.get_path', return_value=Path.cwd())
         mocker.patch('yaml.load', return_value=config)

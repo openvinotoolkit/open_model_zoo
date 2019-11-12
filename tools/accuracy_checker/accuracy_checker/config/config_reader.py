@@ -372,7 +372,12 @@ class ConfigReader:
             if models_prefix:
                 launcher_entry['_models_prefix'] = models_prefix
 
-            if 'converted_models' not in arguments or not arguments.converted_models:
+            if 'deprecated_ir_v7' in arguments and arguments.deprecated_ir_v7:
+                mo_flags = launcher_entry.get('mo_flags', [])
+                mo_flags.append('generate_deprecated_ir_v7')
+                launcher_entry['mo_flags'] = mo_flags
+
+            if 'converted_models' in arguments or arguments.converted_models:
                 return launcher_entry
 
             mo_params = launcher_entry.get('mo_params', {})
