@@ -28,9 +28,24 @@ curve. Validation dataset is BIT-Vehicle.
 
 ## Performance
 
-## Inputs
+## Input
 
-1. name: "input" , shape: [1x3x256x256] - An input image in the format [BxCxHxW],
+### Original Model
+
+An input image, name: `input` , shape: [1x256x256x3], format: [BxHxWxC],
+   where:
+
+    - B - batch size
+    - H - image height
+    - W - image width
+    - C - number of channels
+
+   Expected color order: RGB.
+   Mean values: [127.5,127.5,127.5], scale factor for each channel: 127.5
+
+### Converted Model
+
+An input image, name: "input", shape: [1x3x256x256], format [BxCxHxW],
    where:
     - B - batch size
     - C - number of channels
@@ -39,9 +54,22 @@ curve. Validation dataset is BIT-Vehicle.
 
    Expected color order is BGR.
 
-## Outputs
+## Output
 
-1. The net outputs a blob with the shape: [1, 1, N, 7], where N is the number of detected
+### Original Model
+
+The net outputs a blob with the shape: [1, 1, N, 7], where N is the number of detected
+   bounding boxes. For each detection, the description has the format:
+   [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`]
+    - `image_id` - ID of the image in the batch
+    - `label` - predicted class ID
+    - `conf` - confidence for the predicted class
+    - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
+    - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner.
+
+### Converted Model
+
+The net outputs a blob with the shape: [1, 1, N, 7], where N is the number of detected
    bounding boxes. For each detection, the description has the format:
    [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`]
     - `image_id` - ID of the image in the batch

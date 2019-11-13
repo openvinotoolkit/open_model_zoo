@@ -4,7 +4,7 @@ models:
     launchers:
       - framework: tf
         device: CPU
-        model:   object_detection/barrier/tf/0123/model/model.pb.frozen
+        model:   public/vehicle-license-plate-detection-barrier-0123/model/model.pb.frozen
         adapter: ssd
 
       - framework: dlsdk
@@ -22,10 +22,7 @@ models:
         adapter: ssd
 
     datasets:
-      - name: bitvehicle_dataset
-        data_source: BITVehicle/annotation_val/data
-        annotation: bitvehicle.pickle
-        dataset_meta: bitvehicle.json
+      - name: vehicle_license_plate_detection
 
         preprocessing:
           - type: resize
@@ -53,3 +50,4 @@ models:
             allow_multiple_matches_per_ignored: True
             distinct_conf: False
             presenter: print_vector
+            global_definitions: ../dataset_definitions.yml
