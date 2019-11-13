@@ -88,16 +88,32 @@ class CPUExtensionPathField(PathField):
 
 
 class DLSDKLauncherConfigValidator(LauncherConfigValidator):
-    def __init__(self, config_uri, **kwargs):
-        super().__init__(config_uri, **kwargs)
+    def __init__(
+            self, config_uri, fields=None, delayed_model_loading=False, **kwargs
+    ):
+        super().__init__(config_uri, fields, delayed_model_loading, **kwargs)
         self.need_conversion = None
 
-    def validate(self, entry, field_uri=None):
+    def create_device_regex(self, available_devices):
+        self.regular_device_regex = r"(?:^(?P<device>{devices})$)".format(devices="|".join(available_devices))
+        self.hetero_regex = r"(?:^{hetero}(?P<devices>(?:{devices})(?:,(?:{devices}))*)$)".format(
+            hetero=HETERO_KEYWORD, devices="|".join(available_devices)
+        )
+        self.multi_device_regex = r"(?:^{multi}(?P<devices_ireq>(?:{devices_ireq})(?:,(?:{devices_ireq}))*)$)".format(
+            multi=MULTI_DEVICE_KEYWORD, devices_ireq="{}?|".format(NIREQ_REGEX).join(available_devices)
+        )
+        self.supported_device_regex = r"{multi}|{hetero}|{regular}".format(
+            multi=self.multi_device_regex, hetero=self.hetero_regex, regular=self.regular_device_regex
+        )
+        self.fields['device'].set_regex(self.supported_device_regex)
+
+    def validate(self, entry, field_uri=None, ie_core=None):
         """
         Validate that launcher entry meets all configuration structure requirements.
         Args:
             entry: launcher configuration file entry.
             field_uri: id of launcher entry.
+            ie_core: IECore instance.
         """
         if not self.delayed_model_loading:
             framework_parameters = self.check_model_source(entry)
@@ -107,8 +123,8 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
         try:
             self.fields['device'].validate(entry['device'], field_uri)
         except ConfigError as error:
-            if self._ie_core is not None:
-                self.create_device_regex(self._ie_core.available_devices)
+            if ie_core is not None:
+                self.create_device_regex(ie_core.available_devices)
                 self.fields['device'].validate(entry['device'], field_uri)
             else:
                 raise error
@@ -226,13 +242,12 @@ class DLSDKLauncher(Launcher):
         super().__init__(config_entry)
 
         dlsdk_launcher_config = DLSDKLauncherConfigValidator(
-            'DLSDK_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading
+            'DLSDK_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading,
         )
-        dlsdk_launcher_config.validate(self.config)
-
-        self._device = self.config['device'].upper()
-        self._device_ids = self._check_device_id()
         self._set_variable = False
+        dlsdk_launcher_config.validate(self.config, ie_core=self.ie_core)
+        device = self.config['device'].split('.')
+        self._device = '.'.join((device[0].upper(), device[1])) if len(device) > 1 else device[0].upper()
         self._prepare_bitstream_firmware(self.config)
         self._delayed_model_loading = delayed_model_loading
 
