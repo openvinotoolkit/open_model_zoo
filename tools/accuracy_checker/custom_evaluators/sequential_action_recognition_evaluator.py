@@ -16,7 +16,7 @@ limitations under the License.
 from pathlib import Path
 import pickle
 import numpy as np
-from accuracy_checker.evaluators.base_evaluator import BaseEvaluator
+from accuracy_checker.evaluators import BaseEvaluator
 from accuracy_checker.dataset import Dataset
 from accuracy_checker.adapters import create_adapter
 from accuracy_checker.data_readers import BaseReader
@@ -93,7 +93,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
 
     def print_metrics_results(self, output_callback=None, ignore_results_formatting=False):
         if not self._metrics_results:
-            self.compute_metrics(True, output_callback, ignore_results_formatting)
+            self.compute_metrics(True, ignore_results_formatting)
             return
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
@@ -114,7 +114,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
         dataset_config = module_specific_params['datasets'][0]
         launcher_config = module_specific_params['launchers'][0]
         return (
-            model_name,launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
+            model_name, launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
             dataset_config['name']
         )
 
@@ -155,7 +155,7 @@ def create_decoder(model_config, launcher):
     framework = launcher.config['framework']
     model_class = launcher_model_mapping.get(framework)
     if not model_class:
-        raise ValueError('model for framework {] is not supported'.format(framework))
+        raise ValueError('model for framework {} is not supported'.format(framework))
     return model_class(model_config, launcher)
 
 
