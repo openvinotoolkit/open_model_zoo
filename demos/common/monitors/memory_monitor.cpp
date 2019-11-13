@@ -144,11 +144,7 @@ double getMemTotalOnly() {
         }
         std::getline(meminfo, line);
     }
-    if (0 == memTotal) {
-        throw std::runtime_error("Can't get total memory");
-    } else {
-        return memTotal;
-    }
+    return memTotal;
 }
 
 double getSwapTotalOnly() {
@@ -168,17 +164,12 @@ double getSwapTotalOnly() {
         }
         std::getline(meminfo, line);
     }
-    if (0 == swapTotal) {
-        throw std::runtime_error("Can't get total memory");
-    } else {
-        return swapTotal;
-    }
+    return swapTotal;
 }
 }
 
 std::pair<std::pair<double, double>, std::pair<double, double>> getAvailableMemSwapTotalMemSwap() {
-    double availableMem = 0, availableSwap = 0, memTotal = 0, swapTotal = 0;
-    unsigned long memfree = 0, buffers = 0, cached = 0, sReclaimable = 0, shmem = 0;
+    double memAvailable = 0, swapFree = 0, memTotal = 0, swapTotal = 0;
     std::regex memRegex("^(.+):\\s+(\\d+) kB$");
     std::string line;
     std::smatch match;
@@ -186,20 +177,11 @@ std::pair<std::pair<double, double>, std::pair<double, double>> getAvailableMemS
     std::getline(meminfo, line);
     while(meminfo.good())
     {
-        if (std::regex_match(line, match, memRegex))
-        {
-            if ("MemFree" == match[1]) {
-                memfree = stoul(match[2]);
-            } else if ("Buffers" == match[1]) {
-                buffers = stoul(match[2]);
-            } else if ("Cached" == match[1]) {
-                cached = stoul(match[2]);
-            } else if ("SReclaimable" == match[1]) {
-                sReclaimable = stoul(match[2]);
-            } else if ("Shmem" == match[1]) {
-                shmem = stoul(match[2]);
+        if (std::regex_match(line, match, memRegex)) {
+            if ("MemAvailable" == match[1]) {
+                memAvailable = stod(match[2]) / (1024 * 1024);
             } else if ("SwapFree" == match[1]) {
-                availableSwap = stod(match[2]) / (1024 * 1024);
+                swapFree = stod(match[2]) / (1024 * 1024);
             } else if ("MemTotal" == match[1]) {
                 memTotal = stod(match[2]) / (1024 * 1024);
             } else if ("SwapTotal" == match[1]) {
@@ -208,11 +190,10 @@ std::pair<std::pair<double, double>, std::pair<double, double>> getAvailableMemS
         }
         std::getline(meminfo, line);
     }
-    if (0 == availableSwap) {
-        throw std::runtime_error("Can't get available swap memory");
+    if (0 == memTotal) {
+        throw std::runtime_error("Can't get MemTotal");
     }
-    availableMem = static_cast<double>(memfree + buffers + cached + sReclaimable - shmem) / (1024 * 1024);
-    return {{availableMem, availableSwap}, {memTotal, swapTotal}};
+    return {{memAvailable, swapFree}, {memTotal, swapTotal}};
 }
 
 MemoryMonitor::MemoryMonitor() :
