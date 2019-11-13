@@ -132,7 +132,7 @@ class BaseModel:
 
 def create_encoder(model_config, launcher):
     launcher_model_mapping = {
-        'dlsdk': EncoderModelDLSDKL,
+        'dlsdk': EncoderDLSDKModel,
         'onnx_runtime': EncoderONNXModel,
         'opencv': EncoderOpenCVModel,
         'dummy': DummyEncoder
@@ -148,7 +148,7 @@ def create_encoder(model_config, launcher):
 
 def create_decoder(model_config, launcher):
     launcher_model_mapping = {
-        'dlsdk': DecoderModelDLSDKL,
+        'dlsdk': DecoderDLSDKModel,
         'onnx_runtime': DecoderONNXModel,
         'opencv': DecoderOpenCVModel,
     }
@@ -202,7 +202,7 @@ class SequentialModel(BaseModel):
                 pickle.dump(self._encoder_predictions, file)
 
 
-class EncoderModelDLSDKL(BaseModel):
+class EncoderDLSDKModel(BaseModel):
     def __init__(self, network_info, launcher):
         super().__init__(network_info, launcher)
         if 'onnx_model' in network_info:
@@ -231,7 +231,7 @@ class EncoderModelDLSDKL(BaseModel):
         return {self.input_blob: input_data}
 
 
-class DecoderModelDLSDKL(BaseModel):
+class DecoderDLSDKModel(BaseModel):
     def __init__(self, network_info, launcher):
         super().__init__(network_info, launcher)
         if 'onnx_model' in network_info:

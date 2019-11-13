@@ -128,6 +128,10 @@ class CaffeLauncher(Launcher):
     def predict_async(self, *args, **kwargs):
         raise ValueError('Caffe Launcher does not support async mode')
 
+    @staticmethod
+    def create_network(model, weights):
+        return caffe.Net(str(model), str(weights, caffe.TEST))
+
     def release(self):
         """
         Releases launcher.
