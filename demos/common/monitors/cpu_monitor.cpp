@@ -166,7 +166,7 @@ std::vector<double> CpuMonitor::getMeanCpuLoad() const {
 namespace {
 std::vector<std::pair<unsigned long, unsigned long>> getIdleNonIdleCpuStat(std::size_t nCores) {
     std::vector<std::pair<unsigned long, unsigned long>> idleNonIdleCpuStat(nCores);
-    std::ifstream proc_stat("/proc/stat");
+    std::ifstream procStat("/proc/stat");
     std::string line;
     std::smatch match;
     std::regex coreJiffies("^cpu(\\d+)\\s+"
@@ -180,7 +180,7 @@ std::vector<std::pair<unsigned long, unsigned long>> getIdleNonIdleCpuStat(std::
         "(\\d+)\\s+" // steal
         "(\\d+)\\s+" // guest
         "(\\d+)$");  // guest_nice
-    while (std::getline(proc_stat, line))
+    while (std::getline(procStat, line))
     {
         if (std::regex_match(line, match, coreJiffies))
         {

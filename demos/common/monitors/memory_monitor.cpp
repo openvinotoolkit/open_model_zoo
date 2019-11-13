@@ -133,8 +133,7 @@ double getMemTotalOnly() {
     std::string line;
     std::smatch match;
     std::ifstream meminfo("/proc/meminfo");
-    std::getline(meminfo, line);
-    while(meminfo.good())
+    while(std::getline(meminfo, line))
     {
         if (std::regex_match(line, match, memRegex))
         {
@@ -142,7 +141,6 @@ double getMemTotalOnly() {
                 memTotal = stod(match[2]) / (1024 * 1024);
             }
         }
-        std::getline(meminfo, line);
     }
     return memTotal;
 }
@@ -153,8 +151,7 @@ double getSwapTotalOnly() {
     std::string line;
     std::smatch match;
     std::ifstream meminfo("/proc/meminfo");
-    std::getline(meminfo, line);
-    while(meminfo.good())
+    while(std::getline(meminfo, line))
     {
         if (std::regex_match(line, match, memRegex))
         {
@@ -162,7 +159,6 @@ double getSwapTotalOnly() {
                 swapTotal = stod(match[2]) / (1024 * 1024);
             }
         }
-        std::getline(meminfo, line);
     }
     return swapTotal;
 }
@@ -174,8 +170,7 @@ std::pair<std::pair<double, double>, std::pair<double, double>> getAvailableMemS
     std::string line;
     std::smatch match;
     std::ifstream meminfo("/proc/meminfo");
-    std::getline(meminfo, line);
-    while(meminfo.good())
+    while(std::getline(meminfo, line))
     {
         if (std::regex_match(line, match, memRegex)) {
             if ("MemAvailable" == match[1]) {
@@ -188,7 +183,6 @@ std::pair<std::pair<double, double>, std::pair<double, double>> getAvailableMemS
                 swapTotal = stod(match[2]) / (1024 * 1024);
             }
         }
-        std::getline(meminfo, line);
     }
     if (0 == memTotal) {
         throw std::runtime_error("Can't get MemTotal");
