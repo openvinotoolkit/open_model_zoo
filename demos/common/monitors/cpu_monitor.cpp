@@ -179,7 +179,7 @@ std::vector<std::pair<unsigned long, unsigned long>> getIdleNonIdleCpuStat(std::
         "(\\d+)\\s+" // softirq
         "(\\d+)\\s+" // steal
         "(\\d+)\\s+" // guest
-        "(\\d+)$");  // guest_nice
+        "(\\d+)");  // guest_nice
     while (std::getline(procStat, line))
     {
         if (std::regex_match(line, match, coreJiffies))
@@ -191,9 +191,12 @@ std::vector<std::pair<unsigned long, unsigned long>> getIdleNonIdleCpuStat(std::
                     + stoul(match[7])
                     + stoul(match[8])
                     + stoul(match[9]), // it doesn't handle overflow of sum and overflows of /proc/stat values
-                core_id = stoul(match[1]);
-            idleNonIdleCpuStat[core_id].first = idleInfo;
-            idleNonIdleCpuStat[core_id].second = nonIdleInfo;
+                coreId = stoul(match[1]);
+            if (coreId < nCores) {
+                throw std::runtime_error("The number of cores has changed");
+            }
+            idleNonIdleCpuStat[coreId].first = idleInfo;
+            idleNonIdleCpuStat[coreId].second = nonIdleInfo;
         }
     }
     return idleNonIdleCpuStat;
