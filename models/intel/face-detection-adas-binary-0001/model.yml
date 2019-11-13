@@ -1,0 +1,31 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Face detector for driver monitoring and similar scenarios. The network features
+  a pruned MobileNet backbone that includes depth-wise convolutions to reduce
+  the amount of computation for the 3x3 convolution block. Also some 1x1 convolutions
+  are binary that can be implemented using effective binary XNOR+POPCOUNT approach
+task_type: detection
+files:
+  - name: INT1/face-detection-adas-binary-0001.xml
+    size: 116647
+    sha256: fde8c465a5e3f3425fb567d31b9591ff8be589930c8488639f8feddf7f0301f2
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.xml
+  - name: INT1/face-detection-adas-binary-0001.bin
+    size: 1840444
+    sha256: 0e0742b61fb924e937a8974da8a2e15cc6afc15630afa3f220676ee7a3a99700
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/face-detection-adas-binary-0001/INT1/face-detection-adas-binary-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

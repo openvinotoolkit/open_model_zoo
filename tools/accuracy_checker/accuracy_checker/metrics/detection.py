@@ -30,9 +30,11 @@ from ..representation import (
 )
 from .metric import Metric, FullDatasetEvaluationMetric
 
+
 class APIntegralType(enum.Enum):
     voc_11_point = '11point'
     voc_max = 'max'
+
 
 class BaseDetectionMetricMixin(Metric):
     @classmethod
@@ -261,6 +263,9 @@ class DetectionAccuracyMetric(BaseDetectionMetricMixin, FullDatasetEvaluationMet
             ),
             'ignore_label': NumberField(
                 optional=True, value_type=int, min_value=0, description="Ignore label ID."
+            ),
+            'fast_match': BoolField(
+                default=False, optional=True, description='Apply fast match algorithm'
             )
         })
         return parameters
@@ -270,9 +275,11 @@ class DetectionAccuracyMetric(BaseDetectionMetricMixin, FullDatasetEvaluationMet
 
         self.use_normalization = self.get_value_from_config('use_normalization')
         self.ignore_label = self.get_value_from_config('ignore_label')
+        fast_match = self.get_value_from_config('fast_match')
+        self.match_func = match_detections_class_agnostic if not fast_match else fast_match_detections_class_agnostic
 
     def evaluate(self, annotations, predictions):
-        all_matches = match_detections_class_agnostic(
+        all_matches = self.match_func(
             predictions, annotations, self.overlap_threshold, self.overlap_method
         )
         cm = confusion_matrix(all_matches, predictions, annotations, len(self.labels), self.ignore_label)
@@ -348,6 +355,43 @@ def match_detections_class_agnostic(predicted_data, gt_data, min_iou, overlap_me
 
         total_gt_bbox_num += gt_bboxes_num
         matched_gt_bbox_num += len(matches)
+
+    return all_matches
+
+
+def fast_match_detections_class_agnostic(predicted_data, gt_data, min_iou, overlap_method):
+    all_matches = {}
+    total_gt_bbox_num = 0
+    matched_gt_bbox_num = 0
+
+    for gt, prediction in zip(gt_data, predicted_data):
+        gt_bboxes = np.stack((gt.x_mins, gt.y_mins, gt.x_maxs, gt.y_maxs), axis=-1)
+        matches = []
+        total_gt_bbox_num += len(gt_bboxes)
+        if prediction.size:
+            predicted_bboxes = np.stack(
+                (prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs), axis=-1
+            )
+
+            similarity_matrix = calculate_similarity_matrix(gt_bboxes, predicted_bboxes, overlap_method)
+
+            for _ in gt_bboxes:
+                best_match_pos = np.unravel_index(similarity_matrix.argmax(), similarity_matrix.shape)
+                best_match_value = similarity_matrix[best_match_pos]
+
+                if best_match_value <= min_iou:
+                    break
+
+                gt_id = best_match_pos[0]
+                predicted_id = best_match_pos[1]
+
+                similarity_matrix[gt_id, :] = 0.0
+                similarity_matrix[:, predicted_id] = 0.0
+
+                matches.append((gt_id, predicted_id))
+                matched_gt_bbox_num += 1
+
+        all_matches[gt.identifier] = matches
 
     return all_matches
 

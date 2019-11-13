@@ -138,6 +138,9 @@ class SegmentationDSCAcc(PerImageEvaluationMetric):
     def evaluate(self, annotations, predictions):
         return sum(self.overall_metric) / len(self.overall_metric)
 
+    def reset(self):
+        self.overall_metric = []
+
 
 class SegmentationDIAcc(PerImageEvaluationMetric):
     __provider__ = 'dice_index'
@@ -169,6 +172,8 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
 
         self.meta['calculate_mean'] = False
 
+        self.overall_metric = []
+
     def update(self, annotation, prediction):
         result = np.zeros(shape=self.classes)
 
@@ -199,3 +204,6 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         median = np.median(self.overall_metric, axis=0) if self.median else []
         result = np.concatenate((mean, median))
         return result
+
+    def reset(self):
+        self.overall_metric = []

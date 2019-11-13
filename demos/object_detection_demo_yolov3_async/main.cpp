@@ -20,14 +20,15 @@
 #include <iterator>
 
 #include <inference_engine.hpp>
-#include <ie_utils.hpp>
 
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
 #include "object_detection_demo_yolov3_async.hpp"
 
+#ifdef WITH_EXTENSIONS
 #include <ext_list.hpp>
+#endif
 
 using namespace InferenceEngine;
 
@@ -205,6 +206,7 @@ int main(int argc, char *argv[]) {
 
         /**Loading extensions to the devices **/
 
+#ifdef WITH_EXTENSIONS
         /** Loading default extensions **/
         if (FLAGS_d.find("CPU") != std::string::npos) {
             /**
@@ -213,6 +215,7 @@ int main(int argc, char *argv[]) {
             **/
             ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
         }
+#endif
 
         if (!FLAGS_l.empty()) {
             // CPU extensions are loaded as a shared library and passed as a pointer to the base extension
@@ -414,7 +417,9 @@ int main(int argc, char *argv[]) {
                     }
                 }
             }
-            cv::imshow("Detection results", frame);
+            if (!FLAGS_no_show) {
+                cv::imshow("Detection results", frame);
+            }
 
             t1 = std::chrono::high_resolution_clock::now();
             ocv_render_time = std::chrono::duration_cast<ms>(t1 - t0).count();

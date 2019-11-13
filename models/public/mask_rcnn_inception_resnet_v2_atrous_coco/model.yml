@@ -1,0 +1,37 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Mask R-CNN Inception Resnet V2 Atrous trained on COCO dataset.
+  Used for object instance segmentation. For details see paper
+  <https://arxiv.org/pdf/1703.06870.pdf>.
+task_type: instance_segmentation
+files:
+  - name: mask_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
+    size: 727390102
+    sha256: 816afc8987c2152cbd0e24af3a6fb82086cea0645a38778884bd166c0d016bb5
+    source: http://download.tensorflow.org/models/object_detection/mask_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: mask_rcnn_inception_resnet_v2_atrous_coco_2018_01_28.tar.gz
+model_optimizer_args:
+  - --reverse_input_channels
+  - --input_shape=[1,800,800,3]
+  - --input=image_tensor
+  - --tensorflow_use_custom_operations_config=$mo_dir/extensions/front/tf/mask_rcnn_support.json
+  - --tensorflow_object_detection_api_pipeline_config=$dl_dir/mask_rcnn_inception_resnet_v2_atrous_coco_2018_01_28/pipeline.config
+  - --input_model=$dl_dir/mask_rcnn_inception_resnet_v2_atrous_coco_2018_01_28/frozen_inference_graph.pb
+framework: tf
+license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

@@ -22,19 +22,19 @@ static const char lpr_model_message[] = "Optional. Path to the License Plate Rec
 
 /// @brief message for assigning vehicle detection inference to device
 static const char target_device_message[] = "Optional. Specify the target device for Vehicle Detection "\
-                                            "(the list of available devices is shown below).Default value is CPU. " \
+                                            "(the list of available devices is shown below). Default value is CPU. " \
                                             "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
                                             "The application looks for a suitable plugin for the specified device.";
 
 /// @brief message for assigning vehicle attributes to device
 static const char target_device_message_vehicle_attribs[] = "Optional. Specify the target device for Vehicle Attributes "\
-                                                            "(the list of available devices is shown below).Default value is CPU. " \
+                                                            "(the list of available devices is shown below). Default value is CPU. " \
                                                             "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
                                                             "The application looks for a suitable plugin for the specified device.";
 
 /// @brief message for assigning LPR inference to device
 static const char target_device_message_lpr[] = "Optional. Specify the target device for License Plate Recognition "\
-                                                "(the list of available devices is shown below).Default value is CPU. " \
+                                                "(the list of available devices is shown below). Default value is CPU. " \
                                                 "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
                                                 "The application looks for a suitable plugin for the specified device.";
 
@@ -96,6 +96,14 @@ static const char use_tag_scheduler_message[] = "Required for HDDL plugin only. 
                                                 "Running each network on a set of Intel(R) Movidius(TM) X VPUs with a specific tag. "
                                                 "You must specify the number of VPUs for each network in the hddl_service.config file. "
                                                 "Refer to the corresponding README file for more information.";
+
+/// @brief message for #threads for CPU inference
+static const char infer_num_threads_message[] = "Optional. Number of threads to use for inference on the CPU "
+                                                "(including HETERO and MULTI cases).";
+
+/// @brief message for #streams for CPU inference
+static const char infer_num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode "
+                                                "(for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 
 /// \brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
@@ -192,6 +200,12 @@ DEFINE_string(display_resolution, "1920x1080", display_resolution_message);
 /// It is a optional parameter
 DEFINE_bool(tag, false, use_tag_scheduler_message);
 
+/// @brief Number of threads to use for inference on the CPU in throughput mode (also affects Hetero cases)
+DEFINE_uint32(nthreads, 0, infer_num_threads_message);
+
+/// @brief Number of streams to use for inference on the CPU (also affects Hetero cases)
+DEFINE_string(nstreams, "", infer_num_streams_message);
+
 /**
 * \brief This function show a help message
 */
@@ -225,6 +239,7 @@ void showUsage() {
     std::cout << "    -fps                       " << fps << std::endl;
     std::cout << "    -n_wt                      " << worker_threads << std::endl;
     std::cout << "    -display_resolution        " << display_resolution_message << std::endl;
-
     std::cout << "    -tag                       " << use_tag_scheduler_message << std::endl;
+    std::cout << "    -nstreams \"<integer>\"      " << infer_num_streams_message << std::endl;
+    std::cout << "    -nthreads \"<integer>\"      " << infer_num_threads_message << std::endl;
 }

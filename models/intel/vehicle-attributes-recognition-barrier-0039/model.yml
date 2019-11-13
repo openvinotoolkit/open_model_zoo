@@ -1,0 +1,45 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This model presents a vehicle attributes classification algorithm for a traffic
+  analysis scenario.
+task_type: object_attributes
+files:
+  - name: FP32/vehicle-attributes-recognition-barrier-0039.xml
+    size: 18179
+    sha256: 3d11a6c9920fd32ea34d59fe31a1f5e21fa2e112616c962dbdcb2c8f5afe5f42
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.xml
+  - name: FP32/vehicle-attributes-recognition-barrier-0039.bin
+    size: 2504004
+    sha256: 8195ea60216d9aefdab41e3129900aa847f4f0d3d003ce93aa15ecba0ca18e91
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-attributes-recognition-barrier-0039/FP32/vehicle-attributes-recognition-barrier-0039.bin
+  - name: FP16/vehicle-attributes-recognition-barrier-0039.xml
+    size: 18165
+    sha256: e96f15c82e7bdc549c517d39ee6fe5364319748e99de9d75b09b7b2ab0802488
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.xml
+  - name: FP16/vehicle-attributes-recognition-barrier-0039.bin
+    size: 1252002
+    sha256: be8b61e337a23ffa57d1742f92d2317560303652f330fef0cbe918161bfcaf50
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-attributes-recognition-barrier-0039/FP16/vehicle-attributes-recognition-barrier-0039.bin
+  - name: INT8/vehicle-attributes-recognition-barrier-0039.xml
+    size: 64190
+    sha256: b416777d0ba15c4a525f04baa66835671528d1ca974d298c9b79facc0aa4a8ab
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-attributes-recognition-barrier-0039/INT8/vehicle-attributes-recognition-barrier-0039.xml
+  - name: INT8/vehicle-attributes-recognition-barrier-0039.bin
+    size: 2504004
+    sha256: 4ca9587b866ecc92418b87424ec5becb05f73a9781cd2eab6abeff7a54067590
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/vehicle-attributes-recognition-barrier-0039/INT8/vehicle-attributes-recognition-barrier-0039.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

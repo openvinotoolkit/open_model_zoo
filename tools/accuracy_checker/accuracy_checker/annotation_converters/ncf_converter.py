@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-
 from ..representation import HitRatioAnnotation
 from ..utils import read_txt, get_path
 from ..config import PathField, NumberField
 
-from .format_converter import BaseFormatConverter
+from .format_converter import BaseFormatConverter, ConverterReturn
+
 
 class MovieLensConverter(BaseFormatConverter):
     __provider__ = "movie_lens_converter"
@@ -39,11 +39,11 @@ class MovieLensConverter(BaseFormatConverter):
         return parameters
 
     def configure(self):
-        self.rating_file = self.get_value_from_config('raiting_file')
+        self.rating_file = self.get_value_from_config('rating_file')
         self.negative_file = self.get_value_from_config('negative_file')
         self.users_max_number = self.get_value_from_config('users_max_number')
 
-    def convert(self):
+    def convert(self, check_content=False, **kwargs):
         annotations = []
         users = []
 
@@ -74,4 +74,4 @@ class MovieLensConverter(BaseFormatConverter):
                     identifier = ['u:' + user, 'i:' + item]
                     annotations.append(HitRatioAnnotation(identifier, False))
 
-        return annotations, {'users_number': len(users), 'item_numbers': item_numbers}
+        return ConverterReturn(annotations, {'users_number': len(users), 'item_numbers': item_numbers}, None)

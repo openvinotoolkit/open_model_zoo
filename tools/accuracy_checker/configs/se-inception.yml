@@ -1,0 +1,41 @@
+models:
+  - name: se-inception-cf
+    launchers:
+      - framework: caffe
+        model:   public/se-inception/se-inception.prototxt
+        weights: public/se-inception/se-inception.caffemodel
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes_2015
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224
+          - type: normalization
+            mean: 104, 117, 123
+
+  - name: se-inception
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/se-inception/FP32/se-inception.xml
+        weights: public/se-inception/FP32/se-inception.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/se-inception/FP16/se-inception.xml
+        weights: public/se-inception/FP16/se-inception.bin
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1000_classes_2015
+        preprocessing:
+          - type: resize
+            size: 256
+          - type: crop
+            size: 224

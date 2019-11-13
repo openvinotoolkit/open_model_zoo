@@ -1,0 +1,39 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This model presents a person attributes classification algorithm analysis scenario.
+  It produces probability of person attributions existing on the sample and a
+  position of two point on sample, whiches can be used for color prob (like, color
+  picker in graphical editors)
+task_type: object_attributes
+files:
+  - name: FP32/person-attributes-recognition-crossroad-0230.xml
+    size: 85544
+    sha256: 99d57e3a879c5fd5174651d2dd07f294d4e7c6d0f70bce55ca99f8638d023ef0
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.xml
+  - name: FP32/person-attributes-recognition-crossroad-0230.bin
+    size: 2939224
+    sha256: 1d1c392826e77373d87fd1d7c65ce238c615f729e5524f1dfbc07a3a6c0cf8db
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.bin
+  - name: FP16/person-attributes-recognition-crossroad-0230.xml
+    size: 85458
+    sha256: 880592676c50a472f316db4b8f1745f3d9233e9234d0791e9a615107264e8e73
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.xml
+  - name: FP16/person-attributes-recognition-crossroad-0230.bin
+    size: 1469612
+    sha256: 033c56ba8e93c03604e78b99f9b7e5ab07fa57cfd1d865cb62fc001744fc6e72
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

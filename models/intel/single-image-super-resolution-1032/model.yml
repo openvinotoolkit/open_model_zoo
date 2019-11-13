@@ -1,0 +1,46 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  An Attention-Based Approach for Single Image Super Resolution <https://arxiv.org/pdf/1807.06779.pdf>
+  but with reduced number of channels and changes in network achitecture. It enhances
+  the resolution of the input image by a factor of 4.
+task_type: image_processing
+files:
+  - name: FP32/single-image-super-resolution-1032.xml
+    size: 26530
+    sha256: b822073958fa1098054dca13a6f4a63de182179a037cdb6ad46fd6bcafad4728
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
+  - name: FP32/single-image-super-resolution-1032.bin
+    size: 119424
+    sha256: e2403b56bd57b0e7c68e33dad3fb1af5e3f0be4a3ad7c7cbc1836fddf0c062b0
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
+  - name: FP16/single-image-super-resolution-1032.xml
+    size: 26507
+    sha256: ea929389e3196053d3066323ee69d03d5c766521868d162f0aa01ddcbfdc90c2
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
+  - name: FP16/single-image-super-resolution-1032.bin
+    size: 59752
+    sha256: ac8a8c9387098ae9bc0cbda82cfe3235c9d2f9652277bbf07d78b96d2c4ff7e9
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
+  - name: INT8/single-image-super-resolution-1032.xml
+    size: 40591
+    sha256: 6e0ad9d25a9f1d31733edec7c220c3ff5d2a3e0c02c1793313067b5cb4692a56
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1032/INT8/single-image-super-resolution-1032.xml
+  - name: INT8/single-image-super-resolution-1032.bin
+    size: 119424
+    sha256: 89f809550199ccc33f65e54377ae88098fceacdb5f71800fe04ab2c9439e1818
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1032/INT8/single-image-super-resolution-1032.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

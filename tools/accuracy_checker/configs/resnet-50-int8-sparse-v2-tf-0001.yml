@@ -1,0 +1,30 @@
+models:
+  - name: resnet-50-int8-sparse-v2-tf-0001
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - INT8
+        model:   intel/resnet-50-int8-sparse-v2-tf-0001/FP32/resnet-50-int8-sparse-v2-tf-0001.xml
+        weights: intel/resnet-50-int8-sparse-v2-tf-0001/FP32/resnet-50-int8-sparse-v2-tf-0001.bin
+        adapter: classification
+        cpu_extensions: AUTO
+
+
+    datasets:
+      - name: imagenet_1000_classes
+
+        preprocessing:
+        - type: resize
+          size: 256
+          aspect_ratio_scale: greater
+        - type: crop
+          size: 224
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5

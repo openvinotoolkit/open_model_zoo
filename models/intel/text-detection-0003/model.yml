@@ -1,0 +1,46 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Text detector based on PixelLink <https://arxiv.org/pdf/1801.01315.pdf> architecture
+  with MobileNetV2-like <https://arxiv.org/pdf/1801.04381.pdf> as a backbone
+  for indoor/outdoor scenes.
+task_type: detection
+files:
+  - name: FP32/text-detection-0003.xml
+    size: 83483
+    sha256: c57f9e037e7bed7219ddf275a1773106b0101f6567df7b79e42e838798a384d9
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-detection-0003/FP32/text-detection-0003.xml
+  - name: FP32/text-detection-0003.bin
+    size: 26986232
+    sha256: 4ce684ad28cb70dc464565e1a476718845e3cc190fca14f385117f9ad970bcc4
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-detection-0003/FP32/text-detection-0003.bin
+  - name: FP16/text-detection-0003.xml
+    size: 83403
+    sha256: b59554dd0e5f789fc5cacdbe7e5472ee977e368a6ca2a7023e99168c8f0bae97
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-detection-0003/FP16/text-detection-0003.xml
+  - name: FP16/text-detection-0003.bin
+    size: 13493008
+    sha256: 0ee50f6aad475bf34116f809278766e0ecc82a648bbde40e2070c2e36f62ace7
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-detection-0003/FP16/text-detection-0003.bin
+  - name: INT8/text-detection-0003.xml
+    size: 939308
+    sha256: 1b54398122719ead6bb98f9ac8d0d9cf73eac7787c547c08e485711dcdd76e0e
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-detection-0003/INT8/text-detection-0003.xml
+  - name: INT8/text-detection-0003.bin
+    size: 26986232
+    sha256: 5685f059522ae30cdbdef60317882988415fccc0e33950ed224b4d81d8e1a27c
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/text-detection-0003/INT8/text-detection-0003.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

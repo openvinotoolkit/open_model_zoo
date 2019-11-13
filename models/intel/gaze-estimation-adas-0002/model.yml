@@ -1,0 +1,44 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is a custom VGG-like convolutional neural network for gaze direction estimation.
+task_type: object_attributes
+files:
+  - name: FP32/gaze-estimation-adas-0002.xml
+    size: 27546
+    sha256: 7aa055a1e660121be6fb7fa0c22368446046111b43ae5815e19f775dbb30eac5
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.xml
+  - name: FP32/gaze-estimation-adas-0002.bin
+    size: 7529292
+    sha256: 0c73b93bc4162b61a4abf6f1decc892f769e9c289de86793673dc0a723b84652
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/gaze-estimation-adas-0002/FP32/gaze-estimation-adas-0002.bin
+  - name: FP16/gaze-estimation-adas-0002.xml
+    size: 27505
+    sha256: 6f7cd2bede647667d4699a9e22c1330967868fa13c4764ff89b09e3ca0db6964
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.xml
+  - name: FP16/gaze-estimation-adas-0002.bin
+    size: 3764654
+    sha256: 01acb7d0a596f1a691e6f36235fab07b99bcab9d97b9b8fb545ea1d1a27db3b0
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/gaze-estimation-adas-0002/FP16/gaze-estimation-adas-0002.bin
+  - name: INT8/gaze-estimation-adas-0002.xml
+    size: 143904
+    sha256: 45812fe1983c4f5b9293170f409d3713b8509aede1e3e4639d85e068a18ef2e9
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.xml
+  - name: INT8/gaze-estimation-adas-0002.bin
+    size: 7529308
+    sha256: ac281130aab7eb4a69a59520a483301b3cfe3d385402bfdec5640941fc1433f7
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

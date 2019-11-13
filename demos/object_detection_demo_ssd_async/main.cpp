@@ -23,7 +23,9 @@
 #include <samples/slog.hpp>
 
 #include "object_detection_demo_ssd_async.hpp"
+#ifdef WITH_EXTENSIONS
 #include <ext_list.hpp>
+#endif
 
 using namespace InferenceEngine;
 
@@ -98,6 +100,7 @@ int main(int argc, char *argv[]) {
 
         /** Load extensions for the plugin **/
 
+#ifdef WITH_EXTENSIONS
         /** Loading default extensions **/
         if (FLAGS_d.find("CPU") != std::string::npos) {
             /**
@@ -107,6 +110,7 @@ int main(int argc, char *argv[]) {
             **/
             ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
         }
+#endif
 
         if (!FLAGS_l.empty()) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
@@ -315,7 +319,6 @@ int main(int argc, char *argv[]) {
                 for (int i = 0; i < maxProposalCount; i++) {
                     float image_id = detections[i * objectSize + 0];
                     if (image_id < 0) {
-                        std::cout << "Only " << i << " proposals found" << std::endl;
                         break;
                     }
 
@@ -345,7 +348,9 @@ int main(int argc, char *argv[]) {
                     }
                 }
             }
-            cv::imshow("Detection results", curr_frame);
+            if (!FLAGS_no_show) {
+                cv::imshow("Detection results", curr_frame);
+            }
 
             t1 = std::chrono::high_resolution_clock::now();
             ocv_render_time = std::chrono::duration_cast<ms>(t1 - t0).count();

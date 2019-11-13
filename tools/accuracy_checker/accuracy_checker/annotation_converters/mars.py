@@ -19,7 +19,7 @@ from __future__ import absolute_import, print_function
 import re
 
 from ._reid_common import check_dirs, read_directory
-from .format_converter import DirectoryBasedAnnotationConverter
+from .format_converter import DirectoryBasedAnnotationConverter, ConverterReturn
 from ..representation import ReIdentificationAnnotation
 
 MARS_IMAGE_PATTERN = re.compile(r'([\d]+)C(\d)')
@@ -29,7 +29,7 @@ class MARSConverter(DirectoryBasedAnnotationConverter):
     __provider__ = 'mars'
     annotation_types = (ReIdentificationAnnotation, )
 
-    def convert(self):
+    def convert(self, check_content=False, **kwargs):
         gallery = self.data_dir / 'bbox_test'
         query = self.data_dir / 'query'
 
@@ -37,4 +37,4 @@ class MARSConverter(DirectoryBasedAnnotationConverter):
         gallery_images, gallery_pids = read_directory(gallery, query=False, image_pattern=MARS_IMAGE_PATTERN)
         query_images, query_pids = read_directory(query, query=True, image_pattern=MARS_IMAGE_PATTERN)
 
-        return gallery_images + query_images, {'num_identities': len(gallery_pids | query_pids)}
+        return ConverterReturn(gallery_images + query_images, {'num_identities': len(gallery_pids | query_pids)}, None)

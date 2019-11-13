@@ -123,7 +123,7 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `lr_suffix` - low resolution file name's suffix (default lr).
   * `hr_suffix` - high resolution file name's suffix (default hr).
   * `annotation_loader` - which library will be used for ground truth image reading. Supported: `opencv`, `pillow` (Optional. Default value is pillow). Note, color space of image depends on loader (OpenCV uses BGR, Pillow uses RGB for image reading).
-* `icdar15_detection` - converts ICDAR15 dataset for text detection  task to `TextDetectionAnnotation`.
+* `icdar_detection` - converts ICDAR13 and ICDAR15 datasets for text detection challenge to `TextDetectionAnnotation`.
   * `data_dir` - path to folder with annotations on txt format.
 * `icdar13_recognition` - converts ICDAR13 dataset for text recognition task to `CharecterRecognitionAnnotation`.
   * `annotation_file` - path to annotation file in txt format.
@@ -140,6 +140,53 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `labels_file` - path to file, which contains labels (optional, if omitted no labels will be shown)
   * `data_suffix` - suffix for files with data (default `_data_cropped`)
   * `label_suffix` - suffix for files with groundtruth data (default `_label_cropped`)
-  * `boxes_file` - path to file with brain boxes (optional). Set this option with including postprocessor `segmentation-prediction-resample`(see [Postprocessors][spr])
-  
- [spr]: ../postprocessor/README.md  
+  * `boxes_file` - path to file with brain boxes (optional). Set this option with including postprocessor `segmentation-prediction-resample`(see [Postprocessors](../postprocessor/README.md)).
+* `wmt` - converts WMT dataset for Machine Translation task to `MachineTranslationAnnotation`.
+  * `input_file` - path to file which contains input sentences tokens for translation.
+  * `reference_file` - path to file with reference for translation.
+* `common_semantic_segmentation` - converts general format of datasets for semantic segmentation task to `SegmentationAnnotation`. The converter expects following dataset structure:
+  1. images and GT masks are located in separated directories (e.g. `<dataset_root>/images` for images and `<dataset_root>/masks` for masks respectively)
+  2. images and GT masks has common part in names and can have difference in prefix and postfix (e.g. image name is image0001.jpeg, mask for it is gt0001.png are acceptable. In this case base_part - 0001, image_prefix - image, image_postfix - .jpeg, mask_prefix - gt, mask_postfix - .png)
+  * `images_dir` - path to directory with images.
+  * `masks_dir` - path to directory with GT masks.
+  * `image_prefix` - prefix part for image file names. (Optional, default is empty).
+  * `image_postfix` - postfix part for image file names (optional, default is `.png`).
+  * `mask_prefix` - prefix part for mask file names. (Optional, default is empty).
+  * `image_postfix` - postfix part for mask file names (optional, default is `.png`).
+  * `mask_loader` - the way how GT mask should be loaded. Supported methods: `pillow`, `opencv`, `nifti`, `numpy`, `scipy`.
+  * `dataset_meta` - path to json file with prepared dataset meta info. It should contains `label_map` key with dictionary in format class_id: class_name and optionally `segmentation_colors` (if your dataset uses color encoding). Segmentation colors is a list of channel-wise values for each class. (e.g. if your dataset has 3 classes in BGR colors, segmentation colors for it will looks like: `[[255, 0, 0], [0, 255, 0], [0, 0, 255]]`). (Optional, you can provide self-created file as `dataset_meta` in your config).
+* `camvid` - converts CamVid dataset format to `SegmentationAnnotation`.
+  * `annotation_file` - file in txt format which contains list of validation pairs (`<path_to_image>` `<path_to_annotation>` separated by space)
+* `image_retrieval` - converts dataset for image retrieval task to `ReidentificationAnnotation`. Dataset should have following structure:
+   1. the dataset root directory contains 2 subdirectory named `gallery` and `queries` for gallery images and query images respectively.
+   2. Every of these subdirectories should contains text file with list of pairs: `<path_to_image>` `<image_ID>` (image_path and image_ID should be separated by space),  where `<path_to_image>` is path to the image related dataset root, `<image_ID>` is the number which represent image id in the gallery.
+   * `data_dir` - path to dataset root directory.
+   * `gallery_annotation_file` - file with gallery images and IDs concordance in txt format (Optional, default value is `<data_dir>/gallery/list.txt`)
+   * `queries_annotation_file` - file with queries images and IDs concordance in txt format (Optional, default value is `<data_dir>/queries/list.txt`)
+* `cvat_object_detection` - converts [CVAT XML annotation version 1.1](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `DetectionAnnotation`.
+  * `annotation_file` - path to xml file in appropriate format.
+  * `has_background` - allows prepend original labels with special class represented background and convert dataset for n+1 classes instead n (default value is True).
+* `cvat_attributes_recognition` - converts [CVAT XML annotation version 1.1](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `ClassificationAnnotation` or `ContainerAnnotation` with `ClassificationAnnotation` as value type and attribute names as keys (in multiple attributes case). Used bbox attributes as annotation classes.
+  * `annotation_file` - path to xml file in appropriate format.
+  * `label` - the dataset label which will be used for attributes collection (e.g. if your dataset contains 2 labels: `face` and `person` and you want recognise attributes for face, you should use `face` as value for this parameter).
+* `cvat_age_gender` -  converts [CVAT XML annotation version 1.1](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images which represent dataset for age gender recognition to `ContainerAnnotation` with `ClassificationAnnotation` for gender recognition, `ClassificationAnnotation` for age classification and `RegeressionAnnotation` for age regression. The identifiers for representations following: `gender_annotation`, `age_class_annotation`, `age_regression_annotation`.
+  * `annotation_file` - path to xml file in appropriate format.
+* `cvat_facial_landmarks` - converts [CVAT XML annotation version 1.1](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `FacialLandmarksAnnotation`.
+  * `annotation_file` - path to xml file in appropriate format.
+* `cvat_pose_estimation` - converts [CVAT XML annotation version 1.1](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `PoseEstimationAnnotation`.
+  * `annotation_file` - path to xml file in appropriate format.
+* `cvat_text_recognition` - converts [CVAT XML annotation version 1.1](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `CharacterRecognitionAnnotation`.
+  * `annotation_file` - path to xml file in appropriate format.
+* `cvat_binary_multilabel_attributes_recognition` - converts [CVAT XML annotation version 1.1](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) format for images to `MultiLabelRecognitionAnnotation`. Used bbox attributes as annotation classes. Each attribute field should contains `T` or `F` values for attribute existence/non-existence on the image respectively.
+  * `annotation_file` - path to xml file in appropriate format.
+  * `label` - the dataset label which will be used for attributes collection (e.g. if your dataset contains 2 labels: `face` and `person` and you want recognise attributes for face, you should use `face` as value for this parameter).
+* `cvat_person_detection_action_recognition` converts dataset with [CVAT XML annotation version 1.1](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/xml_format.md#xml-annotation-format) for person detection and action recognition task to `ContainerAnnotation` with `DetectionAnnotation` for person detection quality estimation named `person_annotation` and `ActionDetectionAnnotation` for action recognition named `action_annotation`.
+  * `annotation_file` - path to xml file with ground truth.
+  * `use_case` - use case, which determines the dataset label map. Supported range actions:
+    * `common_3_actions`(seating, standing, raising hand)
+    * `common_6_actions`(seating, writing, raising hand, standing, turned around, lie on the desk)
+    * `teacher` (standing, writing, demonstrating)
+    * `raising_hand` (seating, raising hand)
+* `lpr_txt` - converts annotation for license plate recognition task in txt format to `CharacterRecognitionAnnotation`.
+  * `annotation_file` - path to txt annotation.
+  * `decoding_dictionary` - path to file containing dictionary for output decoding.

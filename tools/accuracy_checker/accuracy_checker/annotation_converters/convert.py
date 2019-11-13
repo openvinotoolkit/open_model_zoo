@@ -25,7 +25,7 @@ from functools import partial
 import numpy as np
 
 from ..representation import ReIdentificationClassificationAnnotation
-from ..utils import get_path
+from ..utils import get_path, OrderedSet
 from ..data_analyzer import BaseDataAnalyzer
 from .format_converter import BaseFormatConverter
 
@@ -59,7 +59,7 @@ def build_argparser():
 def make_subset(annotation, size, seed=666):
     def make_subset_pairwise(annotation, size):
         def get_pairs(pairs_list):
-            pairs_set = set()
+            pairs_set = OrderedSet()
             for identifier in pairs_list:
                 next_annotation = next(
                     pair_annotation for pair_annotation in annotation if pair_annotation.identifier == identifier
@@ -67,23 +67,29 @@ def make_subset(annotation, size, seed=666):
                 positive_pairs = get_pairs(next_annotation.positive_pairs)
                 negative_pairs = get_pairs(next_annotation.negative_pairs)
                 pairs_set.add(next_annotation)
-                pairs_set.update(positive_pairs)
-                pairs_set.update(negative_pairs)
+                pairs_set |= positive_pairs
+                pairs_set |= negative_pairs
+
             return pairs_set
 
-        subsample_set = set()
-        while len(subsample_set) < size:
-            ann_ind = np.random.choice(len(annotation), 1)
-            annotation_for_subset = annotation[ann_ind[0]]
+        subsample_set = OrderedSet()
+        potential_ann_ind = np.random.choice(len(annotation), size, replace=False)
+        for ann_ind in potential_ann_ind:
+            annotation_for_subset = annotation[ann_ind]
             positive_pairs = annotation_for_subset.positive_pairs
             negative_pairs = annotation_for_subset.negative_pairs
             if len(positive_pairs) + len(negative_pairs) == 0:
                 continue
-            updated_pairs = set()
+            updated_pairs = OrderedSet()
             updated_pairs.add(annotation_for_subset)
-            updated_pairs.update(get_pairs(positive_pairs))
-            updated_pairs.update(get_pairs(negative_pairs))
-            subsample_set.update(updated_pairs)
+            updated_pairs |= get_pairs(positive_pairs)
+            updated_pairs |= get_pairs(negative_pairs)
+            subsample_set |= updated_pairs
+            if len(subsample_set) == size:
+                break
+            if len(subsample_set) > size:
+                subsample_set -= updated_pairs
+
         return list(subsample_set)
 
     np.random.seed(seed)
@@ -109,23 +115,25 @@ def main():
     out_dir = args.output_dir or Path.cwd()
 
     results = converter.convert()
-    if isinstance(results, tuple) and len(results) == 2:
-        result, meta = results
-    else:
-        result, meta = results, None
+    converted_annotation = results.annotations
+    meta = results.meta
+    errors = results.content_check_errors
+    if errors:
+        warnings.warn('Following problems were found during conversion:'
+                      '\n{}'.format('\n'.join(errors)))
 
     subsample = args.subsample
     if subsample:
         if subsample.endswith('%'):
             subsample_ratio = float(subsample[:-1]) / 100
-            subsample_size = int(len(result) * subsample_ratio)
+            subsample_size = int(len(converted_annotation) * subsample_ratio)
         else:
             subsample_size = int(args.subsample)
 
-        result = make_subset(result, subsample_size, args.subsample_seed)
+        converted_annotation = make_subset(converted_annotation, subsample_size, args.subsample_seed)
 
     if args.analyze_dataset:
-        analyze_dataset(result, meta)
+        analyze_dataset(converted_annotation, meta)
 
     converter_name = converter.get_name()
     annotation_name = args.annotation_name or "{}.pickle".format(converter_name)
@@ -134,7 +142,7 @@ def main():
     annotation_file = out_dir / annotation_name
     meta_file = out_dir / meta_name
 
-    save_annotation(result, meta, annotation_file, meta_file)
+    save_annotation(converted_annotation, meta, annotation_file, meta_file)
 
 
 def save_annotation(annotation, meta, annotation_file, meta_file):

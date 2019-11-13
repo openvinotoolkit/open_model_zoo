@@ -8,7 +8,7 @@ reports general vehicle attributes, for example, vehicle type (car/van/bus/track
 * `license-plate-recognition-barrier-0001`, which is executed on top of the results from the first network
 and reports a string per recognized license plate
 
-For more information about the pre-trained models, refer to the [model documentation](../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
 Other demo objectives are:
 * Video/Camera as inputs, via OpenCV\*
@@ -75,7 +75,9 @@ Options:
     -fps                       Optional. Set the playback speed not faster than the specified FPS. 0 removes the upper bound.
     -n_wt                      Optional. Set the number of threads including the main thread a Worker class will use.
     -display_resolution        Optional. Specify the maximum output window resolution.
-    -tag                       Optional. Required for HDDL plugin only. If not set, the performance on Intel(R) Movidius(TM) X VPUs will not be optimal. Running each network on a set of Intel(R) Movidius(TM) X VPUs with a specific tag. You must specify the number of VPUs for each network in the hddl_service.config file. Refer to the corresponding README file for more information.
+    -tag                       Required for HDDL plugin only. If not set, the performance on Intel(R) Movidius(TM) X VPUs will not be optimal. Running each network on a set of Intel(R) Movidius(TM) X VPUs with a specific tag. You must specify the number of VPUs for each network in the hddl_service.config file. Refer to the corresponding README file for more information.
+    -nstreams "<integer>"      Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
+    -nthreads "<integer>"      Optional. Number of threads to use for inference on the CPU (including HETERO and MULTI cases).
 
 ```
 

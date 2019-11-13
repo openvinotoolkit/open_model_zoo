@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
 import numpy as np
 
 from ..adapters import Adapter
@@ -25,6 +26,7 @@ from ..representation import (
     MultiLabelRecognitionPrediction,
     GazeVectorPrediction
 )
+
 
 class HeadPoseEstimatorAdapter(Adapter):
     """
@@ -71,12 +73,15 @@ class HeadPoseEstimatorAdapter(Adapter):
                 raw_output[self.angle_pitch],
                 raw_output[self.angle_roll]
         ):
-            prediction = ContainerPrediction({'angle_yaw'  : RegressionPrediction(identifier, yaw[0]),
-                                              'angle_pitch': RegressionPrediction(identifier, pitch[0]),
-                                              'angle_roll' : RegressionPrediction(identifier, roll[0])})
+            prediction = ContainerPrediction({
+                'angle_yaw': RegressionPrediction(identifier, yaw[0]),
+                'angle_pitch': RegressionPrediction(identifier, pitch[0]),
+                'angle_roll': RegressionPrediction(identifier, roll[0])
+            })
             result.append(prediction)
 
         return result
+
 
 class VehicleAttributesRecognitionAdapter(Adapter):
     __provider__ = 'vehicle_attributes'
@@ -86,8 +91,8 @@ class VehicleAttributesRecognitionAdapter(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'color_out' : StringField(description="Vehicle color attribute output layer name."),
-            'type_out'  : StringField(description="Vehicle type attribute output layer name.")
+            'color_out': StringField(description="Vehicle color attribute output layer name."),
+            'type_out': StringField(description="Vehicle type attribute output layer name.")
         })
         return parameters
 
@@ -105,9 +110,13 @@ class VehicleAttributesRecognitionAdapter(Adapter):
         res = []
         raw_output = self._extract_predictions(raw, frame_meta)
         for identifier, colors, types in zip(identifiers, raw_output[self.color_out], raw_output[self.type_out]):
-            res.append(ContainerPrediction({'color': ClassificationPrediction(identifier, colors.reshape(-1)),
-                                            'type': ClassificationPrediction(identifier, types.reshape(-1))}))
+            res.append(ContainerPrediction({
+                'color': ClassificationPrediction(identifier, colors.reshape(-1)),
+                'type': ClassificationPrediction(identifier, types.reshape(-1))
+            }))
+
         return res
+
 
 class AgeGenderAdapter(Adapter):
     __provider__ = 'age_gender'
@@ -117,8 +126,8 @@ class AgeGenderAdapter(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'age_out'    : StringField(description="Output layer name for age recognition."),
-            'gender_out' : StringField(description="Output layer name for gender recognition.")
+            'age_out': StringField(description="Output layer name for age recognition."),
+            'gender_out': StringField(description="Output layer name for gender recognition.")
         })
         return parameters
 
@@ -153,8 +162,10 @@ class AgeGenderAdapter(Adapter):
             gender_rep = ClassificationPrediction(identifier, gender)
             age_class_rep = ClassificationPrediction(identifier, self.get_age_scores(age))
             age_error_rep = RegressionPrediction(identifier, age)
-            result.append(ContainerPrediction({'gender': gender_rep, 'age_classification': age_class_rep,
-                                               'age_error': age_error_rep}))
+            result.append(ContainerPrediction({
+                'gender': gender_rep, 'age_classification': age_class_rep, 'age_error': age_error_rep
+            }))
+
         return result
 
 
@@ -168,7 +179,9 @@ class LandmarksRegressionAdapter(Adapter):
         for identifier, values in zip(identifiers, raw_output[self.output_blob]):
             x_values, y_values = values[::2], values[1::2]
             res.append(FacialLandmarksPrediction(identifier, x_values.reshape(-1), y_values.reshape(-1)))
+
         return res
+
 
 class PersonAttributesAdapter(Adapter):
     __provider__ = 'person_attributes'
@@ -178,7 +191,9 @@ class PersonAttributesAdapter(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'attributes_recognition_out' : StringField(description="Output layer name for attributes recognition.")
+            'attributes_recognition_out': StringField(
+                description="Output layer name for attributes recognition.", optional=True
+            )
         })
         return parameters
 

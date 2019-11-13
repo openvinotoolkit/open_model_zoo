@@ -1,0 +1,39 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is a network for text recognition scenario. It consists of VGG16-like backbone
+  and bidirectional LSTM encoder-decoder. The network is able to recognize school
+  marks that should have format either `<digit>` or `<digit>.<digit>` (e.g. `4`
+  or `3.5`).
+task_type: optical_character_recognition
+files:
+  - name: FP32/handwritten-score-recognition-0003.xml
+    size: 41876
+    sha256: 16b69c46a99f5bc6d05c7d08e1170cc7f7f7a051e3ca156ced906b0560dcd2ee
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/handwritten-score-recognition-0003/FP32/handwritten-score-recognition-0003.xml
+  - name: FP32/handwritten-score-recognition-0003.bin
+    size: 41121868
+    sha256: 56dc7bf776b712be477417ec153f34af57f31444d40772f181889544334c67e1
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/handwritten-score-recognition-0003/FP32/handwritten-score-recognition-0003.bin
+  - name: FP16/handwritten-score-recognition-0003.xml
+    size: 41857
+    sha256: 1aaa04c37887ac21d6bad7e8ae03ec02ebf32a338a762e42fe68b1456982645a
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/handwritten-score-recognition-0003/FP16/handwritten-score-recognition-0003.xml
+  - name: FP16/handwritten-score-recognition-0003.bin
+    size: 20560946
+    sha256: 4d7d4df0bd8e69fbf9a3d3d34cf2d1e0df1abe201f8d083457cd3ab8f5402d92
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/handwritten-score-recognition-0003/FP16/handwritten-score-recognition-0003.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

@@ -26,6 +26,7 @@ MetricInstance = namedtuple(
     'MetricInstance', ['name', 'metric_type', 'metric_fn', 'reference', 'threshold', 'presenter']
 )
 
+
 class MetricsExecutor:
     """
     Class for evaluating metrics according to dataset configuration entry.
@@ -73,8 +74,9 @@ class MetricsExecutor:
     @classmethod
     def parameters(cls):
         return {
-            'type' : StringField(choices=Metric.providers, description="Metric providers: " +
-                                 ", ".join(Metric.providers))
+            'type': StringField(
+                choices=Metric.providers, description="Metric providers: {}".format(", ".join(Metric.providers))
+            )
         }
 
     @property
@@ -121,3 +123,10 @@ class MetricsExecutor:
                 threshold=threshold,
                 meta=functor.meta,
             )
+
+    def get_metric_presenters(self):
+        return [metric.presenter for metric in self.metrics]
+
+    def reset(self):
+        for metric in self.metrics:
+            metric.metric_fn.reset()

@@ -1,0 +1,317 @@
+launchers:
+  - framework: dlsdk
+    cpu_extensions: AUTO
+
+datasets:
+  - name: ms_coco_mask_rcnn
+    annotation_conversion:
+      converter: mscoco_mask_rcnn
+      annotation_file: instances_val2017.json
+      has_background: True
+      sort_annotations: True
+    annotation: mscoco_mask_rcnn.pickle
+    dataset_meta: mscoco_mask_rcnn.json
+    data_source: val2017
+
+  - name: ms_coco_mask_rcnn_short_80_classes
+    annotation_conversion:
+      converter: mscoco_mask_rcnn
+      annotation_file: instances_val2017_short.json
+      has_background: True
+      sort_annotations: True
+    annotation: mscoco_mask_rcnn_short_80.pickle
+    dataset_meta: mscoco_mask_rcnn_short_80.json
+    data_source: val2017
+
+  - name: ms_coco_mask_rcnn_short_91_classes
+    annotation_conversion:
+      converter: mscoco_mask_rcnn
+      annotation_file: instances_val2017_short.json
+      has_background: True
+      sort_annotations: True
+      use_full_label_map: True
+    annotation: mscoco_mask_rcnn_short_91.pickle
+    dataset_meta: mscoco_mask_rcnn_short_91.json
+    data_source: val2017
+
+  - name: ms_coco_detection_91_classes
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: instances_val2017.json
+      has_background: True
+      sort_annotations: True
+      use_full_label_map: True
+    annotation: mscoco_det_91.pickle
+    dataset_meta: mscoco_det_91.json
+    data_source: val2017
+
+  - name: ms_coco_keypoints
+    data_source: val2017
+    annotation_conversion:
+      converter: mscoco_keypoints
+      annotation_file: person_keypoints_val2017.json
+    annotation: mscoco_keypoints.pickle
+    dataset_meta: mscoco_keypoints.json
+    metrics:
+      - name: AP
+        type: coco_precision
+        max_detections: 20
+
+  - name: imagenet_1000_classes
+    annotation_conversion:
+      converter: imagenet
+      annotation_file: val.txt
+    annotation: imagenet1000.pickle
+    data_source: ILSVRC2012_img_val
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+    - name: acciracy@top5
+      type: accuracy
+      top_k: 5
+
+  - name: imagenet_1000_classes_2015
+    annotation_conversion:
+      converter: imagenet
+      annotation_file: val15.txt
+    annotation: imagenet1000_2015.pickle
+    data_source: ILSVRC2012_img_val
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+    - name: acciracy@top5
+      type: accuracy
+      top_k: 5
+
+  - name: imagenet_1001_classes
+    annotation_conversion:
+      converter: imagenet
+      annotation_file: val.txt
+      has_background: True
+    annotation: imagenet1001.pickle
+    data_source: ILSVRC2012_img_val
+    metrics:
+    - name: accuracy@top1
+      type: accuracy
+      top_k: 1
+    - name: acciracy@top5
+      type: accuracy
+      top_k: 5
+
+  - name: VOC2012
+    annotation_conversion:
+      converter: voc_detection
+      annotations_dir: VOCdevkit/VOC2012/Annotations
+      images_dir: VOCdevkit/VOC2012/JPEGImages
+      imageset_file: VOCdevkit/VOC2012/ImageSets/Main/val.txt
+    data_source: VOCdevkit/VOC2012/JPEGImages
+    annotation: voc12.pickle
+    dataset_meta: voc12.json
+    postprocessing:
+    - type: resize_prediction_boxes
+    metrics:
+    - type: map
+      integral: 11point
+      ignore_difficult: True
+      presenter: print_scalar
+
+  - name: VOC2012_Segmentation
+    annotation_conversion:
+      converter: voc_segmentation
+      imageset_file: VOCdevkit/VOC2012/ImageSets/Segmentation/val.txt
+      images_dir: VOCdevkit/VOC2012/JPEGImages/
+      mask_dir: VOCdevkit/VOC2012/SegmentationClass/
+    data_source: VOCdevkit/VOC2012
+    annotation: voc2012_segmentation.pickle
+    dataset_meta: voc2012_segmentation.json
+
+  - name: wider
+    data_source: WIDER_val/images
+    annotation_conversion:
+      converter: wider
+      annotation_file: wider_face_split/wider_face_val_bbx_gt.txt
+    annotation: wider.pickle
+    dataset_meta: wider.json
+
+  - name: facial_landmarks_35
+    data_source: VOCdevkit/VOC2012/JPEGImages
+    annotation_conversion:
+      converter: cvat_facial_landmarks
+      annotation_file: 3632_OMZ_task3_facial_landmarks_35_adas.xml
+    annotation: facial_landmarks_35.pickle
+    preprocessing:
+      - type: resize
+        size: 60
+    postprocessing:
+      - type: normalize_landmarks_points
+
+  - name: emotions_recognition
+    data_source: VOCdevkit/VOC2012/JPEGImages
+    annotation_conversion:
+      converter: cvat_attributes_recognition
+      annotation_file: 3631_OMZ_task2_emotions_recognition.xml
+      label: face
+    annotation: emotions_recognition.pickle
+    dataset_meta: emotions_recognition.json
+    preprocessing:
+      - type: extend_around_rect
+        augmentation_param: 0.3
+      - type: crop_rect
+      - type: resize
+        size: 64
+
+  - name: age_gender
+    data_source: ILSVRC2012_img_val
+    annotation_conversion:
+      converter: cvat_age_gender
+      annotation_file: 3630_OMZ_task1_age_gender.xml
+    annotation: age_gender.pickle
+    dataset_meta: age_gender.json
+
+  - name: vehicle_attributes
+    data_source: val2017
+    annotation_conversion:
+      converter: cvat_attributes_recognition
+      annotation_file: 3634_OMZ_task8_vehicle_attributes_recognition_barrier_0039.xml
+      label: vehicle
+    annotation: vehicle_attributes.pickle
+    dataset_meta: vehicle_attributes.json
+
+  - name: person_8_attributes
+    data_source: ILSVRC2012_img_val
+    annotation_conversion:
+      converter: cvat_multilabel_binary_attributes_recognition
+      annotation_file: 3640_OMZ_task6_person_attributes_recognition_crossroad_0230.xml
+      label: person
+    annotation: person_8_attributes.pickle
+    dataset_meta: person_8_attributes.json
+
+  - name: vehicle_license_plate_detection
+    data_source: ILSVRC2012_img_val
+    annotation_conversion:
+      converter: cvat_object_detection
+      annotation_file: 3638_OMZ_task13_vehicle_license_plate_detection_barrier_0106.xml
+      has_background: True
+    annotation: vlpd.pickle
+    dataset_meta: vlpd.json
+
+  - name: action_detection_dataset_3_classes
+    data_source: WIDER_val/images/44--Aerobics
+    annotation_conversion:
+      converter: cvat_person_detection_action_recognition
+      use_case: common_3_actions
+      annotation_file: 3766_OMZ_task14_person-detection-raisinghand-recognition-0001.xml
+    annotation: action_detection_3classes.pickle
+    dataset_meta: action_detection_3classes.json
+
+  - name: action_detection_dataset_6_classes
+    data_source: WIDER_val/images/44--Aerobics
+    annotation_conversion:
+      converter: cvat_person_detection_action_recognition
+      use_case: common_6_actions
+      annotation_file: 3766_OMZ_task14_person-detection-raisinghand-recognition-0001.xml
+    annotation: action_detection_6classes.pickle
+    dataset_meta: action_detection_6classes.json
+
+  - name: action_detection_dataset_teacher
+    data_source: WIDER_val/images/44--Aerobics
+    annotation_conversion:
+      converter: cvat_person_detection_action_recognition
+      use_case: teacher
+      annotation_file: 3766_OMZ_task14_person-detection-raisinghand-recognition-0001.xml
+    annotation: action_detection_teacher.pickle
+    dataset_meta: action_detection_teacher.json
+
+  - name: action_detection_dataset_raising_hand
+    data_source: WIDER_val/images/44--Aerobics
+    annotation_conversion:
+      converter: cvat_person_detection_action_recognition
+      use_case: raising_hand
+      annotation_file: 3766_OMZ_task14_person-detection-raisinghand-recognition-0001.xml
+    annotation: action_detection_raising_hand.pickle
+    dataset_meta: action_detection_raising_hand.json
+
+  - name: person_detection
+    data_source: val2017
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: person_keypoints_val2017.json
+      has_background: True
+      sort_annotations: True
+      use_full_label_map: True
+    annotation: mscoco_person_detection.pickle
+    dataset_meta: mscoco_person_detection.json
+
+  - name: crossroad_dataset_1016
+    data_source: val2017
+    annotation_conversion:
+      converter: cvat_object_detection
+      annotation_file: 3637_OMZ_task12_person_vehicle_bike_detection_crossroad_0078.xml
+      labels_file: person-vehicle-bike-detection-crossroad-1016-labels.json
+      has_background: True
+    annotation: crossroad-1016.pickle
+    dataset_meta: crossroad-1016.json
+
+  - name: crossroad_dataset_0078
+    data_source: val2017
+    annotation_conversion:
+      converter: cvat_object_detection
+      annotation_file: 3637_OMZ_task12_person_vehicle_bike_detection_crossroad_0078.xml
+      labels_file: person-vehicle-bike-detection-crossroad-0078-labels.json
+      has_background: True
+    annotation: crossroad-0078.pickle
+    dataset_meta: crossroad-0078.json
+
+  - name: pedestrian_and_vehicle_dataset
+    data_source: val2017
+    annotation_conversion:
+      converter: cvat_object_detection
+      annotation_file: 3636_OMZ_task11_pedestrian_and_vehicle_detector_adas_0001.xml
+      labels_file: pedestrian-and-vehicle-labels.json
+      has_background: True
+    annotation: pedestrian_and_vehicle.pickle
+    dataset_meta: pedestrian_and_vehicle.json
+
+  - name: pedestrian_detection_dataset
+    data_source: val2017
+    annotation_conversion:
+      converter: cvat_object_detection
+      annotation_file: 3636_OMZ_task11_pedestrian_and_vehicle_detector_adas_0001.xml
+      labels_file: pedestrian-detection-labels.json
+      has_background: True
+    annotation: pedestrian_detection.pickle
+    dataset_meta: pedestrian_detection.json
+
+  - name: vehicle_detection_dataset
+    data_source: val2017
+    annotation_conversion:
+      converter: cvat_object_detection
+      annotation_file: 3636_OMZ_task11_pedestrian_and_vehicle_detector_adas_0001.xml
+      labels_file: vehicle-detection-labels.json
+      has_background: True
+    annotation: vehicle_detection.pickle
+    dataset_meta: vehicle_detection.json
+
+  - name: synthetic_chinese_license_plates
+    data_source: Synthetic_Chinese_License_Plates
+    annotation_conversion:
+      converter: lpr_txt
+      annotation_file: Synthetic_Chinese_License_Plates/annotation
+      decoding_dictionary_file: dict
+    annotation: lpr.pickle
+    dataset_meta: lpr.json
+
+  - name: image_retrieval
+    data_source: textile_crops
+    annotattion_conversion:
+      converter: image_retrieval
+      data_dir: textile_crops
+      gallery_annotation_file: textile_crops/gallery/gallery.txt
+      queries_annotation_file: textile_crops/queries/quieries.txt
+    annotation: textile.pickle
+    dataset_meta: textile.json
+    preprocessing:
+      - type: resize
+        size: 224

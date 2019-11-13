@@ -1,0 +1,28 @@
+models:
+  - name: inceptionv3-int8-sparse-v1-tf-0001
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - INT8
+        model:   intel/inceptionv3-int8-sparse-v1-tf-0001/FP32/inceptionv3-int8-sparse-v1-tf-0001.xml
+        weights: intel/inceptionv3-int8-sparse-v1-tf-0001/FP32/inceptionv3-int8-sparse-v1-tf-0001.bin
+        adapter: classification
+        cpu_extensions: AUTO
+
+    datasets:
+      - name: imagenet_1001_classes
+
+        preprocessing:
+        - type: crop
+          central_fraction: 0.875
+        - type: resize
+          size: 299
+
+        metrics:
+          - name: accuracy@top1
+            type: accuracy
+            top_k: 1
+          - name: accuracy@top5
+            type: accuracy
+            top_k: 5

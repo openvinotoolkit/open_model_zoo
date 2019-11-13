@@ -5,7 +5,6 @@
 #include "detector.hpp"
 
 #include <algorithm>
-#include <iostream>
 #include <string>
 #include <map>
 #include <opencv2/core/core.hpp>
@@ -75,6 +74,14 @@ void ObjectDetector::enqueue(const cv::Mat &frame) {
 
     matU8ToBlob<uint8_t>(frame, inputBlob);
 
+    if (!im_info_name_.empty()) {
+        float* buffer = request->GetBlob(im_info_name_)->buffer().as<float*>();
+        buffer[0] = static_cast<float>(inputBlob->getTensorDesc().getDims()[2]);
+        buffer[1] = static_cast<float>(inputBlob->getTensorDesc().getDims()[3]);
+        buffer[2] = buffer[4] = static_cast<float>(inputBlob->getTensorDesc().getDims()[3]) / width_;
+        buffer[3] = buffer[5] = static_cast<float>(inputBlob->getTensorDesc().getDims()[2]) / height_;
+    }
+
     enqueued_frames_ = 1;
 }
 
@@ -99,52 +106,61 @@ ObjectDetector::ObjectDetector(
     }
 
     InputsDataMap inputInfo(net_reader.getNetwork().getInputsInfo());
-    if (inputInfo.size() != 1) {
-        THROW_IE_EXCEPTION << "Face Detection network should have only one input";
+    if (1 == inputInfo.size() || 2 == inputInfo.size()) {
+        for (const std::pair<std::string, InputInfo::Ptr>& input : inputInfo) {
+            InputInfo::Ptr inputInfo = input.second;
+            if (4 == inputInfo->getTensorDesc().getDims().size()) {
+                inputInfo->setPrecision(Precision::U8);
+                inputInfo->getInputData()->setLayout(Layout::NCHW);
+                input_name_ = input.first;
+            } else if (SizeVector{1, 6} == inputInfo->getTensorDesc().getDims()) {
+                inputInfo->setPrecision(Precision::FP32);
+                im_info_name_ = input.first;
+            } else {
+                THROW_IE_EXCEPTION << "Unknown input for Person Detection network";
+            }
+        }
+        if (input_name_.empty()) {
+            THROW_IE_EXCEPTION << "No image input for Person Detection network found";
+        }
+    } else {
+        THROW_IE_EXCEPTION << "Person Detection network should have one or two inputs";
     }
     InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
     inputInfoFirst->setPrecision(Precision::U8);
     inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
 
-    SizeVector input_dims = inputInfoFirst->getInputData()->getTensorDesc().getDims();
-    input_dims[2] = config_.input_h;
-    input_dims[3] = config_.input_w;
-    std::map<std::string, SizeVector> input_shapes;
-    input_shapes[inputInfo.begin()->first] = input_dims;
-    net_reader.getNetwork().reshape(input_shapes);
-
     OutputsDataMap outputInfo(net_reader.getNetwork().getOutputsInfo());
     if (outputInfo.size() != 1) {
-        THROW_IE_EXCEPTION << "Face Detection network should have only one output";
+        THROW_IE_EXCEPTION << "Person Detection network should have only one output";
     }
     DataPtr& _output = outputInfo.begin()->second;
     output_name_ = outputInfo.begin()->first;
 
     const CNNLayerPtr outputLayer = net_reader.getNetwork().getLayerByName(output_name_.c_str());
     if (outputLayer->type != "DetectionOutput") {
-        THROW_IE_EXCEPTION << "Face Detection network output layer(" + outputLayer->name +
+        THROW_IE_EXCEPTION << "Person Detection network output layer(" + outputLayer->name +
             ") should be DetectionOutput, but was " +  outputLayer->type;
     }
 
     if (outputLayer->params.find("num_classes") == outputLayer->params.end()) {
-        THROW_IE_EXCEPTION << "Face Detection network output layer (" +
+        THROW_IE_EXCEPTION << "Person Detection network output layer (" +
             output_name_ + ") should have num_classes integer attribute";
     }
 
     const SizeVector outputDims = _output->getTensorDesc().getDims();
+    if (outputDims.size() != 4) {
+        THROW_IE_EXCEPTION << "Person Detection network output dimensions not compatible shoulld be 4, but was " +
+            std::to_string(outputDims.size());
+    }
     max_detections_count_ = outputDims[2];
     object_size_ = outputDims[3];
     if (object_size_ != 7) {
-        THROW_IE_EXCEPTION << "Face Detection network output layer should have 7 as a last dimension";
-    }
-    if (outputDims.size() != 4) {
-        THROW_IE_EXCEPTION << "Face Detection network output dimensions not compatible shoulld be 4, but was " +
-            std::to_string(outputDims.size());
+        THROW_IE_EXCEPTION << "Person Detection network output layer should have 7 as a last dimension";
     }
     _output->setPrecision(Precision::FP32);
     _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
 
-    input_name_ = inputInfo.begin()->first;
     net_ = ie_.LoadNetwork(net_reader.getNetwork(), deviceName_);
 }
 
@@ -205,4 +221,3 @@ void ObjectDetector::PrintPerformanceCounts(std::string fullDeviceName) {
     std::cout << "Performance counts for object detector" << std::endl << std::endl;
     ::printPerformanceCounts(*request, std::cout, fullDeviceName, false);
 }
-

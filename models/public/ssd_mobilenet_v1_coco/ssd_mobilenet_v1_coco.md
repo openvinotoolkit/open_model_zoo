@@ -13,7 +13,7 @@ The `ssd_mobilenet_v1_coco` model is a [Single-Shot multibox Detection (SSD)](ht
 | Type              | Detection     |
 | GFLOPs            | 2.494         |
 | MParams           | 6.807         |
-| Source framework  | Tensorflow\*  |
+| Source framework  | TensorFlow\*  |
 
 ## Accuracy
 

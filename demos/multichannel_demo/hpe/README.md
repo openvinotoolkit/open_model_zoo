@@ -3,7 +3,7 @@
 This demo provides an inference pipeline for Multi-Channel Human Pose Estimation. The demo uses Human Pose Estimation network. You can use the following pre-trained model with the demos:
 * `human-pose-estimation-0001`
 
-For more information about the pre-trained models, refer to the [model documentation](../../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
 Other demo objectives are:
 
@@ -34,7 +34,7 @@ Options:
     -d "<device>"                Optional. Specify the target device for a network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo looks for a suitable plugin for a specified device.
     -nc                          Optional. Maximum number of processed camera inputs (web cameras)
     -bs                          Optional. Batch size for processing (the number of frames processed per infer request)
-    -n_ir                        Optional. Number of infer requests
+    -nireq                       Optional. Number of infer requests
     -n_iqs                       Optional. Frame queue size for input channels
     -fps_sp                      Optional. FPS measurement sampling period between timepoints in msec
     -n_sp                        Optional. Number of sampling periods

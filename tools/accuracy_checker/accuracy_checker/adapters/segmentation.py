@@ -19,6 +19,7 @@ from ..adapters import Adapter
 from ..representation import SegmentationPrediction, BrainTumorSegmentationPrediction
 from ..config import ConfigValidator, BoolField
 
+
 class SegmentationAdapter(Adapter):
     __provider__ = 'segmentation'
     prediction_types = (SegmentationPrediction, )
@@ -27,8 +28,9 @@ class SegmentationAdapter(Adapter):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'make_argmax' : BoolField(optional=True, default=False,
-                                      description="Allows to apply argmax operation to output values.")
+            'make_argmax': BoolField(
+                optional=True, default=False, description="Allows to apply argmax operation to output values."
+            )
         })
         return parameters
 
@@ -51,7 +53,8 @@ class SegmentationAdapter(Adapter):
 
     def _extract_predictions(self, outputs_list, meta):
         if not 'tiles_shape' in (meta[-1] or {}):
-            return outputs_list[0]
+            return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
+
         tiles_shapes = [meta['tiles_shape'] for meta in meta]
         restore_output = []
         offset = 0
@@ -83,7 +86,7 @@ class BrainTumorSegmentationAdapter(Adapter):
 
     def _extract_predictions(self, outputs_list, meta):
         if not (meta[-1] or {}).get('multi_infer', False):
-            return outputs_list[0]
+            return outputs_list[0] if not isinstance(outputs_list, dict) else outputs_list
 
         output_keys = list(outputs_list[0].keys())
         output_map = {}

@@ -1,0 +1,37 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Multiclass (person -  vehicle -  non-vehicle) detector based on SSD detection
+  architecture -  MobileNetV2 backbone)
+task_type: detection
+files:
+  - name: FP32/person-vehicle-bike-detection-crossroad-1016.xml
+    size: 82676
+    sha256: 56d2b92139749dc8d35fca1ee2633f97f2146e0857f3cf76ca9791c107286ffd
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.xml
+  - name: FP32/person-vehicle-bike-detection-crossroad-1016.bin
+    size: 11547916
+    sha256: 0858938f00ee87fb47c632f47039316f6060a096e74dd3e5dc061d850b4b702d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.bin
+  - name: FP16/person-vehicle-bike-detection-crossroad-1016.xml
+    size: 82582
+    sha256: a040f8d3e81b2d1a352318bc0fd8d8b9dd9fbf7a9c591cef7d0c2e7171efbfe8
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.xml
+  - name: FP16/person-vehicle-bike-detection-crossroad-1016.bin
+    size: 5773968
+    sha256: 3d22081d3b1a8c3e24dcbbe23b677a92ad144530880df33f070615e42901cc55
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

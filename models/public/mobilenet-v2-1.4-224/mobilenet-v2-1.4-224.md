@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-`mobilenet-v2-1.4-224` is one of MobileNets - small, low-latency, low-power models parameterized to meet the resource constraints of a variety of use cases. They can be built upon for classification, detection, embeddings and segmentation similar to how other popular large scale models are used. For details, see [paper](https://arxiv.org/abs/1704.04861).
+`mobilenet-v2-1.4-224` is one of MobileNets - small, low-latency, low-power models parameterized to meet the resource constraints of a variety of use cases. They can be built upon for classification, detection, embeddings and segmentation similar to how other popular large scale models are used. For details, see the [paper](https://arxiv.org/abs/1704.04861).
 
 ## Example
 
@@ -13,7 +13,7 @@
 | Type                            | Classification                            |
 | GFlops                          | 1.183                                     |
 | MParams                         | 6.087                                     |
-| Source framework                | Tensorflow\*                              |
+| Source framework                | TensorFlow\*                              |
 
 ## Performance
 
@@ -29,7 +29,7 @@ Image, name: `input` , shape: [1x224x224x3], format: [BxHxWxC], where:
     - C - number of channels
 
    Expected color order: RGB.
-   Mean values: [127.5, 127.5, 127.5], scale factor for each channel: 127.0
+   Mean values: [127.5, 127.5, 127.5], scale factor for each channel: 127.5
 
 ### Converted Model
 

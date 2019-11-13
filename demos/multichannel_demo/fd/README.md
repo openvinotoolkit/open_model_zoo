@@ -3,7 +3,7 @@
 This demo provides an inference pipeline for multi-channel face detection. The demo uses Face Detection network. You can use the following pre-trained model with the demo:
 * `face-detection-retail-0004`, which is a primary detection network for finding faces
 
-For more information about the pre-trained models, refer to the [model documentation](../../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
 Other demo objectives are:
 
@@ -36,7 +36,7 @@ Options:
     -d "<device>"                Optional. Specify the target device for a network (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo looks for a suitable plugin for a specified device.
     -nc                          Optional. Maximum number of processed camera inputs (web cameras)
     -bs                          Optional. Batch size for processing (the number of frames processed per infer request)
-    -n_ir                        Optional. Number of infer requests
+    -nireq                       Optional. Number of infer requests
     -n_iqs                       Optional. Frame queue size for input channels
     -fps_sp                      Optional. FPS measurement sampling period between timepoints in msec
     -n_sp                        Optional. Number of sampling periods
@@ -78,7 +78,7 @@ On the top of the screen, the demo reports throughput in frames per second. You 
 
 ## Input Video Sources
 
-General parameter for input video source is `-i`. Use it to specify video files and web cameras (**USB cameras**) as input video source. You can add the parameter to a sample command line as follows:
+General parameter for input video source is `-i`. Use it to specify video files and web (**USB**) or IP cameras as input video source. You can add the parameter to a sample command line as follows:
 ```
 -i <file1> <file2>
 ```
@@ -102,7 +102,10 @@ Alternatively, you can just set `-nc 3`, which simplifies application usage.
 
 If your cameras are connected to PC with indexes gap (for example, `0,1,3`), use the `-i` parameter.
 
-IP-cameras through RSTP URI interface are not supported.
+IP сameras support:
+```
+-i rtsp://camera_address_1/ rtsp://camera_address_2/
+```
 
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)

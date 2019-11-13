@@ -1,0 +1,49 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is the Inception v3 model that is designed to perform image classification.
+  The model has been pretrained on the ImageNet image database and then pruned
+  to **59.9%** of sparsity and quantized to INT8 fixed-point precision using
+  so-called Quantization-aware training approach implemented in TensorFlow framework.
+  The sparsity is represented by zeros inside the weights of Convolutional and
+  Fully-conneted layers. For details about the original floating point model,
+  check out the paper <https://arxiv.org/pdf/1512.03385.pdf>.
+
+  The model input is a blob that consists of a single image of "1x299x299x3"
+  in BGR order.
+
+  The model output for `inceptionv3-int8-sparse-v2-tf-0001` is the usual object
+  classifier output for the 1001 different classifications matching those in
+  the ImageNet database (the first item represents the background).
+task_type: classification
+files:
+  - name: FP32/inceptionv3-int8-sparse-v2-tf-0001.xml
+    size: 613563
+    sha256: d18c00828bd59cb716501b06378716c9d2a3317961d7326b972747ce690094bf
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/inceptionv3-int8-sparse-v2-tf-0001/FP32/inceptionv3-int8-sparse-v2-tf-0001.xml
+  - name: FP32/inceptionv3-int8-sparse-v2-tf-0001.bin
+    size: 95277636
+    sha256: ee0f9b9e7aa60a72a14696a000616e7ce230db032b1e47e86b13bed102aa6f50
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/inceptionv3-int8-sparse-v2-tf-0001/FP32/inceptionv3-int8-sparse-v2-tf-0001.bin
+  - name: FP16/inceptionv3-int8-sparse-v2-tf-0001.xml
+    size: 613464
+    sha256: 86fcb895e570b59a80d5c899e1afa59a1b4804defc5a1a0a2e3141e25b7af535
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/inceptionv3-int8-sparse-v2-tf-0001/FP16/inceptionv3-int8-sparse-v2-tf-0001.xml
+  - name: FP16/inceptionv3-int8-sparse-v2-tf-0001.bin
+    size: 47638822
+    sha256: 1fd2fc1119b7e956b1ae4a3faa5d4de2fdd20f2d6bc247a5f0e0fa601d56adfa
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/inceptionv3-int8-sparse-v2-tf-0001/FP16/inceptionv3-int8-sparse-v2-tf-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

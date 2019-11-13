@@ -1,0 +1,38 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  `image-retrieval-0001` is an image retrieval model based on Mobilenet v2 as
+  a backbone. The model produces l2-normalized embeddings with dimension that
+  equals to 256.
+task_type: object_attributes
+files:
+  - name: FP32/image-retrieval-0001.xml
+    size: 65666
+    sha256: ae46340eaa2848f7feed8f33431cacf1c94d310eb968efd4c9c878b96f707a92
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/image-retrieval-0001/FP32/image-retrieval-0001.xml
+  - name: FP32/image-retrieval-0001.bin
+    size: 10140104
+    sha256: 3826d08fd7968e002ca2a8d880840622e925eb000b343518b709b24151d2aeeb
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/image-retrieval-0001/FP32/image-retrieval-0001.bin
+  - name: FP16/image-retrieval-0001.xml
+    size: 65601
+    sha256: b6c148e05d0e06b6ef32d8d8264b2c637f66416cb7b819847804492c67b7df26
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/image-retrieval-0001/FP16/image-retrieval-0001.xml
+  - name: FP16/image-retrieval-0001.bin
+    size: 5070076
+    sha256: 79d272e74b68f00987447080527a3dbe30dde8ca82acce1f031cbb68b6e61ad2
+    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/image-retrieval-0001/FP16/image-retrieval-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

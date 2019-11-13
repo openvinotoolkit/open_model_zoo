@@ -15,11 +15,14 @@ limitations under the License.
 """
 
 from argparse import ArgumentParser
+from collections import namedtuple
 
 from ..topology_types import GenericTopology
 from ..config import ConfigValidator, StringField, PathField
 from ..dependency import ClassProvider
 from ..utils import format_key, get_parameter_value_from_config
+
+ConverterReturn = namedtuple('ConverterReturn', ['annotations', 'meta', 'content_check_errors'])
 
 
 class BaseFormatConverter(ClassProvider):
@@ -29,7 +32,7 @@ class BaseFormatConverter(ClassProvider):
     @classmethod
     def parameters(cls):
         return {
-            'converter' : StringField(description="Converter name.")
+            'converter': StringField(description="Converter name.")
         }
 
     @property
@@ -48,13 +51,18 @@ class BaseFormatConverter(ClassProvider):
     def get_value_from_config(self, key):
         return get_parameter_value_from_config(self.config, self.parameters(), key)
 
-    def convert(self, *args, **kwargs):
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         """
         Converts specific annotation format to the ResultRepresentation specific for current dataset/task.
+        Arguments:
+            check_content: bool flag which enable dataset files (e. g. images, gt segmentation masks) existence checking
+            progress_callback: callback function for handling conversion progress status
 
         Returns:
-            annotation: list of ResultRepresentations.
-            meta: meta-data map for the current dataset.
+            instance of ConverterReturn, where:
+             annotations is list of AnnotationRepresentations for current dataset
+             meta is dataset specific attributes e. g. label_map (can be None if dataset does not have specific info)
+             content_check_errors: list of error string messages for content check (can be None if check_content=False)
         """
         raise NotImplementedError
 
@@ -98,7 +106,7 @@ class FileBasedAnnotationConverter(BaseFormatConverter):
     def configure(self):
         self.annotation_file = self.get_value_from_config('annotation_file')
 
-    def convert(self, *args, **kwargs):
+    def convert(self, check_content=False, **kwargs):
         pass
 
 
@@ -114,5 +122,5 @@ class DirectoryBasedAnnotationConverter(BaseFormatConverter):
     def configure(self):
         self.data_dir = self.get_value_from_config('data_dir')
 
-    def convert(self, *args, **kwargs):
+    def convert(self, check_content=False, **kwargs):
         pass

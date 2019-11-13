@@ -47,23 +47,26 @@ class ModelEvaluator:
 
         self._annotations = []
         self._predictions = []
+        self._metrics_results = []
 
     @classmethod
     def from_configs(cls, launcher_config, dataset_config):
         dataset_name = dataset_config['name']
         data_reader_config = dataset_config.get('reader', 'opencv_imread')
         data_source = dataset_config.get('data_source')
-
+        dataset = Dataset(dataset_config)
         if isinstance(data_reader_config, str):
-            data_reader = BaseReader.provide(data_reader_config, data_source)
+            data_reader = BaseReader.provide(data_reader_config, data_source, annotations=dataset.annotation)
         elif isinstance(data_reader_config, dict):
-            data_reader = BaseReader.provide(data_reader_config['type'], data_source, data_reader_config)
+            data_reader = BaseReader.provide(
+                data_reader_config['type'], data_source, data_reader_config, annotations=dataset.annotation
+            )
         else:
             raise ConfigError('reader should be dict or string')
 
         dataset = Dataset(dataset_config)
-        async_mode = launcher_config.get('async_mode', False)
         launcher = create_launcher(launcher_config)
+        async_mode = launcher.async_mode if hasattr(launcher, 'async_mode') else False
         config_adapter = launcher_config.get('adapter')
         adapter = None if not config_adapter else create_adapter(config_adapter, launcher, dataset)
         input_feeder = InputFeeder(
@@ -95,7 +98,9 @@ class ModelEvaluator:
     def process_dataset_async(self, stored_predictions, progress_reporter, *args, **kwargs):
         def _process_ready_predictions(batch_predictions, batch_identifiers, batch_meta, adapter, raw_outputs_callback):
             if raw_outputs_callback:
-                raw_outputs_callback([batch_predictions])
+                raw_outputs_callback(
+                    [batch_predictions], network=self.launcher.network, exec_network=self.launcher.exec_network
+                )
             if adapter:
                 batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
 
@@ -164,7 +169,7 @@ class ModelEvaluator:
         predictions_to_store = []
         for batch_id, batch_annotation in enumerate(self.dataset):
             filled_inputs, batch_meta, batch_identifiers = self._get_batch_input(batch_annotation)
-            batch_predictions = self.launcher.predict(filled_inputs, batch_meta, *args, **kwargs)
+            batch_predictions = self.launcher.predict(filled_inputs, batch_meta, **kwargs)
             if self.adapter:
                 self.adapter.output_blob = self.adapter.output_blob or self.launcher.output_blob
                 batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
@@ -238,10 +243,25 @@ class ModelEvaluator:
 
         return free_irs, queued_irs
 
-    def compute_metrics(self, output_callback=None, ignore_results_formatting=False):
+    def compute_metrics(self, print_results=True, output_callback=None, ignore_results_formatting=False):
+        if self._metrics_results:
+            del self._metrics_results
+            self._metrics_results = []
+
         for result_presenter, evaluated_metric in self.metric_executor.iterate_metrics(
                 self._annotations, self._predictions):
-            result_presenter.write_result(evaluated_metric, output_callback, ignore_results_formatting)
+            self._metrics_results.append(evaluated_metric)
+            if print_results:
+                result_presenter.write_result(evaluated_metric, output_callback, ignore_results_formatting)
+        return self._metrics_results
+
+    def print_metrics_results(self, output_callback=None, ignore_results_formatting=False):
+        if not self._metrics_results:
+            self.compute_metrics(True, output_callback, ignore_results_formatting)
+            return
+        result_presenters = self.metric_executor.get_metric_presenters()
+        for presenter, metric_result in zip(result_presenters, self._metrics_results):
+            presenter.write_results(metric_result, output_callback, ignore_results_formatting)
 
     def load(self, stored_predictions, progress_reporter):
         self._annotations = self.dataset.annotation
@@ -260,12 +280,28 @@ class ModelEvaluator:
 
         return self._annotations, predictions
 
+    @property
+    def metrics_results(self):
+        if not self.metrics_results:
+            self.compute_metrics(print_results=False)
+        computed_metrics = copy.deepcopy(self._metrics_results)
+        return computed_metrics
+
     @staticmethod
     def store_predictions(stored_predictions, predictions):
         # since at the first time file does not exist and then created we can not use it as a pathlib.Path object
         with open(stored_predictions, "wb") as content:
             pickle.dump(predictions, content)
             print_info("prediction objects are save to {}".format(stored_predictions))
+
+    def reset(self):
+        self.metric_executor.reset()
+        del self._annotations
+        del self._predictions
+        del self._metrics_results
+        self._annotations = []
+        self._predictions = []
+        self._metrics_results = []
 
     def release(self):
         self.launcher.release()
