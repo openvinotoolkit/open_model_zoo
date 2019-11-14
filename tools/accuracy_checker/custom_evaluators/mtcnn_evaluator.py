@@ -32,10 +32,10 @@ from accuracy_checker.config import ConfigError
 
 
 class BaseStage:
-    def __init__(self, model_info, input_feeder, preprocessor):
+    def __init__(self, model_info, preprocessor):
         self.model_info = model_info
-        self.input_feeder = input_feeder
         self.preprocessor = preprocessor
+        self.input_feeder = None
 
     def predict(self, input_blobs, batch_meta):
         raise NotImplementedError
@@ -51,14 +51,15 @@ class BaseStage:
 
 
 class ProposalBaseStage(BaseStage):
-    def __init__(self, model_info, input_feeder, preprocessor, adapter):
-        super().__init__(model_info, input_feeder, preprocessor)
+    def __init__(self, model_info, preprocessor, adapter):
+        super().__init__(model_info, preprocessor)
         self.adapter = adapter
+        self.input_feeder = None
 
     def preprocess_data(self, batch_input, batch_annotation, *args, **kwargs):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
         _, batch_meta = extract_image_representations(batch_input)
-        filled_inputs = self.input_feeder.fill_inputs(batch_input)
+        filled_inputs = self.input_feeder.fill_inputs(batch_input) if self.input_feeder else batch_input
         return filled_inputs, batch_meta
 
     def postprocess_result(self, identifiers, this_stage_result, batch_meta, *args, **kwargs):
@@ -82,7 +83,7 @@ class RefineBaseStage(BaseStage):
             cut_roi(input_image, prediction, self.input_size, include_bound=self.include_boundaries)
             for input_image, prediction in zip(batch_input, previous_stage_prediction)
         ]
-        filled_inputs = self.input_feeder.fill_inputs(batch_input)
+        filled_inputs = self.input_feeder.fill_inputs(batch_input) if self.input_feeder else batch_input
         return filled_inputs, batch_meta
 
     def postprocess_result(self, identifiers, this_stage_result, batch_meta, previous_stage_result, *args, **kwargs):
@@ -167,27 +168,31 @@ class DLSDKModelMixin:
 
 
 class CaffeProposalStage(ProposalBaseStage, CaffeModelMixin):
-    def __init__(self,  model_info, input_feeder, preprocessor, adapter, launcher):
-        super().__init__(model_info, input_feeder, preprocessor, adapter)
+    def __init__(self,  model_info, preprocessor, adapter, launcher):
+        super().__init__(model_info, preprocessor, adapter)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
+        self.input_feeder = InputFeeder(launcher.config.get('inputs', []), self.inputs, launcher.fit_to_input)
 
 
 class CaffeRefineStage(RefineBaseStage, CaffeModelMixin):
-    def __init__(self,  model_info, input_feeder, preprocessor, launcher):
-        super().__init__(model_info, input_feeder, preprocessor)
+    def __init__(self,  model_info, preprocessor, launcher):
+        super().__init__(model_info, preprocessor)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
+        self.input_feeder = InputFeeder(launcher.config.get('inputs', []), self.inputs, launcher.fit_to_input)
+
 
 
 class CaffeOutputStage(OutputBaseStage, CaffeModelMixin):
-    def __init__(self,  model_info, input_feeder, preprocessor, launcher):
-        super().__init__(model_info, input_feeder, preprocessor)
+    def __init__(self,  model_info, preprocessor, launcher):
+        super().__init__(model_info, preprocessor)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
+        self.input_feeder = InputFeeder(launcher.config.get('inputs', []), self.inputs, launcher.fit_to_input)
 
 
 class DLSDKProposalStage(ProposalBaseStage, DLSDKModelMixin):
-    def __init__(self,  model_info, input_feeder, preprocessor, adapter, launcher):
-        super().__init__(model_info, input_feeder, preprocessor, adapter)
-        if 'onnx_model' in self.model_info:
+    def __init__(self,  model_info, preprocessor, adapter, launcher):
+        super().__init__(model_info, preprocessor, adapter)
+        if 'caffe_model' in self.model_info:
             self.model_info.update(launcher.config)
             model_xml, model_bin = launcher.convert_model(self.model_info)
         else:
@@ -196,12 +201,13 @@ class DLSDKProposalStage(ProposalBaseStage, DLSDKModelMixin):
         self.network = launcher.create_ie_network(model_xml, model_bin)
         self.exec_network = launcher.plugin.load_network(self.network, launcher.device)
         self.launcher = launcher
+        self.input_feeder = InputFeeder(launcher.config.get('inputs', []), self.inputs, launcher.fit_to_input)
 
 
 class DLSDKRefineStage(RefineBaseStage, DLSDKModelMixin):
-    def __init__(self,  model_info, input_feeder, preprocessor, launcher):
-        super().__init__(model_info, input_feeder, preprocessor)
-        if 'onnx_model' in self.model_info:
+    def __init__(self,  model_info, preprocessor, launcher):
+        super().__init__(model_info, preprocessor)
+        if 'caffe_model' in self.model_info:
             self.model_info.update(launcher.config)
             model_xml, model_bin = launcher.convert_model(self.model_info)
         else:
@@ -210,11 +216,12 @@ class DLSDKRefineStage(RefineBaseStage, DLSDKModelMixin):
         self.network = launcher.create_ie_network(model_xml, model_bin)
         self.exec_network = launcher.plugin.load_network(self.network, launcher.device)
         self.launcher = launcher
+        self.input_feeder = InputFeeder(launcher.config.get('inputs', []), self.inputs, launcher.fit_to_input)
 
 
 class DLSDKOutputStage(RefineBaseStage, DLSDKModelMixin):
-    def __init__(self,  model_info, input_feeder, preprocessor, launcher):
-        super().__init__(model_info, input_feeder, preprocessor)
+    def __init__(self,  model_info, preprocessor, launcher):
+        super().__init__(model_info,  preprocessor)
         if 'onnx_model' in self.model_info:
             self.model_info.update(launcher.config)
             model_xml, model_bin = launcher.convert_model(self.model_info)
@@ -224,6 +231,7 @@ class DLSDKOutputStage(RefineBaseStage, DLSDKModelMixin):
         self.network = launcher.create_ie_network(model_xml, model_bin)
         self.exec_network = launcher.plugin.load_network(self.network, launcher.device)
         self.launcher = launcher
+        self.input_feeder = InputFeeder(launcher.config.get('inputs', []), self.inputs, launcher.fit_to_input)
 
 
 class MTCNNEvaluator(BaseEvaluator):
@@ -331,21 +339,14 @@ class MTCNNEvaluator(BaseEvaluator):
             launcher_specific_entry: onet_config.get(launcher_specific_entry)
             for launcher_specific_entry in launcher_specific_entries if onet_config.get(launcher_specific_entry)
         }
-        launcher_config_1 = config['launchers'][0]
-        update_mo_params(launcher_config_1, pnet_launcher_options)
-        launcher_config_1.update({'allow_reshape_input': True})
-        launcher_config_1.update(pnet_launcher_options)
-        launcher_config_2 = copy.deepcopy(launcher_config_1)
-        launcher_config_3 = copy.deepcopy(launcher_config_1)
-        update_mo_params(launcher_config_2, rnet_launcher_options)
-        update_mo_params(launcher_config_3, onet_launcher_options)
-        launcher = create_launcher(launcher_config_1, delayed_model_loading=True)
+        launcher_config = config['launchers'][0]
+        update_mo_params(launcher_config, pnet_launcher_options)
+        launcher_config.update({'allow_reshape_input': True})
+        launcher_config.update(pnet_launcher_options)
+        update_mo_params(launcher_config, rnet_launcher_options)
+        update_mo_params(launcher_config, onet_launcher_options)
+        launcher = create_launcher(launcher_config, delayed_model_loading=True)
         pnet_adapter = create_adapter(pnet_adapter_config, launcher, dataset)
-        input_feeders = [
-            InputFeeder(launcher_config_1['inputs'], launcher.inputs, launcher.fit_to_input),
-            InputFeeder(launcher_config_2['inputs'], launcher.inputs, launcher.fit_to_input),
-            InputFeeder(launcher_config_3['inputs'], launcher.inputs, launcher.fit_to_input)
-        ]
         preprocessors = dataset_config.get('preprocessing', [])
         first_stage_preprocessing = merge_preprocessing(pnet_config.get('preprocessing', []), preprocessors)
         second_stage_preprocessing = merge_preprocessing(rnet_config.get('preprocessing', []), preprocessors)
@@ -355,9 +356,9 @@ class MTCNNEvaluator(BaseEvaluator):
             PreprocessingExecutor(second_stage_preprocessing, dataset.name),
             PreprocessingExecutor(third_stage_preprocessing, dataset.name)
         ]
-        stage1 = CaffeProposalStage(pnet_config, input_feeders[0], preprocessors[0], pnet_adapter, launcher)
-        stage2 = CaffeRefineStage(rnet_config, input_feeders[1], preprocessors[1], launcher)
-        stage3 = CaffeOutputStage(onet_config, input_feeders[2], preprocessors[2], launcher)
+        stage1 = CaffeProposalStage(pnet_config, preprocessors[0], pnet_adapter, launcher)
+        stage2 = CaffeRefineStage(rnet_config,  preprocessors[1], launcher)
+        stage3 = CaffeOutputStage(onet_config, preprocessors[2], launcher)
         metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
         postprocessing = PostprocessingExecutor(dataset_config['postprocessing'])
 
