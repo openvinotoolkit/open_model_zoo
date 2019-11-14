@@ -45,7 +45,7 @@ An input image, name: `input` , shape: [1x256x256x3], format: [BxHxWxC],
 
 ### Converted Model
 
-An input image, name: "input", shape: [1x3x256x256], format [BxCxHxW],
+An input image, name: `input`, shape: [1x3x256x256], format [BxCxHxW],
    where:
     - B - batch size
     - C - number of channels
