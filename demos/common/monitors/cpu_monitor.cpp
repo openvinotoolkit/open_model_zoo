@@ -17,6 +17,28 @@ std::size_t getNCores() {
 }
 }
 
+QueryWrapper::~QueryWrapper() {
+    PdhCloseQuery(query);
+}
+
+void QueryWrapper::openQuery() {
+    PDH_STATUS status = PdhOpenQuery(NULL, NULL, &query);
+    if (ERROR_SUCCESS != status) {
+        throw std::runtime_error("PdhOpenQuery() failed");
+    }
+}
+
+void QueryWrapper::closeQuery() {
+    PDH_STATUS status = PdhCloseQuery(query);
+    if (ERROR_SUCCESS != status) {
+        throw std::runtime_error("PdhCloseQuery() failed");
+    }
+}
+
+QueryWrapper::operator PDH_HQUERY() const {
+    return query;
+}
+
 CpuMonitor::CpuMonitor() :
     nCores{getNCores()},
     lastEnabled{false},
@@ -25,12 +47,9 @@ CpuMonitor::CpuMonitor() :
     cpuLoadSum(nCores, 0) {}
 
 void CpuMonitor::openQuery() {
-    PDH_STATUS status;
+    queryWrapper.openQuery();
 
-    status = PdhOpenQuery(NULL, NULL, &query);
-    if (ERROR_SUCCESS != status) {
-        throw std::runtime_error("PdhOpenQuery() failed");
-    }
+    PDH_STATUS status;
 
     for (std::size_t i = 0; i < nCores; ++i)
     {
@@ -39,7 +58,7 @@ void CpuMonitor::openQuery() {
 
         PDH_HCOUNTER counter;
 
-        status = PdhAddCounter(query, szCounterName, 0, &counter);
+        status = PdhAddCounter(queryWrapper, szCounterName, 0, &counter);
         if (ERROR_SUCCESS != status)
         {
             throw std::runtime_error("PdhAddCounter() failed");
@@ -53,7 +72,7 @@ void CpuMonitor::openQuery() {
 
         coreTimeCounters.push_back(counter);
     }
-    status = PdhCollectQueryData(query);
+    status = PdhCollectQueryData(queryWrapper);
     if (ERROR_SUCCESS != status)
     {
         throw std::runtime_error("PdhCollectQueryData() failed");
@@ -61,11 +80,8 @@ void CpuMonitor::openQuery() {
 }
 
 void CpuMonitor::closeQuery() {
+    queryWrapper.closeQuery();
     coreTimeCounters.clear();
-    PDH_STATUS status = PdhCloseQuery(query);
-    if (ERROR_SUCCESS != status) {
-        throw std::runtime_error("PdhCloseQuery() failed");
-    }
 }
 
 void CpuMonitor::setHistorySize(std::size_t historySize) {
@@ -88,7 +104,7 @@ void CpuMonitor::collectData() {
     PDH_STATUS status;
     PDH_FMT_COUNTERVALUE DisplayValue;
 
-    status = PdhCollectQueryData(query);
+    status = PdhCollectQueryData(queryWrapper);
     if (ERROR_SUCCESS != status) {
         throw std::runtime_error("PdhCollectQueryData() failed");
     }

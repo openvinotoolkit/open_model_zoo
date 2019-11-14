@@ -9,6 +9,14 @@
 #include <vector>
 #ifdef _WIN32
 #include <pdh.h>
+class QueryWrapper {
+public:
+    ~QueryWrapper();
+    void openQuery();
+    void closeQuery();
+    operator PDH_HQUERY() const;
+    PDH_HQUERY query;
+};
 #endif
 
 class CpuMonitor {
@@ -33,7 +41,7 @@ private:
     void openQuery();
     void closeQuery();
 
-    PDH_HQUERY query;
+    QueryWrapper queryWrapper;
     std::vector<PDH_HCOUNTER> coreTimeCounters;
 #endif
 };
