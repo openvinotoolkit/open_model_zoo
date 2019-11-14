@@ -78,7 +78,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
         if self.model.store_encoder_predictions:
             self.model.save_encoder_predictions()
 
-    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
+    def compute_metrics(self, print_results=True, output_callback=None, ignore_results_formatting=False):
         if self._metrics_results:
             del self._metrics_results
             self._metrics_results = []
@@ -87,17 +87,17 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
                 self._annotations, self._predictions):
             self._metrics_results.append(evaluated_metric)
             if print_results:
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting)
+                result_presenter.write_result(evaluated_metric, output_callback, ignore_results_formatting)
 
         return self._metrics_results
 
-    def print_metrics_results(self, ignore_results_formatting=False):
+    def print_metrics_results(self, output_callback=None, ignore_results_formatting=False):
         if not self._metrics_results:
-            self.compute_metrics(True,  ignore_results_formatting)
+            self.compute_metrics(True, output_callback, ignore_results_formatting)
             return
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_results(metric_result, ignore_results_formatting)
+            presenter.write_results(metric_result, output_callback, ignore_results_formatting)
 
     def release(self):
         self.model.release()
@@ -212,7 +212,9 @@ class EncoderModelDLSDKL(BaseModel):
             model_xml = str(network_info['model'])
             model_bin = str(network_info['weights'])
         self.network = launcher.create_ie_network(model_xml, model_bin)
-        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+        if not hasattr(launcher, 'plugin'):
+            launcher.create_ie_plugin()
+        self.exec_network = launcher.plugin.load(self.network)
         self.input_blob = next(iter(self.network.inputs))
         self.output_blob = next(iter(self.network.outputs))
 
@@ -240,7 +242,11 @@ class DecoderModelDLSDKL(BaseModel):
             model_bin = str(network_info['weights'])
 
         self.network = launcher.create_ie_network(model_xml, model_bin)
-        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+        if hasattr(launcher, 'plugin'):
+            self.exec_network = launcher.plugin.load(self.network)
+        else:
+            launcher.load_network(self.network)
+            self.exec_network = launcher.exec_network
         self.input_blob = next(iter(self.network.inputs))
         self.output_blob = next(iter(self.network.outputs))
         self.adapter = create_adapter('classification')

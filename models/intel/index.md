@@ -38,6 +38,8 @@ network to detect objects of the same type better.
 | [person-vehicle-bike-detection-crossroad-0078](./person-vehicle-bike-detection-crossroad-0078/description/person-vehicle-bike-detection-crossroad-0078.md)                          | 3.964                | 1.178      |       | X       | X        | X     |                |
 | [person-vehicle-bike-detection-crossroad-1016](./person-vehicle-bike-detection-crossroad-1016/description/person-vehicle-bike-detection-crossroad-1016.md)                          | 3.560                | 2.887      |       | X       | X        | X     |                |
 | [vehicle-license-plate-detection-barrier-0106](./vehicle-license-plate-detection-barrier-0106/description/vehicle-license-plate-detection-barrier-0106.md)                          | 0.349                | 0.634      |       |         | X        |       | X              |
+| [ssd300-onnx-0001](./ssd300-onnx-0001/description/ssd300-onnx-0001.md)                          | 62.815                | 26.285      |   X   |   X      | X        |   X   |               |
+| [ssd512-onnx-0001](./ssd512-onnx-0001/description/ssd512-onnx-0001.md)                          | 180.611                | 27.189      |   X   |   X      | X        |   X   |               |
 
 ## Object Recognition Models
 
@@ -96,7 +98,8 @@ detect areas with complex shape (for example, free space on the road).
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [road-segmentation-adas-0001](./road-segmentation-adas-0001/description/road-segmentation-adas-0001.md)                                        | 4.770                | 0.184      |
 | [semantic-segmentation-adas-0001](./semantic-segmentation-adas-0001/description/semantic-segmentation-adas-0001.md)                            | 58.572               | 6.686      |
-
+| [icnet-camvid-onnx-0001](./icnet-camvid-onnx-0001/description/icnet-camvid-onnx-0001.md)                            | -               | -      |
+| [unet-camvid-onnx-0001](./unet-camvid-onnx-0001/description/unet-camvid-onnx-0001.md)                            | -              | -      |
 
 ## Instance Segmentation Models
 
@@ -203,6 +206,14 @@ Deep Learning compressed models
 | [mobilenetv2-int8-sparse-v2-onnx-0001](./mobilenetv2-int8-sparse-v2-onnx-0001/description/mobilenetv2-int8-sparse-v2-onnx-0001.md)             | 0.615                | 3.488      |
 | [squeezenetv1.1-int8-onnx-0001](./squeezenetv1.1-int8-onnx-0001/description/squeezenetv1.1-int8-onnx-0001.md)                                  | 0.707                | 1.236      |
 | [squeezenetv1.1-int8-sparse-v1-onnx-0001](./squeezenetv1.1-int8-sparse-v1-onnx-0001/description/squeezenetv1.1-int8-sparse-v1-onnx-0001.md)    | 0.707                | 1.236      |
+| [icnet-camvid-int8-onnx-0001](./icnet-camvid-int8-onnx-0001/description/icnet-camvid-int8-onnx-0001.md)                                        | -                    | -          |
+| [icnet-camvid-int8-sparse-v2-onnx-0001](./icnet-camvid-int8-sparse-v2-onnx-0001/description/icnet-camvid-int8-sparse-v2-onnx-0001.md)          | -                    | -          |
+| [unet-camvid-int8-onnx-0001](./unet-camvid-int8-onnx-0001/description/unet-camvid-int8-onnx-0001.md)                                           | -                    | -          |
+| [unet-camvid-int8-sparse-v2-onnx-0001](./unet-camvid-int8-sparse-v2-onnx-0001/description/unet-camvid-int8-sparse-v2-onnx-0001.md)             | -                    | -          |
+| [ssd300-int8-onnx-0001](./ssd300-int8-onnx-0001/description/ssd300-int8-onnx-0001.md)                                                          | 62.815               | 26.285     |
+| [ssd300-int8-sparse-v2-onnx-0001](./ssd300-int8-sparse-v2-onnx-0001/description/ssd300-int8-sparse-v2-onnx-0001.md)                            | 62.815               | 26.285     |
+| [ssd512-int8-onnx-0001](./ssd512-int8-onnx-0001/description/ssd512-int8-onnx-0001.md)                                                          | 180.611              | 27.189     |
+| [ssd512-int8-sparse-v2-onnx-0001](./ssd512-int8-sparse-v2-onnx-0001/description/ssd512-int8-sparse-v2-onnx-0001.md)                            | 180.611              | 27.189     |
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

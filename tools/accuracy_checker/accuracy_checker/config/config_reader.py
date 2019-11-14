@@ -90,7 +90,10 @@ class ConfigReader:
         definitions = os.environ.get('DEFINITIONS_FILE') or local_config.get('global_definitions')
         if definitions:
             definitions = read_yaml(Path(arguments.config).parent / definitions)
-        global_config = read_yaml(arguments.definitions) if arguments.definitions else definitions
+        if 'definitions' in arguments and arguments.definitions:
+            global_config = read_yaml(arguments.definitions)
+        else:
+            global_config = definitions
 
         return global_config, local_config
 
@@ -371,6 +374,11 @@ class ConfigReader:
             models_prefix = arguments.models if 'models' in arguments else None
             if models_prefix:
                 launcher_entry['_models_prefix'] = models_prefix
+
+            if 'deprecated_ir_v7' in arguments and arguments.deprecated_ir_v7:
+                mo_flags = launcher_entry.get('mo_flags', [])
+                mo_flags.append('generate_deprecated_IR_V7')
+                launcher_entry['mo_flags'] = mo_flags
 
             if 'converted_models' not in arguments or not arguments.converted_models:
                 return launcher_entry
