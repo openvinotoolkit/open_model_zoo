@@ -192,7 +192,7 @@ def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True)
         image_handle = read_nii_header(test_data_path, data_name, separate_folder=False)
         handle = image_handle
         image = image_handle.get_data().astype(np.float32)
-
+        # Reading order is specified for data from http://medicaldecathlon.com/
         for j in (1, 3, 0, 2):
             img = image[:, :, :, j]
             mask = img > 0
