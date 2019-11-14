@@ -192,7 +192,7 @@ std::vector<std::pair<unsigned long, unsigned long>> getIdleNonIdleCpuStat(std::
                     + stoul(match[8])
                     + stoul(match[9]), // it doesn't handle overflow of sum and overflows of /proc/stat values
                 coreId = stoul(match[1]);
-            if (coreId < nCores) {
+            if (nCores <= coreId) {
                 throw std::runtime_error("The number of cores has changed");
             }
             idleNonIdleCpuStat[coreId].first = idleInfo;
