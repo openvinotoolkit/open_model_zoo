@@ -22,7 +22,7 @@ from accuracy_checker.evaluators import BaseEvaluator
 from accuracy_checker.adapters import create_adapter
 from accuracy_checker.launcher import create_launcher, InputFeeder
 from accuracy_checker.dataset import Dataset
-from accuracy_checker.data_readers import BaseReader
+from accuracy_checker.data_readers import BaseReader, REQUIRES_ANNOTATIONS
 from accuracy_checker.preprocessor import PreprocessingExecutor
 from accuracy_checker.utils import extract_image_representations
 from accuracy_checker.adapters import MTCNNPAdapter
@@ -137,6 +137,9 @@ class CaffeModelMixin:
 
         return inputs_map
 
+    def release(self):
+        del self.net
+
 
 class CaffeProposalStage(ProposalBaseStage, CaffeModelMixin):
     def __init__(self,  model_info, input_feeder, preprocessor, adapter, launcher):
@@ -158,63 +161,33 @@ class CaffeOutputStage(OutputBaseStage, CaffeModelMixin):
 
 class MTCNNEvaluator(BaseEvaluator):
     def __init__(
-            self, dataset, reader, input_feeders, launcher_stage1, launcher_stage2, launcher_stage3,
-            metrics_executor, preprocessing_executors, first_stage_adapter,
-            models_info, postprocessing
+            self, dataset, reader, stages, postprocessing, metrics_executor
     ):
         super().__init__()
         self.dataset = dataset
         self.reader = reader
-        self.launcher_stage1 = launcher_stage1
-        self.launcher_stage2 = launcher_stage2
-        self.launcher_stage3 = launcher_stage3
-        self.preprocessing_executors = preprocessing_executors
-        self.metrics_executor = metrics_executor
-        self.input_feeders = input_feeders
-        self.adapter = first_stage_adapter
-        self.models_info = models_info
+        self.stages = stages
         self.postprocessing = postprocessing
+        self.metrics_executor = metrics_executor
         self._metrics_results = []
         self._annotations, self._predictions = [], []
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
-        for batch_id, batch_annotation in enumerate(self.dataset):
+        for batch_id, (_, batch_annotation) in enumerate(self.dataset):
             batch_identifiers = [annotation.identifier for annotation in batch_annotation]
             batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
-            batch_input = self.preprocessing_executors[0].process(batch_input, batch_annotation)
-            _, batch_meta = extract_image_representations(batch_input)
-            filled_inputs = self.input_feeders[0].fill_inputs(batch_input)
-            batch_predictions = self.launcher_stage1.predict(filled_inputs, batch_meta, **kwargs)
-            batch_predictions = self.adapter.process(batch_predictions, batch_identifiers, batch_meta)
-            batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
-            batch_input = self.preprocessing_executors[1].process(batch_input)
-            batch_input = [
-                cut_roi(input_image, prediction, 24, include_bound=True)
-                for input_image, prediction in zip(batch_input, batch_predictions)
-            ]
-            filled_inputs = self.input_feeders[1].fill_inputs(batch_input)
-            batch_s2_predictions = self.launcher_stage2.predict(filled_inputs, batch_meta, **kwargs)
-            batch_predictions = calibrate_predictions(
-                batch_predictions, batch_s2_predictions, 0.7, self.models_info['rnet']['outputs'], 'Union'
-            )
-            batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
-            self.preprocessing_executors[2].process(batch_input)
-            batch_input = [
-                cut_roi(input_image, prediction, 48, include_bound=False)
-                for input_image, prediction in zip(batch_input, batch_predictions)
-            ]
-            if np.size(batch_input[0].data):
-                filled_inputs = self.input_feeders[2].fill_inputs(batch_input)
-                batch_s3_predictions = self.launcher_stage3.predict(filled_inputs, batch_meta, **kwargs)
-                batch_predictions = calibrate_predictions(
-                    batch_predictions, batch_s3_predictions, 0.7, self.models_info['onet']['outputs']
+            batch_predictions = []
+            for stage in self.stages:
+                previous_stage_predictions = batch_predictions
+                filled_inputs, batch_meta = stage.preprocess_data(copy.deepcopy(batch_input), batch_annotation)
+                batch_predictions = stage.predict(filled_inputs, batch_meta)
+                batch_predictions = stage.postprocess_result(
+                    batch_identifiers, batch_predictions, batch_meta, previous_stage_predictions
                 )
-                batch_predictions[0], _ = nms(batch_predictions[0], 0.7, 'Min')
-                batch_annotation, batch_predictions = self.postprocessing.process_batch(
-                    batch_annotation, batch_predictions
-                )
+
+            batch_annotation, batch_predictions = self.postprocessing.process_batch(batch_annotation, batch_predictions)
 
             self._annotations.extend(batch_annotation)
             self._predictions.extend(batch_predictions)
@@ -258,11 +231,15 @@ class MTCNNEvaluator(BaseEvaluator):
         data_reader_config = dataset_config.get('reader', 'opencv_imread')
         data_source = dataset_config['data_source']
         if isinstance(data_reader_config, str):
-            reader = BaseReader.provide(data_reader_config, data_source)
+            data_reader_type = data_reader_config
+            data_reader_config = None
         elif isinstance(data_reader_config, dict):
-            reader = BaseReader.provide(data_reader_config['type'], data_source, data_reader_config)
+            data_reader_type = data_reader_config['type']
         else:
             raise ConfigError('reader should be dict or string')
+        if data_reader_type in REQUIRES_ANNOTATIONS:
+            data_source = dataset.annotation
+        data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
         models_info = config['networks_info']
         pnet_config = models_info['pnet']
         rnet_config = models_info['rnet']
@@ -295,16 +272,12 @@ class MTCNNEvaluator(BaseEvaluator):
         launcher_config_3 = copy.deepcopy(launcher_config_1)
         update_mo_params(launcher_config_2, rnet_launcher_options)
         update_mo_params(launcher_config_3, onet_launcher_options)
-        launcher_s1 = create_launcher(launcher_config_1)
-        pnet_adapter = create_adapter(pnet_adapter_config, launcher_s1, dataset)
-        launcher_config_2.update(rnet_launcher_options)
-        launcher_s2 = create_launcher(launcher_config_2)
-        launcher_config_3.update(onet_launcher_options)
-        launcher_s3 = create_launcher(launcher_config_3)
+        launcher = create_launcher(launcher_config_1, delayed_model_loading=True)
+        pnet_adapter = create_adapter(pnet_adapter_config, launcher, dataset)
         input_feeders = [
-            InputFeeder(launcher_config_1['inputs'], launcher_s1.inputs, launcher_s1.fit_to_input),
-            InputFeeder(launcher_config_2['inputs'], launcher_s2.inputs, launcher_s2.fit_to_input),
-            InputFeeder(launcher_config_3['inputs'], launcher_s3.inputs, launcher_s3.fit_to_input)
+            InputFeeder(launcher_config_1['inputs'], launcher.inputs, launcher.fit_to_input),
+            InputFeeder(launcher_config_2['inputs'], launcher.inputs, launcher.fit_to_input),
+            InputFeeder(launcher_config_3['inputs'], launcher.inputs, launcher.fit_to_input)
         ]
         preprocessors = dataset_config.get('preprocessing', [])
         first_stage_preprocessing = merge_preprocessing(pnet_config.get('preprocessing', []), preprocessors)
@@ -315,17 +288,17 @@ class MTCNNEvaluator(BaseEvaluator):
             PreprocessingExecutor(second_stage_preprocessing, dataset.name),
             PreprocessingExecutor(third_stage_preprocessing, dataset.name)
         ]
+        stage1 = CaffeProposalStage(pnet_config, input_feeders[0], preprocessors[0], pnet_adapter, launcher)
+        stage2 = CaffeRefineStage(rnet_config, input_feeders[1], preprocessors[1], launcher)
+        stage3 = CaffeOutputStage(onet_config, input_feeders[2], preprocessors[2], launcher)
         metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
         postprocessing = PostprocessingExecutor(dataset_config['postprocessing'])
-        return cls(
-            dataset, reader, input_feeders, launcher_s1, launcher_s2, launcher_s3,
-            metrics_executor, preprocessors, pnet_adapter, models_info, postprocessing
-        )
+
+        return cls(dataset, data_reader, [stage1, stage2, stage3], postprocessing, metrics_executor)
 
     def release(self):
-        self.launcher_stage1.release()
-        self.launcher_stage2.release()
-        self.launcher_stage3.release()
+        for stage in self.stages:
+            stage.relaase()
 
     def reset(self):
         self.metrics_executor.reset()
