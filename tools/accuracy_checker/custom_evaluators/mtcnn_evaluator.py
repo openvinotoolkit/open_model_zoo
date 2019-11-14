@@ -127,10 +127,6 @@ class CaffeModelMixin:
 
     @property
     def inputs(self):
-        """
-        Returns:
-            inputs in NCHW format.
-        """
         inputs_map = {}
         for input_blob in self.net.inputs:
             inputs_map[input_blob] = self.net.blobs[input_blob].data.shape
@@ -139,6 +135,35 @@ class CaffeModelMixin:
 
     def release(self):
         del self.net
+
+
+class DLSDKModelMixin:
+    def _infer(self, input_blobs, batch_meta):
+        for meta in batch_meta:
+            meta['input_shape'] = []
+        results = []
+        for feed_dict in input_blobs:
+            input_shapes = {layer_name: data.shape for layer_name, data in feed_dict.items()}
+            self._reshape_input(input_shapes)
+            results.append(self.exec_network.infer(feed_dict))
+            for meta in batch_meta:
+                meta['input_shape'].append(self.inputs)
+
+        return results
+
+    def _reshape_input(self, input_shapes):
+        del self.exec_network
+        self.network.reshape(input_shapes)
+        self.exec_network = self.launcher.plugin.load(network=self.network)
+
+    @property
+    def inputs(self):
+        return self.network.inputs
+
+    def release(self):
+        del self.network
+        del self.exec_network
+        self.launcher.release()
 
 
 class CaffeProposalStage(ProposalBaseStage, CaffeModelMixin):
@@ -157,6 +182,48 @@ class CaffeOutputStage(OutputBaseStage, CaffeModelMixin):
     def __init__(self,  model_info, input_feeder, preprocessor, launcher):
         super().__init__(model_info, input_feeder, preprocessor)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
+
+
+class DLSDKProposalStage(ProposalBaseStage, DLSDKModelMixin):
+    def __init__(self,  model_info, input_feeder, preprocessor, adapter, launcher):
+        super().__init__(model_info, input_feeder, preprocessor, adapter)
+        if 'onnx_model' in self.model_info:
+            self.model_info.update(launcher.config)
+            model_xml, model_bin = launcher.convert_model(self.model_info)
+        else:
+            model_xml = str(self.model_info['model'])
+            model_bin = str(self.model_info['weights'])
+        self.network = launcher.create_ie_network(model_xml, model_bin)
+        self.exec_network = launcher.plugin.load_network(self.network, launcher.device)
+        self.launcher = launcher
+
+
+class DLSDKRefineStage(RefineBaseStage, DLSDKModelMixin):
+    def __init__(self,  model_info, input_feeder, preprocessor, launcher):
+        super().__init__(model_info, input_feeder, preprocessor)
+        if 'onnx_model' in self.model_info:
+            self.model_info.update(launcher.config)
+            model_xml, model_bin = launcher.convert_model(self.model_info)
+        else:
+            model_xml = str(self.model_info['model'])
+            model_bin = str(self.model_info['weights'])
+        self.network = launcher.create_ie_network(model_xml, model_bin)
+        self.exec_network = launcher.plugin.load_network(self.network, launcher.device)
+        self.launcher = launcher
+
+
+class DLSDKOutputStage(RefineBaseStage, DLSDKModelMixin):
+    def __init__(self,  model_info, input_feeder, preprocessor, launcher):
+        super().__init__(model_info, input_feeder, preprocessor)
+        if 'onnx_model' in self.model_info:
+            self.model_info.update(launcher.config)
+            model_xml, model_bin = launcher.convert_model(self.model_info)
+        else:
+            model_xml = str(self.model_info['model'])
+            model_bin = str(self.model_info['weights'])
+        self.network = launcher.create_ie_network(model_xml, model_bin)
+        self.exec_network = launcher.plugin.load_network(self.network, launcher.device)
+        self.launcher = launcher
 
 
 class MTCNNEvaluator(BaseEvaluator):
