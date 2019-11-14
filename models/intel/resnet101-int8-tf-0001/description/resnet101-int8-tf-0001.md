@@ -1,4 +1,4 @@
-# resnetv1-101-int8-tf-0001
+# resnet101-int8-tf-0001
 
 ## Use Case and High-Level Description
 
@@ -9,7 +9,7 @@ For details about the original floating point model, check out the [paper](https
 
 The model input is a blob that consists of a single image of "1x224x224x3" in BGR order.
 
-The model output for `resnetv1-101-int8-tf-0001` is the usual object classifier output for the 1000 different classifications matching those in the ImageNet database.
+The model output for `resnet101-int8-tf-0001` is the usual object classifier output for the 1000 different classifications matching those in the ImageNet database.
 
 ## Example
 

@@ -1,4 +1,4 @@
-# resnet50v1-int8-onnx-0001
+# resnet50-int8-onnx-0001
 
 ## Use Case and High-Level Description
 
@@ -8,7 +8,7 @@ INT8 fixed-point precision using Neural Network Compression Framework (NNCF).
 
 The model input is a blob that consists of a single image of "1x3x224x224" in BGR order.
 
-The model output for `resnet50v1-int8-onnx-0001` is the usual object classifier output for the 1000 different classifications matching those in the ImageNet database.
+The model output for `resnet50-int8-onnx-0001` is the usual object classifier output for the 1000 different classifications matching those in the ImageNet database.
 
 ## Example
 

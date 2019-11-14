@@ -188,9 +188,9 @@ Deep Learning compressed models
 | [resnet-50-int8-tf-0001](./resnet-50-int8-tf-0001/description/resnet-50-int8-tf-0001.md)                                                       | 6.996                | 25.530     |
 | [resnet-50-int8-sparse-v1-tf-0001](./resnet-50-int8-sparse-v1-tf-0001/description/resnet-50-int8-sparse-v1-tf-0001.md)                         | 6.996                | 25.530     |
 | [resnet-50-int8-sparse-v2-tf-0001](./resnet-50-int8-sparse-v2-tf-0001/description/resnet-50-int8-sparse-v2-tf-0001.md)                         | 6.996                | 25.530     |
-| [resnet50v1-int8-onnx-0001](./resnet50v1-int8-onnx-0001/description/resnet50v1-int8-onnx-0001.md)                                              | 8.216                | 25.53      |
-| [resnetv1-101-int8-tf-0001](./resnetv1-101-int8-tf-0001/description/resnetv1-101-int8-tf-0001.md)                                              | 14.441               | 44.496     |
+| [resnet50-int8-onnx-0001](./resnet50-int8-onnx-0001/description/resnet50-int8-onnx-0001.md)                                                    | 8.216                | 25.53      |
 | [resnet50-int8-sparse-v2-onnx-0001](./resnet50-int8-sparse-v2-onnx-0001/description/resnet50-int8-sparse-v2-onnx-0001.md)                      | 8.216                | 25.53      |
+| [resnet101-int8-tf-0001](./resnet101-int8-tf-0001/description/resnet101-int8-tf-0001.md)                                                       | 14.441               | 44.496     |
 | [inceptionv3-int8-tf-0001](./inceptionv3-int8-tf-0001/description/inceptionv3-int8-tf-0001.md)                                                 | 11.469               | 23.819     |
 | [inceptionv3-int8-sparse-v1-tf-0001](./inceptionv3-int8-sparse-v1-tf-0001/description/inceptionv3-int8-sparse-v1-tf-0001.md)                   | 11.469               | 23.819     |
 | [inceptionv3-int8-sparse-v2-tf-0001](./inceptionv3-int8-sparse-v2-tf-0001/description/inceptionv3-int8-sparse-v2-tf-0001.md)                   | 11.469               | 23.819     |
