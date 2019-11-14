@@ -6,9 +6,9 @@
 #include <algorithm>
 #ifdef _WIN32
 #include <windows.h>
-#include <Sysinfoapi.h>
-#include <tchar.h>
+#include <pdhmsg.h>
 #include <string>
+#include <system_error>
 
 namespace {
 std::size_t getNCores() {
@@ -25,14 +25,14 @@ QueryWrapper::~QueryWrapper() {
 void QueryWrapper::openQuery() {
     PDH_STATUS status = PdhOpenQuery(NULL, NULL, &query);
     if (ERROR_SUCCESS != status) {
-        throw std::runtime_error("PdhOpenQuery() failed");
+        throw std::system_error(status, std::system_category(), "PdhOpenQuery() failed");
     }
 }
 
 void QueryWrapper::closeQuery() {
     PDH_STATUS status = PdhCloseQuery(query);
     if (ERROR_SUCCESS != status) {
-        throw std::runtime_error("PdhCloseQuery() failed");
+        throw std::logic_error("PdhCloseQuery() failed");
     }
 }
 
@@ -58,18 +58,18 @@ void CpuMonitor::openQuery() {
         status = PdhAddCounter(queryWrapper, fullCounterPath.c_str(), 0, &coreTimeCounters[i]);
         if (ERROR_SUCCESS != status)
         {
-            throw std::runtime_error("PdhAddCounter() failed");
+            throw std::system_error(status, std::system_category(), "PdhAddCounter() failed");
         }
         status = PdhSetCounterScaleFactor(coreTimeCounters[i], -2); // scale counter to [0, 1]
         if (ERROR_SUCCESS != status)
         {
-            throw std::runtime_error("PdhSetCounterScaleFactor() failed");
+            throw std::system_error(status, std::system_category(), "PdhSetCounterScaleFactor() failed");
         }
     }
     status = PdhCollectQueryData(queryWrapper);
     if (ERROR_SUCCESS != status)
     {
-        throw std::runtime_error("PdhCollectQueryData() failed");
+        throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
     }
 }
 
@@ -96,21 +96,24 @@ std::size_t CpuMonitor::getHistorySize() const {
 void CpuMonitor::collectData() {
     // store CPU Utulization in range [0, 1]
     PDH_STATUS status;
-    PDH_FMT_COUNTERVALUE DisplayValue;
+    PDH_FMT_COUNTERVALUE displayValue;
 
     status = PdhCollectQueryData(queryWrapper);
     if (ERROR_SUCCESS != status) {
-        throw std::runtime_error("PdhCollectQueryData() failed");
+        throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
     }
 
     std::vector<std::pair<double, double>> idleNonIdleCpuStat;
     for (std::size_t i = 0; i < coreTimeCounters.size(); i++) {
-        status = PdhGetFormattedCounterValue(coreTimeCounters[i], PDH_FMT_DOUBLE, NULL, &DisplayValue);
+        status = PdhGetFormattedCounterValue(coreTimeCounters[i], PDH_FMT_DOUBLE, NULL, &displayValue);
         if (ERROR_SUCCESS != status) {
-            throw std::runtime_error("PdhGetFormattedCounterValue() failed");
+            throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
+        }
+        if (PDH_CSTATUS_VALID_DATA != displayValue.CStatus && PDH_CSTATUS_NEW_DATA != displayValue.CStatus) {
+            throw std::system_error(status, std::system_category(), "Error in counter data");
         }
 
-        idleNonIdleCpuStat.emplace_back(DisplayValue.doubleValue, 1 - DisplayValue.doubleValue);
+        idleNonIdleCpuStat.emplace_back(displayValue.doubleValue, 1 - displayValue.doubleValue);
     }
 
     std::vector<double> cpuLoad(idleNonIdleCpuStat.size());
