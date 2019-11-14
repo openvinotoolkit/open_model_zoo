@@ -46,6 +46,9 @@ class BaseStage:
     def postprocess_result(self, identifiers, this_stage_result, batch_meta, previous_stage_result, *args, **kwargs):
         raise NotImplementedError
 
+    def release(self):
+        pass
+
 
 class ProposalBaseStage(BaseStage):
     def __init__(self, model_info, input_feeder, preprocessor, adapter):
@@ -94,7 +97,7 @@ class RefineBaseStage(BaseStage):
         return self._infer(input_blobs, batch_meta)
 
 
-class OutputStage(BaseStage):
+class OutputBaseStage(BaseStage):
     input_size = 48
     include_boundaries = False
 
@@ -106,10 +109,51 @@ class OutputStage(BaseStage):
 
         return batch_predictions
 
-class CaffeProposalStage(ProposalBaseStage):
+
+class CaffeModelMixin:
+    def _infer(self, input_blobs, batch_meta):
+        for meta in batch_meta:
+            meta['input_shape'] = []
+        results = []
+        for feed_dict in input_blobs:
+            for layer_name, data in feed_dict.items():
+                if data.shape != self.inputs[layer_name]:
+                    self.net.blobs[layer_name].reshape(*data.shape)
+            for meta in batch_meta:
+                meta['input_shape'].append(self.inputs)
+            results.append(self.net.forward(**feed_dict))
+
+        return results
+
+    @property
+    def inputs(self):
+        """
+        Returns:
+            inputs in NCHW format.
+        """
+        inputs_map = {}
+        for input_blob in self.net.inputs:
+            inputs_map[input_blob] = self.net.blobs[input_blob].data.shape
+
+        return inputs_map
+
+
+class CaffeProposalStage(ProposalBaseStage, CaffeModelMixin):
     def __init__(self,  model_info, input_feeder, preprocessor, adapter, launcher):
         super().__init__(model_info, input_feeder, preprocessor, adapter)
-        self.net =
+        self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
+
+
+class CaffeRefineStage(RefineBaseStage, CaffeModelMixin):
+    def __init__(self,  model_info, input_feeder, preprocessor, launcher):
+        super().__init__(model_info, input_feeder, preprocessor)
+        self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
+
+
+class CaffeOutputStage(OutputBaseStage, CaffeModelMixin):
+    def __init__(self,  model_info, input_feeder, preprocessor, launcher):
+        super().__init__(model_info, input_feeder, preprocessor)
+        self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
 
 
 class MTCNNEvaluator(BaseEvaluator):
