@@ -8,6 +8,7 @@
 #include <windows.h>
 #include <Sysinfoapi.h>
 #include <tchar.h>
+#include <string>
 
 namespace {
 std::size_t getNCores() {
@@ -50,27 +51,20 @@ void CpuMonitor::openQuery() {
     queryWrapper.openQuery();
 
     PDH_STATUS status;
-
+    coreTimeCounters.resize(nCores);
     for (std::size_t i = 0; i < nCores; ++i)
     {
-        TCHAR szCounterName[MAX_PATH];
-        _stprintf_s(szCounterName, sizeof(szCounterName), TEXT("\\Processor(%u)\\%% Processor Time"), i);
-
-        PDH_HCOUNTER counter;
-
-        status = PdhAddCounter(queryWrapper, szCounterName, 0, &counter);
+        std::string fullCounterPath{"\\Processor(" + std::to_string(i) + ")\\% Processor Time"};
+        status = PdhAddCounter(queryWrapper, fullCounterPath.c_str(), 0, &coreTimeCounters[i]);
         if (ERROR_SUCCESS != status)
         {
             throw std::runtime_error("PdhAddCounter() failed");
         }
-
-        status = PdhSetCounterScaleFactor(counter, -2); // scale counter to [0, 1]
+        status = PdhSetCounterScaleFactor(coreTimeCounters[i], -2); // scale counter to [0, 1]
         if (ERROR_SUCCESS != status)
         {
             throw std::runtime_error("PdhSetCounterScaleFactor() failed");
         }
-
-        coreTimeCounters.push_back(counter);
     }
     status = PdhCollectQueryData(queryWrapper);
     if (ERROR_SUCCESS != status)
