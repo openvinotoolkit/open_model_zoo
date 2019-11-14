@@ -11,9 +11,8 @@
 class MemoryMonitor {
 public:
     MemoryMonitor();
-    bool isEnabled() const;
-    void enable(std::size_t  historySize);
-    void disable();
+    void setHistorySize(std::size_t historySize);
+    std::size_t getHistorySize() const;
     void collectData();
     std::deque<std::pair<double, double>> getLastHistory() const;
     double getMeanMem() const; // in GiB

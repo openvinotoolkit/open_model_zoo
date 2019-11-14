@@ -34,26 +34,24 @@ double getSwapTotalOnly() {
 MemoryMonitor::MemoryMonitor() :
     enabled{false},
     samplesNumber{0},
-    memSum{0},
-    swapSum{0},
-    maxMem{0},
-    maxSwap{0},
+    historySize{0},
+    memSum{0.0},
+    swapSum{0.0},
+    maxMem{0.0},
+    maxSwap{0.0},
     memTotal{getMemTotalOnly()},
     swapTotal{getSwapTotalOnly()},
     maxMemTotal{memTotal},
     maxSwapTotal{swapTotal} {}
 
-bool MemoryMonitor::isEnabled() const {
-    return enabled;
-}
-
-void MemoryMonitor::enable(std::size_t historySize) {
+void MemoryMonitor::setHistorySize(std::size_t historySize) {
     this->historySize = historySize;
-    enabled = true;
+    std::size_t newSize = std::min(historySize, memSwapUsageHistory.size());
+    memSwapUsageHistory.erase(memSwapUsageHistory.begin(), memSwapUsageHistory.end() - newSize);
 }
 
-void MemoryMonitor::disable() {
-    enabled = false;
+std::size_t MemoryMonitor::getHistorySize() const {
+    return historySize;
 }
 
 void MemoryMonitor::collectData() {
@@ -193,26 +191,24 @@ std::pair<std::pair<double, double>, std::pair<double, double>> getAvailableMemS
 MemoryMonitor::MemoryMonitor() :
     enabled{false},
     samplesNumber{0},
-    memSum{0},
-    swapSum{0},
-    maxMem{0},
-    maxSwap{0},
+    historySize{0},
+    memSum{0.0},
+    swapSum{0.0},
+    maxMem{0.0},
+    maxSwap{0.0},
     memTotal{getMemTotalOnly()},
     swapTotal{getSwapTotalOnly()},
     maxMemTotal{memTotal},
     maxSwapTotal{swapTotal} {}
 
-bool MemoryMonitor::isEnabled() const {
-    return enabled;
-}
-
-void MemoryMonitor::enable(std::size_t historySize) {
+void MemoryMonitor::setHistorySize(std::size_t historySize) {
     this->historySize = historySize;
-    enabled = true;
+    std::size_t newSize = std::min(historySize, memSwapUsageHistory.size());
+    memSwapUsageHistory.erase(memSwapUsageHistory.begin(), memSwapUsageHistory.end() - newSize);
 }
 
-void MemoryMonitor::disable() {
-    enabled = false;
+std::size_t MemoryMonitor::getHistorySize() const {
+    return historySize;
 }
 
 void MemoryMonitor::collectData() {

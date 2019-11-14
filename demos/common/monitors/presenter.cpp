@@ -73,6 +73,7 @@ Presenter::Presenter(std::set<MonitorType> enabledMonitors,
             graphSize{graphSize},
             graphPadding{std::max(1, static_cast<int>(graphSize.width * 0.05))},
             historySize{historySize},
+            distributionCpuEnabled{false},
             strStream{std::ostringstream(std::ios_base::app)} {
     for (MonitorType monitor : enabledMonitors) {
         addRemoveMonitor(monitor);
@@ -87,26 +88,32 @@ void Presenter::addRemoveMonitor(MonitorType monitor) {
     unsigned updatedHistorySize = (graphSize.width + sampleStep - 1) / sampleStep; // round up
     switch(monitor) {
         case MonitorType::CpuAverage: {
-            if (cpuMonitor.isHistoryEnabled()) {
-                cpuMonitor.disableHistory();
-            } else {
-                cpuMonitor.enableHistory(updatedHistorySize);
+            if (cpuMonitor.getHistorySize() > 1 && distributionCpuEnabled) {
+                cpuMonitor.setHistorySize(1);
+            } else if (cpuMonitor.getHistorySize() > 1 && !distributionCpuEnabled) {
+                cpuMonitor.setHistorySize(0);
+            } else { // cpuMonitor.getHistorySize() <= 1
+                cpuMonitor.setHistorySize(updatedHistorySize);
             }
             break;
         }
         case MonitorType::DistributionCpu: {
-            if (cpuMonitor.isLastEnabled()) {
-                cpuMonitor.disableLast();
+            if (distributionCpuEnabled) {
+                distributionCpuEnabled = false;
+                if (1 == cpuMonitor.getHistorySize()) { // cpuMonitor was used only for DistributionCpu => disable it
+                    cpuMonitor.setHistorySize(0);
+                }
             } else {
-                cpuMonitor.enableLast();
+                distributionCpuEnabled = true;
+                cpuMonitor.setHistorySize(std::max(std::size_t{1}, cpuMonitor.getHistorySize()));
             }
             break;
         }
         case MonitorType::Memory: {
-            if (memoryMonitor.isEnabled()) {
-                memoryMonitor.disable();
+            if (memoryMonitor.getHistorySize() > 1) {
+                memoryMonitor.setHistorySize(0);
             } else {
-                memoryMonitor.enable(updatedHistorySize);
+                memoryMonitor.setHistorySize(updatedHistorySize);
             }
             break;
         }
@@ -122,14 +129,14 @@ void Presenter::addRemoveMonitor(int key) {
         case 'M': addRemoveMonitor(MonitorType::Memory);
             break;
         case 'H': // show/hide all
-            if (0 == cpuMonitor.isHistoryEnabled() + cpuMonitor.isLastEnabled() + memoryMonitor.isEnabled()) {
+            if (0 == cpuMonitor.getHistorySize() && memoryMonitor.getHistorySize() <= 1) {
                 addRemoveMonitor(MonitorType::CpuAverage);
                 addRemoveMonitor(MonitorType::DistributionCpu);
                 addRemoveMonitor(MonitorType::Memory);
             } else {
-                cpuMonitor.disableHistory();
-                cpuMonitor.disableLast();
-                memoryMonitor.disable();
+                cpuMonitor.setHistorySize(0);
+                distributionCpuEnabled = false;
+                memoryMonitor.setHistorySize(0);
             }
             break;
     }
@@ -139,16 +146,16 @@ void Presenter::drawGraphs(cv::Mat& frame) {
     const std::chrono::steady_clock::time_point curTimeStamp = std::chrono::steady_clock::now();
     if (curTimeStamp - prevTimeStamp >= std::chrono::milliseconds{1000}) {
         prevTimeStamp = curTimeStamp;
-        if (cpuMonitor.isLastEnabled() || cpuMonitor.isHistoryEnabled()) {
+        if (0 != cpuMonitor.getHistorySize()) {
             cpuMonitor.collectData();
         }
-        if (memoryMonitor.isEnabled()) {
+        if (memoryMonitor.getHistorySize() > 1) {
             memoryMonitor.collectData();
         }
     }
 
-    int numberOfEnabledMonitors = cpuMonitor.isHistoryEnabled() + cpuMonitor.isLastEnabled()
-        + memoryMonitor.isEnabled();
+    int numberOfEnabledMonitors = (cpuMonitor.getHistorySize() > 1) + distributionCpuEnabled
+        + (memoryMonitor.getHistorySize() > 1);
     int pannelLength = graphSize.width * numberOfEnabledMonitors
         + std::max(0, numberOfEnabledMonitors - 1) * graphPadding;
     while (pannelLength > frame.cols) {
@@ -160,7 +167,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
     int graphRectHeight = graphSize.height - textGraphSplittingLine;
     int sampleStep = std::max(1, static_cast<int>((graphSize.width + historySize - 1) / historySize)); // round up
 
-    if (cpuMonitor.isHistoryEnabled() && --numberOfEnabledMonitors >= 0) {
+    if (cpuMonitor.getHistorySize() > 1 && --numberOfEnabledMonitors >= 0) {
         std::deque<std::vector<double>> lastHistory = cpuMonitor.getLastHistory();
         cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize} & cv::Rect(0, 0, frame.cols, frame.rows));
         graph *= 1.3;
@@ -201,7 +208,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
         graphPos += graphSize.width + graphPadding;
     }
 
-    if (cpuMonitor.isLastEnabled() && --numberOfEnabledMonitors >= 0) {
+    if (distributionCpuEnabled && --numberOfEnabledMonitors >= 0) {
         std::deque<std::vector<double>> lastHistory = cpuMonitor.getLastHistory();
         cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize} & cv::Rect(0, 0, frame.cols, frame.rows));
         graph *= 1.3;
@@ -246,7 +253,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
         graphPos += graphSize.width + graphPadding;
     }
 
-    if (memoryMonitor.isEnabled() && --numberOfEnabledMonitors >= 0) {
+    if (memoryMonitor.getHistorySize() > 1 && --numberOfEnabledMonitors >= 0) {
         std::deque<std::pair<double, double>> lastHistory = memoryMonitor.getLastHistory();
         cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize} & cv::Rect(0, 0, frame.cols, frame.rows));
         graph *= 1.3;
@@ -297,15 +304,15 @@ void Presenter::drawGraphs(cv::Mat& frame) {
 
 std::map<MonitorType, std::vector<double>> Presenter::getMeans() const {
     std::map<MonitorType, std::vector<double>> means;
-    if (cpuMonitor.isHistoryEnabled()) {
+    if (cpuMonitor.getHistorySize() > 1) {
         means.emplace(MonitorType::DistributionCpu, cpuMonitor.getMeanCpuLoad());
     }
-    if (cpuMonitor.isLastEnabled()) {
+    if (distributionCpuEnabled) {
         std::vector<double> meanCpuLoad = cpuMonitor.getMeanCpuLoad();
         double mean = std::accumulate(meanCpuLoad.begin(), meanCpuLoad.end(), 0.0) / meanCpuLoad.size();
         means.emplace(MonitorType::CpuAverage, std::vector<double>{mean});
     }
-    if (memoryMonitor.isEnabled()) {
+    if (memoryMonitor.getHistorySize() > 1) {
         means.emplace(MonitorType::Memory, std::vector<double>{memoryMonitor.getMeanMem(), memoryMonitor.getMeanSwap()});
     }
     return means;

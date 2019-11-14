@@ -3,6 +3,7 @@
 //
 
 #include "cpu_monitor.h"
+#include <algorithm>
 #ifdef _WIN32
 #include <windows.h>
 #include <Sysinfoapi.h>
@@ -60,52 +61,26 @@ void CpuMonitor::openQuery() {
 }
 
 void CpuMonitor::closeQuery() {
+    coreTimeCounters.clear();
     PDH_STATUS status = PdhCloseQuery(query);
     if (ERROR_SUCCESS != status) {
         throw std::runtime_error("PdhCloseQuery() failed");
     }
 }
 
-void CpuMonitor::enableHistory(std::size_t historySize) {
-    if (historySize < 2) {
-        disableHistory();
-    }
-    else {
-        this->historySize = historySize;
-        if (!lastEnabled) {
-            openQuery();
-        }
-    }
-}
-
-bool CpuMonitor::isHistoryEnabled() const {
-    return historySize > 1;
-}
-
-void CpuMonitor::disableHistory() {
-    historySize = 1;
-    if (!lastEnabled) {
-        closeQuery();
-    }
-}
-
-void CpuMonitor::enableLast() {
-    lastEnabled = true;
-    if (!isHistoryEnabled()) {
-        historySize = 1;
+void CpuMonitor::setHistorySize(std::size_t historySize) {
+    if (0 == this->historySize && 0 != historySize) {
         openQuery();
-    }
-}
-
-bool CpuMonitor::isLastEnabled() const {
-    return lastEnabled;
-}
-
-void CpuMonitor::disableLast() {
-    lastEnabled = false;
-    if (!isHistoryEnabled()) {
+    } else if (0 != this->historySize && 0 == historySize) {
         closeQuery();
     }
+    this->historySize = historySize;
+    std::size_t newSize = std::min(historySize, cpuLoadHistory.size());
+    cpuLoadHistory.erase(cpuLoadHistory.begin(), cpuLoadHistory.end() - newSize);
+}
+
+std::size_t CpuMonitor::getHistorySize() const {
+    return historySize;
 }
 
 void CpuMonitor::collectData() {
@@ -210,39 +185,17 @@ CpuMonitor::CpuMonitor() :
     historySize{0},
     cpuLoadSum(nCores, 0) {}
 
-void CpuMonitor::enableHistory(std::size_t historySize) {
-    if (historySize < 2) {
-        disableHistory();
-    } else {
-        this->historySize = historySize;
-        if (!lastEnabled) {
-            prevIdleNonIdleCpuStat = getIdleNonIdleCpuStat(nCores);
-        }
-    }
-}
-
-bool CpuMonitor::isHistoryEnabled() const {
-    return historySize > 1;
-}
-
-void CpuMonitor::disableHistory() {
-    historySize = 1;
-}
-
-void CpuMonitor::enableLast() {
-    lastEnabled = true;
-    if (!isHistoryEnabled()) {
-        historySize = 1;
+void CpuMonitor::setHistorySize(std::size_t historySize) {
+    if (0 == this->historySize && 0 != historySize) {
         prevIdleNonIdleCpuStat = getIdleNonIdleCpuStat(nCores);
     }
+    this->historySize = historySize;
+    std::size_t newSize = std::min(historySize, cpuLoadHistory.size());
+    cpuLoadHistory.erase(cpuLoadHistory.begin(), cpuLoadHistory.end() - newSize);
 }
 
-bool CpuMonitor::isLastEnabled() const {
-    return lastEnabled;
-}
-
-void CpuMonitor::disableLast() {
-    lastEnabled = false;
+std::size_t CpuMonitor::getHistorySize() const {
+    return historySize;
 }
 
 void CpuMonitor::collectData() {

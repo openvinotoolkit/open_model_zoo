@@ -39,6 +39,7 @@ private:
     std::chrono::steady_clock::time_point prevTimeStamp;
     std::size_t historySize;
     CpuMonitor cpuMonitor;
+    bool distributionCpuEnabled;
     MemoryMonitor memoryMonitor;
     std::ostringstream strStream;
 };
