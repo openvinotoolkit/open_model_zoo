@@ -35,9 +35,11 @@ class CaffeLauncher(Launcher):
     def __init__(self, config_entry: dict, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
 
-        caffe_launcher_config = LauncherConfigValidator('Caffe_Launcher', fields=self.parameters())
-        caffe_launcher_config.validate(self.config)
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
+        caffe_launcher_config = LauncherConfigValidator(
+            'Caffe_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
+        )
+        caffe_launcher_config.validate(self.config)
         self._do_reshape = False
 
         if not self._delayed_model_loading:
@@ -130,7 +132,7 @@ class CaffeLauncher(Launcher):
 
     @staticmethod
     def create_network(model, weights):
-        return caffe.Net(str(model), str(weights, caffe.TEST))
+        return caffe.Net(str(model), str(weights), caffe.TEST)
 
     def release(self):
         """
