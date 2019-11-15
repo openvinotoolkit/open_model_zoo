@@ -16,6 +16,8 @@ limitations under the License.
 
 import copy
 from collections import OrderedDict
+import pickle
+from pathlib import Path
 import numpy as np
 import cv2
 
@@ -30,7 +32,6 @@ from accuracy_checker.adapters import MTCNNPAdapter
 from accuracy_checker.metrics import MetricsExecutor
 from accuracy_checker.postprocessor import PostprocessingExecutor
 from accuracy_checker.config import ConfigError
-from accuracy_checker.logging import warning
 
 
 def build_stages(models_info, preprocessors_config, launcher):
@@ -54,9 +55,14 @@ def build_stages(models_info, preprocessors_config, launcher):
                 continue
             else:
                 raise ConfigError('{} required for evaluation'.format(stage_name))
-        stage = stage_classes.get(framework)
+        model_config = models_info[stage_name]
+        if 'predictions' in model_config and not model_config.get('store_predictions', False):
+            stage_framework = 'dummy'
+        else:
+            stage_framework = framework
+        stage = stage_classes.get(stage_framework)
         if not stage_classes:
-            raise ConfigError('{} stage does not support {} framework'.format(stage_name, framework))
+            raise ConfigError('{} stage does not support {} framework'.format(stage_name, stage_framework))
         stage_preprocess = merge_preprocessing(models_info[stage_name].get('preprocessing', []), preprocessors_config)
         preprocessor = PreprocessingExecutor(stage_preprocess)
         stages.append(stage(models_info[stage_name], preprocessor, launcher))
@@ -71,6 +77,7 @@ class BaseStage:
         self.model_info = model_info
         self.preprocessor = preprocessor
         self.input_feeder = None
+        self.store = model_info.get('store_predictions', False)
 
     def predict(self, input_blobs, batch_meta):
         raise NotImplementedError
@@ -98,13 +105,24 @@ class ProposalBaseStage(BaseStage):
         return filled_inputs, batch_meta
 
     def postprocess_result(self, identifiers, this_stage_result, batch_meta, *args, **kwargs):
-        return self.adapter.process(this_stage_result, identifiers, batch_meta) if self.adapter else this_stage_result
+        result = self.adapter.process(this_stage_result, identifiers, batch_meta) if self.adapter else this_stage_result
+        if self.store:
+            self.dump_predictions(result)
+        return result
 
     def _infer(self, input_blobs, batch_meta):
         raise NotImplementedError
 
     def predict(self, input_blobs, batch_meta):
         return self._infer(input_blobs, batch_meta)
+
+    def dump_predictions(self, predictions):
+        if not hasattr(self, 'prediction_file'):
+            prediction_file = Path(self.model_info.get('predictions', 'pnet_predictions.pickle'))
+            self.prediction_file = prediction_file.open('wb')
+        for prediction in predictions:
+            pickle.dump(prediction,self.prediction_file)
+
 
 
 class RefineBaseStage(BaseStage):
@@ -122,15 +140,25 @@ class RefineBaseStage(BaseStage):
         return filled_inputs, batch_meta
 
     def postprocess_result(self, identifiers, this_stage_result, batch_meta, previous_stage_result, *args, **kwargs):
-        return calibrate_predictions(
+        result = calibrate_predictions(
             previous_stage_result, this_stage_result, 0.7, self.model_info['outputs'], 'Union'
         )
+        if self.store:
+            self.dump_predictions(result)
+        return result
 
     def _infer(self, input_blobs, batch_meta):
         raise NotImplementedError
 
     def predict(self, input_blobs, batch_meta):
         return self._infer(input_blobs, batch_meta)
+
+    def dump_predictions(self, predictions):
+        if not hasattr(self, 'prediction_file'):
+            prediction_file = Path(self.model_info.get('predictions', 'rnet_predictions.pickle'))
+            self.prediction_file = prediction_file.open('wb')
+        for prediction in predictions:
+            pickle.dump(prediction,self.prediction_file)
 
 
 class OutputBaseStage(RefineBaseStage):
@@ -142,8 +170,17 @@ class OutputBaseStage(RefineBaseStage):
             previous_stage_result, this_stage_result, 0.7, self.model_info['outputs']
         )
         batch_predictions[0], _ = nms(batch_predictions[0], 0.7, 'Min')
+        if self.store:
+            self.dump_predictions(batch_predictions)
 
         return batch_predictions
+
+    def dump_predictions(self, predictions):
+        if not hasattr(self, 'prediction_file'):
+            prediction_file = Path(self.model_info.get('predictions', 'rnet_predictions.pickle'))
+            self.prediction_file = prediction_file.open('wb')
+        for prediction in predictions:
+            pickle.dump(prediction,self.prediction_file)
 
 
 class CaffeModelMixin:
@@ -289,6 +326,7 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
         pnet_outs = model_info['outputs']
         pnet_adapter_config = launcher.config.get('adapter', {'type': 'mtcnn_p', **pnet_outs})
+        # pnet_adapter_config.update({'regions_format': 'hw'})
         self.adapter = create_adapter(pnet_adapter_config)
 
 
@@ -386,6 +424,8 @@ class MTCNNEvaluator(BaseEvaluator):
         self._annotations, self._predictions = [], []
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
+        def no_detections(batch_pred):
+            return batch_pred[0].size == 0
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
         for batch_id, (_, batch_annotation) in enumerate(self.dataset):
@@ -399,6 +439,8 @@ class MTCNNEvaluator(BaseEvaluator):
                 batch_predictions = stage.postprocess_result(
                     batch_identifiers, batch_predictions, batch_meta, previous_stage_predictions
                 )
+                if no_detections(batch_predictions):
+                    break
 
             batch_annotation, batch_predictions = self.postprocessing.process_batch(batch_annotation, batch_predictions)
 
@@ -448,7 +490,7 @@ class MTCNNEvaluator(BaseEvaluator):
 
     def release(self):
         for stage in self.stages:
-            stage.relaase()
+            stage.release()
 
     def reset(self):
         self.metrics_executor.reset()
