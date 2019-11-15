@@ -27,7 +27,7 @@ from accuracy_checker.launcher import create_launcher, InputFeeder
 from accuracy_checker.dataset import Dataset
 from accuracy_checker.data_readers import BaseReader, REQUIRES_ANNOTATIONS
 from accuracy_checker.preprocessor import PreprocessingExecutor
-from accuracy_checker.utils import extract_image_representations
+from accuracy_checker.utils import extract_image_representations, read_pickle
 from accuracy_checker.adapters import MTCNNPAdapter
 from accuracy_checker.metrics import MetricsExecutor
 from accuracy_checker.postprocessor import PostprocessingExecutor
@@ -43,7 +43,7 @@ def build_stages(models_info, preprocessors_config, launcher):
 
     required_stages = ['pnet']
     stages_mapping = OrderedDict([
-        ('pnet', {'caffe': CaffeProposalStage, 'dlsdk': DLSDKProposalStage}),
+        ('pnet', {'caffe': CaffeProposalStage, 'dlsdk': DLSDKProposalStage, 'dummy': DummyProposalStage}),
         ('rnet', {'caffe': CaffeRefineStage, 'dlsdk': DLSDKRefineStage}),
         ('onet', {'caffe': CaffeOutputStage,'dlsdk': DLSDKOutputStage})
     ])
@@ -123,6 +123,28 @@ class ProposalBaseStage(BaseStage):
         for prediction in predictions:
             pickle.dump(prediction,self.prediction_file)
 
+
+class DummyProposalStage(ProposalBaseStage):
+    def __init__(self, model_info, preprocessor):
+        super().__init__(model_info, preprocessor)
+        self._index = 0
+        if 'predictions' not in self.model_info:
+            raise ConfigError('predictions_file is not found')
+        self._predictions = read_pickle(self.model_info['predictions'])
+        self.iterator = 0
+
+    def preprocess_data(self, batch_input, batch_annotation, *args, **kwargs):
+        _, batch_meta = extract_image_representations(batch_input)
+        return batch_input, batch_meta
+
+    def _infer(self, input_blobs, batch_meta):
+        batch_size = len(batch_meta)
+        results = self._predictions[self._index:self._index+batch_size]
+        self._index += batch_size
+        return results
+
+    def postprocess_result(self, identifiers, this_stage_result, batch_meta, *args, **kwargs):
+        return this_stage_result
 
 
 class RefineBaseStage(BaseStage):
