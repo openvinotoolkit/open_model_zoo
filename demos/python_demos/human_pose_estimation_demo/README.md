@@ -1,6 +1,6 @@
 # Human Pose Estimation Demo (top-down pipeline)
 
-This demo showcases top-down pipeline for human pose estimation on video or image. The task is to predict bboxes for everyone person on frame and then to predict a pose for everyone detected person. The pose may contain up to 18 keypoints: ears, eyes, nose, neck, shoulders, elbows, wrists, hips, knees, and ankles.
+This demo showcases top-down pipeline for human pose estimation on video or image. The task is to predict bboxes for everyone person on frame and then to predict a pose for everyone detected person. The pose may contain up to 17 keypoints: ears, eyes, nose, shoulders, elbows, wrists, hips, knees, and ankles.
 
 # How It Works
 
@@ -12,8 +12,8 @@ Running the application with the `-h` option yields the following usage message:
 ```
 usage: demo.py [-h] --model-od-xml MODEL_OD_XML --model-od-bin MODEL_OD_BIN
                --model-hpe-xml MODEL_HPE_XML --model-hpe-bin MODEL_HPE_BIN
-               [--video VIDEO] [--image IMAGE [IMAGE ...]]
-               [--cpu_extension CPU_EXTENSION] [--label-person LABEL_PERSON]
+               [--video VIDEO] [--image IMAGE [IMAGE ...]] [--device DEVICE]
+               [--cpu-extension CPU_EXTENSION] [--label-person LABEL_PERSON]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -28,7 +28,8 @@ optional arguments:
   --video VIDEO         path to video
   --image IMAGE [IMAGE ...]
                         path to image or images
-  --cpu_extension CPU_EXTENSION
+  --device DEVICE       Specify the target to infer on CPU or GPU
+  --cpu-extension CPU_EXTENSION
                         path to cpu extension
   --label-person LABEL_PERSON
                         Label of class person for detector
