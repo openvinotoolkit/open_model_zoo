@@ -32,7 +32,7 @@ void QueryWrapper::openQuery() {
 void QueryWrapper::closeQuery() {
     PDH_STATUS status = PdhCloseQuery(query);
     if (ERROR_SUCCESS != status) {
-        throw std::logic_error("PdhCloseQuery() failed");
+        throw std::logic_error("The query handle to close is not valid");
     }
 }
 
