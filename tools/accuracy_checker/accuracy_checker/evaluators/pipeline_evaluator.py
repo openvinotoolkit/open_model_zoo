@@ -243,10 +243,10 @@ class PipeLineEvaluator(BaseEvaluator):
         if progress_reporter:
             progress_reporter.finish()
 
-    def compute_metrics(self, print_results=True, output_callback=None, ignore_results_formatting=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         def eval_metrics(metrics_executor, annotations, predictions):
             for result_presenter, evaluated_metric in metrics_executor.iterate_metrics(annotations, predictions):
-                result_presenter.write_result(evaluated_metric, output_callback, ignore_results_formatting)
+                result_presenter.write_result(evaluated_metric, ignore_results_formatting)
 
         for _, stage in self.stages.items():
             metrics_executors = stage.evaluation_context.metrics_executor
