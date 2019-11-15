@@ -3622,6 +3622,7 @@ License terms:
 ==================================================================================================
 
 * license-plate-recognition-barrier-0007
+* vehicle-license-plate-detection-barrier-0123
 
 License terms:
 
