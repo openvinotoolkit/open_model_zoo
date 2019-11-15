@@ -15,34 +15,28 @@
 description: >-
   
   The pose may contain up to 18 keypoints: ears, eyes, nose,
-  neck, shoulders, elbows, wrists, hips, knees and ankles.
+  shoulders, elbows, wrists, hips, knees and ankles.
   
   The model input is a blob that consists of one images of "1x3x384x288" in
   RGB order.
-
   The model outputs one blob: heatmaps ( shape of output blob "1x17x48x36")
-task_type: single_human_pose_estimation
+task_type: human_pose_estimation
 files:
-  - name: single_human-pose-estimation-0001.tar.gz
-    sha256: 
-    size: 
-    source: https://download.01.org/opencv/openvino_training_extensions/models/
-  - name: single-human-pose-estimation-001.pth
-    sha256: 
-    size: 
-    source: https://download.01.org/opencv/openvino_training_extensions/models/human_pose_estimation/single-human-pose-estimation-0001.pth
+  - name: single-human-pose-estimation-0001.tar.gz
+    sha256: 182c51075502643ada303a5f3a081b6adf943b711e5eddf80635582369588d34
+    size: 151979155
+    source: https://download.01.org/opencv/openvino_training_extensions/models/human_pose_estimation/single-human-pose-estimation-0001.tar.gz
   
 postprocessing:
   - $type: unpack_archive
     format: gztar
-    file: human-pose-estimation-3d-0001.tar.gz
+    file: single-human-pose-estimation-0001.tar.gz
 framework: pytorch
 conversion_to_onnx_args:
-  - --model-path=$dl_dir
-  - --model-name=
-  - --model-param=is_convertible_by_mo=True
-  - --import-module=model
-  - --weights=$dl_dir/human-pose-estimation-3d-0001.pth
+  - --model-path=$conv_dir/single-human-pose-estimation-0001/
+  - --model-name=SinglePersonPoseEstimationWithMobileNet
+  - --import-module=models
+  - --weights=$conv_dir/single-human-pose-estimation-0001/single-human-pose-estimation-0001.pth
   - --input-shape=1,3,384,288
   - --input-names=data
   - --output-names=heatmaps
@@ -54,5 +48,5 @@ model_optimizer_args:
   - --output=heatmaps
   - --input_model=$conv_dir/single-human-pose-estimation-0001.onnx
   - --reverse_input_channels
-  - --input_shape=data[1,3,384,288]
+  - --input_shape=[1,3,384,288]
 license: https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE
