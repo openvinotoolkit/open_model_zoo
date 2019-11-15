@@ -54,8 +54,8 @@ void CpuMonitor::openQuery() {
     coreTimeCounters.resize(nCores);
     for (std::size_t i = 0; i < nCores; ++i)
     {
-        std::string fullCounterPath{"\\Processor(" + std::to_string(i) + ")\\% Processor Time"};
-        status = PdhAddCounter(queryWrapper, fullCounterPath.c_str(), 0, &coreTimeCounters[i]);
+        std::wstring fullCounterPath{L"\\Processor(" + std::to_wstring(i) + L")\\% Processor Time"};
+        status = PdhAddCounterW(queryWrapper, fullCounterPath.c_str(), 0, &coreTimeCounters[i]);
         if (ERROR_SUCCESS != status)
         {
             throw std::system_error(status, std::system_category(), "PdhAddCounter() failed");
