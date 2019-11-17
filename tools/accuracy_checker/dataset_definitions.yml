@@ -35,9 +35,19 @@ datasets:
     data_source: val2017
     preprocessing:
       - type: resize
-        size: 800
+        aspect_ratio_scale: fit_to_window
+        dst_height: 800
+        dst_width: 1365
+      - type: padding
+        dst_height: 800
+        dst_width: 1365
+        pad_type: right_bottom
+
     postprocessing:
-      - type: resize_prediction_boxes
+      - type: faster_rcnn_postprocessing_resize
+        dst_height: 800
+        dst_width: 1365
+
 
   - name: ms_coco_detection_91_classes
     annotation_conversion:
@@ -51,9 +61,18 @@ datasets:
     data_source: val2017
     preprocessing:
       - type: resize
-        size: 600
+        aspect_ratio_scale: fit_to_window
+        dst_height: 600
+        dst_width: 1024
+      - type: padding
+        dst_height: 600
+        dst_width: 1024
+        pad_type: right_bottom
+
     postprocessing:
-      - type: resize_prediction_boxes
+      - type: faster_rcnn_postprocessing_resize
+        dst_height: 600
+        dst_width: 1024
 
   - name: ms_coco_keypoints
     data_source: val2017

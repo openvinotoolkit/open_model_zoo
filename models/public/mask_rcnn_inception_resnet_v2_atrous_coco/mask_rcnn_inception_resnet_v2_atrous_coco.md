@@ -21,7 +21,7 @@ Mask R-CNN Inception Resnet V2 Atrous  is trained on COCO dataset and used for o
 
 ### Original Model
 
-Image, name: `image_tensor`, shape: [1x800x800x3], format: [BxHxWxC],
+Image, name: `image_tensor`, shape: [1x800x1365x3], format: [BxHxWxC],
    where:
 
     - B - batch size
@@ -33,7 +33,7 @@ Image, name: `image_tensor`, shape: [1x800x800x3], format: [BxHxWxC],
 
 ### Converted Model
 
-1. Image, name: `image_tensor`, shape: [1x3x800x800], format: [BxCxHxW],
+1. Image, name: `image_tensor`, shape: [1x3x800x1365], format: [BxCxHxW],
    where:
 
     - B - batch size
