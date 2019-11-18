@@ -78,6 +78,7 @@ class BaseStage:
         self.preprocessor = preprocessor
         self.input_feeder = None
         self.store = model_info.get('store_predictions', False)
+        self.predictions = []
 
     def predict(self, input_blobs, batch_meta):
         raise NotImplementedError
@@ -91,12 +92,23 @@ class BaseStage:
     def release(self):
         pass
 
+    def reset(self):
+        self._predictions = []
+
+    def dump_predictions(self):
+        if not hasattr(self, 'prediction_file'):
+            prediction_file = Path(self.model_info.get('predictions', 'predictions.pickle'))
+            self.prediction_file = prediction_file
+        with self.prediction_file.open('wb') as out_file:
+            pickle.dump(self._predictions, out_file)
+
 
 class ProposalBaseStage(BaseStage):
     def __init__(self, model_info, preprocessor):
         super().__init__(model_info, preprocessor)
         self.adapter = None
         self.input_feeder = None
+        self._predictions = []
 
     def preprocess_data(self, batch_input, batch_annotation, *args, **kwargs):
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
@@ -107,7 +119,7 @@ class ProposalBaseStage(BaseStage):
     def postprocess_result(self, identifiers, this_stage_result, batch_meta, *args, **kwargs):
         result = self.adapter.process(this_stage_result, identifiers, batch_meta) if self.adapter else this_stage_result
         if self.store:
-            self.dump_predictions(result)
+            self._predictions.extend(result)
         return result
 
     def _infer(self, input_blobs, batch_meta):
@@ -116,16 +128,16 @@ class ProposalBaseStage(BaseStage):
     def predict(self, input_blobs, batch_meta):
         return self._infer(input_blobs, batch_meta)
 
-    def dump_predictions(self, predictions):
+    def dump_predictions(self):
         if not hasattr(self, 'prediction_file'):
             prediction_file = Path(self.model_info.get('predictions', 'pnet_predictions.pickle'))
-            self.prediction_file = prediction_file.open('wb')
-        for prediction in predictions:
-            pickle.dump(prediction,self.prediction_file)
+            self.prediction_file = prediction_file
+        with self.prediction_file.open('wb') as out_file:
+            pickle.dump(self._predictions, out_file)
 
 
 class DummyProposalStage(ProposalBaseStage):
-    def __init__(self, model_info, preprocessor):
+    def __init__(self, model_info, preprocessor, *args, **kwargs):
         super().__init__(model_info, preprocessor)
         self._index = 0
         if 'predictions' not in self.model_info:
@@ -166,7 +178,7 @@ class RefineBaseStage(BaseStage):
             previous_stage_result, this_stage_result, 0.7, self.model_info['outputs'], 'Union'
         )
         if self.store:
-            self.dump_predictions(result)
+            self._predictions.extend(result)
         return result
 
     def _infer(self, input_blobs, batch_meta):
@@ -175,12 +187,12 @@ class RefineBaseStage(BaseStage):
     def predict(self, input_blobs, batch_meta):
         return self._infer(input_blobs, batch_meta)
 
-    def dump_predictions(self, predictions):
+    def dump_predictions(self):
         if not hasattr(self, 'prediction_file'):
             prediction_file = Path(self.model_info.get('predictions', 'rnet_predictions.pickle'))
-            self.prediction_file = prediction_file.open('wb')
-        for prediction in predictions:
-            pickle.dump(prediction,self.prediction_file)
+            self.prediction_file = prediction_file
+        with self.prediction_file.open('wb') as out_file:
+            pickle.dump(self._predictions, out_file)
 
 
 class OutputBaseStage(RefineBaseStage):
@@ -193,16 +205,15 @@ class OutputBaseStage(RefineBaseStage):
         )
         batch_predictions[0], _ = nms(batch_predictions[0], 0.7, 'Min')
         if self.store:
-            self.dump_predictions(batch_predictions)
-
+            self._predictions.extend(batch_predictions)
         return batch_predictions
 
-    def dump_predictions(self, predictions):
+    def dump_predictions(self):
         if not hasattr(self, 'prediction_file'):
-            prediction_file = Path(self.model_info.get('predictions', 'rnet_predictions.pickle'))
-            self.prediction_file = prediction_file.open('wb')
-        for prediction in predictions:
-            pickle.dump(prediction,self.prediction_file)
+            prediction_file = Path(self.model_info.get('predictions', 'onet_predictions.pickle'))
+            self.prediction_file = prediction_file
+        with self.prediction_file.open('wb') as out_file:
+            pickle.dump(self._predictions, out_file)
 
 
 class CaffeModelMixin:
@@ -470,6 +481,9 @@ class MTCNNEvaluator(BaseEvaluator):
             self._predictions.extend(batch_predictions)
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_predictions))
+        for stage in self.stages:
+            if stage.store:
+                stage.dump_predictions()
 
     def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if self._metrics_results:
@@ -510,6 +524,17 @@ class MTCNNEvaluator(BaseEvaluator):
 
         return cls(dataset, data_reader, stages, postprocessing, metrics_executor)
 
+    @staticmethod
+    def get_processing_info(config):
+        module_specific_params = config.get('module_config')
+        model_name = config['name']
+        dataset_config = module_specific_params['datasets'][0]
+        launcher_config = module_specific_params['launchers'][0]
+        return (
+            model_name, launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
+            dataset_config['name']
+        )
+
     def release(self):
         for stage in self.stages:
             stage.release()
@@ -517,6 +542,8 @@ class MTCNNEvaluator(BaseEvaluator):
     def reset(self):
         self.metrics_executor.reset()
         self.dataset.reset()
+        for stage in self.stages:
+            stage.reset()
 
 
 def calibrate_predictions(previous_stage_predictions, out, threshold, outputs_mapping, iou_type=None):
