@@ -78,10 +78,13 @@ class ONNXLauncher(Launcher):
 
         return results
 
-    @staticmethod
-    def fit_to_input(data, layer_name, layout):
+    def fit_to_input(self, data, layer_name, layout):
+        layer_shape = self.inputs[layer_name]
         if len(np.shape(data)) == 4:
-            return np.transpose(data, layout).astype(np.float32)
+            data = np.transpose(data, layout).astype(np.float32)
+            if len(layer_shape) == 3:
+                return data[0]
+            return data
         if len(np.shape(data)) == 5 and len(layout) == 5:
             return np.transpose(data, layout).astype(np.float32)
         return np.array(data).astype(np.float32)
