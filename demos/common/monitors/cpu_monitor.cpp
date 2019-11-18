@@ -207,7 +207,6 @@ std::size_t CpuMonitor::getHistorySize() const {
 }
 
 void CpuMonitor::collectData() {
-    // store CPU Utulization in range [0, 1]
     std::vector<std::pair<unsigned long, unsigned long>> idleNonIdleCpuStat = getIdleNonIdleCpuStat(nCores);
     std::vector<double> cpuLoad(idleNonIdleCpuStat.size());
     for (std::size_t i = 0; i < idleNonIdleCpuStat.size(); ++i) {

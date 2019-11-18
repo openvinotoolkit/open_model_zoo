@@ -11,38 +11,21 @@
 #include <windows.h>
 #include <psapi.h>
 
-namespace {
-double getMemTotalOnly() {
-    PERFORMANCE_INFORMATION performanceInformation;
-    if (!GetPerformanceInfo(&performanceInformation, sizeof(performanceInformation))) {
-        throw std::runtime_error("GetPerformanceInfo() failed");
-    }
-    return static_cast<double>(performanceInformation.PhysicalTotal * performanceInformation.PageSize)
-        / (1024 * 1024 * 1024);
-}
-
-double getSwapTotalOnly() {
-    PERFORMANCE_INFORMATION performanceInformation;
-    if (!GetPerformanceInfo(&performanceInformation, sizeof(performanceInformation))) {
-        throw std::runtime_error("GetPerformanceInfo() failed");
-    }
-    return static_cast<double>(performanceInformation.CommitLimit * performanceInformation.PageSize)
-        / (1024 * 1024 * 1024);
-}
-}
-
 MemoryMonitor::MemoryMonitor() :
-    enabled{false},
-    samplesNumber{0},
-    historySize{0},
-    memSum{0.0},
-    swapSum{0.0},
-    maxMem{0.0},
-    maxSwap{0.0},
-    memTotal{getMemTotalOnly()},
-    swapTotal{getSwapTotalOnly()},
-    maxMemTotal{memTotal},
-    maxSwapTotal{swapTotal} {}
+        enabled{false},
+        samplesNumber{0},
+        historySize{0},
+        memSum{0.0},
+        swapSum{0.0},
+        maxMem{0.0},
+        maxSwap{0.0} {
+    PERFORMANCE_INFORMATION performanceInformation;
+    if (!GetPerformanceInfo(&performanceInformation, sizeof(performanceInformation))) {
+        throw std::runtime_error("GetPerformanceInfo() failed");
+    }
+    maxMemTotal = memTotal = static_cast<double>(performanceInformation.PhysicalTotal * performanceInformation.PageSize)
+        / (1024 * 1024 * 1024);
+}
 
 void MemoryMonitor::setHistorySize(std::size_t size) {
     historySize = size;
@@ -66,10 +49,7 @@ void MemoryMonitor::collectData() {
         / (1024 * 1024 * 1024);
     memTotal = static_cast<double>(performanceInformation.PhysicalTotal * performanceInformation.PageSize)
             / (1024 * 1024 * 1024),
-    swapTotal = static_cast<double>(performanceInformation.CommitLimit * performanceInformation.PageSize)
-            / (1024 * 1024 * 1024);
     maxMemTotal = std::max(maxMemTotal, memTotal);
-    maxSwapTotal = std::max(maxSwapTotal, swapTotal);
 
     memSum += usedMem;
     swapSum += usedSwap;
@@ -107,17 +87,10 @@ double MemoryMonitor::getMemTotal() const {
     return memTotal;
 }
 
-double MemoryMonitor::getSwapTotal() const {
-    return swapTotal;
-}
-
 double MemoryMonitor::getMaxMemTotal() const {
     return maxMemTotal;
 }
 
-double MemoryMonitor::getMaxSwapTotal() const {
-    return maxSwapTotal;
-}
 #else
 #include <fstream>
 #include <utility>
@@ -125,51 +98,13 @@ double MemoryMonitor::getMaxSwapTotal() const {
 #include <regex>
 
 namespace {
-double getMemTotalOnly() {
-    double memTotal = 0;
-    std::regex memRegex("^(.+):\\s+(\\d+) kB$");
-    std::string line;
-    std::smatch match;
-    std::ifstream meminfo("/proc/meminfo");
-    while(std::getline(meminfo, line))
-    {
-        if (std::regex_match(line, match, memRegex))
-        {
-            if ("MemTotal" == match[1]) {
-                memTotal = stod(match[2]) / (1024 * 1024);
-            }
-        }
-    }
-    return memTotal;
-}
-
-double getSwapTotalOnly() {
-    double swapTotal = 0;
-    std::regex memRegex("^(.+):\\s+(\\d+) kB$");
-    std::string line;
-    std::smatch match;
-    std::ifstream meminfo("/proc/meminfo");
-    while(std::getline(meminfo, line))
-    {
-        if (std::regex_match(line, match, memRegex))
-        {
-            if ("SwapTotal" == match[1]) {
-                swapTotal = stod(match[2]) / (1024 * 1024);
-            }
-        }
-    }
-    return swapTotal;
-}
-}
-
 std::pair<std::pair<double, double>, std::pair<double, double>> getAvailableMemSwapTotalMemSwap() {
     double memAvailable = 0, swapFree = 0, memTotal = 0, swapTotal = 0;
     std::regex memRegex("^(.+):\\s+(\\d+) kB$");
     std::string line;
     std::smatch match;
     std::ifstream meminfo("/proc/meminfo");
-    while(std::getline(meminfo, line))
-    {
+    while (std::getline(meminfo, line)) {
         if (std::regex_match(line, match, memRegex)) {
             if ("MemAvailable" == match[1]) {
                 memAvailable = stod(match[2]) / (1024 * 1024);
@@ -187,19 +122,18 @@ std::pair<std::pair<double, double>, std::pair<double, double>> getAvailableMemS
     }
     return {{memAvailable, swapFree}, {memTotal, swapTotal}};
 }
+}
 
 MemoryMonitor::MemoryMonitor() :
-    enabled{false},
-    samplesNumber{0},
-    historySize{0},
-    memSum{0.0},
-    swapSum{0.0},
-    maxMem{0.0},
-    maxSwap{0.0},
-    memTotal{getMemTotalOnly()},
-    swapTotal{getSwapTotalOnly()},
-    maxMemTotal{memTotal},
-    maxSwapTotal{swapTotal} {}
+        enabled{false},
+        samplesNumber{0},
+        historySize{0},
+        memSum{0.0},
+        swapSum{0.0},
+        maxMem{0.0},
+        maxSwap{0.0} {
+    maxMemTotal = memTotal = getAvailableMemSwapTotalMemSwap().second.first;
+}
 
 void MemoryMonitor::setHistorySize(std::size_t size) {
     historySize = size;
@@ -215,9 +149,8 @@ void MemoryMonitor::collectData() {
     std::pair<std::pair<double, double>, std::pair<double, double>> availableMemSwapTotalMemSwap
         = getAvailableMemSwapTotalMemSwap();
     memTotal = availableMemSwapTotalMemSwap.second.first;
-    swapTotal = availableMemSwapTotalMemSwap.second.second;
+    double swapTotal = availableMemSwapTotalMemSwap.second.second;
     maxMemTotal = std::max(maxMemTotal, memTotal);
-    maxSwapTotal = std::max(maxSwapTotal, swapTotal);
     double usedMem = memTotal - availableMemSwapTotalMemSwap.first.first;
     double usedSwap = swapTotal - availableMemSwapTotalMemSwap.first.second;
 
@@ -257,15 +190,7 @@ double MemoryMonitor::getMemTotal() const {
     return memTotal;
 }
 
-double MemoryMonitor::getSwapTotal() const {
-    return swapTotal;
-}
-
 double MemoryMonitor::getMaxMemTotal() const {
     return maxMemTotal;
-}
-
-double MemoryMonitor::getMaxSwapTotal() const {
-    return maxSwapTotal;
 }
 #endif

@@ -20,9 +20,7 @@ public:
     double getMaxMem() const;
     double getMaxSwap() const;
     double getMemTotal() const;
-    double getSwapTotal() const;
     double getMaxMemTotal() const; // a system may have hotpluggable memory
-    double getMaxSwapTotal() const; // swap files/partitions may be changed
 private:
     bool enabled;
     unsigned samplesNumber;

@@ -258,7 +258,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
         cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize} & cv::Rect(0, 0, frame.cols, frame.rows));
         graph *= 1.3;
         int histxPos = graph.cols - 1;
-        double range = std::min(memoryMonitor.getMaxMemTotal() + memoryMonitor.getMaxSwapTotal(),
+        double range = std::min(memoryMonitor.getMaxMemTotal() + memoryMonitor.getMaxSwap(),
             (memoryMonitor.getMaxMem() + memoryMonitor.getMaxSwap()) * 1.2);
         if (lastHistory.size() > 1) {
             for (auto memUsageIt = lastHistory.rbegin(); memUsageIt != lastHistory.rend() - 1; ++memUsageIt) {
