@@ -103,9 +103,8 @@ void CpuMonitor::collectData() {
     }
 
     PDH_FMT_COUNTERVALUE displayValue;
-    std::vector<std::pair<double, double>> idleNonIdleCpuStat;
+    std::vector<double> cpuLoad(coreTimeCounters.size());
     for (std::size_t i = 0; i < coreTimeCounters.size(); i++) {
-
         status = PdhGetFormattedCounterValue(coreTimeCounters[i], PDH_FMT_DOUBLE, NULL, &displayValue);
         if (ERROR_SUCCESS != status) {
             throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
@@ -114,12 +113,7 @@ void CpuMonitor::collectData() {
             throw std::system_error(status, std::system_category(), "Error in counter data");
         }
 
-        idleNonIdleCpuStat.emplace_back(displayValue.doubleValue, 1 - displayValue.doubleValue);
-    }
-
-    std::vector<double> cpuLoad(idleNonIdleCpuStat.size());
-    for (std::size_t i = 0; i < idleNonIdleCpuStat.size(); ++i) {
-        cpuLoad[i] = static_cast<double>(idleNonIdleCpuStat[i].first);
+        cpuLoad[i] = displayValue.doubleValue;
     }
 
     for (std::size_t i = 0; i < cpuLoad.size(); ++i) {
