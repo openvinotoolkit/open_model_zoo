@@ -147,43 +147,33 @@ std::vector<double> CpuMonitor::getMeanCpuLoad() const {
 #include <unistd.h>
 
 namespace {
-std::vector<std::pair<unsigned long, unsigned long>> getIdleNonIdleCpuStat(std::size_t nCores) {
-    std::vector<std::pair<unsigned long, unsigned long>> idleNonIdleCpuStat(nCores);
+std::vector<unsigned long> getIdleCpuStat(std::size_t nCores) {
+    std::vector<unsigned long> idleCpuStat(nCores);
     std::ifstream procStat("/proc/stat");
     std::string line;
     std::smatch match;
     std::regex coreJiffies("^cpu(\\d+)\\s+"
-        "(\\d+)\\s+" // user
-        "(\\d+)\\s+" // nice
-        "(\\d+)\\s+" // system
+        "(\\d+)\\s+"
+        "(\\d+)\\s+"
+        "(\\d+)\\s+"
         "(\\d+)\\s+" // idle
-        "(\\d+)\\s+" // iowait
-        "(\\d+)\\s+" // irq
-        "(\\d+)\\s+" // softirq
-        "(\\d+)\\s+" // steal
-        "(\\d+)\\s+" // guest
-        "(\\d+)");  // guest_nice
-    while (std::getline(procStat, line))
-    {
-        if (std::regex_match(line, match, coreJiffies))
-        {
+        "(\\d+).*"); // iowait
+
+    while (std::getline(procStat, line)) {
+        if (std::regex_match(line, match, coreJiffies)) {
+            // it doesn't handle overflow of sum and overflows of /proc/stat values
             unsigned long idleInfo = stoul(match[5]) + stoul(match[6]),
-                nonIdleInfo = stoul(match[2])
-                    + stoul(match[3])
-                    + stoul(match[4])
-                    + stoul(match[7])
-                    + stoul(match[8])
-                    + stoul(match[9]), // it doesn't handle overflow of sum and overflows of /proc/stat values
                 coreId = stoul(match[1]);
             if (nCores <= coreId) {
                 throw std::runtime_error("The number of cores has changed");
             }
-            idleNonIdleCpuStat[coreId].first = idleInfo;
-            idleNonIdleCpuStat[coreId].second = nonIdleInfo;
+            idleCpuStat[coreId] = idleInfo;
         }
     }
-    return idleNonIdleCpuStat;
+    return idleCpuStat;
 }
+
+const long clockTicks = sysconf(_SC_CLK_TCK);
 }
 
 CpuMonitor::CpuMonitor() :
@@ -195,7 +185,8 @@ CpuMonitor::CpuMonitor() :
 
 void CpuMonitor::setHistorySize(std::size_t size) {
     if (0 == historySize && 0 != size) {
-        prevIdleNonIdleCpuStat = getIdleNonIdleCpuStat(nCores);
+        prevIdleCpuStat = getIdleCpuStat(nCores);
+        prevTimePoint = std::chrono::steady_clock::now();
     }
     historySize = size;
     std::size_t newSize = std::min(size, cpuLoadHistory.size());
@@ -207,22 +198,16 @@ std::size_t CpuMonitor::getHistorySize() const {
 }
 
 void CpuMonitor::collectData() {
-    std::vector<std::pair<unsigned long, unsigned long>> idleNonIdleCpuStat = getIdleNonIdleCpuStat(nCores);
-    std::vector<double> cpuLoad(idleNonIdleCpuStat.size());
-    for (std::size_t i = 0; i < idleNonIdleCpuStat.size(); ++i) {
-        unsigned long idleDiff = idleNonIdleCpuStat[i].first - prevIdleNonIdleCpuStat[i].first;
-        unsigned long nonIdleDiff = idleNonIdleCpuStat[i].second - prevIdleNonIdleCpuStat[i].second;
-        if (0 == idleDiff + nonIdleDiff) {
-            if (cpuLoadHistory.empty()) {
-                cpuLoad[i] = 0;
-            } else {
-                cpuLoad[i] = cpuLoadHistory.back()[i];
-            }
-        } else {
-            cpuLoad[i] = static_cast<double>(nonIdleDiff) / (idleDiff + nonIdleDiff);
-        }
+    std::vector<unsigned long> idleCpuStat = getIdleCpuStat(nCores);
+    auto timePoint = std::chrono::steady_clock::now();
+    std::vector<double> cpuLoad(idleCpuStat.size());
+    for (std::size_t i = 0; i < idleCpuStat.size(); ++i) {
+        double idleDiff = idleCpuStat[i] - prevIdleCpuStat[i];
+        typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
+        cpuLoad[i] = 1.0 - idleDiff / clockTicks / std::chrono::duration_cast<Sec>(timePoint - prevTimePoint).count();
     }
-    prevIdleNonIdleCpuStat = std::move(idleNonIdleCpuStat);
+    prevTimePoint = timePoint;
+    prevIdleCpuStat = std::move(idleCpuStat);
 
     for (std::size_t i = 0; i < cpuLoad.size(); ++i) {
         cpuLoadSum[i] += cpuLoad[i];

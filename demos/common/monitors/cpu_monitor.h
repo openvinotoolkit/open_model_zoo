@@ -18,6 +18,7 @@ public:
     PDH_HQUERY query;
 };
 #endif
+#include <chrono>
 
 class CpuMonitor {
 public:
@@ -35,7 +36,8 @@ private:
     unsigned historySize;
     std::vector<double> cpuLoadSum;
     std::deque<std::vector<double>> cpuLoadHistory;
-    std::vector<std::pair<unsigned long, unsigned long>> prevIdleNonIdleCpuStat;
+    std::vector<unsigned long> prevIdleCpuStat;
+    std::chrono::steady_clock::time_point prevTimePoint;
 
 #ifdef _WIN32
     void openQuery();
