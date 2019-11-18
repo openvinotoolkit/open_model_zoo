@@ -7,7 +7,7 @@
 #ifdef _WIN32
 #include <algorithm>
 
-#define PSAPI_VERSION 1 // for psapi
+#define PSAPI_VERSION 2
 #include <windows.h>
 #include <psapi.h>
 

@@ -17,5 +17,4 @@ target_include_directories(monitors PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(monitors PRIVATE opencv_core opencv_imgproc)
 if(WIN32)
     target_link_libraries(monitors PRIVATE pdh) # for CPU, GPU utilization
-    target_link_libraries(monitors PRIVATE Psapi) # for memory monitor
 endif()
