@@ -22,7 +22,7 @@ public:
 class CpuMonitor {
 public:
     CpuMonitor();
-    void setHistorySize(std::size_t historySize);
+    void setHistorySize(std::size_t size);
     std::size_t getHistorySize() const;
     void collectData();
     std::deque<std::vector<double>> getLastHistory() const;

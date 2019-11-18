@@ -11,7 +11,7 @@
 class MemoryMonitor {
 public:
     MemoryMonitor();
-    void setHistorySize(std::size_t historySize);
+    void setHistorySize(std::size_t size);
     std::size_t getHistorySize() const;
     void collectData();
     std::deque<std::pair<double, double>> getLastHistory() const;

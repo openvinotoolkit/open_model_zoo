@@ -44,9 +44,9 @@ MemoryMonitor::MemoryMonitor() :
     maxMemTotal{memTotal},
     maxSwapTotal{swapTotal} {}
 
-void MemoryMonitor::setHistorySize(std::size_t historySize) {
-    this->historySize = historySize;
-    std::size_t newSize = std::min(historySize, memSwapUsageHistory.size());
+void MemoryMonitor::setHistorySize(std::size_t size) {
+    historySize = size;
+    std::size_t newSize = std::min(size, memSwapUsageHistory.size());
     memSwapUsageHistory.erase(memSwapUsageHistory.begin(), memSwapUsageHistory.end() - newSize);
 }
 
@@ -201,9 +201,9 @@ MemoryMonitor::MemoryMonitor() :
     maxMemTotal{memTotal},
     maxSwapTotal{swapTotal} {}
 
-void MemoryMonitor::setHistorySize(std::size_t historySize) {
-    this->historySize = historySize;
-    std::size_t newSize = std::min(historySize, memSwapUsageHistory.size());
+void MemoryMonitor::setHistorySize(std::size_t size) {
+    historySize = size;
+    std::size_t newSize = std::min(size, memSwapUsageHistory.size());
     memSwapUsageHistory.erase(memSwapUsageHistory.begin(), memSwapUsageHistory.end() - newSize);
 }
 

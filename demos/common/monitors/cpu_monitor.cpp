@@ -80,14 +80,14 @@ void CpuMonitor::closeQuery() {
     coreTimeCounters.clear();
 }
 
-void CpuMonitor::setHistorySize(std::size_t historySize) {
-    if (0 == this->historySize && 0 != historySize) {
+void CpuMonitor::setHistorySize(std::size_t size) {
+    if (0 == historySize && 0 != size) {
         openQuery();
-    } else if (0 != this->historySize && 0 == historySize) {
+    } else if (0 != historySize && 0 == size) {
         closeQuery();
     }
-    this->historySize = historySize;
-    std::size_t newSize = std::min(historySize, cpuLoadHistory.size());
+    historySize = size;
+    std::size_t newSize = std::min(size, cpuLoadHistory.size());
     cpuLoadHistory.erase(cpuLoadHistory.begin(), cpuLoadHistory.end() - newSize);
 }
 
@@ -105,6 +105,7 @@ void CpuMonitor::collectData() {
     PDH_FMT_COUNTERVALUE displayValue;
     std::vector<std::pair<double, double>> idleNonIdleCpuStat;
     for (std::size_t i = 0; i < coreTimeCounters.size(); i++) {
+
         status = PdhGetFormattedCounterValue(coreTimeCounters[i], PDH_FMT_DOUBLE, NULL, &displayValue);
         if (ERROR_SUCCESS != status) {
             throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
@@ -198,12 +199,12 @@ CpuMonitor::CpuMonitor() :
     historySize{0},
     cpuLoadSum(nCores, 0) {}
 
-void CpuMonitor::setHistorySize(std::size_t historySize) {
-    if (0 == this->historySize && 0 != historySize) {
+void CpuMonitor::setHistorySize(std::size_t size) {
+    if (0 == historySize && 0 != size) {
         prevIdleNonIdleCpuStat = getIdleNonIdleCpuStat(nCores);
     }
-    this->historySize = historySize;
-    std::size_t newSize = std::min(historySize, cpuLoadHistory.size());
+    historySize = size;
+    std::size_t newSize = std::min(size, cpuLoadHistory.size());
     cpuLoadHistory.erase(cpuLoadHistory.begin(), cpuLoadHistory.end() - newSize);
 }
 
