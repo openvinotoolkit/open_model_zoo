@@ -11,8 +11,8 @@
 #include <pdh.h>
 class QueryWrapper {
 public:
+    QueryWrapper();
     ~QueryWrapper();
-    void openQuery();
     void closeQuery();
     operator PDH_HQUERY() const;
     PDH_HQUERY query;
