@@ -156,13 +156,13 @@ void Presenter::drawGraphs(cv::Mat& frame) {
 
     int numberOfEnabledMonitors = (cpuMonitor.getHistorySize() > 1) + distributionCpuEnabled
         + (memoryMonitor.getHistorySize() > 1);
-    int pannelLength = graphSize.width * numberOfEnabledMonitors
+    int panelWidth = graphSize.width * numberOfEnabledMonitors
         + std::max(0, numberOfEnabledMonitors - 1) * graphPadding;
-    while (pannelLength > frame.cols) {
-        pannelLength = std::max(0, pannelLength - graphSize.width - graphPadding);
+    while (panelWidth > frame.cols) {
+        panelWidth = std::max(0, panelWidth - graphSize.width - graphPadding);
         --numberOfEnabledMonitors; // can't draw all monitors
     }
-    int graphPos = std::max(0, (frame.cols - 1 - pannelLength) / 2);
+    int graphPos = std::max(0, (frame.cols - 1 - panelWidth) / 2);
     int textGraphSplittingLine = graphSize.height / 5;
     int graphRectHeight = graphSize.height - textGraphSplittingLine;
     int sampleStep = std::max(1, static_cast<int>((graphSize.width + historySize - 1) / historySize)); // round up
@@ -264,7 +264,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
             for (auto memUsageIt = lastHistory.rbegin(); memUsageIt != lastHistory.rend() - 1; ++memUsageIt) {
                 constexpr double SWAP_THRESHOLD = 10.0 / 1024; // 10 MiB
                 cv::Vec3b color =
-                    (memoryMonitor.getMemTotal() * 0.95 > memUsageIt->first) || (memUsageIt->second < SWAP_TRESHOLD) ?
+                    (memoryMonitor.getMemTotal() * 0.95 > memUsageIt->first) || (memUsageIt->second < SWAP_THRESHOLD) ?
                         cv::Vec3b{0, 255, 255} :
                         cv::Vec3b{0, 0, 255};
                 cv::Point right{histxPos,
