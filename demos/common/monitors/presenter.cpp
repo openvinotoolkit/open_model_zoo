@@ -41,7 +41,7 @@ void meansToOstream(const std::map<MonitorType, std::vector<double>> means, std:
     const auto distributionCpuMean = means.find(MonitorType::DistributionCpu);
     if (means.end() != distributionCpuMean) {
         if (distributionCpuMean->second.empty()) {
-            tmpStream << "No data collected per core utilization\n";
+            tmpStream << "No data collected for core utilization\n";
         } else {
             tmpStream << "Mean core utilization: " << std::fixed << std::setprecision(1);
             for (double mean : distributionCpuMean->second) {
@@ -53,7 +53,7 @@ void meansToOstream(const std::map<MonitorType, std::vector<double>> means, std:
     const auto memoryMean = means.find(MonitorType::Memory);
         if (means.end() != memoryMean) {
             if (memoryMean->second.empty()) {
-                tmpStream << "No data collected for memory ans swap usage\n";
+                tmpStream << "No data collected for memory and swap usage\n";
             } else {
                 assert (2 == memoryMean->second.size());
                 tmpStream << "Mean memory usage: " << std::fixed << std::setprecision(1) << memoryMean->second.front()
@@ -262,7 +262,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
             (memoryMonitor.getMaxMem() + memoryMonitor.getMaxSwap()) * 1.2);
         if (lastHistory.size() > 1) {
             for (auto memUsageIt = lastHistory.rbegin(); memUsageIt != lastHistory.rend() - 1; ++memUsageIt) {
-                constexpr double SWAP_TRESHOLD = 10.0 / 1024; // 10 MiB
+                constexpr double SWAP_THRESHOLD = 10.0 / 1024; // 10 MiB
                 cv::Vec3b color =
                     (memoryMonitor.getMemTotal() * 0.95 > memUsageIt->first) || (memUsageIt->second < SWAP_TRESHOLD) ?
                         cv::Vec3b{0, 255, 255} :
