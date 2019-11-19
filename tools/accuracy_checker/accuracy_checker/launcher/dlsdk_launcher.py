@@ -133,7 +133,6 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
         self.need_conversion = framework.name != 'dlsdk'
         self.framework = framework
         self.fields['model'].optional = self.need_conversion
-        self.fields['weights'].optional = self.need_conversion
         self.fields['caffe_model'].optional = framework.name != 'caffe'
         self.fields['caffe_weights'].optional = framework.name != 'caffe'
         self.fields['mxnet_weights'].optional = framework.name != 'mxnet'
@@ -144,7 +143,7 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
 
     @staticmethod
     def check_model_source(entry):
-        dlsdk_model_options = ['model', 'weights']
+        dlsdk_model_options = ['model']
         caffe_model_options = ['caffe_model', 'caffe_weights']
         mxnet_model_options = ['mxnet_weights']
         tf_model_options = ['tf_model']
@@ -191,8 +190,9 @@ class DLSDKLauncher(Launcher):
         parameters = super().parameters()
         parameters.update({
             'model': PathField(description="Path to model."),
-            'weights': PathField(description="Path to model."),
-            'device': StringField(regex=SUPPORTED_DEVICE_REGEX, description="Device name."),
+            'weights': PathField(description="Path to model.", optional=True),
+            'ie_config': PathField(description='Path to Inference Engine xml config', optional=True),
+            'device': StringField(description="Device name."),
             'caffe_model': PathField(optional=True, description="Path to Caffe model file."),
             'caffe_weights': PathField(optional=True, description="Path to Caffe weights file."),
             'mxnet_weights': PathField(optional=True, description="Path to MXNet weights file."),
@@ -260,7 +260,7 @@ class DLSDKLauncher(Launcher):
 
             self.load_network(log=True)
 
-        self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
+        self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
         self._do_reshape = False
         # It is an important switch -- while the FASTER RCNN is not reshaped correctly, the
         # whole network should be recreated during reshape
@@ -273,6 +273,8 @@ class DLSDKLauncher(Launcher):
         Returns:
             inputs in NCHW format.
         """
+        if self.network is None:
+            return self.exec_network.inputs
         return self.network.inputs
 
     @property
@@ -533,7 +535,7 @@ class DLSDKLauncher(Launcher):
         self.network.reshape({**const_inputs_shapes, **new_non_const_input_shapes})
 
     def _align_data_shape(self, data, input_blob):
-        input_shape = self.network.inputs[input_blob].shape
+        input_shape = self.inputs[input_blob].shape
         data_batch_size = data.shape[0]
         input_batch_size = input_shape[0]
 
@@ -655,8 +657,19 @@ class DLSDKLauncher(Launcher):
                 print_info('    {} - {}'.format(device, nreq))
 
     def _create_network(self, input_shapes=None):
-        assert self.plugin, "create_ie_plugin should be called before _create_network"
-
+        model_path = Path(self._model)
+        compiled_model = model_path.suffix == '.blob'
+        if compiled_model:
+            self.network = None
+            self.exec_network = self.ie_core.import_network(str(self._model), self._device)
+            self.original_outputs = list(self.exec_network.outputs.keys())
+            first_input = next(iter(self.exec_network.inputs))
+            input_info = self.exec_network.inputs[first_input]
+            batch_pos = input_info.layout.find('N')
+            self._batch = input_info.shape[batch_pos] if batch_pos != -1 else 1
+            return None
+        if self._weights is None:
+            self._weights = model_path.parent / (model_path.name.split(model_path.suffix)[0] + '.bin')
         self.network = ie.IENetwork(model=str(self._model), weights=str(self._weights))
 
         self.original_outputs = self.network.outputs
@@ -685,16 +698,15 @@ class DLSDKLauncher(Launcher):
     def load_network(self, network=None, log=False):
         if hasattr(self, 'exec_network'):
             del self.exec_network
-        if not hasattr(self, 'plugin'):
-            self.create_ie_plugin()
         if network is None:
             self._create_network()
         else:
             self.network = network
-        self._set_precision()
-        if log:
-            self._print_input_output_info()
-        self.exec_network = self.plugin.load(network=self.network, num_requests=self.num_requests)
+        if self.network is not None:
+            self._set_precision()
+            if log:
+                self._print_input_output_info()
+            self.exec_network = self.ie_core.load_network(self.network, self._device, num_requests=self.num_requests)
 
     def load_ir(self, xml_path, bin_path, log=False):
         self._model = xml_path
