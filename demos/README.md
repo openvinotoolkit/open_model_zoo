@@ -185,7 +185,7 @@ directory.
 Some of the Python demo applications require native Python extension modules to be built before they can be run.
 This requires you to have Python development files (headers and import libraries) installed.
 To build these modules, follow the instructions for building the demo applications above,
-but add `-DENABLE_PYTHON=ON` to the `cmake` command.
+but add `-DENABLE_PYTHON=ON` to either the `cmake` or the `build_demos*` command, depending on which you use.
 For example:
 
 ```sh
