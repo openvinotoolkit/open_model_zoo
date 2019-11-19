@@ -270,7 +270,7 @@ class DLSDKModelMixin:
     def _reshape_input(self, input_shapes):
         del self.exec_network
         self.network.reshape(input_shapes)
-        self.exec_network = self.launcher.plugin.load(network=self.network)
+        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
 
     @property
     def inputs(self):
@@ -346,7 +346,6 @@ class CaffeRefineStage(CaffeModelMixin, RefineBaseStage):
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs,  self.fit_to_input)
 
 
-
 class CaffeOutputStage(CaffeModelMixin, OutputBaseStage):
     def __init__(self,  model_info, preprocessor, launcher):
         super().__init__(model_info, preprocessor)
@@ -357,11 +356,9 @@ class CaffeOutputStage(CaffeModelMixin, OutputBaseStage):
 class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
     def __init__(self,  model_info, preprocessor, launcher):
         super().__init__(model_info, preprocessor)
-        if not hasattr(launcher, 'plugin'):
-            launcher.create_ie_plugin(True)
         model_xml, model_bin = self.prepare_model(launcher)
         self.network = launcher.create_ie_network(str(model_xml), str(model_bin))
-        self.exec_network = launcher.plugin.load(self.network)
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
         pnet_outs = model_info['outputs']
@@ -373,12 +370,9 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
 class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
     def __init__(self,  model_info, preprocessor, launcher):
         super().__init__(model_info, preprocessor)
-
-        if not hasattr(launcher, 'plugin'):
-            launcher.create_ie_plugin(True)
         model_xml, model_bin = self.prepare_model(launcher)
         self.network = launcher.create_ie_network(str(model_xml), str(model_bin))
-        self.exec_network = launcher.plugin.load(self.network)
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
 
@@ -386,11 +380,9 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
 class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
     def __init__(self,  model_info, preprocessor, launcher):
         super().__init__(model_info,  preprocessor)
-        if not hasattr(launcher, 'plugin'):
-            launcher.create_ie_plugin(True)
         model_xml, model_bin = self.prepare_model(launcher)
         self.network = launcher.create_ie_network(str(model_xml), str(model_bin))
-        self.exec_network = launcher.plugin.load(self.network)
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
 
