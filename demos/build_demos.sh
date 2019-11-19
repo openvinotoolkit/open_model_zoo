@@ -68,6 +68,6 @@ fi
 mkdir -p "$build_dir"
 
 (cd "$build_dir" && cmake -DCMAKE_BUILD_TYPE=Release "$DEMOS_PATH")
-make -C "$build_dir" "$NUM_THREADS"
+cmake --build "$build_dir" -- "$NUM_THREADS"
 
 printf "\nBuild completed, you can find binaries for all demos in the %s subfolder.\n\n" "$build_dir/$OS_PATH/Release"
