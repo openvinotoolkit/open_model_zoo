@@ -1,3 +1,4 @@
+import os
 import copy
 import cv2
 from accessify import private
@@ -6,8 +7,8 @@ from openvino.inference_engine import IENetwork, IECore
 
 
 class Detector(object):
-    def __init__(self, path_to_model_xml, path_to_model_bin, path_to_lib, label_class=15, scale=None, thr=0.3, device='CPU'):
-        self.model = IENetwork(model=path_to_model_xml, weights=path_to_model_bin)
+    def __init__(self, path_to_model_xml, path_to_lib, label_class=15, scale=None, thr=0.3, device='CPU'):
+        self.model = IENetwork(model=path_to_model_xml, weights=os.path.splitext(path_to_model_xml)[0] + '.bin')
         self._device = device
         self.ie = IECore()
         if self._device == 'CPU':

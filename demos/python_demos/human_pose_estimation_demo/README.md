@@ -10,29 +10,27 @@ On the start-up, the application reads command line parameters and loads  detect
 
 Running the application with the `-h` option yields the following usage message:
 ```
-usage: demo.py [-h] --model-od-xml MODEL_OD_XML --model-od-bin MODEL_OD_BIN
-               --model-hpe-xml MODEL_HPE_XML --model-hpe-bin MODEL_HPE_BIN
-               [--video VIDEO] [--image IMAGE [IMAGE ...]] [--device DEVICE]
+usage: demo.py [-h] -m_od MODEL_OD_XML -m_hpe MODEL_HPE_XML
+               [-i INPUT [INPUT ...]] [-d DEVICE]
                [--cpu-extension CPU_EXTENSION] [--label-person LABEL_PERSON]
+               [--no_show]
 
 optional arguments:
   -h, --help            show this help message and exit
-  --model-od-xml MODEL_OD_XML
+  -m_od MODEL_OD_XML, --model-od-xml MODEL_OD_XML
                         path to model of object detector in xml format
-  --model-od-bin MODEL_OD_BIN
-                        path to model of object detector in bin format
-  --model-hpe-xml MODEL_HPE_XML
+  -m_hpe MODEL_HPE_XML, --model-hpe-xml MODEL_HPE_XML
                         path to model of human pose estimator in xml format
-  --model-hpe-bin MODEL_HPE_BIN
-                        path to model of human pose estimator in bin format
-  --video VIDEO         path to video
-  --image IMAGE [IMAGE ...]
-                        path to image or images
-  --device DEVICE       Specify the target to infer on CPU or GPU
+  -i INPUT [INPUT ...], --input INPUT [INPUT ...]
+                        path to video or image/images
+  -d DEVICE, --device DEVICE
+                        Specify the target to infer on CPU or GPU
   --cpu-extension CPU_EXTENSION
                         path to cpu extension
   --label-person LABEL_PERSON
                         Label of class person for detector
+  --no_show             Optional. Do not display output.
+
 ```
 To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO Model Downloader or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
 

@@ -1,5 +1,6 @@
-import numpy as np
+import os
 import copy
+import numpy as np
 from accessify import private
 
 import cv2
@@ -91,8 +92,8 @@ class TransformedCrop(object):
 
 
 class HumanPoseEstimator(object):
-    def __init__(self, path_to_model_xml, path_to_model_bin, path_to_lib, scale=None, thr=-100, device='CPU'):
-        self.model = IENetwork(model=path_to_model_xml, weights=path_to_model_bin)
+    def __init__(self, path_to_model_xml, path_to_lib, scale=None, thr=-100, device='CPU'):
+        self.model = IENetwork(model=path_to_model_xml, weights=os.path.splitext(path_to_model_xml)[0] + '.bin')
         self._device = device
         self.ie = IECore()
         if self._device == 'CPU':

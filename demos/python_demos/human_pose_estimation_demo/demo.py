@@ -5,20 +5,18 @@ from estimator import HumanPoseEstimator
 
 def build_argparser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-od-xml", type=str, required=True,
+    parser.add_argument("-m_od", "--model-od-xml", type=str, required=True,
                         help="path to model of object detector in xml format")
-    parser.add_argument("--model-od-bin", type=str, required=True,
-                        help="path to model of object detector in bin format")
-    parser.add_argument("--model-hpe-xml", type=str, required=True,
+
+    parser.add_argument("-m_hpe", "--model-hpe-xml", type=str, required=True,
                         help="path to model of human pose estimator in xml format")
-    parser.add_argument("--model-hpe-bin", type=str, required=True,
-                        help="path to model of human pose estimator in bin format")
-    parser.add_argument("--video", type=str, default='', help="path to video")
-    parser.add_argument("--image", type=str, nargs='+',  default='', help="path to image or images")
-    parser.add_argument("--device", type=str, default='CPU', required=False,
+
+    parser.add_argument("-i", "--input", type=str, nargs='+',  default='', help="path to video or image/images")
+    parser.add_argument("-d", "--device", type=str, default='CPU', required=False,
                         help="Specify the target to infer on CPU or GPU")
     parser.add_argument("--cpu-extension", type=str, required=False, help="path to cpu extension")
     parser.add_argument("--label-person", type=str, required=False, help="Label of class person for detector")
+    parser.add_argument('--no_show', help='Optional. Do not display output.', action='store_true')
 
     return parser
 
@@ -44,9 +42,9 @@ class ImageReader(object):
 
 class VideoReader(object):
     def __init__(self, file_name):
-        self.file_name = file_name
+        self.file_name = file_name[0]
         try:
-            self.file_name = int(file_name)
+            self.file_name = int(file_name[0])
         except ValueError:
             pass
 
@@ -65,23 +63,18 @@ class VideoReader(object):
 
 def run_demo(args):
 
-    DetectorPerson = Detector(path_to_model_bin=args.model_od_bin,
-                              path_to_model_xml=args.model_od_xml,
+    DetectorPerson = Detector(path_to_model_xml=args.model_od_xml,
                               device=args.device,
                               path_to_lib=args.cpu_extension)
 
-    SingleHumanPoseEstimator = HumanPoseEstimator(path_to_model_bin=args.model_hpe_bin,
-                                                  path_to_model_xml=args.model_hpe_xml,
+    SingleHumanPoseEstimator = HumanPoseEstimator(path_to_model_xml=args.model_hpe_xml,
                                                   device=args.device,
                                                   path_to_lib=args.cpu_extension)
-
-    if args.video == '' and args.image == '':
-        raise ValueError('Either --video or --image has to be set')
-
-    if args.video != '':
-        frames_reader = VideoReader(args.video)
+    if args.input != '':
+        img = cv2.imread(args.input[0], cv2.IMREAD_COLOR)
+        frames_reader = VideoReader(args.input) if img is None else ImageReader(args.input)
     else:
-        frames_reader = ImageReader(args.image)
+        raise ValueError('Either --input has to be set')
 
     for frame in frames_reader:
         bboxes = DetectorPerson.detect(frame)
@@ -102,8 +95,9 @@ def run_demo(args):
             float(1 / (DetectorPerson.infer_time + SingleHumanPoseEstimator.infer_time * len(human_poses))),
             float(1 / SingleHumanPoseEstimator.infer_time),
             float(1 / DetectorPerson.infer_time)), (50, 50), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
-
-        cv2.imshow('frame', frame)
+        if args.no_show:
+            continue
+        cv2.imshow('Human Pose Estimation Demo', frame)
         key = cv2.waitKey(33)
         if key == 27:
             cv2.destroyAllWindows()
