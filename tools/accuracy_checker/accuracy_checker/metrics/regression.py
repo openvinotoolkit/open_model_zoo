@@ -368,6 +368,7 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
 
     def __init__(self, *args, **kwargs):
         super().__init__(self._psnr_differ, *args, **kwargs)
+        self.meta['target'] = 'higher-better'
 
     def configure(self):
         super().configure()
