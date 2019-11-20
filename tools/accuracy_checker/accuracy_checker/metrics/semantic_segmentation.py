@@ -91,7 +91,7 @@ class SegmentationIOU(SegmentationMetric):
         cm = super().update(annotation, prediction)
         diagonal = np.diag(cm).astype(float)
         union = cm.sum(axis=1) + cm.sum(axis=0) - diagonal
-        iou = np.divide(diagonal, union, out=np.zeros_like(diagonal), where=union != 0)
+        iou = np.divide(diagonal, union, out=np.full_like(diagonal, np.nan), where=union != 0)
 
         return iou
 
@@ -99,7 +99,7 @@ class SegmentationIOU(SegmentationMetric):
         confusion_matrix = self.state[self.CONFUSION_MATRIX_KEY]
         diagonal = np.diag(confusion_matrix)
         union = confusion_matrix.sum(axis=1) + confusion_matrix.sum(axis=0) - diagonal
-        iou = np.divide(diagonal, union, out=np.zeros_like(diagonal), where=union != 0)
+        iou = np.divide(diagonal, union, out=np.full_like(diagonal, np.nan), where=union != 0)
 
         values, names = finalize_metric_result(iou, list(self.dataset.labels.values()))
         self.meta['names'] = names
@@ -114,7 +114,7 @@ class SegmentationMeanAccuracy(SegmentationMetric):
         cm = super().update(annotation, prediction)
         diagonal = np.diag(cm).astype(float)
         per_class_count = cm.sum(axis=1)
-        acc_cls = np.divide(diagonal, per_class_count, out=np.zeros_like(diagonal), where=per_class_count != 0)
+        acc_cls = np.divide(diagonal, per_class_count, out=np.full_like(diagonal, np.nan), where=per_class_count != 0)
 
         return acc_cls
 
@@ -122,7 +122,7 @@ class SegmentationMeanAccuracy(SegmentationMetric):
         confusion_matrix = self.state[self.CONFUSION_MATRIX_KEY]
         diagonal = np.diag(confusion_matrix)
         per_class_count = confusion_matrix.sum(axis=1)
-        acc_cls = np.divide(diagonal, per_class_count, out=np.zeros_like(diagonal), where=per_class_count != 0)
+        acc_cls = np.divide(diagonal, per_class_count, out=np.full_like(diagonal, np.nan), where=per_class_count != 0)
 
         values, names = finalize_metric_result(acc_cls, list(self.dataset.labels.values()))
         self.meta['names'] = names
