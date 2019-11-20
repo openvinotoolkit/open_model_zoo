@@ -9,6 +9,7 @@
 
 #define PSAPI_VERSION 2
 #include <windows.h>
+#include <pdhmsg.h>
 #include <psapi.h>
 
 MemoryMonitor::MemoryMonitor() :
@@ -27,7 +28,32 @@ MemoryMonitor::MemoryMonitor() :
         / (1024 * 1024 * 1024);
 }
 
+void MemoryMonitor::openQuery() {
+    std::unique_ptr<QueryWrapper> newQuery{new QueryWrapper};
+
+    PDH_STATUS status = PdhAddCounterW(*newQuery, L"\\Paging File(_Total)\\% Usage", 0, &pagingFileUsageCounter);
+    if (ERROR_SUCCESS != status)
+    {
+        throw std::system_error(status, std::system_category(), "PdhSetCounterScaleFactor() failed");
+    }
+    status = PdhSetCounterScaleFactor(pagingFileUsageCounter, -2); // scale counter to [0, 1]
+    if (ERROR_SUCCESS != status)
+    {
+        throw std::system_error(status, std::system_category(), "PdhSetCounterScaleFactor() failed");
+    }
+    query = std::move(newQuery);
+}
+
+void MemoryMonitor::closeQuery() {
+    query.reset();
+}
+
 void MemoryMonitor::setHistorySize(std::size_t size) {
+    if (0 == historySize && 0 != size) {
+        openQuery();
+    } else if (0 != historySize && 0 == size) {
+        closeQuery();
+    }
     historySize = size;
     std::size_t newSize = std::min(size, memSwapUsageHistory.size());
     memSwapUsageHistory.erase(memSwapUsageHistory.begin(), memSwapUsageHistory.end() - newSize);
@@ -42,14 +68,31 @@ void MemoryMonitor::collectData() {
     if (!GetPerformanceInfo(&performanceInformation, sizeof(performanceInformation))) {
         throw std::runtime_error("GetPerformanceInfo() failed");
     }
+
+    PDH_STATUS status;
+    status = PdhCollectQueryData(*query);
+    if (ERROR_SUCCESS != status) {
+        throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
+    }
+    PDH_FMT_COUNTERVALUE displayValue;
+    status = PdhGetFormattedCounterValue(pagingFileUsageCounter, PDH_FMT_DOUBLE, NULL, &displayValue);
+    if (ERROR_SUCCESS != status) {
+        throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
+    }
+    if (PDH_CSTATUS_VALID_DATA != displayValue.CStatus && PDH_CSTATUS_NEW_DATA != displayValue.CStatus) {
+        throw std::runtime_error("Error in counter data");
+    }
+
     double usedMem = static_cast<double>(
         (performanceInformation.PhysicalTotal - performanceInformation.PhysicalAvailable)
         * performanceInformation.PageSize) / (1024 * 1024 * 1024);
-    double usedSwap = static_cast<double>(performanceInformation.CommitTotal * performanceInformation.PageSize)
-        / (1024 * 1024 * 1024);
     memTotal = static_cast<double>(performanceInformation.PhysicalTotal * performanceInformation.PageSize)
-            / (1024 * 1024 * 1024),
+        / (1024 * 1024 * 1024);
     maxMemTotal = std::max(maxMemTotal, memTotal);
+    double pagingFilesSize = static_cast<double>(
+        (performanceInformation.CommitLimit - performanceInformation.PhysicalTotal)
+        * performanceInformation.PageSize) / (1024 * 1024 * 1024);
+    double usedSwap = pagingFilesSize * displayValue.doubleValue;
 
     memSum += usedMem;
     swapSum += usedSwap;

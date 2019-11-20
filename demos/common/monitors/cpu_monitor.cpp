@@ -18,27 +18,6 @@ std::size_t getNCores() {
 }
 }
 
-QueryWrapper::QueryWrapper() {
-    PDH_STATUS status = PdhOpenQuery(NULL, NULL, &query);
-    if (ERROR_SUCCESS != status) {
-        throw std::system_error(status, std::system_category(), "PdhOpenQuery() failed");
-    }
-}
-QueryWrapper::~QueryWrapper() {
-    PdhCloseQuery(query);
-}
-
-void QueryWrapper::closeQuery() {
-    PDH_STATUS status = PdhCloseQuery(query);
-    if (ERROR_SUCCESS != status) {
-        throw std::logic_error("The query handle to close is not valid");
-    }
-}
-
-QueryWrapper::operator PDH_HQUERY() const {
-    return query;
-}
-
 CpuMonitor::CpuMonitor() :
     nCores{getNCores()},
     lastEnabled{false},
@@ -47,14 +26,14 @@ CpuMonitor::CpuMonitor() :
     cpuLoadSum(nCores, 0) {}
 
 void CpuMonitor::openQuery() {
-    QueryWrapper newQueryWrapper;
+    std::unique_ptr<QueryWrapper> newQuery{new QueryWrapper};
 
     PDH_STATUS status;
     coreTimeCounters.resize(nCores);
     for (std::size_t i = 0; i < nCores; ++i)
     {
         std::wstring fullCounterPath{L"\\Processor(" + std::to_wstring(i) + L")\\% Processor Time"};
-        status = PdhAddCounterW(newQueryWrapper, fullCounterPath.c_str(), 0, &coreTimeCounters[i]);
+        status = PdhAddCounterW(*newQuery, fullCounterPath.c_str(), 0, &coreTimeCounters[i]);
         if (ERROR_SUCCESS != status)
         {
             throw std::system_error(status, std::system_category(), "PdhAddCounter() failed");
@@ -65,18 +44,16 @@ void CpuMonitor::openQuery() {
             throw std::system_error(status, std::system_category(), "PdhSetCounterScaleFactor() failed");
         }
     }
-    status = PdhCollectQueryData(newQueryWrapper);
+    status = PdhCollectQueryData(*newQuery);
     if (ERROR_SUCCESS != status)
     {
         throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
     }
-    QueryWrapper dummy;
-    queryWrapper = newQueryWrapper;
-    newQueryWrapper = dummy;
+    query = std::move(newQuery);
 }
 
 void CpuMonitor::closeQuery() {
-    queryWrapper.closeQuery();
+    query.reset();
     coreTimeCounters.clear();
 }
 
@@ -97,7 +74,7 @@ std::size_t CpuMonitor::getHistorySize() const {
 
 void CpuMonitor::collectData() {
     PDH_STATUS status;
-    status = PdhCollectQueryData(queryWrapper);
+    status = PdhCollectQueryData(*query);
     if (ERROR_SUCCESS != status) {
         throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
     }
@@ -110,7 +87,7 @@ void CpuMonitor::collectData() {
             throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
         }
         if (PDH_CSTATUS_VALID_DATA != displayValue.CStatus && PDH_CSTATUS_NEW_DATA != displayValue.CStatus) {
-            throw std::system_error(status, std::system_category(), "Error in counter data");
+            throw std::runtime_error("Error in counter data");
         }
 
         cpuLoad[i] = displayValue.doubleValue;

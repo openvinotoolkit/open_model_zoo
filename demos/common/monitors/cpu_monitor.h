@@ -8,15 +8,7 @@
 #include <deque>
 #include <vector>
 #ifdef _WIN32
-#include <pdh.h>
-class QueryWrapper {
-public:
-    QueryWrapper();
-    ~QueryWrapper();
-    void closeQuery();
-    operator PDH_HQUERY() const;
-    PDH_HQUERY query;
-};
+#include <query_wrapper.h>
 #endif
 #include <chrono>
 
@@ -43,7 +35,7 @@ private:
     void openQuery();
     void closeQuery();
 
-    QueryWrapper queryWrapper;
+    std::unique_ptr<QueryWrapper> query;
     std::vector<PDH_HCOUNTER> coreTimeCounters;
 #endif
 };

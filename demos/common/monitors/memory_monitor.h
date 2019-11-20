@@ -7,6 +7,9 @@
 #include<iostream> // TODO: remove
 
 #include <deque>
+#ifdef _WIN32
+#include<query_wrapper.h>
+#endif
 
 class MemoryMonitor {
 public:
@@ -30,4 +33,11 @@ private:
     double memTotal, swapTotal;
     double maxMemTotal, maxSwapTotal;
     std::deque<std::pair<double, double>> memSwapUsageHistory;
+#ifdef _WIN32
+    void openQuery();
+    void closeQuery();
+
+    std::unique_ptr<QueryWrapper> query;
+    PDH_HCOUNTER pagingFileUsageCounter;
+#endif
 };
