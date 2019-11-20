@@ -43,7 +43,7 @@ class FRCNNPostprocessingBboxResize(Postprocessor):
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
 
     @staticmethod
-    def _get_coeff_x_y_from_metadata(image_metadata):
+    def get_coeff_x_y_from_metadata(image_metadata):
         assert image_metadata and 'geometric_operations' in image_metadata
         geometric_operations = image_metadata['geometric_operations'] # should be list of GeometricOperationMetadata
 
@@ -84,7 +84,7 @@ class FRCNNPostprocessingBboxResize(Postprocessor):
         assert image_metadata and 'geometric_operations' in image_metadata, (
             "Postprocessing step `faster_rcnn_postprocessing_resize` cannot work without "
             "metadata with `geometric_operations` field")
-        coeff_x, coeff_y = self._get_coeff_x_y_from_metadata(image_metadata)
+        coeff_x, coeff_y = self.get_coeff_x_y_from_metadata(image_metadata)
 
         for prediction in predictions:
             prediction.x_mins *= coeff_x

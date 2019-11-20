@@ -23,6 +23,7 @@ except ImportError:
 from .adapter import Adapter
 from ..config import StringField, ConfigError
 from ..representation import CoCocInstanceSegmentationPrediction, DetectionPrediction, ContainerPrediction
+from ..postprocessor import FRCNNPostprocessingBboxResize
 from ..utils import contains_all
 
 
@@ -201,6 +202,7 @@ class MaskRCNNAdapter(Adapter):
 
         for batch_index, identifier in enumerate(identifiers):
             image_size = frame_meta[batch_index]['image_size'][:2]
+            coeff_x, coeff_y = FRCNNPostprocessingBboxResize.get_coeff_x_y_from_metadata(frame_meta[batch_index])
             prediction_box_mask = np.where(detections_boxes[:, 0] == batch_index)
             filtered_detections_boxes = detections_boxes[prediction_box_mask]
             filtered_detections_boxes = filtered_detections_boxes[:, 1::]
@@ -210,8 +212,8 @@ class MaskRCNNAdapter(Adapter):
             for box, masks in zip(filtered_detections_boxes, filtered_masks):
                 label = box[0]
                 cls_mask = masks[int(label)-1, ...]
-                box[2::2] *= image_size[1]
-                box[3::2] *= image_size[0]
+                box[2::2] *= coeff_x
+                box[3::2] *= coeff_y
                 cls_mask = self.segm_postprocess(box[2:], cls_mask, *image_size, True, True)
                 instance_masks.append(cls_mask)
             instance_segmentation_prediction = CoCocInstanceSegmentationPrediction(
