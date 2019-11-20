@@ -83,6 +83,8 @@ class ONNXLauncher(Launcher):
         if len(np.shape(data)) == 4:
             data = np.transpose(data, layout).astype(np.float32)
             if len(layer_shape) == 3:
+                if np.shape(data)[0] != 1:
+                    raise ValueError('Only for batch size 1 first dimension can be omitted')
                 return data[0]
             return data
         if len(np.shape(data)) == 5 and len(layout) == 5:
