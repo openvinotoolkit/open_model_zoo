@@ -109,7 +109,7 @@ inline std::vector<std::string> parseDevices(const std::string& device_string) {
 	std::string device_type = device_string.substr(0, colon_position);
 	if (device_type.compare("HETERO") == 0 || device_type.compare("MULTI") == 0) {
             std::string comma_separated_devices = device_string.substr(colon_position + 1);
-	    devices = split(comma_separated_devices, ',');
+	    std::vector<std::string> devices = split(comma_separated_devices, ',');
 	    for (auto& device : devices)
         	device = device.substr(0, device.find("("));
 	    return devices;
