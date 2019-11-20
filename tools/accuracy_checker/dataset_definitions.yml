@@ -313,6 +313,12 @@ datasets:
     annotation: lpr.pickle
     dataset_meta: lpr.json
 
+    preprocessing:
+      - type: resize
+        dst_width: 94
+        dst_height: 24
+
+
   - name: image_retrieval
     data_source: textile_crops
     annotation_conversion:
