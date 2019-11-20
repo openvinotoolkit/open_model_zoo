@@ -143,10 +143,10 @@ NATIVE_DEMOS = [
         TestCase(options={'-i': ImageDirectoryArg('semantic-segmentation-adas')}),
         device_cases('-d'),
         single_option_cases('-m',
-                            ModelArg('mask_rcnn_inception_resnet_v2_atrous_coco'),
-                            ModelArg('mask_rcnn_inception_v2_coco'),
-                            ModelArg('mask_rcnn_resnet101_atrous_coco'),
-                            ModelArg('mask_rcnn_resnet50_atrous_coco'))
+            ModelArg('mask_rcnn_inception_resnet_v2_atrous_coco'),
+            ModelArg('mask_rcnn_inception_v2_coco'),
+            ModelArg('mask_rcnn_resnet101_atrous_coco'),
+            ModelArg('mask_rcnn_resnet50_atrous_coco'))
     )),
 
     NativeDemo(subdirectory='multi_channel/face_detection_demo',
