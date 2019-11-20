@@ -1,5 +1,4 @@
 import os
-import copy
 import cv2
 from accessify import private
 
@@ -7,13 +6,12 @@ from openvino.inference_engine import IENetwork, IECore
 
 
 class Detector(object):
-    def __init__(self, path_to_model_xml, path_to_lib, label_class=15, scale=None, thr=0.3, device='CPU'):
+    def __init__(self,ie,  path_to_model_xml, path_to_lib, label_class, scale=None, thr=0.3, device='CPU'):
         self.model = IENetwork(model=path_to_model_xml, weights=os.path.splitext(path_to_model_xml)[0] + '.bin')
-        self._device = device
-        self.ie = IECore()
-        if self._device == 'CPU':
-            self.ie.add_extension(path_to_lib, self._device)
-        self._exec_model = self.ie.load_network(self.model, device)
+        self._ie = ie
+        if device == 'CPU':
+            self._ie.add_extension(path_to_lib, device)
+        self._exec_model = self._ie.load_network(self.model, device)
         self._scale = scale
         self._thr = thr
         self._label_class = label_class
@@ -37,7 +35,7 @@ class Detector(object):
     def infer(self, prep_img):
         t0 = cv2.getTickCount()
         output = self._exec_model.infer(inputs={self._input_layer_name: prep_img})
-        self.infer_time = ((cv2.getTickCount() - t0) / cv2.getTickFrequency())
+        self.infer_time = (cv2.getTickCount() - t0) / cv2.getTickFrequency()
         return output
 
     @private
@@ -52,13 +50,13 @@ class Detector(object):
             h_box = ymax - ymin
             return [xmin, ymin, w_box, h_box]
 
-        bboxes_new = [coord_translation(bbox[3:]) for bbox in bboxes if bbox[1] == 15 and bbox[2] > self._thr]
+        bboxes_new = [coord_translation(bbox[3:]) for bbox in bboxes if bbox[1] == self._label_class and bbox[2] > self._thr]
 
         return bboxes_new
 
     def detect(self, img):
-        img = copy.copy(img)
         img = self.preprocess(img)
         output = self.infer(img)
         bboxes = self.postprocess(output[self._output_layer_name][0][0])
+
         return bboxes

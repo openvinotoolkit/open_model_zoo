@@ -5,7 +5,6 @@ The Open Model Zoo demo applications are console applications that demonstrate h
 
 The Open Model Zoo includes the following demos:
 
-  [Single Human Pose Estimation Python* Demo](./python_demos/human_pose_estimation_demo/README.md) - 2D human pose estimation demo. 
 - [3D Human Pose Estimation Python* Demo](./python_demos/human_pose_estimation_3d_demo/README.md) - 3D human pose estimation demo.
 - [Action Recognition Python* Demo](./python_demos/action_recognition/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
@@ -24,6 +23,7 @@ The Open Model Zoo includes the following demos:
 - [Object Detection for YOLO V3 C++ Demo](./object_detection_demo_yolov3_async/README.md) - Demo application for YOLOV3-based Object Detection networks, new Async API performance showcase, and simple OpenCV interoperability (supports video and camera inputs).
 - [Pedestrian Tracker C++ Demo](./pedestrian_tracker_demo/README.md) - Demo application for pedestrian tracking scenario.
 - [Security Barrier Camera C++ Demo](./security_barrier_camera_demo/README.md) - Vehicle Detection followed by the Vehicle Attributes and License-Plate Recognition, supports images/video and camera inputs.
+- [Single Human Pose Estimation Python* Demo](./python_demos/single_human_pose_estimation_demo/README.md) - 2D human pose estimation demo.
 - [Smart Classroom C++ Demo](./smart_classroom_demo/README.md) - Face recognition and action detection demo for classroom environment.
 - [Super Resolution C++ Demo](./super_resolution_demo/README.md) - Super Resolution demo (the demo supports only images as inputs). It enhances the resolution of the input image.
 - [Text Detection C++ Demo](./text_detection_demo/README.md) - Text Detection demo. It detects and recognizes multi-oriented scene text on an input image and puts a bounding box around detected area.
@@ -46,7 +46,6 @@ The table below shows the correlation between models, demos, and supported plugi
 | Model                                            | Demos supported on the model                                                                                 | CPU       | GPU       | MYRIAD/HDDL | HETERO:FPGA,CPU |
 |--------------------------------------------------|----------------------------------------------------------------------------------------------------------------|-----------|-----------|-------------|-----------------|
 | human-pose-estimation-3d-0001                    | [3D Human Pose Estimation Python* Demo](./python_demos/human_pose_estimation_3d_demo/README.md)    | Supported | Supported |             |                 |
-| single-human-pose-estimation-0001                | [Human Pose Estimation Python* Demo](./python_demos/human_pose_estimation_demo/README.md)     | Supported | Supported |
 | action-recognition-0001-decoder                  | [Action Recognition Demo](./python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
 | action-recognition-0001-encoder                  | [Action Recognition Demo](./python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
 | driver-action-recognition-adas-0002-decoder      | [Action Recognition Demo](./python_demos/action_recognition/README.md)            | Supported | Supported |             |                 |
@@ -76,6 +75,7 @@ The table below shows the correlation between models, demos, and supported plugi
 | landmarks-regression-retail-0009                 | [Smart Classroom Demo](./smart_classroom_demo/README.md)<br>[Interactive Face Recognition Python* Demo](./python_demos/face_recognition_demo/README.md)                              | Supported | Supported | Supported   | Supported       |
 | person-detection-action-recognition-0005         | [Smart Classroom Demo](./smart_classroom_demo/README.md)                              | Supported | Supported | Supported   | Supported       |
 | person-detection-action-recognition-teacher-0002 | [Smart Classroom Demo](./smart_classroom_demo/README.md)                              | Supported | Supported |             | Supported       |
+| single-human-pose-estimation-0001                | [Single Human Pose Estimation Python* Demo](./python_demos/single_human_pose_estimation_demo/README.md)     | Supported | Supported |
 | single-image-super-resolution-1032               | [Super Resolution Demo](./super_resolution_demo/README.md)                            | Supported | Supported |             | Supported       |
 | single-image-super-resolution-1033               | [Super Resolution Demo](./super_resolution_demo/README.md)                            | Supported | Supported |             | Supported       |
 | text-detection-0003                              | [Text Detection Demo](./text_detection_demo/README.md)                                | Supported | Supported |             | Supported       |

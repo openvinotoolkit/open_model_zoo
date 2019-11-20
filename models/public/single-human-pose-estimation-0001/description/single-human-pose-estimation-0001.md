@@ -25,7 +25,7 @@ Name: "data" , shape: [1x3x384x288] - An input image in the format [BxCxHxW],
     - H - image height
     - W - image width
 
-   Expected color order - RGB. Mean values - [123.675,116.28,103.53](for BGR). Scale values - [58.395,57.12,57.375](for BGR).
+   Expected color order - RGB. Mean values - [123.675,116.28,103.53]. Scale values - [58.395,57.12,57.375]
 
 ### Converted model
 

@@ -1,20 +1,18 @@
 import os
-import copy
 import numpy as np
 from accessify import private
 
 import cv2
-from openvino.inference_engine import IENetwork, IECore
+from openvino.inference_engine import IENetwork
 
 def preprocess_bbox(bbox, image):
     aspect_ratio = 0.75
-    bbox[0] = np.max((0, bbox[0]))
-    bbox[1] = np.max((0, bbox[1]))
+    bbox[0] = np.clip(bbox[0], 0, image.shape[0] - 1)
+    bbox[1] = np.clip(bbox[1], 0, image.shape[0] - 1)
     x2 = np.min((image.shape[1] - 1, bbox[0] + np.max((0, bbox[2] - 1))))
     y2 = np.min((image.shape[0] - 1, bbox[1] + np.max((0, bbox[3] - 1))))
 
-    if x2 >= bbox[0] and y2 >= bbox[1]:
-        bbox = [bbox[0], bbox[1], x2 - bbox[0], y2 - bbox[1]]
+    bbox = [bbox[0], bbox[1], x2 - bbox[0], y2 - bbox[1]]
 
     cx_bbox = bbox[0] + bbox[2] * 0.5
     cy_bbox = bbox[1] + bbox[3] * 0.5
@@ -25,7 +23,7 @@ def preprocess_bbox(bbox, image):
     elif bbox[2] < aspect_ratio * bbox[3]:
         bbox[2] = bbox[3] * aspect_ratio
 
-    s = np.array([bbox[2] / 200., bbox[3] / 200.], np.float32)
+    s = np.array([bbox[2], bbox[3]], np.float32)
     scale = s * 1.25
 
     return center, scale
@@ -46,12 +44,10 @@ def affine_transform(pt, t):
 
 
 class TransformedCrop(object):
-    def __init__(self, scale=0.35, input_weight=288, input_height=384, stride=8):
+    def __init__(self, input_weight=288, input_height=384):
         self._num_keypoints = 17
-        self._scale = scale
         self._weight = input_weight
         self._height = input_height
-        self._stride = stride
 
     def __call__(self, sample):
         s = sample['scale']
@@ -69,7 +65,7 @@ class TransformedCrop(object):
     @staticmethod
     def get_trasformation_matrix(center, scale, output_size):
 
-        w, h = scale * 200
+        w, h = scale
         points = np.zeros((3, 2), dtype=np.float32)
         transformed_points = np.zeros((3, 2), dtype=np.float32)
 
@@ -92,13 +88,12 @@ class TransformedCrop(object):
 
 
 class HumanPoseEstimator(object):
-    def __init__(self, path_to_model_xml, path_to_lib, scale=None, thr=-100, device='CPU'):
+    def __init__(self, ie, path_to_model_xml, path_to_lib, scale=None, thr=-100, device='CPU'):
         self.model = IENetwork(model=path_to_model_xml, weights=os.path.splitext(path_to_model_xml)[0] + '.bin')
-        self._device = device
-        self.ie = IECore()
-        if self._device == 'CPU':
-            self.ie.add_extension(path_to_lib, self._device)
-        self._exec_model = self.ie.load_network(self.model, self._device)
+        self._ie = ie
+        if device == 'CPU':
+            self._ie.add_extension(path_to_lib, device)
+        self._exec_model = self._ie.load_network(self.model, device)
         self._scale = scale
         self._thr = thr
         self.input_layer_name = next(iter(self.model.inputs))
@@ -117,7 +112,7 @@ class HumanPoseEstimator(object):
             'center': c
         }
         sample = self._transform(sample)
-        sample['image'] = np.expand_dims(sample['image'].transpose(2, 0, 1), axis=0),
+        sample['image'] = sample['image'].transpose(2, 0, 1)[None, ]
 
         return sample['image'], sample['rev_trans']
 
@@ -136,7 +131,6 @@ class HumanPoseEstimator(object):
         return all_keypoints_transformed
 
     def estimate(self, img, bbox):
-        img = copy.copy(img)
         preprocessed_img, rev_trans = self.preprocess(img, bbox)
         heatmaps = self.infer(preprocessed_img)
         keypoints = self.postprocess(heatmaps, rev_trans)

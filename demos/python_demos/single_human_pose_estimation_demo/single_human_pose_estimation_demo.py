@@ -1,5 +1,8 @@
 import argparse
 import cv2
+
+from openvino.inference_engine import IECore
+
 from detector import Detector
 from estimator import HumanPoseEstimator
 
@@ -14,12 +17,11 @@ def build_argparser():
     parser.add_argument("-i", "--input", type=str, nargs='+',  default='', help="path to video or image/images")
     parser.add_argument("-d", "--device", type=str, default='CPU', required=False,
                         help="Specify the target to infer on CPU or GPU")
-    parser.add_argument("--cpu-extension", type=str, required=False, help="path to cpu extension")
-    parser.add_argument("--label-person", type=str, required=False, help="Label of class person for detector")
-    parser.add_argument('--no_show', help='Optional. Do not display output.', action='store_true')
+    parser.add_argument("-l", "--cpu-extension", type=str, required=False, help="path to cpu extension")
+    parser.add_argument("--label-person", type=int, required=False, default=15, help="Label of class person for detector")
+    parser.add_argument("--no_show", help='Optional. Do not display output.', action='store_true')
 
     return parser
-
 
 class ImageReader(object):
     def __init__(self, file_names):
@@ -62,23 +64,24 @@ class VideoReader(object):
 
 
 def run_demo(args):
-
-    DetectorPerson = Detector(path_to_model_xml=args.model_od_xml,
+    ie = IECore()
+    detector_person = Detector(ie, path_to_model_xml=args.model_od_xml,
                               device=args.device,
-                              path_to_lib=args.cpu_extension)
+                              path_to_lib=args.cpu_extension,
+                              label_class=args.label_person)
 
-    SingleHumanPoseEstimator = HumanPoseEstimator(path_to_model_xml=args.model_hpe_xml,
+    single_human_pose_estimator = HumanPoseEstimator(ie, path_to_model_xml=args.model_hpe_xml,
                                                   device=args.device,
                                                   path_to_lib=args.cpu_extension)
     if args.input != '':
         img = cv2.imread(args.input[0], cv2.IMREAD_COLOR)
-        frames_reader = VideoReader(args.input) if img is None else ImageReader(args.input)
+        frames_reader, delay = (VideoReader(args.input), 1) if img is None else (ImageReader(args.input), 0)
     else:
         raise ValueError('Either --input has to be set')
 
     for frame in frames_reader:
-        bboxes = DetectorPerson.detect(frame)
-        human_poses = [SingleHumanPoseEstimator.estimate(frame, bbox) for bbox in bboxes]
+        bboxes = detector_person.detect(frame)
+        human_poses = [single_human_pose_estimator.estimate(frame, bbox) for bbox in bboxes]
 
         colors = [(0, 0, 255),
                   (255, 0, 0), (0, 255, 0), (255, 0, 0), (0, 255, 0),
@@ -91,16 +94,15 @@ def run_demo(args):
             for id_kpt, kpt in enumerate(pose):
                 cv2.circle(frame, (int(kpt[0]), int(kpt[1])), 3, colors[id_kpt], -1)
 
-        cv2.putText(frame, 'summary fps: {:.2f} (fps estimation: {:.2f} / fps detection: {:.2f})'.format(
-            float(1 / (DetectorPerson.infer_time + SingleHumanPoseEstimator.infer_time * len(human_poses))),
-            float(1 / SingleHumanPoseEstimator.infer_time),
-            float(1 / DetectorPerson.infer_time)), (50, 50), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
+            cv2.putText(frame, 'summary: {:.1f} FPS (estimation: {:.1f} FPS / detection: {:.1f} FPS)'.format(
+            float(1 / (detector_person.infer_time + single_human_pose_estimator.infer_time * len(human_poses))),
+            float(1 / single_human_pose_estimator.infer_time),
+            float(1 / detector_person.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
         if args.no_show:
             continue
         cv2.imshow('Human Pose Estimation Demo', frame)
-        key = cv2.waitKey(33)
+        key = cv2.waitKey(delay)
         if key == 27:
-            cv2.destroyAllWindows()
             return
 
 if __name__ == "__main__":
