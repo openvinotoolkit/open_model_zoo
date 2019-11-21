@@ -141,3 +141,4 @@ goto :eof
 
 :errorHandling
 echo Error
+exit /B 1
