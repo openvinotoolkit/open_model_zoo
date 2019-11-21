@@ -44,11 +44,11 @@ class ImageReader(object):
 
 class VideoReader(object):
     def __init__(self, file_name):
-        self.file_name = file_name[0]
         try:
             self.file_name = int(file_name[0])
-        except ValueError:
-            pass
+        except:
+            self.file_name = file_name[0]
+
 
     def __iter__(self):
         self.cap = cv2.VideoCapture(self.file_name)
@@ -94,7 +94,7 @@ def run_demo(args):
             for id_kpt, kpt in enumerate(pose):
                 cv2.circle(frame, (int(kpt[0]), int(kpt[1])), 3, colors[id_kpt], -1)
 
-            cv2.putText(frame, 'summary: {:.1f} FPS (estimation: {:.1f} FPS / detection: {:.1f} FPS)'.format(
+        cv2.putText(frame, 'summary: {:.1f} FPS (estimation: {:.1f} FPS / detection: {:.1f} FPS)'.format(
             float(1 / (detector_person.infer_time + single_human_pose_estimator.infer_time * len(human_poses))),
             float(1 / single_human_pose_estimator.infer_time),
             float(1 / detector_person.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))

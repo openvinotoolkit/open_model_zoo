@@ -6,8 +6,18 @@ from openvino.inference_engine import IENetwork, IECore
 
 
 class Detector(object):
-    def __init__(self,ie,  path_to_model_xml, path_to_lib, label_class, scale=None, thr=0.3, device='CPU'):
+    def __init__(self, ie, path_to_model_xml, path_to_lib, label_class, scale=None, thr=0.3, device='CPU'):
+        self.OUTPUT_SIZE = 7
         self.model = IENetwork(model=path_to_model_xml, weights=os.path.splitext(path_to_model_xml)[0] + '.bin')
+        self._input_layer_name = next(iter(self.model.inputs))
+        self._output_layer_name = next(iter(self.model.outputs))
+
+        assert len(self.model.outputs) == 1, "Expected 1 output blob"
+
+        assert len(self.model.outputs[self._output_layer_name].shape) == 4 and \
+               self.model.outputs[self._output_layer_name].shape[3] == self.OUTPUT_SIZE, \
+            "Expected model output shape with %s outputs" % (self.OUTPUT_SIZE)
+
         self._ie = ie
         if device == 'CPU':
             self._ie.add_extension(path_to_lib, device)
@@ -15,9 +25,7 @@ class Detector(object):
         self._scale = scale
         self._thr = thr
         self._label_class = label_class
-        self._input_layer_name = next(iter(self.model.inputs))
-        self._output_layer_name = next(iter(self.model.outputs))
-        _, _, self.input_w, self.input_h = self.model.inputs[self._input_layer_name].shape
+        _, _, self.input_h,  self.input_w = self.model.inputs[self._input_layer_name].shape
         self._h = -1
         self._w = -1
         self.infer_time = -1
@@ -58,5 +66,4 @@ class Detector(object):
         img = self.preprocess(img)
         output = self.infer(img)
         bboxes = self.postprocess(output[self._output_layer_name][0][0])
-
         return bboxes

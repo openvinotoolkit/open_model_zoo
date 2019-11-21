@@ -49,18 +49,13 @@ class TransformedCrop(object):
         self._weight = input_weight
         self._height = input_height
 
-    def __call__(self, sample):
-        s = sample['scale']
-        c = sample['center']
-
+    def __call__(self, img, bbox):
+        c, s = preprocess_bbox(bbox, img)
         trans, _ = self.get_trasformation_matrix(c, s, [self._weight, self._height])
-        transformed_image = cv2.warpAffine(sample['image'], trans, (self._weight, self._height), flags=cv2.INTER_LINEAR)
-        sample['trans'] = trans
-        sample['rev_trans'] = self.get_trasformation_matrix(c, s, [36, 48])[1]
+        transformed_image = cv2.warpAffine(img, trans, (self._weight, self._height), flags=cv2.INTER_LINEAR)
+        rev_trans = self.get_trasformation_matrix(c, s, [36, 48])[1]
 
-        sample['image'] = transformed_image
-
-        return sample
+        return trans,  rev_trans, transformed_image.transpose(2, 0, 1)[None, ]
 
     @staticmethod
     def get_trasformation_matrix(center, scale, output_size):
@@ -90,38 +85,34 @@ class TransformedCrop(object):
 class HumanPoseEstimator(object):
     def __init__(self, ie, path_to_model_xml, path_to_lib, scale=None, thr=-100, device='CPU'):
         self.model = IENetwork(model=path_to_model_xml, weights=os.path.splitext(path_to_model_xml)[0] + '.bin')
+        self._input_layer_name = next(iter(self.model.inputs))
+        self._output_layer_name = next(iter(self.model.outputs))
+
+        assert len(self.model.outputs) == 1, "Expected 1 output blob"
+
+        assert len(self.model.outputs[self._output_layer_name].shape) == 4, "Expected model output shape [1, N, H, W]"
+
         self._ie = ie
         if device == 'CPU':
             self._ie.add_extension(path_to_lib, device)
         self._exec_model = self._ie.load_network(self.model, device)
         self._scale = scale
         self._thr = thr
-        self.input_layer_name = next(iter(self.model.inputs))
-        self.output_layer_name = next(iter(self.model.outputs))
-        _, _, self.input_w, self.input_h = self.model.inputs[self.input_layer_name].shape
+
+        _, _, self.input_h, self.input_w = self.model.inputs[self._input_layer_name].shape
         self._transform = TransformedCrop()
         self.infer_time = -1
 
     @private
     def preprocess(self, img, bbox):
-        c, s = preprocess_bbox(bbox, img)
-        sample = {
-            'image': img,
-            'bbox': bbox,
-            'scale': s,
-            'center': c
-        }
-        sample = self._transform(sample)
-        sample['image'] = sample['image'].transpose(2, 0, 1)[None, ]
-
-        return sample['image'], sample['rev_trans']
+        return self._transform(img, bbox)
 
     @private
     def infer(self, prep_img):
         t0 = cv2.getTickCount()
-        output = self._exec_model.infer(inputs={self.input_layer_name: prep_img})
+        output = self._exec_model.infer(inputs={self._input_layer_name: prep_img})
         self.infer_time = ((cv2.getTickCount() - t0) / cv2.getTickFrequency())
-        return output[self.output_layer_name][0]
+        return output[self._output_layer_name][0]
 
     @staticmethod
     def postprocess(heatmaps, rev_trans):
@@ -131,7 +122,7 @@ class HumanPoseEstimator(object):
         return all_keypoints_transformed
 
     def estimate(self, img, bbox):
-        preprocessed_img, rev_trans = self.preprocess(img, bbox)
+        trans, rev_trans, preprocessed_img = self.preprocess(img, bbox)
         heatmaps = self.infer(preprocessed_img)
         keypoints = self.postprocess(heatmaps, rev_trans)
         return keypoints

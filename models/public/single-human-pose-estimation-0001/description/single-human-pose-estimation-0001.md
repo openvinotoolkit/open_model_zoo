@@ -43,11 +43,11 @@ Name: "data" , shape: [1x3x384x288] - An input image in the format [BxCxHxW],
 
 ### Original model
 
-The net outputs tensor with shapes: [1x17x48x36]. ( For everyone keypoint own heatmap)
+The net outputs tensor with shapes: [1x17x48x36]. ( For every keypoint own heatmap)
 
 ### Converted model
 
-The net outputs tensor with shapes: [1x17x48x36]. ( For everyone keypoint own heatmap)
+The net outputs tensor with shapes: [1x17x48x36]. ( For every keypoint own heatmap)
 
 ## Legal Information
 [LICENSE](https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE)
