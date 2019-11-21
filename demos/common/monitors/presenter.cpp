@@ -57,9 +57,9 @@ void meansToOstream(const std::map<MonitorType, std::vector<double>> means, std:
             } else {
                 assert (2 == memoryMean->second.size());
                 tmpStream << "Mean memory usage: " << std::fixed << std::setprecision(1) << memoryMean->second.front()
-                    << "GiB\n";
+                    << " GiB\n";
                 tmpStream << "Mean swap usage: " << std::fixed << std::setprecision(1) << memoryMean->second.back()
-                    << "GiB\n";
+                    << " GiB\n";
             }
         }
     stream << tmpStream.str();
@@ -86,6 +86,7 @@ Presenter::Presenter(const std::string& keys, int yPos, cv::Size graphSize, std:
 void Presenter::addRemoveMonitor(MonitorType monitor) {
     int sampleStep = std::max(1, static_cast<int>(graphSize.width / historySize));
     unsigned updatedHistorySize = (graphSize.width + sampleStep - 1) / sampleStep; // round up
+    updatedHistorySize = std::max(2u, updatedHistorySize);
     switch(monitor) {
         case MonitorType::CpuAverage: {
             if (cpuMonitor.getHistorySize() > 1 && distributionCpuEnabled) {
@@ -166,11 +167,12 @@ void Presenter::drawGraphs(cv::Mat& frame) {
     int textGraphSplittingLine = graphSize.height / 5;
     int graphRectHeight = graphSize.height - textGraphSplittingLine;
     int sampleStep = std::max(1, static_cast<int>((graphSize.width + historySize - 1) / historySize)); // round up
+    unsigned possibleHistorySize = (graphSize.width + sampleStep - 1) / sampleStep; // round up
 
-    if (cpuMonitor.getHistorySize() > 1 && --numberOfEnabledMonitors >= 0) {
+    if (cpuMonitor.getHistorySize() > 1 && possibleHistorySize > 1 && --numberOfEnabledMonitors >= 0) {
         std::deque<std::vector<double>> lastHistory = cpuMonitor.getLastHistory();
         cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize} & cv::Rect(0, 0, frame.cols, frame.rows));
-        graph *= 1.3;
+        graph = graph / 2 + cv::Scalar{127, 127, 127};
 
         int lineXPos = graph.cols - 1;
         std::vector<cv::Point> averageLoad(lastHistory.size());
@@ -211,7 +213,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
     if (distributionCpuEnabled && --numberOfEnabledMonitors >= 0) {
         std::deque<std::vector<double>> lastHistory = cpuMonitor.getLastHistory();
         cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize} & cv::Rect(0, 0, frame.cols, frame.rows));
-        graph *= 1.3;
+        graph = graph / 2 + cv::Scalar{127, 127, 127};
 
         if (!lastHistory.empty()) {
             int rectXPos = 0;
@@ -253,10 +255,10 @@ void Presenter::drawGraphs(cv::Mat& frame) {
         graphPos += graphSize.width + graphPadding;
     }
 
-    if (memoryMonitor.getHistorySize() > 1 && --numberOfEnabledMonitors >= 0) {
+    if (memoryMonitor.getHistorySize() > 1 && possibleHistorySize > 1 && --numberOfEnabledMonitors >= 0) {
         std::deque<std::pair<double, double>> lastHistory = memoryMonitor.getLastHistory();
         cv::Mat graph = frame(cv::Rect{cv::Point{graphPos, yPos}, graphSize} & cv::Rect(0, 0, frame.cols, frame.rows));
-        graph *= 1.3;
+        graph = graph / 2 + cv::Scalar{127, 127, 127};
         int histxPos = graph.cols - 1;
         double range = std::min(memoryMonitor.getMaxMemTotal() + memoryMonitor.getMaxSwap(),
             (memoryMonitor.getMaxMem() + memoryMonitor.getMaxSwap()) * 1.2);
@@ -285,7 +287,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
         } else {
             strStream.str("");
             strStream << std::fixed << std::setprecision(1) << lastHistory.back().first << " + "
-                << lastHistory.back().second << "GiB";
+                << lastHistory.back().second << " GiB";
         }
         int baseline;
         int textWidth = cv::getTextSize(strStream.str(),

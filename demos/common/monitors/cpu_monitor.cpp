@@ -134,10 +134,10 @@ std::vector<unsigned long> getIdleCpuStat(std::size_t nCores) {
         "(\\d+)\\s+"
         "(\\d+)\\s+"
         "(\\d+)\\s+" // idle
-        "(\\d+).*"); // iowait
+        "(\\d+)"); // iowait
 
     while (std::getline(procStat, line)) {
-        if (std::regex_match(line, match, coreJiffies)) {
+        if (std::regex_search(line, match, coreJiffies)) {
             // it doesn't handle overflow of sum and overflows of /proc/stat values
             unsigned long idleInfo = stoul(match[5]) + stoul(match[6]),
                 coreId = stoul(match[1]);
