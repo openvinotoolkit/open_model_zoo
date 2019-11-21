@@ -20,3 +20,17 @@ Each custom evaluation config should start with keyword `evaluation` and contain
  * `module` - evaluation module for loading. 
 Before running, please make sure that prefix to module added to your python path or use `python_path` parameter in config for it specification.
 Optionally you can provide `module_config` section which contains config for custom evaluator (Depends from realization, it can contains evaluator specific parameters).
+
+
+## Examples
+* **Sequential Action Recognition Evaluator** demonstrates how to run Action Recognition models with encoder + decoder architecture.
+  [Evaluator code](sequential_action_recognition_evaluator.py)
+  Configuration file examples:
+    * [action-recognition-0001-encoder](../configs/action-recognition-0001-encoder.yml) - running full pipeline of action recognition model.
+    * [action-recognition-0001-decoder](../configs/action-recognition-0001-decoder.yml) - running only decoder stage with dumped embeddings of encoder.
+* **MTCNN Evaluator** shows how to run MTCNN model.
+  [Evaluator code](mtcnn_evaluator.py)
+  Configuration file examples:
+    * [mtcnn-p](../configs/mtcnn-p.yml) - running proposal stage of MTCNN as usual model.
+    * [mtcnn-r](../configs/mtcnn-r.yml) - running only refine stage of MTCNN using dumped proposal stage results.
+    * [mtcnn-o](../configs/mtcnn-o.yml) - running full MTCNN pipeline.

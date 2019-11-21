@@ -469,7 +469,6 @@ class DLSDKLauncher(Launcher):
             self.network.reshape(shapes)
 
         self.exec_network = self.plugin.load(network=self.network, num_requests=self._num_requests)
-        self._do_reshape = False
 
     def _set_batch_size(self, batch_size):
         # in some cases we can not use explicit property for setting batch size, so we need to use reshape instead
