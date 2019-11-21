@@ -397,7 +397,7 @@ int main(int argc, char *argv[]) {
         if (FLAGS_pc) {
             printPerformanceCounts(*async_infer_request_curr, std::cout, getFullDeviceName(ie, FLAGS_d));
         }
-        meansToOstream(presenter.getMeans(), std::cout);
+        std::cout << presenter << '\n';
     }
     catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;

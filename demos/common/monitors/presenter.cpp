@@ -28,45 +28,6 @@ std::set<MonitorType> strKeysToMonitorSet(const std::string& keys) {
 }
 }
 
-void meansToOstream(const std::map<MonitorType, std::vector<double>> means, std::ostream& stream) {
-    std::ostringstream tmpStream; // create tmp stream to avoid affecting provided stream`s settings
-    const auto cpuAverageMean = means.find(MonitorType::CpuAverage);
-    if (means.end() != cpuAverageMean) {
-        if (cpuAverageMean->second.empty()) {
-            tmpStream << "No data collected for CPU utilization\n";
-        } else {
-            assert (1 == cpuAverageMean->second.size());
-            tmpStream << "Mean CPU utilization: " << std::fixed << std::setprecision(1)
-                << cpuAverageMean->second.front() * 100 << "%\n";
-        }
-    }
-    const auto distributionCpuMean = means.find(MonitorType::DistributionCpu);
-    if (means.end() != distributionCpuMean) {
-        if (distributionCpuMean->second.empty()) {
-            tmpStream << "No data collected for core utilization\n";
-        } else {
-            tmpStream << "Mean core utilization: " << std::fixed << std::setprecision(1);
-            for (double mean : distributionCpuMean->second) {
-                tmpStream << mean * 100 << "% ";
-            }
-            tmpStream << '\n';
-        }
-    }
-    const auto memoryMean = means.find(MonitorType::Memory);
-        if (means.end() != memoryMean) {
-            if (memoryMean->second.empty()) {
-                tmpStream << "No data collected for memory and swap usage\n";
-            } else {
-                assert (2 == memoryMean->second.size());
-                tmpStream << "Mean memory usage: " << std::fixed << std::setprecision(1) << memoryMean->second.front()
-                    << " GiB\n";
-                tmpStream << "Mean swap usage: " << std::fixed << std::setprecision(1) << memoryMean->second.back()
-                    << " GiB\n";
-            }
-        }
-    stream << tmpStream.str();
-}
-
 Presenter::Presenter(std::set<MonitorType> enabledMonitors,
         int yPos,
         cv::Size graphSize,
@@ -304,18 +265,27 @@ void Presenter::drawGraphs(cv::Mat& frame) {
     }
 }
 
-std::map<MonitorType, std::vector<double>> Presenter::getMeans() const {
-    std::map<MonitorType, std::vector<double>> means;
-    if (cpuMonitor.getHistorySize() > 1) {
-        means.emplace(MonitorType::DistributionCpu, cpuMonitor.getMeanCpuLoad());
+std::ostream& operator<<(std::ostream& os, const Presenter& presenter) {
+    std::ostringstream collectedDataStream; // create tmp stream to avoid affecting provided stream`s settings
+    collectedDataStream << std::fixed << std::setprecision(1);
+    if (presenter.cpuMonitor.getHistorySize() > 1) {
+        collectedDataStream << "Mean core utilization: ";
+        for (double mean : presenter.cpuMonitor.getMeanCpuLoad()) {
+            collectedDataStream << mean * 100 << "% ";
+        }
+        collectedDataStream << '\n';
     }
-    if (distributionCpuEnabled) {
-        std::vector<double> meanCpuLoad = cpuMonitor.getMeanCpuLoad();
+    if (presenter.distributionCpuEnabled) {
+        std::vector<double> meanCpuLoad = presenter.cpuMonitor.getMeanCpuLoad();
         double mean = std::accumulate(meanCpuLoad.begin(), meanCpuLoad.end(), 0.0) / meanCpuLoad.size();
-        means.emplace(MonitorType::CpuAverage, std::vector<double>{mean});
+        collectedDataStream << "Mean CPU utilization: " << mean * 100 << "%\n";
     }
-    if (memoryMonitor.getHistorySize() > 1) {
-        means.emplace(MonitorType::Memory, std::vector<double>{memoryMonitor.getMeanMem(), memoryMonitor.getMeanSwap()});
+    if (presenter.memoryMonitor.getHistorySize() > 1) {
+        collectedDataStream << "Memory mean usage: " << presenter.memoryMonitor.getMeanMem() << " GiB\n";
+        collectedDataStream << "Mean swap usage: " << presenter.memoryMonitor.getMeanSwap() << " GiB\n";
     }
-    return means;
+    std::string collectedData = collectedDataStream.str();
+    // drop last \n because usually it is not expeted that printing an objects starts a new line
+    os << collectedData.substr(0, collectedData.size() - 1);
+    return os;
 }

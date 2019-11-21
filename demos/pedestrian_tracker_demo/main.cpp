@@ -259,6 +259,8 @@ int main_work(int argc, char **argv) {
         pedestrian_detector.PrintPerformanceCounts(getFullDeviceName(ie, FLAGS_d_det));
         tracker->PrintReidPerformanceCounts(getFullDeviceName(ie, FLAGS_d_reid));
     }
+
+    std::cout << presenter << '\n';
     return 0;
 }
 

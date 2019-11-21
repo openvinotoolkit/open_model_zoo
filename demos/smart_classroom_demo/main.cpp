@@ -990,6 +990,8 @@ int main(int argc, char* argv[]) {
                                       face_obj_id_to_smoothed_action_maps);
             }
         }
+
+        std::cout << presenter << '\n';
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

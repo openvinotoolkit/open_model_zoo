@@ -396,6 +396,8 @@ int main(int argc, char *argv[]) {
             emotionsDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_em));
             facialLandmarksDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_lm));
         }
+
+        std::cout << presenter << '\n';
         // ---------------------------------------------------------------------------------------------------
 
         if (!FLAGS_o.empty()) {

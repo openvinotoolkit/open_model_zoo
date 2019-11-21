@@ -848,6 +848,8 @@ int main(int argc, char *argv[]) {
                 personReId.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
             }
         }
+
+        std::cout << presenter << '\n';
         // -----------------------------------------------------------------------------------------------------
     }
     catch (const std::exception& error) {

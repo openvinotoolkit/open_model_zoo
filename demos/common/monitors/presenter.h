@@ -15,8 +15,6 @@
 
 enum class MonitorType{CpuAverage, DistributionCpu, Memory};
 
-void meansToOstream(const std::map<MonitorType, std::vector<double>>, std::ostream& stream);
-
 class Presenter {
 public:
     explicit Presenter(std::set<MonitorType> enabledMonitors = {},
@@ -27,10 +25,12 @@ public:
         int yPos = 20,
         cv::Size graphSize = {150, 60},
         std::size_t historySize = 20);
+    operator std::string() const;
     void addRemoveMonitor(MonitorType monitor);
     void addRemoveMonitor(int key); // handles c, d, m, h keys
     void drawGraphs(cv::Mat& frame);
-    std::map<MonitorType, std::vector<double>> getMeans() const;
+
+    friend std::ostream& operator<<(std::ostream& os, const Presenter& presenter);
 
     const int yPos;
     const cv::Size graphSize;
@@ -43,3 +43,5 @@ private:
     MemoryMonitor memoryMonitor;
     std::ostringstream strStream;
 };
+
+std::ostream& operator<<(std::ostream& os, const Presenter& presenter);

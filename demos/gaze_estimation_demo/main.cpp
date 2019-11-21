@@ -221,6 +221,7 @@ int main(int argc, char *argv[]) {
             else
                 presenter.addRemoveMonitor(key);
         } while (cap.read(frame));
+        std::cout << presenter << '\n';
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

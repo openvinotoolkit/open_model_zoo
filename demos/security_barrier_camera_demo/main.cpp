@@ -878,6 +878,8 @@ int main(int argc, char* argv[]) {
                 / (frameCounter * context.nireq) * 100;
             std::cout << "Detection InferRequests usage: " << detectionsInfersUsage << "%\n";
         }
+
+        std::cout << context.drawersContext.presenter << '\n';
     } catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
         return 1;

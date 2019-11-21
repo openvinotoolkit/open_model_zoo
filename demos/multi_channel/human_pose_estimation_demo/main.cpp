@@ -459,6 +459,8 @@ int main(int argc, char* argv[]) {
         }
 
         network.reset();
+
+        std::cout << presenter << '\n';
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

@@ -126,6 +126,7 @@ int main(int argc, char* argv[]) {
                 presenter.addRemoveMonitor(key);
             }
         } while (cap.read(image));
+        std::cout << presenter << '\n';
     }
     catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
