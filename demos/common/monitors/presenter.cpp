@@ -9,6 +9,7 @@
 #include "presenter.h"
 
 namespace {
+constexpr std::map<int, MonitorType> keyToMonitorType{{'C', MonitorType::CpuAverage}, {'D', MonitorType::DistributionCpu}, {'M', MonitorType::Memory}};
 std::set<MonitorType> strKeysToMonitorSet(const std::string& keys) {
     std::set<MonitorType> enabledMonitors;
     for (unsigned char key: keys) {
