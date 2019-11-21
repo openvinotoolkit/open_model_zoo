@@ -7,7 +7,7 @@ The detector is able to detect 12 classes of objects (`sprite`, `kool-aid`, `ext
 
 ## Example
 
-`TBD`
+![](./product-detection-0001.png)
 
 ## Specification
 
