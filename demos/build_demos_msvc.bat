@@ -15,8 +15,7 @@
 :: limitations under the License.
 
 
-@setlocal
-SETLOCAL EnableDelayedExpansion
+setlocal EnableDelayedExpansion
 set "ROOT_DIR=%~dp0"
 
 set "SOLUTION_DIR64=%USERPROFILE%\Documents\Intel\OpenVINO\omz_demos_build"
