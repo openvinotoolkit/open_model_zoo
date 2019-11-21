@@ -177,23 +177,28 @@ std::size_t CpuMonitor::getHistorySize() const {
 void CpuMonitor::collectData() {
     std::vector<unsigned long> idleCpuStat = getIdleCpuStat(nCores);
     auto timePoint = std::chrono::steady_clock::now();
-    std::vector<double> cpuLoad(idleCpuStat.size());
-    for (std::size_t i = 0; i < idleCpuStat.size(); ++i) {
-        double idleDiff = idleCpuStat[i] - prevIdleCpuStat[i];
-        typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
-        cpuLoad[i] = 1.0 - idleDiff / clockTicks / std::chrono::duration_cast<Sec>(timePoint - prevTimePoint).count();
-    }
-    prevTimePoint = timePoint;
-    prevIdleCpuStat = std::move(idleCpuStat);
+    // don't update data too frequently which may result in negative values for cpuLoad.
+    // It may happen when collectData() is called just after setHistorySize().
+    if (timePoint - prevTimePoint > std::chrono::milliseconds{100}) {
+        std::vector<double> cpuLoad(idleCpuStat.size());
+        for (std::size_t i = 0; i < idleCpuStat.size(); ++i) {
+            double idleDiff = idleCpuStat[i] - prevIdleCpuStat[i];
+            typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
+            cpuLoad[i] = 1.0
+                - idleDiff / clockTicks / std::chrono::duration_cast<Sec>(timePoint - prevTimePoint).count();
+        }
+        prevTimePoint = timePoint;
+        prevIdleCpuStat = std::move(idleCpuStat);
 
-    for (std::size_t i = 0; i < cpuLoad.size(); ++i) {
-        cpuLoadSum[i] += cpuLoad[i];
-    }
-    ++samplesNumber;
+        for (std::size_t i = 0; i < cpuLoad.size(); ++i) {
+            cpuLoadSum[i] += cpuLoad[i];
+        }
+        ++samplesNumber;
 
-    cpuLoadHistory.push_back(std::move(cpuLoad));
-    if (cpuLoadHistory.size() > historySize) {
-        cpuLoadHistory.pop_front();
+        cpuLoadHistory.push_back(std::move(cpuLoad));
+        if (cpuLoadHistory.size() > historySize) {
+            cpuLoadHistory.pop_front();
+        }
     }
 }
 
