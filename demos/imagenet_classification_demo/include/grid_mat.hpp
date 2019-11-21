@@ -15,16 +15,13 @@
 
 class GridMat {
 public:
-    cv::Mat outimg;
-
-    explicit GridMat(const cv::Size maxDisp = cv::Size{1080, 1920},
-                     size_t rNum = 15, size_t cNum = 10, size_t rh = 60):
-    currSourceID{0}, rectangleHeight{rh}, positionNum{cNum * rNum} {
-        cellSize.width = maxDisp.width * 1. / cNum;
-        cellSize.height = (maxDisp.height - rectangleHeight) * 1. / rNum;
-        
-        //size_t nGridCols = static_cast<size_t>(ceil(sqrt(static_cast<float>(sizes.size()))));
-        //size_t nGridRows = (sizes.size() - 1) / nGridCols + 1;
+    explicit GridMat(const cv::Size maxDisp = cv::Size{1920, 1080},
+                     const cv::Size cellSize = cv::Size{240, 135},
+                     size_t rh = 60):
+    cellSize{cellSize}, currSourceID{0}, rectangleHeight{rh} {
+        size_t cNum = ceil(maxDisp.width / cellSize.width);
+        size_t rNum = ceil(maxDisp.height / cellSize.height);
+        positionNum = cNum * rNum;
 
         for (size_t i = 0; i < cNum * rNum; i++) {
             cv::Point p;
@@ -33,9 +30,8 @@ public:
             points.push_back(p);
         }
 
-        outimg.create((cellSize.height * rNum) + rectangleHeight, cellSize.width * cNum, CV_8UC3);
-        outimg.setTo(0);
-        clear();
+        outImg.create((cellSize.height * rNum) + rectangleHeight, cellSize.width * cNum, CV_8UC3);
+        outImg.setTo(0);
     }
 
     cv::Size getCellSize() {
@@ -49,9 +45,30 @@ public:
         }
     }
 
-    void update() {
+    void textUpdate(double overSPF){
+        //set rectangle
+        size_t colunmNum = outImg.cols;
+        cv::Point p1 = cv::Point(0,0);
+        cv::Point p2 = cv::Point(colunmNum, rectangleHeight);
+        
+        rectangle(outImg,p1,p2,
+            cv::Scalar(0,0,0), cv::FILLED);
+        
+        //set text        
+        auto frameWidth = outImg.cols;
+        double fontScale = frameWidth * 1. / 640;
+        auto fontColor = cv::Scalar(0, 255, 0);
+        int thickness = 2;
+
+        cv::putText(outImg,
+                    cv::format("Overall FPS: %0.01f", 1./overSPF),
+                    cv::Point(10, static_cast<int>(30 * fontScale / 1.6)),
+                    cv::FONT_HERSHEY_PLAIN, fontScale, fontColor, thickness);
+    }
+
+    cv::Mat getMat() {
         while(!updateList.empty()) {    
-            cv::Mat cell = outimg(cv::Rect(points[currSourceID], cellSize));
+            cv::Mat cell = outImg(cv::Rect(points[currSourceID], cellSize));
             cv::Mat frame = updateList.front();
             updateList.pop_front();
 
@@ -68,48 +85,15 @@ public:
             else
                 currSourceID++;
         }
-    }
 
-    void textUpdate(double overSPF){
-        //set rectangle
-        size_t colunmNum = outimg.cols;
-        cv::Point p1 = cv::Point(0,0);
-        cv::Point p2 = cv::Point(colunmNum, rectangleHeight);
-        
-        rectangle(outimg,p1,p2,
-            cv::Scalar(0,0,0), cv::FILLED);
-        
-        //set text        
-        auto frameWidth = outimg.cols;
-        double fontScale = frameWidth * 1. / 640;
-        auto fontColor = cv::Scalar(0, 255, 0);
-        int thickness = 2;
-
-        cv::putText(outimg,
-                    cv::format("Overall FPS: %0.01f", 1./overSPF),
-                    cv::Point(10, static_cast<int>(30 * fontScale / 1.6)),
-                    cv::FONT_HERSHEY_PLAIN, fontScale, fontColor, thickness);
-    }
-
-    bool isFilled() const noexcept {
-        return unupdatedSourceIDs.empty();
-    }
-    void clear() {
-        size_t counter = 0;
-        std::generate_n(std::inserter(unupdatedSourceIDs, unupdatedSourceIDs.end()), points.size(), [&counter]{return counter++;});
-    }
-    std::set<size_t> getUnupdatedSourceIDs() const noexcept {
-        return unupdatedSourceIDs;
-    }
-    cv::Mat getMat() const noexcept {
-        return outimg;
+        return outImg;
     }
 
 private:
+    cv::Mat outImg;
     std::list<cv::Mat> updateList;
     cv::Size cellSize;
     size_t currSourceID;
-    std::set<size_t> unupdatedSourceIDs;
     std::vector<cv::Point> points;
     size_t rectangleHeight;
     size_t positionNum;
