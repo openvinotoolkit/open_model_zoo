@@ -9,6 +9,8 @@
 #include <utility>
 #include <algorithm>
 
+#include <inference_engine.hpp>
+
 using namespace InferenceEngine;
 using InferenceEngine::details::InferenceEngineException;
 
@@ -24,60 +26,46 @@ static bool SortScorePairDescend(const std::pair<float, T>& pair1,
  * In our demo we use it as a post-processing class for Faster-RCNN networks
  */
 class DetectionOutputPostProcessor {
-    CNNLayer cnnLayer;
-
 public:
-    explicit DetectionOutputPostProcessor(const CNNLayer* layer): cnnLayer(*layer) {
+    explicit DetectionOutputPostProcessor(const SizeVector &image_dims,
+                                          const SizeVector &loc_dims,
+                                          const SizeVector &conf_dims,
+                                          const SizeVector &prior_dims) {
         try {
-            if (cnnLayer.insData.size() != 3)
-                THROW_IE_EXCEPTION << "Incorrect number of input edges for layer " << cnnLayer.name;
-            if (cnnLayer.outData.empty())
-                THROW_IE_EXCEPTION << "Incorrect number of output edges for layer " << cnnLayer.name;
+            IE_ASSERT(4 == image_dims.size());
 
-            _num_classes = cnnLayer.GetParamAsInt("num_classes");
-            _background_label_id = cnnLayer.GetParamAsInt("background_label_id", 0);
-            _top_k = cnnLayer.GetParamAsInt("top_k", -1);
-            _variance_encoded_in_target = cnnLayer.GetParamAsBool("variance_encoded_in_target", false);
-            _keep_top_k = cnnLayer.GetParamAsInt("keep_top_k", -1);
-            _nms_threshold = cnnLayer.GetParamAsFloat("nms_threshold");
-            _confidence_threshold = cnnLayer.GetParamAsFloat("confidence_threshold", -FLT_MAX);
-            _share_location = cnnLayer.GetParamAsBool("share_location", true);
-            _normalized = cnnLayer.GetParamAsBool("normalized", true);
-            _image_height = cnnLayer.GetParamAsInt("input_height", 1);
-            _image_width = cnnLayer.GetParamAsInt("input_width", 1);
-            _prior_size = _normalized ? 4 : 5;
-            _offset = _normalized ? 0 : 1;
-            _num_loc_classes = _share_location ? 1 : _num_classes;
+            _background_label_id = 0;
+            _top_k = 400;
+            _variance_encoded_in_target = true;
+            _keep_top_k = 200;
+            _nms_threshold = 0.3;
+            _confidence_threshold = -FLT_MAX;
+            _share_location = false;
+            _normalized = false;
+            _image_height = image_dims[2];
+            _image_width = image_dims[3];
+            _prior_size = 5;
+            _offset = 1;
+            _code_type = CodeType::CENTER_SIZE;
 
-            std::string code_type_str = cnnLayer.GetParamAsString("code_type", "caffe.PriorBoxParameter.CORNER");
-            _code_type = (code_type_str == "caffe.PriorBoxParameter.CENTER_SIZE" ? CodeType::CENTER_SIZE
-                                                                                 : CodeType::CORNER);
-
-            auto prior_ptr = cnnLayer.insData[idx_priors].lock();
-            if (!prior_ptr) {
-                THROW_IE_EXCEPTION << "Pointer to the input data of layer " << cnnLayer.name << " is exprired";
-            }
-            auto prior_dims = prior_ptr->getTensorDesc().getDims();
             IE_ASSERT(2 <=  prior_dims.size());
             int priors_size = prior_dims[prior_dims.size() - 2] * prior_dims[prior_dims.size() - 1];
 
-            auto loc_ptr = cnnLayer.insData[idx_location].lock();
-            if (!loc_ptr) {
-                THROW_IE_EXCEPTION << "Pointer to the input data of layer " << cnnLayer.name << " is exprired";
-            }
-            auto loc_dims = loc_ptr->getTensorDesc().getDims();
             IE_ASSERT(2 <= loc_dims.size());
             int loc_size = loc_dims[loc_dims.size() - 2]*loc_dims[loc_dims.size() - 1];
 
-            auto conf_ptr = cnnLayer.insData[idx_confidence].lock();
-            if (!conf_ptr) {
-                THROW_IE_EXCEPTION << "Pointer to the input data of layer " << cnnLayer.name << " is exprired";
-            }
-            auto conf_dims = conf_ptr->getTensorDesc().getDims();
             IE_ASSERT(2 <= conf_dims.size());
             size_t conf_size = conf_dims[0]*conf_dims[1];
 
             _num_priors = static_cast<int>(priors_size / _prior_size);
+
+            // num_classes guessed from the output dims
+            if (loc_size % (_num_priors * 4) != 0) {
+                throw std::runtime_error("Can't guess number of classes. Something's wrong with output layers dims");
+            }
+
+            _num_classes = loc_size / (_num_priors * 4);
+            _num_loc_classes = _num_classes;
 
             if (_num_priors * _num_loc_classes * 4 != loc_size)
                 THROW_IE_EXCEPTION << "Number of priors must match number of location predictions.";
