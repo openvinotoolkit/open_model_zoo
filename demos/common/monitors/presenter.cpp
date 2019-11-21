@@ -9,18 +9,19 @@
 #include "presenter.h"
 
 namespace {
-constexpr std::map<int, MonitorType> keyToMonitorType{{'C', MonitorType::CpuAverage}, {'D', MonitorType::DistributionCpu}, {'M', MonitorType::Memory}};
+const std::map<int, MonitorType> keyToMonitorType{
+    {'C', MonitorType::CpuAverage},
+    {'D', MonitorType::DistributionCpu},
+    {'M', MonitorType::Memory}};
+
 std::set<MonitorType> strKeysToMonitorSet(const std::string& keys) {
     std::set<MonitorType> enabledMonitors;
     for (unsigned char key: keys) {
-        switch(std::toupper(key)) {
-            case 'C': enabledMonitors.insert(MonitorType::CpuAverage);
-                break;
-            case 'D': enabledMonitors.insert(MonitorType::DistributionCpu);
-                break;
-            case 'M': enabledMonitors.insert(MonitorType::Memory);
-                break;
-            default: throw std::runtime_error("Unknown monitor type");
+        auto iter = keyToMonitorType.find(std::toupper(key));
+        if (keyToMonitorType.end() == iter) {
+            throw std::runtime_error("Unknown monitor type");
+        } else {
+            enabledMonitors.insert(iter->second);
         }
     }
     return enabledMonitors;
@@ -123,24 +124,22 @@ void Presenter::addRemoveMonitor(MonitorType monitor) {
 }
 
 void Presenter::addRemoveMonitor(int key) {
-    switch(std::toupper(key)) {
-        case 'C': addRemoveMonitor(MonitorType::CpuAverage);
-            break;
-        case 'D': addRemoveMonitor(MonitorType::DistributionCpu);
-            break;
-        case 'M': addRemoveMonitor(MonitorType::Memory);
-            break;
-        case 'H': // show/hide all
-            if (0 == cpuMonitor.getHistorySize() && memoryMonitor.getHistorySize() <= 1) {
-                addRemoveMonitor(MonitorType::CpuAverage);
-                addRemoveMonitor(MonitorType::DistributionCpu);
-                addRemoveMonitor(MonitorType::Memory);
-            } else {
-                cpuMonitor.setHistorySize(0);
-                distributionCpuEnabled = false;
-                memoryMonitor.setHistorySize(0);
-            }
-            break;
+    key = std::toupper(key);
+    if ('H' == key) {
+        if (0 == cpuMonitor.getHistorySize() && memoryMonitor.getHistorySize() <= 1) {
+            addRemoveMonitor(MonitorType::CpuAverage);
+            addRemoveMonitor(MonitorType::DistributionCpu);
+            addRemoveMonitor(MonitorType::Memory);
+        } else {
+            cpuMonitor.setHistorySize(0);
+            distributionCpuEnabled = false;
+            memoryMonitor.setHistorySize(0);
+        }
+    } else {
+        auto iter = keyToMonitorType.find(key);
+        if (keyToMonitorType.end() != iter) {
+            addRemoveMonitor(iter->second);
+        }
     }
 }
 
