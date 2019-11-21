@@ -47,7 +47,7 @@ if "%INTEL_OPENVINO_DIR%"=="" (
         echo Failed to set the environment variables automatically
         echo To fix, run the following command: ^<INSTALL_DIR^>\bin\setupvars.bat
         echo where INSTALL_DIR is the OpenVINO installation directory.
-        GOTO errorHandling
+        goto errorHandling
     )
 )
 
@@ -120,7 +120,7 @@ if "!MSBUILD_BIN!" == "" (
 
 if "!MSBUILD_BIN!" == "" (
     echo Build tools for Microsoft Visual Studio !VS_VERSION! cannot be found. If you use Visual Studio 2017, please download and install build tools from https://www.visualstudio.com/downloads/#build-tools-for-visual-studio-2017
-    GOTO errorHandling
+    goto errorHandling
 )
 
 if exist "%SOLUTION_DIR64%\CMakeCache.txt" del "%SOLUTION_DIR64%\CMakeCache.txt"
@@ -133,7 +133,7 @@ echo ###############^|^| Build Inference Engine Demos using MS Visual Studio (MS
 echo.
 echo "!MSBUILD_BIN!" Demos.sln /p:Configuration=Release
 "!MSBUILD_BIN!" Demos.sln /p:Configuration=Release
-if ERRORLEVEL 1 GOTO errorHandling
+if ERRORLEVEL 1 goto errorHandling
 
 echo Done.
 goto :eof
