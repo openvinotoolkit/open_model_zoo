@@ -77,11 +77,14 @@ vectors that are "close" by L2 metric (Euclidean distance).
 There are multiple models that provide various trade-offs between performance
 and accuracy (expect a bigger model to perform better).
 
-| Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Pairwise accuracy |
+| Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Rank-1 |
 |-----------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |------------------ |
 | [person-reidentification-retail-0031](./person-reidentification-retail-0031/description/person-reidentification-retail-0031.md)   | 0.028                | 0.280      | 92.11%            |
 | [person-reidentification-retail-0079](./person-reidentification-retail-0079/description/person-reidentification-retail-0079.md)   | 0.124                | 0.820      | 92.93%            |
 | [person-reidentification-retail-0076](./person-reidentification-retail-0076/description/person-reidentification-retail-0076.md)   | 0.594                | 0.820      | 93.35%            |
+
+| Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Pairwise accuracy |
+|-----------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |------------------ |
 | [face-reidentification-retail-0095](./face-reidentification-retail-0095/description/face-reidentification-retail-0095.md)         | 0.588                | 1.107      | 99.33%            |
 
 
