@@ -1,15 +1,14 @@
 #include <cstdio>
 #include <string>
 #include <functional>
+#include <atomic>
 
 #include <inference_engine.hpp>
 
 #include <ie_iextension.h>
 #include <ext_list.hpp>
 
-#include "captures.hpp"
-
-class  infReqCallback
+class  InferRequestCallback
 {
     public:
     InferenceEngine::InferRequest& ir;
@@ -17,43 +16,56 @@ class  infReqCallback
 
     std::mutex&  mutex;
     std::condition_variable& condVar;
-    Captures& captures;
+    std::vector<cv::Mat>& inputImgs;
+    std::string inputBlobName;
+    unsigned batchSize;
     std::queue<cv::Mat>& showMats;
+    unsigned& curPos;
+    unsigned& framesNum;
+    std::atomic<bool>& quitFlag;
 
-    infReqCallback(InferenceEngine::InferRequest& ir, 
+    InferRequestCallback(InferenceEngine::InferRequest& ir,
+                int index, 
                 std::mutex& mutex, std::condition_variable& condVar,
-                Captures& captures,
+                std::vector<cv::Mat>& inputImgs,
+                const std::string& inputBlobName,
+                unsigned batchSize,
                 std::queue<cv::Mat>& showMats,
-                int index
+                unsigned& curPos,
+                unsigned& framesNum,
+                std::atomic<bool>& quitFlag
                 ):
                 ir(ir), firstIndex(index),
                 mutex(mutex), condVar(condVar),
-                captures(captures),
-                showMats(showMats) {}
+                inputImgs(inputImgs),
+                inputBlobName(inputBlobName),
+                batchSize(batchSize),
+                showMats(showMats),
+                curPos(curPos),
+                framesNum(framesNum),
+                quitFlag(quitFlag) {}
 
 
     //curPos and framesNum is stored in ieWrapper
     void operator()() const{
-        if(!captures.quitFlag) {
-            int batchSize = captures.batchSize;
-            std::vector<cv::Mat>& inputImgs = captures.inputImgs;
-            int inputDataSize = captures.inputImgs.size();
+        if(!quitFlag) {
+            int inputDataSize = inputImgs.size();
             {
                 std::lock_guard<std::mutex> lock(mutex);
 
-                for(int j = 0; j < batchSize; j++)
+                for(unsigned j = 0; j < batchSize; j++)
                     showMats.push(inputImgs[(firstIndex+j)%inputDataSize]);
 
                 //sumTime += lastInferTime = cv::getTickCount() - startTime; // >:-/
-                captures.framesNum += batchSize;
-                firstIndex = captures.curPos;
-                captures.curPos = (captures.curPos + batchSize) % inputDataSize;
+                framesNum += batchSize;
+                firstIndex = curPos;
+                curPos = (curPos + batchSize) % inputDataSize;
             }
             condVar.notify_one();
 
-            auto inputBlob = ir.GetBlob(captures.inputBlobName);
+            auto inputBlob = ir.GetBlob(inputBlobName);
         
-            for(int i = 0; i < batchSize; i++) {        
+            for(unsigned i = 0; i < batchSize; i++) {        
                 cv::Mat inputImg = inputImgs.at((firstIndex + i) % inputDataSize);
                 matU8ToBlob<uint8_t>(inputImg, inputBlob, i);
             }
