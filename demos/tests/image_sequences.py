@@ -51,6 +51,12 @@ IMAGE_SEQUENCES = {
         image_net_arg('00045630'),
     ],
 
+    'face-recognition-gallery': [
+        image_net_arg('00000184'),
+        image_net_arg('00008165'),
+        image_net_arg('00040548'),
+    ],
+
     'gaze-estimation-adas': [
         image_net_arg('00008165'),
         image_net_arg('00008170'),
