@@ -286,6 +286,8 @@ std::ostream& operator<<(std::ostream& os, const Presenter& presenter) {
     }
     std::string collectedData = collectedDataStream.str();
     // drop last \n because usually it is not expeted that printing an objects starts a new line
-    os << collectedData.substr(0, collectedData.size() - 1);
+    if (!collectedData.empty()) {
+        os << collectedData.substr(0, collectedData.size() - 1);
+    }
     return os;
 }
