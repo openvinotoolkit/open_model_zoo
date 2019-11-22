@@ -5,15 +5,12 @@
 #pragma once
 
 #include<iostream> // TODO: remove
-
 #include <deque>
-#ifdef _WIN32
-#include<query_wrapper.h>
-#endif
 
 class MemoryMonitor {
 public:
     MemoryMonitor();
+    ~MemoryMonitor();
     void setHistorySize(std::size_t size);
     std::size_t getHistorySize() const;
     void collectData();
@@ -37,7 +34,7 @@ private:
     void openQuery();
     void closeQuery();
 
-    std::unique_ptr<QueryWrapper> query;
-    PDH_HCOUNTER pagingFileUsageCounter;
+    struct PerformanceCounter;
+    std::unique_ptr<PerformanceCounter> performanceCounter;
 #endif
 };

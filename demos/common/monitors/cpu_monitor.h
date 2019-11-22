@@ -5,16 +5,14 @@
 #pragma once
 
 #include <iostream> // TODO remove
+#include <chrono>
 #include <deque>
 #include <vector>
-#ifdef _WIN32
-#include <query_wrapper.h>
-#endif
-#include <chrono>
 
 class CpuMonitor {
 public:
     CpuMonitor();
+    ~CpuMonitor();
     void setHistorySize(std::size_t size);
     std::size_t getHistorySize() const;
     void collectData();
@@ -35,7 +33,7 @@ private:
     void openQuery();
     void closeQuery();
 
-    std::unique_ptr<QueryWrapper> query;
-    std::vector<PDH_HCOUNTER> coreTimeCounters;
+    struct PerformanceCounter;
+    std::unique_ptr<PerformanceCounter> performanceCounter;
 #endif
 };

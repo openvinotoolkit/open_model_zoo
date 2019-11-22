@@ -5,10 +5,11 @@
 #include "cpu_monitor.h"
 #include <algorithm>
 #ifdef _WIN32
-#include <windows.h>
-#include <pdhmsg.h>
+#include "query_wrapper.h"
 #include <string>
 #include <system_error>
+#include <pdhmsg.h>
+#include <windows.h>
 
 namespace {
 std::size_t getNCores() {
@@ -18,6 +19,13 @@ std::size_t getNCores() {
 }
 }
 
+struct CpuMonitor::PerformanceCounter {
+    PerformanceCounter(std::size_t nCores) : query{new QueryWrapper}, coreTimeCounters(nCores, 0) {}
+
+    std::unique_ptr<QueryWrapper> query;
+    std::vector<PDH_HCOUNTER> coreTimeCounters;
+};
+
 CpuMonitor::CpuMonitor() :
     nCores{getNCores()},
     lastEnabled{false},
@@ -25,36 +33,36 @@ CpuMonitor::CpuMonitor() :
     historySize{0},
     cpuLoadSum(nCores, 0) {}
 
+CpuMonitor::~CpuMonitor() = default; // PerformanceCounter is incomplete in header and destructor can't be defined implicitly
+
 void CpuMonitor::openQuery() {
-    std::unique_ptr<QueryWrapper> newQuery{new QueryWrapper};
+    std::unique_ptr<CpuMonitor::PerformanceCounter> newPerformanceCounter{new CpuMonitor::PerformanceCounter{nCores}};
 
     PDH_STATUS status;
-    coreTimeCounters.resize(nCores);
     for (std::size_t i = 0; i < nCores; ++i)
     {
         std::wstring fullCounterPath{L"\\Processor(" + std::to_wstring(i) + L")\\% Processor Time"};
-        status = PdhAddCounterW(*newQuery, fullCounterPath.c_str(), 0, &coreTimeCounters[i]);
+        status = PdhAddCounterW(*newPerformanceCounter->query, fullCounterPath.c_str(), 0, &newPerformanceCounter->coreTimeCounters[i]);
         if (ERROR_SUCCESS != status)
         {
             throw std::system_error(status, std::system_category(), "PdhAddCounter() failed");
         }
-        status = PdhSetCounterScaleFactor(coreTimeCounters[i], -2); // scale counter to [0, 1]
+        status = PdhSetCounterScaleFactor(newPerformanceCounter->coreTimeCounters[i], -2); // scale counter to [0, 1]
         if (ERROR_SUCCESS != status)
         {
             throw std::system_error(status, std::system_category(), "PdhSetCounterScaleFactor() failed");
         }
     }
-    status = PdhCollectQueryData(*newQuery);
+    status = PdhCollectQueryData(*newPerformanceCounter->query);
     if (ERROR_SUCCESS != status)
     {
         throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
     }
-    query = std::move(newQuery);
+    performanceCounter = std::move(newPerformanceCounter);
 }
 
 void CpuMonitor::closeQuery() {
-    query.reset();
-    coreTimeCounters.clear();
+    performanceCounter.reset();
 }
 
 void CpuMonitor::setHistorySize(std::size_t size) {
@@ -74,15 +82,15 @@ std::size_t CpuMonitor::getHistorySize() const {
 
 void CpuMonitor::collectData() {
     PDH_STATUS status;
-    status = PdhCollectQueryData(*query);
+    status = PdhCollectQueryData(*performanceCounter->query);
     if (ERROR_SUCCESS != status) {
         throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
     }
 
     PDH_FMT_COUNTERVALUE displayValue;
-    std::vector<double> cpuLoad(coreTimeCounters.size());
-    for (std::size_t i = 0; i < coreTimeCounters.size(); i++) {
-        status = PdhGetFormattedCounterValue(coreTimeCounters[i], PDH_FMT_DOUBLE, NULL, &displayValue);
+    std::vector<double> cpuLoad(performanceCounter->coreTimeCounters.size());
+    for (std::size_t i = 0; i < performanceCounter->coreTimeCounters.size(); ++i) {
+        status = PdhGetFormattedCounterValue(performanceCounter->coreTimeCounters[i], PDH_FMT_DOUBLE, NULL, &displayValue);
         if (ERROR_SUCCESS != status) {
             throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
         }

@@ -3,14 +3,20 @@
 //
 
 #include "memory_monitor.h"
-
 #ifdef _WIN32
+#include "query_wrapper.h"
 #include <algorithm>
-
 #define PSAPI_VERSION 2
 #include <windows.h>
 #include <pdhmsg.h>
 #include <psapi.h>
+
+struct MemoryMonitor::PerformanceCounter {
+    PerformanceCounter() : query{new QueryWrapper} {}
+
+    std::unique_ptr<QueryWrapper> query;
+    PDH_HCOUNTER pagingFileUsageCounter;
+};
 
 MemoryMonitor::MemoryMonitor() :
         enabled{false},
@@ -28,24 +34,26 @@ MemoryMonitor::MemoryMonitor() :
         / (1024 * 1024 * 1024);
 }
 
-void MemoryMonitor::openQuery() {
-    std::unique_ptr<QueryWrapper> newQuery{new QueryWrapper};
+MemoryMonitor::~MemoryMonitor() = default; // PerformanceCounter is incomplete in header and destructor can't be defined implicitly
 
-    PDH_STATUS status = PdhAddCounterW(*newQuery, L"\\Paging File(_Total)\\% Usage", 0, &pagingFileUsageCounter);
+void MemoryMonitor::openQuery() {
+    std::unique_ptr<MemoryMonitor::PerformanceCounter> newPerformanceCounter{new MemoryMonitor::PerformanceCounter};
+
+    PDH_STATUS status = PdhAddCounterW(*newPerformanceCounter->query, L"\\Paging File(_Total)\\% Usage", 0, &newPerformanceCounter->pagingFileUsageCounter);
     if (ERROR_SUCCESS != status)
     {
         throw std::system_error(status, std::system_category(), "PdhSetCounterScaleFactor() failed");
     }
-    status = PdhSetCounterScaleFactor(pagingFileUsageCounter, -2); // scale counter to [0, 1]
+    status = PdhSetCounterScaleFactor(newPerformanceCounter->pagingFileUsageCounter, -2); // scale counter to [0, 1]
     if (ERROR_SUCCESS != status)
     {
         throw std::system_error(status, std::system_category(), "PdhSetCounterScaleFactor() failed");
     }
-    query = std::move(newQuery);
+    performanceCounter = std::move(newPerformanceCounter);
 }
 
 void MemoryMonitor::closeQuery() {
-    query.reset();
+    performanceCounter.reset();
 }
 
 void MemoryMonitor::setHistorySize(std::size_t size) {
@@ -70,12 +78,12 @@ void MemoryMonitor::collectData() {
     }
 
     PDH_STATUS status;
-    status = PdhCollectQueryData(*query);
+    status = PdhCollectQueryData(*performanceCounter->query);
     if (ERROR_SUCCESS != status) {
         throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
     }
     PDH_FMT_COUNTERVALUE displayValue;
-    status = PdhGetFormattedCounterValue(pagingFileUsageCounter, PDH_FMT_DOUBLE, NULL, &displayValue);
+    status = PdhGetFormattedCounterValue(performanceCounter->pagingFileUsageCounter, PDH_FMT_DOUBLE, NULL, &displayValue);
     if (ERROR_SUCCESS != status) {
         throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
     }
