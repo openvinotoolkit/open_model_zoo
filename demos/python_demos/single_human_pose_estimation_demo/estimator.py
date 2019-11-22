@@ -44,18 +44,20 @@ def affine_transform(pt, t):
 
 
 class TransformedCrop(object):
-    def __init__(self, input_weight=288, input_height=384):
+    def __init__(self, input_height=384, input_weight=288, output_height=48, output_weight=36):
         self._num_keypoints = 17
-        self._weight = input_weight
-        self._height = input_height
+        self.input_weight = input_weight
+        self.input_height = input_height
+        self.output_weight = output_weight
+        self.output_height = output_height
 
     def __call__(self, img, bbox):
         c, s = preprocess_bbox(bbox, img)
-        trans, _ = self.get_trasformation_matrix(c, s, [self._weight, self._height])
-        transformed_image = cv2.warpAffine(img, trans, (self._weight, self._height), flags=cv2.INTER_LINEAR)
-        rev_trans = self.get_trasformation_matrix(c, s, [36, 48])[1]
+        trans, _ = self.get_trasformation_matrix(c, s, [self.input_weight, self.input_height])
+        transformed_image = cv2.warpAffine(img, trans, (self.input_weight, self.input_height), flags=cv2.INTER_LINEAR)
+        rev_trans = self.get_trasformation_matrix(c, s, [self.output_weight, self.output_height])[1]
 
-        return trans,  rev_trans, transformed_image.transpose(2, 0, 1)[None, ]
+        return rev_trans, transformed_image.transpose(2, 0, 1)[None, ]
 
     @staticmethod
     def get_trasformation_matrix(center, scale, output_size):
@@ -87,10 +89,20 @@ class HumanPoseEstimator(object):
         self.model = IENetwork(model=path_to_model_xml, weights=os.path.splitext(path_to_model_xml)[0] + '.bin')
         self._input_layer_name = next(iter(self.model.inputs))
         self._output_layer_name = next(iter(self.model.outputs))
+        self.CHANNELS_SIZE = 3
+        self.OUTPUT_CHANNELS_SIZE = 17
+
+        assert len(self.model.inputs) == 1, "Expected 1 input blob"
+
+        assert len(self.model.inputs[self._input_layer_name].shape) == 4 and \
+               self.model.inputs[self._input_layer_name].shape[1] == self.CHANNELS_SIZE,\
+               "Expected model input blob with shape [1, 3, H, W]"
 
         assert len(self.model.outputs) == 1, "Expected 1 output blob"
 
-        assert len(self.model.outputs[self._output_layer_name].shape) == 4, "Expected model output shape [1, N, H, W]"
+        assert len(self.model.outputs[self._output_layer_name].shape) == 4 and \
+               self.model.outputs[self._output_layer_name].shape[1] == self.OUTPUT_CHANNELS_SIZE,\
+            "Expected model output shape [1, %s, H, W]" % (self.OUTPUT_CHANNELS_SIZE)
 
         self._ie = ie
         if device == 'CPU':
@@ -100,7 +112,8 @@ class HumanPoseEstimator(object):
         self._thr = thr
 
         _, _, self.input_h, self.input_w = self.model.inputs[self._input_layer_name].shape
-        self._transform = TransformedCrop()
+        _, _, self.output_h, self.output_w = self.model.outputs[self._output_layer_name].shape
+        self._transform = TransformedCrop(self.input_h, self.input_w, self.output_h, self.output_w)
         self.infer_time = -1
 
     @private
@@ -122,7 +135,7 @@ class HumanPoseEstimator(object):
         return all_keypoints_transformed
 
     def estimate(self, img, bbox):
-        trans, rev_trans, preprocessed_img = self.preprocess(img, bbox)
+        rev_trans, preprocessed_img = self.preprocess(img, bbox)
         heatmaps = self.infer(preprocessed_img)
         keypoints = self.postprocess(heatmaps, rev_trans)
         return keypoints
