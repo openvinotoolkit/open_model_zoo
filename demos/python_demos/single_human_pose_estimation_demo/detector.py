@@ -10,25 +10,23 @@ class Detector(object):
         self.OUTPUT_SIZE = 7
         self.CHANNELS_SIZE = 3
         self.model = IENetwork(model=path_to_model_xml, weights=os.path.splitext(path_to_model_xml)[0] + '.bin')
+
+        assert len(self.model.inputs) == 1, "Expected 1 input blob"
+
+        assert len(self.model.outputs) == 1, "Expected 1 output blob"
+
         self._input_layer_name = next(iter(self.model.inputs))
         self._output_layer_name = next(iter(self.model.outputs))
-        self._input_model = {}
-
-
-        assert len(self.model.inputs) == 1 or len(self.model.inputs) == 2
 
         assert len(self.model.inputs[self._input_layer_name].shape) == 4 and \
                self.model.inputs[self._input_layer_name].shape[1] == self.CHANNELS_SIZE, \
             "Expected model output shape with %s channels " % (self.CHANNELS_SIZE)
 
-        assert len(self.model.outputs) == 1, "Expected 1 output blob"
 
         assert len(self.model.outputs[self._output_layer_name].shape) == 4 and \
                self.model.outputs[self._output_layer_name].shape[3] == self.OUTPUT_SIZE, \
             "Expected model output shape with %s outputs" % (self.OUTPUT_SIZE)
 
-        if len(self.model.inputs) == 2:
-            self._input_model['im_info'] = [[544, 992, 0, 0, 0, 0]]
         self._ie = ie
         if device == 'CPU':
             self._ie.add_extension(path_to_lib, device)
@@ -53,9 +51,7 @@ class Detector(object):
     @private
     def infer(self, prep_img):
         t0 = cv2.getTickCount()
-        self._input_model[self._input_layer_name] = prep_img
-        output = self._exec_model.infer(inputs=self._input_model)
-
+        output = self._exec_model.infer(inputs={self._input_layer_name: prep_img})
         self.infer_time = (cv2.getTickCount() - t0) / cv2.getTickFrequency()
         return output
 
