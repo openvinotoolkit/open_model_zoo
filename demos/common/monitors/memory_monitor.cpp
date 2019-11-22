@@ -34,12 +34,14 @@ MemoryMonitor::MemoryMonitor() :
         / (1024 * 1024 * 1024);
 }
 
-MemoryMonitor::~MemoryMonitor() = default; // PerformanceCounter is incomplete in header and destructor can't be defined implicitly
+// PerformanceCounter is incomplete in header and destructor can't be defined implicitly
+MemoryMonitor::~MemoryMonitor() = default;
 
 void MemoryMonitor::openQuery() {
     std::unique_ptr<MemoryMonitor::PerformanceCounter> newPerformanceCounter{new MemoryMonitor::PerformanceCounter};
 
-    PDH_STATUS status = PdhAddCounterW(*newPerformanceCounter->query, L"\\Paging File(_Total)\\% Usage", 0, &newPerformanceCounter->pagingFileUsageCounter);
+    PDH_STATUS status = PdhAddCounterW(*newPerformanceCounter->query, L"\\Paging File(_Total)\\% Usage", 0,
+        &newPerformanceCounter->pagingFileUsageCounter);
     if (ERROR_SUCCESS != status)
     {
         throw std::system_error(status, std::system_category(), "PdhSetCounterScaleFactor() failed");
@@ -83,7 +85,8 @@ void MemoryMonitor::collectData() {
         throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
     }
     PDH_FMT_COUNTERVALUE displayValue;
-    status = PdhGetFormattedCounterValue(performanceCounter->pagingFileUsageCounter, PDH_FMT_DOUBLE, NULL, &displayValue);
+    status = PdhGetFormattedCounterValue(performanceCounter->pagingFileUsageCounter, PDH_FMT_DOUBLE, NULL,
+        &displayValue);
     if (ERROR_SUCCESS != status) {
         throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
     }

@@ -10,7 +10,6 @@
 class MemoryMonitor {
 public:
     MemoryMonitor();
-    ~MemoryMonitor();
     void setHistorySize(std::size_t size);
     std::size_t getHistorySize() const;
     void collectData();
@@ -31,6 +30,9 @@ private:
     double maxMemTotal, maxSwapTotal;
     std::deque<std::pair<double, double>> memSwapUsageHistory;
 #ifdef _WIN32
+public:
+    ~MemoryMonitor();
+private:
     void openQuery();
     void closeQuery();
 

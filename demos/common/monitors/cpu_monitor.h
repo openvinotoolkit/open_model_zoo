@@ -12,7 +12,6 @@
 class CpuMonitor {
 public:
     CpuMonitor();
-    ~CpuMonitor();
     void setHistorySize(std::size_t size);
     std::size_t getHistorySize() const;
     void collectData();
@@ -30,6 +29,9 @@ private:
     std::chrono::steady_clock::time_point prevTimePoint;
 
 #ifdef _WIN32
+public:
+    ~CpuMonitor();
+private:
     void openQuery();
     void closeQuery();
 

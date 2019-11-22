@@ -33,7 +33,8 @@ CpuMonitor::CpuMonitor() :
     historySize{0},
     cpuLoadSum(nCores, 0) {}
 
-CpuMonitor::~CpuMonitor() = default; // PerformanceCounter is incomplete in header and destructor can't be defined implicitly
+// PerformanceCounter is incomplete in header and destructor can't be defined implicitly
+CpuMonitor::~CpuMonitor() = default;
 
 void CpuMonitor::openQuery() {
     std::unique_ptr<CpuMonitor::PerformanceCounter> newPerformanceCounter{new CpuMonitor::PerformanceCounter{nCores}};
@@ -42,7 +43,8 @@ void CpuMonitor::openQuery() {
     for (std::size_t i = 0; i < nCores; ++i)
     {
         std::wstring fullCounterPath{L"\\Processor(" + std::to_wstring(i) + L")\\% Processor Time"};
-        status = PdhAddCounterW(*newPerformanceCounter->query, fullCounterPath.c_str(), 0, &newPerformanceCounter->coreTimeCounters[i]);
+        status = PdhAddCounterW(*newPerformanceCounter->query, fullCounterPath.c_str(), 0,
+            &newPerformanceCounter->coreTimeCounters[i]);
         if (ERROR_SUCCESS != status)
         {
             throw std::system_error(status, std::system_category(), "PdhAddCounter() failed");
@@ -90,7 +92,8 @@ void CpuMonitor::collectData() {
     PDH_FMT_COUNTERVALUE displayValue;
     std::vector<double> cpuLoad(performanceCounter->coreTimeCounters.size());
     for (std::size_t i = 0; i < performanceCounter->coreTimeCounters.size(); ++i) {
-        status = PdhGetFormattedCounterValue(performanceCounter->coreTimeCounters[i], PDH_FMT_DOUBLE, NULL, &displayValue);
+        status = PdhGetFormattedCounterValue(performanceCounter->coreTimeCounters[i], PDH_FMT_DOUBLE, NULL,
+            &displayValue);
         if (ERROR_SUCCESS != status) {
             throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
         }
