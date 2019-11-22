@@ -28,7 +28,8 @@ from .geometric_transformations import (
     ExtendAroundRect,
     PointAligner,
     Tiling,
-    Crop3D
+    Crop3D,
+    ImagePyramid
 )
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
 
@@ -47,6 +48,7 @@ __all__ = [
     'PointAligner',
     'Tiling',
     'Crop3D',
+    'ImagePyramid',
 
     'BgrToGray',
     'BgrToRgb',

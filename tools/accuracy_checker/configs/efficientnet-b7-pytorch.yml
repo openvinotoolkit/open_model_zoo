@@ -38,7 +38,6 @@ models:
         model:   public/efficientnet-b7-pytorch/FP32/efficientnet-b7-pytorch.xml
         weights: public/efficientnet-b7-pytorch/FP32/efficientnet-b7-pytorch.bin
         adapter: classification
-        cpu_extensions: AUTO
 
 
       - framework: dlsdk
@@ -47,7 +46,6 @@ models:
         model:   public/efficientnet-b7-pytorch/FP16/efficientnet-b7-pytorch.xml
         weights: public/efficientnet-b7-pytorch/FP16/efficientnet-b7-pytorch.bin
         adapter: classification
-        cpu_extensions: AUTO
 
     datasets:
       - name: imagenet_1000_classes

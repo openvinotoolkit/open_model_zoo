@@ -33,6 +33,21 @@ datasets:
     annotation: mscoco_mask_rcnn_short_91.pickle
     dataset_meta: mscoco_mask_rcnn_short_91.json
     data_source: val2017
+    preprocessing:
+      - type: resize
+        aspect_ratio_scale: fit_to_window
+        dst_height: 800
+        dst_width: 1365
+      - type: padding
+        dst_height: 800
+        dst_width: 1365
+        pad_type: right_bottom
+
+    postprocessing:
+      - type: faster_rcnn_postprocessing_resize
+        dst_height: 800
+        dst_width: 1365
+
 
   - name: ms_coco_detection_91_classes
     annotation_conversion:
@@ -44,6 +59,20 @@ datasets:
     annotation: mscoco_det_91.pickle
     dataset_meta: mscoco_det_91.json
     data_source: val2017
+    preprocessing:
+      - type: resize
+        aspect_ratio_scale: fit_to_window
+        dst_height: 600
+        dst_width: 1024
+      - type: padding
+        dst_height: 600
+        dst_width: 1024
+        pad_type: right_bottom
+
+    postprocessing:
+      - type: faster_rcnn_postprocessing_resize
+        dst_height: 600
+        dst_width: 1024
 
   - name: ms_coco_keypoints
     data_source: val2017
@@ -302,6 +331,12 @@ datasets:
       decoding_dictionary_file: dict
     annotation: lpr.pickle
     dataset_meta: lpr.json
+
+    preprocessing:
+      - type: resize
+        dst_width: 94
+        dst_height: 24
+
 
   - name: image_retrieval
     data_source: textile_crops

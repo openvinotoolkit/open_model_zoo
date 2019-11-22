@@ -8,7 +8,6 @@ models:
         model:   intel/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.xml
         weights: intel/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -16,7 +15,6 @@ models:
         model:   intel/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.xml
         weights: intel/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -24,7 +22,6 @@ models:
         model:   intel/pedestrian-detection-adas-0002/INT8/pedestrian-detection-adas-0002.xml
         weights: intel/pedestrian-detection-adas-0002/INT8/pedestrian-detection-adas-0002.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
     datasets:
       - name: pedestrian_detection_dataset

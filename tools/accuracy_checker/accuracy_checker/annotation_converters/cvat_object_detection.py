@@ -83,7 +83,7 @@ class CVATObjectDetectionConverter(FileBasedAnnotationConverter):
     def generate_labels_mapping(self, annotation_meta):
         if self.dataset_meta:
             meta = read_json(self.dataset_meta)
-            if 'labels' in meta:
+            if 'labels' in meta and 'label_map' not in meta:
                 offset = int(self.has_background)
                 label_to_id = {label_name: label_id + offset for label_id, label_name in enumerate(meta['labels'])}
                 meta['label_map'] = {'label_map': {value: key for key, value in label_to_id.items()}}

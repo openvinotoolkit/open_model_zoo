@@ -94,7 +94,6 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
     def validate(self, entry, field_uri=None):
         """
         Validate that launcher entry meets all configuration structure requirements.
-
         Args:
             entry: launcher configuration file entry.
             field_uri: id of launcher entry.
@@ -470,7 +469,6 @@ class DLSDKLauncher(Launcher):
             self.network.reshape(shapes)
 
         self.exec_network = self.plugin.load(network=self.network, num_requests=self._num_requests)
-        self._do_reshape = False
 
     def _set_batch_size(self, batch_size):
         # in some cases we can not use explicit property for setting batch size, so we need to use reshape instead
@@ -673,6 +671,8 @@ class DLSDKLauncher(Launcher):
 
             if len(layer_shape) == 2 and len(data_shape) == 1:
                 return np.transpose([data])
+            if len(layer_shape) == 5 and len(layout) == 5:
+                return np.transpose(data, layout)
 
             return np.array(data)
 

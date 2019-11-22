@@ -24,7 +24,6 @@ models:
         model:   public/squeezenet1.1-caffe2/FP32/squeezenet1.1-caffe2.xml
         weights: public/squeezenet1.1-caffe2/FP32/squeezenet1.1-caffe2.bin
         adapter: classification
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -32,7 +31,6 @@ models:
         model:   public/squeezenet1.1-caffe2/FP16/squeezenet1.1-caffe2.xml
         weights: public/squeezenet1.1-caffe2/FP16/squeezenet1.1-caffe2.bin
         adapter: classification
-        cpu_extensions: AUTO
 
     datasets:
       - name: imagenet_1000_classes

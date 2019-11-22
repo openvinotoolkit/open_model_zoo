@@ -148,6 +148,12 @@ More detailed information about calculation segmentation metrics you can find [h
 * `coco_recall` - MS COCO Average Recall metric for keypoints recognition and object detection tasks. Supported representations: `PoseEstimationAnnotation`, `PoseEstimationPrediction`, `DetectionAnnotation`, `DetectionPrediction`.
   * `max_detections` - max number of predicted results per image. If you have more predictions,the results with minimal confidence will be ignored.
   * `threshold` - intersection over union threshold. You can specify one value or comma separated range of values. This parameter supports precomputed values for standard COCO thresholds (`.5`, `.75`, `.5:.05:.95`).
+* `coco_keypoints_precision` - MS COCO Average Precision metric for keypoints recognition task. Supported representations: `PoseEstimationAnnotation`, `PoseEstimationPrediction`.
+  * `max_detections` - max number of predicted results per image. If you have more predictions,the results with minimal confidence will be ignored.
+  * `threshold` - intersection over union threshold. You can specify one value or comma separated range of values. This parameter supports precomputed values for standard COCO thresholds (`.5`, `.75`, `.5:.05:.95`).
+* `coco_keypoints_recall` - MS COCO Average Recall metric for keypoints recognition task. Supported representations: `PoseEstimationAnnotation`, `PoseEstimationPrediction`.
+  * `max_detections` - max number of predicted results per image. If you have more predictions,the results with minimal confidence will be ignored.
+  * `threshold` - intersection over union threshold. You can specify one value or comma separated range of values. This parameter supports precomputed values for standard COCO thresholds (`.5`, `.75`, `.5:.05:.95`).
 * `hit_ratio` - metric for recommendation system evaluation. Supported representations: `HitRatioAnnotation`, `HitRatioPrediction`.
   * `top_k` - definition of number elements in rank list (optional, default 10).
 * `ndcg` - [Normalized Discounted Cumulative Gain](https://en.wikipedia.org/wiki/Discounted_cumulative_gain). Supported representations: `HitRatioAnnotation`, `HitRatioPrediction`.

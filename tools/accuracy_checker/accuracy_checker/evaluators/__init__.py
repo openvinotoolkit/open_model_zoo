@@ -17,10 +17,13 @@ limitations under the License.
 from .model_evaluator import ModelEvaluator
 from .pipeline_evaluator import PipeLineEvaluator
 from .module_evaluator import ModuleEvaluator
+from .base_evaluator import BaseEvaluator
 
 
 __all__ = [
     'ModelEvaluator',
     'PipeLineEvaluator',
-    'ModuleEvaluator'
+    'ModuleEvaluator',
+
+    'BaseEvaluator'
 ]

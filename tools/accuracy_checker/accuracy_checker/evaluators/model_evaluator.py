@@ -275,7 +275,7 @@ class ModelEvaluator(BaseEvaluator):
 
         return free_irs, queued_irs
 
-    def compute_metrics(self, print_results=True, output_callback=None, ignore_results_formatting=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if self._metrics_results:
             del self._metrics_results
             self._metrics_results = []
@@ -284,16 +284,16 @@ class ModelEvaluator(BaseEvaluator):
                 self._annotations, self._predictions):
             self._metrics_results.append(evaluated_metric)
             if print_results:
-                result_presenter.write_result(evaluated_metric, output_callback, ignore_results_formatting)
+                result_presenter.write_result(evaluated_metric, ignore_results_formatting)
         return self._metrics_results
 
-    def print_metrics_results(self, output_callback=None, ignore_results_formatting=False):
+    def print_metrics_results(self, ignore_results_formatting=False):
         if not self._metrics_results:
-            self.compute_metrics(True, output_callback, ignore_results_formatting)
+            self.compute_metrics(True, ignore_results_formatting)
             return
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_results(metric_result, output_callback, ignore_results_formatting)
+            presenter.write_results(metric_result, ignore_results_formatting)
 
     def load(self, stored_predictions, progress_reporter):
         self._annotations = self.dataset.annotation

@@ -48,6 +48,14 @@ ENTRIES_PATHS = {
     },
 }
 
+COMMAND_LINE_ARGS_AS_ENV_VARS = {
+    'source': 'DATA_DIR',
+    'annotations': 'ANNOTATIONS_DIR',
+    'bitstreams': 'BITSTREAMS_DIR',
+    'models': 'MODELS_DIR',
+    'extensions': 'EXTENSIONS_DIR',
+}
+DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
 
 class ConfigReader:
     """
@@ -87,7 +95,7 @@ class ConfigReader:
     @staticmethod
     def _read_configs(arguments):
         local_config = read_yaml(arguments.config)
-        definitions = os.environ.get('DEFINITIONS_FILE') or local_config.get('global_definitions')
+        definitions = os.environ.get(DEFINITION_ENV_VAR) or local_config.get('global_definitions')
         if definitions:
             definitions = read_yaml(Path(arguments.config).parent / definitions)
         global_config = read_yaml(arguments.definitions) if arguments.definitions else definitions
@@ -306,14 +314,7 @@ class ConfigReader:
     @staticmethod
     def _merge_paths_with_prefixes(arguments, config, mode='models'):
         args = arguments if isinstance(arguments, dict) else vars(arguments)
-        commandline_arg_to_env_var = {
-            'source': 'DATA_DIR',
-            'annotations': 'ANNOTATIONS_DIR',
-            'bitstreams': 'BITSTREAMS_DIR',
-            'models': 'MODELS_DIR',
-            'extensions': 'EXTENSIONS_DIR',
-        }
-        for argument, env_var in commandline_arg_to_env_var.items():
+        for argument, env_var in COMMAND_LINE_ARGS_AS_ENV_VARS.items():
             if argument not in args or args[argument] is None:
                 env_var_value = os.environ.get(env_var)
                 if env_var_value is not None:
@@ -523,6 +524,14 @@ class ConfigReader:
 
     @staticmethod
     def convert_paths(config):
+        definitions = os.environ.get(DEFINITION_ENV_VAR)
+        if definitions:
+            definitions = read_yaml(Path(definitions))
+            ConfigReader._prepare_global_configs(definitions)
+            config = ConfigReader._merge_configs(definitions, config, {}, 'models')
+        if COMMAND_LINE_ARGS_AS_ENV_VARS['source'] in os.environ:
+            ConfigReader._merge_paths_with_prefixes({}, config, 'models')
+
         def convert_launcher_paths(launcher_config):
             for key, path in launcher_config.items():
                 if key not in ENTRIES_PATHS['launchers']:
@@ -545,7 +554,7 @@ class ConfigReader:
                 for preprocessor in dataset_config['preprocessing']:
                     path_preprocessing = (create_command_line_mapping(preprocessor, None))
                     for path in path_preprocessing:
-                        preprocessor[path] = Path(path_preprocessing[path])
+                        preprocessor[path] = Path(preprocessor[path])
 
             for key, path in dataset_config.items():
                 if key not in ENTRIES_PATHS['datasets']:
@@ -558,6 +567,7 @@ class ConfigReader:
             datasets = model['datasets'].values() if isinstance(model['datasets'], dict) else model['datasets']
             for dataset_config in datasets:
                 convert_dataset_paths(dataset_config)
+        return config
 
 
 def create_command_line_mapping(config, value):

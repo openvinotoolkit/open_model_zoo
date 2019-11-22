@@ -10,15 +10,14 @@ models:
         adapter:
           type: action_detection
           priorbox_out: mbox/priorbox
-          loc_out: mbox_loc1/out/conv/flat/Reshape
-          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat/Reshape
+          loc_out: mbox_loc1/out/conv/flat
+          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat
           add_conf_out_prefix: out/anchor
           add_conf_out_count: 4
           num_action_classes: 3
           detection_threshold: 0.4
           action_confidence_threshold: 0.75
           action_scale: 3
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -28,15 +27,14 @@ models:
         adapter:
           type: action_detection
           priorbox_out: mbox/priorbox
-          loc_out: mbox_loc1/out/conv/flat/Reshape
-          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat/Reshape
+          loc_out: mbox_loc1/out/conv/flat
+          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat
           add_conf_out_prefix: out/anchor
           add_conf_out_count: 4
           num_action_classes: 3
           detection_threshold: 0.4
           action_confidence_threshold: 0.75
           action_scale: 3
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -46,15 +44,14 @@ models:
         adapter:
           type: action_detection
           priorbox_out: mbox/priorbox
-          loc_out: mbox_loc1/out/conv/flat/Reshape
-          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat/Reshape
+          loc_out: mbox_loc1/out/conv/flat
+          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat
           add_conf_out_prefix: out/anchor
           add_conf_out_count: 4
           num_action_classes: 3
           detection_threshold: 0.4
           action_confidence_threshold: 0.75
           action_scale: 3
-        cpu_extensions: AUTO
 
     datasets:
       - name: action_detection_dataset_3_classes

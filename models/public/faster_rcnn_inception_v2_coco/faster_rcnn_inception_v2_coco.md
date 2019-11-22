@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Faster R-CNN with Inception v2. Used for object detection. For details, see the [paper](https://arxiv.org/pdf/1801.04381.pdf).
+Faster R-CNN with Inception v2. Used for object detection. For details, see the [paper](https://arxiv.org/pdf/1506.01497v3.pdf).
 
 ## Example
 
@@ -21,7 +21,7 @@ Faster R-CNN with Inception v2. Used for object detection. For details, see the 
 
 ### Original Model
 
-Image, name: `image_tensor`, shape: [1x600x600x3], format: [BxHxWxC],
+Image, name: `image_tensor`, shape: [1x600x1024x3], format: [BxHxWxC],
    where:
 
     - B - batch size
@@ -33,7 +33,7 @@ Image, name: `image_tensor`, shape: [1x600x600x3], format: [BxHxWxC],
 
 ### Converted Model
 
-1. Image, name: `image_tensor`, shape: [1x3x600x600], format: [BxCxHxW],
+1. Image, name: `image_tensor`, shape: [1x3x600x1024], format: [BxCxHxW],
    where:
 
     - B - batch size

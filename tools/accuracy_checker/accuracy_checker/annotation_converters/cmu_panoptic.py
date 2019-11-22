@@ -29,17 +29,10 @@ class CmuPanopticKeypointsConverter(DirectoryBasedAnnotationConverter):
     annotation_types = (PoseEstimation3dAnnotation,)
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        data = {}
         images_dir_name = 'hdImgs'
         labels_dir_name = 'hdPose3d_stage1_coco19'
         label_prefix = 'body3DScene'
-        num_iterations = 0
-        for scene_dir in self.data_dir.iterdir():
-            data[scene_dir] = {}
-            scene_images_dir = scene_dir / images_dir_name
-            for camera_dir in scene_images_dir.iterdir():
-                data[scene_dir][camera_dir] = list(camera_dir.iterdir())
-                num_iterations += len(data[scene_dir][camera_dir])
+        data, num_iterations = self._collect_data(self.data_dir, images_dir_name)
 
         keypoints_annotations = []
         content_errors = []
@@ -91,7 +84,7 @@ class CmuPanopticKeypointsConverter(DirectoryBasedAnnotationConverter):
                         progress_callback(image_id / num_iterations * 100)
                     image_id += 1
 
-        return ConverterReturn(keypoints_annotations, None, None)
+        return ConverterReturn(keypoints_annotations, None, content_errors)
 
     @staticmethod
     def _project_3d_keypoints_to_frame(annotations, camera_parameters):
@@ -105,6 +98,7 @@ class CmuPanopticKeypointsConverter(DirectoryBasedAnnotationConverter):
             pt = np.squeeze(pt[0], axis=1).transpose()
 
             keypoints_2d.append(pt)
+
         return np.array(keypoints_2d)
 
     @staticmethod
@@ -118,3 +112,20 @@ class CmuPanopticKeypointsConverter(DirectoryBasedAnnotationConverter):
             keypoints_3d[pose_id] = keypoints_in_camera_space
 
         return keypoints_3d
+
+    @staticmethod
+    def _collect_data(data_dir, images_dir_name):
+        data = {}
+        num_iterations = 0
+        for scene_dir in data_dir.iterdir():
+            if not scene_dir.is_dir():
+                continue
+            data[scene_dir] = {}
+            scene_images_dir = scene_dir / images_dir_name
+            for camera_dir in scene_images_dir.iterdir():
+                if not camera_dir.is_dir():
+                    continue
+                data[scene_dir][camera_dir] = list(camera_dir.rglob('*.jpg'))
+                num_iterations += len(data[scene_dir][camera_dir])
+
+        return data, num_iterations

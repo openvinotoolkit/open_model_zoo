@@ -26,7 +26,9 @@ def create_config(metric_name, use_argmax=False):
 
 
 def generate_expected_result(values, metric_name, labels=None):
-    meta = {'names': list(labels.values())} if labels else {}
+    meta = {'target': 'higher-better'}
+    if labels:
+        meta.update({'names': list(labels.values())})
 
     return EvaluationResult(pytest.approx(values), None, metric_name, metric_name, None, meta)
 
@@ -85,7 +87,7 @@ class TestMeanAccuracy:
         dataset = single_class_dataset()
         dispatcher = MetricsExecutor(create_config(self.name), dataset)
         dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
-        expected = generate_expected_result([1.0, 0.0], self.name, dataset.labels)
+        expected = generate_expected_result([1.0], self.name, {0: dataset.labels[0]})
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
 
@@ -95,7 +97,7 @@ class TestMeanAccuracy:
         dataset = multi_class_dataset()
         dispatcher = MetricsExecutor(create_config(self.name), dataset)
         dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
-        expected = generate_expected_result([0.0, 0.0, 0.0, 0.0], self.name, dataset.labels)
+        expected = generate_expected_result([0.0], self.name, {1: dataset.labels[1]})
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
 
@@ -105,7 +107,7 @@ class TestMeanAccuracy:
         predictions = make_segmentation_representation(np.array([[1, 0, 3, 0, 0], [0, 0, 0, 0, 0]]), False)
         dispatcher = MetricsExecutor(create_config(self.name), dataset)
         dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
-        expected = generate_expected_result([1.0, 1.0, 0.0, 0.5], self.name, dataset.labels)
+        expected = generate_expected_result([1.0, 1.0, 0.0, 0.5], self.name, dataset.label_map)
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
 
@@ -128,7 +130,7 @@ class TestMeanIOU:
         dataset = single_class_dataset()
         dispatcher = MetricsExecutor(create_config(self.name), dataset)
         dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
-        expected = generate_expected_result([1.0, 0.0], self.name, dataset.labels)
+        expected = generate_expected_result([1.0], self.name, {0: dataset.labels[0]})
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
 
@@ -138,7 +140,7 @@ class TestMeanIOU:
         dataset = multi_class_dataset()
         dispatcher = MetricsExecutor(create_config(self.name), dataset)
         dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
-        expected = generate_expected_result([0.0, 0.0, 0.0, 0.0], self.name, dataset.labels)
+        expected = generate_expected_result([0.0, 0.0], self.name, {0: dataset.labels[0], 1: dataset.labels[1]})
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result == expected
 

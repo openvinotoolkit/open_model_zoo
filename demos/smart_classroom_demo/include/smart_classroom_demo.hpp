@@ -45,6 +45,9 @@ static const char target_device_message_face_reid[] = "Optional. Specify the tar
                                                       "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
                                                       "The application looks for a suitable plugin for the specified device.";
 
+/// @brief Message for greedy reid matching
+static const char greedy_reid_matching_message[] = "Optional. Use faster greedy matching algorithm in face reid.";
+
 /// @brief Message for performance counters
 static const char performance_counter_message[] = "Optional. Enables per-layer performance statistics.";
 
@@ -172,6 +175,9 @@ DEFINE_string(d_lm, "CPU", target_device_message_landmarks_regression);
 
 /// @brief device the target device for face reidentification infer on <br>
 DEFINE_string(d_reid, "CPU", target_device_message_face_reid);
+
+/// @brief Use greedy matching algorithm in face reid
+DEFINE_bool(greedy_reid_matching, false, greedy_reid_matching_message);
 
 /// @brief Enable per-layer performance report
 DEFINE_bool(pc, false, performance_counter_message);
@@ -314,6 +320,7 @@ static void showUsage() {
     std::cout << "    -d_lm '<device>'               " << target_device_message_landmarks_regression << std::endl;
     std::cout << "    -d_reid '<device>'             " << target_device_message_face_reid << std::endl;
     std::cout << "    -out_v  '<path>'               " << output_video_message << std::endl;
+    std::cout << "    -greedy_reid_matching          " << greedy_reid_matching_message << std::endl;
     std::cout << "    -pc                            " << performance_counter_message << std::endl;
     std::cout << "    -r                             " << raw_output_message << std::endl;
     std::cout << "    -ad                            " << act_stat_output_message << std::endl;

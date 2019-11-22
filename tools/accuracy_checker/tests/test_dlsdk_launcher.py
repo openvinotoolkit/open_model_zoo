@@ -35,16 +35,6 @@ from accuracy_checker.data_readers import DataRepresentation
 from accuracy_checker.utils import contains_all
 
 
-def check_no_gpu():
-    try:
-        import openvino.inference_engine as ie
-        gpu_plugin = ie.IEPlugin('GPU')
-        del gpu_plugin
-        return False
-    except (ImportError, RuntimeError):
-        return True
-
-
 @pytest.fixture()
 def mock_inference_engine(mocker):
     try:
@@ -110,7 +100,6 @@ class TestDLSDKLauncherInfer:
         assert dlsdk_test_model.batch == 2
 
 
-@pytest.mark.skipif(check_no_gpu(), reason="GPU is not installed")
 @pytest.mark.usefixtures('mock_path_exists')
 class TestDLSDKLauncherAffinity:
     def test_dlsdk_launcher_valid_affinity_map(self, mocker, models_dir):
@@ -120,7 +109,7 @@ class TestDLSDKLauncherAffinity:
             'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
-        dlsdk_test_model = get_dlsdk_test_model(models_dir, {'device': 'HETERO:CPU,GPU', 'affinity_map': './affinity_map.yml'})
+        dlsdk_test_model = get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,GPU', 'affinity_map' : './affinity_map.yml'})
         layers = dlsdk_test_model.network.layers
         for key, value in affinity_map.items():
             assert layers[key].affinity == value
@@ -133,89 +122,21 @@ class TestDLSDKLauncherAffinity:
         )
 
         with pytest.raises(ConfigError):
-            get_dlsdk_test_model(models_dir, {'device': 'HETERO:CPU,CPU', 'affinity_map': './affinity_map.yml'})
+            get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,CPU', 'affinity_map' : './affinity_map.yml'})
 
     def test_dlsdk_launcher_affinity_map_invalid_layer(self, mocker, models_dir):
-        affinity_map = {'none-existing-layer': 'CPU'}
+        affinity_map = {'none-existing-layer' : 'CPU'}
 
         mocker.patch(
             'accuracy_checker.launcher.dlsdk_launcher.read_yaml', return_value=affinity_map
         )
 
         with pytest.raises(ConfigError):
-            get_dlsdk_test_model(models_dir, {'device': 'HETERO:CPU,CPU', 'affinity_map': './affinity_map.yml'})
+            get_dlsdk_test_model(models_dir, {'device' : 'HETERO:CPU,CPU', 'affinity_map' : './affinity_map.yml'})
 
 
 @pytest.mark.usefixtures('mock_path_exists', 'mock_inference_engine', 'mock_inputs')
-class TestDLSDKLauncherMultiDevice:
-    def test_multi_device_launcher_creation(self):
-        launcher_config = {
-            'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'device': 'MULTI:CPU,GPU', 'async_mode': True
-        }
-        launcher = create_launcher(launcher_config)
-        assert launcher.async_mode
-        assert launcher.num_requests == 4
-
-    def test_multi_device_launcher_creation_with_num_requests_as_one_value(self):
-        launcher_config = {
-            'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'device': 'MULTI:CPU,GPU', 'async_mode': True,
-            'num_requests': 2
-        }
-        launcher = create_launcher(launcher_config)
-        assert launcher.async_mode
-        assert launcher.num_requests == 8
-
-    def test_multi_device_launcher_creation_with_num_requests_as_list(self):
-        launcher_config = {
-            'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'device': 'MULTI:CPU,GPU', 'async_mode': True,
-            'num_requests': '1,2'
-        }
-        launcher = create_launcher(launcher_config)
-        assert launcher.async_mode
-        assert launcher.num_requests == 6
-
-    def test_multi_device_launcher_creation_with_num_requests_not_for_all_devices_raise_error(self):
-        launcher_config_1 = {
-            'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'device': 'MULTI:CPU,GPU,FPGA',
-            'async_mode': True,
-            'num_requests': '1,2'
-        }
-        launcher_config_2 = {
-            'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'device': 'MULTI:CPU(1),GPU(2),FPGA',
-            'async_mode': True,
-        }
-        with pytest.raises(ConfigError):
-            create_launcher(launcher_config_1)
-
-        with pytest.raises(ConfigError):
-            create_launcher(launcher_config_2)
-
-    def test_multi_device_launcher_creation_warn_if_not_async_mode(self):
-        launcher_config = {
-            'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'device': 'MULTI:CPU,GPU'
-        }
-        with pytest.warns(None) as warnings:
-            launcher = create_launcher(launcher_config)
-            assert len(warnings) == 1
-            assert warnings[0].message.args[0] == 'Using multi device in sync mode non-applicable. Async mode will be used.'
-            assert launcher.async_mode
-            assert launcher.num_requests == 4
-
-    def test_multi_device_launcher_creation_warn_if_num_requests_in_device_string_and_confid_field_both_provided(self):
-        launcher_config = {
-            'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'device': 'MULTI:CPU(2),GPU(3)',
-            'async_mode': True, 'num_requests': 2
-        }
-        with pytest.warns(None) as warnings:
-            launcher = create_launcher(launcher_config)
-            assert len(warnings) == 1
-            assert warnings[0].message.args[0] == "number requests already provided in device name specification. 'num_requests' option will be ignored."
-            assert launcher.async_mode
-            assert launcher.num_requests == 10
-
-
-@pytest.mark.usefixtures('mock_path_exists', 'mock_inference_engine', 'mock_inputs')
-class TestDLSDKLauncherBitstreamProgramming:
+class TestDLSDKLauncher:
     def test_program_bitsream_when_device_is_fpga(self, mocker):
         subprocess_mock = mocker.patch('subprocess.run')
         config = {
@@ -412,9 +333,6 @@ class TestDLSDKLauncherBitstreamProgramming:
 
         os.environ.__setitem__.assert_not_called()
 
-
-@pytest.mark.usefixtures('mock_path_exists', 'mock_inference_engine', 'mock_inputs')
-class TestDLSDKLauncherModels:
     def test_model_converted_from_caffe(self, mocker):
         mock = mocker.patch(
             'accuracy_checker.launcher.dlsdk_launcher.convert_model',
@@ -694,7 +612,7 @@ class TestDLSDKLauncherModels:
         DLSDKLauncher(config)
         prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
 
-    def test_model_converted_from_tf_checkpoint_with_default_path_to_custom_tf_config(self, mocker):
+    def test_model_converted_from_tf_checkoint_with_default_path_to_custom_tf_config(self, mocker):
         config = {
             'framework': 'dlsdk',
             'tf_meta': '/path/to/source_models/custom_model',
@@ -720,7 +638,7 @@ class TestDLSDKLauncherModels:
         DLSDKLauncher(config)
         prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
 
-    def test_model_converted_from_tf_checkpoint_with_default_path_to_obj_detection_api_config(self, mocker):
+    def test_model_converted_from_tf_checkoint_with_default_path_to_obj_detection_api_config(self, mocker):
         config = {
             'framework': 'dlsdk',
             'tf_meta': '/path/to/source_models/custom_model',
@@ -1130,46 +1048,6 @@ class TestDLSDKLauncherConfig:
         with pytest.raises(ConfigError):
             self.config.validate(update_dict(self.launcher, device='HETERO:CPU,FPGA,'))
 
-    def test_multi_device_correct(self):
-        self.config.validate(update_dict(self.launcher, device='MULTI:CPU'))
-        self.config.validate(update_dict(self.launcher, device='MULTI:CPU,FPGA'))
-        self.config.validate(update_dict(self.launcher, device='MULTI:CPU(1),FPGA(2)'))
-
-    def test_multi_device_endswith_comma(self):
-        with pytest.raises(ConfigError):
-            self.config.validate(update_dict(self.launcher, device='MULTI:CPU,FPGA,'))
-
-    def test_multi_device_empty_brackets(self):
-        with pytest.raises(ConfigError):
-            self.config.validate(update_dict(self.launcher, device='MULTI:CPU,FPGA()'))
-
-    def test_multi_device_n_requests_without_brackets(self):
-        with pytest.raises(ConfigError):
-            self.config.validate(update_dict(self.launcher, device='MULTI:CPU(42),FPGA666'))
-
-        with pytest.raises(ConfigError):
-            self.config.validate(update_dict(self.launcher, device='MULTI:CPU42,FPGA(666)'))
-
-        with pytest.raises(ConfigError):
-            self.config.validate(update_dict(self.launcher, device='MULTI:CPU42,FPGA666'))
-
-    def test_multi_device_missed_bracket(self):
-        with pytest.raises(ConfigError):
-            self.config.validate(update_dict(self.launcher, device='MULTI:CPU(42,FPGA(666)'))
-
-        with pytest.raises(ConfigError):
-            self.config.validate(update_dict(self.launcher, device='MULTI:CPU(42),FPGA666)'))
-
-        with pytest.raises(ConfigError):
-            self.config.validate(update_dict(self.launcher, device='MULTI:CPU42),FPGA(666)'))
-
-        with pytest.raises(ConfigError):
-            self.config.validate(update_dict(self.launcher, device='MULTI:CPU(42),FPGA(666'))
-
-    def test_multi_device_empty(self):
-        with pytest.raises(ConfigError):
-            self.config.validate(update_dict(self.launcher, device='MULTI:'))
-
     def test_normal_multiple_devices(self):
         with pytest.raises(ConfigError):
             self.config.validate(update_dict(self.launcher, device='CPU,FPGA'))
@@ -1205,19 +1083,19 @@ class TestDLSDKLauncherConfig:
         with pytest.raises(ConfigError):
             create_launcher(launcher_config)
 
-    def test_empty_dict_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
+    def test_empty_dir_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
         launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': {}}
 
         with pytest.raises(ConfigError):
             create_launcher(launcher_config)
 
-    def test_missed_type_in_dict_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
+    def test_missed_type_in_dir_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
         launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': {'key': 'val'}}
 
         with pytest.raises(ConfigError):
             create_launcher(launcher_config)
 
-    def test_undefined_type_in_dict_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
+    def test_undefined_type_in_dir_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
         launcher_config = {
             'framework': 'dlsdk',
             'model': 'custom',
@@ -1250,3 +1128,7 @@ class TestDLSDKLauncherConfig:
 
         with pytest.raises(ValueError):
             create_launcher(launcher_config)
+
+
+def dummy_adapter():
+    pass

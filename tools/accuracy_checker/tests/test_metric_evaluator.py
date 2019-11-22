@@ -366,7 +366,7 @@ class TestMetricPerInstanceResult:
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
         metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
-        expected_metric_result = PerImageMetricResult('accuracy', 'accuracy', 1.0)
+        expected_metric_result = PerImageMetricResult('accuracy', 'accuracy', 1.0, 'higher-better')
         assert len(metric_result) == 1
         assert 0 in metric_result
         assert len(metric_result[0]) == 1
@@ -378,7 +378,7 @@ class TestMetricPerInstanceResult:
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1, 'name': 'accuracy@top1'}], None)
         metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
-        expected_metric_result = PerImageMetricResult('accuracy@top1', 'accuracy', 1.0)
+        expected_metric_result = PerImageMetricResult('accuracy@top1', 'accuracy', 1.0, 'higher-better')
         assert len(metric_result) == 1
         assert 0 in metric_result
         assert len(metric_result[0]) == 1
@@ -392,7 +392,10 @@ class TestMetricPerInstanceResult:
             {'name': 'top1', 'type': 'accuracy', 'top_k': 1}, {'name': 'top3', 'type': 'accuracy', 'top_k': 3}
         ], None)
         metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
-        expected_metric_result = [PerImageMetricResult('top1', 'accuracy', 1.0), PerImageMetricResult('top3', 'accuracy', 1.0)]
+        expected_metric_result = [
+            PerImageMetricResult('top1', 'accuracy', 1.0, 'higher-better'),
+            PerImageMetricResult('top3', 'accuracy', 1.0, 'higher-better')
+        ]
         assert len(metric_result) == 1
         assert 0 in metric_result
         assert len(metric_result[0]) == 2
@@ -405,7 +408,8 @@ class TestMetricPerInstanceResult:
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
         metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
-        expected_metric_result = [PerImageMetricResult('accuracy', 'accuracy', 1.0), PerImageMetricResult('accuracy', 'accuracy', 0.0)]
+        expected_metric_result = [PerImageMetricResult('accuracy', 'accuracy', 1.0, 'higher-better'),
+                                  PerImageMetricResult('accuracy', 'accuracy', 0.0, 'higher-better')]
         assert len(metric_result) == 2
         assert 0 in metric_result
         assert len(metric_result[0]) == 1
@@ -420,7 +424,8 @@ class TestMetricPerInstanceResult:
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
         metric_result = dispatcher.update_metrics_on_batch([42, 17], annotations, predictions)
-        expected_metric_result = [PerImageMetricResult('accuracy', 'accuracy', 1.0), PerImageMetricResult('accuracy', 'accuracy', 0.0)]
+        expected_metric_result = [PerImageMetricResult('accuracy', 'accuracy', 1.0, 'higher-better'),
+                                  PerImageMetricResult('accuracy', 'accuracy', 0.0, 'higher-better')]
         assert len(metric_result) == 2
         assert 42 in metric_result
         assert len(metric_result[42]) == 1

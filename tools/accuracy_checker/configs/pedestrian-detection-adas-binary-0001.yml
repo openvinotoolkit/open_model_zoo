@@ -8,7 +8,6 @@ models:
         model:   intel/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.xml
         weights: intel/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
     datasets:
       - name: pedestrian_detection_dataset

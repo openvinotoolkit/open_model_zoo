@@ -19,7 +19,6 @@ models:
       - framework: dlsdk
         tags:
           - INT8
-        device: CPU
         model:   intel/person-reidentification-retail-0031/INT8/person-reidentification-retail-0031.xml
         weights: intel/person-reidentification-retail-0031/INT8/person-reidentification-retail-0031.bin
         adapter: reid

@@ -142,7 +142,9 @@ class ModelEvaluator:
                         batch_raw_predictions, batch_identifiers, batch_meta, self.adapter
                     )
                     free_irs.append(ir)
-                    annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions)
+                    annotations, predictions = self.postprocessor.process_batch(
+                        batch_annotation, batch_predictions, batch_meta
+                    )
 
                     metrics_result = None
                     if self.metric_executor:
@@ -329,6 +331,11 @@ class ModelEvaluator:
 
     def get_network(self):
         return self.launcher.network
+
+    def get_metrics_direction(self):
+        if not self.metric_executor:
+            return {}
+        return self.metric_executor.get_metrics_direction()
 
     def reset(self):
         if self.metric_executor:

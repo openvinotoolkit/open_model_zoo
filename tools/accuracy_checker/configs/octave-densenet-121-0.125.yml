@@ -48,7 +48,6 @@ models:
         model:   public/octave-densenet-121-0.125/FP32/octave-densenet-121-0.125.xml
         weights: public/octave-densenet-121-0.125/FP32/octave-densenet-121-0.125.bin
         adapter: classification
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
