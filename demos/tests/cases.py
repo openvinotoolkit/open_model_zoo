@@ -283,8 +283,22 @@ PYTHON_DEMOS = [
         ],
     )),
 
-    # TODO: face_recognition_demo: requires face gallery
-    
+    PythonDemo(subdirectory='face_recognition_demo', test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+                          '-i': ImagePatternArg('face-detection-adas'),
+                          '-fg': ImageDirectoryArg('face-recognition-gallery')
+                          }),
+        device_cases('-d_fd', '-d_lm', '-d_reid'),
+        single_option_cases('-m_fd',
+            ModelArg('face-detection-adas-0001'),
+            ModelArg('face-detection-adas-binary-0001', "INT1"),
+            ModelArg('face-detection-retail-0004'),
+            ModelArg('face-detection-retail-0005'),
+            ModelArg('face-detection-retail-0044')),
+        TestCase(options={'-m_lm': ModelArg('landmarks-regression-retail-0009')}),
+        TestCase(options={'-m_reid': ModelArg('face-reidentification-retail-0095')}),
+    )),
+
     PythonDemo(subdirectory='image_retrieval_demo', test_cases=combine_cases(
         TestCase(options={'--no_show':None,
                           '-m': ModelArg('image-retrieval-0001')}),
