@@ -134,9 +134,8 @@ NATIVE_DEMOS = [
         ],
     )),
 
-    NativeDemo(subdirectory='mask_rcnn_demo', test_cases=combine_cases(
+    NativeDemo(subdirectory='mask_rcnn_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-i': ImageDirectoryArg('semantic-segmentation-adas')}),
-        device_cases('-d'),
         single_option_cases('-m',
             ModelArg('mask_rcnn_inception_resnet_v2_atrous_coco'),
             ModelArg('mask_rcnn_inception_v2_coco'),
@@ -262,10 +261,9 @@ NATIVE_DEMOS = [
 ]
 
 PYTHON_DEMOS = [
-    PythonDemo(subdirectory='3d_segmentation_demo', test_cases=combine_cases(
+    PythonDemo(subdirectory='3d_segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-m': ModelArg('brain-tumor-segmentation-0001'),
                           '-o': '.'}),
-        device_cases('-d'),
         single_option_cases('-i', *IMAGE_SEQUENCES['brain-tumor-nifti']),
     )),
 
@@ -283,12 +281,12 @@ PYTHON_DEMOS = [
         ],
     )),
 
-    PythonDemo(subdirectory='face_recognition_demo', test_cases=combine_cases(
+    PythonDemo(subdirectory='face_recognition_demo', device_keys=['-d_fd', '-d_lm', '-d_reid'],
+               test_cases=combine_cases(
         TestCase(options={'--no_show': None,
                           '-i': ImagePatternArg('face-detection-adas'),
                           '-fg': ImageDirectoryArg('face-recognition-gallery')
                           }),
-        device_cases('-d_fd', '-d_lm', '-d_reid'),
         single_option_cases('-m_fd',
             ModelArg('face-detection-adas-0001'),
             ModelArg('face-detection-adas-binary-0001', "INT1"),
@@ -299,10 +297,9 @@ PYTHON_DEMOS = [
         TestCase(options={'-m_reid': ModelArg('face-reidentification-retail-0095')}),
     )),
 
-    PythonDemo(subdirectory='image_retrieval_demo', test_cases=combine_cases(
+    PythonDemo(subdirectory='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show':None,
                           '-m': ModelArg('image-retrieval-0001')}),
-        device_cases('-d'),
         single_option_cases('-i', *IMAGE_SEQUENCES['image-retrieval-video']),
         single_option_cases('-g', *IMAGE_SEQUENCES['image-retrieval-gallery']),
     )),
