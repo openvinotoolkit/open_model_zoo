@@ -28,6 +28,9 @@ static const char performance_counter_message[] = "Optional. Enable per-layer pe
 /// @brief Message for not showing processed video
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 
+/// @brief Message for showing black screen video
+static const char black_background[] = "Optional. Show black background.";
+
 /// @brief Message for raw output
 static const char raw_output_message[] = "Optional. Output inference results as raw values.";
 
@@ -54,6 +57,10 @@ DEFINE_bool(pc, false, performance_counter_message);
 /// It is an optional parameter
 DEFINE_bool(no_show, false, no_show_processed_video);
 
+/// @brief Defines flag for only showing black screen with poses <br>
+/// It is an optional parameter
+DEFINE_bool(black, false, black_background);
+
 /// @brief Defines flag to output raw results <br>
 /// It is an optional parameter
 DEFINE_bool(r, false, raw_output_message);
@@ -72,5 +79,6 @@ static void showUsage() {
     std::cout << "    -d \"<device>\"              " << target_device_message << std::endl;
     std::cout << "    -pc                        " << performance_counter_message << std::endl;
     std::cout << "    -no_show                   " << no_show_processed_video << std::endl;
+    std::cout << "    -black                     " << black_background << std::endl;
     std::cout << "    -r                         " << raw_output_message << std::endl;
 }

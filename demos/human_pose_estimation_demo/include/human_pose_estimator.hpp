@@ -20,11 +20,18 @@ public:
     HumanPoseEstimator(const std::string& modelPath,
                        const std::string& targetDeviceName,
                        bool enablePerformanceReport = false);
-    std::vector<HumanPose> estimate(const cv::Mat& image);
+    std::vector<HumanPose> estimateCurr();
+    void reshape(const cv::Mat& image);
+    void frameToBlob_curr(const cv::Mat& image);
+    void frameToBlob_next(const cv::Mat& image);
+    void startCurr();
+    void startNext();
+    bool readyCurr();
+    void swapRequest();
     ~HumanPoseEstimator();
 
 private:
-    void preprocess(const cv::Mat& image, uint8_t* buffer) const;
+    void preprocess(const cv::Mat& image, float* buffer) const;
     std::vector<HumanPose> postprocess(
             const float* heatMapsData, const int heatMapOffset, const int nHeatMaps,
             const float* pafsData, const int pafOffset, const int nPafs,
@@ -47,12 +54,14 @@ private:
     float foundMidPointsRatioThreshold;
     float minSubsetScore;
     cv::Size inputLayerSize;
+    cv::Size imageSize;
     int upsampleRatio;
     InferenceEngine::Core ie;
     std::string targetDeviceName;
     InferenceEngine::CNNNetwork network;
     InferenceEngine::ExecutableNetwork executableNetwork;
-    InferenceEngine::InferRequest request;
+    InferenceEngine::InferRequest::Ptr request_next;
+    InferenceEngine::InferRequest::Ptr request_curr;
     InferenceEngine::CNNNetReader netReader;
     std::string pafsBlobName;
     std::string heatmapsBlobName;
