@@ -418,7 +418,7 @@ int main(int argc, char *argv[]) {
                 }
             }
             if (!FLAGS_no_show) {
-                cv::imshow("Detection results", frame);
+                cv::imshow("Detection results on " + FLAGS_d, frame);
             }
 
             t1 = std::chrono::high_resolution_clock::now();

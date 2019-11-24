@@ -342,7 +342,7 @@ int main(int argc, char *argv[]) {
                 visualizer->draw(prev_frame, faces);
 
                 if (!FLAGS_no_show) {
-                    cv::imshow("Detection results", prev_frame);
+                    cv::imshow("Detection results on " + FLAGS_d, prev_frame);
                 }
             }
 

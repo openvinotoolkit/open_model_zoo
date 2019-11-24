@@ -349,7 +349,7 @@ int main(int argc, char *argv[]) {
                 }
             }
             if (!FLAGS_no_show) {
-                cv::imshow("Detection results", curr_frame);
+                cv::imshow("Detection results on " + FLAGS_d, curr_frame);
             }
 
             t1 = std::chrono::high_resolution_clock::now();
