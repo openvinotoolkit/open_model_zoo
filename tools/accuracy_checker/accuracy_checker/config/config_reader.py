@@ -231,7 +231,7 @@ class ConfigReader:
         raw_pipelines = local_config['pipelines']
         for pipeline in raw_pipelines:
             device_infos = pipeline.get('device_info', [])
-            if not device_infos:
+            if not device_infos and 'target_devices' in args and args.target_devices:
                 device_infos = [{'device': device} for device in args.target_devices]
             per_device_pipelines = []
             for device_info in device_infos:
