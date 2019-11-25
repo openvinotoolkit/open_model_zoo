@@ -15,9 +15,13 @@ limitations under the License.
 """
 
 import tensorflow as tf
-
 from .launcher import Launcher, LauncherConfigValidator, ListInputsField
 from ..config import PathField, StringField
+
+try:
+    tf_lite = tf.lite
+except AttributeError:
+    tf_lite = tf.contrib.lite
 
 
 class TFLiteLauncher(Launcher):
@@ -33,8 +37,8 @@ class TFLiteLauncher(Launcher):
         })
         return parameters
 
-    def __init__(self, config_entry, adapter, *args, **kwargs):
-        super().__init__(config_entry, adapter, *args, **kwargs)
+    def __init__(self, config_entry, *args, **kwargs):
+        super().__init__(config_entry, *args, **kwargs)
         self.default_layout = 'NHWC'
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
@@ -43,7 +47,7 @@ class TFLiteLauncher(Launcher):
         )
         tf_launcher_config.validate(self.config)
         if not self._delayed_model_loading:
-            self._interpreter = tf.contrib.lite.Interpreter(model_path=str(self.config['model']))
+            self._interpreter = tf_lite.Interpreter(model_path=str(self.config['model']))
             self._interpreter.allocate_tensors()
             self._input_details = self._interpreter.get_input_details()
             self._output_details = self._interpreter.get_output_details()
@@ -79,7 +83,7 @@ class TFLiteLauncher(Launcher):
 
     @property
     def inputs(self):
-        return self._inputs.items()
+        return self._inputs
 
     def release(self):
         del self._interpreter
