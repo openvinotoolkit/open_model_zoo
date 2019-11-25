@@ -14,7 +14,7 @@ def build_argparser():
     parser.add_argument("-m_hpe", "--model-hpe-xml", type=str, required=True,
                         help="path to model of human pose estimator in xml format")
 
-    parser.add_argument("-i", "--input", type=str, nargs='+',  default='', help="path to video or image/images")
+    parser.add_argument("-i", "--input", type=str, nargs='+', default='', help="path to video or image/images")
     parser.add_argument("-d", "--device", type=str, default='CPU', required=False,
                         help="Specify the target to infer on CPU or GPU")
     parser.add_argument("-l", "--cpu-extension", type=str, required=False, help="path to cpu extension")

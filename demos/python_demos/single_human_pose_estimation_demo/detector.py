@@ -22,7 +22,6 @@ class Detector(object):
                self.model.inputs[self._input_layer_name].shape[1] == self.CHANNELS_SIZE, \
             "Expected model output shape with %s channels " % (self.CHANNELS_SIZE)
 
-
         assert len(self.model.outputs[self._output_layer_name].shape) == 4 and \
                self.model.outputs[self._output_layer_name].shape[3] == self.OUTPUT_SIZE, \
             "Expected model output shape with %s outputs" % (self.OUTPUT_SIZE)
@@ -34,7 +33,7 @@ class Detector(object):
         self._scale = scale
         self._thr = thr
         self._label_class = label_class
-        _, _, self.input_h,  self.input_w = self.model.inputs[self._input_layer_name].shape
+        _, _, self.input_h, self.input_w = self.model.inputs[self._input_layer_name].shape
         self._h = -1
         self._w = -1
         self.infer_time = -1

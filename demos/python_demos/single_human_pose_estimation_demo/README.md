@@ -4,7 +4,7 @@ This demo showcases top-down pipeline for human pose estimation on video or imag
 
 # How It Works
 
-On the start-up, the application reads command line parameters and loads  detection person model and single human pose estimation model. Upon getting a frame from the OpenCV VideoCapture, the demo executes top/down pipeline for this frame and displays the results.
+On the start-up, the application reads command line parameters and loads detection person model and single human pose estimation model. Upon getting a frame from the OpenCV VideoCapture, the demo executes top/down pipeline for this frame and displays the results.
 
 # Running
 
@@ -38,7 +38,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 For example, to do inference on a CPU, run the following command:
 
 ```sh
- python single_human_pose_estimation_demo.py --model-od-xml <path_to_dir__with_models>/mobilenet-ssd.xml --model-hpe-xml /home/inteladmin/single-human-pose-estimation-0001.xml --input <path_to_video>/back-passengers.avi --cpu_extension <path_to_lib>/libcpu_extension_avx2.so
+python single_human_pose_estimation_demo.py --model-od-xml <path_to_dir__with_models>/mobilenet-ssd.xml --model-hpe-xml /home/inteladmin/single-human-pose-estimation-0001.xml --input <path_to_video>/back-passengers.avi --cpu_extension <path_to_lib>/libcpu_extension_avx2.so
 ```
 
 The demo uses OpenCV to display the resulting frame with estimated poses and reports performance in the following format: summary inference FPS (single human pose inference FPS / detector inference FPS).

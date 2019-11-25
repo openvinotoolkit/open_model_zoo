@@ -44,18 +44,18 @@ def affine_transform(pt, t):
 
 
 class TransformedCrop(object):
-    def __init__(self, input_height=384, input_weight=288, output_height=48, output_weight=36):
+    def __init__(self, input_height=384, input_width=288, output_height=48, output_width=36):
         self._num_keypoints = 17
-        self.input_weight = input_weight
+        self.input_width = input_width
         self.input_height = input_height
-        self.output_weight = output_weight
+        self.output_width = output_width
         self.output_height = output_height
 
     def __call__(self, img, bbox):
         c, s = preprocess_bbox(bbox, img)
-        trans, _ = self.get_trasformation_matrix(c, s, [self.input_weight, self.input_height])
-        transformed_image = cv2.warpAffine(img, trans, (self.input_weight, self.input_height), flags=cv2.INTER_LINEAR)
-        rev_trans = self.get_trasformation_matrix(c, s, [self.output_weight, self.output_height])[1]
+        trans, _ = self.get_trasformation_matrix(c, s, [self.input_width, self.input_height])
+        transformed_image = cv2.warpAffine(img, trans, (self.input_width, self.input_height), flags=cv2.INTER_LINEAR)
+        rev_trans = self.get_trasformation_matrix(c, s, [self.output_width, self.output_height])[1]
 
         return rev_trans, transformed_image.transpose(2, 0, 1)[None, ]
 
@@ -100,7 +100,6 @@ class HumanPoseEstimator(object):
         assert len(self.model.inputs[self._input_layer_name].shape) == 4 and \
                self.model.inputs[self._input_layer_name].shape[1] == self.CHANNELS_SIZE,\
                "Expected model input blob with shape [1, 3, H, W]"
-
 
         assert len(self.model.outputs[self._output_layer_name].shape) == 4 and \
                self.model.outputs[self._output_layer_name].shape[1] == self.OUTPUT_CHANNELS_SIZE,\
