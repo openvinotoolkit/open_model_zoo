@@ -77,6 +77,17 @@ IMAGE_SEQUENCES = {
         image_net_arg('00048311'),
     ],
 
+    'imagenet-classification': [
+        image_net_arg('00000002'),
+        image_net_arg('00000003'),
+        image_net_arg('00000012'),
+        image_net_arg('00000014'),
+        image_net_arg('00000031'),
+        image_net_arg('00000046'),
+        image_net_arg('00000089'),
+        image_net_arg('00000094'),
+    ],
+
     'instance-segmentation': [
         image_net_arg('00000001'),
         image_net_arg('00000002'),

@@ -105,6 +105,13 @@ NATIVE_DEMOS = [
         TestCase(options={'-m': ModelArg('human-pose-estimation-0001')}),
     )),
 
+    NativeDemo(subdirectory='imagenet_classification_demo', test_cases=combine_cases(
+        TestCase(options={'-no_show': None,
+            '-i': ImageDirectoryArg('imagenet-classification')}),
+        device_cases('-d'),
+        TestCase(options={'-m': ModelArg('alexnet')}),
+    )),
+
     NativeDemo(subdirectory='interactive_face_detection_demo', test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             '-i': ImagePatternArg('face-detection-adas')}),
