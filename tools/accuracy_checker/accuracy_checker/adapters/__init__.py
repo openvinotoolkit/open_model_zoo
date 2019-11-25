@@ -61,6 +61,8 @@ from .mask_rcnn import MaskRCNNAdapter
 
 from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter
 
+from .centernet import CTDETAdapter
+
 __all__ = [
     'Adapter',
     'AdapterField',
@@ -112,5 +114,7 @@ __all__ = [
     'MaskRCNNAdapter',
 
     'MachineTranslationAdapter',
-    'QuestionAnsweringAdapter'
+    'QuestionAnsweringAdapter',
+
+    'CTDETAdapter'
 ]

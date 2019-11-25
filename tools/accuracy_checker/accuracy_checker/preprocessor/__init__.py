@@ -29,7 +29,8 @@ from .geometric_transformations import (
     PointAligner,
     Tiling,
     Crop3D,
-    ImagePyramid
+    ImagePyramid,
+    CenterNetAffineTransformation
 )
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
 
@@ -60,5 +61,7 @@ __all__ = [
     'Normalize',
 
     'DecodeByVocabulary',
-    'PadWithEOS'
+    'PadWithEOS',
+
+    'CenterNetAffineTransformation'
 ]
