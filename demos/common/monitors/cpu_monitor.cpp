@@ -20,9 +20,9 @@ std::size_t getNCores() {
 }
 
 struct CpuMonitor::PerformanceCounter {
-    PerformanceCounter(std::size_t nCores) : query{new QueryWrapper}, coreTimeCounters(nCores, 0) {}
+    PerformanceCounter(std::size_t nCores) : coreTimeCounters(nCores, 0) {}
 
-    std::unique_ptr<QueryWrapper> query;
+    QueryWrapper query;
     std::vector<PDH_HCOUNTER> coreTimeCounters;
 };
 
@@ -43,7 +43,7 @@ void CpuMonitor::openQuery() {
     for (std::size_t i = 0; i < nCores; ++i)
     {
         std::wstring fullCounterPath{L"\\Processor(" + std::to_wstring(i) + L")\\% Processor Time"};
-        status = PdhAddCounterW(*newPerformanceCounter->query, fullCounterPath.c_str(), 0,
+        status = PdhAddCounterW(newPerformanceCounter->query, fullCounterPath.c_str(), 0,
             &newPerformanceCounter->coreTimeCounters[i]);
         if (ERROR_SUCCESS != status)
         {
@@ -55,7 +55,7 @@ void CpuMonitor::openQuery() {
             throw std::system_error(status, std::system_category(), "PdhSetCounterScaleFactor() failed");
         }
     }
-    status = PdhCollectQueryData(*newPerformanceCounter->query);
+    status = PdhCollectQueryData(newPerformanceCounter->query);
     if (ERROR_SUCCESS != status)
     {
         throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
@@ -84,7 +84,7 @@ std::size_t CpuMonitor::getHistorySize() const {
 
 void CpuMonitor::collectData() {
     PDH_STATUS status;
-    status = PdhCollectQueryData(*performanceCounter->query);
+    status = PdhCollectQueryData(performanceCounter->query);
     if (ERROR_SUCCESS != status) {
         throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
     }

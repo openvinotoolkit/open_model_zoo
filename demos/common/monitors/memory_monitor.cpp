@@ -12,9 +12,7 @@
 #include <psapi.h>
 
 struct MemoryMonitor::PerformanceCounter {
-    PerformanceCounter() : query{new QueryWrapper} {}
-
-    std::unique_ptr<QueryWrapper> query;
+    QueryWrapper query;
     PDH_HCOUNTER pagingFileUsageCounter;
 };
 
@@ -40,7 +38,7 @@ MemoryMonitor::~MemoryMonitor() = default;
 void MemoryMonitor::openQuery() {
     std::unique_ptr<MemoryMonitor::PerformanceCounter> newPerformanceCounter{new MemoryMonitor::PerformanceCounter};
 
-    PDH_STATUS status = PdhAddCounterW(*newPerformanceCounter->query, L"\\Paging File(_Total)\\% Usage", 0,
+    PDH_STATUS status = PdhAddCounterW(newPerformanceCounter->query, L"\\Paging File(_Total)\\% Usage", 0,
         &newPerformanceCounter->pagingFileUsageCounter);
     if (ERROR_SUCCESS != status)
     {
@@ -80,7 +78,7 @@ void MemoryMonitor::collectData() {
     }
 
     PDH_STATUS status;
-    status = PdhCollectQueryData(*performanceCounter->query);
+    status = PdhCollectQueryData(performanceCounter->query);
     if (ERROR_SUCCESS != status) {
         throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
     }

@@ -285,7 +285,7 @@ std::ostream& operator<<(std::ostream& os, const Presenter& presenter) {
         collectedDataStream << "Mean swap usage: " << presenter.memoryMonitor.getMeanSwap() << " GiB\n";
     }
     std::string collectedData = collectedDataStream.str();
-    // drop last \n because usually it is not expeted that printing an objects starts a new line
+    // drop last \n because usually it is not expeted that printing an object starts a new line
     if (!collectedData.empty()) {
         os << collectedData.substr(0, collectedData.size() - 1);
     }
