@@ -17,7 +17,6 @@ struct MemoryMonitor::PerformanceCounter {
 };
 
 MemoryMonitor::MemoryMonitor() :
-        enabled{false},
         samplesNumber{0},
         historySize{0},
         memSum{0.0},
@@ -67,10 +66,6 @@ void MemoryMonitor::setHistorySize(std::size_t size) {
     memSwapUsageHistory.erase(memSwapUsageHistory.begin(), memSwapUsageHistory.end() - newSize);
 }
 
-std::size_t MemoryMonitor::getHistorySize() const {
-    return historySize;
-}
-
 void MemoryMonitor::collectData() {
     PERFORMANCE_INFORMATION performanceInformation;
     if (!GetPerformanceInfo(&performanceInformation, sizeof(performanceInformation))) {
@@ -115,35 +110,7 @@ void MemoryMonitor::collectData() {
     }
 }
 
-std::deque<std::pair<double, double>> MemoryMonitor::getLastHistory() const {
-    return memSwapUsageHistory;
-}
-
-double MemoryMonitor::getMeanMem() const {
-    return memSum / samplesNumber;
-}
-
-double MemoryMonitor::getMeanSwap() const {
-    return swapSum / samplesNumber;
-}
-
-double MemoryMonitor::getMaxMem() const {
-    return maxMem;
-}
-
-double MemoryMonitor::getMaxSwap() const {
-    return maxSwap;
-}
-
-double MemoryMonitor::getMemTotal() const {
-    return memTotal;
-}
-
-double MemoryMonitor::getMaxMemTotal() const {
-    return maxMemTotal;
-}
-
-#else
+#elif __linux__
 #include <fstream>
 #include <utility>
 #include <vector>
@@ -177,7 +144,6 @@ std::pair<std::pair<double, double>, std::pair<double, double>> getAvailableMemS
 }
 
 MemoryMonitor::MemoryMonitor() :
-        enabled{false},
         samplesNumber{0},
         historySize{0},
         memSum{0.0},
@@ -191,10 +157,6 @@ void MemoryMonitor::setHistorySize(std::size_t size) {
     historySize = size;
     std::size_t newSize = std::min(size, memSwapUsageHistory.size());
     memSwapUsageHistory.erase(memSwapUsageHistory.begin(), memSwapUsageHistory.end() - newSize);
-}
-
-std::size_t MemoryMonitor::getHistorySize() const {
-    return historySize;
 }
 
 void MemoryMonitor::collectData() {
@@ -216,6 +178,19 @@ void MemoryMonitor::collectData() {
     if (memSwapUsageHistory.size() > historySize) {
         memSwapUsageHistory.pop_front();
     }
+}
+
+#else
+// not implemented
+MemoryMonitor::MemoryMonitor() : historySize{0} {}
+
+void MemoryMonitor::setHistorySize(std::size_t size) {historySize=size;}
+
+void MemoryMonitor::collecData() {}
+#endif
+
+std::size_t MemoryMonitor::getHistorySize() const {
+    return historySize;
 }
 
 std::deque<std::pair<double, double>> MemoryMonitor::getLastHistory() const {
@@ -245,4 +220,3 @@ double MemoryMonitor::getMemTotal() const {
 double MemoryMonitor::getMaxMemTotal() const {
     return maxMemTotal;
 }
-#endif

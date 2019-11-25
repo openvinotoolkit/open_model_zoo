@@ -21,7 +21,6 @@ public:
     double getMemTotal() const;
     double getMaxMemTotal() const; // a system may have hotpluggable memory
 private:
-    bool enabled;
     unsigned samplesNumber;
     std::size_t historySize;
     double memSum, swapSum;

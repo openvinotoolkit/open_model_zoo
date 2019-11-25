@@ -78,10 +78,6 @@ void CpuMonitor::setHistorySize(std::size_t size) {
     cpuLoadHistory.erase(cpuLoadHistory.begin(), cpuLoadHistory.end() - newSize);
 }
 
-std::size_t CpuMonitor::getHistorySize() const {
-    return historySize;
-}
-
 void CpuMonitor::collectData() {
     PDH_STATUS status;
     status = PdhCollectQueryData(performanceCounter->query);
@@ -115,23 +111,10 @@ void CpuMonitor::collectData() {
     }
 }
 
-std::deque<std::vector<double>> CpuMonitor::getLastHistory() const {
-    return cpuLoadHistory;
-}
-
-std::vector<double> CpuMonitor::getMeanCpuLoad() const {
-    std::vector<double> meanCpuLoad;
-    meanCpuLoad.reserve(cpuLoadSum.size());
-    for (double coreLoad : cpuLoadSum) {
-        meanCpuLoad.push_back(coreLoad / samplesNumber);
-    }
-    return meanCpuLoad;
-}
-#else
+#elif __linux__
 #include <regex>
 #include <utility>
 #include <fstream>
-
 #include <unistd.h>
 
 namespace {
@@ -181,10 +164,6 @@ void CpuMonitor::setHistorySize(std::size_t size) {
     cpuLoadHistory.erase(cpuLoadHistory.begin(), cpuLoadHistory.end() - newSize);
 }
 
-std::size_t CpuMonitor::getHistorySize() const {
-    return historySize;
-}
-
 void CpuMonitor::collectData() {
     std::vector<unsigned long> idleCpuStat = getIdleCpuStat(nCores);
     auto timePoint = std::chrono::steady_clock::now();
@@ -213,6 +192,19 @@ void CpuMonitor::collectData() {
     }
 }
 
+#else
+// not implemented
+CpuMonitor::CpuMonitor() : nCores{0}, lastEnabled{false}, historySize{0} {}
+
+void CpuMonitor::setHistorySize(std::size_t size) {historySize=size;}
+
+void CpuMonitor::collectData() {}
+#endif
+
+std::size_t CpuMonitor::getHistorySize() const {
+    return historySize;
+}
+
 std::deque<std::vector<double>> CpuMonitor::getLastHistory() const {
     return cpuLoadHistory;
 }
@@ -225,4 +217,3 @@ std::vector<double> CpuMonitor::getMeanCpuLoad() const {
     }
     return meanCpuLoad;
 }
-#endif
