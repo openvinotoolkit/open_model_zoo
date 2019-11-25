@@ -44,7 +44,7 @@
 ConsoleErrorListener error_listener;
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
-    // ---------------------------Parsing and validation of input args--------------------------------------
+    // ---------------------------------Parsing and validation of input args----------------------------------
     slog::info << "Parsing input parameters" << slog::endl;
 
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
         std::vector<std::string> imageNames;
         parseInputFilesArguments(imageNames);
 
-        // ---------------------------Read all images-------------------------------------------------------
+        // ------------------------------------------Read all images------------------------------------------
         std::vector<cv::Mat> inputImgs = {};
         for (const auto & i : imageNames) {
             const cv::Mat& tmp = cv::imread(i);
@@ -86,39 +86,27 @@ int main(int argc, char *argv[]) {
             }
         }
 
-    // ---------------------------Read network--------------------------------------------------------------
+        // -------------------------------------------Read network--------------------------------------------
         InferenceEngine::Core ie;
         if (FLAGS_p_msg) {
             ie.SetLogCallback(error_listener);
         }
-        InferenceEngine::CNNNetReader netReader;//
-        InferenceEngine::CNNNetwork network;//
+        InferenceEngine::CNNNetReader netReader;
+        InferenceEngine::CNNNetwork network;
         netReader.ReadNetwork(FLAGS_m);
         std::string binFileName = fileNameNoExt(FLAGS_m) + ".bin";
         netReader.ReadWeights(binFileName);
         network = netReader.getNetwork();
 
-    // ---------------------------Init inputBlobName--------------------------------------------------------
-        InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo()); //???
+        // ----------------------------------------Init inputBlobName-----------------------------------------
+        InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
         if (inputInfo.size() != 1) throw std::logic_error("Sample supports topologies with 1 input only");
         std::string inputBlobName = inputInfo.begin()->first;
         unsigned curPos = 0;
         unsigned framesNum = 0;
         std::atomic<bool> quitFlag(false);
 
-    // ---------------------------Reshape network-----------------------------------------------------------    
-        /*
-        std::map<std::string, std::vector<unsigned long>> newBlobsDimsInfo;
-            auto newBlobDims(inputBlobDims);
-            // Fix height and change width to make networkAspectRatio equal to imageAspectRatio
-            newBlobDims[3] = static_cast<unsigned long>(newBlobDims[2] * imageAspectRatio);
-            newBlobsDimsInfo[inputBlobName] = newBlobDims;
-        
-        
-        if (inputBlobsDimsInfo.size() != newBlobsDimsInfo.size()) {
-            throw std::runtime_error("Mismatch in the number of blobs being reshaped");
-        }
-        */
+        // ------------------------------------------Reshape network------------------------------------------
         auto input_shapes = network.getInputShapes();
         std::string input_name;
         InferenceEngine::SizeVector input_shape;
@@ -127,14 +115,14 @@ int main(int argc, char *argv[]) {
         input_shape[2] = input_shapes[input_name][2];
         input_shape[3] = input_shapes[input_name][3];
         input_shapes[input_name] = input_shape;
-        std::cout << "Resizing network to the image size = [" << input_shapes[input_name][2] << "x" << input_shapes[input_name][3] << "] "
-                  << "with batch = " << FLAGS_b << std::endl;
+        std::cout << "Resizing network to the image size = [" 
+                  << input_shapes[input_name][2] << "x" << input_shapes[input_name][3]
+                  << "] " << "with batch = " << FLAGS_b << std::endl;
         network.reshape(input_shapes);
 
-    // ---------------------------???-----------------------------------------------------------------------
-        std::map<std::string, std::vector<unsigned long>> inputBlobsDimsInfo;//!!!!!!!!!!!!!!
-        std::map<std::string, std::vector<unsigned long>> outputBlobsDimsInfo;//
-        //auto inputInfo = network.getInputsInfo();
+        // ---------------------------------------------------------------------------------------------------
+        std::map<std::string, std::vector<unsigned long>> inputBlobsDimsInfo;
+        std::map<std::string, std::vector<unsigned long>> outputBlobsDimsInfo;
         for (auto inputBlobsIt = inputInfo.begin(); inputBlobsIt != inputInfo.end(); ++inputBlobsIt) {
             auto layerName = inputBlobsIt->first;
             auto layerData = inputBlobsIt->second;
@@ -150,7 +138,8 @@ int main(int argc, char *argv[]) {
                 layerData->setLayout(InferenceEngine::Layout::NC);
                 layerData->setPrecision(InferenceEngine::Precision::FP32);
             } else {
-                throw std::runtime_error("Unknow type of input layer layout. Expected either 4 or 2 dimensional inputs");
+                throw std::runtime_error("Unknow type of input layer layout. "
+                                         "Expected either 4 or 2 dimensional inputs");
             }
         }
 
@@ -165,11 +154,11 @@ int main(int argc, char *argv[]) {
             outputBlobsDimsInfo[layerName] = layerDims_;
             layerData->setPrecision(InferenceEngine::Precision::FP32);
         }
-        // ---------------------------???-------------------------------------------------------------------
+        // ---------------------------------------------------------------------------------------------------
 
 
 
-        // ---------------------------Set device and device settings----------------------------------------
+        // ----------------------------------Set device and device settings-----------------------------------
         std::set<std::string> devices;
         for (const std::string& netDevices : {FLAGS_d, /*FLAGS_d_va, FLAGS_d_lpr*/}) {
             if (netDevices.empty()) {
@@ -199,13 +188,15 @@ int main(int argc, char *argv[]) {
                 ie.SetConfig({{ CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
                                 (device_nstreams.count(device) > 0 ? std::to_string(device_nstreams.at(device)) :
                                                                                  "CPU_THROUGHPUT_AUTO") }}, device);
-                device_nstreams[device] = std::stoi(ie.GetConfig(device, CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
+                device_nstreams[device] = std::stoi(
+                    ie.GetConfig(device, CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
             } else if (device == ("GPU")) {
                 //if (FLAGS_api == "async")
                 ie.SetConfig({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
                                 (device_nstreams.count(device) > 0 ? std::to_string(device_nstreams.at(device)) :
                                                                          "GPU_THROUGHPUT_AUTO") }}, device);
-                device_nstreams[device] = std::stoi(ie.GetConfig(device, CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
+                device_nstreams[device] = std::stoi(
+                    ie.GetConfig(device, CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
 
                 if ((FLAGS_d.find("MULTI") != std::string::npos) &&
                     (FLAGS_d.find("CPU") != std::string::npos)) {
@@ -219,11 +210,11 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        // ---------------------------Load network to device------------------------------------------------
-        InferenceEngine::ExecutableNetwork executableNetwork;//
+        // --------------------------------------Load network to device---------------------------------------
+        InferenceEngine::ExecutableNetwork executableNetwork;
         executableNetwork = ie.LoadNetwork(network, FLAGS_d);
 
-        // ---------------------------Try to set optimal number of infer requests---------------------------
+        // ----------------------------Try to set optimal number of infer requests----------------------------
         if (FLAGS_nireq == 0) {
             std::string key = METRIC_KEY(OPTIMAL_NUMBER_OF_INFER_REQUESTS);
             try {
@@ -236,13 +227,11 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        // ---------------------------Create infer request--------------------------------------------------
+        // ---------------------------------------Create infer request----------------------------------------
         std::vector<InferenceEngine::InferRequest> inferRequests;
         int infReqNum = FLAGS_nireq;
         for(int infReqID = 0; infReqID < infReqNum; ++infReqID)
             inferRequests.push_back(executableNetwork.CreateInferRequest());
-
-       
 
         std::queue<cv::Mat> showMats;
         
@@ -254,15 +243,27 @@ int main(int argc, char *argv[]) {
         unsigned batchSize = FLAGS_b;
         int irFirstIndex = 0;
         
-        // ---------------------------Set completion callback-----------------------------------------------
+        // --------------------------------------Set completion callback---------------------------------------
         for (InferenceEngine::InferRequest& inferRequest : inferRequests) {
             inferRequest.SetCompletionCallback(
-                InferRequestCallback(inferRequest, irFirstIndex, mutex, condVar, inputImgs, inputBlobName, FLAGS_b, showMats, curPos, framesNum, quitFlag)
+                InferRequestCallback(
+                    inferRequest,
+                    irFirstIndex,
+                    mutex,
+                    condVar,
+                    inputImgs,
+                    inputBlobName,
+                    FLAGS_b,
+                    showMats,
+                    curPos,
+                    framesNum,
+                    quitFlag
+                )
             );
             irFirstIndex = (irFirstIndex + batchSize) % inputImgs.size();
         }
         
-        // ---------------------------Filling blobs---------------------------------------------------------
+        // -------------------------------------------Filling blobs-------------------------------------------
         auto blobDims = inputBlobsDimsInfo[inputBlobName];
         if (blobDims.size() != 4) {
             throw std::runtime_error("Input data does not match size of the blob");
@@ -279,7 +280,7 @@ int main(int argc, char *argv[]) {
         }
 
         if (!FLAGS_no_show) {
-            // ---------------------------Create output info----------------------------------------------------
+            // --------------------------------------Create output info---------------------------------------
             int width;
             int height;
             std::vector<std::string> gmRowsCols = split(FLAGS_res, 'x');        
@@ -300,7 +301,7 @@ int main(int argc, char *argv[]) {
             
             GridMat gridMat = GridMat(cv::Size(width, height), cv::Size(cellWidth, cellHeight));
 
-            // ---------------------------Start async-----------------------------------------------------------
+            // ------------------------------------------Start async------------------------------------------
             int64 startTime = cv::getTickCount();
             for (InferenceEngine::InferRequest& inferRequest : inferRequests)
                 inferRequest.StartAsync();
@@ -331,7 +332,7 @@ int main(int argc, char *argv[]) {
             cv::destroyWindow("main");
         }
 
-        // ---------------------------Wait for all infer requests-------------------------------------------
+        // ------------------------------------Wait for all infer requests------------------------------------
         for (InferenceEngine::InferRequest& inferRequest : inferRequests)
             inferRequest.Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
     }
@@ -344,8 +345,5 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    slog::info << "Execution successful" << slog::endl;
-    slog::info << slog::endl << "This sample is an API example, for any performance measurements "
-                                "please use the dedicated benchmark_app tool" << slog::endl;
     return 0;
 }

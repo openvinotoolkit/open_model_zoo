@@ -13,15 +13,16 @@
 static const char help_message[] = "Print a usage message.";
 
 /// @brief message for images argument
-static const char image_message[] = "Required. Path to a folder with images or path to an image files: a .ubyte file for LeNet" \
-                                    "and a .bmp file for the other networks.";
+static const char image_message[] = "Required. Path to a folder with images or path to an image files: a .ubyte " \
+                                    "file for LeNet and a .bmp file for the other networks.";
 
 /// @brief message for model argument
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 
 /// @brief message for assigning cnn calculation to device
-static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). " \
-                                            "Default value is CPU. Sample will look for a suitable plugin for device specified.";
+static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available " \
+                                            "devices is shown below). Default value is CPU. " \
+                                            "Sample will look for a suitable plugin for device specified.";
 
 /// @brief message for batch size 
 static const char batch_size_message[] = "Optional. Specify batch to infer. " \
@@ -41,27 +42,29 @@ static const char delay_message[] = "Optional. Delay between screen updates in m
                                     "Default value is 1.";
 
 /// @brief Message for setting image grid resolution
-static const char image_grid_resolution_message[] = "Optional. Set image grid resolution in format WxH. Default value is 1920x1080.";
+static const char image_grid_resolution_message[] = "Optional. Set image grid resolution in format WxH. " \
+                                                    "Default value is 1920x1080.";
 
 /// @brief Message for setting image grid cell resolution
-static const char image_grid_cell_resolution_message[] = "Optional. Set image grid cell resolution in format WxH. Default value is 240x135.";
+static const char image_grid_cell_resolution_message[] = "Optional. Set image grid cell resolution in format WxH. " \
+                                                         "Default value is 240x135.";
 
 /// @brief message for top results number
 static const char ntop_message[] = "Optional. Number of top results. Default value is 10.";
 
 /// @brief message for clDNN custom kernels desc
-static const char custom_cldnn_message[] = "Required for GPU custom kernels." \
-                                           "Absolute path to the .xml file with kernels description";
+static const char custom_cldnn_message[] = "Required for GPU custom kernels. " \
+                                           "Absolute path to the .xml file with kernels description.";
 
 /// @brief message for user library argument
 static const char custom_cpu_library_message[] = "Required for CPU custom layers." \
-                                                 "Absolute path to a shared library with the kernels implementation";
+                                                 "Absolute path to a shared library with the kernels implementation.";
 
 /// @brief message for plugin messages
-static const char plugin_message[] = "Optional. Enables messages from a plugin";
+static const char plugin_message[] = "Optional. Enables messages from a plugin.";
 
 /// @brief Don't show processed images
-static const char no_show_message[] = "Optional. Not showing processed images";
+static const char no_show_message[] = "Optional. Not showing processed images.";
 
 
 /// @brief Define flag for showing help message <br>
@@ -127,20 +130,20 @@ static void showUsage() {
     std::cout << "Options:" << std::endl;
     std::cout << std::endl;
     std::cout << "    -h                        " << help_message << std::endl;
-    std::cout << "    -i \"<path>\"             " << image_message << std::endl;
-    std::cout << "    -m \"<path>\"             " << model_message << std::endl;
-    std::cout << "      -l \"<absolute_path>\"  " << custom_cpu_library_message << std::endl;
+    std::cout << "    -i \"<path>\"               " << image_message << std::endl;
+    std::cout << "    -m \"<path>\"               " << model_message << std::endl;
+    std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
-    std::cout << "      -c \"<absolute_path>\"  " << custom_cldnn_message << std::endl;
-    std::cout << "    -d \"<device>\"           " << target_device_message << std::endl;
-    std::cout << "    -b                        " << batch_size_message << std::endl;
-    std::cout << "    -nthreads                 " << num_threads_message << std::endl;
-    std::cout << "    -nstreams                 " << num_streams_message << std::endl;
-    std::cout << "    -nireq                    " << num_inf_req_message << std::endl;
-    std::cout << "    -nt \"<integer>\"         " << ntop_message << std::endl;
-    std::cout << "    -delay                    " << delay_message << std::endl; 
+    std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
+    std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
+    std::cout << "    -b \"<integer>\"            " << batch_size_message << std::endl;
+    std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
+    std::cout << "    -nstreams \"<integer>\"     " << num_streams_message << std::endl;
+    std::cout << "    -nireq \"<integer>\"        " << num_inf_req_message << std::endl;
+    std::cout << "    -nt \"<integer>\"           " << ntop_message << std::endl;
+    std::cout << "    -delay \"<integer>\"        " << delay_message << std::endl; 
     std::cout << "    -p_msg                    " << plugin_message << std::endl;
-    std::cout << "    -res \"<WxH>\"            " << image_grid_resolution_message << std::endl;
-    std::cout << "    -cell_res \"<WxH>\"       " << image_grid_cell_resolution_message << std::endl;
+    std::cout << "    -res \"<WxH>\"              " << image_grid_resolution_message << std::endl;
+    std::cout << "    -cell_res \"<WxH>\"         " << image_grid_cell_resolution_message << std::endl;
     std::cout << "    -no_show                  " << no_show_message << std::endl;
 }
