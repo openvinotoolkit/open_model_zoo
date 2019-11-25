@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import re
 import math
 from operator import itemgetter
 
@@ -56,10 +57,13 @@ class HumanPoseAdapter(Adapter):
     def configure(self):
         self.part_affinity_fields = self.get_value_from_config('part_affinity_fields_out')
         self.keypoints_heatmap = self.get_value_from_config('keypoints_heatmap_out')
+        self.outputs_verified = False
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self._get_output_names(raw_outputs)
         raw_output = zip(
             identifiers, raw_outputs[self.keypoints_heatmap],
             raw_outputs[self.part_affinity_fields], frame_meta
@@ -337,3 +341,21 @@ class HumanPoseAdapter(Adapter):
         scores = np.array(scores)
 
         return persons_keypoints_x, persons_keypoints_y, persons_keypoints_v, scores
+
+    def _get_output_names(self, raw_outputs):
+        paf_regex = re.compile(self.part_affinity_fields)
+        hm_regex = re.compile(self.keypoints_heatmap)
+
+        def find_layer(regex, output_name, all_outputs):
+            suitable_layers = [layer_name for layer_name in all_outputs if regex.match(layer_name)]
+            if not suitable_layers:
+                raise ValueError('suitable layer for {} output is not found'.format(output_name))
+
+            if len(suitable_layers) > 1:
+                raise ValueError('more than 1 layers matched to regular expression, please specify more detailed regex')
+
+            return suitable_layers[0]
+
+        self.part_affinity_fields = find_layer(paf_regex, 'part_affinity_fields_out', raw_outputs)
+        self.keypoints_heatmap = find_layer(hm_regex, 'keypoints_heatmap_out', raw_outputs)
+        self.outputs_verified = True

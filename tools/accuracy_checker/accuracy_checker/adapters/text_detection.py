@@ -330,7 +330,7 @@ class TextProposalsDetectionAdapter(Adapter):
             if len(resize_op) >= 2:
                 scale_x, scale_y = resize_op[0].parameters['scale_y'], resize_op[0].parameters['scale_x']
                 boxes[:, 0::2] /= scale_x
-                boxes [:, 1::2] /= scale_y
+                boxes[:, 1::2] /= scale_y
             rects = [box.reshape(4, 2) for box in boxes]
             result.append(TextDetectionPrediction(identifier, np.array(rects)))
 

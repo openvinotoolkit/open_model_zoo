@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import re
 import numpy as np
 
 from ..adapters import Adapter
@@ -55,6 +56,7 @@ class HeadPoseEstimatorAdapter(Adapter):
         self.angle_yaw = self.get_value_from_config('angle_yaw')
         self.angle_pitch = self.get_value_from_config('angle_pitch')
         self.angle_roll = self.get_value_from_config('angle_roll')
+        self.outputs_verified = False
 
     def process(self, raw, identifiers=None, frame_meta=None):
         """
@@ -67,6 +69,8 @@ class HeadPoseEstimatorAdapter(Adapter):
         """
         result = []
         raw_output = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self._get_output_names(raw_output)
         for identifier, yaw, pitch, roll in zip(
                 identifiers,
                 raw_output[self.angle_yaw],
@@ -81,6 +85,27 @@ class HeadPoseEstimatorAdapter(Adapter):
             result.append(prediction)
 
         return result
+
+    def _get_output_names(self, raw_outputs):
+        yaw_regex = re.compile(self.angle_yaw)
+        pitch_regex = re.compile(self.angle_pitch)
+        roll_regex = re.compile(self.angle_roll)
+
+        def find_layer(regex, output_name, all_outputs):
+            suitable_layers = [layer_name for layer_name in all_outputs if regex.match(layer_name)]
+            if not suitable_layers:
+                raise ValueError('suitable layer for {} output is not found'.format(output_name))
+
+            if len(suitable_layers) > 1:
+                raise ValueError('more than 1 layers matched to regular expression, please specify more detailed regex')
+
+            return suitable_layers[0]
+
+        self.angle_yaw = find_layer(yaw_regex, 'angle_yaw', raw_outputs)
+        self.angle_pitch = find_layer(pitch_regex, 'angle_pitch', raw_outputs)
+        self.angle_roll = find_layer(roll_regex, 'angle_roll', raw_outputs)
+
+        self.outputs_verified = True
 
 
 class VehicleAttributesRecognitionAdapter(Adapter):
@@ -134,6 +159,7 @@ class AgeGenderAdapter(Adapter):
     def configure(self):
         self.age_out = self.get_value_from_config('age_out')
         self.gender_out = self.get_value_from_config('gender_out')
+        self.outputs_verified = False
 
     def validate_config(self):
         super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
@@ -156,6 +182,8 @@ class AgeGenderAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_output = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self._get_output_names(raw_output)
         for identifier, age, gender in zip(identifiers, raw_output[self.age_out], raw_output[self.gender_out]):
             gender = gender.reshape(-1)
             age = age.reshape(-1)[0]*100
@@ -167,6 +195,24 @@ class AgeGenderAdapter(Adapter):
             }))
 
         return result
+
+    def _get_output_names(self, raw_outputs):
+        age_regex = re.compile(self.age_out)
+        gender_regex = re.compile(self.gender_out)
+
+        def find_layer(regex, output_name, all_outputs):
+            suitable_layers = [layer_name for layer_name in all_outputs if regex.match(layer_name)]
+            if not suitable_layers:
+                raise ValueError('suitable layer for {} output is not found'.format(output_name))
+
+            if len(suitable_layers) > 1:
+                raise ValueError('more than 1 layers matched to regular expression, please specify more detailed regex')
+
+            return suitable_layers[0]
+
+        self.age_out = find_layer(age_regex, 'age_out', raw_outputs)
+        self.gender_out = find_layer(gender_regex, 'gender_out', raw_outputs)
+        self.outputs_verified = True
 
 
 class LandmarksRegressionAdapter(Adapter):
