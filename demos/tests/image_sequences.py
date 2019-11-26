@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from args import image_net_arg, brats_arg, image_retrieval_arg, TestDataArg
+from args import image_net_arg, brats_arg, image_retrieval_arg
 
 IMAGE_SEQUENCES = {
     'action-recognition': [
@@ -229,7 +229,7 @@ IMAGE_SEQUENCES = {
     ],
 
     'image-retrieval-gallery': [
-        TestDataArg('gallery.txt'),
+        image_retrieval_arg('gallery.txt'),
     ],
 
     'image-retrieval-video': [
