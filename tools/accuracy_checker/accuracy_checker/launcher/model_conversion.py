@@ -209,7 +209,7 @@ def set_path_to_tf_custom_operation_configs(
 
 
 def set_path_to_transformation_configs(mo_params, framework, transformation_config_dir, mo_path):
-    transformation_config_path = mo_params.get('tensorflow_use_custom_operations_config')
+    transformation_config_path = mo_params.get('transformations_config')
     if not transformation_config_path:
         return mo_params
 

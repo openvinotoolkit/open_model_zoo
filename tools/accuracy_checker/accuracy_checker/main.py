@@ -108,7 +108,7 @@ def build_arguments_parser():
     )
     parser.add_argument(
         '--tf_custom_op_config_dir',
-        help='path to directory with Model Optimizer transformation configuration files',
+        help='path to directory with tensorflow custom operation configuration files for model optimizer',
         type=partial(get_path, is_directory=True),
         # there is no default value because if user did not specify it we use specific location
         # defined in model_conversion.py
