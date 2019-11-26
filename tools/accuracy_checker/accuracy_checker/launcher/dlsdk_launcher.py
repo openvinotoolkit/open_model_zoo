@@ -200,7 +200,7 @@ class DLSDKLauncher(Launcher):
                 optional=True, is_directory=True, description="TF Custom Operation Config prefix."
             ),
             '_transformations_config_dir': PathField(
-                optional=True, is_directory=True, description="Transformation config for Model Optimizer"),
+                optional=True, is_directory=True, description="Transformation config prefix for Model Optimizer"),
             '_tf_obj_detection_api_pipeline_config_path': PathField(
                 optional=True, is_directory=False, description="TF Custom Operation Pipeline Config."),
             '_cpu_extensions_mode': StringField(optional=True, description="CPU extensions mode."),
