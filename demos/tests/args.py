@@ -32,7 +32,7 @@ def image_net_arg(id):
 
 
 def brats_arg(id):
-    return TestDataArg('HGG_LGG/{}'.format(id))
+    return TestDataArg('BraTS/{}'.format(id))
 
 
 def image_retrieval_arg(id):

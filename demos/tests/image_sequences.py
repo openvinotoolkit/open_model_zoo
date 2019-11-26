@@ -222,8 +222,10 @@ IMAGE_SEQUENCES = {
 
     'brain-tumor-nifti': [
         brats_arg('BRATS_485.nii.gz'),
-        brats_arg('BRATS_501.nii.gz'),
-        brats_arg('BRATS_750.nii,gz'),
+        brats_arg('BRATS_486.nii.gz'),
+        brats_arg('BRATS_487.nii.gz'),
+        brats_arg('BRATS_488.nii.gz'),
+        brats_arg('BRATS_489.nii.gz'),
     ],
 
     'image-retrieval-gallery': [
