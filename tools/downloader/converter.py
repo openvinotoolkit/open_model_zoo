@@ -98,9 +98,12 @@ def convert_to_onnx(context, model, output_dir, args):
     cmd = [str(args.python), str(Path(__file__).absolute().parent / model.converter_to_onnx), *conversion_to_onnx_args]
 
     context.printf('Conversion to ONNX command: {}', ' '.join(map(quote_arg, cmd)))
+    context.printf('')
 
-    return True if args.dry_run else context.subprocess(cmd)
+    success = True if args.dry_run else context.subprocess(cmd)
+    context.printf('')
 
+    return success
 
 def num_jobs_arg(value_str):
     if value_str == 'auto':
