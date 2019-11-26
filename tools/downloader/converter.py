@@ -189,7 +189,7 @@ def main():
                                             conv_dir=output_dir / model.subdirectory)
             for arg in model.mo_args]
 
-        for model_precision in model_precisions:
+        for model_precision in sorted(model_precisions):
             mo_cmd = [str(args.python), '--', str(mo_path),
                 '--framework={}'.format(model_format),
                 '--data_type={}'.format(model_precision),
