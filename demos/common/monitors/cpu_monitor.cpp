@@ -20,7 +20,7 @@ std::size_t getNCores() {
 }
 
 struct CpuMonitor::PerformanceCounter {
-    PerformanceCounter(std::size_t nCores) : coreTimeCounters(nCores, 0) {}
+    PerformanceCounter(std::size_t nCores) : coreTimeCounters(nCores) {}
 
     QueryWrapper query;
     std::vector<PDH_HCOUNTER> coreTimeCounters;
