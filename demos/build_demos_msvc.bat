@@ -23,8 +23,23 @@ set "SOLUTION_DIR64=%USERPROFILE%\Documents\Intel\OpenVINO\omz_demos_build"
 set MSBUILD_BIN=
 set VS_PATH=
 set VS_VERSION=
+set EXTRA_CMAKE_OPTS=
 
+:argParse
 if not "%1" == "" (
+    rem cmd.exe mangles -DENABLE_PYTHON=YES into -DENABLE_PYTHON YES,
+    rem so it gets split into two arguments
+    if "%1" == "-DENABLE_PYTHON" (
+        set EXTRA_CMAKE_OPTS=%EXTRA_CMAKE_OPTS% %1=%2
+        shift & shift
+        goto argParse
+    )
+
+    if not "%VS_VERSION%" == "" (
+        echo Unexpected argument: "%1"
+        goto errorHandling
+    )
+
     if "%1"=="VS2015" (
         set "VS_VERSION=2015"
     ) else if "%1"=="VS2017" (
@@ -32,10 +47,13 @@ if not "%1" == "" (
     ) else if "%1"=="VS2019" (
         set "VS_VERSION=2019"
     ) else (
-        echo Unrecognized option specified "%1"
-        echo Supported command line options: VS2015, VS2017, VS2019
+        echo Unrecognized Visual Studio version specified: "%1"
+        echo Supported versions: VS2015, VS2017, VS2019
         goto errorHandling
     )
+
+    shift
+    goto argparse
 )
 
 if "%INTEL_OPENVINO_DIR%"=="" (
@@ -126,7 +144,9 @@ if "!MSBUILD_BIN!" == "" (
 if exist "%SOLUTION_DIR64%\CMakeCache.txt" del "%SOLUTION_DIR64%\CMakeCache.txt"
 
 echo Creating Visual Studio %MSBUILD_VERSION% %PLATFORM% files in %SOLUTION_DIR64%... && ^
-cd "%ROOT_DIR%" && cmake -E make_directory "%SOLUTION_DIR64%" && cd "%SOLUTION_DIR64%" && cmake -G "Visual Studio !MSBUILD_VERSION!" -A %PLATFORM% "%ROOT_DIR%"
+cd "%ROOT_DIR%" && cmake -E make_directory "%SOLUTION_DIR64%"
+
+cd "%SOLUTION_DIR64%" && cmake -G "Visual Studio !MSBUILD_VERSION!" -A %PLATFORM% %EXTRA_CMAKE_OPTS% "%ROOT_DIR%"
 
 echo.
 echo ###############^|^| Build Inference Engine Demos using MS Visual Studio (MSBuild.exe) ^|^|###############
