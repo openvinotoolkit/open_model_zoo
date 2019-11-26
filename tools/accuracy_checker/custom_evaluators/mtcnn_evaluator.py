@@ -348,7 +348,6 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
 
         update_mo_params(launcher.config, self.model_info)
         if 'caffe_model' in self.model_info:
-            self.model_info.update(launcher.config)
             model_xml, model_bin = launcher.convert_model(self.model_info)
         else:
             model_xml = self.model_info['model']
@@ -393,7 +392,6 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
             launcher.create_ie_plugin(True)
         update_mo_params(launcher.config, self.model_info)
         if 'caffe_model' in self.model_info:
-            self.model_info.update(launcher.config)
             model_xml, model_bin = launcher.convert_model(self.model_info)
         else:
             model_xml = self.model_info['model']
