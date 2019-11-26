@@ -45,10 +45,6 @@ static const char delay_message[] = "Optional. Delay between screen updates in m
 static const char image_grid_resolution_message[] = "Optional. Set image grid resolution in format WxH. " \
                                                     "Default value is 1920x1080.";
 
-/// @brief Message for setting image grid cell resolution
-static const char image_grid_cell_resolution_message[] = "Optional. Set image grid cell resolution in format WxH. " \
-                                                         "Default value is 240x135.";
-
 /// @brief message for top results number
 static const char ntop_message[] = "Optional. Number of top results. Default value is 10.";
 
@@ -95,17 +91,12 @@ DEFINE_uint32(nireq, 0, num_inf_req_message);
 DEFINE_uint32(nt, 10, ntop_message);
 
 /// @brief Delay between screen updates in milliseconds (default 1) <br>
-DEFINE_uint32(delay, 1, delay_message);
+DEFINE_int32(delay, 1, delay_message);
 
 /// \brief Set image grid resolution in format WxH<br>
 /// It is an optional parameter
 /// Default is 1920x1080
 DEFINE_string(res, "1920x1080", image_grid_resolution_message);
-
-/// \brief Set image grid cell resolution in format WxH<br>
-/// It is an optional parameter
-/// Default is 240x135
-DEFINE_string(cell_res, "240x135", image_grid_cell_resolution_message);
 
 /// @brief Define parameter for clDNN custom kernels path <br>
 /// Default is ./lib
@@ -144,6 +135,5 @@ static void showUsage() {
     std::cout << "    -delay \"<integer>\"        " << delay_message << std::endl; 
     std::cout << "    -p_msg                    " << plugin_message << std::endl;
     std::cout << "    -res \"<WxH>\"              " << image_grid_resolution_message << std::endl;
-    std::cout << "    -cell_res \"<WxH>\"         " << image_grid_cell_resolution_message << std::endl;
     std::cout << "    -no_show                  " << no_show_message << std::endl;
 }

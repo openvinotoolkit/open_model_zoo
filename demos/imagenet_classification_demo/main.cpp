@@ -66,6 +66,36 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
+double updateGridMat(std::mutex& mutex,
+                     std::queue<cv::Mat>& showMats,
+                     std::condition_variable& condVar,
+                     GridMat& gridMat,
+                     int64 startTime,
+                     unsigned framesNum,
+                     char& key,
+                     int64 delay,
+                     bool imShow) {
+    double overallSPF;
+    {
+        std::unique_lock<std::mutex> lock(mutex);
+        while (showMats.empty()) {   
+            condVar.wait(lock);
+        }
+        gridMat.listUpdate(showMats);
+    
+        overallSPF = ((cv::getTickCount() - startTime) / cv::getTickFrequency()) / framesNum;
+    }
+    
+    if (imShow) {
+        gridMat.textUpdate(overallSPF);
+        cv::imshow("main", gridMat.getMat());
+    }
+                    
+    key = static_cast<char>(cv::waitKey(delay));
+
+    return 1. / overallSPF;
+}
+
 int main(int argc, char *argv[]) {
     try {
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -279,58 +309,71 @@ int main(int argc, char *argv[]) {
             curPos = (curPos + batchSize) % inputImgs.size();   
         }
 
-        if (!FLAGS_no_show) {
-            // --------------------------------------Create output info---------------------------------------
-            int width;
-            int height;
-            std::vector<std::string> gmRowsCols = split(FLAGS_res, 'x');        
-            if(gmRowsCols.size() != 2) throw std::runtime_error("Input gmsizes key is not valid.");
-            else{
-                width = std::stoi(gmRowsCols[0]);
-                height = std::stoi(gmRowsCols[1]);
-            }
-
-            int cellWidth;
-            int cellHeight;
-            std::vector<std::string> gmCellRowsCols = split(FLAGS_cell_res, 'x');        
-            if(gmCellRowsCols.size() != 2) throw std::runtime_error("Input gmcsizes key is not valid.");
-            else{
-                cellWidth = std::stoi(gmCellRowsCols[0]);
-                cellHeight = std::stoi(gmCellRowsCols[1]);
-            }
-            
-            GridMat gridMat = GridMat(cv::Size(width, height), cv::Size(cellWidth, cellHeight));
-
-            // ------------------------------------------Start async------------------------------------------
-            int64 startTime = cv::getTickCount();
-            for (InferenceEngine::InferRequest& inferRequest : inferRequests)
-                inferRequest.StartAsync();
-    
-    
-            int64 delay = FLAGS_delay;
-            cv::Mat tmpMat;
-            char key;
-            do {      
-                //double currSPF; 
-                double overallSPF;
-                {
-                    std::unique_lock<std::mutex> lock(mutex);
-                    while(showMats.empty()){   
-                        condVar.wait(lock);
-                    }
-                    gridMat.listUpdate(showMats);
-    
-                    //currSPF = (lastInferTime / cv::getTickFrequency()) / batchSize;
-                    overallSPF = ((cv::getTickCount() - startTime) / cv::getTickFrequency()) / framesNum;
-                }
-                gridMat.textUpdate(overallSPF);// overallTime is not protected
-                cv::imshow("main", gridMat.getMat());
-                    
-                key = static_cast<char>(cv::waitKey(delay));
-            } while (27 != key); //Press 'Esc' to quit
-            quitFlag = true;
-            cv::destroyWindow("main");
+        // --------------------------------------Create output info---------------------------------------
+        int width;
+        int height;
+        std::vector<std::string> gmRowsCols = split(FLAGS_res, 'x');        
+        if (gmRowsCols.size() != 2) throw std::runtime_error("Input gmsizes key is not valid.");
+        else {
+            width = std::stoi(gmRowsCols[0]);
+            height = std::stoi(gmRowsCols[1]);
         }
+        
+        GridMat gridMat = GridMat(cv::Size(width, height));
+
+        // ------------------------------------------Start async------------------------------------------
+        int64 startTime = cv::getTickCount();
+        for (InferenceEngine::InferRequest& inferRequest : inferRequests)
+            inferRequest.StartAsync();
+    
+    
+        int64 delay = FLAGS_delay;
+        cv::Mat tmpMat;
+        char key;
+
+        unsigned fpsTestSize = 12 * batchSize;
+        double fpsSum = 0;
+        double avgFPS = 0;
+        unsigned gridMatSize;
+
+        if (FLAGS_no_show || delay == -1) {
+            for (size_t i = 0; i < fpsTestSize; i++) {
+                fpsSum += updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, 1, false);
+
+                avgFPS = fpsSum / fpsTestSize;
+            }              
+        } else {
+            for (size_t i = 0; i < fpsTestSize; i++) {
+                fpsSum += updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, 1, true);
+
+                avgFPS = fpsSum / (i + 1);
+                gridMatSize = (unsigned)round(std::sqrt(avgFPS));
+
+                if (gridMatSize > gridMat.getSize()) {
+                    std::cout << "GridMat resized: " << gridMat.getSize() << " -> " << gridMatSize << std::endl;
+
+                    gridMat = GridMat(cv::Size(width, height), gridMatSize);
+                }
+            }
+        }
+
+        gridMatSize = (unsigned)round(std::sqrt(avgFPS));
+        gridMat = GridMat(cv::Size(width, height), gridMatSize);
+
+        if (delay == -1) {
+            delay = avgFPS / (gridMatSize * gridMatSize) * 1000;
+        }
+
+        std::cout << "--------------------" << std::endl;
+        std::cout << "FPS test result: " << avgFPS << std::endl;
+        std::cout << "GridMat size: " << gridMatSize << std::endl;
+        std::cout << "Delay: "<< delay << std::endl;
+
+        do {
+            updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, delay, !FLAGS_no_show);
+        } while (27 != key); //Press 'Esc' to quit
+        quitFlag = true;
+        cv::destroyWindow("main");
 
         // ------------------------------------Wait for all infer requests------------------------------------
         for (InferenceEngine::InferRequest& inferRequest : inferRequests)
