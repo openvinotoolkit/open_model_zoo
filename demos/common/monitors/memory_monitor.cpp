@@ -7,6 +7,7 @@
 #include "query_wrapper.h"
 #include <algorithm>
 #define PSAPI_VERSION 2
+#include <system_error>
 #include <windows.h>
 #include <pdhmsg.h>
 #include <psapi.h>

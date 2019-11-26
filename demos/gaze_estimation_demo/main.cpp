@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
         std::string windowName = "Gaze estimation demo";
         double overallTime = 0., inferenceTime = 0.;
         cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
-        Presenter presenter(FLAGS_u, cap.get(cv::CAP_PROP_FRAME_HEIGHT) - graphSize.height - 10, graphSize);
+        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
         auto tIterationBegins = cv::getTickCount();
         do {
             if (flipImage) {

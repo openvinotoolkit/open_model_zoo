@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include<iostream> // TODO: remove
 #include <deque>
+#include <memory>
 
 class MemoryMonitor {
 public:
