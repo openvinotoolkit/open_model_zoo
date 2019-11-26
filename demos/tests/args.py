@@ -36,7 +36,7 @@ def brats_arg(id):
 
 
 def image_retrieval_arg(id):
-    return TestDataArg('test-master/{}'.format(id))
+    return TestDataArg('Image_Retrieval/{}'.format(id))
 
 
 class ModelArg:
