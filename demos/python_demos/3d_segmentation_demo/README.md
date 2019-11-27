@@ -26,8 +26,8 @@ usage: 3d_segmentation_demo.py [-h] -i PATH_TO_INPUT_DATA -m PATH_TO_MODEL -o
 Options:
   -h, --help            Show this help message and exit.
   -i PATH_TO_INPUT_DATA, --path_to_input_data PATH_TO_INPUT_DATA
-                        Required. Path to an input folder with NIfTI data/TIFF
-                        file
+                        Required. Path to an input folder with NIfTI
+                        data/NIFTI file/TIFF file
   -m PATH_TO_MODEL, --path_to_model PATH_TO_MODEL
                         Required. Path to an .xml file with a trained model
   -o PATH_TO_OUTPUT, --path_to_output PATH_TO_OUTPUT
@@ -60,13 +60,18 @@ For example, to do inference on a 3D TIFF image using a trained network with mul
 command:
 
 ```
-python3 3d_segmentation_demo.py -i <path_to_image>/inputImage.tiff -m <path_to_model>/multiple-output.xml -d CPU -o <path_to_output>
+python3 3d_segmentation_demo.py -i <path_to_image>/inputImage.tiff -m <path_to_model>/brain-tumor-segmentation-0001.xml -d CPU -o <path_to_output>
 ```
      
-For example, to do inference on an 3D NIfTI image using a trained network with multiple outputs on CPU and save 
+For example, to do inference on an 3D NIfTI images using a trained network with multiple outputs on CPU and save 
 output TIFF and NIFTI images, run the following command:
 ```
-python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/multiple-output.xml -d CPU -o <path_to_output> -nii
+python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/brain-tumor-segmentation-0001 -d CPU -o <path_to_output> -nii
+```
+
+For example, to do inference on an single 3D NIfTI image and save output TIFF image, run the following command
+```
+python3 3d_segmentation_demo.py -i <path_to_nifti_image>/PackedImage.nii -m <path_to_model>/brain-tumor-segmentation-0001 -d CPU -o <path_to_output>
 ```
      
 ## Demo Output

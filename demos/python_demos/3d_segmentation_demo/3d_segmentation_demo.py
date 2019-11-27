@@ -77,7 +77,7 @@ def parse_arguments():
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-i', '--path_to_input_data', type=str, required=True,
-                        help="Required. Path to an input folder with NIfTI data/TIFF file")
+                        help="Required. Path to an input folder with NIfTI data/NIFTI file/TIFF file")
     args.add_argument('-m', '--path_to_model', type=str, required=True,
                         help="Required. Path to an .xml file with a trained model")
     args.add_argument('-o', '--path_to_output', type=str, required=True,
@@ -101,7 +101,6 @@ def parse_arguments():
 
 
 def get_input_type(path):
-    print("Is dir: ", os.path.isdir(path))
     if os.path.isdir(path):
         return NIFTI_FOLDER
     elif (fnmatch(path, '*.nii.gz') or fnmatch(path, '*.nii')):
@@ -143,10 +142,10 @@ def bbox3(img):
     return np.array([[-1, -1, -1], [0, 0, 0]])
 
 
-def read_nii_header(data_path, name, suffix='', separate_folder=True):
-    filename = os.path.join(data_path, name, name + suffix)
-    if not separate_folder:
-        filename = os.path.join(data_path, name + suffix)
+def read_nii_header(data_path, name, suffix='', separate_folder=False):
+    filename = os.path.join(data_path, name + suffix)
+    if separate_folder:
+        filename = os.path.join(data_path, name, name + suffix)
     if not os.path.exists(filename):
         raise AttributeError("File {} is not exist. Please, validate path to input".format(filename))
     return nib.load(filename)
@@ -174,11 +173,12 @@ def resample_np(data, output_shape, order):
 def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True):
     images_list = []
     handle = None
+    original_shape = ()
     bboxes = np.zeros(shape=(len(DATA_SUFFIXES),) + (2, 3))
 
     if is_series:
         for j, s in enumerate(DATA_SUFFIXES):
-            image_handle = read_nii_header(test_data_path, data_name, s, separate_folder=False)
+            image_handle = read_nii_header(test_data_path, data_name, s)
             handle = image_handle
             image = image_handle.get_data().astype(np.float32)
 
@@ -189,9 +189,11 @@ def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True)
             images_list.append(image.reshape((1, 1,) + image.shape))
             original_shape = image.shape
     else:
-        image_handle = read_nii_header(test_data_path, data_name, separate_folder=False)
+        image_handle = read_nii_header(test_data_path, data_name)
         handle = image_handle
         image = image_handle.get_data().astype(np.float32)
+        assert len(image.shape) == 4, 'Wrong data dimensions - {}, must be 4'.format(len(image.shape))
+        assert image.shape[3] == 4, 'Wrong data shape - {}, must be (:,:,:,4)'.format(image.shape)
         # Reading order is specified for data from http://medicaldecathlon.com/
         for j in (1, 3, 0, 2):
             img = image[:, :, :, j]
