@@ -68,7 +68,7 @@ public:
     }
 
     cv::Mat getMat() {
-        while (!updateList.empty()) {    
+        while (!updateList.empty()) {
             cv::Mat cell = outImg(cv::Rect(points[currSourceID], cellSize));
             cv::Mat frame = updateList.front();
             updateList.pop_front();

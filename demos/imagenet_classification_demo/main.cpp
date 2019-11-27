@@ -81,6 +81,10 @@ double updateGridMat(std::mutex& mutex,
         while (showMats.empty()) {   
             condVar.wait(lock);
         }
+
+        if (showMats.size()+1 == gridMat.getSize()) {   // Because when the size of GridMat is equal to the number of
+            showMats.pop();                             // shown images GridMat looks too static
+        } 
         gridMat.listUpdate(showMats);
     
         overallSPF = ((cv::getTickCount() - startTime) / cv::getTickFrequency()) / framesNum;
