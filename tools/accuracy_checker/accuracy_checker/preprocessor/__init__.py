@@ -30,6 +30,7 @@ from .geometric_transformations import (
     Tiling,
     Crop3D,
     TransformedCropWithAutoScale
+    ImagePyramid
 )
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
 
@@ -49,7 +50,7 @@ __all__ = [
     'Tiling',
     'Crop3D',
     'TransformedCropWithAutoScale',
-
+    'ImagePyramid',
     'BgrToGray',
     'BgrToRgb',
     'RgbToGray',

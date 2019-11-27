@@ -48,13 +48,15 @@ from .text_detection import (
     IncidentalSceneTextLocalizationRecall,
     IncidentalSceneTextLocalizationHMean
 )
-from .coco_metrics import MSCOCOAveragePrecision, MSCOCORecall
+from .coco_metrics import MSCOCOAveragePrecision, MSCOCORecall, MSCOCOKeypointsPrecision, MSCOCOKeypointsRecall
 from .coco_orig_metrics import (
     MSCOCOorigAveragePrecision,
     MSCOCOorigRecall,
 
     MSCOCOOrigSegmAveragePrecision,
-    MSCOCOorigSegmRecall
+    MSCOCOorigSegmRecall,
+
+    MSCOCOOrigKeyPointsAveragePrecision,
 )
 from .hit_ratio import HitRatioMetric, NDSGMetric
 from .machine_translation import BilingualEvaluationUnderstudy
@@ -113,10 +115,13 @@ __all__ = [
 
     'MSCOCOAveragePrecision',
     'MSCOCORecall',
+    'MSCOCOKeypointsPrecision',
+    'MSCOCOKeypointsRecall',
     'MSCOCOorigAveragePrecision',
     'MSCOCOorigRecall',
     'MSCOCOOrigSegmAveragePrecision',
     'MSCOCOorigSegmRecall',
+    'MSCOCOOrigKeyPointsAveragePrecision',
 
     'HitRatioMetric',
     'NDSGMetric',

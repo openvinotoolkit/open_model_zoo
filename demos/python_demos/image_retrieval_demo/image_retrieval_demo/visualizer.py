@@ -54,7 +54,7 @@ def add_top10_gallery_images(demo_image, impaths, distances, input_image, target
 
 
 def visualize(image, target_pos, impaths, distances, input_size, compute_embedding_time,
-              search_in_gallery_time, imshow_delay):
+              search_in_gallery_time, imshow_delay, no_show=False):
     """ Visualizes input video frame with detected ROI and
         top-10 most similar images from the gallery. """
 
@@ -95,6 +95,9 @@ def visualize(image, target_pos, impaths, distances, input_size, compute_embeddi
 
     demo_image = add_top10_gallery_images(demo_image, impaths, distances, input_image, target_pos)
 
-    cv2.imshow('demo_image', demo_image)
+    if not no_show:
+        cv2.imshow('demo_image', demo_image)
+        key_pressed = cv2.waitKey(imshow_delay)
+        return key_pressed & 0xff if key_pressed != -1 else -1
 
-    return cv2.waitKey(imshow_delay) & 0xff
+    return -1

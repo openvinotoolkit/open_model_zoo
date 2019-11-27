@@ -100,11 +100,17 @@ def main():
     out_blob = next(iter(net.outputs))
     net.batch_size = len(args.input)
 
+    # NB: This is required to load the image as uint8 np.array
+    #     Without this step the input blob is loaded in FP32 precision,
+    #     this requires additional operation and more memory.
+    net.inputs[input_blob].precision = "U8"
+
     # Read and pre-process input images
     n, c, h, w = net.inputs[input_blob].shape
     images = np.ndarray(shape=(n, c, h, w))
     for i in range(n):
         image = cv2.imread(args.input[i])
+        assert image.dtype == np.uint8
         if image.shape[:-1] != (h, w):
             log.warning("Image {} is resized from {} to {}".format(args.input[i], image.shape[:-1], (h, w)))
             image = cv2.resize(image, (w, h))

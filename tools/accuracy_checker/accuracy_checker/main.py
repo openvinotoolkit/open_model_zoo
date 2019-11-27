@@ -115,6 +115,14 @@ def build_arguments_parser():
         required=False
     )
     parser.add_argument(
+        '--transformations_config_dir',
+        help='path to directory with Model Optimizer transformations configuration files',
+        type=partial(get_path, is_directory=True),
+        # there is no default value because if user did not specify it we use specific location
+        # defined in model_conversion.py
+        required=False
+    )
+    parser.add_argument(
         '--tf_obj_detection_api_pipeline_config_path',
         help='path to directory with tensorflow object detection api pipeline configuration files for model optimizer',
         type=partial(get_path, is_directory=True),
@@ -188,6 +196,13 @@ def build_arguments_parser():
         required=False,
         choices=['LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG'],
         default='LOG_WARNING'
+    )
+    parser.add_argument(
+        '--deprecated_ir_v7',
+        help='Allow generation IR v7 via Model Optimizer',
+        required=False,
+        default=False,
+        type=cast_to_bool
     )
 
     return parser

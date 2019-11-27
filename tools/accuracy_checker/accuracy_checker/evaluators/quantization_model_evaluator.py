@@ -142,7 +142,9 @@ class ModelEvaluator:
                         batch_raw_predictions, batch_identifiers, batch_meta, self.adapter
                     )
                     free_irs.append(ir)
-                    annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions)
+                    annotations, predictions = self.postprocessor.process_batch(
+                        batch_annotation, batch_predictions, batch_meta
+                    )
 
                     metrics_result = None
                     if self.metric_executor:

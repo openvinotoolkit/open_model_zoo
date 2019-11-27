@@ -3622,6 +3622,7 @@ License terms:
 ==================================================================================================
 
 * license-plate-recognition-barrier-0007
+* vehicle-license-plate-detection-barrier-0123
 
 License terms:
 
@@ -3848,6 +3849,8 @@ License terms:
 * inceptionv3-int8-sparse-v1-tf-0001
 * inceptionv3-int8-sparse-v2-tf-0001
 * inceptionv3-int8-tf-0001
+* inceptionv3-int8-sparse-v2-onnx-0001
+* inceptionv3-int8-onnx-0001
 * instance-segmentation-security-0010
 * instance-segmentation-security-0050
 * instance-segmentation-security-0083
@@ -3857,6 +3860,8 @@ License terms:
 * mobilenetv2-int8-sparse-v1-tf-0001
 * mobilenetv2-int8-sparse-v2-tf-0001
 * mobilenetv2-int8-tf-0001
+* mobilenetv2-int8-sparse-v2-onnx-0001
+* mobilenetv2-int8-onnx-0001
 * pedestrian-and-vehicle-detector-adas-0001
 * pedestrian-detection-adas-0002
 * pedestrian-detection-adas-binary-0001
@@ -3875,11 +3880,16 @@ License terms:
 * resnet-50-int8-sparse-v1-tf-0001
 * resnet-50-int8-sparse-v2-tf-0001
 * resnet-50-int8-tf-0001
+* resnet50-int8-sparse-v2-onnx-0001
+* resnet50v1-int8-onnx-0001
 * resnet50-binary-0001
+* resnetv1-101-int8-tf-0001
 * road-segmentation-adas-0001
 * semantic-segmentation-adas-0001
 * single-image-super-resolution-1032
 * single-image-super-resolution-1033
+* squeezenetv1.1-int8-sparse-v1-onnx-0001
+* squeezenetv1.1-int8-onnx-0001
 * text-detection-0003
 * text-detection-0004
 * text-image-super-resolution-0001

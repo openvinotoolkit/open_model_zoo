@@ -38,11 +38,6 @@ models:
     datasets:
       - name: synthetic_chinese_license_plates
 
-        preprocessing:
-          - type: resize
-            dst_width: 94
-            dst_height: 24
-
         metrics:
           - type: character_recognition_accuracy
 global_definitions: ../dataset_definitions.yml

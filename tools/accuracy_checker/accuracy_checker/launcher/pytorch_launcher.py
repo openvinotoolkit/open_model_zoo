@@ -99,7 +99,7 @@ class PyTorchLauncher(Launcher):
             if checkpoint:
                 checkpoint = self._torch.load(checkpoint)
                 state = checkpoint if not state_key else checkpoint[state_key]
-                module.load_state_dict(state)
+                module.load_state_dict(state, strict=False)
             if self.cuda:
                 module.cuda()
             else:

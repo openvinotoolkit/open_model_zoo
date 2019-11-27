@@ -94,7 +94,6 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
     def validate(self, entry, field_uri=None):
         """
         Validate that launcher entry meets all configuration structure requirements.
-
         Args:
             entry: launcher configuration file entry.
             field_uri: id of launcher entry.
@@ -198,8 +197,10 @@ class DLSDKLauncher(Launcher):
                 optional=True, is_directory=True, description="TF Object Detection API Config."
             ),
             '_tf_custom_op_config_dir': PathField(
-                optional=True, is_directory=True, description="TF Custom Operation Config."
+                optional=True, is_directory=True, description="TF Custom Operation Config prefix."
             ),
+            '_transformations_config_dir': PathField(
+                optional=True, is_directory=True, description="Transformation config prefix for Model Optimizer"),
             '_tf_obj_detection_api_pipeline_config_path': PathField(
                 optional=True, is_directory=False, description="TF Custom Operation Pipeline Config."),
             '_cpu_extensions_mode': StringField(optional=True, description="CPU extensions mode."),
@@ -438,8 +439,12 @@ class DLSDKLauncher(Launcher):
             get_parameter_value_from_config(config, DLSDKLauncher.parameters(), 'mo_params'),
             get_parameter_value_from_config(config, DLSDKLauncher.parameters(), 'mo_flags'),
             get_parameter_value_from_config(config, DLSDKLauncher.parameters(), '_tf_custom_op_config_dir'),
-            get_parameter_value_from_config(config, DLSDKLauncher.parameters(),
-                                            '_tf_obj_detection_api_pipeline_config_path'),
+            get_parameter_value_from_config(
+                config, DLSDKLauncher.parameters(), '_tf_obj_detection_api_pipeline_config_path'
+            ),
+            get_parameter_value_from_config(
+                config, DLSDKLauncher.parameters(), '_transformations_config_dir'
+            ),
             should_log_cmd=should_log_mo_cmd
         )
 
@@ -470,7 +475,6 @@ class DLSDKLauncher(Launcher):
             self.network.reshape(shapes)
 
         self.exec_network = self.plugin.load(network=self.network, num_requests=self._num_requests)
-        self._do_reshape = False
 
     def _set_batch_size(self, batch_size):
         # in some cases we can not use explicit property for setting batch size, so we need to use reshape instead
@@ -673,6 +677,8 @@ class DLSDKLauncher(Launcher):
 
             if len(layer_shape) == 2 and len(data_shape) == 1:
                 return np.transpose([data])
+            if len(layer_shape) == 5 and len(layout) == 5:
+                return np.transpose(data, layout)
 
             return np.array(data)
 

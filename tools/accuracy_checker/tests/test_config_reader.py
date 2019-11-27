@@ -88,7 +88,7 @@ class TestConfigReader:
             'bitstreams': Path('bitstreams/'),
             'definitions': None,
             'stored_predictions': None,
-            'tf_custom_op_config': None,
+            'tf_custom_op_config_dir': None,
             'tf_obj_detection_api_pipeline_config_path': None,
             'progress': 'bar',
             'target_framework': None,
@@ -96,7 +96,9 @@ class TestConfigReader:
             'log_file': None,
             'target_tags': None,
             'cpu_extensions_mode': None,
-            'aocl': None
+            'aocl': None,
+            'deprecated_ir_v7': False,
+            'transformations_config_dir': None
         })
 
     def test_read_configs_without_global_config(self, mocker):
@@ -108,10 +110,10 @@ class TestConfigReader:
         empty_args = Namespace(**{
             'models': Path.cwd(), 'extensions': Path.cwd(), 'source': Path.cwd(), 'annotations': Path.cwd(),
             'converted_models': None, 'model_optimizer': None, 'bitstreams': Path.cwd(),
-            'definitions': None, 'config': None, 'stored_predictions': None, 'tf_custom_op_config': None,
+            'definitions': None, 'config': None, 'stored_predictions': None, 'tf_custom_op_config_dir': None,
             'progress': 'bar', 'target_framework': None, 'target_devices': None, 'log_file': None,
             'tf_obj_detection_api_pipeline_config_path': None, 'target_tags': None, 'cpu_extensions_mode': None,
-            'aocl': None
+            'aocl': None, 'deprecated_ir_v7': False, 'transformations_config_dir': None
         })
         mocker.patch('accuracy_checker.utils.get_path', return_value=Path.cwd())
         mocker.patch('yaml.load', return_value=config)

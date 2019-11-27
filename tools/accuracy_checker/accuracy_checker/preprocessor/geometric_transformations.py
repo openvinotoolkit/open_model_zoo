@@ -876,7 +876,6 @@ class Crop3D(Preprocessor):
 
         return img[startz:endz, starty:endy, startx:endx, :]
 
-
 class TransformedCropWithAutoScale(Preprocessor):
     __provider__ = 'transformed_crop_with_auto_scale'
 
@@ -955,3 +954,45 @@ class TransformedCropWithAutoScale(Preprocessor):
         else:
             trans = cv2.getAffineTransform(np.float32(transformed_points), np.float32(points))
         return trans
+
+class ImagePyramid(Preprocessor):
+    __provider__ = 'pyramid'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update(
+            {
+                'min_size': NumberField(value_type=int, min_value=1, description='min side size for pyramid layer'),
+                'factor': NumberField(value_type=float, description='scale factor for pyramid layers')
+            }
+        )
+
+        return parameters
+
+    def configure(self):
+        self.min_size = self.get_value_from_config('min_size')
+        self.factor = self.get_value_from_config('factor')
+
+    def process(self, image, annotation_meta=None):
+        data = image.data.astype(float)
+        height, width, _ = data.shape
+        min_layer = min(height, width)
+        m = 12.0 / self.min_size
+        min_layer = min_layer * m
+        scales = []
+        factor_count = 0
+        while min_layer >= 12:
+            scales.append(m * pow(self.factor, factor_count))
+            min_layer *= self.factor
+            factor_count += 1
+        scaled_data = []
+        for scale in scales:
+            hs = int(np.ceil(height * scale))
+            ws = int(np.ceil(width * scale))
+            scaled_data.append(cv2.resize(data, (ws, hs)))
+
+        image.data = scaled_data
+        image.metadata.update({'multi_infer': True, 'scales': scales})
+
+        return image

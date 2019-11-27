@@ -180,6 +180,7 @@ def create_launcher(launcher_config, delayed_model_loading=False):
     """
     Args:
         launcher_config: launcher configuration file entry.
+        delayed_model_loading: allows postpone model loading to the launcher
     Returns:
         framework-specific launcher object.
     """

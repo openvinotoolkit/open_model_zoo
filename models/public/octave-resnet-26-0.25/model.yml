@@ -46,6 +46,5 @@ model_optimizer_args:
   - --input=data
   - --output=softmax
   - --input_model=$dl_dir/a02_resnet-26_alpha-0.250/checkpoint-0-0000.params
-  - --input_symbol=$dl_dir/a02_resnet-26_alpha-0.250/checkpoint-0-symbol.json
 framework: mxnet
 license: https://raw.githubusercontent.com/facebookresearch/OctConv/master/LICENSE
