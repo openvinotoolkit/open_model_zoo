@@ -29,7 +29,7 @@ from .geometric_transformations import (
     PointAligner,
     Tiling,
     Crop3D,
-    TransformedCropWithAutoScale
+    TransformedCropWithAutoScale,
     ImagePyramid
 )
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
