@@ -371,6 +371,7 @@ int main(int argc, char *argv[]) {
         double fps;
         fpsSum = 0;
         std::queue<double> fpsQueue;
+        unsigned elapsedTime = 0;
 
         do {
             fps = updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, delay, !FLAGS_no_show);
@@ -385,13 +386,19 @@ int main(int argc, char *argv[]) {
 
             fpsQueue.push(fps);
             fpsSum += fps;
-        } while (27 != key); //Press 'Esc' to quit
+
+            elapsedTime = (unsigned)round((cv::getTickCount() - startTime)/10e8);
+        } while (27 != key && (!FLAGS_no_show || elapsedTime < 10));    // no_show flag: stops when 'Esc' is pressed
+                                                                        // w/o flag: after ~10 sec
 
         std::cout << "Overall FPS: " << (fpsSum / currentResultNum) << std::endl;
         
         quitFlag = true;
-        cv::destroyWindow("main");
 
+        if (!FLAGS_no_show) {
+            cv::destroyWindow("main");
+        }
+        
         // ------------------------------------Wait for all infer requests------------------------------------
         for (InferenceEngine::InferRequest& inferRequest : inferRequests)
             inferRequest.Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
