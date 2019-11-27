@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
 
@@ -90,8 +89,8 @@ class CTDETAdapter(Adapter):
                             (A.shape[1] - kernel_size)//stride + 1)
             kernel_size = (kernel_size, kernel_size)
             A_w = as_strided(A, shape=output_shape + kernel_size,
-                                strides=(stride*A.strides[0],
-                                        stride*A.strides[1]) + A.strides)
+                             strides=(stride*A.strides[0],
+                                      stride*A.strides[1]) + A.strides)
             A_w = A_w.reshape(-1, *kernel_size)
 
             return A_w.max(axis=(1, 2)).reshape(output_shape)
@@ -131,7 +130,7 @@ class CTDETAdapter(Adapter):
         wh = self._extract_predictions(raw, frame_meta)[self.wh]
         reg = self._extract_predictions(raw, frame_meta)[self.reg]
         heat = 1/(1 + np.exp(-hm))
-        batch, cat, height, width = heat.shape
+        batch, _, height, width = heat.shape
 
         heat = self._nms(heat)
         scores, inds, clses, ys, xs = self._topk(heat, K=100)
