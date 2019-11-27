@@ -39,6 +39,7 @@ AccuracyChecker supports following set of adapters:
     - `tiny_yolo_v3` - `[10.0, 14.0, 23.0, 27.0, 37.0, 58.0, 81.0, 82.0, 135.0, 169.0, 344.0, 319.0]`
   * `coords` - number of bbox coordinates (default 4).
   * `num` - num parameter from DarkNet configuration file (default 3).
+  * `anchor_mask` - mask for used anchors for each output layer (Optional, if not provided default way for selecting anchors will be used.)
   * `threshold` - minimal objectness score value for valid detections (default 0.001).
   * `input_width` and `input_height` - network input width and height correspondingly (default 416).
   * `outputs` - the list of output layers names (optional), if specified there should be exactly 3 output layers provided.
