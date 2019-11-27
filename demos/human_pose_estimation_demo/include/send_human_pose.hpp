@@ -9,7 +9,8 @@
 #include <opencv2/core/core.hpp>
 
 #include "human_pose.hpp"
+#include  <mqtt.h>
 
 namespace human_pose_estimation {
-    void sendHumanPose(const std::vector<HumanPose>& poses);
+    void sendHumanPose(mqtt * publisher, const std::vector<HumanPose>& poses);
 }  // namespace human_pose_estimation

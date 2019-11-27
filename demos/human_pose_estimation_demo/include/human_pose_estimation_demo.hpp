@@ -26,13 +26,23 @@ static const char target_device_message[] = "Optional. Specify the target device
 static const char performance_counter_message[] = "Optional. Enable per-layer performance report.";
 
 /// @brief Message for not showing processed video
-static const char no_show_processed_video[] = "Optional. Do not show processed video.";
+static const char no_show_processed_video_message[] = "Optional. Do not show processed video.";
 
 /// @brief Message for showing black screen video
-static const char black_background[] = "Optional. Show black background.";
+static const char black_background_message[] = "Optional. Show black background.";
 
 /// @brief Message for raw output
 static const char raw_output_message[] = "Optional. Output inference results as raw values.";
+
+/// @brief Message for MQTT Broker
+static const char broker_mqtt_message[] = "Optional. MQTT Broker address.";
+
+// @brief Message for MQTT client id
+static const char client_mqtt_message[] = "Optional. MQTT Client id.";
+
+// @brief Message for MQTT port
+static const char port_mqtt_message[] = "Optional. MOTT port";
+
 
 /// @brief Defines flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
@@ -55,15 +65,27 @@ DEFINE_bool(pc, false, performance_counter_message);
 
 /// @brief Defines flag for disabling processed video showing <br>
 /// It is an optional parameter
-DEFINE_bool(no_show, false, no_show_processed_video);
+DEFINE_bool(no_show, false, no_show_processed_video_message);
 
 /// @brief Defines flag for only showing black screen with poses <br>
 /// It is an optional parameter
-DEFINE_bool(black, false, black_background);
+DEFINE_bool(black, false, black_background_message);
 
 /// @brief Defines flag to output raw results <br>
 /// It is an optional parameter
 DEFINE_bool(r, false, raw_output_message);
+
+// @brief Defines parameter for setting MQTT broker <br>
+/// It is an optional parameter
+DEFINE_string(broker, "localhost", broker_mqtt_message);
+
+/// @brief Defines parameter for MQTT client id <br>
+/// It is an optional parameter
+DEFINE_string(client, "Demo", client_mqtt_message);
+
+/// @brief Defines parameter for the  MQTT port <br>
+/// It is an optional parameter
+DEFINE_int32(port, 1883, port_mqtt_message);
 
 /**
 * @brief This function shows a help message
@@ -78,7 +100,11 @@ static void showUsage() {
     std::cout << "    -m \"<path>\"                " << human_pose_estimation_model_message << std::endl;
     std::cout << "    -d \"<device>\"              " << target_device_message << std::endl;
     std::cout << "    -pc                        " << performance_counter_message << std::endl;
-    std::cout << "    -no_show                   " << no_show_processed_video << std::endl;
-    std::cout << "    -black                     " << black_background << std::endl;
+    std::cout << "    -no_show                   " << no_show_processed_video_message << std::endl;
+    std::cout << "    -black                     " << black_background_message << std::endl;
     std::cout << "    -r                         " << raw_output_message << std::endl;
+    std::cout << "    -client                    " << client_mqtt_message << std::endl;
+    std::cout << "    -broker                    " << broker_mqtt_message<< std::endl;
+    std::cout << "    -port                      " << port_mqtt_message<< std::endl;
+
 }

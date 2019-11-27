@@ -12,6 +12,8 @@
 #include <chrono>
 
 #include <inference_engine.hpp>
+#include <mqtt.h>
+#define APPLICATION_TOPIC "HumanPose"
 
 #include <samples/ocv_common.hpp>
 
@@ -60,6 +62,9 @@ int main(int argc, char* argv[]) {
         if (!(FLAGS_i == "cam" ? cap.open(0) : cap.open(FLAGS_i))) {
             throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);
         }
+
+        mqtt *mqtt_human_pose;
+        mqtt_human_pose = new mqtt(FLAGS_client.c_str(), (char*)APPLICATION_TOPIC, FLAGS_broker.c_str(), FLAGS_port);
 
         int delay = 33;
 
@@ -165,7 +170,7 @@ int main(int argc, char* argv[]) {
                 poses = estimator.estimateCurr();
 
                 if (FLAGS_r) {
-                    sendHumanPose(poses);
+                    sendHumanPose(mqtt_human_pose, poses);
                 }
 
                 if (!FLAGS_no_show) {

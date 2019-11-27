@@ -17,7 +17,8 @@ char POSE_COCO_BODY_PARTS[][18] = { "Nose", "Neck", "RShoulder", "RElbow", "RWri
                                    "LElbow", "LWrist", "RHip", "RKnee", "RAnkle", "LHip",
                                     "LKnee", "LAnkle", "REye", "LEye", "REar", "LEar", "Bkg"};
 
-void sendHumanPose(const std::vector<HumanPose>& poses) {
+void sendHumanPose(mqtt *publisher, const std::vector<HumanPose>& poses) {
+
 
     if (!poses.empty()) {
         std::time_t result = std::time(nullptr);
@@ -31,6 +32,8 @@ void sendHumanPose(const std::vector<HumanPose>& poses) {
             rawPose << keypoint.x << "," << keypoint.y << " ";
             }
         rawPose << pose.score;
+        std::string message = rawPose.str();
+        publisher->send_message(message.c_str());
         std::cout << rawPose.str() << std::endl;
     }
 }
