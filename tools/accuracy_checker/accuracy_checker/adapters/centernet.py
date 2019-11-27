@@ -20,8 +20,8 @@ from numpy.lib.stride_tricks import as_strided
 
 from ..adapters import Adapter
 from ..config import StringField
-from ..representation import DetectionPrediction
 from ..preprocessor import CenterNetAffineTransformation
+from ..representation import DetectionPrediction
 
 
 class CTDETAdapter(Adapter):
@@ -32,9 +32,9 @@ class CTDETAdapter(Adapter):
         parameters = super().parameters()
         parameters.update(
             {
-                'hm': StringField(description='hm'),
-                'wh': StringField(description='wh'),
-                'reg': StringField(description='reg')
+                'hm': StringField(description="Object center points heatmap."),
+                'wh': StringField(description='Width heatmap'),
+                'reg': StringField(description='Regression output')
             }
         )
         return parameters
@@ -50,14 +50,14 @@ class CTDETAdapter(Adapter):
         ind = np.expand_dims(ind, axis=2)
         ind = np.repeat(ind, dim, axis=2)
         feat = feat[np.arange(feat.shape[0])[:, None, None], ind, np.arange(feat.shape[2])]
-        return np.array(feat)
+        return feat
 
     @staticmethod
     def _tranpose_and_gather_feat(feat, ind):
         feat = np.transpose(feat, (0, 2, 3, 1))
         feat = feat.reshape((feat.shape[0], -1, feat.shape[3]))
         feat = CTDETAdapter._gather_feat(feat, ind)
-        return np.array(feat)
+        return feat
 
     @staticmethod
     def _topk(scores, K=40):
