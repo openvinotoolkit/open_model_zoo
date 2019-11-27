@@ -103,9 +103,9 @@ def parse_arguments():
 def get_input_type(path):
     if os.path.isdir(path):
         return NIFTI_FOLDER
-    elif (fnmatch(path, '*.nii.gz') or fnmatch(path, '*.nii')):
+    elif fnmatch(path, '*.nii.gz') or fnmatch(path, '*.nii'):
         return NIFTI_FILE
-    elif (fnmatch(path, '*.tif') or fnmatch(path, '*.tiff')):
+    elif fnmatch(path, '*.tif') or fnmatch(path, '*.tiff'):
         return TIFF_FILE
 
     raise AttributeError("Input must be a folder with 4 NIFTI files, single NIFTI file (*.nii or *.nii.gz) or "
@@ -147,7 +147,7 @@ def read_nii_header(data_path, name, suffix='', separate_folder=False):
     if separate_folder:
         filename = os.path.join(data_path, name, name + suffix)
     if not os.path.exists(filename):
-        raise AttributeError("File {} is not exist. Please, validate path to input".format(filename))
+        raise ValueError("File {} is not exist. Please, validate path to input".format(filename))
     return nib.load(filename)
 
 
@@ -294,9 +294,6 @@ def main():
         original_data, data_crop, affine, original_size, bbox = \
             read_image(args.path_to_input_data, data_name=args.path_to_input_data, sizes=(h, w, d), is_series=False)
     else:
-        if not (fnmatch(args.path_to_input_data, '*.tif') or fnmatch(args.path_to_input_data, '*.tiff')):
-            raise AttributeError("Input file extension must have tiff format")
-
         data_crop = np.zeros(shape=(n, c, d, h, w), dtype=np.float)
         im_seq = ImageSequence.Iterator(Image.open(args.path_to_input_data))
         for i, page in enumerate(im_seq):
