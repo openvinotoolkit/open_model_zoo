@@ -319,7 +319,6 @@ class MSCocoSingleKeypointsConverter(FileBasedAnnotationConverter):
         full_annotation = read_json(self.annotation_file)
         image_info = full_annotation['images']
         annotations = full_annotation['annotations']
-        label_map, _ = get_label_map(full_annotation, True)
         num_iterations = len(image_info)
         for image_id, image in enumerate(image_info):
             identifier = image['file_name']
@@ -354,4 +353,4 @@ class MSCocoSingleKeypointsConverter(FileBasedAnnotationConverter):
                 if progress_callback is not None and image_id & progress_interval == 0:
                     progress_callback(image_id / num_iterations * 100)
 
-        return ConverterReturn(keypoints_annotations, {'label_map': label_map}, None)
+        return ConverterReturn(keypoints_annotations, {'label_map': {1: 'person'}}, content_errors)
