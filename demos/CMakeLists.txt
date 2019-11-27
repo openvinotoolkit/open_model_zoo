@@ -98,6 +98,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
 endif()
 
 add_subdirectory(common/format_reader)
+add_subdirectory(common/mqtt)
 
 # samples build can be switched off during whole IE build
 if (IE_MAIN_SOURCE_DIR AND NOT ENABLE_SAMPLES)
