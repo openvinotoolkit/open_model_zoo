@@ -189,19 +189,19 @@ def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True)
             images_list.append(image.reshape((1, 1,) + image.shape))
             original_shape = image.shape
     else:
-        image_handle = read_nii_header(test_data_path, data_name)
-        handle = image_handle
-        image = image_handle.get_data().astype(np.float32)
-        assert len(image.shape) == 4, 'Wrong data dimensions - {}, must be 4'.format(len(image.shape))
-        assert image.shape[3] == 4, 'Wrong data shape - {}, must be (:,:,:,4)'.format(image.shape)
+        data_handle = read_nii_header(test_data_path, data_name)
+        handle = data_handle
+        data = data_handle.get_data().astype(np.float32)
+        assert len(data.shape) == 4, 'Wrong data dimensions - {}, must be 4'.format(len(data.shape))
+        assert data.shape[3] == 4, 'Wrong data shape - {}, must be (:,:,:,4)'.format(data.shape)
         # Reading order is specified for data from http://medicaldecathlon.com/
         for j in (1, 3, 0, 2):
-            img = image[:, :, :, j]
-            mask = img > 0
+            image = data[:, :, :, j]
+            mask = image > 0
             bboxes[j] = bbox3(mask)
-            img = normalize(img, mask)
-            images_list.append(img.reshape((1, 1,) + img.shape))
-        original_shape = image.shape[:3]
+            image = normalize(image, mask)
+            images_list.append(image.reshape((1, 1,) + image.shape))
+        original_shape = data.shape[:3]
 
     bbox_min = np.min(bboxes[:, 0, :], axis=0).ravel().astype(int)
     bbox_max = np.max(bboxes[:, 1, :], axis=0).ravel().astype(int)
