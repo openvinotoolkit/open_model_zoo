@@ -34,19 +34,8 @@ public:
         try {
             IE_ASSERT(4 == image_dims.size());
 
-            _background_label_id = 0;
-            _top_k = 400;
-            _variance_encoded_in_target = true;
-            _keep_top_k = 200;
-            _nms_threshold = 0.3;
-            _confidence_threshold = -FLT_MAX;
-            _share_location = false;
-            _normalized = false;
             _image_height = image_dims[2];
             _image_width = image_dims[3];
-            _prior_size = 5;
-            _offset = 1;
-            _code_type = CodeType::CENTER_SIZE;
 
             IE_ASSERT(2 <=  prior_dims.size());
             int priors_size = prior_dims[prior_dims.size() - 2] * prior_dims[prior_dims.size() - 1];
@@ -138,22 +127,15 @@ public:
         const float *ppriors = prior_data;
 
         for (int n = 0; n < N; ++n) {
-            if (_share_location) {
-                const float *ploc = loc_data + n*4*_num_priors;
-                float *pboxes = decoded_bboxes_data + n*4*_num_priors;
-                float *psizes = bbox_sizes_data + n*_num_priors;
-                decodeBBoxes(ppriors, ploc, prior_variances, pboxes, psizes, num_priors_actual, n);
-            } else {
-                for (int c = 0; c < _num_loc_classes; ++c) {
-                    if (c == _background_label_id) {
-                        continue;
-                    }
-
-                    const float *ploc = loc_data + n*4*_num_loc_classes*_num_priors + c*4;
-                    float *pboxes = decoded_bboxes_data + n*4*_num_loc_classes*_num_priors + c*4*_num_priors;
-                    float *psizes = bbox_sizes_data + n*_num_loc_classes*_num_priors + c*_num_priors;
-                    decodeBBoxes(ppriors, ploc, prior_variances, pboxes, psizes, num_priors_actual, n);
+            for (int c = 0; c < _num_loc_classes; ++c) {
+                if (c == _background_label_id) {
+                    continue;
                 }
+
+                const float *ploc = loc_data + n*4*_num_loc_classes*_num_priors + c*4;
+                float *pboxes = decoded_bboxes_data + n*4*_num_loc_classes*_num_priors + c*4*_num_priors;
+                float *psizes = bbox_sizes_data + n*_num_loc_classes*_num_priors + c*_num_priors;
+                decodeBBoxes(ppriors, ploc, prior_variances, pboxes, psizes, num_priors_actual, n);
             }
         }
 
@@ -181,15 +163,8 @@ public:
                 int *pdetections = detections_data + n*_num_classes + c;
 
                 const float *pconf = reordered_conf_data + n*_num_classes*_num_priors + c*_num_priors;
-                const float *pboxes;
-                const float *psizes;
-                if (_share_location) {
-                    pboxes = decoded_bboxes_data + n*4*_num_priors;
-                    psizes = bbox_sizes_data + n*_num_priors;
-                } else {
-                    pboxes = decoded_bboxes_data + n*4*_num_classes*_num_priors + c*4*_num_priors;
-                    psizes = bbox_sizes_data + n*_num_classes*_num_priors + c*_num_priors;
-                }
+                const float *pboxes = decoded_bboxes_data + n*4*_num_classes*_num_priors + c*4*_num_priors;
+                const float *psizes = bbox_sizes_data + n*_num_classes*_num_priors + c*_num_priors;
 
                 nms(pconf, pboxes, psizes, pbuffer, pindices, *pdetections, num_priors_actual[n]);
             }
@@ -256,14 +231,10 @@ public:
                     dst_data[count * DETECTION_SIZE + 1] = static_cast<float>(c);
                     dst_data[count * DETECTION_SIZE + 2] = pconf[c*_num_priors + idx];
 
-                    float xmin = _share_location ? pboxes[idx*4 + 0] :
-                                 pboxes[c*4*_num_priors + idx*4 + 0];
-                    float ymin = _share_location ? pboxes[idx*4 + 1] :
-                                 pboxes[c*4*_num_priors + idx*4 + 1];
-                    float xmax = _share_location ? pboxes[idx*4 + 2] :
-                                 pboxes[c*4*_num_priors + idx*4 + 2];
-                    float ymax = _share_location ? pboxes[idx*4 + 3] :
-                                 pboxes[c*4*_num_priors + idx*4 + 3];
+                    float xmin = pboxes[c*4*_num_priors + idx*4 + 0];
+                    float ymin = pboxes[c*4*_num_priors + idx*4 + 1];
+                    float xmax = pboxes[c*4*_num_priors + idx*4 + 2];
+                    float ymax = pboxes[c*4*_num_priors + idx*4 + 3];
 
                     dst_data[count * DETECTION_SIZE + 3] = xmin;
                     dst_data[count * DETECTION_SIZE + 4] = ymin;
@@ -290,30 +261,20 @@ private:
 
 
     int _num_classes = 0;
-    int _background_label_id = 0;
-    int _top_k = 0;
-    int _variance_encoded_in_target = 0;
-    int _keep_top_k = 0;
-    int _code_type = 0;
-
-    bool _share_location = false;
+    const int _background_label_id = 0;
+    const int _top_k = 400;
+    const int _keep_top_k = 200;
 
     int _image_width = 0;
     int _image_height = 0;
-    int _prior_size = 4;
-    bool _normalized = true;
-    int _offset = 0;
+    const int _prior_size = 5;
+    const int _offset = 1;
 
-    float _nms_threshold = 0.0f;
-    float _confidence_threshold = 0.0f;
+    const float _nms_threshold = 0.3f;
+    const float _confidence_threshold = -FLT_MAX;
 
     int _num_loc_classes = 0;
     int _num_priors = 0;
-
-    enum CodeType {
-        CORNER = 1,
-        CENTER_SIZE = 2,
-    };
 
     void decodeBBoxes(const float *prior_data, const float *loc_data, const float *variance_data,
                       float *decoded_bboxes, float *decoded_bbox_sizes, int* num_priors_actual, int n);
@@ -387,14 +348,12 @@ void DetectionOutputPostProcessor::decodeBBoxes(const float *prior_data,
                                    int* num_priors_actual,
                                    int n) {
     num_priors_actual[n] = _num_priors;
-    if (!_normalized) {
-        int num = 0;
-        for (; num < _num_priors; ++num) {
-            float batch_id = prior_data[num * _prior_size + 0];
-            if (batch_id == -1.f) {
-                num_priors_actual[n] = num;
-                break;
-            }
+
+    for (int num = 0; num < _num_priors; ++num) {
+        float batch_id = prior_data[num * _prior_size + 0];
+        if (batch_id == -1.f) {
+            num_priors_actual[n] = num;
+            break;
         }
     }
 
@@ -414,54 +373,29 @@ void DetectionOutputPostProcessor::decodeBBoxes(const float *prior_data,
         float loc_xmax = loc_data[4*p*_num_loc_classes + 2];
         float loc_ymax = loc_data[4*p*_num_loc_classes + 3];
 
-        if (!_normalized) {
-            prior_xmin /= _image_width;
-            prior_ymin /= _image_height;
-            prior_xmax /= _image_width;
-            prior_ymax /= _image_height;
-        }
+        prior_xmin /= _image_width;
+        prior_ymin /= _image_height;
+        prior_xmax /= _image_width;
+        prior_ymax /= _image_height;
 
-        if (_code_type == CodeType::CORNER) {
-            if (_variance_encoded_in_target) {
-                // variance is encoded in target, we simply need to add the offset predictions.
-                new_xmin = prior_xmin + loc_xmin;
-                new_ymin = prior_ymin + loc_ymin;
-                new_xmax = prior_xmax + loc_xmax;
-                new_ymax = prior_ymax + loc_ymax;
-            } else {
-                new_xmin = prior_xmin + variance_data[p*4 + 0] * loc_xmin;
-                new_ymin = prior_ymin + variance_data[p*4 + 1] * loc_ymin;
-                new_xmax = prior_xmax + variance_data[p*4 + 2] * loc_xmax;
-                new_ymax = prior_ymax + variance_data[p*4 + 3] * loc_ymax;
-            }
-        } else if (_code_type == CodeType::CENTER_SIZE) {
-            float prior_width    =  prior_xmax - prior_xmin;
-            float prior_height   =  prior_ymax - prior_ymin;
-            float prior_center_x = (prior_xmin + prior_xmax) / 2.0f;
-            float prior_center_y = (prior_ymin + prior_ymax) / 2.0f;
+        float prior_width    =  prior_xmax - prior_xmin;
+        float prior_height   =  prior_ymax - prior_ymin;
+        float prior_center_x = (prior_xmin + prior_xmax) / 2.0f;
+        float prior_center_y = (prior_ymin + prior_ymax) / 2.0f;
 
-            float decode_bbox_center_x, decode_bbox_center_y;
-            float decode_bbox_width, decode_bbox_height;
+        float decode_bbox_center_x, decode_bbox_center_y;
+        float decode_bbox_width, decode_bbox_height;
 
-            if (_variance_encoded_in_target) {
-                // variance is encoded in target, we simply need to restore the offset predictions.
-                decode_bbox_center_x = loc_xmin * prior_width  + prior_center_x;
-                decode_bbox_center_y = loc_ymin * prior_height + prior_center_y;
-                decode_bbox_width  = std::exp(loc_xmax) * prior_width;
-                decode_bbox_height = std::exp(loc_ymax) * prior_height;
-            } else {
-                // variance is encoded in bbox, we need to scale the offset accordingly.
-                decode_bbox_center_x = variance_data[p*4 + 0] * loc_xmin * prior_width + prior_center_x;
-                decode_bbox_center_y = variance_data[p*4 + 1] * loc_ymin * prior_height + prior_center_y;
-                decode_bbox_width    = std::exp(variance_data[p*4 + 2] * loc_xmax) * prior_width;
-                decode_bbox_height   = std::exp(variance_data[p*4 + 3] * loc_ymax) * prior_height;
-            }
+        // variance is encoded in target, we simply need to restore the offset predictions.
+        decode_bbox_center_x = loc_xmin * prior_width  + prior_center_x;
+        decode_bbox_center_y = loc_ymin * prior_height + prior_center_y;
+        decode_bbox_width  = std::exp(loc_xmax) * prior_width;
+        decode_bbox_height = std::exp(loc_ymax) * prior_height;
 
-            new_xmin = decode_bbox_center_x - decode_bbox_width  / 2.0f;
-            new_ymin = decode_bbox_center_y - decode_bbox_height / 2.0f;
-            new_xmax = decode_bbox_center_x + decode_bbox_width  / 2.0f;
-            new_ymax = decode_bbox_center_y + decode_bbox_height / 2.0f;
-        }
+        new_xmin = decode_bbox_center_x - decode_bbox_width  / 2.0f;
+        new_ymin = decode_bbox_center_y - decode_bbox_height / 2.0f;
+        new_xmax = decode_bbox_center_x + decode_bbox_width  / 2.0f;
+        new_ymax = decode_bbox_center_y + decode_bbox_height / 2.0f;
 
         decoded_bboxes[p*4 + 0] = new_xmin;
         decoded_bboxes[p*4 + 1] = new_ymin;
