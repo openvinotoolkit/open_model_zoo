@@ -354,8 +354,6 @@ int main(int argc, char *argv[]) {
                 gridMatSize = (unsigned)round(std::sqrt(avgFPS));
 
                 if (gridMatSize > gridMat.getSize()) {
-                    std::cout << "GridMat resized: " << gridMat.getSize() << " -> " << gridMatSize << std::endl;
-
                     gridMat = GridMat(cv::Size(width, height), gridMatSize);
                 }
             }
@@ -368,14 +366,29 @@ int main(int argc, char *argv[]) {
             delay = avgFPS / (gridMatSize * gridMatSize) * 1000;
         }
 
-        std::cout << "--------------------" << std::endl;
-        std::cout << "FPS test result: " << avgFPS << std::endl;
-        std::cout << "GridMat size: " << gridMatSize << std::endl;
-        std::cout << "Delay: "<< delay << std::endl;
+        unsigned fpsResultsMaxCount = 1000;
+        unsigned currentResultNum = 0;
+        double fps;
+        fpsSum = 0;
+        std::queue<double> fpsQueue;
 
         do {
-            updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, delay, !FLAGS_no_show);
+            fps = updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, delay, !FLAGS_no_show);
+
+            if (currentResultNum >= fpsResultsMaxCount) {
+                fpsSum -= fpsQueue.front();
+                fpsQueue.pop();
+            }
+            else {
+                currentResultNum++;
+            }
+
+            fpsQueue.push(fps);
+            fpsSum += fps;
         } while (27 != key); //Press 'Esc' to quit
+
+        std::cout << "Overall FPS: " << (fpsSum / currentResultNum) << std::endl;
+        
         quitFlag = true;
         cv::destroyWindow("main");
 
