@@ -16,7 +16,7 @@
 class GridMat {
 public:
     explicit GridMat(const cv::Size maxDisp = cv::Size{1920, 1080}, unsigned size = 2): size{size}, currSourceID{0} {
-        cellSize = cv::Size{int(maxDisp.width / size), int(maxDisp.height / size)};
+        cellSize = cv::Size{static_cast<int>(maxDisp.width / size), static_cast<int>(maxDisp.height / size)};
         rectangleHeight = maxDisp.height / 25;
 
         for (size_t i = 0; i < size; i++) {

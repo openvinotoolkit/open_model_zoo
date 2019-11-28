@@ -59,9 +59,12 @@ static const char custom_cpu_library_message[] = "Required for CPU custom layers
 /// @brief message for plugin messages
 static const char plugin_message[] = "Optional. Enables messages from a plugin.";
 
-/// @brief Don't show processed images
-static const char no_show_message[] = "Optional. Not showing processed images.";
+/// @brief message for disabling showing of processed images
+static const char no_show_message[] = "Optional. Disable showing of processed images.";
 
+/// @brief message for program run time in no_show mode
+static const char no_show_time_message[] = "Optional. Program run time in no_show mode. " \
+                                           "Default is -1 (infinite time).";
 
 /// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
@@ -112,6 +115,9 @@ DEFINE_bool(p_msg, false, plugin_message);
 /// @brief Disable showing of processed images
 DEFINE_bool(no_show, false, no_show_message);
 
+/// @brief Program run time in no_show mode
+DEFINE_int32(no_show_time, -1, no_show_time_message);
+
 /**
 * @brief This function show a help message
 */
@@ -136,4 +142,5 @@ static void showUsage() {
     std::cout << "    -p_msg                    " << plugin_message << std::endl;
     std::cout << "    -res \"<WxH>\"              " << image_grid_resolution_message << std::endl;
     std::cout << "    -no_show                  " << no_show_message << std::endl;
+    std::cout << "    -no_show_time \"<integer>\" " << no_show_time_message << std::endl;
 }

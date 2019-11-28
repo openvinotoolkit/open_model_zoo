@@ -351,7 +351,7 @@ int main(int argc, char *argv[]) {
                 fpsSum += updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, 1, true);
 
                 avgFPS = fpsSum / (i + 1);
-                gridMatSize = (unsigned)round(std::sqrt(avgFPS));
+                gridMatSize = static_cast<unsigned>(round(std::sqrt(avgFPS)));
 
                 if (gridMatSize > gridMat.getSize()) {
                     gridMat = GridMat(cv::Size(width, height), gridMatSize);
@@ -359,7 +359,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        gridMatSize = (unsigned)round(std::sqrt(avgFPS));
+        gridMatSize = static_cast<unsigned>(round(std::sqrt(avgFPS)));
         gridMat = GridMat(cv::Size(width, height), gridMatSize);
 
         if (delay == -1) {
@@ -371,7 +371,7 @@ int main(int argc, char *argv[]) {
         double fps;
         fpsSum = 0;
         std::queue<double> fpsQueue;
-        unsigned elapsedTime = 0;
+        int elapsedTime = 0;
 
         do {
             fps = updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, delay, !FLAGS_no_show);
@@ -387,9 +387,11 @@ int main(int argc, char *argv[]) {
             fpsQueue.push(fps);
             fpsSum += fps;
 
-            elapsedTime = (unsigned)round((cv::getTickCount() - startTime)/10e8);
-        } while (27 != key && (!FLAGS_no_show || elapsedTime < 10));    // no_show flag: stops when 'Esc' is pressed
-                                                                        // w/o flag: after ~10 sec
+            elapsedTime = static_cast<int>(round((cv::getTickCount() - startTime)/10e8));
+        } while (27 != key && (!FLAGS_no_show || FLAGS_no_show_time == -1 || elapsedTime < FLAGS_no_show_time));
+                                                                        // no -no_show: stops when 'Esc' is pressed
+                                                                        // -no_show_time -1: never stops
+                                                                        // -no_show_time N: stops after N*10e8 ticks 
 
         std::cout << "Overall FPS: " << (fpsSum / currentResultNum) << std::endl;
         
