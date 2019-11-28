@@ -29,10 +29,10 @@ from .geometric_transformations import (
     PointAligner,
     Tiling,
     Crop3D,
-    ImagePyramid,
-    CenterNetAffineTransformation
+    ImagePyramid
 )
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
+from .centernet_preprocessing import CenterNetAffineTransformation
 
 __all__ = [
     'PreprocessingExecutor',
