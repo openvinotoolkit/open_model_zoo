@@ -133,3 +133,7 @@ AccuracyChecker supports following set of adapters:
   * `features_3d_out` - name of output layer with 3D coordinates maps.
   * `keypoints_heatmap_out` - name of output layer with keypoints heatmaps.
   * `part_affinity_fields_out` - name of output layer with keypoints pairwise relations (part affinity fields).
+* `ctdet` - converting output of CenterNet object detection model to `DetectionPrediction`.
+  * `center_heatmap_out` - name of output layer with center points heatmaps.
+  * `width_height_out` - name of the output layer with object sizes.
+  * `regression_out` - name of the regression output with the offset prediction.

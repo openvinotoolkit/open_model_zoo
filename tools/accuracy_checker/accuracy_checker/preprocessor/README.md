@@ -82,4 +82,7 @@ Accuracy Checker supports following set of preprocessors:
 *  `pad_with_eos` - supplement the input sequence to a specific size using a line terminator character or index.
   * `eos_symbol` or `eos_index` - line terminator symbol or index of this symbol in vocab for encoded sequence respectively.
   *  `sequence_len` - length of sequence after supplement.
+* `centernet_affine_transform` - CenterNet affine transformation, used for image resizing.
+  * `dst_width` and `dst_height` are destination width, and height for image. You can also use size instead in case when destination sizes are equal.
+  * `scale` - scale factor for image (default is 1).
 

@@ -31,17 +31,17 @@ class CTDETAdapter(Adapter):
         parameters = super().parameters()
         parameters.update(
             {
-                'hm_out': StringField(description="Object center points heatmap."),
-                'wh_out': StringField(description='Width heatmap'),
-                'reg_out': StringField(description='Regression output')
+                'center_heatmap_out': StringField(description="Object center points heatmap."),
+                'width_height_out': StringField(description='Object size output.'),
+                'regression_out': StringField(description='Regression output.')
             }
         )
         return parameters
 
     def configure(self):
-        self.hm_out = self.get_value_from_config('hm_out')
-        self.wh_out = self.get_value_from_config('wh_out')
-        self.reg_out = self.get_value_from_config('reg_out')
+        self.center_heatmap_out = self.get_value_from_config('center_heatmap_out')
+        self.width_height_out = self.get_value_from_config('width_height_out')
+        self.regression_out = self.get_value_from_config('regression_out')
 
     @staticmethod
     def _gather_feat(feat, ind):
@@ -125,9 +125,9 @@ class CTDETAdapter(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         predictions_batch = self._extract_predictions(raw, frame_meta)
-        hm_batch = predictions_batch[self.hm_out]
-        wh_batch = predictions_batch[self.wh_out]
-        reg_batch = predictions_batch[self.reg_out]
+        hm_batch = predictions_batch[self.center_heatmap_out]
+        wh_batch = predictions_batch[self.width_height_out]
+        reg_batch = predictions_batch[self.regression_out]
         for identifier, heat, wh, reg, meta in zip(identifiers, hm_batch, wh_batch, reg_batch, frame_meta):
             heat = 1/(1 + np.exp(-heat))
             height, width = heat.shape[1:3]
