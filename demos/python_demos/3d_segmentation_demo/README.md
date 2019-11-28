@@ -69,7 +69,7 @@ output TIFF and NIFTI images, run the following command:
 python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/brain-tumor-segmentation-0001 -d CPU -o <path_to_output> -nii
 ```
 
-For example, to do inference on an single 3D NIfTI image and save output TIFF image, run the following command
+For example, to do inference on a single 3D NIfTI image and save an output TIFF image, run the following command:
 ```
 python3 3d_segmentation_demo.py -i <path_to_nifti_image>/PackedImage.nii -m <path_to_model>/brain-tumor-segmentation-0001 -d CPU -o <path_to_output>
 ```
