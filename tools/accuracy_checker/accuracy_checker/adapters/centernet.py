@@ -31,53 +31,53 @@ class CTDETAdapter(Adapter):
         parameters = super().parameters()
         parameters.update(
             {
-                'hm': StringField(description="Object center points heatmap."),
-                'wh': StringField(description='Width heatmap'),
-                'reg': StringField(description='Regression output')
+                'hm_out': StringField(description="Object center points heatmap."),
+                'wh_out': StringField(description='Width heatmap'),
+                'reg_out': StringField(description='Regression output')
             }
         )
         return parameters
 
     def configure(self):
-        self.hm = self.get_value_from_config('hm')
-        self.wh = self.get_value_from_config('wh')
-        self.reg = self.get_value_from_config('reg')
+        self.hm_out = self.get_value_from_config('hm_out')
+        self.wh_out = self.get_value_from_config('wh_out')
+        self.reg_out = self.get_value_from_config('reg_out')
 
     @staticmethod
     def _gather_feat(feat, ind):
-        dim = feat.shape[2]
-        ind = np.expand_dims(ind, axis=2)
-        ind = np.repeat(ind, dim, axis=2)
-        feat = feat[np.arange(feat.shape[0])[:, None, None], ind, np.arange(feat.shape[2])]
+        dim = feat.shape[1]
+        ind = np.expand_dims(ind, axis=1)
+        ind = np.repeat(ind, dim, axis=1)
+        feat = feat[ind, np.arange(feat.shape[1])]
         return feat
 
     @staticmethod
     def _tranpose_and_gather_feat(feat, ind):
-        feat = np.transpose(feat, (0, 2, 3, 1))
-        feat = feat.reshape((feat.shape[0], -1, feat.shape[3]))
+        feat = np.transpose(feat, (1, 2, 0))
+        feat = feat.reshape((-1, feat.shape[2]))
         feat = CTDETAdapter._gather_feat(feat, ind)
         return feat
 
     @staticmethod
     def _topk(scores, K=40):
-        batch, cat, height, width = scores.shape
+        cat, height, width = scores.shape
 
-        scores = scores.reshape((batch, cat, -1))
-        topk_inds = np.argpartition(scores, -K, axis=2)[:, :, -K:]
-        topk_scores = scores[np.arange(scores.shape[0])[:, None, None], np.arange(scores.shape[1])[:, None], topk_inds]
+        scores = scores.reshape((cat, -1))
+        topk_inds = np.argpartition(scores, -K, axis=1)[:, -K:]
+        topk_scores = scores[np.arange(scores.shape[0])[:, None], topk_inds]
 
         topk_inds = topk_inds % (height * width)
         topk_ys = (topk_inds / width).astype(np.int32).astype(np.float)
         topk_xs = (topk_inds % width).astype(np.int32).astype(np.float)
 
-        topk_scores = topk_scores.reshape((batch, -1))
-        topk_ind = np.argpartition(topk_scores, -K, axis=1)[:, -K:]
-        topk_score = topk_scores[np.arange(topk_scores.shape[0])[:, None], topk_ind]
+        topk_scores = topk_scores.reshape((-1))
+        topk_ind = np.argpartition(topk_scores, -K)[-K:]
+        topk_score = topk_scores[topk_ind]
         topk_clses = (topk_ind / K).astype(np.int32)
         topk_inds = CTDETAdapter._gather_feat(
-            topk_inds.reshape((batch, -1, 1)), topk_ind).reshape((batch, K))
-        topk_ys = CTDETAdapter._gather_feat(topk_ys.reshape((batch, -1, 1)), topk_ind).reshape((batch, K))
-        topk_xs = CTDETAdapter._gather_feat(topk_xs.reshape((batch, -1, 1)), topk_ind).reshape((batch, K))
+            topk_inds.reshape((-1, 1)), topk_ind).reshape((K))
+        topk_ys = CTDETAdapter._gather_feat(topk_ys.reshape((-1, 1)), topk_ind).reshape((K))
+        topk_xs = CTDETAdapter._gather_feat(topk_xs.reshape((-1, 1)), topk_ind).reshape((K))
 
         return topk_score, topk_inds, topk_clses, topk_ys, topk_xs
 
@@ -97,8 +97,7 @@ class CTDETAdapter(Adapter):
 
         pad = (kernel - 1) // 2
 
-        hmax = np.array([max_pool2d(channel, kernel, pad) for channel in heat[0]])
-        hmax = np.expand_dims(hmax, axis=0)
+        hmax = np.array([max_pool2d(channel, kernel, pad) for channel in heat])
         keep = (hmax == heat)
         return heat * keep
 
@@ -117,44 +116,44 @@ class CTDETAdapter(Adapter):
 
     @staticmethod
     def _transform(dets, center, scale, heigth, width):
-        for i in range(dets.shape[0]):
-            dets[i, :, :2] = CTDETAdapter._transform_preds(
-                dets[i, :, 0:2], center[i], scale[i], (width, heigth))
-            dets[i, :, 2:4] = CTDETAdapter._transform_preds(
-                dets[i, :, 2:4], center[i], scale[i], (width, heigth))
+        dets[:, :2] = CTDETAdapter._transform_preds(
+            dets[:, 0:2], center, scale, (width, heigth))
+        dets[:, 2:4] = CTDETAdapter._transform_preds(
+            dets[:, 2:4], center, scale, (width, heigth))
         return dets
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
-        hm = self._extract_predictions(raw, frame_meta)[self.hm]
-        wh = self._extract_predictions(raw, frame_meta)[self.wh]
-        reg = self._extract_predictions(raw, frame_meta)[self.reg]
-        heat = 1/(1 + np.exp(-hm))
-        batch, _, height, width = heat.shape
+        predictions_batch = self._extract_predictions(raw, frame_meta)
+        hm_batch = predictions_batch[self.hm_out]
+        wh_batch = predictions_batch[self.wh_out]
+        reg_batch = predictions_batch[self.reg_out]
+        for identifier, heat, wh, reg, meta in zip(identifiers, hm_batch, wh_batch, reg_batch, frame_meta):
+            heat = 1/(1 + np.exp(-heat))
+            height, width = heat.shape[1:3]
 
-        heat = self._nms(heat)
-        scores, inds, clses, ys, xs = self._topk(heat, K=100)
-        reg = self._tranpose_and_gather_feat(reg, inds)
-        K = 100
+            heat = self._nms(heat)
+            scores, inds, clses, ys, xs = self._topk(heat, K=100)
+            reg = self._tranpose_and_gather_feat(reg, inds)
+            num_predictions = 100
 
-        reg = reg.reshape((batch, K, 2))
-        xs = xs.reshape((batch, K, 1)) + reg[:, :, 0:1]
-        ys = ys.reshape((batch, K, 1)) + reg[:, :, 1:2]
+            reg = reg.reshape((num_predictions, 2))
+            xs = xs.reshape((num_predictions, 1)) + reg[:, 0:1]
+            ys = ys.reshape((num_predictions, 1)) + reg[:, 1:2]
 
-        wh = self._tranpose_and_gather_feat(wh, inds)
-        wh = wh.reshape((batch, K, 2))
-        clses = clses.reshape((batch, K, 1)).astype(np.float)
-        scores = scores.reshape((batch, K, 1))
-        bboxes = np.concatenate((xs - wh[..., 0:1] / 2,
-                                 ys - wh[..., 1:2] / 2,
-                                 xs + wh[..., 0:1] / 2,
-                                 ys + wh[..., 1:2] / 2), axis=2)
-        detections = np.concatenate((bboxes, scores, clses), axis=2)
-        detections = np.array(detections)
-        im_size = frame_meta[0].get('image_size')
-        scale = max(im_size)
-        center = np.array(im_size[:2])/2.0
-        dets = self._transform(detections, [np.flip(center)], [scale], height, width)
-        x_min, y_min, x_max, y_max, scores, classes = dets[0].transpose(1, 0)
-        result.append(DetectionPrediction(identifiers, classes, scores, x_min, y_min, x_max, y_max))
+            wh = self._tranpose_and_gather_feat(wh, inds)
+            wh = wh.reshape((num_predictions, 2))
+            clses = clses.reshape((num_predictions, 1)).astype(np.float)
+            scores = scores.reshape((num_predictions, 1))
+            bboxes = np.concatenate((xs - wh[..., 0:1] / 2,
+                                     ys - wh[..., 1:2] / 2,
+                                     xs + wh[..., 0:1] / 2,
+                                     ys + wh[..., 1:2] / 2), axis=1)
+            detections = np.concatenate((bboxes, scores, clses), axis=1)
+            im_size = meta.get('image_size')
+            scale = max(im_size)
+            center = np.array(im_size[:2])/2.0
+            dets = self._transform(detections, np.flip(center), scale, height, width)
+            x_min, y_min, x_max, y_max, scores, classes = dets.transpose(1, 0)
+            result.append(DetectionPrediction(identifier, classes, scores, x_min, y_min, x_max, y_max))
         return result

@@ -925,6 +925,9 @@ class CenterNetAffineTransformation(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
+            'size': NumberField(
+                value_type=int, optional=True, min_value=1, description="Destination size for image."
+            ),
             'dst_width': NumberField(
                 value_type=int, optional=False, min_value=1, description="Destination width for image."
             ),
@@ -968,7 +971,8 @@ class CenterNetAffineTransformation(Preprocessor):
         src_dir = get_dir([0, src_w * -0.5], rot_rad)
         dst_dir = np.array([0, dst_w * -0.5], dtype=np.float32)
 
-        dst = src = np.zeros((3, 2), dtype=np.float32)
+        dst = np.zeros((3, 2), dtype=np.float32)
+        src = np.zeros((3, 2), dtype=np.float32)
         src[0, :], src[1, :] = center, center + src_dir
         dst[0, :] = [dst_w * 0.5, dst_h * 0.5]
         dst[1, :] = np.array([dst_w * 0.5, dst_h * 0.5], np.float32) + dst_dir
