@@ -63,7 +63,7 @@ command:
 python3 3d_segmentation_demo.py -i <path_to_image>/inputImage.tiff -m <path_to_model>/brain-tumor-segmentation-0001.xml -d CPU -o <path_to_output>
 ```
      
-For example, to do inference on an 3D NIfTI images using a trained network with multiple outputs on CPU and save 
+For example, to do inference on 3D NIfTI images using a trained network with multiple outputs on CPU and save 
 output TIFF and NIFTI images, run the following command:
 ```
 python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/brain-tumor-segmentation-0001 -d CPU -o <path_to_output> -nii
