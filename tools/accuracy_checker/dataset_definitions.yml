@@ -48,7 +48,6 @@ datasets:
         dst_height: 800
         dst_width: 1365
 
-
   - name: ms_coco_detection_91_classes
     annotation_conversion:
       converter: mscoco_detection
@@ -549,17 +548,6 @@ datasets:
       data_dir: kinetics/frames_val
     annotation: driver_action_recognition.pickle
     dataset_meta: driver_action_recognition.json
-
-  - name: BraTS
-    data_source: BraTS
-    reader: numpy_reader
-    annotation_conversion:
-      converter: brats_numpy
-      data_dir: BraTS
-      ids_file: BraTS/val_ids.p
-      labels_file: BraTS/labels
-    annotation: brats.pickle
-    dataset_meta: brats.json
 
   - name: product_detection
     annotation: product_detection.pickle
