@@ -93,6 +93,7 @@ int main(int argc, char* argv[]) {
         auto total_t0 = std::chrono::high_resolution_clock::now();
         auto wallclock = std::chrono::high_resolution_clock::now();
         double decode_time = 0, render_time = 0;
+        int frame = 0;
 
         while (true) {
             //here is the first asynchronus point:
@@ -170,7 +171,8 @@ int main(int argc, char* argv[]) {
                 poses = estimator.estimateCurr();
 
                 if (FLAGS_r) {
-                    sendHumanPose(mqtt_human_pose, poses);
+                    sendHumanPose(frame, mqtt_human_pose, poses);
+                    frame++;
                 }
 
                 if (!FLAGS_no_show) {
