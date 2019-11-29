@@ -25,7 +25,7 @@ models:
 
     datasets:
       - name: globalme-reid
-        reader: opencv_imread
+        reader: pillow_imread
 
         preprocessing:
           - type: bgr_to_rgb
@@ -33,7 +33,7 @@ models:
             dst_width: 128
             dst_height: 256
             use_pillow: True
-            interpolation: ANTIALIAS
+            interpolation: BILINEAR
 
         metrics:
           - name: rank@1
