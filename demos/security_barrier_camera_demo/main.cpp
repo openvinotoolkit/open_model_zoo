@@ -377,7 +377,7 @@ void Drawer::process() {
         } else if (key == 32) {
             context.drawersContext.pause = (context.drawersContext.pause + 1) & 1;
         } else {
-            context.drawersContext.presenter.addRemoveMonitor(key);
+            context.drawersContext.presenter.handleKey(key);
         }
         firstGridIt->second.clear();
         gridMats.emplace((--gridMats.end())->first + 1, firstGridIt->second);
@@ -879,7 +879,7 @@ int main(int argc, char* argv[]) {
             std::cout << "Detection InferRequests usage: " << detectionsInfersUsage << "%\n";
         }
 
-        std::cout << context.drawersContext.presenter << '\n';
+        std::cout << context.drawersContext.presenter.reportMeans() << '\n';
     } catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
         return 1;

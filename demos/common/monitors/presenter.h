@@ -25,12 +25,10 @@ public:
         int yPos = 20,
         cv::Size graphSize = {150, 60},
         std::size_t historySize = 20);
-    operator std::string() const;
     void addRemoveMonitor(MonitorType monitor);
-    void addRemoveMonitor(int key); // handles c, d, m, h keys
+    void handleKey(int key); // handles c, d, m, h keys
     void drawGraphs(cv::Mat& frame);
-
-    friend std::ostream& operator<<(std::ostream& os, const Presenter& presenter);
+    std::string reportMeans() const;
 
     const int yPos;
     const cv::Size graphSize;
@@ -43,5 +41,3 @@ private:
     MemoryMonitor memoryMonitor;
     std::ostringstream strStream;
 };
-
-std::ostream& operator<<(std::ostream& os, const Presenter& presenter);

@@ -238,7 +238,7 @@ int main_work(int argc, char **argv) {
             if (k == 27)
                 break;
             else
-                presenter.addRemoveMonitor(k);
+                presenter.handleKey(k);
         }
 
         if (should_save_det_log && (frame_idx % 100 == 0)) {
@@ -260,7 +260,7 @@ int main_work(int argc, char **argv) {
         tracker->PrintReidPerformanceCounts(getFullDeviceName(ie, FLAGS_d_reid));
     }
 
-    std::cout << presenter << '\n';
+    std::cout << presenter.reportMeans() << '\n';
     return 0;
 }
 

@@ -380,7 +380,7 @@ int main(int argc, char *argv[]) {
                 if (27 == key || 'Q' == key || 'q' == key) {
                     break;
                 } else {
-                    presenter.addRemoveMonitor(key);
+                    presenter.handleKey(key);
                 }
             }
         }
@@ -397,7 +397,7 @@ int main(int argc, char *argv[]) {
             facialLandmarksDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_lm));
         }
 
-        std::cout << presenter << '\n';
+        std::cout << presenter.reportMeans() << '\n';
         // ---------------------------------------------------------------------------------------------------
 
         if (!FLAGS_o.empty()) {

@@ -42,7 +42,7 @@ void MemoryMonitor::openQuery() {
         &newPerformanceCounter->pagingFileUsageCounter);
     if (ERROR_SUCCESS != status)
     {
-        throw std::system_error(status, std::system_category(), "PdhSetCounterScaleFactor() failed");
+        throw std::system_error(status, std::system_category(), "PdhAddCounterW() failed");
     }
     status = PdhSetCounterScaleFactor(newPerformanceCounter->pagingFileUsageCounter, -2); // scale counter to [0, 1]
     if (ERROR_SUCCESS != status)

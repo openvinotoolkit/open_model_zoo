@@ -9,6 +9,9 @@ class QueryWrapper {
 public:
     QueryWrapper();
     ~QueryWrapper();
+    QueryWrapper(const QueryWrapper&) = delete;
+    QueryWrapper& operator=(const QueryWrapper&) = delete;
     operator PDH_HQUERY() const;
+private:
     PDH_HQUERY query;
 };

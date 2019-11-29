@@ -824,7 +824,7 @@ int main(int argc, char *argv[]) {
                 if (27 == key)  // Esc
                     break;
                 else
-                    presenter.addRemoveMonitor(key);
+                    presenter.handleKey(key);
             }
         } while (isVideo);
 
@@ -849,7 +849,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        std::cout << presenter << '\n';
+        std::cout << presenter.reportMeans() << '\n';
         // -----------------------------------------------------------------------------------------------------
     }
     catch (const std::exception& error) {

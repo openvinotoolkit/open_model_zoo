@@ -505,7 +505,7 @@ int main(int argc, char* argv[]) {
             }
             displayNSources(result, averageFps, str, params, colors, presenter);
             int key = cv::waitKey(1);
-            presenter.addRemoveMonitor(key);
+            presenter.handleKey(key);
 
             return (key != 27);
         });
@@ -603,7 +603,7 @@ int main(int argc, char* argv[]) {
 
         network.reset();
 
-        std::cout << presenter << '\n';
+        std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

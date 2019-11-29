@@ -284,7 +284,7 @@ int main(int argc, char *argv[]) {
                 cv::imshow("Press ESC key to exit", demo_image);
                 char k = cv::waitKey(wait_time);
                 if (k == 27) break;
-                else presenter.addRemoveMonitor(k);
+                else presenter.handleKey(k);
             }
 
             grabber->GrabNextImage(&image);

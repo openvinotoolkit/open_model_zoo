@@ -47,7 +47,7 @@ void CpuMonitor::openQuery() {
             &newPerformanceCounter->coreTimeCounters[i]);
         if (ERROR_SUCCESS != status)
         {
-            throw std::system_error(status, std::system_category(), "PdhAddCounter() failed");
+            throw std::system_error(status, std::system_category(), "PdhAddCounterW() failed");
         }
         status = PdhSetCounterScaleFactor(newPerformanceCounter->coreTimeCounters[i], -2); // scale counter to [0, 1]
         if (ERROR_SUCCESS != status)

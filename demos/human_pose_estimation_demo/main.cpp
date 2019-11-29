@@ -123,10 +123,10 @@ int main(int argc, char* argv[]) {
             } else if (key == 27) {
                 break;
             } else {
-                presenter.addRemoveMonitor(key);
+                presenter.handleKey(key);
             }
         } while (cap.read(image));
-        std::cout << presenter << '\n';
+        std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;

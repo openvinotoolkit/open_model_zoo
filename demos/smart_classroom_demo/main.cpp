@@ -727,7 +727,7 @@ int main(int argc, char* argv[]) {
             if (key == ESC_KEY) {
                 break;
             } else {
-                presenter.addRemoveMonitor(key);
+                presenter.handleKey(key);
             }
 
             presenter.drawGraphs(prev_frame);
@@ -992,7 +992,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        std::cout << presenter << '\n';
+        std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

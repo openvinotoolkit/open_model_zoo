@@ -219,9 +219,9 @@ int main(int argc, char *argv[]) {
             else if (key == 'f')
                 flipImage = !flipImage;
             else
-                presenter.addRemoveMonitor(key);
+                presenter.handleKey(key);
         } while (cap.read(frame));
-        std::cout << presenter << '\n';
+        std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

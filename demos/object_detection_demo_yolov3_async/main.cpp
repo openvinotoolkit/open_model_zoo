@@ -451,7 +451,7 @@ int main(int argc, char *argv[]) {
                 isAsyncMode ^= true;
                 isModeChanged = true;
             } else {
-                presenter.addRemoveMonitor(key);
+                presenter.handleKey(key);
             }
         }
         // -----------------------------------------------------------------------------------------------------
@@ -464,7 +464,7 @@ int main(int argc, char *argv[]) {
             printPerformanceCounts(*async_infer_request_curr, std::cout, getFullDeviceName(ie, FLAGS_d));
         }
 
-        std::cout << presenter << '\n';
+        std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
