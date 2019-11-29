@@ -31,55 +31,45 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
         parameters = super().parameters()
         parameters.update({
             'classes_out': StringField(
-                description="Name of output layer with information about classes. "
-                            "(optional, if your model has detection_output layer as output).",
-                optional=True
+                description="Name of output layer with information about classes.",
+                optional=False
             ),
             'scores_out': StringField(
-                description="Name of output layer with bbox scores."
-                            "(optional, if your model has detection_output layer as output).",
-                optional=True
+                description="Name of output layer with bbox scores.",
+                optional=False
             ),
             'boxes_out': StringField(
-                description="Name of output layer with bboxes."
-                            "(optional, if your model has detection_output layer as output).",
-                optional=True
+                description="Name of output layer with bboxes.",
+                optional=False
             ),
             'raw_masks_out': StringField(
-                description='Name of output layer with raw instances masks'
+                description='Name of output layer with raw instances masks.',
+                optional=False
             ),
             'texts_out': StringField(
-                description='Name of output layer with texts'
+                description='Name of output layer with texts.',
+                optional=False
             ),
             'confidence_threshold': NumberField(
-                description='Confidence threshold that is used to filter out detected instances'
+                description='Confidence threshold that is used to filter out detected instances.',
+                optional=False
             ),
         })
 
         return parameters
 
     def configure(self):
-        box_outputs = ['classes_out', 'scores_out', 'boxes_out']
-        if not contains_all(self.launcher_config, box_outputs):
-            raise ConfigError(
-                'all related outputs should be specified: {}'.format(', '.join(box_outputs)))
         self.classes_out = self.get_value_from_config('classes_out')
         self.scores_out = self.get_value_from_config('scores_out')
         self.boxes_out = self.get_value_from_config('boxes_out')
         self.num_detections_out = self.get_value_from_config('num_detections_out')
-
         self.raw_masks_out = self.get_value_from_config('raw_masks_out')
         self.texts_out = self.get_value_from_config('texts_out')
-
         self.confidence_threshold = self.get_value_from_config('confidence_threshold')
-
-        self.realisation = self._process_pytorch_outputs
 
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        return self.realisation(raw_outputs, identifiers, frame_meta)
 
-    def _process_pytorch_outputs(self, raw_outputs, identifiers, frame_meta):
         classes = raw_outputs[self.classes_out]
         valid_detections_mask = classes > 0
         classes = classes[valid_detections_mask]
