@@ -157,7 +157,7 @@ class SequentialModel(BaseModel):
     def __init__(self, network_info, launcher):
         super().__init__(network_info, launcher)
         if not contains_all(network_info, ['detector', 'recognizer_encoder', 'recognizer_decoder']):
-            raise ConfigError('network_info should contains encoder and decoder fields')
+            raise ConfigError('network_info should contains detector, encoder and decoder fields')
         self.detector = create_detector(network_info['detector'], launcher)
         self.recognizer_encoder = create_recognizer(network_info['recognizer_encoder'], launcher)
         self.recognizer_decoder = create_recognizer(network_info['recognizer_decoder'], launcher)
