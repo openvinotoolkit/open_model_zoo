@@ -479,11 +479,15 @@ class IncidentalSceneTextLocalizationMetric(PerImageEvaluationMetric):
                     not_matched_before = gt_matched[gt_id] == 0 and det_matched[pred_id] == 0
                     not_difficult = not gt_difficult_mask[gt_id] and not prediction_difficult_mask[pred_id]
                     if not_matched_before and not_difficult:
-                        if iou_matrix[gt_id, pred_id] >= self.iou_constrain:
-                            if not self.word_spotting or gt_texts[gt_id].lower() == prediction_texts[pred_id].lower():
-                                gt_matched[gt_id] = 1
-                                det_matched[pred_id] = 1
-                                num_det_matched += 1
+                        iou_big_enough = iou_matrix[gt_id, pred_id] >= self.iou_constrain
+                        if not self.word_spotting:
+                            transcriptions_equal = True
+                        else:
+                            transcriptions_equal = gt_texts[gt_id].lower() == prediction_texts[pred_id].lower()
+                        if iou_big_enough and transcriptions_equal:
+                            gt_matched[gt_id] = 1
+                            det_matched[pred_id] = 1
+                            num_det_matched += 1
 
         num_ignored_gt = np.sum(gt_difficult_mask)
         num_ignored_pred = np.sum(prediction_difficult_mask)
