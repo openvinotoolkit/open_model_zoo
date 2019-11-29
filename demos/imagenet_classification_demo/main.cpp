@@ -306,8 +306,33 @@ int main(int argc, char *argv[]) {
             //setInputBlob(*it, curPos);    
             auto inputBlob = inferRequest.GetBlob(inputBlobName);
 
-            for(unsigned i = 0; i < batchSize; i++) {        
-                cv::Mat inputImg = inputImgs.at((curPos+i)%inputImgs.size());
+            for(unsigned i = 0; i < batchSize; i++) {
+                int imageIndex = (curPos+i)%inputImgs.size();
+                cv::Mat inputImg = inputImgs[imageIndex];
+                
+                int inputSize = input_shapes[input_name][2];
+                double scale = static_cast<double>(inputSize) / ((inputImg.cols >= inputImg.rows) ? inputImg.rows
+                                                                                                  : inputImg.cols);
+                cv::resize(inputImg, inputImg, cv::Size(), scale, scale);
+
+                cv::Rect imgROI;
+                if (inputImg.cols >= inputImg.rows) {
+                    int fromWidth = inputImg.cols/2 - inputSize/2;
+                    imgROI = cv::Rect(fromWidth,
+                                      0,
+                                      std::min(inputSize, inputImg.cols - fromWidth),
+                                      inputSize);
+                }
+                else {
+                    int fromHeight = inputImg.rows/2 - inputSize/2;
+                    imgROI = cv::Rect(0,
+                                      fromHeight,
+                                      inputSize,
+                                      std::min(inputSize, inputImg.rows - fromHeight));
+                }
+                inputImg(imgROI).copyTo(inputImg);
+                inputImgs[imageIndex] = inputImg;
+
                 matU8ToBlob<uint8_t>(inputImg, inputBlob, i);
             }
             curPos = (curPos + batchSize) % inputImgs.size();   
@@ -340,25 +365,12 @@ int main(int argc, char *argv[]) {
         double avgFPS = 0;
         unsigned gridMatSize;
 
-        if (FLAGS_no_show || delay == -1) {
-            for (size_t i = 0; i < fpsTestSize; i++) {
-                fpsSum += updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, 1, false);
 
-                avgFPS = fpsSum / fpsTestSize;
-            }              
-        } else {
-            for (size_t i = 0; i < fpsTestSize; i++) {
-                fpsSum += updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, 1, true);
+        for (size_t i = 0; i < fpsTestSize; i++) {
+            fpsSum += updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, 1, !(FLAGS_no_show || delay == -1));
+        } 
 
-                avgFPS = fpsSum / (i + 1);
-                gridMatSize = static_cast<unsigned>(round(std::sqrt(avgFPS)));
-
-                if (gridMatSize > gridMat.getSize()) {
-                    gridMat = GridMat(cv::Size(width, height), gridMatSize);
-                }
-            }
-        }
-
+        avgFPS = fpsSum / fpsTestSize;
         gridMatSize = static_cast<unsigned>(round(std::sqrt(avgFPS)));
         gridMat = GridMat(cv::Size(width, height), gridMatSize);
 

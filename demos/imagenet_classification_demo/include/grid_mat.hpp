@@ -15,8 +15,8 @@
 
 class GridMat {
 public:
-    explicit GridMat(const cv::Size maxDisp = cv::Size{1920, 1080}, unsigned size = 2): size{size}, currSourceID{0} {
-        cellSize = cv::Size{static_cast<int>(maxDisp.width / size), static_cast<int>(maxDisp.height / size)};
+    explicit GridMat(const cv::Size maxDisp = cv::Size{1920, 1080}, unsigned scale = 2): scale{scale}, currSourceID{0} {
+        cellSize = cv::Size{50, 50};
         rectangleHeight = maxDisp.height / 25;
 
         for (size_t i = 0; i < size; i++) {
@@ -73,13 +73,7 @@ public:
             cv::Mat frame = updateList.front();
             updateList.pop_front();
 
-            if ((cellSize.width == frame.cols) && (cellSize.height == frame.rows)) {
-                frame.copyTo(cell);
-            } else if ((cellSize.width > frame.cols) && (cellSize.height > frame.rows)) {
-                frame.copyTo(cell(cv::Rect(0, 0, frame.cols, frame.rows)));
-            } else {
-                cv::resize(frame, cell, cellSize);
-            }
+            cv::resize(frame, cell, cellSize);
             
             if (currSourceID == points.size() - 1)
                 currSourceID = 0;
@@ -91,7 +85,7 @@ public:
     }
 
 private:
-    unsigned size;
+    unsigned scale;
     cv::Mat outImg;
     std::list<cv::Mat> updateList;
     cv::Size cellSize;
