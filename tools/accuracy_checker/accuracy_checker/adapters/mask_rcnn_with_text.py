@@ -18,9 +18,8 @@ import cv2
 import numpy as np
 
 from .mask_rcnn import MaskRCNNAdapter
-from ..config import StringField, ConfigError, NumberField
+from ..config import StringField, NumberField
 from ..representation import TextDetectionPrediction
-from ..utils import contains_all
 
 
 class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
