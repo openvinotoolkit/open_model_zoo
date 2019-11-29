@@ -32,6 +32,7 @@ from .geometric_transformations import (
     ImagePyramid
 )
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
+from .centernet_preprocessing import CenterNetAffineTransformation
 
 __all__ = [
     'PreprocessingExecutor',
@@ -60,5 +61,7 @@ __all__ = [
     'Normalize',
 
     'DecodeByVocabulary',
-    'PadWithEOS'
+    'PadWithEOS',
+
+    'CenterNetAffineTransformation'
 ]
