@@ -28,8 +28,6 @@ struct CnnConfig {
     std::string path_to_weights;
     /** @brief Maximal size of batch */
     int max_batch_size{1};
-    /** @brief Enabled/disabled status */
-    bool enabled{true};
 
     /** @brief Inference Engine */
     InferenceEngine::Core ie;
@@ -63,11 +61,6 @@ public:
     * @brief Prints performance report
     */
     void PrintPerformanceCounts(std::string fullDeviceName) const;
-
-    /**
-    * @brief Indicates whether model enabled or not
-    */
-    bool Enabled() const;
 
 protected:
     /**
