@@ -161,6 +161,9 @@ class SequentialModel(BaseModel):
         self.detector = create_detector(network_info['detector'], launcher)
         self.recognizer_encoder = create_recognizer(network_info['recognizer_encoder'], launcher)
         self.recognizer_decoder = create_recognizer(network_info['recognizer_decoder'], launcher)
+        self.recognizer_decoder_inputs = network_info['recognizer_decoder_inputs']
+        self.recognizer_decoder_outputs = network_info['recognizer_decoder_outputs']
+        self.max_seq_len = int(network_info['max_seq_len'])
         self.adapter = create_adapter(network_info['adapter'])
         self.alphabet = network_info['alphabet']
         self.sos_index = int(network_info['sos_index'])
@@ -178,23 +181,25 @@ class SequentialModel(BaseModel):
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
             feature = np.transpose(feature, (0, 2, 1))
 
-            hidden = np.zeros([1, 1, 256])
+            hidden_shape = self.recognizer_decoder.network.inputs[
+                self.recognizer_decoder_inputs['prev_hidden']].shape
+            hidden = np.zeros(hidden_shape)
             prev_symbol_index = np.ones((1,)) * self.sos_index
-
-            max_seq_len = 28
 
             text = str()
 
-            for i in range(max_seq_len):
-                decoder_outputs = self.recognizer_decoder.predict(idenitifiers,
-                                                                  {'prev_symbol': prev_symbol_index,
-                                                                   'prev_hidden': hidden,
-                                                                   'encoder_outputs': feature})
-                coder_output = decoder_outputs['output']
+            for i in range(self.max_seq_len):
+                input_to_decoder = {
+                    self.recognizer_decoder_inputs['prev_symbol']: prev_symbol_index,
+                    self.recognizer_decoder_inputs['prev_hidden']: hidden,
+                    self.recognizer_decoder_inputs['encoder_outputs']: feature}
+                decoder_outputs = self.recognizer_decoder.predict(idenitifiers, input_to_decoder)
+                coder_output = decoder_outputs[
+                    self.recognizer_decoder_outputs['symbols_distribution']]
                 prev_symbol_index = np.argmax(coder_output, axis=1)
                 if prev_symbol_index == self.eos_index:
                     break
-                hidden = decoder_outputs['84/SqueezeNumDirections/1']
+                hidden = decoder_outputs[self.recognizer_decoder_outputs['cur_hidden']]
                 text += self.alphabet[int(prev_symbol_index)]
             texts.append(text)
 
@@ -222,15 +227,19 @@ class DetectorDLSDKModel(BaseModel):
         if not hasattr(launcher, 'plugin'):
             launcher.create_ie_plugin()
         self.exec_network = launcher.plugin.load(self.network)
-        self.input_blob = next(iter(self.network.inputs))
+        self.im_info_name = \
+            [x for x in self.network.inputs if len(self.network.inputs[x].shape) == 2][0]
+        self.im_data_name = \
+            [x for x in self.network.inputs if len(self.network.inputs[x].shape) == 4][0]
 
     def predict(self, identifiers, input_data):
         input_data = np.array(input_data)
         assert len(input_data.shape) == 4
         assert input_data.shape[0] == 1
 
-        input_data = {'im_data': self.fit_to_input(input_data),
-                      'im_info': np.array([[input_data.shape[1], input_data.shape[2], 1.0]])}
+        input_data = {self.im_data_name: self.fit_to_input(input_data),
+                      self.im_info_name: np.array(
+                          [[input_data.shape[1], input_data.shape[2], 1.0]])}
 
         output = self.exec_network.infer(input_data)
 
@@ -241,7 +250,7 @@ class DetectorDLSDKModel(BaseModel):
 
     def fit_to_input(self, input_data):
         input_data = np.transpose(input_data, (0, 3, 1, 2))
-        input_data = input_data.reshape(self.network.inputs[self.input_blob].shape)
+        input_data = input_data.reshape(self.network.inputs[self.im_data_name].shape)
 
         return input_data
 

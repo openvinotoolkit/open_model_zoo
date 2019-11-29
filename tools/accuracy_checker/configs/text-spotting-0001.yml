@@ -15,6 +15,17 @@ evaluations:
             model:   intel/text-spotting-0001-recognizer-decoder/FP32/text-spotting-0001-recognizer-decoder.xml
             weights: intel/text-spotting-0001-recognizer-decoder/FP32/text-spotting-0001-recognizer-decoder.bin
 
+        recognizer_decoder_inputs:
+            prev_symbol: prev_symbol
+            prev_hidden: prev_hidden
+            encoder_outputs: encoder_outputs
+
+        recognizer_decoder_outputs:
+            symbols_distribution: output
+            cur_hidden: 84/SqueezeNumDirections/1
+
+        max_seq_len: '28'
+
         alphabet: __0123456789abcdefghijklmnopqrstuvwxyz
         sos_index: '0'
         eos_index: '1'
@@ -30,7 +41,6 @@ evaluations:
 
       launchers:
         - framework: dlsdk
-          device: CPU
           tags:
             - FP32
 
