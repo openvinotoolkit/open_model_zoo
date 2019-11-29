@@ -58,40 +58,21 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
             'confidence_threshold': NumberField(
                 description='Confidence threshold that is used to filter out detected instances'
             ),
-            'num_detections_out': StringField(
-                optional=True, description='Name of output layer with number valid detections '
-                                           '(used in MaskRCNN models trained with TF Object Detection API)'
-            ),
-            'detection_out': StringField(
-                description='SSD-like detection output layer name '
-                            '(optional, if your model has scores_out, boxes_out and classes_out).',
-                optional=True
-            )
         })
 
         return parameters
 
     def configure(self):
         box_outputs = ['classes_out', 'scores_out', 'boxes_out']
-        detection_out = 'detection_out'
-        if contains_all(self.launcher_config, [*box_outputs, detection_out]):
-            raise ConfigError('only detection output or [{}] should be provided'.format(', '.join(box_outputs)))
-        self.detection_out = self.get_value_from_config(detection_out)
-        if not self.detection_out:
-            if not contains_all(self.launcher_config, box_outputs):
-                raise ConfigError('all related outputs should be specified: {}'.format(', '.join(box_outputs)))
-            self.classes_out = self.get_value_from_config('classes_out')
-            self.scores_out = self.get_value_from_config('scores_out')
-            self.boxes_out = self.get_value_from_config('boxes_out')
-            self.num_detections_out = self.get_value_from_config('num_detections_out')
+        if not contains_all(self.launcher_config, box_outputs):
+            raise ConfigError('all related outputs should be specified: {}'.format(', '.join(box_outputs)))
+        self.classes_out = self.get_value_from_config('classes_out')
+        self.scores_out = self.get_value_from_config('scores_out')
+        self.boxes_out = self.get_value_from_config('boxes_out')
+        self.num_detections_out = self.get_value_from_config('num_detections_out')
 
         self.raw_masks_out = self.get_value_from_config('raw_masks_out')
         self.texts_out = self.get_value_from_config('texts_out')
-        if self.detection_out:
-            raise NotImplementedError
-
-        if self.num_detections_out:
-            raise NotImplementedError
 
         self.confidence_threshold = self.get_value_from_config('confidence_threshold')
 
@@ -115,8 +96,6 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
         boxes = boxes[confidence_filter]
         texts = texts[confidence_filter]
         raw_masks = raw_masks[confidence_filter]
-        # raw_masks = list(
-        #     segm for segm, is_valid in zip(raw_masks, confidence_filter) if is_valid)
 
         results = []
 
