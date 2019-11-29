@@ -58,5 +58,5 @@ class TextDetectionAnnotation(TextDetectionRepresentation):
         self.description = np.delete(self.description, indexes)
 
 
-class TextDetectionPrediction(TextDetectionRepresentation):
+class TextDetectionPrediction(TextDetectionAnnotation):
     pass

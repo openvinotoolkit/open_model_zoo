@@ -58,6 +58,7 @@ from .dummy_adapters import XML2DetectionAdapter
 from .hit_ratio import HitRatioAdapter
 
 from .mask_rcnn import MaskRCNNAdapter
+from .mask_rcnn_with_text import MaskRCNNWithTextAdapter
 
 from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter
 
@@ -112,6 +113,7 @@ __all__ = [
     'HitRatioAdapter',
 
     'MaskRCNNAdapter',
+    'MaskRCNNWithTextAdapter',
 
     'MachineTranslationAdapter',
     'QuestionAnsweringAdapter',
