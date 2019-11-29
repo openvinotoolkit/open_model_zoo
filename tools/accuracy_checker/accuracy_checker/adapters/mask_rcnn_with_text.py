@@ -26,9 +26,6 @@ from ..utils import contains_all
 class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
     __provider__ = 'mask_rcnn_with_text'
 
-    def __init__(self, launcher_config, label_map=None, output_blob=None):
-        super().__init__(launcher_config, label_map, output_blob)
-
     @classmethod
     def parameters(cls):
         parameters = super().parameters()

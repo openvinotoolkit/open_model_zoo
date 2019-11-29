@@ -58,15 +58,16 @@ def is_word(text):
         if char in forbidden_symbols:
             return False
 
-        if not (range1[0] <= char_code <= range1[1] or \
-                range2[0] <= char_code <= range2[1] or \
-                range3[0] <= char_code <= range3[1] or \
-                range4[0] <= char_code <= range4[1] or \
-                range5[0] <= char_code <= range5[1] or \
+        if not (range1[0] <= char_code <= range1[1] or
+                range2[0] <= char_code <= range2[1] or
+                range3[0] <= char_code <= range3[1] or
+                range4[0] <= char_code <= range4[1] or
+                range5[0] <= char_code <= range5[1] or
                 range6[0] <= char_code <= range6[1]):
             return False
 
     return True
+
 
 class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
     __provider__ = 'icdar_detection'
@@ -125,7 +126,7 @@ class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
                     if not is_word(transcription):
                         difficult.append(len(transcriptions))
                     else:
-                        transcription =  strip(transcription)
+                        transcription = strip(transcription)
                 all_points.append(points)
                 transcriptions.append(transcription)
             annotation = TextDetectionAnnotation(identifier, all_points, transcriptions)
