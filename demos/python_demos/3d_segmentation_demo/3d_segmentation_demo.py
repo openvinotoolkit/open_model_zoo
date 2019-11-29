@@ -67,12 +67,17 @@ SUFFIX_SEG = "_seg.nii.gz"
 # file suffixes to form a data tensor
 DATA_SUFFIXES = [SUFFIX_T1, SUFFIX_T2, SUFFIX_FLAIR, SUFFIX_T1CE]
 
+NIFTI_FOLDER = 0
+NIFTI_FILE = 1
+TIFF_FILE = 2
+
+
 def parse_arguments():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument('-i', '--path_to_input_data', type=str, required=True,
-                        help="Required. Path to an input folder with NIfTI data/TIFF file")
+                        help="Required. Path to an input folder with NIfTI data/NIFTI file/TIFF file")
     args.add_argument('-m', '--path_to_model', type=str, required=True,
                         help="Required. Path to an .xml file with a trained model")
     args.add_argument('-o', '--path_to_output', type=str, required=True,
@@ -93,6 +98,18 @@ def parse_arguments():
                         help="Required for GPU custom kernels. "
                              "Absolute path to an .xml file with the kernels description.")
     return parser.parse_args()
+
+
+def get_input_type(path):
+    if os.path.isdir(path):
+        return NIFTI_FOLDER
+    elif fnmatch(path, '*.nii.gz') or fnmatch(path, '*.nii'):
+        return NIFTI_FILE
+    elif fnmatch(path, '*.tif') or fnmatch(path, '*.tiff'):
+        return TIFF_FILE
+
+    raise RuntimeError("Input must be a folder with 4 NIFTI files, single NIFTI file (*.nii or *.nii.gz) or "
+                         "TIFF file (*.tif or *.tiff)")
 
 
 def find_series_name(path):
@@ -125,12 +142,10 @@ def bbox3(img):
     return np.array([[-1, -1, -1], [0, 0, 0]])
 
 
-def read_nii_header(data_path, series_name, suffix, separate_folder=True):
-    filename = os.path.join(data_path, series_name, series_name + suffix)
-    if not separate_folder:
-        filename = os.path.join(data_path, series_name + suffix)
+def read_nii_header(data_path, name):
+    filename = os.path.join(data_path, name)
     if not os.path.exists(filename):
-        raise AttributeError("File {} is not exist. Please, validate path to input".format(filename))
+        raise ValueError("File {} is not exist. Please, validate path to input".format(filename))
     return nib.load(filename)
 
 
@@ -153,21 +168,37 @@ def resample_np(data, output_shape, order):
     return interpolation.zoom(data, zoom=factor, order=order)
 
 
-def read_image(test_data_path, series_name, sizes=(128, 128, 128)):
+def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True):
     images_list = []
-    handle = None
+    original_shape = ()
     bboxes = np.zeros(shape=(len(DATA_SUFFIXES),) + (2, 3))
 
-    for j, s in enumerate(DATA_SUFFIXES):
-        image_handle = read_nii_header(test_data_path, series_name, s, separate_folder=False)
-        handle = image_handle
-        image = image_handle.get_data().astype(np.float32)
+    if is_series:
+        for j, s in enumerate(DATA_SUFFIXES):
+            image_handle = read_nii_header(test_data_path, data_name + s)
+            affine = image_handle.affine
+            image = image_handle.get_data().astype(np.float32)
 
-        mask = image > 0.
-        bboxes[j] = bbox3(mask)
-        image = normalize(image, mask)
+            mask = image > 0.
+            bboxes[j] = bbox3(mask)
+            image = normalize(image, mask)
 
-        images_list.append(image.reshape((1, 1,) + image.shape))
+            images_list.append(image.reshape((1, 1,) + image.shape))
+            original_shape = image.shape
+    else:
+        data_handle = read_nii_header(test_data_path, data_name)
+        affine = data_handle.affine
+        data = data_handle.get_data().astype(np.float32)
+        assert len(data.shape) == 4, 'Wrong data dimensions - {}, must be 4'.format(len(data.shape))
+        assert data.shape[3] == 4, 'Wrong data shape - {}, must be (:,:,:,4)'.format(data.shape)
+        # Reading order is specified for data from http://medicaldecathlon.com/
+        for j in (1, 3, 0, 2):
+            image = data[:, :, :, j]
+            mask = image > 0
+            bboxes[j] = bbox3(mask)
+            image = normalize(image, mask)
+            images_list.append(image.reshape((1, 1,) + image.shape))
+        original_shape = data.shape[:3]
 
     bbox_min = np.min(bboxes[:, 0, :], axis=0).ravel().astype(int)
     bbox_max = np.max(bboxes[:, 1, :], axis=0).ravel().astype(int)
@@ -187,7 +218,7 @@ def read_image(test_data_path, series_name, sizes=(128, 128, 128)):
         bbox_min[2], bbox_max[2]
     ]
 
-    return data, data_crop, handle.affine, image.shape, bbox_ret
+    return data, data_crop, affine, original_shape, bbox_ret
 
 
 def main():
@@ -248,17 +279,18 @@ def main():
     if not os.path.exists(args.path_to_input_data):
         raise AttributeError("Path to input data: '{}' does not exist".format(args.path_to_input_data))
 
-    is_nifti_data = os.path.isdir(args.path_to_input_data)
+    input_type = get_input_type(args.path_to_input_data)
+    is_nifti_data = (input_type == NIFTI_FILE or input_type == NIFTI_FOLDER)
 
-    if is_nifti_data:
+    if input_type == NIFTI_FOLDER:
         series_name = find_series_name(args.path_to_input_data)
         original_data, data_crop, affine, original_size, bbox = \
-            read_image(args.path_to_input_data, series_name=series_name, sizes=(h, w, d))
+            read_image(args.path_to_input_data, data_name=series_name, sizes=(h, w, d))
 
+    elif input_type == NIFTI_FILE:
+        original_data, data_crop, affine, original_size, bbox = \
+            read_image(args.path_to_input_data, data_name=args.path_to_input_data, sizes=(h, w, d), is_series=False)
     else:
-        if not (fnmatch(args.path_to_input_data, '*.tif') or fnmatch(args.path_to_input_data, '*.tiff')):
-            raise AttributeError("Input file extension must have tiff format")
-
         data_crop = np.zeros(shape=(n, c, d, h, w), dtype=np.float)
         im_seq = ImageSequence.Iterator(Image.open(args.path_to_input_data))
         for i, page in enumerate(im_seq):
