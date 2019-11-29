@@ -351,7 +351,7 @@ class SingleHumanPoseAdapter(Adapter):
         raw_outputs = self._extract_predictions(raw, frame_meta)
 
         outputs_batch = raw_outputs[self.output_blob]
-        for i, heatmaps in enumerate(outputs_batch):       
+        for i, heatmaps in enumerate(outputs_batch):
             heatmaps = np.transpose(heatmaps, (1, 2, 0))
             sum_score = 0
             sum_score_thr = 0
