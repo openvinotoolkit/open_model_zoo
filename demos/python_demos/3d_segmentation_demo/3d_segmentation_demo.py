@@ -142,10 +142,8 @@ def bbox3(img):
     return np.array([[-1, -1, -1], [0, 0, 0]])
 
 
-def read_nii_header(data_path, name, suffix='', separate_folder=False):
-    filename = os.path.join(data_path, name + suffix)
-    if separate_folder:
-        filename = os.path.join(data_path, name, name + suffix)
+def read_nii_header(data_path, name):
+    filename = os.path.join(data_path, name)
     if not os.path.exists(filename):
         raise ValueError("File {} is not exist. Please, validate path to input".format(filename))
     return nib.load(filename)
@@ -172,14 +170,13 @@ def resample_np(data, output_shape, order):
 
 def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True):
     images_list = []
-    handle = None
     original_shape = ()
     bboxes = np.zeros(shape=(len(DATA_SUFFIXES),) + (2, 3))
 
     if is_series:
         for j, s in enumerate(DATA_SUFFIXES):
-            image_handle = read_nii_header(test_data_path, data_name, s)
-            handle = image_handle
+            image_handle = read_nii_header(test_data_path, data_name + s)
+            affine = image_handle.affine
             image = image_handle.get_data().astype(np.float32)
 
             mask = image > 0.
@@ -190,7 +187,7 @@ def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True)
             original_shape = image.shape
     else:
         data_handle = read_nii_header(test_data_path, data_name)
-        handle = data_handle
+        affine = data_handle.affine
         data = data_handle.get_data().astype(np.float32)
         assert len(data.shape) == 4, 'Wrong data dimensions - {}, must be 4'.format(len(data.shape))
         assert data.shape[3] == 4, 'Wrong data shape - {}, must be (:,:,:,4)'.format(data.shape)
@@ -221,7 +218,7 @@ def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True)
         bbox_min[2], bbox_max[2]
     ]
 
-    return data, data_crop, handle.affine, original_shape, bbox_ret
+    return data, data_crop, affine, original_shape, bbox_ret
 
 
 def main():
