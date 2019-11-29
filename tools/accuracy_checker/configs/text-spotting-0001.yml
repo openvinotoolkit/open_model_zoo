@@ -26,9 +26,6 @@ evaluations:
             boxes_out: boxes
             raw_masks_out: raw_masks
             texts_out: texts
-            inputs:
-                -   name: im_info
-                    type: IMAGE_INFO
             confidence_threshold: 0.8
 
       launchers:
