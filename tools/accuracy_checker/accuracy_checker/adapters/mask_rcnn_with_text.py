@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import numpy as np
 import cv2
+import numpy as np
 
 from .mask_rcnn import MaskRCNNAdapter
 from ..config import StringField, ConfigError, NumberField
-from ..representation import ContainerPrediction, TextDetectionPrediction
+from ..representation import TextDetectionPrediction
 from ..utils import contains_all
 
 
@@ -28,7 +28,6 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
 
     def __init__(self, launcher_config, label_map=None, output_blob=None):
         super().__init__(launcher_config, label_map, output_blob)
-
 
     @classmethod
     def parameters(cls):
@@ -65,7 +64,8 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
     def configure(self):
         box_outputs = ['classes_out', 'scores_out', 'boxes_out']
         if not contains_all(self.launcher_config, box_outputs):
-            raise ConfigError('all related outputs should be specified: {}'.format(', '.join(box_outputs)))
+            raise ConfigError(
+                'all related outputs should be specified: {}'.format(', '.join(box_outputs)))
         self.classes_out = self.get_value_from_config('classes_out')
         self.scores_out = self.get_value_from_config('scores_out')
         self.boxes_out = self.get_value_from_config('boxes_out')
@@ -126,7 +126,8 @@ class MaskRCNNWithTextAdapter(MaskRCNNAdapter):
 
             rectangles = self.masks_to_rects(masks)
 
-            results.append(TextDetectionPrediction(identifier, points=rectangles, description=texts))
+            results.append(
+                TextDetectionPrediction(identifier, points=rectangles, description=texts))
 
         return results
 
