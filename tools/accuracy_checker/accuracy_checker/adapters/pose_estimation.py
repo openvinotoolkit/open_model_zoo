@@ -375,7 +375,7 @@ class SingleHumanPoseAdapter(Adapter):
             else:
                 pose_score = sum_score / raw_outputs[self.output_blob].shape[1]
             result.append(PoseEstimationPrediction(identifiers[i], np.array([x_values]),
-				                   np.array([y_values]), np.array([vis]), np.array([pose_score])))
+				                     np.array([y_values]), np.array([vis]), np.array([pose_score])))
 
         return result
 
