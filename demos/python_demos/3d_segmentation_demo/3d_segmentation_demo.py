@@ -108,7 +108,7 @@ def get_input_type(path):
     elif fnmatch(path, '*.tif') or fnmatch(path, '*.tiff'):
         return TIFF_FILE
 
-    raise AttributeError("Input must be a folder with 4 NIFTI files, single NIFTI file (*.nii or *.nii.gz) or "
+    raise RuntimeError("Input must be a folder with 4 NIFTI files, single NIFTI file (*.nii or *.nii.gz) or "
                          "TIFF file (*.tif or *.tiff)")
 
 
