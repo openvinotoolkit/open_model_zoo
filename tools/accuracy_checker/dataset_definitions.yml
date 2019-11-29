@@ -389,7 +389,7 @@ datasets:
     data_source: GlobalMe-reID
     annotation_conversion:
       converter: market1501_reid
-      data_dir: GlobalMe-reID
+      data_dir: globalme-reid/GlobalMe-reID
     annotation: globalme-reid.pickle
 
   - name: vgg2face
