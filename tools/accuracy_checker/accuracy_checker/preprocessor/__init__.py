@@ -16,7 +16,7 @@ limitations under the License.
 
 from .preprocessing_executor import PreprocessingExecutor
 from .preprocessor import Preprocessor
-from .color_spece_conversion import BgrToRgb, BgrToGray, TfConvertImageDType
+from .color_space_conversion import BgrToRgb, RgbToBgr, BgrToGray, RgbToGray, TfConvertImageDType
 from .normalization import Normalize, Normalize3d
 from .geometric_transformations import (
     GeometricOperationMetadata,
@@ -28,7 +28,8 @@ from .geometric_transformations import (
     ExtendAroundRect,
     PointAligner,
     Tiling,
-    Crop3D
+    Crop3D,
+    ImagePyramid
 )
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
 
@@ -47,9 +48,12 @@ __all__ = [
     'PointAligner',
     'Tiling',
     'Crop3D',
+    'ImagePyramid',
 
     'BgrToGray',
     'BgrToRgb',
+    'RgbToGray',
+    'RgbToBgr',
     'TfConvertImageDType',
 
     'Normalize3d',

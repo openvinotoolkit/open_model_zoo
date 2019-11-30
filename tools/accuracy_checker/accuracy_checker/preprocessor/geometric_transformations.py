@@ -20,6 +20,10 @@ from collections import namedtuple
 import cv2
 import numpy as np
 from PIL import Image
+try:
+    import tensorflow as tf
+except ImportError as import_error:
+    tf = None
 
 from ..config import ConfigError, NumberField, StringField, BoolField
 from ..dependency import ClassProvider
@@ -158,20 +162,28 @@ class _OpenCVResizer(_Resizer):
 
 class _PillowResizer(_Resizer):
     __provider__ = 'pillow'
-
     supported_interpolations = {
         'NEAREST': Image.NEAREST,
         'NONE': Image.NONE,
-        'BOX': Image.BOX,
         'BILINEAR': Image.BILINEAR,
         'LINEAR': Image.LINEAR,
-        'HAMMING': Image.HAMMING,
         'BICUBIC': Image.BICUBIC,
         'CUBIC': Image.CUBIC,
-        'LANCZOS': Image.LANCZOS,
-        'ANTIALIAS': Image.ANTIALIAS
+        'ANTIALIAS': Image.ANTIALIAS,
     }
     default_interpolation = 'BILINEAR'
+
+    def __init__(self, interpolation):
+        try:
+            optional_interpolations = {
+                'BOX': Image.BOX,
+                'LANCZOS': Image.LANCZOS,
+                'HAMMING': Image.HAMMING,
+            }
+            self.supported_interpolations.update(optional_interpolations)
+        except AttributeError:
+            pass
+        super().__init__(interpolation)
 
     def resize(self, data, new_height, new_width):
         data = Image.fromarray(data)
@@ -185,12 +197,8 @@ class _TFResizer(_Resizer):
     __provider__ = 'tf'
 
     def __init__(self, interpolation):
-        try:
-            import tensorflow as tf
-        except ImportError as import_error:
-            raise ImportError(
-                'tf resize disabled. Please, install Tensorflow before using. \n{}'.format(import_error.msg)
-            )
+        if tf is None:
+            raise ImportError('tf backend for resize operation requires TensorFlow. Please install it before usage.')
         tf.enable_eager_execution()
         self.supported_interpolations = {
             'BILINEAR': tf.image.ResizeMethod.BILINEAR,
@@ -865,3 +873,46 @@ class Crop3D(Preprocessor):
         endz = min(startz + cropz, z)
 
         return img[startz:endz, starty:endy, startx:endx, :]
+
+
+class ImagePyramid(Preprocessor):
+    __provider__ = 'pyramid'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update(
+            {
+                'min_size': NumberField(value_type=int, min_value=1, description='min side size for pyramid layer'),
+                'factor': NumberField(value_type=float, description='scale factor for pyramid layers')
+            }
+        )
+
+        return parameters
+
+    def configure(self):
+        self.min_size = self.get_value_from_config('min_size')
+        self.factor = self.get_value_from_config('factor')
+
+    def process(self, image, annotation_meta=None):
+        data = image.data.astype(float)
+        height, width, _ = data.shape
+        min_layer = min(height, width)
+        m = 12.0 / self.min_size
+        min_layer = min_layer * m
+        scales = []
+        factor_count = 0
+        while min_layer >= 12:
+            scales.append(m * pow(self.factor, factor_count))
+            min_layer *= self.factor
+            factor_count += 1
+        scaled_data = []
+        for scale in scales:
+            hs = int(np.ceil(height * scale))
+            ws = int(np.ceil(width * scale))
+            scaled_data.append(cv2.resize(data, (ws, hs)))
+
+        image.data = scaled_data
+        image.metadata.update({'multi_infer': True, 'scales': scales})
+
+        return image

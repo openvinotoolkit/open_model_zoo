@@ -2,10 +2,10 @@
 
 This demo showcases Vehicle and License Plate Detection network followed by the Vehicle Attributes Recognition and License Plate Recognition networks applied on top
 of the detection results. You can use a set of the following pre-trained models with the demo:
-* `vehicle-license-plate-detection-barrier-0106`, which is a primary detection network to find the vehicles and license plates
+* `vehicle-license-plate-detection-barrier-0106` or `vehicle-license-plate-detection-barrier-0123`, which is primary detection network to find the vehicles and license plates
 * `vehicle-attributes-recognition-barrier-0039`, which is executed on top of the results from the first network and
 reports general vehicle attributes, for example, vehicle type (car/van/bus/track) and color
-* `license-plate-recognition-barrier-0001`, which is executed on top of the results from the first network
+* `license-plate-recognition-barrier-0001` or `license-plate-recognition-barrier-0007`, which is executed on top of the results from the first network
 and reports a string per recognized license plate
 
 For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
@@ -123,7 +123,7 @@ If you build the Inference Engine with the OMP, you can use the following parame
 
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
 
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies:
 >* `license-plate-recognition-barrier-0001`
 >* `vehicle-attributes-recognition-barrier-0039`
 >* `vehicle-license-plate-detection-barrier-0106`

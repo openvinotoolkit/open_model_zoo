@@ -19,6 +19,9 @@ from ..dependency import ClassProvider
 from ..utils import get_parameter_value_from_config
 
 
+MULTI_INFER_PREPROCESSORS = ['tiling', 'normalize3d', 'image_pyramid']
+
+
 class Preprocessor(ClassProvider):
     __provider_type__ = 'preprocessor'
 

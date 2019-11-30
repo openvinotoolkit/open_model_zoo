@@ -1,6 +1,6 @@
 # [OpenVINO™ Toolkit](https://01.org/openvinotoolkit) - Open Model Zoo repository
 [![Build Status](http://134.191.240.124/buildStatus/icon?job=omz/2018/trigger)](http://134.191.240.124/job/omz/job/2018/job/trigger/)
-[![Stable release](https://img.shields.io/badge/version-2019_R3.1-green.svg)](https://github.com/opencv/open_model_zoo/releases/tag/2019_R3.1)
+[![Stable release](https://img.shields.io/badge/version-2019_R4-green.svg)](https://github.com/opencv/open_model_zoo/releases/tag/2019_R4)
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/open_model_zoo/community)
 [![Apache License Version 2.0](https://img.shields.io/badge/license-Apache_2.0-green.svg)](LICENSE)
 
@@ -33,6 +33,8 @@ We welcome community contributions to the Open Model Zoo repository. If you have
 * Make sure you can build the product and run all the demos with your patch.
 * In case of a larger feature, provide a relevant demo.
 * Submit a pull request at https://github.com/opencv/open_model_zoo/pulls
+
+You can find additional information about model contribution [here](CONTRIBUTING.md).
 
 We will review your contribution and, if any additional fixes or modifications are needed, may give you feedback to guide you. When accepted, your pull request will be merged into the GitHub* repositories.
 

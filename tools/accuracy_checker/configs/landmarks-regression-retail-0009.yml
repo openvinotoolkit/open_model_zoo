@@ -18,11 +18,6 @@ models:
 
     datasets:
       - name: vgg2face
-        data_source: VGGFaces2/test
-        annotation_conversion:
-          converter: vgg_face
-          landmarks_csv_file: VGGFaces2/bb_landmark/loose_landmark_test.csv
-          bbox_csv_file: VGGFaces2/bb_landmark/loose_bb_test.csv
 
         preprocessing:
           - type: crop_rect
@@ -37,3 +32,4 @@ models:
           - type: per_point_normed_error
             presenter: print_vector
           - type: normed_error
+global_definitions: ../dataset_definitions.yml

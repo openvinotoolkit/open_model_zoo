@@ -56,8 +56,9 @@ class SegmentationPredictionResample(Postprocessor):
 
         label = np.zeros(shape=(prediction_shape[0],) + image_shape)
 
-        label[:, low[0]:high[0], low[1]:high[1], low[2]:high[2]] = resample(prediction_.mask,
-                                                                            (prediction_shape[0],) + box_shape)
+        label[:, low[0]:high[0], low[1]:high[1], low[2]:high[2]] = resample(
+            prediction_.mask, (prediction_shape[0],) + box_shape
+        )
 
         prediction[0].mask = label
 

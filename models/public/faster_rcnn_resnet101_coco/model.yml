@@ -27,7 +27,7 @@ postprocessing:
     file: faster_rcnn_resnet101_coco.tar.gz
 model_optimizer_args:
   - --reverse_input_channels
-  - --input_shape=[1,600,600,3]
+  - --input_shape=[1,600,1024,3]
   - --input=image_tensor
   - --output=detection_scores,detection_boxes,num_detections
   - --tensorflow_use_custom_operations_config=$mo_dir/extensions/front/tf/faster_rcnn_support.json

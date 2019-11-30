@@ -321,8 +321,8 @@ class FilterInvalidBoxes(BaseFilter):
     __provider__ = 'invalid_boxes'
 
     def apply_filter(self, entry, invalid_boxes):
-        infinite_mask_x = np.logical_or(~np.isfinite(entry.x_mins), ~np.isfinite(entry.x_maxs))
-        infinite_mask_y = np.logical_or(~np.isfinite(entry.y_mins), ~np.isfinite(entry.y_maxs))
+        infinite_mask_x = np.logical_or(~np.isfinite(entry.x_mins), ~np.isfinite(entry.x_maxs)) # pylint: disable=E1130
+        infinite_mask_y = np.logical_or(~np.isfinite(entry.y_mins), ~np.isfinite(entry.y_maxs)) # pylint: disable=E1130
         infinite_mask = np.logical_or(infinite_mask_x, infinite_mask_y)
 
         return np.argwhere(infinite_mask).reshape(-1).tolist()

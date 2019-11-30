@@ -77,7 +77,9 @@ void CnnBase::InferBatch(
             matU8ToBlob<uint8_t>(frames[batch_i + b], input_blob_, b);
         }
 
-        infer_request_.SetBatch(current_batch_size);
+        if (1 != batch_size) {
+            infer_request_.SetBatch(current_batch_size);
+        }
         infer_request_.Infer();
 
         fetch_results(outputs_, current_batch_size);

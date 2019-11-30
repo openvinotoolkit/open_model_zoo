@@ -14,7 +14,7 @@ namespace human_pose_estimation {
 void renderHumanPose(const std::vector<HumanPose>& poses, cv::Mat& image) {
     CV_Assert(image.type() == CV_8UC3);
 
-    const std::vector<cv::Scalar> colors = {
+    static const cv::Scalar colors[HumanPoseEstimator::keypointsNumber] = {
         cv::Scalar(255, 0, 0), cv::Scalar(255, 85, 0), cv::Scalar(255, 170, 0),
         cv::Scalar(255, 255, 0), cv::Scalar(170, 255, 0), cv::Scalar(85, 255, 0),
         cv::Scalar(0, 255, 0), cv::Scalar(0, 255, 85), cv::Scalar(0, 255, 170),
@@ -22,7 +22,7 @@ void renderHumanPose(const std::vector<HumanPose>& poses, cv::Mat& image) {
         cv::Scalar(0, 0, 255), cv::Scalar(85, 0, 255), cv::Scalar(170, 0, 255),
         cv::Scalar(255, 0, 255), cv::Scalar(255, 0, 170), cv::Scalar(255, 0, 85)
     };
-    const std::vector<std::pair<int, int> > limbKeypointsIds = {
+    static const std::pair<int, int> limbKeypointsIds[] = {
         {1, 2},  {1, 5},   {2, 3},
         {3, 4},  {5, 6},   {6, 7},
         {1, 8},  {8, 9},   {9, 10},

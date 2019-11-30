@@ -37,11 +37,21 @@ from .attributes_recognition import (
 
 from .reidentification import ReidAdapter
 from .detection import (
-    TinyYOLOv1Adapter, SSDAdapter, FacePersonAdapter, YoloV2Adapter, YoloV3Adapter, TFObjectDetectionAPIAdapter
+    TinyYOLOv1Adapter,
+    SSDAdapter,
+    FacePersonAdapter,
+    YoloV2Adapter,
+    YoloV3Adapter,
+    TFObjectDetectionAPIAdapter,
+    SSDAdapterMxNet,
+    PyTorchSSDDecoder,
+    SSDONNXAdapter,
+    MTCNNPAdapter
 )
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter
 from .pose_estimation import HumanPoseAdapter
+from .pose_estimation_3d import HumanPose3dAdapter
 
 from .dummy_adapters import XML2DetectionAdapter
 
@@ -49,7 +59,7 @@ from .hit_ratio import HitRatioAdapter
 
 from .mask_rcnn import MaskRCNNAdapter
 
-from .nlp import MachineTranslationAdapter
+from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter
 
 __all__ = [
     'Adapter',
@@ -66,6 +76,10 @@ __all__ = [
     'YoloV3Adapter',
     'FacePersonAdapter',
     'TFObjectDetectionAPIAdapter',
+    'SSDAdapterMxNet',
+    'SSDONNXAdapter',
+    'PyTorchSSDDecoder',
+    'MTCNNPAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
@@ -89,6 +103,7 @@ __all__ = [
     'LPRAdapter',
 
     'HumanPoseAdapter',
+    'HumanPose3dAdapter',
 
     'ActionDetection',
 
@@ -96,5 +111,6 @@ __all__ = [
 
     'MaskRCNNAdapter',
 
-    'MachineTranslationAdapter'
+    'MachineTranslationAdapter',
+    'QuestionAnsweringAdapter'
 ]

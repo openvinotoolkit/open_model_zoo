@@ -22,7 +22,7 @@ models:
         model:   intel/text-detection-0003/FP16/text-detection-0003.xml
         weights: intel/text-detection-0003/FP16/text-detection-0003.bin
         adapter:
-          type: text_detection
+          type: pixel_link_text_detection
           pixel_link_out: model/link_logits_/add
           pixel_class_out: model/segm_logits/add
           pixel_class_confidence_threshold: 0.8
@@ -37,7 +37,7 @@ models:
         model:   intel/text-detection-0003/INT8/text-detection-0003.xml
         weights: intel/text-detection-0003/INT8/text-detection-0003.bin
         adapter:
-          type: text_detection
+          type: pixel_link_text_detection
           pixel_link_out: model/link_logits_/add
           pixel_class_out: model/segm_logits/add
           pixel_class_confidence_threshold: 0.8
@@ -47,11 +47,6 @@ models:
 
     datasets:
       - name: ICDAR2015
-
-        data_source: ICDAR15_DET_validation/ch4_test_images
-        annotation_conversion:
-          converter: icdar_detection
-          data_dir: ICDAR15_DET_validation/gt
 
         preprocessing:
           - type: resize
@@ -73,3 +68,4 @@ models:
           - type: incidental_text_hmean
             name: f-measure
             ignore_difficult: True
+global_definitions: ../dataset_definitions.yml

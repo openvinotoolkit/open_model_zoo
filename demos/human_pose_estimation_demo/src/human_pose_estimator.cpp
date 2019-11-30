@@ -14,8 +14,6 @@
 #include "peak.hpp"
 
 namespace human_pose_estimation {
-const size_t HumanPoseEstimator::keypointsNumber = 18;
-
 HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
                                        const std::string& targetDeviceName_,
                                        bool enablePerformanceReport)
@@ -43,10 +41,62 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
     InferenceEngine::InputInfo::Ptr inputInfo = network.getInputsInfo().begin()->second;
     inputLayerSize = cv::Size(inputInfo->getTensorDesc().getDims()[3], inputInfo->getTensorDesc().getDims()[2]);
 
+    const auto& inputInfo = network.getInputsInfo();
+
+    if (inputInfo.size() != 1) {
+        throw std::runtime_error(modelPath + ": expected to have 1 input");
+    }
+
+    const auto& imageInputInfo = *inputInfo.begin();
+    const auto& imageInputDims = imageInputInfo.second->getTensorDesc().getDims();
+
+    if (imageInputDims.size() != 4 || imageInputDims[0] != 1 || imageInputDims[1] != 3) {
+        throw std::runtime_error(
+            modelPath + ": expected \"" + imageInputInfo.first + "\" to have dimensions 1x3xHxW");
+    }
+
+    inputLayerSize = cv::Size(imageInputDims[3], imageInputDims[2]);
+    imageInputInfo.second->setPrecision(InferenceEngine::Precision::U8);
+
     InferenceEngine::OutputsDataMap outputInfo = network.getOutputsInfo();
-    auto outputBlobsIt = outputInfo.begin();
-    pafsBlobName = outputBlobsIt->first;
-    heatmapsBlobName = (++outputBlobsIt)->first;
+
+    if (outputInfo.size() != 2) {
+        throw std::runtime_error(modelPath + ": expected to have 2 outputs");
+    }
+
+    auto outputIt = outputInfo.begin();
+
+    const auto& pafsOutputInfo = *outputIt++;
+
+    pafsBlobName = pafsOutputInfo.first;
+
+    const auto& pafsOutputDims = pafsOutputInfo.second->getTensorDesc().getDims();
+
+    if (pafsOutputDims.size() != 4 || pafsOutputDims[0] != 1
+            || pafsOutputDims[1] != 2 * (keypointsNumber + 1)) {
+        throw std::runtime_error(
+            modelPath + ": expected \"" + pafsBlobName + "\" to have dimensions "
+                "1x" + std::to_string(2 * (keypointsNumber + 1)) + "xHFMxWFM");
+    }
+
+    const auto& heatmapsOutputInfo = *outputIt++;
+
+    heatmapsBlobName = heatmapsOutputInfo.first;
+
+    const auto& heatmapsOutputDims = heatmapsOutputInfo.second->getTensorDesc().getDims();
+
+    if (heatmapsOutputDims.size() != 4 || heatmapsOutputDims[0] != 1
+            || heatmapsOutputDims[1] != keypointsNumber + 1) {
+        throw std::runtime_error(
+            modelPath + ": expected \"" + heatmapsBlobName + "\" to have dimensions "
+                "1x" + std::to_string(keypointsNumber + 1) + "xHFMxWFM");
+    }
+
+    if (pafsOutputDims[2] != heatmapsOutputDims[2] || pafsOutputDims[3] != heatmapsOutputDims[3]) {
+        throw std::runtime_error(
+            modelPath + ": expected \"" + pafsBlobName + "\" and \"" + heatmapsBlobName + "\""
+                "to have matching last two dimensions");
+    }
 
     executableNetwork = ie.LoadNetwork(network, targetDeviceName);
     request_next = executableNetwork.CreateInferRequestPtr();

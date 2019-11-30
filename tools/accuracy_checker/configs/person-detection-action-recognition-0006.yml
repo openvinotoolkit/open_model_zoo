@@ -26,7 +26,6 @@ models:
          num_action_classes: 6
          detection_threshold: 0.3
          action_scale: 16.0
-       cpu_extensions: AUTO
 
      - framework: dlsdk
        tags:
@@ -52,7 +51,6 @@ models:
          num_action_classes: 6
          detection_threshold: 0.3
          action_scale: 16.0
-       cpu_extensions: AUTO
 
      - framework: dlsdk
        tags:
@@ -78,7 +76,6 @@ models:
          num_action_classes: 6
          detection_threshold: 0.3
          action_scale: 16.0
-       cpu_extensions: AUTO
 
    datasets:
    - name: action_detection_dataset_6_classes
@@ -118,3 +115,4 @@ models:
          prediction_source: action_prediction
          label_map: action_label_map
          ignore_label: 6
+global_definitions: ../dataset_definitions.yml

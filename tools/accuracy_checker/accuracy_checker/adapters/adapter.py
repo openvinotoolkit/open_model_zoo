@@ -109,6 +109,7 @@ def create_adapter(adapter_config, launcher=None, dataset=None):
         adapter = Adapter.provide(adapter_config['type'], adapter_config, label_map=label_map)
     else:
         raise ConfigError('Unknown type for adapter configuration')
+
     if launcher:
         adapter.output_blob = launcher.output_blob
 
