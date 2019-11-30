@@ -18,7 +18,9 @@
 Test script for the demos.
 
 For the tests to work, the test data directory must contain a "ILSVRC2012_img_val"
-subdirectory with the ILSVRC2012 dataset.
+subdirectory with the ILSVRC2012 dataset, a "BraTS" subdirectory with BraTS 2017
+dataset in NIFTI format and "Image_Retrieval" subdirectory with image retrieval
+dataset (images, videos).
 """
 
 import argparse

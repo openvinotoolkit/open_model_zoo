@@ -238,6 +238,5 @@ IMAGE_SEQUENCES = {
         image_retrieval_arg('d0c460d0-4d75-4315-98a8-a0116d3dfb81.dav'),
         image_retrieval_arg('636e91cc-4829-40bd-a8bc-18505b943a9b.dav'),
         image_retrieval_arg('add09613-b45c-432f-94c0-f785d3ae2a7e.dav'),
-
     ]
 }
