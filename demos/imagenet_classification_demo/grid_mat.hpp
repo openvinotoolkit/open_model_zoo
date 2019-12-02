@@ -57,7 +57,7 @@ public:
         }
     }
 
-    void textUpdate(double overSPF, bool isFpsTest){
+    void textUpdate(double overFPS, bool isFpsTest){
         // Draw a rectangle
         cv::Point p1 = cv::Point(0, 0);
         cv::Point p2 = cv::Point(outImg.cols, rectangleHeight);
@@ -70,7 +70,7 @@ public:
 
         if (!isFpsTest) {
             cv::putText(outImg,
-                        cv::format("Overall FPS: %0.01f", 1./overSPF),
+                        cv::format("Overall FPS: %0.01f", overFPS),
                         cv::Point(5, rectangleHeight - 5),
                         cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(0, 255, 0), thickness);
         }
