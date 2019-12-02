@@ -42,7 +42,7 @@ and AP is defined as an area under the
     - H - image height
     - W - image width
 
-   The expected color order is RGB.
+   The expected color order is BGR.
 
 ## Outputs
 
