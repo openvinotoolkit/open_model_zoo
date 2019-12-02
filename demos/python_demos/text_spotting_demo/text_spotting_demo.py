@@ -30,6 +30,10 @@ from openvino.inference_engine import IENetwork, IECore
 from text_spotting_demo.tracker import StaticIOUTracker
 from text_spotting_demo.visualizer import Visualizer
 
+SOS_INDEX = 0
+EOS_INDEX = 1
+MAX_SEQ_LEN = 28
+
 class FolderCapture:
     def __init__(self, path):
         self.images_paths = []
@@ -218,6 +222,8 @@ def main():
     text_enc_exec_net = ie.load_network(network=text_enc_net, device_name=args.device)
     text_dec_exec_net = ie.load_network(network=text_dec_net, device_name=args.device)
 
+    hidden_shape = text_dec_net.inputs[args.trd_input_prev_hidden].shape
+
     del mask_rcnn_net
     del text_enc_net
     del text_dec_net
@@ -307,26 +313,25 @@ def main():
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
             feature = np.transpose(feature, (0, 2, 1))
 
-            hidden = np.zeros([1, 1, 256])
-            prev_symbol = np.zeros((1,))
 
-            eos = 1
-            max_seq_len = 28
+            hidden = np.zeros(hidden_shape)
+            prev_symbol_index = np.ones((1,)) * SOS_INDEX
+
             vocab_size = len(args.alphabet)
-            per_feature_outputs = np.zeros([max_seq_len, vocab_size])
+            per_feature_outputs = np.zeros([MAX_SEQ_LEN, vocab_size])
 
             text = ''
-            for i in range(max_seq_len):
+            for i in range(MAX_SEQ_LEN):
                 decoder_output = text_dec_exec_net.infer({
-                    args.trd_input_prev_symbol: prev_symbol,
+                    args.trd_input_prev_symbol: prev_symbol_index,
                     args.trd_input_prev_hidden: hidden,
                     args.trd_input_encoder_outputs: feature})
                 symbols_distr = decoder_output[args.trd_output_symbols_distr]
                 per_feature_outputs[i] = symbols_distr
-                prev_symbol = np.argmax(symbols_distr, axis=1)
-                if prev_symbol == eos:
+                prev_symbol_index = int(np.argmax(symbols_distr, axis=1))
+                if prev_symbol_index == EOS_INDEX:
                     break
-                text += args.alphabet[int(prev_symbol)]
+                text += args.alphabet[prev_symbol_index]
                 hidden = decoder_output[args.trd_output_cur_hidden]
 
             texts.append(text)
