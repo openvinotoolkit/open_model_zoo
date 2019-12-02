@@ -52,7 +52,7 @@ class FolderCapture:
         return len(self.images_paths) > 0
 
     def release(self):
-        pass
+        self.images_paths = []
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -90,6 +90,24 @@ def build_argparser():
     args.add_argument('-pt', '--prob_threshold',
                       help='Optional. Probability threshold for detections filtering.',
                       default=0.5, type=float, metavar='"<num>"')
+    args.add_argument('-a', '--alphabet',
+                      help='Optional. Alphabet that is used for decoding.',
+                      default='  0123456789abcdefghijklmnopqrstuvwxyz')
+    args.add_argument('--trd_input_prev_symbol',
+                      help='Optional. Name of previous symbol input node to text recognition head decoder part.',
+                      default='prev_symbol')
+    args.add_argument('--trd_input_prev_hidden',
+                      help='Optional. Name of previous hidden input node to text recognition head decoder part.',
+                      default='prev_hidden')
+    args.add_argument('--trd_input_encoder_outputs',
+                      help='Optional. Name of encoder outputs input node to text recognition head decoder part.',
+                      default='encoder_outputs')
+    args.add_argument('--trd_output_symbols_distr',
+                      help='Optional. Name of symbols distribution output node from text recognition head decoder part.',
+                      default='output')
+    args.add_argument('--trd_output_cur_hidden',
+                      help='Optional. Name of current hidden output node from text recognition head decoder part.',
+                      default='84/SqueezeNumDirections/1')
     args.add_argument('--keep_aspect_ratio',
                       help='Optional. Force image resize to keep aspect ratio.',
                       action='store_true')
@@ -283,8 +301,6 @@ def main():
         masks = list(segm for segm, is_valid in zip(masks, detections_filter) if is_valid)
         text_features = text_features[detections_filter]
 
-        alphabet = "  0123456789abcdefghijklmnopqrstuvwxyz"
-
         texts = []
         for feature in text_features:
             feature = text_enc_exec_net.infer({'input': feature})['output']
@@ -296,19 +312,22 @@ def main():
 
             eos = 1
             max_seq_len = 28
-            vocab_size = len(alphabet)
+            vocab_size = len(args.alphabet)
             per_feature_outputs = np.zeros([max_seq_len, vocab_size])
 
             text = ''
             for i in range(max_seq_len):
-                o = text_dec_exec_net.infer({'prev_symbol': prev_symbol, 'prev_hidden': hidden, 'encoder_outputs': feature})
-                output = o['output']
-                per_feature_outputs[i] = output
-                prev_symbol = np.argmax(output, axis=1)
+                decoder_output = text_dec_exec_net.infer({
+                    args.trd_input_prev_symbol: prev_symbol,
+                    args.trd_input_prev_hidden: hidden,
+                    args.trd_input_encoder_outputs: feature})
+                symbols_distr = decoder_output[args.trd_output_symbols_distr]
+                per_feature_outputs[i] = symbols_distr
+                prev_symbol = np.argmax(symbols_distr, axis=1)
                 if prev_symbol == eos:
                     break
-                text += alphabet[int(prev_symbol)]
-                hidden = o['84/SqueezeNumDirections/1']
+                text += args.alphabet[int(prev_symbol)]
+                hidden = decoder_output[args.trd_output_cur_hidden]
 
             texts.append(text)
 
