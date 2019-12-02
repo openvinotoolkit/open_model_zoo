@@ -4,6 +4,7 @@
 
 #include <utility>
 #include <vector>
+#include <ctime>
 
 #include <samples/common.hpp>
 
@@ -17,21 +18,29 @@ char POSE_COCO_BODY_PARTS[][18] = { "Nose", "Neck", "RShoulder", "RElbow", "RWri
                                    "LElbow", "LWrist", "RHip", "RKnee", "RAnkle", "LHip",
                                     "LKnee", "LAnkle", "REye", "LEye", "REar", "LEar", "Bkg"};
 
-void sendHumanPose(const std::vector<HumanPose>& poses) {
+void sendHumanPose(int frame, mqtt *publisher, const std::vector<HumanPose>& poses) {
 
+    std::time_t now = std::time(nullptr);
     if (!poses.empty()) {
-        std::time_t result = std::time(nullptr);
-        std::cout << std::asctime(std::localtime(&result)) << std::endl;
+        std::cout << std::asctime(std::localtime(&now)) << std::endl;
      }
-
+    int pose_id= 0;
     for (HumanPose const& pose : poses) {
         std::stringstream rawPose;
+        std::tm * ptm = std::localtime(&now);
+        char timestamp[20];
+        // Format: 15/06/2009-20:20:00
+        std::strftime(timestamp, 20, "%d/%m/%Y-%H:%M:%S", ptm);
         rawPose << std::fixed << std::setprecision(0);
+        // timestamp frame pose_id keypoints score
+        rawPose << timestamp << " " << std::to_string(frame) << " " << std::to_string(pose_id) << " ";
         for (auto const& keypoint : pose.keypoints) {
             rawPose << keypoint.x << "," << keypoint.y << " ";
             }
         rawPose << pose.score;
-        std::cout << rawPose.str() << std::endl;
+        publisher->send_message(rawPose.str().c_str());
+        //std::cout << rawPose.str() << std::endl;
+        pose_id++;
     }
 }
 }  // namespace human_pose_estimation

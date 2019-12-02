@@ -12,6 +12,8 @@
 #include <chrono>
 
 #include <inference_engine.hpp>
+#include <mqtt.h>
+#define APPLICATION_TOPIC "HumanPose"
 
 #include <samples/ocv_common.hpp>
 
@@ -61,6 +63,9 @@ int main(int argc, char* argv[]) {
             throw std::logic_error("Cannot open input file or camera: " + FLAGS_i);
         }
 
+        mqtt *mqtt_human_pose;
+        mqtt_human_pose = new mqtt(FLAGS_client.c_str(), (char*)APPLICATION_TOPIC, FLAGS_broker.c_str(), FLAGS_port);
+
         int delay = 33;
 
         // read input (video) frame
@@ -88,6 +93,7 @@ int main(int argc, char* argv[]) {
         auto total_t0 = std::chrono::high_resolution_clock::now();
         auto wallclock = std::chrono::high_resolution_clock::now();
         double decode_time = 0, render_time = 0;
+        int frame = 0;
 
         while (true) {
             //here is the first asynchronus point:
@@ -165,7 +171,8 @@ int main(int argc, char* argv[]) {
                 poses = estimator.estimateCurr();
 
                 if (FLAGS_r) {
-                    sendHumanPose(poses);
+                    sendHumanPose(frame, mqtt_human_pose, poses);
+                    frame++;
                 }
 
                 if (!FLAGS_no_show) {
