@@ -22,7 +22,7 @@ import numpy as np
 
 from ..topology_types import YoloV1Tiny, YoloV2, YoloV2Tiny, YoloV3, YoloV3Tiny, SSD, FasterRCNN
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, StringField, ListField
+from ..config import ConfigValidator, NumberField, StringField, ListField, ConfigError
 from ..postprocessor.nms import NMS
 from ..representation import DetectionPrediction, ContainerPrediction
 from ..utils import get_or_parse_value
@@ -245,7 +245,8 @@ class YoloV3Adapter(Adapter):
                 optional=True, default=[],
                 description="The list of output layers names (optional),"
                             " if specified there should be exactly 3 output layers provided."
-            )
+            ),
+            'anchor_masks': ListField(optional=True, description='per layer used anchors mask')
         })
 
         return parameters
@@ -260,6 +261,16 @@ class YoloV3Adapter(Adapter):
         self.anchors = get_or_parse_value(self.get_value_from_config('anchors'), YoloV3Adapter.PRECOMPUTED_ANCHORS)
         self.threshold = self.get_value_from_config('threshold')
         self.outputs = self.get_value_from_config('outputs')
+        anchor_masks = self.get_value_from_config('anchor_masks')
+        self.masked_anchors = None
+        if anchor_masks is not None:
+            per_layer_anchors = []
+            for layer_mask in anchor_masks:
+                layer_anchors = []
+                for idx in layer_mask:
+                    layer_anchors += [self.anchors[idx * 2], self.anchors[idx * 2 + 1]]
+                per_layer_anchors.append(layer_anchors)
+            self.masked_anchors = per_layer_anchors
 
     def process(self, raw, identifiers=None, frame_meta=None):
         """
@@ -270,15 +281,17 @@ class YoloV3Adapter(Adapter):
             list of DetectionPrediction objects
         """
 
-        def get_anchors_offset(x):
-            return int((self.num * 2) * (len(self.anchors) / (self.num * 2) - 1 - math.log2(x / 13)))
+        def get_anchors_offset(x, num, anchors):
+            return int((num * 2) * (len(anchors) / (num * 2) - 1 - math.log2(x / 13)))
 
-        def parse_yolo_v3_results(prediction, threshold, w, h, det):
+        def parse_yolo_v3_results(prediction, threshold, w, h, det, layer_id):
             cells_x, cells_y = prediction.shape[1:]
+            anchors = self.masked_anchors[layer_id] if self.masked_anchors else self.anchors
+            num = len(anchors) // 2
             prediction = prediction.flatten()
-            for y, x, n in np.ndindex((cells_y, cells_x, self.num)):
+            for y, x, n in np.ndindex((cells_y, cells_x, num)):
                 index = n * cells_y * cells_x + y * cells_x + x
-                anchors_offset = get_anchors_offset(cells_x)
+                anchors_offset = get_anchors_offset(cells_x, num, anchors) if not self.masked_anchors else 0
 
                 box_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, 0)
                 obj_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, self.coords)
@@ -290,10 +303,8 @@ class YoloV3Adapter(Adapter):
                 box = [
                     (x + prediction[box_index + 0 * (cells_y * cells_x)]) / cells_x,
                     (y + prediction[box_index + 1 * (cells_y * cells_x)]) / cells_y,
-                    np.exp(prediction[box_index + 2 * (cells_y * cells_x)]) * self.anchors[
-                        anchors_offset + 2 * n + 0] / w,
-                    np.exp(prediction[box_index + 3 * (cells_y * cells_x)]) * self.anchors[
-                        anchors_offset + 2 * n + 1] / h
+                    np.exp(prediction[box_index + 2 * (cells_y * cells_x)]) * anchors[anchors_offset + 2 * n + 0] / w,
+                    np.exp(prediction[box_index + 3 * (cells_y * cells_x)]) * anchors[anchors_offset + 2 * n + 1] / h
                 ]
 
                 classes_prob = np.empty(self.classes)
@@ -320,6 +331,8 @@ class YoloV3Adapter(Adapter):
         else:
             outputs = raw_outputs.keys()
 
+        if self.masked_anchors and len(self.masked_anchors) != len(outputs):
+            raise ConfigError('anchor mask should be specified for all output layers')
         batch = len(identifiers)
         predictions = [[] for _ in range(batch)]
         for blob in outputs:
@@ -332,8 +345,8 @@ class YoloV3Adapter(Adapter):
             self.input_width = input_shape[3]
             self.input_height = input_shape[2]
 
-            for p in prediction:
-                parse_yolo_v3_results(p, self.threshold, self.input_width, self.input_height, detections)
+            for layer_id, p in enumerate(prediction):
+                parse_yolo_v3_results(p, self.threshold, self.input_width, self.input_height, detections, layer_id)
 
             result.append(DetectionPrediction(
                 identifier, detections['labels'], detections['scores'], detections['x_mins'], detections['y_mins'],
