@@ -340,7 +340,7 @@ int main(int argc, char *argv[]) {
             height = std::stoi(gmRowsCols[1]);
         }
         
-        GridMat gridMat = GridMat(cv::Size(width, height));
+        GridMat gridMat = GridMat(inputImgs.size(), cv::Size(width, height));
 
         // ------------------------------------------Start async------------------------------------------
         int64 startTime = cv::getTickCount();
@@ -362,7 +362,7 @@ int main(int argc, char *argv[]) {
 
         avgFPS = fpsSum / fpsTestSize;
         gridMatSize = static_cast<unsigned>(round(std::sqrt(avgFPS)));
-        gridMat = GridMat(cv::Size(width, height), gridMatSize);
+        gridMat = GridMat(inputImgs.size(), cv::Size(width, height), gridMatSize);
 
         int newDelay = ((FLAGS_delay == -1) ? avgFPS / (gridMatSize * gridMatSize) * 1000 : FLAGS_delay);
         unsigned fpsResultsMaxCount = 1000;

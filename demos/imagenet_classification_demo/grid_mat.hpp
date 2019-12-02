@@ -15,10 +15,22 @@
 
 class GridMat {
 public:
-    explicit GridMat(const cv::Size maxDisp = cv::Size{1920, 1080}, int scale = 2): currSourceID{0} {
+    explicit GridMat(int inputImgsCount,
+                     const cv::Size maxDisp = cv::Size{1920, 1080},
+                     int scale = 2
+                     ): 
+                     currSourceID{0} {
         cv::Size aspectRatio = cv::Size{16, 9};
+
         size = cv::Size{static_cast<int>(std::ceil(scale * scale / double(aspectRatio.height))),
                         static_cast<int>(std::ceil(scale * scale / double(aspectRatio.width)))};
+        if (size.width % inputImgsCount == 0) { // fix 'static GridMat' problem
+            size.width++;
+        }
+        else if (size.height % inputImgsCount == 0) {
+            size.height++;
+        }
+
         cellSize = std::min(maxDisp.width / size.width, maxDisp.height / size.height);
         rectangleHeight = 30;
 
