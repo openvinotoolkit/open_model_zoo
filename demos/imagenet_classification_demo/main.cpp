@@ -3,7 +3,7 @@
 //
 
 /**
-* @brief The entry point the Inference Engine sample application
+* @brief The entry point the Inference Engine imagenet_classification demo application
 * @file imagenet_classification_demo/main.cpp
 * @example imagenet_classification_demo/main.cpp
 */
@@ -26,7 +26,6 @@
 #include <samples/ocv_common.hpp>
 #include <samples/common.hpp>
 
-#include <ext_list.hpp>
 #include <vpu/vpu_plugin_config.hpp>
 #include <cldnn/cldnn_config.hpp>
 
@@ -35,9 +34,8 @@
 #include <opencv2/highgui.hpp>
 
 #include <sys/stat.h>
-#include <ext_list.hpp>
 
-#include "imagenet_classification_demo.h"
+#include "imagenet_classification_demo.hpp"
 #include "grid_mat.hpp"
 #include "my_functor.hpp"
 
@@ -67,13 +65,13 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 }
 
 double updateGridMat(std::mutex& mutex,
-                     std::queue<cv::Mat>& showMats,
+                     std::list<cv::Mat>& showMats,
                      std::condition_variable& condVar,
                      GridMat& gridMat,
                      int64 startTime,
                      unsigned framesNum,
                      char& key,
-                     int64 delay,
+                     int delay,
                      bool imShow,
                      bool isFpsTest) {
     double overallSPF;
@@ -175,7 +173,6 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        // set map of output blob name -- blob dimension pairs
         auto outputInfo = network.getOutputsInfo();
         for (auto outputBlobsIt = outputInfo.begin(); outputBlobsIt != outputInfo.end(); ++outputBlobsIt) {
             auto layerName = outputBlobsIt->first;
@@ -192,7 +189,7 @@ int main(int argc, char *argv[]) {
 
         // ----------------------------------Set device and device settings-----------------------------------
         std::set<std::string> devices;
-        for (const std::string& netDevices : {FLAGS_d, /*FLAGS_d_va, FLAGS_d_lpr*/}) {
+        for (const std::string& netDevices : {FLAGS_d}) {
             if (netDevices.empty()) {
                 continue;
             }
@@ -202,7 +199,7 @@ int main(int argc, char *argv[]) {
         }
         std::map<std::string, uint32_t> device_nstreams = parseValuePerDevice(devices, FLAGS_nstreams);
         for (auto& device : devices) {
-            if (device == "CPU") {  // CPU supports few special performance-oriented keys
+            if (device == "CPU") {  // CPU supports a few special performance-oriented keys
                 // limit threading for CPU portion of inference
                 if (FLAGS_nthreads != 0)
                     ie.SetConfig({{ CONFIG_KEY(CPU_THREADS_NUM), std::to_string(FLAGS_nthreads) }}, device);
@@ -216,14 +213,12 @@ int main(int argc, char *argv[]) {
                 }
 
                 // for CPU execution, more throughput-oriented execution via streams
-                //if (FLAGS_api == "async")
                 ie.SetConfig({{ CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
                                 (device_nstreams.count(device) > 0 ? std::to_string(device_nstreams.at(device)) :
                                                                                  "CPU_THROUGHPUT_AUTO") }}, device);
                 device_nstreams[device] = std::stoi(
                     ie.GetConfig(device, CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
             } else if (device == ("GPU")) {
-                //if (FLAGS_api == "async")
                 ie.SetConfig({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
                                 (device_nstreams.count(device) > 0 ? std::to_string(device_nstreams.at(device)) :
                                                                          "GPU_THROUGHPUT_AUTO") }}, device);
@@ -232,7 +227,7 @@ int main(int argc, char *argv[]) {
 
                 if ((FLAGS_d.find("MULTI") != std::string::npos) &&
                     (FLAGS_d.find("CPU") != std::string::npos)) {
-                    // multi-device execution with the CPU + GPU performs best with GPU trottling hint,
+                    // multi-device execution with the CPU + GPU performs best with GPU throttling hint,
                     // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
                     ie.SetConfig({{ CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
                 }
@@ -265,13 +260,13 @@ int main(int argc, char *argv[]) {
         for(int infReqID = 0; infReqID < infReqNum; ++infReqID)
             inferRequests.push_back(executableNetwork.CreateInferRequest());
 
-        std::queue<cv::Mat> showMats;
+        std::list<cv::Mat> showMats;
         
         std::condition_variable condVar;
         std::mutex mutex;
         std::mutex showMutex;
 
-        //curImg is stored in ieWrapper
+        // curImg is stored in ieWrapper
         unsigned batchSize = FLAGS_b;
         int irFirstIndex = 0;
         
@@ -300,12 +295,11 @@ int main(int argc, char *argv[]) {
         if (blobDims.size() != 4) {
             throw std::runtime_error("Input data does not match size of the blob");
         }
-        for (InferenceEngine::InferRequest& inferRequest : inferRequests) { 
-            //setInputBlob(*it, curPos);    
+        for (InferenceEngine::InferRequest& inferRequest : inferRequests) {     
             auto inputBlob = inferRequest.GetBlob(inputBlobName);
 
             for(unsigned i = 0; i < batchSize; i++) {
-                int imageIndex = (curPos+i)%inputImgs.size();
+                int imageIndex = (curPos + i) % inputImgs.size();
                 cv::Mat inputImg = inputImgs[imageIndex];
                 
                 int inputSize = input_shapes[input_name][2];
@@ -353,8 +347,6 @@ int main(int argc, char *argv[]) {
         for (InferenceEngine::InferRequest& inferRequest : inferRequests)
             inferRequest.StartAsync();
     
-    
-        int64 delay = FLAGS_delay;
         cv::Mat tmpMat;
         char key;
 
@@ -363,19 +355,16 @@ int main(int argc, char *argv[]) {
         double avgFPS = 0;
         unsigned gridMatSize;
 
-
         for (size_t i = 0; i < fpsTestSize; i++) {
-            fpsSum += updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, 1, !(FLAGS_no_show || delay == -1), true);
+            fpsSum += updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, FLAGS_delay,
+                                                                       !(FLAGS_no_show || FLAGS_delay == -1), true);
         } 
 
         avgFPS = fpsSum / fpsTestSize;
         gridMatSize = static_cast<unsigned>(round(std::sqrt(avgFPS)));
         gridMat = GridMat(cv::Size(width, height), gridMatSize);
 
-        if (delay == -1) {
-            delay = avgFPS / (gridMatSize * gridMatSize) * 1000;
-        }
-
+        int newDelay = ((FLAGS_delay == -1) ? avgFPS / (gridMatSize * gridMatSize) * 1000 : FLAGS_delay);
         unsigned fpsResultsMaxCount = 1000;
         unsigned currentResultNum = 0;
         double fps;
@@ -384,7 +373,8 @@ int main(int argc, char *argv[]) {
         int elapsedTime = 0;
 
         do {
-            fps = updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, delay, !FLAGS_no_show, false);
+            fps = updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, newDelay,
+                                                                                         !FLAGS_no_show, false);
 
             if (currentResultNum >= fpsResultsMaxCount) {
                 fpsSum -= fpsQueue.front();

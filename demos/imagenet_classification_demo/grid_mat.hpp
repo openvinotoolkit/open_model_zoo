@@ -1,4 +1,4 @@
-// Copyright (C) 2018 Intel Corporation
+// Copyright (C) 2018-2019 Intel Corporation
 // SPDX-License-Identifier: Apache-2.0
 //
 
@@ -39,23 +39,21 @@ public:
         return size;
     }
 
-    void listUpdate(std::queue<cv::Mat>& frames) {
-        while (!frames.empty()) {
-            updateList.push_back(frames.front());
-            frames.pop();
+    void listUpdate(std::list<cv::Mat>& frames) {
+        if (!frames.empty()) {
+            updateList.splice(updateList.end(), frames);
         }
     }
 
     void textUpdate(double overSPF, bool isFpsTest){
         // Draw a rectangle
-        size_t colunmNum = outImg.cols;
-        cv::Point p1 = cv::Point(0,0);
-        cv::Point p2 = cv::Point(colunmNum, rectangleHeight);
+        cv::Point p1 = cv::Point(0, 0);
+        cv::Point p2 = cv::Point(outImg.cols, rectangleHeight);
          
-        rectangle(outImg, p1, p2, cv::Scalar(0,0,0), cv::FILLED);
+        rectangle(outImg, p1, p2, cv::Scalar(0, 0, 0), cv::FILLED);
         
         // Show FPS
-        double fontScale = 2.;
+        double fontScale = 2;
         int thickness = 2;
 
         if (!isFpsTest) {

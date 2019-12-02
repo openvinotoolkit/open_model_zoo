@@ -6,11 +6,10 @@
 #include <inference_engine.hpp>
 
 #include <ie_iextension.h>
-#include <ext_list.hpp>
 
 class  InferRequestCallback
 {
-    public:
+public:
     InferenceEngine::InferRequest& ir;
     mutable int firstIndex;
 
@@ -19,7 +18,7 @@ class  InferRequestCallback
     std::vector<cv::Mat>& inputImgs;
     std::string inputBlobName;
     unsigned batchSize;
-    std::queue<cv::Mat>& showMats;
+    std::list<cv::Mat>& showMats;
     unsigned& curPos;
     unsigned& framesNum;
     std::atomic<bool>& quitFlag;
@@ -30,7 +29,7 @@ class  InferRequestCallback
                 std::vector<cv::Mat>& inputImgs,
                 const std::string& inputBlobName,
                 unsigned batchSize,
-                std::queue<cv::Mat>& showMats,
+                std::list<cv::Mat>& showMats,
                 unsigned& curPos,
                 unsigned& framesNum,
                 std::atomic<bool>& quitFlag
@@ -46,17 +45,17 @@ class  InferRequestCallback
                 quitFlag(quitFlag) {}
 
 
-    //curPos and framesNum is stored in ieWrapper
-    void operator()() const{
-        if(!quitFlag) {
+    // curPos and framesNum are stored in ieWrapper
+    void operator()() const {
+        if (!quitFlag) {
             int inputDataSize = inputImgs.size();
-            {
+            if (inputDataSize > 0) {
                 std::lock_guard<std::mutex> lock(mutex);
 
-                for(unsigned j = 0; j < batchSize; j++)
-                    showMats.push(inputImgs[(firstIndex+j)%inputDataSize]);
+                for (unsigned j = 0; j < batchSize; j++) {
+                    showMats.push_back(inputImgs[(firstIndex + j) % inputDataSize]);
+                }
 
-                //sumTime += lastInferTime = cv::getTickCount() - startTime; // >:-/
                 framesNum += batchSize;
                 firstIndex = curPos;
                 curPos = (curPos + batchSize) % inputDataSize;
@@ -65,15 +64,12 @@ class  InferRequestCallback
 
             auto inputBlob = ir.GetBlob(inputBlobName);
         
-            for(unsigned i = 0; i < batchSize; i++) {        
+            for (unsigned i = 0; i < batchSize; i++) {        
                 cv::Mat inputImg = inputImgs.at((firstIndex + i) % inputDataSize);
                 matU8ToBlob<uint8_t>(inputImg, inputBlob, i);
             }
-            
-            //startTime = cv::getTickCount();
 
-            //start async for actual ir
-            ir.StartAsync();
+            ir.StartAsync(); // start async for actual ir
         }
     }
 };

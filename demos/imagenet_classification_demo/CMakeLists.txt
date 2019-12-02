@@ -8,7 +8,6 @@ file (GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 ie_add_sample(NAME imagenet_classification_demo
               SOURCES ${SOURCES}
               HEADERS ${HEADERS}
-              INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
               DEPENDENCIES format_reader
               OPENCV_DEPENDENCIES core highgui
               )
