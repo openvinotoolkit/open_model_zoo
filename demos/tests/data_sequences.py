@@ -14,7 +14,7 @@
 
 from args import image_net_arg, brats_arg, image_retrieval_arg
 
-IMAGE_SEQUENCES = {
+DATA_SEQUENCES = {
     'action-recognition': [
         image_net_arg('00000001'),
         image_net_arg('00000002'),
