@@ -291,7 +291,7 @@ class DLSDKModelMixin:
 
         return data
 
-    def preprare_model(self, launcher):
+    def prepare_model(self, launcher):
         launcher_specific_entries = [
             'model', 'weights', 'caffe_model', 'caffe_weights', 'tf_model', 'inputs', 'outputs', '_model_optimizer'
         ]
