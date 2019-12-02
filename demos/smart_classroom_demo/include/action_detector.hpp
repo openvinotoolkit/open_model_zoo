@@ -58,6 +58,9 @@ struct ActionDetectorConfig : public CnnConfig {
     explicit ActionDetectorConfig(const std::string& path_to_model,
                                   const std::string& path_to_weights)
         : CnnConfig(path_to_model, path_to_weights) {}
+
+    bool enabled{true};
+
     /** @brief Name of output blob with location info */
     std::string old_loc_blob_name{"mbox_loc1/out/conv/flat"};
     /** @brief Name of output blob with detection confidence info */
