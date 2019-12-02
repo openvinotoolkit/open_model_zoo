@@ -16,6 +16,7 @@
 #include <cldnn/cldnn_config.hpp>
 #include <inference_engine.hpp>
 #include <vpu/vpu_plugin_config.hpp>
+#include <multi-device/multi_device_config.hpp>
 #ifdef WITH_EXTENSIONS
 #include <ext_list.hpp>
 #endif
@@ -747,10 +748,6 @@ int main(int argc, char* argv[]) {
                     ie.SetConfig({{ CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
                 }
             }
-
-            if ("FPGA" == device) {
-                ie.SetConfig({ { InferenceEngine::PluginConfigParams::KEY_DEVICE_ID, FLAGS_fpga_device_ids } }, "FPGA");
-            }
         }
 
         /** Per layer metrics **/
@@ -758,32 +755,77 @@ int main(int argc, char* argv[]) {
             ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
         }
 
-        /** Graph tagging via config options**/
-        auto makeTagConfig = [&](const std::string &deviceName, const std::string &suffix) {
+        std::map<std::string, std::string> executionDevices = {{FLAGS_d, FLAGS_d}};
+        if (!FLAGS_d_va.empty()) {
+            executionDevices[FLAGS_d_va] = FLAGS_d_va;
+        }
+        if (!FLAGS_d_lpr.empty()) {
+            executionDevices[FLAGS_d_lpr] = FLAGS_d_lpr;
+        }
+
+
+        /** Replace FPGA device with MULTI if several device IDs are presented**/
+        std::vector<std::string> deviceIdStr;
+        if (!FLAGS_fpga_device_ids.empty()) {
+            std::stringstream strm{FLAGS_fpga_device_ids};
+            while (strm.good()) {
+                std::string substr;
+                std::getline(strm, substr, ',');
+                deviceIdStr.push_back(substr);
+            }
+            if (deviceIdStr.size() > 1) {
+                for (auto&& execDevice : executionDevices) {
+                    auto& device = execDevice.second;
+                    device.replace(device.find("FPGA"), 4, "MULTI");
+                }
+            }
+        }
+
+        auto makeLoadNetworkConfig = [&](const std::string &deviceName, const std::string &suffix) {
             std::map<std::string, std::string> config;
+
+            /** Graph tagging via config options**/
             if (FLAGS_tag && deviceName == "HDDL") {
                 config[VPU_HDDL_CONFIG_KEY(GRAPH_TAG)] = "tag" + suffix;
             }
+
+            /** MULTI FPGA config options**/
+            if (deviceName.find("FPGA") != std::string::npos) {
+                if (deviceIdStr.size() > 1) {
+                    std::string devicePriorities;
+                    for (auto&& deviceId : deviceIdStr) {
+                        devicePriorities += "FPGA." + deviceId;
+                        if (&deviceId != &(deviceIdStr.back())) {
+                            devicePriorities += ',';
+                        }
+                    }
+                    config[MULTI_CONFIG_KEY(DEVICE_PRIORITIES)] = devicePriorities;
+
+                    slog::info << "Loading with devices " << devicePriorities << slog::endl;
+                }
+            }
+
             return config;
         };
-
         // -----------------------------------------------------------------------------------------------------
         unsigned nireq = FLAGS_nireq == 0 ? inputChannels.size() : FLAGS_nireq;
-        slog::info << "Loading detection model to the "<< FLAGS_d << " plugin" << slog::endl;
-        Detector detector(ie, FLAGS_d, FLAGS_m,
-            {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeTagConfig(FLAGS_d, "Detect"));
+
+        slog::info << "Loading detection model to the "<< executionDevices[FLAGS_d] << " plugin" << slog::endl;
+        Detector detector(ie, executionDevices[FLAGS_d], FLAGS_m,
+            {static_cast<float>(FLAGS_t), static_cast<float>(FLAGS_t)}, FLAGS_auto_resize, makeLoadNetworkConfig(FLAGS_d, "Detect"));
         VehicleAttributesClassifier vehicleAttributesClassifier;
         std::size_t nclassifiersireq{0};
         Lpr lpr;
         std::size_t nrecognizersireq{0};
         if (!FLAGS_m_va.empty()) {
-            slog::info << "Loading Vehicle Attribs model to the "<< FLAGS_d_va << " plugin" << slog::endl;
-            vehicleAttributesClassifier = VehicleAttributesClassifier(ie, FLAGS_d_va, FLAGS_m_va, FLAGS_auto_resize, makeTagConfig(FLAGS_d_va, "Attr"));
+            slog::info << "Loading Vehicle Attribs model to the "<< executionDevices[FLAGS_d_va] << " plugin" << slog::endl;
+            vehicleAttributesClassifier = VehicleAttributesClassifier(ie, executionDevices[FLAGS_d_va],
+                                                                      FLAGS_m_va, FLAGS_auto_resize, makeLoadNetworkConfig(FLAGS_d_va, "Attr"));
             nclassifiersireq = nireq * 3;
         }
         if (!FLAGS_m_lpr.empty()) {
-            slog::info << "Loading Licence Plate Recognition (LPR) model to the "<< FLAGS_d_lpr << " plugin" << slog::endl;
-            lpr = Lpr(ie, FLAGS_d_lpr, FLAGS_m_lpr, FLAGS_auto_resize, makeTagConfig(FLAGS_d_lpr, "LPR"));
+            slog::info << "Loading Licence Plate Recognition (LPR) model to the "<< executionDevices[FLAGS_d_lpr] << " plugin" << slog::endl;
+            lpr = Lpr(ie, executionDevices[FLAGS_d_lpr], FLAGS_m_lpr, FLAGS_auto_resize, makeLoadNetworkConfig(FLAGS_d_lpr, "LPR"));
             nrecognizersireq = nireq * 3;
         }
         std::shared_ptr<Worker> worker = std::make_shared<Worker>(FLAGS_n_wt - 1);
@@ -800,7 +842,8 @@ int main(int argc, char* argv[]) {
         cv::Size displayResolution = cv::Size{std::stoi(FLAGS_display_resolution.substr(0, found)),
                                               std::stoi(FLAGS_display_resolution.substr(found + 1, FLAGS_display_resolution.length()))};
 
-        slog::info << "Number of InferRequests: " << nireq << " (detection), " << nclassifiersireq << " (classification), " << nrecognizersireq << " (recognition)" << slog::endl;
+        slog::info << "Number of InferRequests: " << nireq << " (detection), "
+                   << nclassifiersireq << " (classification), " << nrecognizersireq << " (recognition)" << slog::endl;
         std::ostringstream device_ss;
         for (const auto& nstreams : device_nstreams) {
             if (!device_ss.str().empty()) {
