@@ -129,7 +129,7 @@ class CTDETAdapter(Adapter):
         wh_batch = predictions_batch[self.width_height_out]
         reg_batch = predictions_batch[self.regression_out]
         for identifier, heat, wh, reg, meta in zip(identifiers, hm_batch, wh_batch, reg_batch, frame_meta):
-            heat = 1/(1 + np.exp(-heat))
+            heat = np.exp(heat)/(1 + np.exp(heat))
             height, width = heat.shape[1:3]
 
             heat = self._nms(heat)
