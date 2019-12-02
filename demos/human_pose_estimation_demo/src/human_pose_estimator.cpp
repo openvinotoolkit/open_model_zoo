@@ -38,8 +38,6 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
     std::string binFileName = fileNameNoExt(modelPath) + ".bin";
     netReader.ReadWeights(binFileName);
     network = netReader.getNetwork();
-    InferenceEngine::InputInfo::Ptr inputInfo = network.getInputsInfo().begin()->second;
-    inputLayerSize = cv::Size(inputInfo->getTensorDesc().getDims()[3], inputInfo->getTensorDesc().getDims()[2]);
 
     const auto& inputInfo = network.getInputsInfo();
 
@@ -126,15 +124,15 @@ void HumanPoseEstimator::reshape(const cv::Mat& image){
 void HumanPoseEstimator::frameToBlob_curr(const cv::Mat& image) {
     CV_Assert(image.type() == CV_8UC3);
     InferenceEngine::Blob::Ptr input = request_curr->GetBlob(network.getInputsInfo().begin()->first);
-    auto buffer =input->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
-    preprocess(image, static_cast<float*>(buffer));
+    auto buffer =input->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type *>();
+    preprocess(image, buffer);
 }
 
 void HumanPoseEstimator::frameToBlob_next(const cv::Mat& image) {
     CV_Assert(image.type() == CV_8UC3);
     InferenceEngine::Blob::Ptr input = request_next->GetBlob(network.getInputsInfo().begin()->first);
-    auto buffer =input->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
-    preprocess(image, static_cast<float*>(buffer));
+    auto buffer =input->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type *>();
+    preprocess(image, buffer);
 }
 
 void HumanPoseEstimator::startCurr() {
@@ -175,7 +173,7 @@ std::vector<HumanPose> HumanPoseEstimator::estimateCurr() {
     return poses;
 }
 
-void HumanPoseEstimator::preprocess(const cv::Mat& image, float* buffer) const {
+void HumanPoseEstimator::preprocess(const cv::Mat& image, uint8_t* buffer) const {
     cv::Mat resizedImage;
     double scale = inputLayerSize.height / static_cast<double>(image.rows);
     cv::resize(image, resizedImage, cv::Size(), scale, scale, cv::INTER_CUBIC);
@@ -185,11 +183,9 @@ void HumanPoseEstimator::preprocess(const cv::Mat& image, float* buffer) const {
     std::vector<cv::Mat> planes(3);
     cv::split(paddedImage, planes);
     for (size_t pId = 0; pId < planes.size(); pId++) {
-        cv::Mat dst(inputLayerSize.height, inputLayerSize.width, CV_32FC1,
-                    reinterpret_cast<void*>(
-                        buffer + pId * inputLayerSize.area()));
-        planes[pId].convertTo(dst, CV_32FC1);
+        planes[pId] = cv::Mat(inputLayerSize, CV_8UC1, buffer + pId * inputLayerSize.area());
     }
+    cv::split(paddedImage, planes);
 }
 
 std::vector<HumanPose> HumanPoseEstimator::postprocess(
