@@ -886,7 +886,7 @@ class TransformedCropWithAutoScale(Preprocessor):
             'size': NumberField(
                 value_type=int, optional=True, min_value=1,
                 description="Destination sizes for both dimensions of heatmaps output."
-            )
+            ),
             'dst_width': NumberField(
                 value_type=int, optional=True, min_value=1, description="Width of heatmaps output."
             ),
