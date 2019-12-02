@@ -918,27 +918,22 @@ class TransformedCropWithAutoScale(Preprocessor):
 
     @staticmethod
     def get_center_scale(bbox, image_w, image_h):
-        # x y w h
         aspect_ratio = 0.75
         bbox[0] = np.max((0, bbox[0]))
         bbox[1] = np.max((0, bbox[1]))
         x2 = np.min((image_w - 1, bbox[0] + np.max((0, bbox[2] - 1))))
         y2 = np.min((image_h - 1, bbox[1] + np.max((0, bbox[3] - 1))))
-
         if x2 >= bbox[0] and y2 >= bbox[1]:
             bbox = [bbox[0], bbox[1], x2 - bbox[0], y2 - bbox[1]]
-
         cx_bbox = bbox[0] + bbox[2] * 0.5
         cy_bbox = bbox[1] + bbox[3] * 0.5
         center = np.array([np.float32(cx_bbox), np.float32(cy_bbox)])
-
         if bbox[2] > aspect_ratio * bbox[3]:
             bbox[3] = bbox[2] * 1.0 / aspect_ratio
         elif bbox[2] < aspect_ratio * bbox[3]:
             bbox[2] = bbox[3] * aspect_ratio
 
-        s = np.array([bbox[2] / 200., bbox[3] / 200.], np.float32)
-        scale = s * 1.25
+        scale = np.array([bbox[2] / 200., bbox[3] / 200.], np.float32) * 1.25
 
         return center, scale
 
