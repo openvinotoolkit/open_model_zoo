@@ -97,14 +97,15 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
     }
 
     executableNetwork = ie.LoadNetwork(network, targetDeviceName);
-    request = executableNetwork.CreateInferRequest();
+    request_next = executableNetwork.CreateInferRequestPtr();
+    request_curr = executableNetwork.CreateInferRequestPtr();
 }
 
-std::vector<HumanPose> HumanPoseEstimator::estimate(const cv::Mat& image) {
+void HumanPoseEstimator::reshape(const cv::Mat& image){
     CV_Assert(image.type() == CV_8UC3);
 
-    cv::Size imageSize = image.size();
-    if (inputWidthIsChanged(imageSize)) {
+    imageSize = image.size();
+    if (inputWidthIsChanged(imageSize)){
         auto input_shapes = network.getInputShapes();
         std::string input_name;
         InferenceEngine::SizeVector input_shape;
@@ -114,18 +115,52 @@ std::vector<HumanPose> HumanPoseEstimator::estimate(const cv::Mat& image) {
         input_shapes[input_name] = input_shape;
         network.reshape(input_shapes);
         executableNetwork = ie.LoadNetwork(network, targetDeviceName);
-        request = executableNetwork.CreateInferRequest();
+        request_next = executableNetwork.CreateInferRequestPtr();
+        request_curr = executableNetwork.CreateInferRequestPtr();
+        std::cout << "Reshape needed" << std::endl;
     }
-    InferenceEngine::Blob::Ptr input = request.GetBlob(network.getInputsInfo().begin()->first);
-    auto buffer = input->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type *>();
+}
+
+void HumanPoseEstimator::frameToBlob_curr(const cv::Mat& image) {
+    CV_Assert(image.type() == CV_8UC3);
+    InferenceEngine::Blob::Ptr input = request_curr->GetBlob(network.getInputsInfo().begin()->first);
+    auto buffer =input->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type *>();
     preprocess(image, buffer);
+}
 
-    request.Infer();
+void HumanPoseEstimator::frameToBlob_next(const cv::Mat& image) {
+    CV_Assert(image.type() == CV_8UC3);
+    InferenceEngine::Blob::Ptr input = request_next->GetBlob(network.getInputsInfo().begin()->first);
+    auto buffer =input->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type *>();
+    preprocess(image, buffer);
+}
 
-    InferenceEngine::Blob::Ptr pafsBlob = request.GetBlob(pafsBlobName);
-    InferenceEngine::Blob::Ptr heatMapsBlob = request.GetBlob(heatmapsBlobName);
-    InferenceEngine::SizeVector heatMapDims =
-            heatMapsBlob->getTensorDesc().getDims();
+void HumanPoseEstimator::startCurr() {
+    request_curr->StartAsync();
+}
+
+void HumanPoseEstimator::startNext() {
+    request_next->StartAsync();
+}
+
+bool HumanPoseEstimator::readyCurr() {
+    if (InferenceEngine::OK == request_curr->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void HumanPoseEstimator::swapRequest() {
+    request_curr.swap(request_next);
+}
+
+std::vector<HumanPose> HumanPoseEstimator::estimateCurr() {
+
+    InferenceEngine::Blob::Ptr pafsBlob = request_curr->GetBlob(pafsBlobName);
+    InferenceEngine::Blob::Ptr heatMapsBlob = request_curr->GetBlob(heatmapsBlobName);
+    CV_Assert(heatMapsBlob->getTensorDesc().getDims()[1] == keypointsNumber + 1);
+    InferenceEngine::SizeVector heatMapDims = heatMapsBlob->getTensorDesc().getDims();
     std::vector<HumanPose> poses = postprocess(
             heatMapsBlob->buffer(),
             heatMapDims[2] * heatMapDims[3],
@@ -146,9 +181,9 @@ void HumanPoseEstimator::preprocess(const cv::Mat& image, uint8_t* buffer) const
     cv::copyMakeBorder(resizedImage, paddedImage, pad(0), pad(2), pad(1), pad(3),
                        cv::BORDER_CONSTANT, meanPixel);
     std::vector<cv::Mat> planes(3);
+    cv::split(paddedImage, planes);
     for (size_t pId = 0; pId < planes.size(); pId++) {
-        planes[pId] = cv::Mat(inputLayerSize, CV_8UC1,
-                              buffer + pId * inputLayerSize.area());
+        planes[pId] = cv::Mat(inputLayerSize, CV_8UC1, buffer + pId * inputLayerSize.area());
     }
     cv::split(paddedImage, planes);
 }
@@ -279,7 +314,7 @@ HumanPoseEstimator::~HumanPoseEstimator() {
     try {
         if (enablePerformanceReport) {
             std::cout << "Performance counts for " << modelPath << std::endl << std::endl;
-            printPerformanceCounts(request, std::cout, getFullDeviceName(ie, targetDeviceName), false);
+            printPerformanceCounts(*request_curr, std::cout, getFullDeviceName(ie, targetDeviceName), false);
         }
     }
     catch (...) {
