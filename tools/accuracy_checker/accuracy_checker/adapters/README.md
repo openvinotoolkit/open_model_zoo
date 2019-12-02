@@ -137,3 +137,17 @@ AccuracyChecker supports following set of adapters:
   * `center_heatmap_out` - name of output layer with center points heatmaps.
   * `width_height_out` - name of the output layer with object sizes.
   * `regression_out` - name of the regression output with the offset prediction.
+* `mask_rcnn` - converting raw outputs of Mask-RCNN to combination of `DetectionPrediction` and `CoCocInstanceSegmentationPrediction`.
+  * `classes_out` - name of output layer with information about classes (optional, if your model has detection_output layer as output).
+  * `scores_out` - name of output layer with bbox scores (optional, if your model has detection_output layer as output).
+  * `boxes_out` - name of output layer with bboxes (optional, if your model has detection_output layer as output).
+  * `raw_masks_out` - name of output layer with raw instances masks.
+  * `num_detections_out` - name of output layer with number valid detections (used in MaskRCNN models trained with TF Object Detection API).
+  * `detection_out` - SSD-like detection output layer name (optional, if your model has scores_out, boxes_out and classes_out).
+* `mask_rcnn_with_text` - converting raw outputs of Mask-RCNN with additional Text Recognition head to `TextDetectionPrediction`.
+  * `classes_out` - name of output layer with information about classes.
+  * `scores_out` - name of output layer with bbox scores.
+  * `boxes_out` - name of output layer with bboxes.
+  * `raw_masks_out` - name of output layer with raw instances masks.
+  * `texts_out` - name of output layer with texts.
+  * `confidence_threshold` - confidence threshold that is used to filter out detected instances.
