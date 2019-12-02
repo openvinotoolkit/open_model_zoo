@@ -29,8 +29,6 @@ struct DetectorConfig : public CnnConfig {
                             const std::string& path_to_weights)
         : CnnConfig(path_to_model, path_to_weights) {}
 
-    bool enabled{true};
-
     float confidence_threshold{0.6f};
     float increase_scale_x{1.15f};
     float increase_scale_y{1.15f};
@@ -39,7 +37,7 @@ struct DetectorConfig : public CnnConfig {
     int input_w = 600;
 };
 
-class FaceDetection : public BaseCnnDetection {
+class FaceDetection : public AsyncDetection<DetectedObject>, public BaseCnnDetection {
 private:
     DetectorConfig config_;
     InferenceEngine::ExecutableNetwork net_;
@@ -55,8 +53,13 @@ public:
     explicit FaceDetection(const DetectorConfig& config);
 
     void submitRequest() override;
-    void enqueue(const cv::Mat &frame);
-    DetectedObjects fetchResults();
+    void enqueue(const cv::Mat &frame) override;
+    void wait() override { BaseCnnDetection::wait(); }
+    void printPerformanceCounts(const std::string &fullDeviceName) override {
+        BaseCnnDetection::printPerformanceCounts(fullDeviceName);
+    }
+
+    DetectedObjects fetchResults() override;
 };
 
 }  // namespace detection

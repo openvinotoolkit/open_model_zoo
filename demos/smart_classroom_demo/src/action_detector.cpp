@@ -31,8 +31,6 @@ void ActionDetection::submitRequest() {
 }
 
 void ActionDetection::enqueue(const cv::Mat &frame) {
-    if (!enabled()) return;
-
     if (!request) {
         request = net_.CreateInferRequestPtr();
     }
@@ -48,84 +46,82 @@ void ActionDetection::enqueue(const cv::Mat &frame) {
 }
 
 ActionDetection::ActionDetection(const ActionDetectorConfig& config)
-    : BaseCnnDetection(config.enabled, config.is_async), config_(config) {
-    if (config.enabled) {
-        topoName = "action detector";
-        CNNNetReader net_reader;
-        net_reader.ReadNetwork(config.path_to_model);
-        net_reader.ReadWeights(config.path_to_weights);
-        if (!net_reader.isParseSuccess()) {
-            THROW_IE_EXCEPTION << "Cannot load model";
-        }
+        : BaseCnnDetection(config.is_async), config_(config) {
+    topoName = "action detector";
+    CNNNetReader net_reader;
+    net_reader.ReadNetwork(config.path_to_model);
+    net_reader.ReadWeights(config.path_to_weights);
+    if (!net_reader.isParseSuccess()) {
+        THROW_IE_EXCEPTION << "Cannot load model";
+    }
 
-        net_reader.getNetwork().setBatchSize(config.max_batch_size);
+    net_reader.getNetwork().setBatchSize(config.max_batch_size);
 
-        InputsDataMap inputInfo(net_reader.getNetwork().getInputsInfo());
-        if (inputInfo.size() != 1) {
-            THROW_IE_EXCEPTION << "Action Detection network should have only one input";
-        }
-        InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
-        inputInfoFirst->setPrecision(Precision::U8);
-        inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
+    InputsDataMap inputInfo(net_reader.getNetwork().getInputsInfo());
+    if (inputInfo.size() != 1) {
+        THROW_IE_EXCEPTION << "Action Detection network should have only one input";
+    }
+    InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
+    inputInfoFirst->setPrecision(Precision::U8);
+    inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
 
-        network_input_size_.height = inputInfoFirst->getTensorDesc().getDims()[2];
-        network_input_size_.width = inputInfoFirst->getTensorDesc().getDims()[3];
+    network_input_size_.height = inputInfoFirst->getTensorDesc().getDims()[2];
+    network_input_size_.width = inputInfoFirst->getTensorDesc().getDims()[3];
 
-        OutputsDataMap outputInfo(net_reader.getNetwork().getOutputsInfo());
+    OutputsDataMap outputInfo(net_reader.getNetwork().getOutputsInfo());
 
-        for (auto&& item : outputInfo) {
-            item.second->setPrecision(Precision::FP32);
-        }
+    for (auto&& item : outputInfo) {
+        item.second->setPrecision(Precision::FP32);
+    }
 
-        new_network_ = outputInfo.find(config_.new_loc_blob_name) != outputInfo.end();
-        input_name_ = inputInfo.begin()->first;
-        net_ = config_.ie.LoadNetwork(net_reader.getNetwork(), config_.deviceName);
+    new_network_ = outputInfo.find(config_.new_loc_blob_name) != outputInfo.end();
+    input_name_ = inputInfo.begin()->first;
+    net_ = config_.ie.LoadNetwork(net_reader.getNetwork(), config_.deviceName);
 
-        const auto& head_anchors = new_network_ ? config_.new_anchors : config_.old_anchors;
-        const int num_heads = head_anchors.size();
+    const auto& head_anchors = new_network_ ? config_.new_anchors : config_.old_anchors;
+    const int num_heads = head_anchors.size();
 
-        head_ranges_.resize(num_heads + 1);
-        glob_anchor_map_.resize(num_heads);
-        head_step_sizes_.resize(num_heads);
+    head_ranges_.resize(num_heads + 1);
+    glob_anchor_map_.resize(num_heads);
+    head_step_sizes_.resize(num_heads);
 
-        num_glob_anchors_ = 0;
-        head_ranges_[0] = 0;
-        int head_shift = 0;
-        for (int head_id = 0; head_id < num_heads; ++head_id) {
-            glob_anchor_map_[head_id].resize(head_anchors[head_id]);
+    num_glob_anchors_ = 0;
+    head_ranges_[0] = 0;
+    int head_shift = 0;
+    for (int head_id = 0; head_id < num_heads; ++head_id) {
+        glob_anchor_map_[head_id].resize(head_anchors[head_id]);
 
-            int anchor_height, anchor_width;
-            for (int anchor_id = 0; anchor_id < head_anchors[head_id]; ++anchor_id) {
-                const auto glob_anchor_name = new_network_
-                      ? config_.new_action_conf_blob_name_prefix + std::to_string(head_id + 1) +
-                        config_.new_action_conf_blob_name_suffix + std::to_string(anchor_id + 1)
-                      : config_.old_action_conf_blob_name_prefix + std::to_string(anchor_id + 1);
-                glob_anchor_names_.push_back(glob_anchor_name);
+        int anchor_height, anchor_width;
+        for (int anchor_id = 0; anchor_id < head_anchors[head_id]; ++anchor_id) {
+            const auto glob_anchor_name = new_network_
+                  ? config_.new_action_conf_blob_name_prefix + std::to_string(head_id + 1) +
+                    config_.new_action_conf_blob_name_suffix + std::to_string(anchor_id + 1)
+                  : config_.old_action_conf_blob_name_prefix + std::to_string(anchor_id + 1);
+            glob_anchor_names_.push_back(glob_anchor_name);
 
-                const auto anchor_dims = outputInfo[glob_anchor_name]->getDims();
-                anchor_height = new_network_ ? anchor_dims[2] : anchor_dims[1];
-                anchor_width = new_network_ ? anchor_dims[3] : anchor_dims[2];
-                std::size_t action_dimention_idx = new_network_ ? 1 : 3;
-                if (anchor_dims[action_dimention_idx] != config_.num_action_classes) {
-                    throw std::logic_error("The number of specified actions and the number of actions predicted by "
-                        "the Person/Action Detection Retail model must match");
-                }
-
-                const int anchor_size = anchor_height * anchor_width;
-                head_shift += anchor_size;
-
-                head_step_sizes_[head_id] = new_network_ ? anchor_size : 1;
-                glob_anchor_map_[head_id][anchor_id] = num_glob_anchors_++;
+            const auto anchor_dims = outputInfo[glob_anchor_name]->getDims();
+            anchor_height = new_network_ ? anchor_dims[2] : anchor_dims[1];
+            anchor_width = new_network_ ? anchor_dims[3] : anchor_dims[2];
+            std::size_t action_dimention_idx = new_network_ ? 1 : 3;
+            if (anchor_dims[action_dimention_idx] != config_.num_action_classes) {
+                throw std::logic_error("The number of specified actions and the number of actions predicted by "
+                    "the Person/Action Detection Retail model must match");
             }
 
-            head_ranges_[head_id + 1] = head_shift;
-            head_blob_sizes_.emplace_back(anchor_width, anchor_height);
+            const int anchor_size = anchor_height * anchor_width;
+            head_shift += anchor_size;
+
+            head_step_sizes_[head_id] = new_network_ ? anchor_size : 1;
+            glob_anchor_map_[head_id][anchor_id] = num_glob_anchors_++;
         }
 
-        num_candidates_ = head_shift;
-
-        binary_task_ = config_.num_action_classes == 2;
+        head_ranges_[head_id + 1] = head_shift;
+        head_blob_sizes_.emplace_back(anchor_width, anchor_height);
     }
+
+    num_candidates_ = head_shift;
+
+    binary_task_ = config_.num_action_classes == 2;
 }
 
 std::vector<int> ieSizeToVector(const SizeVector& ie_output_dims) {
@@ -137,8 +133,6 @@ std::vector<int> ieSizeToVector(const SizeVector& ie_output_dims) {
 }
 
 DetectedActions ActionDetection::fetchResults() {
-    if (!enabled()) return {};
-
     const auto loc_blob_name = new_network_ ? config_.new_loc_blob_name : config_.old_loc_blob_name;
     const auto det_conf_blob_name = new_network_ ? config_.new_det_conf_blob_name : config_.old_det_conf_blob_name;
 
