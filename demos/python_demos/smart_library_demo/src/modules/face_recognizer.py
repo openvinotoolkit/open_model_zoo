@@ -1,7 +1,6 @@
 import sys, os
 import numpy as np
 import cv2 as cv
-import ctypes as C
 
 from abc import ABC, abstractmethod
 
@@ -49,7 +48,7 @@ class FaceDetector(ABC):
 class FaceLandmarks(ABC):
     @staticmethod
     def create(args): 
-         if args['name'] == 'DNNLandmarks':
+         if args['name'] == 'DNNlm':
             return DNNLandmarks(args['modelXML'], args['width'],
                                                args['height'])
          else:
