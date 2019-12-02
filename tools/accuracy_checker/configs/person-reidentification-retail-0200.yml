@@ -25,10 +25,8 @@ models:
 
     datasets:
       - name: globalme-reid
-        reader: pillow_imread
 
         preprocessing:
-          - type: rgb_to_bgr
           - type: resize
             dst_width: 128
             dst_height: 256
