@@ -227,10 +227,8 @@ class DetectorDLSDKModel(BaseModel):
         if not hasattr(launcher, 'plugin'):
             launcher.create_ie_plugin()
         self.exec_network = launcher.plugin.load(self.network)
-        self.im_info_name = \
-            [x for x in self.network.inputs if len(self.network.inputs[x].shape) == 2][0]
-        self.im_data_name = \
-            [x for x in self.network.inputs if len(self.network.inputs[x].shape) == 4][0]
+        self.im_info_name = [x for x in self.network.inputs if len(self.network.inputs[x].shape) == 2][0]
+        self.im_data_name = [x for x in self.network.inputs if len(self.network.inputs[x].shape) == 4][0]
 
     def predict(self, identifiers, input_data):
         input_data = np.array(input_data)
