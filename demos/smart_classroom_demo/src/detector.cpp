@@ -50,8 +50,6 @@ cv::Rect IncreaseRect(const cv::Rect& r, float coeff_x,
 void FaceDetection::submitRequest() {
     if (!enqueued_frames_) return;
     enqueued_frames_ = 0;
-    results_fetched_ = false;
-    results.clear();
     BaseCnnDetection::submitRequest();
 }
 
@@ -134,11 +132,9 @@ FaceDetection::FaceDetection(const DetectorConfig& config) :
     }
 }
 
-void FaceDetection::fetchResults() {
-    if (!enabled()) return;
-    results.clear();
-    if (results_fetched_) return;
-    results_fetched_ = true;
+DetectedObjects FaceDetection::fetchResults() {
+    if (!enabled()) return {};
+    DetectedObjects results;
     const float *data = request->GetBlob(output_name_)->buffer().as<float *>();
 
     for (int det_id = 0; det_id < max_detections_count_; ++det_id) {
@@ -176,4 +172,6 @@ void FaceDetection::fetchResults() {
             results.emplace_back(object);
         }
     }
+
+    return results;
 }

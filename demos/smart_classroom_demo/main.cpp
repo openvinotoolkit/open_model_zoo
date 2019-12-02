@@ -856,8 +856,7 @@ int main(int argc, char* argv[]) {
                     }
 
                     action_detector.wait();
-                    action_detector.fetchResults();
-                    actions = action_detector.results;
+                    actions = action_detector.fetchResults();
 
                     if (!is_last_frame) {
                         prev_frame_path = cap.GetVideoPath();
@@ -911,12 +910,10 @@ int main(int argc, char* argv[]) {
                 }
             } else {
                 face_detector.wait();
-                face_detector.fetchResults();
-                faces = face_detector.results;
+                faces = face_detector.fetchResults();
 
                 action_detector.wait();
-                action_detector.fetchResults();
-                actions = action_detector.results;
+                actions = action_detector.fetchResults();
 
                 if (!is_last_frame) {
                     prev_frame_path = cap.GetVideoPath();

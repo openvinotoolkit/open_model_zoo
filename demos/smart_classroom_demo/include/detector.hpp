@@ -50,15 +50,13 @@ private:
     int enqueued_frames_ = 0;
     float width_ = 0;
     float height_ = 0;
-    bool results_fetched_ = false;
 
 public:
     explicit FaceDetection(const DetectorConfig& config);
 
-    DetectedObjects results;
     void submitRequest() override;
     void enqueue(const cv::Mat &frame);
-    void fetchResults();
+    DetectedObjects fetchResults();
 };
 
 }  // namespace detection

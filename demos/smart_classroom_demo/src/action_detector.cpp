@@ -27,8 +27,6 @@ bool SortScorePairDescend(const std::pair<float, T>& pair1,
 void ActionDetection::submitRequest() {
     if (!enqueued_frames_) return;
     enqueued_frames_ = 0;
-    results_fetched_ = false;
-    results.clear();
     BaseCnnDetection::submitRequest();
 }
 
@@ -138,12 +136,8 @@ std::vector<int> ieSizeToVector(const SizeVector& ie_output_dims) {
     return blob_sizes;
 }
 
-void ActionDetection::fetchResults() {
-    if (!enabled()) return;
-    results.clear();
-    if (results_fetched_) return;
-    results_fetched_ = true;
-
+DetectedActions ActionDetection::fetchResults() {
+    if (!enabled()) return {};
 
     const auto loc_blob_name = new_network_ ? config_.new_loc_blob_name : config_.old_loc_blob_name;
     const auto det_conf_blob_name = new_network_ ? config_.new_det_conf_blob_name : config_.old_det_conf_blob_name;
@@ -168,8 +162,8 @@ void ActionDetection::fetchResults() {
     }
 
     /** Parse detections **/
-    GetDetections(loc_out, main_conf_out, priorbox_out, add_conf_out,
-                  cv::Size(static_cast<int>(width_), static_cast<int>(height_)), &results);
+    return GetDetections(loc_out, main_conf_out, priorbox_out, add_conf_out,
+                         cv::Size(static_cast<int>(width_), static_cast<int>(height_)));
 }
 
 inline ActionDetection::NormalizedBBox
@@ -232,9 +226,9 @@ cv::Rect ActionDetection::ConvertToRect(
                     static_cast<int>((decoded_bbox_ymax - decoded_bbox_ymin) * frame_size.height));
 }
 
-void ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat& main_conf,
+DetectedActions ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat& main_conf,
         const cv::Mat& priorboxes, const std::vector<cv::Mat>& add_conf,
-        const cv::Size& frame_size, DetectedActions* detections) const {
+        const cv::Size& frame_size) const {
     /** Prepare input data buffers **/
     const float* loc_data = reinterpret_cast<float*>(loc.data);
     const float* det_conf_data = reinterpret_cast<float*>(main_conf.data);
@@ -332,10 +326,11 @@ void ActionDetection::GetDetections(const cv::Mat& loc, const cv::Mat& main_conf
                           config_.detection_confidence_threshold,
                           &out_det_indices);
 
-    detections->clear();
+    DetectedActions detections;
     for (size_t i = 0; i < out_det_indices.size(); ++i) {
-        detections->emplace_back(valid_detections[out_det_indices[i]]);
+        detections.emplace_back(valid_detections[out_det_indices[i]]);
     }
+    return detections;
 }
 
 void ActionDetection::SoftNonMaxSuppression(const DetectedActions& detections,

@@ -115,10 +115,9 @@ class ActionDetection : public BaseCnnDetection {
 public:
     explicit ActionDetection(const ActionDetectorConfig& config);
 
-    DetectedActions results;
     void submitRequest() override;
     void enqueue(const cv::Mat &frame);
-    void fetchResults();
+    DetectedActions fetchResults();
 
 private:
     ActionDetectorConfig config_;
@@ -129,7 +128,6 @@ private:
     int enqueued_frames_ = 0;
     float width_ = 0;
     float height_ = 0;
-    bool results_fetched_ = false;
     bool new_network_ = false;
     std::vector<int> head_ranges_;
     std::vector<int> head_step_sizes_;
@@ -160,14 +158,13 @@ private:
     * @param add_conf Action conf buffer
     * @param priorboxes Priorboxes buffer
     * @param frame_size Size of input image (WxH)
-    * @param detections Detected objects
+    * @return Detected objects
     */
-    void GetDetections(const cv::Mat& loc,
-                       const cv::Mat& main_conf,
-                       const cv::Mat& priorboxes,
-                       const std::vector<cv::Mat>& add_conf,
-                       const cv::Size& frame_size,
-                       DetectedActions* detections) const;
+    DetectedActions GetDetections(const cv::Mat& loc,
+                                  const cv::Mat& main_conf,
+                                  const cv::Mat& priorboxes,
+                                  const std::vector<cv::Mat>& add_conf,
+                                  const cv::Size& frame_size) const;
 
      /**
     * @brief Translate input buffer to BBox
