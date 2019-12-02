@@ -492,15 +492,6 @@ def check_file_existence(file):
         return False
 
 
-def get_stride_from_config(config, allow_none=False):
-    if 'stride' in config:
-        return config['stride']
-    if not allow_none:
-        raise ValueError('Parameter stride required')
-
-    return None
-
-
 class Color(Enum):
     PASSED = 0
     FAILED = 1

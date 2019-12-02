@@ -30,7 +30,7 @@ from ..dependency import ClassProvider
 from ..logging import warning
 from ..preprocessor import Preprocessor
 from ..utils import (
-    contains_all, get_size_from_config, string_to_tuple, get_size_3d_from_config, get_stride_from_config
+    contains_all, get_size_from_config, string_to_tuple, get_size_3d_from_config
 )
 
 
@@ -883,6 +883,10 @@ class TransformedCropWithAutoScale(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
+            'size': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Destination sizes for both dimensions of heatmaps output."
+            )
             'dst_width': NumberField(
                 value_type=int, optional=True, min_value=1, description="Width of heatmaps output."
             ),
@@ -899,7 +903,7 @@ class TransformedCropWithAutoScale(Preprocessor):
 
     def configure(self):
         self.input_height, self.input_width = get_size_from_config(self.config)
-        self.stride = get_stride_from_config(self.config)
+        self.stride = self.get_value_from_config('stride')
 
     def process(self, image, annotation_meta=None):
         data = image.data

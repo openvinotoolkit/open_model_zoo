@@ -359,8 +359,8 @@ class SingleHumanPoseAdapter(Adapter):
             x_values = []
             y_values = []
             num_kp_thr = 0
-            vis = [1] * raw_outputs[self.output_blob].shape[1]
-            for kpt_idx in range(raw_outputs[self.output_blob].shape[1]):
+            vis = [1] * outputs_batch.shape[1]
+            for kpt_idx in range(outputs_batch.shape[1]):
                 score, coord = self.extract_keypoints(heatmaps[:, :, kpt_idx])
                 scores.append(score)
                 x, y = self.affine_transform(coord, frame_meta[0]['rev_trans'])
@@ -373,7 +373,7 @@ class SingleHumanPoseAdapter(Adapter):
             if num_kp_thr != 0:
                 pose_score = sum_score_thr / num_kp_thr
             else:
-                pose_score = sum_score / raw_outputs[self.output_blob].shape[1]
+                pose_score = sum_score / outputs_batch.shape[1]
             result.append(PoseEstimationPrediction(identifiers[i], np.array([x_values]),
                                                    np.array([y_values]), np.array([vis]), np.array([pose_score])))
 

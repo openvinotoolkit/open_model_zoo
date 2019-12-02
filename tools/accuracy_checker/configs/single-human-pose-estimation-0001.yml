@@ -27,3 +27,4 @@ models:
         metrics:
           - name: AP
             type: coco_orig_keypoints_precision
+global_definitions: ../dataset_definitions.yml
