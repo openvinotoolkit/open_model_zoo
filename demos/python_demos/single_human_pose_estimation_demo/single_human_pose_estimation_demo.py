@@ -8,17 +8,16 @@ from estimator import HumanPoseEstimator
 
 def build_argparser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-m_od", "--model-od-xml", type=str, required=True,
+    parser.add_argument("-m_od", "--model_od", type=str, required=True,
                         help="path to model of object detector in xml format")
 
-    parser.add_argument("-m_hpe", "--model-hpe-xml", type=str, required=True,
+    parser.add_argument("-m_hpe", "--model_hpe", type=str, required=True,
                         help="path to model of human pose estimator in xml format")
 
     parser.add_argument("-i", "--input", type=str, nargs='+', default='', help="path to video or image/images")
     parser.add_argument("-d", "--device", type=str, default='CPU', required=False,
                         help="Specify the target to infer on CPU or GPU")
-    parser.add_argument("-l", "--cpu-extension", type=str, required=False, help="path to cpu extension")
-    parser.add_argument("--label-person", type=int, required=False, default=15, help="Label of class person for detector")
+    parser.add_argument("--person_label", type=int, required=False, default=15, help="Label of class person for detector")
     parser.add_argument("--no_show", help='Optional. Do not display output.', action='store_true')
 
     return parser
@@ -65,19 +64,17 @@ class VideoReader(object):
 
 def run_demo(args):
     ie = IECore()
-    detector_person = Detector(ie, path_to_model_xml=args.model_od_xml,
+    detector_person = Detector(ie, path_to_model_xml=args.model_od,
                               device=args.device,
-                              path_to_lib=args.cpu_extension,
-                              label_class=args.label_person)
+                              label_class=args.person_label)
 
-    single_human_pose_estimator = HumanPoseEstimator(ie, path_to_model_xml=args.model_hpe_xml,
-                                                  device=args.device,
-                                                  path_to_lib=args.cpu_extension)
+    single_human_pose_estimator = HumanPoseEstimator(ie, path_to_model_xml=args.model_hpe,
+                                                  device=args.device)
     if args.input != '':
         img = cv2.imread(args.input[0], cv2.IMREAD_COLOR)
         frames_reader, delay = (VideoReader(args.input), 1) if img is None else (ImageReader(args.input), 0)
     else:
-        raise ValueError('Either --input has to be set')
+        raise ValueError('--input has to be set')
 
     for frame in frames_reader:
         bboxes = detector_person.detect(frame)

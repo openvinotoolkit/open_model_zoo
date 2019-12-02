@@ -10,26 +10,23 @@ On the start-up, the application reads command line parameters and loads detecti
 
 Running the application with the `-h` option yields the following usage message:
 ```
-usage: single_human_pose_estimation_demo.py [-h] -m_od MODEL_OD_XML -m_hpe
-                                            MODEL_HPE_XML
-                                            [-i INPUT [INPUT ...]] [-d DEVICE]
-                                            [-l CPU_EXTENSION]
-                                            [--label-person LABEL_PERSON]
+usage: single_human_pose_estimation_demo.py [-h] -m_od MODEL_OD -m_hpe
+                                            MODEL_HPE [-i INPUT [INPUT ...]]
+                                            [-d DEVICE]
+                                            [--person_label PERSON_LABEL]
                                             [--no_show]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -m_od MODEL_OD_XML, --model-od-xml MODEL_OD_XML
+  -m_od MODEL_OD, --model_od MODEL_OD
                         path to model of object detector in xml format
-  -m_hpe MODEL_HPE_XML, --model-hpe-xml MODEL_HPE_XML
+  -m_hpe MODEL_HPE, --model_hpe MODEL_HPE
                         path to model of human pose estimator in xml format
   -i INPUT [INPUT ...], --input INPUT [INPUT ...]
                         path to video or image/images
   -d DEVICE, --device DEVICE
                         Specify the target to infer on CPU or GPU
-  -l CPU_EXTENSION, --cpu-extension CPU_EXTENSION
-                        path to cpu extension
-  --label-person LABEL_PERSON
+  --person_label PERSON_LABEL
                         Label of class person for detector
   --no_show             Optional. Do not display output.
 ```
@@ -38,7 +35,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 For example, to do inference on a CPU, run the following command:
 
 ```sh
-python single_human_pose_estimation_demo.py --model-od-xml <path_to_dir__with_models>/mobilenet-ssd.xml --model-hpe-xml /home/inteladmin/single-human-pose-estimation-0001.xml --input <path_to_video>/back-passengers.avi --cpu_extension <path_to_lib>/libcpu_extension_avx2.so
+python single_human_pose_estimation_demo.py --model_od <path_to_dir__with_models>/mobilenet-ssd.xml --model_hpe <path_to_dir__with_models>/single-human-pose-estimation-0001.xml --input <path_to_video>/back-passengers.avi
 ```
 
 The demo uses OpenCV to display the resulting frame with estimated poses and reports performance in the following format: summary inference FPS (single human pose inference FPS / detector inference FPS).

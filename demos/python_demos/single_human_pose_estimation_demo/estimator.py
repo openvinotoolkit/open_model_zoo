@@ -1,6 +1,5 @@
 import os
 import numpy as np
-from accessify import private
 
 import cv2
 from openvino.inference_engine import IENetwork
@@ -85,7 +84,7 @@ class TransformedCrop(object):
 
 
 class HumanPoseEstimator(object):
-    def __init__(self, ie, path_to_model_xml, path_to_lib, scale=None, thr=-100, device='CPU'):
+    def __init__(self, ie, path_to_model_xml, scale=None, thr=-100, device='CPU'):
         self.model = IENetwork(model=path_to_model_xml, weights=os.path.splitext(path_to_model_xml)[0] + '.bin')
 
         assert len(self.model.inputs) == 1, "Expected 1 input blob"
@@ -106,8 +105,6 @@ class HumanPoseEstimator(object):
             "Expected model output shape [1, %s, H, W]" % (self.OUTPUT_CHANNELS_SIZE)
 
         self._ie = ie
-        if device == 'CPU':
-            self._ie.add_extension(path_to_lib, device)
         self._exec_model = self._ie.load_network(self.model, device)
         self._scale = scale
         self._thr = thr
@@ -117,26 +114,24 @@ class HumanPoseEstimator(object):
         self._transform = TransformedCrop(self.input_h, self.input_w, self.output_h, self.output_w)
         self.infer_time = -1
 
-    @private
-    def preprocess(self, img, bbox):
+    def _preprocess(self, img, bbox):
         return self._transform(img, bbox)
 
-    @private
-    def infer(self, prep_img):
+    def _infer(self, prep_img):
         t0 = cv2.getTickCount()
         output = self._exec_model.infer(inputs={self._input_layer_name: prep_img})
         self.infer_time = ((cv2.getTickCount() - t0) / cv2.getTickFrequency())
         return output[self._output_layer_name][0]
 
     @staticmethod
-    def postprocess(heatmaps, rev_trans):
+    def _postprocess(heatmaps, rev_trans):
         all_keypoints = [extract_keypoints(heatmap) for heatmap in heatmaps]
         all_keypoints_transformed = [affine_transform([kp[1][0], kp[1][1]], rev_trans) for kp in all_keypoints]
 
         return all_keypoints_transformed
 
     def estimate(self, img, bbox):
-        rev_trans, preprocessed_img = self.preprocess(img, bbox)
-        heatmaps = self.infer(preprocessed_img)
-        keypoints = self.postprocess(heatmaps, rev_trans)
+        rev_trans, preprocessed_img = self._preprocess(img, bbox)
+        heatmaps = self._infer(preprocessed_img)
+        keypoints = self._postprocess(heatmaps, rev_trans)
         return keypoints
