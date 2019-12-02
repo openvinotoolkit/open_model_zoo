@@ -74,7 +74,8 @@ double updateGridMat(std::mutex& mutex,
                      unsigned framesNum,
                      char& key,
                      int64 delay,
-                     bool imShow) {
+                     bool imShow,
+                     bool isFpsTest) {
     double overallSPF;
     {
         std::unique_lock<std::mutex> lock(mutex);
@@ -82,16 +83,13 @@ double updateGridMat(std::mutex& mutex,
             condVar.wait(lock);
         }
 
-        if (showMats.size()+1 == gridMat.getSize()) {   // Because when the size of GridMat is equal to the number of
-            showMats.pop();                             // shown images GridMat looks too static
-        } 
         gridMat.listUpdate(showMats);
     
         overallSPF = ((cv::getTickCount() - startTime) / cv::getTickFrequency()) / framesNum;
     }
     
     if (imShow) {
-        gridMat.textUpdate(overallSPF);
+        gridMat.textUpdate(overallSPF, isFpsTest);
         cv::imshow("main", gridMat.getMat());
     }
                     
@@ -367,7 +365,7 @@ int main(int argc, char *argv[]) {
 
 
         for (size_t i = 0; i < fpsTestSize; i++) {
-            fpsSum += updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, 1, !(FLAGS_no_show || delay == -1));
+            fpsSum += updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, 1, !(FLAGS_no_show || delay == -1), true);
         } 
 
         avgFPS = fpsSum / fpsTestSize;
@@ -386,7 +384,7 @@ int main(int argc, char *argv[]) {
         int elapsedTime = 0;
 
         do {
-            fps = updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, delay, !FLAGS_no_show);
+            fps = updateGridMat(mutex, showMats, condVar, gridMat, startTime, framesNum, key, delay, !FLAGS_no_show, false);
 
             if (currentResultNum >= fpsResultsMaxCount) {
                 fpsSum -= fpsQueue.front();

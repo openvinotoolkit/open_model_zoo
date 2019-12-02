@@ -15,29 +15,28 @@
 
 class GridMat {
 public:
-    explicit GridMat(const cv::Size maxDisp = cv::Size{1920, 1080}, unsigned scale = 2): scale{scale}, currSourceID{0} {
-        cellSize = cv::Size{50, 50};
-        rectangleHeight = maxDisp.height / 25;
+    explicit GridMat(const cv::Size maxDisp = cv::Size{1920, 1080}, int scale = 2): currSourceID{0} {
+        cv::Size aspectRatio = cv::Size{16, 9};
+        size = cv::Size{static_cast<int>(std::ceil(scale * scale / double(aspectRatio.height))),
+                        static_cast<int>(std::ceil(scale * scale / double(aspectRatio.width)))};
+        cellSize = std::min(maxDisp.width / size.width, maxDisp.height / size.height);
+        rectangleHeight = 30;
 
-        for (size_t i = 0; i < size; i++) {
-            for (size_t j = 0; j < size; j++) {
+        for (int i = 0; i < size.width; i++) {
+            for (int j = 0; j < size.height; j++) {
                 cv::Point p;
-                p.x = cellSize.width * i;
-                p.y = rectangleHeight + (cellSize.height * j);
+                p.x = cellSize * i;
+                p.y = rectangleHeight + (cellSize * j);
                 points.push_back(p);
             }
         }
 
-        outImg.create((cellSize.height * size) + rectangleHeight, cellSize.width * size, CV_8UC3);
+        outImg.create((cellSize * size.height) + rectangleHeight, cellSize * size.width, CV_8UC3);
         outImg.setTo(0);
     }
 
-    unsigned getSize() {
+    cv::Size getSize() {
         return size;
-    }
-
-    cv::Size getCellSize() {
-        return cellSize;
     }
 
     void listUpdate(std::queue<cv::Mat>& frames) {
@@ -47,7 +46,7 @@ public:
         }
     }
 
-    void textUpdate(double overSPF){
+    void textUpdate(double overSPF, bool isFpsTest){
         // Draw a rectangle
         size_t colunmNum = outImg.cols;
         cv::Point p1 = cv::Point(0,0);
@@ -56,24 +55,30 @@ public:
         rectangle(outImg, p1, p2, cv::Scalar(0,0,0), cv::FILLED);
         
         // Show FPS
-        auto frameWidth = outImg.cols;
-        double fontScale = frameWidth * 1. / 640;
-        auto fontColor = cv::Scalar(0, 255, 0);
+        double fontScale = 2.;
         int thickness = 2;
 
-        cv::putText(outImg,
-                    cv::format("Overall FPS: %0.01f", 1./overSPF),
-                    cv::Point(5, rectangleHeight - 5),
-                    cv::FONT_HERSHEY_PLAIN, fontScale, fontColor, thickness);
+        if (!isFpsTest) {
+            cv::putText(outImg,
+                        cv::format("Overall FPS: %0.01f", 1./overSPF),
+                        cv::Point(5, rectangleHeight - 5),
+                        cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(0, 255, 0), thickness);
+        }
+        else {
+            cv::putText(outImg,
+                        "FPS test, please wait...",
+                        cv::Point(5, rectangleHeight - 5),
+                        cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(0, 0, 255), thickness);
+        }
     }
 
     cv::Mat getMat() {
         while (!updateList.empty()) {
-            cv::Mat cell = outImg(cv::Rect(points[currSourceID], cellSize));
+            cv::Mat cell = outImg(cv::Rect(points[currSourceID], cv::Size{cellSize, cellSize}));
             cv::Mat frame = updateList.front();
             updateList.pop_front();
 
-            cv::resize(frame, cell, cellSize);
+            cv::resize(frame, cell, cv::Size{cellSize, cellSize});
             
             if (currSourceID == points.size() - 1)
                 currSourceID = 0;
@@ -85,10 +90,10 @@ public:
     }
 
 private:
-    unsigned scale;
     cv::Mat outImg;
     std::list<cv::Mat> updateList;
-    cv::Size cellSize;
+    cv::Size size;
+    int cellSize;
     size_t currSourceID;
     std::vector<cv::Point> points;
     size_t rectangleHeight;
