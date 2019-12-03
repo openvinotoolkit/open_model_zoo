@@ -670,8 +670,8 @@ int main(int argc, char* argv[]) {
 
         std::unique_ptr<FaceRecognizer> face_recognizer;
 
-        if (face_config.enabled && !fr_model_path.empty() && !lm_model_path.empty()) {
-            // Create face tracker
+        if (!fd_model_path.empty() && !fr_model_path.empty() && !lm_model_path.empty()) {
+            // Create face recognizer
 
             detection::DetectorConfig face_registration_det_config(fd_model_path, fd_weights_path);
             face_registration_det_config.deviceName = FLAGS_d_fd;
