@@ -29,7 +29,7 @@ try:
     from .mxnet_launcher import MxNetLauncher
 except ImportError as import_error:
     MxNetLauncher = unsupported_launcher(
-        'mxnet', "MxNet isn't installed. Please, install it before using.\n{}".format(import_error.msg)
+        'mxnet', "MXNet isn't installed. Please, install it before using.\n{}".format(import_error.msg)
     )
 
 try:

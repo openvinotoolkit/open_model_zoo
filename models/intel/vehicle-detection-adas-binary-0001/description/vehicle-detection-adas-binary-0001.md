@@ -19,7 +19,7 @@ This detecector was created by binarization the vehicle-detection-adas-0002
 | GFlops                          | 0.75                                      |
 | GI1ops                          | 2.048                                     |
 | MParams                         | 1.079                                     |
-| Source framework                | Pytorch*                                  |
+| Source framework                | PyTorch*                                  |
 
 Average Precision metric described in: Mark Everingham et al.
 ["The PASCAL Visual Object Classes (VOC) Challenge"](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf).

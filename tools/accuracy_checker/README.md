@@ -45,11 +45,11 @@ In order to evaluate some models required frameworks have to be installed. Accur
 
 - [OpenVINO](https://software.intel.com/en-us/openvino-toolkit/documentation/get-started).
 - [Caffe](accuracy_checker/launcher/caffe_installation_readme.md).
-- [MxNet](https://mxnet.incubator.apache.org/versions/master/).
+- [MXNet](https://mxnet.incubator.apache.org/versions/master/).
 - [OpenCV DNN](https://docs.opencv.org/4.1.0/d2/de6/tutorial_py_setup_in_ubuntu.html).
 - [TensorFlow](https://www.tensorflow.org/).
 - [ONNX Runtime](https://github.com/microsoft/onnxruntime/blob/master/README.md).
-- [Pytorch](https://pytorch.org/)
+- [PyTorch](https://pytorch.org/)
 
 You can use any of them or several at a time.
 
@@ -132,11 +132,11 @@ Please view:
 - [how to configure Caffe launcher](accuracy_checker/launcher/caffe_launcher_readme.md).
 - [how to configure DLSDK launcher](accuracy_checker/launcher/dlsdk_launcher_readme.md).
 - [how to configure OpenCV launcher](accuracy_checker/launcher/opencv_launcher_readme.md).
-- [how to configure MxNet Launcher](accuracy_checker/launcher/mxnet_launcher_readme.md).
+- [how to configure MXNet Launcher](accuracy_checker/launcher/mxnet_launcher_readme.md).
 - [how to configure TensorFlow Launcher](accuracy_checker/launcher/tf_launcher_readme.md).
 - [how to configure TensorFlow Lite Launcher](accuracy_checker/launcher/tf_lite_launcher_readme.md).
 - [how to configure ONNX Runtime Launcher](accuracy_checker/launcher/onnx_runtime_launcher_readme.md).
-- [how to configure Pytorch Launcher](accuracy_checker/launcher/pytorch_launcher_readme.md)
+- [how to configure PyTorch Launcher](accuracy_checker/launcher/pytorch_launcher_readme.md)
 
 ### Datasets
 
