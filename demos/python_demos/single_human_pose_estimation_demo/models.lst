@@ -1,11 +1,11 @@
 # This file can be used with the --list option of the model downloader.
 mobilenet-ssd
-pedestrian-and-vehicle-detector-adas-0001
-pedestrian-detection-adas-0002
-pedestrian-detection-adas-binary-0001
+pedestrian-and-vehicle-detector-adas-????
+pedestrian-detection-adas-????
+pedestrian-detection-adas-binary-????
 person-detection-retail-0013
 person-vehicle-bike-detection-crossroad-????
-single-human-pose-estimation-0001
+single-human-pose-estimation-????
 ssd???
 ssd_mobilenet_v?_*
 ssdlite_mobilenet_v2

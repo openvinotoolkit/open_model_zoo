@@ -43,7 +43,7 @@ Name: "data" , shape: [1x3x384x288] - An input image in the format [BxCxHxW],
 
 ### Original model
 
-The net outputs list of tensor. Count of list elements is 6. Every tensor with shapes: [1x17x48x36]. ( For every keypoint own heatmap)
+The net outputs list of tensor. Count of list elements is 6. Every tensor with shapes: [1x17x48x36] ( For every keypoint own heatmap). The six outputs are necessary in order to calculate the loss in during training. But in the future, for obtaining the results of prediction and postprocessing them, the last output is used. Each following tensor gives more accurate predictions ( in context metric AP).
 
 
 ### Converted model
@@ -54,4 +54,3 @@ The net outputs tensor with shapes: [1x17x48x36]. ( For every keypoint own heatm
 [LICENSE](https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE)
 
 [*] Other names and brands may be claimed as the property of others.
-[**] The six outputs are necessary in order to calculate the loss in during training. But in the future, for obtaining the results of prediction and postprocessing them, the last output is used.
