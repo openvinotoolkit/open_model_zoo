@@ -114,7 +114,9 @@ NATIVE_DEMOS = [
     )),
 
     NativeDemo(subdirectory='imagenet_classification_demo', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'-no_show': None,
+        TestCase(options={
+            '-no_show': None,
+            '-no_show_time': 5,
             '-i': ImageDirectoryArg('imagenet-classification')}),
         [
             TestCase(options={'-m': ModelArg('alexnet')}),
