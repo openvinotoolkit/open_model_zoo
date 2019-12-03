@@ -583,3 +583,14 @@ datasets:
 
     metrics:
       - type: coco_precision
+
+  - name: ms_coco_single_keypoints
+    data_source: val2017
+    annotation_conversion:
+      converter: mscoco_single_keypoints
+      annotation_file: person_keypoints_val2017.json
+    annotation: mscoco_single_keypoints.pickle
+    dataset_meta: mscoco_single_keypoints.json
+    metrics:
+      - name: AP
+        type: coco_orig_keypoints_precision
