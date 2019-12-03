@@ -46,13 +46,13 @@ AccuracyChecker supports following set of adapters:
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
 * `ssd` - converting  output of SSD model to `DetectionPrediction` representation.
 * `ssd_mxnet` - converting output of SSD-based models from MxNet framework to `DetectionPrediction` representation.
-* `pytorch_ssd_decoder` - converts output of SSD model from Pytorch without embedded decoder.
+* `pytorch_ssd_decoder` - converts output of SSD model from PyTorch without embedded decoder.
   * `scores_out` - name of output layer with bounding boxes scores.
   * `boxes_out` - name of output layer with bounding boxes coordinates.
   * `confidence_threshold` - lower bound for valid boxes scores (optional, default 0.05).
   * `nms_threshold` - overlap threshold for NMS (optional, default 0.5).
   * `keep_top_k ` - maximal number of boxes which should be kept (optional, default 200).
-* `ssd_onnx` - converting output of SSD-based model from Pytorch with NonMaxSuppression layer.
+* `ssd_onnx` - converting output of SSD-based model from PyTorch with NonMaxSuppression layer.
   * `labels_out` - name of output layer with labels or regular expression for it searching.
   * `scores_out`- name of output layer with scores or regular expression for it searching.
   * `bboxes_out` - name of output layer with bboxes or regular expression for it searching.
