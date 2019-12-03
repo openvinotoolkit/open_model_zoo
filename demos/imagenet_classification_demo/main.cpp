@@ -318,7 +318,7 @@ int main(int argc, char *argv[]) {
 
         avgFPS = fpsSum / fpsTestSize;
         gridMatSize = static_cast<unsigned>(round(std::sqrt(avgFPS)));
-        gridMat = GridMat(inputImgs.size(), cv::Size(width, height), gridMatSize);
+        gridMat = GridMat(inputImgs.size(), cv::Size(width, height), cv::Size(16, 9), gridMatSize);
 
         int newDelay = ((FLAGS_delay == -1) ? avgFPS / (gridMatSize * gridMatSize) * 1000 : FLAGS_delay);
         unsigned fpsResultsMaxCount = 1000;

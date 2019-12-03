@@ -17,13 +17,13 @@ class GridMat {
 public:
     explicit GridMat(int inputImgsCount,
                      const cv::Size maxDisp = cv::Size{1920, 1080},
+                     const cv::Size aspectRatio = cv::Size{16, 9},
                      int scale = 2
-                     ): 
-                     currSourceID{0} {
-        cv::Size aspectRatio = cv::Size{16, 9};
-
-        size = cv::Size{static_cast<int>(std::ceil(scale * scale / double(aspectRatio.height))),
-                        static_cast<int>(std::ceil(scale * scale / double(aspectRatio.width)))};
+                     ):
+                     size{static_cast<int>(std::ceil(scale * scale / double(aspectRatio.height))),
+                          static_cast<int>(std::ceil(scale * scale / double(aspectRatio.width)))},
+                     currSourceID{0},
+                     rectangleHeight{30} {
         if (size.width % inputImgsCount == 0) { // fix 'static GridMat' problem
             size.width++;
         }
@@ -32,7 +32,6 @@ public:
         }
 
         cellSize = std::min(maxDisp.width / size.width, maxDisp.height / size.height);
-        rectangleHeight = 30;
 
         for (int i = 0; i < size.width; i++) {
             for (int j = 0; j < size.height; j++) {
