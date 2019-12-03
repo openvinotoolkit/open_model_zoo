@@ -1,4 +1,4 @@
-# person-reidentification-retail-0200
+# person-reidentification-retail-0107
 
 ## Use Case and High-Level Description
 
@@ -10,19 +10,19 @@ feature map outputs the embedding vector of 256 floats.
 
 ## Example
 
-![](./person-reidentification-retail-0200.jpg)
+![](./person-reidentification-retail-0107.jpg)
 
 ## Specification
 
 | Metric                            | Value                                     |
 |-----------------------------------|-------------------------------------------|
-| GlobalMe-reID rank@1 accuracy     | 95.4                                      |
-| GlobalMe-reID mAP                 | 75.5                                      |
+| GlobalMe-reID rank@1 accuracy     | 91.7                                      |
+| GlobalMe-reID mAP                 | 63.4                                      |
 | Pose coverage                     | Standing upright, parallel to image plane |
 | Support of occluded pedestrians   | YES                                       |
 | Occlusion coverage                | <50%                                      |
-| GFlops                            | 5.506                                     |
-| MParams                           | 4.723                                     |
+| GFlops                            | 0.174                                     |
+| MParams                           | 0.183                                     |
 | Source framework                  | Pytorch*                                  |
 
 The cumulative matching curve (CMC) at rank-1 is accuracy denoting the possibility 
