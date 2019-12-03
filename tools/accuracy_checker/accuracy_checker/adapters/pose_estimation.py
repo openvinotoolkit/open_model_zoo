@@ -96,6 +96,7 @@ class HumanPoseAdapter(Adapter):
     @staticmethod
     def find_peaks(heatmap, all_peaks, prev_peak_counter):
         heatmap[heatmap < 0.1] = 0
+        heatmap[np.isnan(heatmap)] = 0
         map_aug = np.zeros((heatmap.shape[0] + 2, heatmap.shape[1] + 2))
         map_left = np.zeros(map_aug.shape)
         map_right = np.zeros(map_aug.shape)
