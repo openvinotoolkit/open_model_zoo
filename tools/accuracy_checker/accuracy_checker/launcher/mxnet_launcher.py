@@ -39,7 +39,7 @@ class MxNetLauncherConfigValidator(LauncherConfigValidator):
 
 class MxNetLauncher(Launcher):
     """
-    Class for infer model using MxNet framework
+    Class for infer model using MXNet framework
     """
     __provider__ = 'mxnet'
 
@@ -140,7 +140,7 @@ class MxNetLauncher(Launcher):
         return results
 
     def predict_async(self, *args, **kwargs):
-        raise ValueError('MxNet Launcher does not support async mode yet')
+        raise ValueError('MXNet Launcher does not support async mode yet')
 
     @property
     def output_blob(self):

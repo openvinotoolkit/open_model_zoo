@@ -169,7 +169,7 @@ class DLSDKLauncher(Launcher):
             'device': StringField(regex=SUPPORTED_DEVICE_REGEX, description="Device name."),
             'caffe_model': PathField(optional=True, description="Path to Caffe model file."),
             'caffe_weights': PathField(optional=True, description="Path to Caffe weights file."),
-            'mxnet_weights': PathField(optional=True, description="Path to MxNet weights file."),
+            'mxnet_weights': PathField(optional=True, description="Path to MXNet weights file."),
             'tf_model': PathField(optional=True, description="Path to TF model file."),
             'tf_meta': PathField(optional=True, description="Path to TF meta file."),
             'onnx_model': PathField(optional=True, description="Path to ONNX model file."),

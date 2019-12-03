@@ -45,7 +45,7 @@ AccuracyChecker supports following set of adapters:
   * `outputs` - the list of output layers names (optional), if specified there should be exactly 3 output layers provided.
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
 * `ssd` - converting  output of SSD model to `DetectionPrediction` representation.
-* `ssd_mxnet` - converting output of SSD-based models from MxNet framework to `DetectionPrediction` representation.
+* `ssd_mxnet` - converting output of SSD-based models from MXNet framework to `DetectionPrediction` representation.
 * `pytorch_ssd_decoder` - converts output of SSD model from PyTorch without embedded decoder.
   * `scores_out` - name of output layer with bounding boxes scores.
   * `boxes_out` - name of output layer with bounding boxes coordinates.
