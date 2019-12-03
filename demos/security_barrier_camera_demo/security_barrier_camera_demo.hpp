@@ -106,7 +106,7 @@ static const char infer_num_streams_message[] = "Optional. Number of streams to 
                                                 "(for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 
 /// @brief Message list of monitors to show
-static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 /// \brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);

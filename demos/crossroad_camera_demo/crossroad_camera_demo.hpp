@@ -65,7 +65,7 @@ static const char no_show_processed_video[] = "Optional. No show processed video
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 
 /// @brief Message list of monitors to show
-static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 
 /// @brief Define flag for showing help message <br>

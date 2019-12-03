@@ -45,7 +45,7 @@ Options:
     -c "<absolute_path>"         Optional. Absolute path to the GPU kernels implementation for custom layers.
     -no_show                     Optional. If it is true, then detected text will not be shown on image frame. By default, it is false.
     -r                           Optional. Output Inference results as raw values.
-    -u                           Optional. List of monitors to show.
+    -u                           Optional. List of monitors to show initially.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

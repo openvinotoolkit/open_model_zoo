@@ -139,7 +139,7 @@ static const char act_det_output_message[] = "Optional. Output file name to save
 static const char tracker_smooth_size_message[] = "Optional. Number of frames to smooth actions.";
 
 /// @brief Message list of monitors to show
-static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 /// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);

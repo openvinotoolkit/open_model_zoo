@@ -32,7 +32,7 @@ static const char no_show_processed_video[] = "Optional. Do not show processed v
 static const char raw_output_message[] = "Optional. Output inference results as raw values.";
 
 /// @brief Message list of monitors to show
-static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 /// @brief Defines flag for showing help message <br>
 DEFINE_bool(h, false, help_message);

@@ -18,7 +18,7 @@ import sys
 from args import *
 from image_sequences import IMAGE_SEQUENCES
 
-MONITORS = 'cdm'
+MONITORS = {'-u': 'cdm'}
 TestCase = collections.namedtuple('TestCase', ['options'])
 
 class Demo:
@@ -89,7 +89,7 @@ NATIVE_DEMOS = [
             device_keys=['-d', '-d_pa', '-d_reid'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
-            '-u': MONITORS,
+            **MONITORS,
             '-i': ImagePatternArg('person-vehicle-bike-detection-crossroad')}),
         TestCase(options={'-m': ModelArg('person-vehicle-bike-detection-crossroad-0078')}),
         single_option_cases('-m_pa', None, ModelArg('person-attributes-recognition-crossroad-0230')),
@@ -100,7 +100,7 @@ NATIVE_DEMOS = [
             device_keys=['-d', '-d_fd', '-d_hp', '-d_lm'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
-            '-u': MONITORS,
+            **MONITORS,
             '-i': ImagePatternArg('gaze-estimation-adas')}),
         TestCase(options={
             '-m': ModelArg('gaze-estimation-adas-0002'),
@@ -112,7 +112,7 @@ NATIVE_DEMOS = [
 
     NativeDemo(subdirectory='human_pose_estimation_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
-            '-u': MONITORS,
+            **MONITORS,
             '-i': ImagePatternArg('human-pose-estimation')}),
         TestCase(options={'-m': ModelArg('human-pose-estimation-0001')}),
     )),
@@ -121,7 +121,7 @@ NATIVE_DEMOS = [
             device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
-            '-u': MONITORS,
+            **MONITORS,
             '-i': ImagePatternArg('face-detection-adas')}),
         TestCase(options={'-m': ModelArg('face-detection-adas-0001')}),
         [
@@ -145,7 +145,7 @@ NATIVE_DEMOS = [
             device_keys=['-d'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
-            '-u': MONITORS,
+            **MONITORS,
             '-i': IMAGE_SEQUENCES['face-detection-adas']}),
         single_option_cases('-m',
             ModelArg('face-detection-adas-0001'),
@@ -158,13 +158,13 @@ NATIVE_DEMOS = [
     NativeDemo(subdirectory='multi_channel/human_pose_estimation_demo', device_keys=['-d'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
-            '-u': MONITORS,
+            **MONITORS,
             '-i': IMAGE_SEQUENCES['human-pose-estimation'],
             '-m': ModelArg('human-pose-estimation-0001')}),
     )),
 
     NativeDemo(subdirectory='object_detection_demo_ssd_async', device_keys=[], test_cases=combine_cases(
-        TestCase(options={'-no_show': None, '-u': MONITORS}),
+        TestCase(options={'-no_show': None, **MONITORS}),
         [
             TestCase(options={
                 '-m': ModelArg('face-detection-adas-0001'),
@@ -185,7 +185,7 @@ NATIVE_DEMOS = [
 
     NativeDemo('pedestrian_tracker_demo', device_keys=['-d_det', '-d_reid'], test_cases=combine_cases(
         TestCase(options={'-no_show': None,
-            '-u': MONITORS,
+            **MONITORS,
             '-i': ImagePatternArg('person-detection-retail')}),
         [
             TestCase(options={'-m_det': ModelArg('person-detection-retail-0002')}),
@@ -201,7 +201,7 @@ NATIVE_DEMOS = [
             device_keys=['-d', '-d_lpr', '-d_va'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
-            '-u': MONITORS,
+            **MONITORS,
             '-i': ImageDirectoryArg('vehicle-license-plate-detection-barrier')}),
         TestCase(options={'-m': ModelArg('vehicle-license-plate-detection-barrier-0106')}),
         single_option_cases('-m_lpr',
@@ -228,7 +228,7 @@ NATIVE_DEMOS = [
             device_keys=['-d_act', '-d_fd', '-d_lm', '-d_reid'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
-            '-u': MONITORS,
+            **MONITORS,
             '-i': ImagePatternArg('smart-classroom-demo'),
             '-m_fd': ModelArg('face-detection-adas-0001')}),
         [
@@ -257,7 +257,7 @@ NATIVE_DEMOS = [
 
     NativeDemo(subdirectory='text_detection_demo', device_keys=['-d_td', '-d_tr'], test_cases=combine_cases(
         TestCase(options={'-no_show': None, '-dt': 'video',
-            '-u': MONITORS,
+            **MONITORS,
             '-i': ImagePatternArg('text-detection')}),
         single_option_cases('-m_td', ModelArg('text-detection-0003'), ModelArg('text-detection-0004')),
         single_option_cases('-m_tr', None, ModelArg('text-recognition-0012')),

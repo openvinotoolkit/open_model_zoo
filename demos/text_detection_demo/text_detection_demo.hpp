@@ -81,7 +81,7 @@ static const char input_data_type_message[] = "Required. Input data type: \"imag
                                               "\"webcam\" (for a webcamera device). By default, it is \"image\".";
 
 /// @brief Message list of monitors to show
-static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 /// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);

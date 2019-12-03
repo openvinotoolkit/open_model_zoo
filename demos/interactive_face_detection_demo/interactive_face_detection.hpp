@@ -131,7 +131,7 @@ static const char no_smooth_output_message[] = "Optional. Do not smooth person a
 static const char no_show_emotion_bar_message[] = "Optional. Do not show emotion bar";
 
 /// @brief Message list of monitors to show
-static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 /// \brief Define flag for showing help message<br>
 DEFINE_bool(h, false, help_message);

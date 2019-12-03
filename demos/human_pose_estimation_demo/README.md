@@ -37,7 +37,7 @@ Options:
     -pc                        Optional. Enable per-layer performance report.
     -no_show                   Optional. Do not show processed video.
     -r                         Optional. Output inference results as raw values.
-    -u                         Optional. List of monitors to show.
+    -u                         Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields an error message.

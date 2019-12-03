@@ -71,7 +71,7 @@ static const char fd_reshape_message[] = "Optional. Reshape Face Detector networ
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 
 /// @brief Message list of monitors to show
-static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 /// \brief Define flag for showing help message<br>
 DEFINE_bool(h, false, help_message);

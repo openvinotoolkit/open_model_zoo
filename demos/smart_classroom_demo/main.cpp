@@ -726,9 +726,8 @@ int main(int argc, char* argv[]) {
             char key = cv::waitKey(1);
             if (key == ESC_KEY) {
                 break;
-            } else {
-                presenter.handleKey(key);
             }
+            presenter.handleKey(key);
 
             presenter.drawGraphs(prev_frame);
 

@@ -823,8 +823,7 @@ int main(int argc, char *argv[]) {
                 const int key = cv::waitKey(isVideo ? 1 : 0);
                 if (27 == key)  // Esc
                     break;
-                else
-                    presenter.handleKey(key);
+                presenter.handleKey(key);
             }
         } while (isVideo);
 

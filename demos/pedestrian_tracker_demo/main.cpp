@@ -237,8 +237,7 @@ int main_work(int argc, char **argv) {
             char k = cv::waitKey(delay);
             if (k == 27)
                 break;
-            else
-                presenter.handleKey(k);
+            presenter.handleKey(k);
         }
 
         if (should_save_det_log && (frame_idx % 100 == 0)) {

@@ -64,7 +64,7 @@ static const char real_input_fps[] = "Optional. Disable input frames caching, fo
 static const char input_video[] = "Optional. Specify full path to input video files";
 
 /// @brief Message list of monitors to show
-static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 /// \brief Define a flag for showing help message <br>
 DEFINE_bool(h, false, help_message);

@@ -122,9 +122,8 @@ int main(int argc, char* argv[]) {
                 delay = (delay == 0) ? 33 : 0;
             } else if (key == 27) {
                 break;
-            } else {
-                presenter.handleKey(key);
             }
+            presenter.handleKey(key);
         } while (cap.read(image));
         std::cout << presenter.reportMeans() << '\n';
     }

@@ -382,7 +382,7 @@ int main(int argc, char *argv[]) {
             if (27 == key)  // Esc
                 break;
             if (9 == key) {  // Tab
-                isAsyncMode = true;
+                isAsyncMode ^= true;
                 isModeChanged = true;
             } else {
                 presenter.handleKey(key);

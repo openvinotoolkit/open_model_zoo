@@ -121,7 +121,7 @@ Options:
     -t                        Optional. Probability threshold for detections.
     -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
     -no_show                  Optional. Do not show processed video.
-    -u                        Optional. List of monitors to show.
+    -u                        Optional. List of monitors to show initially.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

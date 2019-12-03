@@ -66,7 +66,7 @@ static const char last_frame_message[] = "Optional. The index of the last frame 
                                           "This has effect only if it is positive.";
 
 /// @brief Message list of monitors to show
-static const char utilization_monitors_message[] = "Optional. List of monitors to show.";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 
 /// @brief Define flag for showing help message <br>

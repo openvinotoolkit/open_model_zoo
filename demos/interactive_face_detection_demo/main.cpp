@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
 
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press Q, q or Esc";
+            std::cout << " or switch to the output window and press Q or Esc";
         }
         std::cout << std::endl;
 
@@ -379,9 +379,8 @@ int main(int argc, char *argv[]) {
                 int key = cv::waitKey(delay);
                 if (27 == key || 'Q' == key || 'q' == key) {
                     break;
-                } else {
-                    presenter.handleKey(key);
                 }
+                presenter.handleKey(key);
             }
         }
 
