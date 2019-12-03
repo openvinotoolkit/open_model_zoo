@@ -12,113 +12,76 @@
 #include <windows.h>
 
 namespace {
-std::size_t getNCores() {
-    SYSTEM_INFO sysinfo;
-    GetSystemInfo(&sysinfo);
-    return sysinfo.dwNumberOfProcessors;
-}
+const std::size_t nCores = []() {
+        SYSTEM_INFO sysinfo;
+        GetSystemInfo(&sysinfo);
+        return sysinfo.dwNumberOfProcessors;
+    }();
 }
 
-struct CpuMonitor::PerformanceCounter {
-    PerformanceCounter(std::size_t nCores) : coreTimeCounters(nCores) {}
+class CpuMonitor::PerformanceCounter {
+public:
+    PerformanceCounter() : coreTimeCounters(nCores) {
+        PDH_STATUS status;
+        for (std::size_t i = 0; i < nCores; ++i) {
+            std::wstring fullCounterPath{L"\\Processor(" + std::to_wstring(i) + L")\\% Processor Time"};
+            status = PdhAddCounterW(query, fullCounterPath.c_str(), 0, &coreTimeCounters[i]);
+            if (ERROR_SUCCESS != status) {
+                throw std::system_error(status, std::system_category(), "PdhAddCounterW() failed");
+            }
+            status = PdhSetCounterScaleFactor(coreTimeCounters[i], -2); // scale counter to [0, 1]
+            if (ERROR_SUCCESS != status) {
+                throw std::system_error(status, std::system_category(), "PdhSetCounterScaleFactor() failed");
+            }
+        }
+        status = PdhCollectQueryData(query);
+        if (ERROR_SUCCESS != status) {
+            throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
+        }
+    }
 
+    std::vector<double> getCpuLoad() {
+        PDH_STATUS status;
+        status = PdhCollectQueryData(query);
+        if (ERROR_SUCCESS != status) {
+            throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
+        }
+
+        PDH_FMT_COUNTERVALUE displayValue;
+        std::vector<double> cpuLoad(coreTimeCounters.size());
+        for (std::size_t i = 0; i < coreTimeCounters.size(); ++i) {
+            status = PdhGetFormattedCounterValue(coreTimeCounters[i], PDH_FMT_DOUBLE, NULL,
+                &displayValue);
+            if (ERROR_SUCCESS != status) {
+                throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
+            }
+            if (PDH_CSTATUS_VALID_DATA != displayValue.CStatus && PDH_CSTATUS_NEW_DATA != displayValue.CStatus) {
+                throw std::runtime_error("Error in counter data");
+            }
+
+            cpuLoad[i] = displayValue.doubleValue;
+        }
+        return cpuLoad;
+    }
+
+private:
     QueryWrapper query;
     std::vector<PDH_HCOUNTER> coreTimeCounters;
 };
 
-CpuMonitor::CpuMonitor() :
-    nCores{getNCores()},
-    lastEnabled{false},
-    samplesNumber{0},
-    historySize{0},
-    cpuLoadSum(nCores, 0) {}
-
-// PerformanceCounter is incomplete in header and destructor can't be defined implicitly
-CpuMonitor::~CpuMonitor() = default;
-
-void CpuMonitor::openQuery() {
-    std::unique_ptr<CpuMonitor::PerformanceCounter> newPerformanceCounter{new CpuMonitor::PerformanceCounter{nCores}};
-
-    PDH_STATUS status;
-    for (std::size_t i = 0; i < nCores; ++i)
-    {
-        std::wstring fullCounterPath{L"\\Processor(" + std::to_wstring(i) + L")\\% Processor Time"};
-        status = PdhAddCounterW(newPerformanceCounter->query, fullCounterPath.c_str(), 0,
-            &newPerformanceCounter->coreTimeCounters[i]);
-        if (ERROR_SUCCESS != status)
-        {
-            throw std::system_error(status, std::system_category(), "PdhAddCounterW() failed");
-        }
-        status = PdhSetCounterScaleFactor(newPerformanceCounter->coreTimeCounters[i], -2); // scale counter to [0, 1]
-        if (ERROR_SUCCESS != status)
-        {
-            throw std::system_error(status, std::system_category(), "PdhSetCounterScaleFactor() failed");
-        }
-    }
-    status = PdhCollectQueryData(newPerformanceCounter->query);
-    if (ERROR_SUCCESS != status)
-    {
-        throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
-    }
-    performanceCounter = std::move(newPerformanceCounter);
-}
-
-void CpuMonitor::closeQuery() {
-    performanceCounter.reset();
-}
-
-void CpuMonitor::setHistorySize(std::size_t size) {
-    if (0 == historySize && 0 != size) {
-        openQuery();
-    } else if (0 != historySize && 0 == size) {
-        closeQuery();
-    }
-    historySize = size;
-    std::size_t newSize = std::min(size, cpuLoadHistory.size());
-    cpuLoadHistory.erase(cpuLoadHistory.begin(), cpuLoadHistory.end() - newSize);
-}
-
-void CpuMonitor::collectData() {
-    PDH_STATUS status;
-    status = PdhCollectQueryData(performanceCounter->query);
-    if (ERROR_SUCCESS != status) {
-        throw std::system_error(status, std::system_category(), "PdhCollectQueryData() failed");
-    }
-
-    PDH_FMT_COUNTERVALUE displayValue;
-    std::vector<double> cpuLoad(performanceCounter->coreTimeCounters.size());
-    for (std::size_t i = 0; i < performanceCounter->coreTimeCounters.size(); ++i) {
-        status = PdhGetFormattedCounterValue(performanceCounter->coreTimeCounters[i], PDH_FMT_DOUBLE, NULL,
-            &displayValue);
-        if (ERROR_SUCCESS != status) {
-            throw std::system_error(status, std::system_category(), "PdhGetFormattedCounterValue() failed");
-        }
-        if (PDH_CSTATUS_VALID_DATA != displayValue.CStatus && PDH_CSTATUS_NEW_DATA != displayValue.CStatus) {
-            throw std::runtime_error("Error in counter data");
-        }
-
-        cpuLoad[i] = displayValue.doubleValue;
-    }
-
-    for (std::size_t i = 0; i < cpuLoad.size(); ++i) {
-        cpuLoadSum[i] += cpuLoad[i];
-    }
-    ++samplesNumber;
-
-    cpuLoadHistory.push_back(std::move(cpuLoad));
-    if (cpuLoadHistory.size() > historySize) {
-        cpuLoadHistory.pop_front();
-    }
-}
-
 #elif __linux__
+#include <chrono>
 #include <regex>
 #include <utility>
 #include <fstream>
 #include <unistd.h>
 
 namespace {
-std::vector<unsigned long> getIdleCpuStat(std::size_t nCores) {
+const long clockTicks = sysconf(_SC_CLK_TCK);
+
+const std::size_t nCores = sysconf(_SC_NPROCESSORS_CONF);
+
+std::vector<unsigned long> getIdleCpuStat() {
     std::vector<unsigned long> idleCpuStat(nCores);
     std::ifstream procStat("/proc/stat");
     std::string line;
@@ -143,21 +106,59 @@ std::vector<unsigned long> getIdleCpuStat(std::size_t nCores) {
     }
     return idleCpuStat;
 }
-
-const long clockTicks = sysconf(_SC_CLK_TCK);
 }
 
+class CpuMonitor::PerformanceCounter {
+public:
+    PerformanceCounter() : prevIdleCpuStat{getIdleCpuStat()}, prevTimePoint{std::chrono::steady_clock::now()} {}
+
+    std::vector<double> getCpuLoad() {
+        std::vector<double> cpuLoad(nCores, 0);
+        std::vector<unsigned long> idleCpuStat = getIdleCpuStat();
+        auto timePoint = std::chrono::steady_clock::now();
+        // don't update data too frequently which may result in negative values for cpuLoad.
+        // It may happen when collectData() is called just after setHistorySize().
+        if (timePoint - prevTimePoint > std::chrono::milliseconds{100}) {
+            for (std::size_t i = 0; i < idleCpuStat.size(); ++i) {
+                double idleDiff = idleCpuStat[i] - prevIdleCpuStat[i];
+                typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
+                cpuLoad[i] = 1.0
+                    - idleDiff / clockTicks / std::chrono::duration_cast<Sec>(timePoint - prevTimePoint).count();
+            }
+        }
+        return cpuLoad;
+    }
+private:
+    std::vector<unsigned long> prevIdleCpuStat;
+    std::chrono::steady_clock::time_point prevTimePoint;
+};
+
+#else
+// not implemented
+namespace {
+const std::size_t nCores{1};
+}
+
+class CpuMonitor::PerformanceCounter {
+public:
+    std::vector<double> getCpuLoad() {return {0.0};};
+};
+#endif
+
 CpuMonitor::CpuMonitor() :
-    nCores{static_cast<std::size_t>(sysconf(_SC_NPROCESSORS_CONF))},
     lastEnabled{false},
     samplesNumber{0},
     historySize{0},
     cpuLoadSum(nCores, 0) {}
 
+// PerformanceCounter is incomplete in header and destructor can't be defined implicitly
+CpuMonitor::~CpuMonitor() = default;
+
 void CpuMonitor::setHistorySize(std::size_t size) {
     if (0 == historySize && 0 != size) {
-        prevIdleCpuStat = getIdleCpuStat(nCores);
-        prevTimePoint = std::chrono::steady_clock::now();
+        performanceCounter.reset(new PerformanceCounter);
+    } else if (0 != historySize && 0 == size) {
+        performanceCounter.reset();
     }
     historySize = size;
     std::size_t newSize = std::min(size, cpuLoadHistory.size());
@@ -165,41 +166,18 @@ void CpuMonitor::setHistorySize(std::size_t size) {
 }
 
 void CpuMonitor::collectData() {
-    std::vector<unsigned long> idleCpuStat = getIdleCpuStat(nCores);
-    auto timePoint = std::chrono::steady_clock::now();
-    // don't update data too frequently which may result in negative values for cpuLoad.
-    // It may happen when collectData() is called just after setHistorySize().
-    if (timePoint - prevTimePoint > std::chrono::milliseconds{100}) {
-        std::vector<double> cpuLoad(idleCpuStat.size());
-        for (std::size_t i = 0; i < idleCpuStat.size(); ++i) {
-            double idleDiff = idleCpuStat[i] - prevIdleCpuStat[i];
-            typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
-            cpuLoad[i] = 1.0
-                - idleDiff / clockTicks / std::chrono::duration_cast<Sec>(timePoint - prevTimePoint).count();
-        }
-        prevTimePoint = timePoint;
-        prevIdleCpuStat = std::move(idleCpuStat);
+    std::vector<double> cpuLoad = performanceCounter->getCpuLoad();
 
-        for (std::size_t i = 0; i < cpuLoad.size(); ++i) {
-            cpuLoadSum[i] += cpuLoad[i];
-        }
-        ++samplesNumber;
+    for (std::size_t i = 0; i < cpuLoad.size(); ++i) {
+        cpuLoadSum[i] += cpuLoad[i];
+    }
+    ++samplesNumber;
 
-        cpuLoadHistory.push_back(std::move(cpuLoad));
-        if (cpuLoadHistory.size() > historySize) {
-            cpuLoadHistory.pop_front();
-        }
+    cpuLoadHistory.push_back(std::move(cpuLoad));
+    if (cpuLoadHistory.size() > historySize) {
+        cpuLoadHistory.pop_front();
     }
 }
-
-#else
-// not implemented
-CpuMonitor::CpuMonitor() : nCores{0}, lastEnabled{false}, historySize{0} {}
-
-void CpuMonitor::setHistorySize(std::size_t size) {historySize=size;}
-
-void CpuMonitor::collectData() {}
-#endif
 
 std::size_t CpuMonitor::getHistorySize() const {
     return historySize;
