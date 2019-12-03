@@ -41,33 +41,19 @@ static const char last_frame_message[] = "Optional. The index of the last frame 
 
 
 DEFINE_bool(h, false, help_message);
-
 DEFINE_string(i, "", video_message);
-
 DEFINE_string(m_det, "", pedestrian_detection_model_message);
-
 DEFINE_string(m_reid, "", pedestrian_reid_model_message);
-
 DEFINE_string(d_det, "CPU", target_device_detection_message);
-
 DEFINE_string(d_reid, "CPU", target_device_reid_message);
-
 DEFINE_bool(pc, false, performance_counter_message);
-
 DEFINE_string(c, "", custom_cldnn_message);
-
 DEFINE_string(l, "", custom_cpu_library_message);
-
 DEFINE_bool(r, false, raw_output_message);
-
 DEFINE_bool(no_show, false, no_show_processed_video);
-
 DEFINE_int32(delay, 3, delay_message);
-
 DEFINE_string(out, "", output_log_message);
-
 DEFINE_int32(first, -1, first_frame_message);
-
 DEFINE_int32(last, -1, last_frame_message);
 
 

@@ -57,57 +57,31 @@ static const char infer_num_streams_message[] = "Optional. Number of streams to 
                                                 "(for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 
 DEFINE_bool(h, false, help_message);
-
 DEFINE_string(i, "", video_message);
-
 DEFINE_string(m, "", detection_model_message);
-
 DEFINE_string(m_va, "", vehicle_attribs_model_message);
-
 DEFINE_string(m_lpr, "", lpr_model_message);
-
 DEFINE_string(d, "CPU", target_device_message);
-
 DEFINE_string(d_va, "CPU", target_device_message_vehicle_attribs);
-
 DEFINE_string(d_lpr, "CPU", target_device_message_lpr);
-
 DEFINE_bool(pc, false, performance_counter_message);
-
 DEFINE_bool(r, false, raw_output_message);
-
 DEFINE_double(t, 0.5, thresh_output_message);
-
 DEFINE_string(c, "", custom_cldnn_message);
-
 DEFINE_string(l, "", custom_cpu_library_message);
-
 DEFINE_bool(no_show, false, no_show_processed_video);
-
 DEFINE_bool(auto_resize, false, input_resizable_message);
-
 DEFINE_uint32(nireq, 0, ninfer_request_message);
-
 DEFINE_uint32(nc, 0, num_cameras);
-
 DEFINE_string(fpga_device_ids, "", fpga_device_ids_message);
-
 DEFINE_bool(loop_video, false, loop_video_output_message);
-
 DEFINE_uint32(n_iqs, 3, input_queue_size);
-
 DEFINE_uint32(ni, 0, ninputs_message);
-
 DEFINE_uint32(fps, 0, fps);
-
 DEFINE_uint32(n_wt, 1, worker_threads);
-
 DEFINE_string(display_resolution, "1920x1080", display_resolution_message);
-
 DEFINE_bool(tag, false, use_tag_scheduler_message);
-
 DEFINE_uint32(nthreads, 0, infer_num_threads_message);
-
 DEFINE_string(nstreams, "", infer_num_streams_message);
 
 /**

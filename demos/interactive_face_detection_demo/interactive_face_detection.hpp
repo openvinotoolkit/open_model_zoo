@@ -66,75 +66,40 @@ static const char no_smooth_output_message[] = "Optional. Do not smooth person a
 static const char no_show_emotion_bar_message[] = "Optional. Do not show emotion bar";
 
 DEFINE_bool(h, false, help_message);
-
 DEFINE_string(i, "", input_video_message);
-
 DEFINE_string(o, "", output_video_message);
-
 DEFINE_string(m, "", face_detection_model_message);
-
 DEFINE_string(m_ag, "", age_gender_model_message);
-
 DEFINE_string(m_hp, "", head_pose_model_message);
-
 DEFINE_string(m_em, "", emotions_model_message);
-
 DEFINE_string(m_lm, "", facial_landmarks_model_message);
-
 DEFINE_string(d, "CPU", target_device_message);
-
 DEFINE_string(d_ag, "CPU", target_device_message_ag);
-
 DEFINE_string(d_hp, "CPU", target_device_message_hp);
-
 DEFINE_string(d_em, "CPU", target_device_message_em);
-
 DEFINE_string(d_lm, "CPU", target_device_message_lm);
-
 DEFINE_uint32(n_ag, 16, num_batch_ag_message);
-
 DEFINE_bool(dyn_ag, false, dyn_batch_ag_message);
-
 DEFINE_uint32(n_hp, 16, num_batch_hp_message);
-
 DEFINE_bool(dyn_hp, false, dyn_batch_hp_message);
-
 DEFINE_uint32(n_em, 16, num_batch_em_message);
-
 DEFINE_bool(dyn_em, false, dyn_batch_em_message);
-
 DEFINE_uint32(n_lm, 16, num_batch_em_message);
-
 DEFINE_bool(dyn_lm, false, dyn_batch_em_message);
-
 DEFINE_bool(pc, false, performance_counter_message);
-
 DEFINE_string(c, "", custom_cldnn_message);
-
 DEFINE_string(l, "", custom_cpu_library_message);
-
 DEFINE_bool(r, false, raw_output_message);
-
 DEFINE_double(t, 0.5, thresh_output_message);
-
 DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_output_message);
-
 DEFINE_bool(no_wait, false, no_wait_for_keypress_message);
-
 DEFINE_bool(no_show, false, no_show_processed_video);
-
 DEFINE_bool(async, false, async_message);
-
 DEFINE_double(dx_coef, 1, dx_coef_output_message);
-
 DEFINE_double(dy_coef, 1, dy_coef_output_message);
-
 DEFINE_double(fps, -1, fps_output_message);
-
 DEFINE_bool(loop_video, false, loop_video_output_message);
-
 DEFINE_bool(no_smooth, false, no_smooth_output_message);
-
 DEFINE_bool(no_show_emotion_bar, false, no_show_emotion_bar_message);
 
 

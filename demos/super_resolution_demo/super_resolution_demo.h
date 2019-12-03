@@ -25,17 +25,11 @@ static const char show_processed_images[] = "Optional. Show processed images. De
 
 
 DEFINE_bool(h, false, help_message);
-
 DEFINE_string(i, "", image_message);
-
 DEFINE_string(m, "", model_message);
-
 DEFINE_string(d, "CPU", target_device_message);
-
 DEFINE_string(l, "", custom_cpu_library_message);
-
 DEFINE_string(c, "", custom_cldnn_message);
-
 DEFINE_bool(show, false, show_processed_images);
 
 /**

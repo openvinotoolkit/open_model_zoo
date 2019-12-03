@@ -19,17 +19,11 @@ static const char no_show_processed_video[] = "Optional. Do not show processed v
 static const char raw_output_message[] = "Optional. Output inference results as raw values.";
 
 DEFINE_bool(h, false, help_message);
-
 DEFINE_string(i, "cam", video_message);
-
 DEFINE_string(m, "", human_pose_estimation_model_message);
-
 DEFINE_string(d, "CPU", target_device_message);
-
 DEFINE_bool(pc, false, performance_counter_message);
-
 DEFINE_bool(no_show, false, no_show_processed_video);
-
 DEFINE_bool(r, false, raw_output_message);
 
 /**

@@ -23,17 +23,11 @@ static const char custom_cpu_library_message[] = "Required for CPU custom layers
 static constexpr char config_message[] = "Path to the configuration file. Default value: \"config\".";
 
 DEFINE_string(c, "", custom_cldnn_message);
-
 DEFINE_string(l, "", custom_cpu_library_message);
-
 DEFINE_bool(h, false, help_message);
-
 DEFINE_string(i, "", image_message);
-
 DEFINE_string(m, "", model_message);
-
 DEFINE_string(d, "CPU", target_device_message);
-
 DEFINE_string(config, "", config_message);
 
 

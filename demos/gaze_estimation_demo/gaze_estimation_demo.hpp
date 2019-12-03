@@ -44,35 +44,20 @@ static const char fd_reshape_message[] = "Optional. Reshape Face Detector networ
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 
 DEFINE_bool(h, false, help_message);
-
 DEFINE_string(i, "cam", video_message);
-
 DEFINE_string(m, "", gaze_estimation_model_message);
-
 DEFINE_string(m_fd, "", face_detection_model_message);
-
 DEFINE_string(m_hp, "", head_pose_model_message);
-
 DEFINE_string(m_lm, "", facial_landmarks_model_message);
-
 DEFINE_string(d, "CPU", target_device_message);
-
 DEFINE_string(d_fd, "CPU", target_device_message_fd);
-
 DEFINE_string(d_hp, "CPU", target_device_message_hp);
-
 DEFINE_string(d_lm, "CPU", target_device_message_lm);
-
 DEFINE_string(res, "", camera_resolution_message);
-
 DEFINE_bool(fd_reshape, false, fd_reshape_message);
-
 DEFINE_bool(pc, false, performance_counter_message);
-
 DEFINE_bool(r, false, raw_output_message);
-
 DEFINE_double(t, 0.5, thresh_output_message);
-
 DEFINE_bool(no_show, false, no_show_processed_video);
 
 /**

@@ -44,41 +44,23 @@ static const char input_data_type_message[] = "Required. Input data type: \"imag
                                               "\"webcam\" (for a webcamera device). By default, it is \"image\".";
 
 DEFINE_bool(h, false, help_message);
-
 DEFINE_string(i, "", input_message);
-
 DEFINE_string(m_td, "", text_detection_model_message);
-
 DEFINE_string(m_tr, "", text_recognition_model_message);
-
 DEFINE_string(m_tr_ss, "0123456789abcdefghijklmnopqrstuvwxyz", text_recognition_model_symbols_set_message);
-
 DEFINE_bool(cc, false, text_central_image_crop_message);
-
 DEFINE_int32(w_td, 1280, image_width_for_text_detection_model_message);
-
 DEFINE_int32(h_td, 768, image_height_for_text_detection_model_message);
-
 DEFINE_double(thr, 0.2, text_recognition_threshold_message);
-
 DEFINE_double(cls_pixel_thr, 0.8, pixel_classification_threshold_message);
-
 DEFINE_double(link_pixel_thr, 0.8, pixel_linkage_threshold_message);
-
 DEFINE_int32(max_rect_num, -1, text_max_rectangles_number_message);
-
 DEFINE_string(dt, "", input_data_type_message);
-
 DEFINE_string(d_td, "CPU", text_detection_target_device_message);
-
 DEFINE_string(d_tr, "CPU", text_recognition_target_device_message);
-
 DEFINE_string(l, "", custom_cpu_library_message);
-
 DEFINE_string(c, "", custom_gpu_library_message);
-
 DEFINE_bool(no_show, false, no_show_message);
-
 DEFINE_bool(r, false, raw_output_message);
 
 /**

@@ -66,83 +66,44 @@ static const char act_det_output_message[] = "Optional. Output file name to save
 static const char tracker_smooth_size_message[] = "Optional. Number of frames to smooth actions.";
 
 DEFINE_bool(h, false, help_message);
-
 DEFINE_string(i, "cam", video_message);
-
 DEFINE_string(m_act, "", person_action_detection_model_message);
-
 DEFINE_string(m_fd, "", face_detection_model_message);
-
 DEFINE_string(m_lm, "", facial_landmarks_model_message);
-
 DEFINE_string(m_reid, "", face_reid_model_message);
-
 DEFINE_string(d_act, "CPU", target_device_message_action_detection);
-
 DEFINE_string(d_fd, "CPU", target_device_message_face_detection);
-
 DEFINE_string(d_lm, "CPU", target_device_message_landmarks_regression);
-
 DEFINE_string(d_reid, "CPU", target_device_message_face_reid);
-
 DEFINE_bool(greedy_reid_matching, false, greedy_reid_matching_message);
-
 DEFINE_bool(pc, false, performance_counter_message);
-
 DEFINE_string(c, "", custom_cldnn_message);
-
 DEFINE_string(l, "", custom_cpu_library_message);
-
 DEFINE_string(ad, "", act_stat_output_message);
-
 DEFINE_bool(r, false, raw_output_message);
-
 DEFINE_double(t_ad, 0.3, person_threshold_output_message);
-
 DEFINE_double(t_ar, 0.75, action_threshold_output_message);
-
 DEFINE_double(t_fd, 0.6, face_threshold_output_message);
-
 DEFINE_double(t_reid, 0.7, threshold_output_message_face_reid);
-
 DEFINE_string(fg, "", reid_gallery_path_message);
-
 DEFINE_string(out_v, "", output_video_message);
-
 DEFINE_bool(no_show, false, no_show_processed_video);
-
 DEFINE_int32(inh_fd, 600, input_image_height_output_message);
-
 DEFINE_int32(inw_fd, 600, input_image_width_output_message);
-
 DEFINE_double(exp_r_fd, 1.15, face_threshold_output_message);
-
 DEFINE_int32(last_frame, -1, last_frame_message);
-
 DEFINE_string(teacher_id, "", teacher_id_message);
-
 DEFINE_double(min_ad, 1.0, min_action_duration_message);
-
 DEFINE_double(d_ad, 1.0, same_action_time_delta_message);
-
 DEFINE_string(student_ac, "sitting,standing,raising_hand", student_actions_message);
-
 DEFINE_string(top_ac, "sitting,raising_hand", top_actions_message);
-
 DEFINE_string(teacher_ac, "standing,writing,demonstrating", teacher_actions_message);
-
 DEFINE_string(top_id, "raising_hand", target_action_name_message);
-
 DEFINE_int32(a_top, -1, target_actions_num_message);
-
 DEFINE_bool(crop_gallery, false, crop_gallery_message);
-
 DEFINE_double(t_reg_fd, 0.9, face_threshold_registration_output_message);
-
 DEFINE_int32(min_size_fr, 128, min_size_fr_reg_output_message);
-
 DEFINE_string(al, "", act_det_output_message);
-
 DEFINE_int32(ss_t, -1, tracker_smooth_size_message);
 
 /**

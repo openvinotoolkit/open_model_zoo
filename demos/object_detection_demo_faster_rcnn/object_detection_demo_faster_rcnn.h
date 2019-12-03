@@ -30,21 +30,14 @@ static const char prob_layer_name_message[] = "Optional. The name of output prob
 static const char plugin_message[] = "Optional. Enables messages from a plugin";
 
 DEFINE_bool(h, false, help_message);
-
 DEFINE_string(i, "", image_message);
-
 DEFINE_string(m, "", model_message);
-
 DEFINE_string(d, "CPU", target_device_message);
-
 DEFINE_string(c, "", custom_cldnn_message);
-
 DEFINE_string(l, "", custom_cpu_library_message);
-
 DEFINE_string(bbox_name, "bbox_pred", bbox_layer_name_message);
 DEFINE_string(proposal_name, "proposal", proposal_layer_name_message);
 DEFINE_string(prob_name, "cls_prob", prob_layer_name_message);
-
 DEFINE_bool(p_msg, false, plugin_message);
 
 /**

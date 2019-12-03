@@ -31,35 +31,19 @@ static const char real_input_fps[] = "Optional. Disable input frames caching, fo
 static const char input_video[] = "Optional. Specify full path to input video files";
 
 DEFINE_bool(h, false, help_message);
-
 DEFINE_string(m, "", model_path_message);
-
 DEFINE_string(d, "CPU", target_device_message);
-
 DEFINE_bool(pc, false, performance_counter_message);
-
 DEFINE_string(c, "", custom_cldnn_message);
-
 DEFINE_string(l, "", custom_cpu_library_message);
-
 DEFINE_bool(no_show, false, no_show_processed_video);
-
 DEFINE_uint32(nc, 0, num_cameras);
-
 DEFINE_uint32(bs, 1, batch_size);
-
 DEFINE_uint32(nireq, 5, num_infer_requests);
-
 DEFINE_uint32(n_iqs, 5, input_queue_size);
-
 DEFINE_uint32(fps_sp, 1000, fps_sampling_period);
-
 DEFINE_uint32(n_sp, 10, num_sampling_periods);
-
 DEFINE_bool(show_stats, false, show_statistics);
-
 DEFINE_uint32(duplicate_num, 0, duplication_channel_number);
-
 DEFINE_bool(real_input_fps, false, real_input_fps);
-
 DEFINE_string(i, "", input_video);
