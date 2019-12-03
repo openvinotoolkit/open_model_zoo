@@ -43,63 +43,36 @@ static const char raw_output_message[] = "Optional. Output inference results as 
 static const char fd_reshape_message[] = "Optional. Reshape Face Detector network so that its input resolution has the same aspect ratio as the input frame.";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 
-/// \brief Define flag for showing help message<br>
 DEFINE_bool(h, false, help_message);
 
-/// \brief Define parameter for set image file<br>
-/// It is a required parameter
 DEFINE_string(i, "cam", video_message);
 
-/// \brief Define parameter for Gaze Estimation model file<br>
-/// It is a required parameter
 DEFINE_string(m, "", gaze_estimation_model_message);
 
-/// \brief Define parameter for Face Detection model file<br>
-/// It is a required parameter
 DEFINE_string(m_fd, "", face_detection_model_message);
 
-/// \brief Define parameter for Head Pose Estimation model file<br>
-/// It is a required parameter
 DEFINE_string(m_hp, "", head_pose_model_message);
 
-/// \brief Define parameter for Facial Landmarks Estimation model file<br>
-/// It is an optional parameter
 DEFINE_string(m_lm, "", facial_landmarks_model_message);
 
-/// \brief target device for Gaze Estimation network<br>
 DEFINE_string(d, "CPU", target_device_message);
 
-/// \brief Define parameter for target device for Face Detection network<br>
 DEFINE_string(d_fd, "CPU", target_device_message_fd);
 
-/// \brief Define parameter for target device for Head Pose Estimation network<br>
 DEFINE_string(d_hp, "CPU", target_device_message_hp);
 
-/// \brief Define parameter for target device for Facial Landmarks Estimation network<br>
 DEFINE_string(d_lm, "CPU", target_device_message_lm);
 
-/// \brief Define parameter camera resolution<br>
-/// It is an optional parameter
 DEFINE_string(res, "", camera_resolution_message);
 
-/// \brief Define parameter to enable face detector network reshape<br>
-/// It is an optional parameter
 DEFINE_bool(fd_reshape, false, fd_reshape_message);
 
-/// \brief Define parameter to enable per-layer performance report<br>
-/// It is an optional parameter
 DEFINE_bool(pc, false, performance_counter_message);
 
-/// \brief Define a flag to output raw scoring results<br>
-/// It is an optional parameter
 DEFINE_bool(r, false, raw_output_message);
 
-/// \brief Define a parameter for probability threshold for detections<br>
-/// It is an optional parameter
 DEFINE_double(t, 0.5, thresh_output_message);
 
-/// \brief Define a flag to disable showing processed video<br>
-/// It is an optional parameter
 DEFINE_bool(no_show, false, no_show_processed_video);
 
 /**

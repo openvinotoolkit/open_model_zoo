@@ -29,36 +29,22 @@ static const char proposal_layer_name_message[] = "Optional. The name of output 
 static const char prob_layer_name_message[] = "Optional. The name of output probability layer. Default value is \"cls_prob\"";
 static const char plugin_message[] = "Optional. Enables messages from a plugin";
 
-/// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
-/// @brief Define parameter for set image file <br>
-/// It is a required parameter
 DEFINE_string(i, "", image_message);
 
-/// @brief Define parameter for set model file <br>
-/// It is a required parameter
 DEFINE_string(m, "", model_message);
 
-/// @brief device the target device to infer on <br>
 DEFINE_string(d, "CPU", target_device_message);
 
-/// @brief Define parameter for clDNN custom kernels path <br>
-/// Default is ./lib
 DEFINE_string(c, "", custom_cldnn_message);
 
-/// @brief Absolute path to CPU library with user layers <br>
-/// It is a optional parameter
 DEFINE_string(l, "", custom_cpu_library_message);
 
-/// @brief Custom bbox layer name
 DEFINE_string(bbox_name, "bbox_pred", bbox_layer_name_message);
-/// @brief Custom proposal layer name
 DEFINE_string(proposal_name, "proposal", proposal_layer_name_message);
-/// @brief Custom prob layer name
 DEFINE_string(prob_name, "cls_prob", prob_layer_name_message);
 
-/// @brief Enable plugin messages
 DEFINE_bool(p_msg, false, plugin_message);
 
 /**

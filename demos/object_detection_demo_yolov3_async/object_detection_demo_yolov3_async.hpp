@@ -26,49 +26,28 @@ static const char raw_output_message[] = "Optional. Output inference results raw
 static const char input_resizable_message[] = "Optional. Enable resizable input with support of ROI crop and auto resize.";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 
-/// \brief Defines flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
-/// \brief Define parameter for set video file of reading from camera <br>
-/// It is a required parameter
 DEFINE_string(i, "", video_message);
 
-/// \brief Defines parameter for setting path to a model file <br>
-/// It is a required parameter
 DEFINE_string(m, "", model_message);
 
-/// \brief Defines the target device to infer on <br>
 DEFINE_string(d, "CPU", target_device_message);
 
-/// \brief Enables per-layer performance report
 DEFINE_bool(pc, false, performance_counter_message);
 
-/// @brief Defines GPU custom kernels path <br>
-/// Default is ./lib
 DEFINE_string(c, "", custom_cldnn_message);
 
-/// @brief Defines absolute path to CPU library with user layers <br>
-/// It is a optional parameter
 DEFINE_string(l, "", custom_cpu_library_message);
 
-/// \brief Defines flag to output raw scoring results<br>
-/// It is an optional parameter
 DEFINE_bool(r, false, raw_output_message);
 
-/// \brief Defines value of confidence threshold <br>
-/// It is an optional parameter
 DEFINE_double(t, 0.5, thresh_output_message);
 
-/// \brief Defines value of intersection over union threshold<br>
-/// It is an optional parameter
 DEFINE_double(iou_t, 0.4, iou_thresh_output_message);
 
-/// \brief Enables resizable input<br>
-/// It is an optional parameter
 DEFINE_bool(auto_resize, false, input_resizable_message);
 
-/// \brief Define a flag to disable showing processed video<br>
-/// It is an optional parameter
 DEFINE_bool(no_show, false, no_show_processed_video);
 
 /**

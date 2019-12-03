@@ -22,32 +22,20 @@ static const char custom_cpu_library_message[] = "Required for CPU custom layers
 static const char detection_output_layer_name_message[] = "Optional. The name of detection output layer. Default value is \"detection_output\"";
 static const char masks_layer_name_message[] = "Optional. The name of masks layer. Default value is \"masks\"";
 
-/// @brief Define parameter for clDNN custom kernels path <br>
-/// Default is ./lib
 DEFINE_string(c, "", custom_cldnn_message);
 
-/// @brief Absolute path to CPU library with user layers <br>
-/// It is a optional parameter
 DEFINE_string(l, "", custom_cpu_library_message);
 
-/// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
-/// @brief Define parameter for set image file <br>
-/// It is a required parameter
 DEFINE_string(i, "", image_message);
 
-/// @brief Define parameter for set model file <br>
-/// It is a required parameter
 DEFINE_string(m, "", model_message);
 
-/// @brief device the target device to infer on <br>
 DEFINE_string(d, "CPU", target_device_message);
 
-/// @brief Custom Detection Output layer name
 DEFINE_string(detection_output_name, "detection_output", detection_output_layer_name_message);
 
-/// @brief Custom layer name producing masks
 DEFINE_string(masks_name, "masks", masks_layer_name_message);
 
 /**

@@ -30,67 +30,36 @@ static const char duplication_channel_number[] = "Optional. Enable and specify t
 static const char real_input_fps[] = "Optional. Disable input frames caching, for maximum throughput pipeline";
 static const char input_video[] = "Optional. Specify full path to input video files";
 
-/// \brief Define a flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
-/// \brief Define a parameter for a model file <br>
-/// It is a required parameter
 DEFINE_string(m, "", model_path_message);
 
-/// \brief Define a target device parameter for a model <br>
 DEFINE_string(d, "CPU", target_device_message);
 
-/// \brief Define a flag to enable per-layer performance report <br>
 DEFINE_bool(pc, false, performance_counter_message);
 
-/// @brief GPU custom kernels path <br>
-/// Default is ./lib
 DEFINE_string(c, "", custom_cldnn_message);
 
-/// @brief Absolute path to CPU library with user layers <br>
-/// It is a optional parameter
 DEFINE_string(l, "", custom_cpu_library_message);
 
-/// \brief Flag to disable showing processed video<br>
-/// It is an optional parameter
 DEFINE_bool(no_show, false, no_show_processed_video);
 
-/// \brief Flag to specify the number of expected input channels<br>
-/// It is an optional parameter
 DEFINE_uint32(nc, 0, num_cameras);
 
-/// \brief Flag to specify batch size<br>
-/// It is an optional parameter
 DEFINE_uint32(bs, 1, batch_size);
 
-/// \brief Flag to specify the number of infer requests<br>
-/// It is an optional parameter
 DEFINE_uint32(nireq, 5, num_infer_requests);
 
-/// \brief Flag to specify the number of expected input channels<br>
-/// It is an optional parameter
 DEFINE_uint32(n_iqs, 5, input_queue_size);
 
-/// \brief Flag to specify FPS measurement sampling period<br>
-/// It is an optional parameter
 DEFINE_uint32(fps_sp, 1000, fps_sampling_period);
 
-/// \brief Flag to specify the number of sampling periods<br>
-/// It is an optional parameter
 DEFINE_uint32(n_sp, 10, num_sampling_periods);
 
-/// \brief Flag to enable statisics output<br>
-/// It is an optional parameter
 DEFINE_bool(show_stats, false, show_statistics);
 
-/// \brief Flag to enable and specify the number of channels additionally copied from real sources<br>
-/// It is an optional parameter
 DEFINE_uint32(duplicate_num, 0, duplication_channel_number);
 
-/// \brief Flag to enable real input FPS<br>
-/// It is an optional parameter
 DEFINE_bool(real_input_fps, false, real_input_fps);
 
-/// \brief Define parameter for input video files <br>
-/// It is a optional parameter
 DEFINE_string(i, "", input_video);

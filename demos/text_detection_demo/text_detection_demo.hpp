@@ -43,77 +43,42 @@ static const char input_data_type_message[] = "Required. Input data type: \"imag
                                               "\"video\" (for a saved video), "
                                               "\"webcam\" (for a webcamera device). By default, it is \"image\".";
 
-/// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
-/// @brief Define parameter for setting input path <br>
-/// It is a required parameter
 DEFINE_string(i, "", input_message);
 
-/// @brief Define parameter for text detection model file <br>
-/// It is a required parameter
 DEFINE_string(m_td, "", text_detection_model_message);
 
-/// @brief Define parameter for text recognition model file <br>
-/// It is a required parameter
 DEFINE_string(m_tr, "", text_recognition_model_message);
 
-/// @brief Define parameter for text recognition model symbols set <br>
-/// It is a optional parameter
 DEFINE_string(m_tr_ss, "0123456789abcdefghijklmnopqrstuvwxyz", text_recognition_model_symbols_set_message);
 
-/// @brief Define parameter for central image crop. <br>
-/// It is a optional parameter
 DEFINE_bool(cc, false, text_central_image_crop_message);
 
-/// @brief Define parameter for input image width for text detection model <br>
-/// It is a optional parameter
 DEFINE_int32(w_td, 1280, image_width_for_text_detection_model_message);
 
-/// @brief Define parameter for input image height for text detection model <br>
-/// It is a optional parameter
 DEFINE_int32(h_td, 768, image_height_for_text_detection_model_message);
 
-/// @brief Define parameter for text recognition threshold <br>
-/// It is a optional parameter
 DEFINE_double(thr, 0.2, text_recognition_threshold_message);
 
-/// @brief Define parameter for pixel classification threshold <br>
-/// It is a optional parameter
 DEFINE_double(cls_pixel_thr, 0.8, pixel_classification_threshold_message);
 
-/// @brief Define parameter for pixel linking threshold <br>
-/// It is a optional parameter
 DEFINE_double(link_pixel_thr, 0.8, pixel_linkage_threshold_message);
 
-/// @brief Define parameter for maximum number of rectangles to recognize. If it is negative number of rectangles to recognize is not limited. <br>
-/// It is a optional parameter
 DEFINE_int32(max_rect_num, -1, text_max_rectangles_number_message);
 
-/// @brief Define parameter for input data type ("image", "list", "video", "webcam"). <br>
-/// It is a required parameter
 DEFINE_string(dt, "", input_data_type_message);
 
-/// @brief Define the target device for text detection model to infer on <br>
 DEFINE_string(d_td, "CPU", text_detection_target_device_message);
 
-/// @brief Define the target device for text recognition model to infer on <br>
 DEFINE_string(d_tr, "CPU", text_recognition_target_device_message);
 
-/// @brief Define parameter for asolute path to a shared library with the CPU kernels implementation for custom layers. <br>
-/// It is a optional parameter
 DEFINE_string(l, "", custom_cpu_library_message);
 
-/// @brief Define parameter for asolute path to the GPU kernels implementation for custom layers. <br>
-/// It is a optional parameter
 DEFINE_string(c, "", custom_gpu_library_message);
 
-/// @brief Define a flag to not show detected text on image frame. By default, it is false. <br>
-/// It is an optional parameter
 DEFINE_bool(no_show, false, no_show_message);
 
-/// @brief Flag to output raw pipeline results<br>
-/// It is an optional parameter
 DEFINE_bool(r, false, raw_output_message);
 
 /**

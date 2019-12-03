@@ -65,157 +65,84 @@ static const char min_size_fr_reg_output_message[] = "Optional. Minimum input si
 static const char act_det_output_message[] = "Optional. Output file name to save per-person action detections in.";
 static const char tracker_smooth_size_message[] = "Optional. Number of frames to smooth actions.";
 
-/// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
-/// @brief Define parameter for set image file <br>
-/// It is a required parameter
 DEFINE_string(i, "cam", video_message);
 
-/// @brief Define parameter for person/action detection model file <br>
-/// It is a required parameter
 DEFINE_string(m_act, "", person_action_detection_model_message);
 
-/// @brief Define parameter for face detection model file <br>
-/// It is a required parameter
 DEFINE_string(m_fd, "", face_detection_model_message);
 
-/// @brief Define parameter for facial landmarks model file <br>
-/// It is a required parameter
 DEFINE_string(m_lm, "", facial_landmarks_model_message);
 
-/// @brief Define parameter for face reidentification model file <br>
-/// It is a required parameter
 DEFINE_string(m_reid, "", face_reid_model_message);
 
-/// @brief device the target device for person/action detection infer on <br>
 DEFINE_string(d_act, "CPU", target_device_message_action_detection);
 
-/// @brief device the target device for face detection on <br>
 DEFINE_string(d_fd, "CPU", target_device_message_face_detection);
 
-/// @brief device the target device for facial landnmarks regression infer on <br>
 DEFINE_string(d_lm, "CPU", target_device_message_landmarks_regression);
 
-/// @brief device the target device for face reidentification infer on <br>
 DEFINE_string(d_reid, "CPU", target_device_message_face_reid);
 
-/// @brief Use greedy matching algorithm in face reid
 DEFINE_bool(greedy_reid_matching, false, greedy_reid_matching_message);
 
-/// @brief Enable per-layer performance report
 DEFINE_bool(pc, false, performance_counter_message);
 
-/// @brief clDNN custom kernels path <br>
-/// Default is ./lib
 DEFINE_string(c, "", custom_cldnn_message);
 
-/// @brief Absolute path to CPU library with user layers <br>
-/// It is a optional parameter
 DEFINE_string(l, "", custom_cpu_library_message);
 
-/// @brief Output file name to save per-person action statistics in.
-/// It is an optional parameter
 DEFINE_string(ad, "", act_stat_output_message);
 
-/// @brief Flag to output raw pipeline results<br>
-/// It is an optional parameter
 DEFINE_bool(r, false, raw_output_message);
 
-/// @brief Define probability threshold for person/action detection <br>
-/// It is an optional parameter
 DEFINE_double(t_ad, 0.3, person_threshold_output_message);
 
-/// @brief Define probability threshold for action recognition <br>
-/// It is an optional parameter
 DEFINE_double(t_ar, 0.75, action_threshold_output_message);
 
-/// @brief Define probability threshold for face detections <br>
-/// It is an optional parameter
 DEFINE_double(t_fd, 0.6, face_threshold_output_message);
 
-/// @brief Define cosine distance threshold for face reid <br>
-/// It is an optional parameter
 DEFINE_double(t_reid, 0.7, threshold_output_message_face_reid);
 
-/// @brief Path to a faces gallery for reid <br>
-/// It is a optional parameter
 DEFINE_string(fg, "", reid_gallery_path_message);
 
-/// @brief File to write output video with visualization to.
-/// It is a optional parameter
 DEFINE_string(out_v, "", output_video_message);
 
-/// @brief Flag to disable processed video showing<br>
-/// It is an optional parameter
 DEFINE_bool(no_show, false, no_show_processed_video);
 
-/// @brief Input image height for face detector<br>
-/// It is an optional parameter
 DEFINE_int32(inh_fd, 600, input_image_height_output_message);
 
-/// @brief Input image width for face detector<br>
-/// It is an optional parameter
 DEFINE_int32(inw_fd, 600, input_image_width_output_message);
 
-/// @brief Expand ratio for bbox before face recognition<br>
-/// It is an optional parameter
 DEFINE_double(exp_r_fd, 1.15, face_threshold_output_message);
 
-/// @brief Input image height for face detector<br>
-/// It is an optional parameter
 DEFINE_int32(last_frame, -1, last_frame_message);
 
-/// @brief Label of teacher<br>
-/// It is an optional parameter
 DEFINE_string(teacher_id, "", teacher_id_message);
 
-/// @brief Min action duration<br>
-/// It is an optional parameter
 DEFINE_double(min_ad, 1.0, min_action_duration_message);
 
-/// @brief Same action time delta<br>
-/// It is an optional parameter
 DEFINE_double(d_ad, 1.0, same_action_time_delta_message);
 
-/// @brief Labels of student actions<br>
-/// It is an optional parameter
 DEFINE_string(student_ac, "sitting,standing,raising_hand", student_actions_message);
 
-/// @brief Labels of student actions for top-k mode<br>
-/// It is an optional parameter
 DEFINE_string(top_ac, "sitting,raising_hand", top_actions_message);
 
-/// @brief Labels of teacher actions<br>
-/// It is an optional parameter
 DEFINE_string(teacher_ac, "standing,writing,demonstrating", teacher_actions_message);
 
-/// @brief Define target action name for top-k mode <br>
-/// It is an optional parameter
 DEFINE_string(top_id, "raising_hand", target_action_name_message);
 
-/// @brief Define maximal number of target actions <br>
-/// It is an optional parameter
 DEFINE_int32(a_top, -1, target_actions_num_message);
 
-/// @brief Flag to enable image cropping during database creation<br>
-/// It is an optional parameter
 DEFINE_bool(crop_gallery, false, crop_gallery_message);
 
-/// @brief Define probability threshold for face detections during registration<br>
-/// It is an optional parameter
 DEFINE_double(t_reg_fd, 0.9, face_threshold_registration_output_message);
 
-/// @brief Minimum input image width & heigh for sucessful face registration<br>
-/// It is an optional parameter
 DEFINE_int32(min_size_fr, 128, min_size_fr_reg_output_message);
 
-/// @brief Output file name to save per-person action detections in.
-/// It is an optional parameter
 DEFINE_string(al, "", act_det_output_message);
 
-/// @brief Number of frames to smooth actions<br>
-/// It is an optional parameter
 DEFINE_int32(ss_t, -1, tracker_smooth_size_message);
 
 /**

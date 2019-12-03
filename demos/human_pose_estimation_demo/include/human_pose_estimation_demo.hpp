@@ -18,31 +18,18 @@ static const char performance_counter_message[] = "Optional. Enable per-layer pe
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 static const char raw_output_message[] = "Optional. Output inference results as raw values.";
 
-/// @brief Defines flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
-/// @brief Defines parameter for setting video file <br>
-/// It is a required parameter
 DEFINE_string(i, "cam", video_message);
 
-/// @brief Defines parameter for human pose estimation model file <br>
-/// It is a required parameter
 DEFINE_string(m, "", human_pose_estimation_model_message);
 
-/// @brief Defines parameter for the target device to infer on <br>
-/// It is an optional parameter
 DEFINE_string(d, "CPU", target_device_message);
 
-/// @brief Defines flag for per-layer performance report <br>
-/// It is an optional parameter
 DEFINE_bool(pc, false, performance_counter_message);
 
-/// @brief Defines flag for disabling processed video showing <br>
-/// It is an optional parameter
 DEFINE_bool(no_show, false, no_show_processed_video);
 
-/// @brief Defines flag to output raw results <br>
-/// It is an optional parameter
 DEFINE_bool(r, false, raw_output_message);
 
 /**

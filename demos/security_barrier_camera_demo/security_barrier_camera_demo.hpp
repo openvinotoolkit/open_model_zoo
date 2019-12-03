@@ -56,105 +56,58 @@ static const char infer_num_threads_message[] = "Optional. Number of threads to 
 static const char infer_num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode "
                                                 "(for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 
-/// \brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
-/// \brief Define parameter for input video files <br>
-/// It is a optional parameter
 DEFINE_string(i, "", video_message);
 
-/// \brief Define parameter for vehicle detection  model file <br>
-/// It is a required parameter
 DEFINE_string(m, "", detection_model_message);
 
-/// \brief Define parameter for vehicle attributes model file <br>
-/// It is a required parameter
 DEFINE_string(m_va, "", vehicle_attribs_model_message);
 
-/// \brief Define parameter for vehicle detection  model file <br>
-/// It is a required parameter
 DEFINE_string(m_lpr, "", lpr_model_message);
 
-/// \brief device the target device for vehicle detection infer on <br>
 DEFINE_string(d, "CPU", target_device_message);
 
-/// \brief device the target device for age gender detection on <br>
 DEFINE_string(d_va, "CPU", target_device_message_vehicle_attribs);
 
-/// \brief device the target device for head pose detection on <br>
 DEFINE_string(d_lpr, "CPU", target_device_message_lpr);
 
-/// \brief enable per-layer performance report <br>
 DEFINE_bool(pc, false, performance_counter_message);
 
-/// \brief Flag to output raw scoring results<br>
-/// It is an optional parameter
 DEFINE_bool(r, false, raw_output_message);
 
-/// \brief Flag to output raw scoring results<br>
-/// It is an optional parameter
 DEFINE_double(t, 0.5, thresh_output_message);
 
-/// @brief clDNN custom kernels path <br>
-/// Default is ./lib
 DEFINE_string(c, "", custom_cldnn_message);
 
-/// @brief Absolute path to CPU library with user layers <br>
-/// It is a optional parameter
 DEFINE_string(l, "", custom_cpu_library_message);
 
-/// \brief Flag to disable processed video showing<br>
-/// It is an optional parameter
 DEFINE_bool(no_show, false, no_show_processed_video);
 
-/// \brief Enables resizable input<br>
-/// It is an optional parameter
 DEFINE_bool(auto_resize, false, input_resizable_message);
 
-/// \brief Flag to specify number of infer requests<br>
-/// It is an optional parameter
 DEFINE_uint32(nireq, 0, ninfer_request_message);
 
-/// \brief Flag to specify number of expected input channels<br>
-/// It is an optional parameter
 DEFINE_uint32(nc, 0, num_cameras);
 
-/// \brief Flag to specify FPGA device IDs
-/// It is an optional parameter
 DEFINE_string(fpga_device_ids, "", fpga_device_ids_message);
 
-/// \brief Define a flag to loop video<br>
-/// It is an optional parameter
 DEFINE_bool(loop_video, false, loop_video_output_message);
 
-/// \brief Flag to specify number of allocated frames. It is a multiplyir of inputs number.<br>
-/// It is an optional parameter
 DEFINE_uint32(n_iqs, 3, input_queue_size);
 
-/// \brief Flag to specify number of input channels. It will multiply channels by reusing provided ones if there is lack of inputs<br>
-/// It is an optional parameter
 DEFINE_uint32(ni, 0, ninputs_message);
 
-/// \brief Define parameter for playing FPS <br>
-/// It is a optional parameter
 DEFINE_uint32(fps, 0, fps);
 
-/// \brief Define parameter for the number of threads including the main theread a Worker will use<br>
-/// It is a optional parameter
 DEFINE_uint32(n_wt, 1, worker_threads);
 
-/// \brief Flag to specify the maximum output window resolution<br>
-/// It is an optional parameter
 DEFINE_string(display_resolution, "1920x1080", display_resolution_message);
 
-/// \brief Message for using tag scheduler<br>
-/// It is a optional parameter
 DEFINE_bool(tag, false, use_tag_scheduler_message);
 
-/// @brief Number of threads to use for inference on the CPU in throughput mode (also affects Hetero cases)
 DEFINE_uint32(nthreads, 0, infer_num_threads_message);
 
-/// @brief Number of streams to use for inference on the CPU (also affects Hetero cases)
 DEFINE_string(nstreams, "", infer_num_streams_message);
 
 /**

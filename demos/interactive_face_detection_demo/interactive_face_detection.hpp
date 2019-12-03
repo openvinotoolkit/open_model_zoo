@@ -65,133 +65,76 @@ static const char loop_video_output_message[] = "Optional. Enable playing video 
 static const char no_smooth_output_message[] = "Optional. Do not smooth person attributes";
 static const char no_show_emotion_bar_message[] = "Optional. Do not show emotion bar";
 
-/// \brief Define flag for showing help message<br>
 DEFINE_bool(h, false, help_message);
 
-/// \brief Define parameter for set image file<br>
-/// It is a required parameter
 DEFINE_string(i, "", input_video_message);
 
-/// \brief Define parameter for an output video file<br>
-/// It is an optional parameter
 DEFINE_string(o, "", output_video_message);
 
-/// \brief Define parameter for Face Detection model file<br>
-/// It is a required parameter
 DEFINE_string(m, "", face_detection_model_message);
 
-/// \brief Define parameter for Age Gender Recognition model file<br>
-/// It is a optional parameter
 DEFINE_string(m_ag, "", age_gender_model_message);
 
-/// \brief Define parameter for Head Pose Estimation model file<br>
-/// It is a optional parameter
 DEFINE_string(m_hp, "", head_pose_model_message);
 
-/// \brief Define parameter for Emotions Recognition model file<br>
-/// It is a optional parameter
 DEFINE_string(m_em, "", emotions_model_message);
 
-/// \brief Define parameter for Facial Landmarks Estimation model file<br>
-/// It is an optional parameter
 DEFINE_string(m_lm, "", facial_landmarks_model_message);
 
-/// \brief target device for Face Detection network<br>
 DEFINE_string(d, "CPU", target_device_message);
 
-/// \brief Define parameter for target device for Age/Gender Recognition network<br>
 DEFINE_string(d_ag, "CPU", target_device_message_ag);
 
-/// \brief Define parameter for target device for Head Pose Estimation network<br>
 DEFINE_string(d_hp, "CPU", target_device_message_hp);
 
-/// \brief Define parameter for target device for Emotions Recognition network<br>
 DEFINE_string(d_em, "CPU", target_device_message_em);
 
-/// \brief Define parameter for target device for Facial Landmarks Estimation network<br>
 DEFINE_string(d_lm, "CPU", target_device_message_lm);
 
-/// \brief Define parameter for maximum batch size for Age/Gender Recognition network<br>
 DEFINE_uint32(n_ag, 16, num_batch_ag_message);
 
-/// \brief Define parameter to enable dynamic batch size for Age/Gender Recognition network<br>
 DEFINE_bool(dyn_ag, false, dyn_batch_ag_message);
 
-/// \brief Define parameter for maximum batch size for Head Pose Estimation network<br>
 DEFINE_uint32(n_hp, 16, num_batch_hp_message);
 
-/// \brief Define parameter to enable dynamic batch size for Head Pose Estimation network<br>
 DEFINE_bool(dyn_hp, false, dyn_batch_hp_message);
 
-/// \brief Define parameter for maximum batch size for Emotions Recognition network<br>
 DEFINE_uint32(n_em, 16, num_batch_em_message);
 
-/// \brief Define parameter to enable dynamic batch size for Emotions Recognition network<br>
 DEFINE_bool(dyn_em, false, dyn_batch_em_message);
 
-/// \brief Define parameter for maximum batch size for Facial Landmarks Estimation network<br>
 DEFINE_uint32(n_lm, 16, num_batch_em_message);
 
-/// \brief Define parameter to enable dynamic batch size for Facial Landmarks Estimation network<br>
 DEFINE_bool(dyn_lm, false, dyn_batch_em_message);
 
-/// \brief Define parameter to enable per-layer performance report<br>
 DEFINE_bool(pc, false, performance_counter_message);
 
-/// @brief Define parameter for GPU custom kernels path<br>
-/// Default is ./lib
 DEFINE_string(c, "", custom_cldnn_message);
 
-/// @brief Define parameter for absolute path to CPU library with user layers<br>
-/// It is an optional parameter
 DEFINE_string(l, "", custom_cpu_library_message);
 
-/// \brief Define a flag to output raw scoring results<br>
-/// It is an optional parameter
 DEFINE_bool(r, false, raw_output_message);
 
-/// \brief Define a parameter for probability threshold for detections<br>
-/// It is an optional parameter
 DEFINE_double(t, 0.5, thresh_output_message);
 
-/// \brief Define a parameter to enlarge the bounding box around the detected face for more robust operation of face analytics networks<br>
-/// It is an optional parameter
 DEFINE_double(bb_enlarge_coef, 1.2, bb_enlarge_coef_output_message);
 
-/// \brief Define a flag to disable keypress exit<br>
-/// It is an optional parameter
 DEFINE_bool(no_wait, false, no_wait_for_keypress_message);
 
-/// \brief Define a flag to disable showing processed video<br>
-/// It is an optional parameter
 DEFINE_bool(no_show, false, no_show_processed_video);
 
-/// \brief Define a flag to enable aynchronous execution<br>
-/// It is an optional parameter
 DEFINE_bool(async, false, async_message);
 
-/// \brief Define a parameter to shift face bounding box by Ox for more robust operation of face analytics networks<br>
-/// It is an optional parameter
 DEFINE_double(dx_coef, 1, dx_coef_output_message);
 
-/// \brief Define a parameter to shift face bounding box by Oy for more robust operation of face analytics networks<br>
-/// It is an optional parameter
 DEFINE_double(dy_coef, 1, dy_coef_output_message);
 
-/// \brief Define a parameter to play video with defined fps<br>
-/// It is an optional parameter
 DEFINE_double(fps, -1, fps_output_message);
 
-/// \brief Define a flag to loop video<br>
-/// It is an optional parameter
 DEFINE_bool(loop_video, false, loop_video_output_message);
 
-/// \brief Define a flag to disable smoothing person attributes<br>
-/// It is an optional parameter
 DEFINE_bool(no_smooth, false, no_smooth_output_message);
 
-/// \brief Define a flag to disable showing emotion bar<br>
-/// It is an optional parameter
 DEFINE_bool(no_show_emotion_bar, false, no_show_emotion_bar_message);
 
 

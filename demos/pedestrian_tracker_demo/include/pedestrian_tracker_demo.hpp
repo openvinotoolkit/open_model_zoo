@@ -40,60 +40,34 @@ static const char last_frame_message[] = "Optional. The index of the last frame 
                                           "This has effect only if it is positive.";
 
 
-/// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
-/// @brief Define parameter for set image file <br>
-/// It is a required parameter
 DEFINE_string(i, "", video_message);
 
-/// @brief Define parameter for pedestrian detection model file <br>
-/// It is a required parameter
 DEFINE_string(m_det, "", pedestrian_detection_model_message);
 
-/// @brief Define parameter for pedestrian reidentification model file <br>
-/// It is a required parameter
 DEFINE_string(m_reid, "", pedestrian_reid_model_message);
 
-/// @brief device the target device for pedestrian detection infer on <br>
 DEFINE_string(d_det, "CPU", target_device_detection_message);
 
-/// @brief device the target device for pedestrian reidentification infer on <br>
 DEFINE_string(d_reid, "CPU", target_device_reid_message);
 
-/// @brief Enable per-layer performance report
 DEFINE_bool(pc, false, performance_counter_message);
 
-/// @brief clDNN custom kernels path <br>
-/// Default is ./lib
 DEFINE_string(c, "", custom_cldnn_message);
 
-/// @brief Absolute path to CPU library with user layers <br>
-/// It is a optional parameter
 DEFINE_string(l, "", custom_cpu_library_message);
 
-/// \brief Flag to output pedestrian tracking results in raw format<br>
-/// It is an optional parameter
 DEFINE_bool(r, false, raw_output_message);
 
-/// @brief Flag to disable processed video showing<br>
-/// It is an optional parameter
 DEFINE_bool(no_show, false, no_show_processed_video);
 
-/// @brief Define delay for visualization <br>
-/// It is an optional parameter
 DEFINE_int32(delay, 3, delay_message);
 
-/// @brief Define output log path to store tracking results <br>
-/// It is an optional parameter
 DEFINE_string(out, "", output_log_message);
 
-/// @brief Define the first frame to process <br>
-/// It is an optional parameter
 DEFINE_int32(first, -1, first_frame_message);
 
-/// @brief Define the last frame to process <br>
-/// It is an optional parameter
 DEFINE_int32(last, -1, last_frame_message);
 
 

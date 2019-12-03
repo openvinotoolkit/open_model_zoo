@@ -38,63 +38,36 @@ static const char no_show_processed_video[] = "Optional. No show processed video
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 
 
-/// @brief Define flag for showing help message <br>
 DEFINE_bool(h, false, help_message);
 
-/// @brief Define parameter for set image file <br>
-/// It is a required parameter
 DEFINE_string(i, "cam", video_message);
 
-/// @brief Define parameter for vehicle detection  model file <br>
-/// It is a required parameter
 DEFINE_string(m, "", person_vehicle_bike_detection_model_message);
 
-/// @brief Define parameter for vehicle attributes model file <br>
-/// It is a required parameter
 DEFINE_string(m_pa, "", person_attribs_model_message);
 
-/// @brief Define parameter for vehicle detection  model file <br>
-/// It is a required parameter
 DEFINE_string(m_reid, "", person_reid_model_message);
 
-/// @brief device the target device for vehicle detection infer on <br>
 DEFINE_string(d, "CPU", target_device_message);
 
-/// @brief device the target device for age gender detection on <br>
 DEFINE_string(d_pa, "CPU", target_device_message_person_attribs);
 
-/// @brief device the target device for head pose detection on <br>
 DEFINE_string(d_reid, "CPU", target_device_message_person_reid);
 
-/// @brief Enable per-layer performance report
 DEFINE_bool(pc, false, performance_counter_message);
 
-/// @brief clDNN custom kernels path <br>
-/// Default is ./lib
 DEFINE_string(c, "", custom_cldnn_message);
 
-/// @brief Absolute path to CPU library with user layers <br>
-/// It is a optional parameter
 DEFINE_string(l, "", custom_cpu_library_message);
 
-/// @brief Flag to output raw scoring results<br>
-/// It is an optional parameter
 DEFINE_bool(r, false, raw_output_message);
 
-/// @brief Define probability threshold for person/vehicle/bike crossroad detections <br>
-/// It is an optional parameter
 DEFINE_double(t, 0.5, threshold_output_message);
 
-/// @brief Define probability threshold for person/vehicle/bike crossroad detections <br>
-/// It is an optional parameter
 DEFINE_double(t_reid, 0.7, threshold_output_message_person_reid);
 
-/// @brief Flag to disable processed video showing<br>
-/// It is an optional parameter
 DEFINE_bool(no_show, false, no_show_processed_video);
 
-/// \brief Enables resizable input<br>
-/// It is an optional parameter
 DEFINE_bool(auto_resize, false, input_resizable_message);
 
 
