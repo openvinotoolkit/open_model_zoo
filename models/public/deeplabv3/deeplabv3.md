@@ -13,7 +13,7 @@ DeepLab is a state-of-art deep learning model for semantic image segmentation. F
 | Type              | Semantic segmentation|
 | GFLOPs            | 11.469               |
 | MParams           | 23.819               |
-| Source framework  | Tensorflow\*         |
+| Source framework  | TensorFlow\*         |
 
 ## Accuracy
 

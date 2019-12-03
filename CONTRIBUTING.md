@@ -146,7 +146,7 @@ This example shows how to download the classification model [DenseNet-121*](mode
 
 ```
 description: >-
-  This is an Tensorflow\* version of `densenet-121` model, one of the DenseNet
+  This is an TensorFlow\* version of `densenet-121` model, one of the DenseNet
   group of models designed to perform image classification. The weights were converted
   from DenseNet-Keras Models. For details see repository <https://github.com/pudae/tensorflow-densenet/>,
   paper <https://arxiv.org/pdf/1608.06993.pdf>
