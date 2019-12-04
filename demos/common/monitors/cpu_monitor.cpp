@@ -113,20 +113,21 @@ public:
     PerformanceCounter() : prevIdleCpuStat{getIdleCpuStat()}, prevTimePoint{std::chrono::steady_clock::now()} {}
 
     std::vector<double> getCpuLoad() {
-        std::vector<double> cpuLoad(nCores, 0);
         std::vector<unsigned long> idleCpuStat = getIdleCpuStat();
         auto timePoint = std::chrono::steady_clock::now();
         // don't update data too frequently which may result in negative values for cpuLoad.
         // It may happen when collectData() is called just after setHistorySize().
         if (timePoint - prevTimePoint > std::chrono::milliseconds{100}) {
+            std::vector<double> cpuLoad(nCores);
             for (std::size_t i = 0; i < idleCpuStat.size(); ++i) {
                 double idleDiff = idleCpuStat[i] - prevIdleCpuStat[i];
                 typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
                 cpuLoad[i] = 1.0
                     - idleDiff / clockTicks / std::chrono::duration_cast<Sec>(timePoint - prevTimePoint).count();
             }
+            return cpuLoad;
         }
-        return cpuLoad;
+        return {};
     }
 private:
     std::vector<unsigned long> prevIdleCpuStat;
@@ -136,17 +137,16 @@ private:
 #else
 // not implemented
 namespace {
-const std::size_t nCores{1};
+const std::size_t nCores{0};
 }
 
 class CpuMonitor::PerformanceCounter {
 public:
-    std::vector<double> getCpuLoad() {return {0.0};};
+    std::vector<double> getCpuLoad() {return {};};
 };
 #endif
 
 CpuMonitor::CpuMonitor() :
-    lastEnabled{false},
     samplesNumber{0},
     historySize{0},
     cpuLoadSum(nCores, 0) {}
@@ -168,14 +168,16 @@ void CpuMonitor::setHistorySize(std::size_t size) {
 void CpuMonitor::collectData() {
     std::vector<double> cpuLoad = performanceCounter->getCpuLoad();
 
-    for (std::size_t i = 0; i < cpuLoad.size(); ++i) {
-        cpuLoadSum[i] += cpuLoad[i];
-    }
-    ++samplesNumber;
+    if (!cpuLoad.empty()) {
+        for (std::size_t i = 0; i < cpuLoad.size(); ++i) {
+            cpuLoadSum[i] += cpuLoad[i];
+        }
+        ++samplesNumber;
 
-    cpuLoadHistory.push_back(std::move(cpuLoad));
-    if (cpuLoadHistory.size() > historySize) {
-        cpuLoadHistory.pop_front();
+        cpuLoadHistory.push_back(std::move(cpuLoad));
+        if (cpuLoadHistory.size() > historySize) {
+            cpuLoadHistory.pop_front();
+        }
     }
 }
 

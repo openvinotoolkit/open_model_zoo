@@ -19,7 +19,6 @@ public:
     std::vector<double> getMeanCpuLoad() const;
 
 private:
-    bool lastEnabled;
     unsigned samplesNumber;
     unsigned historySize;
     std::vector<double> cpuLoadSum;
