@@ -10,52 +10,34 @@
 #include <gflags/gflags.h>
 
 static const char help_message[] = "Print a usage message.";
-
 static const char input_message[] = "Required. Path to an image or video file, to a text file with paths to images, "
                                     "or to a webcamera device node (for example, /dev/video0).";
-
 static const char text_detection_model_message[] = "Required. Path to the Text Detection model (.xml) file.";
-
 static const char text_recognition_model_message[] = "Required. Path to the Text Recognition model (.xml) file.";
-
 static const char text_recognition_model_symbols_set_message[] = "Optional. Symbol set for the Text Recognition model.";
-
 static const char text_central_image_crop_message[] = "Optional. If it is set, then in case of absence of the Text Detector, "
                                                       "the Text Reconition model takes a central image crop as an input, but not full frame.";
-
 static const char image_width_for_text_detection_model_message[] = "Optional. Input image width for Text Detection model.";
-
 static const char image_height_for_text_detection_model_message[] = "Optional. Input image height for Text Detection model.";
-
 static const char text_recognition_threshold_message[] = "Optional. Specify a recognition confidence threshold. Text detection candidates with "
                                                          "text recognition confidence below specified threshold are rejected.";
-
 static const char pixel_classification_threshold_message[] = "Optional. Specify a confidence threshold for pixel classification. "
                                                              "Pixels with classification confidence below specified threshold are rejected.";
-
 static const char pixel_linkage_threshold_message[] = "Optional. Specify a confidence threshold for pixel linkage. "
                                                       "Pixels with linkage confidence below specified threshold are not linked.";
-
 static const char text_max_rectangles_number_message[] = "Optional. Maximum number of rectangles to recognize. "
                                                          "If it is negative, number of rectangles to recognize is not limited.";
-
 static const char text_detection_target_device_message[] = "Optional. Specify the target device for the Text Detection model to infer on "
                                                            "(the list of available devices is shown below). "
                                                            "The demo will look for a suitable plugin for a specified device. By default, it is CPU.";
-
 static const char text_recognition_target_device_message[] = "Optional. Specify the target device for the Text Recognition model to infer on "
                                                              "(the list of available devices is shown below). "
                                                              "The demo will look for a suitable plugin for a specified device. By default, it is CPU.";
-
 static const char custom_cpu_library_message[] = "Optional. Absolute path to a shared library with the CPU kernels implementation "
                                                  "for custom layers.";
-
 static const char custom_gpu_library_message[] = "Optional. Absolute path to the GPU kernels implementation for custom layers.";
-
 static const char no_show_message[] = "Optional. If it is true, then detected text will not be shown on image frame. By default, it is false.";
-
 static const char raw_output_message[] = "Optional. Output Inference results as raw values.";
-
 static const char input_data_type_message[] = "Required. Input data type: \"image\" (for a single image), "
                                               "\"list\" (for a text file where images paths are listed), "
                                               "\"video\" (for a saved video), "

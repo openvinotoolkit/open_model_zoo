@@ -10,44 +10,31 @@
 #include <gflags/gflags.h>
 
 static const char help_message[] = "Print a usage message.";
-
 static const char video_message[] = "Required. Path to a video or image file. Default value is \"cam\" to work with camera.";
-
 static const char person_vehicle_bike_detection_model_message[] = "Required. Path to the Person/Vehicle/Bike Detection Crossroad model (.xml) file.";
 static const char person_attribs_model_message[] = "Optional. Path to the Person Attributes Recognition Crossroad model (.xml) file.";
 static const char person_reid_model_message[] = "Optional. Path to the Person Reidentification Retail model (.xml) file.";
-
 static const char target_device_message[] = "Optional. Specify the target device for Person/Vehicle/Bike Detection. " \
                                             "The list of available devices is shown below. Default value is CPU. " \
                                             "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
                                             "The application looks for a suitable plugin for the specified device.";
-
 static const char target_device_message_person_attribs[] = "Optional. Specify the target device for Person Attributes Recognition. "\
                                                             "The list of available devices is shown below. Default value is CPU. " \
                                                             "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
                                                             "The application looks for a suitable plugin for the specified device.";
-
 static const char target_device_message_person_reid[] = "Optional. Specify the target device for Person Reidentification Retail. "\
                                                         "The list of available devices is shown below. Default value is CPU. " \
                                                         "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
                                                         "The application looks for a suitable plugin for the specified device.";
-
 static const char performance_counter_message[] = "Optional. Enables per-layer performance statistics.";
-
 static const char custom_cldnn_message[] = "Optional. For clDNN (GPU)-targeted custom kernels, if any. "\
-"Absolute path to the xml file with the kernels desc.";
-
+                                           "Absolute path to the xml file with the kernels desc.";
 static const char custom_cpu_library_message[] = "Optional. For MKLDNN (CPU)-targeted custom layers, if any. " \
-"Absolute path to a shared library with the kernels impl.";
-
+                                                 "Absolute path to a shared library with the kernels impl.";
 static const char threshold_output_message[] = "Optional. Probability threshold for person/vehicle/bike crossroad detections.";
-
 static const char threshold_output_message_person_reid[] = "Optional. Cosine similarity threshold between two vectors for person reidentification.";
-
 static const char raw_output_message[] = "Optional. Output Inference results as raw values.";
-
 static const char no_show_processed_video[] = "Optional. No show processed video.";
-
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 
 

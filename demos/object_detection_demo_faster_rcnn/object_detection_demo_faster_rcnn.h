@@ -15,25 +15,18 @@
 #include <chrono>
 
 static const char help_message[] = "Print a usage message.";
-
 static const char image_message[] = "Required. Path to a .bmp image.";
-
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
-
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). " \
-"Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
-"The demo will look for a suitable plugin for a specified device.";
-
+                                            "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+                                            "The demo will look for a suitable plugin for a specified device.";
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "\
-"Absolute path to the .xml file with the kernels descriptions.";
-
+                                           "Absolute path to the .xml file with the kernels descriptions.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. " \
-"Absolute path to a shared library with the kernels implementations.";
-
+                                                 "Absolute path to a shared library with the kernels implementations.";
 static const char bbox_layer_name_message[] = "Optional. The name of output box prediction layer. Default value is \"bbox_pred\"";
 static const char proposal_layer_name_message[] = "Optional. The name of output proposal layer. Default value is \"proposal\"";
 static const char prob_layer_name_message[] = "Optional. The name of output probability layer. Default value is \"cls_prob\"";
-
 static const char plugin_message[] = "Optional. Enables messages from a plugin";
 
 /// @brief Define flag for showing help message <br>

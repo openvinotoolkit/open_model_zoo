@@ -10,73 +10,49 @@
 #include <iostream>
 
 static const char help_message[] = "Print a usage message.";
-
 static const char video_message[] = "Required for video or image files input. Path to video or image files.";
-
 static const char detection_model_message[] = "Required. Path to the Vehicle and License Plate Detection model .xml file.";
 static const char vehicle_attribs_model_message[] = "Optional. Path to the Vehicle Attributes model .xml file.";
 static const char lpr_model_message[] = "Optional. Path to the License Plate Recognition model .xml file.";
-
 static const char target_device_message[] = "Optional. Specify the target device for Vehicle Detection "\
                                             "(the list of available devices is shown below). Default value is CPU. " \
                                             "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
                                             "The application looks for a suitable plugin for the specified device.";
-
 static const char target_device_message_vehicle_attribs[] = "Optional. Specify the target device for Vehicle Attributes "\
                                                             "(the list of available devices is shown below). Default value is CPU. " \
                                                             "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
                                                             "The application looks for a suitable plugin for the specified device.";
-
 static const char target_device_message_lpr[] = "Optional. Specify the target device for License Plate Recognition "\
                                                 "(the list of available devices is shown below). Default value is CPU. " \
                                                 "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
                                                 "The application looks for a suitable plugin for the specified device.";
-
 static const char performance_counter_message[] = "Optional. Enables per-layer performance statistics.";
-
 static const char raw_output_message[] = "Optional. Output inference results as raw values.";
-
 static const char thresh_output_message[] = "Optional. Probability threshold for vehicle and license plate detections.";
-
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "\
-"Absolute path to an .xml file with the kernels description.";
-
+                                           "Absolute path to an .xml file with the kernels description.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. " \
-"Absolute path to a shared library with the kernels implementation.";
-
+                                                 "Absolute path to a shared library with the kernels implementation.";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
-
 static const char input_resizable_message[] = "Optional. Enable resizable input with support of ROI crop and auto resize.";
-
 static const char ninfer_request_message[] = "Optional. Number of infer requests. 0 sets the number of infer requests equal to the number of inputs.";
-
 static const char num_cameras[] = "Required for web camera input. Maximum number of processed camera inputs (web cameras).";
-
 static const char fpga_device_ids_message[] = "Optional. Specify FPGA device IDs (0,1,n).";
-
 static const char loop_video_output_message[] = "Optional. Enable playing video on a loop.";
-
 static const char input_queue_size[] = "Optional. Number of allocated frames. It is a multiplier of the number of inputs.";
-
 static const char ninputs_message[] = "Optional. Specify the number of channels generated from provided inputs (with -i and -nc keys). "\
-"For example, if only one camera is provided, but -ni is set to 2, the demo will process frames as if they are captured from two cameras. "\
-"0 sets the number of input channels equal to the number of provided inputs.";
-
+                                      "For example, if only one camera is provided, but -ni is set to 2, the demo will process frames as if they are captured from two cameras. "\
+                                      "0 sets the number of input channels equal to the number of provided inputs.";
 static const char fps[] = "Optional. Set the playback speed not faster than the specified FPS. 0 removes the upper bound.";
-
 static const char worker_threads[] = "Optional. Set the number of threads including the main thread a Worker class will use.";
-
 static const char display_resolution_message[] = "Optional. Specify the maximum output window resolution.";
-
 static const char use_tag_scheduler_message[] = "Required for HDDL plugin only. "
                                                 "If not set, the performance on Intel(R) Movidius(TM) X VPUs will not be optimal. "
                                                 "Running each network on a set of Intel(R) Movidius(TM) X VPUs with a specific tag. "
                                                 "You must specify the number of VPUs for each network in the hddl_service.config file. "
                                                 "Refer to the corresponding README file for more information.";
-
 static const char infer_num_threads_message[] = "Optional. Number of threads to use for inference on the CPU "
                                                 "(including HETERO and MULTI cases).";
-
 static const char infer_num_streams_message[] = "Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode "
                                                 "(for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)";
 
