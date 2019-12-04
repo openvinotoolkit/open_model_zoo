@@ -10,7 +10,7 @@
 #include <iostream>
 
 static const char help_message[] = "Print a usage message.";
-static const char image_message[] = "Required. Path to an .bmp image.";
+static const char image_message[] = "Required. Path to a .bmp image.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";\
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). " \
                                             "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
