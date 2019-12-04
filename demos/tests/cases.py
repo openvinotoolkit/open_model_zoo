@@ -113,10 +113,12 @@ NATIVE_DEMOS = [
         TestCase(options={'-m': ModelArg('human-pose-estimation-0001')}),
     )),
 
-    NativeDemo(subdirectory='imagenet_classification_demo', device_keys=['-d'], test_cases=combine_cases(
+    NativeDemo(subdirectory='imagenet_classification_demo',
+            device_keys=['-d'],
+            test_cases=combine_cases(
         TestCase(options={
             '-no_show': None,
-            '-no_show_time': 5,
+            '-no_show_time': '5',
             '-i': ImageDirectoryArg('imagenet-classification')}),
         single_option_cases('-m',
             ModelArg('alexnet'),
