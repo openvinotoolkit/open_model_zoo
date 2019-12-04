@@ -297,6 +297,12 @@ PYTHON_DEMOS = [
         TestCase(options={'-m_reid': ModelArg('face-reidentification-retail-0095')}),
     )),
 
+    PythonDemo(subdirectory='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+                          '-i': DataPatternArg('human-pose-estimation')}),
+        TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
+    )),
+
     PythonDemo(subdirectory='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show':None,
                           '-m': ModelArg('image-retrieval-0001')}),
