@@ -19,8 +19,7 @@ static const char custom_cldnn_message[] = "Required for GPU custom kernels. "\
                                            "Absolute path to the .xml file with the kernels descriptions.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. " \
                                                  "Absolute path to a shared library with the kernels implementations.";
-
-static constexpr char config_message[] = "Path to the configuration file. Default value: \"config\".";
+static const char config_message[] = "Path to the configuration file. Default value: \"config\".";
 
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
