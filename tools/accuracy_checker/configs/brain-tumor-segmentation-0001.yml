@@ -7,7 +7,8 @@ models:
           - FP32
         model:   public/brain-tumor-segmentation-0001/FP32/brain-tumor-segmentation-0001.xml
         weights: public/brain-tumor-segmentation-0001/FP32/brain-tumor-segmentation-0001.bin
-        adapter: brain_tumor_segmentation
+        adapter:
+            type: brain_tumor_segmentation
 
       - framework: dlsdk
         tags:
@@ -18,7 +19,18 @@ models:
         adapter: brain_tumor_segmentation
 
     datasets:
-      - name: BraTS
+      - name: BraTS_2017
+        preprocessing:
+          - type: crop_brats
+          - type: normalize_brats
+            masked: True
+            cutoff: 5
+            shift_value: 5
+            normalize_value: 10
+          - type: resize3d
+            size: (128,128,128)
+        postprocessing:
+          - type: segmentation_prediction_resample
 
         metrics:
           # ground truth mean            [0.9239, 0.7114, 0.8205, 0.7271]
@@ -26,6 +38,7 @@ models:
           # ground truth median             [0.9316, 0.7714, 0.8535, 0.8456]
           # UNCROPPED: ground truth median  [0.9339, 0.7918, 0.8603, 0.8576]
           - type: dice_index
+            output_order: [0,2,1,3]
             median: True
             presenter: print_vector
 

@@ -287,7 +287,10 @@ class NiftiImageReader(BaseReader):
         image = np.array(nib_image.dataobj)
         if len(image.shape) != 4:  # Make sure 4D
             image = np.expand_dims(image, -1)
-        image = np.swapaxes(np.array(image), 0, -2)
+        image = np.transpose(image, (3, 0, 1, 2))
+
+        order = [1, 3, 0, 2] if image.shape[0] == 4 else [0]
+        image = image[order, :, :, :]
 
         return image
 

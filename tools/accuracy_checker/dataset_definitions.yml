@@ -576,6 +576,14 @@ datasets:
     annotation: brats.pickle
     dataset_meta: brats.json
 
+  - name: BraTS_2017
+    data_source: BraTS_2017
+    reader: nifti_reader
+    annotation_conversion:
+      converter: brats
+      data_dir: BraTS_2017
+    annotation: brats.pickle
+
   - name: product_detection
     annotation: product_detection.pickle
     dataset_meta: product_detection.json

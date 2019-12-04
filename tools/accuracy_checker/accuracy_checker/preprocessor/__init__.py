@@ -40,6 +40,9 @@ __all__ = [
     'Preprocessor',
     'GeometricOperationMetadata',
 
+    'Resize',
+    'Resize3D',
+    'AutoResize',
     'Flip',
     'Crop',
     'CropRect',
@@ -47,6 +50,7 @@ __all__ = [
     'PointAligner',
     'Tiling',
     'Crop3D',
+    'CropBraTS',
     'TransformedCropWithAutoScale',
     'ImagePyramid',
     'BgrToGray',
@@ -57,6 +61,7 @@ __all__ = [
 
     'Normalize3d',
     'Normalize',
+    'NormalizeBrats',
 
     'DecodeByVocabulary',
     'PadWithEOS',

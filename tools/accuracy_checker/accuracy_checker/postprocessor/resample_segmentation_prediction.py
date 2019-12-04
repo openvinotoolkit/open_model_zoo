@@ -33,19 +33,23 @@ class SegmentationPredictionResample(Postprocessor):
     prediction_types = (BrainTumorSegmentationPrediction, )
     annotation_types = (BrainTumorSegmentationAnnotation, )
 
-    def process_image(self, annotation, prediction):
+    def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
         if not len(annotation) == len(prediction) == 1:
             raise RuntimeError('Postprocessor {} does not support multiple annotation and/or prediction.'
                                .format(self.__provider__))
 
-        if not annotation[0].box:
+        if annotation[0].box:
+            box = annotation[0].box
+        elif image_metadata['box'] is not None:
+            box = image_metadata['box']
+        else:
             raise ValueError('Postprocessor {} not found bounding box.'.format(self.__provider__))
 
         annotation_ = annotation[0]
         prediction_ = prediction[0]
 
-        low = annotation_.box[0, :]
-        high = annotation_.box[1, :]
+        low = box[0, :]
+        high = box[1, :]
         diff = (high - low).astype(np.int32)
 
         annotation_shape = annotation_.mask.shape

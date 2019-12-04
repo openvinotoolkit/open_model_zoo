@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 
-from ..config import BoolField, ConfigError
+from ..config import BoolField, ConfigError, ListField
 from ..representation import (
     SegmentationAnnotation,
     SegmentationPrediction,
@@ -192,7 +192,9 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         parameters.update({
             'mean': BoolField(optional=True, default=True, description='Allows calculation mean value.'),
             'median': BoolField(optional=True, default=False, description='Allows calculation median value.'),
-            'use_argmax': BoolField(optional=True, default=True, description="Allows to use argmax for prediction mask")
+            'use_argmax': BoolField(optional=True, default=False, description="Allows to use argmax for prediction mask"),
+            'output_order': ListField(optional=True, default=[0,1,2,3],
+                                      description="Order of network output labels according to dataset labels")
         })
 
         return parameters
@@ -201,6 +203,7 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         self.mean = self.get_value_from_config('mean')
         self.median = self.get_value_from_config('median')
         self.use_argmax = self.get_value_from_config('use_argmax')
+        self.output_order = self.get_value_from_config('output_order')
 
         labels = list(self.dataset.labels.values()) if self.dataset.metadata else ['overall']
         self.classes = len(labels)
@@ -219,9 +222,9 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         annotation_data = annotation.mask
         prediction_data = np.argmax(prediction.mask, axis=0) if self.use_argmax else prediction.mask.astype('int64')
 
-        for c in range(1, self.classes):
+        for c, p in enumerate(self.output_order[1:],1):
             annotation_data_ = (annotation_data == c)
-            prediction_data_ = (prediction_data == c)
+            prediction_data_ = (prediction_data == p)
 
             intersection_count = np.logical_and(annotation_data_, prediction_data_).sum()
             union_count = annotation_data_.sum() + prediction_data_.sum()
