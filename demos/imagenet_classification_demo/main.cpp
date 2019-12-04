@@ -293,34 +293,36 @@ int main(int argc, char *argv[]) {
         GridMat gridMat = GridMat(inputImgs.size(), cv::Size(width, height));
 
         cv::Mat tmpMat;
-        char key;
+        char key = 0;
         unsigned fpsTestSize = 12 * batchSize;
         double fpsSum = 0;
         double avgFPS = 0;
-        unsigned gridMatSize;
 
         for (size_t i = 0; i < fpsTestSize; i++) {
-            std::unique_lock<std::mutex> lock(mutex);
-            while (showMats.empty()) {   
-                condVar.wait(lock);
-            }
+            {
+                std::unique_lock<std::mutex> lock(mutex);
+                while (showMats.empty()) {   
+                    condVar.wait(lock);
+                }
 
-            gridMat.listUpdate(showMats);
-            fpsSum += 1. / (((cv::getTickCount() - startTime) / cv::getTickFrequency()) / framesNum);
+                gridMat.listUpdate(showMats);
+                fpsSum += 1. / (((cv::getTickCount() - startTime) / cv::getTickFrequency()) / framesNum);
+            }
 
             if (!(FLAGS_no_show || FLAGS_delay == -1)) {
                 gridMat.textUpdate(fpsSum / (i + 1), true);
                 cv::imshow("main", gridMat.getMat());
+                key = static_cast<char>(cv::waitKey(1));
             }
-
-            key = static_cast<char>(cv::waitKey(1));
         } 
 
         avgFPS = fpsSum / fpsTestSize;
-        gridMatSize = static_cast<unsigned>(round(std::sqrt(avgFPS)));
-        gridMat = GridMat(inputImgs.size(), cv::Size(width, height), cv::Size(16, 9), gridMatSize);
-
-        int newDelay = ((FLAGS_delay == -1) ? avgFPS / (gridMatSize * gridMatSize) * 1000 : FLAGS_delay);
+        unsigned gridMatScale = static_cast<unsigned>(round(std::sqrt(avgFPS)));
+        gridMat = GridMat(inputImgs.size(), cv::Size(width, height), cv::Size(16, 9), gridMatScale);
+        cv::Size gridMatSize = gridMat.getSize();
+        int newDelay = ((FLAGS_delay == -1)
+                        ? avgFPS / (gridMatSize.width * (gridMatSize.height / FLAGS_b)) * 1000
+                        : FLAGS_delay);
         unsigned fpsResultsMaxCount = 1000;
         unsigned currentResultNum = 0;
         double fps;
@@ -329,20 +331,21 @@ int main(int argc, char *argv[]) {
         int elapsedTime = 0;
 
         do {
-            std::unique_lock<std::mutex> lock(mutex);
-            while (showMats.empty()) {   
-                condVar.wait(lock);
-            }
+            {
+                std::unique_lock<std::mutex> lock(mutex);
+                while (showMats.empty()) {
+                    condVar.wait(lock);
+                }
 
-            gridMat.listUpdate(showMats);
-            fps = 1. / (((cv::getTickCount() - startTime) / cv::getTickFrequency()) / framesNum);
+                gridMat.listUpdate(showMats);
+                fps = 1. / (((cv::getTickCount() - startTime) / cv::getTickFrequency()) / framesNum);
+            }
 
             if (!FLAGS_no_show) {
                 gridMat.textUpdate(fpsSum / (currentResultNum + 1), false);
                 cv::imshow("main", gridMat.getMat());
+                key = static_cast<char>(cv::waitKey(newDelay));
             }
-                    
-            key = static_cast<char>(cv::waitKey(newDelay));
 
             if (currentResultNum >= fpsResultsMaxCount) {
                 fpsSum -= fpsQueue.front();

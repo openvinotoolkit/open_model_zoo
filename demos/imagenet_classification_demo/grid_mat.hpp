@@ -20,8 +20,8 @@ public:
                      const cv::Size aspectRatio = cv::Size{16, 9},
                      int scale = 2
                      ):
-                     size{static_cast<int>(std::ceil(scale * scale / double(aspectRatio.height))),
-                          static_cast<int>(std::ceil(scale * scale / double(aspectRatio.width)))},
+                     size{static_cast<int>(std::ceil(1. * scale * scale / aspectRatio.height)),
+                          static_cast<int>(std::ceil(1. * scale * scale / aspectRatio.width))},
                      currSourceID{0},
                      rectangleHeight{30} {
         if (size.width % inputImgsCount == 0) { // fix 'static GridMat' problem
@@ -31,18 +31,19 @@ public:
             size.height++;
         }
 
-        cellSize = std::min(maxDisp.width / size.width, maxDisp.height / size.height);
+        int minCellSize = std::min(maxDisp.width / size.width, maxDisp.height / size.height);
+        cellSize = cv::Size(minCellSize, minCellSize);
 
         for (int i = 0; i < size.width; i++) {
             for (int j = 0; j < size.height; j++) {
                 cv::Point p;
-                p.x = cellSize * i;
-                p.y = rectangleHeight + (cellSize * j);
+                p.x = cellSize.width * i;
+                p.y = rectangleHeight + (cellSize.height * j);
                 points.push_back(p);
             }
         }
 
-        outImg.create((cellSize * size.height) + rectangleHeight, cellSize * size.width, CV_8UC3);
+        outImg.create((cellSize.height * size.height) + rectangleHeight, cellSize.width * size.width, CV_8UC3);
         outImg.setTo(0);
     }
 
@@ -60,7 +61,6 @@ public:
         // Draw a rectangle
         cv::Point p1 = cv::Point(0, 0);
         cv::Point p2 = cv::Point(outImg.cols, rectangleHeight);
-         
         rectangle(outImg, p1, p2, cv::Scalar(0, 0, 0), cv::FILLED);
         
         // Show FPS
@@ -83,11 +83,30 @@ public:
 
     cv::Mat getMat() {
         while (!updateList.empty()) {
-            cv::Mat cell = outImg(cv::Rect(points[currSourceID], cv::Size{cellSize, cellSize}));
             cv::Mat frame = updateList.front();
             updateList.pop_front();
 
-            cv::resize(frame, cell, cv::Size{cellSize, cellSize});
+            if (updateList.empty()) {
+                if (!prevImg.empty()) {
+                    int prevSourceID = ((currSourceID < FLAGS_b) ? points.size() - 1 : currSourceID - FLAGS_b);
+                    cv::resize(prevImg,
+                               outImg(cv::Rect(points[prevSourceID], cellSize)),
+                               cellSize);
+                }
+
+                prevImg = frame;
+                
+                int thickness =  static_cast<int>(10. * frame.cols / cellSize.width);
+                copyMakeBorder(frame,
+                               frame,
+                               thickness, thickness, thickness, thickness,
+                               cv::BORDER_CONSTANT,
+                               cv::Scalar(0, 255, 0));
+            }
+
+            cv::resize(frame,
+                       outImg(cv::Rect(points[currSourceID], cellSize)),
+                       cellSize);
             
             if (currSourceID == points.size() - 1)
                 currSourceID = 0;
@@ -100,10 +119,11 @@ public:
 
 private:
     cv::Mat outImg;
+    cv::Mat prevImg;
     std::list<cv::Mat> updateList;
     cv::Size size;
-    int cellSize;
+    cv::Size cellSize;
     size_t currSourceID;
     std::vector<cv::Point> points;
-    size_t rectangleHeight;
+    unsigned rectangleHeight;
 };
