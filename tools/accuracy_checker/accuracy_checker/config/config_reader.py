@@ -231,7 +231,7 @@ class ConfigReader:
         raw_pipelines = local_config['pipelines']
         for pipeline in raw_pipelines:
             device_infos = pipeline.get('device_info', [])
-            if not device_infos:
+            if not device_infos and 'target_devices' in args and args.target_devices:
                 device_infos = [{'device': device} for device in args.target_devices]
             per_device_pipelines = []
             for device_info in device_infos:
@@ -373,6 +373,11 @@ class ConfigReader:
             if models_prefix:
                 launcher_entry['_models_prefix'] = models_prefix
 
+            if 'deprecated_ir_v7' in arguments and arguments.deprecated_ir_v7:
+                mo_flags = launcher_entry.get('mo_flags', [])
+                mo_flags.append('generate_deprecated_IR_V7')
+                launcher_entry['mo_flags'] = mo_flags
+
             if 'converted_models' not in arguments or not arguments.converted_models:
                 return launcher_entry
 
@@ -433,6 +438,7 @@ class ConfigReader:
         additional_keys = [
             'model_optimizer', 'tf_custom_op_config_dir',
             'tf_obj_detection_api_pipeline_config_path',
+            'transformations_config_dir',
             'cpu_extensions_mode', 'vpu_log_level'
         ]
         arguments_dict = arguments if isinstance(arguments, dict) else vars(arguments)

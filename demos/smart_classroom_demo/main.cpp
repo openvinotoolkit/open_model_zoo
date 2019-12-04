@@ -431,7 +431,101 @@ bool checkDynamicBatchSupport(const Core& ie, const std::string& device)  {
     return true;
 }
 
-}  // namespace
+class FaceRecognizer {
+public:
+    virtual ~FaceRecognizer() = default;
+
+    virtual bool LabelExists(const std::string &label) const = 0;
+    virtual std::string GetLabelByID(int id) const = 0;
+    virtual std::vector<std::string> GetIDToLabelMap() const = 0;
+
+    virtual std::vector<int> Recognize(const cv::Mat& frame, const detection::DetectedObjects& faces) = 0;
+
+    virtual void PrintPerformanceCounts(
+        const std::string &landmarks_device, const std::string &reid_device) = 0;
+};
+
+class FaceRecognizerNull : public FaceRecognizer {
+public:
+    bool LabelExists(const std::string &) const override { return false; }
+
+    std::string GetLabelByID(int) const override {
+        return EmbeddingsGallery::unknown_label;
+    }
+
+    std::vector<std::string> GetIDToLabelMap() const override { return {}; }
+
+    std::vector<int> Recognize(const cv::Mat&, const detection::DetectedObjects& faces) override {
+        return std::vector<int>(faces.size(), EmbeddingsGallery::unknown_id);
+    }
+
+    void PrintPerformanceCounts(
+        const std::string &, const std::string &) override {}
+};
+
+class FaceRecognizerDefault : public FaceRecognizer {
+public:
+    FaceRecognizerDefault(
+            const CnnConfig& landmarks_detector_config,
+            const CnnConfig& reid_config,
+            const detection::DetectorConfig& face_registration_det_config,
+            const std::string& face_gallery_path,
+            double reid_threshold,
+            int min_size_fr,
+            bool crop_gallery,
+            bool greedy_reid_matching
+    )
+        : landmarks_detector(landmarks_detector_config),
+          face_reid(reid_config),
+          face_gallery(face_gallery_path, reid_threshold, min_size_fr, crop_gallery,
+                       face_registration_det_config, landmarks_detector, face_reid,
+                       greedy_reid_matching)
+    {
+        if (face_gallery.size() == 0) {
+            slog::warn << "Face reid gallery is empty!" << slog::endl;
+        } else {
+            slog::info << "Face reid gallery size: " << face_gallery.size() << slog::endl;
+        }
+    }
+
+    bool LabelExists(const std::string &label) const override {
+        return face_gallery.LabelExists(label);
+    }
+
+    std::string GetLabelByID(int id) const override {
+        return face_gallery.GetLabelByID(id);
+    }
+
+    std::vector<std::string> GetIDToLabelMap() const override {
+        return face_gallery.GetIDToLabelMap();
+    }
+
+    std::vector<int> Recognize(const cv::Mat& frame, const detection::DetectedObjects& faces) override {
+        std::vector<cv::Mat> face_rois;
+
+        for (const auto& face : faces) {
+            face_rois.push_back(frame(face.rect));
+        }
+
+        std::vector<cv::Mat> landmarks, embeddings;
+
+        landmarks_detector.Compute(face_rois, &landmarks, cv::Size(2, 5));
+        AlignFaces(&face_rois, &landmarks);
+        face_reid.Compute(face_rois, &embeddings);
+        return face_gallery.GetIDsByEmbeddings(embeddings);
+    }
+
+    void PrintPerformanceCounts(
+            const std::string &landmarks_device, const std::string &reid_device) {
+        landmarks_detector.PrintPerformanceCounts(landmarks_device);
+        face_reid.PrintPerformanceCounts(reid_device);
+    }
+
+private:
+    VectorCNN landmarks_detector;
+    VectorCNN face_reid;
+    EmbeddingsGallery face_gallery;
+};
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
@@ -455,6 +549,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
+}  // namespace
 
 int main(int argc, char* argv[]) {
     try {
@@ -574,56 +669,52 @@ int main(int argc, char* argv[]) {
         face_config.increase_scale_y = static_cast<float>(FLAGS_exp_r_fd);
         detection::FaceDetection face_detector(face_config);
 
-        // Load face detector for face database registration
-        detection::DetectorConfig face_registration_det_config(fd_model_path, fd_weights_path);
-        face_registration_det_config.deviceName = FLAGS_d_fd;
-        face_registration_det_config.ie = ie;
-        face_registration_det_config.enabled = !fd_model_path.empty();
-        face_registration_det_config.is_async = false;
-        face_registration_det_config.confidence_threshold = static_cast<float>(FLAGS_t_reg_fd);
-        face_registration_det_config.increase_scale_x = static_cast<float>(FLAGS_exp_r_fd);
-        face_registration_det_config.increase_scale_y = static_cast<float>(FLAGS_exp_r_fd);
-        detection::FaceDetection face_detector_for_registration(face_registration_det_config);
+        std::unique_ptr<FaceRecognizer> face_recognizer;
 
-        // Load face reid
-        CnnConfig reid_config(fr_model_path, fr_weights_path);
-        reid_config.enabled = face_config.enabled && !fr_model_path.empty() && !lm_model_path.empty();
-        reid_config.deviceName = FLAGS_d_reid;
-        if (checkDynamicBatchSupport(ie, FLAGS_d_reid))
-            reid_config.max_batch_size = 16;
-        else
-            reid_config.max_batch_size = 1;
-        reid_config.ie = ie;
-        VectorCNN face_reid(reid_config);
+        if (!fd_model_path.empty() && !fr_model_path.empty() && !lm_model_path.empty()) {
+            // Create face recognizer
 
-        // Load landmarks detector
-        CnnConfig landmarks_config(lm_model_path, lm_weights_path);
-        landmarks_config.max_batch_size = 16;
-        landmarks_config.enabled = face_config.enabled && reid_config.enabled && !lm_model_path.empty();
-        landmarks_config.deviceName = FLAGS_d_lm;
-        if (checkDynamicBatchSupport(ie, FLAGS_d_lm))
-            landmarks_config.max_batch_size = 16;
-        else
-            landmarks_config.max_batch_size = 1;
-        landmarks_config.ie = ie;
-        VectorCNN landmarks_detector(landmarks_config);
+            detection::DetectorConfig face_registration_det_config(fd_model_path, fd_weights_path);
+            face_registration_det_config.deviceName = FLAGS_d_fd;
+            face_registration_det_config.ie = ie;
+            face_registration_det_config.is_async = false;
+            face_registration_det_config.confidence_threshold = static_cast<float>(FLAGS_t_reg_fd);
+            face_registration_det_config.increase_scale_x = static_cast<float>(FLAGS_exp_r_fd);
+            face_registration_det_config.increase_scale_y = static_cast<float>(FLAGS_exp_r_fd);
 
-        // Create face gallery
-        EmbeddingsGallery face_gallery(FLAGS_fg, FLAGS_t_reid, FLAGS_min_size_fr, FLAGS_crop_gallery,
-                                       face_detector_for_registration, landmarks_detector, face_reid,
-                                       FLAGS_greedy_reid_matching);
+            CnnConfig reid_config(fr_model_path, fr_weights_path);
+            reid_config.deviceName = FLAGS_d_reid;
+            if (checkDynamicBatchSupport(ie, FLAGS_d_reid))
+                reid_config.max_batch_size = 16;
+            else
+                reid_config.max_batch_size = 1;
+            reid_config.ie = ie;
 
-        if (!reid_config.enabled) {
-            slog::warn << "Face recognition models are disabled!"  << slog::endl;
-        } else if (!face_gallery.size()) {
-            slog::warn << "Face reid gallery is empty!"  << slog::endl;
+            CnnConfig landmarks_config(lm_model_path, lm_weights_path);
+            landmarks_config.deviceName = FLAGS_d_lm;
+            if (checkDynamicBatchSupport(ie, FLAGS_d_lm))
+                landmarks_config.max_batch_size = 16;
+            else
+                landmarks_config.max_batch_size = 1;
+            landmarks_config.ie = ie;
+
+            face_recognizer.reset(new FaceRecognizerDefault(
+                landmarks_config, reid_config,
+                face_registration_det_config,
+                FLAGS_fg, FLAGS_t_reid, FLAGS_min_size_fr, FLAGS_crop_gallery, FLAGS_greedy_reid_matching));
+
+            if (actions_type == TEACHER && !face_recognizer->LabelExists(teacher_id)) {
+                slog::err << "Teacher id does not exist in the gallery!" << slog::endl;
+                return 1;
+            }
         } else {
-            slog::info << "Face reid gallery size: " << face_gallery.size() << slog::endl;
-        }
+            slog::warn << "Face recognition models are disabled!" << slog::endl;
+            if (actions_type == TEACHER) {
+                slog::err << "Face recognition must be enabled to recognize teacher actions." << slog::endl;
+                return 1;
+            }
 
-        if (actions_type == TEACHER && !face_gallery.LabelExists(teacher_id)) {
-            slog::err << "Teacher id does not exist in the gallery!"  << slog::endl;
-            return 1;
+            face_recognizer.reset(new FaceRecognizerNull);
         }
 
         // Create tracker for reid
@@ -835,20 +926,12 @@ int main(int argc, char* argv[]) {
                     action_detector.submitRequest();
                 }
 
-                std::vector<cv::Mat> face_rois, landmarks, embeddings;
+                auto ids = face_recognizer->Recognize(prev_frame, faces);
+
                 TrackedObjects tracked_face_objects;
 
-                for (const auto& face : faces) {
-                    face_rois.push_back(prev_frame(face.rect));
-                }
-                landmarks_detector.Compute(face_rois, &landmarks, cv::Size(2, 5));
-                AlignFaces(&face_rois, &landmarks);
-                face_reid.Compute(face_rois, &embeddings);
-                auto ids = face_gallery.GetIDsByEmbeddings(embeddings);
-
                 for (size_t i = 0; i < faces.size(); i++) {
-                    int label = ids.empty() ? EmbeddingsGallery::unknown_id : ids[i];
-                    tracked_face_objects.emplace_back(faces[i].rect, faces[i].confidence, label);
+                    tracked_face_objects.emplace_back(faces[i].rect, faces[i].confidence, ids[i]);
                 }
                 tracker_reid.Process(prev_frame, tracked_face_objects, work_num_frames);
 
@@ -871,9 +954,11 @@ int main(int argc, char* argv[]) {
                 std::map<int, int> frame_face_obj_id_to_action;
                 for (size_t j = 0; j < tracked_faces.size(); j++) {
                     const auto& face = tracked_faces[j];
+                    std::string face_label = face_recognizer->GetLabelByID(face.label);
+
                     std::string label_to_draw;
                     if (face.label != EmbeddingsGallery::unknown_id)
-                        label_to_draw += face_gallery.GetLabelByID(face.label);
+                        label_to_draw += face_label;
 
                     int person_ind = GetIndexOfTheNearestPerson(face, tracked_actions);
                     int action_ind = default_action_index;
@@ -887,11 +972,11 @@ int main(int argc, char* argv[]) {
                         }
                         frame_face_obj_id_to_action[face.object_id] = action_ind;
                         sc_visualizer.DrawObject(face.rect, label_to_draw, red_color, white_color, true);
-                        logger.AddFaceToFrame(face.rect, face_gallery.GetLabelByID(face.label), "");
+                        logger.AddFaceToFrame(face.rect, face_label, "");
                     }
 
                     if ((actions_type == TEACHER) && (person_ind >= 0)) {
-                        if (face_gallery.GetLabelByID(face.label) == teacher_id) {
+                        if (face_label == teacher_id) {
                             teacher_track_id = tracked_actions[person_ind].object_id;
                         } else if (teacher_track_id == tracked_actions[person_ind].object_id) {
                             teacher_track_id = -1;
@@ -950,8 +1035,9 @@ int main(int argc, char* argv[]) {
             action_detector.wait();
             action_detector.PrintPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_act));
             face_detector.PrintPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_fd));
-            face_reid.PrintPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
-            landmarks_detector.PrintPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_lm));
+            face_recognizer->PrintPerformanceCounts(
+                getFullDeviceName(mapDevices, FLAGS_d_lm),
+                getFullDeviceName(mapDevices, FLAGS_d_reid));
         }
 
         if (actions_type == STUDENT) {
@@ -961,7 +1047,9 @@ int main(int argc, char* argv[]) {
             std::vector<Track> new_face_tracks = UpdateTrackLabelsToBestAndFilterOutUnknowns(face_tracks);
             std::map<int, int> face_track_id_to_label = GetMapFaceTrackIdToLabel(new_face_tracks);
 
-            if (reid_config.enabled && face_gallery.size() > 0) {
+            std::vector<std::string> face_id_to_label_map = face_recognizer->GetIDToLabelMap();
+
+            if (!face_id_to_label_map.empty()) {
                 std::map<int, FrameEventsTrack> face_obj_id_to_actions_track;
                 ConvertActionMapsToFrameEventTracks(face_obj_id_to_action_maps, default_action_index,
                                                     &face_obj_id_to_actions_track);
@@ -976,7 +1064,7 @@ int main(int argc, char* argv[]) {
                 slog::info << "Final ID->events mapping" << slog::endl;
                 logger.DumpTracks(face_obj_id_to_events,
                                   actions_map, face_track_id_to_label,
-                                  face_gallery.GetIDToLabelMap());
+                                  face_id_to_label_map);
 
                 std::vector<std::map<int, int>> face_obj_id_to_smoothed_action_maps;
                 ConvertRangeEventsTracksToActionMaps(end_frame, face_obj_id_to_events,
@@ -986,7 +1074,7 @@ int main(int argc, char* argv[]) {
                 logger.DumpDetections(cap.GetVideoPath(), frame.size(), work_num_frames,
                                       new_face_tracks,
                                       face_track_id_to_label,
-                                      actions_map, face_gallery.GetIDToLabelMap(),
+                                      actions_map, face_id_to_label_map,
                                       face_obj_id_to_smoothed_action_maps);
             }
         }

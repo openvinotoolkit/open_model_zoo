@@ -79,16 +79,22 @@ class HumanPose3dAdapter(Adapter):
         )
         for identifier, features, heatmap, paf, meta in raw_output:
             poses_2d = self._extract_poses_2d(heatmap, paf, meta, identifier)
+            if poses_2d.size == 0:
+                result.append(PoseEstimation3dPrediction(identifier, poses_2d.x_values, poses_2d.y_values))
+                continue
+
             height, width, _ = meta['image_size']
             scale_y = height / features.shape[1]
             scale_x = width / features.shape[2]
             panoptic_poses_3d, translations, panoptic_poses_2d = HumanPose3dAdapter._parse_poses(
-                features, poses_2d, scale_y, scale_x, 1 / scale_x)
+                features, poses_2d, scale_y, scale_x, 1 / scale_x
+            )
             frame_result = PoseEstimation3dPrediction(
                 identifier, panoptic_poses_2d[:, 0:-1:3], panoptic_poses_2d[:, 1:-1:3], panoptic_poses_2d[:, 2:-1:3],
                 panoptic_poses_2d[:, -1], x_3d_values=panoptic_poses_3d[:, 0::4],
                 y_3d_values=panoptic_poses_3d[:, 1::4], z_3d_values=panoptic_poses_3d[:, 2::4],
-                translations=translations)
+                translations=translations
+            )
             result.append(frame_result)
 
         return result

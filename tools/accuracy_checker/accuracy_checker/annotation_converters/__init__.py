@@ -27,7 +27,7 @@ from .vgg_face_regression import VGGFaceRegressionConverter
 from .super_resolution_converter import SRConverter, SRMultiFrameConverter
 from .imagenet import ImageNetFormatConverter
 from .icdar import ICDAR13RecognitionDatasetConverter, ICDAR15DetectionDatasetConverter
-from .ms_coco import MSCocoDetectionConverter, MSCocoKeypointsConverter
+from .ms_coco import MSCocoDetectionConverter, MSCocoKeypointsConverter, MSCocoSingleKeypointsConverter
 from .cityscapes import CityscapesConverter
 from .ncf_converter import MovieLensConverter
 from .brats import BratsConverter, BratsNumpyConverter
@@ -71,6 +71,7 @@ __all__ = [
     'ICDAR13RecognitionDatasetConverter',
     'ICDAR15DetectionDatasetConverter',
     'MSCocoKeypointsConverter',
+    'MSCocoSingleKeypointsConverter',
     'MSCocoDetectionConverter',
     'CityscapesConverter',
     'MovieLensConverter',

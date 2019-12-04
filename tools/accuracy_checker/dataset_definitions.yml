@@ -370,6 +370,14 @@ datasets:
       data_dir: ICDAR15_DET/gt
     annotation: icdar15_detection.pickle
 
+  - name: ICDAR2015_word_spotting
+    data_source: ICDAR15_DET/ch4_test_images
+    annotation_conversion:
+      converter: icdar_detection
+      word_spotting: True
+      data_dir: ICDAR15_DET/gt
+    annotation: icdar15_detection.pickle
+
   - name: ICDAR2013
     data_source: ICDAR13_REC/Challenge2_Test_Task3_Images
     annotation_conversion:
@@ -384,6 +392,13 @@ datasets:
       converter: market1501_reid
       data_dir: Market-1501-v15.09.15
     annotation: market1501_reid.pickle
+
+  - name: globalme-reid
+    data_source: GlobalMe-reID
+    annotation_conversion:
+      converter: market1501_reid
+      data_dir: globalme-reid/GlobalMe-reID
+    annotation: globalme-reid.pickle
 
   - name: vgg2face
     data_source: VGGFaces2/test
@@ -568,3 +583,14 @@ datasets:
 
     metrics:
       - type: coco_precision
+
+  - name: ms_coco_single_keypoints
+    data_source: val2017
+    annotation_conversion:
+      converter: mscoco_single_keypoints
+      annotation_file: person_keypoints_val2017.json
+    annotation: mscoco_single_keypoints.pickle
+    dataset_meta: mscoco_single_keypoints.json
+    metrics:
+      - name: AP
+        type: coco_orig_keypoints_precision

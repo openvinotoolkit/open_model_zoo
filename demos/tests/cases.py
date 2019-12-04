@@ -242,8 +242,14 @@ NATIVE_DEMOS = [
                     # -teacher_ac is ignored thus run the test just with default actions pretending it's about students
                     TestCase(options={'-m_act': ModelArg('person-detection-action-recognition-teacher-0002')}),
                 ],
-                single_option_cases('-m_lm', None, ModelArg('landmarks-regression-retail-0009')),
-                single_option_cases('-m_reid', None, ModelArg('face-reidentification-retail-0095'))),
+                [
+                    TestCase(options={}),
+                    TestCase(options={
+                        '-m_lm': ModelArg('landmarks-regression-retail-0009'),
+                        '-m_reid': ModelArg('face-reidentification-retail-0095'),
+                    }),
+                ],
+            ),
             TestCase(options={'-m_act': ModelArg('person-detection-raisinghand-recognition-0001'), '-a_top': '5'}),
         ],
     )),

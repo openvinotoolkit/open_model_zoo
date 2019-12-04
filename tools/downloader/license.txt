@@ -3177,7 +3177,7 @@ License terms:
 
 ==================================================================================================
 
-* densenet-121-tf, densenet-169-tf, densenet-161-tf - Tensorflow implementation of DenseNet by G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten with ImageNet pretrained models.
+* densenet-121-tf, densenet-169-tf, densenet-161-tf - TensorFlow implementation of DenseNet by G. Huang, Z. Liu, K. Weinberger, and L. van der Maaten with ImageNet pretrained models.
 
 License terms:
 

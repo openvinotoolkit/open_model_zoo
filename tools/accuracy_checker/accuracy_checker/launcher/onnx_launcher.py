@@ -17,8 +17,12 @@ limitations under the License.
 import re
 import numpy as np
 import onnxruntime.backend as backend
-from ..config import PathField, StringField
+import onnxruntime as onnx_rt
+from ..logging import warning
+from ..config import PathField, StringField, ListField
 from .launcher import Launcher, LauncherConfigValidator
+from ..utils import contains_all
+
 
 DEVICE_REGEX = r'(?P<device>cpu$|gpu)'
 
@@ -31,9 +35,9 @@ class ONNXLauncher(Launcher):
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
         onnx_launcher_config = LauncherConfigValidator(
-            'ONNX_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading)
+            'ONNX_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading,
+        )
         onnx_launcher_config.validate(self.config)
-        self.device = re.match(DEVICE_REGEX, self.get_value_from_config('device').lower()).group('device')
         if not self._delayed_model_loading:
             self.model = self.get_value_from_config('model')
             self._inference_session = self.create_inference_session(self.model)
@@ -46,6 +50,10 @@ class ONNXLauncher(Launcher):
         parameters.update({
             'model': PathField(description="Path to model."),
             'device': StringField(regex=DEVICE_REGEX, description="Device name.", optional=True, default='CPU'),
+            'execution_providers': ListField(
+                value_type=StringField(description="Execution provider name.", ),
+                default=['CPUExecutionProvider'], optional=True
+            )
         })
 
         return parameters
@@ -64,6 +72,26 @@ class ONNXLauncher(Launcher):
         return 1
 
     def create_inference_session(self, model):
+        if 'execution_providers' in self.config:
+            try:
+                session = self._create_session_via_execution_providers_api(model)
+                return session
+            except AttributeError:
+                warning('Execution Providers API is not supported, onnxruntime switched on Backend API')
+        return self._create_session_via_backend_api(model)
+
+    def _create_session_via_execution_providers_api(self, model):
+        session_options = onnx_rt.SessionOptions()
+        session = onnx_rt.InferenceSession(model, sess_options=session_options)
+        self.execution_providers = self.get_value_from_config('execution_providers')
+        available_providers = session.get_providers()
+        contains_all(available_providers, self.execution_providers)
+        session.set_providers(self.execution_providers)
+
+        return session
+
+    def _create_session_via_backend_api(self, model):
+        self.device = re.match(DEVICE_REGEX, self.get_value_from_config('device').lower()).group('device')
         beckend_rep = backend.prepare(model=str(model), device=self.device.upper())
         return beckend_rep._session  # pylint: disable=W0212
 

@@ -39,19 +39,20 @@ AccuracyChecker supports following set of adapters:
     - `tiny_yolo_v3` - `[10.0, 14.0, 23.0, 27.0, 37.0, 58.0, 81.0, 82.0, 135.0, 169.0, 344.0, 319.0]`
   * `coords` - number of bbox coordinates (default 4).
   * `num` - num parameter from DarkNet configuration file (default 3).
+  * `anchor_mask` - mask for used anchors for each output layer (Optional, if not provided default way for selecting anchors will be used.)
   * `threshold` - minimal objectness score value for valid detections (default 0.001).
   * `input_width` and `input_height` - network input width and height correspondingly (default 416).
   * `outputs` - the list of output layers names (optional), if specified there should be exactly 3 output layers provided.
 * `lpr` - converting output of license plate recognition model to `CharacterRecognitionPrediction` representation.
 * `ssd` - converting  output of SSD model to `DetectionPrediction` representation.
-* `ssd_mxnet` - converting output of SSD-based models from MxNet framework to `DetectionPrediction` representation.
-* `pytorch_ssd_decoder` - converts output of SSD model from Pytorch without embedded decoder.
+* `ssd_mxnet` - converting output of SSD-based models from MXNet framework to `DetectionPrediction` representation.
+* `pytorch_ssd_decoder` - converts output of SSD model from PyTorch without embedded decoder.
   * `scores_out` - name of output layer with bounding boxes scores.
   * `boxes_out` - name of output layer with bounding boxes coordinates.
   * `confidence_threshold` - lower bound for valid boxes scores (optional, default 0.05).
   * `nms_threshold` - overlap threshold for NMS (optional, default 0.5).
   * `keep_top_k ` - maximal number of boxes which should be kept (optional, default 200).
-* `ssd_onnx` - converting output of SSD-based model from Pytorch with NonMaxSuppression layer.
+* `ssd_onnx` - converting output of SSD-based model from PyTorch with NonMaxSuppression layer.
   * `labels_out` - name of output layer with labels or regular expression for it searching.
   * `scores_out`- name of output layer with scores or regular expression for it searching.
   * `bboxes_out` - name of output layer with bboxes or regular expression for it searching.
@@ -133,3 +134,21 @@ AccuracyChecker supports following set of adapters:
   * `features_3d_out` - name of output layer with 3D coordinates maps.
   * `keypoints_heatmap_out` - name of output layer with keypoints heatmaps.
   * `part_affinity_fields_out` - name of output layer with keypoints pairwise relations (part affinity fields).
+* `ctdet` - converting output of CenterNet object detection model to `DetectionPrediction`.
+  * `center_heatmap_out` - name of output layer with center points heatmaps.
+  * `width_height_out` - name of the output layer with object sizes.
+  * `regression_out` - name of the regression output with the offset prediction.
+* `mask_rcnn` - converting raw outputs of Mask-RCNN to combination of `DetectionPrediction` and `CoCocInstanceSegmentationPrediction`.
+  * `classes_out` - name of output layer with information about classes (optional, if your model has detection_output layer as output).
+  * `scores_out` - name of output layer with bbox scores (optional, if your model has detection_output layer as output).
+  * `boxes_out` - name of output layer with bboxes (optional, if your model has detection_output layer as output).
+  * `raw_masks_out` - name of output layer with raw instances masks.
+  * `num_detections_out` - name of output layer with number valid detections (used in MaskRCNN models trained with TF Object Detection API).
+  * `detection_out` - SSD-like detection output layer name (optional, if your model has scores_out, boxes_out and classes_out).
+* `mask_rcnn_with_text` - converting raw outputs of Mask-RCNN with additional Text Recognition head to `TextDetectionPrediction`.
+  * `classes_out` - name of output layer with information about classes.
+  * `scores_out` - name of output layer with bbox scores.
+  * `boxes_out` - name of output layer with bboxes.
+  * `raw_masks_out` - name of output layer with raw instances masks.
+  * `texts_out` - name of output layer with texts.
+  * `confidence_threshold` - confidence threshold that is used to filter out detected instances.

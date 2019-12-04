@@ -29,6 +29,8 @@ struct DetectorConfig : public CnnConfig {
                             const std::string& path_to_weights)
         : CnnConfig(path_to_model, path_to_weights) {}
 
+    bool enabled{true};
+
     float confidence_threshold{0.6f};
     float increase_scale_x{1.15f};
     float increase_scale_y{1.15f};

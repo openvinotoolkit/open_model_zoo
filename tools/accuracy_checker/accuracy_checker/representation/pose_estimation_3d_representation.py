@@ -54,5 +54,5 @@ class PoseEstimation3dPrediction(PoseEstimation3dRepresentation):
     def __init__(self, identifier='', x_values=None, y_values=None, visibility=None, scores=None,
                  x_3d_values=None, y_3d_values=None, z_3d_values=None, labels=None, translations=None):
         super().__init__(identifier, x_values, y_values, visibility, labels, x_3d_values, y_3d_values, z_3d_values)
-        self.scores = scores if scores.any() else np.array([])
-        self.translations = translations if translations.any() else np.array([])
+        self.scores = scores if scores is not None and np.size(scores) else np.array([])
+        self.translations = translations if translations is not None and np.size(translations) else np.array([])

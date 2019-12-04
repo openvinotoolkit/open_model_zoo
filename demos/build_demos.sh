@@ -25,6 +25,20 @@ error() {
 }
 trap 'error ${LINENO}' ERR
 
+extra_cmake_opts=()
+
+for opt in "$@"; do
+    case "$opt" in
+    -DENABLE_PYTHON=*)
+        extra_cmake_opts+=("$opt")
+        ;;
+    *)
+        printf "Unknown option: %q\n" "$opt"
+        exit 1
+        ;;
+    esac
+done
+
 DEMOS_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 printf "\nSetting environment variables for building demos...\n"
@@ -67,7 +81,7 @@ if [ -e "$build_dir/CMakeCache.txt" ]; then
 fi
 mkdir -p "$build_dir"
 
-(cd "$build_dir" && cmake -DCMAKE_BUILD_TYPE=Release "$DEMOS_PATH")
+(cd "$build_dir" && cmake -DCMAKE_BUILD_TYPE=Release "${extra_cmake_opts[@]}" "$DEMOS_PATH")
 cmake --build "$build_dir" -- "$NUM_THREADS"
 
 printf "\nBuild completed, you can find binaries for all demos in the %s subfolder.\n\n" "$build_dir/$OS_PATH/Release"
