@@ -18,8 +18,9 @@
 Test script for the demos.
 
 For the tests to work, the test data directory must contain:
+* a "BraTS" subdirectory with BraTS 2017 dataset in NIFTI format (see http://medicaldecathlon.com,
+  https://drive.google.com/open?id=1A2IU8Sgea1h3fYLpYtFb2v7NYdMjvEhU);
 * a "ILSVRC2012_img_val" subdirectory with the ILSVRC2012 dataset;
-* a "BraTS" subdirectory with BraTS 2017 dataset in NIFTI format (see http://medicaldecathlon.com);
 * a "Image_Retrieval" subdirectory with image retrieval dataset (images, videos) (see https://github.com/19900531/test)
   and list of images (see https://github.com/opencv/openvino_training_extensions/blob/develop/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt)
 """

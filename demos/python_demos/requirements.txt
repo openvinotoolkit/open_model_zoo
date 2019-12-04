@@ -1,7 +1,5 @@
-joblib
 nibabel
 numpy
 scikit-learn
 scipy
-six
 tqdm
