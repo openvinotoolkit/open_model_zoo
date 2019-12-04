@@ -10,124 +10,91 @@
 #include <gflags/gflags.h>
 #include <iostream>
 
-/// @brief Message for help argument
 static const char help_message[] = "Print a usage message";
 
-/// @brief Message for images argument
 static const char input_video_message[] = "Required. Path to a video file (specify \"cam\" to work with camera).";
 
-/// @brief Message for images argument
 static const char output_video_message[] = "Optional. Path to an output video file.";
 
-/// @brief message for model argument
 static const char face_detection_model_message[] = "Required. Path to an .xml file with a trained Face Detection model.";
 static const char age_gender_model_message[] = "Optional. Path to an .xml file with a trained Age/Gender Recognition model.";
 static const char head_pose_model_message[] = "Optional. Path to an .xml file with a trained Head Pose Estimation model.";
 static const char emotions_model_message[] = "Optional. Path to an .xml file with a trained Emotions Recognition model.";
 static const char facial_landmarks_model_message[] = "Optional. Path to an .xml file with a trained Facial Landmarks Estimation model.";
 
-/// @brief Message for plugin argument
 static const char plugin_message[] = "Plugin name. For example, CPU. If this parameter is specified, " \
 "the demo will look for this plugin only.";
 
-/// @brief Message for assigning face detection calculation to device
 static const char target_device_message[] = "Optional. Target device for Face Detection network (the list of available devices is shown below). " \
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo will look for a suitable plugin for a specified device.";
 
-/// @brief Message for assigning age/gender calculation to device
 static const char target_device_message_ag[] = "Optional. Target device for Age/Gender Recognition network (the list of available devices is shown below). " \
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo will look for a suitable plugin for a specified device.";
 
-/// @brief Message for assigning head pose calculation to device
 static const char target_device_message_hp[] = "Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). " \
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo will look for a suitable plugin for a specified device.";
 
-/// @brief Message for assigning emotions calculation to device
 static const char target_device_message_em[] = "Optional. Target device for Emotions Recognition network (the list of available devices is shown below). " \
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo will look for a suitable plugin for a specified device.";
 
-/// @brief Message for assigning Facial Landmarks Estimation network to device
 static const char target_device_message_lm[] = "Optional. Target device for Facial Landmarks Estimation network " \
 "(the list of available devices is shown below). Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo will look for a suitable plugin for device specified.";
 
-/// @brief Message for the maximum number of simultaneously processed faces for Age Gender network
 static const char num_batch_ag_message[] = "Optional. Number of maximum simultaneously processed faces for Age/Gender Recognition network " \
 "(by default, it is 16)";
 
-/// @brief Message for the maximum number of simultaneously processed faces for Head Pose network
 static const char num_batch_hp_message[] = "Optional. Number of maximum simultaneously processed faces for Head Pose Estimation network " \
 "(by default, it is 16)";
 
-/// @brief Message for the maximum number of simultaneously processed faces for Emotions network
 static const char num_batch_em_message[] = "Optional. Number of maximum simultaneously processed faces for Emotions Recognition network " \
 "(by default, it is 16)";
 
-/// @brief Message for the maximum number of simultaneously processed faces for Facial Landmarks Estimation network
 static const char num_batch_lm_message[] = "Optional. Number of maximum simultaneously processed faces for Facial Landmarks Estimation network " \
 "(by default, it is 16)";
 
-/// @brief Message for dynamic batching support for AgeGender net
 static const char dyn_batch_ag_message[] = "Optional. Enable dynamic batch size for Age/Gender Recognition network";
 
-/// @brief Message for dynamic batching support for HeadPose net
 static const char dyn_batch_hp_message[] = "Optional. Enable dynamic batch size for Head Pose Estimation network";
 
-/// @brief Message for dynamic batching support for Emotions net
 static const char dyn_batch_em_message[] = "Optional. Enable dynamic batch size for Emotions Recognition network";
 
-/// @brief Message for dynamic batching support for Facial Landmarks Estimation network
 static const char dyn_batch_lm_message[] = "Optional. Enable dynamic batch size for Facial Landmarks Estimation network";
 
-/// @brief Message for performance counters
 static const char performance_counter_message[] = "Optional. Enable per-layer performance report";
 
-/// @brief Message for GPU custom kernels description
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "\
 "Absolute path to an .xml file with the kernels description.";
 
-/// @brief Message for user library argument
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. " \
 "Absolute path to a shared library with the kernels implementation.";
 
-/// @brief Message for probability threshold argument
 static const char thresh_output_message[] = "Optional. Probability threshold for detections";
 
-/// @brief Message for face enlarge coefficient argument
 static const char bb_enlarge_coef_output_message[] = "Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face";
 
-/// @brief Message raw output flag
 static const char raw_output_message[] = "Optional. Output inference results as raw values";
 
-/// @brief Message do not wait for keypress after input stream completed
 static const char no_wait_for_keypress_message[] = "Optional. Do not wait for key press in the end.";
 
-/// @brief Message do not show processed video
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 
-/// @brief Message for asynchronous mode
 static const char async_message[] = "Optional. Enable asynchronous mode";
 
-/// @brief Message for shifting coefficient by dx for detected faces
 static const char dx_coef_output_message[] = "Optional. Coefficient to shift the bounding box around the detected face along the Ox axis";
 
-/// @brief Message for shifting coefficient by dy for detected faces
 static const char dy_coef_output_message[] = "Optional. Coefficient to shift the bounding box around the detected face along the Oy axis";
 
-/// @brief Message for fps argument
 static const char fps_output_message[] = "Optional. Maximum FPS for playing video";
 
-/// @brief Message for looping video argument
 static const char loop_video_output_message[] = "Optional. Enable playing video on a loop";
 
-/// @brief Message for smooth argument
 static const char no_smooth_output_message[] = "Optional. Do not smooth person attributes";
 
-/// @brief Message for smooth argument
 static const char no_show_emotion_bar_message[] = "Optional. Do not show emotion bar";
 
 /// \brief Define flag for showing help message<br>

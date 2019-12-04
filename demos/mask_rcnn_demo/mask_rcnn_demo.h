@@ -9,32 +9,24 @@
 #include <gflags/gflags.h>
 #include <iostream>
 
-/// @brief message for help argument
 static const char help_message[] = "Print a usage message.";
 
-/// @brief message for images argument
 static const char image_message[] = "Required. Path to an .bmp image.";
 
-/// @brief message for model argument
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";\
 
-/// @brief message for assigning cnn calculation to device
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). " \
 "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo will look for a suitable plugin for a specified device (CPU by default)";
 
-/// @brief message for clDNN custom kernels desc
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "\
 "Absolute path to the .xml file with the kernels descriptions.";
 
-/// @brief message for user library argument
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. " \
 "Absolute path to a shared library with the kernels implementations.";
 
-/// @brief message for detection output layer name argument
 static const char detection_output_layer_name_message[] = "Optional. The name of detection output layer. Default value is \"detection_output\"";
 
-/// @brief message for masks layer name argument
 static const char masks_layer_name_message[] = "Optional. The name of masks layer. Default value is \"masks\"";
 
 /// @brief Define parameter for clDNN custom kernels path <br>

@@ -8,59 +8,42 @@
 #include <vector>
 #include <gflags/gflags.h>
 
-/// @brief Message for help argument
 static const char help_message[] = "Print a usage message";
 
-/// @brief Message for model argument
 static const char model_path_message[] = "Required. Path to an .xml file with a trained model.";
 
-/// @brief Message for assigning face detection calculation to a device
 static const char target_device_message[] = "Optional. Specify the target device for a network (the list of available devices is shown below). " \
 "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
 "The demo looks for a suitable plugin for a specified device.";
 
-/// @brief Message for performance counters
 static const char performance_counter_message[] = "Optional. Enable per-layer performance report";
 
-/// @brief Message for GPU custom kernels descriptions
 static const char custom_cldnn_message[] = "Required for GPU custom kernels. "\
 "Absolute path to an .xml file with the kernels descriptions";
 
-/// @brief Message for user library argument
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. " \
 "Absolute path to a shared library with the kernels implementations";
 
-/// @brief Message for not showing a processed video
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 
-/// @brief Message for the number of camera inputs
 static const char num_cameras[] = "Optional. Maximum number of processed camera inputs (web cameras)";
 
-/// @brief Message for batch size
 static const char batch_size[] = "Optional. Batch size for processing (the number of frames processed per infer request)";
 
-/// @brief Message for the number of infer requests
 static const char num_infer_requests[] = "Optional. Number of infer requests";
 
-/// @brief Message for inputs queue size
 static const char input_queue_size[] = "Optional. Frame queue size for input channels";
 
-/// @brief Message for FPS measurement sampling period
 static const char fps_sampling_period[] = "Optional. FPS measurement sampling period between timepoints in msec";
 
-/// @brief Message for the number of sampling periods
 static const char num_sampling_periods[] = "Optional. Number of sampling periods";
 
-/// @brief Message for enabling statistics output
 static const char show_statistics[] = "Optional. Enable statistics report";
 
-/// @brief Message for enabling channel duplication
 static const char duplication_channel_number[] = "Optional. Enable and specify the number of channels additionally copied from real sources";
 
-/// @brief Message for enabling real input FPS
 static const char real_input_fps[] = "Optional. Disable input frames caching, for maximum throughput pipeline";
 
-/// @brief Message for enabling input video
 static const char input_video[] = "Optional. Specify full path to input video files";
 
 /// \brief Define a flag for showing help message <br>

@@ -7,28 +7,21 @@
 #include <gflags/gflags.h>
 #include <iostream>
 
-/// @brief Message for help argument
 static const char help_message[] = "Print a usage message.";
 
-/// @brief Message for video argument
 static const char video_message[] = "Required. Path to a video. Default value is \"cam\" to work with camera.";
 
-/// @brief Message for model argument
 static const char human_pose_estimation_model_message[] = "Required. Path to the Human Pose Estimation model (.xml) file.";
 
-/// @brief Message for assigning Human Pose Estimation inference to device
 static const char target_device_message[] = "Optional. Specify the target device for Human Pose Estimation "\
                                             "(the list of available devices is shown below). Default value is CPU. " \
                                             "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
                                             "The application looks for a suitable plugin for the specified device.";
 
-/// @brief Message for performance counter
 static const char performance_counter_message[] = "Optional. Enable per-layer performance report.";
 
-/// @brief Message for not showing processed video
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 
-/// @brief Message for raw output
 static const char raw_output_message[] = "Optional. Output inference results as raw values.";
 
 /// @brief Defines flag for showing help message <br>
