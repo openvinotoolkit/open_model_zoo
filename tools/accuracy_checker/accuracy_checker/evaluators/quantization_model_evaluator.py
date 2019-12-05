@@ -107,6 +107,7 @@ class ModelEvaluator:
         _set_number_infer_requests(nreq)
 
         self.dataset.batch = self.launcher.batch
+        self.preprocessor.input_shapes = self.launcher.inputs_info_for_meta()
         progress_reporter = None
 
         _create_subset(subset, num_images)
@@ -198,6 +199,7 @@ class ModelEvaluator:
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
         self.dataset.batch = self.launcher.batch
+        self.preprocessor.input_shapes = self.launcher.inputs_info_for_meta()
         progress_reporter = None
 
         _create_subset(subset, num_images)

@@ -340,14 +340,21 @@ class Resize(Preprocessor):
 class AutoResize(Preprocessor):
     __provider__ = 'auto_resize'
 
-    def configure(self):
-        if self.input_shapes is None or len(self.input_shapes) != 1:
+    def __init__(self, config, name=None):
+        super().__init__(config, name)
+        self.dst_height = None
+        self.dst_width = None
+
+    def set_input_shape(self, input_shape):
+        if input_shape is None or len(input_shape) != 1:
             raise ConfigError('resize to input size possible, only for one input layer case')
-        input_shape = next(iter(self.input_shapes.values()))
+        input_shape = next(iter(input_shape.values()))
         self.dst_height, self.dst_width = input_shape[2:]
 
     def process(self, image, annotation_meta=None):
-        is_simple_case = not isinstance(image.data, list) # otherwise -- pyramid, tiling, etc
+        is_simple_case = not isinstance(image.data, list)  # otherwise -- pyramid, tiling, etc
+        if self.dst_height is None or self.dst_width is None:
+            self.set_input_shape(self.input_shapes)
 
         def process_data(data):
             data = cv2.resize(data, (self.dst_width, self.dst_height)).astype(np.float32)
