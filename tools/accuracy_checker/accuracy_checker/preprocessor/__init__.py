@@ -27,6 +27,7 @@ from .geometric_transformations import (
     PointAligner,
     Tiling,
     Crop3D,
+    TransformedCropWithAutoScale,
     ImagePyramid
 )
 from .resize import Resize, AutoResize
@@ -46,8 +47,8 @@ __all__ = [
     'PointAligner',
     'Tiling',
     'Crop3D',
+    'TransformedCropWithAutoScale',
     'ImagePyramid',
-
     'BgrToGray',
     'BgrToRgb',
     'RgbToGray',

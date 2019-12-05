@@ -21,7 +21,7 @@ Each input description should has following info:
     * `INPUT` - network input for main data stream (e. g. images). If you have several data inputs, you should provide regular expression for identifier as `value` for specifying which one data should be provided in specific input.
     Optionally you can determine `shape` of input (actually does not used, ONNX Runtime launcher uses info given from network) and `layout` in case when your model was trained with non-standard data layout (For ONNX Runtime default layout is `NCHW`).
 
-MxNet launcher config example:
+MXNet launcher config example:
 
 ```yml
 launchers:

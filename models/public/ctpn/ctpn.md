@@ -13,7 +13,7 @@ Detecting Text in Natural Image with Connectionist Text Proposal Network. For de
 | Type                            | Object detection                          |
 | GFlops                          | 55.813                                    |
 | MParams                         | 17.237                                    |
-| Source framework                | Tensorflow\*                              |
+| Source framework                | TensorFlow\*                              |
 
 ## Performance
 

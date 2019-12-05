@@ -89,7 +89,7 @@ class TFLiteLauncher(Launcher):
         del self._interpreter
 
     def predict_async(self, *args, **kwargs):
-        raise ValueError('Tensorflow Lite Launcher does not support async mode yet')
+        raise ValueError('TensorFlow Lite Launcher does not support async mode yet')
 
     @property
     def output_blob(self):

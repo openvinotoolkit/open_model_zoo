@@ -638,7 +638,7 @@ class FacePersonAdapter(Adapter):
 
 class SSDAdapterMxNet(Adapter):
     """
-    Class for converting output of MxNet SSD model to DetectionPrediction representation
+    Class for converting output of MXNet SSD model to DetectionPrediction representation
     """
     __provider__ = 'ssd_mxnet'
 

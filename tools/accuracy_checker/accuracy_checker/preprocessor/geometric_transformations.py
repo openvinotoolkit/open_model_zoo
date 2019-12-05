@@ -20,10 +20,6 @@ from collections import namedtuple
 import cv2
 import numpy as np
 from PIL import Image
-try:
-    import tensorflow as tf
-except ImportError as import_error:
-    tf = None
 
 from ..config import ConfigError, NumberField, StringField, BoolField
 from ..preprocessor import Preprocessor
@@ -535,6 +531,83 @@ class Crop3D(Preprocessor):
 
         return img[startz:endz, starty:endy, startx:endx, :]
 
+class TransformedCropWithAutoScale(Preprocessor):
+    __provider__ = 'transformed_crop_with_auto_scale'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'size': NumberField(
+                value_type=int, optional=True, min_value=1,
+                description="Destination sizes for both dimensions of heatmaps output."
+            ),
+            'dst_width': NumberField(
+                value_type=int, optional=True, min_value=1, description="Width of heatmaps output."
+            ),
+            'dst_height': NumberField(
+                value_type=int, optional=True, min_value=1, description="Height of heatmaps output."
+            ),
+            'stride': NumberField(
+                value_type=int, optional=False,
+                description="Stride for network. It is input size of heatmaps / output size of heatmaps."
+            )
+        })
+
+        return parameters
+
+    def configure(self):
+        self.input_height, self.input_width = get_size_from_config(self.config)
+        self.stride = self.get_value_from_config('stride')
+
+    def process(self, image, annotation_meta=None):
+        data = image.data
+        center, scale = self.get_center_scale(annotation_meta['rects'][0], data.shape[1], data.shape[0])
+        trans = self.get_transformation_matrix(center, scale, [self.input_width, self.input_height])
+        rev_trans = self.get_transformation_matrix(center, scale, [self.input_width // self.stride,
+                                                                   self.input_height // self.stride], key=1)
+        data = cv2.warpAffine(data, trans, (self.input_width, self.input_height), flags=cv2.INTER_LINEAR)
+        image.data = data
+        image.metadata.setdefault('rev_trans', rev_trans)
+        return image
+
+    @staticmethod
+    def get_center_scale(bbox, image_w, image_h):
+        aspect_ratio = 0.75
+        bbox[0] = np.max((0, bbox[0]))
+        bbox[1] = np.max((0, bbox[1]))
+        x2 = np.min((image_w - 1, bbox[0] + np.max((0, bbox[2] - 1))))
+        y2 = np.min((image_h - 1, bbox[1] + np.max((0, bbox[3] - 1))))
+        if x2 >= bbox[0] and y2 >= bbox[1]:
+            bbox = [bbox[0], bbox[1], x2 - bbox[0], y2 - bbox[1]]
+        cx_bbox = bbox[0] + bbox[2] * 0.5
+        cy_bbox = bbox[1] + bbox[3] * 0.5
+        center = np.array([np.float32(cx_bbox), np.float32(cy_bbox)])
+        if bbox[2] > aspect_ratio * bbox[3]:
+            bbox[3] = bbox[2] * 1.0 / aspect_ratio
+        elif bbox[2] < aspect_ratio * bbox[3]:
+            bbox[2] = bbox[3] * aspect_ratio
+
+        scale = np.array([bbox[2] / 200., bbox[3] / 200.], np.float32) * 1.25
+
+        return center, scale
+
+
+    @staticmethod
+    def get_transformation_matrix(center, scale, output_size, key=0):
+        w, _ = scale * 200
+        shift_y = [0, -w * 0.5]
+        shift_x = [-w * 0.5, 0]
+        points = np.array([center, center + shift_x, center + shift_y], dtype=np.float32)
+        transformed_points = np.array([
+            [output_size[0] * 0.5, output_size[1] * 0.5],
+            [0, output_size[1] * 0.5],
+            [output_size[0] * 0.5, output_size[1] * 0.5 - output_size[0] * 0.5]], dtype=np.float32)
+        if key == 0:
+            trans = cv2.getAffineTransform(np.float32(points), np.float32(transformed_points))
+        else:
+            trans = cv2.getAffineTransform(np.float32(transformed_points), np.float32(points))
+        return trans
 
 class ImagePyramid(Preprocessor):
     __provider__ = 'pyramid'

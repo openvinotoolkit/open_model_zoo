@@ -193,32 +193,6 @@ Deep Learning compressed models
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [resnet50-binary-0001](./resnet50-binary-0001/description/resnet50-binary-0001.md)                                                             | 1.002                | 7.446      |
-| [resnet-50-int8-tf-0001](./resnet-50-int8-tf-0001/description/resnet-50-int8-tf-0001.md)                                                       | 6.996                | 25.530     |
-| [resnet-50-int8-sparse-v1-tf-0001](./resnet-50-int8-sparse-v1-tf-0001/description/resnet-50-int8-sparse-v1-tf-0001.md)                         | 6.996                | 25.530     |
-| [resnet-50-int8-sparse-v2-tf-0001](./resnet-50-int8-sparse-v2-tf-0001/description/resnet-50-int8-sparse-v2-tf-0001.md)                         | 6.996                | 25.530     |
-| [resnet50-int8-onnx-0001](./resnet50-int8-onnx-0001/description/resnet50-int8-onnx-0001.md)                                                    | 8.216                | 25.53      |
-| [resnet50-int8-sparse-v2-onnx-0001](./resnet50-int8-sparse-v2-onnx-0001/description/resnet50-int8-sparse-v2-onnx-0001.md)                      | 8.216                | 25.53      |
-| [resnet101-int8-tf-0001](./resnet101-int8-tf-0001/description/resnet101-int8-tf-0001.md)                                                       | 14.441               | 44.496     |
-| [inceptionv3-int8-tf-0001](./inceptionv3-int8-tf-0001/description/inceptionv3-int8-tf-0001.md)                                                 | 11.469               | 23.819     |
-| [inceptionv3-int8-sparse-v1-tf-0001](./inceptionv3-int8-sparse-v1-tf-0001/description/inceptionv3-int8-sparse-v1-tf-0001.md)                   | 11.469               | 23.819     |
-| [inceptionv3-int8-sparse-v2-tf-0001](./inceptionv3-int8-sparse-v2-tf-0001/description/inceptionv3-int8-sparse-v2-tf-0001.md)                   | 11.469               | 23.819     |
-| [inceptionv3-int8-onnx-0001](./inceptionv3-int8-onnx-0001/description/inceptionv3-int8-onnx-0001.md)                                           | 11.469               | 23.817     |
-| [inceptionv3-int8-sparse-v2-onnx-0001](./inceptionv3-int8-sparse-v2-onnx-0001/description/inceptionv3-int8-sparse-v2-onnx-0001.md)             | 11.469               | 23.817     |
-| [mobilenetv2-int8-tf-0001](./mobilenetv2-int8-tf-0001/description/mobilenetv2-int8-tf-0001.md)                                                 | 0.615                | 3.489      |
-| [mobilenetv2-int8-sparse-v1-tf-0001](./mobilenetv2-int8-sparse-v1-tf-0001/description/mobilenetv2-int8-sparse-v1-tf-0001.md)                   | 0.615                | 3.489      |
-| [mobilenetv2-int8-sparse-v2-tf-0001](./mobilenetv2-int8-sparse-v2-tf-0001/description/mobilenetv2-int8-sparse-v2-tf-0001.md)                   | 0.615                | 3.489      |
-| [mobilenetv2-int8-onnx-0001](./mobilenetv2-int8-onnx-0001/description/mobilenetv2-int8-onnx-0001.md)                                           | 0.615                | 3.488      |
-| [mobilenetv2-int8-sparse-v2-onnx-0001](./mobilenetv2-int8-sparse-v2-onnx-0001/description/mobilenetv2-int8-sparse-v2-onnx-0001.md)             | 0.615                | 3.488      |
-| [squeezenetv1.1-int8-onnx-0001](./squeezenetv1.1-int8-onnx-0001/description/squeezenetv1.1-int8-onnx-0001.md)                                  | 0.707                | 1.236      |
-| [squeezenetv1.1-int8-sparse-v1-onnx-0001](./squeezenetv1.1-int8-sparse-v1-onnx-0001/description/squeezenetv1.1-int8-sparse-v1-onnx-0001.md)    | 0.707                | 1.236      |
-| [icnet-camvid-int8-onnx-0001](./icnet-camvid-int8-onnx-0001/description/icnet-camvid-int8-onnx-0001.md)                                        | -                    | -          |
-| [icnet-camvid-int8-sparse-v2-onnx-0001](./icnet-camvid-int8-sparse-v2-onnx-0001/description/icnet-camvid-int8-sparse-v2-onnx-0001.md)          | -                    | -          |
-| [unet-camvid-int8-onnx-0001](./unet-camvid-int8-onnx-0001/description/unet-camvid-int8-onnx-0001.md)                                           | -                    | -          |
-| [unet-camvid-int8-sparse-v2-onnx-0001](./unet-camvid-int8-sparse-v2-onnx-0001/description/unet-camvid-int8-sparse-v2-onnx-0001.md)             | -                    | -          |
-| [ssd300-int8-onnx-0001](./ssd300-int8-onnx-0001/description/ssd300-int8-onnx-0001.md)                                                          | 62.815               | 26.285     |
-| [ssd300-int8-sparse-v2-onnx-0001](./ssd300-int8-sparse-v2-onnx-0001/description/ssd300-int8-sparse-v2-onnx-0001.md)                            | 62.815               | 26.285     |
-| [ssd512-int8-onnx-0001](./ssd512-int8-onnx-0001/description/ssd512-int8-onnx-0001.md)                                                          | 180.611              | 27.189     |
-| [ssd512-int8-sparse-v2-onnx-0001](./ssd512-int8-sparse-v2-onnx-0001/description/ssd512-int8-sparse-v2-onnx-0001.md)                            | 180.611              | 27.189     |
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
