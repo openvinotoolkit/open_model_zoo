@@ -32,7 +32,7 @@ from accuracy_checker.preprocessor import (
     GeometricOperationMetadata
 )
 from accuracy_checker.preprocessor.preprocessing_executor import PreprocessingExecutor
-from accuracy_checker.preprocessor.geometric_transformations import _OpenCVResizer
+from accuracy_checker.preprocessor.resize import _OpenCVResizer
 from accuracy_checker.data_readers import DataRepresentation
 
 
