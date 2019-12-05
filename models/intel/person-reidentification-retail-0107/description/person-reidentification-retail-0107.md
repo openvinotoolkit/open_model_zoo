@@ -23,7 +23,7 @@ feature map outputs the embedding vector of 256 floats.
 | Occlusion coverage                | <50%                                      |
 | GFlops                            | 0.174                                     |
 | MParams                           | 0.183                                     |
-| Source framework                  | PyTorch*                                  |
+| Source framework                  | PyTorch\*                                 |
 
 The cumulative matching curve (CMC) at rank-1 is accuracy denoting the possibility
 to locate at least one true positive in the top-1 rank.
@@ -46,7 +46,7 @@ and AP is defined as an area under the
 
 ## Outputs
 
-1. The net outputs a blob with shape: [1, 256] named descriptor, which can be
+The net outputs a blob with shape: [1, 256] named descriptor, which can be
 compared with other descriptors using the
 [Cosine distance](https://en.wikipedia.org/wiki/Cosine_similarity).
 
