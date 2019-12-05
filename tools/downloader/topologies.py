@@ -32,9 +32,11 @@ class Topology:
             main()
 
 
-    def getIR(self, precision='FP32'):
+    def get_ir(self, precision='FP32'):
         '''
-        Creates OpenVINO Intermediate Representation (IR) network format.
+        Creates OpenVINO Intermediate Representation (IR) network model.
+        If there is already converted model or the model has been downloaded in
+        IR - just returns the paths to the files.
 
         Returns
         -------
@@ -43,9 +45,6 @@ class Topology:
             binPath
                 Path to generated or downloaded .bin file
         '''
-        if self.framework == 'dldt':
-            return self.config, self.model
-
         prefix = Path(self.download_dir) / precision / self.name
         xmlPath = str(prefix) + '.xml'
         binPath = str(prefix) + '.bin'
@@ -60,18 +59,18 @@ class Topology:
         return xmlPath, binPath
 
 
-    def getOCVModel(self, useIR=True):
+    def get_ocv_model(self, use_ir=True):
         '''
-        Creates OpenCV's cv::dnn::Model from origin network. Depends on network type,
+        Creates OpenCV's cv.dnn_Model from origin network. Depends on network type,
         returns cv.dnn_DetectionModel, cv.dnn_ClassificationModel, cv.dnn_SegmentationModel
-        or cv.dnn_Model if not specified.
+        or cv.dnn_Model in case of unclassified type.
 
         Preprocessing parameters are set.
         '''
         import cv2 as cv
 
-        if useIR:
-            model, config = self.getIR()
+        if use_ir:
+            model, config = self.get_ir()
         else:
             model, config = self.model, self.config
 
@@ -84,7 +83,7 @@ class Topology:
         else:
             m = cv.dnn_Model(model, config)
 
-        if useIR:
+        if use_ir:
             return m
 
         if '--mean_values' in self.mo_args:
@@ -115,13 +114,13 @@ class Topology:
         return m
 
 
-    def getIENetwork(self):
+    def get_ie_network(self):
         '''
         Creates openvino.inference_engine.IENetwork instance.
-        Model Optimizer is lauched to create OpenVINO Intermediate Representation (IR).
+        Model Optimizer is launched to create OpenVINO Intermediate Representation (IR).
         '''
         from openvino.inference_engine import IENetwork
-        xmlPath, binPath = self.getIR()
+        xmlPath, binPath = self.get_ir()
         return IENetwork(xmlPath, binPath)
 
 
@@ -142,9 +141,7 @@ for _topology in common.load_models(argparse.Namespace(config=None)):
         for i in range(2):
             # Get only basename and add precision marker
             _path = str(_topology.files[i].name)
-            _pos = _path.find('/')
-            if _path[:_pos] in common.KNOWN_PRECISIONS:
-                _path = _precision_marker + _path[_pos:]
+            _path = _precision_marker + _path[_path.find('/'):]
             _paths.append(_path)
 
         _config_path, _model_path = _paths if _paths[0].endswith('.xml') else _paths[::-1]
@@ -162,9 +159,8 @@ for _topology in common.load_models(argparse.Namespace(config=None)):
     if _config_path:
         _config_path = _download_dir / _config_path
 
-
     exec("""
-class {className}(Topology):
+def {funcName}(precision='FP32'):
     '''
     {description}
 
@@ -179,13 +175,9 @@ class {className}(Topology):
         framework : str
             Name of the framework in which format network is represented.
     '''
-
-    def __init__(self, precision='FP32'):
-        Topology.__init__(self, '{name}', '{task_type}', '{download_dir}',
-                          '{config}', '{model}', '{framework}', {mo_args},
-                          precision)
-
-            """.format(className=_name, description=_topology.description,
+    return Topology('{name}', '{task_type}', '{download_dir}', '{config}',
+                    '{model}', '{framework}', {mo_args}, precision)
+            """.format(funcName=_name, description=_topology.description,
                        license=_topology.license_url,
                        name=_topology.name,
                        download_dir=str(_download_dir),
