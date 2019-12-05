@@ -23,8 +23,6 @@ googlenet-v3-pytorch
 googlenet-v4
 inception-resnet-v2
 inception-resnet-v2-tf
-inceptionv3-int8-sparse-v1-tf-0001
-inceptionv3-int8-sparse-v2-tf-0001
 mobilenet-v1-0.25-128
 mobilenet-v1-0.50-160
 mobilenet-v1-0.50-224
