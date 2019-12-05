@@ -113,9 +113,9 @@ class CityscapesConverter(BaseFormatConverter):
         num_iterations = len(images)
         for idx, image in enumerate(images):
             identifier = str(Path(self.images_dir).joinpath(*image.parts[-2:]))
-            mask = Path(self.masks_dir) / image.parts[-2] / self.masks_suffix.join(
+            mask = str(Path(self.masks_dir) / image.parts[-2] / self.masks_suffix.join(
                 str(image.name).split(self.images_suffix)
-            )
+            ))
             if check_content:
                 if not check_file_existence(self.dataset_root / mask):
                     content_errors.append('{}: does not exist'.format(self.dataset_root / mask))
