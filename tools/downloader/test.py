@@ -6,8 +6,8 @@ import os
 from topologies import ssd300
 
 t = ssd300()
-xmlPath, binPath = t.getIR()
-xmlPath_fp16, binPath_fp16 = t.getIR(precision='FP16')
+xmlPath, binPath = t.get_ir()
+xmlPath_fp16, binPath_fp16 = t.get_ir(precision='FP16')
 
 for path, name in zip ([t.model, t.config, xmlPath, binPath, xmlPath_fp16, binPath_fp16],
                        ['VGG_VOC0712Plus_SSD_300x300_ft_iter_160000.caffemodel',
@@ -25,7 +25,7 @@ from topologies import vehicle_license_plate_detection_barrier_0106
 
 t = vehicle_license_plate_detection_barrier_0106('FP16')
 xmlPath, binPath = t.config, t.model
-xmlPathIR, binPathIR = t.getIR()
+xmlPathIR, binPathIR = t.get_ir()
 
 for path, ref in zip([xmlPath, binPath, xmlPathIR, binPathIR],
                      ['FP16/vehicle-license-plate-detection-barrier-0106.xml',
@@ -35,7 +35,7 @@ for path, ref in zip([xmlPath, binPath, xmlPathIR, binPathIR],
     assert(os.path.exists(path)), path
     assert(path.endswith(ref)), ref
 
-net = t.getIENetwork()
+net = t.get_ie_network()
 
 os.remove(xmlPath)
 os.remove(binPath)
@@ -61,9 +61,9 @@ def iou(a, b):
 
 t = mobilenet_ssd()
 try:
-    net = t.getOCVModel()
+    net = t.get_ocv_model()
 except:
-    net = t.getOCVModel(useIR=False)
+    net = t.get_ocv_model(useIR=False)
 
 
 img = cv.imread(os.path.join(os.environ['OPENCV_TEST_DATA_PATH'], 'dnn', 'dog416.png'))
@@ -107,3 +107,23 @@ for path, ref in zip([t.config, t.model],
 
 os.remove(t.config)
 os.remove(t.model)
+
+#
+# Test TensorFlow meta graph
+#
+from topologies import densenet_121_tf
+t = densenet_121_tf()
+
+xmlPath, binPath = t.get_ir()
+
+for path, ref in zip([xmlPath, binPath],
+                     ['FP32/densenet-121-tf.xml', 'FP32/densenet-121-tf.bin',]):
+    assert(os.path.exists(path)), path
+    assert(path.endswith(ref)), ref
+
+os.path.exists(t.model)
+os.remove(xmlPath)
+os.remove(binPath)
+os.remove(t.model)
+
+print('PASSED')

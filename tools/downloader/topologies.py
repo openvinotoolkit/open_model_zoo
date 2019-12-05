@@ -3,6 +3,7 @@ import os
 import re
 import yaml
 import types
+import string
 import argparse
 
 from pathlib import Path
@@ -22,6 +23,7 @@ class Topology:
         self.download_dir = download_dir
         self.config = config.replace(_precision_marker, precision)
         self.model = model.replace(_precision_marker, precision)
+        self.precision = precision
         self.framework = framework
 
         if self.config and not os.path.exists(self.config) or \
@@ -32,11 +34,16 @@ class Topology:
             main()
 
 
-    def get_ir(self, precision='FP32'):
+    def get_ir(self, precision=None):
         '''
         Creates OpenVINO Intermediate Representation (IR) network model.
         If there is already converted model or the model has been downloaded in
         IR - just returns the paths to the files.
+
+        Parameters
+        ----------
+            precision
+                Target model precision. By default, the precision from a constructor is used.
 
         Returns
         -------
@@ -45,6 +52,7 @@ class Topology:
             binPath
                 Path to generated or downloaded .bin file
         '''
+        precision = precision if precision else self.precision
         prefix = Path(self.download_dir) / precision / self.name
         xmlPath = str(prefix) + '.xml'
         binPath = str(prefix) + '.bin'
@@ -147,17 +155,28 @@ for _topology in common.load_models(argparse.Namespace(config=None)):
         _config_path, _model_path = _paths if _paths[0].endswith('.xml') else _paths[::-1]
     else:
         # Get paths from Model Optimizer arguments
-        if '--input_model' in _mo_args:
-            _model_path = _mo_args['--input_model'].replace('$dl_dir/', '')
-            _config_path = ''  # If there is a text file - we will set it next
+        _model_path, _config_path = '', ''
+        for key in ['--input_model', '--input_meta_graph']:
+            if key in _mo_args:
+                _model_path = _mo_args[key]
 
         for key in ['--input_proto', '--input_symbol']:
             if key in _mo_args:
-                _config_path = _mo_args[key].replace('$dl_dir/', '')
+                _config_path = _mo_args[key]
 
-    _model_path = _download_dir / _model_path
+    if _model_path:
+        try:
+            _model_path = string.Template(_model_path).substitute(dl_dir=_download_dir,
+                                                                  conv_dir=_download_dir)
+        except KeyError:
+            _model_path = _download_dir / _model_path
+
     if _config_path:
-        _config_path = _download_dir / _config_path
+        try:
+            _config_path = string.Template(_config_path).substitute(dl_dir=_download_dir,
+                                                                    conv_dir=_download_dir)
+        except KeyError:
+            _config_path = _download_dir / _config_path
 
     exec("""
 def {funcName}(precision='FP32'):
