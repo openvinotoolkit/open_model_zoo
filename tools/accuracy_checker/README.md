@@ -45,7 +45,7 @@ In order to evaluate some models required frameworks have to be installed. Accur
 
 - [OpenVINO](https://software.intel.com/en-us/openvino-toolkit/documentation/get-started).
 - [Caffe](accuracy_checker/launcher/caffe_installation_readme.md).
-- [MXNet](https://mxnet.incubator.apache.org/versions/master/).
+- [MXNet](https://mxnet.apache.org/).
 - [OpenCV DNN](https://docs.opencv.org/4.1.0/d2/de6/tutorial_py_setup_in_ubuntu.html).
 - [TensorFlow](https://www.tensorflow.org/).
 - [ONNX Runtime](https://github.com/microsoft/onnxruntime/blob/master/README.md).
