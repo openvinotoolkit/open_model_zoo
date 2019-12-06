@@ -29,6 +29,9 @@ ENTRIES_PATHS = {
         'weights': 'models',
         'caffe_model': 'models',
         'caffe_weights': 'models',
+        'color_reconstruction': {
+            'coeff': 'models'
+        },
         'tf_model': 'models',
         'tf_meta': 'models',
         'mxnet_weights': 'models',
@@ -39,16 +42,6 @@ ENTRIES_PATHS = {
         'bitstream': 'bitstreams',
         'affinity_map': 'affinity_map',
         'predictions': 'source'
-    },
-
-    'module_config': {
-        'network_info': {
-            'test': {
-                'color_reconstruction': {
-                    'coeff': 'models'
-                },
-            },
-        },
     },
 
     'datasets': {
