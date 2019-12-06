@@ -27,6 +27,7 @@ ENTRIES_PATHS = {
     'launchers': {
         'model': 'models',
         'weights': 'models',
+        'coeff': 'models',
         'caffe_model': 'models',
         'caffe_weights': 'models',
         'tf_model': 'models',

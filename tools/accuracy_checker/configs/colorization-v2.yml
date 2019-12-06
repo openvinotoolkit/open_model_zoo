@@ -1,6 +1,6 @@
 evaluations:
   - name: colorization-v2
-    module: custom_evaluators.colorization_v2_evaluator.ColorizationEvaluator
+    module: custom_evaluators.colorization_evaluator.ColorizationEvaluator
     module_config:
         network_info:
           test:
@@ -34,7 +34,7 @@ evaluations:
                 std:  255
 
   - name: colorization-v2
-    module: custom_evaluators.colorization_v2_evaluator.ColorizationEvaluator
+    module: custom_evaluators.colorization_evaluator.ColorizationEvaluator
     module_config:
         network_info:
           test:
