@@ -281,21 +281,12 @@ def main():
         # Run the net.
         inf_start = time.time()
         outputs = mask_rcnn_exec_net.infer({'im_data': input_image, 'im_info': input_image_info})
-        inf_end = time.time()
-        det_time = inf_end - inf_start
 
         # Parse detection results of the current request
         boxes = outputs['boxes']
-        boxes[:, 0::2] /= scale_x
-        boxes[:, 1::2] /= scale_y
         scores = outputs['scores']
         classes = outputs['classes'].astype(np.uint32)
-        masks = []
-        for box, cls, raw_mask in zip(boxes, classes, outputs['raw_masks']):
-            raw_cls_mask = raw_mask[cls, ...]
-            mask = segm_postprocess(box, raw_cls_mask, frame.shape[0], frame.shape[1])
-            masks.append(mask)
-
+        raw_masks = outputs['raw_masks']
         text_features = outputs['text_features']
 
         # Filter out detections with low confidence.
@@ -303,8 +294,16 @@ def main():
         scores = scores[detections_filter]
         classes = classes[detections_filter]
         boxes = boxes[detections_filter]
-        masks = list(segm for segm, is_valid in zip(masks, detections_filter) if is_valid)
+        raw_masks = raw_masks[detections_filter]
         text_features = text_features[detections_filter]
+
+        boxes[:, 0::2] /= scale_x
+        boxes[:, 1::2] /= scale_y
+        masks = []
+        for box, cls, raw_mask in zip(boxes, classes, raw_masks):
+            raw_cls_mask = raw_mask[cls, ...]
+            mask = segm_postprocess(box, raw_cls_mask, frame.shape[0], frame.shape[1])
+            masks.append(mask)
 
         texts = []
         for feature in text_features:
@@ -330,6 +329,9 @@ def main():
 
             texts.append(text)
 
+        inf_end = time.time()
+        inf_time = inf_end - inf_start
+
         render_start = time.time()
 
         if len(boxes) and args.raw_output_message:
@@ -347,7 +349,7 @@ def main():
         frame = visualizer(frame, boxes, classes, scores, masks, texts, masks_tracks_ids)
 
         # Draw performance stats.
-        inf_time_message = 'Inference time: {:.3f} ms'.format(det_time * 1000)
+        inf_time_message = 'Inference and post-processing time: {:.3f} ms'.format(inf_time * 1000)
         render_time_message = 'OpenCV rendering time: {:.3f} ms'.format(render_time * 1000)
         cv2.putText(frame, inf_time_message, (15, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (200, 10, 10), 1)
         cv2.putText(frame, render_time_message, (15, 30), cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
