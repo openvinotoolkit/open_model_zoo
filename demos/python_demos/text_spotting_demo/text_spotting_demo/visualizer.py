@@ -123,7 +123,7 @@ class Visualizer(object):
 
         if self.show_masks and segms is not None:
             segms = list(segm for segm, show in zip(segms, filter_mask) if show)
-            result = self.overlay_masks(result, segms, classes, ids)
+            result = self.overlay_masks(result, segms, ids)
 
         if self.show_boxes:
             result = self.overlay_boxes(result, boxes, classes)
@@ -147,16 +147,14 @@ class Visualizer(object):
             )
         return image
 
-    def overlay_masks(self, image, masks, classes, ids=None):
-        colors = self.compute_colors_for_labels(classes).tolist()
-
+    def overlay_masks(self, image, masks, ids=None):
         segments_image = image.copy()
         aggregated_mask = np.zeros(image.shape[:2], dtype=np.uint8)
         aggregated_colored_mask = np.zeros(image.shape, dtype=np.uint8)
         black = np.zeros(3, dtype=np.uint8)
 
         all_contours = []
-        for i, (mask, color) in enumerate(zip(masks, colors)):
+        for i, mask in enumerate(masks):
             color_idx = i if ids is None else ids[i]
             mask_color = self.instance_color_palette[color_idx % len(self.instance_color_palette)].tolist()
 
