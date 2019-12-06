@@ -22,8 +22,7 @@ Second model is Text Recognition Encoder that takes `text_features` as input and
 
 Third model is Text Recognition Decoder that takes `encoded text` from Text Recognition Encoder ,`previous symbol` and `hidden state`. On the first step special `Start Of Sequence (SOS)` symbol and zero `hidden state` are fed to Text Recognition Decoder. The decoder produces `symbols distribution`, `current hidden state` each step until `End Of Sequence (EOS)` symbol is generated.
 
-As input, the demo application takes:
-* a path to a single image file, a video file or a numeric ID of a web camera specified with a command-line argument `-i`
+As input, the demo application takes a path to a single image file, a video file or a numeric ID of a web camera specified with a command-line argument `-i`.
 
 The demo workflow is the following:
 
@@ -114,7 +113,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (`*.xml` + `*.bin`) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
-To run the demo, please provide paths to the model in the IR format, to a file with class labels, and to an input video, image, or folder with images:
+To run the demo, please provide paths to the model in the IR format and to an input video, image, or folder with images:
 ```bash
 python3 text_spotting_demo.py \
 -mm <path_to_models>/text-spotting-0001-detector.xml \
