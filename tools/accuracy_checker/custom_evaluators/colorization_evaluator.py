@@ -53,7 +53,7 @@ class ColorizationEvaluator(BaseEvaluator):
         launcher = create_launcher(config['launchers'][0], delayed_model_loading=True)
         test_model = ColorizationTestModel(config.get('network_info', {}), launcher)
         check_model = ColorizationCheckModel(config.get('network_info', {}),
-                                           dataset_config.get('preprocessing', {}), launcher)
+                                             dataset_config.get('preprocessing', {}), launcher)
         return cls(dataset, reader, preprocessing, metrics_executor, launcher, test_model, check_model)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, ** kwargs):
@@ -132,15 +132,14 @@ class ColorizationTestModel(BaseModel):
         super().__init__(network_info, launcher)
         model_xml = str(network_info['test']['model'])
         model_bin = str(network_info['test']['weights'])
+        self.color_coeff = str(network_info['test']['color_coeff'])
         self.network = launcher.create_ie_network(model_xml, model_bin)
         if not hasattr(launcher, 'plugin'):
             launcher.create_ie_plugin()
         self.exec_network = launcher.plugin.load(self.network)
         self.input_blob = next(iter(self.network.inputs))
         self.output_blob = next(iter(self.network.outputs))
-        list_colors_param = network_info['test']['color_reconstruction']
-        self.color_coeff = str([elem for elem in list_colors_param if 'coeff' in elem][0]['coeff'])
-        self.test_mean = float([elem for elem in list_colors_param if 'mean' in elem][0]['mean'])
+        self.test_mean = float(network_info['test']['color_mean'])
 
     def predict(self, identifiers, input_data):
 

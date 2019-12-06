@@ -27,11 +27,9 @@ ENTRIES_PATHS = {
     'launchers': {
         'model': 'models',
         'weights': 'models',
+        'color_coeff': 'models',
         'caffe_model': 'models',
         'caffe_weights': 'models',
-        'color_reconstruction': {
-            'coeff': 'models'
-        },
         'tf_model': 'models',
         'tf_meta': 'models',
         'mxnet_weights': 'models',

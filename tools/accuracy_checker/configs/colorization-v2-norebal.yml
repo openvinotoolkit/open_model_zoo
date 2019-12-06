@@ -6,9 +6,8 @@ evaluations:
           test:
             model:   public/colorization-v2-norebal/FP32/colorization-v2-norebal.xml
             weights: public/colorization-v2-norebal/FP32/colorization-v2-norebal.bin
-            color_reconstruction:
-            -   coeff: public/colorization-v2-norebal/colorization-v2-norebal.npy
-            -   mean: 50
+            color_coeff: public/colorization-v2-norebal/colorization-v2-norebal.npy
+            color_mean: 50
 
           checker:
             model:   public/vgg16/FP32/vgg16.xml
@@ -40,9 +39,8 @@ evaluations:
           test:
             model:   public/colorization-v2-norebal/FP16/colorization-v2-norebal.xml
             weights: public/colorization-v2-norebal/FP16/colorization-v2-norebal.bin
-            color_reconstruction:
-            -   coeff: public/colorization-v2-norebal/colorization-v2-norebal.npy
-            -   mean: 50
+            color_coeff: public/colorization-v2-norebal/colorization-v2-norebal.npy
+            color_mean: 50
 
           checker:
             model:   public/vgg16/FP16/vgg16.xml
