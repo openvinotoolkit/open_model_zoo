@@ -31,9 +31,6 @@ mobilenet-v1-1.0-224-tf
 mobilenet-v2
 mobilenet-v2-1.0-224
 mobilenet-v2-1.4-224
-mobilenetv2-int8-sparse-v1-tf-0001
-mobilenetv2-int8-sparse-v2-tf-0001
-mobilenetv2-int8-tf-0001
 mobilenet-v2-pytorch
 octave-densenet-121-0.125
 octave-resnet-101-0.125
@@ -49,9 +46,6 @@ resnet-152
 resnet-50
 resnet50-binary-0001
 resnet-50-caffe2
-resnet-50-int8-sparse-v1-tf-0001
-resnet-50-int8-sparse-v2-tf-0001
-resnet-50-int8-tf-0001
 resnet-50-pytorch
 se-inception
 se-resnet-101
