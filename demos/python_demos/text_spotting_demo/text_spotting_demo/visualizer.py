@@ -112,16 +112,15 @@ class Visualizer(object):
         self.show_scores = show_scores
 
     def __call__(self, image, boxes, classes, scores, segms, texts, ids=None):
-        result = image
         if self.show_masks and segms is not None:
-            result = self.overlay_masks(result, segms, ids)
+            image = self.overlay_masks(image, segms, ids)
 
         if self.show_boxes:
-            result = self.overlay_boxes(result, boxes, classes)
+            image = self.overlay_boxes(image, boxes, classes)
 
-        result = self.overlay_class_names(result, boxes, texts, scores,
-                                          show_score=self.show_scores)
-        return result
+        image = self.overlay_class_names(image, boxes, texts, scores, show_score=self.show_scores)
+
+        return image
 
     def compute_colors_for_labels(self, labels):
         colors = labels[:, None] * self.class_color_palette
