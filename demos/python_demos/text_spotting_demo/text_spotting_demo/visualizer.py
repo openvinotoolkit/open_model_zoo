@@ -103,26 +103,17 @@ class Visualizer(object):
 
     class_color_palette = np.asarray([2 ** 25 - 1, 2 ** 15 - 1, 2 ** 21 - 1])
 
-    def __init__(self, class_labels, confidence_threshold=0.5, show_boxes=False,
+    def __init__(self, class_labels, show_boxes=False,
                  show_masks=True, show_scores=False):
         super().__init__()
         self.class_labels = class_labels
-        self.confidence_threshold = confidence_threshold
         self.show_masks = show_masks
         self.show_boxes = show_boxes
         self.show_scores = show_scores
 
     def __call__(self, image, boxes, classes, scores, segms, texts, ids=None):
-        result = image.copy()
-
-        # Filter out detections with low confidence.
-        filter_mask = scores > self.confidence_threshold
-        scores = scores[filter_mask]
-        classes = classes[filter_mask]
-        boxes = boxes[filter_mask]
-
+        result = image
         if self.show_masks and segms is not None:
-            segms = list(segm for segm, show in zip(segms, filter_mask) if show)
             result = self.overlay_masks(result, segms, ids)
 
         if self.show_boxes:
