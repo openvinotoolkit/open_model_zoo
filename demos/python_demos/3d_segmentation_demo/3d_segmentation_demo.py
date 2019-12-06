@@ -38,10 +38,10 @@ CLASSES_COLOR_MAP = [
     (150, 150, 150),
     (58, 55, 169),
     (211, 51, 17),
+    (76, 226, 202),
     (157, 80, 44),
     (23, 95, 189),
     (210, 133, 34),
-    (76, 226, 202),
     (101, 138, 127),
     (223, 91, 182),
     (80, 128, 113),
@@ -58,6 +58,12 @@ CLASSES_COLOR_MAP = [
     (71, 30, 204)
 ]
 
+TUMOR_CLASSES = [
+    'overall',
+    'necrotic core / non-enhancing tumor',
+    'edema',
+    'enhancing tumor'
+]
 # suffixes for original interpretation in dataset
 SUFFIX_T1 = "_t1.nii.gz"
 SUFFIX_T2 = "_t2.nii.gz"
@@ -97,6 +103,7 @@ def parse_arguments():
     args.add_argument('-c', '--path_to_cldnn_config', type=str, required=False,
                         help="Required for GPU custom kernels. "
                              "Absolute path to an .xml file with the kernels description.")
+    args.add_argument('-gt', '--path_to_ground_truth', type=str)
     return parser.parse_args()
 
 
@@ -219,6 +226,33 @@ def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True)
     ]
 
     return data, data_crop, affine, original_shape, bbox_ret
+
+
+def add_ground_truth(image, predict_segmentation, seg_mask, ground_truth_data):
+    color_ground_truth = np.zeros(image.shape, dtype=np.uint8)
+    for idx, c in enumerate(CLASSES_COLOR_MAP):
+        color_ground_truth[ground_truth_data[:, :, :] == idx, :] = np.array(c, dtype=np.uint8)
+    image_copy = image.copy()
+    image[seg_mask] = predict_segmentation[seg_mask]
+    mask = ground_truth_data > 0
+    image_copy[mask] = color_ground_truth[mask]
+    result = np.zeros((image.shape[0], 2 * image.shape[1],) + image.shape[2:])
+    result[:, :image.shape[0], :, :] = image
+    result[:, image.shape[0]:, :, :] = image_copy
+    return result
+
+
+def calc_dice(ground_truth_data, seg_result, classes):
+    dice = []
+    res = 2 * np.logical_and(seg_result > 0, ground_truth_data > 0).sum() / \
+           ((seg_result > 0).sum() + (ground_truth_data > 0).sum())
+    dice.append(res)
+    labels = [(1,2), (2,1), (3,3)]
+    for i, j in labels:
+        res = 2 * np.logical_and(seg_result == j, ground_truth_data == i).sum() / \
+                  ((seg_result == j).sum() + (ground_truth_data == i).sum())
+        dice.append(res)
+    return dice
 
 
 def main():
@@ -347,10 +381,30 @@ def main():
 
         im = 255 * (im - im.min())/(im.max() - im.min())
         color_seg_frame = np.zeros(im.shape, dtype=np.uint8)
-        for idx, c in enumerate(CLASSES_COLOR_MAP):
+        class_order = (0, 2, 1, 3)
+        for idx, c in zip(class_order, CLASSES_COLOR_MAP):
             color_seg_frame[seg_result[:, :, :] == idx, :] = np.array(c, dtype=np.uint8)
+
         mask = seg_result[:, :, :] > 0
-        im[mask] = color_seg_frame[mask]
+
+        if args.path_to_ground_truth:
+            try:
+                ground_truth_data = read_nii_header('', args.path_to_ground_truth)
+                ground_truth_data = np.array(ground_truth_data.dataobj)
+                if ground_truth_data.shape != original_size:
+                    raise ValueError('Wrong ground truth data shape - {}, must be {}'
+                                     .format(ground_truth_data.shape, original_size))
+
+                im = add_ground_truth(im, color_seg_frame, mask, ground_truth_data)
+
+                dice = calc_dice(ground_truth_data, seg_result, TUMOR_CLASSES)
+                for c, d in zip(TUMOR_CLASSES, dice):
+                    logging.info("Dice index for \"{}\": {:.2f}".format(c, d))
+            except ValueError as err:
+                logger.warning('Ground truth data is missing or corrupt: {}'.format(err))
+                im[mask] = color_seg_frame[mask]
+        else:
+            im[mask] = color_seg_frame[mask]
 
         for k in range(out_d):
             if is_nifti_data:
