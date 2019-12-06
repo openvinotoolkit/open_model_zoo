@@ -510,7 +510,6 @@ class DLSDKLauncher(Launcher):
 
         if len(data.shape) > 1 and len(input_shape) > 1 and data.shape[1] != input_shape[1]:
             data = data[:, :input_shape[1]]
-
         return data.reshape(input_shape)
 
     def create_ie_plugin(self, log=True):

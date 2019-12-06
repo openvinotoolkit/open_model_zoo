@@ -9,13 +9,13 @@ models:
     datasets:
       - name: imagenet_1000_classes
         preprocessing:
-        - type: resize
-          size: 256
-          aspect_ratio_scale: greater
-        - type: crop
-          size: 224
-        - type: normalization
-          mean: 103.939, 116.779, 123.68
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 224
+          - type: normalization
+            mean: 103.939, 116.779, 123.68
 
   - name: vgg19-caffe2
     launchers:
@@ -36,9 +36,9 @@ models:
     datasets:
       - name: imagenet_1000_classes
         preprocessing:
-        - type: resize
-          size: 256
-          aspect_ratio_scale: greater
-        - type: crop
-          size: 224
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 224
 global_definitions: ../dataset_definitions.yml

@@ -42,4 +42,5 @@ models:
 
         metrics:
           - type: mpjpe_multiperson
+
 global_definitions: ../dataset_definitions.yml

@@ -30,4 +30,5 @@ models:
           - type: dice_index
             median: True
             presenter: print_vector
+
 global_definitions: ../dataset_definitions.yml

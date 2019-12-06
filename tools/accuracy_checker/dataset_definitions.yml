@@ -1,6 +1,6 @@
 launchers:
   - framework: dlsdk
-    cpu_extensions: AUTO
+#    cpu_extensions: AUTO
 
 datasets:
   - name: ms_coco_mask_rcnn

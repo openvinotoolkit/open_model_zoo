@@ -7,7 +7,7 @@ models:
         model: public/resnet-26-0.250/checkpoint-0-0000.params
         adapter: classification
         cpu_extensions: AUTO
-        inputs: 
+        inputs:
           - name: 'data'
             type: INPUT
             shape: 3,224,224
@@ -37,7 +37,7 @@ models:
             mean: (124,117,104)
             std: 59.88
 
-        # Using accuracy metric, achieved result of public model - 76.1 / 92.6 (top 1 and top 5 respectively)
+            # Using accuracy metric, achieved result of public model - 76.1 / 92.6 (top 1 and top 5 respectively)
 
   # DLSDK inference
   - name: octave-resnet-26-0.25
@@ -70,5 +70,6 @@ models:
           - type: crop
             size: 224
 
-        # Using accuracy metric, achieved result of public model - 76.1 / 92.6 (top 1 and top 5 respectively)
+            # Using accuracy metric, achieved result of public model - 76.1 / 92.6 (top 1 and top 5 respectively)
+
 global_definitions: ../dataset_definitions.yml
