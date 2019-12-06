@@ -43,8 +43,8 @@ evaluations:
             color_mean: 50
 
           checker:
-            model:   public/vgg16/FP16/vgg16.xml
-            weights: public/vgg16/FP16/vgg16.bin
+            model:   public/vgg16/FP32/vgg16.xml
+            weights: public/vgg16/FP32/vgg16.bin
             adapter: classification
 
         launchers:
