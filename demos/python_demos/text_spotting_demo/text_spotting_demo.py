@@ -214,7 +214,6 @@ def main():
         'Demo supports only topologies with the following output keys: {}'.format(', '.join(required_output_keys))
 
     n, c, h, w = mask_rcnn_net.inputs['im_data'].shape
-    print(n, c, h, w)
     assert n == 1, 'Only batch 1 is supported by the demo application'
 
     log.info('Loading IR to the plugin...')
