@@ -27,7 +27,6 @@ ENTRIES_PATHS = {
     'launchers': {
         'model': 'models',
         'weights': 'models',
-        'coeff': 'models',
         'caffe_model': 'models',
         'caffe_weights': 'models',
         'tf_model': 'models',
@@ -41,6 +40,17 @@ ENTRIES_PATHS = {
         'affinity_map': 'affinity_map',
         'predictions': 'source'
     },
+
+    'module_config': {
+        'network_info': {
+            'test': {
+                'color_reconstruction': {
+                    'coeff': 'models'
+                },
+            },
+        },
+    },
+
     'datasets': {
         'segmentation_masks_source': 'source',
         'annotation': 'annotations',
