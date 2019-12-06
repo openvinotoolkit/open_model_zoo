@@ -117,7 +117,7 @@ def num_jobs_arg(value_str):
 
     raise argparse.ArgumentTypeError('must be a positive integer or "auto" (got {!r})'.format(value_str))
 
-def main():
+def main(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', type=Path, metavar='CONFIG.YML',
         help='model configuration file (deprecated)')
@@ -143,7 +143,7 @@ def main():
         help='Print the conversion commands without running them')
     parser.add_argument('-j', '--jobs', type=num_jobs_arg, default=1,
         help='number of conversions to run concurrently')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     mo_path = args.mo
     if mo_path is None:
@@ -242,4 +242,4 @@ def main():
         sys.exit(1)
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])

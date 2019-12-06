@@ -181,7 +181,7 @@ def positive_int_arg(value_str):
 
     raise argparse.ArgumentTypeError('must be a positive integer (got {!r})'.format(value_str))
 
-def main():
+def main(argv):
     parser = DownloaderArgumentParser()
     parser.add_argument('-c', '--config', type=Path, metavar='CONFIG.YML',
         help='model configuration file (deprecated)')
@@ -202,7 +202,7 @@ def main():
     parser.add_argument('--progress_format', choices=('text', 'json'), default='text',
         help='which format to use for progress reporting')
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     reporter = common.Reporter(
         enable_human_output=args.progress_format == 'text',
@@ -272,4 +272,4 @@ def main():
         sys.exit(1)
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])

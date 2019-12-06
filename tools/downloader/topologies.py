@@ -9,6 +9,8 @@ import argparse
 from pathlib import Path
 
 import common
+import downloader
+import converter
 
 _precision_marker = '$precision'
 _cache = Path(os.getenv('OPENCV_OPEN_MODEL_ZOO_CACHE_DIR', Path('.').resolve() / 'models'))
@@ -28,10 +30,9 @@ class Topology:
 
         if self.config and not os.path.exists(self.config) or \
            self.model and not os.path.exists(self.model):
-            sys.argv = ['', '--name=' + self.name, '--precisions=' + precision,
-                        '--output_dir=' + str(_cache).replace('\\', '\\\\')]
-            from downloader import main
-            main()
+
+            downloader.main(['--name=' + self.name, '--precisions=' + precision,
+                             '--output_dir=' + str(_cache).replace('\\', '\\\\')])
 
 
     def get_ir(self, precision=None):
@@ -59,10 +60,8 @@ class Topology:
         if os.path.exists(xmlPath) and os.path.exists(binPath):
             return xmlPath, binPath
 
-        sys.argv = ['', '--name=' + self.name, '--precisions=' + precision,
-                    '--download_dir=' + str(_cache).replace('\\', '\\\\')]
-        from converter import main
-        main()
+        converter.main(['--name=' + self.name, '--precisions=' + precision,
+                        '--download_dir=' + str(_cache).replace('\\', '\\\\')])
 
         return xmlPath, binPath
 
