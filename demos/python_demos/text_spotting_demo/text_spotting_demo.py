@@ -312,12 +312,8 @@ def main():
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
             feature = np.transpose(feature, (0, 2, 1))
 
-
             hidden = np.zeros(hidden_shape)
             prev_symbol_index = np.ones((1,)) * SOS_INDEX
-
-            vocab_size = len(args.alphabet)
-            per_feature_outputs = np.zeros([MAX_SEQ_LEN, vocab_size])
 
             text = ''
             for i in range(MAX_SEQ_LEN):
@@ -326,7 +322,6 @@ def main():
                     args.trd_input_prev_hidden: hidden,
                     args.trd_input_encoder_outputs: feature})
                 symbols_distr = decoder_output[args.trd_output_symbols_distr]
-                per_feature_outputs[i] = symbols_distr
                 prev_symbol_index = int(np.argmax(symbols_distr, axis=1))
                 if prev_symbol_index == EOS_INDEX:
                     break
