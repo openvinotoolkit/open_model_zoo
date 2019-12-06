@@ -87,14 +87,18 @@ public:
             updateList.pop_front();
 
             if (updateList.empty()) {
-                if (!prevImg.empty()) {
-                    int prevSourceID = ((currSourceID < FLAGS_b) ? points.size() - 1 : currSourceID - FLAGS_b);
-                    cv::resize(prevImg,
+                if (prevImgs.size() >= FLAGS_b && points.size() > 1) {
+                    int prevSourceID = currSourceID - FLAGS_b;
+                    if (prevSourceID < 0) {
+                        prevSourceID += points.size();
+                    }
+                    cv::resize(prevImgs.front(),
                                outImg(cv::Rect(points[prevSourceID], cellSize)),
                                cellSize);
+                    prevImgs.pop();
                 }
 
-                prevImg = frame;
+                prevImgs.push(frame);
                 
                 int thickness =  static_cast<int>(10. * frame.cols / cellSize.width);
                 copyMakeBorder(frame,
@@ -102,16 +106,16 @@ public:
                                thickness, thickness, thickness, thickness,
                                cv::BORDER_CONSTANT,
                                cv::Scalar(0, 255, 0));
-            }
-
-            cv::resize(frame,
-                       outImg(cv::Rect(points[currSourceID], cellSize)),
-                       cellSize);
+                
+                cv::resize(frame,
+                           outImg(cv::Rect(points[currSourceID], cellSize)),
+                           cellSize);
             
-            if (currSourceID == points.size() - 1)
-                currSourceID = 0;
-            else
-                currSourceID++;
+                if (currSourceID == points.size() - 1)
+                    currSourceID = 0;
+                else
+                    currSourceID++;
+            }
         }
 
         return outImg;
@@ -119,7 +123,7 @@ public:
 
 private:
     cv::Mat outImg;
-    cv::Mat prevImg;
+    std::queue<cv::Mat> prevImgs;
     std::list<cv::Mat> updateList;
     cv::Size size;
     cv::Size cellSize;
