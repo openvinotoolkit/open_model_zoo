@@ -16,7 +16,7 @@ First model is Mask-RCNN like text detector with the following constraints:
     * `scores` with confidence scores for all bounding boxes
     * `classes` with object class IDs for all bounding boxes
     * `raw_masks` with fixed-size segmentation heat maps for all classes of all bounding boxes
-    * `text_features` with text features which are feed to Text Recognition Head further
+    * `text_features` with text features which are fed to Text Recognition Head further
 
 Second model is Text Recognition Encoder that takes `text_features` as input and produces `encoded text`.
 
