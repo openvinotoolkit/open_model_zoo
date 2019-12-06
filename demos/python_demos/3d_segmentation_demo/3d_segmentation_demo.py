@@ -78,7 +78,7 @@ def mri_sequence(arg):
         raise AttributeError("The MRI-sequence should contain exactly 4 values, but contains {}.".format(len(sequence)))
     if len(set(sequence)) != 4:
         raise AttributeError("The MRI-sequence has repeating scan types - {}. "
-                             "The MRI-sequence must contains "
+                             "The MRI-sequence must contain "
                              "native T1, native T2, T2-FLAIR, post-Gadolinium contrast T1 scans in that order".
                              format(sequence))
     return sequence
@@ -109,9 +109,11 @@ def parse_arguments():
     args.add_argument('-c', '--path_to_cldnn_config', type=str, required=False,
                         help="Required for GPU custom kernels. "
                              "Absolute path to an .xml file with the kernels description.")
-    args.add_argument('-ms', '--mri_sequence', type=mri_sequence, metavar='N1,N2,N3,N4', default=(2, 0, 3, 1),
+    args.add_argument('-ms', '--mri_sequence', type=mri_sequence, metavar='N1,N2,N3,N4', default=(0,1,2,3),
                       help='Optional. Set MRI-sequence, if data is in single NIFTI file.'
                            'Input order is: native T1, native T2, T2-FLAIR, post-Gadolinium contrast T1')
+    args.add_argument("--full_intensities_range", help="Take intensities of the input image in a full range.",
+                        default=False, action="store_true")
     return parser.parse_args()
 
 
@@ -164,16 +166,17 @@ def read_nii_header(data_path, name):
     return nib.load(filename)
 
 
-def normalize(image, mask):
+def normalize(image, mask, full_intensities_range):
     ret = image.copy()
     image_masked = np.ma.masked_array(ret, ~(mask))
-    ret[mask] = ret[mask] - np.mean(image_masked)
-    ret[mask] = ret[mask] / np.var(image_masked) ** 0.5
-    ret[ret > 5.] = 5.
-    ret[ret < -5.] = -5.
-    ret += 5.
-    ret /= 10
-    ret[~mask] = 0.
+    ret = ret - np.mean(image_masked)
+    ret = ret / np.var(image_masked) ** 0.5
+    if not full_intensities_range:
+        ret[ret > 5.] = 5.
+        ret[ret < -5.] = -5.
+        ret += 5.
+        ret /= 10
+        ret[~mask] = 0.
     return ret
 
 
@@ -183,20 +186,22 @@ def resample_np(data, output_shape, order):
     return interpolation.zoom(data, zoom=factor, order=order)
 
 
-def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True, mri_sequence_order=(1, 3, 0, 2)):
+def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True, \
+               mri_sequence_order=(0,1,2,3), full_intensities_range=False):
     images_list = []
     original_shape = ()
     bboxes = np.zeros(shape=(len(DATA_SUFFIXES),) + (2, 3))
 
     if is_series:
-        for j, s in enumerate(DATA_SUFFIXES):
+        data_seq = [DATA_SUFFIXES[i] for i in mri_sequence_order]
+        for j, s in enumerate(data_seq):
             image_handle = read_nii_header(test_data_path, data_name + s)
             affine = image_handle.affine
             image = image_handle.get_data().astype(np.float32)
 
             mask = image > 0.
             bboxes[j] = bbox3(mask)
-            image = normalize(image, mask)
+            image = normalize(image, mask, full_intensities_range)
 
             images_list.append(image.reshape((1, 1,) + image.shape))
             original_shape = image.shape
@@ -211,7 +216,7 @@ def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True,
             image = data[:, :, :, j]
             mask = image > 0
             bboxes[j] = bbox3(mask)
-            image = normalize(image, mask)
+            image = normalize(image, mask, full_intensities_range)
             images_list.append(image.reshape((1, 1,) + image.shape))
         original_shape = data.shape[:3]
 
@@ -222,10 +227,13 @@ def read_image(test_data_path, data_name, sizes=(128, 128, 128), is_series=True,
     bbox[1] = bbox_max
 
     data = np.concatenate(images_list, axis=1)
-    data_crop = resample_np(
-        data[:, :, bbox_min[0]:bbox_max[0], bbox_min[1]:bbox_max[1], bbox_min[2]:bbox_max[2]],
-        (1, len(DATA_SUFFIXES),) + sizes,
-        1)
+    if data.shape[2:] == sizes:
+        data_crop = data
+    else:
+        data_crop = resample_np(
+            data[:, :, bbox_min[0]:bbox_max[0], bbox_min[1]:bbox_max[1], bbox_min[2]:bbox_max[2]],
+            (1, len(DATA_SUFFIXES),) + sizes,
+            1)
 
     bbox_ret = [
         bbox_min[0], bbox_max[0],
@@ -300,12 +308,13 @@ def main():
     if input_type == NIFTI_FOLDER:
         series_name = find_series_name(args.path_to_input_data)
         original_data, data_crop, affine, original_size, bbox = \
-            read_image(args.path_to_input_data, data_name=series_name, sizes=(h, w, d))
+            read_image(args.path_to_input_data, data_name=series_name, sizes=(d, h, w),
+                       mri_sequence_order=args.mri_sequence, full_intensities_range=args.full_intensities_range)
 
     elif input_type == NIFTI_FILE:
         original_data, data_crop, affine, original_size, bbox = \
-            read_image(args.path_to_input_data, data_name=args.path_to_input_data, sizes=(h, w, d),
-                       is_series=False, mri_sequence_order=args.mri_sequence)
+            read_image(args.path_to_input_data, data_name=args.path_to_input_data, sizes=(d, h, w), is_series=False,
+                       mri_sequence_order=args.mri_sequence, full_intensities_range=args.full_intensities_range)
     else:
         data_crop = np.zeros(shape=(n, c, d, h, w), dtype=np.float)
         im_seq = ImageSequence.Iterator(Image.open(args.path_to_input_data))
@@ -346,15 +355,29 @@ def main():
             x = bbox[1] - bbox[0]
             y = bbox[3] - bbox[2]
             z = bbox[5] - bbox[4]
-            seg_result[bbox[0]:bbox[1], bbox[2]:bbox[3], bbox[4]:bbox[5]] = \
-                np.argmax(resample_np(data, (channels, x, y, z), 1), axis=0)
-        elif channels == 1:
-            reshaped_data = data.reshape(out_d, out_h, out_w)
+            out_result = np.zeros(shape=((channels,) + original_size), dtype=float)
+            out_result[:,bbox[0]:bbox[1], bbox[2]:bbox[3], bbox[4]:bbox[5]] = \
+                resample_np(data, (channels, x, y, z), 1)
+        else:
+            out_result = data
+
+        if channels == 1:
+            reshaped_data = out_result.reshape(original_size[0], original_size[1], original_size[2])
             mask = reshaped_data[:, :, :] > 0.5
             reshaped_data[mask] = 1
             seg_result = reshaped_data.astype(int)
-        else:
-            seg_result = np.argmax(data, axis=0).astype(int)
+        elif channels == 4:
+            seg_result = np.argmax(out_result, axis=0).astype(int)
+        elif channels == 3:
+            res = np.zeros(shape=out_result.shape, dtype=bool)
+            res = out_result > 0.5
+            wt = res[0]
+            tc = res[1]
+            et = res[2]
+
+            seg_result[wt] = 2
+            seg_result[tc] = 1
+            seg_result[et] = 3
 
         im = np.stack([original_data[batch, 0, :, :, :],
                        original_data[batch, 0, :, :, :],
@@ -368,7 +391,7 @@ def main():
         mask = seg_result[:, :, :] > 0
         im[mask] = color_seg_frame[mask]
 
-        for k in range(out_d):
+        for k in range(im.shape[2]):
             if is_nifti_data:
                 list_img.append(Image.fromarray(im[:, :, k, :].astype('uint8'), 'RGB'))
             else:
@@ -383,7 +406,8 @@ def main():
 
     # --------------------------------------------- 7. Save output -----------------------------------------------
     tiff_output_name = os.path.join(args.path_to_output, 'output.tiff')
-    Image.new('RGB', (data.shape[3], data.shape[2])).save(tiff_output_name, append_images=list_img, save_all=True)
+    Image.new('RGB', (original_data.shape[3], original_data.shape[2])).save(tiff_output_name, \
+        append_images=list_img, save_all=True)
     logger.info("Result tiff file was saved to {}".format(tiff_output_name))
 
     if args.output_nifti and is_nifti_data:
@@ -391,7 +415,6 @@ def main():
             nii_filename = os.path.join(args.path_to_output, 'output_{}.nii.gz'.format(list_seg_result.index(seg_res)))
             nib.save(nib.Nifti1Image(seg_res, affine=affine), nii_filename)
             logger.info("Result nifti file was saved to {}".format(nii_filename))
-
 
 if __name__ == "__main__":
     main()

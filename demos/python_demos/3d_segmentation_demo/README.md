@@ -49,6 +49,13 @@ Options:
   -c PATH_TO_CLDNN_CONFIG, --path_to_cldnn_config PATH_TO_CLDNN_CONFIG
                         Required for GPU custom kernels. Absolute path to an
                         .xml file with the kernels description.
+  -ms N1,N2,N3,N4, --mri_sequence N1,N2,N3,N4
+                        Optional. Set MRI-sequence, if data is in single NIFTI
+                        file.Input order is: native T1, native T2, T2-FLAIR,
+                        post-Gadolinium contrast T1
+  --full_intensities_range
+                        Take intensities of the input image in a full range.
+
 ```
 
 Running the application with the empty list of options yields the usage message and an error message.
@@ -66,13 +73,18 @@ python3 3d_segmentation_demo.py -i <path_to_image>/inputImage.tiff -m <path_to_m
 For example, to do inference on 3D NIfTI images using a trained network with multiple outputs on CPU and save 
 output TIFF and NIFTI images, run the following command:
 ```
-python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/brain-tumor-segmentation-0001 -d CPU -o <path_to_output> -nii
+python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/brain-tumor-segmentation-0001 -d CPU -o <path_to_output> -nii -ms 2,0,3,1
 ```
-
 For example, to do inference on a single 3D NIfTI image and save an output TIFF image, run the following command:
 ```
-python3 3d_segmentation_demo.py -i <path_to_nifti_image>/PackedImage.nii -m <path_to_model>/brain-tumor-segmentation-0001 -d CPU -o <path_to_output>
+python3 3d_segmentation_demo.py -i <path_to_nifti_image>/PackedImage.nii -m <path_to_model>/brain-tumor-segmentation-0001 -d CPU -o <path_to_output> -ms 2,0,3,1
 ```
+'-ms' option is added since input modalities can differ depending on a dataset. For example, [http://medicaldecathlon.com/](Medical Decathlon) brain tumor segmentation data modalities follow in different order than it's required by nets. To make a correct order using Medical Decathlon brain tumor data the correct option is 2,0,3,1 for brain-tumor-segmentation-0001 and 1,2,3,0 for brain-tumor-segmentation-0002.
+```
+python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/brain-tumor-segmentation-0002 -d CPU -o <path_to_output> -nii -ms 1,2,3,0 --full_intensities_range
+```
+'--full_intensities_range' option is related to preprocessing of input data. It can be different for different models, for example, brain-tumor-segmentation-0001 expects normalized data in [0,1] range and nullified non-positive values, while brain-tumor-segmentation-0002 just requires z-score normalization in a full range. So to use brain-tumor-segmentation-0002 model, the flag '--full_intensities_range' should be set, while for brain-tumor-segmentation-0001 no preprocessing option is required.
+
      
 ## Demo Output
 The demo outputs a multipage TIFF image and a NIFTI archive.
