@@ -51,7 +51,7 @@ Options:
                         .xml file with the kernels description.
   -ms N1,N2,N3,N4, --mri_sequence N1,N2,N3,N4
                         Optional. Set MRI-sequence, if data is in single NIFTI
-                        file.Input order is: native T1, native T2, T2-FLAIR,
+                        file. Input order is: native T1, native T2, T2-FLAIR,
                         post-Gadolinium contrast T1
   --full_intensities_range
                         Take intensities of the input image in a full range.
