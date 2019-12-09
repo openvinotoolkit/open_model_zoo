@@ -25,6 +25,7 @@ static const char thresh_output_message[] = "Optional. Probability threshold for
 static const char raw_output_message[] = "Optional. Inference results as raw values.";
 static const char input_resizable_message[] = "Optional. Enables resizable input with support of ROI crop & auto resize.";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", video_message);
@@ -37,6 +38,7 @@ DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_bool(auto_resize, false, input_resizable_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
+DEFINE_string(u, "", utilization_monitors_message);
 
 /**
 * \brief This function show a help message
@@ -58,4 +60,5 @@ static void showUsage() {
     std::cout << "    -t                        " << thresh_output_message << std::endl;
     std::cout << "    -auto_resize              " << input_resizable_message << std::endl;
     std::cout << "    -no_show                  " << no_show_processed_video << std::endl;
+    std::cout << "    -u                        " << utilization_monitors_message << std::endl;
 }

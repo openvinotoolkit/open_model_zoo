@@ -64,6 +64,7 @@ static const char fps_output_message[] = "Optional. Maximum FPS for playing vide
 static const char loop_video_output_message[] = "Optional. Enable playing video on a loop";
 static const char no_smooth_output_message[] = "Optional. Do not smooth person attributes";
 static const char no_show_emotion_bar_message[] = "Optional. Do not show emotion bar";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", input_video_message);
@@ -101,6 +102,7 @@ DEFINE_double(fps, -1, fps_output_message);
 DEFINE_bool(loop_video, false, loop_video_output_message);
 DEFINE_bool(no_smooth, false, no_smooth_output_message);
 DEFINE_bool(no_show_emotion_bar, false, no_show_emotion_bar_message);
+DEFINE_string(u, "", utilization_monitors_message);
 
 
 /**
@@ -149,4 +151,5 @@ static void showUsage() {
     std::cout << "    -loop_video                " << loop_video_output_message << std::endl;
     std::cout << "    -no_smooth                 " << no_smooth_output_message << std::endl;
     std::cout << "    -no_show_emotion_bar       " << no_show_emotion_bar_message << std::endl;
+    std::cout << "    -u                         " << utilization_monitors_message << std::endl;
 }

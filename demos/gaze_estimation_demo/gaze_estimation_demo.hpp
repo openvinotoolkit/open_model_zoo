@@ -42,6 +42,7 @@ static const char thresh_output_message[] = "Optional. Probability threshold for
 static const char raw_output_message[] = "Optional. Output inference results as raw values.";
 static const char fd_reshape_message[] = "Optional. Reshape Face Detector network so that its input resolution has the same aspect ratio as the input frame.";
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "cam", video_message);
@@ -59,6 +60,7 @@ DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_double(t, 0.5, thresh_output_message);
 DEFINE_bool(no_show, false, no_show_processed_video);
+DEFINE_string(u, "", utilization_monitors_message);
 
 /**
 * \brief This function shows a help message
@@ -85,4 +87,5 @@ static void showUsage() {
     std::cout << "    -pc                      " << performance_counter_message << std::endl;
     std::cout << "    -r                       " << raw_output_message << std::endl;
     std::cout << "    -t                       " << thresh_output_message << std::endl;
+    std::cout << "    -u                       " << utilization_monitors_message << std::endl;
 }

@@ -42,6 +42,7 @@ static const char input_data_type_message[] = "Required. Input data type: \"imag
                                               "\"list\" (for a text file where images paths are listed), "
                                               "\"video\" (for a saved video), "
                                               "\"webcam\" (for a webcamera device). By default, it is \"image\".";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", input_message);
@@ -62,6 +63,7 @@ DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_string(c, "", custom_gpu_library_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_bool(r, false, raw_output_message);
+DEFINE_string(u, "", utilization_monitors_message);
 
 /**
 * @brief This function shows a help message
@@ -90,4 +92,5 @@ static void showUsage() {
     std::cout << "    -c \"<absolute_path>\"         " << custom_gpu_library_message << std::endl;
     std::cout << "    -no_show                     " << no_show_message << std::endl;
     std::cout << "    -r                           " << raw_output_message << std::endl;
+    std::cout << "    -u                           " << utilization_monitors_message << std::endl;
 }

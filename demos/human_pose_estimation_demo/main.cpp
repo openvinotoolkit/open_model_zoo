@@ -12,6 +12,7 @@
 
 #include <inference_engine.hpp>
 
+#include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 
 #include "human_pose_estimation_demo.hpp"
@@ -74,6 +75,9 @@ int main(int argc, char* argv[]) {
         }
         std::cout << std::endl;
 
+        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
+        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
+
         do {
             double t1 = static_cast<double>(cv::getTickCount());
             std::vector<HumanPose> poses = estimator.estimate(image);
@@ -99,6 +103,8 @@ int main(int argc, char* argv[]) {
                 continue;
             }
 
+            presenter.drawGraphs(image);
+
             renderHumanPose(poses, image);
 
             cv::Mat fpsPane(35, 155, CV_8UC3);
@@ -117,7 +123,9 @@ int main(int argc, char* argv[]) {
             } else if (key == 27) {
                 break;
             }
+            presenter.handleKey(key);
         } while (cap.read(image));
+        std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;

@@ -64,6 +64,7 @@ static const char face_threshold_registration_output_message[] = "Optional. Prob
 static const char min_size_fr_reg_output_message[] = "Optional. Minimum input size for faces during database registration.";
 static const char act_det_output_message[] = "Optional. Output file name to save per-person action detections in.";
 static const char tracker_smooth_size_message[] = "Optional. Number of frames to smooth actions.";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "cam", video_message);
@@ -105,6 +106,7 @@ DEFINE_double(t_reg_fd, 0.9, face_threshold_registration_output_message);
 DEFINE_int32(min_size_fr, 128, min_size_fr_reg_output_message);
 DEFINE_string(al, "", act_det_output_message);
 DEFINE_int32(ss_t, -1, tracker_smooth_size_message);
+DEFINE_string(u, "", utilization_monitors_message);
 
 /**
 * @brief This function show a help message
@@ -155,4 +157,5 @@ static void showUsage() {
     std::cout << "    -min_size_fr                   " << min_size_fr_reg_output_message << std::endl;
     std::cout << "    -al                            " << act_det_output_message << std::endl;
     std::cout << "    -ss_t                          " << tracker_smooth_size_message << std::endl;
+    std::cout << "    -u                             " << utilization_monitors_message << std::endl;
 }

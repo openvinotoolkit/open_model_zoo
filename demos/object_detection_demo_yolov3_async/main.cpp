@@ -21,6 +21,7 @@
 
 #include <inference_engine.hpp>
 
+#include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
@@ -304,6 +305,8 @@ int main(int argc, char *argv[]) {
 
         std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and press ESC key" << std::endl;
         std::cout << "To switch between sync/async modes, press TAB key in the output window" << std::endl;
+        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
+        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
         while (true) {
             auto t0 = std::chrono::high_resolution_clock::now();
             // Here is the first asynchronous point:
@@ -353,6 +356,7 @@ int main(int argc, char *argv[]) {
                 wallclock = t0;
 
                 t0 = std::chrono::high_resolution_clock::now();
+                presenter.drawGraphs(frame);
                 std::ostringstream out;
                 out << "OpenCV cap/render time: " << std::fixed << std::setprecision(2)
                     << (ocv_decode_time + ocv_render_time) << " ms";
@@ -446,6 +450,8 @@ int main(int argc, char *argv[]) {
             if (9 == key) {  // Tab
                 isAsyncMode ^= true;
                 isModeChanged = true;
+            } else {
+                presenter.handleKey(key);
             }
         }
         // -----------------------------------------------------------------------------------------------------
@@ -457,6 +463,8 @@ int main(int argc, char *argv[]) {
         if (FLAGS_pc) {
             printPerformanceCounts(*async_infer_request_curr, std::cout, getFullDeviceName(ie, FLAGS_d));
         }
+
+        std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;

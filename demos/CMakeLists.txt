@@ -99,7 +99,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 endif()
 
-add_subdirectory(common/format_reader)
+add_subdirectory(common)
 
 # samples build can be switched off during whole IE build
 if (IE_MAIN_SOURCE_DIR AND NOT ENABLE_SAMPLES)

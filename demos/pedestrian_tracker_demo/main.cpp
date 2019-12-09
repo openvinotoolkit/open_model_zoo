@@ -10,6 +10,8 @@
 #include "detector.hpp"
 #include "pedestrian_tracker_demo.hpp"
 
+#include <monitors/presenter.h>
+
 #include <opencv2/core.hpp>
 
 #include <iostream>
@@ -191,6 +193,9 @@ int main_work(int argc, char **argv) {
     }
     std::cout << std::endl;
 
+    cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
+    Presenter presenter(FLAGS_u, 10, graphSize);
+
     for (int32_t frame_idx = std::max(0, FLAGS_first); 0 > FLAGS_last || frame_idx <= FLAGS_last; ++frame_idx) {
         cv::Mat frame;
         if (!cap.read(frame)) {
@@ -205,6 +210,8 @@ int main_work(int argc, char **argv) {
         // timestamp in milliseconds
         uint64_t cur_timestamp = static_cast<uint64_t >(1000.0 / video_fps * frame_idx);
         tracker->Process(frame, detections, cur_timestamp);
+
+        presenter.drawGraphs(frame);
 
         if (should_show) {
             // Drawing colored "worms" (tracks).
@@ -230,6 +237,7 @@ int main_work(int argc, char **argv) {
             char k = cv::waitKey(delay);
             if (k == 27)
                 break;
+            presenter.handleKey(k);
         }
 
         if (should_save_det_log && (frame_idx % 100 == 0)) {
@@ -250,6 +258,8 @@ int main_work(int argc, char **argv) {
         pedestrian_detector.PrintPerformanceCounts(getFullDeviceName(ie, FLAGS_d_det));
         tracker->PrintReidPerformanceCounts(getFullDeviceName(ie, FLAGS_d_reid));
     }
+
+    std::cout << presenter.reportMeans() << '\n';
     return 0;
 }
 
