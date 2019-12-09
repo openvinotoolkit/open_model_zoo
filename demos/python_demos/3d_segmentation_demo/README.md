@@ -55,7 +55,6 @@ Options:
                         post-Gadolinium contrast T1
   --full_intensities_range
                         Take intensities of the input image in a full range.
-
 ```
 
 Running the application with the empty list of options yields the usage message and an error message.
