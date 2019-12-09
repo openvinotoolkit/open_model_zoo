@@ -222,7 +222,7 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         annotation_data = annotation.mask
         prediction_data = np.argmax(prediction.mask, axis=0) if self.use_argmax else prediction.mask.astype('int64')
 
-        for c, p in enumerate(self.output_order[1:],1):
+        for c, p in enumerate(prediction.label_order, 1):
             annotation_data_ = (annotation_data == c)
             prediction_data_ = (prediction_data == p)
 

@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 
-from ..config import BaseField, BoolField, ConfigError, NumberField
+from ..config import BaseField, ConfigError
 from ..preprocessor import Preprocessor
 from ..utils import get_or_parse_value
 
@@ -103,51 +103,3 @@ class Normalize3d(Preprocessor):
             img[:, :, :, channel] = channel_val
 
         return img
-
-
-class NormalizeBrats(Preprocessor):
-    __provider__ = "normalize_brats"
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'masked': BoolField(optional=True, default=False,
-                                description='Does not apply normalization to zero values. '
-                                            'Applicable for brain tumor segmentation models'),
-            'cutoff': NumberField(optional=True,
-                                  description='Species range of values - [-cutoff, cutoff]'),
-            'shift_value': NumberField(optional=True, default=0, description='Specifies shift value'),
-            'normalize_value': NumberField(optional=True, default=1, description='Specifies normalize value')
-        })
-
-        return parameters
-
-    def configure(self):
-        self.masked = self.config.get('masked')
-        self.cutoff = self.config.get('cutoff', None)
-        self.shift_value = self.config.get('shift_value')
-        self.normalize_value = self.config.get('normalize_value')
-
-    def process(self, image, annotation_meta=None):
-        image.data = self.normalize_img(image.data)
-        return image
-
-    def normalize_img(self, image):
-        image_copy = image.copy()
-        for channel in range(image.shape[0]):
-            img = image[channel, :, :, :].copy()
-            mean, std = np.mean(img), np.std(img)
-            img -= mean
-            img /= std
-            if self.cutoff:
-                img[img > self.cutoff] = self.cutoff
-                img[img < -self.cutoff] = -self.cutoff
-            img += self.shift_value
-            img /= self.normalize_value
-            if self.masked:
-                mask = image[channel, :, :, :] > 0
-                img[~mask] = 0
-            image[channel, :, :, :] = img
-
-        return image

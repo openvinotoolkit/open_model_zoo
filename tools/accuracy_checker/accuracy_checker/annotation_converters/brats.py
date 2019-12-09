@@ -34,7 +34,8 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
         parameters = super().parameters()
         parameters.update({
             'image_folder': StringField(optional=True, default='imagesTr', description="Image folder."),
-            'mask_folder': StringField(optional=True, default='labelsTr', description="Mask folder.")
+            'mask_folder': StringField(optional=True, default='labelsTr', description="Mask folder."),
+            'labels_file': PathField(optional=True, default=None, description="File with labels")
         })
 
         return parameters
@@ -43,6 +44,7 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
         self.data_dir = self.get_value_from_config('data_dir')
         self.image_folder = self.get_value_from_config('image_folder')
         self.mask_folder = self.get_value_from_config('mask_folder')
+        self.labels_file = self.get_value_from_config('labels_file')
 
     def convert(self, check_content=False, **kwargs):
         mask_folder = Path(self.mask_folder)
@@ -72,7 +74,12 @@ class BratsConverter(DirectoryBasedAnnotationConverter):
 
             annotations.append(annotation)
 
-        return ConverterReturn(annotations, None, content_check_erros)
+        return ConverterReturn(annotations, self._get_meta(), content_check_erros)
+
+    def _get_meta(self):
+        if not self.labels_file:
+            return None
+        return {'label_map': dict(enumerate(read_txt(self.labels_file)))}
 
 
 class BratsNumpyConverter(DirectoryBasedAnnotationConverter):

@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 from ..adapters import Adapter
 from ..representation import SegmentationPrediction, BrainTumorSegmentationPrediction
-from ..config import ConfigValidator, BoolField, NumberField
+from ..config import ConfigValidator, BoolField, ListField, NumberField
 
 
 class SegmentationAdapter(Adapter):
@@ -104,13 +104,33 @@ class BrainTumorSegmentationAdapter(Adapter):
     __provider__ = 'brain_tumor_segmentation'
     prediction_types = (BrainTumorSegmentationPrediction, )
 
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'make_argmax': BoolField(
+                optional=True, default=False, description="Allows to apply argmax operation to output values."
+            ),
+            'label_order': ListField(
+                optional=True, default=[1, 2, 3], description="Specifies order of output labels, according to "
+                                                              "order of dataset labels"
+            )
+        })
+
+        return parameters
+
+    def configure(self):
+        self.argmax = self.get_value_from_config('make_argmax')
+        self.label_order = tuple(self.get_value_from_config('label_order'))
+
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
         for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
-            output = np.argmax(output, axis=0).reshape((1,)+output.shape[1:])
-            result.append(BrainTumorSegmentationPrediction(identifier, output))
+            if self.argmax:
+                output = np.argmax(output, axis=0).reshape((1,)+output.shape[1:])
+            result.append(BrainTumorSegmentationPrediction(identifier, output, self.label_order))
 
         return result
 

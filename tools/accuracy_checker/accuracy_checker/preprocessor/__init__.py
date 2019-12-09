@@ -33,6 +33,7 @@ from .geometric_transformations import (
 from .resize import Resize, AutoResize
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
 from .centernet_preprocessing import CenterNetAffineTransformation
+from .brats_preprocessing import Resize3D, NormalizeBrats, CropBraTS, SwapModalitiesBrats
 
 __all__ = [
     'PreprocessingExecutor',
@@ -62,6 +63,8 @@ __all__ = [
     'Normalize3d',
     'Normalize',
     'NormalizeBrats',
+
+    'SwapModalitiesBrats',
 
     'DecodeByVocabulary',
     'PadWithEOS',

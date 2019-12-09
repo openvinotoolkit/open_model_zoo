@@ -582,7 +582,9 @@ datasets:
     annotation_conversion:
       converter: brats
       data_dir: BraTS_2017
+      labels_file: BraTS_2017/labels
     annotation: brats.pickle
+    dataset_meta: brats.json
 
   - name: product_detection
     annotation: product_detection.pickle
