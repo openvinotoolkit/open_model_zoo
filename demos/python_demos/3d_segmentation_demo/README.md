@@ -79,7 +79,7 @@ For example, to do inference on a single 3D NIfTI image and save an output TIFF 
 ```
 python3 3d_segmentation_demo.py -i <path_to_nifti_image>/PackedImage.nii -m <path_to_model>/brain-tumor-segmentation-0001 -d CPU -o <path_to_output> -ms 2,0,3,1
 ```
-'-ms' option is added since input modalities can differ depending on a dataset. For example, [http://medicaldecathlon.com/](Medical Decathlon) brain tumor segmentation data modalities follow in different order than it's required by nets. To make a correct order using Medical Decathlon brain tumor data the correct option is 2,0,3,1 for brain-tumor-segmentation-0001 and 1,2,3,0 for brain-tumor-segmentation-0002.
+`-ms` option aligns input modalities that depend on a dataset. For example, [Medical Decathlon](http://medicaldecathlon.com/) brain tumor segmentation data modalities follow in different order than it's required by nets. To make a correct order using Medical Decathlon brain tumor data the correct option is `2,0,3,1` for `brain-tumor-segmentation-0001` and `1,2,3,0` for `brain-tumor-segmentation-0002`.
 ```
 python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/brain-tumor-segmentation-0002 -d CPU -o <path_to_output> -nii -ms 1,2,3,0 --full_intensities_range
 ```
