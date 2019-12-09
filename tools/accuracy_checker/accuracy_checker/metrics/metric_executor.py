@@ -143,6 +143,14 @@ class MetricsExecutor:
     def get_metrics_direction(self):
         return {metric.name: metric.metric_fn.meta.get('target', 'higher-better') for metric in self.metrics}
 
+    def get_metrics_attributes(self):
+        return {
+            metric.name: {
+                'direction':  metric.metric_fn.meta.get('target', 'higher-better'),
+                'type': metric.metric_type
+            } for metric in self.metrics
+        }
+
     def reset(self):
         for metric in self.metrics:
             metric.metric_fn.reset()

@@ -77,6 +77,7 @@ class ModelEvaluator:
             check_progress=False,
             dataset_tag='',
             output_callback=None,
+            allow_pairwise_subset=False,
             **kwargs
     ):
 
@@ -88,9 +89,9 @@ class ModelEvaluator:
 
         def _create_subset(subset, num_images):
             if subset is not None:
-                self.dataset.make_subset(ids=subset)
+                self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
             elif num_images is not None:
-                self.dataset.make_subset(end=num_images)
+                self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
 
         def _set_number_infer_requests(nreq):
             if nreq is None:
@@ -188,13 +189,14 @@ class ModelEvaluator:
             check_progress=False,
             dataset_tag='',
             output_callback=None,
+            allow_pairwise_subset=False,
             **kwargs
     ):
         def _create_subset(subset, num_images):
             if subset is not None:
-                self.dataset.make_subset(ids=subset)
+                self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
             elif num_images is not None:
-                self.dataset.make_subset(end=num_images)
+                self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
 
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
@@ -334,10 +336,10 @@ class ModelEvaluator:
     def get_network(self):
         return self.launcher.network
 
-    def get_metrics_direction(self):
+    def get_metrics_attributes(self):
         if not self.metric_executor:
             return {}
-        return self.metric_executor.get_metrics_direction()
+        return self.metric_executor.get_metrics_attributes()
 
     def reset(self):
         if self.metric_executor:
