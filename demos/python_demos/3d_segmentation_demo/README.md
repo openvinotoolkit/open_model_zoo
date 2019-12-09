@@ -83,7 +83,7 @@ python3 3d_segmentation_demo.py -i <path_to_nifti_image>/PackedImage.nii -m <pat
 ```
 python3 3d_segmentation_demo.py -i <path_to_nifti_images> -m <path_to_model>/brain-tumor-segmentation-0002 -d CPU -o <path_to_output> -nii -ms 1,2,3,0 --full_intensities_range
 ```
-'--full_intensities_range' option is related to preprocessing of input data. It can be different for different models, for example, brain-tumor-segmentation-0001 expects normalized data in [0,1] range and nullified non-positive values, while brain-tumor-segmentation-0002 just requires z-score normalization in a full range. So to use brain-tumor-segmentation-0002 model, the flag '--full_intensities_range' should be set, while for brain-tumor-segmentation-0001 no preprocessing option is required.
+`--full_intensities_range` option is related to preprocessing of input data. It can be different for different models, for example, `brain-tumor-segmentation-0001` expects normalized data in [0,1] range and nullified non-positive values, while `brain-tumor-segmentation-0002` just requires z-score normalization in a full range. So to use `brain-tumor-segmentation-0002` model, the flag `--full_intensities_range` should be set, while for `brain-tumor-segmentation-0001` no preprocessing option is required.
      
 ## Demo Output
 The demo outputs a multipage TIFF image and a NIFTI archive.
