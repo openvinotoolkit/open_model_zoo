@@ -43,7 +43,8 @@ class PreprocessingExecutor:
 
             self.processors.append(preprocessor)
 
-        self.input_shapes = input_shapes
+        if input_shapes is not None:
+            self.input_shapes = input_shapes
 
     def __call__(self, context, *args, **kwargs):
         batch_data = context.data_batch

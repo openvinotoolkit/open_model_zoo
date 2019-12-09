@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import warnings
 from collections import defaultdict, namedtuple
 from sklearn.metrics import auc, precision_recall_curve
 # noinspection PyProtectedMember
@@ -83,6 +84,9 @@ class CMCScore(FullDatasetEvaluationMetric):
 
     def evaluate(self, annotations, predictions):
         dist_matrix = distance_matrix(annotations, predictions)
+        if np.size(dist_matrix) == 0:
+            warnings.warn('Gallery and query ids are not matched. CMC score can not be calculated.')
+            return 0
         gallery_cameras, gallery_pids, query_cameras, query_pids = get_gallery_query_pids(annotations)
 
         _cmc_score = eval_cmc(
@@ -124,6 +128,9 @@ class ReidMAP(FullDatasetEvaluationMetric):
 
     def evaluate(self, annotations, predictions):
         dist_matrix = distance_matrix(annotations, predictions)
+        if np.size(dist_matrix) == 0:
+            warnings.warn('Gallery and query ids are not matched. ReID mAP can not be calculated.')
+            return 0
         gallery_cameras, gallery_pids, query_cameras, query_pids = get_gallery_query_pids(annotations)
 
         return eval_map(
@@ -254,7 +261,8 @@ class PairwiseAccuracySubsets(FullDatasetEvaluationMetric):
 
 
 def extract_embeddings(annotation, prediction, query):
-    return np.stack([pred.embedding for pred, ann in zip(prediction, annotation) if ann.query == query])
+    embeddings = [pred.embedding for pred, ann in zip(prediction, annotation) if ann.query == query]
+    return np.stack(embeddings) if embeddings else embeddings
 
 
 def get_gallery_query_pids(annotation):
@@ -269,8 +277,9 @@ def get_gallery_query_pids(annotation):
 def distance_matrix(annotation, prediction):
     gallery_embeddings = extract_embeddings(annotation, prediction, query=False)
     query_embeddings = extract_embeddings(annotation, prediction, query=True)
+    not_empty = np.size(gallery_embeddings) > 0 and np.size(query_embeddings) > 0
 
-    return 1. - np.matmul(gallery_embeddings, np.transpose(query_embeddings)).T
+    return 1. - np.matmul(gallery_embeddings, np.transpose(query_embeddings)).T if not_empty else []
 
 
 def unique_sample(ids_dict, num):
