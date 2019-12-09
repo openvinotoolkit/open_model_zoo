@@ -110,7 +110,7 @@ def parse_arguments():
                         help="Required for GPU custom kernels. "
                              "Absolute path to an .xml file with the kernels description.")
     args.add_argument('-ms', '--mri_sequence', type=mri_sequence, metavar='N1,N2,N3,N4', default=(0,1,2,3),
-                      help='Optional. Set MRI-sequence, if data is in single NIFTI file.'
+                      help='Optional. Set MRI-sequence, if data is in single NIFTI file. '
                            'Input order is: native T1, native T2, T2-FLAIR, post-Gadolinium contrast T1')
     args.add_argument("--full_intensities_range", help="Take intensities of the input image in a full range.",
                         default=False, action="store_true")
