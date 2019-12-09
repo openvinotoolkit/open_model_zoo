@@ -756,8 +756,6 @@ int main(int argc, char* argv[]) {
         Tracker tracker_action(tracker_action_params);
 
         cv::Mat frame, prev_frame;
-        DetectedActions actions;
-        detection::DetectedObjects faces;
 
         float work_time_ms = 0.f;
         float wait_time_ms = 0.f;
@@ -864,7 +862,7 @@ int main(int argc, char* argv[]) {
                     }
 
                     action_detector->wait();
-                    actions = action_detector->fetchResults();
+                    DetectedActions actions = action_detector->fetchResults();
 
                     if (!is_last_frame) {
                         prev_frame_path = cap.GetVideoPath();
@@ -918,10 +916,10 @@ int main(int argc, char* argv[]) {
                 }
             } else {
                 face_detector->wait();
-                faces = face_detector->fetchResults();
+                detection::DetectedObjects faces = face_detector->fetchResults();
 
                 action_detector->wait();
-                actions = action_detector->fetchResults();
+                DetectedActions actions = action_detector->fetchResults();
 
                 if (!is_last_frame) {
                     prev_frame_path = cap.GetVideoPath();
