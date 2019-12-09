@@ -28,4 +28,5 @@ models:
 
         metrics:
           - type: accuracy
+
 global_definitions: ../dataset_definitions.yml

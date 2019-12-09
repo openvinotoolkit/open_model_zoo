@@ -12,17 +12,17 @@ evaluations:
           weights: intel/text-spotting-0001-recognizer-encoder/FP32/text-spotting-0001-recognizer-encoder.bin
 
         recognizer_decoder:
-            model:   intel/text-spotting-0001-recognizer-decoder/FP32/text-spotting-0001-recognizer-decoder.xml
-            weights: intel/text-spotting-0001-recognizer-decoder/FP32/text-spotting-0001-recognizer-decoder.bin
+          model:   intel/text-spotting-0001-recognizer-decoder/FP32/text-spotting-0001-recognizer-decoder.xml
+          weights: intel/text-spotting-0001-recognizer-decoder/FP32/text-spotting-0001-recognizer-decoder.bin
 
         recognizer_decoder_inputs:
-            prev_symbol: prev_symbol
-            prev_hidden: prev_hidden
-            encoder_outputs: encoder_outputs
+          prev_symbol: prev_symbol
+          prev_hidden: prev_hidden
+          encoder_outputs: encoder_outputs
 
         recognizer_decoder_outputs:
-            symbols_distribution: output
-            cur_hidden: hidden
+          symbols_distribution: output
+          cur_hidden: hidden
 
         max_seq_len: '28'
 
@@ -31,13 +31,13 @@ evaluations:
         eos_index: '1'
 
         adapter:
-            type: mask_rcnn_with_text
-            classes_out: classes
-            scores_out: scores
-            boxes_out: boxes
-            raw_masks_out: raw_masks
-            texts_out: texts
-            confidence_threshold: 0.8
+          type: mask_rcnn_with_text
+          classes_out: classes
+          scores_out: scores
+          boxes_out: boxes
+          raw_masks_out: raw_masks
+          texts_out: texts
+          confidence_threshold: 0.8
 
       launchers:
         - framework: dlsdk
@@ -71,17 +71,17 @@ evaluations:
           weights: intel/text-spotting-0001-recognizer-encoder/FP16/text-spotting-0001-recognizer-encoder.bin
 
         recognizer_decoder:
-            model:   intel/text-spotting-0001-recognizer-decoder/FP16/text-spotting-0001-recognizer-decoder.xml
-            weights: intel/text-spotting-0001-recognizer-decoder/FP16/text-spotting-0001-recognizer-decoder.bin
+          model:   intel/text-spotting-0001-recognizer-decoder/FP16/text-spotting-0001-recognizer-decoder.xml
+          weights: intel/text-spotting-0001-recognizer-decoder/FP16/text-spotting-0001-recognizer-decoder.bin
 
         recognizer_decoder_inputs:
-            prev_symbol: prev_symbol
-            prev_hidden: prev_hidden
-            encoder_outputs: encoder_outputs
+          prev_symbol: prev_symbol
+          prev_hidden: prev_hidden
+          encoder_outputs: encoder_outputs
 
         recognizer_decoder_outputs:
-            symbols_distribution: output
-            cur_hidden: hidden
+          symbols_distribution: output
+          cur_hidden: hidden
 
         max_seq_len: '28'
 
@@ -90,13 +90,13 @@ evaluations:
         eos_index: '1'
 
         adapter:
-            type: mask_rcnn_with_text
-            classes_out: classes
-            scores_out: scores
-            boxes_out: boxes
-            raw_masks_out: raw_masks
-            texts_out: texts
-            confidence_threshold: 0.8
+          type: mask_rcnn_with_text
+          classes_out: classes
+          scores_out: scores
+          boxes_out: boxes
+          raw_masks_out: raw_masks
+          texts_out: texts
+          confidence_threshold: 0.8
 
       launchers:
         - framework: dlsdk

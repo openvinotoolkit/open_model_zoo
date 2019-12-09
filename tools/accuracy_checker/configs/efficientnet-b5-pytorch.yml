@@ -10,7 +10,6 @@ models:
             type: INPUT
             shape: 1,3,456,456
 
-
     datasets:
       - name: imagenet_1000_classes
         reader: pillow_imread
@@ -63,4 +62,5 @@ models:
           - type: crop
             use_pillow: True
             size: 456
+
 global_definitions: ../dataset_definitions.yml

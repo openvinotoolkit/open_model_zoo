@@ -25,4 +25,5 @@ models:
           - type: resize
             dst_height: 112
             dst_width: 96
+
 global_definitions: ../dataset_definitions.yml

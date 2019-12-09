@@ -44,4 +44,5 @@ models:
             prediction_source: age_classification
 
           - type: mae
+
 global_definitions: ../dataset_definitions.yml

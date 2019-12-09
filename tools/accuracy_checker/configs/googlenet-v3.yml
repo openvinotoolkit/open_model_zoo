@@ -41,4 +41,5 @@ models:
             central_fraction: 0.875
           - type: resize
             size: 299
+
 global_definitions: ../dataset_definitions.yml

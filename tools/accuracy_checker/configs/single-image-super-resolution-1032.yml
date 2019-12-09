@@ -52,4 +52,5 @@ models:
 
     datasets:
       - name: super_resolution_x4
+
 global_definitions: ../dataset_definitions.yml
