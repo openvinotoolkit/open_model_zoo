@@ -83,7 +83,7 @@ class BaseDetectionMetricMixin(Metric):
 
         label_map = self.config.get('label_map', 'label_map')
         labels = self.dataset.metadata.get(label_map, {})
-        self.labels = labels.keys()
+        self.labels = list(labels.keys())
         valid_labels = list(filter(lambda x: x != self.dataset.metadata.get('background_label'), self.labels))
         self.meta['names'] = [labels[name] for name in valid_labels]
 
@@ -558,7 +558,8 @@ def _prepare_annotation_boxes(annotation, ignore_difficult, label):
 
         difficult_boxes[ground_truth.identifier] = difficult_box_mask
         if ignore_difficult:
-            num_ground_truth -= np.sum(difficult_box_mask)
+            if np.size(difficult_box_mask) > 0:
+                num_ground_truth -= np.sum(difficult_box_mask)
 
     return used_boxes, num_ground_truth, difficult_boxes
 

@@ -104,7 +104,9 @@ class ModelEvaluator:
 
         if self.launcher.allow_reshape_input or self.preprocessor.has_multi_infer_transformations:
             warning('Model can not to be processed in async mode. Switched to sync.')
-            return self.process_dataset(subset, num_images, check_progress, dataset_tag, output_callback, **kwargs)
+            return self.process_dataset(
+                subset, num_images, check_progress, dataset_tag, output_callback, allow_pairwise_subset, **kwargs
+            )
         _set_number_infer_requests(nreq)
 
         self.dataset.batch = self.launcher.batch

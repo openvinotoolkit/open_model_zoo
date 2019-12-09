@@ -287,7 +287,7 @@ class YoloV3Adapter(Adapter):
         def parse_yolo_v3_results(prediction, threshold, w, h, det, layer_id):
             cells_x, cells_y = prediction.shape[1:]
             anchors = self.masked_anchors[layer_id] if self.masked_anchors else self.anchors
-            num = len(anchors) // 2
+            num = len(anchors) // 2 if self.masked_anchors else self.num
             prediction = prediction.flatten()
             for y, x, n in np.ndindex((cells_y, cells_x, num)):
                 index = n * cells_y * cells_x + y * cells_x + x
@@ -295,7 +295,6 @@ class YoloV3Adapter(Adapter):
 
                 box_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, 0)
                 obj_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, self.coords)
-
                 scale = prediction[obj_index]
                 if scale < threshold:
                     continue
