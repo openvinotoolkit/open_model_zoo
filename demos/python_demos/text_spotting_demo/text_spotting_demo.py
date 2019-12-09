@@ -111,7 +111,7 @@ def build_argparser():
                       default='output')
     args.add_argument('--trd_output_cur_hidden',
                       help='Optional. Name of current hidden output node from text recognition head decoder part.',
-                      default='84/SqueezeNumDirections/1')
+                      default='hidden')
     args.add_argument('--keep_aspect_ratio',
                       help='Optional. Force image resize to keep aspect ratio.',
                       action='store_true')
