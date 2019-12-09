@@ -22,7 +22,7 @@ evaluations:
 
         recognizer_decoder_outputs:
             symbols_distribution: output
-            cur_hidden: 84/SqueezeNumDirections/1
+            cur_hidden: hidden
 
         max_seq_len: '28'
 
