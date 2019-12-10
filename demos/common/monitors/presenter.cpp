@@ -37,7 +37,7 @@ Presenter::Presenter(std::set<MonitorType> enabledMonitors,
             graphPadding{std::max(1, static_cast<int>(graphSize.width * 0.05))},
             historySize{historySize},
             distributionCpuEnabled{false},
-            strStream{std::ostringstream(std::ios_base::app)} {
+            strStream{std::ios_base::app} {
     for (MonitorType monitor : enabledMonitors) {
         addRemoveMonitor(monitor);
     }
