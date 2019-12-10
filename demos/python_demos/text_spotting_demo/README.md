@@ -6,7 +6,7 @@ This demo shows how to run Text Spotting models using OpenVINO&trade;.
 
 ## How It Works
 
-The demo application expects a text spotting model that is split on three parts. Every model part must be in the Intermediate Representation (IR) format.
+The demo application expects a text spotting model that is split into three parts. Every model part must be in the Intermediate Representation (IR) format.
 
 First model is Mask-RCNN like text detector with the following constraints:
 
