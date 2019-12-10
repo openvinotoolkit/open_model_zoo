@@ -1,6 +1,6 @@
 # Text Spotting Python* Demo
 
-This demo shows how to run Text Spotting models. Text Spotting models allows us to simultaneously detect and recognize text.
+This demo shows how to run Text Spotting models. Text Spotting models allow us to simultaneously detect and recognize text.
 
 > **NOTE**: Only batch size of 1 is supported.
 
