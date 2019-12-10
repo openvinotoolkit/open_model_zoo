@@ -40,6 +40,16 @@ Accuracy Checker supports following set of preprocessors:
      You can specify one value for all channels or list of comma separated channel-wise values.
   * `std` specifies values, on which pixels will be divided.
      You can specify one value for all channels or list of comma separated channel-wise values.
+* `resize3d` - resizing 3d image (e.g. MRI scans) to new size:
+  * `size` in format `(H,W,D)`. All values will be interpolated with 1st-order spline.
+* `crop_brats` performs crop of 3d images (e.g. MRI scans) by cropping all non-zero voxels. Also sets bounding boxes for `segmentation_prediction_resample` preprocessor (see [Postprocessors](../postprocessor/README.md))
+* `normalize_brats` normalizes of 3d images (e.g. MRI scans) with z-score normalization
+  * `masked` - ignore all zero voxels
+  * `cutoff` - cuts minimum and value to `-cutoff` and `cutoff` respectively
+  * `shift_value` - adds to all values
+  * `normalize_value` - divides all values
+* `swap_modalities` swaps modalities of MRI scan (works as channel swapping)
+  * `modality_order` - new order
 
      These parameters support work with precomputed values of frequently used datasets (e.g. `cifar10` or `imagenet`).
 
