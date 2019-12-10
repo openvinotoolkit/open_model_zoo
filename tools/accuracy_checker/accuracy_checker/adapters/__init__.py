@@ -46,7 +46,8 @@ from .detection import (
     SSDAdapterMxNet,
     PyTorchSSDDecoder,
     SSDONNXAdapter,
-    MTCNNPAdapter
+    MTCNNPAdapter,
+    RetinaNetAdapter
 )
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter
@@ -83,6 +84,8 @@ __all__ = [
     'SSDONNXAdapter',
     'PyTorchSSDDecoder',
     'MTCNNPAdapter',
+    'CTDETAdapter',
+    'RetinaNetAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
@@ -117,6 +120,4 @@ __all__ = [
 
     'MachineTranslationAdapter',
     'QuestionAnsweringAdapter',
-
-    'CTDETAdapter'
 ]

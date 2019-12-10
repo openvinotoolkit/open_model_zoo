@@ -187,6 +187,7 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
                 average_precisions.append(ap)
             else:
                 average_precisions.append(np.nan)
+
         return average_precisions
 
 
@@ -558,7 +559,8 @@ def _prepare_annotation_boxes(annotation, ignore_difficult, label):
 
         difficult_boxes[ground_truth.identifier] = difficult_box_mask
         if ignore_difficult:
-            num_ground_truth -= np.sum(difficult_box_mask)
+            if np.size(difficult_box_mask) > 0:
+                num_ground_truth -= np.sum(difficult_box_mask)
 
     return used_boxes, num_ground_truth, difficult_boxes
 
