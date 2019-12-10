@@ -51,6 +51,8 @@ The net outputs list of tensor. Count of list elements is 6. Every tensor with s
 The net outputs tensor with shapes: [1x17x48x36]. ( For every keypoint own heatmap)
 
 ## Legal Information
-[LICENSE](https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE)
+The original model is distributed under the
+[Apache License, Version 2.0](https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE).
+A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../../licenses/APACHE-2.0.txt).
 
 [*] Other names and brands may be claimed as the property of others.

@@ -56,4 +56,6 @@ Name:`densenet169/predictions/Reshape_1`. Contains floating point values in a ra
 Name: `densenet169/predictions/Reshape_1/Transpose`, shape: [1, 1, 1, 1000]. Contains floating point values in a range [0, 1], which represent probabilities for classes in a dataset.
 
 ## Legal Information
-[https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE]()
+The original model is distributed under the
+[Apache License, Version 2.0](https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE).
+A copy of the license is provided in [APACHE-2.0-TF-DenseNet.txt](../licenses/APACHE-2.0-TF-DenseNet.txt).
