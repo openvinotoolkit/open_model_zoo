@@ -378,8 +378,6 @@ def main():
 
     cv2.destroyAllWindows()
     cap.release()
-    del mask_rcnn_exec_net
-    del ie
 
 
 if __name__ == '__main__':
