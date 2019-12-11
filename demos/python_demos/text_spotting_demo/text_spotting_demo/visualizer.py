@@ -148,8 +148,9 @@ class Visualizer(object):
             color_idx = i if ids is None else ids[i]
             mask_color = self.instance_color_palette[color_idx % len(self.instance_color_palette)].tolist()
 
-            contour = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[-2][0]
-            all_contours.append(contour)
+            contours = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[-2]
+            if contours:
+                all_contours.append(contours[0])
 
             cv2.bitwise_or(aggregated_mask, mask, dst=aggregated_mask)
             cv2.bitwise_or(aggregated_colored_mask, np.asarray(mask_color, dtype=np.uint8),
