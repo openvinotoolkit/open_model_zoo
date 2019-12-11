@@ -594,3 +594,11 @@ datasets:
     metrics:
       - name: AP
         type: coco_orig_keypoints_precision
+
+  - name: CamVid
+    data_source: CamVid
+    annotation_conversion:
+      converter: camvid
+      annotation_file: CamVid/val.txt
+    annotation: camvid.pickle
+    dataset_meta: camvid.json
