@@ -111,7 +111,6 @@ class NormalizeBrats(Preprocessor):
         return image
 
     def normalize_img(self, image):
-        image_copy = image.copy()
         for channel in range(image.shape[0]):
             img = image[channel, :, :, :].copy()
             if self.masked:

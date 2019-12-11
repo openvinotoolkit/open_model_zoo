@@ -192,9 +192,8 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         parameters.update({
             'mean': BoolField(optional=True, default=True, description='Allows calculation mean value.'),
             'median': BoolField(optional=True, default=False, description='Allows calculation median value.'),
-            'use_argmax': BoolField(optional=True, default=False, description="Allows to use argmax for prediction mask"),
-            'output_order': ListField(optional=True, default=[0,1,2,3],
-                                      description="Order of network output labels according to dataset labels")
+            'use_argmax': BoolField(optional=True, default=False,
+                                    description="Allows to use argmax for prediction mask"),
         })
 
         return parameters
