@@ -16,7 +16,7 @@ limitations under the License.
 
 from functools import singledispatch
 import numpy as np
-from ..config import NumberField, BaseField
+from ..config import NumberField, BaseField, ConfigError
 from ..representation import (
     DetectionPrediction,
     DetectionAnnotation,
@@ -60,11 +60,17 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
     def configure(self):
         self.max_detections = self.get_value_from_config('max_detections')
         self.thresholds = get_or_parse_value(self.get_value_from_config('threshold'), COCO_THRESHOLDS)
+        if not self.dataset.metadata:
+            raise ConfigError('coco metrics require dataset metadata providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
         label_map = self.dataset.metadata.get('label_map', {})
         self.labels = [
             label for label in label_map
             if label != self.dataset.metadata.get('background_label')
         ]
+        if not self.labels:
+            raise ConfigError('coco metrics require label_map providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
         self.meta['names'] = [label_map[label] for label in self.labels]
         self.matching_results = [[] for _ in self.labels]
 

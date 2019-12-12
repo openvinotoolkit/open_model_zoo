@@ -104,7 +104,7 @@ class Dataset:
             save_annotation(annotation, meta, Path(annotation_name), meta_name)
 
         self._annotation = annotation
-        self._meta = meta
+        self._meta = meta or {}
         self.name = self._config.get('name')
         self.subset = None
 
