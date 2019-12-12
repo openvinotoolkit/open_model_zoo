@@ -29,7 +29,7 @@ void sendHumanPose(const std::vector<HumanPose>& poses) {
         rawPose << std::fixed << std::setprecision(0);
         for (auto const& keypoint : pose.keypoints) {
             rawPose << keypoint.x << "," << keypoint.y << " ";
-            }
+        }
         rawPose << pose.score;
         std::cout << rawPose.str() << std::endl;
     }
