@@ -208,7 +208,6 @@ int main(int argc, char* argv[]) {
         auto total_t1 = std::chrono::high_resolution_clock::now();
         ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
         std::cout << "Total Inference time: " << total.count() << std::endl;
-
     }
     catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
