@@ -34,23 +34,17 @@ def _average_binary_score(binary_metric, y_true, y_score):
         return not (len(np.unique(y)) > 2) or (y.ndim >= 2 and len(y[0]) > 1)
 
     if binary_target(y_true):
-        return binary_metric(y_true, y_score, sample_weight=None)
+        return binary_metric(y_true, y_score)
 
     y_true = y_true.ravel()
     y_score = y_score.ravel()
-
-    if y_true.ndim == 1:
-        y_true = y_true.reshape((-1, 1))
-
-    if y_score.ndim == 1:
-        y_score = y_score.reshape((-1, 1))
 
     n_classes = y_score.shape[1]
     score = np.zeros((n_classes,))
     for c in range(n_classes):
         y_true_c = y_true.take([c], axis=1).ravel()
         y_score_c = y_score.take([c], axis=1).ravel()
-        score[c] = binary_metric(y_true_c, y_score_c, None)
+        score[c] = binary_metric(y_true_c, y_score_c)
 
     return score
 
@@ -426,8 +420,8 @@ def get_embedding_distances(annotation, prediction, train=False):
 
 
 def binary_average_precision(y_true, y_score, interpolated_auc=True):
-    def _average_precision(y_true_, y_score_, sample_weight=None):
-        precision, recall, _ = precision_recall_curve(y_true_, y_score_, sample_weight)
+    def _average_precision(y_true_, y_score_):
+        precision, recall, _ = precision_recall_curve(y_true_, y_score_)
         if not interpolated_auc:
             # Return the step function integral
             # The following works because the last entry of precision is
