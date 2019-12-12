@@ -4,8 +4,8 @@
 
 This is text spotting model that means it simultaneously detects and
 recognizes text. The model detects symbol sequences separated by space and does
- recognition without using any dictionary. The model is built on top of Mask-RCNN
- framework with additional attention-based text recognition head.
+recognition without using any dictionary. The model is built on top of Mask-RCNN
+framework with additional attention-based text recognition head.
 
 Symbols set is alphanumeric: 0123456789abcdefghijklmnopqrstuvwxyz
 
