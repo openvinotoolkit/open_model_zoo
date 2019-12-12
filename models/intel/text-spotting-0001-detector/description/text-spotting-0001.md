@@ -4,10 +4,12 @@
 
 This is text spotting model that means it simultaneously detects and
 recognizes text. The model detects symbol sequences separated by space and does
- recognition without using any dictionary. The model is build on top of Mask-RCNN
+ recognition without using any dictionary. The model is built on top of Mask-RCNN
  framework with additional attention-based text recognition head.
 
 Symbols set is alphanumeric: 0123456789abcdefghijklmnopqrstuvwxyz
+
+This model is Mask-RCNN-based text detector with ResNet50 backbone and additional text features output.
 
 ## Example
 
@@ -18,8 +20,8 @@ Symbols set is alphanumeric: 0123456789abcdefghijklmnopqrstuvwxyz
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
 | Word spotting hmean ICDAR2015, w/o dictionary | 59.04%    |
-| GFlops (detection part)                       | TBD       |
-| MParams (detection part)                      | TBD       |
+| GFlops (detection part)                       | `TBD`     |
+| MParams (detection part)                      | `TBD`     |
 | Source framework                              | PyTorch\* |
 
 *Hmean Word spotting* is defined and measured according to
