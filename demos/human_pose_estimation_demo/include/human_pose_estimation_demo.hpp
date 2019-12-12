@@ -28,7 +28,6 @@ static const char performance_counter_message[] = "Optional. Enable per-layer pe
 /// @brief Message for not showing processed video
 static const char no_show_processed_video[] = "Optional. Do not show processed video.";
 
-/// @brief Message for showing black screen video
 static const char black_background[] = "Optional. Show black background.";
 
 /// @brief Message for raw output
