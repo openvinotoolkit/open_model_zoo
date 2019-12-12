@@ -124,7 +124,7 @@ void HumanPoseEstimator::reshape(const cv::Mat& image){
 void HumanPoseEstimator::frameToBlob_curr(const cv::Mat& image) {
     CV_Assert(image.type() == CV_8UC3);
     InferenceEngine::Blob::Ptr input = request_curr->GetBlob(network.getInputsInfo().begin()->first);
-    auto buffer =input->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type *>();
+    auto buffer = input->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type *>();
     preprocess(image, buffer);
 }
 
