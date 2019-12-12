@@ -23,7 +23,7 @@ import numpy as np
 
 from ..utils import finalize_metric_result
 from .overlap import Overlap, IOA
-from ..config import BoolField, NumberField, StringField
+from ..config import BoolField, NumberField, StringField, ConfigError
 from ..representation import (
     DetectionAnnotation, DetectionPrediction,
     ActionDetectionPrediction, ActionDetectionAnnotation
@@ -82,7 +82,13 @@ class BaseDetectionMetricMixin(Metric):
         self.use_filtered_tp = self.get_value_from_config('use_filtered_tp')
 
         label_map = self.config.get('label_map', 'label_map')
+        if not self.dataset.metadata:
+            raise ConfigError('detection metrics require label_map providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
         labels = self.dataset.metadata.get(label_map, {})
+        if not labels:
+            raise ConfigError('detection metrics require label_map providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
         self.labels = list(labels.keys())
         valid_labels = list(filter(lambda x: x != self.dataset.metadata.get('background_label'), self.labels))
         self.meta['names'] = [labels[name] for name in valid_labels]
