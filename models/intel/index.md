@@ -171,7 +171,7 @@ Deep Learning models for text spotting (simultaneous detection and recognition).
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [text-spotting-0001-detector](./text-spotting-0001-detector/description/text-spotting-0001-detector.md)                                        | TBD                  | TBD        |
 | [text-spotting-0001-recognizer-encoder](./text-spotting-0001-recognizer-encoder/description/text-spotting-0001-recognizer-encoder.md)          | TBD                  | TBD        |
-| [text-spotting-0001-recognizer-decoder](./text-spotting-0001-recognizer-encoder/description/text-spotting-0001-recognizer-decoder.md)          | TBD                  | TBD        |
+| [text-spotting-0001-recognizer-decoder](./text-spotting-0001-recognizer-decoder/description/text-spotting-0001-recognizer-decoder.md)          | TBD                  | TBD        |
 
 ## Action Recognition Models
 
