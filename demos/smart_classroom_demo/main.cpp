@@ -645,29 +645,37 @@ int main(int argc, char* argv[]) {
             loadedDevices.insert(device);
         }
 
-        // Load action detector
-        ActionDetectorConfig action_config(ad_model_path, ad_weights_path);
-        action_config.deviceName = FLAGS_d_act;
-        action_config.ie = ie;
-        action_config.is_async = true;
-        action_config.enabled = !ad_model_path.empty();
-        action_config.detection_confidence_threshold = static_cast<float>(FLAGS_t_ad);
-        action_config.action_confidence_threshold = static_cast<float>(FLAGS_t_ar);
-        action_config.num_action_classes = actions_map.size();
-        ActionDetection action_detector(action_config);
+        std::unique_ptr<AsyncDetection<DetectedAction>> action_detector;
+        if (!ad_model_path.empty()) {
+            // Load action detector
+            ActionDetectorConfig action_config(ad_model_path, ad_weights_path);
+            action_config.deviceName = FLAGS_d_act;
+            action_config.ie = ie;
+            action_config.is_async = true;
+            action_config.detection_confidence_threshold = static_cast<float>(FLAGS_t_ad);
+            action_config.action_confidence_threshold = static_cast<float>(FLAGS_t_ar);
+            action_config.num_action_classes = actions_map.size();
+            action_detector.reset(new ActionDetection(action_config));
+        } else {
+            action_detector.reset(new NullDetection<DetectedAction>);
+        }
 
-        // Load face detector
-        detection::DetectorConfig face_config(fd_model_path, fd_weights_path);
-        face_config.deviceName = FLAGS_d_fd;
-        face_config.ie = ie;
-        face_config.is_async = true;
-        face_config.enabled = !fd_model_path.empty();
-        face_config.confidence_threshold = static_cast<float>(FLAGS_t_fd);
-        face_config.input_h = FLAGS_inh_fd;
-        face_config.input_w = FLAGS_inw_fd;
-        face_config.increase_scale_x = static_cast<float>(FLAGS_exp_r_fd);
-        face_config.increase_scale_y = static_cast<float>(FLAGS_exp_r_fd);
-        detection::FaceDetection face_detector(face_config);
+        std::unique_ptr<AsyncDetection<detection::DetectedObject>> face_detector;
+        if (!fd_model_path.empty()) {
+            // Load face detector
+            detection::DetectorConfig face_config(fd_model_path, fd_weights_path);
+            face_config.deviceName = FLAGS_d_fd;
+            face_config.ie = ie;
+            face_config.is_async = true;
+            face_config.confidence_threshold = static_cast<float>(FLAGS_t_fd);
+            face_config.input_h = FLAGS_inh_fd;
+            face_config.input_w = FLAGS_inw_fd;
+            face_config.increase_scale_x = static_cast<float>(FLAGS_exp_r_fd);
+            face_config.increase_scale_y = static_cast<float>(FLAGS_exp_r_fd);
+            face_detector.reset(new detection::FaceDetection(face_config));
+        } else {
+            face_detector.reset(new NullDetection<detection::DetectedObject>);
+        }
 
         std::unique_ptr<FaceRecognizer> face_recognizer;
 
@@ -748,8 +756,6 @@ int main(int argc, char* argv[]) {
         Tracker tracker_action(tracker_action_params);
 
         cv::Mat frame, prev_frame;
-        DetectedActions actions;
-        detection::DetectedObjects faces;
 
         float work_time_ms = 0.f;
         float wait_time_ms = 0.f;
@@ -774,10 +780,10 @@ int main(int argc, char* argv[]) {
         }
 
         if (actions_type != TOP_K) {
-            action_detector.enqueue(frame);
-            action_detector.submitRequest();
-            face_detector.enqueue(frame);
-            face_detector.submitRequest();
+            action_detector->enqueue(frame);
+            action_detector->submitRequest();
+            face_detector->enqueue(frame);
+            face_detector->submitRequest();
         }
 
         prev_frame = frame.clone();
@@ -828,8 +834,8 @@ int main(int argc, char* argv[]) {
                 if ( (is_monitoring_enabled && key == SPACE_KEY) ||
                      (!is_monitoring_enabled && key != SPACE_KEY) ) {
                     if (key == SPACE_KEY) {
-                        action_detector.wait();
-                        action_detector.fetchResults();
+                        action_detector->wait();
+                        action_detector->fetchResults();
 
                         tracker_action.Reset();
                         top_k_obj_ids.clear();
@@ -851,18 +857,17 @@ int main(int argc, char* argv[]) {
                     if (key == SPACE_KEY) {
                         is_monitoring_enabled = true;
 
-                        action_detector.enqueue(prev_frame);
-                        action_detector.submitRequest();
+                        action_detector->enqueue(prev_frame);
+                        action_detector->submitRequest();
                     }
 
-                    action_detector.wait();
-                    action_detector.fetchResults();
-                    actions = action_detector.results;
+                    action_detector->wait();
+                    DetectedActions actions = action_detector->fetchResults();
 
                     if (!is_last_frame) {
                         prev_frame_path = cap.GetVideoPath();
-                        action_detector.enqueue(frame);
-                        action_detector.submitRequest();
+                        action_detector->enqueue(frame);
+                        action_detector->submitRequest();
                     }
 
                     TrackedObjects tracked_action_objects;
@@ -910,20 +915,18 @@ int main(int argc, char* argv[]) {
                     }
                 }
             } else {
-                face_detector.wait();
-                face_detector.fetchResults();
-                faces = face_detector.results;
+                face_detector->wait();
+                detection::DetectedObjects faces = face_detector->fetchResults();
 
-                action_detector.wait();
-                action_detector.fetchResults();
-                actions = action_detector.results;
+                action_detector->wait();
+                DetectedActions actions = action_detector->fetchResults();
 
                 if (!is_last_frame) {
                     prev_frame_path = cap.GetVideoPath();
-                    face_detector.enqueue(frame);
-                    face_detector.submitRequest();
-                    action_detector.enqueue(frame);
-                    action_detector.submitRequest();
+                    face_detector->enqueue(frame);
+                    face_detector->submitRequest();
+                    action_detector->enqueue(frame);
+                    action_detector->submitRequest();
                 }
 
                 auto ids = face_recognizer->Recognize(prev_frame, faces);
@@ -988,7 +991,7 @@ int main(int argc, char* argv[]) {
                     for (const auto& action : tracked_actions) {
                         const auto& action_label = GetActionTextLabel(action.label, actions_map);
                         const auto& action_color = GetActionTextColor(action.label);
-                        const auto& text_label = face_config.enabled ? "" : action_label;
+                        const auto& text_label = fd_model_path.empty() ? action_label : "";
                         sc_visualizer.DrawObject(action.rect, text_label, action_color, white_color, true);
                         logger.AddPersonToFrame(action.rect, action_label, "");
                         logger.AddDetectionToFrame(action, work_num_frames);
@@ -1031,10 +1034,10 @@ int main(int argc, char* argv[]) {
         slog::info << "Frames processed: " << total_num_frames << slog::endl;
         if (FLAGS_pc) {
             std::map<std::string, std::string>  mapDevices = getMapFullDevicesNames(ie, devices);
-            face_detector.wait();
-            action_detector.wait();
-            action_detector.PrintPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_act));
-            face_detector.PrintPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_fd));
+            face_detector->wait();
+            action_detector->wait();
+            action_detector->printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_act));
+            face_detector->printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_fd));
             face_recognizer->PrintPerformanceCounts(
                 getFullDeviceName(mapDevices, FLAGS_d_lm),
                 getFullDeviceName(mapDevices, FLAGS_d_reid));

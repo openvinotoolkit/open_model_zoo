@@ -60,8 +60,7 @@ RegistrationStatus EmbeddingsGallery::RegisterIdentity(const std::string& identi
       detector.enqueue(image);
       detector.submitRequest();
       detector.wait();
-      detector.fetchResults();
-      detection::DetectedObjects faces = detector.results;
+      detection::DetectedObjects faces = detector.fetchResults();
       if (faces.size() == 0) {
         return RegistrationStatus::FAILURE_NOT_DETECTED;
       }
