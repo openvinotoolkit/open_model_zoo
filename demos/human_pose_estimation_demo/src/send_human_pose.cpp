@@ -13,10 +13,6 @@
 
 namespace human_pose_estimation {
 
-char POSE_COCO_BODY_PARTS[][18] = { "Nose", "Neck", "RShoulder", "RElbow", "RWrist",  "LShoulder",
-                                   "LElbow", "LWrist", "RHip", "RKnee", "RAnkle", "LHip",
-                                    "LKnee", "LAnkle", "REye", "LEye", "REar", "LEar", "Bkg"};
-
 void sendHumanPose(const std::vector<HumanPose>& poses) {
 
     if (!poses.empty()) {
