@@ -19,7 +19,7 @@ from ..representation import ClassificationAnnotation
 from ..data_readers import ClipIdentifier
 from ..config import PathField, NumberField, StringField
 
-from .format_converter import BaseFormatConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 
 class ActionRecognitionConverter(BaseFormatConverter):
@@ -68,6 +68,7 @@ class ActionRecognitionConverter(BaseFormatConverter):
             dataset_meta = read_json(self.dataset_meta)
             if 'label_map' in dataset_meta:
                 label_map = dataset_meta['label_map']
+                label_map = verify_label_map(label_map)
             elif 'labels' in dataset_meta:
                 label_map = dict(enumerate(dataset_meta['labels']))
         video_names, annotation = self.get_video_names_and_annotations(full_annotation['database'], self.subset)

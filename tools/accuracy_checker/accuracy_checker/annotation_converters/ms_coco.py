@@ -22,7 +22,7 @@ from ..utils import read_json, convert_bboxes_xywh_to_x1y1x2y2, check_file_exist
 from ..representation import (
     DetectionAnnotation, PoseEstimationAnnotation, CoCoInstanceSegmentationAnnotation, ContainerAnnotation
 )
-from .format_converter import BaseFormatConverter, FileBasedAnnotationConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, FileBasedAnnotationConverter, ConverterReturn, verify_label_map
 
 
 def get_image_annotation(image_id, annotations_):
@@ -39,6 +39,7 @@ def get_label_map(dataset_meta, full_annotation, use_full_label_map=False, has_b
             if labels:
                 label_map = {i + label_offset: label for i, label in enumerate(labels)}
         if label_map:
+            label_map = verify_label_map(label_map)
             label_id_to_label = {i: i for i in label_map}
             return label_map, label_id_to_label
 

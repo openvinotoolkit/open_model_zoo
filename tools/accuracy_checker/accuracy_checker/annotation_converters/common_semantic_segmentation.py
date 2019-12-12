@@ -1,7 +1,7 @@
 from pathlib import Path
 from ..config import PathField, StringField
 from ..logging import warning
-from .format_converter import BaseFormatConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 from ..representation.segmentation_representation import LOADERS_MAPPING
 from ..representation import SegmentationAnnotation
 from ..utils import read_json
@@ -81,5 +81,7 @@ class CommonSegmentationConverter(BaseFormatConverter):
                     dataset_meta['label_map'] = dict(enumerate(dataset_meta['labels']))
                 else:
                     warning("Information about dataset labels is provided. Please provide it for metric calculation.")
+            else:
+                dataset_meta['label_map'] = verify_label_map(dataset_meta['label_map'])
 
         return ConverterReturn(annotations, dataset_meta, content_errors)
