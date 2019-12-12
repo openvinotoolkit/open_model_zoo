@@ -13,7 +13,7 @@ This model is 2d-attention-based GRU decoder of text recognition head.
 
 ## Example
 
-![](../text-spotting-0001-detector/text-spotting-0001.png)
+![](./text-spotting-0001.png)
 
 ## Specification
 
