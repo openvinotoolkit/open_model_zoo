@@ -166,6 +166,16 @@ Deep Learning models for text recognition in various applications.
 | [text-recognition-0012](./text-recognition-0012/description/text-recognition-0012.md)                                                          | 1.485                | 5.568      |
 | [handwritten-score-recognition-0003](./handwritten-score-recognition-0003/description/handwritten-score-recognition-0003.md)                   | 0.792                | 5.555      |
 
+## Text Spotting
+
+Deep Learning models for text spotting (simultaneous detection and recognition).
+
+| Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
+|------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [text-spotting-0001-detector](./text-spotting-0001-detector/description/text-spotting-0001-detector.md)                                        | 185.169             | 26.497    |
+| [text-spotting-0001-recognizer-encoder](./text-spotting-0001-recognizer-encoder/description/text-spotting-0001-recognizer-encoder.md)          | 2.082                | 1.328      |
+| [text-spotting-0001-recognizer-decoder](./text-spotting-0001-recognizer-decoder/description/text-spotting-0001-recognizer-decoder.md)          | 0.002                | 0.273      |
+
 ## Action Recognition Models
 
 Action Recognition models predict action that is being performed on a short video clip
