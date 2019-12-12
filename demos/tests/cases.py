@@ -118,7 +118,7 @@ NATIVE_DEMOS = [
             test_cases=combine_cases(
         TestCase(options={
             '-no_show': None,
-            '-no_show_time': '5',
+            '-time': '5',
             '-i': ImageDirectoryArg('imagenet-classification')}),
         single_option_cases('-m',
             ModelArg('alexnet'),

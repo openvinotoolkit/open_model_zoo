@@ -41,6 +41,92 @@ private:
         std::cout << std::endl;
     }
 
+    std::vector<unsigned> topResults(unsigned int n, InferenceEngine::Blob& input) {
+        std::vector<unsigned> output;
+
+        switch (input.getTensorDesc().getPrecision()) {
+            case InferenceEngine::Precision::FP32: {
+                using currentBlobType = InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type;
+                InferenceEngine::TBlob<currentBlobType>& tblob = dynamic_cast<
+                                                                    InferenceEngine::TBlob<currentBlobType>&>(input);
+                return topResults(n, tblob);
+            }
+            case InferenceEngine::Precision::FP16: {
+                using currentBlobType = InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP16>::value_type;
+                InferenceEngine::TBlob<currentBlobType>& tblob = dynamic_cast<
+                                                                    InferenceEngine::TBlob<currentBlobType>&>(input);
+                return topResults(n, tblob);
+            }
+            case InferenceEngine::Precision::Q78: {
+                using currentBlobType = InferenceEngine::PrecisionTrait<InferenceEngine::Precision::Q78>::value_type;
+                InferenceEngine::TBlob<currentBlobType>& tblob = dynamic_cast<
+                                                                    InferenceEngine::TBlob<currentBlobType>&>(input);
+                return topResults(n, tblob);
+            }
+            case InferenceEngine::Precision::I16: {
+                using currentBlobType = InferenceEngine::PrecisionTrait<InferenceEngine::Precision::I16>::value_type;
+                InferenceEngine::TBlob<currentBlobType>& tblob = dynamic_cast<
+                                                                    InferenceEngine::TBlob<currentBlobType>&>(input);
+                return topResults(n, tblob);
+            }
+            case InferenceEngine::Precision::U8: {
+                using currentBlobType = InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type;
+                InferenceEngine::TBlob<currentBlobType>& tblob = dynamic_cast<
+                                                                    InferenceEngine::TBlob<currentBlobType>&>(input);
+                return topResults(n, tblob);
+            }
+            case InferenceEngine::Precision::I8: {
+                using currentBlobType = InferenceEngine::PrecisionTrait<InferenceEngine::Precision::I8>::value_type;
+                InferenceEngine::TBlob<currentBlobType>& tblob = dynamic_cast<
+                                                                    InferenceEngine::TBlob<currentBlobType>&>(input);
+                return topResults(n, tblob);
+            }
+            case InferenceEngine::Precision::U16: {
+                using currentBlobType = InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U16>::value_type;
+                InferenceEngine::TBlob<currentBlobType>& tblob = dynamic_cast<
+                                                                    InferenceEngine::TBlob<currentBlobType>&>(input);
+                return topResults(n, tblob);
+            }
+            case InferenceEngine::Precision::I32: {
+                using currentBlobType = InferenceEngine::PrecisionTrait<InferenceEngine::Precision::I32>::value_type;
+                InferenceEngine::TBlob<currentBlobType>& tblob = dynamic_cast<
+                                                                    InferenceEngine::TBlob<currentBlobType>&>(input);
+                return topResults(n, tblob);
+            }
+            default:
+                THROW_IE_EXCEPTION << "cannot locate blob for precision: " << input.getTensorDesc().getPrecision();
+        }
+    }
+
+    template<class T>
+    inline void topResults(unsigned int n, InferenceEngine::TBlob<T> &input, std::vector<unsigned> &output) {
+        InferenceEngine::SizeVector dims = input.getTensorDesc().getDims();
+        size_t input_rank = dims.size();
+        if (!input_rank || !dims[0])
+            THROW_IE_EXCEPTION << "Input blob has incorrect dimensions!";
+        size_t batchSize = dims[0];
+        std::vector<unsigned> indexes(input.size() / batchSize);
+
+        n = static_cast<unsigned>(std::min<size_t>((size_t) n, input.size()));
+
+        output.resize(n * batchSize);
+
+        for (size_t i = 0; i < batchSize; i++) {
+            size_t offset = i * (input.size() / batchSize);
+            T *batchData = input.data();
+            batchData += offset;
+
+            std::iota(std::begin(indexes), std::end(indexes), 0);
+            std::partial_sort(std::begin(indexes), std::begin(indexes) + n, std::end(indexes),
+                              [&batchData](unsigned l, unsigned r) {
+                                  return batchData[l] > batchData[r];
+                              });
+            for (unsigned j = 0; j < n; j++) {
+                output.at(i * n + j) = indexes.at(j);
+            }
+        }
+}
+
 public:
     explicit ClassificationResult(InferenceEngine::Blob::Ptr output_blob,
                                   std::vector<std::string> image_names = {},
@@ -62,8 +148,7 @@ public:
     */
     void print() {
         /** This vector stores id's of top N results **/
-        std::vector<unsigned> results;
-        TopResults(_nTop, *_outBlob, results);
+        std::vector<unsigned> results = topResults(_nTop, *_outBlob);
 
         /** Print the result iterating over each batch **/
         std::cout << std::endl << "Top " << _nTop << " results:" << std::endl << std::endl;

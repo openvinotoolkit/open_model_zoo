@@ -2,22 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-/**
-* @brief The entry point the Inference Engine imagenet_classification demo application
-* @file imagenet_classification_demo/main.cpp
-* @example imagenet_classification_demo/main.cpp
-*/
 #include <vector>
 #include <queue>
 #include <memory>
 #include <string>
 #include <map>
+#include <chrono>
 #include <condition_variable>
 #include <mutex>
-
-#include <inference_engine.hpp>
-
-#include <format_reader_ptr.h>
 
 #include <samples/common.hpp>
 #include <samples/slog.hpp>
@@ -30,10 +22,6 @@
 #include <cldnn/cldnn_config.hpp>
 
 #include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-
-#include <sys/stat.h>
 
 #include "imagenet_classification_demo.hpp"
 #include "grid_mat.hpp"
@@ -64,6 +52,27 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     return true;
 }
 
+void resizeImage(cv::Mat& image, int modelInputResolution) {
+    double scale = static_cast<double>(modelInputResolution) / std::min(image.cols, image.rows);
+    cv::resize(image, image, cv::Size(), scale, scale);
+
+    cv::Rect imgROI;
+    if (image.cols >= image.rows) {
+        int fromWidth = image.cols/2 - modelInputResolution/2;
+        imgROI = cv::Rect(fromWidth,
+                          0,
+                          std::min(modelInputResolution, image.cols - fromWidth),
+                          modelInputResolution);
+    } else {
+        int fromHeight = image.rows/2 - modelInputResolution/2;
+        imgROI = cv::Rect(0,
+                          fromHeight,
+                          modelInputResolution,
+                          std::min(modelInputResolution, image.rows - fromHeight));
+    }
+    image(imgROI).copyTo(image);
+}
+
 int main(int argc, char *argv[]) {
     try {
         if (!ParseAndCheckCommandLine(argc, argv)) {
@@ -72,17 +81,8 @@ int main(int argc, char *argv[]) {
             
         std::vector<std::string> imageNames;
         parseInputFilesArguments(imageNames);
-
-        // ------------------------------------------Read all images------------------------------------------
-        std::vector<cv::Mat> inputImgs = {};
-        for (const auto & i : imageNames) {
-            const cv::Mat& tmp = cv::imread(i);
-            if (tmp.data == nullptr) {
-                std::cerr << "Could not read image " << i << '\n';
-            } else {
-                inputImgs.push_back(tmp);
-            }
-        }
+        unsigned inputImagesCount = imageNames.size();
+        if (inputImagesCount == 0) throw std::runtime_error("No images provided");
 
         // -------------------------------------------Read network--------------------------------------------
         InferenceEngine::Core ie;
@@ -90,19 +90,14 @@ int main(int argc, char *argv[]) {
             ie.SetLogCallback(error_listener);
         }
         InferenceEngine::CNNNetReader netReader;
-        InferenceEngine::CNNNetwork network;
         netReader.ReadNetwork(FLAGS_m);
-        std::string binFileName = fileNameNoExt(FLAGS_m) + ".bin";
-        netReader.ReadWeights(binFileName);
-        network = netReader.getNetwork();
+        netReader.ReadWeights(fileNameNoExt(FLAGS_m) + ".bin");
+        InferenceEngine::CNNNetwork network(netReader.getNetwork());
 
         // ----------------------------------------Init inputBlobName-----------------------------------------
         InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
         if (inputInfo.size() != 1) throw std::logic_error("Sample supports topologies with 1 input only");
         std::string inputBlobName = inputInfo.begin()->first;
-        unsigned curPos = 0;
-        unsigned framesNum = 0;
-        std::atomic<bool> quitFlag(false);
 
         // ------------------------------------------Reshape network------------------------------------------
         auto input_shapes = network.getInputShapes();
@@ -124,15 +119,15 @@ int main(int argc, char *argv[]) {
         for (auto inputBlobsIt = inputInfo.begin(); inputBlobsIt != inputInfo.end(); ++inputBlobsIt) {
             auto layerName = inputBlobsIt->first;
             auto layerData = inputBlobsIt->second;
-            auto layerDims = layerData->getTensorDesc().getDims();
+            auto layerDataDims = layerData->getTensorDesc().getDims();
 
-            std::vector<unsigned long> layerDims_(layerDims.data(), layerDims.data() + layerDims.size());
-            inputBlobsDimsInfo[layerName] = layerDims_;
+            std::vector<unsigned long> layerDims(layerDataDims.data(), layerDataDims.data() + layerDataDims.size());
+            inputBlobsDimsInfo[layerName] = layerDims;
 
-            if (layerDims.size() == 4) {
+            if (layerDataDims.size() == 4) {
                 layerData->setLayout(InferenceEngine::Layout::NCHW);
                 layerData->setPrecision(InferenceEngine::Precision::U8);
-            } else if (layerDims.size() == 2) {
+            } else if (layerDataDims.size() == 2) {
                 layerData->setLayout(InferenceEngine::Layout::NC);
                 layerData->setPrecision(InferenceEngine::Precision::FP32);
             } else {
@@ -145,24 +140,17 @@ int main(int argc, char *argv[]) {
         for (auto outputBlobsIt = outputInfo.begin(); outputBlobsIt != outputInfo.end(); ++outputBlobsIt) {
             auto layerName = outputBlobsIt->first;
             auto layerData = outputBlobsIt->second;
-            auto layerDims = layerData->getTensorDesc().getDims();
+            auto layerDataDims = layerData->getTensorDesc().getDims();
 
-            std::vector<unsigned long> layerDims_(layerDims.data(), layerDims.data() + layerDims.size());
-            outputBlobsDimsInfo[layerName] = layerDims_;
+            std::vector<unsigned long> layerDims(layerDataDims.data(), layerDataDims.data() + layerDataDims.size());
+            outputBlobsDimsInfo[layerName] = layerDims;
             layerData->setPrecision(InferenceEngine::Precision::FP32);
         }
         // ---------------------------------------------------------------------------------------------------
 
         // ----------------------------------Set device and device settings-----------------------------------
-        std::set<std::string> devices;
-        for (const std::string& netDevices : {FLAGS_d}) {
-            if (netDevices.empty()) {
-                continue;
-            }
-            for (const std::string& device : parseDevices(netDevices)) {
-                devices.insert(device);
-            }
-        }
+        std::vector<std::string> deviceNames = parseDevices(FLAGS_d);
+        std::set<std::string> devices(deviceNames.begin(), deviceNames.end());
         std::map<std::string, uint32_t> device_nstreams = parseValuePerDevice(devices, FLAGS_nstreams);
         for (auto& device : devices) {
             if (device == "CPU") {  // CPU supports a few special performance-oriented keys
@@ -211,7 +199,7 @@ int main(int argc, char *argv[]) {
         if (FLAGS_nireq == 0) {
             std::string key = METRIC_KEY(OPTIMAL_NUMBER_OF_INFER_REQUESTS);
             try {
-                FLAGS_nireq = executableNetwork.GetMetric(key).as<unsigned int>();
+                FLAGS_nireq = 2 * executableNetwork.GetMetric(key).as<unsigned int>();
             } catch (const InferenceEngine::details::InferenceEngineException& ex) {
                 THROW_IE_EXCEPTION
                         << "Every device used with the imagenet_classification_demo should "
@@ -223,150 +211,139 @@ int main(int argc, char *argv[]) {
         // ---------------------------------------Create infer request----------------------------------------
         std::vector<InferenceEngine::InferRequest> inferRequests;
         int infReqNum = FLAGS_nireq;
-        for(int infReqID = 0; infReqID < infReqNum; ++infReqID)
+        for (int infReqID = 0; infReqID < infReqNum; ++infReqID) {
             inferRequests.push_back(executableNetwork.CreateInferRequest());
-
+        }
         std::list<cv::Mat> showMats;
         
         std::condition_variable condVar;
         std::mutex mutex;
-        std::mutex showMutex;
-
-        // curImg is stored in ieWrapper
-        unsigned batchSize = FLAGS_b;
-        int irFirstIndex = 0;
         int modelInputResolution = input_shapes[input_name][2];
         
-        // --------------------------------------Set completion callback---------------------------------------
-        for (InferenceEngine::InferRequest& inferRequest : inferRequests) {
-            inferRequest.SetCompletionCallback(
-                InferRequestCallback(
-                    inferRequest,
-                    modelInputResolution,
-                    irFirstIndex,
-                    mutex,
-                    condVar,
-                    inputImgs,
-                    inputBlobName,
-                    FLAGS_b,
-                    showMats,
-                    curPos,
-                    framesNum,
-                    quitFlag
-                )
-            );
-            irFirstIndex = (irFirstIndex + batchSize) % inputImgs.size();
-        }
-        
-        // -------------------------------------------Filling blobs-------------------------------------------
-        auto blobDims = inputBlobsDimsInfo[inputBlobName];
-        if (blobDims.size() != 4) {
-            throw std::runtime_error("Input data does not match size of the blob");
-        }
-
-        int64 startTime = cv::getTickCount();
-        for (InferenceEngine::InferRequest& inferRequest : inferRequests) {     
-            auto inputBlob = inferRequest.GetBlob(inputBlobName);
-
-            for (unsigned i = 0; i < batchSize; i++) {
-                int imageIndex = (curPos + i) % inputImgs.size();
-                cv::Mat inputImg = inputImgs[imageIndex];
-                resizeImage(inputImg, modelInputResolution);
-
-                matU8ToBlob<uint8_t>(inputImg, inputBlob, i);
-            }
-            curPos = (curPos + batchSize) % inputImgs.size();
-
-            inferRequest.StartAsync();
-        }
-
         // ----------------------------------------Create output info-----------------------------------------
         int width;
         int height;
         std::vector<std::string> gmRowsCols = split(FLAGS_res, 'x');        
-        if (gmRowsCols.size() != 2) throw std::runtime_error("Input gmsizes key is not valid.");
-        else {
+        if (gmRowsCols.size() != 2) {
+            throw std::runtime_error("The value of GridMat resolution flag is not valid.");
+        } else {
             width = std::stoi(gmRowsCols[0]);
             height = std::stoi(gmRowsCols[1]);
         }
         
-        GridMat gridMat = GridMat(inputImgs.size(), cv::Size(width, height));
+        GridMat gridMat = GridMat(inputImagesCount, cv::Size(width, height));
 
-        cv::Mat tmpMat;
         char key = 0;
-        unsigned fpsTestSize = 12 * batchSize;
-        double fpsSum = 0;
-        double avgFPS = 0;
-
-        for (size_t i = 0; i < fpsTestSize; i++) {
-            {
-                std::unique_lock<std::mutex> lock(mutex);
-                while (showMats.empty()) {   
-                    condVar.wait(lock);
-                }
-
-                gridMat.listUpdate(showMats);
-                fpsSum += 1. / (((cv::getTickCount() - startTime) / cv::getTickFrequency()) / framesNum);
-            }
-
-            if (!(FLAGS_no_show || FLAGS_delay == -1)) {
-                gridMat.textUpdate(fpsSum / (i + 1), true);
-                cv::imshow("main", gridMat.getMat());
-                key = static_cast<char>(cv::waitKey(1));
-            }
-        } 
-
-        avgFPS = fpsSum / fpsTestSize;
-        unsigned gridMatScale = static_cast<unsigned>(round(std::sqrt(avgFPS)));
-        gridMat = GridMat(inputImgs.size(), cv::Size(width, height), cv::Size(16, 9), gridMatScale);
-        cv::Size gridMatSize = gridMat.getSize();
-        int newDelay = ((FLAGS_delay == -1)
-                        ? avgFPS / (gridMatSize.width * (gridMatSize.height / FLAGS_b)) * 1000
-                        : FLAGS_delay);
         unsigned fpsResultsMaxCount = 1000;
         unsigned currentResultNum = 0;
         double fps;
-        fpsSum = 0;
+        double avgFPS = 0;
+        double fpsSum = 0;
         std::queue<double> fpsQueue;
-        int elapsedTime = 0;
+        unsigned framesNum = 0;
+        long long startTickCount = cv::getTickCount();
+        auto startTime = std::chrono::system_clock::now();
+        auto currentTime = std::chrono::system_clock::now();
+        std::chrono::duration<double> elapsedSeconds = currentTime - startTime;
+        
+        std::queue<std::pair<InferenceEngine::InferRequest&, std::vector<cv::Mat>>> readyInferRequests;
+        std::queue<std::pair<InferenceEngine::InferRequest&, std::vector<cv::Mat>>> completedInferRequests;
+        for (std::size_t i = 0; i < inferRequests.size(); i++) {
+            readyInferRequests.push({inferRequests[i], std::vector<cv::Mat>()});
+        }
+        std::size_t nextImageIndex = 0;
 
+        bool isTestMode = true;
+        int delay = 1;
         do {
-            {
-                std::unique_lock<std::mutex> lock(mutex);
-                while (showMats.empty()) {
-                    condVar.wait(lock);
+            if (isTestMode && elapsedSeconds.count() >= 5) {
+                isTestMode = false;
+
+                unsigned gridMatScale = static_cast<unsigned>(round(std::sqrt(avgFPS)));
+                gridMat = GridMat(inputImagesCount, cv::Size(width, height), cv::Size(16, 9), gridMatScale);
+                cv::Size gridMatSize = gridMat.getSize();
+                delay = ((FLAGS_delay == -1)
+                         ? static_cast<int>(avgFPS / (gridMatSize.width * (gridMatSize.height / FLAGS_b)) * 1000)
+                         : FLAGS_delay);
+                
+                currentResultNum = 0;
+                fpsSum = 0;
+                avgFPS = 0;
+                std::queue<double>().swap(fpsQueue);
+            }
+
+            if (!completedInferRequests.empty()) {
+                auto completedIR = completedInferRequests.front();
+                for (unsigned j = 0; j < FLAGS_b; j++) {
+                    showMats.push_back(completedIR.second[j]);
                 }
+                framesNum += FLAGS_b;
 
                 gridMat.listUpdate(showMats);
-                fps = 1. / (((cv::getTickCount() - startTime) / cv::getTickFrequency()) / framesNum);
+                fps = 1. / (((cv::getTickCount() - startTickCount) / cv::getTickFrequency()) / framesNum);
+
+                gridMat.textUpdate(fpsSum / (currentResultNum + 1), isTestMode);
+
+                if (!FLAGS_no_show || (isTestMode && FLAGS_delay != -1)) {
+                    cv::imshow("main", gridMat.getMat());
+                    key = static_cast<char>(cv::waitKey(delay));
+                }
+
+                if (currentResultNum >= fpsResultsMaxCount) {
+                    fpsSum -= fpsQueue.front();
+                    fpsQueue.pop();
+                } else {
+                    currentResultNum++;
+                }
+                
+                fpsQueue.push(fps);
+                fpsSum += fps;
+                avgFPS = fpsSum / (currentResultNum + 1);
+
+                readyInferRequests.push({completedInferRequests.front().first, std::vector<cv::Mat>()});
+                completedInferRequests.pop();
+            } 
+            else if (!readyInferRequests.empty() && readyInferRequests.front().second.size() == FLAGS_b) {
+                auto ir = readyInferRequests.front();
+                
+                ir.first.SetCompletionCallback(
+                    InferRequestCallback(
+                        ir.first,
+                        ir.second,
+                        completedInferRequests
+                    )
+                );
+
+                auto inputBlob = ir.first.GetBlob(inputBlobName);
+                for (unsigned i = 0; i < FLAGS_b; i++) {        
+                    matU8ToBlob<uint8_t>(ir.second[i], inputBlob, i);
+                }
+
+                ir.first.StartAsync();
+                readyInferRequests.pop();
+            }
+            else if (!readyInferRequests.empty()) {
+                const cv::Mat& readImg = cv::imread(imageNames[nextImageIndex]);
+                if (readImg.data == nullptr) {
+                    std::cerr << "Could not read image " << imageNames[nextImageIndex] << '\n';
+                } else {
+                    cv::Mat tmpImg = readImg;
+                    resizeImage(tmpImg, modelInputResolution);
+
+                    readyInferRequests.front().second.push_back(tmpImg);
+                }
+
+                nextImageIndex++;
+                if (nextImageIndex == inputImagesCount) {
+                    nextImageIndex = 0;
+                }
             }
 
-            if (!FLAGS_no_show) {
-                gridMat.textUpdate(fpsSum / (currentResultNum + 1), false);
-                cv::imshow("main", gridMat.getMat());
-                key = static_cast<char>(cv::waitKey(newDelay));
-            }
-
-            if (currentResultNum >= fpsResultsMaxCount) {
-                fpsSum -= fpsQueue.front();
-                fpsQueue.pop();
-            }
-            else {
-                currentResultNum++;
-            }
-
-            fpsQueue.push(fps);
-            fpsSum += fps;
-
-            elapsedTime = static_cast<int>(round((cv::getTickCount() - startTime)/10e8));
-        } while (27 != key && (!FLAGS_no_show || FLAGS_no_show_time == -1 || elapsedTime < FLAGS_no_show_time));
-                                                                        // no -no_show: stops when 'Esc' is pressed
-                                                                        // -no_show_time -1: never stops
-                                                                        // -no_show_time N: stops after N*10e8 ticks 
+            currentTime = std::chrono::system_clock::now();
+            elapsedSeconds = currentTime - startTime;
+        } while (27 != key && (FLAGS_time == -1 || elapsedSeconds.count() < FLAGS_time));
 
         std::cout << "Overall FPS: " << (fpsSum / currentResultNum) << std::endl;
-        
-        quitFlag = true;
 
         if (!FLAGS_no_show) {
             cv::destroyWindow("main");

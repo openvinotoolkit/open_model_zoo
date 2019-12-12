@@ -24,12 +24,6 @@ public:
                           static_cast<int>(std::ceil(1. * scale * scale / aspectRatio.width))},
                      currSourceID{0},
                      rectangleHeight{30} {
-        if (size.width % inputImgsCount == 0) { // fix 'static GridMat' problem
-            size.width++;
-        }
-        else if (size.height % inputImgsCount == 0) {
-            size.height++;
-        }
 
         int minCellSize = std::min(maxDisp.width / size.width, maxDisp.height / size.height);
         cellSize = cv::Size(minCellSize, minCellSize);
@@ -72,10 +66,9 @@ public:
                         cv::format("Overall FPS: %0.01f", overFPS),
                         cv::Point(5, rectangleHeight - 5),
                         cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(0, 255, 0), thickness);
-        }
-        else {
+        } else {
             cv::putText(outImg,
-                        "FPS test, please wait...",
+                        cv::format("FPS: %0.01f   Testing, please wait...", overFPS),
                         cv::Point(5, rectangleHeight - 5),
                         cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(0, 0, 255), thickness);
         }
@@ -111,10 +104,11 @@ public:
                            outImg(cv::Rect(points[currSourceID], cellSize)),
                            cellSize);
             
-                if (currSourceID == points.size() - 1)
+                if (currSourceID == points.size() - 1) {
                     currSourceID = 0;
-                else
+                } else {
                     currSourceID++;
+                }
             }
         }
 
