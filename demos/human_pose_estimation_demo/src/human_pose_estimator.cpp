@@ -179,7 +179,6 @@ void HumanPoseEstimator::preprocess(const cv::Mat& image, uint8_t* buffer) const
     cv::copyMakeBorder(resizedImage, paddedImage, pad(0), pad(2), pad(1), pad(3),
                        cv::BORDER_CONSTANT, meanPixel);
     std::vector<cv::Mat> planes(3);
-    cv::split(paddedImage, planes);
     for (size_t pId = 0; pId < planes.size(); pId++) {
         planes[pId] = cv::Mat(inputLayerSize, CV_8UC1, buffer + pId * inputLayerSize.area());
     }
