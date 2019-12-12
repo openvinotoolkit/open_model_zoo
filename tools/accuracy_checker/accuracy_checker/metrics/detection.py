@@ -193,6 +193,7 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
                 average_precisions.append(ap)
             else:
                 average_precisions.append(np.nan)
+
         return average_precisions
 
 

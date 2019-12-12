@@ -61,6 +61,9 @@ AccuracyChecker supports following set of adapters:
   * `boxes_out` - name of output layer with predicted boxes coordinates in format [y0, x0, y1, x1].
   *  `scores_out` - name of output layer with detection scores.
   * `num_detections_out` - name of output layer which contains the number of valid detections.
+* `retinanet` - converting output of RetinaNet-based model.
+  * `loc_out` - name of output layer with bounding box deltas.
+  * `class_out` - name of output layer with classification probabilities.
 * `face_person_detection` - converting face person detection model output with 2 detection outputs to `ContainerPredition`, where value of parameters `face_out`and `person_out` are used for identification `DetectionPrediction` in container.
   * `face_out` -  face detection output layer name.
   * `person_out` - person detection output layer name.
