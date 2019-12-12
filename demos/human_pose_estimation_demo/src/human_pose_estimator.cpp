@@ -105,7 +105,7 @@ void HumanPoseEstimator::reshape(const cv::Mat& image){
     CV_Assert(image.type() == CV_8UC3);
 
     imageSize = image.size();
-    if (inputWidthIsChanged(imageSize)){
+    if (inputWidthIsChanged(imageSize)) {
         auto input_shapes = network.getInputShapes();
         std::string input_name;
         InferenceEngine::SizeVector input_shape;

@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
                 t0 = std::chrono::high_resolution_clock::now();
 
                 if (!FLAGS_no_show) {
-                    if (FLAGS_black){
+                    if (FLAGS_black) {
                         curr_frame = cv::Mat::zeros(curr_frame.size(), curr_frame.type());
                     }
                     std::ostringstream out;
