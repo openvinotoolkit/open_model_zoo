@@ -20,8 +20,8 @@ This model is Mask-RCNN-based text detector with ResNet50 backbone and additiona
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
 | Word spotting hmean ICDAR2015, w/o dictionary | 59.04%    |
-| GFlops (detection part)                       | `TBD`     |
-| MParams (detection part)                      | `TBD`     |
+| GFlops                                        | `TBD`     |
+| MParams                                       | `TBD`     |
 | Source framework                              | PyTorch\* |
 
 *Hmean Word spotting* is defined and measured according to

@@ -20,8 +20,8 @@ This model is 2d-attention-based GRU decoder of text recognition head.
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
 | Word spotting hmean ICDAR2015, w/o dictionary | 59.04%    |
-| GFlops (detection part)                       | `TBD`     |
-| MParams (detection part)                      | `TBD`     |
+| GFlops                                        | 0.002     |
+| MParams                                       | 0.273     |
 | Source framework                              | PyTorch\* |
 
 *Hmean Word spotting* is defined and measured according to

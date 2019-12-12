@@ -20,8 +20,8 @@ This model is fully-convolutional encoder of text recognition head.
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
 | Word spotting hmean ICDAR2015, w/o dictionary | 59.04%    |
-| GFlops (detection part)                       | `TBD`     |
-| MParams (detection part)                      | `TBD`     |
+| GFlops                                        | 2.082     |
+| MParams                                       | 1.328     |
 | Source framework                              | PyTorch\* |
 
 *Hmean Word spotting* is defined and measured according to
