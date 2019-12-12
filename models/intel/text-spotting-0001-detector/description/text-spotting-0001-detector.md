@@ -41,7 +41,7 @@ This model is Mask-RCNN-based text detector with ResNet50 backbone and additiona
 
 1.	name: `classes`, shape: [100, ] - Contiguous integer class ID for every
     detected object, '0' for background, i.e. no object.
-1.	name: `scores`: shape: [100, ] - Detection confidence scores in range [0, 1]
+1.	name: `scores`, shape: [100, ] - Detection confidence scores in range [0, 1]
     for every object.
 1.	name: `boxes`, shape: [100, 4] - Bounding boxes around every detected objects
     in (top_left_x, top_left_y, bottom_right_x, bottom_right_y) format.
