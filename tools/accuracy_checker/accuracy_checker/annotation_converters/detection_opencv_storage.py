@@ -18,7 +18,7 @@ from ..config import PathField, NumberField, ConfigError
 from ..representation import DetectionAnnotation
 from ..utils import convert_bboxes_xywh_to_x1y1x2y2, read_xml, read_txt, check_file_existence, read_json
 
-from .format_converter import BaseFormatConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 
 class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
@@ -156,6 +156,7 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
             label_map = meta.get('label_map')
             if not label_map:
                 raise ConfigError('dataset_meta_file should contains labels or label_map')
+            label_map = verify_label_map(label_map)
             class_to_ind = {value: key for key, value in label_map.items()}
 
             return class_to_ind, meta

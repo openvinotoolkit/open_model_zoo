@@ -107,7 +107,7 @@ class MNISTCSVFormatConverter(BaseFormatConverter):
             if progress_callback is not None and index % progress_interval == 0:
                 progress_callback(index / num_iterations * 100)
 
-        return ConverterReturn(annotations, meta, None)
+        return ConverterReturn(annotations, meta, content_errors)
 
     @staticmethod
     def convert_image(features):
