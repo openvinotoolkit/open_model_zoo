@@ -156,7 +156,6 @@ void HumanPoseEstimator::swapRequest() {
 }
 
 std::vector<HumanPose> HumanPoseEstimator::estimateCurr() {
-
     InferenceEngine::Blob::Ptr pafsBlob = request_curr->GetBlob(pafsBlobName);
     InferenceEngine::Blob::Ptr heatMapsBlob = request_curr->GetBlob(heatmapsBlobName);
     CV_Assert(heatMapsBlob->getTensorDesc().getDims()[1] == keypointsNumber + 1);
