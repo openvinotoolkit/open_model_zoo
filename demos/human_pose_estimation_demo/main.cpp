@@ -90,6 +90,7 @@ int main(int argc, char* argv[]) {
         double decode_time = 0, render_time = 0;
 
         while (true) {
+            auto t0 = std::chrono::high_resolution_clock::now();
             //here is the first asynchronus point:
             //in the async mode we capture frame to populate the NEXT infer request
             //in the regular mode we capture frame to the current infer request
@@ -101,7 +102,6 @@ int main(int argc, char* argv[]) {
                     throw std::logic_error("Failed to get frame from cv::VideoCapture");
                 }
             }
-            auto t0 = std::chrono::high_resolution_clock::now();
             if (isAsyncMode) {
                 if (isModeChanged) {
                     estimator.frameToBlob_curr(curr_frame);
