@@ -7,6 +7,8 @@
 
 #include <ie_iextension.h>
 
+std::exception_ptr irCallbackException;
+
 class InferRequestCallback
 {
 public:
@@ -20,7 +22,12 @@ public:
                          completedInferRequests(completedInferRequests) {}
 
     void operator()() const {
-        completedInferRequests.push({ir, inputBlobImages});
+        try {
+            completedInferRequests.push({ir, inputBlobImages});
+        }
+        catch(...) {
+            irCallbackException = std::current_exception();
+        }
     }
 
 private:

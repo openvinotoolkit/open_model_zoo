@@ -18,13 +18,18 @@ public:
     explicit GridMat(int inputImgsCount,
                      const cv::Size maxDisp = cv::Size{1920, 1080},
                      const cv::Size aspectRatio = cv::Size{16, 9},
-                     int scale = 2
+                     double targetFPS = 60
                      ):
-                     size{static_cast<int>(std::ceil(1. * scale * scale / aspectRatio.height)),
-                          static_cast<int>(std::ceil(1. * scale * scale / aspectRatio.width))},
+                     size{std::max(static_cast<int>(std::ceil(targetFPS / aspectRatio.height)),
+                                   static_cast<int>(std::ceil(
+                                       1. * FLAGS_b / (aspectRatio.width + aspectRatio.height) * aspectRatio.width))
+                                    ),
+                          std::max(static_cast<int>(std::ceil(targetFPS / aspectRatio.width)),
+                                   static_cast<int>(std::ceil(
+                                       1. * FLAGS_b / (aspectRatio.width + aspectRatio.height) * aspectRatio.height))
+                                    )},
                      currSourceID{0},
                      rectangleHeight{30} {
-
         int minCellSize = std::min(maxDisp.width / size.width, maxDisp.height / size.height);
         cellSize = cv::Size(minCellSize, minCellSize);
 
@@ -51,7 +56,7 @@ public:
         }
     }
 
-    void textUpdate(double overFPS, bool isFpsTest){
+    void textUpdate(double overFPS, bool isFpsTest) {
         // Draw a rectangle
         cv::Point p1 = cv::Point(0, 0);
         cv::Point p2 = cv::Point(outImg.cols, rectangleHeight);

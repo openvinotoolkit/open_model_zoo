@@ -233,43 +233,45 @@ int main(int argc, char *argv[]) {
         
         GridMat gridMat = GridMat(inputImagesCount, cv::Size(width, height));
 
-        char key = 0;
-        unsigned fpsResultsMaxCount = 1000;
-        unsigned currentResultNum = 0;
-        double fps;
+        unsigned spfResultsMaxCount = 1000;
+        std::queue<double> spfQueue;
+        double spf;
+        double spfSum = 0;
         double avgFPS = 0;
-        double fpsSum = 0;
-        std::queue<double> fpsQueue;
         unsigned framesNum = 0;
+
         long long startTickCount = cv::getTickCount();
         auto startTime = std::chrono::system_clock::now();
         auto currentTime = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsedSeconds = currentTime - startTime;
         
-        std::queue<std::pair<InferenceEngine::InferRequest&, std::vector<cv::Mat>>> readyInferRequests;
+        std::queue<std::pair<InferenceEngine::InferRequest&, std::vector<cv::Mat>>> emptyInferRequests;
         std::queue<std::pair<InferenceEngine::InferRequest&, std::vector<cv::Mat>>> completedInferRequests;
         for (std::size_t i = 0; i < inferRequests.size(); i++) {
-            readyInferRequests.push({inferRequests[i], std::vector<cv::Mat>()});
+            emptyInferRequests.push({inferRequests[i], std::vector<cv::Mat>()});
         }
         std::size_t nextImageIndex = 0;
 
         bool isTestMode = true;
         int delay = 1;
+        char key = 0;
         do {
-            if (isTestMode && elapsedSeconds.count() >= 5) {
+            if (irCallbackException) std::rethrow_exception(irCallbackException);
+
+            if (isTestMode && elapsedSeconds.count() >= 10) {
                 isTestMode = false;
 
-                unsigned gridMatScale = static_cast<unsigned>(round(std::sqrt(avgFPS)));
-                gridMat = GridMat(inputImagesCount, cv::Size(width, height), cv::Size(16, 9), gridMatScale);
+                gridMat = GridMat(inputImagesCount, cv::Size(width, height), cv::Size(16, 9), avgFPS);
                 cv::Size gridMatSize = gridMat.getSize();
                 delay = ((FLAGS_delay == -1)
                          ? static_cast<int>(avgFPS / (gridMatSize.width * (gridMatSize.height / FLAGS_b)) * 1000)
                          : FLAGS_delay);
                 
-                currentResultNum = 0;
-                fpsSum = 0;
+                spfSum = 0;
                 avgFPS = 0;
-                std::queue<double>().swap(fpsQueue);
+                framesNum = 0;
+                std::queue<double>().swap(spfQueue);
+                startTickCount = cv::getTickCount();
             }
 
             if (!completedInferRequests.empty()) {
@@ -278,51 +280,27 @@ int main(int argc, char *argv[]) {
                     showMats.push_back(completedIR.second[j]);
                 }
                 framesNum += FLAGS_b;
-
                 gridMat.listUpdate(showMats);
-                fps = 1. / (((cv::getTickCount() - startTickCount) / cv::getTickFrequency()) / framesNum);
+                
+                spf = ((cv::getTickCount() - startTickCount) / cv::getTickFrequency()) / framesNum;
+                if (spfQueue.size() >= spfResultsMaxCount) {
+                    spfSum -= spfQueue.front();
+                    spfQueue.pop();
+                }
+                spfQueue.push(spf);
+                spfSum += spf;
+                avgFPS = spfQueue.size() / spfSum;
 
-                gridMat.textUpdate(fpsSum / (currentResultNum + 1), isTestMode);
-
+                gridMat.textUpdate(avgFPS, isTestMode);
                 if (!FLAGS_no_show || (isTestMode && FLAGS_delay != -1)) {
                     cv::imshow("main", gridMat.getMat());
                     key = static_cast<char>(cv::waitKey(delay));
                 }
 
-                if (currentResultNum >= fpsResultsMaxCount) {
-                    fpsSum -= fpsQueue.front();
-                    fpsQueue.pop();
-                } else {
-                    currentResultNum++;
-                }
-                
-                fpsQueue.push(fps);
-                fpsSum += fps;
-                avgFPS = fpsSum / (currentResultNum + 1);
-
-                readyInferRequests.push({completedInferRequests.front().first, std::vector<cv::Mat>()});
+                emptyInferRequests.push({completedInferRequests.front().first, std::vector<cv::Mat>()});
                 completedInferRequests.pop();
             } 
-            else if (!readyInferRequests.empty() && readyInferRequests.front().second.size() == FLAGS_b) {
-                auto ir = readyInferRequests.front();
-                
-                ir.first.SetCompletionCallback(
-                    InferRequestCallback(
-                        ir.first,
-                        ir.second,
-                        completedInferRequests
-                    )
-                );
-
-                auto inputBlob = ir.first.GetBlob(inputBlobName);
-                for (unsigned i = 0; i < FLAGS_b; i++) {        
-                    matU8ToBlob<uint8_t>(ir.second[i], inputBlob, i);
-                }
-
-                ir.first.StartAsync();
-                readyInferRequests.pop();
-            }
-            else if (!readyInferRequests.empty()) {
+            else if (!emptyInferRequests.empty()) {
                 const cv::Mat& readImg = cv::imread(imageNames[nextImageIndex]);
                 if (readImg.data == nullptr) {
                     std::cerr << "Could not read image " << imageNames[nextImageIndex] << '\n';
@@ -330,12 +308,32 @@ int main(int argc, char *argv[]) {
                     cv::Mat tmpImg = readImg;
                     resizeImage(tmpImg, modelInputResolution);
 
-                    readyInferRequests.front().second.push_back(tmpImg);
+                    emptyInferRequests.front().second.push_back(tmpImg);
                 }
 
                 nextImageIndex++;
                 if (nextImageIndex == inputImagesCount) {
                     nextImageIndex = 0;
+                }
+
+                if (emptyInferRequests.front().second.size() == FLAGS_b) {
+                    auto ir = emptyInferRequests.front();
+                
+                    ir.first.SetCompletionCallback(
+                        InferRequestCallback(
+                            ir.first,
+                            ir.second,
+                            completedInferRequests
+                        )
+                    );
+
+                    auto inputBlob = ir.first.GetBlob(inputBlobName);
+                    for (unsigned i = 0; i < FLAGS_b; i++) {
+                        matU8ToBlob<uint8_t>(ir.second[i], inputBlob, i);
+                    }
+
+                    ir.first.StartAsync();
+                    emptyInferRequests.pop();
                 }
             }
 
@@ -343,7 +341,7 @@ int main(int argc, char *argv[]) {
             elapsedSeconds = currentTime - startTime;
         } while (27 != key && (FLAGS_time == -1 || elapsedSeconds.count() < FLAGS_time));
 
-        std::cout << "Overall FPS: " << (fpsSum / currentResultNum) << std::endl;
+        std::cout << "Overall FPS: " << avgFPS << std::endl;
 
         if (!FLAGS_no_show) {
             cv::destroyWindow("main");
