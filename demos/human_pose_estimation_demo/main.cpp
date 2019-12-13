@@ -104,13 +104,13 @@ int main(int argc, char* argv[]) {
             }
             if (isAsyncMode) {
                 if (isModeChanged) {
-                    estimator.frameToBlob_curr(curr_frame);
+                    estimator.frameToBlobCurr(curr_frame);
                 }
                 if (!isLastFrame) {
-                    estimator.frameToBlob_next(next_frame);
+                    estimator.frameToBlobNext(next_frame);
                 }
             } else if (!isModeChanged) {
-                estimator.frameToBlob_curr(curr_frame);
+                estimator.frameToBlobCurr(curr_frame);
             }
             auto t1 = std::chrono::high_resolution_clock::now();
             decode_time = std::chrono::duration_cast<ms>(t1 - t0).count();

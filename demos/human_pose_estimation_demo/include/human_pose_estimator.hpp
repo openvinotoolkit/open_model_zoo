@@ -22,8 +22,8 @@ public:
                        bool enablePerformanceReport = false);
     std::vector<HumanPose> postprocessCurr();
     void reshape(const cv::Mat& image);
-    void frameToBlob_curr(const cv::Mat& image);
-    void frameToBlob_next(const cv::Mat& image);
+    void frameToBlobCurr(const cv::Mat& image);
+    void frameToBlobNext(const cv::Mat& image);
     void startCurr();
     void startNext();
     bool readyCurr();
@@ -60,8 +60,8 @@ private:
     std::string targetDeviceName;
     InferenceEngine::CNNNetwork network;
     InferenceEngine::ExecutableNetwork executableNetwork;
-    InferenceEngine::InferRequest::Ptr request_next;
-    InferenceEngine::InferRequest::Ptr request_curr;
+    InferenceEngine::InferRequest::Ptr requestNext;
+    InferenceEngine::InferRequest::Ptr requestCurr;
     InferenceEngine::CNNNetReader netReader;
     std::string pafsBlobName;
     std::string heatmapsBlobName;
