@@ -145,7 +145,7 @@ int main(int argc, char* argv[]) {
                     }
                     std::ostringstream out;
                     out << "OpenCV cap/render time: " << std::fixed << std::setprecision(2)
-                    << (decode_time + render_time) << " ms";
+                        << (decode_time + render_time) << " ms";
 
                     cv::putText(curr_frame, out.str(), cv::Point2f(0, 25),
                                 cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 255, 0));
