@@ -317,8 +317,8 @@ describing a single model. Each such object has the following keys:
 * `description`: text describing the model. Paragraphs are separated by line feed characters.
 
 * `framework`: a string identifying the framework whose format the model is downloaded in.
-  Current possible values are `dldt` (Inference Engine IR), `caffe`, `caffe2`, `mxnet`, `pytorch`
-  and `tf` (TensorFlow). Additional possible values might be added in the future.
+  Current possible values are `dldt` (Inference Engine IR), `caffe`, `caffe2`, `mxnet`, `onnx`,
+  `pytorch` and `tf` (TensorFlow). Additional possible values might be added in the future.
 
 * `license_url`: an URL for the license that the model is distributed under.
 
