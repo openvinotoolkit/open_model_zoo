@@ -112,8 +112,8 @@ class BrainTumorSegmentationAdapter(Adapter):
                 optional=True, default=False, description="Allows to apply argmax operation to output values."
             ),
             'label_order': ListField(
-                optional=True, default=[1, 2, 3], description="Specifies order of output labels, according to "
-                                                              "order of dataset labels"
+                optional=True, default=[1, 2, 3], value_type=int, validate_values=True,
+                description="Specifies order of output labels, according to order of dataset labels"
             )
         })
 

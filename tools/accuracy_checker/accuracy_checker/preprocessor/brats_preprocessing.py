@@ -141,7 +141,7 @@ class SwapModalitiesBrats(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'modality_order': ListField(optional=True, default=None,
+            'modality_order': ListField(value_type=int, validate_values=True,
                                         description="Specifies order of modality according to model input")
         })
 
@@ -160,8 +160,7 @@ class SwapModalitiesBrats(Preprocessor):
                               .format(self.modal_order, self.__provider__))
 
     def process(self, image, annotation_meta=None):
-        if self.modal_order is not None:
-            image.data = self.swap_modalities(image.data)
+        image.data = self.swap_modalities(image.data)
         return image
 
     def swap_modalities(self, image):

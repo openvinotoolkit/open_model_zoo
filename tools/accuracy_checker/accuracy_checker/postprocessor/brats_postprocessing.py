@@ -95,7 +95,7 @@ class TransformBratsPrediction(Postprocessor):
         parameters = super().parameters()
         parameters.update({
             'order': ListField(value_type=int, validate_values=True,
-                               description="Specifies channel order of filling")
+                               description="Specifies channel order of filling"),
             'values': ListField(value_type=int, validate_values=True,
                                 description="Specifies values for each channel according to new order")
         })
