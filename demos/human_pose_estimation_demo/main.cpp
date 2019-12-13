@@ -165,7 +165,7 @@ int main(int argc, char* argv[]) {
                     }
                 }
 
-                poses = estimator.estimateCurr();
+                poses = estimator.postprocessCurr();
 
                 if (FLAGS_r) {
                     sendHumanPose(poses);

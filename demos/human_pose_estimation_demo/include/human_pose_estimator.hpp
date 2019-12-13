@@ -20,7 +20,7 @@ public:
     HumanPoseEstimator(const std::string& modelPath,
                        const std::string& targetDeviceName,
                        bool enablePerformanceReport = false);
-    std::vector<HumanPose> estimateCurr();
+    std::vector<HumanPose> postprocessCurr();
     void reshape(const cv::Mat& image);
     void frameToBlob_curr(const cv::Mat& image);
     void frameToBlob_next(const cv::Mat& image);

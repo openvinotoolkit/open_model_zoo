@@ -155,7 +155,7 @@ void HumanPoseEstimator::swapRequest() {
     request_curr.swap(request_next);
 }
 
-std::vector<HumanPose> HumanPoseEstimator::estimateCurr() {
+std::vector<HumanPose> HumanPoseEstimator::postprocessCurr() {
     InferenceEngine::Blob::Ptr pafsBlob = request_curr->GetBlob(pafsBlobName);
     InferenceEngine::Blob::Ptr heatMapsBlob = request_curr->GetBlob(heatmapsBlobName);
     InferenceEngine::SizeVector heatMapDims = heatMapsBlob->getTensorDesc().getDims();
