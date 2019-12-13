@@ -58,4 +58,9 @@ probability for each class.
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_reference_caffenet/readme.md]()
+The original model is distributed under the following
+[license](https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_reference_caffenet/readme.md):
+
+```
+This model is released for unrestricted use.
+```

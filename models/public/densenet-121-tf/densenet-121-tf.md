@@ -57,4 +57,6 @@ Floating point values in a range [0, 1], which represent probabilities for class
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE]()
+The original model is distributed under the
+[Apache License, Version 2.0](https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE).
+A copy of the license is provided in [APACHE-2.0-TF-DenseNet.txt](../licenses/APACHE-2.0-TF-DenseNet.txt).

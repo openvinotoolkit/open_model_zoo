@@ -75,4 +75,6 @@ Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000
 
 ## Legal Information
 
-[LICENSE](https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/a36e2b2cd1bd122a508a6fffeaa7606890f8c882/LICENSE)
+The original model is distributed under the
+[Apache License, Version 2.0](https://raw.githubusercontent.com/rwightman/gen-efficientnet-pytorch/5e91628ed98250989a7ddd20abfe27385e0493c1/LICENSE).
+A copy of the license is provided in [APACHE-2.0-PyTorch-EfficientNet.txt](../licenses/APACHE-2.0-PyTorch-EfficientNet.txt).

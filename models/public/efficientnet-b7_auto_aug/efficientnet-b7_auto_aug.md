@@ -71,4 +71,6 @@ Object classifier according to ImageNet classes, name - `efficientnet-b7/model/h
 
 ## Legal Information
 
-[LICENSE](https://raw.githubusercontent.com/tensorflow/tpu/master/LICENSE)
+The original model is distributed under the
+[Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/tpu/master/LICENSE).
+A copy of the license is provided in [APACHE-2.0-TF-TPU.txt](../licenses/APACHE-2.0-TF-TPU.txt).

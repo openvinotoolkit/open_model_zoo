@@ -66,4 +66,6 @@ Object classifier according to ImageNet classes, name - `prob`, shape - `1,1000`
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/keras-team/keras/master/LICENSE]()
+The original model is distributed under the
+[Creative Commons Attribution 4.0 International Public License](https://creativecommons.org/licenses/by/4.0/legalcode.txt).
+A copy of the license is provided in [CC-BY-4.0.txt](../licenses/CC-BY-4.0.txt).

@@ -77,4 +77,6 @@ Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000
 
 ## Legal Information
 
-[LICENSE](https://raw.githubusercontent.com/tonylins/pytorch-mobilenet-v2/master/LICENSE)
+The original model is distributed under the
+[Apache License, Version 2.0](https://raw.githubusercontent.com/tonylins/pytorch-mobilenet-v2/master/LICENSE).
+A copy of the license is provided in [APACHE-2.0.txt](../licenses/APACHE-2.0.txt).
