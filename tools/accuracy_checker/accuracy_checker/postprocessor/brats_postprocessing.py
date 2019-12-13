@@ -102,11 +102,10 @@ class TransformBratsPrediction(Postprocessor):
         return parameters
 
     def configure(self):
-        self.order = get_parameter_value_from_config('order')
-        self.values = get_parameter_value_from_config('values')
+        self.order = self.get_value_from_config('order')
+        self.values = self.get_value_from_config('values')
         if len(self.order) != len(self.values):
             raise ConfigError('Length of "order" and "values" must be the same')
-
 
     def process(self, annotation, prediction, image_metadata=None):
         if not len(annotation) == len(prediction) == 1:

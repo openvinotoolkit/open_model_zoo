@@ -92,7 +92,7 @@ class NormalizeBrats(Preprocessor):
             'masked': BoolField(optional=True, default=False,
                                 description='Does not apply normalization to zero values. '
                                             'Applicable for brain tumor segmentation models'),
-            'cutoff': NumberField(optional=True,
+            'cutoff': NumberField(optional=True, default=None,
                                   description='Species range of values - [-cutoff, cutoff]'),
             'shift_value': NumberField(optional=True, default=0, description='Specifies shift value'),
             'normalize_value': NumberField(optional=True, default=1, description='Specifies normalize value')
@@ -101,10 +101,10 @@ class NormalizeBrats(Preprocessor):
         return parameters
 
     def configure(self):
-        self.masked = self.config.get('masked')
-        self.cutoff = self.config.get('cutoff', None)
-        self.shift_value = self.config.get('shift_value')
-        self.normalize_value = self.config.get('normalize_value')
+        self.masked = self.get_value_from_config('masked')
+        self.cutoff = self.get_value_from_config('cutoff')
+        self.shift_value = self.get_value_from_config('shift_value')
+        self.normalize_value = self.get_value_from_config('normalize_value')
 
     def process(self, image, annotation_meta=None):
         image.data = self.normalize_img(image.data)
@@ -141,7 +141,8 @@ class SwapModalitiesBrats(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'modality_order': ListField(value_type=int, validate_values=True,
+            'modality_order': ListField(value_type=NumberField(value_type=int, min_value=0, max_value=3),
+                                        validate_values=True,
                                         description="Specifies order of modality according to model input")
         })
 
@@ -152,9 +153,6 @@ class SwapModalitiesBrats(Preprocessor):
         if len(self.modal_order) != 4:
             raise ConfigError('{} supports only 4 modality, but found {}'
                               .format(self.__provider__, len(self.modal_order)))
-        if max(self.modal_order) != 3 or min(self.modal_order) != 0:
-            raise ConfigError('Incorrect modality index found in {} for {}'
-                              .format(self.modal_order, self.__provider__))
         if len(self.modal_order) != len(set(self.modal_order)):
             raise ConfigError('Incorrect modality index found in {} for {}. Indexes must be unique'
                               .format(self.modal_order, self.__provider__))
