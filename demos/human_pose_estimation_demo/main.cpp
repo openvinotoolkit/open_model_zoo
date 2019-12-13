@@ -147,11 +147,14 @@ int main(int argc, char* argv[]) {
                     out << "OpenCV cap/render time: " << std::fixed << std::setprecision(2)
                     << (decode_time + render_time) << " ms";
 
-                    cv::putText(curr_frame, out.str(), cv::Point2f(0, 25), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 255, 0));
+                    cv::putText(curr_frame, out.str(), cv::Point2f(0, 25),
+                                cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 255, 0));
                     out.str("");
                     out << "Wallclock time " << (isAsyncMode ? "(TRUE ASYNC):      " : "(SYNC, press Tab): ");
-                    out << std::fixed << std::setprecision(2) << wall.count() << " ms (" << 1000.f / wall.count() << " fps)";
-                    cv::putText(curr_frame, out.str(), cv::Point2f(0, 50), cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 0, 255));
+                    out << std::fixed << std::setprecision(2) << wall.count()
+                        << " ms (" << 1000.f / wall.count() << " fps)";
+                    cv::putText(curr_frame, out.str(), cv::Point2f(0, 50),
+                                cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 0, 255));
                     if (!isAsyncMode) {  // In the true async mode, there is no way to measure detection time directly
                         out.str("");
                         out << "Detection time  : " << std::fixed << std::setprecision(2) << detection.count()
