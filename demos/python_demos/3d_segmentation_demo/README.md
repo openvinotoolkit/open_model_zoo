@@ -50,9 +50,7 @@ Options:
                         Required for GPU custom kernels. Absolute path to an
                         .xml file with the kernels description.
   -ms N1,N2,N3,N4, --mri_sequence N1,N2,N3,N4
-                        Optional. Set MRI-sequence, if data is in single NIFTI
-                        file. Input order is: native T1, native T2, T2-FLAIR,
-                        post-Gadolinium contrast T1
+                        Optional. Transfer MRI-sequence from dataset order to the network order.
   --full_intensities_range
                         Optional. Take intensities of the input image in a full range.
 ```

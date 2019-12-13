@@ -78,8 +78,8 @@ def mri_sequence(arg):
         raise AttributeError("The MRI-sequence should contain exactly 4 values, but contains {}.".format(len(sequence)))
     if len(set(sequence)) != 4:
         raise AttributeError("The MRI-sequence has repeating scan types - {}. "
-                             "The MRI-sequence must contain "
-                             "native T1, native T2, T2-FLAIR, post-Gadolinium contrast T1 scans in that order".
+                             "The MRI-sequence must contain native T1, native T2, T2-FLAIR, "
+                             "post-Gadolinium contrast T1 scans in the specific for the net order".
                              format(sequence))
     return sequence
 
@@ -110,8 +110,7 @@ def parse_arguments():
                         help="Required for GPU custom kernels. "
                              "Absolute path to an .xml file with the kernels description.")
     args.add_argument('-ms', '--mri_sequence', type=mri_sequence, metavar='N1,N2,N3,N4', default=(0,1,2,3),
-                      help='Optional. Set MRI-sequence, if data is in single NIFTI file. '
-                           'Input order is: native T1, native T2, T2-FLAIR, post-Gadolinium contrast T1')
+                      help='Optional. Transfer MRI-sequence from dataset order to the network order.')
     args.add_argument("--full_intensities_range", required=False, default=False, action="store_true",
                       help="Take intensities of the input image in a full range.")
     return parser.parse_args()
