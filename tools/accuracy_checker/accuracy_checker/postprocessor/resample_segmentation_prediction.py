@@ -17,6 +17,7 @@ limitations under the License.
 import numpy as np
 from scipy.ndimage import interpolation
 from .postprocessor import Postprocessor
+from ..config import BoolField
 from ..representation import BrainTumorSegmentationPrediction, BrainTumorSegmentationAnnotation
 
 
@@ -32,6 +33,18 @@ class SegmentationPredictionResample(Postprocessor):
 
     prediction_types = (BrainTumorSegmentationPrediction, )
     annotation_types = (BrainTumorSegmentationAnnotation, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'make_argmax': BoolField(optional=True, default=False,
+                                     description="Applies argmax operation for prediction")
+        })
+        return parameters
+
+    def configure(self):
+        self.make_argmax = self.config.get('make_argmax')
 
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
         if not len(annotation) == len(prediction) == 1:
@@ -63,6 +76,10 @@ class SegmentationPredictionResample(Postprocessor):
         label[:, low[0]:high[0], low[1]:high[1], low[2]:high[2]] = resample(
             prediction_.mask, (prediction_shape[0],) + box_shape
         )
+
+        if self.make_argmax:
+            label = np.argmax(label, axis=0).astype(np.int8)
+            label = np.expand_dims(label, axis=0)
 
         prediction[0].mask = label
 

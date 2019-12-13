@@ -129,7 +129,8 @@ class BrainTumorSegmentationAdapter(Adapter):
         raw_outputs = self._extract_predictions(raw, frame_meta)
         for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
             if self.argmax:
-                output = np.argmax(output, axis=0).reshape((1,)+output.shape[1:])
+                output = np.argmax(output, axis=0).astype(np.int8)
+                output = np.expand_dims(output, axis=0)
             result.append(BrainTumorSegmentationPrediction(identifier, output, self.label_order))
 
         return result
