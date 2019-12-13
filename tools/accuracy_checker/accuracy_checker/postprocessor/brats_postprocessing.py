@@ -17,7 +17,8 @@ limitations under the License.
 import numpy as np
 from scipy.ndimage import interpolation
 from .postprocessor import Postprocessor
-from ..config import BoolField
+from ..config import ConfigError, BoolField, ListField
+from ..utils import get_parameter_value_from_config
 from ..representation import BrainTumorSegmentationPrediction, BrainTumorSegmentationAnnotation
 
 
@@ -84,3 +85,43 @@ class SegmentationPredictionResample(Postprocessor):
         prediction[0].mask = label
 
         return annotation, prediction
+
+
+class TransformBratsPrediction(Postprocessor):
+    __provider__ = 'transform_brats_prediction'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'order': ListField(value_type=int, validate_values=True,
+                               description="Specifies channel order of filling")
+            'values': ListField(value_type=int, validate_values=True,
+                                description="Specifies values for each channel according to new order")
+        })
+        return parameters
+
+    def configure(self):
+        self.order = get_parameter_value_from_config('order')
+        self.values = get_parameter_value_from_config('values')
+        if len(self.order) != len(self.values):
+            raise ConfigError('Length of "order" and "values" must be the same')
+
+
+    def process(self, annotation, prediction, image_metadata=None):
+        if not len(annotation) == len(prediction) == 1:
+            raise RuntimeError('Postprocessor {} does not support multiple annotation and/or prediction.'
+                               .format(self.__provider__))
+        data = prediction[0].mask
+
+        result = np.zeros(shape=data.shape[1:], dtype=np.int8)
+
+        label = data > 0.5
+        for i, value in zip(self.order, self.values):
+            result[label[i, :, :, :]] = value
+
+        result = np.expand_dims(result, axis=0)
+
+        prediction[0].mask = result
+
+        return  annotation, prediction
