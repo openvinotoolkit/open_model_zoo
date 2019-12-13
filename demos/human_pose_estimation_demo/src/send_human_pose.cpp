@@ -14,7 +14,6 @@
 namespace human_pose_estimation {
 
 void sendHumanPose(const std::vector<HumanPose>& poses) {
-
     if (!poses.empty()) {
         std::time_t result = std::time(nullptr);
         std::cout << std::asctime(std::localtime(&result)) << std::endl;
