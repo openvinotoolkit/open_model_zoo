@@ -26,8 +26,8 @@ private:
     std::size_t historySize;
     double memSum, swapSum;
     double maxMem, maxSwap;
-    double memTotal, swapTotal;
-    double maxMemTotal, maxSwapTotal;
+    double memTotal;
+    double maxMemTotal;
     std::deque<std::pair<double, double>> memSwapUsageHistory;
     class PerformanceCounter;
     std::unique_ptr<PerformanceCounter> performanceCounter;
