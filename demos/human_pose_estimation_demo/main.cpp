@@ -83,6 +83,7 @@ int main(int argc, char* argv[]) {
         bool isLastFrame = false;
         bool isAsyncMode = false; // execution is always started in SYNC mode
         bool isModeChanged = false; // set to true when execution mode is changed (SYNC<->ASYNC)
+        bool blackBackground = FLAGS_black;
 
         typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
         auto total_t0 = std::chrono::high_resolution_clock::now();
@@ -140,7 +141,7 @@ int main(int argc, char* argv[]) {
                 t0 = std::chrono::high_resolution_clock::now();
 
                 if (!FLAGS_no_show) {
-                    if (FLAGS_black) {
+                    if (blackBackground) {
                         curr_frame = cv::Mat::zeros(curr_frame.size(), curr_frame.type());
                     }
                     std::ostringstream out;
@@ -204,7 +205,7 @@ int main(int argc, char* argv[]) {
                 isAsyncMode ^= true;
                 isModeChanged = true;
             } else if (32 == key) { // Space
-                FLAGS_black ^= true;
+                blackBackground ^= true;
             }
         }
 
