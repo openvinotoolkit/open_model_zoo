@@ -28,9 +28,15 @@ Optionally you can provide `module_config` section which contains config for cus
   Configuration file examples:
     * [action-recognition-0001-encoder](../configs/action-recognition-0001-encoder.yml) - running full pipeline of action recognition model.
     * [action-recognition-0001-decoder](../configs/action-recognition-0001-decoder.yml) - running only decoder stage with dumped embeddings of encoder.
+
 * **MTCNN Evaluator** shows how to run MTCNN model.
   [Evaluator code](mtcnn_evaluator.py)
   Configuration file examples:
     * [mtcnn-p](../configs/mtcnn-p.yml) - running proposal stage of MTCNN as usual model.
     * [mtcnn-r](../configs/mtcnn-r.yml) - running only refine stage of MTCNN using dumped proposal stage results.
     * [mtcnn-o](../configs/mtcnn-o.yml) - running full MTCNN pipeline.
+
+* **Text Spotting Evaluator** demonstrates how to evaluate text-spotting-0001 model via Accuracy Checker.
+  [Evaluator code](text_spotting_evaluator.py)
+  Configuration file examples:
+    * [text-spotting-0001](../configs/text-spotting-0001.yml)

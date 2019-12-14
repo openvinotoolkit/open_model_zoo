@@ -81,3 +81,5 @@ if(COMMAND add_cpplint_target)
 endif()
 
 add_dependencies(ie_samples ${TARGET_NAME})
+
+target_link_libraries(${TARGET_NAME} monitors)

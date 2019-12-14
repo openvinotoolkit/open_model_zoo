@@ -169,7 +169,7 @@ class DLSDKLauncher(Launcher):
             'device': StringField(regex=SUPPORTED_DEVICE_REGEX, description="Device name."),
             'caffe_model': PathField(optional=True, description="Path to Caffe model file."),
             'caffe_weights': PathField(optional=True, description="Path to Caffe weights file."),
-            'mxnet_weights': PathField(optional=True, description="Path to MxNet weights file."),
+            'mxnet_weights': PathField(optional=True, description="Path to MXNet weights file."),
             'tf_model': PathField(optional=True, description="Path to TF model file."),
             'tf_meta': PathField(optional=True, description="Path to TF meta file."),
             'onnx_model': PathField(optional=True, description="Path to ONNX model file."),
@@ -197,8 +197,10 @@ class DLSDKLauncher(Launcher):
                 optional=True, is_directory=True, description="TF Object Detection API Config."
             ),
             '_tf_custom_op_config_dir': PathField(
-                optional=True, is_directory=True, description="TF Custom Operation Config."
+                optional=True, is_directory=True, description="TF Custom Operation Config prefix."
             ),
+            '_transformations_config_dir': PathField(
+                optional=True, is_directory=True, description="Transformation config prefix for Model Optimizer"),
             '_tf_obj_detection_api_pipeline_config_path': PathField(
                 optional=True, is_directory=False, description="TF Custom Operation Pipeline Config."),
             '_cpu_extensions_mode': StringField(optional=True, description="CPU extensions mode."),
@@ -437,8 +439,12 @@ class DLSDKLauncher(Launcher):
             get_parameter_value_from_config(config, DLSDKLauncher.parameters(), 'mo_params'),
             get_parameter_value_from_config(config, DLSDKLauncher.parameters(), 'mo_flags'),
             get_parameter_value_from_config(config, DLSDKLauncher.parameters(), '_tf_custom_op_config_dir'),
-            get_parameter_value_from_config(config, DLSDKLauncher.parameters(),
-                                            '_tf_obj_detection_api_pipeline_config_path'),
+            get_parameter_value_from_config(
+                config, DLSDKLauncher.parameters(), '_tf_obj_detection_api_pipeline_config_path'
+            ),
+            get_parameter_value_from_config(
+                config, DLSDKLauncher.parameters(), '_transformations_config_dir'
+            ),
             should_log_cmd=should_log_mo_cmd
         )
 

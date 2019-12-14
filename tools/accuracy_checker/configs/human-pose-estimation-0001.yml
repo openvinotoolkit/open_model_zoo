@@ -59,4 +59,5 @@ models:
           - name: AP
             type: coco_precision
             max_detections: 20
+
 global_definitions: ../dataset_definitions.yml

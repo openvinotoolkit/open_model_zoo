@@ -83,3 +83,5 @@ if(NOT TARGET ie_samples)
 endif()
 
 add_dependencies(ie_samples ${TARGET_NAME})
+
+target_link_libraries(${TARGET_NAME} monitors)

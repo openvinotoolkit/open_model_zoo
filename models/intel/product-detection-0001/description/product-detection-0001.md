@@ -16,7 +16,7 @@ The detector is able to detect 12 classes of objects (`sprite`, `kool-aid`, `ext
 | Average Precision (AP) @[ IoU=0.50:0.95,  area=all, maxDets=100 ] | 0.715    |
 | GFlops                                                            | 3.598    |
 | MParams                                                           | 3.212    |
-| Source framework                                                  | Pytorch* |
+| Source framework                                                  | PyTorch* |
 
 ## Performance
 

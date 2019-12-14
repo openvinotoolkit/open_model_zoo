@@ -38,7 +38,7 @@ Options:
     -no_show                   Optional. Do not show processed video.
     -black                     Optional. Show black background.
     -r                         Optional. Output inference results as raw values.
-
+    -u                         Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields an error message.

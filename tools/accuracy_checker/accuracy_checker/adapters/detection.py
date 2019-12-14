@@ -22,7 +22,7 @@ import numpy as np
 
 from ..topology_types import YoloV1Tiny, YoloV2, YoloV2Tiny, YoloV3, YoloV3Tiny, SSD, FasterRCNN
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, StringField, ListField
+from ..config import ConfigValidator, NumberField, StringField, ListField, ConfigError
 from ..postprocessor.nms import NMS
 from ..representation import DetectionPrediction, ContainerPrediction
 from ..utils import get_or_parse_value
@@ -245,7 +245,8 @@ class YoloV3Adapter(Adapter):
                 optional=True, default=[],
                 description="The list of output layers names (optional),"
                             " if specified there should be exactly 3 output layers provided."
-            )
+            ),
+            'anchor_masks': ListField(optional=True, description='per layer used anchors mask')
         })
 
         return parameters
@@ -260,6 +261,16 @@ class YoloV3Adapter(Adapter):
         self.anchors = get_or_parse_value(self.get_value_from_config('anchors'), YoloV3Adapter.PRECOMPUTED_ANCHORS)
         self.threshold = self.get_value_from_config('threshold')
         self.outputs = self.get_value_from_config('outputs')
+        anchor_masks = self.get_value_from_config('anchor_masks')
+        self.masked_anchors = None
+        if anchor_masks is not None:
+            per_layer_anchors = []
+            for layer_mask in anchor_masks:
+                layer_anchors = []
+                for idx in layer_mask:
+                    layer_anchors += [self.anchors[idx * 2], self.anchors[idx * 2 + 1]]
+                per_layer_anchors.append(layer_anchors)
+            self.masked_anchors = per_layer_anchors
 
     def process(self, raw, identifiers=None, frame_meta=None):
         """
@@ -270,19 +281,20 @@ class YoloV3Adapter(Adapter):
             list of DetectionPrediction objects
         """
 
-        def get_anchors_offset(x):
-            return int((self.num * 2) * (len(self.anchors) / (self.num * 2) - 1 - math.log2(x / 13)))
+        def get_anchors_offset(x, num, anchors):
+            return int((num * 2) * (len(anchors) / (num * 2) - 1 - math.log2(x / 13)))
 
-        def parse_yolo_v3_results(prediction, threshold, w, h, det):
+        def parse_yolo_v3_results(prediction, threshold, w, h, det, layer_id):
             cells_x, cells_y = prediction.shape[1:]
+            anchors = self.masked_anchors[layer_id] if self.masked_anchors else self.anchors
+            num = len(anchors) // 2 if self.masked_anchors else self.num
             prediction = prediction.flatten()
-            for y, x, n in np.ndindex((cells_y, cells_x, self.num)):
+            for y, x, n in np.ndindex((cells_y, cells_x, num)):
                 index = n * cells_y * cells_x + y * cells_x + x
-                anchors_offset = get_anchors_offset(cells_x)
+                anchors_offset = get_anchors_offset(cells_x, num, anchors) if not self.masked_anchors else 0
 
                 box_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, 0)
                 obj_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, self.coords)
-
                 scale = prediction[obj_index]
                 if scale < threshold:
                     continue
@@ -290,10 +302,8 @@ class YoloV3Adapter(Adapter):
                 box = [
                     (x + prediction[box_index + 0 * (cells_y * cells_x)]) / cells_x,
                     (y + prediction[box_index + 1 * (cells_y * cells_x)]) / cells_y,
-                    np.exp(prediction[box_index + 2 * (cells_y * cells_x)]) * self.anchors[
-                        anchors_offset + 2 * n + 0] / w,
-                    np.exp(prediction[box_index + 3 * (cells_y * cells_x)]) * self.anchors[
-                        anchors_offset + 2 * n + 1] / h
+                    np.exp(prediction[box_index + 2 * (cells_y * cells_x)]) * anchors[anchors_offset + 2 * n + 0] / w,
+                    np.exp(prediction[box_index + 3 * (cells_y * cells_x)]) * anchors[anchors_offset + 2 * n + 1] / h
                 ]
 
                 classes_prob = np.empty(self.classes)
@@ -320,6 +330,8 @@ class YoloV3Adapter(Adapter):
         else:
             outputs = raw_outputs.keys()
 
+        if self.masked_anchors and len(self.masked_anchors) != len(outputs):
+            raise ConfigError('anchor mask should be specified for all output layers')
         batch = len(identifiers)
         predictions = [[] for _ in range(batch)]
         for blob in outputs:
@@ -332,8 +344,8 @@ class YoloV3Adapter(Adapter):
             self.input_width = input_shape[3]
             self.input_height = input_shape[2]
 
-            for p in prediction:
-                parse_yolo_v3_results(p, self.threshold, self.input_width, self.input_height, detections)
+            for layer_id, p in enumerate(prediction):
+                parse_yolo_v3_results(p, self.threshold, self.input_width, self.input_height, detections, layer_id)
 
             result.append(DetectionPrediction(
                 identifier, detections['labels'], detections['scores'], detections['x_mins'], detections['y_mins'],
@@ -625,7 +637,7 @@ class FacePersonAdapter(Adapter):
 
 class SSDAdapterMxNet(Adapter):
     """
-    Class for converting output of MxNet SSD model to DetectionPrediction representation
+    Class for converting output of MXNet SSD model to DetectionPrediction representation
     """
     __provider__ = 'ssd_mxnet'
 
@@ -840,3 +852,118 @@ class MTCNNPAdapter(Adapter):
                 total_boxes = np.concatenate((total_boxes, boxes), axis=0)
 
         return [total_boxes]
+
+
+class RetinaNetAdapter(Adapter):
+    __provider__ = 'retinanet'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'loc_out': StringField(description='boxes localization output'),
+            'class_out':  StringField(description="output with classes probabilities")
+        })
+        return params
+
+    def configure(self):
+        self.loc_out = self.get_value_from_config('loc_out')
+        self.cls_out = self.get_value_from_config('class_out')
+        self.pyramid_levels = [3, 4, 5, 6, 7]
+        self.strides = [2 ** x for x in self.pyramid_levels]
+        self.sizes = [2 ** (x + 2) for x in self.pyramid_levels]
+        self.ratios = np.array([0.5, 1, 2])
+        self.scales = np.array([2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)])
+        self.std = np.array([0.1, 0.1, 0.2, 0.2])
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        results = []
+        for identifier, loc_pred, cls_pred, meta in zip(
+                identifiers, raw_outputs[self.loc_out], raw_outputs[self.cls_out], frame_meta
+        ):
+            _, _, h, w = next(iter(meta.get('input_shape', {'data': (1, 3, 800, 800)}).values()))
+            anchors = self.create_anchors([w, h])
+            transformed_anchors = self.regress_boxes(anchors, loc_pred)
+            labels, scores = np.argmax(cls_pred, axis=1), np.max(cls_pred, axis=1)
+            scores_mask = np.reshape(scores > 0.05, -1)
+            transformed_anchors = transformed_anchors[scores_mask, :]
+            x_mins, y_mins, x_maxs, y_maxs = transformed_anchors.T
+            results.append(DetectionPrediction(
+                identifier, labels[scores_mask], scores[scores_mask], x_mins / w, y_mins / h, x_maxs / w, y_maxs / h
+            ))
+
+        return results
+
+    def create_anchors(self, input_shape):
+        def _generate_anchors(base_size=16):
+            """
+            Generate anchor (reference) windows by enumerating aspect ratios X
+            scales w.r.t. a reference window.
+            """
+            num_anchors = len(self.ratios) * len(self.scales)
+            # initialize output anchors
+            anchors = np.zeros((num_anchors, 4))
+            # scale base_size
+            anchors[:, 2:] = base_size * np.tile(self.scales, (2, len(self.ratios))).T
+            # compute areas of anchors
+            areas = anchors[:, 2] * anchors[:, 3]
+            # correct for ratios
+            anchors[:, 2] = np.sqrt(areas / np.repeat(self.ratios, len(self.scales)))
+            anchors[:, 3] = anchors[:, 2] * np.repeat(self.ratios, len(self.scales))
+            # transform from (x_ctr, y_ctr, w, h) -> (x1, y1, x2, y2)
+            anchors[:, 0::2] -= np.tile(anchors[:, 2] * 0.5, (2, 1)).T
+            anchors[:, 1::2] -= np.tile(anchors[:, 3] * 0.5, (2, 1)).T
+
+            return anchors
+
+        def _shift(shape, stride, anchors):
+            shift_x = (np.arange(0, shape[1]) + 0.5) * stride
+            shift_y = (np.arange(0, shape[0]) + 0.5) * stride
+            shift_x, shift_y = np.meshgrid(shift_x, shift_y)
+
+            shifts = np.vstack((
+                shift_x.ravel(), shift_y.ravel(),
+                shift_x.ravel(), shift_y.ravel()
+            )).transpose()
+            a = anchors.shape[0]
+            k = shifts.shape[0]
+            all_anchors = (anchors.reshape((1, a, 4)) + shifts.reshape((1, k, 4)).transpose((1, 0, 2)))
+            all_anchors = all_anchors.reshape((k * a, 4))
+
+            return all_anchors
+
+        image_shapes = [(np.array(input_shape) + 2 ** x - 1) // (2 ** x) for x in self.pyramid_levels]
+        # compute anchors over all pyramid levels
+        all_anchors = np.zeros((0, 4)).astype(np.float32)
+        for idx, _ in enumerate(self.pyramid_levels):
+            anchors = _generate_anchors(base_size=self.sizes[idx])
+            shifted_anchors = _shift(image_shapes[idx], self.strides[idx], anchors)
+            all_anchors = np.append(all_anchors, shifted_anchors, axis=0)
+
+        return all_anchors
+
+    def regress_boxes(self, boxes, deltas):
+        widths = boxes[:, 2] - boxes[:, 0]
+        heights = boxes[:, 3] - boxes[:, 1]
+        ctr_x = boxes[:, 0] + 0.5 * widths
+        ctr_y = boxes[:, 1] + 0.5 * heights
+
+        dx = deltas[:, 0] * self.std[0]
+        dy = deltas[:, 1] * self.std[1]
+        dw = deltas[:, 2] * self.std[2]
+        dh = deltas[:, 3] * self.std[3]
+
+        pred_ctr_x = ctr_x + dx * widths
+        pred_ctr_y = ctr_y + dy * heights
+        pred_w = np.exp(dw) * widths
+        pred_h = np.exp(dh) * heights
+
+        pred_boxes_x1 = pred_ctr_x - 0.5 * pred_w
+        pred_boxes_y1 = pred_ctr_y - 0.5 * pred_h
+        pred_boxes_x2 = pred_ctr_x + 0.5 * pred_w
+        pred_boxes_y2 = pred_ctr_y + 0.5 * pred_h
+
+        pred_boxes = np.stack([pred_boxes_x1, pred_boxes_y1, pred_boxes_x2, pred_boxes_y2], axis=1)
+
+        return pred_boxes

@@ -23,6 +23,7 @@
 
 #include <inference_engine.hpp>
 
+#include <monitors/presenter.h>
 #include <samples/slog.hpp>
 #include <samples/ocv_common.hpp>
 #include "crossroad_camera_demo.hpp"
@@ -605,6 +606,9 @@ int main(int argc, char *argv[]) {
         }
         std::cout << std::endl;
 
+        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
+        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
+
         do {
             // get and enqueue the next frame (in case of video)
             if (isVideo && !cap.read(frame)) {
@@ -777,6 +781,8 @@ int main(int argc, char *argv[]) {
                 }
             }
 
+            presenter.drawGraphs(frame);
+
             // --------------------------- Execution statistics ------------------------------------------------
             std::ostringstream out;
             out << "Person detection time  : " << std::fixed << std::setprecision(2) << detection.count()
@@ -817,6 +823,7 @@ int main(int argc, char *argv[]) {
                 const int key = cv::waitKey(isVideo ? 1 : 0);
                 if (27 == key)  // Esc
                     break;
+                presenter.handleKey(key);
             }
         } while (isVideo);
 
@@ -840,6 +847,8 @@ int main(int argc, char *argv[]) {
                 personReId.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
             }
         }
+
+        std::cout << presenter.reportMeans() << '\n';
         // -----------------------------------------------------------------------------------------------------
     }
     catch (const std::exception& error) {

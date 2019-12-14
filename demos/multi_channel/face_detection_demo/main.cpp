@@ -27,8 +27,8 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <monitors/presenter.h>
 #include <samples/slog.hpp>
-
 #include <samples/args_helper.hpp>
 
 #include "input.hpp"
@@ -67,6 +67,7 @@ void showUsage() {
     std::cout << "    -duplicate_num               " << duplication_channel_number << std::endl;
     std::cout << "    -real_input_fps              " << real_input_fps << std::endl;
     std::cout << "    -i                           " << input_video << std::endl;
+    std::cout << "    -u                           " << utilization_monitors_message << std::endl;
 }
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -151,7 +152,8 @@ DisplayParams prepareDisplayParams(size_t count) {
 void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
                      float time,
                      const std::string& stats,
-                     DisplayParams params) {
+                     DisplayParams params,
+                     Presenter& presenter) {
     cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
     auto loopBody = [&](size_t i) {
         auto& elem = data[i];
@@ -192,6 +194,7 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
         loopBody(i);
     }
 #endif
+    presenter.drawGraphs(windowImage);
     drawStats();
 
     char str[256];
@@ -346,6 +349,9 @@ int main(int argc, char* argv[]) {
         }
         std::cout << std::endl;
 
+        cv::Size graphSize{static_cast<int>(params.windowSize.width / 4), 60};
+        Presenter presenter(FLAGS_u, params.windowSize.height - graphSize.height - 10, graphSize);
+
         const size_t outputQueueSize = 1;
         AsyncOutput output(FLAGS_show_stats, outputQueueSize,
         [&](const std::vector<std::shared_ptr<VideoFrame>>& result) {
@@ -354,9 +360,11 @@ int main(int argc, char* argv[]) {
                 std::unique_lock<std::mutex> lock(statMutex);
                 str = statStream.str();
             }
-            displayNSources(result, averageFps, str, params);
+            displayNSources(result, averageFps, str, params, presenter);
+            int key = cv::waitKey(1);
+            presenter.handleKey(key);
 
-            return (cv::waitKey(1) != 27);
+            return (key != 27);
         });
 
         output.start();
@@ -453,6 +461,8 @@ int main(int argc, char* argv[]) {
         }
 
         network.reset();
+
+        std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

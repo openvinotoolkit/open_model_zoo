@@ -1,6 +1,6 @@
-# How to configure Pytorch launcher
+# How to configure PyTorch launcher
 
-For enabling Pytorch launcher you need to add `framework: pytorch` in launchers section of your configuration file and provide following parameters:
+For enabling PyTorch launcher you need to add `framework: pytorch` in launchers section of your configuration file and provide following parameters:
 
 * `device` - specifies which device will be used for infer (`cpu`, `cuda` and so on).
 * `module`- pytorch network module for loading.
@@ -18,10 +18,10 @@ Each input description should has following info:
     * `IMAGE_INFO` - specific key for setting information about input shape to layer (used in Faster RCNN based topologies). You do not need provide `value`, because it will be calculated in runtime. Format value is `Nx[H, W, S]`, where `N` is batch size, `H` - original image height, `W` - original image width, `S` - scale of original image (default 1).
     * `INPUT` - network input for main data stream (e. g. images). If you have several data inputs, you should provide regular expression for identifier as `value` for specifying which one data should be provided in specific input.
   * `shape` - shape of input layer described as comma-separated of all dimensions size except batch size.
-    Optionally you can determine `layout` in case when your model was trained with non-standard data layout (For Pytorch default layout is `NCHW`).
+    Optionally you can determine `layout` in case when your model was trained with non-standard data layout (For PyTorch default layout is `NCHW`).
 If you model has several outputs you also need specify their names in config for ability to get their values in adapter using option `output_names`.
 
-Pytorch launcher config example (demonstrates how to run AlexNet model from [torchvision](https://pytorch.org/docs/stable/torchvision/models.html)):
+PyTorch launcher config example (demonstrates how to run AlexNet model from [torchvision](https://pytorch.org/docs/stable/torchvision/models.html)):
 
 ```yml
 launchers:

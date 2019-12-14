@@ -51,4 +51,5 @@ models:
             include_boundaries: True
             allow_multiple_matches_per_ignored: False
             distinct_conf: False
+
 global_definitions: ../dataset_definitions.yml

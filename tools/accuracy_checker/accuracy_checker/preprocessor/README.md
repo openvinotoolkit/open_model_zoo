@@ -7,7 +7,7 @@ Accuracy Checker supports following set of preprocessors:
 * `resize` - resizing the image to a new width and height.
   * `dst_width` and `dst_height` are destination width and height for image resizing respectively.
     You can also use `size` instead in case when destination sizes are equal for both dimensions.
-  * `resize_realization` - parameter specifies functionality of which library will be used for resize: `opencv`, `pillow` or `tf` (default `opencv` is used). For enabling `tf` you need to install Tensorflow first.
+  * `resize_realization` - parameter specifies functionality of which library will be used for resize: `opencv`, `pillow` or `tf` (default `opencv` is used). For enabling `tf` you need to install TensorFlow first.
   For compatibility with previous releases you can also use boolean constants for selection resizing backend:
     * `use_pillow` parameter specifies usage of Pillow library for resizing.
     * `use_tensorflow` parameter specifies usage of TensorFlow Image for resizing. Requires TensorFlow installation.
@@ -75,11 +75,14 @@ Accuracy Checker supports following set of preprocessors:
   * `dst_width`, `dst_height` and `dst_volume` are destination width, height and volume for cropped 3D-image respectively.
     You can also use `size` instead in case when destination sizes are equal for all three dimensions.
 * `normalize3d` - normalizing 3D-images using mean and std values per channel of current image for subtraction and division respectively.
-* `tf_convert_image_dtype` - cast image values to floating point values in range [0, 1]. Requires Tensorflow installation.
+* `tf_convert_image_dtype` - cast image values to floating point values in range [0, 1]. Requires TensorFlow installation.
 * `decode_by_vocabulary` - Decode words to set of indexes using model vocab.
   * `vocabulary_file` - path to vocabulary file for decoding. Path can be prefixed with `--models` argument.
   * `unk_index` - index of unknown symbol in vocab.
 *  `pad_with_eos` - supplement the input sequence to a specific size using a line terminator character or index.
   * `eos_symbol` or `eos_index` - line terminator symbol or index of this symbol in vocab for encoded sequence respectively.
   *  `sequence_len` - length of sequence after supplement.
+* `centernet_affine_transform` - CenterNet affine transformation, used for image resizing.
+  * `dst_width` and `dst_height` are destination width, and height for image. You can also use size instead in case when destination sizes are equal.
+  * `scale` - scale factor for image (default is 1).
 

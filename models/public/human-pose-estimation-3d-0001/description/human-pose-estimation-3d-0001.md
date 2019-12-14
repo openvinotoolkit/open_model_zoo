@@ -36,6 +36,9 @@ Multi-person 3D human pose estimation model based on [Lightweight OpenPose](http
 1. The net outputs three blobs with shapes: [1, 57, 32, 56], [1, 19, 32, 56], and [1, 38, 32, 56]. The first blob contains coordinates in 3D space, the second one contains keypoint heatmaps and the third is keypoint pairwise relations (part affinity fields).
 
 ## Legal Information
-[LICENSE](https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE)
+
+The original model is distributed under the
+[Apache License, Version 2.0](https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE).
+A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../../licenses/APACHE-2.0.txt).
 
 [*] Other names and brands may be claimed as the property of others.

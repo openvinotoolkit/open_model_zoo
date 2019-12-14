@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 
-from ..config import BoolField
+from ..config import BoolField, ConfigError
 from ..representation import (
     SegmentationAnnotation,
     SegmentationPrediction,
@@ -49,6 +49,9 @@ class SegmentationMetric(PerImageEvaluationMetric):
 
     def configure(self):
         self.use_argmax = self.get_value_from_config('use_argmax')
+        if not self.dataset.labels:
+            raise ConfigError('semantic segmentation metrics require label_map providing in dataset_meta'
+                              'Please provide dataset meta file or regenerated annotation')
 
     def update(self, annotation, prediction):
         n_classes = len(self.dataset.labels)
@@ -199,7 +202,7 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         self.median = self.get_value_from_config('median')
         self.use_argmax = self.get_value_from_config('use_argmax')
 
-        labels = self.dataset.labels.values() if self.dataset.metadata else ['overall']
+        labels = list(self.dataset.labels.values()) if self.dataset.metadata else ['overall']
         self.classes = len(labels)
 
         names_mean = ['mean@{}'.format(name) for name in labels] if self.mean else []

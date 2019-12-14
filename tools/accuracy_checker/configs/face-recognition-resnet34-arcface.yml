@@ -6,9 +6,9 @@ models:
         model: public/face-recognition-resnet34-arcface/model-r34-amf/model-0000.params
         adapter: reid
         inputs:
-        - name: data
-          type: INPUT
-          shape: 3, 112, 112
+          - name: data
+            type: INPUT
+            shape: 3, 112, 112
 
 
     datasets:
@@ -49,4 +49,5 @@ models:
             size: 400
           - type: resize
             size: 112
+
 global_definitions: ../dataset_definitions.yml

@@ -6,7 +6,7 @@ models:
       - framework: mxnet
         model: public/octave-resnet-101-0.125/checkpoint-0-0000.params
         adapter: classification
-        inputs: 
+        inputs:
           - name: 'data'
             type: INPUT
             shape: 3,224,224
@@ -36,7 +36,7 @@ models:
             mean: (124,117,104)
             std: 59.88
 
-        # Using accuracy metric, achieved result of public model - 79.2 / 94.4 (top 1 and top 5 respectively)
+            # Using accuracy metric, achieved result of public model - 79.2 / 94.4 (top 1 and top 5 respectively)
 
   # DLSDK inference
   - name: octave-resnet-101-0.125
@@ -70,5 +70,6 @@ models:
           - type: crop
             size: 224
 
-        # Using accuracy metric, achieved result of public model - 79.2 / 94.4 (top 1 and top 5 respectively)
+            # Using accuracy metric, achieved result of public model - 79.2 / 94.4 (top 1 and top 5 respectively)
+
 global_definitions: ../dataset_definitions.yml

@@ -37,7 +37,7 @@ struct DetectorConfig : public CnnConfig {
     int input_w = 600;
 };
 
-class FaceDetection : public BaseCnnDetection {
+class FaceDetection : public AsyncDetection<DetectedObject>, public BaseCnnDetection {
 private:
     DetectorConfig config_;
     InferenceEngine::ExecutableNetwork net_;
@@ -48,15 +48,18 @@ private:
     int enqueued_frames_ = 0;
     float width_ = 0;
     float height_ = 0;
-    bool results_fetched_ = false;
 
 public:
     explicit FaceDetection(const DetectorConfig& config);
 
-    DetectedObjects results;
     void submitRequest() override;
-    void enqueue(const cv::Mat &frame);
-    void fetchResults();
+    void enqueue(const cv::Mat &frame) override;
+    void wait() override { BaseCnnDetection::wait(); }
+    void printPerformanceCounts(const std::string &fullDeviceName) override {
+        BaseCnnDetection::printPerformanceCounts(fullDeviceName);
+    }
+
+    DetectedObjects fetchResults() override;
 };
 
 }  // namespace detection

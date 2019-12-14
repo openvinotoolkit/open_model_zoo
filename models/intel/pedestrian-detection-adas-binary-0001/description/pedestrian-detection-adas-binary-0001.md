@@ -19,7 +19,7 @@ Some layers of MobileNet v1 are binary and use I1 arithm
 | GFlops                          | 0.750                                     |
 | GI1ops                          | 2.086                                     |
 | MParams                         | 1.165                                     |
-| Source framework                | Pytorch*                                  |
+| Source framework                | PyTorch*                                  |
 
 Average Precision metric described in: Mark Everingham et al.
 [“The PASCAL Visual Object Classes (VOC) Challenge”](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf).

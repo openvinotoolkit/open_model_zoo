@@ -22,7 +22,7 @@ from ..utils import read_json, convert_bboxes_xywh_to_x1y1x2y2, check_file_exist
 from ..representation import (
     DetectionAnnotation, PoseEstimationAnnotation, CoCoInstanceSegmentationAnnotation, ContainerAnnotation
 )
-from .format_converter import BaseFormatConverter, FileBasedAnnotationConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, FileBasedAnnotationConverter, ConverterReturn, verify_label_map
 
 
 def get_image_annotation(image_id, annotations_):
@@ -39,6 +39,7 @@ def get_label_map(dataset_meta, full_annotation, use_full_label_map=False, has_b
             if labels:
                 label_map = {i + label_offset: label for i, label in enumerate(labels)}
         if label_map:
+            label_map = verify_label_map(label_map)
             label_id_to_label = {i: i for i in label_map}
             return label_map, label_id_to_label
 
@@ -289,3 +290,68 @@ class MSCocoMaskRCNNConverter(MSCocoDetectionConverter):
                 progress_callback(image_id / num_iterations * 100)
 
         return container_annotations, content_errors
+
+
+class MSCocoSingleKeypointsConverter(FileBasedAnnotationConverter):
+    __provider__ = 'mscoco_single_keypoints'
+    annotation_types = (PoseEstimationAnnotation, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update(
+            {
+                'images_dir': PathField(
+                    is_directory=True, optional=True,
+                    description='path to dataset images, used only for content existence check'
+                )
+            }
+        )
+        return parameters
+
+    def configure(self):
+        super().configure()
+        self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
+
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+        keypoints_annotations = []
+        content_errors = []
+
+        full_annotation = read_json(self.annotation_file)
+        image_info = full_annotation['images']
+        annotations = full_annotation['annotations']
+        num_iterations = len(image_info)
+        for image_id, image in enumerate(image_info):
+            identifier = image['file_name']
+            if check_content:
+                full_image_path = self.images_dir / identifier
+                if not check_file_existence(full_image_path):
+                    content_errors.append('{}: does not exist'.format(full_image_path))
+            image_annotation = get_image_annotation(image['id'], annotations)
+            if not image_annotation:
+                continue
+            for target in image_annotation:
+                x_vals, y_vals, visibility, labels, areas, is_crowd, bboxes, difficult = [], [], [], [], [], [], [], []
+                if target['num_keypoints'] == 0:
+                    continue
+                labels.append(target['category_id'])
+                keypoints = target['keypoints']
+                x_vals.append(keypoints[::3])
+                y_vals.append(keypoints[1::3])
+                visibility.append(keypoints[2::3])
+                areas.append(target['area'])
+                bboxes.append(target['bbox'])
+                is_crowd.append(target['iscrowd'])
+                keypoints_annotation = PoseEstimationAnnotation(
+                    identifier, np.array(x_vals), np.array(y_vals), np.array(visibility), np.array(labels)
+                )
+                keypoints_annotation.metadata['areas'] = areas
+                keypoints_annotation.metadata['rects'] = bboxes
+                keypoints_annotation.metadata['iscrowd'] = is_crowd
+                keypoints_annotation.metadata['difficult_boxes'] = difficult
+
+                keypoints_annotations.append(keypoints_annotation)
+                if progress_callback is not None and image_id & progress_interval == 0:
+                    progress_callback(image_id / num_iterations * 100)
+
+        return ConverterReturn(keypoints_annotations, {'label_map': {1: 'person'}}, content_errors)

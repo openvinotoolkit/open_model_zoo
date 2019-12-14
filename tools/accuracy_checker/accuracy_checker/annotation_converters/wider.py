@@ -18,7 +18,7 @@ from ..config import NumberField, PathField
 from ..representation import DetectionAnnotation
 from ..utils import convert_bboxes_xywh_to_x1y1x2y2, read_txt, check_file_existence, read_json
 
-from .format_converter import BaseFormatConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 
 class WiderFormatConverter(BaseFormatConverter):
@@ -104,7 +104,7 @@ class WiderFormatConverter(BaseFormatConverter):
             }
             label_map[background_label] = '__background__'
 
-        label_map = dataset_meta.get('label_map', label_map)
+        label_map = verify_label_map(dataset_meta.get('label_map', label_map))
         valid_labels = [key for key in label_map if key != background_label]
         self.background_label = background_label
         self.label_start = sorted(valid_labels)[0]

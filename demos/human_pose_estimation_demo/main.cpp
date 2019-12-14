@@ -13,6 +13,7 @@
 
 #include <inference_engine.hpp>
 
+#include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 
 #include "human_pose_estimation_demo.hpp"
@@ -79,6 +80,8 @@ int main(int argc, char* argv[]) {
         }
         std::cout << std::endl;
 
+        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
+        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
         std::vector<HumanPose> poses;
         bool isLastFrame = false;
         bool isAsyncMode = false; // execution is always started in SYNC mode
@@ -173,6 +176,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 if (!FLAGS_no_show) {
+                    presenter.drawGraphs(curr_frame);
                     renderHumanPose(poses, curr_frame);
                     cv::imshow("ICV Human Pose Estimation on " + FLAGS_d, curr_frame);
                     t1 = std::chrono::high_resolution_clock::now();
@@ -207,11 +211,13 @@ int main(int argc, char* argv[]) {
             } else if (32 == key) { // Space
                 blackBackground ^= true;
             }
+            presenter.handleKey(key);
         }
 
         auto total_t1 = std::chrono::high_resolution_clock::now();
         ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
         std::cout << "Total Inference time: " << total.count() << std::endl;
+        std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;

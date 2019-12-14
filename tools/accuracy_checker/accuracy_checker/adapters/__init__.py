@@ -46,7 +46,8 @@ from .detection import (
     SSDAdapterMxNet,
     PyTorchSSDDecoder,
     SSDONNXAdapter,
-    MTCNNPAdapter
+    MTCNNPAdapter,
+    RetinaNetAdapter
 )
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter
@@ -58,8 +59,11 @@ from .dummy_adapters import XML2DetectionAdapter
 from .hit_ratio import HitRatioAdapter
 
 from .mask_rcnn import MaskRCNNAdapter
+from .mask_rcnn_with_text import MaskRCNNWithTextAdapter
 
 from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter
+
+from .centernet import CTDETAdapter
 
 __all__ = [
     'Adapter',
@@ -80,6 +84,8 @@ __all__ = [
     'SSDONNXAdapter',
     'PyTorchSSDDecoder',
     'MTCNNPAdapter',
+    'CTDETAdapter',
+    'RetinaNetAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
@@ -110,7 +116,8 @@ __all__ = [
     'HitRatioAdapter',
 
     'MaskRCNNAdapter',
+    'MaskRCNNWithTextAdapter',
 
     'MachineTranslationAdapter',
-    'QuestionAnsweringAdapter'
+    'QuestionAnsweringAdapter',
 ]

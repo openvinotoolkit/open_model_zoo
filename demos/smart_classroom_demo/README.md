@@ -78,6 +78,7 @@ Options:
     -min_size_fr                   Optional. Minimum input size for faces during database registration.
     -al                            Optional. Output file name to save per-person action detections in.
     -ss_t                          Optional. Number of frames to smooth actions.
+    -u                             Optional. List of monitors to show initially.
 ```
 
 Running the application with the empty list of options yields an error message.

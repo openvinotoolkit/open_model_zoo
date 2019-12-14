@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 from .metric import PerImageEvaluationMetric
 from ..representation import MultiLabelRecognitionAnnotation, MultiLabelRecognitionPrediction
-from ..config import StringField, BoolField, ConfigValidator
+from ..config import StringField, BoolField, ConfigValidator, ConfigError
 
 
 class MultiLabelMetric(PerImageEvaluationMetric):
@@ -40,7 +40,13 @@ class MultiLabelMetric(PerImageEvaluationMetric):
         return parameters
 
     def configure(self):
+        if not self.dataset.metadata:
+            raise ConfigError('multi label metrics require  dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
         self.labels = self.dataset.metadata.get(self.get_value_from_config('label_map'))
+        if not self.labels:
+            raise ConfigError('multi label metrics require label_map providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
         self.calculate_average = self.get_value_from_config('calculate_average')
         self.tp = np.zeros_like(list(self.labels.keys()), dtype=np.float)
         self.fp = np.zeros_like(list(self.labels.keys()), dtype=np.float)
@@ -179,8 +185,14 @@ class F1Score(PerImageEvaluationMetric):
         ).validate(self.config)
 
     def configure(self):
+        if not self.dataset.metadata:
+            raise ConfigError('f1-score metric requires dataset metadata providing'
+                              'Please provide dataset meta file or regenerated annotation')
         label_map = self.get_value_from_config('label_map')
         self.labels = self.dataset.metadata.get(label_map)
+        if not self.labels:
+            raise ConfigError('f1-score metric requires label_map providing in dataset_meta'
+                              'Please provide dataset meta file or regenerated annotation')
         self.calculate_average = self.get_value_from_config('calculate_average')
         self._create_meta()
 

@@ -52,6 +52,7 @@ Options:
     -pc                      Optional. Enable per-layer performance report.
     -r                       Optional. Output inference results as raw values.
     -t                       Optional. Probability threshold for Face Detector. The default value is 0.5.
+    -u                       Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields an error message.

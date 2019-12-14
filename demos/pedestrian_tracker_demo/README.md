@@ -52,6 +52,7 @@ Options:
     -out "<path>"                Optional. The file name to write output log file with results of pedestrian tracking. The format of the log file is compatible with MOTChallenge format.
     -first                       Optional. The index of the first frame of video sequence to process. This has effect only if it is positive. The actual first frame captured depends on cv::VideoCapture implementation and may have slightly different number.
     -last                        Optional. The index of the last frame of video sequence to process. This has effect only if it is positive.
+    -u                           Optional. List of monitors to show initially.
 ```
 
 To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).
