@@ -13,7 +13,7 @@ import downloader
 import converter
 
 _precision_marker = '$precision'
-_cache = Path(os.getenv('OPENCV_OPEN_MODEL_ZOO_CACHE_DIR', Path('.').resolve() / 'models'))
+_cache = Path(os.getenv('OPEN_MODEL_ZOO_CACHE_DIR', Path('.').resolve() / 'models'))
 
 
 class Topology:
