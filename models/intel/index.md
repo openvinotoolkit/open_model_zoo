@@ -41,6 +41,7 @@ network to detect objects of the same type better.
 | [ssd300-onnx-0001](./ssd300-onnx-0001/description/ssd300-onnx-0001.md)                                                                                                              | 62.815               | 26.285     |   X   |   X     | X        |   X   |                |         |
 | [ssd512-onnx-0001](./ssd512-onnx-0001/description/ssd512-onnx-0001.md)                                                                                                              | 180.611              | 27.189     |   X   |   X     | X        |   X   |                |         |
 | [product-detection-0001](./product-detection-0001/description/product-detection-0001.md)                                                                                            | 3.598                | 3.212      |       |         |          |       |                | X       |
+| [person-detection-asl-0001](./person-detection-asl-0001/description/person-detection-asl-0001.md)                                                                                   | 0.986                | 1.338      |       |      X  |          |       |                |         |
 
 
 ## Object Recognition Models
@@ -190,6 +191,7 @@ that predict an actual labels are called *decoder*.
 | [driver-action-recognition-adas-0002-decoder](./driver-action-recognition-adas-0002-decoder/description/driver-action-recognition-adas-0002-decoder.md) | 0.147                | 4.205      |
 | [action-recognition-0001-encoder](./action-recognition-0001-encoder/description/action-recognition-0001-encoder.md)                                     | 7.340                | 21.276     |
 | [action-recognition-0001-decoder](./action-recognition-0001-decoder/description/action-recognition-0001-decoder.md)                                     | 0.147                | 4.405      |
+| [asl-recognition-0003](./asl-recognition-0003/description/asl-recognition-0003.md)                                                                      | 6.651                | 4.129      |
 
 ## Image Retrieval
 

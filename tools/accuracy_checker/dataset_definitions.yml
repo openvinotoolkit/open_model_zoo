@@ -602,3 +602,13 @@ datasets:
       annotation_file: CamVid/val.txt
     annotation: camvid.pickle
     dataset_meta: camvid.json
+
+  - name: msasl-100
+    data_source: msasl/global_crops
+    annotation_conversion:
+      converter: continuous_clip_action_recognition
+      annotation_file: msasl/msasl_100.txt
+      data_dir: msasl/global_crops
+      out_fps: 15
+      clip_length: 16
+    annotation: msasl/msasl_action_recognition.pickle

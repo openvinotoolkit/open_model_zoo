@@ -237,6 +237,11 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `temporal_stride` - temporal stride for frames selection (Optional, default 2).
   * `subset` - dataset split: `train`, `validation` or `test` (Optional, default `validation`).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+* `continuous_clip_action_recognition` - converts annotation of video-based MS-ASL dataset to `ClassificationAnnotation`.
+  * `annotation_file` - path to annotation file in txt format.
+  * `data_dir` - dataset root directory, which contains subdirectories with extracted video frames.
+  * `out_fps` - output frame rate of generated video clips.
+  * `clip_length` - number of frames of generated video clips.
 
 ### Customizing dataset meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)
