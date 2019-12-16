@@ -5,7 +5,7 @@ For enabling OpenVINO™ launcher you need to add `framework: dlsdk` in launcher
 * `device` - specifies which device will be used for infer. Supported: `CPU`, `GPU`, `FPGA`, `MYRIAD`, `HDDL`,
 Heterogeneous plugin as `HETERO:target_device,fallback_device` and Multi device plugin as `MULTI:target_device1,target_device2`.
 If you have several MYRIAD devices in your machine, you are able to provide specific device id in such way: `MYRIAD.<DEVICE_ID>` (e.g. `MYRIAD.1.2-ma2480`)
-You are able to not specify device intently and provide one or several devices via `-td, --target devices` command line argument. Target device will be selected from command line (in turn when several devices provided, evaluations will be run one by one with all specified devices).
+It is possible to specify one or more devices via `-td, --target devices` command line argument. Target device will be selected from command line (in case when several devices provided, evaluations will be run one by one with all specified devices).
 * `model` - path to xml file with Caffe model for your topology.
 * `weights` - path to bin file with weights for your topology.
 
