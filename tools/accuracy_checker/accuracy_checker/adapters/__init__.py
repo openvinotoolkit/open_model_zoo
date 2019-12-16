@@ -37,11 +37,8 @@ from .attributes_recognition import (
 
 from .reidentification import ReidAdapter
 from .detection import (
-    TinyYOLOv1Adapter,
     SSDAdapter,
     FacePersonAdapter,
-    YoloV2Adapter,
-    YoloV3Adapter,
     TFObjectDetectionAPIAdapter,
     SSDAdapterMxNet,
     PyTorchSSDDecoder,
@@ -49,6 +46,7 @@ from .detection import (
     MTCNNPAdapter,
     RetinaNetAdapter
 )
+from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter
 from .pose_estimation import HumanPoseAdapter
@@ -75,9 +73,6 @@ __all__ = [
     'ClassificationAdapter',
 
     'SSDAdapter',
-    'TinyYOLOv1Adapter',
-    'YoloV2Adapter',
-    'YoloV3Adapter',
     'FacePersonAdapter',
     'TFObjectDetectionAPIAdapter',
     'SSDAdapterMxNet',
