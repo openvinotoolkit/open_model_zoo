@@ -215,9 +215,6 @@ int main(int argc, char *argv[]) {
             inferRequests.push_back(executableNetwork.CreateInferRequest());
         }
         std::list<cv::Mat> showMats;
-        
-        std::condition_variable condVar;
-        std::mutex mutex;
         int modelInputResolution = input_shapes[input_name][2];
         
         // ----------------------------------------Create output info-----------------------------------------
@@ -245,6 +242,8 @@ int main(int argc, char *argv[]) {
         auto currentTime = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsedSeconds = currentTime - startTime;
         
+        std::condition_variable condVar;
+        std::mutex mutex;
         std::queue<std::pair<InferenceEngine::InferRequest&, std::vector<cv::Mat>>> emptyInferRequests;
         std::queue<std::pair<InferenceEngine::InferRequest&, std::vector<cv::Mat>>> completedInferRequests;
         for (std::size_t i = 0; i < inferRequests.size(); i++) {
@@ -274,14 +273,16 @@ int main(int argc, char *argv[]) {
                 startTickCount = cv::getTickCount();
             }
 
+            std::unique_lock<std::mutex> lock(mutex);
+        
             if (!completedInferRequests.empty()) {
                 auto completedIR = completedInferRequests.front();
+                mutex.unlock();
                 for (unsigned j = 0; j < FLAGS_b; j++) {
                     showMats.push_back(completedIR.second[j]);
                 }
                 framesNum += FLAGS_b;
                 gridMat.listUpdate(showMats);
-                
                 spf = ((cv::getTickCount() - startTickCount) / cv::getTickFrequency()) / framesNum;
                 if (spfQueue.size() >= spfResultsMaxCount) {
                     spfSum -= spfQueue.front();
@@ -290,52 +291,58 @@ int main(int argc, char *argv[]) {
                 spfQueue.push(spf);
                 spfSum += spf;
                 avgFPS = spfQueue.size() / spfSum;
-
                 gridMat.textUpdate(avgFPS, isTestMode);
                 if (!FLAGS_no_show || (isTestMode && FLAGS_delay != -1)) {
                     cv::imshow("main", gridMat.getMat());
                     key = static_cast<char>(cv::waitKey(delay));
                 }
-
+                mutex.lock();
                 emptyInferRequests.push({completedInferRequests.front().first, std::vector<cv::Mat>()});
                 completedInferRequests.pop();
-            } 
+            }
             else if (!emptyInferRequests.empty()) {
+                mutex.unlock();
                 const cv::Mat& readImg = cv::imread(imageNames[nextImageIndex]);
                 if (readImg.data == nullptr) {
                     std::cerr << "Could not read image " << imageNames[nextImageIndex] << '\n';
                 } else {
                     cv::Mat tmpImg = readImg;
                     resizeImage(tmpImg, modelInputResolution);
-
                     emptyInferRequests.front().second.push_back(tmpImg);
                 }
-
                 nextImageIndex++;
                 if (nextImageIndex == inputImagesCount) {
                     nextImageIndex = 0;
                 }
-
                 if (emptyInferRequests.front().second.size() == FLAGS_b) {
                     auto ir = emptyInferRequests.front();
-                
+
+                    mutex.lock();
                     ir.first.SetCompletionCallback(
                         InferRequestCallback(
                             ir.first,
                             ir.second,
-                            completedInferRequests
+                            completedInferRequests,
+                            mutex,
+                            condVar
                         )
                     );
-
+                    mutex.unlock();
+                    
                     auto inputBlob = ir.first.GetBlob(inputBlobName);
                     for (unsigned i = 0; i < FLAGS_b; i++) {
                         matU8ToBlob<uint8_t>(ir.second[i], inputBlob, i);
                     }
-
                     ir.first.StartAsync();
                     emptyInferRequests.pop();
                 }
             }
+            
+            mutex.try_lock();
+            while (emptyInferRequests.empty() && completedInferRequests.empty()) {   
+                condVar.wait(lock);
+            }
+            mutex.unlock();
 
             currentTime = std::chrono::system_clock::now();
             elapsedSeconds = currentTime - startTime;

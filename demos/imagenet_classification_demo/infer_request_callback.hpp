@@ -15,15 +15,24 @@ public:
     InferRequestCallback(InferenceEngine::InferRequest& ir,
                          std::vector<cv::Mat> inputBlobImages,
                          std::queue<std::pair<InferenceEngine::InferRequest&,
-                                              std::vector<cv::Mat>>>& completedInferRequests
+                                              std::vector<cv::Mat>>>& completedInferRequests,
+                         std::mutex& mutex,
+                         std::condition_variable& condVar
                          ):
                          ir(ir),
                          inputBlobImages(inputBlobImages),
-                         completedInferRequests(completedInferRequests) {}
+                         completedInferRequests(completedInferRequests),
+                         mutex(mutex),
+                         condVar(condVar) {}
 
     void operator()() const {
         try {
-            completedInferRequests.push({ir, inputBlobImages});
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+
+                completedInferRequests.push({ir, inputBlobImages});
+            }
+            condVar.notify_one();
         }
         catch(...) {
             irCallbackException = std::current_exception();
@@ -34,4 +43,6 @@ private:
     InferenceEngine::InferRequest& ir;
     std::vector<cv::Mat> inputBlobImages;
     std::queue<std::pair<InferenceEngine::InferRequest&, std::vector<cv::Mat>>>& completedInferRequests;
+    std::mutex& mutex;
+    std::condition_variable& condVar;
 };
