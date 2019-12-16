@@ -277,6 +277,7 @@ int main(int argc, char *argv[]) {
         
             if (!completedInferRequests.empty()) {
                 auto completedIR = completedInferRequests.front();
+                completedInferRequests.pop();
                 mutex.unlock();
                 for (unsigned j = 0; j < FLAGS_b; j++) {
                     showMats.push_back(completedIR.second[j]);
@@ -296,9 +297,7 @@ int main(int argc, char *argv[]) {
                     cv::imshow("main", gridMat.getMat());
                     key = static_cast<char>(cv::waitKey(delay));
                 }
-                mutex.lock();
-                emptyInferRequests.push({completedInferRequests.front().first, std::vector<cv::Mat>()});
-                completedInferRequests.pop();
+                emptyInferRequests.push({completedIR.first, std::vector<cv::Mat>()});
             }
             else if (!emptyInferRequests.empty()) {
                 mutex.unlock();
@@ -317,7 +316,6 @@ int main(int argc, char *argv[]) {
                 if (emptyInferRequests.front().second.size() == FLAGS_b) {
                     auto ir = emptyInferRequests.front();
 
-                    mutex.lock();
                     ir.first.SetCompletionCallback(
                         InferRequestCallback(
                             ir.first,
@@ -327,7 +325,6 @@ int main(int argc, char *argv[]) {
                             condVar
                         )
                     );
-                    mutex.unlock();
                     
                     auto inputBlob = ir.first.GetBlob(inputBlobName);
                     for (unsigned i = 0; i < FLAGS_b; i++) {
