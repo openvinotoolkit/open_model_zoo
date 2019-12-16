@@ -19,7 +19,6 @@
 #include "human_pose_estimation_demo.hpp"
 #include "human_pose_estimator.hpp"
 #include "render_human_pose.hpp"
-#include "send_human_pose.hpp"
 
 using namespace InferenceEngine;
 using namespace human_pose_estimation;
@@ -45,6 +44,23 @@ bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     }
 
     return true;
+}
+
+void sendHumanPose(const std::vector<HumanPose>& poses) {
+    if (!poses.empty()) {
+        std::time_t result = std::time(nullptr);
+        std::cout << std::asctime(std::localtime(&result));
+     }
+
+    for (HumanPose const& pose : poses) {
+        std::stringstream rawPose;
+        rawPose << std::fixed << std::setprecision(0);
+        for (auto const& keypoint : pose.keypoints) {
+            rawPose << keypoint.x << "," << keypoint.y << " ";
+        }
+        rawPose << pose.score;
+        std::cout << rawPose.str() << std::endl;
+    }
 }
 
 int main(int argc, char* argv[]) {
