@@ -18,7 +18,6 @@ import numpy as np
 from scipy.ndimage import interpolation
 from .postprocessor import Postprocessor
 from ..config import ConfigError, BoolField, ListField
-from ..utils import get_parameter_value_from_config
 from ..representation import BrainTumorSegmentationPrediction, BrainTumorSegmentationAnnotation
 
 
@@ -46,6 +45,9 @@ class SegmentationPredictionResample(Postprocessor):
 
     def configure(self):
         self.make_argmax = self.config.get('make_argmax')
+
+    def process_image(self, annotations, predictions):
+        raise RuntimeError("Since `process_image_with_metadata` is overriden, this method MUST NOT be called")
 
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
         if not len(annotation) == len(prediction) == 1:
@@ -107,7 +109,7 @@ class TransformBratsPrediction(Postprocessor):
         if len(self.order) != len(self.values):
             raise ConfigError('Length of "order" and "values" must be the same')
 
-    def process(self, annotation, prediction, image_metadata=None):
+    def process_image(self, annotation, prediction):
         if not len(annotation) == len(prediction) == 1:
             raise RuntimeError('Postprocessor {} does not support multiple annotation and/or prediction.'
                                .format(self.__provider__))

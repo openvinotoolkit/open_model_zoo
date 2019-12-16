@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 
-from ..config import BoolField, ConfigError, ListField
+from ..config import BoolField, ConfigError
 from ..representation import (
     SegmentationAnnotation,
     SegmentationPrediction,

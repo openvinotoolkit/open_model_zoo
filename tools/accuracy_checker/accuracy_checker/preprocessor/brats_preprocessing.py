@@ -92,7 +92,7 @@ class NormalizeBrats(Preprocessor):
             'masked': BoolField(optional=True, default=False,
                                 description='Does not apply normalization to zero values. '
                                             'Applicable for brain tumor segmentation models'),
-            'cutoff': NumberField(optional=True, default=None,
+            'cutoff': NumberField(optional=True, default=0, min_value=0,
                                   description='Species range of values - [-cutoff, cutoff]'),
             'shift_value': NumberField(optional=True, default=0, description='Specifies shift value'),
             'normalize_value': NumberField(optional=True, default=1, description='Specifies normalize value')
@@ -123,7 +123,7 @@ class NormalizeBrats(Preprocessor):
             img -= mean
             img /= std
 
-            if self.cutoff:
+            if self.cutoff > 0:
                 img = np.clip(img, -self.cutoff, self.cutoff)
             img += self.shift_value
             img /= self.normalize_value
@@ -162,6 +162,5 @@ class SwapModalitiesBrats(Preprocessor):
         return image
 
     def swap_modalities(self, image):
-        order = self.modal_order if image.shape[0] == 4 else [0]
-        image = image[order, :, :, :]
+        image = image[self.modal_order, :, :, :]
         return image
