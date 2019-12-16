@@ -318,7 +318,7 @@ PYTHON_DEMOS = [
         TestCase(options={'--no_show':None,
                           '-m': ModelArg('image-retrieval-0001')}),
         single_option_cases('-i', *DATA_SEQUENCES['image-retrieval-video']),
-        single_option_cases('-g', *DATA_SEQUENCES['image-retrieval-gallery']),
+        single_option_cases('-g', image_retrieval_arg('gallery.txt')),
     )),
 
     PythonDemo(subdirectory='instance_segmentation_demo', device_keys=[], test_cases=combine_cases(

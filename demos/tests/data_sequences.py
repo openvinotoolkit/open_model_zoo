@@ -224,10 +224,6 @@ DATA_SEQUENCES = {
         brats_arg('BRATS_485.nii.gz'),
     ],
 
-    'image-retrieval-gallery': [
-        image_retrieval_arg('gallery.txt'),
-    ],
-
     'image-retrieval-video': [
         image_retrieval_arg('4946fb41-9da0-4af7-a858-b443bee6d0f6.dav'),
     ]
