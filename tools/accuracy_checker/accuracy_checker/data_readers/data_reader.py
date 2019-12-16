@@ -238,6 +238,7 @@ class OpenCVFrameReader(BaseReader):
 
     def reset(self):
         self.current = -1
+        self.videocap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
 
 class JSONReaderConfig(ConfigValidator):
