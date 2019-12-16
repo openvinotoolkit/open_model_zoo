@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 from scipy.ndimage import interpolation
 
-from ..config import ConfigError, BaseField, NumberField, ListField, BoolField
+from ..config import ConfigError, BaseField, NumberField, ListField, StringField
 from ..preprocessor import Preprocessor
 from ..utils import get_or_parse_value
 
@@ -85,12 +85,20 @@ class CropBraTS(Preprocessor):
 class NormalizeBrats(Preprocessor):
     __provider__ = "normalize_brats"
 
+    _MASK_OPTIONS = {
+        'none': 0,
+        'nullify': 1,
+        'ignore': 2,
+        'all': 3,
+    }
+
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'masked': BoolField(optional=True, default=False,
-                                description='Does not apply normalization to zero values. '
+            'masked': StringField(optional=True, choices=NormalizeBrats._MASK_OPTIONS.keys(),
+                                  default=False,
+                                  description='Does not apply normalization to zero values. '
                                             'Applicable for brain tumor segmentation models'),
             'cutoff': NumberField(optional=True, default=0, min_value=0,
                                   description='Species range of values - [-cutoff, cutoff]'),
@@ -101,7 +109,7 @@ class NormalizeBrats(Preprocessor):
         return parameters
 
     def configure(self):
-        self.masked = self.get_value_from_config('masked')
+        self.masked = NormalizeBrats._MASK_OPTIONS[self.get_value_from_config('masked')]
         self.cutoff = self.get_value_from_config('cutoff')
         self.shift_value = self.get_value_from_config('shift_value')
         self.normalize_value = self.get_value_from_config('normalize_value')
@@ -113,7 +121,7 @@ class NormalizeBrats(Preprocessor):
     def normalize_img(self, image):
         for channel in range(image.shape[0]):
             img = image[channel, :, :, :].copy()
-            if self.masked:
+            if self.masked in (2, 3):
                 mask = img > 0
                 image_masked = np.ma.masked_array(img, ~mask)
                 mean, std = np.mean(image_masked), np.std(image_masked)
@@ -127,7 +135,8 @@ class NormalizeBrats(Preprocessor):
                 img = np.clip(img, -self.cutoff, self.cutoff)
             img += self.shift_value
             img /= self.normalize_value
-            if self.masked:
+            if self.masked in (1, 3):
+                mask = image[channel, :, :, :] > 0
                 img[~mask] = 0
             image[channel, :, :, :] = img
 

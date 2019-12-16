@@ -44,7 +44,11 @@ Accuracy Checker supports following set of preprocessors:
   * `size` in format `(H,W,D)`. All values will be interpolated with 1st-order spline.
 * `crop_brats` performs crop of 3d images (e.g. MRI scans) by cropping all non-zero voxels. Also sets bounding boxes for `segmentation_prediction_resample` preprocessor (see [Postprocessors](../postprocessor/README.md))
 * `normalize_brats` normalizes of 3d images (e.g. MRI scans) with z-score normalization
-  * `masked` - ignore all zero voxels
+  * `masked` - specifies type of masking:
+    * `none` for not applying mask
+    * `ignore` for ignoring "empty" voxels in statistic calculation
+    * `nullify` for nullifying initially "empty" voxels at the end
+    * `all` for `ignore` and `nullify`
   * `cutoff` - cuts minimum and value to `-cutoff` and `cutoff` respectively
   * `shift_value` - adds to all values
   * `normalize_value` - divides all values
