@@ -99,7 +99,7 @@ class NormalizeBrats(Preprocessor):
             'masked': StringField(optional=True, choices=NormalizeBrats._MASK_OPTIONS.keys(),
                                   default=False,
                                   description='Does not apply normalization to zero values. '
-                                            'Applicable for brain tumor segmentation models'),
+                                              'Applicable for brain tumor segmentation models'),
             'cutoff': NumberField(optional=True, default=0, min_value=0,
                                   description='Species range of values - [-cutoff, cutoff]'),
             'shift_value': NumberField(optional=True, default=0, description='Specifies shift value'),
