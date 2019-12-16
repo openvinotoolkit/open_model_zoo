@@ -292,7 +292,7 @@ int main(int argc, char *argv[]) {
                 spfSum += spf;
                 avgFPS = spfQueue.size() / spfSum;
                 gridMat.textUpdate(avgFPS, isTestMode);
-                if (!FLAGS_no_show || (isTestMode && FLAGS_delay != -1)) {
+                if (!FLAGS_no_show && FLAGS_delay != -1) {
                     cv::imshow("main", gridMat.getMat());
                     key = static_cast<char>(cv::waitKey(delay));
                 }
