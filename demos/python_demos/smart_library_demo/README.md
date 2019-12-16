@@ -60,7 +60,7 @@ any arguments yields the following message:
 ``` sh
 python ./smart_library_demo.py -h
 
-usage: smart_library_demo.py [-h] -reid RDDET -m_rd RDMODEL -fd FDDET -m_fd
+usage: smart_library_demo.py [-h] -fr FREC -m_rd RDMODEL -fd FDDET -m_fd
                              FDMODEL -lm LMDET -m_lm LMMODEL [-w_rd RDWIDTH]
                              [-h_rd RDHEIGHT] [-t_rd RDTHRESHOLD]
                              [-w_fd FDWIDTH] [-h_fd FDHEIGHT]
@@ -85,7 +85,7 @@ Optional arguments:
                      0
 
 Models:
-  -reid RDDET        Required. Type of recognizer. Available DNN face
+  -fr FREC           Required. Type of recognizer. Available DNN face
                      recognizer - DNNfr
   -m_rd RDMODEL      Required. Path to .xml file
   -fd FDDET          Required. Type of detector. Available DNN face detector -
@@ -105,10 +105,10 @@ Linux (`sh`, `bash`, ...) (assuming OpenVINO installed in `/opt/intel/openvino`)
 source /opt/intel/openvino/bin/setupvars.sh
 
 python ./smart_library_demo.py \
--reid='DNNfr' \
+-fr=DNNfr \
 -m_rd=<path_to_model>/face-reidentification-retail-0095.xml \
--fd='DNNfd' -m_fd=<path_to_model>/face-detection-retail-0004.xml  \
--lm='DNNlm' \
+-fd=DNNfd -m_fd=<path_to_model>/face-detection-retail-0004.xml  \
+-lm=DNNlm \
 -m_lm=<path_to_model>/landmarks-regression-retail-0009.xml \
 ```
 
@@ -118,9 +118,9 @@ Windows (`cmd`, `powershell`) (assuming OpenVINO installed in `C:/Program Files 
 # Set up the environment
 call C:/Program Files (x86)/IntelSWTools/openvino_2019.3.334/bin/setupvars.bat
 
-python smart_library_demo.py  -reid='DNNfr' -m_rd=<path_to_model>/face-reidentification-retail-0095.xml 
-                              -fd='DNNfd' -m_fd=<path_to_model>/face-detection-retail-0004.xml 
-                              -lm='DNNlm' -m_lm=<path_to_model>/landmarks-regression-retail-0009.xml
+python smart_library_demo.py  -fr=DNNfr -m_rd=<path_to_model>/face-reidentification-retail-0095.xml 
+                              -fd=DNNfd -m_fd=<path_to_model>/face-detection-retail-0004.xml 
+                              -lm=DNNlm -m_lm=<path_to_model>/landmarks-regression-retail-0009.xml
 
 Notice that the custom networks should be converted to the
 Inference Engine format (*.xml + *bin) first. To do this use the

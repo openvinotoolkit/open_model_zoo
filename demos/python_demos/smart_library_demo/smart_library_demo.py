@@ -14,10 +14,10 @@ from DynamicDatabase import *
 uknownID = -1
 count = 0
 
-def createArgparse():
+def CreateArgparse():
     parser = argparse.ArgumentParser(description='Smart Library Sample') 
-    parser.add_argument('-reid', type = str,
-                        dest = 'rdDet', required=True, 
+    parser.add_argument('-fr', type = str,
+                        dest = 'fRec', required=True, 
                         help = 'Required. \
                         Type of recognizer. \
                         Available DNN face recognizer - DNNfr')
@@ -79,14 +79,14 @@ def createArgparse():
     args = parser.parse_args()
     return args
 
-def createLibrary(libPath, DB):
+def CreateLibrary(libPath, DB):
     with open(libPath, 'r', encoding='utf-8') as lib:
         data = json.load(lib)
     for book in data['books']:
         DB.addBook(book['id'], book['title'],  book['author'],
                    book['publisher'], book['year'])
 
-def putText(img, text, pos, ix, iy, font, color, scale, thickness, rect = 1):
+def PutText(img, text, pos, ix, iy, font, color, scale, thickness, rect = 1):
 
     textSize = cv.getTextSize(text, font, scale, thickness) 
     if rect:
@@ -95,57 +95,57 @@ def putText(img, text, pos, ix, iy, font, color, scale, thickness, rect = 1):
     cv.putText(img, text, (pos[0], pos[1] + iy),
                 font, scale, color, thickness)
 
-def putInfo(img):
+def PutInfo(img):
     indent = 10
     text = 'Show book'
-    putText(img, text, (5,  img.shape[0]), 5, -5, cv.FONT_HERSHEY_SIMPLEX, 
+    PutText(img, text, (5,  img.shape[0]), 5, -5, cv.FONT_HERSHEY_SIMPLEX, 
             (22, 163, 245), 1, 2)
 
     text = 'Press:'
-    putText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
+    PutText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
             (22, 163, 245), 1, 1, 0)
     txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN, 1, 2) 
 
     indent += txtSize[0][1] + 5
     text = 'r - register'
-    putText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
+    PutText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
                         (22, 163, 245), 1, 1, 0)
     txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1) 
 
     indent += txtSize[0][1] + 5
     text = 'b - to get or ret a book'
     txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1) 
-    putText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
+    PutText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
             (22, 163, 245), 1, 1, 0)
 
     indent += txtSize[0][1] + 5
     text = 'f - get info' 
     txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1)
-    putText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
+    PutText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
             (22, 163, 245), 1, 1, 0)
 
-def recognizeUser(img, faceRec):
+def RecognizeUser(img, faceRec):
     faces, out = faceRec.recognize(img)
     userID = uknownID
     for face in faces:
         if len(faces) > 1:
             text = 'No more than one person at a time'
-            putText(img, text, (0,30), 0, -5, cv.FONT_HERSHEY_SIMPLEX, 
+            PutText(img, text, (0,30), 0, -5, cv.FONT_HERSHEY_SIMPLEX, 
                                            (22, 163, 245), 1, 2)
 
         if np.amax(out) > faceRec.threshold:
             userID = int(np.argmax(out) + 1)
             text = 'User #' + str(userID)
-            putText(img, text, face[0], face[0][0], -5, cv.FONT_HERSHEY_SIMPLEX, 
+            PutText(img, text, face[0], face[0][0], -5, cv.FONT_HERSHEY_SIMPLEX, 
                                            (22, 163, 245), 1, 2)
         else:
             text = 'Unknown'
-            putText(img, text, face[0], face[0][0], -5, cv.FONT_HERSHEY_SIMPLEX, 
+            PutText(img, text, face[0], face[0][0], -5, cv.FONT_HERSHEY_SIMPLEX, 
                                            (22, 163, 245), 1, 2)     
         cv.rectangle(img, face[0], face[1], (22, 163, 245), 2)
     return userID
 
-def printInfo(count, DB):
+def PrintInfo(count, DB):
     os.system('cls')
     if count == 0:
         DB.printUsers()
@@ -154,7 +154,7 @@ def printInfo(count, DB):
     elif count == 2:
         DB.printBBooks()
 
-def recognizeBook(img, bookRec):
+def RecognizeBook(img, bookRec):
     data = bookRec.recognize(img)
     try: 
         bID = int(data.split(' ')[0])
@@ -164,7 +164,7 @@ def recognizeBook(img, bookRec):
         return -1
 
 def main():
-    args = createArgparse()
+    args = CreateArgparse()
     brArgs = dict(name='')
     rdArgs = dict(name = '', rdXML = '', rdWidth= 0, rdHeight= 0, 
                   rdThreshold= 0, fdName = '', fdXML = '', fdWidth = 0,
@@ -173,8 +173,8 @@ def main():
 
     DB = DynamicDB()
 
-    if (args.rdDet != None and args.fdDet != None and args.lmDet != None):
-        rdArgs['name'] = args.rdDet
+    if (args.fRec != None and args.fdDet != None and args.lmDet != None):
+        rdArgs['name'] = args.fRec
         print(args)
         if (args.rdModel != None):
             rdArgs['rdXML'] = args.rdModel
@@ -209,20 +209,20 @@ def main():
         if (args.web != None): 
             src = args.web
         
-        createLibrary(lib, DB)
+        CreateLibrary(lib, DB)
         bookRec = br.BookRecognizer.create(brArgs)
         faceRec = fr.FaceRecognizer.create(rdArgs)
         cap = cv.VideoCapture(src)
-        identified = False
+        count = 0
         while(True):
             _, img = cap.read()
             ch = cv.waitKey(5) & 0xFF
-            userID = recognizeUser(img, faceRec)   
+            userID = RecognizeUser(img, faceRec)   
     
             if userID != uknownID:
-                putInfo(img)
+                PutInfo(img)
                 if ch == ord('b'):
-                    bookID = recognizeBook(img, bookRec)
+                    bookID = RecognizeBook(img, bookRec)
                     os.system('cls')
                     print(bookID)
                     DB.getRetBook(userID, bookID)
@@ -232,7 +232,7 @@ def main():
                 n = faceRec.register(img)
                 DB.addUser(n)
                 text = 'You are user #' +  str(n)
-                putText(img, text, (5,  25), 5, -5, cv.FONT_HERSHEY_SIMPLEX, 
+                PutText(img, text, (5,  25), 5, -5, cv.FONT_HERSHEY_SIMPLEX, 
                                             (22, 163, 245), 1, 2)
                 os.system('cls')
                 DB.printUsers()
@@ -242,7 +242,7 @@ def main():
             cv.imshow('window',  img)
             if ch == ord('f'):
                 count = count + 1 
-                printInfo(count % 3, DB)
+                PrintInfo(count % 3, DB)
 
             if ch == ord('q'):
                 break
