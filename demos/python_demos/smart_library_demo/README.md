@@ -121,7 +121,7 @@ call C:/Program Files (x86)/IntelSWTools/openvino_2019.3.334/bin/setupvars.bat
 python smart_library_demo.py  -fr=DNNfr -m_rd=<path_to_model>/face-reidentification-retail-0095.xml 
                               -fd=DNNfd -m_fd=<path_to_model>/face-detection-retail-0004.xml 
                               -lm=DNNlm -m_lm=<path_to_model>/landmarks-regression-retail-0009.xml
-
+```
 Notice that the custom networks should be converted to the
 Inference Engine format (*.xml + *bin) first. To do this use the
 [Model Optimizer](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer) tool.
@@ -132,4 +132,5 @@ The demo uses OpenCV window to display the resulting video frame and detections.
 It outputs logs to the terminal.
 
 ## See also
+
 * [Using Inference Engine Demos](../../README.md)

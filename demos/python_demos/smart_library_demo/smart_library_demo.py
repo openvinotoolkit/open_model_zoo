@@ -172,7 +172,6 @@ def main():
                   lmWidth= 0, lmHeight= 0)
 
     DB = DynamicDB()
-
     if (args.fRec != None and args.fdDet != None and args.lmDet != None):
         rdArgs['name'] = args.fRec
         print(args)
