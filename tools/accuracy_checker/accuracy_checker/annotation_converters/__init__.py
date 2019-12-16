@@ -50,6 +50,7 @@ from .squad import SQUADConverter
 from .xnli import XNLIDatasetConverter, BertXNLITFRecordConverter
 from .cmu_panoptic import CmuPanopticKeypointsConverter
 from .action_recognition import ActionRecognitionConverter
+from .ms_asl_continuous import MSASLContiniousConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -96,5 +97,6 @@ __all__ = [
     'XNLIDatasetConverter',
     'BertXNLITFRecordConverter',
     'CmuPanopticKeypointsConverter',
-    'ActionRecognitionConverter'
+    'ActionRecognitionConverter',
+    'MSASLContiniousConverter'
 ]

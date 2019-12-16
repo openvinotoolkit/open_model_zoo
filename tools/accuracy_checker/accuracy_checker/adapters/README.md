@@ -155,3 +155,6 @@ AccuracyChecker supports following set of adapters:
   * `raw_masks_out` - name of output layer with raw instances masks.
   * `texts_out` - name of output layer with texts.
   * `confidence_threshold` - confidence threshold that is used to filter out detected instances.
+* `fcos_person` - converting output of FCOS (single class) model to `DetectionPrediction` representation.
+  * `output_blob` - name of output layer with bboxes.
+  * `scale` - scalar value to normalize bbox coordinates.

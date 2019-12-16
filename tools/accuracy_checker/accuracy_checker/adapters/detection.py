@@ -639,3 +639,55 @@ class RetinaNetAdapter(Adapter):
         pred_boxes = np.stack([pred_boxes_x1, pred_boxes_y1, pred_boxes_x2, pred_boxes_y2], axis=1)
 
         return pred_boxes
+
+
+class FCOSPersonAdapter(Adapter):
+    """
+    Class for converting output of FCOS model to DetectionPrediction representation
+    """
+    __provider__ = 'fcos_person'
+    prediction_types = (DetectionPrediction, )
+
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'output_blob': StringField(optional=True, default=None, description="Output blob name."),
+            'scale': NumberField(optional=True, default=1.0, description="Scale factor for bboxes."),
+        })
+
+        return parameters
+
+    def configure(self):
+        self.out_blob_name = self.get_value_from_config('output_blob')
+        self.scale = self.get_value_from_config('scale')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        """
+        Args:
+            identifiers: list of input data identifiers
+            raw: output of model
+        Returns:
+            list of DetectionPrediction objects
+        """
+
+        if self.out_blob_name is None:
+            self.out_blob_name = self.output_blob
+
+        prediction_batch = self._extract_predictions(raw, frame_meta)[self.out_blob_name]
+
+        result = []
+        for identifier in identifiers:
+            prediction_mask = np.where(prediction_batch[:, -1] > 0.0)
+            valid_detections = prediction_batch[prediction_mask]
+
+            bboxes = self.scale * valid_detections[:, :-1]
+            scores = valid_detections[:, -1]
+            labels = np.ones([len(scores)], dtype=np.int32)
+
+            result.append(DetectionPrediction(identifier, labels, scores, *zip(*bboxes)))
+
+        return result

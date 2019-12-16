@@ -44,7 +44,8 @@ from .detection import (
     PyTorchSSDDecoder,
     SSDONNXAdapter,
     MTCNNPAdapter,
-    RetinaNetAdapter
+    RetinaNetAdapter,
+    FCOSPersonAdapter
 )
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
 from .classification import ClassificationAdapter
@@ -81,6 +82,7 @@ __all__ = [
     'MTCNNPAdapter',
     'CTDETAdapter',
     'RetinaNetAdapter',
+    'FCOSPersonAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
