@@ -71,7 +71,7 @@ class SegmentationPredictionResample(Postprocessor):
         annotation_shape = annotation_.mask.shape
         prediction_shape = prediction_.mask.shape
 
-        image_shape = annotation_shape[len(annotation_shape)-3:len(annotation_shape)]
+        image_shape = annotation_shape[-3:]
         box_shape = (diff[0], diff[1], diff[2])
 
         label = np.zeros(shape=(prediction_shape[0],) + image_shape)

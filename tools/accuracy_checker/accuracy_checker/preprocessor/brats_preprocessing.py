@@ -34,19 +34,28 @@ class Resize3D(Preprocessor):
         return parameters
 
     def configure(self):
-        self.shape = get_or_parse_value(self.config.get('size'), (128, 128, 128), casting_type=int)
-        self.shape = (4,) + self.shape
+        self.shape = self._check_size(
+            get_or_parse_value(self.config.get('size'), default=(128, 128, 128), casting_type=int))
 
     def process(self, image, annotation_meta=None):
         data = np.asarray(image.data)
-        if len(data.shape) != len(self.shape):
+        shape = self.shape if len(data.shape) == 3 else (data.shape[0],) + self.shape
+        if len(data.shape) != len(shape):
             raise RuntimeError('Shape of original data and resize shape are mismatched for {} preprocessor '
-                               '(data shape - {}, resize shape - {})'.format(self.__provider__, data.shape, self.shape))
+                               '(data shape - {}, resize shape - {})'.format(self.__provider__, data.shape, shape))
 
-        factor = [float(o) / i for i, o in zip(data.shape, self.shape)]
+        factor = [float(o) / i for i, o in zip(data.shape, shape)]
         image.data = interpolation.zoom(data, zoom=factor, order=1)
 
         return image
+
+    def _check_size(self, size):
+        if len(size) != 3:
+            raise ConfigError("Incorrect size dimenstion for {} - must be 3, but {} found"
+                              .format(self.__provider__, len(size)))
+        if not all(np.array(size) > 0):
+            raise ConfigError("Size must be positive value for {}, but {} found".format(self.__provider__, size))
+        return size
 
 
 class CropBraTS(Preprocessor):
@@ -54,17 +63,25 @@ class CropBraTS(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         def bbox3(img):
-            rows = np.where(np.any(np.any(img, axis=1), axis=1))
-            cols = np.where(np.any(np.any(img, axis=0), axis=1))
-            slices = np.where(np.any(np.any(img, axis=0), axis=0))
+            # Finds indexes non-zero voxels across axis 0, 1 and 2 correspondenly
+            nonzero_across_axis_0 = np.any(img, axis=(1, 2)).nonzero()
+            nonzero_across_axis_1 = np.any(img, axis=(0, 2)).nonzero()
+            nonzero_across_axis_2 = np.any(img, axis=(0, 1)).nonzero()
 
-            if rows[0].shape[0] > 0:
-                rmin, rmax = rows[0][[0, -1]]
-                cmin, cmax = cols[0][[0, -1]]
-                smin, smax = slices[0][[0, -1]]
+            nonzero_across_axis_0 = nonzero_across_axis_0[0]
+            nonzero_across_axis_1 = nonzero_across_axis_1[0]
+            nonzero_across_axis_2 = nonzero_across_axis_2[0]
 
-                return np.array([[rmin, cmin, smin], [rmax, cmax, smax]])
-            return np.array([[-1, -1, -1], [0, 0, 0]])
+            # If any axis contains only zero voxels than image is blank
+            bbox = np.array([[-1, -1, -1], [0, 0, 0]])
+            if nonzero_across_axis_0.size == 0:
+                return bbox
+
+            bbox[:, 0] = nonzero_across_axis_0[[0, -1]]
+            bbox[:, 1] = nonzero_across_axis_1[[0, -1]]
+            bbox[:, 2] = nonzero_across_axis_2[[0, -1]]
+
+            return bbox
 
         bboxes = np.zeros((image.data.shape[0],) + (2, 3))
         for i in range(image.data.shape[0]):
