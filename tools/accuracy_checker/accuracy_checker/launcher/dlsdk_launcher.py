@@ -44,13 +44,14 @@ HETERO_KEYWORD = 'HETERO:'
 MULTI_DEVICE_KEYWORD = 'MULTI:'
 FPGA_COMPILER_MODE_VAR = 'CL_CONTEXT_COMPILER_MODE_INTELFPGA'
 NIREQ_REGEX = r"(\(\d+\))"
+MYRIAD_WITH_DEVICE_ID = r"MYRIAD\.*.*"
 HETERO_MODE_REGEX = r"(?:^{hetero}(?P<devices>(?:{devices})(?:,(?:{devices}))*)$)".format(
-    hetero=HETERO_KEYWORD, devices="|".join(ie.known_plugins)
+    hetero=HETERO_KEYWORD, devices="|".join(ie.known_plugins + [MYRIAD_WITH_DEVICE_ID])
 )
 MULTI_DEVICE_MODE_REGEX = r"(?:^{multi}(?P<devices_ireq>(?:{devices_ireq})(?:,(?:{devices_ireq}))*)$)".format(
-    multi=MULTI_DEVICE_KEYWORD, devices_ireq="{}?|".format(NIREQ_REGEX).join(ie.known_plugins)
+    multi=MULTI_DEVICE_KEYWORD, devices_ireq="{}?|".format(NIREQ_REGEX).join(ie.known_plugins + [MYRIAD_WITH_DEVICE_ID])
 )
-DEVICE_REGEX = r"(?:^(?P<device>{devices})$)".format(devices="|".join(ie.known_plugins))
+DEVICE_REGEX = r"(?:^(?P<device>{devices})$)".format(devices="|".join(ie.known_plugins + [MYRIAD_WITH_DEVICE_ID]))
 SUPPORTED_DEVICE_REGEX = r"{multi}|{hetero}|{regular}".format(
     multi=MULTI_DEVICE_MODE_REGEX, hetero=HETERO_MODE_REGEX, regular=DEVICE_REGEX
 )
@@ -221,6 +222,7 @@ class DLSDKLauncher(Launcher):
         dlsdk_launcher_config.validate(self.config)
 
         self._device = self.config['device'].upper()
+        self._device_ids = self._check_device_id()
         self._set_variable = False
         self._prepare_bitstream_firmware(self.config)
         self._delayed_model_loading = delayed_model_loading
@@ -303,6 +305,18 @@ class DLSDKLauncher(Launcher):
             device = re.sub(NIREQ_REGEX, '', device)
 
         return [platform_.upper().strip() for platform_ in device.split(',')]
+
+    def _check_device_id(self):
+        device_list = self._devices_list()
+        myriad_devices = [device_name for device_name in device_list if device_name.startswith('MYRIAD')]
+        device_ids = []
+        for myriad_device in myriad_devices:
+            device_with_id = myriad_device.split('.')
+            device_ids.append('.'.join(device_with_id[1:]).lower() if len(device_with_id) > 1 else None)
+        for devise_id in device_ids:
+            if devise_id is not None:
+                self._device = self._device.replace('.' + devise_id.upper(), '')
+        return device_ids
 
     def _set_affinity(self, affinity_map_path):
         self.plugin.set_initial_affinity(self.network)
@@ -542,7 +556,10 @@ class DLSDKLauncher(Launcher):
 
             if log:
                 print_info('Loaded {} plugin version: {}'.format(self.plugin.device, self.plugin.version))
-
+        if self._device_ids:
+            correct_id = [device_id for device_id in self._device_ids if device_id is not None]
+            if correct_id:
+                self.plugin.set_config({'DEVICE_ID': correct_id[0]})
         cpu_extensions = self.config.get('cpu_extensions')
         if cpu_extensions and 'CPU' in self._devices_list():
             selection_mode = self.config.get('_cpu_extensions_mode')
