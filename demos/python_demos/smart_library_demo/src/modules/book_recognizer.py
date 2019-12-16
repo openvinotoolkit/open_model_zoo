@@ -3,7 +3,6 @@ import pyzbar.pyzbar as pyzbar
 import numpy as np
 from abc import ABC, abstractmethod
 
-
 class BookRecognizer(ABC):
     @staticmethod
     def create(args):
@@ -14,7 +13,6 @@ class BookRecognizer(ABC):
     def recognize(self, frame):
         """Recognize book"""
         
-
 class QRBookRecognizer(BookRecognizer):
     # Constructor
     def __init__(self):

@@ -10,7 +10,6 @@ refLandmarks = np.float32([[0.31556875000000000, 0.4615741071428571],  # left ey
                            [0.34947187500000004, 0.8246919642857142],  # left lip corner, right lip corner
                            [0.65343645833333330, 0.8246919642857142]]) # right lip corner
 
-
 class FaceRecognizer(ABC):
      @staticmethod
      def create(args): 
@@ -206,6 +205,3 @@ class DNNRecognizer(FaceRecognizer):
         self.bd = np.append(self.bd, [vec], axis=0)
         self.counter = self.bd.shape[0]
         return self.counter
-    
-    
-

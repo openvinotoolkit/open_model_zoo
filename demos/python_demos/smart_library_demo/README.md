@@ -1,7 +1,8 @@
 # Smart Library Demo
-The application is a demo of automated “Smart Library”. 
+
+The applicattion is a demo of automated “smart library”. 
 It involves the registration of the reader; authorization of the reader through face recognition; 
-borrowing and returning books by recognizing QR codes generated for each book in the library. 
+receiving and returning books by recognizing QR codes generated for each book in the library. 
 The following pretrained models can be used:
 
 * `face-detection-retail-0004`, to detect faces and predict their bounding boxes;
@@ -12,47 +13,49 @@ For more information about the pre-trained models, refer to the [model documenta
 
 ### How it works
 
-The application is started from the command line. It is accepted with several parameters. 
-It reads video stream frame-by-frame from a web-camera device and performs an independent analysis
-of each frame. To make predictions the application use 3 models. An input frame is processed by
-the face detection model to predict face bounding boxes. Then, face keypoints
-are predicted by the facial landmarks regression model. Keypoints are used
-to align the face and match it with face in the data base. 
-To register in the library press `r` on keyboard. Once the reader has been registered, he will be authorized 
-through the face recognition. Registration allows to borrow and return books by recognizing QR codes for 
-each book. To make book recognition press `b` on keyboard. Also, the application provides some 
-extra statistics in console, like a list of registered readers, full list of books in the library, and
-history of borrowed books. To change the information in console press `f` on keyboard. To exit press `q`.
-
-### Creating QR-codes for books
-Next two files are used to create QR-codes for books:
-`library.json` file contains information about books in the library. 
-`createQRCodes.py` script generates QR-codes for each book in the `library.json` file.
-
-usage: `createQRCodes.py [-h] [-i LIB] [-o OUT]`
-
-optional arguments:
-  -h, --help  show this help message and exit
-  -i LIB      input `.json` file with info
-  -o OUT      directory to save generated QR-codes
+The application is started from command line.
+It reads video stream frame-by-frame from a web-camera device and performs independent analysis
+of each frame. To make predictions the application uses 3 models. An input frame is processed by
+the face detection model to detect bounding boxes. Then face keypoints
+are predicted by the facial landmarks regression model. Keypoints are using
+to align the face and match it with face in data base. 
+To register in library press `r` on keyboard. Once reader has beeen registered, he will be autothorized 
+through face recognition. Registration allows to receiving and returning books by recognizing QR codes for 
+each book. To make book recognition press `b` on keyboard. Also application provides some 
+extra statictics in console, like list of registered readers, full list of books in the library,
+history of borrowing books. To change information in console press `f` on keyboard. To exit press `q`.
 
 ### Installation and dependencies
 
 The demo depends on:
-- OpenVINO toolkit (2019.R2 or newer)
+- OpenVINO toolkit (2019R3 or newer)
 - Python (any of 2.7+ or 3.4+, which is supported by OpenVINO)
 - OpenCV (>=3.4.0)
 
-To install all required Python modules you can use:
+To install all the required Python modules you can use:\
+'''
+pip install -r requirements.txt 
+'''
 
-```bash
-pip install -r requirements.txt
+### Creating QR-codes for books
+
+Next two files are using to create QR-codes for books:
+* `library.json` file contains information about books in the library. 
+* `createQRCodes.py` script generates QR-codes for each book in `library.json` file.
+
+``` sh
+usage: createQRCodes.py [-h] [-i LIB] [-o OUT]
+
+optional arguments:
+  -h, --help  show this help message and exit
+  -i LIB      unput `.json` file with info
+  -o OUT      directory to save generated QR-codes
 ```
 
-### Running the demo:
+### Running the demo
 
 Running the application with the `-h` option or without
-any arguments yield the following message:
+any arguments yields the following message:
 
 ``` sh
 python ./smart_library_demo.py -h
@@ -91,7 +94,7 @@ Models:
   -lm LMDET          Required. Type of detector. Available DNN landmarks
                      regression - DNNlm
   -m_lm LMMODEL      Required. Path to .xml file
-
+```
 
 Example of a valid command line to run the application:
 
@@ -118,7 +121,6 @@ call C:/Program Files (x86)/IntelSWTools/openvino_2019.3.334/bin/setupvars.bat
 python smart_library_demo.py  -reid='DNNfr' -m_rd=<path_to_model>/face-reidentification-retail-0095.xml 
                               -fd='DNNfd' -m_fd=<path_to_model>/face-detection-retail-0004.xml 
                               -lm='DNNlm' -m_lm=<path_to_model>/landmarks-regression-retail-0009.xml
-```
 
 Notice that the custom networks should be converted to the
 Inference Engine format (*.xml + *bin) first. To do this use the
