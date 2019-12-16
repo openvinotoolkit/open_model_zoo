@@ -218,8 +218,10 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         annotation_data = annotation.mask
         prediction_data = prediction.mask
 
-        assert prediction_data.shape[0] == 1, "Prediction mask has more than 1 channel. Specify 'make_argmax' option " \
-                                              "to True in adapter or postrocessor."
+        if prediction_data.shape[0] != 1:
+            raise RuntimeError("For '{}' metric prediction mask should has only 1 channel, but {} found. "
+                               "Specify 'make_argmax' option in adapter or postprocessor."
+                               .format(self.__provider__, prediction_data.shape[0]))
 
         for c, p in enumerate(prediction.label_order, 1):
             annotation_data_ = (annotation_data == c)

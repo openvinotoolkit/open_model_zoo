@@ -39,8 +39,9 @@ class Resize3D(Preprocessor):
 
     def process(self, image, annotation_meta=None):
         data = np.asarray(image.data)
-        assert (len(data.shape) == len(self.shape)), \
-            'Image shape - {}, resize shape - {}'.format(data.shape, self.shape)
+        if len(data.shape) != len(self.shape):
+            raise RuntimeError('Shape of original data and resize shape are mismatched for {} preprocessor '
+                               '(data shape - {}, resize shape - {})'.format(self.__provider__, data.shape, self.shape))
 
         factor = [float(o) / i for i, o in zip(data.shape, self.shape)]
         image.data = interpolation.zoom(data, zoom=factor, order=1)
