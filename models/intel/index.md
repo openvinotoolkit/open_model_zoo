@@ -38,8 +38,6 @@ network to detect objects of the same type better.
 | [person-vehicle-bike-detection-crossroad-0078](./person-vehicle-bike-detection-crossroad-0078/description/person-vehicle-bike-detection-crossroad-0078.md)                          | 3.964                | 1.178      |       | X       | X        | X     |                |         |
 | [person-vehicle-bike-detection-crossroad-1016](./person-vehicle-bike-detection-crossroad-1016/description/person-vehicle-bike-detection-crossroad-1016.md)                          | 3.560                | 2.887      |       | X       | X        | X     |                |         |
 | [vehicle-license-plate-detection-barrier-0106](./vehicle-license-plate-detection-barrier-0106/description/vehicle-license-plate-detection-barrier-0106.md)                          | 0.349                | 0.634      |       |         | X        |       | X              |         |
-| [ssd300-onnx-0001](./ssd300-onnx-0001/description/ssd300-onnx-0001.md)                                                                                                              | 62.815               | 26.285     |   X   |   X     | X        |   X   |                |         |
-| [ssd512-onnx-0001](./ssd512-onnx-0001/description/ssd512-onnx-0001.md)                                                                                                              | 180.611              | 27.189     |   X   |   X     | X        |   X   |                |         |
 | [product-detection-0001](./product-detection-0001/description/product-detection-0001.md)                                                                                            | 3.598                | 3.212      |       |         |          |       |                | X       |
 
 
@@ -106,8 +104,6 @@ detect areas with complex shape (for example, free space on the road).
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [road-segmentation-adas-0001](./road-segmentation-adas-0001/description/road-segmentation-adas-0001.md)                                        | 4.770                | 0.184      |
 | [semantic-segmentation-adas-0001](./semantic-segmentation-adas-0001/description/semantic-segmentation-adas-0001.md)                            | 58.572               | 6.686      |
-| [icnet-camvid-onnx-0001](./icnet-camvid-onnx-0001/description/icnet-camvid-onnx-0001.md)                            | -               | -      |
-| [unet-camvid-onnx-0001](./unet-camvid-onnx-0001/description/unet-camvid-onnx-0001.md)                            | -              | -      |
 
 ## Instance Segmentation Models
 
