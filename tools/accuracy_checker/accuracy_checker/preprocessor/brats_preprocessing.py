@@ -123,7 +123,7 @@ class NormalizeBrats(Preprocessor):
         for channel in range(image.shape[0]):
             img = image[channel, :, :, :].copy()
             if self.masked in (2, 3):
-                mask = img > 0  
+                mask = img > 0
                 image_masked = np.ma.masked_array(img, ~mask)
                 mean, std = np.mean(image_masked), np.std(image_masked)
             else:
