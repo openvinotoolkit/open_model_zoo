@@ -206,8 +206,9 @@ class ModelEvaluator(BaseEvaluator):
             if not self.postprocessor.has_dataset_processors:
                 self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
 
-            self._annotations.extend(annotations)
-            self._predictions.extend(predictions)
+            if self.metric_executor.need_store_predictions:
+                self._annotations.extend(annotations)
+                self._predictions.extend(predictions)
 
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_predictions))
