@@ -83,6 +83,6 @@ where:
 
 The original model is distributed under the
 [Apache License, Version 2.0](https://raw.githubusercontent.com/opencv/training_toolbox_caffe/develop/LICENSE).
-A copy of the license is provided in [APACHE-2.0.txt](../../licenses/APACHE-2.0.txt).
+A copy of the license is provided in [APACHE-2.0.txt](../licenses/APACHE-2.0.txt).
 
 [*] Other names and brands may be claimed as the property of others.
