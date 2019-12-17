@@ -31,7 +31,7 @@ curve. All numbers were evaluated by taking into account only faces bigger than
 
 ### Original Model
 
-Image, name: `input` , shape: '1,3,300,300`, format `B,C,H,W` where:
+Image, name: `input` , shape: `1,3,300,300`, format `B,C,H,W` where:
 
     - B - batch size
     - C - number of channels
