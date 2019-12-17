@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from args import image_net_arg
+from args import image_net_arg, brats_arg, image_retrieval_arg
 
-IMAGE_SEQUENCES = {
+DATA_SEQUENCES = {
     'action-recognition': [
         image_net_arg('00000001'),
         image_net_arg('00000002'),
@@ -38,6 +38,10 @@ IMAGE_SEQUENCES = {
         image_net_arg('00000020'),
     ],
 
+    'brain-tumor-nifti': [
+        brats_arg('BRATS_485.nii.gz'),
+    ],
+
     'face-detection-adas': [
         image_net_arg('00000002'),
         image_net_arg('00000032'),
@@ -49,6 +53,12 @@ IMAGE_SEQUENCES = {
         image_net_arg('00040548'),
         image_net_arg('00040557'),
         image_net_arg('00045630'),
+    ],
+
+    'face-recognition-gallery': [
+        image_net_arg('00000184'),
+        image_net_arg('00008165'),
+        image_net_arg('00040548'),
     ],
 
     'gaze-estimation-adas': [
@@ -75,6 +85,10 @@ IMAGE_SEQUENCES = {
         image_net_arg('00043066'),
         image_net_arg('00045630'),
         image_net_arg('00048311'),
+    ],
+
+    'image-retrieval-video': [
+        image_retrieval_arg('4946fb41-9da0-4af7-a858-b443bee6d0f6.dav'),
     ],
 
     'instance-segmentation': [

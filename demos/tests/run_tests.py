@@ -17,8 +17,12 @@
 """
 Test script for the demos.
 
-For the tests to work, the test data directory must contain a "ILSVRC2012_img_val"
-subdirectory with the ILSVRC2012 dataset.
+For the tests to work, the test data directory must contain:
+* a "BraTS" subdirectory with brain tumor dataset in NIFTI format (see http://medicaldecathlon.com,
+  https://drive.google.com/open?id=1A2IU8Sgea1h3fYLpYtFb2v7NYdMjvEhU);
+* a "ILSVRC2012_img_val" subdirectory with the ILSVRC2012 dataset;
+* a "Image_Retrieval" subdirectory with image retrieval dataset (images, videos) (see https://github.com/19900531/test)
+  and list of images (see https://github.com/opencv/openvino_training_extensions/blob/develop/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt)
 """
 
 import argparse
@@ -37,7 +41,7 @@ from pathlib import Path
 
 from args import ArgContext, ModelArg
 from cases import DEMOS
-from image_sequences import IMAGE_SEQUENCES
+from data_sequences import DATA_SEQUENCES
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -129,8 +133,8 @@ def main():
             arg_context = ArgContext(
                 source_dir=demos_dir / demo.subdirectory,
                 dl_dir=dl_dir,
-                image_sequence_dir=Path(temp_dir) / 'image_seq',
-                image_sequences=IMAGE_SEQUENCES,
+                data_sequence_dir=Path(temp_dir) / 'data_seq',
+                data_sequences=DATA_SEQUENCES,
                 model_info=model_info,
                 test_data_dir=args.test_data_dir,
             )
@@ -171,7 +175,7 @@ def main():
                         print('Exit code:', e.returncode)
                         num_failures += 1
                         execution_time = -1
-                    
+
                     if args.report_file:
                         collect_result(demo.full_name, device, pipeline, execution_time, args.report_file)
 
