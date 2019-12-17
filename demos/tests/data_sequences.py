@@ -38,6 +38,10 @@ DATA_SEQUENCES = {
         image_net_arg('00000020'),
     ],
 
+    'brain-tumor-nifti': [
+        brats_arg('BRATS_485.nii.gz'),
+    ],
+
     'face-detection-adas': [
         image_net_arg('00000002'),
         image_net_arg('00000032'),
@@ -81,6 +85,10 @@ DATA_SEQUENCES = {
         image_net_arg('00043066'),
         image_net_arg('00045630'),
         image_net_arg('00048311'),
+    ],
+
+    'image-retrieval-video': [
+        image_retrieval_arg('4946fb41-9da0-4af7-a858-b443bee6d0f6.dav'),
     ],
 
     'instance-segmentation': [
@@ -219,12 +227,4 @@ DATA_SEQUENCES = {
         image_net_arg('00037128'),
         image_net_arg('00048316'),
     ],
-
-    'brain-tumor-nifti': [
-        brats_arg('BRATS_485.nii.gz'),
-    ],
-
-    'image-retrieval-video': [
-        image_retrieval_arg('4946fb41-9da0-4af7-a858-b443bee6d0f6.dav'),
-    ]
 }
