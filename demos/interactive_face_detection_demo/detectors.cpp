@@ -125,12 +125,12 @@ CNNNetwork FaceDetection::read()  {
     CNNNetReader netReader;
     /** Read network model **/
     netReader.ReadNetwork(pathToModel);
-    /** Set batch size to 1 **/
-    slog::info << "Batch size is set to " << maxBatch << slog::endl;
-    netReader.getNetwork().setBatchSize(maxBatch);
     /** Extract model name and load its weights **/
     std::string binFileName = fileNameNoExt(pathToModel) + ".bin";
     netReader.ReadWeights(binFileName);
+    /** Set batch size to 1 **/
+    slog::info << "Batch size is set to " << maxBatch << slog::endl;
+    netReader.getNetwork().setBatchSize(maxBatch);
     /** Read labels (if any)**/
     std::string labelFileName = fileNameNoExt(pathToModel) + ".labels";
 
@@ -305,15 +305,12 @@ CNNNetwork AgeGenderDetection::read() {
     CNNNetReader netReader;
     // Read network
     netReader.ReadNetwork(pathToModel);
-
-    // Set maximum batch size to be used.
-    netReader.getNetwork().setBatchSize(maxBatch);
-    slog::info << "Batch size is set to " << netReader.getNetwork().getBatchSize() << " for Age/Gender Recognition network" << slog::endl;
-
-
     // Extract model name and load its weights
     std::string binFileName = fileNameNoExt(pathToModel) + ".bin";
     netReader.ReadWeights(binFileName);
+    // Set maximum batch size to be used.
+    netReader.getNetwork().setBatchSize(maxBatch);
+    slog::info << "Batch size is set to " << netReader.getNetwork().getBatchSize() << " for Age/Gender Recognition network" << slog::endl;
 
     // ---------------------------Check inputs -------------------------------------------------------------
     // Age/Gender Recognition network should have one input and two outputs
@@ -439,12 +436,12 @@ CNNNetwork HeadPoseDetection::read() {
     CNNNetReader netReader;
     // Read network model
     netReader.ReadNetwork(pathToModel);
-    // Set maximum batch size
-    netReader.getNetwork().setBatchSize(maxBatch);
-    slog::info << "Batch size is set to  " << netReader.getNetwork().getBatchSize() << " for Head Pose Estimation network" << slog::endl;
     // Extract model name and load its weights
     std::string binFileName = fileNameNoExt(pathToModel) + ".bin";
     netReader.ReadWeights(binFileName);
+    // Set maximum batch size
+    netReader.getNetwork().setBatchSize(maxBatch);
+    slog::info << "Batch size is set to  " << netReader.getNetwork().getBatchSize() << " for Head Pose Estimation network" << slog::endl;
 
     // ---------------------------Check inputs -------------------------------------------------------------
     slog::info << "Checking Head Pose Estimation network inputs" << slog::endl;
@@ -581,16 +578,12 @@ CNNNetwork EmotionsDetection::read() {
     InferenceEngine::CNNNetReader netReader;
     // Read network model
     netReader.ReadNetwork(pathToModel);
-
-    // Set maximum batch size
-    netReader.getNetwork().setBatchSize(maxBatch);
-    slog::info << "Batch size is set to " << netReader.getNetwork().getBatchSize() << " for Emotions Recognition" << slog::endl;
-
-
     // Extract model name and load its weights
     std::string binFileName = fileNameNoExt(pathToModel) + ".bin";
     netReader.ReadWeights(binFileName);
-
+    // Set maximum batch size
+    netReader.getNetwork().setBatchSize(maxBatch);
+    slog::info << "Batch size is set to " << netReader.getNetwork().getBatchSize() << " for Emotions Recognition" << slog::endl;
     // -----------------------------------------------------------------------------------------------------
 
     // Emotions Recognition network should have one input and one output.
@@ -711,12 +704,12 @@ CNNNetwork FacialLandmarksDetection::read() {
     CNNNetReader netReader;
     // Read network model
     netReader.ReadNetwork(pathToModel);
-    // Set maximum batch size
-    netReader.getNetwork().setBatchSize(maxBatch);
-    slog::info << "Batch size is set to  " << netReader.getNetwork().getBatchSize() << " for Facial Landmarks Estimation network" << slog::endl;
     // Extract model name and load its weights
     std::string binFileName = fileNameNoExt(pathToModel) + ".bin";
     netReader.ReadWeights(binFileName);
+    // Set maximum batch size
+    netReader.getNetwork().setBatchSize(maxBatch);
+    slog::info << "Batch size is set to  " << netReader.getNetwork().getBatchSize() << " for Facial Landmarks Estimation network" << slog::endl;
 
     // ---------------------------Check inputs -------------------------------------------------------------
     slog::info << "Checking Facial Landmarks Estimation network inputs" << slog::endl;
