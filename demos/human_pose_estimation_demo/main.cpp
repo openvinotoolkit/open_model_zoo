@@ -46,23 +46,6 @@ bool ParseAndCheckCommandLine(int argc, char* argv[]) {
     return true;
 }
 
-void sendHumanPose(const std::vector<HumanPose>& poses) {
-    if (!poses.empty()) {
-        std::time_t result = std::time(nullptr);
-        std::cout << std::asctime(std::localtime(&result));
-     }
-
-    for (HumanPose const& pose : poses) {
-        std::stringstream rawPose;
-        rawPose << std::fixed << std::setprecision(0);
-        for (auto const& keypoint : pose.keypoints) {
-            rawPose << keypoint.x << "," << keypoint.y << " ";
-        }
-        rawPose << pose.score;
-        std::cout << rawPose.str() << std::endl;
-    }
-}
-
 int main(int argc, char* argv[]) {
     try {
         std::cout << "InferenceEngine: " << GetInferenceEngineVersion() << std::endl;
@@ -188,7 +171,20 @@ int main(int argc, char* argv[]) {
                 poses = estimator.postprocessCurr();
 
                 if (FLAGS_r) {
-                    sendHumanPose(poses);
+                    if (!poses.empty()) {
+                        std::time_t result = std::time(nullptr);
+                        std::cout << std::asctime(std::localtime(&result));
+                     }
+
+                    for (HumanPose const& pose : poses) {
+                        std::stringstream rawPose;
+                        rawPose << std::fixed << std::setprecision(0);
+                        for (auto const& keypoint : pose.keypoints) {
+                            rawPose << keypoint.x << "," << keypoint.y << " ";
+                        }
+                        rawPose << pose.score;
+                        std::cout << rawPose.str() << std::endl;
+                    }
                 }
 
                 if (!FLAGS_no_show) {
