@@ -322,8 +322,9 @@ class YoloV3Adapter(Adapter):
         for identifier, prediction, meta in zip(identifiers, predictions, frame_meta):
             detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
             input_shape = list(meta.get('input_shape', {'data': (1, 3, 416, 416)}).values())[0]
-            self.input_width = input_shape[3]
-            self.input_height = input_shape[2]
+            nchw_layout = input_shape[1] == 3
+            self.input_width = input_shape[3 if nchw_layout else 2]
+            self.input_height = input_shape[2 if nchw_layout else 1]
 
             for layer_id, p in enumerate(prediction):
                 parse_yolo_v3_results(p, self.threshold, self.input_width, self.input_height, detections, layer_id)
