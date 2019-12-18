@@ -126,7 +126,7 @@ AccuracyChecker supports following set of adapters:
 * `gaze_estimation` - converting output of gaze estimation model to `GazeVectorPrediction`.
 * `hit_ratio_adapter` - converting output NCF model to `HitRatioPrediction`.
 * `brain_tumor_segmentation` - converting output of brain tumor segmentation model to `BrainTumorSegmentationPrediction`.
-  * `make_argmax` if `True` applies argmax operation to prediction result (default - `False`)
+  * `make_argmax`  - allows to apply argmax operation to output values. (default - `False`)
   * `label_order` sets mapping from output classes to dataset classes in format `class1,class2,...`
 * `nmt` - converting output of neural machine translation model to `MachineTranslationPrediction`.
   * `vocabulary_file` - file which contains vocabulary for encoding model predicted indexes to words (e. g. vocab.bpe.32000.de). Path can be prefixed with `--models` arguments.
