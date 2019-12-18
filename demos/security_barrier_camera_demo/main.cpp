@@ -59,7 +59,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 struct BboxAndDescr {
     enum class ObjectType {
         NONE,
-        VEHICCLE,
+        VEHICLE,
         PLATE,
     } objectType;
     cv::Rect rect;
@@ -386,7 +386,7 @@ void ResAggregator::process() {
             switch (bboxAndDescr.objectType) {
                 case BboxAndDescr::ObjectType::NONE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {255, 255, 0},  4);
                                                      break;
-                case BboxAndDescr::ObjectType::VEHICCLE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 255, 0},  4);
+                case BboxAndDescr::ObjectType::VEHICLE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 255, 0},  4);
                                                          cv::putText(sharedVideoFrame->frame, bboxAndDescr.descr,
                                                                      cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y + 35},
                                                                      cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 255, 0), 4);
@@ -497,7 +497,7 @@ void DetectionsProcessor::process() {
                                 classifiersAggreagator->rawAttributes.lockedPush_back("Vehicle Attributes results:" + attributes.first + ';'
                                                                                       + attributes.second + '\n');
                             }
-                            classifiersAggreagator->push(BboxAndDescr{BboxAndDescr::ObjectType::VEHICCLE, rect, attributes.first + ' ' + attributes.second});
+                            classifiersAggreagator->push(BboxAndDescr{BboxAndDescr::ObjectType::VEHICLE, rect, attributes.first + ' ' + attributes.second});
                             context.attributesInfers.inferRequests.lockedPush_back(attributesRequest);
                         }, classifiersAggreagator,
                            std::ref(attributesRequest),
