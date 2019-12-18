@@ -42,7 +42,7 @@ Accuracy Checker supports following set of preprocessors:
      You can specify one value for all channels or list of comma separated channel-wise values.
 * `resize3d` - resizing 3d image (e.g. MRI scans) to new size:
   * `size` in format `(H,W,D)`. All values will be interpolated with 1st-order spline.
-* `crop_brats` performs crop of 3d images (e.g. MRI scans) by cropping all non-zero voxels. Also sets bounding boxes for `segmentation_prediction_resample` preprocessor (see [Postprocessors](../postprocessor/README.md))
+* `crop_brats`  -  performing crop of 3d images (e.g. MRI scans) by cropping all non-zero voxels. Also sets bounding boxes for `segmentation_prediction_resample` preprocessor (see [Postprocessors](../postprocessor/README.md))
 * `normalize_brats` normalizes of 3d images (e.g. MRI scans) with z-score normalization
   * `masked` - specifies type of masking:
     * `none` for not applying mask
@@ -99,4 +99,3 @@ Accuracy Checker supports following set of preprocessors:
 * `centernet_affine_transform` - CenterNet affine transformation, used for image resizing.
   * `dst_width` and `dst_height` are destination width, and height for image. You can also use size instead in case when destination sizes are equal.
   * `scale` - scale factor for image (default is 1).
-
