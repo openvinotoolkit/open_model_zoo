@@ -51,6 +51,12 @@ def process_download(reporter, chunk_iterable, size, file):
                     reporter.emit_event('model_file_download_progress', size=progress_size)
 
                 file.write(chunk)
+
+                # don't attempt to finish a file if it's bigger than expected
+                if progress_size > size:
+                    break
+
+        return progress_size
     finally:
         reporter.end_progress()
 
@@ -65,8 +71,19 @@ def try_download(reporter, file, num_attempts, start_download, size):
             chunk_iterable = start_download()
             file.seek(0)
             file.truncate()
-            process_download(reporter, chunk_iterable, size, file)
-            return True
+            actual_size = process_download(reporter, chunk_iterable, size, file)
+
+            if actual_size > size:
+                reporter.log_error("Remote file is longer than expected ({} B), download aborted", size)
+                # no sense in retrying - if the file is longer, there's no way it'll fix itself
+                return False
+            elif actual_size < size:
+                reporter.log_error("Downloaded file is shorter ({} B) than expected ({} B)",
+                    actual_size, size)
+                # it's possible that we got disconnected before receiving the full file,
+                # so try again
+            else:
+                return True
         except (requests.exceptions.RequestException, ssl.SSLError):
             reporter.log_error("Download failed", exc_info=True)
 
