@@ -32,7 +32,7 @@ Options:
     -m_tr "<path>"               Required. Path to the Text Recognition model (.xml) file.
     -dt "<input_data_type>"      Required. Input data type: "image" (for a single image), "list" (for a text file where images paths are listed), "video" (for a saved video), "webcam" (for a webcamera device). By default, it is "image".
     -m_tr_ss "<value>"           Optional. Symbol set for the Text Recognition model.
-    -cc                          Optional. If it is set, then in case of absence of the Text Detector, the Text Reconition model takes a central image crop as an input, but not full frame.
+    -cc                          Optional. If it is set, then in case of absence of the Text Detector, the Text Recognition model takes a central image crop as an input, but not full frame.
     -w_td "<value>"              Optional. Input image width for Text Detection model.
     -h_td "<value>"              Optional. Input image height for Text Detection model.
     -thr "<value>"               Optional. Specify a recognition confidence threshold. Text detection candidates with text recognition confidence below specified threshold are rejected.
