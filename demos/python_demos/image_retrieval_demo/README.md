@@ -66,7 +66,6 @@ python image_retrieval_demo.py \
 -m /home/user/image-retrieval-0001.xml \
 -i /home/user/video.dav.mp4 \
 -g /home/user/list.txt \
--l /opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension_avx512.so \
 --ground_truth text_label
 ```
 
