@@ -16,7 +16,7 @@ static const char text_detection_model_message[] = "Required. Path to the Text D
 static const char text_recognition_model_message[] = "Required. Path to the Text Recognition model (.xml) file.";
 static const char text_recognition_model_symbols_set_message[] = "Optional. Symbol set for the Text Recognition model.";
 static const char text_central_image_crop_message[] = "Optional. If it is set, then in case of absence of the Text Detector, "
-                                                      "the Text Reconition model takes a central image crop as an input, but not full frame.";
+                                                      "the Text Recognition model takes a central image crop as an input, but not full frame.";
 static const char image_width_for_text_detection_model_message[] = "Optional. Input image width for Text Detection model.";
 static const char image_height_for_text_detection_model_message[] = "Optional. Input image height for Text Detection model.";
 static const char text_recognition_threshold_message[] = "Optional. Specify a recognition confidence threshold. Text detection candidates with "
