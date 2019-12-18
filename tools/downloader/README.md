@@ -48,7 +48,7 @@ When running the model downloader with Python 3.5.x on macOS, you may encounter
 an error similar to the following:
 
 > requests.exceptions.SSLError: [...] (Caused by SSLError(SSLError(1, '[SSL: TLSV1_ALERT_PROTOCOL_VERSION]
-tlsv1 alert protocol version (_ssl.c:719)'),))
+tlsv1 alert protocol version (\_ssl.c:719)'),))
 
 You can work around this by installing additional packages:
 
