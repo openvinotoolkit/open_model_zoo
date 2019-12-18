@@ -190,7 +190,7 @@ int main(int argc, char* argv[]) {
                 if (!FLAGS_no_show) {
                     presenter.drawGraphs(curr_frame);
                     renderHumanPose(poses, curr_frame);
-                    cv::imshow("ICV Human Pose Estimation on " + FLAGS_d, curr_frame);
+                    cv::imshow("Human Pose Estimation on " + FLAGS_d, curr_frame);
                     t1 = std::chrono::high_resolution_clock::now();
                     render_time = std::chrono::duration_cast<ms>(t1 - t0).count();
                 }
