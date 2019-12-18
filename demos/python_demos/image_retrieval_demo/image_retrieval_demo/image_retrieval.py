@@ -30,7 +30,7 @@ class IEModel(): # pylint: disable=too-few-public-methods
 
     def __init__(self, model_path, device, cpu_extension):
         ie = IECore()
-        if device == 'CPU':
+        if cpu_extension and device == 'CPU':
             ie.add_extension(cpu_extension, 'CPU')
 
         path = '.'.join(model_path.split('.')[:-1])
