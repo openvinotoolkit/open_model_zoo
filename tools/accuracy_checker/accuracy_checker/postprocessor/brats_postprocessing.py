@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 from scipy.ndimage import interpolation
 from .postprocessor import Postprocessor
-from ..config import ConfigError, BoolField, ListField
+from ..config import ConfigError, BoolField, ListField, NumberField
 from ..representation import BrainTumorSegmentationPrediction, BrainTumorSegmentationAnnotation
 
 
@@ -96,7 +96,7 @@ class TransformBratsPrediction(Postprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'order': ListField(value_type=int, validate_values=True,
+            'order': ListField(value_type=NumberField(value_type=int, min_value=0), validate_values=True,
                                description="Specifies channel order of filling"),
             'values': ListField(value_type=int, validate_values=True,
                                 description="Specifies values for each channel according to new order")

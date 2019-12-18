@@ -127,7 +127,7 @@ AccuracyChecker supports following set of adapters:
 * `hit_ratio_adapter` - converting output NCF model to `HitRatioPrediction`.
 * `brain_tumor_segmentation` - converting output of brain tumor segmentation model to `BrainTumorSegmentationPrediction`.
   * `make_argmax`  - allows to apply argmax operation to output values. (default - `False`)
-  * `label_order` sets mapping from output classes to dataset classes in format `class1,class2,...`
+  * `label_order` - sets mapping from output classes to dataset classes. For example: `label_order: [3,1,2]` means that class with id 3 from model's output matches with class with id 1 from dataset,  class with id 1 from model's output matches with class with id 2 from dataset, class with id 2 from model's output matches with class with id 3 from dataset.
 * `nmt` - converting output of neural machine translation model to `MachineTranslationPrediction`.
   * `vocabulary_file` - file which contains vocabulary for encoding model predicted indexes to words (e. g. vocab.bpe.32000.de). Path can be prefixed with `--models` arguments.
   * `eos_index` - index end of string symbol in vocabulary (Optional, used in cases when launcher does not support dynamic output shape for cut off empty prediction).

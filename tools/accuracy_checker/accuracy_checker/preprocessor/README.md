@@ -40,6 +40,7 @@ Accuracy Checker supports following set of preprocessors:
      You can specify one value for all channels or list of comma separated channel-wise values.
   * `std` specifies values, on which pixels will be divided.
      You can specify one value for all channels or list of comma separated channel-wise values.
+     These parameters support work with precomputed values of frequently used datasets (e.g. `cifar10` or `imagenet`).
 * `resize3d` - resizing 3d image (e.g. MRI scans) to new size:
   * `size` in format `(H,W,D)`. All values will be interpolated with 1st-order spline.
 * `crop_brats`  -  performing crop of 3d images (e.g. MRI scans) by cropping all non-zero voxels. Also sets bounding boxes for `segmentation_prediction_resample` preprocessor (see [Postprocessors](../postprocessor/README.md))
@@ -52,11 +53,8 @@ Accuracy Checker supports following set of preprocessors:
   * `cutoff` - cuts minimum and value to `-cutoff` and `cutoff` respectively
   * `shift_value` - adds to all values
   * `normalize_value` - divides all values
-* `swap_modalities` swaps modalities of MRI scan (works as channel swapping)
+* `swap_modalities` - swapping modalities of MRI scan (works as channel swapping)
   * `modality_order` - new order
-
-     These parameters support work with precomputed values of frequently used datasets (e.g. `cifar10` or `imagenet`).
-
 * `bgr_to_rgb` - reversing image channels. Convert image in BGR format to RGB.
 * `bgr_to_gray` - converting image in BGR to gray scale color space.
 * `rgb_to_bgr` - reversing image channels. Convert image in RGB format to BGR.
