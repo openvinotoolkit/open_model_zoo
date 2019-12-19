@@ -80,6 +80,9 @@ def run(params, capture, detector, reid):
     else:
         output_video = None
 
+    prev_frames = thread_body.frames_queue.get()
+    detector.run_asynch(prev_frames)
+
     while thread_body.process:
         key = check_pressed_keys(key)
         if key == 27:
@@ -96,20 +99,22 @@ def run(params, capture, detector, reid):
         if params.detections:
             all_detections = detector.get_detections(frame_number)
         else:
-            all_detections = detector.get_detections(frames)
+            all_detections = detector.wait_and_grab()
+            detector.run_asynch(frames)
+
         all_masks = [[] for _ in range(len(all_detections))]
         for i, detections in enumerate(all_detections):
             all_detections[i] = [det[0] for det in detections]
             all_masks[i] = [det[2] for det in detections if len(det) == 3]
 
-        tracker.process(frames, all_detections, all_masks)
+        tracker.process(prev_frames, all_detections, all_masks)
         tracked_objects = tracker.get_tracked_objects()
 
         latency = time.time() - start
         avg_latency.update(latency)
         fps = round(1. / latency, 1)
 
-        vis = visualize_multicam_detections(frames, tracked_objects, fps, **config['visualization_config'])
+        vis = visualize_multicam_detections(prev_frames, tracked_objects, fps, **config['visualization_config'])
         cv.imshow(win_name, vis)
         if output_video:
             output_video.write(cv.resize(vis, video_output_size))
@@ -117,6 +122,7 @@ def run(params, capture, detector, reid):
         print('\rProcessing frame: {}, fps = {} (avg_fps = {:.3})'.format(
                             frame_number, fps, 1. / avg_latency.get()), end="")
         frame_number += 1
+        prev_frames, frames = frames, prev_frames
     print('')
 
     thread_body.process = False

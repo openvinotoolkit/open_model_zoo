@@ -31,20 +31,25 @@ class Detector:
         self.expand_ratio = (1., 1.)
         self.max_num_frames = max_num_frames
 
+    def run_asynch(self, frames):
+        assert len(frames) <= self.max_num_frames
+        self.shapes = []
+        for i in range(len(frames)):
+            self.shapes.append(frames[i].shape)
+            self.net.forward_async(frames[i])
+
+    def wait_and_grab(self):
+        all_detections = []
+        outputs = self.net.grab_all_async()
+        for i, out in enumerate(outputs):
+            detections = self.__decode_detections(out, self.shapes[i])
+            all_detections.append(detections)
+        return all_detections
+
     def get_detections(self, frames):
         """Returns all detections on frames"""
-        assert len(frames) <= self.max_num_frames
-
-        all_detections = []
-        for i in range(len(frames)):
-            self.net.forward_async(frames[i])
-        outputs = self.net.grab_all_async()
-
-        for i, out in enumerate(outputs):
-            detections = self.__decode_detections(out, frames[i].shape)
-            all_detections.append(detections)
-
-        return all_detections
+        self.run_asynch(frames)
+        return self.wait_and_grab()
 
     def __decode_detections(self, out, frame_shape):
         """Decodes raw SSD output"""
