@@ -42,7 +42,7 @@ Expected color order - BGR.
 
 ### Converted Model
 
-Image, name: `input` , shape: '1,3,300,300`, format `B,C,H,W` where:
+Image, name: `input` , shape: `1,3,300,300`, format `B,C,H,W` where:
 
     - B - batch size
     - C - number of channels
@@ -55,7 +55,7 @@ Expected color order - BGR.
 
 ### Original Model
 
-The net outputs a blob with shape: [1, 1, N, 7], where N is the number of detected
+The net outputs a blob with shape: `1,1,N,7`, where N is the number of detected
 bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
 where:
@@ -68,7 +68,7 @@ where:
 
 ### Converted Model
 
-The net outputs a blob with shape: [1, 1, N, 7], where N is the number of detected
+The net outputs a blob with shape: `1,1,N,7`, where N is the number of detected
 bounding boxes. For each detection, the description has the format:
 [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`],
 where:
