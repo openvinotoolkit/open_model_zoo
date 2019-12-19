@@ -135,6 +135,8 @@ class YoloV2Adapter(Adapter):
         result = []
         for identifier, prediction in zip(identifiers, predictions):
             labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []
+            if len(np.shape(prediction)) == 3:
+                prediction = prediction.flatten()
             for y, x, n in np.ndindex((cells_y, cells_x, self.num)):
                 index = n * cells_y * cells_x + y * cells_x + x
 
