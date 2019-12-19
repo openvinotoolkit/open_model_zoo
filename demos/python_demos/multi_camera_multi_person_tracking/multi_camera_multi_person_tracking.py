@@ -17,7 +17,6 @@ import queue
 from threading import Thread
 import json
 import logging as log
-import sys
 
 import cv2 as cv
 
@@ -25,12 +24,12 @@ from utils.network_wrappers import Detector, VectorCNN, MaskRCNN, \
                                    DetectionsFromFileReader, ReIDWithOrientationWrapper
 from mc_tracker.mct import MultiCameraTracker
 from utils.analyzer import save_embeddings
-from utils.misc import read_py_config, check_pressed_keys, AverageEstimator
+from utils.misc import read_py_config, check_pressed_keys, AverageEstimator, set_log_config
 from utils.video import MulticamCapture, NormalizerCLAHE
 from utils.visualization import visualize_multicam_detections
 from openvino.inference_engine import IECore # pylint: disable=import-error,E0611
 
-log.basicConfig(stream=sys.stdout, level=log.DEBUG)
+set_log_config()
 
 
 class FramesThreadBody:

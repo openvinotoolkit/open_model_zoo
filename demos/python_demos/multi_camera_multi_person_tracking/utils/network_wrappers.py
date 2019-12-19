@@ -11,8 +11,8 @@
  limitations under the License.
 """
 
-import glog
 import json
+import logging as log
 from collections import namedtuple
 
 import cv2
@@ -301,7 +301,7 @@ class DetectionsFromFileReader(object):
         self.score_thresh = score_thresh
         self.detections = []
         for input_file in input_files:
-            glog.info('Loading {}'.format(input_file))
+            log.info('Loading {}'.format(input_file))
             with open(input_file) as f:
                 detections = json.load(f)
                 detections_dict = {}

@@ -13,18 +13,20 @@
 
 import argparse
 import copy
-import glog as log
 import json
+import logging as log
 
 import cv2 as cv
-import numpy as np
 import motmetrics as mm
+import numpy as np
 from tqdm import tqdm
 
-from utils.misc import check_pressed_keys
+from tools.run_evaluate import read_gt_tracks, get_detections_from_tracks
+from utils.misc import check_pressed_keys, set_log_config
 from utils.video import MulticamCapture
 from utils.visualization import visualize_multicam_detections, plot_timeline
-from tools.run_evaluate import read_gt_tracks, get_detections_from_tracks
+
+set_log_config()
 
 
 def find_max_id(all_tracks):

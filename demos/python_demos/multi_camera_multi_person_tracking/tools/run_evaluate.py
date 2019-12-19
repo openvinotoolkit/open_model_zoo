@@ -13,14 +13,17 @@
 
 import argparse
 import json
+import logging as log
 
-import numpy as np
 import motmetrics as mm
+import numpy as np
 from lxml import etree
 from tqdm import tqdm
-import glog as log
 
 from mc_tracker.sct import TrackedObj
+from utils.misc import set_log_config
+
+set_log_config()
 
 
 def read_gt_tracks(gt_filenames, size_divisor=1, skip_frames=0, skip_heavy_occluded_objects=False):
