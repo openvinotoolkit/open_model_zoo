@@ -222,6 +222,7 @@ class DLSDKLauncher(Launcher):
         dlsdk_launcher_config.validate(self.config)
 
         self._device = self.config['device'].upper()
+        self._async_mode = False
         self._device_ids = self._check_device_id()
         self._set_variable = False
         self._prepare_bitstream_firmware(self.config)
@@ -473,6 +474,21 @@ class DLSDKLauncher(Launcher):
             if hasattr(self, 'exec_network'):
                 del self.exec_network
                 self.exec_network = self.plugin.load(self.network, num_requests=self._num_requests)
+        if num_ireq > 1:
+            self.async_mode = True
+
+    @property
+    def async_mode(self):
+        return self._async_mode
+
+    @async_mode.setter
+    def async_mode(self, flag):
+        if flag:
+            if 'CPU' in self._devices_list():
+                self.plugin.set_config({'CPU_THROUGHPUT_STREAMS': 'CPU_THROUGHPUT_AUTO'})
+            if 'GPU' in self._devices_list():
+                self.plugin.set_config({'GPU_THROUGHPUT_STREAMS': 'GPU_THROUGHPUT_AUTO'})
+        self._async_mode = flag
 
     @property
     def infer_requests(self):
@@ -593,6 +609,9 @@ class DLSDKLauncher(Launcher):
         concurrency = 0
         for device in platform_list:
             concurrency += concurrency_device.get(device, 1)
+        if not self.async_mode:
+            self.async_mode = True
+
         return concurrency
 
     def _create_multi_device_plugin(self, log=True):

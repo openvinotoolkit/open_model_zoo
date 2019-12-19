@@ -80,7 +80,6 @@ class ModelEvaluator:
             allow_pairwise_subset=False,
             **kwargs
     ):
-
         def _process_ready_predictions(batch_raw_predictions, batch_identifiers, batch_meta, adapter):
             if adapter:
                 return self.adapter.process(batch_raw_predictions, batch_identifiers, batch_meta)
