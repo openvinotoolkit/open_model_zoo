@@ -189,10 +189,11 @@ def main():
                                        args.device, args.cpu_extension,
                                        capture.get_num_sources())
 
-    orientation_classifier = VectorCNN(ie, args.po_model, args.device) if args.m_orientation else None
+    orientation_classifier = VectorCNN(ie, args.po_model, args.device, args.cpu_extension) \
+        if args.m_orientation else None
 
     if args.m_reid:
-        person_recognizer = VectorCNN(ie, args.m_reid, args.device)
+        person_recognizer = VectorCNN(ie, args.m_reid, args.device, args.cpu_extension)
         person_recognizer = ReIDWithOrientationWrapper(person_recognizer,
                                                        orientation_classifier, args.t_orientation)
     else:

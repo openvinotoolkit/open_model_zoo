@@ -78,9 +78,9 @@ class Detector:
 class VectorCNN:
     """Wrapper class for a network returning a vector"""
 
-    def __init__(self, ie, model_path, device='CPU', max_reqs=100):
+    def __init__(self, ie, model_path, device='CPU', ext_path='', max_reqs=100):
         self.max_reqs = max_reqs
-        self.net = load_ie_model(ie, model_path, device, None, num_reqs=self.max_reqs)
+        self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
 
     def forward(self, batch):
         """Performs forward of the underlying network on a given batch"""
