@@ -96,7 +96,7 @@ datasets:
       - name: accuracy@top1
         type: accuracy
         top_k: 1
-      - name: acciracy@top5
+      - name: accuracy@top5
         type: accuracy
         top_k: 5
 
@@ -110,7 +110,7 @@ datasets:
       - name: accuracy@top1
         type: accuracy
         top_k: 1
-      - name: acciracy@top5
+      - name: accuracy@top5
         type: accuracy
         top_k: 5
 
@@ -125,7 +125,7 @@ datasets:
       - name: accuracy@top1
         type: accuracy
         top_k: 1
-      - name: acciracy@top5
+      - name: accuracy@top5
         type: accuracy
         top_k: 5
 
