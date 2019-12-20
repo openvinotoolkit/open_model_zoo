@@ -347,6 +347,7 @@ describing a single model. Each such object has the following keys:
   * `classification`
   * `detection`
   * `face_recognition`
+  * `feature_extraction`
   * `head_pose_estimation`
   * `human_pose_estimation`
   * `image_processing`
