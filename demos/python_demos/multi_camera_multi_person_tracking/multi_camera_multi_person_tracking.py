@@ -84,7 +84,6 @@ def run(params, capture, detector, reid):
     detector.run_asynch(prev_frames, frame_number)
 
     while thread_body.process:
-        frame_number += 1
         key = check_pressed_keys(key)
         if key == 27:
             break
@@ -97,6 +96,7 @@ def run(params, capture, detector, reid):
         if frames is None:
             continue
 
+        frame_number += 1
         all_detections = detector.wait_and_grab()
         detector.run_asynch(frames, frame_number)
 
