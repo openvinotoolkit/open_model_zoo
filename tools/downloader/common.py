@@ -37,7 +37,11 @@ KNOWN_FRAMEWORKS = {
     'pytorch': 'pytorch_to_onnx.py',
     'tf': None,
 }
-KNOWN_PRECISIONS = {'FP16', 'FP32', 'INT1', 'INT8'}
+KNOWN_PRECISIONS = {
+    'FP16', 'FP16-INT1', 'FP16-INT8',
+    'FP32', 'FP32-INT1', 'FP32-INT8',
+    'INT1', 'INT8',
+}
 KNOWN_TASK_TYPES = {
     'action_recognition',
     'classification',
