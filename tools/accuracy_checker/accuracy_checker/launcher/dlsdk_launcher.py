@@ -23,6 +23,7 @@ import re
 import numpy as np
 import openvino.inference_engine as ie
 
+from .dlsdk_async_request import AsyncInferRequestWrapper
 from ..config import ConfigError, NumberField, PathField, StringField, DictField, ListField, BoolField, BaseField
 from ..logging import warning
 from ..utils import (
@@ -316,12 +317,12 @@ class DLSDKLauncher(Launcher):
 
         return results
 
-    def predict_async(self, ir, inputs, metadata=None, **kwargs):
+    def predict_async(self, ir, inputs, metadata=None, context=None, **kwargs):
         infer_inputs = inputs[0]
-        ir.async_infer(inputs=infer_inputs)
         if metadata is not None:
             for meta_ in metadata:
                 meta_['input_shape'] = self.inputs_info_for_meta()
+        ir.infer(infer_inputs, metadata, context)
 
     def _is_hetero(self):
         return self._device.startswith(HETERO_KEYWORD)
@@ -510,6 +511,9 @@ class DLSDKLauncher(Launcher):
     @property
     def infer_requests(self):
         return self.exec_network.requests
+
+    def get_async_requests(self):
+        return [AsyncInferRequestWrapper(ireq_id, ireq) for ireq_id, ireq in enumerate(self.exec_network.requests)]
 
     def _reshape_input(self, shapes):
         if self.reload_network:

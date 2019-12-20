@@ -79,7 +79,7 @@ class TestModelEvaluator:
     def test_process_dataset_without_storing_predictions_and_dataset_processors(self):
         self.postprocessor.has_dataset_processors = False
 
-        self.evaluator.dataset_processor(None, None)
+        self.evaluator.process_dataset(None, None)
 
         assert not self.evaluator.store_predictions.called
         assert not self.evaluator.load.called
@@ -92,7 +92,7 @@ class TestModelEvaluator:
     def test_process_dataset_without_storing_predictions_and_with_dataset_processors(self):
         self.postprocessor.has_dataset_processors = True
 
-        self.evaluator.dataset_processor(None, None)
+        self.evaluator.process_dataset(None, None)
 
         assert not self.evaluator.store_predictions.called
         assert not self.evaluator.load.called
@@ -105,7 +105,7 @@ class TestModelEvaluator:
     def test_process_dataset_with_storing_predictions_and_without_dataset_processors(self):
         self.postprocessor.has_dataset_processors = False
 
-        self.evaluator.dataset_processor('path', None)
+        self.evaluator.process_dataset('path', None)
 
         assert self.evaluator.store_predictions.called
         assert not self.evaluator.load.called
@@ -118,7 +118,7 @@ class TestModelEvaluator:
     def test_process_dataset_with_storing_predictions_and_with_dataset_processors(self):
         self.postprocessor.has_dataset_processors = True
 
-        self.evaluator.dataset_processor('path', None)
+        self.evaluator.process_dataset('path', None)
 
         assert self.evaluator.store_predictions.called
         assert not self.evaluator.load.called
@@ -145,7 +145,7 @@ class TestModelEvaluator:
         mocker.patch('accuracy_checker.evaluators.model_evaluator.get_path')
         self.postprocessor.has_dataset_processors = True
 
-        self.evaluator.dataset_processor('path', None)
+        self.evaluator.process_dataset('path', None)
 
         assert not self.evaluator.store_predictions.called
         assert self.evaluator.load.called
@@ -221,7 +221,7 @@ class TestModelEvaluatorAsync:
         self.launcher.allow_reshape_input = False
         self.preprocessor.has_multi_infer_transformations = False
 
-        self.evaluator.dataset_processor(None, None)
+        self.evaluator.process_dataset(None, None)
 
         assert not self.evaluator.store_predictions.called
         assert not self.evaluator.load.called
@@ -234,7 +234,7 @@ class TestModelEvaluatorAsync:
         self.launcher.allow_reshape_input = False
         self.preprocessor.has_multi_infer_transformations = False
 
-        self.evaluator.dataset_processor('path', None)
+        self.evaluator.process_dataset('path', None)
 
         assert self.evaluator.store_predictions.called
         assert not self.evaluator.load.called
