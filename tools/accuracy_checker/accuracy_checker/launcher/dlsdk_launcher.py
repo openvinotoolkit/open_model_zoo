@@ -305,8 +305,7 @@ class DLSDKLauncher(Launcher):
         return results
 
     def predict_async(self, ir, inputs, metadata=None, **kwargs):
-        infer_inputs = inputs[0]
-        ir.async_infer(inputs=infer_inputs)
+        ir.predict(inputs)
         if metadata is not None:
             for meta_ in metadata:
                 meta_['input_shape'] = self.inputs_info_for_meta()
@@ -502,9 +501,30 @@ class DLSDKLauncher(Launcher):
                     self.network, self._device, num_requests=self._num_requests
                 )
 
+        if num_ireq > 1:
+            self.async_mode = True
+
+    @property
+    def async_mode(self):
+        return self._async_mode
+
+    @async_mode.setter
+    def async_mode(self, flag):
+        self._async_mode = flag
+        # if 'CPU' in self._devices_list():
+        #     self.ie_core.set_config({'CPU_THROUGHPUT_STREAMS': 'CPU_THROUGHPUT_AUTO'}, 'CPU')
+        #     print(self.ie_core.get_config('CPU', 'CPU_THROUGHPUT_STREAMS'))
+        #     self.ie_core.set_config({'CPU_BIND_THREAD': 'YES'}, 'CPU')
+
     @property
     def infer_requests(self):
         return self.exec_network.requests
+
+    def get_async_requests(self, completion_callback=None):
+        async_req = []
+        for request_id, request in self.exec_network.requests:
+            async_req.append(AsyncInferRequestWrapper(request_id, request, completion_callback))
+        return async_req
 
     def _reshape_input(self, shapes):
         if self.reload_network:
@@ -778,3 +798,17 @@ class DLSDKLauncher(Launcher):
             del self.ie_core
         if self._set_variable:
             del os.environ[FPGA_COMPILER_MODE_VAR]
+
+
+class AsyncInferRequestWrapper:
+    def __init__(self, requiest_id, ireq, completion_callback=None):
+        self.request_id = requiest_id
+        self.ireq = ireq
+        if completion_callback is not None:
+            self.set_callback(completion_callback)
+
+    def infer(self, infer_inputs):
+        self.ireq.async_infer(inputs=infer_inputs)
+
+    def set_callback(self, callback):
+        self.ireq.set_completion_callback(py_callbal=callback, py_data=self.request_id)
