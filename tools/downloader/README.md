@@ -324,8 +324,18 @@ describing a single model. Each such object has the following keys:
 
 * `precisions`: the list of precisions that the model has IR files for. For models downloaded
   in a format other than the Inference Engine IR format, these are the precisions that the model
-  converter can produce IR files in. Current possible values are `FP16`, `FP32`, `INT1`, `INT8`;
-  more might be added in the future.
+  converter can produce IR files in. Current possible values are:
+
+  * `FP16`
+  * `FP16-INT1`
+  * `FP16-INT8`
+  * `FP32`
+  * `FP32-INT1`
+  * `FP32-INT8`
+  * `INT1`
+  * `INT8`
+
+  Additional possible values might be added in the future.
 
 * `subdirectory`: the subdirectory of the output tree into which the downloaded or converted files
   will be placed by the downloader or the converter, respectively.
