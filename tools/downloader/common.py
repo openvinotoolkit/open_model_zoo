@@ -47,6 +47,7 @@ KNOWN_TASK_TYPES = {
     'classification',
     'detection',
     'face_recognition',
+    'feature_extraction',
     'head_pose_estimation',
     'human_pose_estimation',
     'image_processing',
