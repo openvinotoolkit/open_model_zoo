@@ -81,9 +81,10 @@ def run(params, capture, detector, reid):
         output_video = None
 
     prev_frames = thread_body.frames_queue.get()
-    detector.run_asynch(prev_frames)
+    detector.run_asynch(prev_frames, frame_number)
 
     while thread_body.process:
+        frame_number += 1
         key = check_pressed_keys(key)
         if key == 27:
             break
@@ -96,11 +97,8 @@ def run(params, capture, detector, reid):
         if frames is None:
             continue
 
-        if params.detections:
-            all_detections = detector.get_detections(frame_number)
-        else:
-            all_detections = detector.wait_and_grab()
-            detector.run_asynch(frames)
+        all_detections = detector.wait_and_grab()
+        detector.run_asynch(frames, frame_number)
 
         all_masks = [[] for _ in range(len(all_detections))]
         for i, detections in enumerate(all_detections):
@@ -121,7 +119,6 @@ def run(params, capture, detector, reid):
 
         print('\rProcessing frame: {}, fps = {} (avg_fps = {:.3})'.format(
                             frame_number, fps, 1. / avg_latency.get()), end="")
-        frame_number += 1
         prev_frames, frames = frames, prev_frames
     print('')
 
