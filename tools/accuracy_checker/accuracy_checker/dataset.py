@@ -169,7 +169,7 @@ class Dataset:
         ids = range(start, end, step)
         self.subset = ids if not pairwise_subset else self._make_subset_pairwise(ids, accept_pairs)
 
-    def _make_subset_pairwise(self, ids, add_pairs=True):
+    def _make_subset_pairwise(self, ids, add_pairs=False):
         subsample_set = OrderedSet()
         pairs_set = OrderedSet()
         if isinstance(self._annotation[0], ReIdentificationClassificationAnnotation):
@@ -190,18 +190,17 @@ class Dataset:
                 subsample_set.add(idx)
                 selected_annotation = self._annotation[idx]
                 if not selected_annotation.query:
-                    if not selected_annotation.query:
-                        query_for_person = [
-                            idx for idx, annotation in enumerate(self._annotation)
-                            if annotation.person_id == selected_annotation.person_id and annotation.query
-                        ]
-                        pairs_set |= OrderedSet(query_for_person)
-                    else:
-                        gallery_for_person = [
-                            idx for idx, annotation in enumerate(self._annotation)
-                            if annotation.person_id == selected_annotation.person_id and not annotation.query
-                        ]
-                        pairs_set |= OrderedSet(gallery_for_person)
+                    query_for_person = [
+                        idx for idx, annotation in enumerate(self._annotation)
+                        if annotation.person_id == selected_annotation.person_id and annotation.query
+                    ]
+                    pairs_set |= OrderedSet(query_for_person)
+                else:
+                    gallery_for_person = [
+                        idx for idx, annotation in enumerate(self._annotation)
+                        if annotation.person_id == selected_annotation.person_id and not annotation.query
+                    ]
+                    pairs_set |= OrderedSet(gallery_for_person)
 
         if add_pairs:
             subsample_set |= pairs_set
