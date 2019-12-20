@@ -250,6 +250,8 @@ class DLSDKLauncher(Launcher):
         dlsdk_launcher_config.validate(self.config, ie_core=self.ie_core)
         device = self.config['device'].split('.')
         self._device = '.'.join((device[0].upper(), device[1])) if len(device) > 1 else device[0].upper()
+        self._set_variable = False
+        self._async_mode = False
         self._prepare_bitstream_firmware(self.config)
         self._prepare_ie()
         self._delayed_model_loading = delayed_model_loading
@@ -507,6 +509,25 @@ class DLSDKLauncher(Launcher):
         if num_ireq != self._num_requests:
             self._num_requests = num_ireq
             self.load_network(self.network, log=False)
+
+    @property
+    def async_mode(self):
+        return self._async_mode
+
+    @async_mode.setter
+    def async_mode(self, flag):
+        if flag:
+            if 'CPU' in self._devices_list():
+                self.plugin.set_config({
+                    'CPU_BIND_THREAD': 'YES' if not self._is_multi() else 'NO',
+                    'CPU_THROUGHPUT_STREAMS': 'CPU_THROUGHPUT_AUTO'})
+            if 'GPU' in self._devices_list():
+                config = {'GPU_THROUGHPUT_STREAMS': 'GPU_THROUGHPUT_AUTO'}
+                if self._is_multi() and 'CPU' in self._devices_list():
+                    config['CLDNN_PLUGIN_THROTTLE'] = '1'
+                    self.plugin.set_config(config)
+        self._async_mode = flag
+
 
     @property
     def infer_requests(self):

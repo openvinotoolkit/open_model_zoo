@@ -30,7 +30,7 @@ from ..config import ConfigError
 from ..data_readers import BaseReader, REQUIRES_ANNOTATIONS
 from .base_evaluator import BaseEvaluator
 
-
+# pylint: disable=W0223
 class ModelEvaluator(BaseEvaluator):
     def __init__(
             self, launcher, input_feeder, adapter, reader, preprocessor, postprocessor, dataset, metric, async_mode
@@ -161,7 +161,9 @@ class ModelEvaluator(BaseEvaluator):
                     free_irs.append(ready_ir_id)
                     if stored_predictions:
                         predictions_to_store.extend(copy.deepcopy(batch_predictions))
-                    annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions, batch_meta)
+                    annotations, predictions = self.postprocessor.process_batch(
+                        batch_annotation, batch_predictions, batch_meta
+                    )
                     self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
 
                     if self.metric_executor.need_store_predictions:

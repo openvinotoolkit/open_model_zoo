@@ -159,10 +159,6 @@ class TestModelEvaluator:
 class TestModelEvaluatorAsync:
     def setup_method(self):
         self.launcher = MagicMock()
-        infer_request = MagicMock()
-        # infer_request.request_id = 0
-        # infer_request.get_result = Mock(return_value=[None, None, None])
-        # infer_request.infer = Mock()
         self.launcher.get_async_requests = Mock(return_value=[])
         data = MagicMock(data=MagicMock(), metadata=MagicMock(), identifier=0)
         self.preprocessor = Mock()
