@@ -145,7 +145,7 @@ class ModelEvaluator(BaseEvaluator):
             async_request.set_completion_callback(completion_callback)
 
         while free_irs or queued_irs or ready_irs:
-            self._fill_free_irs(free_irs, queued_irs, dataset_iterator)
+            self._fill_free_irs(free_irs, queued_irs, infer_requests_pool, dataset_iterator)
             free_irs[:] = []
 
             if ready_irs:

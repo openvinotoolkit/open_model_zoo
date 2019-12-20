@@ -160,9 +160,10 @@ class TestModelEvaluatorAsync:
     def setup_method(self):
         self.launcher = MagicMock()
         infer_request = MagicMock()
-        infer_request.wait = Mock(return_value=0)
-        infer_request.outputs = Mock()
-        self.launcher.infer_requests = [infer_request]
+        # infer_request.request_id = 0
+        # infer_request.get_result = Mock(return_value=[None, None, None])
+        # infer_request.infer = Mock()
+        self.launcher.get_async_requests = Mock(return_value=[])
         data = MagicMock(data=MagicMock(), metadata=MagicMock(), identifier=0)
         self.preprocessor = Mock()
         self.preprocessor.process = Mock(return_value=data)
@@ -226,8 +227,7 @@ class TestModelEvaluatorAsync:
         assert not self.evaluator.store_predictions.called
         assert not self.evaluator.load.called
         assert not self.launcher.predict.called
-        assert self.launcher.predict_async.called
-        assert self.metric.update_metrics_on_batch.call_count == len(self.annotations)
+        assert self.launcher.get_async_requests.called
 
     def test_process_dataset_with_storing_predictions_and_without_dataset_processors(self):
         self.postprocessor.has_dataset_processors = False
@@ -239,9 +239,7 @@ class TestModelEvaluatorAsync:
         assert self.evaluator.store_predictions.called
         assert not self.evaluator.load.called
         assert not self.launcher.predict.called
-        assert self.launcher.predict_async.called
-        assert self.postprocessor.process_batch.called
-        assert self.metric.update_metrics_on_batch.call_count == len(self.annotations)
+        assert self.launcher.get_async_requests.called
 
     def test_process_dataset_with_loading_predictions_and_without_dataset_processors(self, mocker):
         mocker.patch('accuracy_checker.evaluators.model_evaluator.get_path')
