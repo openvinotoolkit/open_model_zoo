@@ -83,6 +83,10 @@ int main(int argc, char *argv[]) {
         parseInputFilesArguments(imageNames);
         unsigned inputImagesCount = imageNames.size();
         if (inputImagesCount == 0) throw std::runtime_error("No images provided");
+        std::vector<cv::Mat> inputImgs = {};
+        for (auto& imgName: imageNames) {
+            inputImgs.push_back(cv::imread(imgName));
+        }
 
         // -------------------------------------------Read network--------------------------------------------
         InferenceEngine::Core ie;
@@ -199,7 +203,7 @@ int main(int argc, char *argv[]) {
         if (FLAGS_nireq == 0) {
             std::string key = METRIC_KEY(OPTIMAL_NUMBER_OF_INFER_REQUESTS);
             try {
-                FLAGS_nireq = 2 * executableNetwork.GetMetric(key).as<unsigned int>();
+                FLAGS_nireq = executableNetwork.GetMetric(key).as<unsigned int>();
             } catch (const InferenceEngine::details::InferenceEngineException& ex) {
                 THROW_IE_EXCEPTION
                         << "Every device used with the imagenet_classification_demo should "
@@ -230,14 +234,12 @@ int main(int argc, char *argv[]) {
         
         GridMat gridMat = GridMat(inputImagesCount, cv::Size(width, height));
 
-        unsigned spfResultsMaxCount = 1000;
-        std::queue<double> spfQueue;
-        double spf;
-        double spfSum = 0;
         double avgFPS = 0;
         unsigned framesNum = 0;
-
         long long startTickCount = cv::getTickCount();
+        for (auto& img: inputImgs) {
+            resizeImage(img, modelInputResolution);
+        }
         auto startTime = std::chrono::system_clock::now();
         auto currentTime = std::chrono::system_clock::now();
         std::chrono::duration<double> elapsedSeconds = currentTime - startTime;
@@ -265,12 +267,6 @@ int main(int argc, char *argv[]) {
                 delay = ((FLAGS_delay == -1)
                          ? static_cast<int>(avgFPS / (gridMatSize.width * (gridMatSize.height / FLAGS_b)) * 1000)
                          : FLAGS_delay);
-                
-                spfSum = 0;
-                avgFPS = 0;
-                framesNum = 0;
-                std::queue<double>().swap(spfQueue);
-                startTickCount = cv::getTickCount();
             }
 
             std::unique_lock<std::mutex> lock(mutex);
@@ -284,14 +280,7 @@ int main(int argc, char *argv[]) {
                 }
                 framesNum += FLAGS_b;
                 gridMat.listUpdate(showMats);
-                spf = ((cv::getTickCount() - startTickCount) / cv::getTickFrequency()) / framesNum;
-                if (spfQueue.size() >= spfResultsMaxCount) {
-                    spfSum -= spfQueue.front();
-                    spfQueue.pop();
-                }
-                spfQueue.push(spf);
-                spfSum += spf;
-                avgFPS = spfQueue.size() / spfSum;
+                avgFPS = 1. / (((cv::getTickCount() - startTickCount) / cv::getTickFrequency()) / framesNum);
                 gridMat.textUpdate(avgFPS, isTestMode);
                 if (!FLAGS_no_show && FLAGS_delay != -1) {
                     cv::imshow("main", gridMat.getMat());
@@ -301,14 +290,7 @@ int main(int argc, char *argv[]) {
             }
             else if (!emptyInferRequests.empty()) {
                 mutex.unlock();
-                const cv::Mat& readImg = cv::imread(imageNames[nextImageIndex]);
-                if (readImg.data == nullptr) {
-                    std::cerr << "Could not read image " << imageNames[nextImageIndex] << '\n';
-                } else {
-                    cv::Mat tmpImg = readImg;
-                    resizeImage(tmpImg, modelInputResolution);
-                    emptyInferRequests.front().second.push_back(tmpImg);
-                }
+                emptyInferRequests.front().second.push_back(inputImgs[nextImageIndex]);
                 nextImageIndex++;
                 if (nextImageIndex == inputImagesCount) {
                     nextImageIndex = 0;

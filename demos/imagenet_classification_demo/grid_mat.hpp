@@ -99,13 +99,11 @@ public:
                 prevImgs.push(frame);
                 
                 int thickness =  static_cast<int>(10. * frame.cols / cellSize.width);
-                copyMakeBorder(frame,
-                               frame,
-                               thickness, thickness, thickness, thickness,
-                               cv::BORDER_CONSTANT,
-                               cv::Scalar(0, 255, 0));
+                cv::Mat tmpFrame;
+                frame.copyTo(tmpFrame);
+                cv::rectangle(tmpFrame, cv::Point(), cv::Point(frame.cols, frame.rows), cv::Scalar(255, 0, 0), thickness);
                 
-                cv::resize(frame,
+                cv::resize(tmpFrame,
                            outImg(cv::Rect(points[currSourceID], cellSize)),
                            cellSize);
             
