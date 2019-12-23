@@ -218,6 +218,11 @@ def build_arguments_parser():
         default=False,
         type=cast_to_bool
     )
+    parser.add_argument(
+        '--num_requests',
+        help='the number of infer requests',
+        required=False,
+    )
 
     return parser
 

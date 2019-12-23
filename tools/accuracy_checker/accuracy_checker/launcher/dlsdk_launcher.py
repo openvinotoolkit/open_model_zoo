@@ -628,7 +628,6 @@ class DLSDKLauncher(Launcher):
         async_mode = self.get_value_from_config('async_mode')
         if not async_mode:
             warning('Using multi device in sync mode non-applicable. Async mode will be used.')
-        self.async_mode = True
         num_per_device_req = re.findall(NIREQ_REGEX, self._device)
         device_list = self._devices_list()
         num_devices = len(device_list)

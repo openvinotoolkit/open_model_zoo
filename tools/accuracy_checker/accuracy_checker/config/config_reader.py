@@ -361,58 +361,6 @@ class ConfigReader:
 
     @staticmethod
     def _provide_cmd_arguments(arguments, config, mode):
-        def merge_converted_model_path(converted_models_dir, mo_output_dir):
-            if mo_output_dir:
-                mo_output_dir = Path(mo_output_dir)
-                if mo_output_dir.is_absolute():
-                    return mo_output_dir
-                return converted_models_dir / mo_output_dir
-            return converted_models_dir
-
-        def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
-            if launcher_entry['framework'].lower() != 'dlsdk':
-                return launcher_entry
-
-            launcher_entry.update(update_launcher_entry)
-            models_prefix = arguments.models if 'models' in arguments else None
-            if models_prefix:
-                launcher_entry['_models_prefix'] = models_prefix
-
-            if 'deprecated_ir_v7' in arguments and arguments.deprecated_ir_v7:
-                mo_flags = launcher_entry.get('mo_flags', [])
-                mo_flags.append('generate_deprecated_IR_V7')
-                launcher_entry['mo_flags'] = mo_flags
-
-            if 'converted_models' in arguments and arguments.converted_models:
-                mo_params = launcher_entry.get('mo_params', {})
-                mo_params.update({
-                    'output_dir': merge_converted_model_path(arguments.converted_models, mo_params.get('output_dir'))
-                })
-
-                launcher_entry['mo_params'] = mo_params
-
-            if 'aocl' in arguments and arguments.aocl:
-                launcher_entry['_aocl'] = arguments.aocl
-
-            if 'bitstream' not in launcher_entry and 'bitstreams' in arguments and arguments.bitstreams:
-                if not arguments.bitstreams.is_dir():
-                    launcher_entry['bitstream'] = arguments.bitstreams
-
-            if 'cpu_extensions' not in launcher_entry and 'extensions' in arguments and arguments.extensions:
-                extensions = arguments.extensions
-                if not extensions.is_dir() or extensions.name == 'AUTO':
-                    launcher_entry['cpu_extensions'] = arguments.extensions
-
-            if 'affinity_map' not in launcher_entry and 'affinity_map' in arguments and arguments.affinity_map:
-                am = arguments.affinity_map
-                if not am.is_dir():
-                    launcher_entry['affinity_map'] = arguments.affinity_map
-
-            if 'async_mode' in arguments:
-                launcher_entry['async_mode'] = arguments.async_mode
-
-            return launcher_entry
-
         def merge_models(config, arguments, update_launcher_entry):
             for model in config['models']:
                 for launcher_entry in model['launchers']:
@@ -797,3 +745,71 @@ def get_mode(config):
         raise ConfigError('Multiple evaluation types in the one config is not supported. '
                           'Please separate on several configs.')
     return next(iter(evaluation_keys))
+
+
+def merge_converted_model_path(converted_models_dir, mo_output_dir):
+    if mo_output_dir:
+        mo_output_dir = Path(mo_output_dir)
+        if mo_output_dir.is_absolute():
+            return mo_output_dir
+        return converted_models_dir / mo_output_dir
+    return converted_models_dir
+
+
+def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
+    def _convert_models_args(launcher_entry):
+        if 'deprecated_ir_v7' in arguments and arguments.deprecated_ir_v7:
+            mo_flags = launcher_entry.get('mo_flags', [])
+            mo_flags.append('generate_deprecated_IR_V7')
+            launcher_entry['mo_flags'] = mo_flags
+        if 'converted_models' in arguments and arguments.converted_models:
+            mo_params = launcher_entry.get('mo_params', {})
+            mo_params.update({
+                'output_dir': merge_converted_model_path(arguments.converted_models,
+                                                         mo_params.get('output_dir'))
+            })
+
+            launcher_entry['mo_params'] = mo_params
+
+        return launcher_entry
+
+    def _fpga_specific_args(launcher_entry):
+        if 'aocl' in arguments and arguments.aocl:
+            launcher_entry['_aocl'] = arguments.aocl
+
+        if 'bitstream' not in launcher_entry and 'bitstreams' in arguments and arguments.bitstreams:
+            if not arguments.bitstreams.is_dir():
+                launcher_entry['bitstream'] = arguments.bitstreams
+
+    def _async_evaluation_args(launcher_entry):
+        if 'async_mode' in arguments:
+            launcher_entry['async_mode'] = arguments.async_mode
+
+        if 'num_requests' in arguments and arguments.num_requests is not None:
+            launcher_entry['num_requests'] = arguments.num_requests
+
+        return launcher_entry
+
+    if launcher_entry['framework'].lower() != 'dlsdk':
+        return launcher_entry
+
+    launcher_entry.update(update_launcher_entry)
+    models_prefix = arguments.models if 'models' in arguments else None
+    if models_prefix:
+        launcher_entry['_models_prefix'] = models_prefix
+
+    _convert_models_args(launcher_entry)
+    _async_evaluation_args(launcher_entry)
+    _fpga_specific_args(launcher_entry)
+
+    if 'cpu_extensions' not in launcher_entry and 'extensions' in arguments and arguments.extensions:
+        extensions = arguments.extensions
+        if not extensions.is_dir() or extensions.name == 'AUTO':
+            launcher_entry['cpu_extensions'] = arguments.extensions
+
+    if 'affinity_map' not in launcher_entry and 'affinity_map' in arguments and arguments.affinity_map:
+        am = arguments.affinity_map
+        if not am.is_dir():
+            launcher_entry['affinity_map'] = arguments.affinity_map
+
+    return launcher_entry
