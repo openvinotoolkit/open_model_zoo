@@ -378,16 +378,13 @@ class ConfigReader:
                 mo_flags.append('generate_deprecated_IR_V7')
                 launcher_entry['mo_flags'] = mo_flags
 
-            if 'converted_models' not in arguments or not arguments.converted_models:
-                return launcher_entry
+            if 'converted_models' in arguments and arguments.converted_models:
+                mo_params = launcher_entry.get('mo_params', {})
+                mo_params.update({
+                    'output_dir': merge_converted_model_path(arguments.converted_models, mo_params.get('output_dir'))
+                })
 
-            mo_params = launcher_entry.get('mo_params', {})
-
-            mo_params.update({
-                'output_dir': merge_converted_model_path(arguments.converted_models, mo_params.get('output_dir'))
-            })
-
-            launcher_entry['mo_params'] = mo_params
+                launcher_entry['mo_params'] = mo_params
 
             if 'aocl' in arguments and arguments.aocl:
                 launcher_entry['_aocl'] = arguments.aocl

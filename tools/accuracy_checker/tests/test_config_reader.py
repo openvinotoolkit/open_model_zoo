@@ -827,6 +827,8 @@ class TestConfigReader:
         args = copy.deepcopy(self.arguments)
         args.model_optimizer = None
         args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
         args.target_tags = ['some_tag']
 
         config = ConfigReader.merge(args)[0]
@@ -862,6 +864,8 @@ class TestConfigReader:
         args = copy.deepcopy(self.arguments)
         args.model_optimizer = None
         args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
         args.target_tags = ['some_tag']
 
         config = ConfigReader.merge(args)[0]
@@ -1001,6 +1005,8 @@ class TestConfigReader:
         args = copy.deepcopy(self.arguments)
         args.model_optimizer = None
         args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
         args.target_tags = ['tag2']
 
         config = ConfigReader.merge(args)[0]
@@ -1037,6 +1043,8 @@ class TestConfigReader:
         args = copy.deepcopy(self.arguments)
         args.model_optimizer = None
         args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
         args.target_tags = ['tag1', 'tag2']
 
         config = ConfigReader.merge(args)[0]
@@ -1062,6 +1070,8 @@ class TestConfigReader:
         args = copy.deepcopy(self.arguments)
         args.model_optimizer = None
         args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
         args.target_framework = 'dlsdk'
 
         config = ConfigReader.merge(args)[0]
@@ -1095,6 +1105,8 @@ class TestConfigReader:
         args = copy.deepcopy(self.arguments)
         args.model_optimizer = None
         args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
         args.target_framework = 'dlsdk'
 
         config = ConfigReader.merge(args)[0]
@@ -1211,6 +1223,8 @@ class TestConfigReader:
         args = copy.deepcopy(self.arguments)
         args.model_optimizer = None
         args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
         args.target_devices = ['CPU']
 
         config = ConfigReader.merge(args)[0]
@@ -1241,6 +1255,8 @@ class TestConfigReader:
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
         args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
         args.target_devices = ['CPU']
 
         config = ConfigReader.merge(args)[0]
@@ -1369,6 +1385,8 @@ class TestConfigReader:
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
         args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
         args.target_devices = ['GPU', 'CPU']
 
         config = ConfigReader.merge(args)[0]
@@ -1432,6 +1450,8 @@ class TestConfigReader:
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
         args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
         args.target_devices = ['GPU', 'CPU']
 
         config = ConfigReader.merge(args)[0]
@@ -1465,6 +1485,8 @@ class TestConfigReader:
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
         args = copy.deepcopy(self.arguments)
         args.converted_models = None
+        args.extensions = None
+        args.bitstreams = None
         args.target_devices = ['CPU', 'GPU_unexpected_tail']
 
         config = ConfigReader.merge(args)[0]
