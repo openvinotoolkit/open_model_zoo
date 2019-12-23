@@ -10,7 +10,6 @@ models:
             type: INPUT
             shape: 3, 112, 112
 
-
     datasets:
       - name: lfw
 

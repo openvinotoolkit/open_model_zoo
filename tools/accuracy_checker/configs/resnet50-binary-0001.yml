@@ -4,10 +4,10 @@ models:
     launchers:
       - framework: dlsdk
         tags:
-          - INT1
+          - FP32-INT1
         device: CPU
-        model:   intel/resnet50-binary-0001/INT1/resnet50-binary-0001.xml
-        weights: intel/resnet50-binary-0001/INT1/resnet50-binary-0001.bin
+        model:   intel/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.xml
+        weights: intel/resnet50-binary-0001/FP32-INT1/resnet50-binary-0001.bin
         adapter: classification
 
 
