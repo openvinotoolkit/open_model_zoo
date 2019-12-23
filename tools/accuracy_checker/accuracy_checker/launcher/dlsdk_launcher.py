@@ -474,21 +474,6 @@ class DLSDKLauncher(Launcher):
                 del self.exec_network
                 self.exec_network = self.plugin.load(self.network, num_requests=self._num_requests)
 
-
-    @property
-    def async_mode(self):
-        return self._async_mode
-
-    @async_mode.setter
-    def async_mode(self, flag):
-        if flag:
-            # if 'CPU' in self._devices_list():
-            #     self.plugin.set_config({'CPU_THROUGHPUT_STREAMS': 'CPU_THROUGHPUT_AUTO'})
-            #     self.plugin.set_config({'CPU_BIND_THREAD': 'YES'})
-            if 'GPU' in self._devices_list():
-                self.plugin.set_config({'GPU_THROUGHPUT_STREAMS': 'GPU_THROUGHPUT_AUTO'})
-        self._async_mode = flag
-
     @property
     def infer_requests(self):
         return self.exec_network.requests
