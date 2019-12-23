@@ -60,6 +60,7 @@ DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
 CONFIG_SHARED_PARAMETERS = ['bitstream']
 
 
+
 class ConfigReader:
     """
     Class for parsing input config.
@@ -406,6 +407,9 @@ class ConfigReader:
                 am = arguments.affinity_map
                 if not am.is_dir():
                     launcher_entry['affinity_map'] = arguments.affinity_map
+
+            if 'async_mode' in arguments:
+                launcher_entry['async_mode'] = arguments.async_mode
 
             return launcher_entry
 

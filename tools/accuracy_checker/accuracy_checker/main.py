@@ -211,6 +211,14 @@ def build_arguments_parser():
         required=False
     )
 
+    parser.add_argument(
+        '--async_mode',
+        help='Allow evaluation in async mode',
+        required=False,
+        default=False,
+        type=cast_to_bool
+    )
+
     return parser
 
 
