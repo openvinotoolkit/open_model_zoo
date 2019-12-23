@@ -571,7 +571,7 @@ class DLSDKLauncher(Launcher):
         if self._is_vpu():
             log_level = self.config.get('_vpu_log_level')
             if log_level:
-                self.plugin.set_config({'VPU_LOG_LEVEL': log_level})
+                self.plugin.set_config({'LOG_LEVEL': log_level})
 
     def auto_num_requests(self):
         concurrency_device = {
