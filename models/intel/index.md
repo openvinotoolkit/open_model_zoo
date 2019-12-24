@@ -205,7 +205,6 @@ Deep Learning compressed models
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [resnet50-binary-0001](./resnet50-binary-0001/description/resnet50-binary-0001.md)                                                             | 1.002                | 7.446      |
 | [resnet18-xnor-binary-onnx-0001](./resnet18-xnor-binary-onnx-0001/description/resnet18-xnor-binary-onnx-0001.md)                               | -                    | -          |
-| [resnet18-dorefa-binary-onnx-0001](./resnet18-dorefa-binary-onnx-0001/description/resnet18-dorefa-binary-onnx-0001.md)                         | -                    | -          |
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
