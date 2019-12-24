@@ -63,15 +63,15 @@ def build_argparser():
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS,
                       help='Show this help message and exit.')
-    args.add_argument('-mm', '--mask_rcnn_model',
+    args.add_argument('-m_m', '--mask_rcnn_model',
                       help='Required. Path to an .xml file with a trained Mask-RCNN model with '
                            'additional text features output.',
                       required=True, type=str, metavar='"<path>"')
-    args.add_argument('-mte', '--text_enc_model',
+    args.add_argument('-m_te', '--text_enc_model',
                       help='Required. Path to an .xml file with a trained text recognition model '
                            '(encoder part).',
                       required=True, type=str, metavar='"<path>"')
-    args.add_argument('-mtd', '--text_dec_model',
+    args.add_argument('-m_td', '--text_dec_model',
                       help='Required. Path to an .xml file with a trained text recognition model '
                            '(decoder part).',
                       required=True, type=str, metavar='"<path>"')
