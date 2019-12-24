@@ -310,7 +310,7 @@ def prepare_annotations(annotation, label, create_boxes=False):
 
 def compute_precision_recall(thresholds, matching_results):
     num_thresholds = len(thresholds)
-    rectangle_thresholds = np.linspace(.0, 1.00, np.round((1.00 - .0) / .01) + 1, endpoint=True)
+    rectangle_thresholds = np.linspace(.0, 1.00, int(np.round((1.00 - .0) / .01)) + 1, endpoint=True)
     num_rec_thresholds = len(rectangle_thresholds)
     precision = -np.ones((num_thresholds, num_rec_thresholds))  # -1 for the precision of absent categories
     recall = -np.ones(num_thresholds)
