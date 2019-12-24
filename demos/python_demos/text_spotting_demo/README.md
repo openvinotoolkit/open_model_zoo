@@ -42,7 +42,7 @@ The demo workflow is the following:
 Run the application with the `-h` option to see the following usage message:
 
 ```
-usage: text_spotting_demo.py [-h] -mm "<path>" -mte "<path>" -mtd "<path>" -i
+usage: text_spotting_demo.py [-h] -m_m "<path>" -m_te "<path>" -m_td "<path>" -i
                              "<path>" [-d "<device>"] [-l "<absolute_path>"]
                              [--delay "<num>"] [-pt "<num>"] [-a ALPHABET]
                              [--trd_input_prev_symbol TRD_INPUT_PREV_SYMBOL]
@@ -56,13 +56,13 @@ usage: text_spotting_demo.py [-h] -mm "<path>" -mte "<path>" -mtd "<path>" -i
 
 Options:
   -h, --help            Show this help message and exit.
-  -mm "<path>", --mask_rcnn_model "<path>"
+  -m_m "<path>", --mask_rcnn_model "<path>"
                         Required. Path to an .xml file with a trained Mask-
                         RCNN model with additional text features output.
-  -mte "<path>", --text_enc_model "<path>"
+  -m_te "<path>", --text_enc_model "<path>"
                         Required. Path to an .xml file with a trained text
                         recognition model (encoder part).
-  -mtd "<path>", --text_dec_model "<path>"
+  -m_td "<path>", --text_dec_model "<path>"
                         Required. Path to an .xml file with a trained text
                         recognition model (decoder part).
   -i "<path>"           Required. Path to an image, video file or a numeric
@@ -116,9 +116,9 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 To run the demo, please provide paths to the model in the IR format and to an input video, image, or folder with images:
 ```bash
 python3 text_spotting_demo.py \
--mm <path_to_models>/text-spotting-0001-detector.xml \
--mte <path_to_models>/text-spotting-0001-recognizer-encoder.xml \
--mtd <path_to_models>/text-spotting-0001-recognizer-decoder.xml \
+-m_m <path_to_models>/text-spotting-0001-detector.xml \
+-m_te <path_to_models>/text-spotting-0001-recognizer-encoder.xml \
+-m_td <path_to_models>/text-spotting-0001-recognizer-decoder.xml \
 -i input_image.jpg
 ```
 
