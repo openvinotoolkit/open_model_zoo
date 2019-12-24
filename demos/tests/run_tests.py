@@ -30,6 +30,7 @@ import collections
 import csv
 import itertools
 import json
+import os
 import shlex
 import shutil
 import subprocess
@@ -89,6 +90,8 @@ def main():
         demos_to_test = {demo.full_name for demo in DEMOS}
 
     num_failures = 0
+
+    os.putenv('PYTHONPATH',  "{}:{}/lib".format(os.environ['PYTHONPATH'], args.demo_build_dir))
 
     for demo in DEMOS:
         if demo.full_name not in demos_to_test: continue
