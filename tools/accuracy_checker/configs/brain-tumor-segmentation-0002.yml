@@ -10,6 +10,14 @@ models:
         adapter:
             type: brain_tumor_segmentation
 
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/brain-tumor-segmentation-0002/FP16/brain-tumor-segmentation-0002.xml
+        weights: public/brain-tumor-segmentation-0002/FP16/brain-tumor-segmentation-0002.bin
+        adapter:
+            type: brain_tumor_segmentation
+
     datasets:
       - name: BraTS_2017
         preprocessing:
