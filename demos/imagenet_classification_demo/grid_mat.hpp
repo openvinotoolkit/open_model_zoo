@@ -50,13 +50,13 @@ public:
         return size;
     }
 
-    void listUpdate(std::list<cv::Mat>& frames) {
-        if (!frames.empty()) {
-            updateList.splice(updateList.end(), frames);
+    void listUpdate(std::list<std::tuple<cv::Mat, std::string, bool>>& imageInfos) {
+        if (!imageInfos.empty()) {
+            updateList.splice(updateList.end(), imageInfos);
         }
     }
 
-    void textUpdate(double overFPS, bool isFpsTest) {
+    void textUpdate(double avgFPS, double avgLatency, bool isFpsTest) {
         // Draw a rectangle
         cv::Point p1 = cv::Point(0, 0);
         cv::Point p2 = cv::Point(outImg.cols, rectangleHeight);
@@ -68,12 +68,14 @@ public:
 
         if (!isFpsTest) {
             cv::putText(outImg,
-                        cv::format("Overall FPS: %0.01f", overFPS),
+                        cv::format("FPS: %0.01f     Latency: %dms", avgFPS, static_cast<int>(avgLatency*1000)),
                         cv::Point(5, rectangleHeight - 5),
                         cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(0, 255, 0), thickness);
         } else {
             cv::putText(outImg,
-                        cv::format("FPS: %0.01f   Testing, please wait...", overFPS),
+                        cv::format("FPS: %0.01f     Latency: %dms     Testing, please wait...",
+                                   avgFPS,
+                                   static_cast<int>(avgLatency*1000)),
                         cv::Point(5, rectangleHeight - 5),
                         cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(0, 0, 255), thickness);
         }
@@ -81,7 +83,15 @@ public:
 
     cv::Mat getMat() {
         while (!updateList.empty()) {
-            cv::Mat frame = updateList.front();
+            cv::Mat frame = std::get<0>(updateList.front());
+            std::string predictedLabel = std::get<1>(updateList.front());
+            cv::Scalar textColor;
+            if (std::get<2>(updateList.front())) { // if prediction is right
+                textColor = cv::Scalar(0, 255, 0); // green color
+            }
+            else {
+                textColor = cv::Scalar(0, 0, 255); // red color
+            }
             updateList.pop_front();
 
             if (updateList.empty()) {
@@ -106,6 +116,18 @@ public:
                 cv::resize(tmpFrame,
                            outImg(cv::Rect(points[currSourceID], cellSize)),
                            cellSize);
+                
+                int fontFace = cv::FONT_HERSHEY_PLAIN;
+                double fontScale = 1;
+                thickness = 2;
+                int baseline = 0;
+                cv::Size textSize = cv::getTextSize(predictedLabel, fontFace, fontScale, thickness, &baseline);
+                fontScale = static_cast<double>(cellSize.width) / textSize.width;
+
+                cv::putText(outImg,
+                        predictedLabel,
+                        cv::Point(points[currSourceID].x, points[currSourceID].y + cellSize.height),
+                        cv::FONT_HERSHEY_PLAIN, fontScale, textColor, thickness);
             
                 if (currSourceID == points.size() - 1) {
                     currSourceID = 0;
@@ -121,7 +143,7 @@ public:
 private:
     cv::Mat outImg;
     std::queue<cv::Mat> prevImgs;
-    std::list<cv::Mat> updateList;
+    std::list<std::tuple<cv::Mat, std::string, bool>> updateList;
     cv::Size size;
     cv::Size cellSize;
     size_t currSourceID;

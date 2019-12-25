@@ -13,9 +13,9 @@ class InferRequestCallback
 {
 public:
     InferRequestCallback(InferenceEngine::InferRequest& ir,
-                         std::vector<cv::Mat> inputBlobImages,
+                         std::vector<std::pair<unsigned, cv::Mat>> inputBlobImages,
                          std::queue<std::pair<InferenceEngine::InferRequest&,
-                                              std::vector<cv::Mat>>>& completedInferRequests,
+                                              std::vector<std::pair<unsigned, cv::Mat>>>>& completedInferRequests,
                          std::mutex& mutex,
                          std::condition_variable& condVar
                          ):
@@ -41,8 +41,8 @@ public:
 
 private:
     InferenceEngine::InferRequest& ir;
-    std::vector<cv::Mat> inputBlobImages;
-    std::queue<std::pair<InferenceEngine::InferRequest&, std::vector<cv::Mat>>>& completedInferRequests;
+    std::vector<std::pair<unsigned, cv::Mat>> inputBlobImages;
+    std::queue<std::pair<InferenceEngine::InferRequest&, std::vector<std::pair<unsigned, cv::Mat>>>>& completedInferRequests;
     std::mutex& mutex;
     std::condition_variable& condVar;
 };
