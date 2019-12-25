@@ -343,6 +343,14 @@ class ModelEvaluator:
             return {}
         return self.metric_executor.get_metrics_attributes()
 
+    def register_metric(self, metric_config):
+        if isinstance(metric_config, str):
+            self.metric_executor.register_metric({'type': metric_config})
+        elif isinstance(metric_config, dict):
+            self.metric_executor.register_metric(metric_config)
+        else:
+            raise ValueError('Unsupported metric configuration type {}'.format(type(metric_config)))
+
     def reset(self):
         if self.metric_executor:
             self.metric_executor.reset()

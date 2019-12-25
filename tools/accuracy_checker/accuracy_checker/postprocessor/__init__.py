@@ -45,6 +45,7 @@ from .normalize_boxes import NormalizeBoxes
 from .brats_postprocessing import SegmentationPredictionResample, TransformBratsPrediction
 from .extract_answers_tokens import ExtractSQUADPrediction
 from .translate_3d_poses import Translate3dPoses
+from .normalize_recomendation import NormalizeRecommendation
 
 __all__ = [
     'Postprocessor',
@@ -81,5 +82,7 @@ __all__ = [
 
     'ExtractSQUADPrediction',
 
-    'Translate3dPoses'
+    'Translate3dPoses',
+
+    'NormalizeRecommendation'
 ]
