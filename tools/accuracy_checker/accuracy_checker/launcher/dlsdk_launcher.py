@@ -667,6 +667,7 @@ class DLSDKLauncher(Launcher):
             self._create_network()
         else:
             self.network = network
+        self._set_precision()
         self.exec_network = self.plugin.load(network=self.network, num_requests=self.num_requests)
 
     def load_ir(self, xml_path, bin_path):
@@ -684,7 +685,7 @@ class DLSDKLauncher(Launcher):
             if layer_name not in self.const_inputs + self.image_info_inputs
         }
 
-    def fit_to_input(self, data, layer_name, layout):
+    def fit_to_input(self, data, layer_name, layout, precision):
         def data_to_blob(layer_shape, data):
             data_shape = np.shape(data)
             if len(layer_shape) == 4:
@@ -702,6 +703,8 @@ class DLSDKLauncher(Launcher):
         layer_shape = tuple(self.inputs[layer_name].shape)
 
         data = data_to_blob(layer_shape, data)
+        if precision:
+            data = data.astype(precision)
 
         data_shape = np.shape(data)
         if data_shape != layer_shape:
@@ -710,6 +713,12 @@ class DLSDKLauncher(Launcher):
                 return data
 
         return self._align_data_shape(data, layer_name)
+
+    def _set_precision(self):
+        config_inputs = self.config.get('inputs', [])
+        for input_config in config_inputs:
+            if 'precision' in input_config:
+                self.network.inputs[input_config['name']].precision = input_config['precision']
 
     def release(self):
         if 'network' in self.__dict__:
