@@ -70,14 +70,14 @@ public:
             cv::putText(outImg,
                         cv::format("FPS: %0.01f     Latency: %dms", avgFPS, static_cast<int>(avgLatency*1000)),
                         cv::Point(5, rectangleHeight - 5),
-                        cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(0, 255, 0), thickness);
+                        cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(75, 255, 75), thickness);
         } else {
             cv::putText(outImg,
                         cv::format("FPS: %0.01f     Latency: %dms     Testing, please wait...",
                                    avgFPS,
                                    static_cast<int>(avgLatency*1000)),
                         cv::Point(5, rectangleHeight - 5),
-                        cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(0, 0, 255), thickness);
+                        cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(50, 50, 255), thickness);
         }
     }
 
@@ -87,10 +87,10 @@ public:
             std::string predictedLabel = std::get<1>(updateList.front());
             cv::Scalar textColor;
             if (std::get<2>(updateList.front())) { // if prediction is right
-                textColor = cv::Scalar(0, 255, 0); // green color
+                textColor = cv::Scalar(75, 255, 75); // green color
             }
             else {
-                textColor = cv::Scalar(0, 0, 255); // red color
+                textColor = cv::Scalar(50, 50, 255); // red color
             }
             updateList.pop_front();
 
@@ -111,7 +111,7 @@ public:
                 int thickness =  static_cast<int>(10. * frame.cols / cellSize.width);
                 cv::Mat tmpFrame;
                 frame.copyTo(tmpFrame);
-                cv::rectangle(tmpFrame, cv::Point(), cv::Point(frame.cols, frame.rows), cv::Scalar(255, 0, 0), thickness);
+                cv::rectangle(tmpFrame, cv::Point(), cv::Point(frame.cols, frame.rows), cv::Scalar(255, 50, 50), thickness);
                 
                 cv::resize(tmpFrame,
                            outImg(cv::Rect(points[currSourceID], cellSize)),

@@ -27,8 +27,6 @@
 #include "grid_mat.hpp"
 #include "infer_request_callback.hpp"
 
-using namespace InferenceEngine;
-
 ConsoleErrorListener error_listener;
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -107,7 +105,7 @@ int main(int argc, char *argv[]) {
         // ----------------------------------------Read image classes-----------------------------------------
         std::vector<std::pair<std::string, std::string>> classIndexesMap;
         std::vector<std::string> classIndexes;
-        std::string classIndexFileName = fileNameNoExt(FLAGS_m) + "_classes" + ".txt"; // <<<<<<<<<<<<<<<< different file format
+        std::string classIndexFileName = fileNameNoExt(FLAGS_m) + "_classes.txt";
         std::ifstream inputClassesFile(classIndexFileName);
         while (true) {
             std::string imageName;
@@ -132,7 +130,7 @@ int main(int argc, char *argv[]) {
 
         // --------------------------------------------Read labels--------------------------------------------
         std::vector<std::string> labels;
-        std::string labelsFileName = fileNameNoExt(FLAGS_m) + "_labels" + ".txt"; // <<<<<<<<<<<<<<<<<< different file format
+        std::string labelsFileName = fileNameNoExt(FLAGS_m) + "_labels.txt";
         std::ifstream inputLabelsFile(labelsFileName);
         std::string labelsLine;
         while (std::getline(inputLabelsFile, labelsLine)) {
@@ -303,19 +301,14 @@ int main(int argc, char *argv[]) {
         int delay = 1;
         char key = 0;
         std::size_t nextImageIndex = 0;
+        long long startTickCount = cv::getTickCount();
         std::condition_variable condVar;
         std::mutex mutex;
-
-        long long startTickCount = cv::getTickCount();
-        for (auto& img: inputImages) { // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< when to resize?
-            resizeImage(img, modelInputResolution);
-        }
         
-        // infer request, batch of images [ image class index, image ]
-        std::queue<std::pair<InferRequest&, std::vector<std::pair<unsigned, cv::Mat>>>> emptyInferRequests; // <<<<<<<<<<< simplify
-        std::queue<std::pair<InferRequest&, std::vector<std::pair<unsigned, cv::Mat>>>> completedInferRequests;
+        std::queue<IRInfo> emptyInferRequests;
+        std::queue<IRInfo> completedInferRequests;
         for (std::size_t i = 0; i < inferRequests.size(); i++) {
-            emptyInferRequests.push({inferRequests[i], std::vector<std::pair<unsigned, cv::Mat>>()});
+            emptyInferRequests.push(IRInfo(inferRequests[i], std::vector<IRInfo::IRImage>()));
         }
 
         auto startTime = std::chrono::system_clock::now();
@@ -342,26 +335,26 @@ int main(int argc, char *argv[]) {
             std::unique_lock<std::mutex> lock(mutex);
         
             if (!completedInferRequests.empty()) {
-                auto completedIR = completedInferRequests.front();
+                auto completedIRInfo = completedInferRequests.front();
                 completedInferRequests.pop();
                 mutex.unlock();
-                emptyInferRequests.push({completedIR.first, std::vector<std::pair<unsigned, cv::Mat>>()});
+                emptyInferRequests.push(IRInfo(completedIRInfo.ir, std::vector<IRInfo::IRImage>()));
 
                 // -----------------------------------Process output blobs------------------------------------
                 std::vector<unsigned> rightClasses = {};
-                for (size_t i = 0; i < completedIR.second.size(); i++) {
-                    rightClasses.push_back(std::stoul(classIndexes[completedIR.second[i].first]));
+                for (size_t i = 0; i < completedIRInfo.images.size(); i++) {
+                    rightClasses.push_back(completedIRInfo.images[i].rightClass);
                 }
 
                 int numPredictions = 1;
-                ClassificationResult res(completedIR.first.GetBlob(outputName), FLAGS_b, numPredictions); // <<<<<<<<<<<<<< reuse class?
-                std::vector<unsigned> results = res.topResults(numPredictions, *completedIR.first.GetBlob(outputName));
+                ClassificationResult res(completedIRInfo.ir.GetBlob(outputName), FLAGS_b, numPredictions);
+                std::vector<unsigned> results = res.topResults(numPredictions, *completedIRInfo.ir.GetBlob(outputName));
                 std::vector<std::string> predictedLabels = {};
                 for (size_t i = 0; i < FLAGS_b; i++) {
                     predictedLabels.push_back(labels[results[i]]);
                     bool isPredictionRight = (results[i] == rightClasses[i]);
                     shownImagesInfo.push_back(
-                        std::make_tuple(completedIR.second[i].second, predictedLabels[i], isPredictionRight));
+                        std::make_tuple(completedIRInfo.images[i].mat, predictedLabels[i], isPredictionRight));
                 }
 
                 framesNum += FLAGS_b;
@@ -376,29 +369,32 @@ int main(int argc, char *argv[]) {
             }
             else if (!emptyInferRequests.empty()) {
                 mutex.unlock();
-                emptyInferRequests.front().second.push_back({nextImageIndex, inputImages[nextImageIndex]});
+                cv::Mat nextImage = inputImages[nextImageIndex];
+                resizeImage(nextImage, modelInputResolution);
+                emptyInferRequests.front().images.push_back(
+                    IRInfo::IRImage(nextImage, std::stoul(classIndexes[nextImageIndex])));
                 nextImageIndex++;
                 if (nextImageIndex == inputImagesCount) {
                     nextImageIndex = 0;
                 }
-                if (emptyInferRequests.front().second.size() == FLAGS_b) {
-                    auto ir = emptyInferRequests.front();
+                if (emptyInferRequests.front().images.size() == FLAGS_b) {
+                    auto emptyIR = emptyInferRequests.front();
 
-                    ir.first.SetCompletionCallback(
+                    emptyIR.ir.SetCompletionCallback(
                         InferRequestCallback(
-                            ir.first,
-                            ir.second,
+                            emptyIR.ir,
+                            emptyIR.images,
                             completedInferRequests,
                             mutex,
                             condVar
                         )
                     );
                     
-                    auto inputBlob = ir.first.GetBlob(inputBlobName);
+                    auto inputBlob = emptyIR.ir.GetBlob(inputBlobName);
                     for (unsigned i = 0; i < FLAGS_b; i++) {
-                        matU8ToBlob<uint8_t>(ir.second[i].second, inputBlob, i);
+                        matU8ToBlob<uint8_t>(emptyIR.images[i].mat, inputBlob, i);
                     }
-                    ir.first.StartAsync();
+                    emptyIR.ir.StartAsync();
                     emptyInferRequests.pop();
                 }
             }

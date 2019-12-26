@@ -7,15 +7,32 @@
 
 #include <ie_iextension.h>
 
+using namespace InferenceEngine;
+
 std::exception_ptr irCallbackException;
+
+class IRInfo {
+public:
+    class IRImage {
+    public:
+        cv::Mat mat;
+        unsigned rightClass;
+
+        IRImage(cv::Mat &mat, unsigned rightClass): mat(mat), rightClass(rightClass) {}
+    };
+
+    InferRequest &ir;
+    std::vector<IRImage> images;
+
+    IRInfo(InferRequest &ir, std::vector<IRImage> images): ir(ir), images(images) {}
+};
 
 class InferRequestCallback
 {
 public:
-    InferRequestCallback(InferenceEngine::InferRequest& ir,
-                         std::vector<std::pair<unsigned, cv::Mat>> inputBlobImages,
-                         std::queue<std::pair<InferenceEngine::InferRequest&,
-                                              std::vector<std::pair<unsigned, cv::Mat>>>>& completedInferRequests,
+    InferRequestCallback(InferRequest& ir,
+                         std::vector<IRInfo::IRImage> inputBlobImages,
+                         std::queue<IRInfo>& completedInferRequests,
                          std::mutex& mutex,
                          std::condition_variable& condVar
                          ):
@@ -30,7 +47,7 @@ public:
             {
                 std::lock_guard<std::mutex> lock(mutex);
 
-                completedInferRequests.push({ir, inputBlobImages});
+                completedInferRequests.push(IRInfo(ir, inputBlobImages));
             }
             condVar.notify_one();
         }
@@ -40,9 +57,9 @@ public:
     }
 
 private:
-    InferenceEngine::InferRequest& ir;
-    std::vector<std::pair<unsigned, cv::Mat>> inputBlobImages;
-    std::queue<std::pair<InferenceEngine::InferRequest&, std::vector<std::pair<unsigned, cv::Mat>>>>& completedInferRequests;
+    InferRequest& ir;
+    std::vector<IRInfo::IRImage> inputBlobImages;
+    std::queue<IRInfo>& completedInferRequests;
     std::mutex& mutex;
     std::condition_variable& condVar;
 };
