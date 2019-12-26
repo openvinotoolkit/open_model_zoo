@@ -21,7 +21,7 @@ import cv2
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, StringField
+from ..config import ConfigValidator, StringField, ConfigError
 from ..representation import PoseEstimationPrediction
 
 
@@ -43,9 +43,12 @@ class HumanPoseAdapter(Adapter):
         parameters = super().parameters()
         parameters.update({
             'part_affinity_fields_out': StringField(
-                description="Name of output layer with keypoints pairwise relations (part affinity fields)."
+                description="Name of output layer with keypoints pairwise relations (part affinity fields).",
+                optional=True
             ),
-            'keypoints_heatmap_out': StringField(description="Name of output layer with keypoints heatmaps."),
+            'keypoints_heatmap_out': StringField(
+                description="Name of output layer with keypoints heatmaps.", optional=True
+            ),
         })
 
         return parameters
@@ -56,14 +59,29 @@ class HumanPoseAdapter(Adapter):
     def configure(self):
         self.part_affinity_fields = self.get_value_from_config('part_affinity_fields_out')
         self.keypoints_heatmap = self.get_value_from_config('keypoints_heatmap_out')
+        self.concat_out = self.part_affinity_fields is None and self.keypoints_heatmap is None
+        if not self.concat_out:
+            contains_both = self.part_affinity_fields is not None and self.keypoints_heatmap is not None
+            if not contains_both:
+                raise ConfigError(
+                    'human_pose_estimation adapter should contains both: keypoints_heatmap_out '
+                    'and part_affinity_fields_out or not contain them at all (in single output model case)'
+                )
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        raw_output = zip(
-            identifiers, raw_outputs[self.keypoints_heatmap],
-            raw_outputs[self.part_affinity_fields], frame_meta
-        )
+        if not self.concat_out:
+            raw_output = zip(
+                identifiers, raw_outputs[self.keypoints_heatmap],
+                raw_outputs[self.part_affinity_fields], frame_meta
+            )
+        else:
+            concat_out = raw_outputs[self.output_blob]
+            keypoints_num = concat_out.shape[1] // 3
+            keypoints_heat_map = concat_out[:, :keypoints_num, :]
+            pafs = concat_out[:, keypoints_num:, :]
+            raw_output = zip(identifiers, keypoints_heat_map, pafs, frame_meta)
         for identifier, heatmap, paf, meta in raw_output:
             height, width, _ = meta['image_size']
             heatmap_avg = np.zeros((height, width, 19), dtype=np.float32)
