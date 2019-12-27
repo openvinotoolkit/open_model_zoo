@@ -47,4 +47,4 @@ model_optimizer_args:
   - --input_model=$dl_dir/googlenet-v1.caffemodel
   - --input_proto=$dl_dir/googlenet-v1.prototxt
 framework: caffe
-license: https://raw.githubusercontent.com/BVLC/caffe/master/LICENSE
+license: https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_googlenet/readme.md

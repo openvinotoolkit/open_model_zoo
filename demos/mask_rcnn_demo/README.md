@@ -23,7 +23,7 @@ mask_rcnn_demo [OPTION]
 Options:
 
     -h                                Print a usage message.
-    -i "<path>"                       Required. Path to an .bmp image.
+    -i "<path>"                       Required. Path to a .bmp image.
     -m "<path>"                       Required. Path to an .xml file with a trained model.
       -l "<absolute_path>"            Required for CPU custom layers. Absolute path to a shared library with the kernels implementations.
           Or
@@ -41,7 +41,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 You can use the following command to do inference on CPU on an image using a trained network:
 ```sh
-./mask_rcnn_demo -i <path_to_image>/inputImage.bmp -m <path_to_model>/faster_rcnn.xml
+./mask_rcnn_demo -i <path_to_image>/inputImage.bmp -m <path_to_model>/mask_rcnn_inception_resnet_v2_atrous_coco.xml
 ```
 
 ## Demo Output

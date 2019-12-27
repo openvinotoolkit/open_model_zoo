@@ -34,7 +34,7 @@ AccuracyChecker supports following list of data readers:
 ```
 Note: since 1.3.0 version the image processing module is not a part of scipy library. This reader does not use scipy anymore.
 ```
-* `tf_imred`- read images using Tensorflow. Default color space is RGB. Requires Tensorflow installation.
+* `tf_imred`- read images using TensorFlow. Default color space is RGB. Requires TensorFlow installation.
 * `opencv_capture` - read frames from video using OpenCV.
 * `json_reader` - read value from json file.
   * `key` - key for reading from stored in json dictionary.

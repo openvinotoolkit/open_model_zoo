@@ -18,11 +18,55 @@ import numpy as np
 from ..representation import TextDetectionAnnotation, CharacterRecognitionAnnotation
 from ..utils import read_txt, check_file_existence
 from .format_converter import FileBasedAnnotationConverter, DirectoryBasedAnnotationConverter, ConverterReturn
-from ..config import PathField
+from ..config import PathField, BoolField
 
 
 def box_to_points(box):
     return np.array([[box[0][0], box[0][1]], [box[1][0], box[0][1]], [box[1][0], box[1][1]], [box[0][0], box[1][1]]])
+
+def strip(text):
+    if text.lower().endswith("'s"):
+        text = text[:-2]
+    text = text.strip('-')
+    for c in "'!?.:,*\"()·[]/":
+        text = text.replace(c, ' ')
+    text = text.strip()
+
+    return text
+
+def is_word(text):
+
+    text = strip(text)
+
+    if ' ' in text:
+        return False
+
+    if len(text) < 3:
+        return False
+
+    forbidden_symbols = "×÷·"
+
+    range1 = [ord(u'a'), ord(u'z')]
+    range2 = [ord(u'A'), ord(u'Z')]
+    range3 = [ord(u'À'), ord(u'ƿ')]
+    range4 = [ord(u'Ǆ'), ord(u'ɿ')]
+    range5 = [ord(u'Ά'), ord(u'Ͽ')]
+    range6 = [ord(u'-'), ord(u'-')]
+
+    for char in text:
+        char_code = ord(char)
+        if char in forbidden_symbols:
+            return False
+
+        if not (range1[0] <= char_code <= range1[1] or
+                range2[0] <= char_code <= range2[1] or
+                range3[0] <= char_code <= range3[1] or
+                range4[0] <= char_code <= range4[1] or
+                range5[0] <= char_code <= range5[1] or
+                range6[0] <= char_code <= range6[1]):
+            return False
+
+    return True
 
 
 class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
@@ -37,6 +81,11 @@ class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
                 'images_dir': PathField(
                     is_directory=True, optional=True,
                     description='path to dataset images, used only for content existence check'
+                ),
+                'word_spotting': BoolField(
+                    optional=True, default=False,
+                    description='transcriptions that have lengths less than 3 symbols or '
+                                'transcriptions containing non-alphanumeric symbols will be marked as difficult'
                 )
             }
         )
@@ -45,6 +94,7 @@ class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
     def configure(self):
         super().configure()
         self.images_dir = self.get_value_from_config('images_dir')
+        self.word_spotting = self.get_value_from_config('word_spotting')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations = []
@@ -72,6 +122,11 @@ class ICDAR15DetectionDatasetConverter(DirectoryBasedAnnotationConverter):
                     points = box_to_points(points)
                 if transcription == '###':
                     difficult.append(len(transcriptions))
+                elif self.word_spotting:
+                    if not is_word(transcription):
+                        difficult.append(len(transcriptions))
+                    else:
+                        transcription = strip(transcription)
                 all_points.append(points)
                 transcriptions.append(transcription)
             annotation = TextDetectionAnnotation(identifier, all_points, transcriptions)

@@ -20,7 +20,7 @@ from ..config import PathField, BoolField
 from ..representation import ClassificationAnnotation
 from ..utils import read_pickle, check_file_existence, read_json
 
-from .format_converter import BaseFormatConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 CIFAR10_LABELS_LIST = [
     'airplane', 'automobile', 'bird', 'cat', 'deer',
@@ -146,6 +146,7 @@ class Cifar10FormatConverter(BaseFormatConverter):
         if self.dataset_meta:
             meta = read_json(self.dataset_meta)
             if 'label_map' in meta:
+                meta['label_map'] = verify_label_map(meta['label_map'])
                 return meta
             labels = meta.get('labels', CIFAR10_LABELS_LIST)
         meta.update({'label_map': {label_id + labels_offset: label_name for label_id, label_name in enumerate(labels)}})

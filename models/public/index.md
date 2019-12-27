@@ -142,6 +142,7 @@ instances, thus faster than previous, because network runs once.
 | Model Name                    | Implementation                                                                            | OMZ Model Name                | GFlops | mParams |
 |------------------------------ | ----------------------------------------------------------------------------------------- | ----------------------------- | ------ | ------- |
 | human-pose-estimation-3d-0001 | [PyTorch\*](./human-pose-estimation-3d-0001/description/human-pose-estimation-3d-0001.md) | human-pose-estimation-3d-0001 | 18.998 |  5.074  |
+|single-human-pose-estimation-0001| [PyTorch\*](./single-human-pose-estimation-0001/description/single-human-pose-estimation-0001.md) | single-human-pose-estimation-0001 | 60.125 | 33.165 |
 
 ## Legal Information
 

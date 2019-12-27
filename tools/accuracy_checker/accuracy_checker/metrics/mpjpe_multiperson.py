@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import warnings
 import numpy as np
 from ..representation import PoseEstimation3dPrediction, PoseEstimation3dAnnotation
 from .metric import PerImageEvaluationMetric
@@ -76,6 +77,7 @@ class MpjpeMultiperson(PerImageEvaluationMetric):
         if matching_results:
             image_mpjpe /= len(matching_results)
         self.per_image_mpjpe.append(image_mpjpe)
+        return image_mpjpe
 
     def evaluate(self, annotations, predictions):
         total_mpjpe = 0
@@ -83,6 +85,8 @@ class MpjpeMultiperson(PerImageEvaluationMetric):
             total_mpjpe += image_mpjpe
         if self.per_image_mpjpe:
             total_mpjpe /= len(self.per_image_mpjpe)
+        else:
+            warnings.warn('No predicted results to compute MPJPE')
         return total_mpjpe
 
     def reset(self):

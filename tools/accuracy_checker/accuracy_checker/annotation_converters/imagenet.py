@@ -21,7 +21,7 @@ from ..representation import ClassificationAnnotation
 from ..utils import read_txt, get_path, check_file_existence, read_json
 
 from ..topology_types import ImageClassification
-from .format_converter import BaseFormatConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 
 class ImageNetFormatConverter(BaseFormatConverter):
@@ -91,6 +91,8 @@ class ImageNetFormatConverter(BaseFormatConverter):
                 label_map = dict(enumerate(labels))
                 meta['label_map'] = label_map
             else:
+                if 'label_map' in meta:
+                    meta['label_map'] = verify_label_map(meta['label_map'])
                 return meta
 
         if labels_file:

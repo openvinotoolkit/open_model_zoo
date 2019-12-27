@@ -1,0 +1,5 @@
+# This file can be used with the --list option of the model downloader.
+mask_rcnn_inception_resnet_v2_atrous_coco
+mask_rcnn_inception_v2_coco
+mask_rcnn_resnet101_atrous_coco
+mask_rcnn_resnet50_atrous_coco

@@ -45,4 +45,5 @@ models:
 
           - name: AP@boxes
             type: coco_orig_precision
+
 global_definitions: ../dataset_definitions.yml

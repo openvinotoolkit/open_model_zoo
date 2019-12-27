@@ -156,7 +156,7 @@ class BertXNLITFRecordConverter(BaseFormatConverter):
     def configure(self):
         if tf is None:
             raise ConfigError(
-                'bert_xnli_tf_record converter requires Tensorflow installation. Please install it first.'
+                'bert_xnli_tf_record converter requires TensorFlow installation. Please install it first.'
             )
         self.annotation_file = self.get_value_from_config('annotation_file')
 

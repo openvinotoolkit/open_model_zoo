@@ -179,7 +179,6 @@ python ./face_recognition_demo.py \
 -m_fd <path_to_model>/face-detection-retail-0004.xml \
 -m_lm <path_to_model>/landmarks-regression-retail-0009.xml \
 -m_reid <path_to_model>/face-reidentification-retail-0095.xml \
--l <path_to_cpu_extensions>/libcpu_extension_sse4.so \
 --verbose \
 -fg "/home/face_gallery"
 ```
@@ -194,7 +193,6 @@ python ./face_recognition_demo.py ^
 -m_fd <path_to_model>/face-detection-retail-0004.xml ^
 -m_lm <path_to_model>/landmarks-regression-retail-0009.xml ^
 -m_reid <path_to_model>/face-reidentification-retail-0095.xml ^
--l <path_to_cpu_extensions>/cpu_extension_avx2.dll ^
 --verbose ^
 -fg "C:/face_gallery"
 ```

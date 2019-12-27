@@ -93,12 +93,12 @@ datasets:
     annotation: imagenet1000.pickle
     data_source: ILSVRC2012_img_val
     metrics:
-    - name: accuracy@top1
-      type: accuracy
-      top_k: 1
-    - name: acciracy@top5
-      type: accuracy
-      top_k: 5
+      - name: accuracy@top1
+        type: accuracy
+        top_k: 1
+      - name: accuracy@top5
+        type: accuracy
+        top_k: 5
 
   - name: imagenet_1000_classes_2015
     annotation_conversion:
@@ -107,12 +107,12 @@ datasets:
     annotation: imagenet1000_2015.pickle
     data_source: ILSVRC2012_img_val
     metrics:
-    - name: accuracy@top1
-      type: accuracy
-      top_k: 1
-    - name: acciracy@top5
-      type: accuracy
-      top_k: 5
+      - name: accuracy@top1
+        type: accuracy
+        top_k: 1
+      - name: accuracy@top5
+        type: accuracy
+        top_k: 5
 
   - name: imagenet_1001_classes
     annotation_conversion:
@@ -122,12 +122,12 @@ datasets:
     annotation: imagenet1001.pickle
     data_source: ILSVRC2012_img_val
     metrics:
-    - name: accuracy@top1
-      type: accuracy
-      top_k: 1
-    - name: acciracy@top5
-      type: accuracy
-      top_k: 5
+      - name: accuracy@top1
+        type: accuracy
+        top_k: 1
+      - name: accuracy@top5
+        type: accuracy
+        top_k: 5
 
   - name: VOC2012
     annotation_conversion:
@@ -139,12 +139,12 @@ datasets:
     annotation: voc12.pickle
     dataset_meta: voc12.json
     postprocessing:
-    - type: resize_prediction_boxes
+      - type: resize_prediction_boxes
     metrics:
-    - type: map
-      integral: 11point
-      ignore_difficult: True
-      presenter: print_scalar
+      - type: map
+        integral: 11point
+        ignore_difficult: True
+        presenter: print_scalar
 
   - name: VOC2012_Segmentation
     annotation_conversion:
@@ -370,6 +370,14 @@ datasets:
       data_dir: ICDAR15_DET/gt
     annotation: icdar15_detection.pickle
 
+  - name: ICDAR2015_word_spotting
+    data_source: ICDAR15_DET/ch4_test_images
+    annotation_conversion:
+      converter: icdar_detection
+      word_spotting: True
+      data_dir: ICDAR15_DET/gt
+    annotation: icdar15_detection.pickle
+
   - name: ICDAR2013
     data_source: ICDAR13_REC/Challenge2_Test_Task3_Images
     annotation_conversion:
@@ -384,6 +392,13 @@ datasets:
       converter: market1501_reid
       data_dir: Market-1501-v15.09.15
     annotation: market1501_reid.pickle
+
+  - name: globalme-reid
+    data_source: GlobalMe-reID
+    annotation_conversion:
+      converter: market1501_reid
+      data_dir: globalme-reid/GlobalMe-reID
+    annotation: globalme-reid.pickle
 
   - name: vgg2face
     data_source: VGGFaces2/test
@@ -517,8 +532,8 @@ datasets:
       scheme:
         ".*.png": opencv_imread
         ".*.json":
-            type: json_reader
-            key: head_pose_angles
+          type: json_reader
+          key: head_pose_angles
 
   - name: handwritten_score_recognition
     data_source: ILSVRC2012_img_val
@@ -568,3 +583,32 @@ datasets:
 
     metrics:
       - type: coco_precision
+
+  - name: ms_coco_single_keypoints
+    data_source: val2017
+    annotation_conversion:
+      converter: mscoco_single_keypoints
+      annotation_file: person_keypoints_val2017.json
+    annotation: mscoco_single_keypoints.pickle
+    dataset_meta: mscoco_single_keypoints.json
+    metrics:
+      - name: AP
+        type: coco_orig_keypoints_precision
+
+  - name: CamVid
+    data_source: CamVid
+    annotation_conversion:
+      converter: camvid
+      annotation_file: CamVid/val.txt
+    annotation: camvid.pickle
+    dataset_meta: camvid.json
+
+  - name: msasl-100
+    data_source: msasl/global_crops
+    annotation_conversion:
+      converter: continuous_clip_action_recognition
+      annotation_file: msasl/msasl_100.txt
+      data_dir: msasl/global_crops
+      out_fps: 15
+      clip_length: 16
+    annotation: msasl/msasl_action_recognition.pickle

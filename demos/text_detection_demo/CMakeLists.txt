@@ -9,4 +9,5 @@ ie_add_sample(NAME text_detection_demo
               SOURCES ${SOURCES}
               HEADERS ${HEADERS}
               INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
+              DEPENDENCIES monitors
               OPENCV_DEPENDENCIES highgui)

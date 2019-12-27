@@ -32,7 +32,7 @@ from .format_converter import BaseFormatConverter
 
 def build_argparser():
     parser = ArgumentParser(
-        description="Converts annotation form a arbitrary format to accuracy-checker specific format", add_help=False
+        description="Converts annotation form an arbitrary format to accuracy-checker specific format", add_help=False
     )
     parser.add_argument(
         "converter",

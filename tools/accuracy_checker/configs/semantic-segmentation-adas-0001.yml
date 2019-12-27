@@ -23,4 +23,5 @@ models:
           - type: mean_iou
             use_argmax: False
             presenter: print_vector
+
 global_definitions: ../dataset_definitions.yml

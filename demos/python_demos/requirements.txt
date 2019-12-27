@@ -1,3 +1,5 @@
-opencv-python
+nibabel
 numpy
+scikit-learn
 scipy
+tqdm

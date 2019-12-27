@@ -18,7 +18,6 @@ Each PR contributing a model must contain:
 * [configuration file `model.yml`](#configuration-file)
 * [documentation of model in markdown format](#documentation)
 * [accuracy validation configuration file](#accuracy-validation)
-* license added to [tools/downloader/license.txt](tools/downloader/license.txt)
 * (*optional*) [demo](#demo)
 
 Follow the rules in the sections below before submitting a pull request.
@@ -146,7 +145,7 @@ This example shows how to download the classification model [DenseNet-121*](mode
 
 ```
 description: >-
-  This is an Tensorflow\* version of `densenet-121` model, one of the DenseNet
+  This is a TensorFlow\* version of `densenet-121` model, one of the DenseNet
   group of models designed to perform image classification. The weights were converted
   from DenseNet-Keras Models. For details see repository <https://github.com/pudae/tensorflow-densenet/>,
   paper <https://arxiv.org/pdf/1608.06993.pdf>
@@ -256,6 +255,7 @@ The documentation should contain:
 * validation dataset description and/or a link
 * main accuracy values (also description of a metric)
 * detailed description of input and output for original and converted models
+* the model's licensing terms
 
 Learn the detailed structure and headers naming convention from any model documentation (for example, [alexnet](./models/public/alexnet/alexnet.md)).
 

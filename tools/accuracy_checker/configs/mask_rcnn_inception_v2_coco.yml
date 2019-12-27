@@ -35,4 +35,5 @@ models:
         metrics:
           - type: coco_orig_segm_precision
           - type: coco_orig_precision
+
 global_definitions: ../dataset_definitions.yml

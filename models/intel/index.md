@@ -38,9 +38,8 @@ network to detect objects of the same type better.
 | [person-vehicle-bike-detection-crossroad-0078](./person-vehicle-bike-detection-crossroad-0078/description/person-vehicle-bike-detection-crossroad-0078.md)                          | 3.964                | 1.178      |       | X       | X        | X     |                |         |
 | [person-vehicle-bike-detection-crossroad-1016](./person-vehicle-bike-detection-crossroad-1016/description/person-vehicle-bike-detection-crossroad-1016.md)                          | 3.560                | 2.887      |       | X       | X        | X     |                |         |
 | [vehicle-license-plate-detection-barrier-0106](./vehicle-license-plate-detection-barrier-0106/description/vehicle-license-plate-detection-barrier-0106.md)                          | 0.349                | 0.634      |       |         | X        |       | X              |         |
-| [ssd300-onnx-0001](./ssd300-onnx-0001/description/ssd300-onnx-0001.md)                                                                                                              | 62.815               | 26.285     |   X   |   X     | X        |   X   |                |         |
-| [ssd512-onnx-0001](./ssd512-onnx-0001/description/ssd512-onnx-0001.md)                                                                                                              | 180.611              | 27.189     |   X   |   X     | X        |   X   |                |         |
 | [product-detection-0001](./product-detection-0001/description/product-detection-0001.md)                                                                                            | 3.598                | 3.212      |       |         |          |       |                | X       |
+| [person-detection-asl-0001](./person-detection-asl-0001/description/person-detection-asl-0001.md)                                                                                   | 0.986                | 1.338      |       |      X  |          |       |                |         |
 
 
 ## Object Recognition Models
@@ -84,6 +83,9 @@ and accuracy (expect a bigger model to perform better).
 | [person-reidentification-retail-0031](./person-reidentification-retail-0031/description/person-reidentification-retail-0031.md)   | 0.028                | 0.280      | 92.11%            |
 | [person-reidentification-retail-0079](./person-reidentification-retail-0079/description/person-reidentification-retail-0079.md)   | 0.124                | 0.820      | 92.93%            |
 | [person-reidentification-retail-0076](./person-reidentification-retail-0076/description/person-reidentification-retail-0076.md)   | 0.594                | 0.820      | 93.35%            |
+| [person-reidentification-retail-0103](./person-reidentification-retail-0103/description/person-reidentification-retail-0103.md)   | 0.564                | 0.597      | 93.5%             |
+| [person-reidentification-retail-0107](./person-reidentification-retail-0107/description/person-reidentification-retail-0107.md)   | 0.174                | 0.183      | 91.7%             |
+| [person-reidentification-retail-0200](./person-reidentification-retail-0200/description/person-reidentification-retail-0200.md)   | 5.506                | 4.723      | 95.4%             |
 
 | Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Pairwise accuracy |
 |-----------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |------------------ |
@@ -103,8 +105,6 @@ detect areas with complex shape (for example, free space on the road).
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [road-segmentation-adas-0001](./road-segmentation-adas-0001/description/road-segmentation-adas-0001.md)                                        | 4.770                | 0.184      |
 | [semantic-segmentation-adas-0001](./semantic-segmentation-adas-0001/description/semantic-segmentation-adas-0001.md)                            | 58.572               | 6.686      |
-| [icnet-camvid-onnx-0001](./icnet-camvid-onnx-0001/description/icnet-camvid-onnx-0001.md)                            | -               | -      |
-| [unet-camvid-onnx-0001](./unet-camvid-onnx-0001/description/unet-camvid-onnx-0001.md)                            | -              | -      |
 
 ## Instance Segmentation Models
 
@@ -163,6 +163,16 @@ Deep Learning models for text recognition in various applications.
 | [text-recognition-0012](./text-recognition-0012/description/text-recognition-0012.md)                                                          | 1.485                | 5.568      |
 | [handwritten-score-recognition-0003](./handwritten-score-recognition-0003/description/handwritten-score-recognition-0003.md)                   | 0.792                | 5.555      |
 
+## Text Spotting
+
+Deep Learning models for text spotting (simultaneous detection and recognition).
+
+| Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
+|------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [text-spotting-0001-detector](./text-spotting-0001-detector/description/text-spotting-0001-detector.md)                                        | 185.169             | 26.497    |
+| [text-spotting-0001-recognizer-encoder](./text-spotting-0001-recognizer-encoder/description/text-spotting-0001-recognizer-encoder.md)          | 2.082                | 1.328      |
+| [text-spotting-0001-recognizer-decoder](./text-spotting-0001-recognizer-decoder/description/text-spotting-0001-recognizer-decoder.md)          | 0.002                | 0.273      |
+
 ## Action Recognition Models
 
 Action Recognition models predict action that is being performed on a short video clip
@@ -177,6 +187,7 @@ that predict an actual labels are called *decoder*.
 | [driver-action-recognition-adas-0002-decoder](./driver-action-recognition-adas-0002-decoder/description/driver-action-recognition-adas-0002-decoder.md) | 0.147                | 4.205      |
 | [action-recognition-0001-encoder](./action-recognition-0001-encoder/description/action-recognition-0001-encoder.md)                                     | 7.340                | 21.276     |
 | [action-recognition-0001-decoder](./action-recognition-0001-decoder/description/action-recognition-0001-decoder.md)                                     | 0.147                | 4.405      |
+| [asl-recognition-0003](./asl-recognition-0003/description/asl-recognition-0003.md)                                                                      | 6.651                | 4.129      |
 
 ## Image Retrieval
 
@@ -193,32 +204,8 @@ Deep Learning compressed models
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [resnet50-binary-0001](./resnet50-binary-0001/description/resnet50-binary-0001.md)                                                             | 1.002                | 7.446      |
-| [resnet-50-int8-tf-0001](./resnet-50-int8-tf-0001/description/resnet-50-int8-tf-0001.md)                                                       | 6.996                | 25.530     |
-| [resnet-50-int8-sparse-v1-tf-0001](./resnet-50-int8-sparse-v1-tf-0001/description/resnet-50-int8-sparse-v1-tf-0001.md)                         | 6.996                | 25.530     |
-| [resnet-50-int8-sparse-v2-tf-0001](./resnet-50-int8-sparse-v2-tf-0001/description/resnet-50-int8-sparse-v2-tf-0001.md)                         | 6.996                | 25.530     |
-| [resnet50-int8-onnx-0001](./resnet50-int8-onnx-0001/description/resnet50-int8-onnx-0001.md)                                                    | 8.216                | 25.53      |
-| [resnet50-int8-sparse-v2-onnx-0001](./resnet50-int8-sparse-v2-onnx-0001/description/resnet50-int8-sparse-v2-onnx-0001.md)                      | 8.216                | 25.53      |
-| [resnet101-int8-tf-0001](./resnet101-int8-tf-0001/description/resnet101-int8-tf-0001.md)                                                       | 14.441               | 44.496     |
-| [inceptionv3-int8-tf-0001](./inceptionv3-int8-tf-0001/description/inceptionv3-int8-tf-0001.md)                                                 | 11.469               | 23.819     |
-| [inceptionv3-int8-sparse-v1-tf-0001](./inceptionv3-int8-sparse-v1-tf-0001/description/inceptionv3-int8-sparse-v1-tf-0001.md)                   | 11.469               | 23.819     |
-| [inceptionv3-int8-sparse-v2-tf-0001](./inceptionv3-int8-sparse-v2-tf-0001/description/inceptionv3-int8-sparse-v2-tf-0001.md)                   | 11.469               | 23.819     |
-| [inceptionv3-int8-onnx-0001](./inceptionv3-int8-onnx-0001/description/inceptionv3-int8-onnx-0001.md)                                           | 11.469               | 23.817     |
-| [inceptionv3-int8-sparse-v2-onnx-0001](./inceptionv3-int8-sparse-v2-onnx-0001/description/inceptionv3-int8-sparse-v2-onnx-0001.md)             | 11.469               | 23.817     |
-| [mobilenetv2-int8-tf-0001](./mobilenetv2-int8-tf-0001/description/mobilenetv2-int8-tf-0001.md)                                                 | 0.615                | 3.489      |
-| [mobilenetv2-int8-sparse-v1-tf-0001](./mobilenetv2-int8-sparse-v1-tf-0001/description/mobilenetv2-int8-sparse-v1-tf-0001.md)                   | 0.615                | 3.489      |
-| [mobilenetv2-int8-sparse-v2-tf-0001](./mobilenetv2-int8-sparse-v2-tf-0001/description/mobilenetv2-int8-sparse-v2-tf-0001.md)                   | 0.615                | 3.489      |
-| [mobilenetv2-int8-onnx-0001](./mobilenetv2-int8-onnx-0001/description/mobilenetv2-int8-onnx-0001.md)                                           | 0.615                | 3.488      |
-| [mobilenetv2-int8-sparse-v2-onnx-0001](./mobilenetv2-int8-sparse-v2-onnx-0001/description/mobilenetv2-int8-sparse-v2-onnx-0001.md)             | 0.615                | 3.488      |
-| [squeezenetv1.1-int8-onnx-0001](./squeezenetv1.1-int8-onnx-0001/description/squeezenetv1.1-int8-onnx-0001.md)                                  | 0.707                | 1.236      |
-| [squeezenetv1.1-int8-sparse-v1-onnx-0001](./squeezenetv1.1-int8-sparse-v1-onnx-0001/description/squeezenetv1.1-int8-sparse-v1-onnx-0001.md)    | 0.707                | 1.236      |
-| [icnet-camvid-int8-onnx-0001](./icnet-camvid-int8-onnx-0001/description/icnet-camvid-int8-onnx-0001.md)                                        | -                    | -          |
-| [icnet-camvid-int8-sparse-v2-onnx-0001](./icnet-camvid-int8-sparse-v2-onnx-0001/description/icnet-camvid-int8-sparse-v2-onnx-0001.md)          | -                    | -          |
-| [unet-camvid-int8-onnx-0001](./unet-camvid-int8-onnx-0001/description/unet-camvid-int8-onnx-0001.md)                                           | -                    | -          |
-| [unet-camvid-int8-sparse-v2-onnx-0001](./unet-camvid-int8-sparse-v2-onnx-0001/description/unet-camvid-int8-sparse-v2-onnx-0001.md)             | -                    | -          |
-| [ssd300-int8-onnx-0001](./ssd300-int8-onnx-0001/description/ssd300-int8-onnx-0001.md)                                                          | 62.815               | 26.285     |
-| [ssd300-int8-sparse-v2-onnx-0001](./ssd300-int8-sparse-v2-onnx-0001/description/ssd300-int8-sparse-v2-onnx-0001.md)                            | 62.815               | 26.285     |
-| [ssd512-int8-onnx-0001](./ssd512-int8-onnx-0001/description/ssd512-int8-onnx-0001.md)                                                          | 180.611              | 27.189     |
-| [ssd512-int8-sparse-v2-onnx-0001](./ssd512-int8-sparse-v2-onnx-0001/description/ssd512-int8-sparse-v2-onnx-0001.md)                            | 180.611              | 27.189     |
+| [resnet18-xnor-binary-onnx-0001](./resnet18-xnor-binary-onnx-0001/description/resnet18-xnor-binary-onnx-0001.md)                               | -                    | -          |
+| [resnet18-dorefa-binary-onnx-0001](./resnet18-dorefa-binary-onnx-0001/description/resnet18-dorefa-binary-onnx-0001.md)                         | -                    | -          |
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

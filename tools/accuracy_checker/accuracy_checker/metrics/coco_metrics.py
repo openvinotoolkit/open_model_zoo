@@ -16,7 +16,7 @@ limitations under the License.
 
 from functools import singledispatch
 import numpy as np
-from ..config import NumberField, BaseField
+from ..config import NumberField, BaseField, ConfigError
 from ..representation import (
     DetectionPrediction,
     DetectionAnnotation,
@@ -60,11 +60,17 @@ class MSCOCOBaseMetric(PerImageEvaluationMetric):
     def configure(self):
         self.max_detections = self.get_value_from_config('max_detections')
         self.thresholds = get_or_parse_value(self.get_value_from_config('threshold'), COCO_THRESHOLDS)
+        if not self.dataset.metadata:
+            raise ConfigError('coco metrics require dataset metadata providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
         label_map = self.dataset.metadata.get('label_map', {})
         self.labels = [
             label for label in label_map
             if label != self.dataset.metadata.get('background_label')
         ]
+        if not self.labels:
+            raise ConfigError('coco metrics require label_map providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
         self.meta['names'] = [label_map[label] for label in self.labels]
         self.matching_results = [[] for _ in self.labels]
 
@@ -304,7 +310,7 @@ def prepare_annotations(annotation, label, create_boxes=False):
 
 def compute_precision_recall(thresholds, matching_results):
     num_thresholds = len(thresholds)
-    rectangle_thresholds = np.linspace(.0, 1.00, np.round((1.00 - .0) / .01) + 1, endpoint=True)
+    rectangle_thresholds = np.linspace(.0, 1.00, int(np.round((1.00 - .0) / .01)) + 1, endpoint=True)
     num_rec_thresholds = len(rectangle_thresholds)
     precision = -np.ones((num_thresholds, num_rec_thresholds))  # -1 for the precision of absent categories
     recall = -np.ones(num_thresholds)

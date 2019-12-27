@@ -57,4 +57,5 @@ models:
             annotation_source: type
             prediction_source: type
             label_map: type_label_map
+
 global_definitions: ../dataset_definitions.yml

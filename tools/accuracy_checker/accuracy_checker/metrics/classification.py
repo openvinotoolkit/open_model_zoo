@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 
 from ..representation import ClassificationAnnotation, ClassificationPrediction, TextClassificationAnnotation
-from ..config import NumberField, StringField
+from ..config import NumberField, StringField, ConfigError
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
 
@@ -89,7 +89,14 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
     def configure(self):
         self.top_k = self.get_value_from_config('top_k')
         label_map = self.get_value_from_config('label_map')
-        self.labels = self.dataset.metadata.get(label_map)
+        if self.dataset.metadata:
+            self.labels = self.dataset.metadata.get(label_map)
+            if not self.labels:
+                raise ConfigError('accuracy per class metric requires label_map providing in dataset_meta'
+                                  'Please provide dataset meta file or regenerate annotation')
+        else:
+            raise ConfigError('accuracy per class metric requires dataset metadata'
+                              'Please provide dataset meta file or regenerate annotation')
 
         def loss(annotation_label, prediction_top_k_labels):
             result = np.zeros_like(list(self.labels.keys()))

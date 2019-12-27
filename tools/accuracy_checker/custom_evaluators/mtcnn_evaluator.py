@@ -291,6 +291,42 @@ class DLSDKModelMixin:
 
         return data
 
+    def prepare_model(self, launcher):
+        launcher_specific_entries = [
+            'model', 'weights', 'caffe_model', 'caffe_weights', 'tf_model', 'inputs', 'outputs', '_model_optimizer'
+        ]
+
+        def update_mo_params(launcher_config, model_config):
+            for entry in launcher_specific_entries:
+                if entry not in launcher_config:
+                    continue
+                if entry in model_config:
+                    continue
+                model_config[entry] = launcher_config[entry]
+            model_mo_flags, model_mo_params = model_config.get('mo_flags', []), model_config.get('mo_params', {})
+            launcher_mo_flags, launcher_mo_params = launcher_config.get('mo_flags', []), launcher_config.get(
+                'mo_params', {})
+            for launcher_flag in launcher_mo_flags:
+                if launcher_flag not in model_mo_flags:
+                    model_mo_flags.append(launcher_flag)
+
+            for launcher_mo_key, launcher_mo_value in launcher_mo_params.items():
+                if launcher_mo_key not in launcher_mo_params:
+                    model_mo_params[launcher_mo_key] = launcher_mo_value
+
+            model_config['mo_flags'] = model_mo_flags
+            model_config['mo_params'] = model_mo_params
+
+        update_mo_params(launcher.config, self.model_info)
+        if 'caffe_model' in self.model_info:
+            self.model_info.update(launcher.config)
+            model_xml, model_bin = launcher.convert_model(self.model_info)
+        else:
+            model_xml = self.model_info['model']
+            model_bin = self.model_info['weights']
+
+        return model_xml, model_bin
+
 
 class CaffeProposalStage(CaffeModelMixin, ProposalBaseStage):
     def __init__(self,  model_info, preprocessor, launcher):
@@ -323,36 +359,7 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         super().__init__(model_info, preprocessor)
         if not hasattr(launcher, 'plugin'):
             launcher.create_ie_plugin(True)
-        launcher_specific_entries = [
-            'model', 'weights', 'caffe_model', 'caffe_weights', 'tf_model', 'inputs', 'outputs'
-        ]
-
-        def update_mo_params(launcher_config, model_config):
-            for entry in launcher_specific_entries:
-                if entry not in launcher_config:
-                    continue
-                if entry in model_config:
-                    continue
-                model_config[entry] = launcher_config[entry]
-            model_mo_flags, model_mo_params = model_config.get('mo_flags', []), model_config.get('mo_params', {})
-            launcher_mo_flags, launcher_mo_params = launcher_config.get('mo_flags', []), launcher_config.get('mo_params', {})
-            for launcher_flag in launcher_mo_flags:
-                if launcher_flag not in model_mo_flags:
-                    model_mo_flags.append(launcher_flag)
-
-            for launcher_mo_key, launcher_mo_value in launcher_mo_params.items():
-                if launcher_mo_key not in launcher_mo_params:
-                    model_mo_params[launcher_mo_key] = launcher_mo_value
-            model_info['mo_flags'] = model_mo_flags
-            model_info['mo_params'] = model_mo_params
-
-        update_mo_params(launcher.config, self.model_info)
-        if 'caffe_model' in self.model_info:
-            self.model_info.update(launcher.config)
-            model_xml, model_bin = launcher.convert_model(self.model_info)
-        else:
-            model_xml = self.model_info['model']
-            model_bin = self.model_info['weights']
+        model_xml, model_bin = self.prepare_model(launcher)
         self.network = launcher.create_ie_network(str(model_xml), str(model_bin))
         self.exec_network = launcher.plugin.load(self.network)
         self.launcher = launcher
@@ -366,38 +373,10 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
 class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
     def __init__(self,  model_info, preprocessor, launcher):
         super().__init__(model_info, preprocessor)
-        launcher_specific_entries = [
-            'model', 'weights', 'caffe_model', 'caffe_weights', 'tf_model', 'inputs', 'outputs'
-        ]
-
-        def update_mo_params(launcher_config, model_config):
-            for entry in launcher_specific_entries:
-                if entry not in launcher_config:
-                    continue
-                if entry in model_config:
-                    continue
-                model_config[entry] = launcher_config[entry]
-            model_mo_flags, model_mo_params = model_config.get('mo_flags', []), model_config.get('mo_params', {})
-            launcher_mo_flags, launcher_mo_params = launcher_config.get('mo_flags', []), launcher_config.get('mo_params', {})
-            for launcher_flag in launcher_mo_flags:
-                if launcher_flag not in model_mo_flags:
-                    model_mo_flags.append(launcher_flag)
-
-            for launcher_mo_key, launcher_mo_value in launcher_mo_params.items():
-                if launcher_mo_key not in launcher_mo_params:
-                    model_mo_params[launcher_mo_key] = launcher_mo_value
-            model_info['mo_flags'] = model_mo_flags
-            model_info['mo_params'] = model_mo_params
 
         if not hasattr(launcher, 'plugin'):
             launcher.create_ie_plugin(True)
-        update_mo_params(launcher.config, self.model_info)
-        if 'caffe_model' in self.model_info:
-            self.model_info.update(launcher.config)
-            model_xml, model_bin = launcher.convert_model(self.model_info)
-        else:
-            model_xml = self.model_info['model']
-            model_bin = self.model_info['weights']
+        model_xml, model_bin = self.prepare_model(launcher)
         self.network = launcher.create_ie_network(str(model_xml), str(model_bin))
         self.exec_network = launcher.plugin.load(self.network)
         self.launcher = launcher
@@ -407,36 +386,9 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
 class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
     def __init__(self,  model_info, preprocessor, launcher):
         super().__init__(model_info,  preprocessor)
-        launcher_specific_entries = [
-            'model', 'weights', 'caffe_model', 'caffe_weights', 'tf_model', 'inputs', 'outputs'
-        ]
-
-        def update_mo_params(launcher_config, model_config):
-            for entry in launcher_specific_entries:
-                if entry not in launcher_config:
-                    continue
-                if entry in model_config:
-                    continue
-                model_config[entry] = launcher_config[entry]
-            model_mo_flags, model_mo_params = model_config.get('mo_flags', []), model_config.get('mo_params', {})
-            launcher_mo_flags, launcher_mo_params = launcher_config.get('mo_flags', []), launcher_config.get('mo_params', {})
-            for launcher_flag in launcher_mo_flags:
-                if launcher_flag not in model_mo_flags:
-                    model_mo_flags.append(launcher_flag)
-
-            for launcher_mo_key, launcher_mo_value in launcher_mo_params.items():
-                if launcher_mo_key not in launcher_mo_params:
-                    model_mo_params[launcher_mo_key] = launcher_mo_value
-            model_info['mo_flags'] = model_mo_flags
-            model_info['mo_params'] = model_mo_params
         if not hasattr(launcher, 'plugin'):
             launcher.create_ie_plugin(True)
-        update_mo_params(launcher.config, self.model_info)
-        if 'caffe_model' in self.model_info:
-            model_xml, model_bin = launcher.convert_model(self.model_info)
-        else:
-            model_xml = self.model_info['model']
-            model_bin = self.model_info['weights']
+        model_xml, model_bin = self.prepare_model(launcher)
         self.network = launcher.create_ie_network(str(model_xml), str(model_bin))
         self.exec_network = launcher.plugin.load(self.network)
         self.launcher = launcher

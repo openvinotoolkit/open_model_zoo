@@ -9,12 +9,12 @@ models:
     datasets:
       - name: imagenet_1000_classes
         preprocessing:
-        - type: resize
-          size: 256
-        - type: crop
-          size: 227
-        - type: normalization
-          mean: 103.96,116.78,123.68
+          - type: resize
+            size: 256
+          - type: crop
+            size: 227
+          - type: normalization
+            mean: 103.96,116.78,123.68
 
   - name: squeezenet1.1-caffe2
     launchers:
@@ -35,9 +35,10 @@ models:
     datasets:
       - name: imagenet_1000_classes
         preprocessing:
-        - type: resize
-          size: 256
-          aspect_ratio_scale: greater
-        - type: crop
-          size: 227
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 227
+
 global_definitions: ../dataset_definitions.yml

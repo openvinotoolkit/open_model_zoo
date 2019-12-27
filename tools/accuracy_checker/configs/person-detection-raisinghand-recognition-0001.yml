@@ -78,4 +78,5 @@ models:
             prediction_source: action_prediction
             label_map: action_label_map
             ignore_label: 2
+
 global_definitions: ../dataset_definitions.yml

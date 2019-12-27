@@ -5,7 +5,7 @@ For enabling Caffe launcher you need to add `framework: caffe` in launchers sect
 * `device` - specifies which device will be used for infer (`cpu`, `gpu_0` and so on).
 * `model` - path to prototxt file with Caffe model for your topology.
 * `weights` - path to caffemodel file with weights for your topology.
-* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md]).
+* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
 
 You also can specify batch size for your model using `batch` and allow to reshape input layer to data shape, using specific parameter: `allow_reshape_input` (default value is False).
 

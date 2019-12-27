@@ -22,7 +22,7 @@ from ..config import PathField, BoolField
 from ..representation import DetectionAnnotation, SegmentationAnnotation
 from ..representation.segmentation_representation import GTMaskLoader
 from ..utils import get_path, read_txt, read_xml, check_file_existence, read_json
-from .format_converter import BaseFormatConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 _VOC_CLASSES_DETECTION = (
     'aeroplane', 'bicycle', 'bird', 'boat',
@@ -52,6 +52,7 @@ def prepare_detection_labels(dataset_meta, has_background=True):
     if dataset_meta:
         meta = read_json(dataset_meta)
         if 'label_map' in meta:
+            meta['label_map'] = verify_label_map(meta['label_map'])
             return reverse_label_map(meta['label_map'])
         if 'labels' in meta:
             labels = meta['labels']
