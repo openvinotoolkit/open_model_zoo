@@ -2,9 +2,10 @@ import unicodedata
 
 
 class Tokenizer:
-    def __init__(self, vocab_file, lower_case=True):
+    def __init__(self, vocab_file, lower_case=True, tokenize_chinese_chars=True):
         self.vocab = self.load_vocab(vocab_file)
         self.lower_case = lower_case
+        self.tokenize_chinese_chars = tokenize_chinese_chars
 
     @staticmethod
     def _run_strip_accents(text):
@@ -50,6 +51,9 @@ class Tokenizer:
         if isinstance(text, bytes):
             text = text.decode("utf-8", "ignore")
 
+        if self.tokenize_chinese_chars:
+            text = self._tokenize_chinese_chars(text)
+
         text = text.strip()
         tokens = text.split() if text else []
         split_tokens = []
@@ -63,6 +67,45 @@ class Tokenizer:
         output_tokens = output_tokens.strip()
         output_tokens = output_tokens.split() if output_tokens else []
         return output_tokens
+
+    def _tokenize_chinese_chars(self, text):
+        """Adds whitespace around any CJK character."""
+        output = []
+        for char in text:
+            cp = ord(char)
+            if self._is_chinese_char(cp):
+                output.append(" ")
+                output.append(char)
+                output.append(" ")
+            else:
+                output.append(char)
+        return "".join(output)
+
+    @staticmethod
+    def _is_chinese_char(cp):
+        """Checks whether CP is the codepoint of a CJK character."""
+        # This defines a "chinese character" as anything in the CJK Unicode block:
+        #   https://en.wikipedia.org/wiki/CJK_Unified_Ideographs_(Unicode_block)
+        #
+        # Note that the CJK Unicode block is NOT all Japanese and Korean characters,
+        # despite its name. The modern Korean Hangul alphabet is a different block,
+        # as is Japanese Hiragana and Katakana. Those alphabets are used to write
+        # space-separated words, so they are not treated specially and handled
+        # like the all of the other languages.
+
+        #pylint:disable=chained-comparison
+        #pylint:disable=too-many-boolean-expressions
+        if ((cp >= 0x4E00 and cp <= 0x9FFF) or  #
+                (cp >= 0x3400 and cp <= 0x4DBF) or  #
+                (cp >= 0x20000 and cp <= 0x2A6DF) or  #
+                (cp >= 0x2A700 and cp <= 0x2B73F) or  #
+                (cp >= 0x2B740 and cp <= 0x2B81F) or  #
+                (cp >= 0x2B820 and cp <= 0x2CEAF) or
+                (cp >= 0xF900 and cp <= 0xFAFF) or  #
+                (cp >= 0x2F800 and cp <= 0x2FA1F)):  #
+            return True
+
+        return False
 
     def wordpiece_tokenizer(self, text):
         if isinstance(text, bytes):
