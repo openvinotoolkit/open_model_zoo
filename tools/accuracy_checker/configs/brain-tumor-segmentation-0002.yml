@@ -25,7 +25,7 @@ models:
             modality_order: [1,2,3,0]
           - type: crop_brats
           - type: normalize_brats
-            masked: True
+            masked: ignore
           - type: resize3d
             size: (128,128,128)
         postprocessing:
