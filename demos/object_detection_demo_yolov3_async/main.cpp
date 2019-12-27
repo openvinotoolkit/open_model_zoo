@@ -239,12 +239,12 @@ int main(int argc, char *argv[]) {
         CNNNetReader netReader;
         /** Reading network model **/
         netReader.ReadNetwork(FLAGS_m);
-        /** Setting batch size to 1 **/
-        slog::info << "Batch size is forced to  1." << slog::endl;
-        netReader.getNetwork().setBatchSize(1);
         /** Extracting the model name and loading its weights **/
         std::string binFileName = fileNameNoExt(FLAGS_m) + ".bin";
         netReader.ReadWeights(binFileName);
+        /** Setting batch size to 1 **/
+        slog::info << "Batch size is forced to  1." << slog::endl;
+        netReader.getNetwork().setBatchSize(1);
         /** Reading labels (if specified) **/
         std::string labelFileName = fileNameNoExt(FLAGS_m) + ".labels";
         std::vector<std::string> labels;
