@@ -13,33 +13,32 @@
 # limitations under the License.
 
 description: >-
-  This model uses a small-footprint network trained end-to-end to recognize Chinese
-  license plates in traffic.
+  Chinese license plate recognition
 task_type: optical_character_recognition
 files:
   - name: FP32/license-plate-recognition-barrier-0001.xml
-    size: 24492
-    sha256: f94ba60846d4de4077a8a162fe23f51f3b43981fa4da3c33b568d328173bd0ec
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.xml
+    size: 48901
+    sha256: 892a32b8174c2e81990a2ac3b4b754f7ad8ee92b32ac47f7408f6a97c43f1898
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.xml
   - name: FP32/license-plate-recognition-barrier-0001.bin
-    size: 4871832
-    sha256: e28f7533481c31ee768bba89c6ee0ef05a1892c9919bd4abc125335a8644291d
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.bin
+    size: 4871940
+    sha256: ccadac90772667c730d78f736f9e8fcb67bdbfcc25575b37634e6ec74dfaf7da
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.bin
   - name: FP16/license-plate-recognition-barrier-0001.xml
-    size: 24474
-    sha256: 4d71aa3d8a86d1f6d772b76037f59e483beac7d4443a0369b335f95e67312fa1
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.xml
+    size: 48882
+    sha256: d1f51451ffa020534716f1f122d81a9049803d7ffac4d3a8a1156ee06e256af6
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.xml
   - name: FP16/license-plate-recognition-barrier-0001.bin
-    size: 2435930
-    sha256: cdead95dde2f27f85a192360343998ca6f0fac160a1aecdf7ecbda06eafc883f
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.bin
-  - name: INT8/license-plate-recognition-barrier-0001.xml
-    size: 111802
-    sha256: 68093362cb0d3b62df410c1e9e6ecbada267d11669e19c7f3bcc450831b9fdac
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/license-plate-recognition-barrier-0001/INT8/license-plate-recognition-barrier-0001.xml
-  - name: INT8/license-plate-recognition-barrier-0001.bin
-    size: 4871832
-    sha256: bb27ed7f1d5afaf085c0eae990fe4bd491f40198e73144b2be2153bc7ac5b65f
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/license-plate-recognition-barrier-0001/INT8/license-plate-recognition-barrier-0001.bin
+    size: 2436038
+    sha256: a1db2c8c25cda70d8efdda6a8dcb70180e4bc9a613a3db8d49926b4153892e13
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.bin
+  - name: FP32-INT8/license-plate-recognition-barrier-0001.xml
+    size: 105462
+    sha256: af1778b159e2068fbf6f30b774fbd90b4cbb6f16f2d562a0e9991b2ea102e693
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/license-plate-recognition-barrier-0001/FP32-INT8/license-plate-recognition-barrier-0001.xml
+  - name: FP32-INT8/license-plate-recognition-barrier-0001.bin
+    size: 4882552
+    sha256: 309f08580e1284a702c4d661ffc64cb370dfeb66622724b8dfb1e2ebee646720
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/license-plate-recognition-barrier-0001/FP32-INT8/license-plate-recognition-barrier-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

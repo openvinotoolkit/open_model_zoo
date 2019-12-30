@@ -13,37 +13,32 @@
 # limitations under the License.
 
 description: >-
-  This is an action detector for the Smart Classroom scenario. It is based on
-  the RMNet backbone that includes depth-wise convolutions to reduce the amount
-  of computations for the 3x3 convolution block. The first SSD head from 1/16
-  scale feature map has four clustered prior boxes and outputs detected persons
-  (two class detector). The second SSD-based head predicts actions of the detected
-  persons. Possible actions: sitting, standing, raising hand.
+  Second generation of action detection (SSD-based) model to use in Smart Classroom.
 task_type: detection
 files:
   - name: FP32/person-detection-action-recognition-0005.xml
-    size: 282096
-    sha256: 69b18b2cfe6105bad2cf4970c8187f6879e79d16d8947029fa0993ed16dc71a3
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.xml
+    size: 651645
+    sha256: e02bf103c8100ce0e830944578f47eafde3abb13898e91a32b1735fc401aa0ac
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.xml
   - name: FP32/person-detection-action-recognition-0005.bin
-    size: 7800264
-    sha256: b68ab79b18b570569024665ec9a72e1c15568c5721d243e0e74f0423560361db
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.bin
+    size: 7800360
+    sha256: 2982e6c2683229a450d674c362cc11abd640dce4e39e95925c7957a28011f147
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.bin
   - name: FP16/person-detection-action-recognition-0005.xml
-    size: 281852
-    sha256: d867fdbbfc189be1704d9e35e57ad684a3986669626ddbe4ca73d628927b98c9
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.xml
+    size: 651397
+    sha256: 858c5622aada85a57ce7af3956bb992876a78c1052cea8ec280f62745ae8afb8
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.xml
   - name: FP16/person-detection-action-recognition-0005.bin
-    size: 3900138
-    sha256: 72263b506b29f7d41eadd33386d67faebea19b35cf799ae876a807d35160da8f
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.bin
-  - name: INT8/person-detection-action-recognition-0005.xml
-    size: 2081562
-    sha256: 9098c11bb19fb8718dd3bd8242ff7287e31d47d17930c63aa99740cbf3c34222
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-action-recognition-0005/INT8/person-detection-action-recognition-0005.xml
-  - name: INT8/person-detection-action-recognition-0005.bin
-    size: 7804916
-    sha256: f154273ce9138d2314f68e24a2319fd1add8e9099bd3f8163e939b7d09e73df6
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-action-recognition-0005/INT8/person-detection-action-recognition-0005.bin
+    size: 3900234
+    sha256: 159f52fdd28bef5a3ef3edd998fe08fd4d51c4a3fb2b9134b82a09f6a252c378
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.bin
+  - name: FP32-INT8/person-detection-action-recognition-0005.xml
+    size: 1697280
+    sha256: 554b10132b76c50c329952b3921a259c1ca1f458f21e6cd81279ced4df879a00
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-action-recognition-0005/FP32-INT8/person-detection-action-recognition-0005.xml
+  - name: FP32-INT8/person-detection-action-recognition-0005.bin
+    size: 7972512
+    sha256: cd8f809d2a6dfe12808a9a49c62fa3501c22fdff2c955961746a3c24e20d7db4
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-action-recognition-0005/FP32-INT8/person-detection-action-recognition-0005.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
