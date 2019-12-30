@@ -351,6 +351,14 @@ class ModelEvaluator:
         else:
             raise ValueError('Unsupported metric configuration type {}'.format(type(metric_config)))
 
+    def register_postprocessor(self, postprocessing_config):
+        if isinstance(postprocessing_config, str):
+            self.postprocessor.register_postprocessor({'type': postprocessing_config})
+        elif isinstance(postprocessing_config, dict):
+            self.postprocessor.register_postprocessor(postprocessing_config)
+        else:
+            raise ValueError('Unsupported post-processor configuration type {}'.format(type(postprocessing_config)))
+
     def reset(self):
         if self.metric_executor:
             self.metric_executor.reset()

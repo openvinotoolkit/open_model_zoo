@@ -1,10 +1,11 @@
+import numpy as np
 from ..config import NumberField, ConfigError
 from ..postprocessor.postprocessor import Postprocessor
 from ..representation import HitRatioAnnotation, HitRatioPrediction
 
 
-class NormalizeRecommendation(Postprocessor):
-    __provider__ = 'normalize_recommendation'
+class MinMaxNormalizeRecommendation(Postprocessor):
+    __provider__ = 'min_max_normalize_recommendation'
 
     annotation_types = (HitRatioAnnotation, )
     prediction_types = (HitRatioPrediction, )
@@ -32,5 +33,20 @@ class NormalizeRecommendation(Postprocessor):
     def process_image(self, annotation, prediction):
         for target in prediction:
             target.scores = (target.scores - self.min_value) / (self.max_value - self.min_value)
+
+        return annotation, prediction
+
+
+class SigmoidNormalizeRecommendation(Postprocessor):
+    __provider__ = 'sigmoid_normalize_recommendation'
+
+    annotation_types = (HitRatioAnnotation, )
+    prediction_types = (HitRatioPrediction, )
+
+    def process_image(self, annotation, prediction):
+        def sigmoid(x):
+            return 1 / (1 + np.exp(-x))
+        for target in prediction:
+            target.scores = sigmoid(target.scores)
 
         return annotation, prediction
