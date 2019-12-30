@@ -2,7 +2,6 @@ models:
   - name: gaze-estimation-adas-0002
 
     launchers:
-
       - framework: dlsdk
         tags:
           - FP32

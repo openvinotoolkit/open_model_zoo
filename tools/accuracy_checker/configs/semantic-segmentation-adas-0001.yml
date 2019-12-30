@@ -16,6 +16,13 @@ models:
         weights: intel/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.bin
         adapter: segmentation
 
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   intel/semantic-segmentation-adas-0001/FP32-INT8/semantic-segmentation-adas-0001.xml
+        weights: intel/semantic-segmentation-adas-0001/FP32-INT8/semantic-segmentation-adas-0001.bin
+        adapter: segmentation
+
     datasets:
       - name: semantic_segmentation_adas
 
