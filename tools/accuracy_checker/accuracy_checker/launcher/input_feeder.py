@@ -142,12 +142,22 @@ class InputFeeder:
         return inputs
 
     def _parse_inputs_config(self, inputs_entry, default_layout='NCHW'):
+        def get_layer_precision(input_config, input_name):
+            if 'precision' not in input_config:
+                return None
+            input_precision = PRECISION_TO_DTYPE.get(input_config['precision'])
+            if input_precision is None:
+                raise ConfigError("unsupported precision {} for layer {}".format(input_config['precision'], input_name))
+            precisions[input_name] = input_precision
+            return input_precision
+
         constant_inputs = {}
         non_constant_inputs_mapping = {}
         config_non_constant_inputs = []
         layouts = {}
         precisions = {}
         image_info_inputs = []
+
         for input_ in inputs_entry:
             name = input_['name']
             if name not in self.network_inputs:
@@ -155,17 +165,15 @@ class InputFeeder:
 
             if input_['type'] == 'IMAGE_INFO':
                 image_info_inputs.append(name)
+                get_layer_precision(input_, name)
                 continue
             value = input_.get('value')
 
             if input_['type'] == 'CONST_INPUT':
                 if isinstance(value, list):
                     value = np.array(value)
-                    if 'precision' in input_:
-                        input_precision = PRECISION_TO_DTYPE.get(input_['precision'])
-                        if input_precision is None:
-                            raise ConfigError("unsupported precision {} for layer {}".format(input_['precision'], name))
-                        value.astype(input_precision)
+                    precision = get_layer_precision(input_, name)
+                    value = value.astype(precision) if precision is not None else value
                 constant_inputs[name] = value
             else:
                 config_non_constant_inputs.append(name)
@@ -174,12 +182,7 @@ class InputFeeder:
                     non_constant_inputs_mapping[name] = value
                 layout = input_.get('layout', default_layout)
                 layouts[name] = LAYER_LAYOUT_TO_IMAGE_LAYOUT[layout]
-                precision = input_.get('precision')
-                if precision:
-                    data_type = PRECISION_TO_DTYPE.get(precision)
-                    if data_type is None:
-                        raise ConfigError("unsupported precision {} for layer {}".format(precision, name))
-                    precisions[name] = data_type
+                get_layer_precision(input_, name)
 
         all_config_inputs = config_non_constant_inputs + list(constant_inputs.keys()) + image_info_inputs
         not_config_inputs = [input_layer for input_layer in self.network_inputs if input_layer not in all_config_inputs]

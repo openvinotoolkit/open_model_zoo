@@ -273,3 +273,56 @@ class TestInputFeeder:
         assert len(result) == len(expected)
         assert np.array_equal(result[0]['input'], expected[0]['input'])
         assert np.array_equal(result[1]['input'], expected[1]['input'])
+
+    def test_set_input_precision_for_constant_input(self):
+        input_feeder = InputFeeder(
+            [{'name': 'input_u8', 'type': 'CONST_INPUT', 'value': [1, 2, 3], 'precision': 'U8'}],
+            {'input': (1, 3, 10, 10), 'input_u8': (3,)})
+        assert input_feeder.const_inputs['input_u8'].dtype == np.uint8
+
+    def test_set_invalid_input_precision_for_constant_input_raise_config_error(self):
+        with pytest.raises(ConfigError):
+            InputFeeder(
+                [{'name': 'input_u8', 'type': 'CONST_INPUT', 'value': [1, 2, 3], 'precision': 'U2'}],
+                {'input': (1, 3, 10, 10), 'input_u8': (3,)})
+
+    def test_set_input_precision_for_non_constant_input(self):
+        input_feeder = InputFeeder(
+            [{'name': 'input_u8', 'type': 'INPUT', 'precision': 'U8'}],
+            {'input_u8': (1, 3,10, 10)})
+        result = input_feeder.fill_non_constant_inputs([
+            DataRepresentation(
+                np.zeros((10, 10, 3)),
+                identifier='0'
+            ),
+        ])
+        expected = [{'input_u8': np.zeros((1, 3, 10, 10), dtype=np.uint8)}]
+        assert len(result) == len(expected)
+        assert np.array_equal(result[0]['input_u8'], expected[0]['input_u8'])
+        assert result[0]['input_u8'].dtype == expected[0]['input_u8'].dtype
+
+    def test_set_invalid_input_precision_for_non_constant_input_raise_config_error(self):
+        with pytest.raises(ConfigError):
+            InputFeeder([{'name': 'input', 'type': 'INPUT', 'precision': 'U2'}], {'input': (1, 3, 10, 10)})
+
+    def test_set_input_precision_for_image_info_input(self):
+        input_feeder = InputFeeder(
+            [{'name': 'im_info', 'type': 'IMAGE_INFO', 'precision': 'U8'}],
+            {'input': (1, 3,10, 10), 'im_info': (1, 3)})
+        result = input_feeder.fill_non_constant_inputs([
+            DataRepresentation(
+                np.zeros((10, 10, 3)),
+                identifier='0'
+            ),
+        ])
+        expected = [{'input': np.zeros((1, 3, 10, 10)), 'im_info': np.array([[10, 10, 1]], dtype=np.uint8)}]
+        assert len(result) == len(expected)
+        assert np.array_equal(result[0]['input'], expected[0]['input'])
+        assert result[0]['input'].dtype == expected[0]['input'].dtype
+        assert np.array_equal(result[0]['im_info'], expected[0]['im_info'])
+        assert result[0]['im_info'].dtype == expected[0]['im_info'].dtype
+
+    def test_set_invalid_input_precision_for_image_info_input_raise_config_error(self):
+        with pytest.raises(ConfigError):
+            InputFeeder([{'name': 'im_info', 'type': 'IMAGE_INFO', 'precision': 'U2'}],
+                        {'input': (1, 3, 10, 10), 'im_info': (1, 3)})
