@@ -34,6 +34,7 @@ KNOWN_FRAMEWORKS = {
     'caffe2': 'caffe2_to_onnx.py',
     'dldt': None,
     'mxnet': None,
+    'onnx': None,
     'pytorch': 'pytorch_to_onnx.py',
     'tf': None,
 }

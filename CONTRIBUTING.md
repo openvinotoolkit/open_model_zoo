@@ -9,6 +9,8 @@ Frameworks supported by the Open Model Zoo:
 * PyTorch\* (via conversion to ONNX\*)
 * MXNet\*
 
+Open Model Zoo also supports models already in the ONNX format.
+
 ## Pull Request Requirements
 
 To contribute to OMZ, create a pull request (PR) in this repository using the `develop` branch.
