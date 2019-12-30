@@ -41,37 +41,9 @@ class MetricsExecutor:
         self._dataset = dataset
 
         self.metrics = []
-        type_ = 'type'
-        identifier = 'name'
-        reference = 'reference'
-        threshold = 'threshold'
-        presenter = 'presenter'
         self.need_store_predictions = False
         for metric_config_entry in metrics_config:
-            metric_config = ConfigValidator(
-                "metrics", on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT,
-                fields=self.parameters()
-            )
-            metric_type = metric_config_entry.get(type_)
-            metric_config.validate(metric_config_entry, type_)
-
-            metric_identifier = metric_config_entry.get(identifier, metric_type)
-
-            metric_fn = Metric.provide(
-                metric_type, metric_config_entry, self.dataset, metric_identifier, state=self.state
-            )
-            metric_presenter = BasePresenter.provide(metric_config_entry.get(presenter, 'print_scalar'))
-
-            self.metrics.append(MetricInstance(
-                metric_identifier,
-                metric_type,
-                metric_fn,
-                metric_config_entry.get(reference),
-                metric_config_entry.get(threshold),
-                metric_presenter
-            ))
-            if isinstance(metric_fn, FullDatasetEvaluationMetric):
-                self.need_store_predictions = True
+            self.register_metric(metric_config_entry)
 
     @classmethod
     def parameters(cls):
@@ -136,6 +108,37 @@ class MetricsExecutor:
                 threshold=threshold,
                 meta=functor.meta,
             )
+
+    def register_metric(self, metric_config_entry):
+        type_ = 'type'
+        identifier = 'name'
+        reference = 'reference'
+        threshold = 'threshold'
+        presenter = 'presenter'
+        metric_config_validator = ConfigValidator(
+            "metrics", on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT,
+            fields=self.parameters()
+        )
+        metric_type = metric_config_entry.get(type_)
+        metric_config_validator.validate(metric_config_entry, type_)
+
+        metric_identifier = metric_config_entry.get(identifier, metric_type)
+
+        metric_fn = Metric.provide(
+            metric_type, metric_config_entry, self.dataset, metric_identifier, state=self.state
+        )
+        metric_presenter = BasePresenter.provide(metric_config_entry.get(presenter, 'print_scalar'))
+
+        self.metrics.append(MetricInstance(
+            metric_identifier,
+            metric_type,
+            metric_fn,
+            metric_config_entry.get(reference),
+            metric_config_entry.get(threshold),
+            metric_presenter
+        ))
+        if isinstance(metric_fn, FullDatasetEvaluationMetric):
+            self.need_store_predictions = True
 
     def get_metric_presenters(self):
         return [metric.presenter for metric in self.metrics]
