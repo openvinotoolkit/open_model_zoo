@@ -296,6 +296,7 @@ int main(int argc, char *argv[]) {
         // -----------------------------Prepare variables and data for main loop------------------------------
         double avgFPS = 0;
         double avgLatency = 0;
+        double latencySum = 0;
         unsigned framesNum = 0;
         bool isTestMode = true;
         int delay = 1;
@@ -328,7 +329,7 @@ int main(int argc, char *argv[]) {
                 gridMat = GridMat(inputImagesCount, cv::Size(width, height), cv::Size(16, 9), avgFPS);
                 cv::Size gridMatSize = gridMat.getSize();
                 delay = ((FLAGS_delay == -1)
-                         ? static_cast<int>(avgFPS / (gridMatSize.width * (gridMatSize.height / FLAGS_b)) * 1000)
+                         ? static_cast<int>(avgFPS / (gridMatSize.width * gridMatSize.height) * 1000)
                          : FLAGS_delay);
             }
 
@@ -359,20 +360,31 @@ int main(int argc, char *argv[]) {
 
                 framesNum += FLAGS_b;
                 gridMat.listUpdate(shownImagesInfo);
-                avgLatency = ((cv::getTickCount() - startTickCount) / cv::getTickFrequency()) / framesNum;
-                avgFPS = 1. / avgLatency;
-                gridMat.textUpdate(avgFPS, avgLatency, isTestMode);
+
+                avgFPS = 1. / (((cv::getTickCount() - startTickCount) / cv::getTickFrequency()) / framesNum);
+                
+                std::vector<long long> processingEndTimes;
                 if (!FLAGS_no_show && FLAGS_delay != -1) {
-                    cv::imshow("main", gridMat.getMat());
+                    cv::imshow("main", gridMat.getMat(processingEndTimes));
                     key = static_cast<char>(cv::waitKey(delay));
                 }
+
+                for (size_t i = 0; i < FLAGS_b; i++) {
+                    latencySum += ((processingEndTimes[i] - completedIRInfo.images[i].startTime)
+                                   / cv::getTickFrequency());
+                }
+                avgLatency = latencySum / framesNum;
+                gridMat.textUpdate(avgFPS, avgLatency, isTestMode);
             }
             else if (!emptyInferRequests.empty()) {
                 mutex.unlock();
                 cv::Mat nextImage = inputImages[nextImageIndex];
+                long long IRstartTime = cv::getTickCount();
                 resizeImage(nextImage, modelInputResolution);
                 emptyInferRequests.front().images.push_back(
-                    IRInfo::IRImage(nextImage, std::stoul(classIndexes[nextImageIndex])));
+                    IRInfo::IRImage(nextImage,
+                                    std::stoul(classIndexes[nextImageIndex]),
+                                    IRstartTime));
                 nextImageIndex++;
                 if (nextImageIndex == inputImagesCount) {
                     nextImageIndex = 0;

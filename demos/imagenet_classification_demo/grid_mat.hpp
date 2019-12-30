@@ -81,7 +81,7 @@ public:
         }
     }
 
-    cv::Mat getMat() {
+    cv::Mat getMat(std::vector<long long> &endTimes) {
         while (!updateList.empty()) {
             cv::Mat frame = std::get<0>(updateList.front());
             std::string predictedLabel = std::get<1>(updateList.front());
@@ -105,36 +105,36 @@ public:
                                cellSize);
                     prevImgs.pop();
                 }
-
-                prevImgs.push(frame);
                 
-                int thickness =  static_cast<int>(10. * frame.cols / cellSize.width);
+                cv::resize(frame, frame, cellSize);
+
+                int thickness = cellSize.width / 20;
+                int baseline = 0;
+                cv::Size textSize = cv::getTextSize(predictedLabel, cv::FONT_HERSHEY_PLAIN, 1, 2, &baseline);
+                double fontScale = static_cast<double>(cellSize.width - 2*thickness) / textSize.width;
+                cv::putText(frame,
+                            predictedLabel,
+                            cv::Point(thickness, cellSize.height - thickness - textSize.height),
+                            cv::FONT_HERSHEY_PLAIN, fontScale, textColor, 2);
+                prevImgs.push(frame);
+
                 cv::Mat tmpFrame;
                 frame.copyTo(tmpFrame);
-                cv::rectangle(tmpFrame, cv::Point(), cv::Point(frame.cols, frame.rows), cv::Scalar(255, 50, 50), thickness);
-                
+                cv::rectangle(tmpFrame, cv::Point(), cv::Point(frame.cols, frame.rows),
+                              cv::Scalar(255, 50, 50), thickness);
                 cv::resize(tmpFrame,
                            outImg(cv::Rect(points[currSourceID], cellSize)),
                            cellSize);
                 
-                int fontFace = cv::FONT_HERSHEY_PLAIN;
-                double fontScale = 1;
-                thickness = 2;
-                int baseline = 0;
-                cv::Size textSize = cv::getTextSize(predictedLabel, fontFace, fontScale, thickness, &baseline);
-                fontScale = static_cast<double>(cellSize.width) / textSize.width;
 
-                cv::putText(outImg,
-                        predictedLabel,
-                        cv::Point(points[currSourceID].x, points[currSourceID].y + cellSize.height),
-                        cv::FONT_HERSHEY_PLAIN, fontScale, textColor, thickness);
-            
                 if (currSourceID == points.size() - 1) {
                     currSourceID = 0;
                 } else {
                     currSourceID++;
                 }
             }
+
+            endTimes.push_back(cv::getTickCount());
         }
 
         return outImg;

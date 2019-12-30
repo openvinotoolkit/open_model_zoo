@@ -17,8 +17,10 @@ public:
     public:
         cv::Mat mat;
         unsigned rightClass;
+        long long startTime;
 
-        IRImage(cv::Mat &mat, unsigned rightClass): mat(mat), rightClass(rightClass) {}
+        IRImage(cv::Mat &mat, unsigned rightClass, long long startTime):
+            mat(mat), rightClass(rightClass), startTime(startTime) {}
     };
 
     InferRequest &ir;
