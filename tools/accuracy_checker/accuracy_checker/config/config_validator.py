@@ -52,10 +52,12 @@ class BaseValidator:
 
         raise ConfigError(error_message.format(value, field_uri))
 
+
 class _ExtraArgumentBehaviour(enum.Enum):
     WARN = 'warn'
     IGNORE = 'ignore'
     ERROR = 'error'
+
 
 def _is_dict_like(entry):
     return hasattr(entry, '__iter__') and hasattr(entry, '__getitem__')
@@ -272,7 +274,8 @@ class ListField(BaseField):
 
 class InputField(BaseField):
     INPUTS_TYPES = ('CONST_INPUT', 'INPUT', 'IMAGE_INFO')
-    LAYOUT_TYPES = ['NCHW', 'NHWC', 'NCWH', 'NWHC']
+    LAYOUT_TYPES = ('NCHW', 'NHWC', 'NCWH', 'NWHC')
+    PRECISIONS = ('FP32', 'FP16', 'U8', 'U16', 'I8', 'I16', 'I32', 'I64')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -282,6 +285,7 @@ class InputField(BaseField):
         self.layout = StringField(optional=True, choices=InputField.LAYOUT_TYPES,
                                   description="Layout: " + ', '.join(InputField.LAYOUT_TYPES))
         self.shape = BaseField(optional=True, description="Input shape.")
+        self.precision = StringField(optional=True, description='Input precision', choices=InputField.PRECISIONS)
 
     def validate(self, entry, field_uri=None):
         entry['optional'] = entry['type'] != 'CONST_INPUT'
