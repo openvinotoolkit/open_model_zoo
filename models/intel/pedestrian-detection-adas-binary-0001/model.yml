@@ -13,17 +13,17 @@
 # limitations under the License.
 
 description: >-
-  Pedestrian detection network based on SSD framework with tuned MobileNet v1
-  as a feature extractor. Some layers of MobileNet v1 are binary and use I1 arithm
+  Pedestrian detector based on ssd + mobilenet with reduced channels number binary
+  layers.
 task_type: detection
 files:
-  - name: INT1/pedestrian-detection-adas-binary-0001.xml
+  - name: FP32-INT1/pedestrian-detection-adas-binary-0001.xml
     size: 114635
     sha256: e64e7ce32c87e1c698b50abb8f2cf1d96c7651d45fc20bac09c417e046afa7f4
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.xml
-  - name: INT1/pedestrian-detection-adas-binary-0001.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/pedestrian-detection-adas-binary-0001/FP32-INT1/pedestrian-detection-adas-binary-0001.xml
+  - name: FP32-INT1/pedestrian-detection-adas-binary-0001.bin
     size: 2338004
     sha256: 7c2761ca3859ef55a80d9ed924225df7ba363fcb151e4ec2f7d1061b70bdb374
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/pedestrian-detection-adas-binary-0001/INT1/pedestrian-detection-adas-binary-0001.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/pedestrian-detection-adas-binary-0001/FP32-INT1/pedestrian-detection-adas-binary-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

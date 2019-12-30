@@ -13,25 +13,33 @@
 # limitations under the License.
 
 description: >-
-  Multiclass (person -  vehicle -  non-vehicle) detector based on SSD detection
-  architecture -  MobileNetV2 backbone)
+  Multiclass (person -  vehicle -  non-vehicle) detector based on SSD detection architecture
+  -  MobileNetV2 backbone)
 task_type: detection
 files:
   - name: FP32/person-vehicle-bike-detection-crossroad-1016.xml
-    size: 82676
-    sha256: 56d2b92139749dc8d35fca1ee2633f97f2146e0857f3cf76ca9791c107286ffd
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.xml
+    size: 194297
+    sha256: cfaaa5f792af3c8c7d95182100a3015dcfc108221c5495b6c07e620c0c075ca0
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.xml
   - name: FP32/person-vehicle-bike-detection-crossroad-1016.bin
-    size: 11547916
-    sha256: 0858938f00ee87fb47c632f47039316f6060a096e74dd3e5dc061d850b4b702d
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.bin
+    size: 11548004
+    sha256: 61c9deaca903bb107aecfc31faeb402c894e0d43ab3817db8d9d05d43dfa68cf
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP32/person-vehicle-bike-detection-crossroad-1016.bin
   - name: FP16/person-vehicle-bike-detection-crossroad-1016.xml
-    size: 82582
-    sha256: a040f8d3e81b2d1a352318bc0fd8d8b9dd9fbf7a9c591cef7d0c2e7171efbfe8
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.xml
+    size: 194179
+    sha256: 518bf493e99b28b35c1fe1593814d19393dfd3d48ce857060080e807b3ec5210
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.xml
   - name: FP16/person-vehicle-bike-detection-crossroad-1016.bin
-    size: 5773968
-    sha256: 3d22081d3b1a8c3e24dcbbe23b677a92ad144530880df33f070615e42901cc55
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.bin
+    size: 5774054
+    sha256: a0ba3bc9ca17330c731b395153651c22a666050cd06413c01059070681dc79a7
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP16/person-vehicle-bike-detection-crossroad-1016.bin
+  - name: FP32-INT8/person-vehicle-bike-detection-crossroad-1016.xml
+    size: 510358
+    sha256: 1e5cdaecdd84e43625a843fbaf207937892c48d77afe4c628634f2fa33bbcad8
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP32-INT8/person-vehicle-bike-detection-crossroad-1016.xml
+  - name: FP32-INT8/person-vehicle-bike-detection-crossroad-1016.bin
+    size: 11777480
+    sha256: 0abdc201405b2f910f3ddd49307afd89ee43ab80009f9827b4f16e7aa7274157
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-vehicle-bike-detection-crossroad-1016/FP32-INT8/person-vehicle-bike-detection-crossroad-1016.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

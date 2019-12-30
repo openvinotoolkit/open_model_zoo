@@ -13,34 +13,32 @@
 # limitations under the License.
 
 description: >-
-  An Attention-Based Approach for Single Image Super Resolution <https://arxiv.org/pdf/1807.06779.pdf>
-  but with reduced number of channels and changes in network achitecture. It enhances
-  the resolution of the input image by a factor of 4.
+  Super resolution model
 task_type: image_processing
 files:
   - name: FP32/single-image-super-resolution-1032.xml
-    size: 26530
-    sha256: b822073958fa1098054dca13a6f4a63de182179a037cdb6ad46fd6bcafad4728
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
+    size: 41192
+    sha256: b66fedd64b4cd0c37e714e54cadc43b874c7a6a415c8dc23dce391e39a243516
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
   - name: FP32/single-image-super-resolution-1032.bin
-    size: 119424
-    sha256: e2403b56bd57b0e7c68e33dad3fb1af5e3f0be4a3ad7c7cbc1836fddf0c062b0
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
+    size: 119556
+    sha256: 82b5338155835d6b4307721e6a9b28775a4550b61c31d76aac1a8b5d5612d7dc
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
   - name: FP16/single-image-super-resolution-1032.xml
-    size: 26507
-    sha256: ea929389e3196053d3066323ee69d03d5c766521868d162f0aa01ddcbfdc90c2
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
+    size: 41166
+    sha256: 348ec2236488d0dcb3d423fec3b9bebd749e54c08ae486f98fcc8e247811915d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
   - name: FP16/single-image-super-resolution-1032.bin
-    size: 59752
-    sha256: ac8a8c9387098ae9bc0cbda82cfe3235c9d2f9652277bbf07d78b96d2c4ff7e9
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
-  - name: INT8/single-image-super-resolution-1032.xml
-    size: 40591
-    sha256: 6e0ad9d25a9f1d31733edec7c220c3ff5d2a3e0c02c1793313067b5cb4692a56
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1032/INT8/single-image-super-resolution-1032.xml
-  - name: INT8/single-image-super-resolution-1032.bin
-    size: 119424
-    sha256: 89f809550199ccc33f65e54377ae88098fceacdb5f71800fe04ab2c9439e1818
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1032/INT8/single-image-super-resolution-1032.bin
+    size: 59882
+    sha256: abae5907d40ef7e47d680435a99484b74076a985a6b8c3353b64fa77e6d3c149
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
+  - name: FP32-INT8/single-image-super-resolution-1032.xml
+    size: 122462
+    sha256: 654bfedd6071cece4330272405df9e104101dca0af3f539d378d838f34d22892
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/single-image-super-resolution-1032/FP32-INT8/single-image-super-resolution-1032.xml
+  - name: FP32-INT8/single-image-super-resolution-1032.bin
+    size: 121724
+    sha256: e14739375434b1645d0b6745947aae73fd9b915750b033ce08f25aab93b0b25e
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/single-image-super-resolution-1032/FP32-INT8/single-image-super-resolution-1032.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

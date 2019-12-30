@@ -1,0 +1,44 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  High accuracy single embedding-based person reidentification model
+task_type: object_attributes
+files:
+  - name: FP32/person-reidentification-retail-0200.xml
+    size: 445430
+    sha256: 37c8e70443013aa06a15263daf57c8c3f2d0fe0fb03b5a4716e54024b3d5e83e
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-reidentification-retail-0200/FP32/person-reidentification-retail-0200.xml
+  - name: FP32/person-reidentification-retail-0200.bin
+    size: 18800388
+    sha256: 249d48480bd5a3b124a62cb6da8f0aecd535275a0d27f55cb74916a370450046
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-reidentification-retail-0200/FP32/person-reidentification-retail-0200.bin
+  - name: FP16/person-reidentification-retail-0200.xml
+    size: 445280
+    sha256: 59e56bf927b9b998791866824f14c36f56968a1ca70d872edfb26a5339fee308
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-reidentification-retail-0200/FP16/person-reidentification-retail-0200.xml
+  - name: FP16/person-reidentification-retail-0200.bin
+    size: 9400240
+    sha256: d127cdbb49a83bd14f66470eda597644c7996df9abf86951a67d8976f5f486e1
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-reidentification-retail-0200/FP16/person-reidentification-retail-0200.bin
+  - name: FP32-INT8/person-reidentification-retail-0200.xml
+    size: 1269198
+    sha256: 543654a435e3de8511c912939eab76d1d2c885252cc7af54b0e5226274ec4223
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-reidentification-retail-0200/FP32-INT8/person-reidentification-retail-0200.xml
+  - name: FP32-INT8/person-reidentification-retail-0200.bin
+    size: 19002408
+    sha256: 0b0ccfe91b037e2874aea7642c782f9edd634cbc687ca748d2650ee038ef6264
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-reidentification-retail-0200/FP32-INT8/person-reidentification-retail-0200.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
