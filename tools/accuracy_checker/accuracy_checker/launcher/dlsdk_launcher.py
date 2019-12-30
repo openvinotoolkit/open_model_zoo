@@ -234,7 +234,7 @@ class DLSDKLauncher(Launcher):
                 self._model = self.get_value_from_config('model')
                 self._weights = self.get_value_from_config('weights')
 
-            self.load_network()
+            self.load_network(log=True)
 
         self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
         self._do_reshape = False
@@ -658,7 +658,7 @@ class DLSDKLauncher(Launcher):
         elif affinity_map_path:
             warning('affinity_map config is applicable only for HETERO device')
 
-    def load_network(self, network=None):
+    def load_network(self, network=None, log=False):
         if hasattr(self, 'exec_network'):
             del self.exec_network
         if not hasattr(self, 'plugin'):
@@ -668,12 +668,14 @@ class DLSDKLauncher(Launcher):
         else:
             self.network = network
         self._set_precision()
+        if log:
+            self._print_input_output_info()
         self.exec_network = self.plugin.load(network=self.network, num_requests=self.num_requests)
 
-    def load_ir(self, xml_path, bin_path):
+    def load_ir(self, xml_path, bin_path, log=False):
         self._model = xml_path
         self._weights = bin_path
-        self.load_network()
+        self.load_network(log)
 
     @staticmethod
     def create_ie_network(model_xml, model_bin):
@@ -719,6 +721,18 @@ class DLSDKLauncher(Launcher):
         for input_config in config_inputs:
             if 'precision' in input_config:
                 self.network.inputs[input_config['name']].precision = input_config['precision']
+
+    def _print_input_output_info(self):
+        print_info('Input info:')
+        for name, input_info in self.network.inputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(input_info.precision))
+            print_info('\tshape {}\n'.format(input_info.shape))
+        print_info('Output info')
+        for name, output_info in self.network.outputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(output_info.precision))
+            print_info('\tshape {}\n'.format(output_info.shape))
 
     def release(self):
         if 'network' in self.__dict__:
