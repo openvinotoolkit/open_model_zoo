@@ -675,7 +675,7 @@ class DLSDKLauncher(Launcher):
     def load_ir(self, xml_path, bin_path, log=False):
         self._model = xml_path
         self._weights = bin_path
-        self.load_network(log)
+        self.load_network(log=log)
 
     @staticmethod
     def create_ie_network(model_xml, model_bin):
