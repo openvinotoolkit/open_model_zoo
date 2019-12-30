@@ -6,7 +6,6 @@
 #include <queue>
 #include <memory>
 #include <string>
-#include <map>
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
@@ -20,8 +19,6 @@
 
 #include <vpu/vpu_plugin_config.hpp>
 #include <cldnn/cldnn_config.hpp>
-
-#include <opencv2/core.hpp>
 
 #include "imagenet_classification_demo.hpp"
 #include "grid_mat.hpp"
@@ -207,7 +204,9 @@ int main(int argc, char *argv[]) {
         // ---------------------------------------------------------------------------------------------------
 
         // ----------------------------------Set device and device settings-----------------------------------
-        std::vector<std::string> deviceNames = parseDevices(FLAGS_d);
+        std::string deviceStr;
+        std::transform(FLAGS_d.c_str(), FLAGS_d.c_str() + FLAGS_d.size(), deviceStr.begin(), ::toupper);
+        std::vector<std::string> deviceNames = parseDevices(deviceStr);
         std::set<std::string> devices(deviceNames.begin(), deviceNames.end());
         std::map<std::string, uint32_t> device_nstreams = parseValuePerDevice(devices, FLAGS_nstreams);
         for (auto& device : devices) {
@@ -278,6 +277,7 @@ int main(int argc, char *argv[]) {
         // ---------------------------------------------------------------------------------------------------
         
         // ----------------------------------------Create output info-----------------------------------------
+        Presenter presenter(FLAGS_u, 0);
         int width;
         int height;
         std::vector<std::string> gridMatRowsCols = split(FLAGS_res, 'x');        
@@ -287,7 +287,7 @@ int main(int argc, char *argv[]) {
             width = std::stoi(gridMatRowsCols[0]);
             height = std::stoi(gridMatRowsCols[1]);
         }
-        GridMat gridMat = GridMat(inputImagesCount, cv::Size(width, height));
+        GridMat gridMat = GridMat(inputImagesCount, presenter, cv::Size(width, height));
 
         // image, predicted label, isPredictionRight
         std::list<std::tuple<cv::Mat, std::string, bool>> shownImagesInfo;
@@ -326,7 +326,7 @@ int main(int argc, char *argv[]) {
             if (isTestMode && elapsedSeconds.count() >= 10) {
                 isTestMode = false;
 
-                gridMat = GridMat(inputImagesCount, cv::Size(width, height), cv::Size(16, 9), avgFPS);
+                gridMat = GridMat(inputImagesCount, presenter, cv::Size(width, height), cv::Size(16, 9), avgFPS);
                 cv::Size gridMatSize = gridMat.getSize();
                 delay = ((FLAGS_delay == -1)
                          ? static_cast<int>(avgFPS / (gridMatSize.width * gridMatSize.height) * 1000)
@@ -374,7 +374,7 @@ int main(int argc, char *argv[]) {
                                    / cv::getTickFrequency());
                 }
                 avgLatency = latencySum / framesNum;
-                gridMat.textUpdate(avgFPS, avgLatency, isTestMode);
+                gridMat.textUpdate(avgFPS, avgLatency, isTestMode, presenter);
             }
             else if (!emptyInferRequests.empty()) {
                 mutex.unlock();
@@ -424,6 +424,7 @@ int main(int argc, char *argv[]) {
         std::cout << "-------------------------------------" << std::endl;
         std::cout << "Overall FPS: " << avgFPS << std::endl;
         std::cout << "Latency: " << avgLatency << std::endl;
+        std::cout << presenter.reportMeans() << std::endl;
 
         if (!FLAGS_no_show) {
             cv::destroyWindow("main");

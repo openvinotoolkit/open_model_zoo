@@ -34,6 +34,7 @@ static const char plugin_message[] = "Optional. Enables messages from a plugin."
 static const char no_show_message[] = "Optional. Disable showing of processed images.";
 static const char execution_time_message[] = "Optional. Time in seconds to execute program. " \
                                              "Default is -1 (infinite time).";
+static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", image_message);
@@ -51,6 +52,7 @@ DEFINE_string(l, "", custom_cpu_library_message);
 DEFINE_bool(p_msg, false, plugin_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_int32(time, -1, execution_time_message);
+DEFINE_string(u, "", utilization_monitors_message);
 
 static void showUsage() {
     std::cout << std::endl;
@@ -74,4 +76,5 @@ static void showUsage() {
     std::cout << "    -res \"<WxH>\"              " << image_grid_resolution_message << std::endl;
     std::cout << "    -no_show                  " << no_show_message << std::endl;
     std::cout << "    -time \"<integer>\"         " << execution_time_message << std::endl;
+    std::cout << "    -u                        " << utilization_monitors_message << std::endl;
 }
