@@ -12,7 +12,6 @@
 #include <string>
 #include <memory>
 
-#include <format_reader_ptr.h>
 #include <inference_engine.hpp>
 #ifdef WITH_EXTENSIONS
 #include <ext_list.hpp>

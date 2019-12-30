@@ -108,7 +108,9 @@ class BrainTumorSegmentationAnnotation(SegmentationAnnotation):
 
 
 class BrainTumorSegmentationPrediction(SegmentationPrediction):
-    pass
+    def __init__(self, identifiers, mask, label_order=(0, 1, 2, 3)):
+        super().__init__(identifiers, mask)
+        self.label_order = label_order
 
 
 class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):

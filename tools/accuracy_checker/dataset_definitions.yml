@@ -1,7 +1,3 @@
-launchers:
-  - framework: dlsdk
-    cpu_extensions: AUTO
-
 datasets:
   - name: ms_coco_mask_rcnn
     annotation_conversion:
@@ -73,6 +69,17 @@ datasets:
       - type: faster_rcnn_postprocessing_resize
         dst_height: 600
         dst_width: 1024
+
+  - name: ms_coco_detection_80_class_without_backgound
+    data_source: val2017
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: instances_val2017.json
+      has_background: False
+      sort_annotations: True
+      use_full_label_map: False
+    annotation:  mscoco_det_80.pickle
+    dataset_meta:  mscoco_det_80.json
 
   - name: ms_coco_keypoints
     data_source: val2017
@@ -573,6 +580,16 @@ datasets:
       data_dir: BraTS
       ids_file: BraTS/val_ids.p
       labels_file: BraTS/labels
+    annotation: brats.pickle
+    dataset_meta: brats.json
+
+  - name: BraTS_2017
+    data_source: BraTS_2017
+    reader: nifti_reader
+    annotation_conversion:
+      converter: brats
+      data_dir: BraTS_2017
+      labels_file: BraTS_2017/labels
     annotation: brats.pickle
     dataset_meta: brats.json
 

@@ -23,6 +23,7 @@ from ..representation import HitRatioAnnotation, HitRatioPrediction
 from .metric import PerImageEvaluationMetric
 from ..config import NumberField
 
+
 class BaseRecommenderMetric(PerImageEvaluationMetric):
     annotation_types = (HitRatioAnnotation, )
     prediction_types = (HitRatioPrediction, )
@@ -108,3 +109,28 @@ class NDSGMetric(BaseRecommenderMetric):
 
     def __init__(self, *args, **kwargs):
         super().__init__(ndcg_discounter, *args, **kwargs)
+
+
+class LogLoss(PerImageEvaluationMetric):
+    __provider__ = 'log_loss'
+
+    annotation_types = (HitRatioAnnotation, )
+    prediction_types = (HitRatioPrediction, )
+
+    def configure(self):
+        self.losses = []
+        self.meta.update({
+            'scale': 1, 'postfix': ' ', 'calculate_mean': False, 'target': 'higher-worse'
+        })
+
+    def update(self, annotation, prediction):
+        score = np.clip(prediction.scores, 1e-15, 1 - 1e-15)
+        loss = -np.log(score) if annotation.positive else -np.log(1. - score)
+        self.losses.append(loss)
+        return loss
+
+    def evaluate(self, annotations, predictions):
+        return np.mean(self.losses)
+
+    def reset(self):
+        self.losses = []

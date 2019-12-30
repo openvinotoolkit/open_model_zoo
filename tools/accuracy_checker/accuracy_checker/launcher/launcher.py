@@ -137,10 +137,12 @@ class Launcher(ClassProvider):
         return meta
 
     @staticmethod
-    def fit_to_input(data, layer_name, layout):
+    def fit_to_input(data, layer_name, layout, precision):
         if len(np.shape(data)) == 4:
-            return np.transpose(data, layout)
-        return np.array(data)
+            data = np.transpose(data, layout)
+        else:
+            data = np.array(data)
+        return data.astype(precision) if precision else data
 
     def inputs_info_for_meta(self):
         return {

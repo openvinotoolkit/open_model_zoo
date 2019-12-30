@@ -107,9 +107,9 @@ class PyTorchLauncher(Launcher):
             module.eval()
             return module
 
-    def fit_to_input(self, data, layer_name, layout):
+    def fit_to_input(self, data, layer_name, layout, precision):
         data = np.transpose(data, layout)
-        tensor = self._torch.from_numpy(data.astype(np.float32))
+        tensor = self._torch.from_numpy(data.astype(np.float32 if not precision else precision))
         if self.cuda:
             tensor = tensor.cuda()
         with self._torch.no_grad():

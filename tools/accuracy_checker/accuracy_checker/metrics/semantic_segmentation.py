@@ -192,7 +192,6 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         parameters.update({
             'mean': BoolField(optional=True, default=True, description='Allows calculation mean value.'),
             'median': BoolField(optional=True, default=False, description='Allows calculation median value.'),
-            'use_argmax': BoolField(optional=True, default=True, description="Allows to use argmax for prediction mask")
         })
 
         return parameters
@@ -200,7 +199,7 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
     def configure(self):
         self.mean = self.get_value_from_config('mean')
         self.median = self.get_value_from_config('median')
-        self.use_argmax = self.get_value_from_config('use_argmax')
+        self.output_order = self.get_value_from_config('output_order')
 
         labels = list(self.dataset.labels.values()) if self.dataset.metadata else ['overall']
         self.classes = len(labels)
@@ -217,11 +216,16 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         result = np.zeros(shape=self.classes)
 
         annotation_data = annotation.mask
-        prediction_data = np.argmax(prediction.mask, axis=0) if self.use_argmax else prediction.mask.astype('int64')
+        prediction_data = prediction.mask
 
-        for c in range(1, self.classes):
+        if prediction_data.shape[0] != 1 and len(prediction_data.shape) != 3:
+            raise RuntimeError("For '{}' metric prediction mask should has only 1 channel, but more found. "
+                               "Specify 'make_argmax' option in adapter or postprocessor."
+                               .format(self.__provider__))
+
+        for c, p in enumerate(prediction.label_order, 1):
             annotation_data_ = (annotation_data == c)
-            prediction_data_ = (prediction_data == c)
+            prediction_data_ = (prediction_data == p)
 
             intersection_count = np.logical_and(annotation_data_, prediction_data_).sum()
             union_count = annotation_data_.sum() + prediction_data_.sum()

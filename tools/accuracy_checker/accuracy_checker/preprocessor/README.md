@@ -40,9 +40,21 @@ Accuracy Checker supports following set of preprocessors:
      You can specify one value for all channels or list of comma separated channel-wise values.
   * `std` specifies values, on which pixels will be divided.
      You can specify one value for all channels or list of comma separated channel-wise values.
-
      These parameters support work with precomputed values of frequently used datasets (e.g. `cifar10` or `imagenet`).
-
+* `resize3d` - resizing 3d image (e.g. MRI scans) to new size:
+  * `size` in format `(H,W,D)`. All values will be interpolated with 1st-order spline.
+* `crop_brats`  -  performing crop of 3d images (e.g. MRI scans) by cropping all non-zero voxels. Also sets bounding boxes for `segmentation_prediction_resample` preprocessor (see [Postprocessors](../postprocessor/README.md))
+* `normalize_brats` - normalization of 3d images (e.g. MRI scans) with z-score normalization
+  * `masked` - specifies type of masking:
+    * `none` for not applying mask
+    * `ignore` for ignoring "empty" voxels in statistic calculation
+    * `nullify` for nullifying initially "empty" voxels at the end
+    * `all` for `ignore` and `nullify`
+  * `cutoff` - cuts minimum and value to `-cutoff` and `cutoff` respectively
+  * `shift_value` - adds to all values
+  * `normalize_value` - divides all values
+* `swap_modalities` - swapping modalities of MRI scan (works as channel swapping)
+  * `modality_order` - new order
 * `bgr_to_rgb` - reversing image channels. Convert image in BGR format to RGB.
 * `bgr_to_gray` - converting image in BGR to gray scale color space.
 * `rgb_to_bgr` - reversing image channels. Convert image in RGB format to BGR.
@@ -85,4 +97,3 @@ Accuracy Checker supports following set of preprocessors:
 * `centernet_affine_transform` - CenterNet affine transformation, used for image resizing.
   * `dst_width` and `dst_height` are destination width, and height for image. You can also use size instead in case when destination sizes are equal.
   * `scale` - scale factor for image (default is 1).
-
