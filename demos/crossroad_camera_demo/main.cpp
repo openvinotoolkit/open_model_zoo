@@ -166,12 +166,12 @@ struct PersonDetection : BaseDetection{
         CNNNetReader netReader;
         /** Read network model **/
         netReader.ReadNetwork(FLAGS_m);
-        /** Set batch size to 1 **/
-        slog::info << "Batch size is forced to  1" << slog::endl;
-        netReader.getNetwork().setBatchSize(1);
         /** Extract model name and load it's weights **/
         std::string binFileName = fileNameNoExt(FLAGS_m) + ".bin";
         netReader.ReadWeights(binFileName);
+        /** Set batch size to 1 **/
+        slog::info << "Batch size is forced to  1" << slog::endl;
+        netReader.getNetwork().setBatchSize(1);
         // -----------------------------------------------------------------------------------------------------
 
         /** SSD-based network should have one input and one output **/
@@ -345,12 +345,11 @@ struct PersonAttribsDetection : BaseDetection {
         CNNNetReader netReader;
         /** Read network model **/
         netReader.ReadNetwork(FLAGS_m_pa);
-        netReader.getNetwork().setBatchSize(1);
-        slog::info << "Batch size is forced to 1 for Person Attribs" << slog::endl;
-
         /** Extract model name and load it's weights **/
         std::string binFileName = fileNameNoExt(FLAGS_m_pa) + ".bin";
         netReader.ReadWeights(binFileName);
+        netReader.getNetwork().setBatchSize(1);
+        slog::info << "Batch size is forced to 1 for Person Attribs" << slog::endl;
         // -----------------------------------------------------------------------------------------------------
 
         /** Person Attribs network should have one input two outputs **/
@@ -456,12 +455,11 @@ struct PersonReIdentification : BaseDetection {
         CNNNetReader netReader;
         /** Read network model **/
         netReader.ReadNetwork(FLAGS_m_reid);
-        slog::info << "Batch size is forced to  1 for Person Reidentification Network" << slog::endl;
-        netReader.getNetwork().setBatchSize(1);
         /** Extract model name and load it's weights **/
         std::string binFileName = fileNameNoExt(FLAGS_m_reid) + ".bin";
         netReader.ReadWeights(binFileName);
-
+        slog::info << "Batch size is forced to  1 for Person Reidentification Network" << slog::endl;
+        netReader.getNetwork().setBatchSize(1);
         /** Person Reidentification network should have 1 input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
         slog::info << "Checking Person Reidentification Network input" << slog::endl;
