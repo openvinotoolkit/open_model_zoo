@@ -4,9 +4,9 @@ models:
     launchers:
       - framework: dlsdk
         tags:
-          - INT1
-        model:   intel/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.xml
-        weights: intel/vehicle-detection-adas-binary-0001/INT1/vehicle-detection-adas-binary-0001.bin
+          - FP32-INT1
+        model:   intel/vehicle-detection-adas-binary-0001/FP32-INT1/vehicle-detection-adas-binary-0001.xml
+        weights: intel/vehicle-detection-adas-binary-0001/FP32-INT1/vehicle-detection-adas-binary-0001.bin
         adapter: ssd
 
     datasets:

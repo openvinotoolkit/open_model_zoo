@@ -36,9 +36,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - INT8
-        model:   intel/single-image-super-resolution-1033/INT8/single-image-super-resolution-1033.xml
-        weights: intel/single-image-super-resolution-1033/INT8/single-image-super-resolution-1033.bin
+          - FP32-INT8
+        model:   intel/single-image-super-resolution-1033/FP32-INT8/single-image-super-resolution-1033.xml
+        weights: intel/single-image-super-resolution-1033/FP32-INT8/single-image-super-resolution-1033.bin
         adapter:
           type: super_resolution
           reverse_channels: True
