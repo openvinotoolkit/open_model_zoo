@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import numpy as np
+import os
+import cv2
+
 from accuracy_checker.evaluators.base_evaluator import BaseEvaluator
 from accuracy_checker.dataset import Dataset
 from accuracy_checker.adapters import create_adapter
@@ -23,7 +26,7 @@ from accuracy_checker.preprocessor import PreprocessingExecutor
 from accuracy_checker.metrics import MetricsExecutor
 from accuracy_checker.launcher import create_launcher
 from accuracy_checker.utils import extract_image_representations
-import cv2
+
 
 class ColorizationEvaluator(BaseEvaluator):
     def __init__(self, dataset, reader, preprocessing, metric_executor, launcher, test_model, check_model):
@@ -50,13 +53,16 @@ class ColorizationEvaluator(BaseEvaluator):
             raise ConfigError('reader should be dict or string')
         preprocessing = PreprocessingExecutor(dataset_config.get('preprocessing', []), dataset.name)
         metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
-        launcher = create_launcher(config['launchers'][0], delayed_model_loading=True)
+        launcher_settings = config['launchers'][0]
+        supported_frameworks = ['dlsdk']
+        if not launcher_settings['framework'] in supported_frameworks:
+            raise ConfigError('{} framework not supported'.format(launcher_settings['framework']))
+        launcher = create_launcher(launcher_settings, delayed_model_loading=True)
         test_model = ColorizationTestModel(config.get('network_info', {}), launcher)
-        check_model = ColorizationCheckModel(config.get('network_info', {}),
-                                             dataset_config.get('preprocessing', {}), launcher)
+        check_model = ColorizationCheckModel(config.get('network_info', {}), launcher)
         return cls(dataset, reader, preprocessing, metrics_executor, launcher, test_model, check_model)
 
-    def process_dataset(self, stored_predictions, progress_reporter, *args, ** kwargs):
+    def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
         self._annotations, self._predictions = ([], []) if self.metric_executor.need_store_predictions else None, None
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
@@ -66,7 +72,7 @@ class ColorizationEvaluator(BaseEvaluator):
             batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
             batch_input = self.preprocessing_executor.process(batch_input, batch_annotation)
             batch_input, _ = extract_image_representations(batch_input)
-            batch_out = np.array(self.test_model.predict([], batch_input))
+            batch_out = np.array(self.test_model.predict(batch_annotation, batch_input))
             batch_prediction = self.check_model.predict(batch_identifiers, batch_out)
             self.metric_executor.update_metrics_on_batch(dataset_indices, batch_annotation, batch_prediction)
             if self.metric_executor.need_store_predictions:
@@ -83,7 +89,7 @@ class ColorizationEvaluator(BaseEvaluator):
             self._metrics_results = []
 
         for result_presenter, evaluated_metric in self.metric_executor.iterate_metrics(
-                self._annotations, self._predictions):
+            self._annotations, self._predictions):
             self._metrics_results.append(evaluated_metric)
             if print_results:
                 result_presenter.write_result(evaluated_metric, ignore_results_formatting)
@@ -119,6 +125,12 @@ class ColorizationEvaluator(BaseEvaluator):
 class BaseModel:
     def __init__(self, network_info, launcher):
         self.network_info = network_info
+        self.supported_format = ['.xml', '.bin']
+
+    def check_format(self, current_format):
+        if not os.path.splitext(current_format)[1] in self.supported_format:
+            raise ConfigError('{} format not supported'.format(self.supported_format))
+        return current_format
 
     def predict(self, idenitifers, input_data):
         raise NotImplementedError
@@ -130,8 +142,8 @@ class BaseModel:
 class ColorizationTestModel(BaseModel):
     def __init__(self, network_info, launcher):
         super().__init__(network_info, launcher)
-        model_xml = str(network_info['test']['model'])
-        model_bin = str(network_info['test']['weights'])
+        model_xml = super().check_format(str(network_info['test']['model']))
+        model_bin = super().check_format(str(network_info['test']['weights']))
         self.color_coeff = str(network_info['test']['color_coeff'])
         self.network = launcher.create_ie_network(model_xml, model_bin)
         if not hasattr(launcher, 'plugin'):
@@ -182,10 +194,10 @@ class ColorizationTestModel(BaseModel):
 
 
 class ColorizationCheckModel(BaseModel):
-    def __init__(self, network_info, preprocessing_info, launcher):
+    def __init__(self, network_info, launcher):
         super().__init__(network_info, launcher)
-        model_xml = str(network_info['checker']['model'])
-        model_bin = str(network_info['checker']['weights'])
+        model_xml = super().check_format(str(network_info['checker']['model']))
+        model_bin = super().check_format(str(network_info['checker']['weights']))
 
         self.network = launcher.create_ie_network(model_xml, model_bin)
         if hasattr(launcher, 'plugin'):
@@ -197,8 +209,6 @@ class ColorizationCheckModel(BaseModel):
         self.output_blob = next(iter(self.network.outputs))
         self.adapter = create_adapter(network_info['checker']['adapter'])
         self.adapter.output_blob = self.output_blob
-        self.data_std = float(([elem for elem in preprocessing_info
-                                if elem['type'] == 'normalization'][0]['std']))
 
     def predict(self, identifiers, input_data):
         result = self.exec_network.infer(self.fit_to_input(input_data))
@@ -209,6 +219,7 @@ class ColorizationCheckModel(BaseModel):
         del self.exec_network
 
     def fit_to_input(self, input_data):
-        input_data *= self.data_std
+        constant_normalization = 255.0
+        input_data *= constant_normalization
         input_data = np.transpose(input_data, (0, 3, 1, 2))
         return {self.input_blob: input_data}
