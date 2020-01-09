@@ -216,3 +216,40 @@ class ClassificationF1Score(PerImageEvaluationMetric):
             where=sum_precision_recall != 0
         )
         return f1_score if len(f1_score) == 2 else f1_score[0]
+
+    def reset(self):
+        self.cm = np.zeros((len(self.labels), len(self.labels)))
+
+
+class MetthewsCorrelation(PerImageEvaluationMetric):
+    __provider__ = 'metthews_correlation_coef'
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
+    prediction_types = (ClassificationPrediction, )
+
+    def configure(self):
+        label_map = self.dataset.metadata.get('label_map', [])
+        if label_map and len(label_map) != 2:
+            raise ConfigError('metthew_correlation_coefficient applicable only for binary classification task')
+        self.tp = 0
+        self.tn = 0
+        self.fp = 0
+        self.fn = 0
+
+    def update(self, annotation, prediction):
+        if annotation.label and prediction.label:
+            self.tp += 1
+            return 1
+        if not annotation.label and not prediction.label:
+            self.tn += 1
+            return 1
+        if not annotation.label and prediction.label:
+            self.fp += 1
+            return 0
+        if annotation.label and not prediction.label:
+            self.fn += 1
+            return 0
+        return -1
+
+    def evaluate(self, annotations, predictions):
+        delimeter_sum = (self.tp + self.fp) * (self.tp + self.fn) * (self.tn + self.fp) * (self.tn + self.fn)
+        return ((self.tp * self.tn) - (self.fp * self.fn)) / np.sqrt(delimeter_sum) if delimeter_sum != 0 else -1

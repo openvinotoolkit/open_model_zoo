@@ -447,8 +447,8 @@ class CoLAConverter(BaseFormatConverter):
         self.max_seq_length = self.get_value_from_config('max_seq_length')
         self.lower_case = self.get_value_from_config('lower_case')
         self.tokenizer = get_tokenizer(self.config, self.lower_case)
-        mrpc_labels = labels['mrpc']
-        self.label_map = dict(enumerate(mrpc_labels))
+        cola_labels = labels['cola']
+        self.label_map = dict(enumerate(cola_labels))
         self.reversed_label_map = {value: key for key, value in self.label_map.items()}
         self.support_vocab = 'vocab_file' in self.config
 

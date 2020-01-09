@@ -17,7 +17,13 @@ limitations under the License.
 from .metric_executor import MetricsExecutor
 from .metric import Metric, PerImageMetricResult
 
-from .classification import ClassificationAccuracy, ClassificationAccuracyClasses, ClipAccuracy, ClassificationF1Score
+from .classification import (
+    ClassificationAccuracy,
+    ClassificationAccuracyClasses,
+    ClipAccuracy,
+    ClassificationF1Score,
+    MetthewsCorrelation
+)
 from .detection import (DetectionMAP, MissRate, Recall, DetectionAccuracyMetric)
 from .reid import CMCScore, ReidMAP, PairwiseAccuracy, PairwiseAccuracySubsets
 from .semantic_segmentation import SegmentationAccuracy, SegmentationIOU, SegmentationMeanAccuracy, SegmentationFWAcc
