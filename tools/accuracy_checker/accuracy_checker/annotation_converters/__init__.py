@@ -47,7 +47,7 @@ from .cvat_multilabel_recognition import CVATMultilabelAttributesRecognitionConv
 from .cvat_human_pose import CVATPoseEstimationConverter
 from .cvat_person_detection_action_recognition import CVATPersonDetectionActionRecognitionConverter
 from .squad import SQUADConverter
-from .text_classification import XNLIDatasetConverter, BertXNLITFRecordConverter, IMDBConverter
+from .text_classification import XNLIDatasetConverter, BertXNLITFRecordConverter, IMDBConverter, MRPCConverter
 from .cmu_panoptic import CmuPanopticKeypointsConverter
 from .action_recognition import ActionRecognitionConverter
 from .ms_asl_continuous import MSASLContiniousConverter
@@ -98,6 +98,7 @@ __all__ = [
     'XNLIDatasetConverter',
     'BertXNLITFRecordConverter',
     'IMDBConverter',
+    'MRPCConverter',
     'CmuPanopticKeypointsConverter',
     'ActionRecognitionConverter',
     'MSASLContiniousConverter',
