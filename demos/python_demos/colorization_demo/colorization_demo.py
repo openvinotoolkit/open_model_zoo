@@ -122,9 +122,7 @@ if __name__ == '__main__':
         update_res = np.zeros((n_out, 2, h_out, w_out)).astype(np.float32)
         assert color_coeff.shape == (313, 2), "Current shape of color coefficients does not match required shape"
 
-        for res_blob, color_coeff_blob in zip(res[output_blob][0, :, :, :], color_coeff):
-            for upd_res_blob, clr_coeff in zip(update_res[0, :, :, :], color_coeff_blob):
-                upd_res_blob += res_blob * clr_coeff
+        update_res[0, :, :, :] = (res[output_blob] * color_coeff.transpose()[:, :, np.newaxis, np.newaxis]).sum(1)
 
         log.debug("Get results")
         out = update_res[0, :, :, :].transpose((1, 2, 0))
