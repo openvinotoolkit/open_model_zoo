@@ -169,3 +169,50 @@ class ClipAccuracy(PerImageEvaluationMetric):
         self.clip_accuracy.reset()
         self.video_accuracy.reset()
         self.video_avg_prob.reset()
+
+
+class ClassificationF1Score(PerImageEvaluationMetric):
+    __provider__ = 'classification_f1-score'
+
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
+    prediction_types = (ClassificationPrediction, )
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'label_map': StringField(optional=True, default='label_map', description="Label map.")
+        })
+        return parameters
+
+    def configure(self):
+        label_map = self.get_value_from_config('label_map')
+        if self.dataset.metadata:
+            self.labels = self.dataset.metadata.get(label_map)
+            if not self.labels:
+                raise ConfigError('classification_f1-score metric requires label_map providing in dataset_meta'
+                                  'Please provide dataset meta file or regenerate annotation')
+        else:
+            raise ConfigError('classification_f1-scores metric requires dataset metadata'
+                              'Please provide dataset meta file or regenerate annotation')
+        self.cm = np.zeros((len(self.labels), len(self.labels)))
+
+    def update(self, annotation, prediction):
+        self.cm[prediction.label] += 1
+        return annotation.label == prediction.label
+
+    def evaluate(self, annotations, predictions):
+        cm_diagonal = self.cm.diagonal()
+        cm_horizontal_sum = self.cm.sum(axis=1)
+        cm_vertical_sum = self.cm.sum(axis=0)
+        precision = np.divide(
+            cm_diagonal, cm_horizontal_sum, out=np.zeros_like(cm_diagonal, dtype=float), where=cm_horizontal_sum != 0
+        )
+        recall = np.divide(
+            cm_diagonal, cm_vertical_sum, out=np.zeros_like(cm_diagonal, dtype=float), where=cm_vertical_sum != 0
+        )
+        sum_precision_recall = precision + recall
+        f1_score = 2 * np.divide(
+            precision * recall, sum_precision_recall, out=np.zeros_like(cm_diagonal, dtype=float),
+            where=sum_precision_recall != 0
+        )
+        return f1_score if len(f1_score) == 2 else f1_score[0]

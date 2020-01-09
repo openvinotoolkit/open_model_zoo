@@ -18,7 +18,7 @@ InputExample = namedtuple('InputExample', ['guid', 'text_a', 'text_b', 'label'])
 labels = {
     'xnli': ["contradiction", "entailment", "neutral"],
     'imdb': ['neg', 'pos'],
-
+    'mrpc': ['0', '1']
 }
 
 
