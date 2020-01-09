@@ -416,14 +416,8 @@ struct PersonReIdentification : BaseDetection {
         Blob::Ptr attribsBlob = request.GetBlob(outputName);
 
         auto numOfChannels = attribsBlob->getTensorDesc().getDims().at(1);
-        /* output descriptor of Person Reidentification Recognition network has size 256 */
-        if (numOfChannels != 256) {
-            throw std::logic_error("Output size (" + std::to_string(numOfChannels) + ") of the "
-                                   "Person Reidentification network is not equal to 256");
-        }
-
         auto outputValues = attribsBlob->buffer().as<float*>();
-        return std::vector<float>(outputValues, outputValues + 256);
+        return std::vector<float>(outputValues, outputValues + numOfChannels);
     }
 
     template <typename T>

@@ -45,7 +45,7 @@ The expected color order is BGR.
 
 ## Outputs
 
-The net outputs a blob with shape: [1, 256] named descriptor, which can be
+The net outputs a blob with shape: [1, 512] named descriptor, which can be
 compared with other descriptors using the
 [Cosine distance](https://en.wikipedia.org/wiki/Cosine_similarity).
 
