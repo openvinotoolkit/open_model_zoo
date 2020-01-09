@@ -1,6 +1,8 @@
+
+
 # Colorization Demo
 
-This example demonstrates an example of using neural networks to colorization video. 
+This example demonstrates an example of using neural networks to colorization video.
 You can use the following pre-trained models with the demo:
 
 * `colorization-v2`
@@ -10,7 +12,7 @@ For more information about the pre-trained models, refer to the [model documenta
 
 ### How it works
 
-On the start-up, the application reads command line parameters and loads one network to the Inference Engine for execution. 
+On the start-up, the application reads command line parameters and loads one network to the Inference Engine for execution.
 
 Having received the image, the program:
 1) converts the frame of video into LAB color space
