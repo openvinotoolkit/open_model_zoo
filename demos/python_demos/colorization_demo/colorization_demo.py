@@ -34,9 +34,12 @@ def build_arg():
                          required=True, type=str)
     in_args.add_argument("-d", "--device",
                          help="Optional. Specify target device for infer: CPU, GPU, FPGA, HDDL or MYRIAD. "
-                         "Default: CPU",
+                              "Default: CPU",
                          default="CPU", type=str)
-    in_args.add_argument("-i", "--input", help="Optional. Path to a test video file.", type=str)
+    in_args.add_argument('-i', "--input",
+                         help='Required. Path to an image, video file or a numeric camera ID.',
+                         required=True, type=str, metavar='"<path>"')
+
     in_args.add_argument("-n", "--no_show", help="Optional. Disable display of results on screen.",
                          action='store_true', default=False)
     in_args.add_argument("-v", "--verbose", help="Optional. Enable display of processing logs on screen.",
@@ -87,12 +90,17 @@ if __name__ == '__main__':
     _, _, h_in, w_in = input_shape
 
     try:
+        input_source = int(args.input)
+    except ValueError:
         input_source = args.input
-    except TypeError:
-        input_source = 0
+
+    if not os.path.isdir(input_source):
+        assert "{} not exist".format(input_source)
     cap = cv.VideoCapture(input_source)
 
     color_coeff = np.load(coeffs).astype(np.float32)
+    assert color_coeff.shape == (313, 2), "Current shape of color coefficients does not match required shape"
+
     while True:
         log.debug("#############################")
         hasFrame, original_frame = cap.read()
@@ -120,7 +128,6 @@ if __name__ == '__main__':
 
         (n_out, c_out, h_out, w_out) = res[output_blob].shape
         update_res = np.zeros((n_out, 2, h_out, w_out)).astype(np.float32)
-        assert color_coeff.shape == (313, 2), "Current shape of color coefficients does not match required shape"
 
         update_res[0, :, :, :] = (res[output_blob] * color_coeff.transpose()[:, :, np.newaxis, np.newaxis]).sum(1)
 
@@ -136,6 +143,5 @@ if __name__ == '__main__':
             cv.imshow('origin', cv.resize(original_frame, imshowSize))
             cv.imshow('gray', cv.resize(frame, imshowSize))
             cv.imshow('colorized', cv.resize(img_bgr_out, imshowSize))
-
-        if not cv.waitKey(1) < 0:
-            break
+            if not cv.waitKey(1) < 0:
+                break
