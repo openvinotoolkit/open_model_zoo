@@ -23,7 +23,7 @@ from ..utils import read_json
 from ..config import PathField, NumberField, BoolField
 
 from .format_converter import BaseFormatConverter, ConverterReturn
-from ._nlp_common import get_tokenizer
+from ._nlp_common import get_tokenizer, CLS_ID, SEP_ID
 
 
 class SQUADConverter(BaseFormatConverter):
@@ -61,6 +61,7 @@ class SQUADConverter(BaseFormatConverter):
         self.doc_stride = self.get_value_from_config('doc_stride')
         self.lower_case = self.get_value_from_config('lower_case')
         self.tokenizer = get_tokenizer(self.config, self.lower_case)
+        self.support_vocab = 'vocab_file' in self.config
 
     @staticmethod
     def _load_examples(file):
@@ -136,21 +137,21 @@ class SQUADConverter(BaseFormatConverter):
             for idx, doc_span in enumerate(doc_spans):
                 tokens = []
                 segment_ids = []
-                tokens.append("[CLS]")
+                tokens.append("[CLS]" if self.support_vocab else CLS_ID)
                 segment_ids.append(0)
                 for token in query_tokens:
                     tokens.append(token)
                     segment_ids.append(0)
-                tokens.append("[SEP]")
+                tokens.append("[SEP]" if self.support_vocab else SEP_ID)
                 segment_ids.append(0)
 
                 for i in range(doc_span.length):
                     split_token_index = doc_span.start + i
                     tokens.append(all_doc_tokens[split_token_index])
                     segment_ids.append(1)
-                tokens.append("[SEP]")
+                tokens.append("[SEP]" if self.support_vocab else SEP_ID)
                 segment_ids.append(1)
-                input_ids = tokenizer.convert_tokens_to_ids(tokens)
+                input_ids = self.tokenizer.convert_tokens_to_ids(tokens) if self.support_vocab else tokens
                 input_mask = [1] * len(input_ids)
 
                 while len(input_ids) < self.max_seq_length:

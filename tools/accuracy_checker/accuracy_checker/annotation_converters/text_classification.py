@@ -58,6 +58,7 @@ class XNLIDatasetConverter(BaseFormatConverter):
         xnli_labels = labels['xnli']
         self.label_map = dict(enumerate(xnli_labels))
         self.reversed_label_map = {value: key for key, value in self.label_map.items()}
+        self.support_vocab = 'vocab_file' in self.config
 
     def read_tsv(self):
         lines = []
@@ -99,22 +100,22 @@ class XNLIDatasetConverter(BaseFormatConverter):
                 tokens_a = tokens_a[:self.max_seq_length - 2]
         tokens = []
         segment_ids = []
-        tokens.append("[CLS]")
+        tokens.append("[CLS]" if self.support_vocab else CLS_ID)
         segment_ids.append(0)
         for token in tokens_a:
             tokens.append(token)
             segment_ids.append(0)
-        tokens.append("[SEP]")
+        tokens.append("[SEP]" if self.support_vocab else SEP_ID)
         segment_ids.append(0)
 
         if tokens_b:
             for token in tokens_b:
                 tokens.append(token)
                 segment_ids.append(1)
-            tokens.append("[SEP]")
+            tokens.append("[SEP]" if self.support_vocab else SEP_ID)
             segment_ids.append(1)
 
-        input_ids = self.tokenizer.convert_tokens_to_ids(tokens)
+        input_ids = self.tokenizer.convert_tokens_to_ids(tokens) if self.support_vocab else tokens
 
         # The mask has 1 for real tokens and 0 for padding tokens. Only real
         # tokens are attended to.
@@ -239,6 +240,7 @@ class IMDBConverter(BaseFormatConverter):
         imdb_labels = labels['imdb']
         self.label_map = dict(enumerate(imdb_labels))
         self.reversed_label_map = {value: key for key, value in self.label_map.items()}
+        self.support_vocab = 'vocab_file' in self.config
 
     def _create_examples(self):
         examples = []
@@ -277,20 +279,20 @@ class IMDBConverter(BaseFormatConverter):
         for token in tokens_a:
             tokens.append(token)
             segment_ids.append(SEG_ID_A)
-        tokens.append(SEP_ID)
+        tokens.append('[SEP]' if self.support_vocab else SEP_ID)
         segment_ids.append(SEG_ID_A)
 
         if tokens_b:
             for token in tokens_b:
                 tokens.append(token)
                 segment_ids.append(SEG_ID_B)
-            tokens.append(SEP_ID)
+            tokens.append('[SEP]' if self.support_vocab else SEP_ID)
             segment_ids.append(SEG_ID_B)
 
-        tokens.append(CLS_ID)
+        tokens.append("[CLS]" if self.support_vocab else CLS_ID)
         segment_ids.append(SEG_ID_CLS)
 
-        input_ids = tokens
+        input_ids = self.tokenizer.convert_tokens_to_ids(tokens) if self.support_vocab else tokens
 
         # The mask has 0 for real tokens and 1 for padding tokens. Only real
         # tokens are attended to.
