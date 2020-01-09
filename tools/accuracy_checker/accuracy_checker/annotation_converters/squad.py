@@ -23,7 +23,7 @@ from ..utils import read_json
 from ..config import PathField, NumberField, BoolField
 
 from .format_converter import BaseFormatConverter, ConverterReturn
-from ._nlp_common import Tokenizer
+from ._nlp_common import get_tokenizer
 
 
 class SQUADConverter(BaseFormatConverter):
@@ -35,7 +35,8 @@ class SQUADConverter(BaseFormatConverter):
         configuration_parameters = super().parameters()
         configuration_parameters.update({
             'testing_file': PathField(description="Path to testing file."),
-            'vocab_file': PathField(description='Path to vocabulary file.'),
+            'vocab_file': PathField(description='Path to vocabulary file.', optional=True),
+            'sentence_piece_model_file': PathField(description='sentence piece model for tokenization', optional=True),
             'max_seq_length': NumberField(
                 description='The maximum total input sequence length after WordPiece tokenization.',
                 optional=True, default=128
@@ -55,11 +56,11 @@ class SQUADConverter(BaseFormatConverter):
 
     def configure(self):
         self.testing_file = self.get_value_from_config('testing_file')
-        self.vocab_file = self.get_value_from_config('vocab_file')
         self.max_seq_length = self.get_value_from_config('max_seq_length')
         self.max_query_length = self.get_value_from_config('max_query_length')
         self.doc_stride = self.get_value_from_config('doc_stride')
         self.lower_case = self.get_value_from_config('lower_case')
+        self.tokenizer = get_tokenizer(self.config, self.lower_case)
 
     @staticmethod
     def _load_examples(file):
@@ -108,17 +109,16 @@ class SQUADConverter(BaseFormatConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         examples, answers = self._load_examples(self.testing_file)
         annotations = []
-        tokenizer = Tokenizer(self.vocab_file, self.lower_case)
         unique_id = 1000000000
         DocSpan = namedtuple("DocSpan", ["start", "length"])
 
         for (example_index, example) in enumerate(examples):
-            query_tokens = tokenizer.tokenize(example['question_text'])
+            query_tokens = self.tokenizer.tokenize(example['question_text'])
             if len(query_tokens) > self.max_query_length:
                 query_tokens = query_tokens[:self.max_query_length]
             all_doc_tokens = []
             for (i, token) in enumerate(example['tokens']):
-                sub_tokens = tokenizer.tokenize(token)
+                sub_tokens = self.tokenizer.tokenize(token)
                 for sub_token in sub_tokens:
                     all_doc_tokens.append(sub_token)
             max_tokens_for_doc = self.max_seq_length - len(query_tokens) - 3
