@@ -2,7 +2,7 @@
 
 # Colorization Demo
 
-This example demonstrates an example of using neural networks to colorization video.
+This demo demonstrates an example of using neural networks to colorize a video.
 You can use the following pre-trained models with the demo:
 
 * `colorization-v2`
@@ -16,15 +16,14 @@ On the start-up, the application reads command line parameters and loads one net
 
 Having received the image, the program:
 1) converts the frame of video into LAB color space
-2) uses the L-channel to receive A and B channels
-3) restores the image, converts it into BGR color space
+2) uses the L-channel to predict A and B channels
+3) 3) restores the image, by converting it into BGR color space
 
 ### Installation and dependencies
 
 The demo depends on:
 - OpenVINO library (2018R5 or newer)
 - Python (any of 2.7+ or 3.4+, which is supported by OpenVINO)
-- OpenCV (>=3.4.0)
 
 ### Running the demo:
 
