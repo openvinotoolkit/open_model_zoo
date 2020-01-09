@@ -23,20 +23,14 @@ CnnBase::CnnBase(const Config& config,
     config_(config), ie_(ie), deviceName_(deviceName) {}
 
 void CnnBase::Load() {
-    CNNNetReader net_reader;
-    net_reader.ReadNetwork(config_.path_to_model);
-    net_reader.ReadWeights(config_.path_to_weights);
+    auto cnnNetwork = ie_.ReadNetwork(config_.path_to_model);
 
-    if (!net_reader.isParseSuccess()) {
-        THROW_IE_EXCEPTION << "Cannot load model";
-    }
-
-    const int currentBatchSize = net_reader.getNetwork().getBatchSize();
+    const int currentBatchSize = cnnNetwork.getBatchSize();
     if (currentBatchSize != config_.max_batch_size)
-        net_reader.getNetwork().setBatchSize(config_.max_batch_size);
+        cnnNetwork.setBatchSize(config_.max_batch_size);
 
     InferenceEngine::InputsDataMap in;
-    in = net_reader.getNetwork().getInputsInfo();
+    in = cnnNetwork.getInputsInfo();
     if (in.size() != 1) {
         THROW_IE_EXCEPTION << "Network should have only one input";
     }
@@ -47,7 +41,7 @@ void CnnBase::Load() {
     input_blob_->allocate();
     BlobMap inputs;
     inputs[in.begin()->first] = input_blob_;
-    outInfo_ = net_reader.getNetwork().getOutputsInfo();
+    outInfo_ = cnnNetwork.getOutputsInfo();
 
     for (auto&& item : outInfo_) {
         SizeVector outputDims = item.second->getTensorDesc().getDims();
@@ -59,7 +53,7 @@ void CnnBase::Load() {
         outputs_[item.first] = output;
     }
 
-    executable_network_ = ie_.LoadNetwork(net_reader.getNetwork(), deviceName_);
+    executable_network_ = ie_.LoadNetwork(cnnNetwork, deviceName_);
     infer_request_ = executable_network_.CreateInferRequest();
     infer_request_.SetInput(inputs);
     infer_request_.SetOutput(outputs_);

@@ -103,14 +103,10 @@ int main(int argc, char *argv[]) {
         // --------------------Load network (Generated xml/bin files)-------------------------------------------
         slog::info << "Loading network files" << slog::endl;
 
-        InferenceEngine::CNNNetReader networkReader;
         /** Read network model **/
-        networkReader.ReadNetwork(FLAGS_m);
+        auto network = ie.ReadNetwork(FLAGS_m);
 
         /** Extract model name and load weights **/
-        std::string binFileName = fileNameNoExt(FLAGS_m) + ".bin";
-        networkReader.ReadWeights(binFileName);
-        auto network = networkReader.getNetwork();
 
         // add DetectionOutput layer as output so we can get detected boxes and their probabilities
         network.addOutput(FLAGS_detection_output_name.c_str(), 0);

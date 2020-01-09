@@ -217,7 +217,6 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
-        std::string weightsPath;
         std::string modelPath = FLAGS_m;
         std::size_t found = modelPath.find_last_of(".");
         if (found > modelPath.size()) {
@@ -225,9 +224,7 @@ int main(int argc, char* argv[]) {
             slog::info << "Expected to be <model_name>.xml" << slog::endl;
             return -1;
         }
-        weightsPath = modelPath.substr(0, found) + ".bin";
         slog::info << "Model   path: " << modelPath << slog::endl;
-        slog::info << "Weights path: " << weightsPath << slog::endl;
 
         IEGraph::InitParams graphParams;
         graphParams.batchSize       = FLAGS_bs;
@@ -235,7 +232,6 @@ int main(int argc, char* argv[]) {
         graphParams.collectStats    = FLAGS_show_stats;
         graphParams.reportPerf      = FLAGS_pc;
         graphParams.modelPath       = modelPath;
-        graphParams.weightsPath     = weightsPath;
         graphParams.cpuExtPath      = FLAGS_l;
         graphParams.cldnnConfigPath = FLAGS_c;
         graphParams.deviceName      = FLAGS_d;

@@ -48,16 +48,11 @@ void ActionDetection::enqueue(const cv::Mat &frame) {
 ActionDetection::ActionDetection(const ActionDetectorConfig& config)
         : BaseCnnDetection(config.is_async), config_(config) {
     topoName = "action detector";
-    CNNNetReader net_reader;
-    net_reader.ReadNetwork(config.path_to_model);
-    net_reader.ReadWeights(config.path_to_weights);
-    if (!net_reader.isParseSuccess()) {
-        THROW_IE_EXCEPTION << "Cannot load model";
-    }
+    auto network = config.ie.ReadNetwork(config.path_to_model);
 
-    net_reader.getNetwork().setBatchSize(config.max_batch_size);
+    network.setBatchSize(config.max_batch_size);
 
-    InputsDataMap inputInfo(net_reader.getNetwork().getInputsInfo());
+    InputsDataMap inputInfo(network.getInputsInfo());
     if (inputInfo.size() != 1) {
         THROW_IE_EXCEPTION << "Action Detection network should have only one input";
     }
@@ -68,7 +63,7 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
     network_input_size_.height = inputInfoFirst->getTensorDesc().getDims()[2];
     network_input_size_.width = inputInfoFirst->getTensorDesc().getDims()[3];
 
-    OutputsDataMap outputInfo(net_reader.getNetwork().getOutputsInfo());
+    OutputsDataMap outputInfo(network.getOutputsInfo());
 
     for (auto&& item : outputInfo) {
         item.second->setPrecision(Precision::FP32);
@@ -76,7 +71,7 @@ ActionDetection::ActionDetection(const ActionDetectorConfig& config)
 
     new_network_ = outputInfo.find(config_.new_loc_blob_name) != outputInfo.end();
     input_name_ = inputInfo.begin()->first;
-    net_ = config_.ie.LoadNetwork(net_reader.getNetwork(), config_.deviceName);
+    net_ = config_.ie.LoadNetwork(network, config_.deviceName);
 
     const auto& head_anchors = new_network_ ? config_.new_anchors : config_.old_anchors;
     const int num_heads = head_anchors.size();
