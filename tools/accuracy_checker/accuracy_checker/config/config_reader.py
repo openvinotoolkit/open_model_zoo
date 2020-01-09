@@ -41,7 +41,6 @@ ENTRIES_PATHS = {
         'affinity_map': 'affinity_map',
         'predictions': 'source'
     },
-
     'datasets': {
         'segmentation_masks_source': 'source',
         'annotation': 'annotations',
