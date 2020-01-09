@@ -1,12 +1,12 @@
 # Colorization Demo
 
 This demo demonstrates an example of using neural networks to colorize a video.
-You can use the following pre-trained models with the demo:
+You can use the following models with the demo:
 
 * `colorization-v2`
 * `colorization-v2-norebal`
 
-For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).
 
 ### How it works
 
@@ -15,7 +15,7 @@ On the start-up, the application reads command line parameters and loads one net
 Having received the image, the program:
 1) converts the frame of video into LAB color space
 2) uses the L-channel to predict A and B channels
-3) 3) restores the image, by converting it into BGR color space
+3) restores the image, by converting it into BGR color space
 
 ### Running the demo:
 

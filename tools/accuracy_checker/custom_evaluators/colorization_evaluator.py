@@ -169,15 +169,10 @@ class ColorizationTestModel(BaseModel):
             img_l_rs -= self.test_mean
 
             res = self.exec_network.infer(inputs={self.input_blob: [img_l_rs]})
-            (n_out, c_out, h_out, w_out) = res[output_blob].shape
-            update_res = np.zeros((n_out, 2, h_out, w_out)).astype(np.float32)
             color_coeff = np.load(self.color_coeff)
+            update_res = (res[output_blob] * color_coeff.transpose()[:, :, np.newaxis, np.newaxis]).sum(1)
 
-            for res_blob, color_coeff_blob in list(zip(res[output_blob][0, :, :, :], color_coeff)):
-                for upd_res_blob, clr_coeff in list(zip(update_res[0, :, :, :], color_coeff_blob)):
-                    upd_res_blob += res_blob * clr_coeff
-
-            out = update_res[0, :, :, :].transpose((1, 2, 0))
+            out = update_res.transpose((1, 2, 0)).astype(np.float32)
             out = cv2.resize(out, (w_orig, h_orig))
             img_lab_out = np.concatenate((img_l[:, :, np.newaxis], out), axis=2)
             self.img_bgr_out = np.clip(cv2.cvtColor(img_lab_out, cv2.COLOR_Lab2BGR), 0, 1)

@@ -39,7 +39,6 @@ files:
     sha256: b5dec01315c34f43f1c8c089e84c45ae35d1838d8e77ed0e7ca930f79ffa450e
     source: https://github.com/richzhang/colorization/raw/master/resources/pts_in_hull.npy
 model_optimizer_args:
-  - --framework=caffe
   - --input_shape=[1,1,224,224]
   - --input=data_l
   - --mean_values=data[50]

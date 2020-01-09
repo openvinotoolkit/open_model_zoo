@@ -67,7 +67,7 @@ if __name__ == '__main__':
     args = build_arg().parse_args()
     config_xml, weights_bin, coeffs = get_model_files(args.model)
 
-    # mean are stored in the source caffe model and passed to IR
+    # mean is stored in the source caffe model and passed to IR
     mean = get_parameters(config_xml)
 
     log.basicConfig(format="[ %(levelname)s ] %(message)s",
@@ -127,12 +127,10 @@ if __name__ == '__main__':
         res = exec_net.infer(inputs={input_blob: [img_l_rs]})
 
         (n_out, c_out, h_out, w_out) = res[output_blob].shape
-        update_res = np.zeros((n_out, 2, h_out, w_out)).astype(np.float32)
-
-        update_res[0, :, :, :] = (res[output_blob] * color_coeff.transpose()[:, :, np.newaxis, np.newaxis]).sum(1)
+        update_res = (res[output_blob] * color_coeff.transpose()[:, :, np.newaxis, np.newaxis]).sum(1)
 
         log.debug("Get results")
-        out = update_res[0, :, :, :].transpose((1, 2, 0))
+        out = update_res.transpose((1, 2, 0))
         out = cv.resize(out, (w_orig, h_orig))
         img_lab_out = np.concatenate((img_l[:, :, np.newaxis], out), axis=2)
         img_bgr_out = np.clip(cv.cvtColor(img_lab_out, cv.COLOR_Lab2BGR), 0, 1)
