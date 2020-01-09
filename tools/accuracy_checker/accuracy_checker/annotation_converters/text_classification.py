@@ -18,7 +18,8 @@ InputExample = namedtuple('InputExample', ['guid', 'text_a', 'text_b', 'label'])
 labels = {
     'xnli': ["contradiction", "entailment", "neutral"],
     'imdb': ['neg', 'pos'],
-    'mrpc': ['0', '1']
+    'mrpc': ['0', '1'],
+    'cola': ['0', '1']
 }
 
 
@@ -359,7 +360,7 @@ class MRPCConverter(BaseFormatConverter):
                 if idx == 0:
                     continue
                 guid = "dev-{}".format(idx)
-                label = self.reversed_label_map[line[0]]
+                label = line[0]
                 text_a = line[3]
                 text_b = line[4]
                 lines.append(InputExample(guid, text_a, text_b, label))
@@ -388,6 +389,100 @@ class MRPCConverter(BaseFormatConverter):
             segment_ids.append(SEG_ID_B)
         tokens.append('[SEP]' if self.support_vocab else SEP_ID)
         segment_ids.append(SEG_ID_B)
+
+        tokens.append("[CLS]" if self.support_vocab else CLS_ID)
+        segment_ids.append(SEG_ID_CLS)
+
+        input_ids = self.tokenizer.convert_tokens_to_ids(tokens) if self.support_vocab else tokens
+
+        # The mask has 0 for real tokens and 1 for padding tokens. Only real
+        # tokens are attended to.
+        input_mask = [0] * len(input_ids)
+
+        # Zero-pad up to the sequence length.
+        if len(input_ids) < self.max_seq_length:
+            delta_len = self.max_seq_length - len(input_ids)
+            input_ids = [0] * delta_len + input_ids
+            input_mask = [1] * delta_len + input_mask
+            segment_ids = [SEG_ID_PAD] * delta_len + segment_ids
+
+        return TextClassificationAnnotation(
+            identifier, example.label, np.array(input_ids), np.array(input_mask), np.array(segment_ids), tokens
+        )
+
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+        examples = self.read_tsv()
+        annotations = []
+        num_iter = len(examples)
+        for example_id, example in enumerate(examples):
+            annotations.append(self.convert_single_example(example))
+            if progress_callback and example_id % progress_interval == 0:
+                progress_callback(example_id * 100 / num_iter)
+
+        return ConverterReturn(annotations, {'label_map': self.label_map}, None)
+
+
+class CoLAConverter(BaseFormatConverter):
+    __provider__ = 'cola'
+    annotation_types = (TextClassificationAnnotation,)
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'annotation_file': PathField(description='path to annotation file in txt format'),
+            'vocab_file': PathField(description='Path to vocabulary file for word piece tokenizer', optional=True),
+            'sentence_piece_model_file': PathField(description='sentence piece model for tokenization', optional=True),
+            'max_seq_length': NumberField(
+                description='The maximum total input sequence length after tokenization.',
+                optional=True, default=128
+            ),
+            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register')
+        })
+
+        return params
+
+    def configure(self):
+        self.annotation_file = self.get_value_from_config('annotation_file')
+        self.max_seq_length = self.get_value_from_config('max_seq_length')
+        self.lower_case = self.get_value_from_config('lower_case')
+        self.tokenizer = get_tokenizer(self.config, self.lower_case)
+        mrpc_labels = labels['mrpc']
+        self.label_map = dict(enumerate(mrpc_labels))
+        self.reversed_label_map = {value: key for key, value in self.label_map.items()}
+        self.support_vocab = 'vocab_file' in self.config
+
+    def read_tsv(self):
+        lines = []
+        with self.annotation_file.open('r') as ann_file:
+            reader = csv.reader(ann_file, delimiter="\t", quotechar=None)
+            for idx, line in enumerate(reader):
+                if idx == 0:
+                    continue
+                guid = "dev-{}".format(idx)
+                label = line[1]
+                text_a = line[3]
+                lines.append(InputExample(guid, text_a, None, label))
+
+        return lines
+
+    def convert_single_example(self, example):
+        identifier = [
+            'input_ids_{}'.format(example.guid),
+            'input_mask_{}'.format(example.guid),
+            'segment_ids_{}'.format(example.guid)
+        ]
+        tokens_a = self.tokenizer.tokenize(example.text_a)
+        if len(tokens_a) > self.max_seq_length - 2:
+            tokens_a = tokens_a[:self.max_seq_length - 2]
+
+        tokens = []
+        segment_ids = []
+        for token in tokens_a:
+            tokens.append(token)
+            segment_ids.append(SEG_ID_A)
+        tokens.append('[SEP]' if self.support_vocab else SEP_ID)
+        segment_ids.append(SEG_ID_A)
 
         tokens.append("[CLS]" if self.support_vocab else CLS_ID)
         segment_ids.append(SEG_ID_CLS)
