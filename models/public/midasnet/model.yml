@@ -18,30 +18,30 @@ description: >-
   "Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-Shot Cross-Dataset Transfer"
   <https://arxiv.org/pdf/1907.01341>
 
-  The model input is a blob that consists of a single image of "1x3x224x384" in RGB order.
+  The model input is a blob that consists of a single image of "1x3x384x384" in RGB order.
 
   The model output is an inverse depth map that is defined up to an unknown scale factor.
 task_type: monocular_depth
 files:
   - name: midasnet.py
-    size: 5511
-    sha256: 45d1d3cdee085c22c02d3d6d3fcd1a1c436560705284efcd26f029481415ad6e
+    size: 6464
+    sha256: a3680912f1e6839b5bc4d4684e78b2a8f5f669125ee86aff81b53dbe8d635a12
     source: 
       $type: google_drive
-      id: 1RL4XWlfZVZREFibUJYX2UeczYjyEg0q4
+      id: 1fL_UDsZ8pFUN3QnXqMF4BReVZmfmrKBj
   - name: midasnet.pth
-    size: 149751722
-    sha256: 617d916c0864b95880aed0b6be6d0629ce8b4c0d28361a559f8e5193a9bb554d
+    size: 422388453
+    sha256: f46da7438f3dd46a46fa550cea1d5dcab4bb3192ba272f1fd2b08d23ba41d39e
     source:
       $type: google_drive
-      id: 1uR9mzPUK5HmiWWhmZApcbKgd-pnz2aSY
+      id: 1vLsvovWe6vdI23CLN2z0T3JAmE7cJ786
 framework: pytorch
 conversion_to_onnx_args:
   - --model-name=MidasNet
   - --model-path=$dl_dir
   - --weights=$dl_dir/midasnet.pth
   - --import-module=midasnet
-  - --input-shape=1,3,224,384
+  - --input-shape=1,3,384,384
   - --output-file=$conv_dir/midasnet.onnx
   - --input-names=image
   - --output-names=inverse_depth
@@ -50,4 +50,4 @@ model_optimizer_args:
   - --reverse_input_channels
   - --output=inverse_depth
   - --input_model=$conv_dir/midasnet.onnx
-license: https://drive.google.com/open?id=1p_7P7VKSpD1xM8Ex6p0epZ4TdYFPYjss
+license: https://drive.google.com/open?id=1850UGnMLn0YkIzpNNSDTIjbV-jCJhxov

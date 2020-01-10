@@ -68,13 +68,18 @@ def main():
     image = cv2.imread(args.input, cv2.IMREAD_COLOR)
     (input_height, input_width) = image.shape[:-1]
 
+    # resize
     if (input_height, input_width) != (height, width):
         log.info("Image is resized from {} to {}".format(
             image.shape[:-1], (height, width)))
         image = cv2.resize(image, (width, height), cv2.INTER_CUBIC)
 
-    image = image.transpose((2, 0, 1)).astype(np.float32) / 255
-    input = np.expand_dims(image, 0)
+    # normalization (B, G, R)
+    image = image.astype(np.float32) / 255
+    image = (image - [0.406, 0.456, 0.485]) / [0.225, 0.224, 0.229]
+
+    image = image.transpose((2, 0, 1))
+    image_input = np.expand_dims(image, 0)
 
     # loading model to the plugin
     log.info("loading model to the plugin")
@@ -82,11 +87,11 @@ def main():
 
     # start sync inference
     log.info("starting inference")
-    res = exec_net.infer(inputs={input_blob: input})
+    res = exec_net.infer(inputs={input_blob: image_input})
 
     # processing output blob
     log.info("processing output blob")
-    disp = res[out_blob][0][0]
+    disp = res[out_blob][0]
 
     # resize disp to input resolution
     disp = cv2.resize(disp, (input_width, input_height), cv2.INTER_CUBIC)
