@@ -152,6 +152,7 @@ class ColorizationTestModel(BaseModel):
         super().__init__()
 
         self.network = launcher.create_ie_network(model_xml, model_bin)
+        self.network.batch_size = 1
         if not hasattr(launcher, 'plugin'):
             launcher.create_ie_plugin()
         self.exec_network = launcher.plugin.load(self.network)

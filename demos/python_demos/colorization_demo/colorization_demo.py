@@ -74,6 +74,7 @@ if __name__ == '__main__':
 
     log.debug("Load network")
     load_net = IENetwork(model=config_xml, weights=weights_bin)
+    load_net.batch_size = 1
     exec_net = IECore().load_network(network=load_net, device_name=args.device)
 
     assert len(load_net.inputs) == 1, "Number of inputs does not match network inputs"
