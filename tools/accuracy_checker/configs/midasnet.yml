@@ -8,7 +8,7 @@ models:
         inputs:
           - name: image
             type: INPUT
-            shape: 1,3,224,384
+            shape: 1,3,384,384
 
     datasets:
       - name: redweb
@@ -17,8 +17,8 @@ models:
         preprocessing:
           - type: resize
             dst_width: 384
-            dst_height: 224
-            interpolation: Area
+            dst_height: 384
+            interpolation: Cubic
           
           - type: normalization
             std: 255
@@ -48,8 +48,9 @@ models:
         preprocessing:          
           - type: resize
             dst_width: 384
-            dst_height: 224
-            interpolation: Area
+            dst_height: 384
+            interpolation: Cubic
 
           - type: normalization
             std: 255
+            

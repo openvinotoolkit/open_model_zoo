@@ -4,7 +4,7 @@ This topic demonstrates how to run the MonoDepth demo application, which produce
 To this end, the code uses the network described in the [paper](https://arxiv.org/abs/1907.01341):
 
 > Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-Shot Cross-Dataset Transfer  
-Katrin Lasinger, Rene Ranftl, Konrad Schindler, Vladlen Koltun
+Rene Ranftl, Katrin Lasinger, David Hafner, Konrad Schindler, Vladlen Koltun
 
 ## How It Works
 
