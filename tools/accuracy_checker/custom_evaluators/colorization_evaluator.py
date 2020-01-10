@@ -59,7 +59,7 @@ class ColorizationEvaluator(BaseEvaluator):
         launcher = create_launcher(launcher_settings, delayed_model_loading=True)
         network_info = config.get('network_info', {})
         if not contains_all(network_info, ['colorization_network', 'verification_network']):
-            raise ConfigError('colorization_network/verification_network does not exist')
+            raise ConfigError('configuration for colorization_network/verification_network does not exist')
 
         test_model = ColorizationTestModel(network_info['colorization_network'], launcher)
         check_model = ColorizationCheckModel(network_info['verification_network'], launcher)
