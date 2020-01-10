@@ -77,7 +77,8 @@ Image, name - `class8_313_rh`\*,  shape - `1,313,56,56`, format is `B,C,H,W` whe
 > **NOTE**: `class8_313_rh` layer is in front of `class8_ab` layer,
 in order for network to work,
 you need to reproduce `class8_ab` layer with the coefficients that
-downloaded separately with the model.
+downloaded separately with the model. More detailed information can be found
+>[this](https://github.com/richzhang/colorization/blob/master/demo/colorization_demo_v2.ipynb).
 
 ## Legal Information
 The original model is distributed under the following

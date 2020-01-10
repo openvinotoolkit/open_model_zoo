@@ -3,13 +3,13 @@ evaluations:
     module: custom_evaluators.colorization_evaluator.ColorizationEvaluator
     module_config:
         network_info:
-          test:
+          colorization_network:
             model:   public/colorization-v2-norebal/FP32/colorization-v2-norebal.xml
             weights: public/colorization-v2-norebal/FP32/colorization-v2-norebal.bin
             color_coeff: public/colorization-v2-norebal/colorization-v2-norebal.npy
             color_mean: 50
 
-          checker:
+          verification_network:
             model:   public/vgg16/FP32/vgg16.xml
             weights: public/vgg16/FP32/vgg16.bin
             adapter: classification
@@ -36,13 +36,13 @@ evaluations:
     module: custom_evaluators.colorization_evaluator.ColorizationEvaluator
     module_config:
         network_info:
-          test:
+          colorization_network:
             model:   public/colorization-v2-norebal/FP16/colorization-v2-norebal.xml
             weights: public/colorization-v2-norebal/FP16/colorization-v2-norebal.bin
             color_coeff: public/colorization-v2-norebal/colorization-v2-norebal.npy
             color_mean: 50
 
-          checker:
+          verification_network:
             model:   public/vgg16/FP32/vgg16.xml
             weights: public/vgg16/FP32/vgg16.bin
             adapter: classification

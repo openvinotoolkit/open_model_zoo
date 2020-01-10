@@ -37,9 +37,8 @@ def build_arg():
                               "Default: CPU",
                          default="CPU", type=str)
     in_args.add_argument('-i', "--input",
-                         help='Required. Path to an image, video file or a numeric camera ID.',
+                         help='Required. Input to process.',
                          required=True, type=str, metavar='"<path>"')
-
     in_args.add_argument("-n", "--no_show", help="Optional. Disable display of results on screen.",
                          action='store_true', default=False)
     in_args.add_argument("-v", "--verbose", help="Optional. Enable display of processing logs on screen.",
@@ -94,9 +93,9 @@ if __name__ == '__main__':
     except ValueError:
         input_source = args.input
 
-    if not os.path.isdir(input_source):
-        assert "{} not exist".format(input_source)
     cap = cv.VideoCapture(input_source)
+    if not cap.isOpened():
+        assert "{} not exist".format(input_source)
 
     color_coeff = np.load(coeffs).astype(np.float32)
     assert color_coeff.shape == (313, 2), "Current shape of color coefficients does not match required shape"

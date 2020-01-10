@@ -6,7 +6,7 @@ You can use the following models with the demo:
 * `colorization-v2`
 * `colorization-v2-norebal`
 
-For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/public/index.md).
 
 ### How it works
 
@@ -19,7 +19,7 @@ Having received the image, the program:
 
 ### Running the demo:
 
-Running the application with the <code>-h</code> option yields the following usage message:
+Running the application with the `-h` option yields the following usage message:
 
 ```sh
 colorization.py -h

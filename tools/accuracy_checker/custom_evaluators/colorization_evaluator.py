@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import numpy as np
-import os
+from pathlib import Path
 import cv2
 
 from accuracy_checker.evaluators.base_evaluator import BaseEvaluator
@@ -58,11 +58,28 @@ class ColorizationEvaluator(BaseEvaluator):
         if not launcher_settings['framework'] in supported_frameworks:
             raise ConfigError('{} framework not supported'.format(launcher_settings['framework']))
         launcher = create_launcher(launcher_settings, delayed_model_loading=True)
-        test_model = ColorizationTestModel(config.get('network_info', {}), launcher)
-        check_model = ColorizationCheckModel(config.get('network_info', {}), launcher)
+        network_info = config.get('network_info', {})
+
+        def check_format(current_format):
+            supported_format = ['.xml', '.bin']
+            if not Path(current_format).suffix in supported_format:
+                raise ConfigError('{} format not supported'.format(supported_format))
+            return current_format
+
+        test_model_xml = check_format(network_info['colorization_network']['model'])
+        test_model_bin = check_format(network_info['colorization_network']['weights'])
+        test_mean = float(network_info['colorization_network']['color_mean'])
+        color_coeff = network_info['colorization_network']['color_coeff']
+        test_model = ColorizationTestModel(test_model_xml, test_model_bin, test_mean, color_coeff, launcher)
+
+        check_model_xml = check_format(network_info['verification_network']['model'])
+        check_model_bin = check_format(network_info['verification_network']['weights'])
+        check_adapter = create_adapter(network_info['verification_network']['adapter'])
+        check_model = ColorizationCheckModel(check_model_xml, check_model_bin, check_adapter, launcher)
+
         return cls(dataset, reader, preprocessing, metrics_executor, launcher, test_model, check_model)
 
-    def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
+    def process_dataset(self, _, progress_reporter):
         self._annotations, self._predictions = ([], []) if self.metric_executor.need_store_predictions else None, None
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
@@ -72,7 +89,7 @@ class ColorizationEvaluator(BaseEvaluator):
             batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
             batch_input = self.preprocessing_executor.process(batch_input, batch_annotation)
             batch_input, _ = extract_image_representations(batch_input)
-            batch_out = np.array(self.test_model.predict(batch_annotation, batch_input))
+            batch_out = self.test_model.predict(batch_annotation, batch_input)
             batch_prediction = self.check_model.predict(batch_identifiers, batch_out)
             self.metric_executor.update_metrics_on_batch(dataset_indices, batch_annotation, batch_prediction)
             if self.metric_executor.need_store_predictions:
@@ -123,15 +140,6 @@ class ColorizationEvaluator(BaseEvaluator):
 
 
 class BaseModel:
-    def __init__(self, network_info, launcher):
-        self.network_info = network_info
-        self.supported_format = ['.xml', '.bin']
-
-    def check_format(self, current_format):
-        if not os.path.splitext(current_format)[1] in self.supported_format:
-            raise ConfigError('{} format not supported'.format(self.supported_format))
-        return current_format
-
     def predict(self, idenitifers, input_data):
         raise NotImplementedError
 
@@ -140,48 +148,47 @@ class BaseModel:
 
 
 class ColorizationTestModel(BaseModel):
-    def __init__(self, network_info, launcher):
-        super().__init__(network_info, launcher)
-        model_xml = super().check_format(str(network_info['test']['model']))
-        model_bin = super().check_format(str(network_info['test']['weights']))
-        self.color_coeff = str(network_info['test']['color_coeff'])
+    def __init__(self, model_xml, model_bin, test_mean, color_coeff, launcher):
+        super().__init__()
+
         self.network = launcher.create_ie_network(model_xml, model_bin)
         if not hasattr(launcher, 'plugin'):
             launcher.create_ie_plugin()
         self.exec_network = launcher.plugin.load(self.network)
         self.input_blob = next(iter(self.network.inputs))
         self.output_blob = next(iter(self.network.outputs))
-        self.test_mean = float(network_info['test']['color_mean'])
+        self.test_mean = test_mean
+        self.color_coeff = np.load(color_coeff)
+
+    def data_preparation(self, input_data):
+        input = input_data[0].astype(np.float32)
+        img_lab = cv2.cvtColor(input, cv2.COLOR_RGB2Lab)
+        img_l = np.copy(img_lab[:, :, 0])
+        img_l_rs = np.copy(img_lab[:, :, 0])
+        img_l_rs -= self.test_mean
+        return img_l, img_l_rs
+
+    def postprocessing(self, res, img_l, output_blob, img_size):
+        update_res = (res[output_blob] * self.color_coeff.transpose()[:, :, np.newaxis, np.newaxis]).sum(1)
+
+        out = update_res.transpose((1, 2, 0)).astype(np.float32)
+        out = cv2.resize(out, img_size)
+        img_lab_out = np.concatenate((img_l[:, :, np.newaxis], out), axis=2)
+        new_result = [np.clip(cv2.cvtColor(img_lab_out, cv2.COLOR_Lab2BGR), 0, 1)]
+        return new_result
 
     def predict(self, identifiers, input_data):
+        img_l, img_l_rs = self.data_preparation(input_data)
 
         output_blob = next(iter(self.exec_network.outputs))
-        (h_orig, w_orig) = input_data[0].shape[:2]
+        h_orig, w_orig = input_data[0].shape[:2]
+        res = self.exec_network.infer(inputs={self.input_blob: [img_l_rs]})
 
-        new_result = []
-        for input in input_data:
-            input = input.astype(np.float32)
-            img_lab = cv2.cvtColor(input, cv2.COLOR_RGB2Lab)
-            img_l = img_lab[:, :, 0]
-
-            img_lab_rs = cv2.cvtColor(input, cv2.COLOR_RGB2Lab)
-            img_l_rs = img_lab_rs[:, :, 0]
-            img_l_rs -= self.test_mean
-
-            res = self.exec_network.infer(inputs={self.input_blob: [img_l_rs]})
-            color_coeff = np.load(self.color_coeff)
-            update_res = (res[output_blob] * color_coeff.transpose()[:, :, np.newaxis, np.newaxis]).sum(1)
-
-            out = update_res.transpose((1, 2, 0)).astype(np.float32)
-            out = cv2.resize(out, (w_orig, h_orig))
-            img_lab_out = np.concatenate((img_l[:, :, np.newaxis], out), axis=2)
-            self.img_bgr_out = np.clip(cv2.cvtColor(img_lab_out, cv2.COLOR_Lab2BGR), 0, 1)
-            new_result.append(self.img_bgr_out)
-        return new_result
+        new_result = self.postprocessing(res, img_l, output_blob, (w_orig, h_orig))
+        return np.array(new_result)
 
     def release(self):
         del self.exec_network
-        del self.img_bgr_out
 
     def fit_to_input(self, input_data):
         input_data = np.reshape(input_data, self.network.inputs[self.input_blob].shape)
@@ -189,11 +196,9 @@ class ColorizationTestModel(BaseModel):
 
 
 class ColorizationCheckModel(BaseModel):
-    def __init__(self, network_info, launcher):
-        super().__init__(network_info, launcher)
-        model_xml = super().check_format(str(network_info['checker']['model']))
-        model_bin = super().check_format(str(network_info['checker']['weights']))
-
+    def __init__(self, model_xml, model_bin, adapter, launcher):
+        super().__init__()
+        self.adapter = adapter
         self.network = launcher.create_ie_network(model_xml, model_bin)
         if hasattr(launcher, 'plugin'):
             self.exec_network = launcher.plugin.load(self.network)
@@ -202,7 +207,6 @@ class ColorizationCheckModel(BaseModel):
             self.exec_network = launcher.exec_network
         self.input_blob = next(iter(self.network.inputs))
         self.output_blob = next(iter(self.network.outputs))
-        self.adapter = create_adapter(network_info['checker']['adapter'])
         self.adapter.output_blob = self.output_blob
 
     def predict(self, identifiers, input_data):
