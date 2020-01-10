@@ -71,7 +71,7 @@ def main():
     if (input_height, input_width) != (height, width):
         log.info("Image is resized from {} to {}".format(
             image.shape[:-1], (height, width)))
-        image = cv2.resize(image, (width, height), cv2.INTER_AREA)
+        image = cv2.resize(image, (width, height), cv2.INTER_CUBIC)
 
     image = image.transpose((2, 0, 1)).astype(np.float32) / 255
     input = np.expand_dims(image, 0)

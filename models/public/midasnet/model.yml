@@ -34,9 +34,9 @@ files:
     sha256: 617d916c0864b95880aed0b6be6d0629ce8b4c0d28361a559f8e5193a9bb554d
     source:
       $type: google_drive
-      id: 1htGnZWcdcyEXxnGuNFQOCC4o6uqvIs_7
+      id: 1uR9mzPUK5HmiWWhmZApcbKgd-pnz2aSY
 framework: pytorch
-pytorch_to_onnx:
+conversion_to_onnx_args:
   - --model-name=MidasNet
   - --model-path=$dl_dir
   - --weights=$dl_dir/midasnet.pth
