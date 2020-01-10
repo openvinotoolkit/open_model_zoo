@@ -16,11 +16,13 @@ models:
         adapter: ssd
 
     datasets:
-      - name: ms_coco_detection_91_class
+      - name: ms_coco_detection_91_classes
         preprocessing:
           - type: resize
-            size: 300
+            size: 640
         postprocessing:
           - type: resize_prediction_boxes
         metrics:
           - type: coco_precision
+
+global_definitions: ../dataset_definitions.yml

@@ -15,13 +15,13 @@ Image retrieval model based on [MobileNetV2](https://arxiv.org/pdf/1801.04381.pd
 | Top1 accuracy                                                 | 0.834                   |
 | GFlops                                                        | 0.613                   |
 | MParams                                                       | 2.535                   |
-| Source framework                                              | TensorFlow              |
+| Source framework                                              | TensorFlow\*            |
 
 ## Performance
 
 ## Inputs
 
-1. name: "input" , shape: [1x3x224x224] - An input image in the format [BxCxHxW],
+Name: "input" , shape: [1x3x224x224] — An input image in the format [BxCxHxW],
    where:
 
     - B - batch size
@@ -33,7 +33,7 @@ Image retrieval model based on [MobileNetV2](https://arxiv.org/pdf/1801.04381.pd
 
 ## Outputs
 
-1. The net outputs one [1x256]-shaped tensor - image embedding vector.
+One [1x256]-shaped tensor — image embedding vector.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

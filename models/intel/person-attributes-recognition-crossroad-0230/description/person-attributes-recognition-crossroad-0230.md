@@ -1,7 +1,7 @@
 # person-attributes-recognition-crossroad-0230
 
 ## Use Case and High-Level Description
-This model presents a person attributes classification algorithm analysis scenario. It produces probability of person attributions existing on the sample and a position of two point on sample, whiches can be used for color prob (like, color picker in graphical editors)
+This model presents a person attributes classification algorithm analysis scenario. It produces probability of person attributions existing on the sample and a position of two point on sample, which can be used for color prob (like, color picker in graphical editors)
 
 ## Examples
 
@@ -21,7 +21,7 @@ This model presents a person attributes classification algorithm analysis scenar
 | Supported attributes  | is_male, has_bag, has_backpack, has hat, has longsleeves, has longpants, has longhair, has coat_jacket|
 | GFlops                | 0.174                                                                                                |
 | MParams               | 0.735                                                                                                |
-| Source framework      | Pytorch*                                                                                             |
+| Source framework      | PyTorch*                                                                                             |
 
 
 ## Accuracy

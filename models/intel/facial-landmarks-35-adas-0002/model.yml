@@ -13,25 +13,32 @@
 # limitations under the License.
 
 description: >-
-  This is a custom-architecture convolutional neural network for 35 facial landmarks
-  estimation.
+  Custom-architecture convolutional neural network for 35 facial landmarks estimation.
 task_type: object_attributes
 files:
   - name: FP32/facial-landmarks-35-adas-0002.xml
-    size: 110798
-    sha256: cbeec1382711cea61f94b8c8c8e1e5acc29d0d06d1efb6e9d4f4b73cbf56d6f0
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml
+    size: 237153
+    sha256: 0428363f5e595a49f717d602d10cc6cc47cd902b8bc2bd8e3c03a483f51cce56
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.xml
   - name: FP32/facial-landmarks-35-adas-0002.bin
-    size: 18381136
-    sha256: 232b1a25de480227f36428fdb11a7a1f623acf37eb4232ced5fabac9b7dd2ad7
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
+    size: 18381152
+    sha256: bd41c25201c2ea688a75549c11b9e10aa98e51dcc5a6dd783e84cdcf55a1011e
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/facial-landmarks-35-adas-0002/FP32/facial-landmarks-35-adas-0002.bin
   - name: FP16/facial-landmarks-35-adas-0002.xml
-    size: 110662
-    sha256: 1d3f3b4c2fec2a75a3712e8bca1ef7cda6d2bc6d3ebb4fbfa5883421fe5aac10
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.xml
+    size: 237016
+    sha256: 73158b2f389e0c2748fd37e4098127adf2c856ab46d6d60fc654dae4ce5f025e
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.xml
   - name: FP16/facial-landmarks-35-adas-0002.bin
-    size: 9190568
-    sha256: b8945ba897072289c8cb44357bd211e728ecd1c093c1d4777b79d118a19ab58a
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
+    size: 9190584
+    sha256: 88a2064849da0e6a31557f489ca4d652aa99e5a9676da0c5c857ee5d8cc26fe4
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/facial-landmarks-35-adas-0002/FP16/facial-landmarks-35-adas-0002.bin
+  - name: FP32-INT8/facial-landmarks-35-adas-0002.xml
+    size: 588508
+    sha256: 21036182e3ba5657b4a0f86a94330ac665c085617321a282f42e942beef3f890
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/facial-landmarks-35-adas-0002/FP32-INT8/facial-landmarks-35-adas-0002.xml
+  - name: FP32-INT8/facial-landmarks-35-adas-0002.bin
+    size: 18441156
+    sha256: f81ebf7c25f30138c2fa44530f51f516783ea790c5b6cacbaa5b31d95c73cbb7
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/facial-landmarks-35-adas-0002/FP32-INT8/facial-landmarks-35-adas-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

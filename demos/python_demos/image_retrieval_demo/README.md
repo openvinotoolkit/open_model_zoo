@@ -9,7 +9,7 @@ This demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 The demo application expects an image retrieval model in the Intermediate Representation (IR) format.
 
 As input, the demo application takes:
-* a path to a list of images represeneted by textfile with following format 'path_to_image' 'ID' `--images`
+* a path to a list of images represented by textfile with following format 'path_to_image' 'ID' `--images`
 * a path to a video file or a device node of a web-camera specified with a command line argument `--video`
 
 The demo workflow is the following:
@@ -51,6 +51,7 @@ Options:
                         Optional. Required for CPU custom layers. Absolute
                         path to a shared library with the kernels
                         implementations.
+  --no_show             Optional. Do not visualize inference results.
 ```
 
 Running the application with an empty list of options yields the short version of the usage message and an error message.
@@ -63,11 +64,14 @@ To run the demo, please provide paths to the model in the IR format, to a file w
 ```bash
 python image_retrieval_demo.py \
 -m /home/user/image-retrieval-0001.xml \
--v /home/user/video.dav.mp4 \
--i /home/user/list.txt \
--l /opt/intel/openvino/inference_engine/lib/intel64/libcpu_extension_avx512.so \
+-i /home/user/video.dav.mp4 \
+-g /home/user/list.txt \
 --ground_truth text_label
 ```
+
+An example of file listing gallery images can be found [here](https://github.com/opencv/openvino_training_extensions/blob/develop/tensorflow_toolkit/image_retrieval/data/gallery/gallery.txt).
+
+Examples of videos can be found [here](https://github.com/19900531/test).
 
 ## Demo Output
 

@@ -26,6 +26,7 @@ from mc_tracker.mct import MultiCameraTracker
 from utils.misc import read_py_config
 from utils.video import MulticamCapture
 from utils.visualization import visualize_multicam_detections
+from openvino.inference_engine import IECore # pylint: disable=import-error,E0611
 
 log.basicConfig(stream=sys.stdout, level=log.DEBUG)
 
@@ -70,7 +71,7 @@ def run(params, capture, detector, reid):
     else:
         output_video = None
 
-    while cv.waitKey(1) != 27 and thread_body.process:
+    while thread_body.process:
         start = time.time()
         try:
             frames = thread_body.frames_queue.get_nowait()
@@ -91,7 +92,10 @@ def run(params, capture, detector, reid):
 
         fps = round(1 / (time.time() - start), 1)
         vis = visualize_multicam_detections(frames, tracked_objects, fps)
-        cv.imshow(win_name, vis)
+        if not params.no_show:
+            cv.imshow(win_name, vis)
+            if cv.waitKey(1) == 27:
+                break
         if output_video:
             output_video.write(cv.resize(vis, video_output_size))
 
@@ -128,16 +132,20 @@ def main():
                         help='MKLDNN (CPU)-targeted custom layers.Absolute \
                               path to a shared library with the kernels impl.',
                              type=str, default=None)
+    parser.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
 
     args = parser.parse_args()
 
     capture = MulticamCapture(args.i)
 
-    person_detector = Detector(args.m_detector, args.t_detector,
+    log.info("Creating Inference Engine")
+    ie = IECore()
+
+    person_detector = Detector(ie, args.m_detector, args.t_detector,
                                args.device, args.cpu_extension,
                                capture.get_num_sources())
     if args.m_reid:
-        person_recognizer = VectorCNN(args.m_reid, args.device)
+        person_recognizer = VectorCNN(ie, args.m_reid, args.device)
     else:
         person_recognizer = None
     run(args, capture, person_detector, person_recognizer)

@@ -1,0 +1,34 @@
+models:
+  - name: semantic-segmentation-adas-0001
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   intel/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.xml
+        weights: intel/semantic-segmentation-adas-0001/FP32/semantic-segmentation-adas-0001.bin
+        adapter: segmentation
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   intel/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.xml
+        weights: intel/semantic-segmentation-adas-0001/FP16/semantic-segmentation-adas-0001.bin
+        adapter: segmentation
+
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   intel/semantic-segmentation-adas-0001/FP32-INT8/semantic-segmentation-adas-0001.xml
+        weights: intel/semantic-segmentation-adas-0001/FP32-INT8/semantic-segmentation-adas-0001.bin
+        adapter: segmentation
+
+    datasets:
+      - name: semantic_segmentation_adas
+
+        metrics:
+          - type: mean_iou
+            use_argmax: False
+            presenter: print_vector
+
+global_definitions: ../dataset_definitions.yml

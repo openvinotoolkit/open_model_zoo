@@ -13,34 +13,32 @@
 # limitations under the License.
 
 description: >-
-  Text detector based on PixelLink <https://arxiv.org/pdf/1801.01315.pdf> architecture
-  with MobileNetV2-like <https://arxiv.org/pdf/1801.04381.pdf> as a backbone
-  for indoor/outdoor scenes.
+  Detects oriented text.
 task_type: detection
 files:
   - name: FP32/text-detection-0003.xml
-    size: 83421
-    sha256: 99f1bd3713176703e5e25f374e337a694786136053bb1dbf0507959ffec43a1f
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-detection-0003/FP32/text-detection-0003.xml
+    size: 178392
+    sha256: fcad7422ae13f244b37f7ef4e36964bdecd0b474774d410dc044baaf50b5e3f0
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-detection-0003/FP32/text-detection-0003.xml
   - name: FP32/text-detection-0003.bin
-    size: 26986232
-    sha256: 4ce684ad28cb70dc464565e1a476718845e3cc190fca14f385117f9ad970bcc4
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-detection-0003/FP32/text-detection-0003.bin
+    size: 26986280
+    sha256: 03430c799fa873e859eb0018318e741fd58b8ff6b9891949cb931876db3bf0e1
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-detection-0003/FP32/text-detection-0003.bin
   - name: FP16/text-detection-0003.xml
-    size: 83341
-    sha256: afa7c31ff970112c07d38018be3f359fb36a11782e9c9b32d29ae6ed317df841
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-detection-0003/FP16/text-detection-0003.xml
+    size: 178312
+    sha256: 9c8f15dcefd1b29e82c70bec42b4d50981ee0b7b84a5502eeff9fba2e472b5ea
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-detection-0003/FP16/text-detection-0003.xml
   - name: FP16/text-detection-0003.bin
-    size: 13493008
-    sha256: 0ee50f6aad475bf34116f809278766e0ecc82a648bbde40e2070c2e36f62ace7
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-detection-0003/FP16/text-detection-0003.bin
-  - name: INT8/text-detection-0003.xml
-    size: 939308
-    sha256: 85e079aa98e0bdc926b3a99d418fae7cadbc33868a190b6b534d1a4674d19396
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-detection-0003/INT8/text-detection-0003.xml
-  - name: INT8/text-detection-0003.bin
-    size: 26986232
-    sha256: 5685f059522ae30cdbdef60317882988415fccc0e33950ed224b4d81d8e1a27c
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-detection-0003/INT8/text-detection-0003.bin
+    size: 13493056
+    sha256: 84fc3ce490259047e3a48f2810f4cd2a38ad20c12a82f96e39f4ccb78b86b1f7
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-detection-0003/FP16/text-detection-0003.bin
+  - name: FP32-INT8/text-detection-0003.xml
+    size: 557004
+    sha256: 3c76945afb9ebb669da5098d9603ed4ab47debc5d1a61dbed6eea5eff25ef86e
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-detection-0003/FP32-INT8/text-detection-0003.xml
+  - name: FP32-INT8/text-detection-0003.bin
+    size: 27219792
+    sha256: 5eeffd8c051eba2661f87e43d08721576e0a346af569694a6859b748916233e1
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-detection-0003/FP32-INT8/text-detection-0003.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

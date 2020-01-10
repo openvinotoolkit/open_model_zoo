@@ -15,7 +15,7 @@ models:
         reader: pillow_imread
 
         # In order to be used by model, images must be:
-        # 1) Resized to 256x256 with bilinear interpolation 
+        # 1) Resized to 256x256 with bilinear interpolation
         # 2) Cropped central part 224x224
         # 3) Normalized by 255
         # 4) Normalized by (0.229, 0.224, 0.225) with mean values (0.485, 0.456, 0.406)
@@ -25,7 +25,7 @@ models:
             aspect_ratio_scale: greater
             use_pillow: true
             interpolation: BILINEAR
-          
+
           - type: crop
             size: 224
             use_pillow: true
@@ -34,14 +34,13 @@ models:
             std: 255
 
           - type: normalization
-            mean: (0.485, 0.456, 0.406) 
+            mean: (0.485, 0.456, 0.406)
             std: (0.229, 0.224, 0.225)
 
-        # Reference metric from PyTorch (pytorch v1.0.1, torchvision v0.2.2) top-1 76.13% top-5 92.862%
+            # Reference metric from PyTorch (pytorch v1.0.1, torchvision v0.2.2) top-1 76.13% top-5 92.862%
 
   - name: resnet-50-pytorch
 
-    launchers:
     launchers:
       - framework: dlsdk
         tags:
@@ -49,7 +48,7 @@ models:
         model:   public/resnet-50-pytorch/FP32/resnet-50-pytorch.xml
         weights: public/resnet-50-pytorch/FP32/resnet-50-pytorch.bin
         adapter: classification
-      
+
       - framework: dlsdk
         tags:
           - FP16
@@ -73,4 +72,6 @@ models:
           - type: crop
             size: 224
             use_pillow: True
-        # Reference metric from PyTorch (pytorch v1.0.1, torchvision v0.2.2) top-1 76.13% top-5 92.862%
+            # Reference metric from PyTorch (pytorch v1.0.1, torchvision v0.2.2) top-1 76.13% top-5 92.862%
+
+global_definitions: ../dataset_definitions.yml

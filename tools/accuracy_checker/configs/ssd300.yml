@@ -12,6 +12,8 @@ models:
             size: 300
           - type: normalization
             mean: 104, 117, 123
+        postprocessing:
+          - type: resize_prediction_boxes
 
   - name: ssd300
     launchers:
@@ -21,7 +23,6 @@ models:
         model:   public/ssd300/FP32/ssd300.xml
         weights: public/ssd300/FP32/ssd300.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -29,10 +30,13 @@ models:
         model:   public/ssd300/FP16/ssd300.xml
         weights: public/ssd300/FP16/ssd300.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
     datasets:
       - name: VOC2012
         preprocessing:
           - type: resize
             size: 300
+        postprocessing:
+          - type: resize_prediction_boxes
+
+global_definitions: ../dataset_definitions.yml

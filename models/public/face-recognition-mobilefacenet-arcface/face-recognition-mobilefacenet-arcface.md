@@ -1,6 +1,6 @@
 # face-recognition-mobilefacenet-arcface
 
-This model is originally named MobileFaceNet,ArcFace@ms1m-refine-v1 [source](https://github.com/deepinsight/insightface/wiki/Model-Zoo)
+The original name of the model is [MobileFaceNet,ArcFace@ms1m-refine-v1](https://github.com/deepinsight/insightface/wiki/Model-Zoo).
 
 ## Use Case and High-Level Description
 
@@ -23,9 +23,9 @@ This model is originally named MobileFaceNet,ArcFace@ms1m-refine-v1 [source](htt
 
 ## Input
 
-### Original model
+### Original Model
 
-Image, name - `data`,  shape - `1,3,112,112`, format is `B,C,H,W` where:
+Image, name: `data`,  shape: `1,3,112,112`, format is `B,C,H,W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -34,9 +34,9 @@ Image, name - `data`,  shape - `1,3,112,112`, format is `B,C,H,W` where:
 
 Channel order is `RGB`.
 
-### Converted model
+### Converted Model
 
-Image, name - `data`,  shape - `1,3,112,112`, format is `B,C,H,W` where:
+Image, name: `data`,  shape: `1,3,112,112`, format: `B,C,H,W`, where:
 
 - `B` - batch size
 - `C` - channel
@@ -47,18 +47,18 @@ Channel order is `BGR`.
 
 ## Output
 
-### Original model
+### Original Model
 
-Face embedings, name - `pre_fc1`,  shape - `1,512`, output data format  - `B,C`, where:
+Face embedings, name: `pre_fc1`,  shape: `1,512`, output data format: `B,C`, where:
 
 - `B` - batch size
 - `C` - row-vector of 512 floating points values, face embeddings
 
 The net outputs on different images are comparable in cosine distance.
 
-### Converted model
+### Converted Model
 
-Face embedings, name - `pre_fc1`,  shape - `1,512`, output data format  - `B,C`, where:
+Face embeddings, name: `pre_fc1`,  shape: `1,512`, output data format: `B,C`, where:
 
 - `B` - batch size
 - `C` - row-vector of 512 floating points values, face embeddings
@@ -67,4 +67,29 @@ The net outputs on different images are comparable in cosine distance.
 
 ## Legal Information
 
-[LICENSE](https://raw.githubusercontent.com/deepinsight/insightface/master/LICENSE)
+The original model is distributed under the following
+[license](https://raw.githubusercontent.com/deepinsight/insightface/master/LICENSE):
+
+```
+MIT License
+
+Copyright (c) 2018 Jiankang Deng and Jia Guo
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

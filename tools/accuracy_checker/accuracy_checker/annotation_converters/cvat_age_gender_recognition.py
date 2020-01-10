@@ -26,18 +26,17 @@ class CVATAgeGenderRecognitionConverter(FileBasedAnnotationConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
             'images_dir': PathField(
                 is_directory=True, optional=True,
                 description='path to dataset images, used only for content existence check'
             )
         })
-        return parameters
+        return configuration_parameters
 
     def configure(self):
         super().configure()
-        self.label = self.get_value_from_config('label')
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):

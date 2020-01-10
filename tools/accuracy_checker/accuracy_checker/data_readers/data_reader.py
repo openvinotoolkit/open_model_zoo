@@ -20,13 +20,18 @@ from collections import OrderedDict, namedtuple
 import re
 import cv2
 from PIL import Image
-import scipy.misc
 import numpy as np
 import nibabel as nib
+try:
+    import tensorflow as tf
+except ImportError as import_error:
+    tf = None
 
 from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
 from ..dependency import ClassProvider
 from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField
+
+REQUIRES_ANNOTATIONS = ['annotation_features_extractor', ]
 
 
 class DataRepresentation:
@@ -39,10 +44,11 @@ class DataRepresentation:
         elif isinstance(data, list) and np.isscalar(data[0]):
             self.metadata['image_size'] = len(data)
         else:
-            self.metadata['image_size'] = data.shape if not isinstance(data, list) else data[0].shape
+            self.metadata['image_size'] = data.shape if not isinstance(data, list) else np.shape(data[0])
 
 
 ClipIdentifier = namedtuple('ClipIdentifier', ['video', 'clip_id', 'frames'])
+MultiFramesInputIdentifier = namedtuple('MultiFramesInputIdentifier', ['input_id', 'frames'])
 
 
 def create_reader(config):
@@ -80,6 +86,7 @@ class BaseReader(ClassProvider):
         self.read_dispatcher = singledispatch(self.read)
         self.read_dispatcher.register(list, self._read_list)
         self.read_dispatcher.register(ClipIdentifier, self._read_clip)
+        self.read_dispatcher.register(MultiFramesInputIdentifier, self._read_frames_multi_input)
 
         self.validate_config()
         self.configure()
@@ -117,8 +124,18 @@ class BaseReader(ClassProvider):
         frames_identifiers = [video / frame for frame in data_id.frames]
         return self.read_dispatcher(frames_identifiers)
 
+    def _read_frames_multi_input(self, data_id):
+        return self.read_dispatcher(data_id.frames)
+
     def read_item(self, data_id):
         return DataRepresentation(self.read_dispatcher(data_id), identifier=data_id)
+
+    @property
+    def name(self):
+        return self.__provider__
+
+    def reset(self):
+        pass
 
 
 class ReaderCombinerConfig(ConfigValidator):
@@ -181,7 +198,12 @@ class ScipyImageReader(BaseReader):
     __provider__ = 'scipy_imread'
 
     def read(self, data_id):
-        return np.array(scipy.misc.imread(str(get_path(self.data_source / data_id))))
+        # reimplementation scipy.misc.imread
+        image = Image.open(str(get_path(self.data_source / data_id)))
+        if image.mode == 'P':
+            image = image.convert('RGBA') if 'transparency' in image.info else image.convert('RGB')
+
+        return np.array(image)
 
 
 class OpenCVFrameReader(BaseReader):
@@ -213,6 +235,10 @@ class OpenCVFrameReader(BaseReader):
     def configure(self):
         self.data_source = get_path(self.data_source)
         self.videocap = cv2.VideoCapture(str(self.data_source))
+
+    def reset(self):
+        self.current = -1
+        self.videocap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
 
 class JSONReaderConfig(ConfigValidator):
@@ -262,7 +288,7 @@ class NiftiImageReader(BaseReader):
         image = np.array(nib_image.dataobj)
         if len(image.shape) != 4:  # Make sure 4D
             image = np.expand_dims(image, -1)
-        image = np.swapaxes(np.array(image), 0, -2)
+        image = np.transpose(image, (3, 0, 1, 2))
 
         return image
 
@@ -279,12 +305,8 @@ class TensorflowImageReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
-        try:
-            import tensorflow as tf
-        except ImportError as import_error:
-            raise ConfigError(
-                'tf_imread reader disabled.Please, install Tensorflow before using. \n{}'.format(import_error.msg)
-            )
+        if tf is None:
+            raise ImportError('tf backend for image reading requires TensorFlow. Please install it before usage.')
 
         tf.enable_eager_execution()
 
@@ -307,11 +329,6 @@ class AnnotationFeaturesConfig(ConfigValidator):
 class AnnotationFeaturesReader(BaseReader):
     __provider__ = 'annotation_features_extractor'
 
-    def __init__(self, data_source, config=None, annotations=None):
-        super().__init__(annotations, config)
-        self.counter = 0
-        self.data_source = annotations
-
     def configure(self):
         self.feature_list = self.config['features']
         if not contains_all(self.data_source[0].__dict__, self.feature_list):
@@ -319,9 +336,11 @@ class AnnotationFeaturesReader(BaseReader):
                 'annotation_class prototype does not contain provided features {}'.format(', '.join(self.feature_list))
             )
         self.single = len(self.feature_list) == 1
+        self.counter = 0
+        self.subset = range(len(self.data_source))
 
     def read(self, data_id):
-        relevant_annotation = self.data_source[self.counter]
+        relevant_annotation = self.data_source[self.subset[self.counter]]
         self.counter += 1
         features = [getattr(relevant_annotation, feature) for feature in self.feature_list]
         if self.single:
@@ -330,3 +349,7 @@ class AnnotationFeaturesReader(BaseReader):
 
     def _read_list(self, data_id):
         return self.read(data_id)
+
+    def reset(self):
+        self.subset = range(len(self.data_source))
+        self.counter = 0

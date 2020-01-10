@@ -1,0 +1,44 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Super resolution model
+task_type: image_processing
+files:
+  - name: FP32/text-image-super-resolution-0001.xml
+    size: 11356
+    sha256: 8b8d29eafaf58abfb419ee106c7dcedb60f2535a076df4312e15285598e8fa6b
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-image-super-resolution-0001/FP32/text-image-super-resolution-0001.xml
+  - name: FP32/text-image-super-resolution-0001.bin
+    size: 10836
+    sha256: 033d58430a2744302a2729291d66d4c74ee6bce517b6ae36f1b5a0e8b27d82ff
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-image-super-resolution-0001/FP32/text-image-super-resolution-0001.bin
+  - name: FP16/text-image-super-resolution-0001.xml
+    size: 11346
+    sha256: bd3a27754d39b955741885950260f26da57e86151c096752ffae6f01ec9b7ffa
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-image-super-resolution-0001/FP16/text-image-super-resolution-0001.xml
+  - name: FP16/text-image-super-resolution-0001.bin
+    size: 5418
+    sha256: f203818d73b933e5004aff85aeb84783dbf0be9e5c296d2995fc0678ff719e9c
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-image-super-resolution-0001/FP16/text-image-super-resolution-0001.bin
+  - name: FP32-INT8/text-image-super-resolution-0001.xml
+    size: 27041
+    sha256: ef2b53bc9f9eac73b4d76f2a9d7fdae27d7865024fa5ed26dd85f0799725b3bc
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-image-super-resolution-0001/FP32-INT8/text-image-super-resolution-0001.xml
+  - name: FP32-INT8/text-image-super-resolution-0001.bin
+    size: 11228
+    sha256: f1680f577b003e5d6674d5b2d07277171487dac7707dbd18b686755e438127aa
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-image-super-resolution-0001/FP32-INT8/text-image-super-resolution-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

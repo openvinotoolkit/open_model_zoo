@@ -62,6 +62,7 @@ Options:
     -t_reid                      Optional. Cosine similarity threshold between two vectors for person reidentification.
     -no_show                     Optional. No show processed video.
     -auto_resize                 Optional. Enables resizable input with support of ROI crop & auto resize.
+    -u                           Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.

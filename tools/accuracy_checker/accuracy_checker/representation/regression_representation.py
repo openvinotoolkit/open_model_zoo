@@ -49,8 +49,8 @@ class GazeVectorPrediction(GazeVectorRepresentation):
 class FacialLandmarksRepresentation(BaseRepresentation):
     def __init__(self, identifier='', x_values=None, y_values=None):
         super().__init__(identifier)
-        self.x_values = x_values if x_values.any() else []
-        self.y_values = y_values if y_values.any() else []
+        self.x_values = x_values if x_values is not None else []
+        self.y_values = y_values if y_values is not None else []
 
 
 class FacialLandmarksAnnotation(FacialLandmarksRepresentation):

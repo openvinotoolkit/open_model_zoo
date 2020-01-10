@@ -22,6 +22,17 @@ def positive_int_arg(values):
     return result
 
 
+def model_parameter(parameter):
+    param, value = parameter.split('=', 1)
+    try:
+        value = eval(value, {}, {})
+    except NameError as err:
+        print('Cannot evaluate {!r} value in {}. For string values use "{}=\'{}\'" (with all quotes).'
+              .format(value, parameter, param, value))
+        sys.exit(err)
+    return param, value
+
+
 def parse_args():
     """Parse input arguments"""
 
@@ -42,15 +53,16 @@ def parse_args():
     parser.add_argument('--import-module', type=str, default='',
                         help='Name of module, which contains model\'s constructor.'
                         'Requires if model not from Torchvision')
-    parser.add_argument('--input-names', type=str, nargs='+',
+    parser.add_argument('--input-names', type=str, metavar='L[,L...]',
                         help='Space separated names of the input layers')
-    parser.add_argument('--output-names', type=str, nargs='+',
+    parser.add_argument('--output-names', type=str, metavar='L[,L...]',
                         help='Space separated names of the output layers')
-
+    parser.add_argument('--model-param', type=model_parameter, default=[], action='append',
+                        help='Pair "name"="value" of model constructor parameter')
     return parser.parse_args()
 
 
-def load_model(model_name, weights, from_torchvision=True, model_path=None, module_name=None):
+def load_model(model_name, weights, from_torchvision, model_path, module_name, model_params):
     """Import model and load pretrained weights"""
 
     if from_torchvision:
@@ -72,7 +84,7 @@ def load_model(model_name, weights, from_torchvision=True, model_path=None, modu
         try:
             module = __import__(module_name)
             creator = getattr(module, model_name)
-            model = creator()
+            model = creator(**model_params)
         except ImportError as err:
             print('Module {} in {} doesn\'t exist. Check import path and name'.format(model_name, model_path))
             sys.exit(err)
@@ -95,8 +107,9 @@ def convert_to_onnx(model, input_shape, output_file, input_names, output_names):
     output_file.parent.mkdir(parents=True, exist_ok=True)
     model.eval()
     dummy_input = torch.randn(input_shape)
-    torch.onnx.export(model, dummy_input, str(output_file),
-                      verbose=False, input_names=input_names, output_names=output_names)
+    model(dummy_input)
+    torch.onnx.export(model, dummy_input, str(output_file), verbose=False,
+                      input_names=input_names.split(','), output_names=output_names.split(','))
 
     # Model check after conversion
     model = onnx.load(str(output_file))
@@ -109,7 +122,9 @@ def convert_to_onnx(model, input_shape, output_file, input_names, output_names):
 
 def main():
     args = parse_args()
-    model = load_model(args.model_name, args.weights, args.from_torchvision, args.model_path, args.import_module)
+    model = load_model(args.model_name, args.weights, args.from_torchvision,
+                       args.model_path, args.import_module, dict(args.model_param))
+
     convert_to_onnx(model, args.input_shape, args.output_file, args.input_names, args.output_names)
 
 

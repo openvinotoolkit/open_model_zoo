@@ -8,8 +8,9 @@
 #include "descriptor.hpp"
 #include "distance.hpp"
 #include "detector.hpp"
-#include "image_reader.hpp"
 #include "pedestrian_tracker_demo.hpp"
+
+#include <monitors/presenter.h>
 
 #include <opencv2/core.hpp>
 
@@ -51,7 +52,18 @@ CreatePedestrianTracker(const std::string& reid_model,
 
     if (!reid_model.empty() && !reid_weights.empty()) {
         CnnConfig reid_config(reid_model, reid_weights);
-        reid_config.max_batch_size = 16;
+        reid_config.max_batch_size = 16;   // defaulting to 16
+
+        try {
+            if (ie.GetConfig(deviceName, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != PluginConfigParams::YES) {
+                reid_config.max_batch_size = 1;
+                std::cerr << "Dynamic batch is not supported for " << deviceName << ". Fall back to batch 1." << std::endl;
+            }
+        }
+        catch(const InferenceEngine::details::InferenceEngineException& e) {
+            reid_config.max_batch_size = 1;
+            std::cerr << e.what() << " for " << deviceName << ". Fall back to batch 1." << std::endl;
+        }
 
         std::shared_ptr<IImageDescriptor> descriptor_strong =
             std::make_shared<DescriptorIE>(reid_config, ie, deviceName);
@@ -83,8 +95,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         return false;
     }
 
-    std::cout << "Parsing input parameters" << std::endl;
-
     if (FLAGS_i.empty()) {
         throw std::logic_error("Parameter -i is not set");
     }
@@ -109,8 +119,6 @@ int main_work(int argc, char **argv) {
 
 
     // Reading command line parameters.
-    auto video_path = FLAGS_i;
-
     auto det_model = FLAGS_m_det;
     auto det_weights = fileNameNoExt(FLAGS_m_det) + ".bin";
 
@@ -134,15 +142,12 @@ int main_work(int argc, char **argv) {
         delay = -1;
     should_show = (delay >= 0);
 
-    int first_frame = FLAGS_first;
-    int last_frame = FLAGS_last;
-
     bool should_save_det_log = !detlog_out.empty();
 
-    if (first_frame >= 0)
-        std::cout << "first_frame = " << first_frame << std::endl;
-    if (last_frame >= 0)
-        std::cout << "last_frame = " << last_frame << std::endl;
+    if ((FLAGS_last >= 0) && (FLAGS_first > FLAGS_last)) {
+        throw std::runtime_error("The first frame index (" + std::to_string(FLAGS_first) + ") must be greater than the "
+            "last frame index (" + std::to_string(FLAGS_last) + ')');
+    }
 
     std::vector<std::string> devices{detector_mode, reid_mode};
     InferenceEngine::Core ie =
@@ -158,16 +163,29 @@ int main_work(int argc, char **argv) {
         CreatePedestrianTracker(reid_model, reid_weights, ie, reid_mode,
                                 should_keep_tracking_info);
 
-
-    // Opening video.
-    std::unique_ptr<ImageReader> video =
-        ImageReader::CreateImageReaderForPath(video_path);
-
-    PT_CHECK(video->IsOpened()) << "Failed to open video: " << video_path;
-    double video_fps = video->GetFrameRate();
-
-    if (first_frame > 0)
-        video->SetFrameIndex(first_frame);
+    cv::VideoCapture cap;
+    try {
+        int intInput = std::stoi(FLAGS_i);
+        if (!cap.open(intInput)) {
+            throw std::runtime_error("Can't open " + std::to_string(intInput));
+        }
+    } catch (const std::invalid_argument&) {
+        if (!cap.open(FLAGS_i)) {
+            throw std::runtime_error("Can't open " + FLAGS_i);
+        }
+    } catch (const std::out_of_range&) {
+        if (!cap.open(FLAGS_i)) {
+            throw std::runtime_error("Can't open " + FLAGS_i);
+        }
+    }
+    double video_fps = cap.get(cv::CAP_PROP_FPS);
+    if (0.0 == video_fps) {
+        // the default frame rate for DukeMTMC dataset
+        video_fps = 60.0;
+    }
+    if (0 >= FLAGS_first && !cap.set(cv::CAP_PROP_POS_FRAMES, FLAGS_first)) {
+        throw std::runtime_error("Can't set the frame to begin with");
+    }
 
     std::cout << "To close the application, press 'CTRL+C' here";
     if (!FLAGS_no_show) {
@@ -175,18 +193,12 @@ int main_work(int argc, char **argv) {
     }
     std::cout << std::endl;
 
-    for (;;) {
-        auto pair = video->Read();
-        cv::Mat frame = pair.first;
-        int frame_idx = pair.second;
+    cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
+    Presenter presenter(FLAGS_u, 10, graphSize);
 
-        if (frame.empty()) break;
-
-        PT_CHECK(frame_idx >= first_frame);
-
-        if ( (last_frame >= 0) && (frame_idx > last_frame) ) {
-            std::cout << "Frame " << frame_idx << " is greater than last_frame = "
-                << last_frame << " -- break";
+    for (int32_t frame_idx = std::max(0, FLAGS_first); 0 > FLAGS_last || frame_idx <= FLAGS_last; ++frame_idx) {
+        cv::Mat frame;
+        if (!cap.read(frame)) {
             break;
         }
 
@@ -198,6 +210,8 @@ int main_work(int argc, char **argv) {
         // timestamp in milliseconds
         uint64_t cur_timestamp = static_cast<uint64_t >(1000.0 / video_fps * frame_idx);
         tracker->Process(frame, detections, cur_timestamp);
+
+        presenter.drawGraphs(frame);
 
         if (should_show) {
             // Drawing colored "worms" (tracks).
@@ -223,6 +237,7 @@ int main_work(int argc, char **argv) {
             char k = cv::waitKey(delay);
             if (k == 27)
                 break;
+            presenter.handleKey(k);
         }
 
         if (should_save_det_log && (frame_idx % 100 == 0)) {
@@ -243,6 +258,8 @@ int main_work(int argc, char **argv) {
         pedestrian_detector.PrintPerformanceCounts(getFullDeviceName(ie, FLAGS_d_det));
         tracker->PrintReidPerformanceCounts(getFullDeviceName(ie, FLAGS_d_reid));
     }
+
+    std::cout << presenter.reportMeans() << '\n';
     return 0;
 }
 

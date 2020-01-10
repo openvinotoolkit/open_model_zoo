@@ -20,10 +20,12 @@ import itertools
 import json
 import os
 import pickle
+from enum import Enum
 
 from pathlib import Path
 from typing import Union
 from warnings import warn
+from collections import MutableSet
 
 from shapely.geometry.polygon import Polygon
 import numpy as np
@@ -273,6 +275,7 @@ def read_txt(file: Union[str, Path], sep='\n', **kwargs):
 def read_xml(file: Union[str, Path], *args, **kwargs):
     return et.parse(str(get_path(file)), *args, **kwargs).getroot()
 
+
 def read_json(file: Union[str, Path], *args, **kwargs):
     with get_path(file).open() as content:
         return json.load(content, *args, **kwargs)
@@ -414,6 +417,64 @@ def find_nearest(array, value, mode=None):
     return idx
 
 
+class OrderedSet(MutableSet):
+    def __init__(self, iterable=None):
+        self.end = end = []
+        end += [None, end, end]
+        self.map = {}
+        if iterable is not None:
+            self |= iterable
+
+    def __len__(self):
+        return len(self.map)
+
+    def __contains__(self, key):
+        return key in self.map
+
+    def add(self, key):
+        if key not in self.map:
+            end = self.end
+            curr = end[1]
+            curr[2] = end[1] = self.map[key] = [key, curr, end]
+
+    def discard(self, key):
+        if key in self.map:
+            key, prev_value, next_value = self.map.pop(key)
+            prev_value[2] = next_value
+            next_value[1] = prev_value
+
+    def __iter__(self):
+        end = self.end
+        curr = end[2]
+        while curr is not end:
+            yield curr[0]
+            curr = curr[2]
+
+    def __reversed__(self):
+        end = self.end
+        curr = end[1]
+        while curr is not end:
+            yield curr[0]
+            curr = curr[1]
+
+    def pop(self, last=True):
+        if not self:
+            raise KeyError('set is empty')
+        key = self.end[1][0] if last else self.end[2][0]
+        self.discard(key)
+        return key
+
+    def __repr__(self):
+        if not self:
+            return '{}()'.format(self.__class__.__name__,)
+        return '{}({})'.format(self.__class__.__name__, list(self))
+
+    def __eq__(self, other):
+        if isinstance(other, OrderedSet):
+            return len(self) == len(other) and list(self) == list(other)
+        return set(self) == set(other)
+
+
 def get_parameter_value_from_config(config, parameters, key):
     if key not in parameters.keys():
         return None
@@ -429,3 +490,14 @@ def check_file_existence(file):
         return True
     except (FileNotFoundError, IsADirectoryError):
         return False
+
+
+class Color(Enum):
+    PASSED = 0
+    FAILED = 1
+
+
+def color_format(s, color=Color.PASSED):
+    if color == Color.PASSED:
+        return "\x1b[0;32m{}\x1b[0m".format(s)
+    return "\x1b[0;31m{}\x1b[0m".format(s)

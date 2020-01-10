@@ -13,32 +13,25 @@
 # limitations under the License.
 
 description: >-
-  This is an general-purpose action recognition model for Kinetics-400 dataset.
-  The model uses Video Transformer approach with ResNet34 encoder. Please refer
-  to the kinetics <https://deepmind.com/research/open-source/open-source-datasets/kinetics/>
-  dataset specification to see list of action that are recognised by this model.
-
-  This model is only decoder part of the whole pipeline. It accepts stack of frame
-  embeddings, computed by action-recognition-0001-encoder, and produces prediction
-  on input video. Video frames should be sampled to cover ~1 second fragment (i.e.
-  skip every second frame in 30 fps video).
+  General-purpose action recognition model for Kinetics-400 dataset based on Video
+  Transformer Network approach. Decoder part
 task_type: action_recognition
 files:
   - name: FP32/action-recognition-0001-decoder.xml
-    size: 104052
-    sha256: 022d1249402eaf4d50a4e6dcf0d9df4198a3248d409474d82271cacee9986cb6
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.xml
+    size: 117057
+    sha256: 109077898a609912894256b15d70c77bf8e87ad06826af46a56c66826a30b511
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.xml
   - name: FP32/action-recognition-0001-decoder.bin
-    size: 30238472
-    sha256: 3fe939d259eb096dba98c6e0870237399344a415ae49d33b729812a8d34c4cf3
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.bin
+    size: 30238776
+    sha256: 8912b5f695ac7a639b61d258798a85968035739808c2bdffde28c44544b5e543
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.bin
   - name: FP16/action-recognition-0001-decoder.xml
-    size: 104016
-    sha256: 7fb29a3e7274d3b2dcbbc2f82a9e241415ecd0e85bc092c88b4ddbe5ebe4347d
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.xml
+    size: 117017
+    sha256: 407aa15f983979bd28a4b8dfb97888590cd047e7a8706fe1458faa9512c6d546
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.xml
   - name: FP16/action-recognition-0001-decoder.bin
-    size: 15119336
-    sha256: ba5d5b410c9e8f3cb198e92868d494f69ab2048cf739c397acfa58c9b9ddb92a
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
+    size: 15119512
+    sha256: 2dcf41b1480aeaadb7e8802c35f493e8812b47971884a3ecb2d52fd212adbb5d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

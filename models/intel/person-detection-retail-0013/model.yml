@@ -13,35 +13,32 @@
 # limitations under the License.
 
 description: >-
-  This is a pedestrian detector for the Retail scenario. It is based on MobileNetV2-like
-  backbone that includes depth-wise convolutions to reduce the amount of computation
-  for the 3x3 convolution block. The single SSD head from 1/16 scale feature map
-  has 12 clustered prior boxes.
+  Pedestrian detection (RMNet with lrelu + SSD)
 task_type: detection
 files:
   - name: FP32/person-detection-retail-0013.xml
-    size: 155823
-    sha256: 49cb6a4e0221fc7c32c15f7e35e4d7b7f0c5a8958809872ddfa1085eaf38a77d
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0013/FP32/person-detection-retail-0013.xml
+    size: 354296
+    sha256: 045a29f2f74584948ab4d9421671b9409c1e7fe9799a0f0d56b08c9fb41cac79
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-retail-0013/FP32/person-detection-retail-0013.xml
   - name: FP32/person-detection-retail-0013.bin
-    size: 2891268
-    sha256: c870150640a9ed9e6ab7e3d93398d4ca7604d7b97569b77ee7494649271bbc83
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0013/FP32/person-detection-retail-0013.bin
+    size: 2891364
+    sha256: 6f09cb7061328942f9d5e9fc81631a4234be66a26daa50cd672d4077ee82ad44
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-retail-0013/FP32/person-detection-retail-0013.bin
   - name: FP16/person-detection-retail-0013.xml
-    size: 155668
-    sha256: 00c82c835e703f3167ef4b703f1297b146cfcc72ccdc19259e65dcd18c3bcdae
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0013/FP16/person-detection-retail-0013.xml
+    size: 354146
+    sha256: 5ae1a1c2a4d316f0137f13756b1fd9d150aa06fe05a9ede26d386d26f763d1d0
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-retail-0013/FP16/person-detection-retail-0013.xml
   - name: FP16/person-detection-retail-0013.bin
-    size: 1445640
-    sha256: 77eb13de84d9368da1d437aece02ba14b4ff0e48b194feb48a8b5076c861039a
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0013/FP16/person-detection-retail-0013.bin
-  - name: INT8/person-detection-retail-0013.xml
-    size: 1997589
-    sha256: 569e111c0cecc2d7fcb43d3516fd793bbd5c1246cd0532055e58184cbb0cb7b0
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0013/INT8/person-detection-retail-0013.xml
-  - name: INT8/person-detection-retail-0013.bin
-    size: 2891268
-    sha256: efdc2566e15bbc1e31990eb0a7a35becacc076e052212ec6f2b7341d0f33cb8e
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/person-detection-retail-0013/INT8/person-detection-retail-0013.bin
+    size: 1445736
+    sha256: 56eeccbeb3f27144046edacb95b459d60f3930f54051ef5b9e5253923c07b672
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-retail-0013/FP16/person-detection-retail-0013.bin
+  - name: FP32-INT8/person-detection-retail-0013.xml
+    size: 931316
+    sha256: deab2e4808955cf05f84c457b500f8e5f11e9a3c1db31fa532718d28edfee0c1
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-retail-0013/FP32-INT8/person-detection-retail-0013.xml
+  - name: FP32-INT8/person-detection-retail-0013.bin
+    size: 2969676
+    sha256: 523b79294453845934e068f4a906b9bf88b4c70ab705f2137e089439f4555b92
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-retail-0013/FP32-INT8/person-detection-retail-0013.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

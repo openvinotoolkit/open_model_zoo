@@ -46,6 +46,8 @@ Options:
     -t                        Optional. Probability threshold for detections.
     -iou_t                    Optional. Filtering intersection over union threshold for overlapping boxes.
     -auto_resize              Optional. Enable resizable input with support of ROI crop and auto resize.
+    -no_show                  Optional. Do not show processed video.
+    -u                        Optional. List of monitors to show initially.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

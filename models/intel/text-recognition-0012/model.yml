@@ -13,26 +13,33 @@
 # limitations under the License.
 
 description: >-
-  This is a network for text recognition scenario. It consists of VGG16-like backbone
-  and bidirectional LSTM encoder-decoder. The network is able to recognize case-insensitive
-  alpha-numeric text (36 unique symbols).
+  Recognizes alphanumeric text. Architecture: VGG-like + BiLSTM as an encoder -  BiLSTM
+  as a decoder.
 task_type: optical_character_recognition
 files:
   - name: FP32/text-recognition-0012.xml
-    size: 50357
-    sha256: b02671bb96f5699e39b80213005f30d144c42b7e12f97913c3debcb364e36b52
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-recognition-0012/FP32/text-recognition-0012.xml
+    size: 119138
+    sha256: ec0c79bb39a369f56c2e38cc2d21a3c1d0b1cd049c693ab151f48f958a19fab5
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-recognition-0012/FP32/text-recognition-0012.xml
   - name: FP32/text-recognition-0012.bin
-    size: 47470764
-    sha256: df7426c3a16c005eda3c9efc6afeefe38259b36748819fc0b28f3d2a67c16239
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-recognition-0012/FP32/text-recognition-0012.bin
+    size: 47470864
+    sha256: af88da0433321350cf2451b5839907debdc398aeb99f54290296e620060186c0
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-recognition-0012/FP32/text-recognition-0012.bin
   - name: FP16/text-recognition-0012.xml
-    size: 50333
-    sha256: b4d9e00f5e88e6a257b8b96ad2e99e1a72f2669a9fb1ea1861b2efb2ac597eda
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-recognition-0012/FP16/text-recognition-0012.xml
+    size: 119106
+    sha256: 291de6f634931821a163d9f51221877a23ba084ad284306685cc1482aed5ee29
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-recognition-0012/FP16/text-recognition-0012.xml
   - name: FP16/text-recognition-0012.bin
-    size: 23735394
-    sha256: 657f2b3fdcab897980f976692bb0b93bd05f7b29b111bfe518726ef5c835c786
-    source: https://download.01.org/opencv/2019/open_model_zoo/R2/20190716_170000_models_bin/text-recognition-0012/FP16/text-recognition-0012.bin
+    size: 23735488
+    sha256: a58ef22c6b26a5da07e6a0d8e9e3f721e51b313cf31ab8edea061e4a4426af42
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-recognition-0012/FP16/text-recognition-0012.bin
+  - name: FP32-INT8/text-recognition-0012.xml
+    size: 153421
+    sha256: 7e8a95352f1083654235bb2a184d00a15fbe76ed4512647b729a8dcc813d0b43
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-recognition-0012/FP32-INT8/text-recognition-0012.xml
+  - name: FP32-INT8/text-recognition-0012.bin
+    size: 47489644
+    sha256: 0bac02a212d27677fbacc5f1535190eb05e633f49274f42d1e31c32f55dca17e
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-recognition-0012/FP32-INT8/text-recognition-0012.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
