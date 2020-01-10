@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import numpy as np
-from pathlib import Path
 import cv2
 
 from accuracy_checker.evaluators.base_evaluator import BaseEvaluator
@@ -25,7 +24,7 @@ from accuracy_checker.config import ConfigError
 from accuracy_checker.preprocessor import PreprocessingExecutor
 from accuracy_checker.metrics import MetricsExecutor
 from accuracy_checker.launcher import create_launcher
-from accuracy_checker.utils import extract_image_representations
+from accuracy_checker.utils import extract_image_representations, get_path, contains_all
 
 
 class ColorizationEvaluator(BaseEvaluator):
@@ -59,24 +58,11 @@ class ColorizationEvaluator(BaseEvaluator):
             raise ConfigError('{} framework not supported'.format(launcher_settings['framework']))
         launcher = create_launcher(launcher_settings, delayed_model_loading=True)
         network_info = config.get('network_info', {})
+        if not contains_all(network_info, ['colorization_network', 'verification_network']):
+            raise ConfigError('colorization_network/verification_network does not exist')
 
-        def check_format(current_format):
-            supported_format = ['.xml', '.bin']
-            if not Path(current_format).suffix in supported_format:
-                raise ConfigError('{} format not supported'.format(supported_format))
-            return current_format
-
-        test_model_xml = check_format(network_info['colorization_network']['model'])
-        test_model_bin = check_format(network_info['colorization_network']['weights'])
-        test_mean = float(network_info['colorization_network']['color_mean'])
-        color_coeff = network_info['colorization_network']['color_coeff']
-        test_model = ColorizationTestModel(test_model_xml, test_model_bin, test_mean, color_coeff, launcher)
-
-        check_model_xml = check_format(network_info['verification_network']['model'])
-        check_model_bin = check_format(network_info['verification_network']['weights'])
-        check_adapter = create_adapter(network_info['verification_network']['adapter'])
-        check_model = ColorizationCheckModel(check_model_xml, check_model_bin, check_adapter, launcher)
-
+        test_model = ColorizationTestModel(network_info['colorization_network'], launcher)
+        check_model = ColorizationCheckModel(network_info['verification_network'], launcher)
         return cls(dataset, reader, preprocessing, metrics_executor, launcher, test_model, check_model)
 
     def process_dataset(self, _, progress_reporter):
@@ -140,6 +126,12 @@ class ColorizationEvaluator(BaseEvaluator):
 
 
 class BaseModel:
+    def check_format(self, current_format):
+        supported_format = ['.xml', '.bin']
+        if not get_path(current_format).suffix in supported_format:
+            raise ConfigError('{} format not supported'.format(supported_format))
+        return current_format
+
     def predict(self, idenitifers, input_data):
         raise NotImplementedError
 
@@ -148,9 +140,10 @@ class BaseModel:
 
 
 class ColorizationTestModel(BaseModel):
-    def __init__(self, model_xml, model_bin, test_mean, color_coeff, launcher):
+    def __init__(self, network_info, launcher):
         super().__init__()
-
+        model_xml = self.check_format(network_info['model'])
+        model_bin = self.check_format(network_info['weights'])
         self.network = launcher.create_ie_network(model_xml, model_bin)
         self.network.batch_size = 1
         if not hasattr(launcher, 'plugin'):
@@ -158,8 +151,8 @@ class ColorizationTestModel(BaseModel):
         self.exec_network = launcher.plugin.load(self.network)
         self.input_blob = next(iter(self.network.inputs))
         self.output_blob = next(iter(self.network.outputs))
-        self.test_mean = test_mean
-        self.color_coeff = np.load(color_coeff)
+        self.test_mean = float(network_info['color_mean'])
+        self.color_coeff = np.load(network_info['color_coeff'])
 
     def data_preparation(self, input_data):
         input = input_data[0].astype(np.float32)
@@ -197,9 +190,11 @@ class ColorizationTestModel(BaseModel):
 
 
 class ColorizationCheckModel(BaseModel):
-    def __init__(self, model_xml, model_bin, adapter, launcher):
+    def __init__(self, network_info, launcher):
         super().__init__()
-        self.adapter = adapter
+        model_xml = self.check_format(network_info['model'])
+        model_bin = self.check_format(network_info['weights'])
+        self.adapter = create_adapter(network_info['adapter'])
         self.network = launcher.create_ie_network(model_xml, model_bin)
         if hasattr(launcher, 'plugin'):
             self.exec_network = launcher.plugin.load(self.network)
@@ -219,7 +214,7 @@ class ColorizationCheckModel(BaseModel):
         del self.exec_network
 
     def fit_to_input(self, input_data):
-        constant_normalization = 255.0
+        constant_normalization = 255.
         input_data *= constant_normalization
         input_data = np.transpose(input_data, (0, 3, 1, 2))
         return {self.input_blob: input_data}
