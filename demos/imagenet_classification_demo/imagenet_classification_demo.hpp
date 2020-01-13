@@ -30,7 +30,6 @@ static const char custom_cldnn_message[] = "Required for GPU custom kernels. " \
                                            "Absolute path to the .xml file with kernels description.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers." \
                                                  "Absolute path to a shared library with the kernels implementation.";
-static const char plugin_message[] = "Optional. Enables messages from a plugin.";
 static const char no_show_message[] = "Optional. Disable showing of processed images.";
 static const char execution_time_message[] = "Optional. Time in seconds to execute program. " \
                                              "Default is -1 (infinite time).";
@@ -49,7 +48,6 @@ DEFINE_int32(delay, 1, delay_message);
 DEFINE_string(res, "1920x1080", image_grid_resolution_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);
-DEFINE_bool(p_msg, false, plugin_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_int32(time, -1, execution_time_message);
 DEFINE_string(u, "", utilization_monitors_message);
@@ -72,7 +70,6 @@ static void showUsage() {
     std::cout << "    -nireq \"<integer>\"        " << num_inf_req_message << std::endl;
     std::cout << "    -nt \"<integer>\"           " << ntop_message << std::endl;
     std::cout << "    -delay \"<integer>\"        " << delay_message << std::endl; 
-    std::cout << "    -p_msg                    " << plugin_message << std::endl;
     std::cout << "    -res \"<WxH>\"              " << image_grid_resolution_message << std::endl;
     std::cout << "    -no_show                  " << no_show_message << std::endl;
     std::cout << "    -time \"<integer>\"         " << execution_time_message << std::endl;

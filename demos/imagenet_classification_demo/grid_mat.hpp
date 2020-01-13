@@ -58,7 +58,7 @@ public:
         }
     }
 
-    void textUpdate(double avgFPS, double avgLatency, bool isFpsTest, Presenter& presenter) {
+    void textUpdate(double avgFPS, double avgLatency, double accuracy, bool isFpsTest, Presenter& presenter) {
         // Draw a rectangle
         cv::Point p1 = cv::Point(0, 0);
         cv::Point p2 = cv::Point(outImg.cols, rectangleHeight);
@@ -67,28 +67,39 @@ public:
         presenter.drawGraphs(outImg);
         
         // Show FPS
-        double fontScale = 2;
+        double fontScale = 1.5;
         int thickness = 2;
         int baseline = 0;
         cv::Size textSize = cv::getTextSize("", cv::FONT_HERSHEY_PLAIN, fontScale, thickness, &baseline);
-        cv::Scalar textColor = (isFpsTest ? cv::Scalar(50, 50, 255) : cv::Scalar(75, 255, 75));
+        cv::Scalar textColor = cv::Scalar(255, 255, 255);
+        int textPadding = 10;
 
         cv::putText(outImg,
                     cv::format("FPS: %0.01f", avgFPS),
-                    cv::Point(5, textSize.height + 5),
+                    cv::Point(textPadding, textSize.height + textPadding),
                     cv::FONT_HERSHEY_PLAIN, fontScale, textColor, thickness);
         cv::putText(outImg,
-                    cv::format("Latency: %dms", static_cast<int>(avgLatency*1000)),
-                    cv::Point(5, (textSize.height + 5) * 2),
+                    cv::format("Latency: %dms", static_cast<int>(avgLatency * 1000)),
+                    cv::Point(textPadding, (textSize.height + textPadding) * 2),
                     cv::FONT_HERSHEY_PLAIN, fontScale, textColor, thickness);
+        
+        std::string accuracyMessage = "Accuracy (top 0): 0.000";
+        cv::Size accuracyMessageSize = cv::getTextSize(accuracyMessage,
+                                                       cv::FONT_HERSHEY_PLAIN, fontScale, thickness, &baseline);
+        cv::putText(outImg,
+                    cv::format("Accuracy (top %d): %.3f", FLAGS_nt, accuracy),
+                    cv::Point(outImg.cols - accuracyMessageSize.width - textPadding, textSize.height + textPadding),
+                    cv::FONT_HERSHEY_PLAIN, fontScale, textColor, thickness);
+        
+        std::string testMessage = "Testing, please wait...";
+        cv::Size testMessageSize = cv::getTextSize(testMessage,
+                                                   cv::FONT_HERSHEY_PLAIN, fontScale, thickness, &baseline);
         if (isFpsTest) {
-            std::string testMessage = "Testing, please wait...";
-            cv::Size testMessageSize = cv::getTextSize(testMessage, cv::FONT_HERSHEY_PLAIN,
-                                                       fontScale, thickness, &baseline);
             cv::putText(outImg,
                         testMessage,
-                        cv::Point(outImg.cols - testMessageSize.width, testMessageSize.height + 5),
-                        cv::FONT_HERSHEY_PLAIN, fontScale, textColor, thickness);
+                        cv::Point(outImg.cols - testMessageSize.width - textPadding,
+                                  (textSize.height + textPadding) * 2),
+                        cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(50, 50, 255), thickness);
         }
     }
 

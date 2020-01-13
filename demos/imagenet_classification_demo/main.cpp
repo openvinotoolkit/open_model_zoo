@@ -24,8 +24,6 @@
 #include "grid_mat.hpp"
 #include "infer_request_callback.hpp"
 
-ConsoleErrorListener error_listener;
-
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------------Parsing and validation of input args----------------------------------
     slog::info << "Parsing input parameters" << slog::endl;
@@ -137,13 +135,7 @@ int main(int argc, char *argv[]) {
 
         // -------------------------------------------Read network--------------------------------------------
         Core ie;
-        if (FLAGS_p_msg) {
-            ie.SetLogCallback(error_listener);
-        }
-        CNNNetReader netReader;
-        netReader.ReadNetwork(FLAGS_m);
-        netReader.ReadWeights(fileNameNoExt(FLAGS_m) + ".bin");
-        CNNNetwork network(netReader.getNetwork());
+        CNNNetwork network = ie.ReadNetwork(FLAGS_m);
         // ---------------------------------------------------------------------------------------------------
 
         // ------------------------------------------Reshape network------------------------------------------
@@ -204,10 +196,13 @@ int main(int argc, char *argv[]) {
         // ---------------------------------------------------------------------------------------------------
 
         // ----------------------------------Set device and device settings-----------------------------------
-        std::string deviceStr;
-        std::transform(FLAGS_d.c_str(), FLAGS_d.c_str() + FLAGS_d.size(), deviceStr.begin(), ::toupper);
-        std::vector<std::string> deviceNames = parseDevices(deviceStr);
-        std::set<std::string> devices(deviceNames.begin(), deviceNames.end());
+        std::set<std::string> devices;
+        if (!FLAGS_d.empty()) {
+            for (std::string& device : parseDevices(FLAGS_d)) {
+                std::transform(device.begin(), device.end(), device.begin(), ::toupper);
+                devices.insert(device);
+            }
+        }
         std::map<std::string, uint32_t> device_nstreams = parseValuePerDevice(devices, FLAGS_nstreams);
         for (auto& device : devices) {
             if (device == "CPU") {  // CPU supports a few special performance-oriented keys
@@ -298,6 +293,9 @@ int main(int argc, char *argv[]) {
         double avgLatency = 0;
         double latencySum = 0;
         unsigned framesNum = 0;
+        long long rightPredictionsCount = 0;
+        long long totalPredictionsCount = 0;
+        double accuracy;
         bool isTestMode = true;
         int delay = 1;
         char key = 0;
@@ -347,13 +345,30 @@ int main(int argc, char *argv[]) {
                     rightClasses.push_back(completedIRInfo.images[i].rightClass);
                 }
 
-                int numPredictions = 1;
-                ClassificationResult res(completedIRInfo.ir.GetBlob(outputName), FLAGS_b, numPredictions);
-                std::vector<unsigned> results = res.topResults(numPredictions, *completedIRInfo.ir.GetBlob(outputName));
+                ClassificationResult res(completedIRInfo.ir.GetBlob(outputName), FLAGS_b, FLAGS_nt);
+                std::vector<unsigned> results = res.topResults(FLAGS_nt, *completedIRInfo.ir.GetBlob(outputName));
                 std::vector<std::string> predictedLabels = {};
                 for (size_t i = 0; i < FLAGS_b; i++) {
-                    predictedLabels.push_back(labels[results[i]]);
-                    bool isPredictionRight = (results[i] == rightClasses[i]);
+                    bool isPredictionRight = false;
+                    std::string firstPredicted = labels[results[FLAGS_nt*i]];
+                    std::string predictedRight;
+                    for (size_t j = 0; j < FLAGS_nt; j++) {
+                        unsigned predictedClass = results[FLAGS_nt*i+j];
+                        if (predictedClass == rightClasses[i]) {
+                            isPredictionRight = true;
+                            predictedRight = labels[predictedClass];
+                            break;
+                        }
+                    }
+                    if (isPredictionRight) {
+                        predictedLabels.push_back(predictedRight);
+                        rightPredictionsCount++;
+                    }
+                    else {
+                        predictedLabels.push_back(firstPredicted);
+                    }
+                    totalPredictionsCount++;
+
                     shownImagesInfo.push_back(
                         std::make_tuple(completedIRInfo.images[i].mat, predictedLabels[i], isPredictionRight));
                 }
@@ -374,7 +389,8 @@ int main(int argc, char *argv[]) {
                                    / cv::getTickFrequency());
                 }
                 avgLatency = latencySum / framesNum;
-                gridMat.textUpdate(avgFPS, avgLatency, isTestMode, presenter);
+                accuracy = static_cast<double>(rightPredictionsCount) / totalPredictionsCount;
+                gridMat.textUpdate(avgFPS, avgLatency, accuracy, isTestMode, presenter);
             }
             else if (!emptyInferRequests.empty()) {
                 mutex.unlock();
@@ -424,6 +440,7 @@ int main(int argc, char *argv[]) {
         std::cout << "-------------------------------------" << std::endl;
         std::cout << "Overall FPS: " << avgFPS << std::endl;
         std::cout << "Latency: " << avgLatency << std::endl;
+        std::cout << "Accuracy: " << accuracy << std::endl;
         std::cout << presenter.reportMeans() << std::endl;
 
         if (!FLAGS_no_show) {
