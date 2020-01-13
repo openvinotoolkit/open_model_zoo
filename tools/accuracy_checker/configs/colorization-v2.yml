@@ -7,7 +7,6 @@ evaluations:
             model:   public/colorization-v2/FP32/colorization-v2.xml
             weights: public/colorization-v2/FP32/colorization-v2.bin
             color_coeff: public/colorization-v2/colorization-v2.npy
-            color_mean: 50
 
           verification_network:
             model:   public/vgg16/FP32/vgg16.xml
@@ -40,7 +39,6 @@ evaluations:
             model:   public/colorization-v2/FP16/colorization-v2.xml
             weights: public/colorization-v2/FP16/colorization-v2.bin
             color_coeff: public/colorization-v2/colorization-v2.npy
-            color_mean: 50
 
           verification_network:
             model:   public/vgg16/FP32/vgg16.xml
