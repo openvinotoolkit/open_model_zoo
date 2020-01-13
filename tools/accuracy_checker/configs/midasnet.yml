@@ -4,7 +4,7 @@ models:
     launchers:
       - framework: onnx_runtime
         model: public/midasnet/midasnet.onnx
-        adapter: monocular_depth
+        adapter: mono_depth
         inputs:
           - name: image
             type: INPUT
@@ -32,14 +32,14 @@ models:
           - FP32
         model:   public/midasnet/FP32/midasnet.xml
         weights: public/midasnet/FP32/midasnet.bin
-        adapter: monocular_depth
+        adapter: mono_depth
       
       - framework: dlsdk
         tags:
           - FP16
         model:   public/midasnet/FP16/midasnet.xml
         weights: public/midasnet/FP16/midasnet.bin
-        adapter: monocular_depth
+        adapter: mono_depth
 
     datasets:
       - name: redweb
@@ -53,4 +53,3 @@ models:
 
           - type: normalization
             std: 255
-            

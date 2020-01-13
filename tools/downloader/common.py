@@ -56,7 +56,7 @@ KNOWN_TASK_TYPES = {
     'object_attributes',
     'optical_character_recognition',
     'semantic_segmentation',
-    'monocular_depth',
+    'mono_depth',
 }
 
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')

@@ -21,12 +21,12 @@ description: >-
   The model input is a blob that consists of a single image of "1x3x384x384" in RGB order.
 
   The model output is an inverse depth map that is defined up to an unknown scale factor.
-task_type: monocular_depth
+task_type: mono_depth
 files:
   - name: midasnet.py
     size: 6464
     sha256: a3680912f1e6839b5bc4d4684e78b2a8f5f669125ee86aff81b53dbe8d635a12
-    source: 
+    source:
       $type: google_drive
       id: 1fL_UDsZ8pFUN3QnXqMF4BReVZmfmrKBj
   - name: midasnet.pth
@@ -34,7 +34,7 @@ files:
     sha256: f46da7438f3dd46a46fa550cea1d5dcab4bb3192ba272f1fd2b08d23ba41d39e
     source:
       $type: google_drive
-      id: 1vLsvovWe6vdI23CLN2z0T3JAmE7cJ786
+      id: 1m6-zyyiZj2XCiemSdQ7ldrEW-E1ZFfIl
 framework: pytorch
 conversion_to_onnx_args:
   - --model-name=MidasNet
