@@ -27,6 +27,7 @@ import numpy as np
 
 from asl_recognition_demo.common import load_ie_core
 from asl_recognition_demo.video_stream import VideoStream
+from asl_recognition_demo.video_library import VideoLibrary
 from asl_recognition_demo.person_detector import PersonDetector
 from asl_recognition_demo.person_tracker import PersonTracker
 from asl_recognition_demo.action_recognizer import ActionRecognizer
@@ -38,6 +39,7 @@ ACTION_NET_INPUT_FPS = 15
 ACTION_NUM_CLASSES = 100
 ACTION_IMAGE_SCALE = 256
 ACTION_SCORE_THRESHOLD = 0.8
+SAMPLES_WINDOW_SIZE = 640, 480
 
 
 def build_argparser():
@@ -59,6 +61,9 @@ def build_argparser():
     args.add_argument('-c', '--class_map',
                       help='Required. Path to a file with ASL classes.',
                       required=True, type=str)
+    args.add_argument('-s', '--samples_dir',
+                      help='Optional. Path to a directory with video samples of gestures.',
+                      default=None, type=str)
     args.add_argument('-d', '--device',
                       help='Optional. Specify the target device to infer on: CPU, GPU, FPGA, HDDL '
                            'or MYRIAD. The demo will look for a suitable plugin for device '
@@ -109,6 +114,10 @@ def main():
     class_map = load_class_map(args.class_map)
     assert class_map is not None
 
+    samples_library = None
+    if args.samples_dir is not None and exists(args.samples_dir):
+      samples_library = VideoLibrary(args.samples_dir, SAMPLES_WINDOW_SIZE, list(class_map.values()))
+
     last_caption = None
     person_roi = None
 
@@ -129,7 +138,7 @@ def main():
 
                 action_class_score = np.max(recognizer_result)
                 if action_class_score > ACTION_SCORE_THRESHOLD:
-                    last_caption = 'Last: {} '.format(action_class_label)
+                    last_caption = 'Last gesture: {} '.format(action_class_label)
 
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time
@@ -140,7 +149,7 @@ def main():
 
         if last_caption is not None:
             cv2.putText(frame, last_caption, (10, frame.shape[0] - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         if person_roi is not None:
             cv2.rectangle(frame, (person_roi[0], person_roi[1]),
@@ -155,8 +164,20 @@ def main():
         if key == 27:
             break
 
+        if samples_library is not None:
+          sample_frame = samples_library.get_frame()
+          if sample_frame is not None:
+            cv2.imshow('Sample', sample_frame)
+
+          if key == ord('n'):
+            samples_library.next()
+          elif key == ord('p'):
+            samples_library.prev()
+
     cv2.destroyAllWindows()
     video_stream.release()
+    if samples_library is not None:
+      samples_library.release()
 
 
 if __name__ == '__main__':
