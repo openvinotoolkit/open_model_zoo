@@ -96,13 +96,21 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
             self.compute_metrics(False, ignore_results_formatting)
 
         result_presenters = self.metric_executor.get_metric_presenters()
-        extracted_results = []
+        extracted_names, extracted_values, extracted_meta = [], [], []
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            extracted_results.append(presenter.extract_result(metric_result))
+            names, values, metadata = presenter.extract_result(metric_result)
+            if isinstance(names, list):
+                extracted_names.extend(names)
+                extracted_values.extend(values)
+                extracted_meta.extend(metadata)
+            else:
+                extracted_names.append(names)
+                extracted_values.append(values)
+                extracted_meta.append(metadata)
             if print_results:
                 presenter.write_results(metric_result, ignore_results_formatting)
 
-        return extracted_results
+        return extracted_names, extracted_values, extracted_meta
 
     def print_metrics_results(self, ignore_results_formatting=False):
         if not self._metrics_results:
