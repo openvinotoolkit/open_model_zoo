@@ -288,6 +288,19 @@ class ModelEvaluator(BaseEvaluator):
                 result_presenter.write_result(evaluated_metric, ignore_results_formatting)
         return self._metrics_results
 
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
+        if not self._metrics_results:
+            self.compute_metrics(False, ignore_results_formatting)
+
+        result_presenters = self.metric_executor.get_metric_presenters()
+        extracted_results = []
+        for presenter, metric_result in zip(result_presenters, self._metrics_results):
+            extracted_results.append(presenter.extract_result(metric_result))
+            if print_results:
+                presenter.write_results(metric_result, ignore_results_formatting)
+
+        return extracted_results
+
     def print_metrics_results(self, ignore_results_formatting=False):
         if not self._metrics_results:
             self.compute_metrics(True, ignore_results_formatting)
