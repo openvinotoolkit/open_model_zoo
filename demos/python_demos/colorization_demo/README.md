@@ -24,21 +24,20 @@ Running the application with the `-h` option yields the following usage message:
 ```sh
 colorization_demo.py -h
 
-usage: colorization_demo.py [-h] -m MODEL -c COEFFS [-d DEVICE] -i "<path>"
-                            [-n] [-v]
+usage: colorization_demo.py [-h] -m MODEL --coeffs COEFFS [-d DEVICE] -i
+                            "<path>" [--no_show] [-v]
 
 Options:
   -h, --help            Help with the script.
   -m MODEL, --model MODEL
                         Required. Path to .xml file with pre-trained model.
-  -c COEFFS, --coeffs COEFFS
-                        Required. Path to .npy file with color coefficients.
+  --coeffs COEFFS       Required. Path to .npy file with color coefficients.
   -d DEVICE, --device DEVICE
                         Optional. Specify target device for infer: CPU, GPU,
                         FPGA, HDDL or MYRIAD. Default: CPU
   -i "<path>", --input "<path>"
                         Required. Input to process.
-  -n, --no_show         Optional. Disable display of results on screen.
+  --no_show             Optional. Disable display of results on screen.
   -v, --verbose         Optional. Enable display of processing logs on screen.
 ```
 
