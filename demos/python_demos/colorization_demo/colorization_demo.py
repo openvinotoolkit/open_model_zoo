@@ -30,7 +30,7 @@ def build_arg():
     in_args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Help with the script.')
     in_args.add_argument("-m", "--model", help="Required. Path to .xml file with pre-trained model.",
                          required=True, type=str)
-    in_args.add_argument("-c", "--coeffs", help="Required. Path to .npy file with color coefficients.",
+    in_args.add_argument("--coeffs", help="Required. Path to .npy file with color coefficients.",
                          required=True, type=str)
     in_args.add_argument("-d", "--device",
                          help="Optional. Specify target device for infer: CPU, GPU, FPGA, HDDL or MYRIAD. "
@@ -39,7 +39,7 @@ def build_arg():
     in_args.add_argument('-i', "--input",
                          help='Required. Input to process.',
                          required=True, type=str, metavar='"<path>"')
-    in_args.add_argument("-n", "--no_show", help="Optional. Disable display of results on screen.",
+    in_args.add_argument("--no_show", help="Optional. Disable display of results on screen.",
                          action='store_true', default=False)
     in_args.add_argument("-v", "--verbose", help="Optional. Enable display of processing logs on screen.",
                          action='store_true', default=False)
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     input_shape = load_net.inputs[input_blob].shape
     assert input_shape[1] == 1, "Expected model input shape with 1 channel"
 
-    assert len(load_net.outputs) == 1, "Number of outputs does not match network outputs"
+    assert len(load_net.outputs) == 1, "Expected number of outputs is equal 1"
     output_blob = next(iter(load_net.outputs))
     output_shape = load_net.outputs[output_blob].shape
     assert output_shape == [1, 313, 56, 56], "Shape of outputs does not match network shape outputs"

@@ -6,7 +6,8 @@ The `colorization-v2` model is one of the [colorization](https://arxiv.org/pdf/1
 group of models designed to perform image colorization. For details
 about this family of models, check out the [repository](https://github.com/richzhang/colorization).
 
-The gray-scale or BGR image should be convert to LAB image before inference.
+Model consumes as input L-channel of LAB-image.
+Model give as output predict A- and B-channels of LAB-image.
 
 ## Example
 

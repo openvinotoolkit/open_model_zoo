@@ -13,16 +13,16 @@
 # limitations under the License.
 
 description: >-
-    The colorization-v2-norebal model is one of the [colorization](https://arxiv.org/pdf/1603.08511)
+    The colorization-v2-norebal model is one of the colorization
     group of models designed to perform image colorization. For details
-    about this family of models, check out the [repository](https://github.com/richzhang/colorization).
+    about this family of models, check out the repository - https://github.com/richzhang/colorization.
 
-    The gray-scale or BGR image should be converted to LAB color space first.
-    The model input is a blob that consists of a L-channel of image of 1x1x224x224.
-    The mean values need to be subtracted as follows: 50.0
-    before passing the image blob into the network.
+    This model differs from model `colorization-v2` in that metrics did not take into account
+    balancing of rare classes during training.
 
-    The model output is a blob that consists of AB channels of image of 1x2x56x56.
+    Model consumes as input L-channel of LAB-image.
+    Model give as output predict A- and B-channels of LAB-image.
+
 task_type: "colorization"
 files:
   - name: colorization-v2-norebal.prototxt
