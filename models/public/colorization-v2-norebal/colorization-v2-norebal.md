@@ -6,13 +6,7 @@ The `colorization-v2-norebal` model is one of the [colorization](https://arxiv.o
 group of models designed to perform image colorization. For details
 about this family of models, check out the [repository](https://github.com/richzhang/colorization).
 
-The gray-scale or BGR image should be preprocessed first:
-1) divide image's values by 255
-2) convert the image to LAB
-3) extract l component with 50.0 subtracted from each value
-
-The model input is a blob that consists of a L-channel of image of 1x1x224x224.
-The model output is a blob that consists of AB channels of image of 1x2x56x56.
+The gray-scale or BGR image should be convert to LAB image before inference.
 
 ## Example
 
@@ -41,7 +35,7 @@ Image, name - `data_l`,  shape - `1,1,224,224`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is L-channel.
-Mean values - 50, scale value - 255
+Mean values - 50.
 
 ### Converted model
 

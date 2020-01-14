@@ -22,20 +22,24 @@ Having received the image, the program:
 Running the application with the `-h` option yields the following usage message:
 
 ```sh
-colorization.py -h
+colorization_demo.py -h
 
-usage: colorization.py [-h] -m MODEL [-d DEVICE] [-i INPUT] [-n]
+usage: colorization_demo.py [-h] -m MODEL -c COEFFS [-d DEVICE] -i "<path>"
+                            [-n] [-v]
 
 Options:
   -h, --help            Help with the script.
   -m MODEL, --model MODEL
-                        Required. Path to .xml file with pre-trained model
+                        Required. Path to .xml file with pre-trained model.
+  -c COEFFS, --coeffs COEFFS
+                        Required. Path to .npy file with color coefficients.
   -d DEVICE, --device DEVICE
                         Optional. Specify target device for infer: CPU, GPU,
                         FPGA, HDDL or MYRIAD. Default: CPU
-  -i INPUT, --input INPUT
-                        Optional. Path to a test video file.
+  -i "<path>", --input "<path>"
+                        Required. Input to process.
   -n, --no_show         Optional. Disable display of results on screen.
+  -v, --verbose         Optional. Enable display of processing logs on screen.
 ```
 
 To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).

@@ -151,7 +151,6 @@ class ColorizationTestModel(BaseModel):
         self.exec_network = launcher.plugin.load(self.network)
         self.input_blob = next(iter(self.network.inputs))
         self.output_blob = next(iter(self.network.outputs))
-        self.test_mean = float(network_info['color_mean'])
         self.color_coeff = np.load(network_info['color_coeff'])
 
     def data_preparation(self, input_data):
@@ -159,7 +158,6 @@ class ColorizationTestModel(BaseModel):
         img_lab = cv2.cvtColor(input, cv2.COLOR_RGB2Lab)
         img_l = np.copy(img_lab[:, :, 0])
         img_l_rs = np.copy(img_lab[:, :, 0])
-        img_l_rs -= self.test_mean
         return img_l, img_l_rs
 
     def postprocessing(self, res, img_l, output_blob, img_size):
