@@ -635,7 +635,7 @@ class DLSDKLauncher(Launcher):
 
     def _set_nireq(self):
         num_requests = self.config.get('num_requests')
-        if num_requests is not None:
+        if num_requests is not None and num_requests != 'AUTO':
             num_requests = get_or_parse_value(num_requests, casting_type=int)
             if len(num_requests) != 1:
                 raise ConfigError('Several values for _num_requests specified')
@@ -833,7 +833,7 @@ class DLSDKLauncher(Launcher):
         for name, output_info in network_outputs.items():
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(output_info.precision))
-            print_info('\tshape {}\n'.format(output_info.shape))
+            print_info('\tshape: {}\n'.format(output_info.shape))
 
     def release(self):
         if 'network' in self.__dict__:
