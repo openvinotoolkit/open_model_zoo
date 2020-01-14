@@ -22,7 +22,7 @@ Having received the image, the program:
 Running the application with the `-h` option yields the following usage message:
 
 ```sh
-colorization_demoYou have two models with the same description. There should be some difference between them..py -h
+colorization_demo.py -h
 
 usage: colorization_demo.py [-h] -m MODEL -c COEFFS [-d DEVICE] -i "<path>"
                             [-n] [-v]
