@@ -518,14 +518,9 @@ class DLSDKLauncher(Launcher):
     def async_mode(self, flag):
         if flag:
             if 'CPU' in self._devices_list():
-                self.plugin.set_config({
-                    'CPU_BIND_THREAD': 'YES' if not self._is_multi() else 'NO',
-                    'CPU_THROUGHPUT_STREAMS': 'CPU_THROUGHPUT_AUTO'})
+                self.plugin.set_config({'CPU_THROUGHPUT_STREAMS': 'CPU_THROUGHPUT_AUTO'})
             if 'GPU' in self._devices_list():
-                config = {'GPU_THROUGHPUT_STREAMS': 'GPU_THROUGHPUT_AUTO'}
-                if self._is_multi() and 'CPU' in self._devices_list():
-                    config['CLDNN_PLUGIN_THROTTLE'] = '1'
-                    self.plugin.set_config(config)
+                self.plugin.set_config({'GPU_THROUGHPUT_STREAMS': 'GPU_THROUGHPUT_AUTO'})
         self._async_mode = flag
 
 
@@ -603,26 +598,77 @@ class DLSDKLauncher(Launcher):
             self._prepare_multi_device(log)
         else:
             self.async_mode = self.get_value_from_config('async_mode')
-            set_nireq()
+            self._set_nireq()
 
             if log:
                 self._log_versions()
+        self._device_specific_configuration()
 
+    def _device_specific_configuration(self):
+        if self._device_ids:
+            correct_id = [device_id for device_id in self._device_ids if device_id is not None]
+            if correct_id:
+                self.plugin.set_config({'DEVICE_ID': correct_id[0]})
         cpu_extensions = self.config.get('cpu_extensions')
-        if cpu_extensions and 'CPU' in self._devices_list():
-            selection_mode = self.config.get('_cpu_extensions_mode')
-            cpu_extensions = DLSDKLauncher.get_cpu_extension(cpu_extensions, selection_mode)
-            self.ie_core.add_extension(str(cpu_extensions), 'CPU')
+        if 'CPU' in self._devices_list():
+            if cpu_extensions:
+                selection_mode = self.config.get('_cpu_extensions_mode')
+                cpu_extensions = DLSDKLauncher.get_cpu_extension(cpu_extensions, selection_mode)
+                self.ie_core.add_extension(str(cpu_extensions), 'CPU')
+            self.ie_core.set_config({'CPU_BIND_THREAD': 'YES' if not self._is_multi() else 'NO'}, 'CPU')
         gpu_extensions = self.config.get('gpu_extensions')
-        if gpu_extensions and 'GPU' in self._devices_list():
-            self.ie_core.set_config({'CONFIG_FILE': str(gpu_extensions)}, 'GPU')
+        if 'GPU' in self._devices_list():
+            config = {}
+            if gpu_extensions:
+                config['CONFIG_FILE'] = str(gpu_extensions)
+            if self._is_multi() and 'CPU' in self._devices_list():
+                config['CLDNN_PLUGIN_THROTTLE'] = '1'
+            if config:
+                self.ie_core.set_config(config, 'GPU')
         if self._is_vpu():
+            device_list = map(lambda device: device.split('.')[0], self._devices_list())
+            devices = [vpu_device for vpu_device in VPU_PLUGINS if vpu_device in device_list]
             log_level = self.config.get('_vpu_log_level')
             if log_level:
-                self.ie_core.set_config({'LOG_LEVEL': log_level}, self._device)
-        device_config = self.config.get('_device_config')
-        if device_config:
-            self.set_device_config(device_config)
+                for device in devices:
+                    self.ie_core.set_config({'LOG_LEVEL': log_level}, device)
+
+    def _set_nireq(self):
+        num_requests = self.config.get('num_requests')
+        if num_requests is not None:
+            num_requests = get_or_parse_value(num_requests, casting_type=int)
+            if len(num_requests) != 1:
+                raise ConfigError('Several values for _num_requests specified')
+            self._num_requests = num_requests[0]
+            if self._num_requests != 1 and not self.async_mode:
+                warning('{} infer requests in sync mode is not supported. Only 1 infer request will be used.')
+                self._num_requests = 1
+        elif not self.async_mode:
+            self._num_requests = 1
+        else:
+            self._num_requests = self.auto_num_requests()
+
+    def auto_num_requests(self):
+        concurrency_device = {
+            'CPU': 1,
+            'GPU': 1,
+            'HDDL': 100,
+            'MYRIAD': 4,
+            'FPGA': 3
+        }
+        platform_list = self._devices_list()
+        if 'CPU' in platform_list and len(platform_list) == 1:
+            min_requests = [4, 5, 3]
+            cpu_count = multiprocessing.cpu_count()
+            for min_request in min_requests:
+                if cpu_count % min_request == 0:
+                    return max(min_request, cpu_count / min_request)
+        if 'GPU' in platform_list and len(platform_list) == 1:
+            return 2
+        concurrency = 0
+        for device in platform_list:
+            concurrency += concurrency_device.get(device, 1)
+        return concurrency
 
     def _prepare_multi_device(self, log=True):
         async_mode = self.get_value_from_config('async_mode')
@@ -667,28 +713,6 @@ class DLSDKLauncher(Launcher):
                 device_name=device_name, descr=device_version.description, maj=device_version.major,
                 min=device_version.minor, num=device_version.build_number
             ))
-
-    def auto_num_requests(self):
-        concurrency_device = {
-            'CPU': 1,
-            'GPU': 1,
-            'HDDL': 100,
-            'MYRIAD': 4,
-            'FPGA': 3
-        }
-        platform_list = self._devices_list()
-        if 'CPU' in platform_list and len(platform_list) == 1:
-            min_requests = [4, 5, 3]
-            cpu_count = multiprocessing.cpu_count()
-            for min_request in min_requests:
-                if cpu_count % min_request == 0:
-                    return max(min_request, cpu_count / min_request)
-        if 'GPU' in platform_list and len(platform_list) == 1:
-            return 2
-        concurrency = 0
-        for device in platform_list:
-            concurrency += concurrency_device.get(device, 1)
-        return concurrency
 
     def _create_network(self, input_shapes=None):
         model_path = Path(self._model)
