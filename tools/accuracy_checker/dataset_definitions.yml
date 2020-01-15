@@ -280,6 +280,17 @@ datasets:
     annotation: mscoco_person_detection.pickle
     dataset_meta: mscoco_person_detection.json
 
+  - name: mscoco_person_detection
+    data_source: val2017
+    annotation_conversion:
+      converter: mscoco_detection
+      annotation_file: person_keypoints_val2017.json
+      has_background: True
+      sort_annotations: True
+      use_full_label_map: True
+    annotation: mscoco_person_detection.pickle
+    dataset_meta: mscoco_person_detection.json
+
   - name: crossroad_dataset_1016
     data_source: val2017
     annotation_conversion:
