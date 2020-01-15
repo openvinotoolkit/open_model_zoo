@@ -48,7 +48,7 @@ Channel order is `BGR`.
 
 ### Original model
 
-Face embedings, name - `fc5`,  shape - `1,512`, output data format  - `B,C`, where:
+Face embeddings, name - `fc5`,  shape - `1,512`, output data format  - `B,C`, where:
 
 - `B` - batch size
 - `C` - row-vector of 512 floating points values, face embeddings
@@ -57,7 +57,7 @@ The net outputs on different images are comparable in cosine distance.
 
 ### Converted model
 
-Face embedings, name - `fc5`,  shape - `1,512`, output data format  - `B,C`, where:
+Face embeddings, name - `fc5`,  shape - `1,512`, output data format  - `B,C`, where:
 
 - `B` - batch size
 - `C` - row-vector of 512 floating points values, face embeddings
