@@ -245,7 +245,7 @@ DisplayParams prepareDisplayParams(size_t count) {
 }
 
 std::map<std::string, YoloParams> GetYoloParams(const std::vector<std::string>& outputDataBlobNames,
-                                               InferenceEngine::CNNNetwork &network) {
+                                                InferenceEngine::CNNNetwork &network) {
     std::map<std::string, YoloParams> __yoloParams;
 
     for (auto &output_name :outputDataBlobNames) {

@@ -106,8 +106,6 @@ int main(int argc, char *argv[]) {
         /** Read network model **/
         auto network = ie.ReadNetwork(FLAGS_m);
 
-        /** Extract model name and load weights **/
-
         // add DetectionOutput layer as output so we can get detected boxes and their probabilities
         network.addOutput(FLAGS_detection_output_name.c_str(), 0);
         // -----------------------------------------------------------------------------------------------------
