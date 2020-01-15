@@ -49,19 +49,19 @@ Channel order is `BGR`.
 
 ### Original Model
 
-Face embeddings, name: `pre_fc1`,  shape: `1,512`, output data format: `B,C`, where:
+Face embeddings, name: `pre_fc1`,  shape: `1,128`, output data format: `B,C`, where:
 
 - `B` - batch size
-- `C` - row-vector of 512 floating points values, face embeddings
+- `C` - row-vector of 128 floating points values, face embeddings
 
 The net outputs on different images are comparable in cosine distance.
 
 ### Converted Model
 
-Face embeddings, name: `pre_fc1`,  shape: `1,512`, output data format: `B,C`, where:
+Face embeddings, name: `pre_fc1`,  shape: `1,128`, output data format: `B,C`, where:
 
 - `B` - batch size
-- `C` - row-vector of 512 floating points values, face embeddings
+- `C` - row-vector of 128 floating points values, face embeddings
 
 The net outputs on different images are comparable in cosine distance.
 
