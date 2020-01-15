@@ -123,7 +123,7 @@ NATIVE_DEMOS = [
         TestCase(options={
             '-no_show': None,
             '-time': '5',
-            '-i': DataPatternArg('imagenet-classification')}),
+            '-i': DataDirectoryArg('imagenet-classification')}),
         single_option_cases('-m',
             ModelArg('alexnet'),
             ModelArg('resnet-50'),
