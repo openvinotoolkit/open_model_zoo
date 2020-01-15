@@ -49,7 +49,7 @@ Channel order is `BGR`.
 
 ### Original Model
 
-Face embedings, name: `pre_fc1`,  shape: `1,512`, output data format: `B,C`, where:
+Face embeddings, name: `pre_fc1`,  shape: `1,512`, output data format: `B,C`, where:
 
 - `B` - batch size
 - `C` - row-vector of 512 floating points values, face embeddings
