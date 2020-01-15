@@ -100,8 +100,15 @@ int main(int argc, char *argv[]) {
         // ----------------------------------------Read image classes-----------------------------------------
         std::vector<std::pair<std::string, std::string>> classIndexesMap;
         std::vector<std::string> classIndexes;
-        std::string classIndexFileName = fileNameNoExt(FLAGS_m) + "_classes.txt";
-        std::ifstream inputClassesFile(classIndexFileName);
+        std::string imageClassMappingFileName;
+        const size_t lastSlashIdx = FLAGS_i.rfind('/');
+        if (lastSlashIdx != std::string::npos) {
+            imageClassMappingFileName = FLAGS_i + FLAGS_i.substr(lastSlashIdx) + ".txt";
+        }
+        else {
+            throw std::runtime_error("No file provided for image->class mapping");
+        }
+        std::ifstream inputClassesFile(imageClassMappingFileName);
         while (true) {
             std::string imageName;
             std::string classIndex;
@@ -125,8 +132,7 @@ int main(int argc, char *argv[]) {
 
         // --------------------------------------------Read labels--------------------------------------------
         std::vector<std::string> labels;
-        std::string labelsFileName = fileNameNoExt(FLAGS_m) + "_labels.txt";
-        std::ifstream inputLabelsFile(labelsFileName);
+        std::ifstream inputLabelsFile("imagenet_labels.txt");
         std::string labelsLine;
         while (std::getline(inputLabelsFile, labelsLine)) {
             labels.push_back(labelsLine.substr(0, labelsLine.find(',')));
