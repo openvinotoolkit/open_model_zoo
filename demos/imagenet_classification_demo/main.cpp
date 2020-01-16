@@ -9,25 +9,49 @@
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
+#include <cstdio>
+#include <functional>
+#include <atomic>
+
+#include <inference_engine.hpp>
+
+#include <ie_iextension.h>
 
 #include <samples/common.hpp>
 #include <samples/slog.hpp>
 #include <samples/args_helper.hpp>
 #include <samples/classification_results.h>
 #include <samples/ocv_common.hpp>
-#include <samples/common.hpp>
 
 #include <vpu/vpu_plugin_config.hpp>
 #include <cldnn/cldnn_config.hpp>
 
 #include "imagenet_classification_demo.hpp"
 #include "grid_mat.hpp"
-#include "infer_request_callback.hpp"
+
+using namespace InferenceEngine;
+
+class IRInfo {
+public:
+    class IRImage {
+    public:
+        cv::Mat mat;
+        unsigned rightClass;
+        long long startTime;
+
+        IRImage(cv::Mat &mat, unsigned rightClass, long long startTime):
+            mat(mat), rightClass(rightClass), startTime(startTime) {}
+    };
+
+    InferRequest &ir;
+    std::vector<IRImage> images;
+
+    IRInfo(InferRequest &ir, std::vector<IRImage> images):
+        ir(ir), images(images) {}
+};
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------------Parsing and validation of input args----------------------------------
-    slog::info << "Parsing input parameters" << slog::endl;
-
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
@@ -309,6 +333,7 @@ int main(int argc, char *argv[]) {
         long long startTickCount = cv::getTickCount();
         std::condition_variable condVar;
         std::mutex mutex;
+        std::exception_ptr irCallbackException;
         
         std::queue<IRInfo> emptyInferRequests;
         std::queue<IRInfo> completedInferRequests;
@@ -413,16 +438,27 @@ int main(int argc, char *argv[]) {
                 }
                 if (emptyInferRequests.front().images.size() == FLAGS_b) {
                     auto emptyIR = emptyInferRequests.front();
+                    auto& ir = emptyIR.ir;
+                    auto irImages = emptyIR.images;
 
-                    emptyIR.ir.SetCompletionCallback(
-                        InferRequestCallback(
-                            emptyIR.ir,
-                            emptyIR.images,
-                            completedInferRequests,
-                            mutex,
-                            condVar
-                        )
-                    );
+                    emptyIR.ir.SetCompletionCallback([&ir,
+                                                      irImages,
+                                                      &completedInferRequests,
+                                                      &mutex,
+                                                      &condVar,
+                                                      &irCallbackException] {
+                        try {
+                            {
+                                std::lock_guard<std::mutex> lock(mutex);
+
+                                completedInferRequests.push(IRInfo(ir, irImages));
+                            }
+                            condVar.notify_one();
+                        }
+                        catch(...) {
+                            irCallbackException = std::current_exception();
+                        }
+                    });
                     
                     auto inputBlob = emptyIR.ir.GetBlob(inputBlobName);
                     for (unsigned i = 0; i < FLAGS_b; i++) {
@@ -443,10 +479,10 @@ int main(int argc, char *argv[]) {
             elapsedSeconds = currentTime - startTime;
         } while (27 != key && (FLAGS_time == -1 || elapsedSeconds.count() < FLAGS_time));
 
-        std::cout << "-------------------------------------" << std::endl;
-        std::cout << "Overall FPS: " << avgFPS << std::endl;
+        std::cout << "--------------------------------" << std::endl;
+        std::cout << "FPS: " << avgFPS << std::endl;
         std::cout << "Latency: " << avgLatency << std::endl;
-        std::cout << "Accuracy: " << accuracy << std::endl;
+        std::cout << "Accuracy (top " << static_cast<size_t>(FLAGS_nt) << "): " << accuracy << std::endl;
         std::cout << presenter.reportMeans() << std::endl;
 
         if (!FLAGS_no_show) {
