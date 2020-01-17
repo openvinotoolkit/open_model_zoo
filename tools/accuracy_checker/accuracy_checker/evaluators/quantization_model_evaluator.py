@@ -99,7 +99,14 @@ class ModelEvaluator:
         if self.launcher.allow_reshape_input or self.preprocessor.has_multi_infer_transformations:
             warning('Model can not to be processed in async mode. Switched to sync.')
             return self.process_dataset(
-                subset, num_images, check_progress, dataset_tag, output_callback, allow_pairwise_subset, **kwargs
+                subset,
+                num_images,
+                check_progress,
+                dataset_tag,
+                output_callback,
+                allow_pairwise_subset,
+                dump_prediction_to_annotation,
+                **kwargs
             )
 
         self._set_number_infer_requests(nreq)
@@ -159,8 +166,13 @@ class ModelEvaluator:
 
     def select_dataset(self, dataset_tag):
         if self.dataset is not None and isinstance(self.dataset_config, list):
+            if self.dataset.annotation_reader is None and self._dumped_annotations:
+                annotation_reader = Dataset(self.dataset.dataset_config, True)
+                annotation_reader.set_annotation(self._dumped_annotations)
+                self.dataset.annotation_reader = annotation_reader
             return
-        dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
+
+        dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag, self._dumped_annotations)
         self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
         if self.dataset.annotation_reader and self.dataset.annotation_reader.metadata:
             self.adapter.label_map = self.dataset.annotation_reader.metadata.get('label_map')
@@ -400,7 +412,7 @@ class ModelEvaluator:
         self.launcher.release()
 
 
-def create_dataset_attributes(config, tag):
+def create_dataset_attributes(config, tag, dumped_annotations=None):
     if isinstance(config, list):
         dataset_config = config[0]
     elif isinstance(config, dict):
@@ -415,8 +427,10 @@ def create_dataset_attributes(config, tag):
     data_source = dataset_config.get('data_source')
     annotation_reader = None
     dataset_meta = {}
-    if contains_any(dataset_config, ['annotation', 'annotation_conversion']):
-        annotation_reader = Dataset(dataset_config)
+    if contains_any(dataset_config, ['annotation', 'annotation_conversion']) or dumped_annotations:
+        annotation_reader = Dataset(dataset_config, bool(dumped_annotations))
+        if dumped_annotations:
+            annotation_reader.set_annotation(dumped_annotations)
         dataset_meta = annotation_reader.metadata
     if isinstance(data_reader_config, str):
         data_reader_type = data_reader_config
@@ -432,7 +446,7 @@ def create_dataset_attributes(config, tag):
     data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
 
     metric_dispatcher = None
-    dataset = DatasetWrapper(data_reader, annotation_reader)
+    dataset = DatasetWrapper(data_reader, annotation_reader, tag, dataset_config)
     preprocessor = PreprocessingExecutor(
         dataset_config.get('preprocessing'), dataset_name, dataset_meta
     )
