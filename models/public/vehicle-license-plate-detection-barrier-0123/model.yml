@@ -30,7 +30,7 @@ model_optimizer_args:
   - --input_shape=[1,256,256,3]
   - --scale=127.5
   - --mean_values=[127.5,127.5,127.5]
-  - --tensorflow_use_custom_operations_config=$dl_dir/model/model.tfmo.json
+  - --transformations_config=$dl_dir/model/model.tfmo.json
   - --output=ssd_heads/concat_reshape_softmax/mbox_loc_final,ssd_heads/concat_reshape_softmax/mbox_conf_final,ssd_heads/concat_reshape_softmax/mbox_priorbox
   - --input_model=$dl_dir/model/model.pb.frozen
 framework: tf
