@@ -143,7 +143,7 @@ class ModelEvaluator:
                         annotations = [prediction.to_annotation() for prediction in predictions]
                         self._dumped_annotations.extend(annotations)
                     metrics_result = None
-                    if self.metric_executor:
+                    if not dump_prediction_to_annotation and self.metric_executor:
                         metrics_result = self.metric_executor.update_metrics_on_batch(
                             batch_input_ids, annotations, predictions
                         )
@@ -240,7 +240,7 @@ class ModelEvaluator:
                 annotations = [prediction.to_annotation() for prediction in predictions]
                 self._dumped_annotations.extend(annotations)
             metrics_result = None
-            if self.metric_executor:
+            if not dump_prediction_to_annotation and self.metric_executor:
                 metrics_result = self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
                 if self.metric_executor.need_store_predictions:
                     self._annotations.extend(annotations)
