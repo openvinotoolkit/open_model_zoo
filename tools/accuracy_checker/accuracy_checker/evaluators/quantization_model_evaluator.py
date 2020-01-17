@@ -176,7 +176,9 @@ class ModelEvaluator:
     def select_dataset(self, dataset_tag):
         if self.dataset is not None and isinstance(self.dataset_config, list):
             if self.dataset.annotation_reader is None and self._dumped_annotations:
-                self.register_annotations(self._dumped_annotations)
+                annotation_reader = Dataset(self.dataset.dataset_config, True)
+                annotation_reader.set_annotation(self._dumped_annotations)
+                self.dataset.annotation_reader = annotation_reader
             return
 
         dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag, self._dumped_annotations)
