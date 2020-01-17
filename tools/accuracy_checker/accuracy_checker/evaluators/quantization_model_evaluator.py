@@ -47,6 +47,7 @@ class ModelEvaluator:
         self._predictions = []
         self._input_ids = []
         self._metrics_results = []
+        self._dumped_annotations = []
 
     @classmethod
     def from_configs(cls, config):
@@ -77,6 +78,7 @@ class ModelEvaluator:
             dataset_tag='',
             output_callback=None,
             allow_pairwise_subset=False,
+            dump_prediction_to_annotation=False,
             **kwargs
     ):
 
@@ -104,6 +106,9 @@ class ModelEvaluator:
                 warning('Request {} failed with status code {}'.format(request_id, status_code))
             queued_irs.remove(request_id)
             ready_irs.append(request_id)
+
+        if dump_prediction_to_annotation:
+            self._dumped_annotations = []
 
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
@@ -148,9 +153,10 @@ class ModelEvaluator:
                     annotations, predictions = self.postprocessor.process_batch(
                         batch_annotation, batch_predictions, batch_meta
                     )
-
+                    if dump_prediction_to_annotation:
+                        self._dumped_annotations.extend([prediction.to_annotation() for prediction in predictions])
                     metrics_result = None
-                    if self.metric_executor:
+                    if not dump_prediction_to_annotation and self.metric_executor:
                         metrics_result = self.metric_executor.update_metrics_on_batch(
                             batch_input_ids, annotations, predictions
                         )
@@ -188,6 +194,7 @@ class ModelEvaluator:
             dataset_tag='',
             output_callback=None,
             allow_pairwise_subset=False,
+            dump_prediction_to_annotation=False,
             **kwargs
     ):
         def _create_subset(subset, num_images):
@@ -198,6 +205,9 @@ class ModelEvaluator:
 
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
+        if dump_prediction_to_annotation:
+            self._dumped_annotations = []
+
         self.dataset.batch = self.launcher.batch
         self.preprocessor.input_shapes = self.launcher.inputs_info_for_meta()
         progress_reporter = None
@@ -217,8 +227,10 @@ class ModelEvaluator:
                 batch_predictions = batch_raw_predictions
 
             annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions, batch_meta)
+            if dump_prediction_to_annotation:
+                self._dumped_annotations.extend([prediction.to_annotation() for prediction in predictions])
             metrics_result = None
-            if self.metric_executor:
+            if not dump_prediction_to_annotation and self.metric_executor:
                 metrics_result = self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
                 if self.metric_executor.need_store_predictions:
                     self._annotations.extend(annotations)

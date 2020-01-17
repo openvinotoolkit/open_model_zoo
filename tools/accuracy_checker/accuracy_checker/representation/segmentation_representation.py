@@ -38,6 +38,7 @@ class GTMaskLoader(Enum):
     NUMPY = 4
     NIFTI_CHANNELS_FIRST = 5
 
+
 LOADERS_MAPPING = {
     'opencv': GTMaskLoader.OPENCV,
     'pillow': GTMaskLoader.PILLOW,
