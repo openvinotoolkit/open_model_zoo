@@ -82,24 +82,11 @@ class ModelEvaluator:
             **kwargs
     ):
 
-        def _process_ready_predictions(batch_raw_predictions, batch_identifiers, batch_meta, adapter):
-            if adapter:
+        def _process_ready_predictions(batch_raw_predictions, batch_identifiers, batch_meta):
+            if self.adapter:
                 return self.adapter.process(batch_raw_predictions, batch_identifiers, batch_meta)
 
             return batch_raw_predictions
-
-        def _create_subset(subset, num_images):
-            if subset is not None:
-                self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
-            elif num_images is not None:
-                self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
-
-        def _set_number_infer_requests(nreq):
-            self.launcher.async_mode = True
-            if nreq is None:
-                nreq = self.launcher.auto_num_requests()
-            if self.launcher.num_requests != nreq:
-                self.launcher.num_requests = nreq
 
         def completion_callback(status_code, request_id):
             if status_code:
@@ -107,28 +94,20 @@ class ModelEvaluator:
             queued_irs.remove(request_id)
             ready_irs.append(request_id)
 
-        if dump_prediction_to_annotation:
-            self._dumped_annotations = []
-
-        if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
-            self.select_dataset(dataset_tag)
+        self._prepare_to_evaluation(dataset_tag, dump_prediction_to_annotation)
 
         if self.launcher.allow_reshape_input or self.preprocessor.has_multi_infer_transformations:
             warning('Model can not to be processed in async mode. Switched to sync.')
             return self.process_dataset(
                 subset, num_images, check_progress, dataset_tag, output_callback, allow_pairwise_subset, **kwargs
             )
-        _set_number_infer_requests(nreq)
 
-        self.dataset.batch = self.launcher.batch
-        self.preprocessor.input_shapes = self.launcher.inputs_info_for_meta()
+        self._set_number_infer_requests(nreq)
+        self._create_subset(subset, num_images, allow_pairwise_subset)
 
-        _create_subset(subset, num_images)
-
-        progress_reporter = self._create_progress_reporter(
+        progress_reporter = None if not check_progress else self._create_progress_reporter(
             check_progress, self.dataset.size
-        ) if check_progress else None
-
+        )
         dataset_iterator = iter(enumerate(self.dataset))
         free_irs, queued_irs, ready_irs = [], [], []
         infer_requests_pool = self._prepare_requests_pool(completion_callback)
@@ -147,7 +126,7 @@ class ModelEvaluator:
                         batch_raw_predictions,
                     ) = ready_data
                     batch_predictions = _process_ready_predictions(
-                        batch_raw_predictions, batch_identifiers, batch_meta, self.adapter
+                        batch_raw_predictions, batch_identifiers, batch_meta
                     )
                     free_irs.append(ready_ir_id)
                     annotations, predictions = self.postprocessor.process_batch(
@@ -186,6 +165,27 @@ class ModelEvaluator:
         if self.dataset.annotation_reader and self.dataset.annotation_reader.metadata:
             self.adapter.label_map = self.dataset.annotation_reader.metadata.get('label_map')
 
+    def _create_subset(self, subset=None, num_images=None, allow_pairwise=False):
+        if subset is not None:
+            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise)
+        elif num_images is not None:
+            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise)
+
+    def _set_number_infer_requests(self, nreq=None):
+        if nreq is None:
+            nreq = self.launcher.auto_num_requests()
+        if self.launcher.num_requests != nreq:
+            self.launcher.num_requests = nreq
+
+    def _prepare_to_evaluation(self, dataset_tag='', dump_prediction_to_annotation=False):
+        if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
+            self.select_dataset(dataset_tag)
+        if dump_prediction_to_annotation:
+            self._dumped_annotations = []
+
+        self.dataset.batch = self.launcher.batch
+        self.preprocessor.input_shapes = self.launcher.inputs_info_for_meta()
+
     def process_dataset(
             self,
             subset=None,
@@ -197,25 +197,13 @@ class ModelEvaluator:
             dump_prediction_to_annotation=False,
             **kwargs
     ):
-        def _create_subset(subset, num_images):
-            if subset is not None:
-                self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
-            elif num_images is not None:
-                self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
 
-        if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
-            self.select_dataset(dataset_tag)
-        if dump_prediction_to_annotation:
-            self._dumped_annotations = []
+        self._prepare_to_evaluation(dataset_tag, dump_prediction_to_annotation)
+        self._create_subset(subset, num_images, allow_pairwise_subset)
 
-        self.dataset.batch = self.launcher.batch
-        self.preprocessor.input_shapes = self.launcher.inputs_info_for_meta()
-        progress_reporter = None
-
-        _create_subset(subset, num_images)
-
-        if check_progress:
-            progress_reporter = self._create_progress_reporter(check_progress, self.dataset.size)
+        progress_reporter = None if not check_progress else self._create_progress_reporter(
+            check_progress, self.dataset.size
+        )
 
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             filled_inputs, batch_meta = self._get_batch_input(batch_inputs, batch_annotation)
