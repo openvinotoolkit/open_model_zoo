@@ -596,13 +596,16 @@ datasets:
 
   - name: BraTS_2017
     data_source: BraTS_2017
-    reader: nifti_reader
+    reader:
+      type: nifti_reader
+      channels_first: True
     annotation_conversion:
       converter: brats
       data_dir: BraTS_2017
       labels_file: BraTS_2017/labels
-    annotation: brats.pickle
-    dataset_meta: brats.json
+      mask_channels_first: True
+    annotation: brats2017.pickle
+    dataset_meta: brats2017.json
 
   - name: product_detection
     annotation: product_detection.pickle
