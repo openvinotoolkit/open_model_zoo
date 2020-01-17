@@ -18,27 +18,27 @@ task_type: image_processing
 files:
   - name: FP32/single-image-super-resolution-1032.xml
     size: 41192
-    sha256: b66fedd64b4cd0c37e714e54cadc43b874c7a6a415c8dc23dce391e39a243516
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
+    sha256: 2ae653c1e2b4e8015c7a794e3de7166f027737ed3b7faec2b4074dfce0a2639d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.xml
   - name: FP32/single-image-super-resolution-1032.bin
     size: 119556
     sha256: 82b5338155835d6b4307721e6a9b28775a4550b61c31d76aac1a8b5d5612d7dc
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/single-image-super-resolution-1032/FP32/single-image-super-resolution-1032.bin
   - name: FP16/single-image-super-resolution-1032.xml
     size: 41166
-    sha256: 348ec2236488d0dcb3d423fec3b9bebd749e54c08ae486f98fcc8e247811915d
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
+    sha256: 22d0d66d1e9d0781b017ef7004647deb86878ecbb526ef2cfb0fba1a045f5bcb
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.xml
   - name: FP16/single-image-super-resolution-1032.bin
     size: 59882
     sha256: abae5907d40ef7e47d680435a99484b74076a985a6b8c3353b64fa77e6d3c149
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/single-image-super-resolution-1032/FP16/single-image-super-resolution-1032.bin
   - name: FP32-INT8/single-image-super-resolution-1032.xml
     size: 122462
-    sha256: 654bfedd6071cece4330272405df9e104101dca0af3f539d378d838f34d22892
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/single-image-super-resolution-1032/FP32-INT8/single-image-super-resolution-1032.xml
+    sha256: 6f6ca9fcbe53340ce1acbc5210b156f17517481de2cb7fc92c6d1770c35ac9ce
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/single-image-super-resolution-1032/FP32-INT8/single-image-super-resolution-1032.xml
   - name: FP32-INT8/single-image-super-resolution-1032.bin
     size: 121724
     sha256: e14739375434b1645d0b6745947aae73fd9b915750b033ce08f25aab93b0b25e
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/single-image-super-resolution-1032/FP32-INT8/single-image-super-resolution-1032.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/single-image-super-resolution-1032/FP32-INT8/single-image-super-resolution-1032.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

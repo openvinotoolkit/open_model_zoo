@@ -18,27 +18,27 @@ task_type: face_recognition
 files:
   - name: FP32/face-reidentification-retail-0095.xml
     size: 225830
-    sha256: a16ac1cfe4334a50ca2ce48639e46f8e981351eb25943f73e3425a47939662b3
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
+    sha256: 6c89104cbb43cc7506039a83283d957cfccfb5670524a71898855f3ab1b7d516
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.xml
   - name: FP32/face-reidentification-retail-0095.bin
     size: 4427256
     sha256: 03836a6a1d03828322491b0608a579b1c47e5097d355c489b5b8aaf5fce1ef48
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/face-reidentification-retail-0095/FP32/face-reidentification-retail-0095.bin
   - name: FP16/face-reidentification-retail-0095.xml
     size: 225721
-    sha256: c1077d4285a4ed52ffbaf191b3f17a9dbd3403befee154491e9383fd55f21d00
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
+    sha256: a9f24e50aee183a892646aa12ff727ba1fbd0807e73b5eade9925c9747713837
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.xml
   - name: FP16/face-reidentification-retail-0095.bin
     size: 2213724
     sha256: c2f8a7b9268e5b5236574d6fda2216df43c03acaa39c078848a98fbb707ae0a3
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/face-reidentification-retail-0095/FP16/face-reidentification-retail-0095.bin
   - name: FP32-INT8/face-reidentification-retail-0095.xml
     size: 643466
-    sha256: 6fc1dbbffacd8a9412cb6009f21c6940d889674d31a9fb6e51ff9de4bcfcc760
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/face-reidentification-retail-0095/FP32-INT8/face-reidentification-retail-0095.xml
+    sha256: ad70c2724fabf4e33820fc30ee0362c1a61148f7df44c525700d9eab0f3c07ca
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/face-reidentification-retail-0095/FP32-INT8/face-reidentification-retail-0095.xml
   - name: FP32-INT8/face-reidentification-retail-0095.bin
     size: 4551656
     sha256: eaae8881109a2dab91fb7fddc73052378b015d6f3aa61b1c772eca21f87e4741
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/face-reidentification-retail-0095/FP32-INT8/face-reidentification-retail-0095.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/face-reidentification-retail-0095/FP32-INT8/face-reidentification-retail-0095.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
