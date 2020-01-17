@@ -18,27 +18,27 @@ task_type: object_attributes
 files:
   - name: FP32/age-gender-recognition-retail-0013.xml
     size: 30004
-    sha256: 136885ef5fb22d247d609634c0a4b48ab46c070b8f2c8cb57f740923e0cffd02
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.xml
+    sha256: 988ad3b0ee3b793598b47f3b0328f7beb58c9a59e0ec6b436c8c6f0cff485e2a
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.xml
   - name: FP32/age-gender-recognition-retail-0013.bin
     size: 8552076
     sha256: 4dab79cfedebd628f3327367a91c9736a32fbf9cc733cbbf1629d16910d4ace7
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.bin
   - name: FP16/age-gender-recognition-retail-0013.xml
-    size: 29994
-    sha256: f0c3cb68d04aa1f4474fb7f7802c60e8c0c573eb861bd05c7a9eccf2f5a1b57e
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.xml
+    size: 29998
+    sha256: 86fd1c1845d46d8f8fc09659db2657d778317ad92a83a042901c5d1482561c85
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.xml
   - name: FP16/age-gender-recognition-retail-0013.bin
     size: 4276038
     sha256: 401101e0a01b3d68add39deae833bcf9f54238d37dd13e3fb1534aa8fbe4719d
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin
   - name: FP32-INT8/age-gender-recognition-retail-0013.xml
     size: 64387
-    sha256: 47f67d249fc5187318ffc716452ad495e05c3175d0c8d20d78915250ad9c2161
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/age-gender-recognition-retail-0013/FP32-INT8/age-gender-recognition-retail-0013.xml
+    sha256: b3fba20acd6318ec1eed376e9491b4cf371aa1d8a82becbd3e5d2b1c390dc63d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/age-gender-recognition-retail-0013/FP32-INT8/age-gender-recognition-retail-0013.xml
   - name: FP32-INT8/age-gender-recognition-retail-0013.bin
     size: 8565952
     sha256: 0efcef2c78fa5208d85d2eb5fc69955c6d97a2ba2948c67a75b0dcb3b74da41e
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/age-gender-recognition-retail-0013/FP32-INT8/age-gender-recognition-retail-0013.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/age-gender-recognition-retail-0013/FP32-INT8/age-gender-recognition-retail-0013.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/face-detection-retail-0005.xml
-    size: 145883
-    sha256: 0708aa23b0bd6af5f80b6527b2e683d7f17368183140851ffd1d76fb2e9ae60b
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/face-detection-retail-0005/FP32/face-detection-retail-0005.xml
+    size: 145894
+    sha256: 7f8b8b477e83186e64b90b671ecc55010404710294daebb210019e0c802f0e51
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/face-detection-retail-0005/FP32/face-detection-retail-0005.xml
   - name: FP32/face-detection-retail-0005.bin
     size: 4083132
     sha256: bc174f03f2314bdbb7e1abfb5136ccb34507d8225f87b040c5a77493f1a6c307
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/face-detection-retail-0005/FP32/face-detection-retail-0005.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/face-detection-retail-0005/FP32/face-detection-retail-0005.bin
   - name: FP16/face-detection-retail-0005.xml
-    size: 145802
-    sha256: 6eca6aaa56b52cedf4677e87eeb7ccfecc8592369e008c904bba6b60c468c21a
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/face-detection-retail-0005/FP16/face-detection-retail-0005.xml
+    size: 145813
+    sha256: 3249940f7de11e2d5b36ed47fdf632ef52e50c15e6c025f84cb834b77c20411a
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/face-detection-retail-0005/FP16/face-detection-retail-0005.xml
   - name: FP16/face-detection-retail-0005.bin
     size: 2041618
     sha256: fef3746455eec3d1e69730b556809a225a4f714b6bc0b4bacfe5c7bb1a944105
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/face-detection-retail-0005/FP16/face-detection-retail-0005.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/face-detection-retail-0005/FP16/face-detection-retail-0005.bin
   - name: FP32-INT8/face-detection-retail-0005.xml
-    size: 414499
-    sha256: 4f738deb8ef666fd355865b6114910af456d43c7f85a1333ade2217ae911509b
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/face-detection-retail-0005/FP32-INT8/face-detection-retail-0005.xml
+    size: 414518
+    sha256: ab7f8be6489e8d3c02229d584fde3e4caa405d8147fd2f293f5455f627568d16
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/face-detection-retail-0005/FP32-INT8/face-detection-retail-0005.xml
   - name: FP32-INT8/face-detection-retail-0005.bin
     size: 4214360
     sha256: 0525d556261936e710d8b540f540718869e36c2e7347ee111dd68c259f6e5d54
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/face-detection-retail-0005/FP32-INT8/face-detection-retail-0005.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/face-detection-retail-0005/FP32-INT8/face-detection-retail-0005.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

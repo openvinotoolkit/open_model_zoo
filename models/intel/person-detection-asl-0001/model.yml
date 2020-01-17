@@ -19,10 +19,10 @@ files:
   - name: FP32/person-detection-asl-0001.xml
     size: 437553
     sha256: 097915163ad9af6c1d578ba3dc2899389ea96de3a4a3ab48cf9c14ac8e113f40
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-asl-0001/FP32/person-detection-asl-0001.xml
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/person-detection-asl-0001/FP32/person-detection-asl-0001.xml
   - name: FP32/person-detection-asl-0001.bin
     size: 4026308
     sha256: 06a95e62010880b9c02d34f1d71da081022ef0a97f91093425284d73d4ccb93d
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-asl-0001/FP32/person-detection-asl-0001.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/person-detection-asl-0001/FP32/person-detection-asl-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

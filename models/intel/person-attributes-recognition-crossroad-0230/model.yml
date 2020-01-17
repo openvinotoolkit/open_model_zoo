@@ -19,27 +19,27 @@ task_type: object_attributes
 files:
   - name: FP32/person-attributes-recognition-crossroad-0230.xml
     size: 173334
-    sha256: 89033e91124d5a5ad7f880c4d521046f7031fe05f038df5112abec5cb3ecd912
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.xml
+    sha256: 8b76a741eff4235771189391233b4d8ecb9200a66056d878bfa2e47df2abba88
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.xml
   - name: FP32/person-attributes-recognition-crossroad-0230.bin
     size: 2939232
     sha256: 01432edde876a4be8c7ef87801b7c45a09a442daec06551fd2db7c81f1d76407
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.bin
   - name: FP16/person-attributes-recognition-crossroad-0230.xml
     size: 173249
-    sha256: 75432019787605322894a2766005403bef49fce0426089e44ceb09612eb76530
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.xml
+    sha256: 8da44a3585baa57dcf948a56bf757467c7ceb6202e57bb7bc5dcf9876b027c97
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.xml
   - name: FP16/person-attributes-recognition-crossroad-0230.bin
     size: 1469624
     sha256: 61327cb5748a234c0320456e83dc8e42756c3a9856f15580a111493da47366fc
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.bin
   - name: FP32-INT8/person-attributes-recognition-crossroad-0230.xml
     size: 469747
-    sha256: 485fc4ce8d9b03df5c6c0123e9581ef7aca7eaf06e413a8a1def04100ba02cf6
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-attributes-recognition-crossroad-0230/FP32-INT8/person-attributes-recognition-crossroad-0230.xml
+    sha256: 3cc456644788a8412ab660e7553c6e5eecd95cdf1bd6c9ef558e032f9f4831c3
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/person-attributes-recognition-crossroad-0230/FP32-INT8/person-attributes-recognition-crossroad-0230.xml
   - name: FP32-INT8/person-attributes-recognition-crossroad-0230.bin
     size: 2967604
     sha256: 40cd74f6b0f653d041750825990b2a2620202850f2d40754ae3229ee79c4bf33
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-attributes-recognition-crossroad-0230/FP32-INT8/person-attributes-recognition-crossroad-0230.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/person-attributes-recognition-crossroad-0230/FP32-INT8/person-attributes-recognition-crossroad-0230.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
