@@ -140,14 +140,9 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
         });
 
         last.clear();
-        if (bandwidth > static_cast<int>(curr.size())) {
-            for (int _b = 0; _b < static_cast<int>(curr.size()); _b++) {
-                last.push_back(curr[_b]);
-            }
-        } else {
-            for (int _b = 0; _b < bandwidth; _b++) {
-                last.push_back(curr[_b]);
-            }
+        int num_to_copy = std::min(bandwidth, static_cast<int>(curr.size()));
+        for (int b = 0; b < num_to_copy; b++) {
+            last.push_back(curr[b]);
         }
     }
 
