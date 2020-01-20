@@ -20,13 +20,13 @@
 #include <samples/common.hpp>
 #include <samples/slog.hpp>
 #include <samples/args_helper.hpp>
-#include <samples/classification_results.h>
 #include <samples/ocv_common.hpp>
 
 #include <vpu/vpu_plugin_config.hpp>
 #include <cldnn/cldnn_config.hpp>
 
 #include "imagenet_classification_demo.hpp"
+#include "classification_results.h"
 #include "grid_mat.hpp"
 
 using namespace InferenceEngine;
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
         if (inputImagesCount == 0) throw std::runtime_error("No images provided");
         std::sort(imageNames.begin(), imageNames.end());
         for (size_t i = 0; i < inputImagesCount; i++) {
-            std::string &name = imageNames[i];
+            std::string& name = imageNames[i];
             const cv::Mat& tmpImage = cv::imread(name);
             if (tmpImage.data == nullptr) {
                 std::cerr << "Could not read image " << name << '\n';
@@ -122,41 +122,36 @@ int main(int argc, char *argv[]) {
         // ---------------------------------------------------------------------------------------------------
 
         // ----------------------------------------Read image classes-----------------------------------------
-        std::vector<std::pair<std::string, std::string>> classIndexesMap;
+        bool hasClasses = !FLAGS_classes.empty();
         std::vector<std::string> classIndexes;
-        std::string imageClassMappingFileName;
-        const size_t lastSlashIdx = FLAGS_i.rfind('/');
-        if (lastSlashIdx != std::string::npos) {
-            imageClassMappingFileName = FLAGS_i + FLAGS_i.substr(lastSlashIdx) + ".txt";
-        }
-        else {
-            throw std::runtime_error("No file provided for image->class mapping");
-        }
-        std::ifstream inputClassesFile(imageClassMappingFileName);
-        while (true) {
-            std::string imageName;
-            std::string classIndex;
-            inputClassesFile >> imageName >> classIndex;
-            if (inputClassesFile.eof()) break;
-            classIndexesMap.push_back({imageName, classIndex});
-        }
-        for (size_t i = 0; i < inputImagesCount; i++) {
-            for (size_t j = 0; j < classIndexesMap.size(); j++) {
-                if (imageNames[i] == classIndexesMap[j].first) {
-                    classIndexes.push_back(classIndexesMap[j].second);
-                    break;
+        if (hasClasses) {
+            std::vector<std::pair<std::string, std::string>> classIndexesMap;
+            std::ifstream inputClassesFile(FLAGS_classes);
+            while (true) {
+                std::string imageName;
+                std::string classIndex;
+                inputClassesFile >> imageName >> classIndex;
+                if (inputClassesFile.eof()) break;
+                classIndexesMap.push_back({imageName, classIndex});
+            }
+            for (size_t i = 0; i < inputImagesCount; i++) {
+                for (size_t j = 0; j < classIndexesMap.size(); j++) {
+                    if (imageNames[i] == classIndexesMap[j].first) {
+                        classIndexes.push_back(classIndexesMap[j].second);
+                        break;
+                    }
+                }
+                if (i+1 != classIndexes.size()) {
+                    throw std::runtime_error("No class specified for image " + imageNames[i]);
                 }
             }
-            if (i+1 != classIndexes.size()) {
-                throw std::runtime_error("No class specified for image " + imageNames[i]);
-            }
+            classIndexesMap.clear();
         }
-        classIndexesMap.clear();
         // ---------------------------------------------------------------------------------------------------
 
         // --------------------------------------------Read labels--------------------------------------------
         std::vector<std::string> labels;
-        std::ifstream inputLabelsFile("imagenet_labels.txt");
+        std::ifstream inputLabelsFile(FLAGS_labels);
         std::string labelsLine;
         while (std::getline(inputLabelsFile, labelsLine)) {
             labels.push_back(labelsLine.substr(0, labelsLine.find(',')));
@@ -411,7 +406,7 @@ int main(int argc, char *argv[]) {
                 
                 std::vector<long long> processingEndTimes;
                 if (!FLAGS_no_show && FLAGS_delay != -1) {
-                    cv::imshow("main", gridMat.getMat(processingEndTimes));
+                    cv::imshow("main", gridMat.getMat(processingEndTimes, hasClasses));
                     key = static_cast<char>(cv::waitKey(delay));
                 }
 
@@ -421,7 +416,7 @@ int main(int argc, char *argv[]) {
                 }
                 avgLatency = latencySum / framesNum;
                 accuracy = static_cast<double>(rightPredictionsCount) / totalPredictionsCount;
-                gridMat.textUpdate(avgFPS, avgLatency, accuracy, isTestMode, presenter);
+                gridMat.textUpdate(avgFPS, avgLatency, accuracy, isTestMode, hasClasses, presenter);
             }
             else if (!emptyInferRequests.empty()) {
                 mutex.unlock();
@@ -430,7 +425,7 @@ int main(int argc, char *argv[]) {
                 resizeImage(nextImage, modelInputResolution);
                 emptyInferRequests.front().images.push_back(
                     IRInfo::IRImage(nextImage,
-                                    std::stoul(classIndexes[nextImageIndex]),
+                                    std::stoul(hasClasses ? classIndexes[nextImageIndex] : "0"),
                                     IRstartTime));
                 nextImageIndex++;
                 if (nextImageIndex == inputImagesCount) {
@@ -482,7 +477,9 @@ int main(int argc, char *argv[]) {
         std::cout << "--------------------------------" << std::endl;
         std::cout << "FPS: " << avgFPS << std::endl;
         std::cout << "Latency: " << avgLatency << std::endl;
-        std::cout << "Accuracy (top " << static_cast<size_t>(FLAGS_nt) << "): " << accuracy << std::endl;
+        if (hasClasses) {
+            std::cout << "Accuracy (top " << static_cast<size_t>(FLAGS_nt) << "): " << accuracy << std::endl;
+        }
         std::cout << presenter.reportMeans() << std::endl;
 
         if (!FLAGS_no_show) {

@@ -58,7 +58,9 @@ public:
         }
     }
 
-    void textUpdate(double avgFPS, double avgLatency, double accuracy, bool isFpsTest, Presenter& presenter) {
+    void textUpdate(double avgFPS, double avgLatency, double accuracy,
+                    bool isFpsTest, bool showAccuracy,
+                    Presenter& presenter) {
         // Draw a rectangle
         cv::Point p1 = cv::Point(0, 0);
         cv::Point p2 = cv::Point(outImg.cols, rectangleHeight);
@@ -83,13 +85,15 @@ public:
                     cv::Point(textPadding, (textSize.height + textPadding) * 2),
                     cv::FONT_HERSHEY_PLAIN, fontScale, textColor, thickness);
         
-        std::string accuracyMessage = "Accuracy (top 0): 0.000";
-        cv::Size accuracyMessageSize = cv::getTextSize(accuracyMessage,
+        if (showAccuracy) {
+            std::string accuracyMessage = "Accuracy (top 0): 0.000";
+            cv::Size accuracyMessageSize = cv::getTextSize(accuracyMessage,
                                                        cv::FONT_HERSHEY_PLAIN, fontScale, thickness, &baseline);
-        cv::putText(outImg,
-                    cv::format("Accuracy (top %d): %.3f", FLAGS_nt, accuracy),
-                    cv::Point(outImg.cols - accuracyMessageSize.width - textPadding, textSize.height + textPadding),
-                    cv::FONT_HERSHEY_PLAIN, fontScale, textColor, thickness);
+            cv::putText(outImg,
+                        cv::format("Accuracy (top %d): %.3f", FLAGS_nt, accuracy),
+                        cv::Point(outImg.cols - accuracyMessageSize.width - textPadding, textSize.height + textPadding),
+                        cv::FONT_HERSHEY_PLAIN, fontScale, textColor, thickness);
+        }
         
         std::string testMessage = "Testing, please wait...";
         cv::Size testMessageSize = cv::getTextSize(testMessage,
@@ -103,17 +107,12 @@ public:
         }
     }
 
-    cv::Mat getMat(std::vector<long long> &endTimes) {
+    cv::Mat getMat(std::vector<long long> &endTimes, bool showLabels) {
         while (!updateList.empty()) {
             cv::Mat frame = std::get<0>(updateList.front());
             std::string predictedLabel = std::get<1>(updateList.front());
-            cv::Scalar textColor;
-            if (std::get<2>(updateList.front())) { // if prediction is right
-                textColor = cv::Scalar(75, 255, 75); // green color
-            }
-            else {
-                textColor = cv::Scalar(50, 50, 255); // red color
-            }
+            cv::Scalar textColor = (std::get<2>(updateList.front())
+                                                ? cv::Scalar(75, 255, 75) : cv::Scalar(50, 50, 255));
             updateList.pop_front();
 
             if (updateList.empty()) {
@@ -132,12 +131,15 @@ public:
 
                 int thickness = cellSize.width / 20;
                 int baseline = 0;
-                cv::Size textSize = cv::getTextSize(predictedLabel, cv::FONT_HERSHEY_PLAIN, 1, 2, &baseline);
-                double fontScale = static_cast<double>(cellSize.width - 2*thickness) / textSize.width;
-                cv::putText(frame,
-                            predictedLabel,
-                            cv::Point(thickness, cellSize.height - thickness - textSize.height),
-                            cv::FONT_HERSHEY_PLAIN, fontScale, textColor, 2);
+
+                if (showLabels) {
+                    cv::Size textSize = cv::getTextSize(predictedLabel, cv::FONT_HERSHEY_PLAIN, 1, 2, &baseline);
+                    double fontScale = static_cast<double>(cellSize.width - 2*thickness) / textSize.width;
+                    cv::putText(frame,
+                                predictedLabel,
+                                cv::Point(thickness, cellSize.height - thickness - textSize.height),
+                                cv::FONT_HERSHEY_PLAIN, fontScale, textColor, 2);
+                }
                 prevImgs.push(frame);
 
                 cv::Mat tmpFrame;

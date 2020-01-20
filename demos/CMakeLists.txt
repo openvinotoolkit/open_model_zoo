@@ -80,8 +80,6 @@ else()
     endif()
 endif()
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/common/imagenet_labels.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${BIN_FOLDER}/${CMAKE_BUILD_TYPE})
-
 ####################################
 ## to use C++11
 set (CMAKE_CXX_STANDARD 11)

@@ -123,7 +123,9 @@ NATIVE_DEMOS = [
         TestCase(options={
             '-no_show': None,
             '-time': '5',
-            '-i': DataDirectoryArg('imagenet-classification')}),
+            '-i': DataDirectoryArg('imagenet-classification'),
+            '-labels': DemoFileArg('imagenet_labels.txt'),
+            '-classes': str(DataDirectoryArg('imagenet-classification')) + "ILSVRC2012_val.txt"}),
         single_option_cases('-m',
             ModelArg('alexnet'),
             ModelArg('resnet-50'),

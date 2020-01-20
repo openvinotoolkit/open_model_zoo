@@ -13,6 +13,8 @@ static const char help_message[] = "Print a usage message.";
 static const char image_message[] = "Required. Path to a folder with images or path to an image files: a .ubyte " \
                                     "file for LeNet and a .bmp file for the other networks.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
+static const char classes_message[] = "Required. Path to .txt file with image classes.";
+static const char labels_message[] = "Required. Path to .txt file with imagenet labels.";
 static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available " \
                                             "devices is shown below). Default value is CPU. " \
                                             "Sample will look for a suitable plugin for device specified.";
@@ -38,6 +40,8 @@ static const char utilization_monitors_message[] = "Optional. List of monitors t
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", image_message);
 DEFINE_string(m, "", model_message);
+DEFINE_string(classes, "", classes_message);
+DEFINE_string(labels, "", labels_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_uint32(b, 1, batch_size_message);
 DEFINE_uint32(nthreads, 0, num_threads_message);
@@ -63,6 +67,8 @@ static void showUsage() {
     std::cout << "      -l \"<absolute_path>\"    " << custom_cpu_library_message << std::endl;
     std::cout << "          Or" << std::endl;
     std::cout << "      -c \"<absolute_path>\"    " << custom_cldnn_message << std::endl;
+    std::cout << "    -classes \"<path>\"         " << classes_message << std::endl;
+    std::cout << "    -labels \"<path>\"          " << labels_message << std::endl;
     std::cout << "    -d \"<device>\"             " << target_device_message << std::endl;
     std::cout << "    -b \"<integer>\"            " << batch_size_message << std::endl;
     std::cout << "    -nthreads \"<integer>\"     " << num_threads_message << std::endl;
