@@ -66,7 +66,7 @@ class DataPatternArg:
         if self.rename:
             name_format = 'input-%04d' + seq[0].suffix
         else:
-            name_format = seq[0].split('/')[-1]
+            name_format = seq[0].stem + seq[0].suffix
 
         if not seq_dir.is_dir():
             seq_dir.mkdir(parents=True)
