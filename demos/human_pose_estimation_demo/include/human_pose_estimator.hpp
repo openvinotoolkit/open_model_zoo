@@ -62,7 +62,6 @@ private:
     InferenceEngine::ExecutableNetwork executableNetwork;
     InferenceEngine::InferRequest::Ptr requestNext;
     InferenceEngine::InferRequest::Ptr requestCurr;
-    InferenceEngine::CNNNetReader netReader;
     std::string pafsBlobName;
     std::string heatmapsBlobName;
     bool enablePerformanceReport;
