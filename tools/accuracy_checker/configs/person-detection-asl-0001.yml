@@ -9,7 +9,7 @@ models:
         weights: intel/person-detection-asl-0001/FP32/person-detection-asl-0001.bin
         adapter:
           type: fcos_person
-          output_blob: 12688/Split.0
+          output_blob: 17701/Split.0
           scale: 0.003125
 
     datasets:
