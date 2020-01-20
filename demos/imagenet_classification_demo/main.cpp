@@ -405,8 +405,9 @@ int main(int argc, char *argv[]) {
                 avgFPS = 1. / (((cv::getTickCount() - startTickCount) / cv::getTickFrequency()) / framesNum);
                 
                 std::vector<long long> processingEndTimes;
+                cv::Mat showMat = gridMat.getMat(processingEndTimes, hasClasses);
                 if (!FLAGS_no_show && FLAGS_delay != -1) {
-                    cv::imshow("main", gridMat.getMat(processingEndTimes, hasClasses));
+                    cv::imshow("main", showMat);
                     key = static_cast<char>(cv::waitKey(delay));
                 }
 
