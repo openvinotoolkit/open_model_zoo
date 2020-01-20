@@ -63,6 +63,12 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `convert_images` - allows to convert images from annotation file to user specified directory (default value is False).
   * `converted_images_dir` - path to converted images location if enabled `convert_images`.
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding). Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+* `fashion_mnist` - convert [Fashion-MNIST](https://github.com/zalandoresearch/fashion-mnist) dataset to `ClassificationAnnotation`.
+  * `annotation_file` - path to labels file in binary format.
+  * `data_file` - path to images file in binary format.
+  * `convert_images` - allows to convert images from data file to user specified directory (default value is False).
+  * `converted_images_dir` - path to converted images location if enabled `convert_images`.
+  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding). Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `imagenet` - convert ImageNet dataset for image classification task to `ClassificationAnnotation`.
   * `annotation_file` - path to annotation in txt format.
   * `labels_file` - path to file with word description of labels (synset_words).
