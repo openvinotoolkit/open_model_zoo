@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
             }
             else {
                 inputImages.push_back(tmpImage);
-                name = name.substr(name.rfind('/') + 1);
+                imageNames[i] = name.substr(name.rfind('/') + 1);
             }
         }
         // ---------------------------------------------------------------------------------------------------
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
                 std::string classIndex;
                 inputClassesFile >> imageName >> classIndex;
                 if (inputClassesFile.eof()) break;
-                classIndexesMap.push_back({imageName, classIndex});
+                classIndexesMap.push_back({imageName.substr(imageName.rfind('/') + 1), classIndex});
             }
             for (size_t i = 0; i < inputImagesCount; i++) {
                 for (size_t j = 0; j < classIndexesMap.size(); j++) {

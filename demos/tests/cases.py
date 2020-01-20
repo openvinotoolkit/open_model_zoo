@@ -123,15 +123,11 @@ NATIVE_DEMOS = [
         TestCase(options={
             '-no_show': None,
             '-time': '5',
-            '-i': DataDirectoryArg('imagenet-classification'),
+            '-i': DataDirectoryArg('imagenet-classification', rename=False),
             '-labels': DemoFileArg('imagenet_labels.txt'),
-            '-classes': str(DataDirectoryArg('imagenet-classification')) + "ILSVRC2012_val.txt"}),
+            '-classes': TestDataArg("ILSVRC2012_val.txt")}),
         single_option_cases('-m',
-            ModelArg('alexnet'),
-            ModelArg('resnet-50'),
-            ModelArg('mobilenet-v2'),
-            ModelArg('googlenet-v4'),
-            ModelArg('densenet-169')),
+            ModelArg('resnet-50')),
     )),
 
     NativeDemo(subdirectory='interactive_face_detection_demo',
