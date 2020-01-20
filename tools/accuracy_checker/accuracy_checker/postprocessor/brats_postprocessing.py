@@ -101,10 +101,14 @@ class TransformBratsPrediction(Postprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'order': ListField(value_type=NumberField(value_type=int, min_value=0), validate_values=True,
-                               description="Specifies channel order of filling"),
-            'values': ListField(value_type=int, validate_values=True,
-                                description="Specifies values for each channel according to new order")
+            'order': ListField(
+                value_type=NumberField(value_type=int, min_value=0), validate_values=True,
+                description="Specifies channel order of filling"
+            ),
+            'values': ListField(
+                value_type=int, validate_values=True,
+                description="Specifies values for each channel according to new order"
+            )
         })
         return parameters
 
@@ -130,4 +134,4 @@ class TransformBratsPrediction(Postprocessor):
 
         prediction[0].mask = result
 
-        return  annotation, prediction
+        return annotation, prediction
