@@ -44,7 +44,6 @@ class IEModel(): # pylint: disable=too-few-public-methods
         assert len(image.shape) == 4
         image = np.transpose(image, (0, 3, 1, 2))
         out = self.exec_net.infer(inputs={'Placeholder': image})[self.output_name]
-        out = out / np.linalg.norm(out, axis=-1)
         return out
 
 
