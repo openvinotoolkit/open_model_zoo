@@ -34,7 +34,7 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_PERF_COUNT,
                        InferenceEngine::PluginConfigParams::YES}});
     }
-    auto network = ie.ReadNetwork(modelPath);
+    network = ie.ReadNetwork(modelPath);
 
     const auto& inputInfo = network.getInputsInfo();
 
