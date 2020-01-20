@@ -69,7 +69,10 @@ class DataPatternArg:
             seq_dir.mkdir(parents=True)
 
             for index, data in enumerate(context.data_sequences[self.sequence_name]):
-                shutil.copyfile(data.resolve(context), str(seq_dir / ((name_format % index) if self.rename else (seq[index].stem + seq[0].suffix))))
+                if self.rename:
+                    shutil.copyfile(data.resolve(context), str(seq_dir / (name_format % index)))
+                else:
+                    shutil.copyfile(data.resolve(context), str(seq_dir / (seq[index].stem + seq[0].suffix)))
 
         return str(seq_dir / name_format)
 

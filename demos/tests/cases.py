@@ -127,6 +127,11 @@ NATIVE_DEMOS = [
             '-labels': DemoFileArg('imagenet_labels.txt'),
             '-classes': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt")}),
         single_option_cases('-m',
+            ModelArg('alexnet'),
+            ModelArg('resnet-50'),
+            ModelArg('mobilenet-v2'),
+            ModelArg('googlenet-v4'),
+            ModelArg('densenet-169'),
             ModelArg('resnet-50')),
     )),
 
