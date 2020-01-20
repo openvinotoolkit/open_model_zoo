@@ -101,6 +101,8 @@ class Postprocessor(ClassProvider):
         self.image_size = None
         if image_size:
             self.image_size = image_size[0]
+        if self.image_size is None and image_metadata:
+            self.image_size = image_metadata.get('image_size')
 
         self.process_image_with_metadata(annotation, prediction, image_metadata)
 
@@ -185,10 +187,12 @@ class PostprocessorWithSpecificTargets(Postprocessor):
         self.configure()
 
     def process(self, annotation, prediction, image_metadata=None):
-        image_size = annotation[0].metadata.get('image_size') if not None in annotation else None
+        image_size = annotation[0].metadata.get('image_size') if None not in annotation else None
         self.image_size = None
         if image_size:
             self.image_size = image_size[0]
+        if self.image_size is None and image_metadata:
+            self.image_size = image_metadata.get('image_size')
         target_annotations, target_predictions = None, None
         if self.annotation_source or self.prediction_source:
             target_annotations, target_predictions = self._choose_targets_using_sources(annotation, prediction)

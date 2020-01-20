@@ -59,7 +59,7 @@ class SegmentationPredictionResample(Postprocessor):
             raise RuntimeError('Postprocessor {} does not support multiple annotation and/or prediction.'
                                .format(self.__provider__))
 
-        if annotation[0].box:
+        if annotation is not None and annotation[0].box:
             box = annotation[0].box
         elif image_metadata['box'] is not None:
             box = image_metadata['box']
@@ -73,7 +73,7 @@ class SegmentationPredictionResample(Postprocessor):
         high = box[1, :]
         diff = (high - low).astype(np.int32)
 
-        annotation_shape = annotation_.mask.shape
+        annotation_shape = annotation_.mask.shape if annotation_ is not None else prediction_.mask.shape
         prediction_shape = prediction_.mask.shape
 
         image_shape = annotation_shape[-3:]
@@ -119,19 +119,17 @@ class TransformBratsPrediction(Postprocessor):
             raise ConfigError('Length of "order" and "values" must be the same')
 
     def process_image(self, annotation, prediction):
-        if not len(annotation) == len(prediction) == 1:
-            raise RuntimeError('Postprocessor {} does not support multiple annotation and/or prediction.'
-                               .format(self.__provider__))
-        data = prediction[0].mask
+        for target in prediction:
+            data = target.mask
 
-        result = np.zeros(shape=data.shape[1:], dtype=np.int8)
+            result = np.zeros(shape=data.shape[1:], dtype=np.int8)
 
-        label = data > 0.5
-        for i, value in zip(self.order, self.values):
-            result[label[i, :, :, :]] = value
+            label = data > 0.5
+            for i, value in zip(self.order, self.values):
+                result[label[i, :, :, :]] = value
 
-        result = np.expand_dims(result, axis=0)
+            result = np.expand_dims(result, axis=0)
 
-        prediction[0].mask = result
+            target.mask = result
 
         return annotation, prediction
