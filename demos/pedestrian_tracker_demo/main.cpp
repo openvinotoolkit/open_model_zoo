@@ -53,17 +53,6 @@ CreatePedestrianTracker(const std::string& reid_model,
         CnnConfig reid_config(reid_model);
         reid_config.max_batch_size = 16;   // defaulting to 16
 
-        try {
-            if (ie.GetConfig(deviceName, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != PluginConfigParams::YES) {
-                reid_config.max_batch_size = 1;
-                std::cerr << "Dynamic batch is not supported for " << deviceName << ". Fall back to batch 1." << std::endl;
-            }
-        }
-        catch(const InferenceEngine::details::InferenceEngineException& e) {
-            reid_config.max_batch_size = 1;
-            std::cerr << e.what() << " for " << deviceName << ". Fall back to batch 1." << std::endl;
-        }
-
         std::shared_ptr<IImageDescriptor> descriptor_strong =
             std::make_shared<DescriptorIE>(reid_config, ie, deviceName);
 
