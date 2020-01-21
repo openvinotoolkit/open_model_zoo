@@ -43,7 +43,7 @@ static const char input_data_type_message[] = "Required. Input data type: \"imag
                                               "\"video\" (for a saved video), "
                                               "\"webcam\" (for a webcamera device). By default, it is \"image\".";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
-static const char decoder_bandwidth_message[] = "Optional. Default bandwidth is 0 it will use CTC Greedy Decoder.";
+static const char decoder_bandwidth_message[] = "Optional. Bandwidth for CTC beam search decoder. Default value is 0, in this case CTC greedy decoder will be used.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", input_message);
