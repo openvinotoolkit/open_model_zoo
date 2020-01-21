@@ -465,7 +465,7 @@ int main(int argc, char *argv[]) {
                 }
             }
             
-            mutex.try_lock();
+            mutex.lock();
             while (emptyInferRequests.empty() && completedInferRequests.empty()) {   
                 condVar.wait(lock);
             }
