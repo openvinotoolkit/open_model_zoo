@@ -2,8 +2,8 @@
 
 ## Use Case and High-Level Description
 
-The product detector based on the SSD-lite architecture with [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf) as a backbone for self-checkout points of sale-related scenes.
-The detector can recognize 12 classes of objects (`sprite`, `kool-aid`, `extra`, `ocelo`, `finish`, `mtn_dew`, `best_foods`, `gatorade`, `heinz`, `ruffles`, `pringles`, `del_monte`). Labels 0 and 1 are related to `background_label` and `undefined` correspondingly.
+A product detector based on the SSD-lite architecture with [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf) as a backbone for self-checkout points of sale-related scenes.
+The network can detect 12 classes of objects (`sprite`, `kool-aid`, `extra`, `ocelo`, `finish`, `mtn_dew`, `best_foods`, `gatorade`, `heinz`, `ruffles`, `pringles`, `del_monte`). Labels 0 and 1 are related to `background_label` and `undefined` correspondingly.
 
 ## Example
 
