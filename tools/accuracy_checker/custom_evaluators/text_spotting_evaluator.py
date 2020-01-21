@@ -108,7 +108,7 @@ class TextSpottingEvaluator(BaseEvaluator):
                 extracted_values.append(values)
                 extracted_meta.append(metadata)
             if print_results:
-                presenter.write_results(metric_result, ignore_results_formatting)
+                presenter.write_result(metric_result, ignore_results_formatting)
 
         return extracted_names, extracted_values, extracted_meta
 
@@ -118,7 +118,7 @@ class TextSpottingEvaluator(BaseEvaluator):
             return
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_results(metric_result, ignore_results_formatting)
+            presenter.write_result(metric_result, ignore_results_formatting)
 
     def release(self):
         self.model.release()

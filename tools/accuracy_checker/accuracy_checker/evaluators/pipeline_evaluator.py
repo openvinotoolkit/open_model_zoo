@@ -269,7 +269,7 @@ class PipeLineEvaluator(BaseEvaluator):
         if not self._metrics_results:
             self.compute_metrics(True, ignore_results_formatting)
         for presenter, metric_result in zip(self._metrics_result_presenters, self._metrics_results):
-            presenter.write_results(metric_result, ignore_results_formatting)
+            presenter.write_result(metric_result, ignore_results_formatting)
 
     def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
         if not self._metrics_results:
@@ -287,7 +287,7 @@ class PipeLineEvaluator(BaseEvaluator):
                 extracted_values.append(values)
                 extracted_meta.append(metadata)
             if print_results:
-                presenter.write_results(metric_result, ignore_results_formatting)
+                presenter.write_result(metric_result, ignore_results_formatting)
 
         return extracted_names, extracted_values, extracted_meta
 

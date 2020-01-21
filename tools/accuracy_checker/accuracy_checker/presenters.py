@@ -112,13 +112,13 @@ class VectorPrintPresenter(BasePresenter):
             if not np.isscalar(value):
                 value = value[0]
             return value_names[0], value, meta
-        per_value_meta = [meta for _ in value_names]
         if meta.get('calculate_mean', True):
             value_names.append('{}@mean'.format(name))
             mean_value = np.mean(value)
-            value.append(mean_value)
-            per_value_meta.append(meta)
-        return value_names, value, meta
+            value = np.append(value, mean_value)
+            meta['names'] = value_names
+        per_value_meta = [meta for _ in value_names]
+        return value_names, value, per_value_meta
 
 
 def write_scalar_result(
