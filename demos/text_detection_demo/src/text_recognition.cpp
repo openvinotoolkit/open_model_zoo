@@ -27,11 +27,13 @@ namespace  {
         *prob = 1.0f / static_cast<float>(sum);
     }
 
-    void softmax(const std::vector<float>::const_iterator& begin, const std::vector<float>::const_iterator& end, std::vector<float> &prob) {
+    std::vector<float> softmax(const std::vector<float>::const_iterator& begin, const std::vector<float>::const_iterator& end) {
+        std::vector<float> prob(end - begin, 0.f);
         std::transform(begin, end, prob.begin(), static_cast<double(*)(double)>(std::exp));
         float sum = std::accumulate(prob.begin(), prob.end(), 0.0f);
         for (int i = 0; i < static_cast<int>(prob.size()); i++)
             prob[i] /= sum;
+        return prob;
     }
 
     struct BeamElement {
@@ -87,8 +89,7 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
     for (std::vector<float>::const_iterator it = data.begin(); it != data.end(); it += num_classes) {
         curr.clear();
 
-        std::vector<float> prob = std::vector<float>(num_classes, 0.f);
-        softmax(it, it + num_classes, prob);
+        std::vector<float> prob = softmax(it, it + num_classes);
 
         for(const auto& candidate: last) {
             float prob_not_blank = 0.f;
