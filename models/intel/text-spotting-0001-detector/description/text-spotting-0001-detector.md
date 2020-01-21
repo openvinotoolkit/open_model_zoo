@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a text-spotting model that simultaneously detects and
+This is a text spotting model that simultaneously detects and
 recognizes text. The model detects symbol sequences separated by space and performs
 recognition without a dictionary. The model is built on top of the Mask-RCNN
 framework with additional attention-based text recognition head.
@@ -34,7 +34,7 @@ This model is a Mask-RCNN-based text detector with ResNet50 backbone and additio
 
 1.	Name: `im_data` , shape: [1x3x768x1280]. An input image in the [1xCxHxW] format. 
     The expected channel order is BGR.
-2.	Name: `im_info`, shape: [1x3]. An input image with a processed image height,
+2.	Name: `im_info`, shape: [1x3]. Image information: processed image height,
     processed image width and processed image scale.
     w.r.t. the original image resolution.
 
@@ -48,7 +48,7 @@ This model is a Mask-RCNN-based text detector with ResNet50 backbone and additio
     in the (top_left_x, top_left_y, bottom_right_x, bottom_right_y) format.
 1.	Name: `raw_masks`, shape: [100x2x28x28]. Segmentation heatmaps for all
     classes for every output bounding box.
-1.  Name: `text_features`, shape [100x64x28x28]. Text features fed to a text recognition head.
+1.  Name: `text_features`, shape [100x64x28x28]. Text features that are fed to a text recognition head.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
