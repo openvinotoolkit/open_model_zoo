@@ -4,7 +4,7 @@
 
 This is a multi-person 2D pose estimation network (based on the OpenPose approach) with tuned MobileNet v1 as a feature extractor. 
 For every person in an image, the network detects a human pose: a body skeleton consisting of keypoints and connections between them.
-The pose may contain up to 18 keypoints: ears, eyes, nose, neck, shoulders, elbows, wrists, hips, knees and ankles and so on.
+The pose may contain up to 18 keypoints: ears, eyes, nose, neck, shoulders, elbows, wrists, hips, knees, and ankles.
 
 ## Example
 
@@ -37,7 +37,7 @@ Tested on a COCO validation subset from the original paper [Realtime Multi-Perso
 
 ## Outputs
 
-The net outputs two blobs with the [1, 38, 32, 57] and [1, 19, 32, 57] shapes. The first blob contains keypoint-pairwise relations (part affinity fields), while the second blob contains keypoint heatmaps.
+The net outputs two blobs with the [1, 38, 32, 57] and [1, 19, 32, 57] shapes. The first blob contains keypoint pairwise relations (part affinity fields), while the second blob contains keypoint heatmaps.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.
