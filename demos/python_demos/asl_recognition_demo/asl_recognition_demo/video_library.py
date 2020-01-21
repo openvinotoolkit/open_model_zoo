@@ -50,8 +50,9 @@ class VideoLibrary:
     def parse_source_paths(input_dir, valid_names):
         """Returns the list of valid video sources"""
 
-        valid_names = [n.lower() for n in valid_names]
+        valid_names = set(n.lower() for n in valid_names)
         all_file_paths = [f for f in listdir(input_dir) if isfile(join(input_dir, f))]
+        all_file_paths.sort()
 
         out_file_paths = []
         for file_path in all_file_paths:
@@ -113,10 +114,8 @@ class VideoLibrary:
             _, frame = self.cap.read()
             assert frame is not None
 
-        if frame is not None:
-            frame = cv2.resize(frame, self.trg_size)
-
-            cv2.putText(frame, 'Gesture: {}'.format(source_name), (10, frame.shape[0] - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        frame = cv2.resize(frame, self.trg_size)
+        cv2.putText(frame, 'Gesture: {}'.format(source_name), (10, frame.shape[0] - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
         return frame

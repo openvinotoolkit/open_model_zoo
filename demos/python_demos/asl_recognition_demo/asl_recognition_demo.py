@@ -116,7 +116,7 @@ def main():
 
     samples_library = None
     if args.samples_dir is not None and exists(args.samples_dir):
-      samples_library = VideoLibrary(args.samples_dir, SAMPLES_WINDOW_SIZE, list(class_map.values()))
+        samples_library = VideoLibrary(args.samples_dir, SAMPLES_WINDOW_SIZE, list(class_map.values()))
 
     last_caption = None
     person_roi = None
@@ -126,7 +126,7 @@ def main():
         frame = video_stream.get_live_frame()
         batch = video_stream.get_batch()
         if frame is None or batch is None:
-          break
+            break
 
         person_roi = person_tracker.get_roi(frame)
         if person_roi is not None:
@@ -165,19 +165,19 @@ def main():
             break
 
         if samples_library is not None:
-          sample_frame = samples_library.get_frame()
-          if sample_frame is not None:
-            cv2.imshow('Sample', sample_frame)
+            sample_frame = samples_library.get_frame()
+            if sample_frame is not None:
+                cv2.imshow('Sample', sample_frame)
 
-          if key == ord('n'):
-            samples_library.next()
-          elif key == ord('p'):
-            samples_library.prev()
+            if key == ord('n'):
+                samples_library.next()
+            elif key == ord('p'):
+                samples_library.prev()
 
     cv2.destroyAllWindows()
     video_stream.release()
     if samples_library is not None:
-      samples_library.release()
+        samples_library.release()
 
 
 if __name__ == '__main__':
