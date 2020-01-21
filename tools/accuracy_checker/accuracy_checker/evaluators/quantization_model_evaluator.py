@@ -137,7 +137,7 @@ class ModelEvaluator:
                     )
                     free_irs.append(ready_ir_id)
                     annotations, predictions = self.postprocessor.process_batch(
-                        batch_annotation, batch_predictions, batch_meta
+                        batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
                     )
                     if dump_prediction_to_annotation:
                         self._dumped_annotations.extend([prediction.to_annotation() for prediction in predictions])
@@ -226,7 +226,9 @@ class ModelEvaluator:
             else:
                 batch_predictions = batch_raw_predictions
 
-            annotations, predictions = self.postprocessor.process_batch(batch_annotation, batch_predictions, batch_meta)
+            annotations, predictions = self.postprocessor.process_batch(
+                batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
+            )
             if dump_prediction_to_annotation:
                 self._dumped_annotations.extend([prediction.to_annotation() for prediction in predictions])
             metrics_result = None
