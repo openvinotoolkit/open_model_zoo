@@ -10,6 +10,7 @@
 #include <vector>
 #include <limits>
 #include <stdexcept>
+#include <numeric>
 
 namespace  {
     void softmax_and_choose(const std::vector<float>::const_iterator& begin, const std::vector<float>::const_iterator& end, int *argmax, float *prob) {
@@ -26,28 +27,24 @@ namespace  {
         *prob = 1.0f / static_cast<float>(sum);
     }
 
-    void softmax(const std::vector<float>::const_iterator& begin, const std::vector<float>::const_iterator& end, std::vector<float> &prob)
-    {
+    void softmax(const std::vector<float>::const_iterator& begin, const std::vector<float>::const_iterator& end, std::vector<float> &prob) {
         std::transform(begin, end, prob.begin(), static_cast<double(*)(double)>(std::exp));
         float sum = std::accumulate(prob.begin(), prob.end(), 0.0f);
         for (int i = 0; i < static_cast<int>(prob.size()); i++)
             prob[i] /= sum;
     }
 
-    struct BeamElement
-    {
-        std::string sentence;   //!< The sequence of chars that will be result of the beam element
-        float prob_blank;       //!< The probability that the last char in CTC sequence
-                                //!< for the beam element is the special blank char
-        float prob_not_blank;   //!< The probability that the last char in CTC sequence
-                                //!<  for the beam element is NOT the special blank char
+    struct BeamElement {
+        std::vector<int> sentence;   //!< The sequence of chars that will be a result of the beam element
+        float prob_blank;            //!< The probability that the last char in CTC sequence
+                                     //!< for the beam element is the special blank char
+        float prob_not_blank;        //!< The probability that the last char in CTC sequence
+                                     //!< for the beam element is NOT the special blank char
 
-        float prob()            //!< The probability of the beam element.
-        {
+        float prob() {               //!< The probability of the beam element.
             return prob_blank + prob_not_blank;
         }
     };
-
 }  // namespace
 
 std::string CTCGreedyDecoder(const std::vector<float> &data, const std::string& alphabet, char pad_symbol, double *conf) {
@@ -85,7 +82,7 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
     std::vector<BeamElement> curr;
     std::vector<BeamElement> last;
 
-    last.push_back(BeamElement{"", 1.f, 0.f});
+    last.push_back(BeamElement{std::vector<int>(), 1.f, 0.f});
 
     for (std::vector<float>::const_iterator it = data.begin(); it != data.end(); it += num_classes) {
         curr.clear();
@@ -93,13 +90,12 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
         std::vector<float> prob = std::vector<float>(num_classes, 0.f);
         softmax(it, it + num_classes, prob);
 
-        for (int candidate_num = 0; candidate_num < static_cast<int>(last.size()); candidate_num++) {
+        for(auto& candidate: last) {
             float prob_not_blank = 0.f;
-            auto candidate = last[candidate_num];
-            std::string candidate_sentence = candidate.sentence;
-            if (candidate_sentence != "") {
-                int n = static_cast<int>(candidate_sentence.back());
-                prob_not_blank = candidate.prob_blank * prob[n];
+            std::vector<int> candidate_sentence = candidate.sentence;
+            if (!candidate_sentence.empty()) {
+                int n = candidate_sentence.back();
+                prob_not_blank = candidate.prob_not_blank * prob[n];
             }
             float prob_blank = candidate.prob() * prob[(num_classes - 1)];
 
@@ -109,14 +105,22 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
             if (check_res == std::end(curr)) {
                 curr.push_back(BeamElement{candidate.sentence, prob_blank, prob_not_blank});
             } else {
-                auto index = std::distance(curr.begin(), check_res);
-                curr[index].prob_not_blank  += prob_not_blank;
-                curr[index].prob_blank = prob_blank;
+                // auto index = std::distance(curr.begin(), check_res);
+                // curr[index].prob_not_blank  += prob_not_blank;
+                check_res->prob_not_blank  += prob_not_blank;
+                // if (curr[index].prob_blank != 0.f) {
+                if (check_res->prob_blank != 0.f) {
+                    throw std::logic_error("Probability that the last char in CTC-sequence is the special blank char must be zero here");
+                }
+                // curr[index].prob_blank = prob_blank;
+                check_res->prob_blank = prob_blank;
             }
 
             for (int i = 0; i < num_classes - 1; i++) {
-                auto extend = candidate_sentence + static_cast<char>(i);
-                if (candidate_sentence.length() > 0 && candidate.sentence.back() == static_cast<char>(i)) {
+                auto extend = candidate_sentence;
+                extend.push_back(i);
+
+                if (candidate_sentence.size() > 0 && candidate.sentence.back() == i) {
                     prob_not_blank = prob[i] * candidate.prob_blank;
                 } else {
                     prob_not_blank = prob[i] * candidate.prob();
@@ -129,8 +133,9 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
                 if (check_res == std::end(curr)) {
                     curr.push_back(BeamElement{extend, 0.f, prob_not_blank});
                 } else {
-                    auto index = std::distance(curr.begin(), check_res);
-                    curr[index].prob_not_blank += prob_not_blank;
+                    // auto index = std::distance(curr.begin(), check_res);
+                    // curr[index].prob_not_blank += prob_not_blank;
+                    check_res->prob_not_blank += prob_not_blank;
                 }
             }
         }
@@ -146,13 +151,10 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
         }
     }
 
-    auto idx = last[0].sentence;
     *conf = last[0].prob();
-    for (int _idx = 0; _idx < static_cast<int>(idx.length()); _idx++)
-    {
-        res += alphabet[static_cast<int>(idx[_idx])];
+    for (const auto& idx: last[0].sentence) {
+        res += alphabet[idx];
     }
 
     return res;
 }
-
