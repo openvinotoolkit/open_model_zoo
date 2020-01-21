@@ -65,7 +65,7 @@ DEFINE_string(c, "", custom_gpu_library_message);
 DEFINE_bool(no_show, false, no_show_message);
 DEFINE_bool(r, false, raw_output_message);
 DEFINE_string(u, "", utilization_monitors_message);
-DEFINE_int32(b, 0, decoder_bandwidth_message);
+DEFINE_uint32(b, 0, decoder_bandwidth_message);
 
 /**
 * @brief This function shows a help message

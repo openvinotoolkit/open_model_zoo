@@ -137,9 +137,6 @@ int main(int argc, char *argv[]) {
         auto cls_conf_threshold = static_cast<float>(FLAGS_cls_pixel_thr);
         auto link_conf_threshold = static_cast<float>(FLAGS_link_pixel_thr);
         auto decoder_bandwidth = FLAGS_b;
-        if (decoder_bandwidth < 0) {
-            throw std::invalid_argument("Parameter -b cannot lower than 0.");
-        }
 
         slog::info << "Loading network files" << slog::endl;
         Cnn text_detection, text_recognition;
