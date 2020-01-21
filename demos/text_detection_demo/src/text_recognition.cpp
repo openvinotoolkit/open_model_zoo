@@ -41,7 +41,7 @@ namespace  {
         float prob_not_blank;        //!< The probability that the last char in CTC sequence
                                      //!< for the beam element is NOT the special blank char
 
-        float prob() {               //!< The probability of the beam element.
+        float prob() const {         //!< The probability of the beam element.
             return prob_blank + prob_not_blank;
         }
     };
@@ -90,9 +90,9 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
         std::vector<float> prob = std::vector<float>(num_classes, 0.f);
         softmax(it, it + num_classes, prob);
 
-        for(auto& candidate: last) {
+        for(const auto& candidate: last) {
             float prob_not_blank = 0.f;
-            std::vector<int> candidate_sentence = candidate.sentence;
+            const std::vector<int>& candidate_sentence = candidate.sentence;
             if (!candidate_sentence.empty()) {
                 int n = candidate_sentence.back();
                 prob_not_blank = candidate.prob_not_blank * prob[n];
@@ -105,14 +105,10 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
             if (check_res == std::end(curr)) {
                 curr.push_back(BeamElement{candidate.sentence, prob_blank, prob_not_blank});
             } else {
-                // auto index = std::distance(curr.begin(), check_res);
-                // curr[index].prob_not_blank  += prob_not_blank;
                 check_res->prob_not_blank  += prob_not_blank;
-                // if (curr[index].prob_blank != 0.f) {
                 if (check_res->prob_blank != 0.f) {
                     throw std::logic_error("Probability that the last char in CTC-sequence is the special blank char must be zero here");
                 }
-                // curr[index].prob_blank = prob_blank;
                 check_res->prob_blank = prob_blank;
             }
 
@@ -133,8 +129,6 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
                 if (check_res == std::end(curr)) {
                     curr.push_back(BeamElement{extend, 0.f, prob_not_blank});
                 } else {
-                    // auto index = std::distance(curr.begin(), check_res);
-                    // curr[index].prob_not_blank += prob_not_blank;
                     check_res->prob_not_blank += prob_not_blank;
                 }
             }
