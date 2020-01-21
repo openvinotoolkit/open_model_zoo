@@ -32,7 +32,7 @@ from asl_recognition_demo.person_detector import PersonDetector
 from asl_recognition_demo.person_tracker import PersonTracker
 from asl_recognition_demo.action_recognizer import ActionRecognizer
 
-DETECTOR_OUTPUT_NAME = "12688/Split.0"
+DETECTOR_OUTPUT_SHAPE = -1, 5
 TRACKER_SCORE_THRESHOLD = 0.5
 TRACKER_IOU_THRESHOLD = 0.5
 ACTION_NET_INPUT_FPS = 15
@@ -101,7 +101,7 @@ def main():
     ie_core = load_ie_core(args.device, args.cpu_extension)
 
     person_detector = PersonDetector(args.detection_model, args.device, ie_core,
-                                     num_requests=2, output_name=DETECTOR_OUTPUT_NAME)
+                                     num_requests=2, output_shape=DETECTOR_OUTPUT_SHAPE)
     action_recognizer = ActionRecognizer(args.action_model, args.device, ie_core,
                                          num_requests=2, img_scale=ACTION_IMAGE_SCALE,
                                          num_classes=ACTION_NUM_CLASSES)
