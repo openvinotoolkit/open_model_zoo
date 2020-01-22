@@ -18,28 +18,28 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/text-recognition-0012.xml
-    size: 119138
-    sha256: ec0c79bb39a369f56c2e38cc2d21a3c1d0b1cd049c693ab151f48f958a19fab5
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-recognition-0012/FP32/text-recognition-0012.xml
+    size: 119137
+    sha256: 9fed384cca2aec53214fbff8f922608882f1f69868c1e07e869586b5612485e0
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/text-recognition-0012/FP32/text-recognition-0012.xml
   - name: FP32/text-recognition-0012.bin
     size: 47470864
-    sha256: af88da0433321350cf2451b5839907debdc398aeb99f54290296e620060186c0
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-recognition-0012/FP32/text-recognition-0012.bin
+    sha256: 9d08734a7128e2099ba0c64ef347c0faf2470611ef627995f66343299473b14a
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/text-recognition-0012/FP32/text-recognition-0012.bin
   - name: FP16/text-recognition-0012.xml
-    size: 119106
-    sha256: 291de6f634931821a163d9f51221877a23ba084ad284306685cc1482aed5ee29
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-recognition-0012/FP16/text-recognition-0012.xml
+    size: 119105
+    sha256: 7f23f42a3e2c9207f68dd6716d8f3ffbb4e8f1d5a26147829cfae9b835f1321e
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/text-recognition-0012/FP16/text-recognition-0012.xml
   - name: FP16/text-recognition-0012.bin
     size: 23735488
-    sha256: a58ef22c6b26a5da07e6a0d8e9e3f721e51b313cf31ab8edea061e4a4426af42
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-recognition-0012/FP16/text-recognition-0012.bin
+    sha256: 6e3cd9139e9bfc32bd4ae7054e97d6050754552c78703df9bda96c313573cc8a
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/text-recognition-0012/FP16/text-recognition-0012.bin
   - name: FP32-INT8/text-recognition-0012.xml
     size: 153421
-    sha256: 7e8a95352f1083654235bb2a184d00a15fbe76ed4512647b729a8dcc813d0b43
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-recognition-0012/FP32-INT8/text-recognition-0012.xml
+    sha256: b148ce47f98a6a41c467274eeb5ad7330a29cf7e33b0126c6784bb8e0830e6fd
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/text-recognition-0012/FP32-INT8/text-recognition-0012.xml
   - name: FP32-INT8/text-recognition-0012.bin
     size: 47489644
     sha256: 0bac02a212d27677fbacc5f1535190eb05e633f49274f42d1e31c32f55dca17e
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-recognition-0012/FP32-INT8/text-recognition-0012.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/text-recognition-0012/FP32-INT8/text-recognition-0012.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

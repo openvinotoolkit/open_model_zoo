@@ -18,28 +18,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-action-recognition-teacher-0002.xml
-    size: 651654
-    sha256: 38c13ba407e38db1303ca77d54cd40395323217a4fe212195806e993df45342f
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
+    size: 651612
+    sha256: 4b81fc7c111fa119bdb229cd9e73474d06d649479d73117bee4e1db97ece7af9
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
   - name: FP32/person-detection-action-recognition-teacher-0002.bin
     size: 7800360
     sha256: ebe9c7cdca28a408302b3b1f241afdc670abc251bd692c13a3140c78b08b0498
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
   - name: FP16/person-detection-action-recognition-teacher-0002.xml
-    size: 651410
-    sha256: 196d7bd58c16a21e02faec877cc397dd82cfeb9d209f0717b7dd94254819cca4
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
+    size: 651368
+    sha256: 062b59018dffa6f6c2b27de36e61bcfcfdb2d454aacc666db9b11db107b76910
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
   - name: FP16/person-detection-action-recognition-teacher-0002.bin
     size: 3900234
     sha256: 190e9b71ae02e022c6afe2dc9fb59939066e046234ff35f4ceab6ddfabab7883
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
   - name: FP32-INT8/person-detection-action-recognition-teacher-0002.xml
-    size: 1697289
-    sha256: 5572fde061fd5d7b7073b287d73be11d6ade21bbffac6a3b1a20e8fd7319b347
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-action-recognition-teacher-0002/FP32-INT8/person-detection-action-recognition-teacher-0002.xml
+    size: 1697252
+    sha256: aefa562cc9f34d4546a594004ce9032f3cb40302deeac0d97113fa860038e626
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/person-detection-action-recognition-teacher-0002/FP32-INT8/person-detection-action-recognition-teacher-0002.xml
   - name: FP32-INT8/person-detection-action-recognition-teacher-0002.bin
     size: 7972512
     sha256: 9423a50cb23b265d8862108a7ab88e1536c1b342276d792af56ff3d34d70553d
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/person-detection-action-recognition-teacher-0002/FP32-INT8/person-detection-action-recognition-teacher-0002.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/person-detection-action-recognition-teacher-0002/FP32-INT8/person-detection-action-recognition-teacher-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

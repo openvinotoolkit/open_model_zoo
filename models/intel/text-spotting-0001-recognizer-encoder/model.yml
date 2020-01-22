@@ -19,19 +19,19 @@ task_type: feature_extraction
 files:
   - name: FP32/text-spotting-0001-recognizer-encoder.xml
     size: 9906
-    sha256: 9d9f3de8b98ced78eb47ef75729a080cedd7877b98c04dab4197f877b2d5be01
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-spotting-0001-recognizer-encoder/FP32/text-spotting-0001-recognizer-encoder.xml
+    sha256: e83d95fc0938ff3c4a40cff80fd2621114ac3d99d8d12942b5d2fb4693d9a002
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/text-spotting-0001-recognizer-encoder/FP32/text-spotting-0001-recognizer-encoder.xml
   - name: FP32/text-spotting-0001-recognizer-encoder.bin
     size: 5311488
     sha256: df3b4d491c953b022afbed4e0492b8f41046da3a6d3c65054884ac15af135942
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-spotting-0001-recognizer-encoder/FP32/text-spotting-0001-recognizer-encoder.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/text-spotting-0001-recognizer-encoder/FP32/text-spotting-0001-recognizer-encoder.bin
   - name: FP16/text-spotting-0001-recognizer-encoder.xml
     size: 9903
-    sha256: edb25b5717e82ecd02666a018a6a365cb42e01cac6d12a78fa88b5264df1a4c2
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-spotting-0001-recognizer-encoder/FP16/text-spotting-0001-recognizer-encoder.xml
+    sha256: dce746a5d4a6b1b03b0da1c2cf1bba3623ab8faa2ecd60e46a6793c65bf1f94f
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/text-spotting-0001-recognizer-encoder/FP16/text-spotting-0001-recognizer-encoder.xml
   - name: FP16/text-spotting-0001-recognizer-encoder.bin
     size: 2655744
     sha256: e0a2315c344e2adf69c31b24faa16fdc9496f48a9ba98c25ecef640f23710517
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/text-spotting-0001-recognizer-encoder/FP16/text-spotting-0001-recognizer-encoder.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/text-spotting-0001-recognizer-encoder/FP16/text-spotting-0001-recognizer-encoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

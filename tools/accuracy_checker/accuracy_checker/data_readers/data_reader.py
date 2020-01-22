@@ -29,7 +29,7 @@ except ImportError as import_error:
 
 from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
 from ..dependency import ClassProvider
-from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField
+from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField
 
 REQUIRES_ANNOTATIONS = ['annotation_features_extractor', ]
 
@@ -280,15 +280,28 @@ class NCFDataReader(BaseReader):
         return float(data_id.split(":")[1])
 
 
+class NiftyReaderConfig(ConfigValidator):
+    type = StringField(optional=True)
+    channels_first = BoolField(optional=True, default=False)
+
+
 class NiftiImageReader(BaseReader):
     __provider__ = 'nifti_reader'
+
+    def validate_config(self):
+        if self.config:
+            config_validator = NiftyReaderConfig('nifti_reader_config')
+            config_validator.validate(self.config)
+
+    def configure(self):
+        self.channels_first = self.config.get('channels_first', False) if self.config else False
 
     def read(self, data_id):
         nib_image = nib.load(str(get_path(self.data_source / data_id)))
         image = np.array(nib_image.dataobj)
         if len(image.shape) != 4:  # Make sure 4D
             image = np.expand_dims(image, -1)
-        image = np.transpose(image, (3, 0, 1, 2))
+        image = np.transpose(image, (3, 0, 1, 2) if self.channels_first else (2, 1, 0, 3))
 
         return image
 

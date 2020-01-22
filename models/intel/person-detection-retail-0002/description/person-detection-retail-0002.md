@@ -39,7 +39,7 @@ curve. Validation dataset consists of ~50K of images from ~100 different scenes.
 
 ## Outputs
 
-1. The net outputs "detection_ouput" blob with shape: [1x1xNx7], where N is the number of detected pedestrians.
+1. The net outputs "detection_output" blob with shape: [1x1xNx7], where N is the number of detected pedestrians.
    For each detection, the description has the format:
    [`image_id`, `label`, `conf`, `x_min`, `y_min`, `x_max`, `y_max`], where:
    - `image_id` - ID of image in batch

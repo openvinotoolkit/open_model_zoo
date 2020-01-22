@@ -18,28 +18,28 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/handwritten-score-recognition-0003.xml
-    size: 96646
-    sha256: d688be5cd218c5a948231e87682aa7234a8d27c8be01c0a199658346d3927b1a
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/handwritten-score-recognition-0003/FP32/handwritten-score-recognition-0003.xml
+    size: 96645
+    sha256: 0c093abc57d9757e349839aa35d1427d48a0afa6aa62ece11f5c2a8084246e20
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/handwritten-score-recognition-0003/FP32/handwritten-score-recognition-0003.xml
   - name: FP32/handwritten-score-recognition-0003.bin
     size: 41121968
-    sha256: 8d63056b8a26cb0effb3f4b18021e32e7dd6a53d2adcb95395e21225f052c8f4
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/handwritten-score-recognition-0003/FP32/handwritten-score-recognition-0003.bin
+    sha256: 7066eae3cf926dcddcdc8564ebd36342139202db38f80c40590c8018d9132d22
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/handwritten-score-recognition-0003/FP32/handwritten-score-recognition-0003.bin
   - name: FP16/handwritten-score-recognition-0003.xml
-    size: 96621
-    sha256: f0e2ca0946d70b88c34a78a23dd0c54632e2c1f111fed31ca7701d58f7154e05
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/handwritten-score-recognition-0003/FP16/handwritten-score-recognition-0003.xml
+    size: 96620
+    sha256: ea0fab2c94bcc91b0d02193ed5932ae3733b59de9322b5aed1cca46e194227cb
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/handwritten-score-recognition-0003/FP16/handwritten-score-recognition-0003.xml
   - name: FP16/handwritten-score-recognition-0003.bin
     size: 20561040
-    sha256: fb5924d6ff2586e372ad63e23ead5c27b71dd9060fac4e3ca26ae5796032712a
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/handwritten-score-recognition-0003/FP16/handwritten-score-recognition-0003.bin
+    sha256: 253c042f74ff3343f7140b95b8dcdaed39512136cd0955bd8d44a953cd16ca86
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/handwritten-score-recognition-0003/FP16/handwritten-score-recognition-0003.bin
   - name: FP32-INT8/handwritten-score-recognition-0003.xml
     size: 130751
-    sha256: c5d63fc230a4f773034645ef6320a595172486ac8b280c83ee43a744a07cb3db
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/handwritten-score-recognition-0003/FP32-INT8/handwritten-score-recognition-0003.xml
+    sha256: b7fb2ca7c8a0b90f44fe416b3b55ee01c65981b2fbe1993f38a4cc34609928f9
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/handwritten-score-recognition-0003/FP32-INT8/handwritten-score-recognition-0003.xml
   - name: FP32-INT8/handwritten-score-recognition-0003.bin
     size: 41140556
     sha256: bec80fa6fd3ec3d64922c757d550f012c5ea24846396afb4073d3f4ce4e607b5
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/handwritten-score-recognition-0003/FP32-INT8/handwritten-score-recognition-0003.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/handwritten-score-recognition-0003/FP32-INT8/handwritten-score-recognition-0003.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

@@ -13,7 +13,7 @@ models:
           scale: 0.003125
 
     datasets:
-      - name: person_detection
+      - name: mscoco_person_detection
 
         preprocessing:
           - type: resize

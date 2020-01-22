@@ -73,7 +73,7 @@ struct BaseDetection {
     ExecutableNetwork * operator ->() {
         return &net;
     }
-    virtual CNNNetwork read()  = 0;
+    virtual CNNNetwork read(const Core& ie)  = 0;
 
     virtual void setRoiBlob(const Blob::Ptr &roiBlob) {
         if (!enabled())
@@ -161,23 +161,19 @@ struct PersonDetection : BaseDetection{
     }
 
     PersonDetection() : BaseDetection(FLAGS_m, "Person Detection"), maxProposalCount(0), objectSize(0) {}
-    CNNNetwork read() override {
+    CNNNetwork read(const Core& ie) override {
         slog::info << "Loading network files for PersonDetection" << slog::endl;
-        CNNNetReader netReader;
         /** Read network model **/
-        netReader.ReadNetwork(FLAGS_m);
-        /** Extract model name and load it's weights **/
-        std::string binFileName = fileNameNoExt(FLAGS_m) + ".bin";
-        netReader.ReadWeights(binFileName);
+        auto network = ie.ReadNetwork(FLAGS_m);
         /** Set batch size to 1 **/
         slog::info << "Batch size is forced to  1" << slog::endl;
-        netReader.getNetwork().setBatchSize(1);
+        network.setBatchSize(1);
         // -----------------------------------------------------------------------------------------------------
 
         /** SSD-based network should have one input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
         slog::info << "Checking Person Detection inputs" << slog::endl;
-        InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+        InputsDataMap inputInfo(network.getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Detection network should have only one input");
         }
@@ -195,7 +191,7 @@ struct PersonDetection : BaseDetection{
 
         // ---------------------------Check outputs ------------------------------------------------------
         slog::info << "Checking Person Detection outputs" << slog::endl;
-        OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
+        OutputsDataMap outputInfo(network.getOutputsInfo());
         if (outputInfo.size() != 1) {
             throw std::logic_error("Person Detection network should have only one output");
         }
@@ -214,7 +210,7 @@ struct PersonDetection : BaseDetection{
         _output->setLayout(Layout::NCHW);
 
         slog::info << "Loading Person Detection model to the "<< FLAGS_d << " device" << slog::endl;
-        return netReader.getNetwork();
+        return network;
     }
 
     void fetchResults() {
@@ -340,22 +336,19 @@ struct PersonAttribsDetection : BaseDetection {
         return returnValue;
     }
 
-    CNNNetwork read() override {
+    CNNNetwork read(const Core& ie) override {
         slog::info << "Loading network files for PersonAttribs" << slog::endl;
-        CNNNetReader netReader;
         /** Read network model **/
-        netReader.ReadNetwork(FLAGS_m_pa);
+        auto network = ie.ReadNetwork(FLAGS_m_pa);
         /** Extract model name and load it's weights **/
-        std::string binFileName = fileNameNoExt(FLAGS_m_pa) + ".bin";
-        netReader.ReadWeights(binFileName);
-        netReader.getNetwork().setBatchSize(1);
+        network.setBatchSize(1);
         slog::info << "Batch size is forced to 1 for Person Attribs" << slog::endl;
         // -----------------------------------------------------------------------------------------------------
 
         /** Person Attribs network should have one input two outputs **/
         // ---------------------------Check inputs ------------------------------------------------------
         slog::info << "Checking PersonAttribs inputs" << slog::endl;
-        InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+        InputsDataMap inputInfo(network.getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Attribs topology should have only one input");
         }
@@ -372,7 +365,7 @@ struct PersonAttribsDetection : BaseDetection {
 
         // ---------------------------Check outputs ------------------------------------------------------
         slog::info << "Checking Person Attribs outputs" << slog::endl;
-        OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
+        OutputsDataMap outputInfo(network.getOutputsInfo());
         if (outputInfo.size() != 3) {
              throw std::logic_error("Person Attribs Network expects networks having one output");
         }
@@ -382,7 +375,7 @@ struct PersonAttribsDetection : BaseDetection {
         outputNameForBottomColorPoint = (it++)->second->getName();  // bottom color location
         slog::info << "Loading Person Attributes Recognition model to the "<< FLAGS_d_pa << " device" << slog::endl;
         _enabled = true;
-        return netReader.getNetwork();
+        return network;
     }
 };
 
@@ -416,14 +409,8 @@ struct PersonReIdentification : BaseDetection {
         Blob::Ptr attribsBlob = request.GetBlob(outputName);
 
         auto numOfChannels = attribsBlob->getTensorDesc().getDims().at(1);
-        /* output descriptor of Person Reidentification Recognition network has size 256 */
-        if (numOfChannels != 256) {
-            throw std::logic_error("Output size (" + std::to_string(numOfChannels) + ") of the "
-                                   "Person Reidentification network is not equal to 256");
-        }
-
         auto outputValues = attribsBlob->buffer().as<float*>();
-        return std::vector<float>(outputValues, outputValues + 256);
+        return std::vector<float>(outputValues, outputValues + numOfChannels);
     }
 
     template <typename T>
@@ -450,20 +437,16 @@ struct PersonReIdentification : BaseDetection {
         return mul / (sqrt(denomA) * sqrt(denomB));
     }
 
-    CNNNetwork read() override {
+    CNNNetwork read(const Core& ie) override {
         slog::info << "Loading network files for Person Reidentification" << slog::endl;
-        CNNNetReader netReader;
         /** Read network model **/
-        netReader.ReadNetwork(FLAGS_m_reid);
-        /** Extract model name and load it's weights **/
-        std::string binFileName = fileNameNoExt(FLAGS_m_reid) + ".bin";
-        netReader.ReadWeights(binFileName);
+        auto network = ie.ReadNetwork(FLAGS_m_reid);
         slog::info << "Batch size is forced to  1 for Person Reidentification Network" << slog::endl;
-        netReader.getNetwork().setBatchSize(1);
+        network.setBatchSize(1);
         /** Person Reidentification network should have 1 input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
         slog::info << "Checking Person Reidentification Network input" << slog::endl;
-        InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+        InputsDataMap inputInfo(network.getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Reidentification Retail should have 1 input");
         }
@@ -480,7 +463,7 @@ struct PersonReIdentification : BaseDetection {
 
         // ---------------------------Check outputs ------------------------------------------------------
         slog::info << "Checking Person Reidentification Network output" << slog::endl;
-        OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
+        OutputsDataMap outputInfo(network.getOutputsInfo());
         if (outputInfo.size() != 1) {
             throw std::logic_error("Person Reidentification Network should have 1 output");
         }
@@ -488,7 +471,7 @@ struct PersonReIdentification : BaseDetection {
         slog::info << "Loading Person Reidentification Retail model to the "<< FLAGS_d_reid << " device" << slog::endl;
 
         _enabled = true;
-        return netReader.getNetwork();
+        return network;
     }
 };
 
@@ -498,7 +481,7 @@ struct Load {
 
     void into(Core & ie, const std::string & deviceName) const {
         if (detector.enabled()) {
-            detector.net = ie.LoadNetwork(detector.read(), deviceName);
+            detector.net = ie.LoadNetwork(detector.read(ie), deviceName);
         }
     }
 };

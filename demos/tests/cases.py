@@ -93,7 +93,12 @@ NATIVE_DEMOS = [
             '-i': DataPatternArg('person-vehicle-bike-detection-crossroad')}),
         TestCase(options={'-m': ModelArg('person-vehicle-bike-detection-crossroad-0078')}),
         single_option_cases('-m_pa', None, ModelArg('person-attributes-recognition-crossroad-0230')),
-        single_option_cases('-m_reid', None, ModelArg('person-reidentification-retail-0031')),
+        single_option_cases('-m_reid',
+            None,
+            ModelArg('person-reidentification-retail-0031'),
+            ModelArg('person-reidentification-retail-0103'),
+            ModelArg('person-reidentification-retail-0107'),
+            ModelArg('person-reidentification-retail-0200')),
     )),
 
     NativeDemo(subdirectory='gaze_estimation_demo',
@@ -199,7 +204,10 @@ NATIVE_DEMOS = [
             TestCase(options={'-m_det': ModelArg('person-detection-retail-0013')}),
         ],
         single_option_cases('-m_reid',
-            ModelArg('person-reidentification-retail-0031')),
+            ModelArg('person-reidentification-retail-0031'),
+            ModelArg('person-reidentification-retail-0103'),
+            ModelArg('person-reidentification-retail-0107'),
+            ModelArg('person-reidentification-retail-0200')),
     )),
 
     NativeDemo(subdirectory='security_barrier_camera_demo',
@@ -343,7 +351,10 @@ PYTHON_DEMOS = [
                 DataPatternArg('multi-camera-multi-person-tracking/repeated')],
             '-m': ModelArg('person-detection-retail-0013')}),
         single_option_cases('--m_reid',
-            ModelArg('person-reidentification-retail-0031')),
+            ModelArg('person-reidentification-retail-0031'),
+            ModelArg('person-reidentification-retail-0103'),
+            ModelArg('person-reidentification-retail-0107'),
+            ModelArg('person-reidentification-retail-0200')),
     )),
 
     PythonDemo(subdirectory='object_detection_demo_ssd_async', device_keys=['-d'], test_cases=combine_cases(

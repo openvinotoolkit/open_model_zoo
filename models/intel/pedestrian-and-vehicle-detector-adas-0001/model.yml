@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/pedestrian-and-vehicle-detector-adas-0001.xml
-    size: 245760
-    sha256: 2b321ea42dadd8101fae5ce29aa4c78dd4199fd44cb9271743b40cf756c06874
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.xml
+    size: 245532
+    sha256: 08211608229fa2d3c1804fbbe3dfd6b4c6053b66a15a09587d459f0d55c7f713
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.xml
   - name: FP32/pedestrian-and-vehicle-detector-adas-0001.bin
     size: 6598568
     sha256: 9b8288591d18c3e3daa8bc48f9f2f14ecb1bf83032fe6439d6bc7b43f9f1a4e9
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP32/pedestrian-and-vehicle-detector-adas-0001.bin
   - name: FP16/pedestrian-and-vehicle-detector-adas-0001.xml
-    size: 245714
-    sha256: ec657b88c13c70ed4b85e6f0499e68d416597f9ebadbe94db1076be5103949a1
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.xml
+    size: 245492
+    sha256: 4a63ed9cad1ba87f7d0642fae25b8c220daca4787c93fed361fe4afc1f53f8cc
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.xml
   - name: FP16/pedestrian-and-vehicle-detector-adas-0001.bin
     size: 3299336
     sha256: 3f9739b91277bc916f29b17d043115c6669e113e5d60d61589063d8054c40d7d
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP16/pedestrian-and-vehicle-detector-adas-0001.bin
   - name: FP32-INT8/pedestrian-and-vehicle-detector-adas-0001.xml
-    size: 478514
-    sha256: 6e7df57081651b7e4916774a541b6e802311fab8e22b8d9c9887688d5a521e80
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP32-INT8/pedestrian-and-vehicle-detector-adas-0001.xml
+    size: 478288
+    sha256: 56f865a35a4e4ba06530d25684095eb8f6bfb1209884267a695c6fdde2995741
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP32-INT8/pedestrian-and-vehicle-detector-adas-0001.xml
   - name: FP32-INT8/pedestrian-and-vehicle-detector-adas-0001.bin
     size: 6693280
     sha256: 6157784eebd2a2e08bc5b0076f8d11868fbc096a0e60f5e34d72c8dd3ed32bb5
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP32-INT8/pedestrian-and-vehicle-detector-adas-0001.bin
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/pedestrian-and-vehicle-detector-adas-0001/FP32-INT8/pedestrian-and-vehicle-detector-adas-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

@@ -18,20 +18,20 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/action-recognition-0001-decoder.xml
-    size: 117057
-    sha256: 109077898a609912894256b15d70c77bf8e87ad06826af46a56c66826a30b511
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.xml
+    size: 117062
+    sha256: e3ec5f5bb201ec6052575dc21e5ae3cfad9988c7ca82ecf1f930ce0700f09c80
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.xml
   - name: FP32/action-recognition-0001-decoder.bin
     size: 30238776
-    sha256: 8912b5f695ac7a639b61d258798a85968035739808c2bdffde28c44544b5e543
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.bin
+    sha256: 94b20a3d531c2f72fa4230aaed22ed9140f8923ed60907cbf1a0a48147d7663d
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.bin
   - name: FP16/action-recognition-0001-decoder.xml
-    size: 117017
-    sha256: 407aa15f983979bd28a4b8dfb97888590cd047e7a8706fe1458faa9512c6d546
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.xml
+    size: 117022
+    sha256: 0382a460591d0a04cce49134e4e26d278e7fcebce804294e2b1b754f20a4e738
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.xml
   - name: FP16/action-recognition-0001-decoder.bin
     size: 15119512
-    sha256: 2dcf41b1480aeaadb7e8802c35f493e8812b47971884a3ecb2d52fd212adbb5d
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
+    sha256: 04108ac97f6815a1929b0cf3a6a5b539b28236ea7cf6bd4329011ca768257f23
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

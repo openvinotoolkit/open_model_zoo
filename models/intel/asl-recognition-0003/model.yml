@@ -17,20 +17,20 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/asl-recognition-0003.xml
-    size: 239471
-    sha256: c77b9b414fe4e58f82739881f524d00e21c4b9fbb8a01c9abf0372822506eb96
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/asl-recognition-0003/FP32/asl-recognition-0003.xml
+    size: 239494
+    sha256: 961de5b24ac154bb153ac5ac94614d5f60214d9b0809f0a356fa6b7ec8c58c8c
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/asl-recognition-0003/FP32/asl-recognition-0003.xml
   - name: FP32/asl-recognition-0003.bin
     size: 16515220
-    sha256: 0444e2f72f4b98ef2c4fbf5cafe26562c1386559eb5b99eca7a77e2e52fad9f4
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/asl-recognition-0003/FP32/asl-recognition-0003.bin
+    sha256: 41c6508a94d86603084dd41a46e4085bc05fcd84f3ecd65ef44a7e03001e7459
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/asl-recognition-0003/FP32/asl-recognition-0003.bin
   - name: FP16/asl-recognition-0003.xml
-    size: 239364
-    sha256: c22eecd090c06077941cbf011fedc5d516e46193a014421d6915e6a4157549ad
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/asl-recognition-0003/FP16/asl-recognition-0003.xml
+    size: 239391
+    sha256: 771b824a0e72e2dce600f6279a2542e3fa9fb61fe68eeb80a6aed3f0c45ee1ce
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/asl-recognition-0003/FP16/asl-recognition-0003.xml
   - name: FP16/asl-recognition-0003.bin
     size: 8257622
-    sha256: c18725ff155e383c261cd0f7ab2556191c8dd5f3dd0fa716aa131e3b1292663c
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20191230_170000_models_bin/asl-recognition-0003/FP16/asl-recognition-0003.bin
+    sha256: a2590f1e5d65480d0dc439b717af8bdf9d5a2c270c716ea6f269d558326dc8af
+    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/asl-recognition-0003/FP16/asl-recognition-0003.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

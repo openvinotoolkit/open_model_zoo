@@ -25,5 +25,11 @@ models:
 
     datasets:
       - name: road_segmentation
+        metrics:
+          - type: mean_iou
+            presenter: print_vector
+          - type: mean_accuracy
+            presenter: print_vector
+
 
 global_definitions: ../dataset_definitions.yml

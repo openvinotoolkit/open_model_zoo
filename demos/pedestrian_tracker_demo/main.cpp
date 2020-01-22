@@ -27,7 +27,6 @@ using ImageWithFrameIndex = std::pair<cv::Mat, int>;
 
 std::unique_ptr<PedestrianTracker>
 CreatePedestrianTracker(const std::string& reid_model,
-                        const std::string& reid_weights,
                         const InferenceEngine::Core & ie,
                         const std::string & deviceName,
                         bool should_keep_tracking_info) {
@@ -50,20 +49,9 @@ CreatePedestrianTracker(const std::string& reid_model,
     tracker->set_descriptor_fast(descriptor_fast);
     tracker->set_distance_fast(distance_fast);
 
-    if (!reid_model.empty() && !reid_weights.empty()) {
-        CnnConfig reid_config(reid_model, reid_weights);
+    if (!reid_model.empty()) {
+        CnnConfig reid_config(reid_model);
         reid_config.max_batch_size = 16;   // defaulting to 16
-
-        try {
-            if (ie.GetConfig(deviceName, CONFIG_KEY(DYN_BATCH_ENABLED)).as<std::string>() != PluginConfigParams::YES) {
-                reid_config.max_batch_size = 1;
-                std::cerr << "Dynamic batch is not supported for " << deviceName << ". Fall back to batch 1." << std::endl;
-            }
-        }
-        catch(const InferenceEngine::details::InferenceEngineException& e) {
-            reid_config.max_batch_size = 1;
-            std::cerr << e.what() << " for " << deviceName << ". Fall back to batch 1." << std::endl;
-        }
 
         std::shared_ptr<IImageDescriptor> descriptor_strong =
             std::make_shared<DescriptorIE>(reid_config, ie, deviceName);
@@ -77,8 +65,8 @@ CreatePedestrianTracker(const std::string& reid_model,
         tracker->set_descriptor_strong(descriptor_strong);
         tracker->set_distance_strong(distance_strong);
     } else {
-        std::cout << "WARNING: Either reid model or reid weights "
-            << "were not specified. "
+        std::cout << "WARNING: Reid model "
+            << "was not specified. "
             << "Only fast reidentification approach will be used." << std::endl;
     }
 
@@ -120,10 +108,7 @@ int main_work(int argc, char **argv) {
 
     // Reading command line parameters.
     auto det_model = FLAGS_m_det;
-    auto det_weights = fileNameNoExt(FLAGS_m_det) + ".bin";
-
     auto reid_model = FLAGS_m_reid;
-    auto reid_weights = fileNameNoExt(FLAGS_m_reid) + ".bin";
 
     auto detlog_out = FLAGS_out;
 
@@ -155,12 +140,12 @@ int main_work(int argc, char **argv) {
             devices, custom_cpu_library, path_to_custom_layers,
             should_use_perf_counter);
 
-    DetectorConfig detector_confid(det_model, det_weights);
+    DetectorConfig detector_confid(det_model);
     ObjectDetector pedestrian_detector(detector_confid, ie, detector_mode);
 
     bool should_keep_tracking_info = should_save_det_log || should_print_out;
     std::unique_ptr<PedestrianTracker> tracker =
-        CreatePedestrianTracker(reid_model, reid_weights, ie, reid_mode,
+        CreatePedestrianTracker(reid_model, ie, reid_mode,
                                 should_keep_tracking_info);
 
     cv::VideoCapture cap;

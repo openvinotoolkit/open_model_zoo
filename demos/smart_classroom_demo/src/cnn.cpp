@@ -18,19 +18,14 @@ using namespace InferenceEngine;
 CnnDLSDKBase::CnnDLSDKBase(const Config& config) : config_(config) {}
 
 void CnnDLSDKBase::Load() {
-    CNNNetReader net_reader;
-    net_reader.ReadNetwork(config_.path_to_model);
-    net_reader.ReadWeights(config_.path_to_weights);
+    auto cnnNetwork = config_.ie.ReadNetwork(config_.path_to_model);
 
-    if (!net_reader.isParseSuccess()) {
-        THROW_IE_EXCEPTION << "Cannot load model";
-    }
 
-    const int currentBatchSize = net_reader.getNetwork().getBatchSize();
+    const int currentBatchSize = cnnNetwork.getBatchSize();
     if (currentBatchSize != config_.max_batch_size)
-        net_reader.getNetwork().setBatchSize(config_.max_batch_size);
+        cnnNetwork.setBatchSize(config_.max_batch_size);
 
-    InferenceEngine::InputsDataMap in = net_reader.getNetwork().getInputsInfo();
+    InferenceEngine::InputsDataMap in = cnnNetwork.getInputsInfo();
     if (in.size() != 1) {
         THROW_IE_EXCEPTION << "Network should have only one input";
     }
@@ -38,13 +33,13 @@ void CnnDLSDKBase::Load() {
     in.begin()->second->setLayout(Layout::NCHW);
     input_blob_name_ = in.begin()->first;
 
-    OutputsDataMap out = net_reader.getNetwork().getOutputsInfo();
+    OutputsDataMap out = cnnNetwork.getOutputsInfo();
     for (auto&& item : out) {
         item.second->setPrecision(Precision::FP32);
         output_blobs_names_.push_back(item.first);
     }
 
-    executable_network_ = config_.ie.LoadNetwork(net_reader.getNetwork(), config_.deviceName);
+    executable_network_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
     infer_request_ = executable_network_.CreateInferRequest();
 }
 

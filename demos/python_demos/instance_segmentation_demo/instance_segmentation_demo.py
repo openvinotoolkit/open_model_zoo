@@ -155,7 +155,6 @@ def main():
 
     log.info('Loading IR to the plugin...')
     exec_net = ie.load_network(network=net, device_name=args.device, num_requests=2)
-    del net
 
     try:
         input_source = int(args.input_source)
@@ -276,8 +275,6 @@ def main():
 
     cv2.destroyAllWindows()
     cap.release()
-    del exec_net
-    del ie
 
 
 if __name__ == '__main__':

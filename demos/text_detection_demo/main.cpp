@@ -226,8 +226,8 @@ int main(int argc, char *argv[]) {
                     if (output_shape[2] != kAlphabet.length())
                         throw std::runtime_error("The text recognition model does not correspond to alphabet.");
 
-                    float *ouput_data_pointer = blobs.begin()->second->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
-                    std::vector<float> output_data(ouput_data_pointer, ouput_data_pointer + output_shape[0] * output_shape[2]);
+                    float *output_data_pointer = blobs.begin()->second->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+                    std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[2]);
 
                     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
                     res = CTCGreedyDecoder(output_data, kAlphabet, kPadSymbol, &conf);
