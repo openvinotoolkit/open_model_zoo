@@ -40,7 +40,7 @@ LOADERS_MAPPING = {
     'opencv': GTMaskLoader.OPENCV,
     'pillow': GTMaskLoader.PILLOW,
     'scipy': GTMaskLoader.SCIPY,
-    'nifty': GTMaskLoader.NIFTI,
+    'nifti': GTMaskLoader.NIFTI,
     'nifti_channels_first': GTMaskLoader.NIFTI_CHANNELS_FIRST,
     'numpy': GTMaskLoader.NUMPY
 }
@@ -56,7 +56,7 @@ class SegmentationAnnotation(SegmentationRepresentation):
         GTMaskLoader.OPENCV: 'opencv_imread',
         GTMaskLoader.SCIPY: 'scipy_imread',
         GTMaskLoader.NIFTI: 'nifti_reader',
-        GTMaskLoader.NIFTI_CHANNELS_FIRST: {'type': 'nifty', 'channels_first': True},
+        GTMaskLoader.NIFTI_CHANNELS_FIRST: {'type': 'nifti_reader', 'channels_first': True},
         GTMaskLoader.NUMPY: 'numpy_reader'
     }
 
