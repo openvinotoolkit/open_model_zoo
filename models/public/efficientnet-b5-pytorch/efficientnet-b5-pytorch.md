@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 The `efficientnet-b5-pytorch` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946)
-models designed to perform image classification. This model was pretrained in TensorFlow\*, then weights were converted to PyTorch\*. All the EfficientNet models have been pretrained on the ImageNet\* image database. For details about this family of models, check out the [TensorFlow EfficientNet repository](https://github.com/rwightman/gen-efficientnet-pytorch).
+models designed to perform image classification. This model was pretrained in TensorFlow\*, then weights were converted to PyTorch\*. All the EfficientNet models have been pretrained on the ImageNet\* image database. For details about this family of models, check out the [EfficientNets for PyTorch repository](https://github.com/rwightman/gen-efficientnet-pytorch).
 
 ### Input
 

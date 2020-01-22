@@ -7,7 +7,7 @@ models designed to perform image classification, trained with the
 [AutoAugmentation preprocessing](https://arxiv.org/abs/1805.09501).
 This model was pretrained in TensorFlow\*.
 All the EfficientNet models have been pretrained on the ImageNet\* image database.
-For details about this family of models, check out the [TensorFlow EfficientNet repository](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet).
+For details about this family of models, check out the [TensorFlow Cloud TPU repository](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet).
 
 ## Example
 

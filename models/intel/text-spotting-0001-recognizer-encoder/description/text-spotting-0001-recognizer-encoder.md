@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is a text-spotting model that simultaneously detects and
+This is a text spotting model that simultaneously detects and
 recognizes text. The model detects symbol sequences separated by space and performs
 recognition without a dictionary. The model is built on top of the Mask-RCNN
 framework with additional attention-based text recognition head.
