@@ -27,7 +27,7 @@ feature map outputs an embedding vector of 256 floats.
 
 The cumulative matching curve (CMC) at rank-1 is accuracy denoting the possibility
 to locate at least one true positive in the top-1 rank.
-Mean Average Precision (mAP) is the mean across all queries Average Precision (AP). 
+Mean Average Precision (mAP) is the mean across Average Precision (AP) of all queries. 
 AP is defined as the area under the
 [precision and recall](https://en.wikipedia.org/wiki/Precision_and_recall) curve.
 
