@@ -22,6 +22,13 @@ Model give as output predict A- and B-channels of LAB-image.
 
 ## Accuracy
 
+The quality metrics calculated on ImageNet validation dataset.
+
+| Metric         | Value         |
+|----------------|---------------|
+| Accuracy top-1 |        61.33% |
+| Accuracy top-5 |        83.77% |
+
 ## Performance
 
 ## Input
