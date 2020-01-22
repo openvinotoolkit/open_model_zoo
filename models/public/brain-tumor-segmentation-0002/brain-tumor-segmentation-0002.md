@@ -30,16 +30,17 @@ are compartible with input labels):
 
 The following accuracy metrics are measured on a `brain tumor` training subset of the [Medical Decathlon](http://medicaldecathlon.com/) dataset. 
 
-**Mean**:  
-Dice index for "overall": 0.915  
-Dice index for "necrotic core / non-enhancing tumor": 0.806  
-Dice index for "edema": 0.611  
-Dice index for "enhancing tumor": 0.794  
-**Median**:  
-Dice index for "overall": 0.927  
-Dice index for "necrotic core / non-enhancing tumor": 0.835  
-Dice index for "edema": 0.644  
-Dice index for "enhancing tumor": 0.86  
+**Mean**:
+- Dice index for "overall": 0.915
+- Dice index for "necrotic core / non-enhancing tumor": 0.806
+- Dice index for "edema": 0.611
+- Dice index for "enhancing tumor": 0.794
+
+**Median**:
+- Dice index for "overall": 0.927
+- Dice index for "necrotic core / non-enhancing tumor": 0.835
+- Dice index for "edema": 0.644
+- Dice index for "enhancing tumor": 0.86
 
   
 > **NOTE**: The accuracy achieved with ONNX\* model adapted for OpenVINO™ can slightly differ from the accuracy achieved with the original PyTorch model since the upsampling operation was changed from the `trilinear` to `nearest` mode.
@@ -106,3 +107,26 @@ The channels are ordered as `whole tumor`, `tumor core`, and `enhancing tumor`.
 The original model is distributed under the
 [MIT License](https://raw.githubusercontent.com/lachinov/brats2019/master/LICENSE).
 
+```
+The MIT License
+
+Copyright (c) 2019 Dmitrii Lachinov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+```
