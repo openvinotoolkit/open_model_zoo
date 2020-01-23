@@ -75,4 +75,5 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
         word_ids = [self.word_to_id.get(word, self._unk) for word in words]
         encoded_sentence.extend(word_ids)
         encoded_sentence.append(self._eos)
+
         return encoded_sentence

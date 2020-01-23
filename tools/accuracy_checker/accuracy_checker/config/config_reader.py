@@ -86,6 +86,7 @@ ACCEPTABLE_MODEL = [
 ]
 
 
+
 class ConfigReader:
     """
     Class for parsing input config.
