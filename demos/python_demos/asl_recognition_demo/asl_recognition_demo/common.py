@@ -58,7 +58,7 @@ class IEModel:  # pylint: disable=too-few-public-methods
                     if len(candidate_shape) != len(output_shape):
                         continue
 
-                    matches = [src == trg if trg is not None and trg > 0 else True
+                    matches = [src == trg or trg < 0
                                for src, trg in zip(candidate_shape, output_shape)]
                     if all(matches):
                         candidates.append(candidate_name)
