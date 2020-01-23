@@ -350,6 +350,20 @@ class DLSDKLauncher(Launcher):
 
         return results
 
+    def predict_sequential(self, inputs, metadata=None, **kwargs):
+        lstm_inputs_feed = self._fill_lstm_inputs()
+        results = []
+        for feed_dict in inputs:
+            feed_dict.update(lstm_inputs_feed)
+            output_result = self.exec_network.infer(feed_dict)
+            lstm_inputs_feed = self._fill_lstm_inputs(output_result)
+            results.append(output_result)
+        if metadata is not None:
+            for meta_ in metadata:
+                meta_['input_shape'] = self.inputs_info_for_meta()
+
+        return results
+
     def predict_async(self, ir, inputs, metadata=None, context=None, **kwargs):
         infer_inputs = inputs[0]
         if metadata is not None:
@@ -917,6 +931,15 @@ class DLSDKLauncher(Launcher):
                         self.exec_network.inputs[input_config['name']].precision = input_config['precision']
                     else:
                         self.exec_network.input_info[input_config['name']].precision = input_config['precision']
+
+    def _fill_lstm_inputs(self, infer_outputs=None):
+        feed_dict = {}
+        for lstm_var, output_layer in self.lstm_inputs.items():
+            layer_shape = self.inputs[lstm_var].shape
+            input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(layer_shape)
+            feed_dict[lstm_var] = input_data
+
+        return feed_dict
 
     def _print_input_output_info(self):
         print_info('Input info:')
