@@ -30,7 +30,7 @@ def load_ie_core(device, cpu_extension=None):
 class IEModel:  # pylint: disable=too-few-public-methods
     """ Class that allows worknig with Inference Engine model. """
 
-    def __init__(self, model_path, device, ie_core, num_requests, output_name=None):
+    def __init__(self, model_path, device, ie_core, num_requests, output_shape=None):
         """Constructor"""
         if model_path.endswith((".xml", ".bin")):
             model_path = model_path[:-4]
@@ -45,18 +45,32 @@ class IEModel:  # pylint: disable=too-few-public-methods
             raise RuntimeError("Following layers are not supported by the {} plugin:\n {}"
                                .format(device, ', '.join(not_supported_layers)))
 
+        self.exec_net = ie_core.load_network(network=self.net,
+                                             device_name=device,
+                                             num_requests=num_requests)
+
         self.input_name = next(iter(self.net.inputs))
-        if len(self.net.outputs) > 1 and output_name is not None:
-            if output_name is not None:
-                self.output_name = output_name
+        if len(self.net.outputs) > 1:
+            if output_shape is not None:
+                candidates = []
+                for candidate_name in self.net.outputs:
+                    candidate_shape = self.exec_net.requests[0].outputs[candidate_name].shape
+                    if len(candidate_shape) != len(output_shape):
+                        continue
+
+                    matches = [src == trg or trg < 0
+                               for src, trg in zip(candidate_shape, output_shape)]
+                    if all(matches):
+                        candidates.append(candidate_name)
+
+                if len(candidates) != 1:
+                    raise Exception("One output is expected")
+
+                self.output_name = candidates[0]
             else:
                 raise Exception("One output is expected")
         else:
             self.output_name = next(iter(self.net.outputs))
-
-        self.exec_net = ie_core.load_network(network=self.net,
-                                             device_name=device,
-                                             num_requests=num_requests)
 
         self.input_size = self.net.inputs[self.input_name].shape
         self.output_size = self.exec_net.requests[0].outputs[self.output_name].shape
