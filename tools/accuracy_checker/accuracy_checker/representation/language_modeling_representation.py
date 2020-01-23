@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import numpy as np
 from .base_representation import BaseRepresentation
 from .classification_representation import ClassificationPrediction
 
@@ -32,4 +33,9 @@ class LMAnnotation(LMRepresentation):
 
 
 class LMPrediction(LMRepresentation, ClassificationPrediction):
-    pass
+    @property
+    def label(self):
+        return np.argmax(self.scores, axis=0)
+
+    def top_k(self, k):
+        return np.argpartition(self.scores, -k, axis=0)[:, -k:]

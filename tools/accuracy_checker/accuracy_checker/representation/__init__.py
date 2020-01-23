@@ -77,12 +77,16 @@ from .nlp_representation import (
     LanguageModelingAnnotation,
     LanguageModelingPrediction
 )
+<<<<<<< 812a8fbdb9a2e7b18e1586aaa392130e27aa65b7
 from .image_inpainting import ImageInpaintingAnnotation, ImageInpaintingPrediction
 from .style_transfer import StyleTransferAnnotation, StyleTransferPrediction
 
 from .depth_estimation import DepthEstimationAnnotation, DepthEstimationPrediction
 from .image_processing import ImageProcessingAnnotation, ImageProcessingPrediction
 from .language_modeling_representation import LMAnnotation
+=======
+from .language_modeling_representation import LMAnnotation, LMPrediction
+>>>>>>> adapter
 
 __all__ = [
     'BaseRepresentation',
@@ -167,6 +171,4 @@ __all__ = [
 
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',
-
-    'LMAnnotation'
 ]

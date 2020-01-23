@@ -68,7 +68,7 @@ from .hit_ratio import HitRatioAdapter
 from .mask_rcnn import MaskRCNNAdapter
 from .mask_rcnn_with_text import MaskRCNNWithTextAdapter
 
-from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter
+from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter, LanguageModelingAdapter
 
 from .centernet import CTDETAdapter
 
@@ -135,6 +135,7 @@ __all__ = [
 
     'MachineTranslationAdapter',
     'QuestionAnsweringAdapter',
+    'LanguageModelingAdapter',
 
     'MonoDepthAdapter',
 
