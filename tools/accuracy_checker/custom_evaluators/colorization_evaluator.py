@@ -126,11 +126,12 @@ class ColorizationEvaluator(BaseEvaluator):
 
 
 class BaseModel:
-    def check_format(self, current_format):
-        supported_format = ['.xml', '.bin']
-        if not get_path(current_format).suffix in supported_format:
-            raise ConfigError('{} format not supported'.format(supported_format))
-        return current_format
+    def check_format(self, model_xml, model_bin):
+        if not get_path(model_xml).suffix == '.xml':
+            raise ConfigError('{} format not supported'.format(model_xml))
+        if not get_path(model_bin).suffix == '.bin':
+            raise ConfigError('{} format not supported'.format(model_bin))
+        return str(model_xml), str(model_bin)
 
     def predict(self, idenitifers, input_data):
         raise NotImplementedError
@@ -142,8 +143,7 @@ class BaseModel:
 class ColorizationTestModel(BaseModel):
     def __init__(self, network_info, launcher):
         super().__init__()
-        model_xml = self.check_format(network_info['model'])
-        model_bin = self.check_format(network_info['weights'])
+        model_xml, model_bin = self.check_format(network_info['model'], network_info['weights'])
         self.network = launcher.create_ie_network(model_xml, model_bin)
         self.network.batch_size = 1
         if not hasattr(launcher, 'plugin'):
@@ -190,8 +190,7 @@ class ColorizationTestModel(BaseModel):
 class ColorizationCheckModel(BaseModel):
     def __init__(self, network_info, launcher):
         super().__init__()
-        model_xml = self.check_format(network_info['model'])
-        model_bin = self.check_format(network_info['weights'])
+        model_xml, model_bin = self.check_format(network_info['model'], network_info['weights'])
         self.adapter = create_adapter(network_info['adapter'])
         self.network = launcher.create_ie_network(model_xml, model_bin)
         if hasattr(launcher, 'plugin'):
