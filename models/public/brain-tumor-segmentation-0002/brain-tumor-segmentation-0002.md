@@ -20,13 +20,15 @@ This model was created for participation in the [Brain Tumor Segmentation Challe
 See [BRATS 2019 Leaderboard](https://www.cbica.upenn.edu/BraTS19/lboardValidation.html). The metrics 
 for challenge validation (Dice_WT, Dice_TC, Dice_ET) differ from the metrics reported below (which 
 are compartible with input labels):
-- WT (*whole tumor*) class combines all three tumor classes:
+
+- WT (whole tumor) class combines all three tumor classes:
     - necrotic core / non-enhancing tumor
-    - edema 
-    - enhancing tumor 
-- TC (*tumor core*) combines the following classes:
-    - necrotic core / non-enhancing tumor
+    - edema
     - enhancing tumor
+- TC (tumor core) combines the following classes:
+    - necrotic core
+    - non-enhancing tumor
+- ET (enhancing tumor)
 
 The following accuracy metrics are measured on a `brain tumor` training subset of the [Medical Decathlon](http://medicaldecathlon.com/) dataset. 
 
