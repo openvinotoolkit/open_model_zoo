@@ -281,6 +281,9 @@ class DLSDKLauncher(Launcher):
         self._do_reshape = False
         self._use_set_blob = False
         self._target_layout_mapping = {}
+        self._lstm_inputs = None
+        if '_list_lstm_inputs' in self.config:
+            self._configure_lstm_inputs()
 
     @property
     def device(self):
@@ -318,6 +321,8 @@ class DLSDKLauncher(Launcher):
         Returns:
             raw data from network.
         """
+        if self._lstm_inputs:
+            return self.predict_sequential(inputs, metadata)
         results = []
         for infer_inputs in inputs:
             if self._do_reshape:
@@ -355,12 +360,17 @@ class DLSDKLauncher(Launcher):
         results = []
         for feed_dict in inputs:
             feed_dict.update(lstm_inputs_feed)
+            if self._do_reshape:
+                input_shapes = {layer_name: data.shape for layer_name, data in feed_dict.items()}
+                self._reshape_input(input_shapes)
             output_result = self.exec_network.infer(feed_dict)
             lstm_inputs_feed = self._fill_lstm_inputs(output_result)
             results.append(output_result)
         if metadata is not None:
             for meta_ in metadata:
                 meta_['input_shape'] = self.inputs_info_for_meta()
+
+        self._do_reshape = False
 
         return results
 
@@ -932,9 +942,17 @@ class DLSDKLauncher(Launcher):
                     else:
                         self.exec_network.input_info[input_config['name']].precision = input_config['precision']
 
+    def _configure_lstm_inputs(self):
+        lstm_mapping = {}
+        config_inputs = self.config.get('inputs', [])
+        for input_config in config_inputs:
+            if input_config['type'] == 'LSTM_INPUT':
+                lstm_mapping[input_config['name']] = input_config['value']
+        self._lstm_inputs = lstm_mapping
+
     def _fill_lstm_inputs(self, infer_outputs=None):
         feed_dict = {}
-        for lstm_var, output_layer in self.lstm_inputs.items():
+        for lstm_var, output_layer in self._lstm_inputs.items():
             layer_shape = self.inputs[lstm_var].shape
             input_data = infer_outputs[output_layer].reshape(layer_shape) if infer_outputs else np.zeros(layer_shape)
             feed_dict[lstm_var] = input_data
