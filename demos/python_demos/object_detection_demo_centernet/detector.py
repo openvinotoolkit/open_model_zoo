@@ -196,7 +196,7 @@ class Detector(object):
         filtered_detections = detections[mask]
         scale = max(image_sizes)
         center = np.array(image_sizes[:2])/2.0
-        dets = self._transform(filtered_detections, np.flip(center), scale, height, width)
+        dets = self._transform(filtered_detections, np.flip(center, 0), scale, height, width)
         return dets
 
     def infer(self, image):
