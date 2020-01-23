@@ -35,8 +35,7 @@ This model is a Mask-RCNN-based text detector with ResNet50 backbone and additio
 1.	Name: `im_data` , shape: [1x3x768x1280]. An input image in the [1xCxHxW] format. 
     The expected channel order is BGR.
 2.	Name: `im_info`, shape: [1x3]. Image information: processed image height,
-    processed image width and processed image scale.
-    w.r.t. the original image resolution.
+    processed image width and processed image scale with respect to the original image resolution.
 
 ## Outputs
 
