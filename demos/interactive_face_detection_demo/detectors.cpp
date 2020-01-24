@@ -22,9 +22,6 @@
 #include <samples/slog.hpp>
 
 #include <ie_iextension.h>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 #include "detectors.hpp"
 

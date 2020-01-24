@@ -38,9 +38,6 @@ void initializeIEObject(InferenceEngine::Core& ie,
 
         /** Loading extensions for the CPU device **/
         if ((deviceName.find("CPU") != std::string::npos)) {
-#ifdef WITH_EXTENSIONS
-            ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-#endif
             loadedDevices.insert(deviceName);
         }
     }

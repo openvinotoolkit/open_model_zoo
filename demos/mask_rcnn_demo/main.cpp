@@ -17,9 +17,6 @@
 #include <iomanip>
 
 #include <inference_engine.hpp>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
@@ -69,18 +66,6 @@ int main(int argc, char *argv[]) {
         // ---------------------Load inference engine------------------------------------------------
         slog::info << "Loading Inference Engine" << slog::endl;
         Core ie;
-
-#ifdef WITH_EXTENSIONS
-        /** Loading default extensions **/
-        if (FLAGS_d.find("CPU") != std::string::npos) {
-            /**
-             * cpu_extensions library is compiled from "extension" folder containing
-             * custom MKLDNNPlugin layer implementations. These layers are not supported
-             * by mkldnn, but they can be useful for inferring custom topologies.
-            **/
-            ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-        }
-#endif
 
         if (!FLAGS_l.empty()) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension

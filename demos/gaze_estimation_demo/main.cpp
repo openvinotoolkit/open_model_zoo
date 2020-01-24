@@ -50,9 +50,6 @@
 #include "utils.hpp"
 
 #include <ie_iextension.h>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 using namespace InferenceEngine;
 using namespace gaze_estimation;
