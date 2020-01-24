@@ -30,9 +30,11 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
             {
                 'input_file': PathField(description='Input file for word prediction'),
                 'vocab_file': PathField(description='model vocabulary file'),
-                'chars_encoding': BoolField(optional=True, default=False, description='include encoding words by chars'),
-                'max_word_length': NumberField(optional=True, value_type=int, default=50, min_value=1)
-                'pad_word_lenght': BoolField(optional=True, default=True)
+                'chars_encoding': BoolField(
+                    optional=True, default=False, description='include encoding words by chars'
+                ),
+                'max_word_length': NumberField(optional=True, value_type=int, default=50, min_value=1),
+                'pad_word_length': BoolField(optional=True, default=True)
             }
         )
         return params
@@ -42,6 +44,7 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
         self.chars_encoding = self.get_value_from_config('chars_encoding')
         self.max_word_length = self.get_value_from_config('max_word_length')
         self.load_vocab(self.get_value_from_config('vocab_file'))
+
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         sentences = read_txt(self.input_file)
         encoded_sentences = [self.encode_sentence(sentence) for sentence in sentences]
@@ -78,7 +81,7 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
                 self._unk = idx
             if word == '!!!MAXTERMID':
                 continue
-            id_to_word.append(idx)
+            id_to_word.append(word)
             self.word_to_id[word] = idx
             idx += 1
         self.vocab = dict(enumerate(id_to_word))
@@ -87,25 +90,25 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
             chars_set = set()
             for word in id_to_word:
                 chars_set |= set(word)
-            free_ids =  [chr(i) for i in range(256) if chr(i) not in chars_set]
+            free_ids = [chr(i) for i in range(256) if chr(i) not in chars_set]
             if len(free_ids) < 5:
                 raise ValueError('chars encoding impossible, not enough free chars for specific symbols ids')
             self._bos_char, self._eos_char, self._bow_char, self._eow_char, self._pad_char = free_ids[:5]
             chars_set |= {self._bos_char, self._eos_char, self._bow_char, self._eow_char, self._pad_char}
             self._word_to_char_ids = []
             for word in id_to_word:
-                padded_chars = np.full(ord(self._pad_char), self.max_word_length)
+                padded_chars = np.full(self.max_word_length, ord(self._pad_char))
                 if len(word) > self.max_word_length - 2:
                     word = word[:self.max_word_length - 2]
                 padded_chars[0] = ord(self._bow_char)
                 for char_id, char in enumerate(word):
-                    padded_chars[char_id] = ord(char)
+                    padded_chars[char_id + 1] = ord(char)
                 padded_chars[len(word)] = ord(self._eow_char)
                 self._word_to_char_ids.append(padded_chars)
-            bos_char_ids = np.full(ord(self._pad_char), self.max_word_length)
-            self._bos_char_ids = np.full(ord(self._pad_char), self.max_word_length)
-            bos_char_ids[:2] = [ord(self._bow_char), ord(self._bos_char), ord(self._eow_char)]
-            self._eos_char_ids = [ord(self._bow_char), ord(self._eos_char), ord(self._eow_char)]
+            self._bos_char_ids = np.full(self.max_word_length, ord(self._pad_char))
+            self._bos_char_ids[:3] = [ord(self._bow_char), ord(self._bos_char), ord(self._eow_char)]
+            self._eos_char_ids = np.full(self.max_word_length, ord(self._pad_char))
+            self._eos_char_ids[:3] = [ord(self._bow_char), ord(self._eos_char), ord(self._eow_char)]
 
     def encode_sentence(self, sentence):
         words = sentence.split()
@@ -119,7 +122,7 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
     def encode_by_chars(self, encoded_sentence):
         sentence_rep = [self._bos_char_ids]
         for word_id in encoded_sentence[1:-1]:
-            sentence_rep.append(self._word_to_char_ids[word_id])
+            sentence_rep.append(self._word_to_char_ids[word_id[0]])
         sentence_rep.append(self._eos_char_ids)
 
         return sentence_rep
