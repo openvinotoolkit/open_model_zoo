@@ -12,9 +12,25 @@ models:
           anchors: tiny_yolo_v2
       - framework: dlsdk
         tags:
+          - FP16
+        model: intel/yolo-tiny-v2-ava-0001/FP16/yolo-tiny-v2-ava-0001.xml
+        weights: intel/yolo-tiny-v2-ava-0001/FP16/yolo-tiny-v2-ava-0001.bin
+        adapter:
+          type: yolo_v2
+          anchors: tiny_yolo_v2
+      - framework: dlsdk
+        tags:
           - FP32-INT8
         model: intel/yolo-tiny-v2-ava-0001/FP32-INT8/yolo-tiny-v2-ava-0001.xml
         weights: intel/yolo-tiny-v2-ava-0001/FP32-INT8/yolo-tiny-v2-ava-0001.bin
+        adapter:
+          type: yolo_v2
+          anchors: tiny_yolo_v2
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model: intel/yolo-tiny-v2-ava-0001/FP16-INT8/yolo-tiny-v2-ava-0001.xml
+        weights: intel/yolo-tiny-v2-ava-0001/FP16-INT8/yolo-tiny-v2-ava-0001.bin
         adapter:
           type: yolo_v2
           anchors: tiny_yolo_v2

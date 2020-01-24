@@ -1,8 +1,9 @@
-# yolo-tiny-v2-ava-0001
+# yolo-tiny-v2-ava-sparse-30-0001
 
 ## Use Case and High-Level Description
 
 This is a re-implemented and re-trained version of [tiny YOLO v2](https://arxiv.org/abs/1612.08242) object detection network trained with VOC2012 training dataset.
+[Network weight pruning](https://arxiv.org/abs/1710.01878) is applied to sparsify convolution layers (30% of network parameters are set to zeros).
 
 ## Example
 
@@ -10,9 +11,9 @@ This is a re-implemented and re-trained version of [tiny YOLO v2](https://arxiv.
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Mean Average Precision (mAP)    | 35.37%                                    |
+| Mean Average Precision (mAP)    | 36.33%                                    |
 | Flops                           | 6.97Bn*                                   |
-| Source framework                | TensorFlow**                              |
+| Source framework                | Tensorflow**                              |
 
 Average Precision metric described in: Mark Everingham et al.
 ["The PASCAL Visual Object Classes (VOC) Challenge"](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf).
