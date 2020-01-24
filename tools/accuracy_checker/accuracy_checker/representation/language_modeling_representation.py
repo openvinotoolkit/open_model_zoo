@@ -24,12 +24,16 @@ class LMRepresentation(BaseRepresentation):
 
 
 class LMAnnotation(LMRepresentation):
-    def __init__(self, identifier, input_ids, target_ids, input_words=None, target_words=None, metadata=None):
+    def __init__(
+            self, identifier, input_ids, target_ids,
+            input_char_ids=None, input_words=None, target_words=None, metadata=None
+    ):
         super().__init__(identifier, metadata)
         self.input_ids = input_ids
         self.target_ids = target_ids
-        self.input_words = input_words
-        self.target_words = target_words
+        self.input_words = input_words or []
+        self.target_words = target_words or []
+        self.input_char_ids = input_char_ids or []
 
 
 class LMPrediction(LMRepresentation, ClassificationPrediction):
