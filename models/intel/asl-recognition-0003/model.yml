@@ -17,20 +17,20 @@ description: >-
 task_type: action_recognition
 files:
   - name: FP32/asl-recognition-0003.xml
-    size: 239494
-    sha256: 961de5b24ac154bb153ac5ac94614d5f60214d9b0809f0a356fa6b7ec8c58c8c
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/asl-recognition-0003/FP32/asl-recognition-0003.xml
+    size: 239496
+    sha256: 26f952c4d025372074d2a54c895805ed12780b744eb2fdd618b7b4d3c10a03ef
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/asl-recognition-0003/FP32/asl-recognition-0003.xml
   - name: FP32/asl-recognition-0003.bin
     size: 16515220
     sha256: 41c6508a94d86603084dd41a46e4085bc05fcd84f3ecd65ef44a7e03001e7459
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/asl-recognition-0003/FP32/asl-recognition-0003.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/asl-recognition-0003/FP32/asl-recognition-0003.bin
   - name: FP16/asl-recognition-0003.xml
-    size: 239391
-    sha256: 771b824a0e72e2dce600f6279a2542e3fa9fb61fe68eeb80a6aed3f0c45ee1ce
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/asl-recognition-0003/FP16/asl-recognition-0003.xml
+    size: 239393
+    sha256: 01da9dfcf28238b6fe949cca171088e45f33bcc3e420b75924878d3d202e684b
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/asl-recognition-0003/FP16/asl-recognition-0003.xml
   - name: FP16/asl-recognition-0003.bin
     size: 8257622
     sha256: a2590f1e5d65480d0dc439b717af8bdf9d5a2c270c716ea6f269d558326dc8af
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/asl-recognition-0003/FP16/asl-recognition-0003.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/asl-recognition-0003/FP16/asl-recognition-0003.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

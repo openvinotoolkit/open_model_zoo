@@ -18,20 +18,20 @@ description: >-
 task_type: optical_character_recognition
 files:
   - name: FP32/text-spotting-0001-recognizer-decoder.xml
-    size: 30543
-    sha256: 7a45447713c1b1cead9cfc7176dcbb3b356a1fc247ade055201e5697ac547b26
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/text-spotting-0001-recognizer-decoder/FP32/text-spotting-0001-recognizer-decoder.xml
+    size: 30545
+    sha256: c161afda8cd45ee21934c74aec49321855651c3286921f5b6909da0e0bc0b626
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/text-spotting-0001-recognizer-decoder/FP32/text-spotting-0001-recognizer-decoder.xml
   - name: FP32/text-spotting-0001-recognizer-decoder.bin
     size: 2707804
     sha256: 00cb0cef419a01661ca1c1b9977b1edebe581427dd28a593ba34505971544303
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/text-spotting-0001-recognizer-decoder/FP32/text-spotting-0001-recognizer-decoder.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/text-spotting-0001-recognizer-decoder/FP32/text-spotting-0001-recognizer-decoder.bin
   - name: FP16/text-spotting-0001-recognizer-decoder.xml
-    size: 30527
-    sha256: 01c2a7b426c91f195c45883b64a3a89b2276a4ecc2598f109820f3436e3f5d4c
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/text-spotting-0001-recognizer-decoder/FP16/text-spotting-0001-recognizer-decoder.xml
+    size: 30529
+    sha256: f4eb268b589327d7bdc22ea7c084aa88cc36dd1eec9855ec9f17890b9b26154a
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/text-spotting-0001-recognizer-decoder/FP16/text-spotting-0001-recognizer-decoder.xml
   - name: FP16/text-spotting-0001-recognizer-decoder.bin
     size: 1354000
     sha256: 58fb88820edf08b2809f2f7d7c563c86082b13342f01206ffc98707ed2a66948
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/text-spotting-0001-recognizer-decoder/FP16/text-spotting-0001-recognizer-decoder.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/text-spotting-0001-recognizer-decoder/FP16/text-spotting-0001-recognizer-decoder.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/product-detection-0001.xml
-    size: 273200
-    sha256: 31b7c786f42432339faec5779b719017120944061805eafe78da190ac70a1fea
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/product-detection-0001/FP32/product-detection-0001.xml
+    size: 273207
+    sha256: ec88b66d16f0899e7a833c5da5de0be3304062a926dd52662cbca4a2c68247bc
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/product-detection-0001/FP32/product-detection-0001.xml
   - name: FP32/product-detection-0001.bin
     size: 12850036
     sha256: 93f2ccd0ce7ba88f190f51b8a62d67fd5178444496f068dc33488fb1949e2726
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/product-detection-0001/FP32/product-detection-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/product-detection-0001/FP32/product-detection-0001.bin
   - name: FP16/product-detection-0001.xml
-    size: 273017
-    sha256: 302bcb7ef314f6eaa19951d6c62e39f640d7ffc107718bc4de27d27a71365953
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/product-detection-0001/FP16/product-detection-0001.xml
+    size: 273019
+    sha256: c6488db369f51c892172b9adc83f466553c7c36f9e4dac531891c1992c79051d
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/product-detection-0001/FP16/product-detection-0001.xml
   - name: FP16/product-detection-0001.bin
     size: 6425070
     sha256: ecc6f6bdae9a49c1749a324e0e98320a0a9aae97cc0c2b536853ee46b9178690
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/product-detection-0001/FP16/product-detection-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/product-detection-0001/FP16/product-detection-0001.bin
   - name: FP32-INT8/product-detection-0001.xml
     size: 674722
-    sha256: cea1c66540e4ec5187f9bc2450694db8931b9648863b95aa03334d1b2f9bc089
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/product-detection-0001/FP32-INT8/product-detection-0001.xml
+    sha256: 8320116effb73fdca11adb7238b7dd95f93e37e359fc44ba08ac35aa35317dd3
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/product-detection-0001/FP32-INT8/product-detection-0001.xml
   - name: FP32-INT8/product-detection-0001.bin
     size: 13101168
     sha256: 741f6bee9d617ca20a5c5813ed3defc240b4fdef84c4c2582e3e4bb586460d1f
-    source: https://download.01.org/opencv/2019/open_model_zoo/R4/20200117_150000_models_bin/product-detection-0001/FP32-INT8/product-detection-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/product-detection-0001/FP32-INT8/product-detection-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
