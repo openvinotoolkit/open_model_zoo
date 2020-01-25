@@ -29,7 +29,7 @@ namespace  {
 
     std::vector<float> softmax(const std::vector<float>::const_iterator& begin, const std::vector<float>::const_iterator& end) {
         std::vector<float> prob(end - begin, 0.f);
-        std::transform(begin, end, prob.begin(), static_cast<double(*)(double)>(std::exp));
+        std::transform(begin, end, prob.begin(), [](float x) { return std::exp(x); });
         float sum = std::accumulate(prob.begin(), prob.end(), 0.0f);
         for (int i = 0; i < static_cast<int>(prob.size()); i++)
             prob[i] /= sum;
@@ -77,8 +77,6 @@ std::string CTCGreedyDecoder(const std::vector<float> &data, const std::string& 
 }
 
 std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::string& alphabet, char pad_symbol, double *conf, int bandwidth) {
-    std::string res = "";
-
     const int num_classes = alphabet.length();
 
     std::vector<BeamElement> curr;
@@ -98,9 +96,9 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
                 int n = candidate_sentence.back();
                 prob_not_blank = candidate.prob_not_blank * prob[n];
             }
-            float prob_blank = candidate.prob() * prob[(num_classes - 1)];
+            float prob_blank = candidate.prob() * prob[num_classes - 1];
 
-            auto check_res = std::find_if(curr.begin(), curr.end(), [candidate_sentence](const BeamElement& n) {
+            auto check_res = std::find_if(curr.begin(), curr.end(), [&candidate_sentence](const BeamElement& n) {
                 return n.sentence == candidate_sentence;
             });
             if (check_res == std::end(curr)) {
@@ -123,7 +121,7 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
                     prob_not_blank = prob[i] * candidate.prob();
                 }
                 
-                auto check_res = std::find_if(curr.begin(), curr.end(), [extend](const BeamElement &n) {
+                auto check_res = std::find_if(curr.begin(), curr.end(), [&extend](const BeamElement &n) {
                     return n.sentence == extend;
                 });
 
@@ -147,6 +145,7 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
     }
 
     *conf = last[0].prob();
+    std::string res="";
     for (const auto& idx: last[0].sentence) {
         res += alphabet[idx];
     }
