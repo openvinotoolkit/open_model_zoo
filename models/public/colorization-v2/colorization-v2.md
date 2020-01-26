@@ -22,12 +22,13 @@ Model give as output predict A- and B-channels of LAB-image.
 
 ## Accuracy
 
-The quality metrics calculated on ImageNet validation dataset.
+The accuracy metrics calculated on ImageNet validation dataset.
+The accuracy metrics used VGG-16 classification model.
 
 | Metric         | Value         |
 |----------------|---------------|
-| Accuracy top-1 |        61.33% |
-| Accuracy top-5 |        83.77% |
+| Accuracy top-1 |        55.39% |
+| Accuracy top-5 |        79.21% |
 
 ## Performance
 
