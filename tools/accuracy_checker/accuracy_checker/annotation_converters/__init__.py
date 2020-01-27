@@ -51,7 +51,7 @@ from .xnli import XNLIDatasetConverter, BertXNLITFRecordConverter
 from .cmu_panoptic import CmuPanopticKeypointsConverter
 from .action_recognition import ActionRecognitionConverter
 from .ms_asl_continuous import MSASLContiniousConverter
-from .fashon_mnist import FashionMnistConverter
+from .fashion_mnist import FashionMnistConverter
 
 __all__ = [
     'BaseFormatConverter',
