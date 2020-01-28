@@ -122,7 +122,7 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
 
     def encode_by_chars(self, encoded_sentence):
         sentence_rep = [self._bos_char_ids]
-        for word_id in encoded_sentence[1:-1]:
+        for word_id in encoded_sentence[1:]:
             sentence_rep.append(self._word_to_char_ids[word_id])
         sentence_rep.append(self._eos_char_ids)
 

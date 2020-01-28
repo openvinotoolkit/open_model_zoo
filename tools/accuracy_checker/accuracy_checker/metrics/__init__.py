@@ -70,6 +70,7 @@ from .machine_translation import BilingualEvaluationUnderstudy
 from .question_answering import ExactMatchScore, ScoreF1
 from .mpjpe_multiperson import MpjpeMultiperson
 from .language_modeling import ScorePerplexity
+from .perplexity import Perplexity
 
 __all__ = [
     'Metric',
@@ -146,4 +147,5 @@ __all__ = [
     'MpjpeMultiperson',
 
     'ScorePerplexity',
+    'Perplexity',
 ]
