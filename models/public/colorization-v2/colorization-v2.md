@@ -28,7 +28,7 @@ model and colorization as preprocessing.
 
 For preprocessing `rgb -> gray -> coloriaztion` recieved values:
 
-| Metric         | Value after preprocessing   | Value without preprocessing |
+| Metric         | Value with preprocessing   | Value without preprocessing |
 |----------------|-----------------------------|-----------------------------|
 | Accuracy top-1 |                      55.39% |                      70.96% |
 | Accuracy top-5 |                      79.21% |                      89.88% |
