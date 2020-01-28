@@ -25,13 +25,16 @@ Model give as output predict A- and B-channels of LAB-image.
 
 ## Accuracy
 
-The accuracy metrics calculated on ImageNet validation dataset.
-The accuracy metrics used VGG-16 classification model.
+The accuracy metrics calculated on ImageNet
+validation dataset using [VGG16](https://arxiv.org/pdf/1409.1556.pdf) caffe
+model and colorization as preprocessing.
 
-| Metric         | Value         |
-|----------------|---------------|
-| Accuracy top-1 |        57.24% |
-| Accuracy top-5 |        80.96% |
+For preprocessing `rgb -> gray -> coloriaztion` recieved values:
+
+| Metric         | Value after preprocessing   | Value without preprocessing |
+|----------------|-----------------------------|-----------------------------|
+| Accuracy top-1 |                      57.24% |                      70.96% |
+| Accuracy top-5 |                      80.96% |                      89.88% |
 
 ## Performance
 
