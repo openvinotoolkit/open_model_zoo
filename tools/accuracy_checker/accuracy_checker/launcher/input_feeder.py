@@ -243,7 +243,7 @@ class InputFeeder:
             return grouped_data
 
         batch_size = len(meta)
-        if meta[0].get('multi_infer', False):
+        if meta[0].get('multi_infer', False) or self.lstm_inputs:
             num_splits = calculate_num_splits(batch_data, batch_size)
             infers_data = [{} for _ in range(num_splits)]
             for layer_name, layer_data in batch_data.items():

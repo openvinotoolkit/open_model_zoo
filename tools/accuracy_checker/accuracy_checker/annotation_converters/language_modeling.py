@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
 import numpy as np
 from .format_converter import BaseFormatConverter, ConverterReturn
 from ..config import PathField, BoolField, NumberField
@@ -112,17 +113,17 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
 
     def encode_sentence(self, sentence):
         words = sentence.split()
-        encoded_sentence = [[self._bos]]
-        word_ids = [[self.word_to_id.get(word, self._unk)] for word in words]
+        encoded_sentence = [self._bos]
+        word_ids = [self.word_to_id.get(word, self._unk) for word in words]
         encoded_sentence.extend(word_ids)
-        encoded_sentence.append([self._eos])
+        encoded_sentence.append(self._eos)
 
         return encoded_sentence
 
     def encode_by_chars(self, encoded_sentence):
         sentence_rep = [self._bos_char_ids]
         for word_id in encoded_sentence[1:-1]:
-            sentence_rep.append(self._word_to_char_ids[word_id[0]])
+            sentence_rep.append(self._word_to_char_ids[word_id])
         sentence_rep.append(self._eos_char_ids)
 
         return sentence_rep

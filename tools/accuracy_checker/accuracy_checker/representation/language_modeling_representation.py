@@ -39,7 +39,7 @@ class LMAnnotation(LMRepresentation):
 class LMPrediction(LMRepresentation, ClassificationPrediction):
     @property
     def label(self):
-        return np.argmax(self.scores, axis=0)
+        return np.argmax(self.scores, axis=1)
 
     def top_k(self, k):
-        return np.argpartition(self.scores, -k, axis=0)[:, -k:]
+        return np.argpartition(self.scores, -k, axis=1)[:, -k:]
