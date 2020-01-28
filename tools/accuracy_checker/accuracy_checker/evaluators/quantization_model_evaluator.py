@@ -143,7 +143,7 @@ class ModelEvaluator:
                         annotations = [prediction.to_annotation() for prediction in predictions]
                         self._dumped_annotations.extend(annotations)
                     metrics_result = None
-                    if not dump_prediction_to_annotation and self.metric_executor:
+                    if self.metric_executor:
                         metrics_result = self.metric_executor.update_metrics_on_batch(
                             batch_input_ids, annotations, predictions
                         )
@@ -165,6 +165,9 @@ class ModelEvaluator:
         if dump_prediction_to_annotation and self._dumped_annotations:
             self.register_annotations(self._dumped_annotations)
 
+        if dump_prediction_to_annotation and self._dumped_annotations:
+            self.register_annotations(self._dumped_annotations)
+
         if progress_reporter:
             progress_reporter.finish()
 
@@ -176,9 +179,7 @@ class ModelEvaluator:
     def select_dataset(self, dataset_tag):
         if self.dataset is not None and isinstance(self.dataset_config, list):
             if self.dataset.annotation_reader is None and self._dumped_annotations:
-                annotation_reader = Dataset(self.dataset.dataset_config, True)
-                annotation_reader.set_annotation(self._dumped_annotations)
-                self.dataset.annotation_reader = annotation_reader
+                self.register_annotations(self._dumped_annotations)
             return
 
         dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag, self._dumped_annotations)
@@ -242,7 +243,7 @@ class ModelEvaluator:
                 annotations = [prediction.to_annotation() for prediction in predictions]
                 self._dumped_annotations.extend(annotations)
             metrics_result = None
-            if not dump_prediction_to_annotation and self.metric_executor:
+            if self.metric_executor:
                 metrics_result = self.metric_executor.update_metrics_on_batch(batch_input_ids, annotations, predictions)
                 if self.metric_executor.need_store_predictions:
                     self._annotations.extend(annotations)
