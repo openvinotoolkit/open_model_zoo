@@ -48,7 +48,8 @@ Presenter::Presenter(const std::string& keys, int yPos, cv::Size graphSize, std:
 
 void Presenter::addRemoveMonitor(MonitorType monitor) {
     int sampleStep = std::max(1, static_cast<int>(graphSize.width / historySize));
-    unsigned updatedHistorySize = (graphSize.width + sampleStep - 1) / sampleStep; // round up
+    // add an extra element to place it on the edge of a graph or out of it
+    unsigned updatedHistorySize = graphSize.width / sampleStep + 1;
     updatedHistorySize = std::max(2u, updatedHistorySize);
     switch(monitor) {
         case MonitorType::CpuAverage: {
@@ -166,7 +167,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
             cv::Point{(graphSize.width - textWidth) / 2, textGraphSplittingLine - 1},
             cv::FONT_HERSHEY_SIMPLEX,
             textGraphSplittingLine * 0.04,
-            {255, 0, 0},
+            {70, 0, 0},
             1);
         graphPos += graphSize.width + graphPadding;
     }
@@ -212,7 +213,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
             cv::Point{(graphSize.width - textWidth) / 2, textGraphSplittingLine - 1},
             cv::FONT_HERSHEY_SIMPLEX,
             textGraphSplittingLine * 0.04,
-            {0, 255, 0});
+            {0, 70, 0});
         graphPos += graphSize.width + graphPadding;
     }
 
@@ -261,7 +262,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
             cv::Point{(graphSize.width - textWidth) / 2, textGraphSplittingLine - 1},
             cv::FONT_HERSHEY_SIMPLEX,
             textGraphSplittingLine * 0.04,
-            {0, 255, 255});
+            {0, 35, 35});
     }
 }
 
