@@ -136,6 +136,7 @@ int main(int argc, char *argv[]) {
         auto extension_path = FLAGS_l;
         auto cls_conf_threshold = static_cast<float>(FLAGS_cls_pixel_thr);
         auto link_conf_threshold = static_cast<float>(FLAGS_link_pixel_thr);
+        auto decoder_bandwidth = FLAGS_b;
 
         slog::info << "Loading network files" << slog::endl;
         Cnn text_detection, text_recognition;
@@ -230,7 +231,11 @@ int main(int argc, char *argv[]) {
                     std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[2]);
 
                     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-                    res = CTCGreedyDecoder(output_data, kAlphabet, kPadSymbol, &conf);
+                    if (decoder_bandwidth == 0) {
+                        res = CTCGreedyDecoder(output_data, kAlphabet, kPadSymbol, &conf);
+                    } else {
+                        res = CTCBeamSearchDecoder(output_data, kAlphabet, kPadSymbol, &conf, decoder_bandwidth);
+                    }
                     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
                     text_recognition_postproc_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
 
