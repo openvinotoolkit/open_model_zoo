@@ -27,10 +27,6 @@
 
 #include "object_detection_demo_yolov3_async.hpp"
 
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
-
 using namespace InferenceEngine;
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
@@ -206,17 +202,6 @@ int main(int argc, char *argv[]) {
         std::cout << ie.GetVersions(FLAGS_d);
 
         /**Loading extensions to the devices **/
-
-#ifdef WITH_EXTENSIONS
-        /** Loading default extensions **/
-        if (FLAGS_d.find("CPU") != std::string::npos) {
-            /**
-             * cpu_extensions library is compiled from the "extension" folder containing
-             * custom CPU layer implementations.
-            **/
-            ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-        }
-#endif
 
         if (!FLAGS_l.empty()) {
             // CPU extensions are loaded as a shared library and passed as a pointer to the base extension

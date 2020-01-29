@@ -16,9 +16,6 @@
 #include <cldnn/cldnn_config.hpp>
 #include <inference_engine.hpp>
 #include <vpu/vpu_plugin_config.hpp>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 #include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/args_helper.hpp>
@@ -720,11 +717,6 @@ int main(int argc, char* argv[]) {
             std::cout << ie.GetVersions(device) << std::endl;
 
             if ("CPU" == device) {
-#ifdef WITH_EXTENSIONS
-                /** Load default extensions lib for the CPU device (e.g. SSD's DetectionOutput)**/
-                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-#endif
-
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
