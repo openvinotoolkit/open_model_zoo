@@ -54,6 +54,53 @@ def build_argparser():
     return parser
 
 
+class SingleOutputPostprocessor:
+    def __init__(self, output_layer):
+        self.output_layer = output_layer
+
+    def __call__(self, outputs):
+        return outputs[self.output_layer][0][0]
+
+
+class MultipleOutputPostprocessor:
+    def __init__(self, bboxes_layer='bboxes', scores_layer='scores', labels_layer='labels'):
+        self.bboxes_layer = bboxes_layer
+        self.scores_layer = scores_layer
+        self.labels_layer = labels_layer
+
+    def __call__(self, outputs):
+        bboxes = outputs[self.bboxes_layer][0]
+        scores = outputs[self.scores_layer][0]
+        labels = outputs[self.labels_layer][0]
+        result = [[0, label, score, *bbox] for label, score, bbox in zip(labels, scores, bboxes)]
+        return result
+
+
+def get_output_postprocessor(net, bboxes='bboxes', labels='labels', scores='scores'):
+    if len(net.outputs) == 1:
+        output_blob = next(iter(net.outputs))
+        return SingleOutputPostprocessor(output_blob)
+    elif len(net.outputs) >= 3:
+        print(*(net.outputs))
+        def find_layer(name, output_name, all_outputs):
+            suitable_layers = [layer_name for layer_name in all_outputs if name in layer_name]
+            if not suitable_layers:
+                raise ValueError('suitable layer for {} output is not found'.format(output_name))
+
+            if len(suitable_layers) > 1:
+                raise ValueError('more than 1 layers matched to regular expression, please specify more detailed regex')
+
+            return suitable_layers[0]
+
+        labels_out = find_layer(labels, 'labels', net.outputs)
+        scores_out = find_layer(scores, 'scores', net.outputs)
+        bboxes_out = find_layer(bboxes, 'bboxes', net.outputs)
+
+        return MultipleOutputPostprocessor(bboxes_out, scores_out, labels_out)
+
+    raise RuntimeError("Unsupported models outputs")
+
+
 def main():
     log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
@@ -89,9 +136,8 @@ def main():
             raise RuntimeError("Unsupported {}D input layer '{}'. Only 2D and 4D input layers are supported"
                                .format(len(net.inputs[blob_name].shape), blob_name))
 
-    assert len(net.outputs) == 1, "Demo supports only single output topologies"
+    output_postprocessor = get_output_postprocessor(net)
 
-    out_blob = next(iter(net.outputs))
     log.info("Loading IR to the plugin...")
     exec_net = ie.load_network(network=net, num_requests=2, device_name=args.device)
     # Read and pre-process input image
@@ -158,8 +204,8 @@ def main():
             det_time = inf_end - inf_start
 
             # Parse detection results of the current request
-            res = exec_net.requests[cur_request_id].outputs[out_blob]
-            for obj in res[0][0]:
+            res = output_postprocessor(exec_net.requests[cur_request_id].outputs)
+            for obj in res:
                 # Draw only objects when probability more than specified threshold
                 if obj[2] > args.prob_threshold:
                     xmin = int(obj[3] * frame_w)
