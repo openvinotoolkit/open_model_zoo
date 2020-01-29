@@ -130,7 +130,7 @@ NATIVE_DEMOS = [
             '-time': '5',
             '-i': DataDirectoryArg('imagenet-classification', rename=False),
             '-labels': DemoFileArg('synset_words.txt'),
-            '-classes': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt")}),
+            '-gt': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt")}),
         single_option_cases('-m',
             ModelArg('alexnet'),
             ModelArg('resnet-50'),

@@ -90,8 +90,11 @@ containing lists of classes and labels.
 It has the following format:
 
 ./ILSVRC2012_val_00000001.JPEG 65
+
 ./ILSVRC2012_val_00000002.JPEG 970
+
 ./ILSVRC2012_val_00000003.JPEG 230
+
 ...
 
 "Labels" file contains the list of human-readable labels, one line for each class.
@@ -99,14 +102,18 @@ You can find this file in source code: /open_model_zoo/demos/imagenet_classifica
 It has the following format:
 
 n01440764 tench, Tinca tinca
+
 n01443537 goldfish, Carassius auratus
+
 n01484850 great white shark, white shark, man-eater, man-eating shark, Carcharodon carcharias
+
 ...
 
 > **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
 >* `resnet-50`
 >* `vgg19`
 >* `googlenet-v4`
+>
 > Other models may produce unexpected results on these devices.
 
 ## See Also
