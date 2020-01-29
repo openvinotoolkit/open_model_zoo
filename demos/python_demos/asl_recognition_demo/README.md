@@ -27,7 +27,7 @@ Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: asl_recognition_demo.py [-h] -m_a ACTION_MODEL -m_d DETECTION_MODEL -i
-                               INPUT -c CLASS_MAP [-d DEVICE]
+                               INPUT -c CLASS_MAP [-s SAMPLES_DIR] [-d DEVICE]
                                [-l CPU_EXTENSION] [--no_show]
 
 Options:
@@ -43,6 +43,9 @@ Options:
                         web-camera.
   -c CLASS_MAP, --class_map CLASS_MAP
                         Required. Path to a file with ASL classes.
+  -s SAMPLES_DIR, --samples_dir SAMPLES_DIR
+                        Optional. Path to a directory with video samples of
+                        gestures.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on: CPU,
                         GPU, FPGA, HDDL or MYRIAD. The demo will look for a
@@ -71,6 +74,8 @@ python asl_recognition_demo.py \
 ```
 
 An example of file with class names can be found [here](./classes.json).
+
+> **NOTE**: To run the demo application with video examples of ASL gestures specify the `-s` key with valid path to the directory with video samples. The name of each video sample should be the valid name of gesture from the `./classes.json` file. To navigate between samples use key 'n' and 'p' for iterating next and previous respectively video sample.
 
 ## Demo Output
 

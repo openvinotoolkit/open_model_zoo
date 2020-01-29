@@ -22,6 +22,16 @@ models:
           gender_out: prob
           age_out: age_conv3
 
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   intel/age-gender-recognition-retail-0013/FP32-INT8/age-gender-recognition-retail-0013.xml
+        weights: intel/age-gender-recognition-retail-0013/FP32-INT8/age-gender-recognition-retail-0013.bin
+        adapter:
+          type: age_gender
+          gender_out: prob
+          age_out: age_conv3
+
     datasets:
       - name: age_gender
 

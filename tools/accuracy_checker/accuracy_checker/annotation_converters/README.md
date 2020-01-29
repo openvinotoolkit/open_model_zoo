@@ -150,6 +150,8 @@ Accuracy Checker supports following list of annotation converters and specific f
 * `brats` - converts BraTS dataset format to `BrainTumorSegmentationAnnotation` format.
   * `data_dir` - dataset root directory, which contain subdirectories with validation data (`imagesTr`) and ground truth labels (`labelsTr`).
   Optionally you can provide relative path for these subdirectories (if they have different location) using `image_folder` and `mask_folder` parameters respectively.
+  * `mask_channels_first` - allows read gt mask nifti files and transpose in order where channels first (Optional, default False)
+  * `labels_file` - path to file, which contains labels (optional, if omitted no labels will be shown)
 * `movie_lens_converter` - converts Movie Lens Datasets format to `HitRatioAnnotation` format.
   * `rating_file` - path to file which contains movieId with top score for each userID (for example ml-1m-test-ratings.csv)
   * `negative_file` - path to file which contains negative examples.

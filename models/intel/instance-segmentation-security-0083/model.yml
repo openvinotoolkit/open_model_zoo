@@ -13,26 +13,33 @@
 # limitations under the License.
 
 description: >-
-  This model is an instance segmentation network for 80 classes of objects.
-  It is a Mask R-CNN model with ResNeXt152 backbone and Feature Pyramid Networks
-  block for feature maps refinement.
+  General purpose instance segmentation model. Mask-RCNN with ResNeXt152 backbone
+  and FPN block.
 task_type: instance_segmentation
 files:
   - name: FP32/instance-segmentation-security-0083.xml
-    size: 254824
-    sha256: 92a54f74e84084e35590819fcedd10ae77cbde3614cc25f0774b65ce7e6f89a2
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/instance-segmentation-security-0083/FP32/instance-segmentation-security-0083.xml
+    size: 512555
+    sha256: 81e9d91b096b0fed5613f02a397e3fb6e0b7605cdaff0ab9c4e24431c9b07bca
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/instance-segmentation-security-0083/FP32/instance-segmentation-security-0083.xml
   - name: FP32/instance-segmentation-security-0083.bin
-    size: 564274416
-    sha256: 3226bf893e9877749c723532164952416dab5b812e825ad533c44285207a2f23
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/instance-segmentation-security-0083/FP32/instance-segmentation-security-0083.bin
+    size: 564274472
+    sha256: 1305d27772c2fc16d84f78e3c6609eb065e106656403d1f0765270b334e7f1db
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/instance-segmentation-security-0083/FP32/instance-segmentation-security-0083.bin
   - name: FP16/instance-segmentation-security-0083.xml
-    size: 254620
-    sha256: f8dfc935757cae047b665719402921dfb3b2ad9ccab1b1059492a09df189c3d0
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/instance-segmentation-security-0083/FP16/instance-segmentation-security-0083.xml
+    size: 512347
+    sha256: 7371458aa674aff7e7f9ad0cb96a40b35b721576a0e3aec85b36b4fc1e8789ce
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/instance-segmentation-security-0083/FP16/instance-segmentation-security-0083.xml
   - name: FP16/instance-segmentation-security-0083.bin
-    size: 282137218
-    sha256: 885f156f0947d873024dcdce51b1c5e59b60dd34d26b5bcc98da39b2267cca8b
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/instance-segmentation-security-0083/FP16/instance-segmentation-security-0083.bin
+    size: 282137274
+    sha256: ae7bf1b3f18d3333df32bb9c5a09cbe7738396d6473fdd050508d4f38356c64f
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/instance-segmentation-security-0083/FP16/instance-segmentation-security-0083.bin
+  - name: FP32-INT8/instance-segmentation-security-0083.xml
+    size: 1392902
+    sha256: ce4df508b7a9a2102e983f73ffb2e5750c8b76c197b9af668669183251c06de9
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/instance-segmentation-security-0083/FP32-INT8/instance-segmentation-security-0083.xml
+  - name: FP32-INT8/instance-segmentation-security-0083.bin
+    size: 565514024
+    sha256: 62f1b57b33e4386c44ddda8ab03d2cca30e30887ca354a2a3fd13dd157ff3f4d
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/instance-segmentation-security-0083/FP32-INT8/instance-segmentation-security-0083.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

@@ -2,9 +2,13 @@
 
 ## Use Case and High-Level Description
 
-This is an human gesture recognition model for American Sign Language (ASL) recognition scenario (word-level recognition). The model uses S3D framework with MobileNet V3 backbone. Please refer to the [MS-ASL-100\*](https://www.microsoft.com/en-us/research/project/ms-asl/) dataset specification to see list of gestures that are recognised by this model.
+A human gesture recognition model for the American Sign Language (ASL) recognition scenario 
+(word-level recognition). The model uses an S3D framework with MobileNet V3 backbone. Please refer 
+to the [MS-ASL-100\*](https://www.microsoft.com/en-us/research/project/ms-asl/) dataset specification 
+to see the list of gestures that are recognized by this model.
 
-This model accepts stack of frames sampled with constant framerate (15 FPS) and produces prediction on the input clip.
+The model accepts a stack of frames sampled with a constant framerate (15 FPS) and produces a prediction
+on the input clip.
 
 ## Example
 
@@ -24,12 +28,12 @@ This model accepts stack of frames sampled with constant framerate (15 FPS) and 
 
 ## Inputs
 
-Name: "input" , shape: [1x3x16x224x224] - An input image sequence in the format [BxCxTxHxW], where:
- - B - Batch size.
- - C - Number of channels.
- - T - Duration of input clip.
- - H - Image height.
- - W - Image width.
+Name: `input` , shape: [1x3x16x224x224]. An input image sequence in the format [BxCxTxHxW], where:
+ - B - batch size
+ - C - number of channels
+ - T - duration of input clip
+ - H - image height
+ - W - image width
 
 ## Outputs
 

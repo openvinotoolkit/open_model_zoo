@@ -72,9 +72,8 @@ In a mean time your app can continue :
 
 ```cpp
 // load network
-CNNNetReader network_reader;
-network_reader.ReadNetwork("Model.xml");
-network_reader.ReadWeights("Model.bin");
+InferenceEngine::Core ie;
+auto network = ie.ReadNetwork("Model.xml");
 // populate inputs etc
 auto input = async_infer_request.GetBlob(input_name);
 ...

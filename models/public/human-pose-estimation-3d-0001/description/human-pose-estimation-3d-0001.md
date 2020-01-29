@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Multi-person 3D human pose estimation model based on [Lightweight OpenPose](https://arxiv.org/pdf/1811.12004.pdf) and [Single-Shot Multi-Person 3D Pose Estimation From Monocular RGB](https://arxiv.org/pdf/1712.03453.pdf) papers.
+Multi-person 3D human pose estimation model based on the [Lightweight OpenPose](https://arxiv.org/pdf/1811.12004.pdf) and [Single-Shot Multi-Person 3D Pose Estimation From Monocular RGB](https://arxiv.org/pdf/1712.03453.pdf) papers.
 
 ## Example
 
@@ -21,7 +21,7 @@ Multi-person 3D human pose estimation model based on [Lightweight OpenPose](http
 
 ## Inputs
 
-1. name: "data" , shape: [1x3x256x448] - An input image in the format [BxCxHxW],
+1. Name: `data`, shape: `[1x3x256x448]`. An input image in the `[BxCxHxW]` format,
    where:
 
     - B - batch size
@@ -29,11 +29,11 @@ Multi-person 3D human pose estimation model based on [Lightweight OpenPose](http
     - H - image height
     - W - image width
 
-   Expected color order - BGR.
+   Expected color order is BGR.
 
 ## Outputs
 
-1. The net outputs three blobs with shapes: [1, 57, 32, 56], [1, 19, 32, 56], and [1, 38, 32, 56]. The first blob contains coordinates in 3D space, the second one contains keypoint heatmaps and the third is keypoint pairwise relations (part affinity fields).
+The net outputs three blobs with the following shapes: `[1, 57, 32, 56]`, `[1, 19, 32, 56]`, and `[1, 38, 32, 56]`. The first blob contains coordinates in 3D space, the second blob contains keypoint heatmaps and the third blob is keypoint pairwise relations (part affinity fields).
 
 ## Legal Information
 

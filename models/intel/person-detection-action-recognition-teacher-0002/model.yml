@@ -13,29 +13,33 @@
 # limitations under the License.
 
 description: >-
-  This is an action detector for the Smart Classroom scenario. It is based on
-  the RMNet backbone that includes depth-wise convolutions to reduce the amount
-  of computations for the 3x3 convolution block. The first SSD head from 1/16
-  scale feature map has four clustered prior boxes and outputs detected persons
-  (two class detector). The second SSD-based head predicts actions of the detected
-  persons. Possible actions: standing, writing, demonstrating.
+  Second generation of action detection (SSD-based) model to use in Smart Classroom
+  for classification teacher's actions.
 task_type: detection
 files:
   - name: FP32/person-detection-action-recognition-teacher-0002.xml
-    size: 282104
-    sha256: 4034363f7e92ea1acba7e9d0bcd08286dcbbf5311041c464b26d081b73c5f54c
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
+    size: 651618
+    sha256: 0853dc3856c28ae2058a02db7522f7f5d66c49c82f60ff4b51d1377d5a322484
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.xml
   - name: FP32/person-detection-action-recognition-teacher-0002.bin
-    size: 7800264
-    sha256: 711ab8b5737f72d6087c86c017e97d8ebc6e29795b5c63c7665f1e1c37909347
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
+    size: 7800360
+    sha256: ebe9c7cdca28a408302b3b1f241afdc670abc251bd692c13a3140c78b08b0498
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-action-recognition-teacher-0002/FP32/person-detection-action-recognition-teacher-0002.bin
   - name: FP16/person-detection-action-recognition-teacher-0002.xml
-    size: 281860
-    sha256: eca9d4d638e3e5786b8c9777ee66aaaa0a0d2aef66e143964cc6b78388ee32e5
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
+    size: 651375
+    sha256: 36cd0bd99542386fd15c083e8325c37f920f95173d314d9406fd3ce41ac73df7
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.xml
   - name: FP16/person-detection-action-recognition-teacher-0002.bin
-    size: 3900138
-    sha256: 9854776b1233e7021deaeb3fc0fe245375b67bd9c5d3e1528d04286b1793e440
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
+    size: 3900234
+    sha256: 190e9b71ae02e022c6afe2dc9fb59939066e046234ff35f4ceab6ddfabab7883
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-action-recognition-teacher-0002/FP16/person-detection-action-recognition-teacher-0002.bin
+  - name: FP32-INT8/person-detection-action-recognition-teacher-0002.xml
+    size: 1697252
+    sha256: 1f363ddd0a09837c06d28b49514db1c81beafb2ba95ea40700a0b26688266d1e
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-action-recognition-teacher-0002/FP32-INT8/person-detection-action-recognition-teacher-0002.xml
+  - name: FP32-INT8/person-detection-action-recognition-teacher-0002.bin
+    size: 7972512
+    sha256: 9423a50cb23b265d8862108a7ab88e1536c1b342276d792af56ff3d34d70553d
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-action-recognition-teacher-0002/FP32-INT8/person-detection-action-recognition-teacher-0002.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

@@ -16,10 +16,7 @@ IEWrapper::IEWrapper(InferenceEngine::Core& ie,
                      const std::string& modelPath,
                      const std::string& deviceName):
            modelPath(modelPath), deviceName(deviceName), ie(ie) {
-    netReader.ReadNetwork(modelPath);
-    std::string binFileName = fileNameNoExt(modelPath) + ".bin";
-    netReader.ReadWeights(binFileName);
-    network = netReader.getNetwork();
+    network = ie.ReadNetwork(modelPath);
     setExecPart();
 }
 

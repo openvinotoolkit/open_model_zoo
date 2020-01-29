@@ -28,10 +28,10 @@ class PostprocessingExecutor:
 
         self.state = state or {}
 
+        self.allow_image_postprocessor = True
+
         if not processors:
             return
-
-        self.allow_image_postprocessor = True
 
         for config in processors:
             postprocessor_config = PostprocessorConfig(

@@ -23,10 +23,10 @@ from asl_recognition_demo.common import IEModel
 class PersonDetector(IEModel):
     """ Class that allows worknig with person detectpr models. """
 
-    def __init__(self, model_path, device, ie_core, num_requests, output_name=None):
+    def __init__(self, model_path, device, ie_core, num_requests, output_shape=None):
         """Constructor"""
 
-        super().__init__(model_path, device, ie_core, num_requests, output_name)
+        super().__init__(model_path, device, ie_core, num_requests, output_shape)
 
         _, _, h, w = self.input_size
         self.input_height = h
