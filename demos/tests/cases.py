@@ -124,7 +124,7 @@ NATIVE_DEMOS = [
             '-no_show': None,
             '-time': '5',
             '-i': DataDirectoryArg('imagenet-classification', rename=False),
-            '-labels': DemoFileArg('imagenet_labels.txt'),
+            '-labels': DemoFileArg('synset_words.txt'),
             '-classes': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt")}),
         single_option_cases('-m',
             ModelArg('alexnet'),

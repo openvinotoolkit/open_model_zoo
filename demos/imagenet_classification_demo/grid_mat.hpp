@@ -14,163 +14,153 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core/core.hpp>
 
+using ImageInfoList = std::list<std::tuple<cv::Mat, std::string, int>>;
+
 class GridMat {
 public:
-    explicit GridMat(int inputImgsCount,
-                     Presenter& presenter,
+    cv::Mat outImg;
+    cv::Size size;
+
+    explicit GridMat(Presenter& presenter,
                      const cv::Size maxDisp = cv::Size{1920, 1080},
                      const cv::Size aspectRatio = cv::Size{16, 9},
                      double targetFPS = 60
                      ):
-                     size{std::max(static_cast<int>(std::ceil(targetFPS / aspectRatio.height)),
-                                   static_cast<int>(std::ceil(
-                                       1. * FLAGS_b / (aspectRatio.width + aspectRatio.height) * aspectRatio.width))
-                                    ),
-                          std::max(static_cast<int>(std::ceil(targetFPS / aspectRatio.width)),
-                                   static_cast<int>(std::ceil(
-                                       1. * FLAGS_b / (aspectRatio.width + aspectRatio.height) * aspectRatio.height))
-                                    )},
                      currSourceID{0} {
+        targetFPS = std::max(targetFPS, static_cast<double>(FLAGS_b));
+        size = cv::Size(static_cast<int>(std::round(sqrt(1. * targetFPS * aspectRatio.width / aspectRatio.height))),
+                        static_cast<int>(std::round(sqrt(1. * targetFPS * aspectRatio.height / aspectRatio.width))));
         int minCellSize = std::min(maxDisp.width / size.width, maxDisp.height / size.height);
         cellSize = cv::Size(minCellSize, minCellSize);
-        rectangleHeight = presenter.graphSize.height;
 
         for (int i = 0; i < size.width; i++) {
             for (int j = 0; j < size.height; j++) {
-                cv::Point p;
-                p.x = cellSize.width * i;
-                p.y = rectangleHeight + (cellSize.height * j);
-                points.push_back(p);
+                points.push_back({cellSize.width * i, presenter.graphSize.height + cellSize.height * j});
             }
         }
 
-        outImg.create((cellSize.height * size.height) + rectangleHeight, cellSize.width * size.width, CV_8UC3);
+        outImg.create((cellSize.height * size.height) + presenter.graphSize.height,
+                       cellSize.width * size.width, CV_8UC3);
         outImg.setTo(0);
-    }
 
-    cv::Size getSize() {
-        return size;
-    }
-
-    void listUpdate(std::list<std::tuple<cv::Mat, std::string, bool>>& imageInfos) {
-        if (!imageInfos.empty()) {
-            updateList.splice(updateList.end(), imageInfos);
-        }
+        fontType = cv::FONT_HERSHEY_PLAIN;
+        fontScale = 1.5;
+        thickness = 2;
+        textSize = cv::getTextSize("", fontType, fontScale, thickness, &baseline);
+        accuracyMessageSize = cv::getTextSize("Accuracy (top 0): 0.000", fontType, fontScale, thickness, &baseline);
+        testMessage = "Testing, please wait...";
+        testMessageSize = cv::getTextSize(testMessage, fontType, fontScale, thickness, &baseline);
     }
 
     void textUpdate(double avgFPS, double avgLatency, double accuracy,
                     bool isFpsTest, bool showAccuracy,
                     Presenter& presenter) {
-        // Draw a rectangle
-        cv::Point p1 = cv::Point(0, 0);
-        cv::Point p2 = cv::Point(outImg.cols, rectangleHeight);
-        rectangle(outImg, p1, p2, cv::Scalar(0, 0, 0), cv::FILLED);
+        rectangle(outImg,
+                  {0, 0}, {outImg.cols, presenter.graphSize.height},
+                  cv::Scalar(0, 0, 0), cv::FILLED);
 
         presenter.drawGraphs(outImg);
         
-        // Show FPS
-        double fontScale = 1.5;
-        int thickness = 2;
-        int baseline = 0;
-        cv::Size textSize = cv::getTextSize("", cv::FONT_HERSHEY_PLAIN, fontScale, thickness, &baseline);
         cv::Scalar textColor = cv::Scalar(255, 255, 255);
         int textPadding = 10;
 
         cv::putText(outImg,
                     cv::format("FPS: %0.01f", avgFPS),
                     cv::Point(textPadding, textSize.height + textPadding),
-                    cv::FONT_HERSHEY_PLAIN, fontScale, textColor, thickness);
+                    fontType, fontScale, textColor, thickness);
         cv::putText(outImg,
                     cv::format("Latency: %dms", static_cast<int>(avgLatency * 1000)),
                     cv::Point(textPadding, (textSize.height + textPadding) * 2),
-                    cv::FONT_HERSHEY_PLAIN, fontScale, textColor, thickness);
+                    fontType, fontScale, textColor, thickness);
         
         if (showAccuracy) {
-            std::string accuracyMessage = "Accuracy (top 0): 0.000";
-            cv::Size accuracyMessageSize = cv::getTextSize(accuracyMessage,
-                                                       cv::FONT_HERSHEY_PLAIN, fontScale, thickness, &baseline);
             cv::putText(outImg,
                         cv::format("Accuracy (top %d): %.3f", FLAGS_nt, accuracy),
                         cv::Point(outImg.cols - accuracyMessageSize.width - textPadding, textSize.height + textPadding),
-                        cv::FONT_HERSHEY_PLAIN, fontScale, textColor, thickness);
+                        fontType, fontScale, textColor, thickness);
         }
-        
-        std::string testMessage = "Testing, please wait...";
-        cv::Size testMessageSize = cv::getTextSize(testMessage,
-                                                   cv::FONT_HERSHEY_PLAIN, fontScale, thickness, &baseline);
+
         if (isFpsTest) {
             cv::putText(outImg,
                         testMessage,
                         cv::Point(outImg.cols - testMessageSize.width - textPadding,
                                   (textSize.height + textPadding) * 2),
-                        cv::FONT_HERSHEY_PLAIN, fontScale, cv::Scalar(50, 50, 255), thickness);
+                        fontType, fontScale, cv::Scalar(50, 50, 255), thickness);
         }
     }
 
-    cv::Mat getMat(std::vector<long long> &endTimes, bool showLabels) {
-        while (!updateList.empty()) {
-            cv::Mat frame = std::get<0>(updateList.front());
-            std::string predictedLabel = std::get<1>(updateList.front());
-            cv::Scalar textColor = (std::get<2>(updateList.front())
-                                                ? cv::Scalar(75, 255, 75) : cv::Scalar(50, 50, 255));
-            updateList.pop_front();
-
-            if (updateList.empty()) {
-                if (prevImgs.size() >= FLAGS_b && points.size() > 1) {
-                    int prevSourceID = currSourceID - FLAGS_b;
-                    if (prevSourceID < 0) {
-                        prevSourceID += points.size();
-                    }
-                    cv::resize(prevImgs.front(),
-                               outImg(cv::Rect(points[prevSourceID], cellSize)),
-                               cellSize);
-                    prevImgs.pop();
-                }
-                
-                cv::resize(frame, frame, cellSize);
-
-                int thickness = cellSize.width / 20;
-                int baseline = 0;
-
-                if (showLabels) {
-                    cv::Size textSize = cv::getTextSize(predictedLabel, cv::FONT_HERSHEY_PLAIN, 1, 2, &baseline);
-                    double fontScale = static_cast<double>(cellSize.width - 2*thickness) / textSize.width;
-                    cv::putText(frame,
-                                predictedLabel,
-                                cv::Point(thickness, cellSize.height - thickness - textSize.height),
-                                cv::FONT_HERSHEY_PLAIN, fontScale, textColor, 2);
-                }
-                prevImgs.push(frame);
-
-                cv::Mat tmpFrame;
-                frame.copyTo(tmpFrame);
-                cv::rectangle(tmpFrame, cv::Point(), cv::Point(frame.cols, frame.rows),
-                              cv::Scalar(255, 50, 50), thickness);
-                cv::resize(tmpFrame,
-                           outImg(cv::Rect(points[currSourceID], cellSize)),
-                           cellSize);
-                
-
-                if (currSourceID == points.size() - 1) {
-                    currSourceID = 0;
-                } else {
-                    currSourceID++;
-                }
-            }
-
-            endTimes.push_back(cv::getTickCount());
+    void updateMat(ImageInfoList& imageInfos) {
+        if (!imageInfos.empty()) {
+            imagesToDraw.splice(imagesToDraw.end(), imageInfos);
         }
 
-        return outImg;
+        while (!imagesToDraw.empty()) {
+            cv::Mat frame = std::get<0>(imagesToDraw.front());
+            std::string predictedLabel = std::get<1>(imagesToDraw.front());
+            int predictionResult = std::get<2>(imagesToDraw.front());
+
+            cv::Scalar textColor;
+            switch (predictionResult) {
+                case 1:
+                    textColor = cv::Scalar(75, 255, 75); break; // green
+                case -1:
+                    textColor = cv::Scalar(50, 50, 255); break; // red
+                default:
+                    textColor = cv::Scalar(75, 255, 255); // yellow
+            }
+
+            imagesToDraw.pop_front();
+            if (prevImgs.size() >= FLAGS_b && points.size() > 1) {
+                int prevSourceID = currSourceID - FLAGS_b;
+                if (prevSourceID < 0) {
+                    prevSourceID += points.size();
+                }
+                prevImgs.front().copyTo(outImg(cv::Rect(points[prevSourceID], cellSize)));
+                prevImgs.pop();
+            }
+            
+            cv::resize(frame, frame, cellSize);
+
+            int labelThickness = cellSize.width / 20;
+            cv::Size labelTextSize = cv::getTextSize(predictedLabel, fontType, 1, 2, &baseline);
+            double labelFontScale = static_cast<double>(cellSize.width - 2*labelThickness) / labelTextSize.width;
+            cv::putText(frame,
+                        predictedLabel,
+                        cv::Point(labelThickness, cellSize.height - labelThickness - labelTextSize.height),
+                        fontType, labelFontScale, textColor, 2);
+            
+            prevImgs.push(frame);
+
+            cv::Mat tmpFrame = frame.clone();
+            cv::rectangle(tmpFrame,
+                          {0, 0}, {frame.cols, frame.rows},
+                          cv::Scalar(255, 50, 50),
+                          labelThickness);
+            cv::resize(tmpFrame,
+                       outImg(cv::Rect(points[currSourceID], cellSize)),
+                       cellSize);
+            
+
+            if (currSourceID == points.size() - 1) {
+                currSourceID = 0;
+            } else {
+                currSourceID++;
+            }
+        }
     }
 
 private:
-    cv::Mat outImg;
     std::queue<cv::Mat> prevImgs;
-    std::list<std::tuple<cv::Mat, std::string, bool>> updateList;
-    cv::Size size;
+    std::list<std::tuple<cv::Mat, std::string, int>> imagesToDraw;
     cv::Size cellSize;
     size_t currSourceID;
     std::vector<cv::Point> points;
-    unsigned rectangleHeight;
+    int fontType;
+    double fontScale;
+    int thickness;
+    int baseline;
+    cv::Size textSize;
+    cv::Size accuracyMessageSize;
+    std::string testMessage;
+    cv::Size testMessageSize;
 };
