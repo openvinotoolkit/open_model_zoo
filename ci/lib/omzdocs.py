@@ -30,9 +30,11 @@ def _get_all_ast_nodes(ast_nodes):
 
 def _get_text_from_ast(ast_nodes):
     def get_text_from_node(node):
-        if node['type'] != 'text':
-            raise RuntimeError(f'unsupported node type: {node["type"]}')
-        return node['text']
+        if node['type'] == 'text':
+            return node['text']
+        elif node['type'] == 'link':
+            return _get_text_from_ast(node['children'])
+        raise RuntimeError(f'unsupported node type: {node["type"]}')
 
     return ''.join(map(get_text_from_node, ast_nodes))
 
