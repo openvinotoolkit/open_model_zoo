@@ -57,7 +57,7 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
         for sentence_id, sentence in enumerate(encoded_sentences):
             if progress_callback and sentence_id % progress_interval == 0:
                 progress_callback(sentence_id / num_iters * 100)
-            targets = sentence[1:-1]
+            targets = sentence[1:]
             annotations.append(
                 LMAnnotation(
                     'sentence_{}'.format(sentence_id), sentence, targets,
@@ -122,7 +122,7 @@ class LanguageModelDatasetConverter(BaseFormatConverter):
 
     def encode_by_chars(self, encoded_sentence):
         sentence_rep = [self._bos_char_ids]
-        for word_id in encoded_sentence[1:]:
+        for word_id in encoded_sentence[1:-1]:
             sentence_rep.append(self._word_to_char_ids[word_id])
         sentence_rep.append(self._eos_char_ids)
 

@@ -11,14 +11,16 @@ class Perplexity(PerImageEvaluationMetric):
     def configure(self):
         self.perplexity = []
 
-    @staticmethod
-    def _cross_enthropy(scores, targets):
-        return np.sum(np.log(scores[range(len(targets)), targets]))
-
     def update(self, annotation, prediction):
-        sentence_perplexity = np.exp(self._cross_enthropy(prediction.scores, annotation.target_ids))
-        self.perplexity.append(sentence_perplexity)
-        return sentence_perplexity
+        sentence_perplexity = []
+        for idx, target_value in enumerate(annotation.target_ids):
+            prediction_score = prediction.scores[idx, target_value]
+            enthropy = -np.log2(prediction_score)
+            sample_perplexity = 2 ** enthropy
+            sentence_perplexity.append(sample_perplexity)
+        self.perplexity.extend(sentence_perplexity)
+
+        return np.mean(sentence_perplexity)
 
     def evaluate(self, annotations, predictions):
         return np.mean(self.perplexity)
