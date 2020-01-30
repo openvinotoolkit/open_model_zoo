@@ -16,7 +16,7 @@ limitations under the License.
 
 from PIL import Image
 import numpy as np
-from ..config import PathField, BoolField
+from ..config import PathField, BoolField, NumberField
 from ..representation import ClassificationAnnotation
 from ..utils import read_pickle, check_file_existence, read_json
 
@@ -27,6 +27,33 @@ CIFAR10_LABELS_LIST = [
     'dog', 'frog', 'horse', 'ship', 'truck'
 ]
 
+CIFAR100_LABELS_LIST = [
+    'beaver', 'dolphin', 'otter', 'seal', 'whale',
+    'aquarium fish', 'flatfish', 'ray', 'shark', 'trout',
+    'orchids', 'poppies', 'roses', 'sunflowers', 'tulips',
+    'bottles', 'bowls', 'cans', 'cups', 'plates',
+    'apples', 'mushrooms', 'oranges', 'pears', 'sweet peppers',
+    'clock', 'computer keyboard', 'lamp', 'telephone', 'television',
+    'bed', 'chair', 'couch', 'table', 'wardrobe',
+    'bee', 'beetle', 'butterfly', 'caterpillar', 'cockroach',
+    'bear', 'leopard', 'lion', 'tiger', 'wolf',
+    'bridge', 'castle', 'house', 'road', 'skyscraper',
+    'cloud', 'forest', 'mountain', 'plain', 'sea',
+    'camel', 'cattle', 'chimpanzee', 'elephant', 'kangaroo',
+    'fox', 'porcupine', 'possum', 'raccoon', 'skunk',
+    'crab', 'lobster', 'snail', 'spider', 'worm',
+    'baby', 'boy', 'girl', 'man', 'woman',
+    'crocodile', 'dinosaur', 'lizard', 'snake', 'turtle',
+    'hamster', 'mouse', 'rabbit', 'shrew', 'squirrel',
+    'maple', 'oak', 'palm', 'pine', 'willow',
+    'bicycle', 'bus', 'motorcycle', 'pickup truck', 'train',
+    'lawn-mower', 'rocket', 'streetcar', 'tank', 'tractor'
+]
+
+class_map = {
+    10: CIFAR10_LABELS_LIST,
+    100: CIFAR100_LABELS_LIST
+}
 
 class Cifar10FormatConverter(BaseFormatConverter):
     """
@@ -35,7 +62,7 @@ class Cifar10FormatConverter(BaseFormatConverter):
 
     # register name for this converter
     # this name will be used for converter class look up
-    __provider__ = 'cifar10'
+    __provider__ = 'cifar'
     annotation_types = (ClassificationAnnotation, )
 
     @classmethod
@@ -54,11 +81,13 @@ class Cifar10FormatConverter(BaseFormatConverter):
             'has_background': BoolField(
                 optional=True,
                 default=False,
-                description="Allows to add background label to original labels and convert dataset "
-                            "for 11 classes instead 10"
+                description="Allows to add background label to original labels"
             ),
             'dataset_meta_file': PathField(
                 description='path to json file with dataset meta (e.g. label_map, color_encoding', optional=True
+            ),
+            'num_classes': NumberField(
+                optional=True, default=10, description='number of classes in the dataset', value_type=int
             )
         })
 
@@ -76,6 +105,7 @@ class Cifar10FormatConverter(BaseFormatConverter):
             self.converted_images_dir = self.data_batch_file.parent / 'converted_images'
         self.convert_images = self.get_value_from_config('convert_images')
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
+        self.num_classes = self.get_value_from_config('num_classes')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         """
@@ -141,14 +171,14 @@ class Cifar10FormatConverter(BaseFormatConverter):
         return ConverterReturn(annotation, meta, content_errors)
 
     def generate_meta(self, labels_offset):
-        labels = CIFAR10_LABELS_LIST
+        labels = class_map.get(self.num_classes, [])
         meta = {}
         if self.dataset_meta:
             meta = read_json(self.dataset_meta)
             if 'label_map' in meta:
                 meta['label_map'] = verify_label_map(meta['label_map'])
                 return meta
-            labels = meta.get('labels', CIFAR10_LABELS_LIST)
+            labels = meta.get('labels', labels)
         meta.update({'label_map': {label_id + labels_offset: label_name for label_id, label_name in enumerate(labels)}})
         if self.has_background:
             meta['label_map'][0] = 'background'

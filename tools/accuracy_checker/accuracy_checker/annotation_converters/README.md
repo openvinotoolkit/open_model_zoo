@@ -52,11 +52,12 @@ You may refer to `-h, --help` to full list of command line options. Some optiona
 ### Supported converters
 
 Accuracy Checker supports following list of annotation converters and specific for them parameters:
-* `cifar10` - converts CIFAR 10 classification dataset to `ClassificationAnnotation`
+* `cifar` - converts CIFAR classification dataset to `ClassificationAnnotation`
   * `data_batch_file` - path to pickle file which contain dataset batch (e.g. test_batch)
   * `has_background` - allows to add background label to original labels and convert dataset for 11 classes instead 10 (default value is False).
   * `convert_images` - allows to convert images from pickle file to user specified directory (default value is False).
   * `converted_images_dir` - path to converted images location.
+  * `num_classes` - the number of classes in the dataset (10 or 100). (Optional, default 10)
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `mnist_csv` - convert MNIST dataset for handwritten digit recognition stored in csv format to `ClassificationAnnotation`.
   * `annotation_file` - path to dataset file in csv format.
