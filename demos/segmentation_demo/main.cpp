@@ -19,6 +19,8 @@
 
 #include "segmentation_demo.h"
 
+using namespace InferenceEngine;
+
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
     slog::info << "Parsing input parameters" << slog::endl;
@@ -43,54 +45,53 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
-        slog::info << "InferenceEngine: " << InferenceEngine::GetInferenceEngineVersion() << slog::endl;
+        slog::info << "InferenceEngine: " << GetInferenceEngineVersion() << slog::endl;
         if (!ParseAndCheckCommandLine(argc, argv)) {
             return 0;
         }
 
-        InferenceEngine::Core ie;
+        Core ie;
 
         if (!FLAGS_l.empty()) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
-            InferenceEngine::IExtensionPtr extension_ptr =
-                InferenceEngine::make_so_pointer<InferenceEngine::IExtension>(FLAGS_l);
+            IExtensionPtr extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
             ie.AddExtension(extension_ptr, "CPU");
             slog::info << "CPU Extension loaded: " << FLAGS_l << slog::endl;
         }
         if (!FLAGS_c.empty()) {
             // clDNN Extensions are loaded from an .xml description and OpenCL kernel files
-            ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
+            ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, FLAGS_c}}, "GPU");
             slog::info << "GPU Extension loaded: " << FLAGS_c << slog::endl;
         }
 
         slog::info << "Device info" << slog::endl;
         std::cout << ie.GetVersions(FLAGS_d);
 
-        InferenceEngine::CNNNetwork network = ie.ReadNetwork(FLAGS_m);
+        CNNNetwork network = ie.ReadNetwork(FLAGS_m);
 
-        InferenceEngine::ICNNNetwork::InputShapes inputShapes = network.getInputShapes();
+        ICNNNetwork::InputShapes inputShapes = network.getInputShapes();
         if (inputShapes.size() != 1)
             throw std::runtime_error("Demo supports topologies only with 1 input");
         const std::string& inName = inputShapes.begin()->first;
-        InferenceEngine::SizeVector& inSizeVector = inputShapes.begin()->second;
+        SizeVector& inSizeVector = inputShapes.begin()->second;
         if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
             throw std::runtime_error("3 channel 4 dimentional model's input is expected");
         inSizeVector[0] = 1;  // set batch size to 1
         network.reshape(inputShapes);
 
-        InferenceEngine::InputInfo& inputInfo = *network.getInputsInfo().begin()->second;
-        inputInfo.getPreProcess().setResizeAlgorithm(InferenceEngine::ResizeAlgorithm::RESIZE_BILINEAR);
-        inputInfo.setLayout(InferenceEngine::Layout::NHWC);
-        inputInfo.setPrecision(InferenceEngine::Precision::U8);
+        InputInfo& inputInfo = *network.getInputsInfo().begin()->second;
+        inputInfo.getPreProcess().setResizeAlgorithm(ResizeAlgorithm::RESIZE_BILINEAR);
+        inputInfo.setLayout(Layout::NHWC);
+        inputInfo.setPrecision(Precision::U8);
 
-        const InferenceEngine::OutputsDataMap& outputsDataMap = network.getOutputsInfo();
+        const OutputsDataMap& outputsDataMap = network.getOutputsInfo();
         if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
         const std::string& outName = outputsDataMap.begin()->first;
-        InferenceEngine::Data& data = *outputsDataMap.begin()->second;
+        Data& data = *outputsDataMap.begin()->second;
         // alternative to resetting the output precision is to have a switch
         // statement in postprocessing handling other precision types
-        data.setPrecision(InferenceEngine::Precision::FP32);
-        const InferenceEngine::SizeVector& outSizeVector = data.getTensorDesc().getDims();
+        data.setPrecision(Precision::FP32);
+        const SizeVector& outSizeVector = data.getTensorDesc().getDims();
         int outChannels, outHeight, outWidth;
         switch(outSizeVector.size()) {
             case 3:
@@ -108,8 +109,8 @@ int main(int argc, char *argv[]) {
                     "supported.");
         }
 
-        InferenceEngine::ExecutableNetwork executableNetwork = ie.LoadNetwork(network, FLAGS_d);
-        InferenceEngine::InferRequest inferRequest = executableNetwork.CreateInferRequest();
+        ExecutableNetwork executableNetwork = ie.LoadNetwork(network, FLAGS_d);
+        InferRequest inferRequest = executableNetwork.CreateInferRequest();
 
         cv::VideoCapture cap;
         try {

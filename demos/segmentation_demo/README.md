@@ -6,7 +6,7 @@ This topic demonstrates how to run the Image Segmentation demo application, whic
 
 ## How It Works
 
-Upon the start-up the demo application reads command line parameters and loads a network. The demo runs inference and shows results for each image captured from an input and.
+Upon the start-up the demo application reads command line parameters and loads a network. The demo runs inference and shows results for each image captured from an input.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
@@ -38,7 +38,7 @@ To run the demo, you can use public or pre-trained models. To download the pre-t
 
 > **NOTE**: Before running the demo with a trained model, make sure the model is converted to the Inference Engine format (\*.xml + \*.bin) using the [Model Optimizer tool](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html).
 
-You can use the following command to do inference on CPU on a camera using a pre-trained semantic-segmentation-adas-0001 network:
+You can use the following command to do inference on CPU on images captured by a camera using a pre-trained semantic-segmentation-adas-0001 network:
 ```sh
 ./segmentation_demo -i 0 -m semantic-segmentation-adas-0001.xml
 ```
