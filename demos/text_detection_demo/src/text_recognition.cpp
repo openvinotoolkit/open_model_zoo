@@ -133,7 +133,7 @@ std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::stri
             }
         }
 
-        sort(curr.begin(), curr.end(), [](BeamElement &a, BeamElement &b) -> bool {
+        sort(curr.begin(), curr.end(), [](const BeamElement &a, const BeamElement &b) -> bool {
             return a.prob() > b.prob();
         });
 
