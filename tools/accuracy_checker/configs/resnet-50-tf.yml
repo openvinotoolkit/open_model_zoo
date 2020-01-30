@@ -1,8 +1,8 @@
 models:
-  - name: resnet-50-official
+  - name: resnet-50-tf
     launchers:
       - framework: tf
-        model: public/resnet-50-official/resnet_v1-50.pb
+        model: public/resnet-50-tf/resnet_v1-50.pb
         adapter: classification
         inputs:
           - name: map/TensorArrayStack/TensorArrayGatherV3
@@ -21,20 +21,20 @@ models:
             size: 224
 
 
-  - name: resnet-50-official
+  - name: resnet-50-tf
     launchers:
       - framework: dlsdk
         tags:
           - FP32
-        model:   public/resnet-50-official/FP32/resnet-50-official.xml
-        weights: public/resnet-50-official/FP32/resnet-50-official.bin
+        model:   public/resnet-50-tf/FP32/resnet-50-tf.xml
+        weights: public/resnet-50-tf/FP32/resnet-50-tf.bin
         adapter: classification
 
       - framework: dlsdk
         tags:
           - FP16
-        model:   public/resnet-50-official/FP16/resnet-50-official.xml
-        weights: public/resnet-50-official/FP16/resnet-50-official.bin
+        model:   public/resnet-50-tf/FP16/resnet-50-tf.xml
+        weights: public/resnet-50-tf/FP16/resnet-50-tf.bin
         adapter: classification
 
     datasets:
