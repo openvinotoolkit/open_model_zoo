@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
         for (std::size_t i = 0; i < colors.size(); ++i)
             colors[i] = {CITYSCAPES_COLORS[i].blue(), CITYSCAPES_COLORS[i].green(), CITYSCAPES_COLORS[i].red()};
         std::mt19937 rng;
-        std::uniform_int_distribution<uchar> distr(0, 255);
+        std::uniform_int_distribution<int> distr(0, 255);
         int delay = 1;
         cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
         Presenter presenter(FLAGS_u, 10, graphSize);
@@ -155,7 +155,7 @@ int main(int argc, char *argv[]) {
                 for (int colId = 0; colId < outWidth; ++colId) {
                     std::size_t classId = 0;
                     if (outChannels == 0) {  // assume the output is already ArgMax'ed
-                        classId = predictions[rowId * outWidth + colId];
+                        classId = static_cast<std::size_t>(predictions[rowId * outWidth + colId]);
                     } else {
                         float maxProb = -1.0f;
                         for (int chId = 0; chId < outChannels; ++chId) {
