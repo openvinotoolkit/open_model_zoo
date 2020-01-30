@@ -41,7 +41,7 @@ class AverageMeter:
             loss = float(loss)
         else:
             loss = loss.astype(float)
-        return np.divide(loss, increment, out=np.zeros_like(loss), where=self.total_count != 0)
+        return np.divide(loss, increment, out=np.zeros_like(loss), where=increment != 0)
 
     def evaluate(self):
         if self.total_count is None:
