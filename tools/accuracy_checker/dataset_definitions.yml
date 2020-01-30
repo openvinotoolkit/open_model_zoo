@@ -153,6 +153,23 @@ datasets:
         ignore_difficult: True
         presenter: print_scalar
 
+  - name: VOC2012_without_background
+    annotation_conversion:
+      converter: voc_detection
+      annotations_dir: VOCdevkit/VOC2012/Annotations
+      images_dir: VOCdevkit/VOC2012/JPEGImages
+      imageset_file: VOCdevkit/VOC2012/ImageSets/Main/val.txt
+    data_source: VOCdevkit/VOC2012/JPEGImages
+    annotation: voc12_without_background.pickle
+    dataset_meta: voc12_without_background.json
+    postprocessing:
+      - type: resize_prediction_boxes
+    metrics:
+      - type: map
+        integral: 11point
+        ignore_difficult: True
+        presenter: print_scalar
+
   - name: VOC2012_Segmentation
     annotation_conversion:
       converter: voc_segmentation
