@@ -302,11 +302,11 @@ class PointAligner(Preprocessor):
 
     @staticmethod
     def transformation_from_points(points1, points2):
-        points1 = np.matrix(points1.astype(np.float64))
-        points2 = np.matrix(points2.astype(np.float64))
+        points1 = points1.astype(np.float64)
+        points2 = points2.astype(np.float64)
 
-        c1 = np.mean(points1, axis=0)
-        c2 = np.mean(points2, axis=0)
+        c1 = np.mean(points1, axis=0, keepdims=True)
+        c2 = np.mean(points2, axis=0, keepdims=True)
         points1 -= c1
         points2 -= c2
         s1 = np.std(points1)
@@ -315,10 +315,10 @@ class PointAligner(Preprocessor):
         points2 /= np.maximum(s1, np.finfo(np.float64).eps)
         points_std_ratio = s2 / np.maximum(s1, np.finfo(np.float64).eps)
 
-        u, _, vt = np.linalg.svd(points1.T * points2)
-        r = (u * vt).T
+        u, _, vt = np.linalg.svd(points1.T @ points2)
+        r = (u @ vt).T
 
-        return np.hstack((points_std_ratio * r, c2.T - points_std_ratio * r * c1.T))
+        return np.hstack((points_std_ratio * r, c2.T - points_std_ratio * r @ c1.T))
 
 
 def center_padding(dst_width, dst_height, width, height):
