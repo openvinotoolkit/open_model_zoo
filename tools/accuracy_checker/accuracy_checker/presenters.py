@@ -34,6 +34,9 @@ class BasePresenter(ClassProvider):
     def write_result(self, evaluation_result, ignore_results_formatting=False):
         raise NotImplementedError
 
+    def extract_result(self, evaluation_result):
+        raise NotImplementedError
+
 
 class ScalarPrintPresenter(BasePresenter):
     __provider__ = "print_scalar"
@@ -49,6 +52,10 @@ class ScalarPrintPresenter(BasePresenter):
         write_scalar_result(
             value, name, threshold, difference, postfix=postfix, scale=scale, result_format=result_format
         )
+
+    def extract_result(self, evaluation_result):
+        value, _, name, _, _, meta = evaluation_result
+        return name, np.mean(value), meta
 
 
 class VectorPrintPresenter(BasePresenter):
@@ -97,6 +104,21 @@ class VectorPrintPresenter(BasePresenter):
                 postfix=postfix[-1] if not np.isscalar(postfix) else postfix, scale=1,
                 result_format=result_format
             )
+
+    def extract_result(self, evaluation_result):
+        value, _, name, _, _, meta = evaluation_result
+        value_names = ['{}@{}'.format(name, value_name) for value_name in meta.get('names', range(0, len(value)))]
+        if np.isscalar(value) or np.size(value) == 1:
+            if not np.isscalar(value):
+                value = value[0]
+            return value_names[0], value, meta
+        if meta.get('calculate_mean', True):
+            value_names.append('{}@mean'.format(name))
+            mean_value = np.mean(value)
+            value = np.append(value, mean_value)
+            meta['names'] = value_names
+        per_value_meta = [meta for _ in value_names]
+        return value_names, value, per_value_meta
 
 
 def write_scalar_result(
