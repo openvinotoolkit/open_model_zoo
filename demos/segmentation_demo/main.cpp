@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
         const std::string& inName = inputShapes.begin()->first;
         SizeVector& inSizeVector = inputShapes.begin()->second;
         if (inSizeVector.size() != 4 || inSizeVector[1] != 3)
-            throw std::runtime_error("3 channel 4 dimentional model's input is expected");
+            throw std::runtime_error("3-channel 4-dimensional model's input is expected");
         inSizeVector[0] = 1;  // set batch size to 1
         network.reshape(inputShapes);
 
