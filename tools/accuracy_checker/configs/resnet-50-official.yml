@@ -21,6 +21,7 @@ models:
             size: 224
 
 
+  - name: resnet-50-official
     launchers:
       - framework: dlsdk
         tags:

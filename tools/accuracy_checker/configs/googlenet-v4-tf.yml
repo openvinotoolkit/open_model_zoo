@@ -17,6 +17,7 @@ models:
           - type: crop
             size: 299
 
+
   - name: googlenet-v4-tf
     launchers:
       - framework: dlsdk
@@ -32,7 +33,6 @@ models:
         model:   public/googlenet-v4-tf/FP16/googlenet-v4-tf.xml
         weights: public/googlenet-v4-tf/FP16/googlenet-v4-tf.bin
         adapter: classification
-
 
     datasets:
       - name: imagenet_1001_classes
