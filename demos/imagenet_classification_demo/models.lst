@@ -40,11 +40,9 @@ octave-resnet-50-0.125
 octave-resnext-101-0.25
 octave-resnext-50-0.25
 octave-se-resnet-50-0.125
-person-attributes-recognition-crossroad-0230
 resnet-101
 resnet-152
 resnet-50
-resnet50-binary-0001
 resnet-50-caffe2
 resnet-50-pytorch
 se-inception
@@ -56,8 +54,6 @@ se-resnext-50
 squeezenet1.0
 squeezenet1.1
 squeezenet1.1-caffe2
-ssd_mobilenet_v2_coco
-vehicle-attributes-recognition-barrier-0039
 vgg16
 vgg19
 vgg19-caffe2

@@ -219,8 +219,6 @@ int main(int argc, char *argv[]) {
             auto layerData = inputBlobsIt.second;
             auto layerDataDims = layerData->getTensorDesc().getDims();
 
-            std::vector<unsigned long> layerDims(layerDataDims.data(), layerDataDims.data() + layerDataDims.size());
-
             layerData->setLayout(Layout::NCHW);
             layerData->setPrecision(Precision::U8);
         }
@@ -231,11 +229,17 @@ int main(int argc, char *argv[]) {
             auto layerData = outputBlobsIt.second;
             auto layerDataDims = layerData->getTensorDesc().getDims();
 
-            if (layerDataDims.size() != 2 || layerDataDims[0] != FLAGS_b || layerDataDims[1] != labels.size()) {
-                throw std::logic_error("Wrong size of model output layer. Must be BatchSize x NumberOfClasses.");
+            if (layerDataDims.size() != 2 && layerDataDims.size() != 4) {
+                throw std::logic_error("Incorrect number of dimensions in model output layer. Must be 2 or 4.");
             }
-
-            std::vector<unsigned long> layerDims(layerDataDims.data(), layerDataDims.data() + layerDataDims.size());
+            if (layerDataDims[1] == labels.size() + 1) {
+                labels.insert(labels.begin(), "other");
+                for (size_t i = 0; i < classIndices.size(); i++) {
+                    classIndices[i]++;
+                }
+            } else if (layerDataDims[1] != labels.size() || layerDataDims[0] != FLAGS_b) {
+                throw std::logic_error("Incorrect size of model output layer. Must be BatchSize x NumberOfClasses.");
+            }
 
             layerData->setPrecision(Precision::FP32);
         }
@@ -290,10 +294,11 @@ int main(int argc, char *argv[]) {
         // ---------------------------------------------------------------------------------------------------
 
         // ----------------------------Try to set optimal number of infer requests----------------------------
-        if (FLAGS_nireq == 0) {
+        unsigned nireq = FLAGS_nireq;
+        if (nireq == 0) {
             std::string key = METRIC_KEY(OPTIMAL_NUMBER_OF_INFER_REQUESTS);
             try {
-                FLAGS_nireq = executableNetwork.GetMetric(key).as<unsigned int>();
+                nireq = executableNetwork.GetMetric(key).as<unsigned int>();
             } catch (const details::InferenceEngineException& ex) {
                 THROW_IE_EXCEPTION
                         << "Every device used with the imagenet_classification_demo should "
@@ -305,7 +310,7 @@ int main(int argc, char *argv[]) {
 
         // ---------------------------------------Create infer request----------------------------------------
         std::vector<InferRequest> inferRequests;
-        for (unsigned infReqID = 0; infReqID < FLAGS_nireq; ++infReqID) {
+        for (unsigned infReqID = 0; infReqID < nireq; ++infReqID) {
             inferRequests.push_back(executableNetwork.CreateInferRequest());
         }
         // ---------------------------------------------------------------------------------------------------
@@ -350,12 +355,13 @@ int main(int argc, char *argv[]) {
 
         auto startTime = std::chrono::steady_clock::now();
         auto currentTime = std::chrono::steady_clock::now();
-        auto elapsedSeconds = currentTime - startTime;
+        std::chrono::duration<double> elapsedSeconds = currentTime - startTime;
         // ---------------------------------------------------------------------------------------------------
         
         // -------------------------------------Processing infer requests-------------------------------------
         do {
-            if (isTestMode && elapsedSeconds >= std::chrono::seconds{3}) {
+            //std::cout << "Num completed: " <<  completedInferRequests.size() << std::endl;
+            if (isTestMode && elapsedSeconds >= std::chrono::seconds{5}) {
                 isTestMode = false;
                 gridMat = GridMat(presenter, cv::Size(width, height), cv::Size(16, 9), avgFPS);
                 startTickCount = std::chrono::steady_clock::now();
@@ -477,7 +483,7 @@ int main(int argc, char *argv[]) {
 
             currentTime = std::chrono::steady_clock::now();
             elapsedSeconds = currentTime - startTime;
-        } while (27 != key && (FLAGS_time == -1 || elapsedSeconds.count() < FLAGS_time));
+        } while (27 != key && (FLAGS_time == -1 || elapsedSeconds < std::chrono::seconds{FLAGS_time}));
 
         std::cout << "FPS: " << avgFPS << std::endl;
         std::cout << "Latency: " << avgLatency << std::endl;
