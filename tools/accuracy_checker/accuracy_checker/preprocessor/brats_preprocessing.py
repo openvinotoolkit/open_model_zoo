@@ -15,11 +15,15 @@ limitations under the License.
 """
 
 import numpy as np
-from scipy.ndimage import interpolation
 
 from ..config import ConfigError, BaseField, NumberField, ListField, StringField
 from ..preprocessor import Preprocessor
 from ..utils import get_or_parse_value
+
+try:
+    from scipy.ndimage import interpolation
+except ImportError:
+    interpolation = None
 
 
 class Resize3D(Preprocessor):
@@ -34,6 +38,9 @@ class Resize3D(Preprocessor):
         return parameters
 
     def configure(self):
+        if interpolation is None:
+            raise ValueError('resize3d require scipy, please install it before usage.')
+
         self.shape = self._check_size(
             get_or_parse_value(self.config.get('size'), default=(128, 128, 128), casting_type=int))
 

@@ -15,13 +15,18 @@ limitations under the License.
 """
 
 import numpy as np
-from scipy.ndimage import interpolation
 from .postprocessor import Postprocessor
 from ..config import ConfigError, BoolField, ListField, NumberField
 from ..representation import BrainTumorSegmentationPrediction, BrainTumorSegmentationAnnotation
+try:
+    from scipy.ndimage import interpolation
+except ImportError:
+    interpolation = None
 
 
 def resample(data, shape):
+    if interpolation is None:
+        raise ValueError('scipy required, please install it')
     if len(data.shape) != len(shape):
         raise RuntimeError('Dimensions of input array and shape are different. Resampling is impossible.')
     factor = [float(o) / i for i, o in zip(data.shape, shape)]

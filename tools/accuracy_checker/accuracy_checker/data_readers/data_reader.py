@@ -19,13 +19,22 @@ from functools import singledispatch
 from collections import OrderedDict, namedtuple
 import re
 import cv2
-from PIL import Image
 import numpy as np
-import nibabel as nib
+
 try:
     import tensorflow as tf
 except ImportError as import_error:
     tf = None
+
+try:
+    from PIL import Image
+except ImportError as import_error:
+    Image = None
+
+try:
+    import nibabel as nib
+except ImportError:
+    nib = None
 
 from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
 from ..dependency import ClassProvider
@@ -185,6 +194,8 @@ class PillowImageReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
+        if Image is None:
+            raise ValueError('Pillow is not installed, please install it')
         self.convert_to_rgb = True
 
     def read(self, data_id):
@@ -196,6 +207,11 @@ class PillowImageReader(BaseReader):
 
 class ScipyImageReader(BaseReader):
     __provider__ = 'scipy_imread'
+
+    def __init__(self, data_source, config=None, **kwargs):
+        super().__init__(data_source, config)
+        if Image is None:
+            raise ValueError('Pillow is not installed, please install it')
 
     def read(self, data_id):
         # reimplementation scipy.misc.imread
@@ -294,6 +310,8 @@ class NiftiImageReader(BaseReader):
             config_validator.validate(self.config)
 
     def configure(self):
+        if nib is None:
+            raise ImportError('nifty backend for image reading requires nibabel. Please install it before usage.')
         self.channels_first = self.config.get('channels_first', False) if self.config else False
 
     def read(self, data_id):

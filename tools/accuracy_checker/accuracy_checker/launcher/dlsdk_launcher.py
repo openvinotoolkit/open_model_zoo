@@ -21,7 +21,6 @@ import os
 import platform
 import re
 import numpy as np
-from cpuinfo import get_cpu_info
 import openvino.inference_engine as ie
 
 from ..config import ConfigError, NumberField, PathField, StringField, DictField, ListField, BoolField, BaseField
@@ -38,6 +37,11 @@ from ..utils import (
 from .launcher import Launcher, LauncherConfigValidator
 from .model_conversion import convert_model, FrameworkParameters
 from ..logging import print_info
+
+try:
+    from cpuinfo import get_cpu_info
+except ImportError:
+    get_cpu_info = None
 
 
 HETERO_KEYWORD = 'HETERO:'
@@ -379,6 +383,10 @@ class DLSDKLauncher(Launcher):
 
                 if extension_list:
                     return extension_list
+
+                if get_cpu_info is None:
+                    raise ValueError('CPU extensions automatic search requires pycpuinfo. '
+                                     'Please install it or set cpu extensions lib directly')
 
                 cpu_info_flags = get_cpu_info()['flags']
                 supported_flags = ['avx512', 'avx2', 'sse4_1', 'sse4_2']

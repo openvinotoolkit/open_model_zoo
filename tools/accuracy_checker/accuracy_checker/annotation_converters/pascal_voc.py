@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 from pathlib import Path
-from tqdm import tqdm
 
 from ..topology_types import ObjectDetection
 from ..config import PathField, BoolField
@@ -180,7 +179,7 @@ class PascalVOCDetectionConverter(BaseFormatConverter):
         detections = []
         image_set = read_txt(self.image_set_file, sep=None)
         num_iterations = len(image_set)
-        for (image_id, image) in tqdm(enumerate(image_set)):
+        for (image_id, image) in enumerate(image_set):
             root = read_xml(self.annotations_dir / '{}.xml'.format(image))
 
             identifier = root.find('.//filename').text
