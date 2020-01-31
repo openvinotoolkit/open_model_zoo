@@ -94,6 +94,8 @@ You may refer to `-h, --help` to full list of command line options. Some optiona
 - `-C, '--converted_models` directory to store Model Optimizer converted models (used for DLSDK launcher only).
 - `-tf, --target_framework` framework for infer.
 - `-td, --target_devices` devices for infer. You can specify several devices using space as a delimiter.
+- `--async_mode` allows run the tool in async mode if launcher support it.
+- `--num_requests` number requests for async execution. Allows override provided in config info. Default is `AUTO`
 
 You are also able to replace some command line arguments with environment variables for path prefixing. Supported following list of variables:
 * `DATA_DIR` -  equivalent of `-s`, `--source`.
