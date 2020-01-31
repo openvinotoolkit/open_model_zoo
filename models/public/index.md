@@ -112,6 +112,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | Faster R-CNN with ResNet 50    | [TensorFlow\*](./faster_rcnn_resnet50_coco/faster_rcnn_resnet50_coco.md) | faster_rcnn_resnet50_coco | 57.203 | 29.162 |
 | Faster R-CNN with ResNet 101   | [TensorFlow\*](./faster_rcnn_resnet101_coco/faster_rcnn_resnet101_coco.md) |faster_rcnn_resnet101_coco | 112.052 | 48.128 |
 | MTCNN                     | Caffe\*: <br>[proposal](./mtcnn-p/mtcnn-p.md) <br>[refine](./mtcnn-r/mtcnn-r.md) <br> [output](./mtcnn-o/mtcnn-o.md) | <br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| | |
+| R-FCN with Resnet-101     | [TensorFlow\*](./rfcn-resnet101-coco-tf/rfcn-resnet101-coco-tf.md) | rfcn-resnet101-coco-tf | 53.462 | 171.85 |
 | SSD 300                   | [Caffe\*](./ssd300/ssd300.md) | ssd300 | 62.815 | 26.285 |
 | SSD 512                   | [Caffe\*](./ssd512/ssd512.md) | ssd512 | 180.611 | 27.189 |
 | SSD with MobileNet        | [Caffe\*](./mobilenet-ssd/mobilenet-ssd.md) <br>[TensorFlow\*](./ssd_mobilenet_v1_coco/ssd_mobilenet_v1_coco.md) | mobilenet-ssd <br>ssd_mobilenet_v1_coco | 2.316~2.494 | 5.783~6.807 |
