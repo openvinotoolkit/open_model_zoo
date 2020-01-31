@@ -31,7 +31,7 @@ from .ms_coco import MSCocoDetectionConverter, MSCocoKeypointsConverter, MSCocoS
 from .cityscapes import CityscapesConverter
 from .ncf_converter import MovieLensConverter
 from .brats import BratsConverter, BratsNumpyConverter
-from .cifar10 import Cifar10FormatConverter
+from .cifar import CifarFormatConverter
 from .mnist import MNISTCSVFormatConverter
 from .wmt import WMTConverter
 from .common_semantic_segmentation import CommonSegmentationConverter
@@ -79,7 +79,7 @@ __all__ = [
     'MovieLensConverter',
     'BratsConverter',
     'BratsNumpyConverter',
-    'Cifar10FormatConverter',
+    'CifarFormatConverter',
     'MNISTCSVFormatConverter',
     'WMTConverter',
     'CommonSegmentationConverter',
