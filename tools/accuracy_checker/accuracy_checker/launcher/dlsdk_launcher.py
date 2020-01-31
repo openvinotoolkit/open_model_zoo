@@ -647,6 +647,9 @@ class DLSDKLauncher(Launcher):
             self._num_requests = 1
         else:
             self._num_requests = self.auto_num_requests()
+        if self.async_mode:
+            print_info('Async mode activated')
+            print_info('Infer requests number:{}'.format(self.num_requests))
 
     def auto_num_requests(self, return_list=False):
         concurrency_device = {
@@ -700,6 +703,7 @@ class DLSDKLauncher(Launcher):
         self._num_requests = sum(num_per_device_requests) * 2
         if log:
             self._log_versions()
+            print_info('Async mode activated')
             print_info('Request number for each device:')
             for device, nreq in zip(device_list, num_per_device_requests):
                 print_info('    {} - {}'.format(device, nreq))
