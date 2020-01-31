@@ -14,8 +14,8 @@
 
 description: >-
   This model was created for participation in the Brain Tumor Segmentation Challenge
-  <https://www.med.upenn.edu/cbica/brats2019/registration.html> (BraTS) 2019.
-  It has UNet architecture trained with residual blocks.
+  <https://www.med.upenn.edu/cbica/brats2019/registration.html> (BraTS) 2019. It has
+  the UNet architecture trained with residual blocks.
 task_type: semantic_segmentation
 files:
   - name: brain-tumor-segmentation-0002.onnx
