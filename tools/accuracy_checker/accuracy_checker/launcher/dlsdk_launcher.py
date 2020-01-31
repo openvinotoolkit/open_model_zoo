@@ -208,7 +208,8 @@ class DLSDKLauncher(Launcher):
             '_aocl': PathField(optional=True, description="path to aocl (FPGA only)"),
             '_vpu_log_level': StringField(
                 optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
-            )
+            ),
+            '_prev_bitstream': PathField(optional=True, description="path to bitstream from previous run (FPGA only)")
         })
 
         return parameters
@@ -349,20 +350,25 @@ class DLSDKLauncher(Launcher):
 
         bitstream = config.get('bitstream')
         if bitstream:
-            print_info('programming bitstream: {}'.format(bitstream.name))
-            aocl_executable = config.get('_aocl')
-            if aocl_executable:
-                subprocess.run([str(aocl_executable), 'program', 'acl0', str(bitstream)], check=True)
+            previous_bitstream = config.get('_prev_bitstream', '')
+            if str(previous_bitstream) != str(bitstream):
+                print_info('programming bitstream: {}'.format(bitstream.name))
+                aocl_executable = config.get('_aocl')
+                if aocl_executable:
+                    subprocess.run([str(aocl_executable), 'program', 'acl0', str(bitstream)], check=True)
+                    os.environ[FPGA_COMPILER_MODE_VAR] = '3'
+                    self._set_variable = True
+                else:
+                    aocx_variable = 'DLA_AOCX'
+                    previous_bitstream = os.environ.get(aocx_variable)
+                    if previous_bitstream == str(bitstream):
+                        return
+                    os.environ[aocx_variable] = str(bitstream)
+                    if not os.environ.get(aocx_variable):
+                        warning('Warning: {} has not been set'.format(aocx_variable))
+            else:
                 os.environ[FPGA_COMPILER_MODE_VAR] = '3'
                 self._set_variable = True
-            else:
-                aocx_variable = 'DLA_AOCX'
-                previous_bitstream = os.environ.get(aocx_variable)
-                if previous_bitstream == str(bitstream):
-                    return
-                os.environ[aocx_variable] = str(bitstream)
-                if not os.environ.get(aocx_variable):
-                    warning('Warning: {} has not been set'.format(aocx_variable))
 
     @staticmethod
     def get_cpu_extension(cpu_extensions, selection_mode):
