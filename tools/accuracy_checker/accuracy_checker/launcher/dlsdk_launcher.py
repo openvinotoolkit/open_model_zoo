@@ -648,7 +648,7 @@ class DLSDKLauncher(Launcher):
         else:
             self._num_requests = self.auto_num_requests()
 
-    def auto_num_requests(self):
+    def auto_num_requests(self, return_list=False):
         concurrency_device = {
             'CPU': 1,
             'GPU': 1,
@@ -662,13 +662,15 @@ class DLSDKLauncher(Launcher):
             cpu_count = multiprocessing.cpu_count()
             for min_request in min_requests:
                 if cpu_count % min_request == 0:
-                    return max(min_request, cpu_count / min_request)
+                    num_req = max(min_request, cpu_count / min_request)
+                    return num_req if not return_list else [num_req]
         if 'GPU' in platform_list and len(platform_list) == 1:
-            return 2
-        concurrency = 0
+            return 2 if not return_list else [2]
+        per_device_requests = []
         for device in platform_list:
-            concurrency += concurrency_device.get(device, 1)
-        return concurrency
+            per_device_requests.append(concurrency_device.get(device, 1))
+
+        return per_device_requests if return_list else sum(per_device_requests)
 
     def _prepare_multi_device(self, log=True):
         async_mode = self.get_value_from_config('async_mode')
@@ -685,8 +687,11 @@ class DLSDKLauncher(Launcher):
                     "number requests already provided in device name specification. "
                     "'num_requests' option will be ignored."
                 )
+        elif 'num_requests' in self.config and self.config['num_requests'] != 'AUTO':
+            num_per_device_requests = get_or_parse_value(self.config['num_request'], casting_type=int)
         else:
-            num_per_device_requests = get_or_parse_value(self.config.get('num_requests', 1), casting_type=int)
+            num_per_device_requests = self.auto_num_requests(return_list=True)
+
         if len(num_per_device_requests) == 1:
             num_per_device_requests = [num_per_device_requests[0]] * len(device_list)
 
