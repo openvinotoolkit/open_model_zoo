@@ -58,6 +58,7 @@ from .cmu_panoptic import CmuPanopticKeypointsConverter
 from .action_recognition import ActionRecognitionConverter
 from .ms_asl_continuous import MSASLContiniousConverter
 from .fashion_mnist import FashionMnistConverter
+from .monocular_depth_perseption import ReDWebDatasetConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -109,5 +110,6 @@ __all__ = [
     'CmuPanopticKeypointsConverter',
     'ActionRecognitionConverter',
     'MSASLContiniousConverter',
-    'FashionMnistConverter'
+    'FashionMnistConverter',
+    'ReDWebDatasetConverter'
 ]

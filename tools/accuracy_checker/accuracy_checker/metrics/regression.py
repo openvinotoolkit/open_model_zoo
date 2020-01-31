@@ -16,6 +16,7 @@ limitations under the License.
 
 import warnings
 import math
+from functools import singledispatch
 import numpy as np
 
 from ..representation import (
@@ -26,7 +27,9 @@ from ..representation import (
     SuperResolutionAnnotation,
     SuperResolutionPrediction,
     GazeVectorAnnotation,
-    GazeVectorPrediction
+    GazeVectorPrediction,
+    DepthEstimationAnnotation,
+    DepthEstimationPrediction
 )
 
 from .metric import PerImageEvaluationMetric
@@ -35,12 +38,14 @@ from ..utils import string_to_tuple, finalize_metric_result
 
 
 class BaseRegressionMetric(PerImageEvaluationMetric):
-    annotation_types = (RegressionAnnotation, )
-    prediction_types = (RegressionPrediction, )
+    annotation_types = (RegressionAnnotation, DepthEstimationAnnotation)
+    prediction_types = (RegressionPrediction, DepthEstimationPrediction)
 
     def __init__(self, value_differ, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.value_differ = value_differ
+        self.calculate_diff = singledispatch(self._calculate_diff_regression_rep)
+        self.calculate_diff.register(DepthEstimationAnnotation, self._calculate_diff_depth_estimation_rep)
 
     def configure(self):
         self.meta.update({
@@ -49,10 +54,16 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         self.magnitude = []
 
     def update(self, annotation, prediction):
-        diff = self.value_differ(annotation.value, prediction.value)
+        diff = self.calculate_diff(annotation, prediction)
         self.magnitude.append(diff)
 
         return diff
+
+    def _calculate_diff_regression_rep(self, annotation, prediction):
+        return self.value_differ(annotation.value, prediction.value)
+
+    def _calculate_diff_depth_estimation_rep(self, annotation, prediction):
+        return self.value_differ(annotation.depth_map, prediction.depth_map)
 
     def evaluate(self, annotations, predictions):
         return np.mean(self.magnitude), np.std(self.magnitude)

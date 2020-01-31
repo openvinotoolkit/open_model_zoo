@@ -48,6 +48,7 @@ from .detection import (
     FCOSPersonAdapter
 )
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
+from .centernet import CTDETAdapter
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter
 from .pose_estimation import HumanPoseAdapter
@@ -62,7 +63,7 @@ from .mask_rcnn_with_text import MaskRCNNWithTextAdapter
 
 from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter
 
-from .centernet import CTDETAdapter
+from .mono_depth import MonoDepthAdapter
 
 __all__ = [
     'Adapter',
@@ -117,4 +118,6 @@ __all__ = [
 
     'MachineTranslationAdapter',
     'QuestionAnsweringAdapter',
+
+    'MonoDepthAdapter'
 ]

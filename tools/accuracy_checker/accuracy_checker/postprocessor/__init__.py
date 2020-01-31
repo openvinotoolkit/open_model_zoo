@@ -47,6 +47,8 @@ from .extract_answers_tokens import ExtractSQUADPrediction
 from .translate_3d_poses import Translate3dPoses
 from .normalize_recomendation import MinMaxNormalizeRecommendation, SigmoidNormalizeRecommendation
 from .resize_super_resolution import ResizeSuperResolution
+from .align_prediction_depth_map import AlignDepth
+from .resize_prediction_depth_map import ResizeDepthMap
 
 __all__ = [
     'Postprocessor',
@@ -88,5 +90,8 @@ __all__ = [
     'SigmoidNormalizeRecommendation',
     'MinMaxNormalizeRecommendation',
 
-    'ResizeSuperResolution'
+    'ResizeSuperResolution',
+
+    'AlignDepth',
+    'ResizeDepthMap'
 ]

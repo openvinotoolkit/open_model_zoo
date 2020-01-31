@@ -68,3 +68,5 @@ Accuracy Checker supports following set of postprocessors:
 * `resize_super_resolution` - resizing super resolution predicted image. Supported representations: `SuperResolutionAnotation`, `SuperResolutionPrediction`.
   * `dst_width` and `dst_height` - destination width and height for resizing respectively. You can also use `size` instead in case when destination sizes are equal.
     If any of these parameters are not specified, gt high resolution image size will be used as default.
+* `resize_prediction_depth_map` - resizing prediction depth map to original image size. Supported representations: `DepthEstimationAnnotation`, `DepthEstimationPrediction`.
+* `align_prediction_depth` - scale prediction depth to align to annotated depth: scale is determined by least-squares. Supported representations: `DepthEstimationAnnotation`, `DepthEstimationPrediction`.
