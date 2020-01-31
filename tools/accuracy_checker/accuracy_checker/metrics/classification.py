@@ -229,11 +229,8 @@ class MetthewsCorrelation(PerImageEvaluationMetric):
     def configure(self):
         label_map = self.dataset.metadata.get('label_map', [])
         if label_map and len(label_map) != 2:
-            raise ConfigError('metthew_correlation_coefficient applicable only for binary classification task')
-        self.tp = 0
-        self.tn = 0
-        self.fp = 0
-        self.fn = 0
+            raise ConfigError('metthews_correlation_coefficient applicable only for binary classification task')
+        self.reset()
 
     def update(self, annotation, prediction):
         if annotation.label and prediction.label:
@@ -253,3 +250,9 @@ class MetthewsCorrelation(PerImageEvaluationMetric):
     def evaluate(self, annotations, predictions):
         delimeter_sum = (self.tp + self.fp) * (self.tp + self.fn) * (self.tn + self.fp) * (self.tn + self.fn)
         return ((self.tp * self.tn) - (self.fp * self.fn)) / np.sqrt(delimeter_sum) if delimeter_sum != 0 else -1
+
+    def reset(self):
+        self.tp = 0
+        self.tn = 0
+        self.fp = 0
+        self.fn = 0
