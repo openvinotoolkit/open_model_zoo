@@ -37,12 +37,8 @@ from accuracy_checker.utils import contains_all
 
 @pytest.fixture()
 def mock_inference_engine(mocker):
-    try:
-        mocker.patch('openvino.inference_engine.IEPlugin')
-        mocker.patch('openvino.inference_engine.IENetwork')
-    except ImportError:
-        mocker.patch('inference_engine.IEPlugin')
-        mocker.patch('inference_engine.IENetwork')
+    mocker.patch('openvino.inference_engine.IECore')
+    mocker.patch('openvino.inference_engine.IENetwork')
 
 
 @pytest.fixture()
@@ -1117,12 +1113,6 @@ class TestDLSDKLauncherConfig:
 
         with pytest.raises(ConfigError):
             create_launcher(config)
-
-    def test_missed_weights_in_create_dlsdk_launcher_raises_config_error_exception(self):
-        launcher = {'framework': 'dlsdk', 'model': 'custom', 'adapter': 'ssd', 'device': 'cpu'}
-
-        with pytest.raises(ConfigError):
-            create_launcher(launcher)
 
     def test_missed_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
         launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom'}
