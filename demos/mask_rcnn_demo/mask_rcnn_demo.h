@@ -19,7 +19,7 @@ static const char custom_cldnn_message[] = "Required for GPU custom kernels. "\
                                            "Absolute path to the .xml file with the kernels descriptions.";
 static const char custom_cpu_library_message[] = "Required for CPU custom layers. " \
                                                  "Absolute path to a shared library with the kernels implementations.";
-static const char detection_output_layer_name_message[] = "Optional. The name of detection output layer. Default value is \"detection_output\"";
+static const char detection_output_layer_name_message[] = "Optional. The name of detection output layer. Default value is \"reshape_do_2d\"";
 static const char masks_layer_name_message[] = "Optional. The name of masks layer. Default value is \"masks\"";
 
 DEFINE_string(c, "", custom_cldnn_message);
@@ -28,7 +28,7 @@ DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", image_message);
 DEFINE_string(m, "", model_message);
 DEFINE_string(d, "CPU", target_device_message);
-DEFINE_string(detection_output_name, "detection_output", detection_output_layer_name_message);
+DEFINE_string(detection_output_name, "reshape_do_2d", detection_output_layer_name_message);
 DEFINE_string(masks_name, "masks", masks_layer_name_message);
 
 /**

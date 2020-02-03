@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
         const float PROBABILITY_THRESHOLD = 0.2f;
         const float MASK_THRESHOLD = 0.5f;  // threshold used to determine whether mask pixel corresponds to object or to background
         // amount of elements in each detected box description (batch, label, prob, x1, y1, x2, y2)
-        IE_ASSERT(do_blob->getTensorDesc().getDims().size() == 4);
+        IE_ASSERT(do_blob->getTensorDesc().getDims().size() == 2);
         size_t BOX_DESCRIPTION_SIZE = do_blob->getTensorDesc().getDims().back();
 
         const TensorDesc& masksDesc = masks_blob->getTensorDesc();
