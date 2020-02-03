@@ -12,12 +12,12 @@
 static const char help_message[] = "Print a usage message.";
 static const char input_message[] = "Required. Input to process.";
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
-static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). " \
-                                            "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
+                                            "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                             "The demo will look for a suitable plugin for a specified device.";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "\
+static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
                                            "Absolute path to the .xml file with the kernels descriptions.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers. " \
+static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
                                                  "Absolute path to a shared library with the kernels implementations.";
 static const char config_message[] = "Path to the configuration file. Default vaelue: \"config\".";
 static const char delay_message[] = "Optional. Default is 1. Interval in milliseconds of waiting for a key to be "
