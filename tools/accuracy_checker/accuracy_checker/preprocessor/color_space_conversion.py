@@ -17,6 +17,7 @@ limitations under the License.
 
 import cv2
 import numpy as np
+from ..config import NumberField
 
 try:
     import tensorflow as tf
@@ -79,5 +80,29 @@ class TfConvertImageDType(Preprocessor):
     def process(self, image, annotation_meta=None):
         converted_data = self.converter(image.data, dtype=self.dtype)
         image.data = converted_data.numpy()
+
+        return image
+
+
+class SelectInputChannel(Preprocessor):
+    __provider__ = 'select_channel'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters['channel'] = NumberField(value_type=int, min_value=0)
+        return parameters
+
+    def configure(self):
+        self.channel = self.get_value_from_config('channel')
+
+    def process(self, image, annotation_meta=None):
+        def process_data(data):
+            return data[:, :, self.channel, np.newaxis]
+
+        if isinstance(image.data, list):
+            image.data = [process_data(item) for item in image.data]
+        else:
+            image.data = process_data(image.data)
 
         return image
