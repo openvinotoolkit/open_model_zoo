@@ -6,7 +6,7 @@ This topic demonstrates how to run the Image Segmentation demo application, whic
 
 ## How It Works
 
-Upon the start-up the demo application reads command line parameters and loads a network. The demo runs inference and shows results for each image captured from an input.
+Upon the start-up the demo application reads command line parameters and loads a network. The demo runs inference and shows results for each image captured from an input. The demo's pipeline is latency oriented. The pipeline minimizes the tame required to process each single image.
 
 > **NOTE**: By default, Open Model Zoo demos expect input with BGR channels order. If you trained your model to work with RGB order, you need to manually rearrange the default channels order in the demo application or reconvert your model using the Model Optimizer tool with `--reverse_input_channels` argument specified. For more information about the argument, refer to **When to Reverse Input Channels** section of [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html).
 
@@ -28,6 +28,7 @@ Options:
           Or
       -c "<absolute_path>"    Required for GPU custom kernels. Absolute path to the .xml file with the kernels descriptions.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The demo will look for a suitable plugin for a specified device.
+    -delay                    Optional. Default is 1. Interval in milliseconds of waiting for a key to be pressed. For a negative value the demo loads a model, opens an input and exits.
     -no_show                  Optional. Do not visualize inference results.
     -u                        Optional. List of monitors to show initially.
 ```

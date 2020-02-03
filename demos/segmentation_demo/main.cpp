@@ -20,6 +20,7 @@
 #include "segmentation_demo.h"
 
 using namespace InferenceEngine;
+typedef std::chrono::duration<double, std::chrono::milliseconds::period> Ms;
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
@@ -88,8 +89,9 @@ int main(int argc, char *argv[]) {
         if (outputsDataMap.size() != 1) throw std::runtime_error("Demo supports topologies only with 1 output");
         const std::string& outName = outputsDataMap.begin()->first;
         Data& data = *outputsDataMap.begin()->second;
-        // alternative to resetting the output precision is to have a switch
-        // statement in postprocessing handling other precision types
+        // if the model performs ArgMax, its output type can be I32 but for models that return heatmaps for each
+        // class the output is usually FP32. Reset the precision to avoid handling different types with switch in
+        // postprocessing
         data.setPrecision(Precision::FP32);
         const SizeVector& outSizeVector = data.getTensorDesc().getDims();
         int outChannels, outHeight, outWidth;
@@ -141,11 +143,16 @@ int main(int argc, char *argv[]) {
             colors[i] = {CITYSCAPES_COLORS[i].blue(), CITYSCAPES_COLORS[i].green(), CITYSCAPES_COLORS[i].red()};
         std::mt19937 rng;
         std::uniform_int_distribution<int> distr(0, 255);
-        int delay = 1;
+        int delay = FLAGS_delay;
         cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
         Presenter presenter(FLAGS_u, 10, graphSize);
 
-        while (cap.read(inImg)) {
+        std::chrono::steady_clock::duration latencySum{0};
+        unsigned latencySamplesNum = 0;
+        std::ostringstream latencyStream;
+
+        std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
+        while (cap.read(inImg) && delay >= 0) {
             if (CV_8UC3 != inImg.type())
                 throw std::runtime_error("BGR (or RGB) image expected to come from input");
             inferRequest.SetBlob(inName, wrapMat2Blob(inImg));
@@ -177,6 +184,20 @@ int main(int argc, char *argv[]) {
             cv::resize(maskImg, resImg, inImg.size());
             resImg = inImg * blending + resImg * (1 - blending);
             presenter.drawGraphs(resImg);
+
+            latencySum += std::chrono::steady_clock::now() - t0;
+            ++latencySamplesNum;
+            latencyStream.str("");
+            latencyStream << std::fixed << std::setprecision(1)
+                << (std::chrono::duration_cast<Ms>(latencySum) / latencySamplesNum).count() << " ms";
+            constexpr int FONT_FACE = cv::FONT_HERSHEY_SIMPLEX;
+            constexpr double FONT_SCALE = 2;
+            constexpr int THICKNESS = 2;
+            int baseLine;
+            cv::getTextSize(latencyStream.str(), FONT_FACE, FONT_SCALE, THICKNESS, &baseLine);
+            cv::putText(resImg, latencyStream.str(), cv::Size{0, resImg.rows - baseLine}, FONT_FACE, FONT_SCALE,
+                cv::Scalar{255, 0, 0}, THICKNESS);
+
             if (!FLAGS_no_show) {
                 cv::imshow(WIN_NAME, resImg);
                 int key = cv::waitKey(delay);
@@ -189,15 +210,15 @@ int main(int argc, char *argv[]) {
                     case 'p':
                     case 'P':
                     case 32: // Space
-                        delay = !delay;
+                        delay = !delay * (FLAGS_delay + !FLAGS_delay);
                         break;
                     default:
                         presenter.handleKey(key);
                 }
             }
-            if (delay == -1)
-                break;
+            t0 = std::chrono::steady_clock::now();
         }
+        std::cout << "Mean pipeline latency: " << latencyStream.str() << '\n';
         std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
