@@ -21,13 +21,13 @@ files:
   - name: resnet_v1-50.pb
     size: 102170160
     sha256: 7c186a471a30682cdee02b246eeb0bfd93fc71d9fa53834d69f8101e664d12f8
-    source: 
+    source: https://download.01.org/opencv/public_models/012020/resnet-50-tf/resnet_v1-50.pb
 model_optimizer_args:
   - --input_shape=[1,224,224,3]
   - --mean_values=[123.68,116.78,103.94]
   - --input=map/TensorArrayStack/TensorArrayGatherV3
   - --output=softmax_tensor
-  - --input_meta_graph=$dl_dir/resnet_v1-50.pb
+  - --input_model=$dl_dir/resnet_v1-50.pb
   - --reverse_input_channels
 framework: tf
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

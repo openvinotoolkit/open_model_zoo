@@ -16,8 +16,6 @@ models:
             central_fraction: 0.875
           - type: resize
             size: 299
-            use_pillow: True
-            interpolation: BILINEAR
 
 
   - name: googlenet-v4-tf
@@ -43,7 +41,5 @@ models:
             central_fraction: 0.875
           - type: resize
             size: 299
-            use_pillow: True
-            interpolation: BILINEAR
 
 global_definitions: ../dataset_definitions.yml

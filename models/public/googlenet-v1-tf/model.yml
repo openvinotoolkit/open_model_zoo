@@ -22,7 +22,7 @@ files:
   - name: inception_v1.frozen.pb
     size: 26735789
     sha256: 5098978b1c82717bb4d1702b200d715f6e1e37121fdf51795ff5d8a228a26485
-    source:
+    source: https://download.01.org/opencv/public_models/012020/googlenet-v1-tf/inception_v1.frozen.pb
 model_optimizer_args:
   - --input_shape=[1,224,224,3]
   - --input=input
