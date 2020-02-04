@@ -23,15 +23,15 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        model:   public/googlenet-v1-tf/FP32/googlenet-v1.xml
-        weights: public/googlenet-v1-tf/FP32/googlenet-v1.bin
+        model:   public/googlenet-v1-tf/FP32/googlenet-v1-tf.xml
+        weights: public/googlenet-v1-tf/FP32/googlenet-v1-tf.bin
         adapter: classification
 
       - framework: dlsdk
         tags:
           - FP16
-        model:   public/googlenet-v1-tf/FP16/googlenet-v1.xml
-        weights: public/googlenet-v1-tf/FP16/googlenet-v1.bin
+        model:   public/googlenet-v1-tf/FP16/googlenet-v1-tf.xml
+        weights: public/googlenet-v1-tf/FP16/googlenet-v1-tf.bin
         adapter: classification
 
     datasets:
