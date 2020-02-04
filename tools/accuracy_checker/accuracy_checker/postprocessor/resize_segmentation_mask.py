@@ -38,14 +38,14 @@ class ResizeSegmentationMask(PostprocessorWithSpecificTargets):
         parameters = super().parameters()
         parameters.update({
             'dst_width': NumberField(
-                value_type=int, optional=True, min_value=1, description="Destination width for box clipping."
+                value_type=int, optional=True, min_value=1, description="Destination width for resize"
             ),
             'dst_height': NumberField(
-                value_type=int, optional=True, min_value=1, description="Destination height for box clipping."
+                value_type=int, optional=True, min_value=1, description="Destination height for resize."
             ),
             'size': NumberField(
                 value_type=int, optional=True, min_value=1,
-                description="Destination size for box clipping for both dimensions."
+                description="Destination size for resize for both dimensions (height and width)."
             )
         })
         return parameters

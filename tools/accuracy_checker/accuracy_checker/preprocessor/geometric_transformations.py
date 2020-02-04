@@ -538,6 +538,7 @@ class Crop3D(Preprocessor):
 
         return img[startz:endz, starty:endy, startx:endx, :]
 
+
 class TransformedCropWithAutoScale(Preprocessor):
     __provider__ = 'transformed_crop_with_auto_scale'
 
@@ -615,6 +616,7 @@ class TransformedCropWithAutoScale(Preprocessor):
         else:
             trans = cv2.getAffineTransform(np.float32(transformed_points), np.float32(points))
         return trans
+
 
 class ImagePyramid(Preprocessor):
     __provider__ = 'pyramid'
