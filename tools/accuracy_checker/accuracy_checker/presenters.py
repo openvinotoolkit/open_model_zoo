@@ -54,8 +54,14 @@ class ScalarPrintPresenter(BasePresenter):
         )
 
     def extract_result(self, evaluation_result):
-        value, _, name, _, _, meta = evaluation_result
-        return name, np.mean(value), meta
+        value, ref, name, metric_type, _, meta = evaluation_result
+        result_dict = {
+            'name': name,
+            'value': np.mean(value),
+            'type': metric_type,
+            'ref': ref or ''
+        }
+        return result_dict, meta
 
 
 class VectorPrintPresenter(BasePresenter):
@@ -106,19 +112,35 @@ class VectorPrintPresenter(BasePresenter):
             )
 
     def extract_result(self, evaluation_result):
-        value, _, name, _, _, meta = evaluation_result
+        value, reference, name, metric_type, _, meta = evaluation_result
         value_names = ['{}@{}'.format(name, value_name) for value_name in meta.get('names', range(0, len(value)))]
         if np.isscalar(value) or np.size(value) == 1:
             if not np.isscalar(value):
                 value = value[0]
-            return value_names[0], value, meta
+            result_dict = {
+                'name': value_names[0] if 'names' in meta else name,
+                'value':value,
+                'type': metric_type,
+                'ref': reference or ''
+            }
+            return result_dict, meta
         if meta.get('calculate_mean', True):
             value_names.append('{}@mean'.format(name))
             mean_value = np.mean(value)
             value = np.append(value, mean_value)
             meta['names'] = value_names
         per_value_meta = [meta for _ in value_names]
-        return value_names, value, per_value_meta
+        results = []
+        for idx, value_item in enumerate(value):
+            results.append(
+                {
+                    'name': value_names[idx],
+                    'value': value_item,
+                    'type': metric_type,
+                    'ref': ''
+                }
+            )
+        return results, per_value_meta
 
 
 def write_scalar_result(
