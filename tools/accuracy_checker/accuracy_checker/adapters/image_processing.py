@@ -15,12 +15,15 @@ limitations under the License.
 """
 
 import cv2
-from PIL import Image
 import numpy as np
 
 from ..adapters import Adapter
 from ..representation import SuperResolutionPrediction
 from ..config import ConfigValidator, BoolField
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 
 class SuperResolutionAdapter(Adapter):
@@ -52,7 +55,7 @@ class SuperResolutionAdapter(Adapter):
             img_sr = img_sr.transpose((1, 2, 0)).astype(np.uint8)
             if self.reverse_channels:
                 img_sr = cv2.cvtColor(img_sr, cv2.COLOR_BGR2RGB)
-                img_sr = Image.fromarray(img_sr, 'RGB')
+                img_sr = Image.fromarray(img_sr, 'RGB') if Image is not None else img_sr
                 img_sr = np.array(img_sr).astype(np.uint8)
             result.append(SuperResolutionPrediction(identifier, img_sr))
 

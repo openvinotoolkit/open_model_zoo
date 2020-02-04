@@ -19,12 +19,15 @@ from collections import namedtuple
 
 import cv2
 import numpy as np
-from PIL import Image
 
 from ..config import ConfigError, NumberField, StringField, BoolField
 from ..preprocessor import Preprocessor
 from ..utils import get_size_from_config, string_to_tuple, get_size_3d_from_config
 
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 # The field .type should be string, the field .parameters should be dict
 GeometricOperationMetadata = namedtuple('GeometricOperationMetadata', ['type', 'parameters'])
@@ -87,6 +90,10 @@ class Crop(Preprocessor):
 
     def configure(self):
         self.use_pillow = self.get_value_from_config('use_pillow')
+        if self.use_pillow and Image is None:
+            raise ValueError(
+                'Crop operation with pillow backend, requires Pillow. Please install it or select default backend'
+            )
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
         self.central_fraction = self.get_value_from_config('central_fraction')
         if self.dst_height is None and self.dst_width is None and self.central_fraction is None:

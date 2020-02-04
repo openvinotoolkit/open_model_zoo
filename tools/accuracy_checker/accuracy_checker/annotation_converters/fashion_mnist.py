@@ -15,13 +15,17 @@ limitations under the License.
 """
 
 import gzip
-from PIL import Image
 import numpy as np
 from ..config import PathField, BoolField
 from ..representation import ClassificationAnnotation
 from ..utils import check_file_existence, read_json
 
 from .format_converter import BaseFormatConverter, ConverterReturn
+
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 
 class FashionMnistConverter(BaseFormatConverter):
@@ -68,6 +72,10 @@ class FashionMnistConverter(BaseFormatConverter):
             self.converted_images_dir = self.test_anno_file.parent / 'converted_images'
             if not self.converted_images_dir.exists():
                 self.converted_images_dir.mkdir(parents=True)
+        if self.convert_images and Image is None:
+            raise ValueError(
+                "conversion fashion mnist images requires Pillow installation, please install it before usage"
+            )
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
