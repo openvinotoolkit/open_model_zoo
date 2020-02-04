@@ -12,6 +12,11 @@ try:
 except ImportError:
     Image = None
 
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
+
 def scale_width(dst_width, dst_height, image_width, image_height,):
     return int(dst_width * image_width / image_height), dst_height
 
@@ -96,9 +101,9 @@ class _Resizer(ClassProvider):
     def __init__(self, interpolation=None):
         if not interpolation:
             interpolation = self.default_interpolation
-        if interpolation.upper() not in self.supported_interpolations:
-            raise ConfigError('{} not found for {}'.format(self.supported_interpolations, self.__provider__))
-        self.interpolation = self.supported_interpolations.get(interpolation.upper(), self.default_interpolation)
+        if interpolation.upper() not in self.supported_interpolations():
+            raise ConfigError('{} not found for {}'.format(self.supported_interpolations(), self.__provider__))
+        self.interpolation = self.supported_interpolations().get(interpolation.upper(), self.default_interpolation)
 
     def resize(self, data, new_height, new_width):
         raise NotImplementedError
@@ -111,7 +116,7 @@ class _Resizer(ClassProvider):
         interpolations = set()
         for _, provider_class in cls.providers.items():
             try:
-                interpolations.update(provider_class.supported_interpolations)
+                interpolations.update(provider_class.supported_interpolations())
             except ImportError:
                 continue
         return interpolations
@@ -120,7 +125,7 @@ class _Resizer(ClassProvider):
 class _OpenCVResizer(_Resizer):
     __provider__ = 'opencv'
 
-    supported_interpolations = {
+    _supported_interpolations = {
         'NEAREST': cv2.INTER_NEAREST,
         'LINEAR': cv2.INTER_LINEAR,
         'CUBIC': cv2.INTER_CUBIC,
@@ -135,6 +140,10 @@ class _OpenCVResizer(_Resizer):
     def resize(self, data, new_height, new_width):
         return cv2.resize(data, (new_width, new_height), interpolation=self.interpolation).astype(np.float32)
 
+    @classmethod
+    def supported_interpolations(cls):
+        return cls._supported_interpolations
+
 
 class _PillowResizer(_Resizer):
     __provider__ = 'pillow'
@@ -145,7 +154,7 @@ class _PillowResizer(_Resizer):
             raise ImportError(
                 'pillow backend for resize operation requires TensorFlow. Please install it before usage.'
             )
-        self.supported_interpolations = {
+        self._supported_interpolations = {
             'NEAREST': Image.NEAREST,
             'NONE': Image.NONE,
             'BILINEAR': Image.BILINEAR,
@@ -160,7 +169,7 @@ class _PillowResizer(_Resizer):
                 'LANCZOS': Image.LANCZOS,
                 'HAMMING': Image.HAMMING,
             }
-            self.supported_interpolations.update(optional_interpolations)
+            self._supported_interpolations.update(optional_interpolations)
         except AttributeError:
             pass
         super().__init__(interpolation)
@@ -172,15 +181,40 @@ class _PillowResizer(_Resizer):
 
         return data
 
+    @classmethod
+    def supported_interpolations(cls):
+        if Image is None:
+            return {}
+        intrp = {
+        'NEAREST': Image.NEAREST,
+        'NONE': Image.NONE,
+        'BILINEAR': Image.BILINEAR,
+        'LINEAR': Image.LINEAR,
+        'BICUBIC': Image.BICUBIC,
+        'CUBIC': Image.CUBIC,
+        'ANTIALIAS': Image.ANTIALIAS
+        }
+        try:
+            optional_interpolations = {
+                'BOX': Image.BOX,
+                'LANCZOS': Image.LANCZOS,
+                'HAMMING': Image.HAMMING,
+            }
+            intrp.update(optional_interpolations)
+        except AttributeError:
+            pass
+        return intrp
+
 
 class _TFResizer(_Resizer):
     __provider__ = 'tf'
+    _supported_interpolations = {}
 
     def __init__(self, interpolation):
         if tf is None:
             raise ImportError('tf backend for resize operation requires TensorFlow. Please install it before usage.')
         tf.enable_eager_execution()
-        self.supported_interpolations = {
+        self._supported_interpolations = {
             'BILINEAR': tf.image.ResizeMethod.BILINEAR,
             'AREA': tf.image.ResizeMethod.AREA,
             'BICUBIC': tf.image.ResizeMethod.BICUBIC,
@@ -193,6 +227,12 @@ class _TFResizer(_Resizer):
     def resize(self, data, new_height, new_width):
         resized_data = self._resize(data, [new_height, new_width], method=self.interpolation)
         return resized_data.numpy()
+
+    @classmethod
+    def supported_interpolations(cls):
+        if tf is None:
+            return {}
+        return cls._supported_interpolations
 
 
 def create_resizer(config):
