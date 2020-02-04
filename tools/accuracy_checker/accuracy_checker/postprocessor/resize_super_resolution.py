@@ -1,7 +1,11 @@
-from PIL import Image
 import numpy as np
 from ..postprocessor import Postprocessor
 from ..representation import SuperResolutionPrediction, SuperResolutionAnnotation
+
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 
 class ResizeSuperResolution(Postprocessor):
@@ -11,6 +15,8 @@ class ResizeSuperResolution(Postprocessor):
     prediction_types = (SuperResolutionPrediction, )
 
     def process_image(self, annotation, prediction):
+        if Image is None:
+            raise ValueError('{} required pillow, please install it'.format(self.__provider__))
         for annotation_, prediction_ in zip(annotation, prediction):
             h, w, _ = annotation_.value.shape
             data = Image.fromarray(prediction_.value)
