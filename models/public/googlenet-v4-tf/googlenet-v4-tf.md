@@ -21,8 +21,8 @@ For details about this family of models, check out the [paper](https://arxiv.org
 
 | Metric | Original model | Converted model |
 | ------ | -------------- | --------------- |
-| Top 1  | 79.99          | 79.99           |
-| Top 5  | 95.07          | 95.07           |
+| Top 1  | 80.21          | 80.21           |
+| Top 5  | 95.20          | 95.20           |
 
 ## Performance
 

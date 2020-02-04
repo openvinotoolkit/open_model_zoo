@@ -1,0 +1,26 @@
+models:
+  - name: googlenet-v1-tf
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/googlenet-v1/tf/FP32/googlenet-v1.xml
+        weights: public/googlenet-v1/tf/FP32/googlenet-v1.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/googlenet-v1/tf/FP16/googlenet-v1.xml
+        weights: public/googlenet-v1/tf/FP16/googlenet-v1.bin
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1001_classes
+        preprocessing:
+          - type: crop
+            central_fraction: 0.875
+          - type: resize
+            size: 224
+
+global_definitions: ../dataset_definitions.yml
