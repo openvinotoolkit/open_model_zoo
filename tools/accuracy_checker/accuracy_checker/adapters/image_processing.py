@@ -19,7 +19,9 @@ import numpy as np
 
 from ..adapters import Adapter
 from ..representation import SuperResolutionPrediction
-from ..config import ConfigValidator, BoolField, NumberField
+from ..config import ConfigValidator, BoolField, BaseField, ConfigError
+from ..utils import get_or_parse_value
+from ..preprocessor import Normalize
 try:
     from PIL import Image
 except ImportError:
@@ -37,13 +39,13 @@ class SuperResolutionAdapter(Adapter):
             'reverse_channels': BoolField(
                 optional=True, default=False, description="Allow switching output image channels e.g. RGB to BGR"
             ),
-            'mean': NumberField(
-                optional=True, default=0, value_type=float,
+            'mean': BaseField(
+                optional=True, default=0,
                 description='The value which should be added to prediction pixels for scaling to range [0, 255]'
                             '(usually it is the same mean value which subtracted in preprocessing step))'
             ),
-            'scale':  NumberField(
-                optional=True, default=255, value_type=float,
+            'std':  BaseField(
+                optional=True, default=255,
                 description='The ысфду value on which prediction pixels should be multiplied for scaling to range '
                             '[0, 255] (usually it is the same scale (std) used in preprocessing step))'
             ),
@@ -55,14 +57,20 @@ class SuperResolutionAdapter(Adapter):
 
     def configure(self):
         self.reverse_channels = self.get_value_from_config('reverse_channels')
-        self.mean = self.get_value_from_config('mean')
-        self.scale = self.get_value_from_config('scale')
+        self.mean = get_or_parse_value(self.launcher_config.get('mean', 0), Normalize.PRECOMPUTED_MEANS)
+        self.std = get_or_parse_value(self.launcher_config.get('std', 255), Normalize.PRECOMPUTED_STDS)
+
+        if not (len(self.mean) == 3 or len(self.mean) == 1):
+            raise ConfigError('mean should be one value or comma-separated list channel-wise values')
+
+        if not (len(self.std) == 3 or len(self.std) == 1):
+            raise ConfigError('std should be one value or comma-separated list channel-wise values')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         for identifier, img_sr in zip(identifiers, raw_outputs[self.output_blob]):
-            img_sr *= self.scale
+            img_sr *= self.std
             img_sr += self.mean
             img_sr = np.clip(img_sr, 0., 255.)
             img_sr = img_sr.transpose((1, 2, 0)).astype(np.uint8)
