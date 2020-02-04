@@ -19,7 +19,7 @@ import numpy as np
 
 from ..adapters import Adapter
 from ..representation import SuperResolutionPrediction
-from ..config import ConfigValidator, BoolField
+from ..config import ConfigValidator, BoolField, NumberField
 try:
     from PIL import Image
 except ImportError:
@@ -36,7 +36,17 @@ class SuperResolutionAdapter(Adapter):
         parameters.update({
             'reverse_channels': BoolField(
                 optional=True, default=False, description="Allow switching output image channels e.g. RGB to BGR"
-            )
+            ),
+            'mean': NumberField(
+                optional=True, default=0, value_type=float,
+                description='The value which should be added to prediction pixels for scaling to range [0, 255]'
+                            '(usually it is the same mean value which subtracted in preprocessing step))'
+            ),
+            'scale':  NumberField(
+                optional=True, default=255, value_type=float,
+                description='The ысфду value on which prediction pixels should be multiplied for scaling to range '
+                            '[0, 255] (usually it is the same scale (std) used in preprocessing step))'
+            ),
         })
         return parameters
 
@@ -45,12 +55,15 @@ class SuperResolutionAdapter(Adapter):
 
     def configure(self):
         self.reverse_channels = self.get_value_from_config('reverse_channels')
+        self.mean = self.get_value_from_config('mean')
+        self.scale = self.get_value_from_config('scale')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         for identifier, img_sr in zip(identifiers, raw_outputs[self.output_blob]):
-            img_sr *= 255
+            img_sr *= self.scale
+            img_sr += self.mean
             img_sr = np.clip(img_sr, 0., 255.)
             img_sr = img_sr.transpose((1, 2, 0)).astype(np.uint8)
             if self.reverse_channels:

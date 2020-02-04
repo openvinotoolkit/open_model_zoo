@@ -46,6 +46,7 @@ from .brats_postprocessing import SegmentationPredictionResample, TransformBrats
 from .extract_answers_tokens import ExtractSQUADPrediction
 from .translate_3d_poses import Translate3dPoses
 from .normalize_recomendation import MinMaxNormalizeRecommendation, SigmoidNormalizeRecommendation
+from .resize_super_resolution import ResizeSuperResolution
 
 __all__ = [
     'Postprocessor',
@@ -85,5 +86,7 @@ __all__ = [
     'Translate3dPoses',
 
     'SigmoidNormalizeRecommendation',
-    'MinMaxNormalizeRecommendation'
+    'MinMaxNormalizeRecommendation',
+
+    'ResizeSuperResolution'
 ]
