@@ -42,8 +42,10 @@ class Flip(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'mode': StringField(choices=FLIP_MODES.keys(), default='horizontal',
-                                 description="Specifies the axis for flipping (vertical or horizontal).")
+            'mode': StringField(
+                choices=FLIP_MODES.keys(), default='horizontal',
+                description="Specifies the axis for flipping (vertical or horizontal)."
+            )
         })
         return parameters
 

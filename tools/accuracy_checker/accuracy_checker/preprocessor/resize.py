@@ -95,7 +95,6 @@ ASPECT_RATIO_SCALE = {
 class _Resizer(ClassProvider):
     __provider_type__ = 'resizer'
 
-    supported_interpolations = {}
     default_interpolation = None
 
     def __init__(self, interpolation=None):
@@ -120,6 +119,10 @@ class _Resizer(ClassProvider):
             except ImportError:
                 continue
         return interpolations
+
+    @classmethod
+    def supported_interpolations(cls):
+        return {}
 
 
 class _OpenCVResizer(_Resizer):
@@ -186,13 +189,13 @@ class _PillowResizer(_Resizer):
         if Image is None:
             return {}
         intrp = {
-        'NEAREST': Image.NEAREST,
-        'NONE': Image.NONE,
-        'BILINEAR': Image.BILINEAR,
-        'LINEAR': Image.LINEAR,
-        'BICUBIC': Image.BICUBIC,
-        'CUBIC': Image.CUBIC,
-        'ANTIALIAS': Image.ANTIALIAS
+            'NEAREST': Image.NEAREST,
+            'NONE': Image.NONE,
+            'BILINEAR': Image.BILINEAR,
+            'LINEAR': Image.LINEAR,
+            'BICUBIC': Image.BICUBIC,
+            'CUBIC': Image.CUBIC,
+            'ANTIALIAS': Image.ANTIALIAS
         }
         try:
             optional_interpolations = {
