@@ -17,7 +17,7 @@ const int TrackedObject::UNKNOWN_LABEL_IDX = -1;
 
 class KuhnMunkres::Impl {
 public:
-    Impl(bool greedy) : n_(), greedy_(greedy) {}
+    explicit Impl(bool greedy) : n_(), greedy_(greedy) {}
 
     std::vector<size_t> Solve(const cv::Mat &dissimilarity_matrix) {
         CV_Assert(dissimilarity_matrix.type() == CV_32F);
