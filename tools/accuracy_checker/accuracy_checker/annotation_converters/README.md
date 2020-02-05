@@ -275,6 +275,7 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `clips_per_video` - number of clips per video (Optional, default 3).
   * `clip_duration` - clip duration (Optional, default 16)
   * `temporal_stride` - temporal stride for frames selection (Optional, default 2).
+  * `numpy_input` - allows usage numpy files instead images. It can be useful if data required difficult preprocessing steps (e.g. conversion to optical flow) (Optional, default `False`)
   * `subset` - dataset split: `train`, `validation` or `test` (Optional, default `validation`).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `continuous_clip_action_recognition` - converts annotation of video-based MS-ASL dataset to `ClassificationAnnotation`.
