@@ -173,7 +173,9 @@ int main(int argc, char* argv[]) {
                 if (FLAGS_r) {
                     if (!poses.empty()) {
                         std::time_t result = std::time(nullptr);
-                        std::cout << std::asctime(std::localtime(&result));
+                        char timeString[sizeof("2020-01-01 00:00:00: ")];
+                        std::strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S: ", std::localtime(&result));
+                        std::cout << timeString;
                      }
 
                     for (HumanPose const& pose : poses) {
