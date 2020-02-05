@@ -242,6 +242,8 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `data_dir` - dataset root directory, which contains subdirectories with extracted video frames.
   * `out_fps` - output frame rate of generated video clips.
   * `clip_length` - number of frames of generated video clips.
+* `redweb` - converts [ReDWeb](https://sites.google.com/site/redwebcvpr18) dataset for monocular relative depth perception to `DepthEstimationAnnotation`
+  * `data_dir` - the dataset root directory, where `imgs` - directory with RGB images and `RD` - directory with relative depth maps are located.
 
 ### Customizing dataset meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)

@@ -70,6 +70,8 @@ from .nlp_representation import (
     TextClassificationAnnotation
 )
 
+from .depth_estimation import DepthEstimationAnnotation, DepthEstimationPrediction
+
 __all__ = [
     'BaseRepresentation',
 
@@ -136,5 +138,8 @@ __all__ = [
     'MachineTranslationPrediction',
     'QuestionAnsweringAnnotation',
     'QuestionAnsweringPrediction',
-    'TextClassificationAnnotation'
+    'TextClassificationAnnotation',
+
+    'DepthEstimationAnnotation',
+    'DepthEstimationPrediction'
 ]

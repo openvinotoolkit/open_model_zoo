@@ -46,6 +46,8 @@ from .brats_postprocessing import SegmentationPredictionResample, TransformBrats
 from .extract_answers_tokens import ExtractSQUADPrediction
 from .translate_3d_poses import Translate3dPoses
 from .normalize_recomendation import MinMaxNormalizeRecommendation, SigmoidNormalizeRecommendation
+from .align_prediction_depth_map import AlignDepth
+from .resize_prediction_depth_map import ResizeDepthMap
 
 __all__ = [
     'Postprocessor',
@@ -85,5 +87,10 @@ __all__ = [
     'Translate3dPoses',
 
     'SigmoidNormalizeRecommendation',
-    'MinMaxNormalizeRecommendation'
+    'MinMaxNormalizeRecommendation',
+
+    'MinMaxNormalizeRecommendation',
+
+    'AlignDepth',
+    'ResizeDepthMap'
 ]
