@@ -1,55 +1,28 @@
 models:
-  - name: midasnet
-
-    launchers:
-      - framework: onnx_runtime
-        model: public/midasnet/midasnet.onnx
-        adapter: mono_depth
-        inputs:
-          - name: image
-            type: INPUT
-            shape: 1,3,384,384
-
-    datasets:
-      - name: redweb
-        reader: scipy_imread
-
-        preprocessing:
-          - type: resize
-            dst_width: 384
-            dst_height: 384
-            interpolation: Cubic
-          
-          - type: normalization
-            std: 255
-
-  - name: midasnet
-
-    # list of launchers for MidasNet.
+  - name: mono-depth
     launchers:
       - framework: dlsdk
         tags:
           - FP32
-        model:   public/midasnet/FP32/midasnet.xml
-        weights: public/midasnet/FP32/midasnet.bin
+        # path to IR relative to open_model_zoo/models for FP32/FP16 converted precisions
+        model: mono-depth.xml
+        weights: mono-depth.bin
         adapter: mono_depth
-      
-      - framework: dlsdk
-        tags:
-          - FP16
-        model:   public/midasnet/FP16/midasnet.xml
-        weights: public/midasnet/FP16/midasnet.bin
-        adapter: mono_depth
-
     datasets:
-      - name: redweb
-        reader: opencv_imread
-
-        preprocessing:          
+      - name: ReDWeb_V1
+        # data_source, annotation_conversion and annotation should be moved to dataset_definitions.yml
+        data_source: ReDWeb_V1
+        annotation_conversion:
+          converter: redweb
+          data_dir: RedWeb_V1
+        annotation: mono_depth.pickle
+        preprocessing:
           - type: resize
-            dst_width: 384
-            dst_height: 384
-            interpolation: Cubic
+            size: 384
+        postprocessing:
+          - type: resize_prediction_depth_map
+          - type: align_prediction_depth_map
+        metrics:
+          - type: rmse
 
-          - type: normalization
-            std: 255
+global_definitions: ../dataset_definitions.yml
