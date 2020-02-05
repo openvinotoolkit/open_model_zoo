@@ -816,9 +816,6 @@ cv::Mat PedestrianTracker::DrawActiveTracks(const cv::Mat &frame) {
     return out_frame;
 }
 
-const cv::Size kMinFrameSize = cv::Size(320, 240);
-const cv::Size kMaxFrameSize = cv::Size(1920, 1080);
-
 void PedestrianTracker::PrintReidPerformanceCounts(std::string fullDeviceName) const {
     if (descriptor_strong_) {
         descriptor_strong_->PrintPerformanceCounts(fullDeviceName);
