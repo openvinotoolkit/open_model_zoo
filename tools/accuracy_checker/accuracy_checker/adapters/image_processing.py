@@ -46,9 +46,9 @@ class SuperResolutionAdapter(Adapter):
             ),
             'std':  BaseField(
                 optional=True, default=255,
-                description='The ысфду value on which prediction pixels should be multiplied for scaling to range '
+                description='The value on which prediction pixels should be multiplied for scaling to range '
                             '[0, 255] (usually it is the same scale (std) used in preprocessing step))'
-            ),
+            )
         })
         return parameters
 

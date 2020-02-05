@@ -454,21 +454,19 @@ class MTCNNEvaluator(BaseEvaluator):
             self.compute_metrics(False, ignore_results_formatting)
 
         result_presenters = self.metrics_executor.get_metric_presenters()
-        extracted_names, extracted_values, extracted_meta = [], [], []
+        extracted_results, extracted_meta = [], []
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            names, values, metadata = presenter.extract_result(metric_result)
-            if isinstance(names, list):
-                extracted_names.extend(names)
-                extracted_values.extend(values)
+            result, metadata = presenter.extract_result(metric_result)
+            if isinstance(result, list):
+                extracted_results.extend(result)
                 extracted_meta.extend(metadata)
             else:
-                extracted_names.append(names)
-                extracted_values.append(values)
+                extracted_results.append(result)
                 extracted_meta.append(metadata)
             if print_results:
                 presenter.write_result(metric_result, ignore_results_formatting)
 
-        return extracted_names, extracted_values, extracted_meta
+        return extracted_results, extracted_meta
 
     def print_metrics_results(self, ignore_results_formatting=False):
         if not self._metrics_results:
