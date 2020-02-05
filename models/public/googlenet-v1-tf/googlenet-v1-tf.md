@@ -2,9 +2,31 @@
 
 ## Use Case and High-Level Description
 
-The `googlenet-v1-tf` model is the most recent of the Inception family of models designed to perform image classification.
+The `googlenet-v1-tf` model is one of the Inception family, designed to perform image classification.
 Like the other Inception models, the `googlenet-v1-tf` model has been pretrained on the ImageNet image database.
+Originally redistributed as a checkpoint file, was converted to frozen graph.
 For details about this family of models, check out the [paper](https://arxiv.org/pdf/1602.07261.pdf), [repository](https://github.com/tensorflow/models/tree/master/research/slim).
+
+### Steps to Reproduce Conversion to Frozen Graph
+
+1. Clone the original repository
+```sh
+git clone https://github.com/tensorflow/models.git
+cd models/research/slim
+```
+2. Checkout the commit that the conversion was tested on:
+```sh
+git checkout 5d36f19
+```
+3. Apply `freeze.py.patch` patch
+```sh
+git apply path/to/freeze.py.patch
+```
+4. Download the [pretrained weights](http://download.tensorflow.org/models/inception_v1_2016_08_28.tar.gz)
+5. Run
+```sh
+python3 freeze.py --ckpt path/to/inception_v1.ckpt --name inception_v1 --num_classes 1001 --output InceptionV1/Logits/Predictions/Softmax
+```
 
 ## Example
 
@@ -69,5 +91,6 @@ Object classifier according to ImageNet classes, name - `InceptionV1/Logits/Pred
 
 ## Legal Information
 
-The original model is distributed under the [license](https://github.com/tensorflow/models/blob/master/LICENSE).
+The original model is distributed under the
+[Apache License, Version 2.0](https://github.com/tensorflow/models/blob/master/LICENSE).
 A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).

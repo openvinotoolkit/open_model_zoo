@@ -2,8 +2,10 @@
 
 ## Use Case and High-Level Description
 
-`resnet-50-tf` is TensorFlow\* implementation of ResNet-50 - image classification model
-pretrained on ImageNet dataset. For details see [paper](https://arxiv.org/pdf/1512.03385.pdf),
+`resnet-50-tf` is a TensorFlow\* implementation of ResNet-50 - an image classification model
+pretrained on the ImageNet dataset. Originally redistributed in Saved model format,
+converted to frozen graph using `tf.graph_util` module.
+For details see [paper](https://arxiv.org/pdf/1512.03385.pdf),
 [repository](https://github.com/tensorflow/models/tree/master/official/r1/resnet).
 
 ## Example
