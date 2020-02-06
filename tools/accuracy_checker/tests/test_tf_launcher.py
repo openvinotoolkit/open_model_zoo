@@ -34,7 +34,7 @@ def get_tf_test_model(models_dir, config_update=None):
     if config_update:
         config.update(config_update)
 
-    return create_launcher(config)
+    return create_launcher(config, 'model')
 
 
 class TestTFLauncher:
@@ -61,14 +61,14 @@ class TestTFLauncherConfig:
         launcher = {'framework': 'tf', 'adapter': 'classification'}
 
         with pytest.raises(ConfigError):
-            create_launcher(launcher)
+            create_launcher(launcher, 'model')
 
     @pytest.mark.usefixtures('mock_path_exists')
     def test_unknown_device_in_tf_launcher_config_raises_config_error_exception(self):
         launcher = {'framework': 'tf', 'adapter': 'classification', 'model': 'custom', 'device': 'unknown'}
 
         with pytest.raises(ConfigError):
-            create_launcher(launcher)
+            create_launcher(launcher, 'model')
 
     def test_unknown_output_name_in_create_tf_launcher_raises_config_error_exception(self, models_dir):
         with pytest.raises(ConfigError):

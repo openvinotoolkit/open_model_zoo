@@ -32,7 +32,7 @@ def get_mx_test_model(models_dir):
         'inputs': [{'name': 'data', 'type': 'INPUT', 'shape': '3,32,32'}]
     }
 
-    return create_launcher(config)
+    return create_launcher(config, 'model')
 
 class TestMxNetLauncher:
     def test_launcher_creates(self, models_dir):
@@ -65,16 +65,16 @@ class TestMxNetLauncherConfig:
         config = {'framework': 'mxnet'}
 
         with pytest.raises(ConfigError):
-            create_launcher(config)
+            create_launcher(config, 'model')
 
     def test_missed_inputs_in_create_mxnet_launcher_raises_config_error_exception(self):
         config = {'framework': 'mxnet', 'model': 'model-0000.params'}
 
         with pytest.raises(ConfigError):
-            create_launcher(config)
+            create_launcher(config, 'model')
 
     def test_missed_shape_in_inputs_in_create_mxnet_launcher_raises_config_error_exception(self):
         config = {'framework': 'mxnet', 'model': 'model-0000.params', 'inputs': [{'name': 'data', 'type': 'INPUT'}]}
 
         with pytest.raises(ConfigError):
-            create_launcher(config)
+            create_launcher(config, 'model')

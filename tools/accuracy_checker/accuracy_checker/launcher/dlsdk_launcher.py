@@ -183,13 +183,49 @@ class DLSDKLauncher(Launcher):
 
     __provider__ = 'dlsdk'
 
+    def __init__(self, config_entry, model_name, delayed_model_loading=False):
+        super().__init__(config_entry, model_name)
+
+        dlsdk_launcher_config = DLSDKLauncherConfigValidator(
+            'DLSDK_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading
+        )
+        dlsdk_launcher_config.validate(self.config)
+
+        self._device = self.config['device'].upper()
+        self._device_ids = self._check_device_id()
+        self._set_variable = False
+        self._prepare_bitstream_firmware(self.config)
+        self._delayed_model_loading = delayed_model_loading
+
+        if not delayed_model_loading:
+            if dlsdk_launcher_config.need_conversion:
+                self._model, self._weights = DLSDKLauncher.convert_model(self.config, dlsdk_launcher_config.framework)
+            else:
+                self._model = self.get_value_from_config('model')
+                self._weights = self.get_value_from_config('weights')
+
+            self.load_network(log=True)
+
+        self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
+        self._do_reshape = False
+        # It is an important switch -- while the FASTER RCNN is not reshaped correctly, the
+        # whole network should be recreated during reshape
+        # it can not be used in case delayed initialization
+        self.reload_network = not delayed_model_loading
+
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
+<<<<<<< 97087627520bd0f4be621e51acf715c9142740b3
             'model': PathField(description="Path to model."),
             'weights': PathField(description="Path to model.", optional=True),
             'device': StringField(description="Device name."),
+=======
+            'model': PathField(description="Path to model.", file_or_directory=True),
+            'weights': PathField(description="Path to model.", optional=True, file_or_directory=True),
+            'device': StringField(regex=SUPPORTED_DEVICE_REGEX, description="Device name."),
+>>>>>>> AC: auto model search
             'caffe_model': PathField(optional=True, description="Path to Caffe model file."),
             'caffe_weights': PathField(optional=True, description="Path to Caffe weights file."),
             'mxnet_weights': PathField(optional=True, description="Path to MXNet weights file."),
@@ -199,7 +235,7 @@ class DLSDKLauncher(Launcher):
             'kaldi_model': PathField(optional=True, description="Path to Kaldi model file."),
             'cpu_extensions': CPUExtensionPathField(optional=True, description="Path to CPU extensions."),
             'gpu_extensions': PathField(optional=True, description="Path to GPU extensions."),
-            'bitstream': PathField(optional=True, description="Bitream (FPGA only)."),
+            'bitstream': PathField(optional=True, description="Bistream (FPGA only)."),
             'mo_params': DictField(optional=True, description="Model Optimizer parameters."),
             'mo_flags': ListField(optional=True, description="Model Optimizer flags."),
             'outputs': ListField(optional=True, description="Outputs."),
@@ -237,6 +273,7 @@ class DLSDKLauncher(Launcher):
 
         return parameters
 
+<<<<<<< 97087627520bd0f4be621e51acf715c9142740b3
     def __init__(self, config_entry, delayed_model_loading=False):
         super().__init__(config_entry)
 
@@ -269,6 +306,8 @@ class DLSDKLauncher(Launcher):
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
         self._do_reshape = False
 
+=======
+>>>>>>> AC: auto model search
     @property
     def device(self):
         return self._device
@@ -696,7 +735,9 @@ class DLSDKLauncher(Launcher):
 
     def _create_network(self, input_shapes=None):
         model_path = Path(self._model)
-        compiled_model = model_path.suffix == '.blob'
+        if self._model_path.is_dir():
+            self._model, self._weights = self.automatic_model_search(model_path)
+        compiled_model = self._model.suffix == '.blob'
         if compiled_model:
             self.network = None
             self.exec_network = self.ie_core.import_network(str(self._model), self._device)
@@ -706,8 +747,6 @@ class DLSDKLauncher(Launcher):
             batch_pos = input_info.layout.find('N')
             self._batch = input_info.shape[batch_pos] if batch_pos != -1 else 1
             return
-        if self._weights is None:
-            self._weights = model_path.parent / (model_path.name.split(model_path.suffix)[0] + '.bin')
         self.network = ie.IENetwork(model=str(self._model), weights=str(self._weights))
 
         self.original_outputs = self.network.outputs

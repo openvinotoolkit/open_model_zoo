@@ -81,7 +81,7 @@ def get_dlsdk_test_blob(models_dir, config_update=None):
     if config_update:
         config.update(config_update)
 
-    return create_launcher(config)
+    return create_launcher(config, 'model')
 
 
 def get_image(image_path, input_shape):
@@ -177,7 +177,7 @@ class TestDLSDKLauncher:
             '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
-        launcher = create_launcher(config)
+        launcher = create_launcher(config, 'model')
         subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
         launcher.release()
 
@@ -193,7 +193,7 @@ class TestDLSDKLauncher:
             '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
-        launcher = create_launcher(config)
+        launcher = create_launcher(config, 'model')
         subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
         launcher.release()
 
@@ -209,7 +209,7 @@ class TestDLSDKLauncher:
             '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, 'model')
         subprocess_mock.assert_not_called()
 
     def test_does_not_program_bitsream_when_hetero_without_fpga(self, mocker):
@@ -225,7 +225,7 @@ class TestDLSDKLauncher:
             '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, 'model')
         subprocess_mock.assert_not_called()
 
     def test_does_not_program_bitstream_if_compiler_mode_3_in_env_when_fpga_in_hetero_device(self, mocker):
@@ -242,7 +242,7 @@ class TestDLSDKLauncher:
             '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, 'model')
 
         subprocess_mock.assert_not_called()
 
@@ -260,7 +260,7 @@ class TestDLSDKLauncher:
             '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
-        create_launcher(config)
+        create_launcher(config, 'model')
 
         subprocess_mock.assert_not_called()
 
@@ -276,7 +276,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_models_prefix': 'prefix'
         }
-        create_launcher(config)
+        create_launcher(config, 'model')
 
         os.environ.__setitem__.assert_called_once_with('DLA_AOCX', 'custom_bitstream')
 
@@ -292,7 +292,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_models_prefix': 'prefix'
         }
-        create_launcher(config)
+        create_launcher(config, 'model')
         os.environ.__setitem__.assert_called_once_with('DLA_AOCX', 'custom_bitstream')
 
     def test_does_not_set_dla_aocx_when_device_is_not_fpga(self, mocker):
@@ -307,7 +307,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_models_prefix': 'prefix'
         }
-        create_launcher(config)
+        create_launcher(config, 'model')
 
         os.environ.__setitem__.assert_not_called()
 
@@ -323,7 +323,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_models_prefix': 'prefix'
         }
-        create_launcher(config)
+        create_launcher(config, 'model')
 
         os.environ.__setitem__.assert_not_called()
 
@@ -340,7 +340,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_models_prefix': 'prefix'
         }
-        create_launcher(config)
+        create_launcher(config, 'model')
 
         os.environ.__setitem__.assert_not_called()
 
@@ -357,7 +357,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             '_models_prefix': 'prefix'
         }
-        create_launcher(config)
+        create_launcher(config, 'model')
 
         os.environ.__setitem__.assert_not_called()
 
@@ -377,7 +377,7 @@ class TestDLSDKLauncher:
             'adapter': 'classification',
             'should_log_cmd': False
         }
-        DLSDKLauncher(config)
+        DLSDKLauncher(config, 'model')
 
         mock.assert_called_once_with(
             'custom_model', '/path/to/source_models/custom_model', '/path/to/source_models/custom_weights', '',
@@ -1144,31 +1144,31 @@ class TestDLSDKLauncherConfig:
         config = {'framework': 'dlsdk', 'weights': 'custom', 'adapter': 'classification', 'device': 'cpu'}
 
         with pytest.raises(ConfigError):
-            create_launcher(config)
+            create_launcher(config, 'model')
 
     def test_missed_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
         launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom'}
 
         with pytest.raises(ConfigError):
-            create_launcher(launcher_config)
+            create_launcher(launcher_config, 'model')
 
     def test_undefined_str_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
         launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': 'undefined_str'}
 
         with pytest.raises(ConfigError):
-            create_launcher(launcher_config)
+            create_launcher(launcher_config, 'model')
 
     def test_empty_dir_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
         launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': {}}
 
         with pytest.raises(ConfigError):
-            create_launcher(launcher_config)
+            create_launcher(launcher_config, 'model')
 
     def test_missed_type_in_dir_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
         launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': {'key': 'val'}}
 
         with pytest.raises(ConfigError):
-            create_launcher(launcher_config)
+            create_launcher(launcher_config, 'model')
 
     def test_undefined_type_in_dir_adapter_in_create_dlsdk_launcher_raises_config_error_exception(self):
         launcher_config = {
@@ -1179,14 +1179,14 @@ class TestDLSDKLauncherConfig:
         }
 
         with pytest.raises(ConfigError):
-            create_launcher(launcher_config)
+            create_launcher(launcher_config, 'model')
 
     def test_dlsdk_launcher(self):
         launcher = {
             'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': 'ssd', 'device': 'cpu',
             '_models_prefix': 'models'
         }
-        create_launcher(launcher)
+        create_launcher(launcher, 'model')
 
     def test_dlsdk_launcher_model_with_several_image_inputs_raise_value_error(self, mocker):
         launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': {'key': 'val'}}
@@ -1196,13 +1196,13 @@ class TestDLSDKLauncherConfig:
                 'accuracy_checker.launcher.dlsdk_launcher.DLSDKLauncher.inputs',
                 new_callable=PropertyMock(return_value={'data1': [3, 227, 227], 'data2': [3, 227, 227]})
             )
-            create_launcher(launcher_config)
+            create_launcher(launcher_config, 'model')
 
     def test_dlsdk_launcher_model_no_image_inputs_raise_value_error(self):
         launcher_config = {'framework': 'dlsdk', 'model': 'custom', 'weights': 'custom', 'adapter': {'key': 'val'}}
 
         with pytest.raises(ValueError):
-            create_launcher(launcher_config)
+            create_launcher(launcher_config, 'model')
 
 
 def dummy_adapter():
