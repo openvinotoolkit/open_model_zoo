@@ -11,13 +11,13 @@
 
 static const char help_message[] = "Print a usage message.";
 static const char image_message[] = "Required. Path to a .bmp image.";
-static const char model_message[] = "Required. Path to an .xml file with a trained model.";\
-static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). " \
-                                            "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+static const char model_message[] = "Required. Path to an .xml file with a trained model.";
+static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available devices is shown below). "
+                                            "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                             "The demo will look for a suitable plugin for a specified device (CPU by default)";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "\
+static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
                                            "Absolute path to the .xml file with the kernels descriptions.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers. " \
+static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
                                                  "Absolute path to a shared library with the kernels implementations.";
 static const char detection_output_layer_name_message[] = "Optional. The name of detection output layer. Default value is \"reshape_do_2d\"";
 static const char masks_layer_name_message[] = "Optional. The name of masks layer. Default value is \"masks\"";

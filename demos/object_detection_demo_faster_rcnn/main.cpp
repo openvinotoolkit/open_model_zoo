@@ -207,7 +207,7 @@ int main(int argc, char *argv[]) {
         size_t batchSize = network.getBatchSize();
         slog::info << "Batch size is " << std::to_string(batchSize) << slog::endl;
         if (batchSize != images.size()) {
-            slog::warn << "Number of images " + std::to_string(images.size()) + \
+            slog::warn << "Number of images " + std::to_string(images.size()) +
                 " doesn't match batch size " + std::to_string(batchSize) << slog::endl;
             batchSize = std::min(batchSize, images.size());
             slog::warn << "Number of images to be processed is "<< std::to_string(batchSize) << slog::endl;
