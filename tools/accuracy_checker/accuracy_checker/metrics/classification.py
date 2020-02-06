@@ -16,8 +16,8 @@ limitations under the License.
 
 import numpy as np
 
-from ..representation import ClassificationAnnotation, ClassificationPrediction
-from ..config import NumberField, StringField
+from ..representation import ClassificationAnnotation, ClassificationPrediction, TextClassificationAnnotation
+from ..config import NumberField, StringField, ConfigError
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
 
@@ -29,7 +29,7 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
 
     __provider__ = 'accuracy'
 
-    annotation_types = (ClassificationAnnotation, )
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
     prediction_types = (ClassificationPrediction, )
 
     @classmethod
@@ -54,7 +54,7 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
         self.accuracy = AverageMeter(loss)
 
     def update(self, annotation, prediction):
-        self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
+        return self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
 
     def evaluate(self, annotations, predictions):
         return self.accuracy.evaluate()
@@ -70,7 +70,7 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
 
     __provider__ = 'accuracy_per_class'
 
-    annotation_types = (ClassificationAnnotation, )
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
     prediction_types = (ClassificationPrediction, )
 
     @classmethod
@@ -89,8 +89,14 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
     def configure(self):
         self.top_k = self.get_value_from_config('top_k')
         label_map = self.get_value_from_config('label_map')
-        self.labels = self.dataset.metadata.get(label_map)
-        self.meta['names'] = list(self.labels.values())
+        if self.dataset.metadata:
+            self.labels = self.dataset.metadata.get(label_map)
+            if not self.labels:
+                raise ConfigError('accuracy per class metric requires label_map providing in dataset_meta'
+                                  'Please provide dataset meta file or regenerate annotation')
+        else:
+            raise ConfigError('accuracy per class metric requires dataset metadata'
+                              'Please provide dataset meta file or regenerate annotation')
 
         def loss(annotation_label, prediction_top_k_labels):
             result = np.zeros_like(list(self.labels.keys()))
@@ -107,9 +113,10 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
         self.accuracy = AverageMeter(loss, counter)
 
     def update(self, annotation, prediction):
-        self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
+        return self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
 
     def evaluate(self, annotations, predictions):
+        self.meta['names'] = list(self.labels.values())
         return self.accuracy.evaluate()
 
     def reset(self):
@@ -145,12 +152,14 @@ class ClipAccuracy(PerImageEvaluationMetric):
             self.video_accuracy.update(video_top_label, self.previous_video_label)
             self.video_avg_prob = AverageProbMeter()
 
-        self.video_avg_prob.update(annotation.label, prediction.scores)
+        video_avg = self.video_avg_prob.update(annotation.label, prediction.scores)
 
-        self.clip_accuracy.update(annotation.label, prediction.label)
+        clip_accuracy = self.clip_accuracy.update(annotation.label, prediction.label)
 
         self.previous_video_id = video_id
         self.previous_video_label = annotation.label
+
+        return [clip_accuracy, video_avg]
 
     def evaluate(self, annotations, predictions):
         self.meta['names'] = ['clip_accuracy', 'video_accuracy']

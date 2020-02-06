@@ -98,12 +98,6 @@ LoadInferenceEngine(const std::vector<std::string>& devices,
             ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, custom_cldnn_kernels}}, "GPU");
         }
 
-        if (device.find("CPU") != std::string::npos) {
-            ie.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}}, "CPU");
-        } else if (device.find("GPU") != std::string::npos) {
-            ie.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}}, "GPU");
-        }
-
         if (should_use_perf_counter)
             ie.SetConfig({{PluginConfigParams::KEY_PERF_COUNT, PluginConfigParams::YES}});
 

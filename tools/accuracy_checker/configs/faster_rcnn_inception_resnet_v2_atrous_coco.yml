@@ -10,7 +10,7 @@ models:
         inputs:
           - name: image_info
             type: CONST_INPUT
-            value: [[1, 600, 600]]
+            value: [[600, 1024, 1]]
 
       - framework: dlsdk
         tags:
@@ -21,14 +21,12 @@ models:
         inputs:
           - name: image_info
             type: CONST_INPUT
-            value: [[1, 600, 600]]
+            value: [[600, 1024, 1]]
 
     datasets:
       - name: ms_coco_detection_91_classes
-        preprocessing:
-          - type: resize
-            size: 600
-        postprocessing:
-          - type: resize_prediction_boxes
         metrics:
           - type: coco_precision
+            max_detections: 100
+
+global_definitions: ../dataset_definitions.yml

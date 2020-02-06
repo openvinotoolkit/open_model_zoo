@@ -12,6 +12,21 @@ LandmarksEstimator::LandmarksEstimator(InferenceEngine::Core& ie,
                                        const std::string& modelPath,
                                        const std::string& deviceName):
                     ieWrapper(ie, modelPath, deviceName) {
+    inputBlobName = ieWrapper.expectSingleInput();
+    ieWrapper.expectImageInput(inputBlobName);
+
+    const auto& outputInfo = ieWrapper.getOutputBlobDimsInfo();
+
+    outputBlobName = ieWrapper.expectSingleOutput();
+    const auto& outputBlobDims = outputInfo.at(outputBlobName);
+
+    bool outputIs1Dim = !outputBlobDims.empty()
+        && std::all_of(outputBlobDims.begin(), outputBlobDims.end() - 1,
+            [](unsigned long n) { return n == 1; });
+
+    if (!outputIs1Dim || outputBlobDims.back() % 2 != 0) {
+        throw std::runtime_error(modelPath + ": expected \"" + outputBlobName + "\" to have dimensions [1x...]2N");
+    }
 }
 
 void LandmarksEstimator::estimate(const cv::Mat& image,
@@ -19,13 +34,11 @@ void LandmarksEstimator::estimate(const cv::Mat& image,
     auto faceBoundingBox = outputResults.faceBoundingBox;
     auto faceCrop(cv::Mat(image, faceBoundingBox));
 
-    auto inputBlobName = ieWrapper.getIputBlobDimsInfo().begin()->first;
-
     ieWrapper.setInputBlob(inputBlobName, faceCrop);
     ieWrapper.infer();
     std::vector<float> rawLandmarks;
 
-    ieWrapper.getOutputBlob(rawLandmarks);
+    ieWrapper.getOutputBlob(outputBlobName, rawLandmarks);
 
     for (unsigned long i = 0; i < rawLandmarks.size() / 2; ++i) {
         int x = static_cast<int>(rawLandmarks[2 * i] * faceCrop.cols + faceBoundingBox.tl().x);

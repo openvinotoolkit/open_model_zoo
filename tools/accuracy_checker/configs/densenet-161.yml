@@ -5,6 +5,7 @@ models:
         model:   public/densenet-161/densenet-161.prototxt
         weights: public/densenet-161/densenet-161.caffemodel
         adapter: classification
+
     datasets:
       - name: imagenet_1000_classes
         preprocessing:
@@ -39,3 +40,5 @@ models:
             size: 256
           - type: crop
             size: 224
+
+global_definitions: ../dataset_definitions.yml

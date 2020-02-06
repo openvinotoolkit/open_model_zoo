@@ -18,19 +18,13 @@ models:
 
       - framework: dlsdk
         tags:
-          - INT8
-        device: CPU
-        model:   intel/face-reidentification-retail-0095/INT8/face-reidentification-retail-0095.xml
-        weights: intel/face-reidentification-retail-0095/INT8/face-reidentification-retail-0095.bin
+          - FP32-INT8
+        model:   intel/face-reidentification-retail-0095/FP32-INT8/face-reidentification-retail-0095.xml
+        weights: intel/face-reidentification-retail-0095/FP32-INT8/face-reidentification-retail-0095.bin
         adapter: reid
 
     datasets:
       - name: lfw
-        data_source: LFW/lfw
-        annotation_conversion:
-          converter: lfw
-          pairs_file: LFW/annotation/pairs.txt
-          landmarks_file: LFW/annotation/lfw_landmark.txt
 
         preprocessing:
           - type: point_alignment
@@ -38,5 +32,4 @@ models:
           - type: resize
             size: 128
 
-        metrics:
-          - type: pairwise_accuracy_subsets
+global_definitions: ../dataset_definitions.yml

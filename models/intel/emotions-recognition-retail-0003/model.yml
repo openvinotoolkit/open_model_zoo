@@ -13,33 +13,32 @@
 # limitations under the License.
 
 description: >-
-  Fully convolutional network for recognition of five emotions ('neutral', 'happy',
-  'sad', 'surprise', 'anger').
+  Recognizes 5 emotions for a face. Targeted for Retail Audience Analytics.
 task_type: object_attributes
 files:
   - name: FP32/emotions-recognition-retail-0003.xml
-    size: 19918
-    sha256: 2410897e0990d55d85f20d88d966a3bbcfebd9656d5989df9ab580d24576e67f
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
+    size: 37686
+    sha256: 702e374b7dc11b369c13c2f9c5fc638c617d19a9c625eba5fdac9d190fddba41
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.xml
   - name: FP32/emotions-recognition-retail-0003.bin
     size: 9930028
     sha256: bcb9b1a910fa3cd18a638bb1dbb0597c4ef7a080d1b83008c8e8c2c3c42b99dd
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/emotions-recognition-retail-0003/FP32/emotions-recognition-retail-0003.bin
   - name: FP16/emotions-recognition-retail-0003.xml
-    size: 19899
-    sha256: aab8a191bb7e5e62cd4212d74160a219496ea7308354bb823fd8388a06642123
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
+    size: 37662
+    sha256: 76ba0e171289711e1d1b8418e2bdebf4940485c6c2e0a75d2572ef7dbcee762f
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.xml
   - name: FP16/emotions-recognition-retail-0003.bin
     size: 4965014
     sha256: e62fb4b819b3b3ad8aafcd308d4353db2f164a1a31d78de6cf5970837aeb6f7b
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
-  - name: INT8/emotions-recognition-retail-0003.xml
-    size: 127471
-    sha256: c8e7e1aec2c483d93143053bc37e7a7edd9d5378e3d30ae64400a12c1ace4c83
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/emotions-recognition-retail-0003/INT8/emotions-recognition-retail-0003.xml
-  - name: INT8/emotions-recognition-retail-0003.bin
-    size: 9930028
-    sha256: 61203cb3b7318101637b444c12c9e050cb3447f682c44bc343e8926f9bfe6130
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/emotions-recognition-retail-0003/INT8/emotions-recognition-retail-0003.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/emotions-recognition-retail-0003/FP16/emotions-recognition-retail-0003.bin
+  - name: FP32-INT8/emotions-recognition-retail-0003.xml
+    size: 102858
+    sha256: 0b739388e9341f083df2d9b23506a13c234782d53e08f2e8051c0189e6e926ba
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/emotions-recognition-retail-0003/FP32-INT8/emotions-recognition-retail-0003.xml
+  - name: FP32-INT8/emotions-recognition-retail-0003.bin
+    size: 9947612
+    sha256: ff8ee9cee69cdc7043ec94522459770dfda865ff979a0c8beb73d7515f4a1df2
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/emotions-recognition-retail-0003/FP32-INT8/emotions-recognition-retail-0003.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

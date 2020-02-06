@@ -23,6 +23,7 @@
 #endif
 #include <inference_engine.hpp>
 
+#include <monitors/presenter.h>
 #include <samples/common.hpp>
 #include <samples/slog.hpp>
 
@@ -160,6 +161,9 @@ int main(int argc, char *argv[]) {
         }
         std::cout << std::endl;
 
+        cv::Size graphSize{static_cast<int>(image.cols / 4), 60};
+        Presenter presenter(FLAGS_u, image.rows - graphSize.height - 10, graphSize);
+
         while (!image.empty()) {
             cv::Mat demo_image = image.clone();
             cv::Size orig_image_size = image.size();
@@ -222,8 +226,8 @@ int main(int argc, char *argv[]) {
                     if (output_shape[2] != kAlphabet.length())
                         throw std::runtime_error("The text recognition model does not correspond to alphabet.");
 
-                    float *ouput_data_pointer = blobs.begin()->second->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
-                    std::vector<float> output_data(ouput_data_pointer, ouput_data_pointer + output_shape[0] * output_shape[2]);
+                    float *output_data_pointer = blobs.begin()->second->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+                    std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[2]);
 
                     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
                     res = CTCGreedyDecoder(output_data, kAlphabet, kPadSymbol, &conf);
@@ -272,12 +276,15 @@ int main(int argc, char *argv[]) {
             }
             int fps = static_cast<int>(1000 / avg_time);
 
+            presenter.drawGraphs(demo_image);
+
             if (!FLAGS_no_show) {
                 cv::putText(demo_image, "fps: " + std::to_string(fps) + " found: " + std::to_string(num_found),
                             cv::Point(50, 50), cv::FONT_HERSHEY_COMPLEX, 1, cv::Scalar(0, 0, 255), 1);
                 cv::imshow("Press ESC key to exit", demo_image);
-                char k = static_cast<char>(cv::waitKey(wait_time));
+                char k = cv::waitKey(wait_time);
                 if (k == 27) break;
+                presenter.handleKey(k);
             }
 
             grabber->GrabNextImage(&image);

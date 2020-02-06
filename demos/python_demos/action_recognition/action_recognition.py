@@ -28,9 +28,9 @@ from action_recognition_demo.steps import run_pipeline
 from os import path
 
 
-def video_demo(encoder, decoder, videos, fps=30, labels=None):
+def video_demo(encoder, decoder, videos, no_show, fps=30, labels=None):
     """Continuously run demo on provided video list"""
-    result_presenter = ResultRenderer(labels=labels)
+    result_presenter = ResultRenderer(no_show=no_show, labels=labels)
     run_pipeline(videos, encoder, decoder, result_presenter.render_frame, fps=fps)
 
 
@@ -54,6 +54,7 @@ def build_argparser():
                       default="CPU", type=str)
     args.add_argument("--fps", help="Optional. FPS for renderer", default=30, type=int)
     args.add_argument("-lb", "--labels", help="Optional. Path to file with label names", type=str)
+    args.add_argument("--no_show", action='store_true', help="Optional. Don't show output")
 
     return parser
 
@@ -102,7 +103,7 @@ def main():
     encoder = IEModel(encoder_xml, encoder_bin, ie, encoder_target_device,
                       num_requests=(3 if args.device == 'MYRIAD' else 1))
     decoder = IEModel(decoder_xml, decoder_bin, ie, decoder_target_device, num_requests=2)
-    video_demo(encoder, decoder, videos, args.fps, labels)
+    video_demo(encoder, decoder, videos, args.no_show, args.fps, labels)
 
 
 if __name__ == '__main__':

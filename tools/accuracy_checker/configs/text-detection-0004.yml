@@ -15,13 +15,12 @@ models:
           pixel_link_confidence_threshold: 0.8
           min_area: 300
           min_height: 10
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
           - FP16
         model:   intel/text-detection-0004/FP16/text-detection-0004.xml
-        weights: intel/text-detection-0004/dldt/FP16/text-detection-0004.bin
+        weights: intel/text-detection-0004/FP16/text-detection-0004.bin
         adapter:
           type: pixel_link_text_detection
           pixel_link_out: model/link_logits_/add
@@ -30,14 +29,12 @@ models:
           pixel_link_confidence_threshold: 0.8
           min_area: 300
           min_height: 10
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
-          - INT8
-        device: CPU
-        model:   intel/text-detection-0004/INT8/text-detection-0004.xml
-        weights: intel/text-detection-0004/INT8/text-detection-0004.bin
+          - FP32-INT8
+        model:   intel/text-detection-0004/FP32-INT8/text-detection-0004.xml
+        weights: intel/text-detection-0004/FP32-INT8/text-detection-0004.bin
         adapter:
           type: pixel_link_text_detection
           pixel_link_out: model/link_logits_/add
@@ -49,11 +46,6 @@ models:
 
     datasets:
       - name: ICDAR2015
-
-        data_source: ICDAR15_DET_validation/ch4_test_images
-        annotation_conversion:
-          converter: icdar_detection
-          data_dir: ICDAR15_DET_validation/gt
 
         preprocessing:
           - type: resize
@@ -75,3 +67,5 @@ models:
           - type: incidental_text_hmean
             name: f-measure
             ignore_difficult: True
+
+global_definitions: ../dataset_definitions.yml

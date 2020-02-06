@@ -24,7 +24,6 @@ models:
         model:   public/mobilenet-ssd/FP32/mobilenet-ssd.xml
         weights: public/mobilenet-ssd/FP32/mobilenet-ssd.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -32,7 +31,6 @@ models:
         model:   public/mobilenet-ssd/FP16/mobilenet-ssd.xml
         weights: public/mobilenet-ssd/FP16/mobilenet-ssd.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
     datasets:
       - name: VOC2012
@@ -41,3 +39,5 @@ models:
             size: 300
         postprocessing:
           - type: resize_prediction_boxes
+
+global_definitions: ../dataset_definitions.yml

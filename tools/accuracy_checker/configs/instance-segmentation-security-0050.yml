@@ -13,7 +13,6 @@ models:
           scores_out: scores
           boxes_out: boxes
           raw_masks_out: raw_masks
-        cpu_extensions: AUTO
         inputs:
           - name: im_info
             type: IMAGE_INFO
@@ -29,7 +28,6 @@ models:
           scores_out: scores
           boxes_out: boxes
           raw_masks_out: raw_masks
-        cpu_extensions: AUTO
         inputs:
           - name: im_info
             type: IMAGE_INFO
@@ -47,3 +45,5 @@ models:
 
           - name: AP@boxes
             type: coco_orig_precision
+
+global_definitions: ../dataset_definitions.yml

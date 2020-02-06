@@ -3,7 +3,6 @@ models:
 
     launchers:
       - framework: caffe
-        device: CPU
         model:   public/face-detection-retail-0044/face-detection-retail-0044.prototxt
         weights: public/face-detection-retail-0044/face-detection-retail-0044.caffemodel
         adapter: ssd
@@ -14,7 +13,6 @@ models:
         model:   public/face-detection-retail-0044/FP32/face-detection-retail-0044.xml
         weights: public/face-detection-retail-0044/FP32/face-detection-retail-0044.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -22,11 +20,6 @@ models:
         model:   public/face-detection-retail-0044/FP16/face-detection-retail-0044.xml
         weights: public/face-detection-retail-0044/FP16/face-detection-retail-0044.bin
         adapter: ssd
-        mo_params:
-            data_type: FP16
-            input_shape: "[1,3,300,300]"
-            input: data
-            output: detection_out
 
     datasets:
       - name: wider
@@ -52,3 +45,5 @@ models:
             include_boundaries: False
             allow_multiple_matches_per_ignored: False
             distinct_conf: False
+
+global_definitions: ../dataset_definitions.yml

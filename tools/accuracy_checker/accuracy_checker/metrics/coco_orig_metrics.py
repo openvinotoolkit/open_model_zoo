@@ -17,7 +17,14 @@ limitations under the License.
 import os
 import tempfile
 import json
-
+try:
+    from pycocotools.coco import COCO
+except ImportError:
+    COCO = None
+try:
+    from pycocotools.cocoeval import COCOeval as coco_eval
+except ImportError:
+    coco_eval = None
 from ..representation import (
     DetectionPrediction,
     DetectionAnnotation,
@@ -27,7 +34,7 @@ from ..representation import (
     PoseEstimationPrediction
 )
 from ..logging import print_info
-from ..config import BaseField
+from ..config import BaseField, ConfigError
 from ..utils import get_or_parse_value
 from .metric import FullDatasetEvaluationMetric
 from .coco_metrics import COCO_THRESHOLDS
@@ -36,6 +43,7 @@ SHOULD_SHOW_PREDICTIONS = False
 SHOULD_DISPLAY_DEBUG_IMAGES = False
 if SHOULD_DISPLAY_DEBUG_IMAGES:
     import cv2
+
 
 def box_to_coco(prediction_data_to_store, pred):
     x_mins = pred.x_mins.tolist()
@@ -51,6 +59,7 @@ def box_to_coco(prediction_data_to_store, pred):
         data_record.update({'bbox': [x_min, y_min, width, height]})
 
     return prediction_data_to_store
+
 
 def segm_to_coco(prediction_data_to_store, pred):
     encoded_masks = pred.mask
@@ -73,6 +82,7 @@ def keypoints_to_coco(prediction_data_to_store, pred):
         })
 
     return prediction_data_to_store
+
 
 iou_specific_processing = {
     'bbox': box_to_coco,
@@ -109,19 +119,22 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         return res_map
 
     def _prepare_coco_structures(self):
-        from pycocotools.coco import COCO
-
         annotation_conversion_parameters = self.dataset.config.get('annotation_conversion')
         if not annotation_conversion_parameters:
-            raise ValueError('annotation_conversion parameter is not pointed, '
-                             'but it is required for coco original metrics')
+            raise ConfigError('annotation_conversion parameter is not pointed, '
+                              'but it is required for coco original metrics')
         annotation_file = annotation_conversion_parameters.get('annotation_file')
         if not annotation_file.is_file():
-            raise ValueError("annotation file '{}' is not found".format(annotation_file))
+            raise ConfigError("annotation file '{}' is not found".format(annotation_file))
         has_background = annotation_conversion_parameters.get('has_background', False)
         use_full_label_map = annotation_conversion_parameters.get('use_full_label_map', False)
+        if not self.dataset.metadata:
+            raise ConfigError('coco orig metrics require dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
         meta = self.dataset.metadata
 
+        if COCO is None:
+            raise ValueError('pycocotools is not installed, please install it')
         coco = COCO(str(annotation_file))
         assert 0 not in coco.cats.keys()
         coco_cat_name_to_id = {v['name']: k for k, v in coco.cats.items()}
@@ -133,6 +146,9 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             coco_cat_name_to_id[bg_name] = bg_lbl
         else:
             assert 'background_label' not in meta
+        if not meta.get('label_map'):
+            raise ConfigError('coco_orig metrics require label_map providing in dataset_meta'
+                              'Please provide dataset meta file or regenerated annotation')
 
         if not use_full_label_map:
             map_pred_label_id_to_coco_cat_id = {k: coco_cat_name_to_id[v] for k, v in meta['label_map'].items()}
@@ -232,9 +248,9 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
 
     @staticmethod
     def _run_coco_evaluation(coco, coco_res, iou_type='bbox', threshold=None):
-        from pycocotools.cocoeval import COCOeval
-
-        cocoeval = COCOeval(coco, coco_res, iouType=iou_type)
+        if coco_eval is None:
+            raise ValueError('pycocotools is not installed, please install it before usage')
+        cocoeval = coco_eval(coco, coco_res, iouType=iou_type)
         if threshold is not None:
             cocoeval.params.iouThrs = threshold
         cocoeval.evaluate()

@@ -16,10 +16,7 @@ IEWrapper::IEWrapper(InferenceEngine::Core& ie,
                      const std::string& modelPath,
                      const std::string& deviceName):
            modelPath(modelPath), deviceName(deviceName), ie(ie) {
-    netReader.ReadNetwork(modelPath);
-    std::string binFileName = fileNameNoExt(modelPath) + ".bin";
-    netReader.ReadWeights(binFileName);
-    network = netReader.getNetwork();
+    network = ie.ReadNetwork(modelPath);
     setExecPart();
 }
 
@@ -110,27 +107,35 @@ void IEWrapper::getOutputBlob(const std::string& blobName,
     }
 }
 
-void IEWrapper::getOutputBlob(std::vector<float>& output) {
-    output.clear();
-    auto blobName = outputBlobsDimsInfo.begin()->first;
-    auto blobDims = outputBlobsDimsInfo[blobName];
-    auto dataSize = 1;
-    for (auto const& dim : blobDims) {
-        dataSize *= dim;
-    }
-    auto outputBlob = request.GetBlob(blobName);
-    auto buffer = outputBlob->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::FP32>::value_type *>();
-
-    for (int i = 0; i < dataSize; ++i) {
-        output.push_back(buffer[i]);
-    }
-}
-
-const std::map<std::string, std::vector<unsigned long>>& IEWrapper::getIputBlobDimsInfo() const {
+const std::map<std::string, std::vector<unsigned long>>& IEWrapper::getInputBlobDimsInfo() const {
     return inputBlobsDimsInfo;
 }
 const std::map<std::string, std::vector<unsigned long>>& IEWrapper::getOutputBlobDimsInfo() const {
     return outputBlobsDimsInfo;
+}
+
+std::string IEWrapper::expectSingleInput() const {
+    if (inputBlobsDimsInfo.size() != 1) {
+        throw std::runtime_error(modelPath + ": expected to have 1 input");
+    }
+
+    return inputBlobsDimsInfo.begin()->first;
+}
+
+std::string IEWrapper::expectSingleOutput() const {
+    if (outputBlobsDimsInfo.size() != 1) {
+        throw std::runtime_error(modelPath + ": expected to have 1 output");
+    }
+
+    return outputBlobsDimsInfo.begin()->first;
+}
+
+void IEWrapper::expectImageInput(const std::string& blobName) const {
+    const auto& dims = inputBlobsDimsInfo.at(blobName);
+
+    if (dims.size() != 4 || dims[0] != 1 || dims[1] != 3) {
+        throw std::runtime_error(modelPath + ": expected \"" + blobName + "\" to have dimensions 1x3xHxW");
+    }
 }
 
 void IEWrapper::infer() {

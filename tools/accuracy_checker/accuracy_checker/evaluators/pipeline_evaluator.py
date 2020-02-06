@@ -26,7 +26,8 @@ from ..launcher import create_launcher, InputFeeder
 from ..metrics import MetricsExecutor
 from ..pipeline_connectors import StageConnectionDescription, Connection
 from ..postprocessor import PostprocessingExecutor
-from..preprocessor import PreprocessingExecutor
+from ..preprocessor import PreprocessingExecutor
+from .base_evaluator import BaseEvaluator
 
 
 def get_processing_info(pipeline_config):
@@ -145,6 +146,7 @@ class EvaluationContext:
         self.predictions = []
         self.annotation_batch = []
         self.prediction_batch = []
+        self.input_ids_batch = []
         self.data_batch = []
         self.metrics_results = []
         self.identifiers_batch = []
@@ -161,7 +163,8 @@ class EvaluationContext:
             'annotation_batch': self.annotation_batch,
             'prediction_batch': self.prediction_batch,
             'data_batch': self.data_batch,
-            'identifiers_batch': self.identifiers_batch
+            'identifiers_batch': self.identifiers_batch,
+            'input_ids_batch': self.input_ids_batch
         }
         return _shared_context
 
@@ -177,7 +180,7 @@ class EvaluationContext:
             self.metrics_executor.reset()
 
 
-class PipeLineEvaluator:
+class PipeLineEvaluator(BaseEvaluator):
     def __init__(self, stages):
         self.stages = stages
         self.create_connectors()
@@ -186,11 +189,27 @@ class PipeLineEvaluator:
     @classmethod
     def from_configs(cls, pipeline_config):
         stages = OrderedDict()
-        for stage_config in pipeline_config:
+        for stage_config in pipeline_config['stages']:
             stage_name = stage_config['stage']
             evaluation_stage = PipeLineStage.from_configs(stage_name, stage_config)
             stages[stage_name] = evaluation_stage
         return cls(stages)
+
+    @staticmethod
+    def get_processing_info(config):
+        name = config['name']
+        stages = config['stages']
+        dataset_name = stages[0]['dataset']['name']
+        launcher = {}
+        for stage in stages:
+            if 'launcher' in stage:
+                launcher = stage['launcher']
+                break
+        framework = launcher.get('framework')
+        device = launcher.get('device')
+        tags = launcher.get('tags')
+
+        return name, framework, device, tags, dataset_name
 
     def create_connectors(self):
         def make_connection(stages, connection_template):
@@ -224,10 +243,10 @@ class PipeLineEvaluator:
         if progress_reporter:
             progress_reporter.finish()
 
-    def compute_metrics(self, output_callback=None, ignore_results_formatting=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         def eval_metrics(metrics_executor, annotations, predictions):
             for result_presenter, evaluated_metric in metrics_executor.iterate_metrics(annotations, predictions):
-                result_presenter.write_result(evaluated_metric, output_callback, ignore_results_formatting)
+                result_presenter.write_result(evaluated_metric, ignore_results_formatting)
 
         for _, stage in self.stages.items():
             metrics_executors = stage.evaluation_context.metrics_executor
@@ -239,3 +258,7 @@ class PipeLineEvaluator:
         for _, stage in self.stages.items():
             for launcher in stage.evaluation_context.launcher:
                 launcher.release()
+
+    def reset(self):
+        for _, stage in self.stages.items():
+            stage.evaluation_context.reset()

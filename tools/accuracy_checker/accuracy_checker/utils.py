@@ -20,6 +20,7 @@ import itertools
 import json
 import os
 import pickle
+from enum import Enum
 
 from pathlib import Path
 from typing import Union
@@ -274,6 +275,7 @@ def read_txt(file: Union[str, Path], sep='\n', **kwargs):
 def read_xml(file: Union[str, Path], *args, **kwargs):
     return et.parse(str(get_path(file)), *args, **kwargs).getroot()
 
+
 def read_json(file: Union[str, Path], *args, **kwargs):
     with get_path(file).open() as content:
         return json.load(content, *args, **kwargs)
@@ -488,3 +490,14 @@ def check_file_existence(file):
         return True
     except (FileNotFoundError, IsADirectoryError):
         return False
+
+
+class Color(Enum):
+    PASSED = 0
+    FAILED = 1
+
+
+def color_format(s, color=Color.PASSED):
+    if color == Color.PASSED:
+        return "\x1b[0;32m{}\x1b[0m".format(s)
+    return "\x1b[0;31m{}\x1b[0m".format(s)

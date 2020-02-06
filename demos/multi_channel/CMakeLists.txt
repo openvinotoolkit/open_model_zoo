@@ -1,0 +1,26 @@
+# Copyright (C) 2018-2019 Intel Corporation
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#      http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+option(MULTICHANNEL_DEMO_USE_TBB "Use TBB-based threading in multichannel face detection demo" OFF)
+option(MULTICHANNEL_DEMO_USE_NATIVE_CAM "Use native camera api in multichannel face detection demo" OFF)
+
+if(MULTICHANNEL_DEMO_USE_NATIVE_CAM)
+    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
+
+add_subdirectory(common)
+add_subdirectory(face_detection_demo)
+add_subdirectory(human_pose_estimation_demo)
+add_subdirectory(object_detection_demo_yolov3)

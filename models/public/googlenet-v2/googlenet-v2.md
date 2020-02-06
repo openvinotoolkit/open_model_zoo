@@ -68,4 +68,9 @@ Object classifier according to ImageNet classes, name - `prob`,  shape - `1,1000
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/lim0606/caffe-googlenet-bn/master/README.md]()
+The original model is distributed under the following
+[license](https://raw.githubusercontent.com/lim0606/caffe-googlenet-bn/master/README.md):
+
+```
+This model is released for unrestricted use.
+```

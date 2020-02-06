@@ -60,8 +60,7 @@ RegistrationStatus EmbeddingsGallery::RegisterIdentity(const std::string& identi
       detector.enqueue(image);
       detector.submitRequest();
       detector.wait();
-      detector.fetchResults();
-      detection::DetectedObjects faces = detector.results;
+      detection::DetectedObjects faces = detector.fetchResults();
       if (faces.size() == 0) {
         return RegistrationStatus::FAILURE_NOT_DETECTED;
       }
@@ -82,17 +81,17 @@ RegistrationStatus EmbeddingsGallery::RegisterIdentity(const std::string& identi
 
 EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
                                      double threshold, int min_size_fr,
-                                     bool crop_gallery, detection::FaceDetection& detector,
+                                     bool crop_gallery, const detection::DetectorConfig &detector_config,
                                      const VectorCNN& landmarks_det,
-                                     const VectorCNN& image_reid)
-    : reid_threshold(threshold) {
+                                     const VectorCNN& image_reid,
+                                     bool use_greedy_matcher)
+    : reid_threshold(threshold),
+      use_greedy_matcher(use_greedy_matcher) {
     if (ids_list.empty()) {
         return;
     }
 
-    if (!landmarks_det.Enabled() || !image_reid.Enabled()) {
-        return;
-    }
+    detection::FaceDetection detector(detector_config);
 
     cv::FileStorage fs(ids_list, cv::FileStorage::Mode::READ);
     cv::FileNode fn = fs.root();
@@ -102,6 +101,11 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
         cv::FileNode item = *fit;
         std::string label = item.name();
         std::vector<cv::Mat> embeddings;
+
+        // Please, note that the case when there are more than one image in gallery
+        // for a person might not work properly with the current implementation
+        // of the demo.
+        // Remove this assert by your own risk.
         CV_Assert(item.size() == 1);
 
         for (size_t i = 0; i < item.size(); i++) {
@@ -129,7 +133,7 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
 
 std::vector<int> EmbeddingsGallery::GetIDsByEmbeddings(const std::vector<cv::Mat>& embeddings) const {
     if (embeddings.empty() || idx_to_id.empty())
-        return std::vector<int>();
+        return std::vector<int>(embeddings.size(), unknown_id);
 
     cv::Mat distances(static_cast<int>(embeddings.size()), static_cast<int>(idx_to_id.size()), CV_32F);
 
@@ -142,7 +146,7 @@ std::vector<int> EmbeddingsGallery::GetIDsByEmbeddings(const std::vector<cv::Mat
             }
         }
     }
-    KuhnMunkres matcher;
+    KuhnMunkres matcher(use_greedy_matcher);
     auto matched_idx = matcher.Solve(distances);
     std::vector<int> output_ids;
     for (auto col_idx : matched_idx) {

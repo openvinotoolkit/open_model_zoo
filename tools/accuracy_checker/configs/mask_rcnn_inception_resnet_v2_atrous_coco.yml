@@ -11,11 +11,10 @@ models:
           type: mask_rcnn
           detection_out: reshape_do_2d
           raw_masks_out: masks
-        cpu_extensions: AUTO
         inputs:
           - name: image_info
-            type: IMAGE_INFO
-
+            type: CONST_INPUT
+            value: [[800, 1365, 1]]
       - framework: dlsdk
         tags:
           - FP16
@@ -25,19 +24,16 @@ models:
           type: mask_rcnn
           detection_out: reshape_do_2d
           raw_masks_out: masks
-        cpu_extensions: AUTO
         inputs:
           - name: image_info
-            type: IMAGE_INFO
+            type: CONST_INPUT
+            value: [[800, 1365, 1]]
 
     datasets:
       - name: ms_coco_mask_rcnn_short_91_classes
-        preprocessing:
-          - type: resize
-            size: 800
-        postprocessing:
-          - type: resize_prediction_boxes
 
         metrics:
           - type: coco_orig_segm_precision
           - type: coco_orig_precision
+
+global_definitions: ../dataset_definitions.yml
