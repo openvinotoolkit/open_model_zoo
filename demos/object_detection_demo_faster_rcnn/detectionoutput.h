@@ -358,11 +358,6 @@ void DetectionOutputPostProcessor::decodeBBoxes(const float *prior_data,
     }
 
     for (int p = 0; p < num_priors_actual[n]; ++p) {
-        float new_xmin = 0.0f;
-        float new_ymin = 0.0f;
-        float new_xmax = 0.0f;
-        float new_ymax = 0.0f;
-
         float prior_xmin = prior_data[p*_prior_size + 0 + _offset];
         float prior_ymin = prior_data[p*_prior_size + 1 + _offset];
         float prior_xmax = prior_data[p*_prior_size + 2 + _offset];
@@ -392,10 +387,10 @@ void DetectionOutputPostProcessor::decodeBBoxes(const float *prior_data,
         decode_bbox_width  = std::exp(loc_xmax) * prior_width;
         decode_bbox_height = std::exp(loc_ymax) * prior_height;
 
-        new_xmin = decode_bbox_center_x - decode_bbox_width  / 2.0f;
-        new_ymin = decode_bbox_center_y - decode_bbox_height / 2.0f;
-        new_xmax = decode_bbox_center_x + decode_bbox_width  / 2.0f;
-        new_ymax = decode_bbox_center_y + decode_bbox_height / 2.0f;
+        float new_xmin = decode_bbox_center_x - decode_bbox_width  / 2.0f;
+        float new_ymin = decode_bbox_center_y - decode_bbox_height / 2.0f;
+        float new_xmax = decode_bbox_center_x + decode_bbox_width  / 2.0f;
+        float new_ymax = decode_bbox_center_y + decode_bbox_height / 2.0f;
 
         decoded_bboxes[p*4 + 0] = new_xmin;
         decoded_bboxes[p*4 + 1] = new_ymin;

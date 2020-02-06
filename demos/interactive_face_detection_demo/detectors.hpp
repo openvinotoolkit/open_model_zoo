@@ -45,7 +45,7 @@ struct BaseDetection {
     mutable bool _enabled;
     const bool doRawOutputMessages;
 
-    BaseDetection(std::string topoName,
+    BaseDetection(const std::string &topoName,
                   const std::string &pathToModel,
                   const std::string &deviceForInference,
                   int maxBatch, bool isBatchDynamic, bool isAsync,

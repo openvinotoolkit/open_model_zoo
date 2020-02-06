@@ -27,7 +27,7 @@
 
 using namespace InferenceEngine;
 
-BaseDetection::BaseDetection(std::string topoName,
+BaseDetection::BaseDetection(const std::string &topoName,
                              const std::string &pathToModel,
                              const std::string &deviceForInference,
                              int maxBatch, bool isBatchDynamic, bool isAsync,

@@ -38,7 +38,7 @@ std::vector<cv::Point2f> floatPointsFromRotatedRect(const cv::RotatedRect &rect)
 std::vector<cv::Point> boundedIntPointsFromRotatedRect(const cv::RotatedRect &rect, const cv::Size& image_size);
 cv::Point topLeftPoint(const std::vector<cv::Point2f> & points, int *idx);
 cv::Mat cropImage(const cv::Mat &image, const std::vector<cv::Point2f> &points, const cv::Size& target_size, int top_left_point_idx);
-void setLabel(cv::Mat& im, const std::string label, const cv::Point & p);
+void setLabel(cv::Mat& im, const std::string& label, const cv::Point & p);
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ------------------------- Parsing and validating input arguments --------------------------------------
@@ -389,7 +389,7 @@ cv::Mat cropImage(const cv::Mat &image, const std::vector<cv::Point2f> &points, 
     return crop;
 }
 
-void setLabel(cv::Mat& im, const std::string label, const cv::Point & p) {
+void setLabel(cv::Mat& im, const std::string& label, const cv::Point & p) {
     int fontface = cv::FONT_HERSHEY_SIMPLEX;
     double scale = 0.7;
     int thickness = 1;

@@ -65,22 +65,19 @@ struct BboxAndDescr {
 };
 
 struct InferRequestsContainer {
-    explicit InferRequestsContainer(std::vector<InferRequest> inferRequests):
-        actualInferRequests{inferRequests} {
-        for (auto& ir : actualInferRequests) {
-            inferRequests.push_back(ir);
-        }
-    }
     InferRequestsContainer() = default;
-    InferRequestsContainer& operator=(const InferRequestsContainer& other) {  // copy assignment
-        if (this != &other) {  // self-assignment check expected
-            this->actualInferRequests = other.actualInferRequests;
-            for (auto& ir : this->actualInferRequests) {
-                this->inferRequests.container.push_back(ir);
-            }
+    InferRequestsContainer(const InferRequestsContainer&) = delete;
+    InferRequestsContainer& operator=(const InferRequestsContainer&) = delete;
+
+    void assign(const std::vector<InferRequest>& inferRequests) {
+        actualInferRequests = inferRequests;
+        this->inferRequests.container.clear();
+
+        for (auto& ir : this->actualInferRequests) {
+            this->inferRequests.container.push_back(ir);
         }
-        return *this;
     }
+
     std::vector<InferRequest> getActualInferRequests() {
         return actualInferRequests;
     }
@@ -126,9 +123,9 @@ struct Context {  // stores all global data for tasks
             return detectionsProcessorsContext.vehicleAttributesClassifier.createInferRequest();});
         std::generate_n(std::back_inserter(lprInferRequests), nrecognizersireq, [&]{
             return detectionsProcessorsContext.lpr.createInferRequest();});
-        detectorsInfers = InferRequestsContainer(detectorInferRequests);
-        attributesInfers = InferRequestsContainer(attributesInferRequests);
-        platesInfers = InferRequestsContainer(lprInferRequests);
+        detectorsInfers.assign(detectorInferRequests);
+        attributesInfers.assign(attributesInferRequests);
+        platesInfers.assign(lprInferRequests);
     }
     struct {
         std::vector<std::shared_ptr<InputChannel>> inputChannels;

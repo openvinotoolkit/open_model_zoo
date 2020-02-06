@@ -151,8 +151,8 @@ double IntersectionOverUnion(const DetectionObject &box_1, const DetectionObject
 }
 
 void ParseYOLOV3Output(InferenceEngine::InferRequest::Ptr req,
-                       const std::string outputName,
-                       const YoloParams yoloParams, const unsigned long resized_im_h,
+                       const std::string &outputName,
+                       const YoloParams &yoloParams, const unsigned long resized_im_h,
                        const unsigned long resized_im_w, const unsigned long original_im_h,
                        const unsigned long original_im_w,
                        const double threshold, std::vector<DetectionObject> &objects) {
@@ -281,7 +281,7 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
                      float time,
                      const std::string& stats,
                      const DisplayParams& params,
-                     const std::vector<cv::Scalar> colors,
+                     const std::vector<cv::Scalar> &colors,
                      Presenter& presenter) {
     cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
     auto loopBody = [&](size_t i) {
