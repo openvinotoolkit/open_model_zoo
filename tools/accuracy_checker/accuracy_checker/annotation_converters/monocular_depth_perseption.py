@@ -14,15 +14,59 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from .format_converter import DirectoryBasedAnnotationConverter, ConverterReturn
-from ..utils import get_path, check_file_existence
+from .format_converter import BaseFormatConverter, ConverterReturn
+from ..utils import get_path, check_file_existence, contains_any, read_txt
+from ..config import PathField, ConfigError
 from ..representation import DepthEstimationAnnotation
 
 
-class ReDWebDatasetConverter(DirectoryBasedAnnotationConverter):
+class ReDWebDatasetConverter(BaseFormatConverter):
     __provider__ = 'redweb'
 
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update(
+            {
+                'data_dir': PathField(optional=True, is_directory=True, description='dataset root directory'),
+                'annotation_file': PathField(
+                    optional=True, description='txt file which represent a list of pairs of image and depth map')
+            }
+        )
+        return params
+
+    def configure(self):
+        if not contains_any(self.config, ['data_dir', 'annotation_file']):
+            raise ConfigError('data_dir or annotation_file should be provided')
+        self.data_dir = self.get_value_from_config('data_dir')
+        self.annotation_file = self.get_value_from_config('annotation_file')
+
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
+        if self.annotation_file is not None:
+            return self._convert_annotation_file_based(check_content, progress_callback, progress_interval)
+        return self._convert_directory_based(check_content, progress_callback, progress_interval)
+
+    def _convert_annotation_file_based(self, check_content=False, progress_callback=None, progress_interval=100):
+        if self.data_dir is None:
+            self.data_dir = self.annotation_file.parent
+        content_errors = [] if check_content else None
+        annotations = []
+        list_of_pairs = read_txt(self.annotation_file)
+        num_iterations = len(list_of_pairs)
+        for idx, line in list_of_pairs:
+            identifier, depth_map_path = line.split(' ')
+            if check_content:
+                if not check_file_existence(self.data_dir / depth_map_path):
+                    content_errors.append('{}: does not exists'.format(self.data_dir / depth_map_path))
+                if not check_file_existence(self.data_dir / identifier):
+                    content_errors.append('{}: does not exists'.format(self.data_dir / identifier))
+            annotations.append(DepthEstimationAnnotation(identifier, depth_map_path))
+            if progress_callback and idx % progress_interval == 0:
+                progress_callback(idx * 100 / num_iterations)
+
+        return ConverterReturn(annotations, None, check_content)
+
+    def _convert_directory_based(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         identifier_prefix = 'imgs'
         images_dir = get_path(self.data_dir / identifier_prefix, is_directory=True)
         relative_depth_prefix = 'RD'
