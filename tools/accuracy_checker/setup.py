@@ -63,8 +63,6 @@ try:
 except ImportError:
     requirements.append('opencv-python')
 
-tests_requirements = ['pytest==4.0.0', 'pytest-mock==1.10.4']
-
 setup(
     name="accuracy_checker",
     description="Deep Learning Accuracy validation framework",
@@ -79,6 +77,6 @@ setup(
     zip_safe=False,
     python_requires='>=3.5',
     install_requires=requirements,
-    tests_require=tests_requirements,
+    tests_require=[read("requirements-test.in")],
     cmdclass={'test': PyTest}
 )
