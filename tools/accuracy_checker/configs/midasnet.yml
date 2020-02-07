@@ -1,12 +1,12 @@
 models:
-  - name: mono-depth
+  - name: midasnet
     launchers:
       - framework: dlsdk
         tags:
           - FP32
         # path to IR relative to open_model_zoo/models for FP32/FP16 converted precisions
-        model: mono-depth.xml
-        weights: mono-depth.bin
+        model: /code/open_model_zoo/tools/downloader/public/midasnet/FP32/midasnet.xml
+        weights: /code/open_model_zoo/tools/downloader/public/midasnet/FP32/midasnet.bin
         adapter: mono_depth
     datasets:
       - name: ReDWeb_V1
@@ -14,7 +14,7 @@ models:
         data_source: ReDWeb_V1
         annotation_conversion:
           converter: redweb
-          data_dir: RedWeb_V1
+          data_dir: ReDWeb_V1
         annotation: mono_depth.pickle
         preprocessing:
           - type: resize

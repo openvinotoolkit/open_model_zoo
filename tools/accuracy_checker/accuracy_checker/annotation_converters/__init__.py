@@ -51,7 +51,7 @@ from .xnli import XNLIDatasetConverter, BertXNLITFRecordConverter
 from .cmu_panoptic import CmuPanopticKeypointsConverter
 from .action_recognition import ActionRecognitionConverter
 from .ms_asl_continuous import MSASLContiniousConverter
-from .monocular_depth_perseption import ReDWebDatasetConverter
+from .monocular_depth_perception import ReDWebDatasetConverter
 
 
 __all__ = [

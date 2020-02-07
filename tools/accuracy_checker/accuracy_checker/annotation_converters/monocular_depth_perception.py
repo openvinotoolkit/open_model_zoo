@@ -20,15 +20,25 @@ class ReDWebDatasetConverter(DirectoryBasedAnnotationConverter):
     __provider__ = 'redweb'
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        identifier_prefix = 'imgs'
-        images_dir = get_path(self.data_dir / identifier_prefix, is_directory=True)
-        relative_depth_prefix = 'RD'
+        images_list = []
+
+        with open(get_path(self.data_dir / 'ReDWeb_validation_360.txt')) as f:
+            for i, row in enumerate(f):
+                row = row.replace("\r", "").replace("\n", "")
+                parts = row.split(" ")
+
+                images_list.append(get_path(self.data_dir / parts[0]))
+
+                if i == 2:
+                    break
+
+        relative_depth_prefix = 'RDs'
         content_errors = [] if check_content else None
-        images_list = list(images_dir.glob('*.jpg'))
         num_iterations = len(images_list)
+
         annotations = []
         for idx, image_path in enumerate(images_list):
-            identifier = '{}/{}'.format(identifier_prefix, image_path.name)
+            identifier = '{}/{}'.format("Imgs", image_path.name)
             depth_map_file = image_path.name.split(image_path.suffix)[0] + '.png'
             depth_map_path = '{}/{}'.format(relative_depth_prefix, depth_map_file)
             if check_content and not check_file_existence(self.data_dir / depth_map_path):

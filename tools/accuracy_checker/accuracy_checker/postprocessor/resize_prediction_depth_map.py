@@ -11,6 +11,7 @@ class ResizeDepthMap(Postprocessor):
 
     def process_image(self, annotation, prediction):
         h, w, _ = self.image_size
+
         for target_prediction in prediction:
             target_prediction.depth_map = cv2.resize(target_prediction.depth_map, (w, h))
 
