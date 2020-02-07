@@ -55,8 +55,8 @@ CIFAR100_LABELS_LIST = [
 ]
 
 class_map = {
-    10: CIFAR10_LABELS_LIST,
-    100: CIFAR100_LABELS_LIST
+    10: (CIFAR10_LABELS_LIST, 'labels'),
+    100: (CIFAR100_LABELS_LIST, 'fine_labels')
 }
 
 
@@ -144,17 +144,17 @@ class CifarFormatConverter(BaseFormatConverter):
         annotation = []
         # read original dataset annotation
         annotation_dict = read_pickle(self.data_batch_file, encoding='latin1')
-        labels = annotation_dict['labels']
-        images = annotation_dict['data']
-        images = images.reshape(images.shape[0], 3, 32, 32).astype(np.uint8)
-        image_file = '{}_{}.png'
         # Originally dataset labels start from 0, some networks can be trained with usage 1 as label start.
         labels_offset = 0 if not self.has_background else 1
-        num_iterations = len(labels)
         # crete metadata for dataset. Provided additional information is task specific and can includes, for example
         # label_map, information about background, used class color representation (for semantic segmentation task)
         # If your dataset does not have additional meta, you can to not provide it.
-        meta, label_names = self.generate_meta(labels_offset)
+        meta, label_names, labels_id = self.generate_meta(labels_offset)
+        labels = annotation_dict[labels_id]
+        images = annotation_dict['data']
+        images = images.reshape(images.shape[0], 3, 32, 32).astype(np.uint8)
+        image_file = '{}_{}.png'
+        num_iterations = len(labels)
         # convert each annotation object to ClassificationAnnotation
         for data_id, (label, feature) in enumerate(zip(labels, images)):
             # generate id of image which will be used for evaluation (usually name of file is used)
@@ -182,7 +182,7 @@ class CifarFormatConverter(BaseFormatConverter):
         return ConverterReturn(annotation, meta, content_errors)
 
     def generate_meta(self, labels_offset):
-        labels = class_map.get(self.num_classes, [])
+        labels, labels_id = class_map.get(self.num_classes, ([], 'labels'))
         meta = {}
         if self.dataset_meta:
             meta = read_json(self.dataset_meta)
@@ -195,4 +195,4 @@ class CifarFormatConverter(BaseFormatConverter):
             meta['label_map'][0] = 'background'
             meta['background_label'] = 0
 
-        return meta, labels
+        return meta, labels, labels_id
