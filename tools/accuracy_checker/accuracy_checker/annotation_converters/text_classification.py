@@ -73,8 +73,19 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
             'segment_ids_{}'.format(example.guid)
         ]
         tokens_a = self.tokenizer.tokenize(example.text_a)
-        tokens_b = self.tokenizer.tokenize(example.text_b)
-        truncate_seq_pair(tokens_a, tokens_b, self.max_seq_length - 3)
+        tokens_b = None
+        if example.text_b:
+            tokens_b = self.tokenizer.tokenize(example.text_b if example.text_b is not None else '')
+
+        if tokens_b:
+            # Modifies `tokens_a` and `tokens_b` in place so that the total
+            # length is less than the specified length.
+            # Account for two [SEP] & one [CLS] with "- 3"
+            truncate_seq_pair(tokens_a, tokens_b, max_seq_length - 3)
+        else:
+            # Account for one [SEP] & one [CLS] with "- 2"
+            if len(tokens_a) > self.max_seq_length - 2:
+                tokens_a = tokens_a[:self.max_seq_length - 2]
 
         tokens = []
         segment_ids = []
@@ -83,11 +94,13 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
             segment_ids.append(SEG_ID_A)
         tokens.append('[SEP]' if self.support_vocab else SEP_ID)
         segment_ids.append(SEG_ID_A)
-        for token in tokens_b:
-            tokens.append(token)
+
+        if tokens_b:
+            for token in tokens_b:
+                tokens.append(token)
+                segment_ids.append(SEG_ID_B)
+            tokens.append('[SEP]' if self.support_vocab else SEP_ID)
             segment_ids.append(SEG_ID_B)
-        tokens.append('[SEP]' if self.support_vocab else SEP_ID)
-        segment_ids.append(SEG_ID_B)
 
         tokens.append("[CLS]" if self.support_vocab else CLS_ID)
         segment_ids.append(SEG_ID_CLS)

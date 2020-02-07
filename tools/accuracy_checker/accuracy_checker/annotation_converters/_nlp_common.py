@@ -257,7 +257,7 @@ class SentencePieceTokenizer:
         if spm is None:
             raise ConfigError('Sentence piece tokenizer required sentencepiece, please install it before usage')
         self.encoder = spm.SentencePieceProcessor()
-        self.encoder.Load(tokenizer_model)
+        self.encoder.Load(str(tokenizer_model))
         self.lower_case = lower_case
         self.remove_space = remove_space
 
@@ -275,7 +275,7 @@ class SentencePieceTokenizer:
 
     def encode_ids(self, text, sample=False):
         pieces = self.encode_pieces(text, sample)
-        ids = [self.encoder.PieceTold(piece) for piece in pieces]
+        ids = [self.encoder.PieceToId(piece) for piece in pieces]
         return ids
 
     def encode_pieces(self, text, sample=False):
