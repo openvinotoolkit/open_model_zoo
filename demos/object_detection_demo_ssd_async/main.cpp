@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include <inference_engine.hpp>
+#include <ngraph/ngraph.hpp>
 
 #include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
@@ -171,7 +172,32 @@ int main(int argc, char *argv[]) {
         }
         DataPtr& output = outputInfo.begin()->second;
         auto outputName = outputInfo.begin()->first;
-        const int num_classes = cnnNetwork.getLayerByName(outputName.c_str())->GetParamAsInt("num_classes");
+
+        int num_classes = 0;
+
+        if (auto ngraphFunction = cnnNetwork.getFunction()) {
+            for (const auto op : ngraphFunction->get_ops()) {
+                if (op->get_friendly_name() == outputName) {
+                    auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
+                    if (!detOutput) {
+                        THROW_IE_EXCEPTION << "Object Detection network output layer(" + op->get_friendly_name() +
+                            ") should be DetectionOutput, but was " +  op->get_type_info().name;
+                    }
+
+                    num_classes = detOutput->get_attrs().num_classes;
+                    break;
+                }
+            }
+        } else {
+            const CNNLayerPtr outputLayer = cnnNetwork.getLayerByName(outputName.c_str());
+            if (outputLayer->type != "DetectionOutput") {
+                throw std::logic_error("Object Detection network output layer(" + outputLayer->name +
+                                       ") should be DetectionOutput, but was " +  outputLayer->type);
+            }
+
+            num_classes = outputLayer->GetParamAsInt("num_classes");
+        }
+
         if (static_cast<int>(labels.size()) != num_classes) {
             if (static_cast<int>(labels.size()) == (num_classes - 1))  // if network assumes default "background" class, having no label
                 labels.insert(labels.begin(), "fake");

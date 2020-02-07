@@ -205,6 +205,8 @@ else()
     find_package(InferenceEngine 2.0 REQUIRED)
 endif()
 
+find_package(ngraph REQUIRED)
+
 # collect all samples subdirectories
 file(GLOB samples_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
 # skip building of unnecessary subdirectories

@@ -17,6 +17,7 @@
 #include <map>
 
 #include <inference_engine.hpp>
+#include <ngraph/ngraph.hpp>
 
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
@@ -152,19 +153,36 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
     }
     DataPtr& _output = outputInfo.begin()->second;
     output = outputInfo.begin()->first;
+    size_t num_classes = 0ul;
 
-    const CNNLayerPtr outputLayer = network.getLayerByName(output.c_str());
-    if (outputLayer->type != "DetectionOutput") {
-        throw std::logic_error("Face Detection network output layer(" + outputLayer->name +
-                               ") should be DetectionOutput, but was " +  outputLayer->type);
+    if (auto ngraphFunction = network.getFunction()) {
+        for (const auto & op : ngraphFunction->get_ops()) {
+            if (op->get_friendly_name() == output) {
+                auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
+                if (!detOutput) {
+                    THROW_IE_EXCEPTION << "Face Detection network output layer(" + op->get_friendly_name() +
+                        ") should be DetectionOutput, but was " +  op->get_type_info().name;
+                }
+
+                num_classes = detOutput->get_attrs().num_classes;
+                break;
+            }
+        }
+    } else {
+        const CNNLayerPtr outputLayer = network.getLayerByName(output.c_str());
+        if (outputLayer->type != "DetectionOutput") {
+            throw std::logic_error("Face Detection network output layer(" + outputLayer->name +
+                                   ") should be DetectionOutput, but was " +  outputLayer->type);
+        }
+
+        if (outputLayer->params.find("num_classes") == outputLayer->params.end()) {
+            throw std::logic_error("Face Detection network output layer (" +
+                                   output + ") should have num_classes integer attribute");
+        }
+
+        num_classes = outputLayer->GetParamAsUInt("num_classes");
     }
 
-    if (outputLayer->params.find("num_classes") == outputLayer->params.end()) {
-        throw std::logic_error("Face Detection network output layer (" +
-                               output + ") should have num_classes integer attribute");
-    }
-
-    const size_t num_classes = outputLayer->GetParamAsUInt("num_classes");
     if (labels.size() != num_classes) {
         if (labels.size() == (num_classes - 1))  // if network assumes default "background" class, which has no label
             labels.insert(labels.begin(), "fake");
