@@ -121,7 +121,7 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
                 try:
                     self.fields['device'].validate(entry['device'], field_uri)
                 except ConfigError:
-                    # workarond for devices where this metric is non implemented
+                    # workaround for devices where this metric is non implemented
                     warning('unknown device: {}'.format(entry['device']))
             else:
                 raise error
@@ -230,7 +230,8 @@ class DLSDKLauncher(Launcher):
             '_vpu_log_level': StringField(
                 optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
             ),
-            '_prev_bitstream': PathField(optional=True, description="path to bitstream from previous run (FPGA only)")
+            '_prev_bitstream': PathField(optional=True, description="path to bitstream from previous run (FPGA only)"),
+            '_device_config': PathField(optional=True, description='path to file with device configuration')
         })
 
         return parameters
@@ -594,6 +595,9 @@ class DLSDKLauncher(Launcher):
             log_level = self.config.get('_vpu_log_level')
             if log_level:
                 self.ie_core.set_config({'LOG_LEVEL': log_level}, self._device)
+        device_config = self.config.get('_device_config')
+        if device_config:
+            self.set_device_config(device_config)
 
     def _prepare_multi_device(self, log=True):
         async_mode = self.get_value_from_config('async_mode')
@@ -624,6 +628,12 @@ class DLSDKLauncher(Launcher):
             print_info('Request number for each device:')
             for device, nreq in zip(device_list, num_per_device_requests):
                 print_info('    {} - {}'.format(device, nreq))
+
+    def set_device_config(self, device_config):
+        device_specific_configuration = read_yaml(device_config)
+        if not isinstance(device_specific_configuration, dict):
+            raise ConfigError('device configuration should be a dict-like')
+        self.ie_core.set_config(device_specific_configuration, self.device)
 
     def _log_versions(self):
         versions = self.ie_core.get_versions(self._device)

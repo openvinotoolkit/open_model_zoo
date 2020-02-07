@@ -440,7 +440,7 @@ class ConfigReader:
             'model_optimizer', 'tf_custom_op_config_dir',
             'tf_obj_detection_api_pipeline_config_path',
             'transformations_config_dir',
-            'cpu_extensions_mode', 'vpu_log_level'
+            'cpu_extensions_mode', 'vpu_log_level', 'device_config'
         ]
         arguments_dict = arguments if isinstance(arguments, dict) else vars(arguments)
         update_launcher_entry = {}
