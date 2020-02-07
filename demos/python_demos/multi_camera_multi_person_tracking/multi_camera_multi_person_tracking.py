@@ -138,7 +138,7 @@ def main():
     parser.add_argument('-i', type=str, nargs='+', help='Input sources (indexes \
                         of cameras or paths to video files)', required=True)
     parser.add_argument('--detections', type=str, nargs='+',
-                        help='Json files with detections')
+                        help='JSON files with detections')
 
     parser.add_argument('-m', '--m_detector', type=str, required=True,
                         help='Path to the person detection model')
@@ -146,7 +146,7 @@ def main():
                         help='Threshold for the person detection model')
 
     parser.add_argument('--m_segmentation', type=str, required=False,
-                        help='Path to the instance segmentation model')
+                        help='Path to the person instance segmentation model')
     parser.add_argument('--t_segmentation', type=float, default=0.6,
                         help='Threshold for person instance segmentation model')
 

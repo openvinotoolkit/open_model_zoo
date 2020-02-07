@@ -69,8 +69,7 @@ def get_detections_from_tracks(tracks_history, time):
         for track in camera_hist:
             if time in track['timestamps']:
                 idx = track['timestamps'].index(time)
-                active_detections[i].append(TrackedObj(track['boxes'][idx],
-                                                       'ID ' + str(track['id'])))
+                active_detections[i].append(TrackedObj(track['boxes'][idx], track['id']))
     return active_detections
 
 
