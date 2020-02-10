@@ -12,6 +12,7 @@ This repository includes optimized deep learning models and a set of demos to ex
 * [Demos](demos/README.md) that demonstrate models usage with Deep Learning Deployment Toolkit
 * [Accuracy Checker](tools/accuracy_checker/README.md) tool for models accuracy validation
 
+
 ## License
 Open Model Zoo is licensed under [Apache License Version 2.0](LICENSE).
 
