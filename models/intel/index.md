@@ -103,6 +103,7 @@ detect areas with complex shape (for example, free space on the road).
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [road-segmentation-adas-0001](./road-segmentation-adas-0001/description/road-segmentation-adas-0001.md)                                        | 4.770                | 0.184      |
 | [semantic-segmentation-adas-0001](./semantic-segmentation-adas-0001/description/semantic-segmentation-adas-0001.md)                            | 58.572               | 6.686      |
+| [unet-camvid-onnx-0001](./unet-camvid-onnx-0001/description/unet-camvid-onnx-0001.md)                                                          | -                    | -          |
 
 ## Instance Segmentation Models
 
