@@ -1,14 +1,14 @@
-# Overview of OpenVINO&trade; Toolkit Pre-Trained Models
+# Overview of OpenVINO&trade; Toolkit Pre-Trained Models.
 
 OpenVINO&trade; toolkit provides a set of pre-trained models
 that you can use for learning and demo purposes or for developing deep learning
 software. Most recent version is available in the [repo on Github](https://github.com/opencv/open_model_zoo).
 
-The models can be downloaded via Model Downloader
+The models can be downloaded via Model Downloader.
 (`<OPENVINO_INSTALL_DIR>/deployment_tools/open_model_zoo/tools/downloader`).
 They can also be downloaded manually from [01.org](https://download.01.org/opencv).
 
-## Object Detection Models
+## Object Detection Models.
 
 Several detection models can be used to detect a set of the most popular
 objects - for example, faces, people, vehicles. Most of the networks are
@@ -26,7 +26,7 @@ network to detect objects of the same type better.
 | [face-detection-retail-0005](./face-detection-retail-0005/description/face-detection-retail-0005.md)                                                                                | 0.982                | 1.021      | X     |         |          |       |                |         |
 | [person-detection-retail-0002](./person-detection-retail-0002/description/person-detection-retail-0002.md)                                                                          | 12.427               | 3.244      |       | X       |          |       |                |         |
 | [person-detection-retail-0013](./person-detection-retail-0013/description/person-detection-retail-0013.md)                                                                          | 2.300                | 0.723      |       | X       |          |       |                |         |
-| [person-detection-action-recognition-0005](./person-detection-action-recognition-0005/description/person-detection-action-recognition-0005.md)                                      | 7.140                | 1.951      |       | X       |          |       |                |         |
+| [person-detection-action-recognition-0005](./person.detection-action-recognition-0005/description/person-detection-action-recognition-0005.md)                                      | 7.140                | 1.951      |       | X       |          |       |                |         |
 | [person-detection-action-recognition-0006](./person-detection-action-recognition-0006/description/person-detection-action-recognition-0006.md)                                      | 8.225                | 2.001      |       | X       |          |       |                |         |
 | [person-detection-action-recognition-teacher-0002](./person-detection-action-recognition-teacher-0002/description/person-detection-action-recognition-teacher-0002.md)              | 7.140                | 1.951      |       | X       |          |       |                |         |
 | [person-detection-raisinghand-recognition-0001](./person-detection-raisinghand-recognition-0001/description/person-detection-raisinghand-recognition-0001.md)                       | 7.138                | 1.951      |       | X       |          |       |                |         |
