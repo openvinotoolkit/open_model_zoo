@@ -23,6 +23,6 @@ models:
           - type: resize_prediction_depth_map
           - type: align_prediction_depth_map
         metrics:
-          - type: rmse
+          - type: mse
 
 global_definitions: ../dataset_definitions.yml
