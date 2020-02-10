@@ -12,7 +12,6 @@
 """
 
 import queue
-import random
 
 import numpy as np
 from scipy.spatial.distance import cosine
@@ -27,7 +26,6 @@ class MultiCameraTracker:
                  global_match_thresh=0.35,
                  bbox_min_aspect_ratio=1.2,
                  visual_analyze=None,
-                 random_seed=100
                  ):
         self.scts = []
         self.time = 0
@@ -39,7 +37,6 @@ class MultiCameraTracker:
         self.global_match_thresh = global_match_thresh
         assert bbox_min_aspect_ratio >= 0
         self.bbox_min_aspect_ratio = bbox_min_aspect_ratio
-        random.seed(random_seed)
         assert num_sources > 0
         for i in range(num_sources):
             self.scts.append(SingleCameraTracker(i, self._get_next_global_id,
@@ -55,7 +52,7 @@ class MultiCameraTracker:
             else:
                 mask = None
             if self.bbox_min_aspect_ratio is not None:
-                all_detections[i] = self._filter_detections(all_detections[i])
+                all_detections[i], mask = self._filter_detections(all_detections[i], mask)
             sct.process(frames[i], all_detections[i], mask)
             all_tracks += sct.get_tracks()
 
@@ -90,15 +87,18 @@ class MultiCameraTracker:
             else:
                 break
 
-    def _filter_detections(self, detections):
+    def _filter_detections(self, detections, masks):
         clean_detections = []
-        for det in detections:
+        clean_masks = []
+        for i, det in enumerate(detections):
             w = det[2] - det[0]
             h = det[3] - det[1]
             ar = h / w
             if ar > self.bbox_min_aspect_ratio:
                 clean_detections.append(det)
-        return clean_detections
+                if i < len(masks):
+                    clean_masks.append(masks[i])
+        return clean_detections, clean_masks
 
     def _compute_mct_distance_matrix(self, all_tracks):
         distance_matrix = THE_BIGGEST_DISTANCE * np.eye(len(all_tracks), dtype=np.float32)

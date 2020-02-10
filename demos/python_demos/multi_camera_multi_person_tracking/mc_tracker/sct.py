@@ -79,7 +79,7 @@ class OrientationFeature:
         assert feature_len > 0
         self.orientation_features = [AverageEstimator() for _ in range(feature_len)]
         self.is_initialized = False
-        if initial_feature[0] is not None and initial_feature[1] >= 0:
+        if initial_feature[0] is not None and initial_feature[1] is not None and initial_feature[1] >= 0:
             self.is_initialized = True
             self.orientation_features[initial_feature[1]].update(initial_feature[0])
 
@@ -159,7 +159,6 @@ class Track:
     def _interpolate(self, target_box, timestamp, skip_size):
         last_box = self.get_last_box()
         for t in range(1, skip_size):
-            interp_box = []
             interp_box = [int(b1 + (b2 - b1) / skip_size * t) for b1, b2 in zip(last_box, target_box)]
             self.boxes.append(interp_box)
             self.timestamps.append(self.get_end_time() + 1)
@@ -173,7 +172,7 @@ class Track:
                                       + filter_speed * self.boxes[-1][j])
             self.boxes[-1] = tuple(filtered_box)
 
-    def add_detection(self, box, feature, orientation, timestamp, max_skip_size=1, filter_speed=0.7, crop=None):
+    def add_detection(self, box, feature, timestamp, max_skip_size=1, filter_speed=0.7, crop=None):
         skip_size = timestamp - self.get_end_time()
         if 1 < skip_size <= max_skip_size:
             self._interpolate(box, timestamp, skip_size)
@@ -186,7 +185,6 @@ class Track:
         if feature is not None:
             self.f_clust.update(feature)
             self.f_avg.update(feature)
-            self.f_orient.update(feature, orientation)
         if crop is not None:
             self.crops.append(crop)
 
@@ -357,8 +355,7 @@ class SingleCameraTracker:
                 if j is not None:
                     idx = active_tracks_idx[j]
                     crop = self.current_detections[i] if self.current_detections is not None else None
-                    self.tracks[idx].add_detection(detections[i], features[i].f if features[i] else None,
-                                                   features[i].o if features[i] else None,
+                    self.tracks[idx].add_detection(detections[i], features[i],
                                                    self.time, self.continue_time_thresh,
                                                    self.detection_filter_speed, crop)
         return assignment
@@ -498,10 +495,9 @@ class SingleCameraTracker:
         for i, j in enumerate(assignment):
             if j is None:
                 crop = self.current_detections[i] if self.analyzer else None
-                feature_vec, orientation = features[i] if features[i] is not None else (None, None)
                 self.tracks.append(Track(self.global_id_getter(), self.id,
-                                         detections[i], self.time, feature_vec,
-                                         self.n_clusters, crop, orientation))
+                                         detections[i], self.time, features[i],
+                                         self.n_clusters, crop, None))
 
     def _compute_detections_assignment_cost(self, active_tracks_idx, detections, features):
         affinity_matrix = np.zeros((len(detections), len(active_tracks_idx)), dtype=np.float32)
@@ -514,8 +510,8 @@ class SingleCameraTracker:
                 iou = 0.5 * self._giou(d, track_box) + 0.5
                 reid_sim_curr, reid_sim_avg, reid_sim_clust = None, None, None
                 if self.tracks[idx].f_avg.is_valid() and features[j] is not None:
-                    reid_sim_avg = 1 - cosine(self.tracks[idx].f_avg.get(), features[j].f)
-                    reid_sim_curr = 1 - cosine(self.tracks[idx].get_last_feature(), features[j].f)
+                    reid_sim_avg = 1 - cosine(self.tracks[idx].f_avg.get(), features[j])
+                    reid_sim_curr = 1 - cosine(self.tracks[idx].get_last_feature(), features[j])
 
                     if self.process_curr_features_number > 0:
                         num_features = len(self.tracks[idx])
@@ -524,11 +520,10 @@ class SingleCameraTracker:
                         start_index = 0 if self.process_curr_features_number > 1 else num_features - 1
                         for s in range(start_index, num_features - 1, step):
                             if self.tracks[idx].features[s] is not None:
-                                reid_sim_curr = max(reid_sim_curr, 1 - cosine(self.tracks[idx].features[s], features[j].f))
+                                reid_sim_curr = max(reid_sim_curr, 1 - cosine(self.tracks[idx].features[s], features[j]))
 
-                    reid_sim_clust = 1 - clusters_vec_distance(self.tracks[idx].f_clust, features[j].f)
-                    reid_sim_orient = 1 - self.tracks[idx].f_orient.dist_to_vec(features[j].f, features[j].o)
-                    reid_sim = max(reid_sim_avg, reid_sim_curr, reid_sim_clust, reid_sim_orient)
+                    reid_sim_clust = 1 - clusters_vec_distance(self.tracks[idx].f_clust, features[j])
+                    reid_sim = max(reid_sim_avg, reid_sim_curr, reid_sim_clust)
                 else:
                     reid_sim = 0.5
                 affinity_matrix[j, i] = iou * reid_sim

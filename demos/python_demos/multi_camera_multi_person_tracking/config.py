@@ -1,3 +1,5 @@
+random_seed = 100
+
 mct_config = dict(
     time_window=20,
     global_match_thresh=0.35,

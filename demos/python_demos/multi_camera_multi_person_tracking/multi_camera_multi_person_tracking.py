@@ -17,19 +17,42 @@ import queue
 from threading import Thread
 import json
 import logging as log
+import random
 
 import cv2 as cv
 
-from utils.network_wrappers import Detector, VectorCNN, MaskRCNN, \
-                                   DetectionsFromFileReader, ReIDWithOrientationWrapper
+from utils.network_wrappers import Detector, VectorCNN, MaskRCNN, DetectionsFromFileReader
 from mc_tracker.mct import MultiCameraTracker
 from utils.analyzer import save_embeddings
 from utils.misc import read_py_config, check_pressed_keys, AverageEstimator, set_log_config
 from utils.video import MulticamCapture, NormalizerCLAHE
 from utils.visualization import visualize_multicam_detections
-from openvino.inference_engine import IECore # pylint: disable=import-error,E0611
+from openvino.inference_engine import IECore  # pylint: disable=import-error,E0611
 
 set_log_config()
+
+
+def check_detectors(args):
+    detectors = {
+        '--m_detector': args.m_detector,
+        '--m_segmentation': args.m_segmentation,
+        '--detections': args.detections
+    }
+    det_counter = 0
+    for _, value in detectors.items():
+        if value:
+            det_counter += 1
+    if det_counter == 0:
+        log.error('No detector specified, please specify one of the next parameters: '
+                  '\'--m_detector\', \'--m_segmentation\' or \'--detections\'')
+    elif det_counter > 1:
+        non_empty_detectors = [{det: value} for det, value in detectors.items() if value]
+        det_string = ''
+        for det in non_empty_detectors:
+            det_string += '\n\t{}'.format(det)
+        log.error('Only one detector expected but got {}, please specify one of them:{}'
+                  .format(len(non_empty_detectors), det_string))
+    return det_counter
 
 
 class FramesThreadBody:
@@ -51,14 +74,11 @@ class FramesThreadBody:
                 self.frames_queue.put(frames)
 
 
-def run(params, capture, detector, reid):
+def run(params, config, capture, detector, reid):
     win_name = 'Multi camera tracking'
     frame_number = 0
     avg_latency = AverageEstimator()
     key = -1
-    config = {}
-    if len(params.config):
-        config = read_py_config(params.config)
 
     if config['normalizer_config']['enabled']:
         del config['normalizer_config']['enabled']
@@ -110,7 +130,8 @@ def run(params, capture, detector, reid):
         fps = round(1. / latency, 1)
 
         vis = visualize_multicam_detections(frames, tracked_objects, fps, **config['visualization_config'])
-        cv.imshow(win_name, vis)
+        if not params.no_show:
+            cv.imshow(win_name, vis)
         if output_video:
             output_video.write(cv.resize(vis, video_output_size))
 
@@ -137,10 +158,13 @@ def main():
                                                   tracking live demo script')
     parser.add_argument('-i', type=str, nargs='+', help='Input sources (indexes \
                         of cameras or paths to video files)', required=True)
+    parser.add_argument('--config', type=str, default='config.py', required=False,
+                        help='Configuration file')
+
     parser.add_argument('--detections', type=str, nargs='+',
                         help='JSON files with detections')
 
-    parser.add_argument('-m', '--m_detector', type=str, required=True,
+    parser.add_argument('-m', '--m_detector', type=str, required=False,
                         help='Path to the person detection model')
     parser.add_argument('--t_detector', type=float, default=0.6,
                         help='Threshold for the person detection model')
@@ -150,27 +174,33 @@ def main():
     parser.add_argument('--t_segmentation', type=float, default=0.6,
                         help='Threshold for person instance segmentation model')
 
-    parser.add_argument('--m_orientation', type=str, required=False,
-                        help='Path to the people orientation classification model')
-    parser.add_argument('--t_orientation', type=float, default=0.7,
-                        help='Confidence threshold for people orientation clissifier')
-
     parser.add_argument('--m_reid', type=str, required=True,
-                        help='Path to the person reidentification model')
+                        help='Path to the person re-identification model')
 
-    parser.add_argument('--output_video', type=str, default='', required=False)
-    parser.add_argument('--config', type=str, default='', required=False)
-    parser.add_argument('--history_file', type=str, default='', required=False)
+    parser.add_argument('--output_video', type=str, default='', required=False,
+                        help='Optional. Path to output video')
+    parser.add_argument('--history_file', type=str, default='', required=False,
+                        help='Optional. Path to file in JSON format to save results of the demo')
+    parser.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
 
     parser.add_argument('-d', '--device', type=str, default='CPU')
     parser.add_argument('-l', '--cpu_extension',
                         help='MKLDNN (CPU)-targeted custom layers.Absolute \
                               path to a shared library with the kernels impl.',
                              type=str, default=None)
-    parser.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
 
     args = parser.parse_args()
+    if check_detectors(args) != 1:
+        return 1
 
+    if len(args.config):
+        log.info('Reading configuration file {}'.format(args.config))
+        config = read_py_config(args.config)
+    else:
+        log.error('No configuration file specified. Please specify parameter \'--config\'')
+        return 1
+
+    random.seed(config['random_seed'])
     capture = MulticamCapture(args.i)
 
     log.info("Creating Inference Engine")
@@ -178,27 +208,21 @@ def main():
 
     if args.detections:
         person_detector = DetectionsFromFileReader(args.detections, args.t_detector)
+    elif args.m_segmentation:
+        person_detector = MaskRCNN(ie, args.m_segmentation, args.t_segmentation,
+                                   args.device, args.cpu_extension,
+                                   capture.get_num_sources())
     else:
-        if args.m_segmentation:
-            person_detector = MaskRCNN(ie, args.m_segmentation, args.t_segmentation,
-                                       args.device, args.cpu_extension,
-                                       capture.get_num_sources())
-        else:
-            person_detector = Detector(ie, args.m_detector, args.t_detector,
-                                       args.device, args.cpu_extension,
-                                       capture.get_num_sources())
-
-    orientation_classifier = VectorCNN(ie, args.po_model, args.device, args.cpu_extension) \
-        if args.m_orientation else None
+        person_detector = Detector(ie, args.m_detector, args.t_detector,
+                                   args.device, args.cpu_extension,
+                                   capture.get_num_sources())
 
     if args.m_reid:
         person_recognizer = VectorCNN(ie, args.m_reid, args.device, args.cpu_extension)
-        person_recognizer = ReIDWithOrientationWrapper(person_recognizer,
-                                                       orientation_classifier, args.t_orientation)
     else:
         person_recognizer = None
 
-    run(args, capture, person_detector, person_recognizer)
+    run(args, config, capture, person_detector, person_recognizer)
     log.info('Demo finished successfully')
 
 

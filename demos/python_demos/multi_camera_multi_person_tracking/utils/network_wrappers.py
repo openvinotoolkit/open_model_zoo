@@ -101,35 +101,6 @@ class VectorCNN:
         return outputs
 
 
-ReidFeature = namedtuple('ReidFeature', 'f o')
-
-
-class ReIDWithOrientationWrapper:
-    def __init__(self, reid, orientation_classifier=None, cl_threshold=0.5):
-        self.reid = reid
-        self.orientation_classifier = orientation_classifier
-        self.cl_threshold = cl_threshold
-
-    def forward(self, rois):
-        self.reid.forward_async(rois)
-        if self.orientation_classifier is not None:
-            self.orientation_classifier.forward_async(rois)
-            embeddings = self.reid.wait_and_grab()
-            orientations = self.orientation_classifier.wait_and_grab()
-            for i, vec in enumerate(orientations):
-                idx = np.argmax(vec)
-                conf = vec[0][idx]
-                if conf < self.cl_threshold:
-                    idx = -1
-                embeddings[i] = ReidFeature(embeddings[i], idx)
-        else:
-            embeddings = self.reid.wait_and_grab()
-            for i, vec in enumerate(embeddings):
-                embeddings[i] = ReidFeature(embeddings[i], -1)
-
-        return embeddings
-
-
 class MaskRCNN:
     """Wrapper class for a network returning masks of objects"""
 
