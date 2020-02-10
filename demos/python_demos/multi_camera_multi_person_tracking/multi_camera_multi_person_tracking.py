@@ -26,7 +26,7 @@ from mc_tracker.mct import MultiCameraTracker
 from utils.analyzer import save_embeddings
 from utils.misc import read_py_config, check_pressed_keys, AverageEstimator, set_log_config
 from utils.video import MulticamCapture, NormalizerCLAHE
-from utils.visualization import visualize_multicam_detections
+from utils.visualization import visualize_multicam_detections, get_terget_size
 from openvino.inference_engine import IECore  # pylint: disable=import-error,E0611
 
 set_log_config()
@@ -92,11 +92,11 @@ def run(params, config, capture, detector, reid):
     frames_thread.start()
 
     if len(params.output_video):
-        video_output_size = (1920 // capture.get_num_sources(), 1080)
+        frame_size, fps = capture.get_source_parameters()
+        target_width, target_height = get_terget_size(frame_size, None, **config['visualization_config'])
+        video_output_size = (target_width, target_height)
         fourcc = cv.VideoWriter_fourcc(*'XVID')
-        output_video = cv.VideoWriter(params.output_video,
-                                      fourcc, 24.0,
-                                      video_output_size)
+        output_video = cv.VideoWriter(params.output_video, fourcc, min(fps), video_output_size)
     else:
         output_video = None
 

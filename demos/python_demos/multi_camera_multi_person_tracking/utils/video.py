@@ -61,6 +61,15 @@ class MulticamCapture:
     def get_num_sources(self):
         return len(self.captures)
 
+    def get_source_parameters(self):
+        frame_size = []
+        fps = []
+        for cap in self.captures:
+            frame_size.append((int(cap.get(cv.CAP_PROP_FRAME_WIDTH)),
+                               int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))))
+            fps.append(int(cap.get(cv.CAP_PROP_FPS)))
+        return frame_size, fps
+
 
 class NormalizerCLAHE:
     def __init__(self, clip_limit=.5, tile_size=16):

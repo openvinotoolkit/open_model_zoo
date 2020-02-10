@@ -24,7 +24,7 @@ from tqdm import tqdm
 from tools.run_evaluate import read_gt_tracks, get_detections_from_tracks
 from utils.misc import check_pressed_keys, set_log_config
 from utils.video import MulticamCapture
-from utils.visualization import visualize_multicam_detections, plot_timeline
+from utils.visualization import visualize_multicam_detections, plot_timeline, get_terget_size
 
 set_log_config()
 
@@ -83,8 +83,8 @@ def match_gt_indices(gt_tracks, history, accs):
     for acc in accs:
         for event in acc.events.values:
             if event[0] == 'MATCH':
-                gt_id = int(event[1].split(' ')[1])
-                hist_id = int(event[2].split(' ')[1])
+                gt_id = int(event[1])
+                hist_id = int(event[2])
                 assignment_matrix[gt_id][hist_id] += 1
     assignment_indices = np.argsort(-assignment_matrix, axis=1)
     next_missed = -1
@@ -103,6 +103,28 @@ def match_gt_indices(gt_tracks, history, accs):
             used_ids.append(gt_tracks[i][j]['id'])
             log.info('Assigned GT ID: {} --> {}'.format(base_id, gt_tracks[i][j]['id']))
     return gt_tracks
+
+
+def calc_output_video_params(input_sizes, fps, gt, merge_det_gt_windows,
+                             max_window_size=(1920, 1080), stack_frames='vertical'):
+    assert stack_frames in ['vertical', 'horizontal']
+    widths = []
+    heights = []
+    for wh in input_sizes:
+        widths.append(wh[0])
+        heights.append(wh[1])
+    if stack_frames == 'vertical':
+        target_width = min(widths)
+        target_height = sum(heights)
+    elif stack_frames == 'horizontal':
+        target_width = sum(widths)
+        target_height = min(heights)
+    if gt and merge_det_gt_windows:
+        target_width *= 2
+    vis = np.zeros((target_height, target_width, 3), dtype='uint8')
+    target_width, target_height = get_terget_size(input_sizes, vis, max_window_size, stack_frames)
+    target_fps = min(fps)
+    return (target_width, target_height), target_fps
 
 
 def main():
@@ -135,15 +157,15 @@ def main():
     # Configure output video files
     output_video = None
     output_video_gt = None
+    frame_size, fps_source = capture.get_source_parameters()
     if len(args.output_video):
-        divisor = capture.get_num_sources() if args.gt_files and not args.merge_outputs else 1
-        video_output_size = (1920 // divisor, 1080)
+        video_output_size, fps = calc_output_video_params(frame_size, fps_source, args.gt_files, args.merge_outputs)
         fourcc = cv.VideoWriter_fourcc(*'XVID')
-        output_video = cv.VideoWriter(args.output_video, fourcc, 24.0, video_output_size)
+        output_video = cv.VideoWriter(args.output_video, fourcc, fps, video_output_size)
         if args.gt_files and not args.merge_outputs:
             ext = args.output_video.split('.')[-1]
             output_path = args.output_video[:len(args.output_video) - len(ext) - 1] + '_gt.' + ext
-            output_video_gt = cv.VideoWriter(output_path, fourcc, 24.0, video_output_size)
+            output_video_gt = cv.VideoWriter(output_path, fourcc, fps, video_output_size)
 
     # Create GT tracks if necessary
     if args.gt_files:
@@ -166,6 +188,7 @@ def main():
     time = 0
     key = -1
     while True:
+        print('\rVisualizing frame: {}'.format(time), end="")
         key = check_pressed_keys(key)
         if key == 27:
             break
@@ -175,7 +198,7 @@ def main():
 
         if gt_tracks:
             gt_detections = get_detections_from_tracks(gt_tracks, time)
-            vis_gt = visualize_multicam_detections(copy.deepcopy(frames), gt_detections)
+            vis_gt = visualize_multicam_detections(copy.deepcopy(frames), gt_detections, fps='Ground truth')
         else:
             vis_gt = None
 
