@@ -23,7 +23,11 @@ git checkout 5d36f19
 git apply path/to/freeze.py.patch
 ```
 4. Download the [pretrained weights](http://download.tensorflow.org/models/inception_v1_2016_08_28.tar.gz)
-5. Run
+5. Install the dependencies:
+```sh
+pip install -r requirements.in
+```
+6. Run
 ```sh
 python3 freeze.py --ckpt path/to/inception_v1.ckpt --name inception_v1 --num_classes 1001 --output InceptionV1/Logits/Predictions/Softmax
 ```

@@ -8,6 +8,15 @@ converted to frozen graph using `tf.graph_util` module.
 For details see [paper](https://arxiv.org/pdf/1512.03385.pdf),
 [repository](https://github.com/tensorflow/models/tree/master/official/r1/resnet).
 
+### Steps to Reproduce Conversion to Frozen Graph
+
+1. Install TensorFlow\*, version lower than 2.0.0
+2. Download [pretrained weights](http://download.tensorflow.org/models/official/20181001_resnet/savedmodels/resnet_v1_fp32_savedmodel_NHWC_jpg.tar.gz)
+3. Run example conversion code, avaliable at [freeze_saved_model.py](./freeze_saved_model.py)
+```sh
+python3 freeze_saved_model.py --saved_model_dir path/to/downloaded/saved_model --save_file path/to/resulting/frozen_graph.pb
+```
+
 ## Example
 
 ## Specification

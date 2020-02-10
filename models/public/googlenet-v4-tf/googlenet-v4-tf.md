@@ -22,8 +22,12 @@ git checkout 5d36f19
 ```sh
 git apply path/to/freeze.py.patch
 ```
-4. Download the [pretrained weights]http://download.tensorflow.org/models/inception_v4_2016_09_09.tar.gz)
-5. Run
+4. Download the [pretrained weights](http://download.tensorflow.org/models/inception_v4_2016_09_09.tar.gz)
+5. Install the dependencies:
+```sh
+pip install -r requirements.in
+```
+6. Run
 ```sh
 python3 freeze.py --ckpt path/to/inception_v4.ckpt --name inception_v4 --num_classes 1001 --output InceptionV4/Logits/Predictions
 ```

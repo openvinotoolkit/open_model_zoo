@@ -38,7 +38,7 @@ index 0000000..411001d
 +        logits, _ = network_fn(placeholder)
 +
 +        pb = ckpt.replace('ckpt', 'pb')
-+        frozen = ckpt.replace('.ckpt', '_frozen.pb')
++        frozen = ckpt.replace('ckpt', 'frozen.pb')
 +
 +        print('Writing {}'.format(pb))
 +        graph_io.write_graph(graph, os.path.dirname(pb), pb, as_text=True)
