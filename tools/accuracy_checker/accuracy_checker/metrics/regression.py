@@ -63,6 +63,8 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         return self.value_differ(annotation.value, prediction.value)
 
     def _calculate_diff_depth_estimation_rep(self, annotation, prediction):
+        print("HALLO")
+
         return self.value_differ(annotation.depth_map, prediction.depth_map)
 
     def evaluate(self, annotations, predictions):
