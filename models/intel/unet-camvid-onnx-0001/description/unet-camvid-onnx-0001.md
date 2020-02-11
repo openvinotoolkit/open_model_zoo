@@ -12,7 +12,8 @@ The model output for `unet-camvid-onnx-0001` is the per-pixel probabilities of e
 
 | Metric            | Value                 |
 |-------------------|-----------------------|
-| Type              | Semantic segmentation |
+| GFlops            | 260.1                 |
+| MParams           | 31.03                 |
 | Source framework  | PyTorch\*             |
 
 ## Accuracy
