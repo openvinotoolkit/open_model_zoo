@@ -15,6 +15,7 @@ models:
         annotation_conversion:
           converter: redweb
           data_dir: ReDWeb_V1
+          annotation_file: ReDWeb_validation_360.txt
         annotation: mono_depth.pickle
         preprocessing:
           - type: resize
