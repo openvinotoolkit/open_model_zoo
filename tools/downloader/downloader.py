@@ -200,8 +200,6 @@ def positive_int_arg(value_str):
 
 def main():
     parser = DownloaderArgumentParser()
-    parser.add_argument('-c', '--config', type=Path, metavar='CONFIG.YML',
-        help='model configuration file (deprecated)')
     parser.add_argument('--name', metavar='PAT[,PAT...]',
         help='download only models whose names match at least one of the specified patterns')
     parser.add_argument('--list', type=Path, metavar='FILE.LST',

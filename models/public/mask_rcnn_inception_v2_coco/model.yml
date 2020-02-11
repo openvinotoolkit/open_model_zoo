@@ -13,9 +13,8 @@
 # limitations under the License.
 
 description: >-
-  Mask R-CNN Inception V2 trained on COCO dataset.
-  Used for object instance segmentation. For details see paper
-  <https://arxiv.org/pdf/1703.06870.pdf>.
+  Mask R-CNN Inception V2 trained on the COCO dataset. The model is used for object
+  instance segmentation.  For details, see a paper <https://arxiv.org/pdf/1703.06870.pdf>.
 task_type: instance_segmentation
 files:
   - name: mask_rcnn_inception_v2_coco_2018_01_28.tar.gz
@@ -30,7 +29,7 @@ model_optimizer_args:
   - --reverse_input_channels
   - --input_shape=[1,800,1365,3]
   - --input=image_tensor
-  - --tensorflow_use_custom_operations_config=$mo_dir/extensions/front/tf/mask_rcnn_support.json
+  - --transformations_config=$mo_dir/extensions/front/tf/mask_rcnn_support.json
   - --tensorflow_object_detection_api_pipeline_config=$dl_dir/mask_rcnn_inception_v2_coco_2018_01_28/pipeline.config
   - --input_model=$dl_dir/mask_rcnn_inception_v2_coco_2018_01_28/frozen_inference_graph.pb
 framework: tf

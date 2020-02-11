@@ -27,6 +27,7 @@ ENTRIES_PATHS = {
     'launchers': {
         'model': 'models',
         'weights': 'models',
+        'color_coeff': 'models',
         'caffe_model': 'models',
         'caffe_weights': 'models',
         'tf_model': 'models',
@@ -56,6 +57,8 @@ COMMAND_LINE_ARGS_AS_ENV_VARS = {
     'extensions': 'EXTENSIONS_DIR',
 }
 DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
+CONFIG_SHARED_PARAMETERS = ['bitstream']
+
 
 class ConfigReader:
     """
@@ -91,6 +94,7 @@ class ConfigReader:
         ConfigReader._provide_cmd_arguments(arguments, config, mode)
         ConfigReader._filter_launchers(config, arguments, mode)
         ConfigReader._separate_evaluations(config, mode)
+        ConfigReader._previous_configuration_parameters_sharing(config, mode)
 
     @staticmethod
     def _read_configs(arguments):
@@ -169,7 +173,7 @@ class ConfigReader:
         if not isinstance(config, dict):
             raise ConfigError('local config should has dictionary based structure')
 
-        eval_mode = next(iter(config))
+        eval_mode = get_mode(config)
         config_checker_func = config_checkers.get(eval_mode)
         if config_checker_func is None:
             raise ConfigError('Accuracy Checker {} mode is not supported. Please select between {}'. format(
@@ -526,6 +530,55 @@ class ConfigReader:
         separator(config)
 
     @staticmethod
+    def _previous_configuration_parameters_sharing(config, mode='models'):
+        def _share_params_models(models_config):
+            shared_params = {parameter: None for parameter in CONFIG_SHARED_PARAMETERS}
+            for model in models_config['models']:
+                launchers = model['launchers']
+                if not launchers:
+                    continue
+                for launcher in model['launchers']:
+                    for parameter in CONFIG_SHARED_PARAMETERS:
+                        if parameter in launcher:
+                            if shared_params[parameter] is not None:
+                                launcher['_prev_{}'.format(parameter)] = shared_params[parameter]
+                            shared_params[parameter] = launcher[parameter]
+
+        def _share_params_modules(modules_config):
+            shared_params = {parameter: None for parameter in CONFIG_SHARED_PARAMETERS}
+            for evaluation in modules_config['evaluations']:
+                if 'module_config' not in evaluation:
+                    continue
+                launchers = evaluation['module_config'].get('launchers')
+                for launcher in launchers:
+                    for parameter in CONFIG_SHARED_PARAMETERS:
+                        if parameter in launcher:
+                            if shared_params[parameter] is not None:
+                                launcher['_prev_{}'.format(parameter)] = shared_params[parameter]
+                            shared_params[parameter] = launcher[parameter]
+
+        def _share_params_pipelines(pipelines_config):
+            shared_params = {parameter: None for parameter in CONFIG_SHARED_PARAMETERS}
+            for pipeline in pipelines_config['pipelines']:
+                for stage in pipeline['stages']:
+                    launcher = stage.get('launcher', {})
+                    for parameter in CONFIG_SHARED_PARAMETERS:
+                        if parameter in launcher:
+                            if shared_params[parameter] is not None:
+                                launcher['_prev_{}'.format(parameter)] = shared_params[parameter]
+                            shared_params[parameter] = launcher[parameter]
+        mode_func = {
+            'models': _share_params_models,
+            'evaluations': _share_params_modules,
+            'pipelines': _share_params_pipelines
+        }
+
+        processor = mode_func.get(mode)
+        if not processor:
+            return
+        processor(config)
+
+    @staticmethod
     def convert_paths(config):
         definitions = os.environ.get(DEFINITION_ENV_VAR)
         if definitions:
@@ -730,3 +783,13 @@ def merge_entry_paths(keys, value, args):
         if not args[argument].is_dir():
             raise ConfigError('argument: {} should be a directory'.format(argument))
         value[field] = args[argument] / config_path
+
+
+def get_mode(config):
+    evaluation_keys = [key for key in config if key != 'global_definitions']
+    if not evaluation_keys:
+        raise ConfigError('Invalid config structure. No evaluations detected.')
+    if len(evaluation_keys) > 1:
+        raise ConfigError('Multiple evaluation types in the one config is not supported. '
+                          'Please separate on several configs.')
+    return next(iter(evaluation_keys))

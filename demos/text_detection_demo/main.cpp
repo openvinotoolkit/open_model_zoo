@@ -18,9 +18,6 @@
 #include <gflags/gflags.h>
 #include <opencv2/opencv.hpp>
 
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 #include <inference_engine.hpp>
 
 #include <monitors/presenter.h>
@@ -41,7 +38,7 @@ std::vector<cv::Point2f> floatPointsFromRotatedRect(const cv::RotatedRect &rect)
 std::vector<cv::Point> boundedIntPointsFromRotatedRect(const cv::RotatedRect &rect, const cv::Size& image_size);
 cv::Point topLeftPoint(const std::vector<cv::Point2f> & points, int *idx);
 cv::Mat cropImage(const cv::Mat &image, const std::vector<cv::Point2f> &points, const cv::Size& target_size, int top_left_point_idx);
-void setLabel(cv::Mat& im, const std::string label, const cv::Point & p);
+void setLabel(cv::Mat& im, const std::string& label, const cv::Point & p);
 
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ------------------------- Parsing and validating input arguments --------------------------------------
@@ -112,10 +109,6 @@ int main(int argc, char *argv[]) {
 
             /** Load extensions for the CPU device **/
             if ((device.find("CPU") != std::string::npos)) {
-#ifdef WITH_EXTENSIONS
-                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-#endif
-
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
@@ -136,6 +129,7 @@ int main(int argc, char *argv[]) {
         auto extension_path = FLAGS_l;
         auto cls_conf_threshold = static_cast<float>(FLAGS_cls_pixel_thr);
         auto link_conf_threshold = static_cast<float>(FLAGS_link_pixel_thr);
+        auto decoder_bandwidth = FLAGS_b;
 
         slog::info << "Loading network files" << slog::endl;
         Cnn text_detection, text_recognition;
@@ -226,11 +220,15 @@ int main(int argc, char *argv[]) {
                     if (output_shape[2] != kAlphabet.length())
                         throw std::runtime_error("The text recognition model does not correspond to alphabet.");
 
-                    float *ouput_data_pointer = blobs.begin()->second->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
-                    std::vector<float> output_data(ouput_data_pointer, ouput_data_pointer + output_shape[0] * output_shape[2]);
+                    float *output_data_pointer = blobs.begin()->second->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
+                    std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[2]);
 
                     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-                    res = CTCGreedyDecoder(output_data, kAlphabet, kPadSymbol, &conf);
+                    if (decoder_bandwidth == 0) {
+                        res = CTCGreedyDecoder(output_data, kAlphabet, kPadSymbol, &conf);
+                    } else {
+                        res = CTCBeamSearchDecoder(output_data, kAlphabet, kPadSymbol, &conf, decoder_bandwidth);
+                    }
                     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
                     text_recognition_postproc_time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
 
@@ -391,7 +389,7 @@ cv::Mat cropImage(const cv::Mat &image, const std::vector<cv::Point2f> &points, 
     return crop;
 }
 
-void setLabel(cv::Mat& im, const std::string label, const cv::Point & p) {
+void setLabel(cv::Mat& im, const std::string& label, const cv::Point & p) {
     int fontface = cv::FONT_HERSHEY_SIMPLEX;
     double scale = 0.7;
     int thickness = 1;

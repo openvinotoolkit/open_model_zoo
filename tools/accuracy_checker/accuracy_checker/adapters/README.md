@@ -91,6 +91,13 @@ AccuracyChecker supports following set of adapters:
   * `action_scale` - scale for correct action score calculation.
 * `super_resolution` - converting output of single image super resolution network to `SuperResolutionPrediction`.
   * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
+  * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
+  * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations. 
+  The order of actions:
+  1. Multiply on `std`
+  2. Add `mean`
+  3. Reverse channels if this option enabled.
 * `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction`.
 * `pixel_link_text_detection` - converting output of PixelLink like model for text detection to `TextDetectionPrediction`.
   * `pixel_class_out` - name of layer containing information related to text/no-text classification for each pixel.

@@ -26,14 +26,11 @@ public:
     static constexpr int objectSize = 7;  // Output should have 7 as a last dimension"
 
     Detector() = default;
-    Detector(InferenceEngine::Core& ie, const std::string deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
+    Detector(InferenceEngine::Core& ie, const std::string& deviceName, const std::string& xmlPath, const std::vector<float>& detectionTresholds,
             const bool autoResize, const std::map<std::string, std::string> & pluginConfig) :
         detectionTresholds{detectionTresholds}, ie_{ie} {
-        InferenceEngine::CNNNetReader netReader;
-        netReader.ReadNetwork(xmlPath);
-        std::string detectorBinFileName = fileNameNoExt(xmlPath) + ".bin";
-        netReader.ReadWeights(detectorBinFileName);
-        InferenceEngine::InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+        auto network = ie.ReadNetwork(xmlPath);
+        InferenceEngine::InputsDataMap inputInfo(network.getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Detector should have only one input");
         }
@@ -49,7 +46,7 @@ public:
         detectorInputBlobName = inputInfo.begin()->first;
 
         // ---------------------------Check outputs ------------------------------------------------------
-        InferenceEngine::OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
+        InferenceEngine::OutputsDataMap outputInfo(network.getOutputsInfo());
         if (outputInfo.size() != 1) {
             throw std::logic_error("Vehicle Detection network should have only one output");
         }
@@ -67,7 +64,7 @@ public:
         }
         _output->setPrecision(InferenceEngine::Precision::FP32);
 
-        net = ie_.LoadNetwork(netReader.getNetwork(), deviceName, pluginConfig);
+        net = ie_.LoadNetwork(network, deviceName, pluginConfig);
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -133,11 +130,8 @@ public:
     VehicleAttributesClassifier() = default;
     VehicleAttributesClassifier(InferenceEngine::Core& ie, const std::string & deviceName,
         const std::string& xmlPath, const bool autoResize, const std::map<std::string, std::string> & pluginConfig) : ie_(ie) {
-        InferenceEngine::CNNNetReader attributesNetReader;
-        attributesNetReader.ReadNetwork(FLAGS_m_va);
-        std::string attributesBinFileName = fileNameNoExt(FLAGS_m_va) + ".bin";
-        attributesNetReader.ReadWeights(attributesBinFileName);
-        InferenceEngine::InputsDataMap attributesInputInfo(attributesNetReader.getNetwork().getInputsInfo());
+        auto network = ie.ReadNetwork(FLAGS_m_va);
+        InferenceEngine::InputsDataMap attributesInputInfo(network.getInputsInfo());
         if (attributesInputInfo.size() != 1) {
             throw std::logic_error("Vehicle Attribs topology should have only one input");
         }
@@ -152,7 +146,7 @@ public:
 
         attributesInputName = attributesInputInfo.begin()->first;
 
-        InferenceEngine::OutputsDataMap attributesOutputInfo(attributesNetReader.getNetwork().getOutputsInfo());
+        InferenceEngine::OutputsDataMap attributesOutputInfo(network.getOutputsInfo());
         if (attributesOutputInfo.size() != 2) {
             throw std::logic_error("Vehicle Attribs Network expects networks having two outputs");
         }
@@ -162,7 +156,7 @@ public:
         it->second->setPrecision(InferenceEngine::Precision::FP32);
         outputNameForType = (it)->second->getName();  // type is the second output.
 
-        net = ie_.LoadNetwork(attributesNetReader.getNetwork(), deviceName, pluginConfig);
+        net = ie_.LoadNetwork(network, deviceName, pluginConfig);
     }
 
     InferenceEngine::InferRequest createInferRequest() {
@@ -214,14 +208,11 @@ public:
     Lpr(InferenceEngine::Core& ie, const std::string & deviceName, const std::string& xmlPath, const bool autoResize,
         const std::map<std::string, std::string> &pluginConfig) :
         ie_{ie} {
-        InferenceEngine::CNNNetReader LprNetReader;
-        LprNetReader.ReadNetwork(FLAGS_m_lpr);
-        std::string lprBinFileName = fileNameNoExt(FLAGS_m_lpr) + ".bin";
-        LprNetReader.ReadWeights(lprBinFileName);
+        auto network = ie.ReadNetwork(FLAGS_m_lpr);
 
         /** LPR network should have 2 inputs (and second is just a stub) and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
-        InferenceEngine::InputsDataMap LprInputInfo(LprNetReader.getNetwork().getInputsInfo());
+        InferenceEngine::InputsDataMap LprInputInfo(network.getInputsInfo());
         if (LprInputInfo.size() != 1 && LprInputInfo.size() != 2) {
             throw std::logic_error("LPR should have 1 or 2 inputs");
         }
@@ -245,7 +236,7 @@ public:
         // -----------------------------------------------------------------------------------------------------
 
         // ---------------------------Check outputs ------------------------------------------------------
-        InferenceEngine::OutputsDataMap LprOutputInfo(LprNetReader.getNetwork().getOutputsInfo());
+        InferenceEngine::OutputsDataMap LprOutputInfo(network.getOutputsInfo());
         if (LprOutputInfo.size() != 1) {
             throw std::logic_error("LPR should have 1 output");
         }
@@ -256,7 +247,7 @@ public:
         size_t indexOfSequenceSize = LprInputSeqName == "" ? 2 : 1;
         maxSequenceSizePerPlate = lprOutputInfo->second->getTensorDesc().getDims()[indexOfSequenceSize];
 
-        net = ie_.LoadNetwork(LprNetReader.getNetwork(), deviceName, pluginConfig);
+        net = ie_.LoadNetwork(network, deviceName, pluginConfig);
     }
 
     InferenceEngine::InferRequest createInferRequest() {

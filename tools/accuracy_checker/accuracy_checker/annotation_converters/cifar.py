@@ -14,28 +14,60 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from PIL import Image
 import numpy as np
-from ..config import PathField, BoolField
+from ..config import PathField, BoolField, NumberField
 from ..representation import ClassificationAnnotation
 from ..utils import read_pickle, check_file_existence, read_json
 
 from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
+
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 CIFAR10_LABELS_LIST = [
     'airplane', 'automobile', 'bird', 'cat', 'deer',
     'dog', 'frog', 'horse', 'ship', 'truck'
 ]
 
+CIFAR100_LABELS_LIST = [
+    'beaver', 'dolphin', 'otter', 'seal', 'whale',
+    'aquarium fish', 'flatfish', 'ray', 'shark', 'trout',
+    'orchids', 'poppies', 'roses', 'sunflowers', 'tulips',
+    'bottles', 'bowls', 'cans', 'cups', 'plates',
+    'apples', 'mushrooms', 'oranges', 'pears', 'sweet peppers',
+    'clock', 'computer keyboard', 'lamp', 'telephone', 'television',
+    'bed', 'chair', 'couch', 'table', 'wardrobe',
+    'bee', 'beetle', 'butterfly', 'caterpillar', 'cockroach',
+    'bear', 'leopard', 'lion', 'tiger', 'wolf',
+    'bridge', 'castle', 'house', 'road', 'skyscraper',
+    'cloud', 'forest', 'mountain', 'plain', 'sea',
+    'camel', 'cattle', 'chimpanzee', 'elephant', 'kangaroo',
+    'fox', 'porcupine', 'possum', 'raccoon', 'skunk',
+    'crab', 'lobster', 'snail', 'spider', 'worm',
+    'baby', 'boy', 'girl', 'man', 'woman',
+    'crocodile', 'dinosaur', 'lizard', 'snake', 'turtle',
+    'hamster', 'mouse', 'rabbit', 'shrew', 'squirrel',
+    'maple', 'oak', 'palm', 'pine', 'willow',
+    'bicycle', 'bus', 'motorcycle', 'pickup truck', 'train',
+    'lawn-mower', 'rocket', 'streetcar', 'tank', 'tractor'
+]
 
-class Cifar10FormatConverter(BaseFormatConverter):
+class_map = {
+    10: (CIFAR10_LABELS_LIST, 'labels'),
+    100: (CIFAR100_LABELS_LIST, 'fine_labels')
+}
+
+
+class CifarFormatConverter(BaseFormatConverter):
     """
     cifar10 dataset converter. All annotation converters should be derived from BaseFormatConverter class.
     """
 
     # register name for this converter
     # this name will be used for converter class look up
-    __provider__ = 'cifar10'
+    __provider__ = 'cifar'
     annotation_types = (ClassificationAnnotation, )
 
     @classmethod
@@ -55,10 +87,14 @@ class Cifar10FormatConverter(BaseFormatConverter):
                 optional=True,
                 default=False,
                 description="Allows to add background label to original labels and convert dataset "
-                            "for 11 classes instead 10"
             ),
             'dataset_meta_file': PathField(
                 description='path to json file with dataset meta (e.g. label_map, color_encoding', optional=True
+            ),
+            'num_classes': NumberField(
+                optional=True, default=10, value_type=int,
+                description='the number of classes in the dataset without background (10 or 100)'
+
             )
         })
 
@@ -71,10 +107,15 @@ class Cifar10FormatConverter(BaseFormatConverter):
         """
         self.data_batch_file = self.get_value_from_config('data_batch_file')
         self.has_background = self.get_value_from_config('has_background')
+        self.num_classes = self.get_value_from_config('num_classes')
         self.converted_images_dir = self.get_value_from_config('converted_images_dir')
         if not self.converted_images_dir:
             self.converted_images_dir = self.data_batch_file.parent / 'converted_images'
         self.convert_images = self.get_value_from_config('convert_images')
+        if self.convert_images and Image is None:
+            raise ValueError(
+                "conversion cifar images extraction requires Pillow installation, please install it before usage"
+            )
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
@@ -103,19 +144,23 @@ class Cifar10FormatConverter(BaseFormatConverter):
         annotation = []
         # read original dataset annotation
         annotation_dict = read_pickle(self.data_batch_file, encoding='latin1')
-        labels = annotation_dict['labels']
+        # Originally dataset labels start from 0, some networks can be trained with usage 1 as label start.
+        labels_offset = 0 if not self.has_background else 1
+        # crete metadata for dataset. Provided additional information is task specific and can includes, for example
+        # label_map, information about background, used class color representation (for semantic segmentation task)
+        # If your dataset does not have additional meta, you can to not provide it.
+        meta, label_names, labels_id = self.generate_meta(labels_offset)
+        labels = annotation_dict[labels_id]
         images = annotation_dict['data']
         images = images.reshape(images.shape[0], 3, 32, 32).astype(np.uint8)
         image_file = '{}_{}.png'
-        # Originally dataset labels start from 0, some networks can be trained with usage 1 as label start.
-        labels_offset = 0 if not self.has_background else 1
         num_iterations = len(labels)
         # convert each annotation object to ClassificationAnnotation
         for data_id, (label, feature) in enumerate(zip(labels, images)):
             # generate id of image which will be used for evaluation (usually name of file is used)
             # file name represented as {id}_{class}.png, where id is index of image in dataset,
             # label is text description of dataset class e.g. 1_cat.png
-            identifier = image_file.format(data_id, CIFAR10_LABELS_LIST[label])
+            identifier = image_file.format(data_id, label_names[label] if label_names else label)
             # Create representation for image. Provided parameters can be differ depends on task.
             # ClassificationAnnotation contains image identifier and label for evaluation.
             annotation.append(ClassificationAnnotation(identifier, label + labels_offset))
@@ -133,25 +178,21 @@ class Cifar10FormatConverter(BaseFormatConverter):
 
             if progress_callback is not None and data_id % progress_interval == 0:
                 progress_callback(data_id / num_iterations * 100)
-        # crete metadata for dataset. Provided additional information is task specific and can includes, for example
-        # label_map, information about background, used class color representation (for semantic segmentation task)
-        # If your dataset does not have additional meta, you can to not provide it.
-        meta = self.generate_meta(labels_offset)
 
         return ConverterReturn(annotation, meta, content_errors)
 
     def generate_meta(self, labels_offset):
-        labels = CIFAR10_LABELS_LIST
+        labels, labels_id = class_map.get(self.num_classes, ([], 'labels'))
         meta = {}
         if self.dataset_meta:
             meta = read_json(self.dataset_meta)
             if 'label_map' in meta:
                 meta['label_map'] = verify_label_map(meta['label_map'])
                 return meta
-            labels = meta.get('labels', CIFAR10_LABELS_LIST)
+            labels = meta.get('labels', labels)
         meta.update({'label_map': {label_id + labels_offset: label_name for label_id, label_name in enumerate(labels)}})
         if self.has_background:
             meta['label_map'][0] = 'background'
             meta['background_label'] = 0
 
-        return meta
+        return meta, labels, labels_id

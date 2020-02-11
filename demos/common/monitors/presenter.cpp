@@ -47,9 +47,13 @@ Presenter::Presenter(const std::string& keys, int yPos, cv::Size graphSize, std:
     Presenter{strKeysToMonitorSet(keys), yPos, graphSize, historySize} {}
 
 void Presenter::addRemoveMonitor(MonitorType monitor) {
-    int sampleStep = std::max(1, static_cast<int>(graphSize.width / historySize));
-    unsigned updatedHistorySize = (graphSize.width + sampleStep - 1) / sampleStep; // round up
-    updatedHistorySize = std::max(2u, updatedHistorySize);
+    unsigned updatedHistorySize = 1;
+    if (historySize > 1) {
+        int sampleStep = std::max(1, static_cast<int>(graphSize.width / (historySize - 1)));
+        // +1 to plot graphSize.width/sampleStep segments
+        // add round up to and an extra element if don't reach graph edge
+        updatedHistorySize = (graphSize.width + sampleStep - 1) / sampleStep + 1;
+    }
     switch(monitor) {
         case MonitorType::CpuAverage: {
             if (cpuMonitor.getHistorySize() > 1 && distributionCpuEnabled) {
@@ -127,8 +131,12 @@ void Presenter::drawGraphs(cv::Mat& frame) {
     int graphPos = std::max(0, (frame.cols - 1 - panelWidth) / 2);
     int textGraphSplittingLine = graphSize.height / 5;
     int graphRectHeight = graphSize.height - textGraphSplittingLine;
-    int sampleStep = std::max(1, static_cast<int>((graphSize.width + historySize - 1) / historySize)); // round up
-    unsigned possibleHistorySize = (graphSize.width + sampleStep - 1) / sampleStep; // round up
+    int sampleStep = 1;
+    unsigned possibleHistorySize = 1;
+    if (historySize > 1) {
+        sampleStep = std::max(1, static_cast<int>(graphSize.width / (historySize - 1)));
+        possibleHistorySize = (graphSize.width + sampleStep - 1) / sampleStep + 1;
+    }
 
     if (cpuMonitor.getHistorySize() > 1 && possibleHistorySize > 1 && --numberOfEnabledMonitors >= 0) {
         std::deque<std::vector<double>> lastHistory = cpuMonitor.getLastHistory();
@@ -166,7 +174,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
             cv::Point{(graphSize.width - textWidth) / 2, textGraphSplittingLine - 1},
             cv::FONT_HERSHEY_SIMPLEX,
             textGraphSplittingLine * 0.04,
-            {255, 0, 0},
+            {70, 0, 0},
             1);
         graphPos += graphSize.width + graphPadding;
     }
@@ -212,7 +220,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
             cv::Point{(graphSize.width - textWidth) / 2, textGraphSplittingLine - 1},
             cv::FONT_HERSHEY_SIMPLEX,
             textGraphSplittingLine * 0.04,
-            {0, 255, 0});
+            {0, 70, 0});
         graphPos += graphSize.width + graphPadding;
     }
 
@@ -261,7 +269,7 @@ void Presenter::drawGraphs(cv::Mat& frame) {
             cv::Point{(graphSize.width - textWidth) / 2, textGraphSplittingLine - 1},
             cv::FONT_HERSHEY_SIMPLEX,
             textGraphSplittingLine * 0.04,
-            {0, 255, 255});
+            {0, 35, 35});
     }
 }
 

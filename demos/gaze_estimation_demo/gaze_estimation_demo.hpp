@@ -22,19 +22,19 @@ static const char gaze_estimation_model_message[] = "Required. Path to an .xml f
 static const char face_detection_model_message[] = "Required. Path to an .xml file with a trained Face Detection model.";
 static const char head_pose_model_message[] = "Required. Path to an .xml file with a trained Head Pose Estimation model.";
 static const char facial_landmarks_model_message[] = "Required. Path to an .xml file with a trained Facial Landmarks Estimation model.";
-static const char plugin_message[] = "Plugin name. For example, CPU. If this parameter is specified, " \
+static const char plugin_message[] = "Plugin name. For example, CPU. If this parameter is specified, "
                                      "the demo will look for this plugin only.";
-static const char target_device_message[] = "Optional. Target device for Gaze Estimation network (the list of available devices is shown below). " \
-                                            "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+static const char target_device_message[] = "Optional. Target device for Gaze Estimation network (the list of available devices is shown below). "
+                                            "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                             "The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
-static const char target_device_message_fd[] = "Optional. Target device for Face Detection network (the list of available devices is shown below). " \
-                                               "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+static const char target_device_message_fd[] = "Optional. Target device for Face Detection network (the list of available devices is shown below). "
+                                               "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                "The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
-static const char target_device_message_hp[] = "Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). " \
-                                               "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+static const char target_device_message_hp[] = "Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). "
+                                               "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                "The demo will look for a suitable plugin for a specified device. Default value is \"CPU\".";
-static const char target_device_message_lm[] = "Optional. Target device for Facial Landmarks Estimation network " \
-                                               "(the list of available devices is shown below). Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+static const char target_device_message_lm[] = "Optional. Target device for Facial Landmarks Estimation network "
+                                               "(the list of available devices is shown below). Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                "The demo will look for a suitable plugin for device specified. Default value is \"CPU\".";
 static const char camera_resolution_message[] = "Optional. Set camera resolution in format WxH.";
 static const char performance_counter_message[] = "Optional. Enable per-layer performance report.";

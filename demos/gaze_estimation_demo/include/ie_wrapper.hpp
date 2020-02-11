@@ -51,7 +51,6 @@ private:
     std::string modelPath;
     std::string deviceName;
     InferenceEngine::Core& ie;
-    InferenceEngine::CNNNetReader netReader;
     InferenceEngine::CNNNetwork network;
     InferenceEngine::ExecutableNetwork executableNetwork;
     InferenceEngine::InferRequest request;

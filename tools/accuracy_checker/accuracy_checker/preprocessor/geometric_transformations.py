@@ -19,12 +19,15 @@ from collections import namedtuple
 
 import cv2
 import numpy as np
-from PIL import Image
 
 from ..config import ConfigError, NumberField, StringField, BoolField
 from ..preprocessor import Preprocessor
 from ..utils import get_size_from_config, string_to_tuple, get_size_3d_from_config
 
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 # The field .type should be string, the field .parameters should be dict
 GeometricOperationMetadata = namedtuple('GeometricOperationMetadata', ['type', 'parameters'])
@@ -39,8 +42,10 @@ class Flip(Preprocessor):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'mode' : StringField(choices=FLIP_MODES.keys(), default='horizontal',
-                                 description="Specifies the axis for flipping (vertical or horizontal).")
+            'mode': StringField(
+                choices=FLIP_MODES.keys(), default='horizontal',
+                description="Specifies the axis for flipping (vertical or horizontal)."
+            )
         })
         return parameters
 
@@ -87,6 +92,10 @@ class Crop(Preprocessor):
 
     def configure(self):
         self.use_pillow = self.get_value_from_config('use_pillow')
+        if self.use_pillow and Image is None:
+            raise ValueError(
+                'Crop operation with pillow backend, requires Pillow. Please install it or select default backend'
+            )
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
         self.central_fraction = self.get_value_from_config('central_fraction')
         if self.dst_height is None and self.dst_width is None and self.central_fraction is None:
@@ -302,11 +311,11 @@ class PointAligner(Preprocessor):
 
     @staticmethod
     def transformation_from_points(points1, points2):
-        points1 = np.matrix(points1.astype(np.float64))
-        points2 = np.matrix(points2.astype(np.float64))
+        points1 = points1.astype(np.float64)
+        points2 = points2.astype(np.float64)
 
-        c1 = np.mean(points1, axis=0)
-        c2 = np.mean(points2, axis=0)
+        c1 = np.mean(points1, axis=0, keepdims=True)
+        c2 = np.mean(points2, axis=0, keepdims=True)
         points1 -= c1
         points2 -= c2
         s1 = np.std(points1)
@@ -315,10 +324,10 @@ class PointAligner(Preprocessor):
         points2 /= np.maximum(s1, np.finfo(np.float64).eps)
         points_std_ratio = s2 / np.maximum(s1, np.finfo(np.float64).eps)
 
-        u, _, vt = np.linalg.svd(points1.T * points2)
-        r = (u * vt).T
+        u, _, vt = np.linalg.svd(points1.T @ points2)
+        r = (u @ vt).T
 
-        return np.hstack((points_std_ratio * r, c2.T - points_std_ratio * r * c1.T))
+        return np.hstack((points_std_ratio * r, c2.T - points_std_ratio * r @ c1.T))
 
 
 def center_padding(dst_width, dst_height, width, height):
@@ -531,6 +540,7 @@ class Crop3D(Preprocessor):
 
         return img[startz:endz, starty:endy, startx:endx, :]
 
+
 class TransformedCropWithAutoScale(Preprocessor):
     __provider__ = 'transformed_crop_with_auto_scale'
 
@@ -608,6 +618,7 @@ class TransformedCropWithAutoScale(Preprocessor):
         else:
             trans = cv2.getAffineTransform(np.float32(transformed_points), np.float32(points))
         return trans
+
 
 class ImagePyramid(Preprocessor):
     __provider__ = 'pyramid'

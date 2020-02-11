@@ -8,9 +8,6 @@
 #include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 #include <string>
 #include <memory>
 #include <limits>
@@ -562,13 +559,9 @@ int main(int argc, char* argv[]) {
 
         const auto video_path = FLAGS_i;
         const auto ad_model_path = FLAGS_m_act;
-        const auto ad_weights_path = fileNameNoExt(FLAGS_m_act) + ".bin";
         const auto fd_model_path = FLAGS_m_fd;
-        const auto fd_weights_path = fileNameNoExt(FLAGS_m_fd) + ".bin";
         const auto fr_model_path = FLAGS_m_reid;
-        const auto fr_weights_path = fileNameNoExt(FLAGS_m_reid) + ".bin";
         const auto lm_model_path = FLAGS_m_lm;
-        const auto lm_weights_path = fileNameNoExt(FLAGS_m_lm) + ".bin";
         const auto teacher_id = FLAGS_teacher_id;
 
         if (!FLAGS_teacher_id.empty() && !FLAGS_top_id.empty()) {
@@ -618,10 +611,6 @@ int main(int argc, char* argv[]) {
 
             /** Load extensions for the CPU device **/
             if ((device.find("CPU") != std::string::npos)) {
-#ifdef WITH_EXTENSIONS
-                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-#endif
-
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
@@ -648,7 +637,7 @@ int main(int argc, char* argv[]) {
         std::unique_ptr<AsyncDetection<DetectedAction>> action_detector;
         if (!ad_model_path.empty()) {
             // Load action detector
-            ActionDetectorConfig action_config(ad_model_path, ad_weights_path);
+            ActionDetectorConfig action_config(ad_model_path);
             action_config.deviceName = FLAGS_d_act;
             action_config.ie = ie;
             action_config.is_async = true;
@@ -663,7 +652,7 @@ int main(int argc, char* argv[]) {
         std::unique_ptr<AsyncDetection<detection::DetectedObject>> face_detector;
         if (!fd_model_path.empty()) {
             // Load face detector
-            detection::DetectorConfig face_config(fd_model_path, fd_weights_path);
+            detection::DetectorConfig face_config(fd_model_path);
             face_config.deviceName = FLAGS_d_fd;
             face_config.ie = ie;
             face_config.is_async = true;
@@ -682,7 +671,7 @@ int main(int argc, char* argv[]) {
         if (!fd_model_path.empty() && !fr_model_path.empty() && !lm_model_path.empty()) {
             // Create face recognizer
 
-            detection::DetectorConfig face_registration_det_config(fd_model_path, fd_weights_path);
+            detection::DetectorConfig face_registration_det_config(fd_model_path);
             face_registration_det_config.deviceName = FLAGS_d_fd;
             face_registration_det_config.ie = ie;
             face_registration_det_config.is_async = false;
@@ -690,7 +679,7 @@ int main(int argc, char* argv[]) {
             face_registration_det_config.increase_scale_x = static_cast<float>(FLAGS_exp_r_fd);
             face_registration_det_config.increase_scale_y = static_cast<float>(FLAGS_exp_r_fd);
 
-            CnnConfig reid_config(fr_model_path, fr_weights_path);
+            CnnConfig reid_config(fr_model_path);
             reid_config.deviceName = FLAGS_d_reid;
             if (checkDynamicBatchSupport(ie, FLAGS_d_reid))
                 reid_config.max_batch_size = 16;
@@ -698,7 +687,7 @@ int main(int argc, char* argv[]) {
                 reid_config.max_batch_size = 1;
             reid_config.ie = ie;
 
-            CnnConfig landmarks_config(lm_model_path, lm_weights_path);
+            CnnConfig landmarks_config(lm_model_path);
             landmarks_config.deviceName = FLAGS_d_lm;
             if (checkDynamicBatchSupport(ie, FLAGS_d_lm))
                 landmarks_config.max_batch_size = 16;

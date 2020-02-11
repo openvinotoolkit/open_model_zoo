@@ -346,7 +346,6 @@ class CaffeRefineStage(CaffeModelMixin, RefineBaseStage):
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs,  self.fit_to_input)
 
 
-
 class CaffeOutputStage(CaffeModelMixin, OutputBaseStage):
     def __init__(self,  model_info, preprocessor, launcher):
         super().__init__(model_info, preprocessor)
@@ -449,6 +448,33 @@ class MTCNNEvaluator(BaseEvaluator):
                 result_presenter.write_result(evaluated_metric, ignore_results_formatting)
 
         return self._metrics_results
+
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
+        if not self._metrics_results:
+            self.compute_metrics(False, ignore_results_formatting)
+
+        result_presenters = self.metrics_executor.get_metric_presenters()
+        extracted_results, extracted_meta = [], []
+        for presenter, metric_result in zip(result_presenters, self._metrics_results):
+            result, metadata = presenter.extract_result(metric_result)
+            if isinstance(result, list):
+                extracted_results.extend(result)
+                extracted_meta.extend(metadata)
+            else:
+                extracted_results.append(result)
+                extracted_meta.append(metadata)
+            if print_results:
+                presenter.write_result(metric_result, ignore_results_formatting)
+
+        return extracted_results, extracted_meta
+
+    def print_metrics_results(self, ignore_results_formatting=False):
+        if not self._metrics_results:
+            self.compute_metrics(True, ignore_results_formatting)
+            return
+        result_presenters = self.metrics_executor.get_metric_presenters()
+        for presenter, metric_result in zip(result_presenters, self._metrics_results):
+            presenter.write_result(metric_result, ignore_results_formatting)
 
     @classmethod
     def from_configs(cls, config):

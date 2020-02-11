@@ -95,7 +95,6 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
 
     cv::FileStorage fs(ids_list, cv::FileStorage::Mode::READ);
     cv::FileNode fn = fs.root();
-    int total_images = 0;
     int id = 0;
     for (cv::FileNodeIterator fit = fn.begin(); fit != fn.end(); ++fit) {
         cv::FileNode item = *fit;
@@ -123,7 +122,6 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
             if (status == RegistrationStatus::SUCCESS) {
                 embeddings.push_back(emb);
                 idx_to_id.push_back(id);
-                total_images++;
                 identities.emplace_back(embeddings, label, id);
                 ++id;
             }

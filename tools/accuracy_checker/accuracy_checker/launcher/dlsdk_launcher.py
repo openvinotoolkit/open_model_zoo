@@ -21,7 +21,6 @@ import os
 import platform
 import re
 import numpy as np
-from cpuinfo import get_cpu_info
 import openvino.inference_engine as ie
 
 from ..config import ConfigError, NumberField, PathField, StringField, DictField, ListField, BoolField, BaseField
@@ -38,6 +37,11 @@ from ..utils import (
 from .launcher import Launcher, LauncherConfigValidator
 from .model_conversion import convert_model, FrameworkParameters
 from ..logging import print_info
+
+try:
+    from cpuinfo import get_cpu_info
+except ImportError:
+    get_cpu_info = None
 
 
 HETERO_KEYWORD = 'HETERO:'
@@ -208,7 +212,8 @@ class DLSDKLauncher(Launcher):
             '_aocl': PathField(optional=True, description="path to aocl (FPGA only)"),
             '_vpu_log_level': StringField(
                 optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
-            )
+            ),
+            '_prev_bitstream': PathField(optional=True, description="path to bitstream from previous run (FPGA only)")
         })
 
         return parameters
@@ -349,20 +354,25 @@ class DLSDKLauncher(Launcher):
 
         bitstream = config.get('bitstream')
         if bitstream:
-            print_info('programming bitstream: {}'.format(bitstream.name))
-            aocl_executable = config.get('_aocl')
-            if aocl_executable:
-                subprocess.run([str(aocl_executable), 'program', 'acl0', str(bitstream)], check=True)
+            previous_bitstream = config.get('_prev_bitstream', '')
+            if str(previous_bitstream) != str(bitstream):
+                print_info('programming bitstream: {}'.format(bitstream.name))
+                aocl_executable = config.get('_aocl')
+                if aocl_executable:
+                    subprocess.run([str(aocl_executable), 'program', 'acl0', str(bitstream)], check=True)
+                    os.environ[FPGA_COMPILER_MODE_VAR] = '3'
+                    self._set_variable = True
+                else:
+                    aocx_variable = 'DLA_AOCX'
+                    previous_bitstream = os.environ.get(aocx_variable)
+                    if previous_bitstream == str(bitstream):
+                        return
+                    os.environ[aocx_variable] = str(bitstream)
+                    if not os.environ.get(aocx_variable):
+                        warning('Warning: {} has not been set'.format(aocx_variable))
+            else:
                 os.environ[FPGA_COMPILER_MODE_VAR] = '3'
                 self._set_variable = True
-            else:
-                aocx_variable = 'DLA_AOCX'
-                previous_bitstream = os.environ.get(aocx_variable)
-                if previous_bitstream == str(bitstream):
-                    return
-                os.environ[aocx_variable] = str(bitstream)
-                if not os.environ.get(aocx_variable):
-                    warning('Warning: {} has not been set'.format(aocx_variable))
 
     @staticmethod
     def get_cpu_extension(cpu_extensions, selection_mode):
@@ -373,6 +383,10 @@ class DLSDKLauncher(Launcher):
 
                 if extension_list:
                     return extension_list
+
+                if get_cpu_info is None:
+                    raise ValueError('CPU extensions automatic search requires pycpuinfo. '
+                                     'Please install it or set cpu extensions lib directly')
 
                 cpu_info_flags = get_cpu_info()['flags']
                 supported_flags = ['avx512', 'avx2', 'sse4_1', 'sse4_2']
@@ -521,9 +535,6 @@ class DLSDKLauncher(Launcher):
             diff_number = input_batch_size - data_batch_size
             filled_part = [data[-1]] * diff_number
             data = np.concatenate([data, filled_part])
-
-        if len(data.shape) > 1 and len(input_shape) > 1 and data.shape[1] != input_shape[1]:
-            data = data[:, :input_shape[1]]
 
         return data.reshape(input_shape)
 

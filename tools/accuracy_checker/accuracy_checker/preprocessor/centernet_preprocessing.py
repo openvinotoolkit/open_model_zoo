@@ -21,6 +21,7 @@ from ..config import NumberField
 from ..preprocessor import Preprocessor
 from ..utils import get_size_from_config
 
+
 class CenterNetAffineTransformation(Preprocessor):
     __provider__ = 'centernet_affine_transform'
 

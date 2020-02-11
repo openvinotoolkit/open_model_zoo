@@ -3,11 +3,11 @@
 ## Use Case and High-Level Description
 
 The `efficientnet-b7_auto_aug` model is one of the [EfficientNet](https://arxiv.org/abs/1905.11946)
-group of models designed to perform image classification, trained with
+models designed to perform image classification, trained with the
 [AutoAugmentation preprocessing](https://arxiv.org/abs/1805.09501).
 This model was pretrained in TensorFlow\*.
-All the EfficientNet models have been pretrained on the ImageNet image database.
-For details about this family of models, check out the [repository](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet).
+All the EfficientNet models have been pretrained on the ImageNet\* image database.
+For details about this family of models, check out the [TensorFlow Cloud TPU repository](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet).
 
 ## Example
 
@@ -31,7 +31,7 @@ For details about this family of models, check out the [repository](https://gith
 
 ## Input
 
-### Original model
+### Original Model
 
 Image, name - `image`,  shape - `[1x600x600x3]`, format is `[BxHxWxC]` where:
 
@@ -42,7 +42,7 @@ Image, name - `image`,  shape - `[1x600x600x3]`, format is `[BxHxWxC]` where:
 
 Channel order is `RGB`.
 
-### Converted model
+### Converted Model
 
 Image, name - `sub/placeholder_port_0`,  shape - `[1x600x600x3]`, format is `[BxHxWxC]` where:
 
@@ -55,19 +55,19 @@ Channel order is `BGR`.
 
 ## Output
 
-### Original model
+### Original Model
 
 Object classifier according to ImageNet classes, name - `logits`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in the [0, 1] range
 
-### Converted model
+### Converted Model
 
 Object classifier according to ImageNet classes, name - `efficientnet-b7/model/head/dense/MatMul`,  shape - `1,1000`, output data format is `B,C` where:
 
 - `B` - batch size
-- `C` - predicted probabilities for each class in  [0, 1] range
+- `C` - predicted probabilities for each class in the [0, 1] range
 
 ## Legal Information
 

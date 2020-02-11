@@ -46,6 +46,7 @@ Options:
     -no_show                     Optional. If it is true, then detected text will not be shown on image frame. By default, it is false.
     -r                           Optional. Output Inference results as raw values.
     -u                           Optional. List of monitors to show initially.
+    -b                           Optional. Bandwidth for CTC beam search decoder. Default value is 0, in this case CTC greedy decoder will be used.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
