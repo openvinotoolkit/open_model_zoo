@@ -25,7 +25,7 @@ git apply path/to/freeze.py.patch
 4. Download the [pretrained weights](http://download.tensorflow.org/models/inception_v1_2016_08_28.tar.gz)
 5. Install the dependencies:
 ```sh
-pip install "tensorflow>=1.0.0,<2.0.0"
+pip install tensorflow==1.14.0
 ```
 6. Run
 ```sh
