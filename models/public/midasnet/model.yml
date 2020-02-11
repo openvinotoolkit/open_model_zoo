@@ -47,6 +47,8 @@ conversion_to_onnx_args:
   - --output-names=inverse_depth
 model_optimizer_args:
   - --input=image
+  - --mean_values=image[123.675,116.28,103.53]
+  - --scale_values=image[51.525,50.4,50.625]
   - --reverse_input_channels
   - --output=inverse_depth
   - --input_model=$conv_dir/midasnet.onnx

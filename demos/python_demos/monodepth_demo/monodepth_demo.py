@@ -73,11 +73,9 @@ def main():
         log.info("Image is resized from {} to {}".format(
             image.shape[:-1], (height, width)))
         image = cv2.resize(image, (width, height), cv2.INTER_CUBIC)
-
-    # normalization (B, G, R)
-    image = image.astype(np.float32) / 255
-    image = (image - [0.406, 0.456, 0.485]) / [0.225, 0.224, 0.229]
-
+    
+    # prepare input
+    image = image.astype(np.float32)
     image = image.transpose((2, 0, 1))
     image_input = np.expand_dims(image, 0)
 
