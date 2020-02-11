@@ -6,7 +6,7 @@ This demo demonstrates how to run Multi Camera Multi Person demo using OpenVINO<
 
 The demo expects the next models in the Intermediate Representation (IR) format:
 
-   * Person detection model
+   * Person detection model (or person instance segmentation model)
    * Person re-identification model
 
 It can be your own models or pre-trained model from OpenVINO Open Model Zoo.
