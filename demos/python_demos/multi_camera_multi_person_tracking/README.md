@@ -20,7 +20,8 @@ As input, the demo application takes:
 
 The demo workflow is the following:
 
-1. The demo application reads tuples of frames from web cameras/videos one by one. For each frame in tuple it runs person detector
+1. The demo application reads tuples of frames from web cameras/videos one by one.
+For each frame in tuple it runs person detector
 and then for each detected object it extracts embeddings using re-identification model.
 2. All embeddings are passed to tracker which assigns an ID to each object.
 3. The demo visualizes the resulting bounding boxes and unique object IDs assigned during tracking.
@@ -41,18 +42,18 @@ Run the application with the `-h` option to see the following usage message:
 
 ```
 usage: multi_camera_multi_person_tracking.py [-h] -i I [I ...]
+                                             [--config CONFIG]
                                              [--detections DETECTIONS [DETECTIONS ...]]
-                                             -m M_DETECTOR
+                                             [-m M_DETECTOR]
                                              [--t_detector T_DETECTOR]
                                              [--m_segmentation M_SEGMENTATION]
                                              [--t_segmentation T_SEGMENTATION]
-                                             [--m_orientation M_ORIENTATION]
-                                             [--t_orientation T_ORIENTATION]
                                              --m_reid M_REID
                                              [--output_video OUTPUT_VIDEO]
-                                             [--config CONFIG]
                                              [--history_file HISTORY_FILE]
-                                             [-d DEVICE] [-l CPU_EXTENSION]
+                                             [--no_show] [-d DEVICE]
+                                             [-l CPU_EXTENSION]
+
 
 Multi camera multi person tracking live demo script
 
@@ -60,29 +61,29 @@ optional arguments:
   -h, --help            show this help message and exit
   -i I [I ...]          Input sources (indexes of cameras or paths to video
                         files)
+  --config CONFIG       Configuration file
   --detections DETECTIONS [DETECTIONS ...]
-                        Json files with detections
+                        JSON files with detections
   -m M_DETECTOR, --m_detector M_DETECTOR
                         Path to the person detection model
   --t_detector T_DETECTOR
                         Threshold for the person detection model
   --m_segmentation M_SEGMENTATION
-                        Path to the instance segmentation model
+                        Path to the person instance segmentation model
   --t_segmentation T_SEGMENTATION
                         Threshold for person instance segmentation model
-  --m_orientation M_ORIENTATION
-                        Path to the people orientation classification model
-  --t_orientation T_ORIENTATION
-                        Confidence threshold for people orientation clissifier
-  --m_reid M_REID       Path to the person reidentification model
+  --m_reid M_REID       Path to the person re-identification model
   --output_video OUTPUT_VIDEO
-  --config CONFIG
+                        Optional. Path to output video
   --history_file HISTORY_FILE
+                        Optional. Path to file in JSON format to save results
+                        of the demo
+  --no_show             Optional. Don't show output
   -d DEVICE, --device DEVICE
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         MKLDNN (CPU)-targeted custom layers.Absolute path to a
                         shared library with the kernels impl.
-  --no_show             Optional. Don't show output
+
 ```
 Minimum command examples to run the demo:
 
@@ -91,20 +92,29 @@ Minimum command examples to run the demo:
 python multi_camera_multi_person_tracking.py \
     -i path/to/video_1.avi path/to/video_2.avi \
     -d path/to/person-detection-retail-0013.xml \
-    -r path/to/person-reidentification-retail-0076.xml \
+    -r path/to/person-reidentification-retail-0103.xml \
+    --config config.py
+
+# videos with instance segmentation model
+python multi_camera_multi_person_tracking.py \
+    -i path/to/video_1.avi path/to/video_2.avi \
+    -d path/to/instance-segmentation-security-0050.xml \
+    -r path/to/person-reidentification-retail-0107.xml \
     --config config.py
 
 # web-cameras
 python multi_camera_multi_person_tracking.py \
     -i 0 1 \
     -d path/to/person-detection-retail-0013.xml \
-    -r path/to/person-reidentification-retail-0076.xml \
+    -r path/to/person-reidentification-retail-0103.xml \
     --config config.py
 ```
 
 ## Demo Output
 
 The demo displays bounding boxes of tracked objects and unique IDs of those objects.
-To save output video with the result please use the option  `--output_video`, to change configuration parameters please open the `config.py` file and edit it.
+To save output video with the result please use the option  `--output_video`,
+to change configuration parameters please open the `config.py` file and edit it.
 
-Also demo can dump resulting tracks to a json file. To specify the file use the `--history_file` argument.
+Also demo can dump resulting tracks to a json file. To specify the file use the
+`--history_file` argument.
