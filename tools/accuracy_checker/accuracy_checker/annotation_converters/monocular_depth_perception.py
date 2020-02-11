@@ -29,10 +29,6 @@ class ReDWebDatasetConverter(DirectoryBasedAnnotationConverter):
 
                 images_list.append(get_path(self.data_dir / parts[0]))
 
-                # TODO: remove (used for debugging)
-                # if i == 2:
-                #     break
-
         relative_depth_prefix = 'RDs'
         content_errors = [] if check_content else None
         num_iterations = len(images_list)
