@@ -84,10 +84,11 @@ class SegmentationAnnotation(SegmentationRepresentation):
     def _load_mask(self):
         if self._mask is None:
             loader_config = self.LOADERS.get(self._mask_loader)
+            data_source = self.metadata.get('segmentation_masks_source', self.metadata['data_source'])
             if isinstance(loader_config, str):
-                loader = BaseReader.provide(loader_config, self.metadata['data_source'])
+                loader = BaseReader.provide(loader_config, data_source)
             else:
-                loader = BaseReader.provide(loader_config['type'], self.metadata['data_source'], config=loader_config)
+                loader = BaseReader.provide(loader_config['type'], data_source, config=loader_config)
             if self._mask_loader == GTMaskLoader.PILLOW:
                 loader.convert_to_rgb = False
             mask = loader.read(self._mask_path)

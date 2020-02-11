@@ -41,6 +41,7 @@ class DatasetConfig(ConfigValidator):
     subsample_size = BaseField(optional=True)
     subsample_seed = NumberField(value_type=int, min_value=0, optional=True)
     analyze_dataset = BaseField(optional=True)
+    segmentation_masks_source = PathField(is_directory=True, optional=True)
 
 
 class Dataset:
@@ -207,19 +208,11 @@ class Dataset:
 
         return list(subsample_set)
 
-    @staticmethod
-    def set_image_metadata(annotation, images):
-        image_sizes = []
-        data = images.data
-        if not isinstance(data, list):
-            data = [data]
-        for image in data:
-            image_sizes.append(image.shape)
-        annotation.set_image_size(image_sizes)
-
     def set_annotation_metadata(self, annotation, image, data_source):
-        self.set_image_metadata(annotation, image.data)
+        set_image_metadata(annotation, image.data)
         annotation.set_data_source(data_source)
+        segmentation_mask_source = self.config.get('segmentation_masks_source')
+        annotation.metadata['segmentation_masks_source'] = segmentation_mask_source
 
     def _load_meta(self):
         meta_data_file = self._config.get('dataset_meta')
@@ -279,6 +272,8 @@ class DatasetWrapper:
             for annotation, input_data in zip(batch_annotation, batch_input):
                 set_image_metadata(annotation, input_data)
                 annotation.metadata['data_source'] = self.data_reader.data_source
+                segmentation_mask_source = self.annotation_reader.config.get('segmentation_masks_source')
+                annotation.metadata['segmentation_masks_source'] = segmentation_mask_source
             return batch_annotation_ids, batch_annotation, batch_input, batch_identifiers
         batch_start = item * self.batch
         batch_end = min(self.size, batch_start + self.batch)
