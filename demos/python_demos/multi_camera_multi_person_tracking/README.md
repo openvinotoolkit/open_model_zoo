@@ -110,6 +110,23 @@ python multi_camera_multi_person_tracking.py \
     --config config.py
 ```
 
+The demo can use file in JSON format with detections instead person detector.
+Structure of this file should be the next:
+```
+[
+    {
+        'frame_id': 0
+        'boxes': [[x0, y0, x1, y1], [x0, y0, x1, y1], ...]  # N bounding boxes
+        'scores': [score0, score1, ...]  # N scores
+    },
+    {
+        'frame_id': 1
+        'boxes': [[x0, y0, x1, y1], [x0, y0, x1, y1], ...]
+        'scores': [score0, score1, ...]
+    }
+]
+```
+
 ## Demo Output
 
 The demo displays bounding boxes of tracked objects and unique IDs of those objects.
