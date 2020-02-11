@@ -47,6 +47,7 @@ Options:
     -duplicate_num               Optional. Enable and specify number of channel additionally copied from real sources
     -real_input_fps              Optional. Disable input frames caching, for maximum throughput pipeline
     -i                           Optional. Specify full path to input video files
+    -loop_video                  Optional. Enable playing video on a loop.
     -u                           Optional. List of monitors to show initially.
 ```
 
