@@ -590,7 +590,7 @@ class DLSDKLauncher(Launcher):
             self.ie_core.add_extension(str(cpu_extensions), 'CPU')
         gpu_extensions = self.config.get('gpu_extensions')
         if gpu_extensions and 'GPU' in self._devices_list():
-            self.ie_core.add_extension(str(gpu_extensions), 'GPU')
+            self.ie_core.set_config({'CONFIG_FILE': str(gpu_extensions)}, 'GPU')
         if self._is_vpu():
             log_level = self.config.get('_vpu_log_level')
             if log_level:
