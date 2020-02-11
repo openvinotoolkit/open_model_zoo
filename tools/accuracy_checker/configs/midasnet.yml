@@ -10,13 +10,6 @@ models:
         adapter: mono_depth
     datasets:
       - name: ReDWeb_V1
-        # data_source, annotation_conversion and annotation should be moved to dataset_definitions.yml
-        data_source: ReDWeb_V1
-        annotation_conversion:
-          converter: redweb
-          data_dir: ReDWeb_V1
-          annotation_file: ReDWeb_validation_360.txt
-        annotation: mono_depth.pickle
         preprocessing:
           - type: resize
             size: 384
