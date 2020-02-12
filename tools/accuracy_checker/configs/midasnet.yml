@@ -4,9 +4,8 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        # path to IR relative to open_model_zoo/models for FP32/FP16 converted precisions
-        model: /code/open_model_zoo/tools/downloader/public/midasnet/FP32/midasnet.xml
-        weights: /code/open_model_zoo/tools/downloader/public/midasnet/FP32/midasnet.bin
+        model: public/midasnet/FP32/midasnet.xml
+        weights: public/midasnet/FP32/midasnet.bin
         adapter: mono_depth
     datasets:
       - name: ReDWeb_V1
