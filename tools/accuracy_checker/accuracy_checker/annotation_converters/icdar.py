@@ -28,7 +28,7 @@ def strip(text):
     if text.lower().endswith("'s"):
         text = text[:-2]
     text = text.strip('-')
-    for c in "'!?.:,*\"()·[]/":
+    for c in "'!?.:,*\"()\N{MIDDLE DOT}[]/":
         text = text.replace(c, ' ')
     text = text.strip()
 
@@ -44,13 +44,16 @@ def is_word(text):
     if len(text) < 3:
         return False
 
-    forbidden_symbols = "×÷·"
+    forbidden_symbols = "\N{MULTIPLICATION SIGN}\N{DIVISION SIGN}\N{GREEK ANO TELEIA}"
 
     range1 = [ord(u'a'), ord(u'z')]
     range2 = [ord(u'A'), ord(u'Z')]
-    range3 = [ord(u'À'), ord(u'ƿ')]
-    range4 = [ord(u'Ǆ'), ord(u'ɿ')]
-    range5 = [ord(u'Ά'), ord(u'Ͽ')]
+    range3 = [ord(u'\N{LATIN CAPITAL LETTER A WITH GRAVE}'),
+              ord(u'\N{LATIN LETTER WYNN}')]
+    range4 = [ord(u'\N{LATIN CAPITAL LETTER DZ WITH CARON}'),
+              ord(u'\N{LATIN SMALL LETTER REVERSED R WITH FISHHOOK}')]
+    range5 = [ord(u'\N{GREEK CAPITAL LETTER ALPHA WITH TONOS}'),
+              ord(u'\N{GREEK CAPITAL REVERSED DOTTED LUNATE SIGMA SYMBOL}')]
     range6 = [ord(u'-'), ord(u'-')]
 
     for char in text:
