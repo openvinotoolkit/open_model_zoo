@@ -89,7 +89,7 @@ def try_download(reporter, file, num_attempts, start_download, size):
 
     return False
 
-def verify_hash(reporter, file, expected_hash, path, model_name):
+def verify_hash(reporter, file, expected_hash, path):
     actual_hash = hashlib.sha256()
     while True:
         chunk = file.read(1 << 20)
@@ -163,7 +163,7 @@ def try_update_cache(reporter, cache, hash, source):
     except Exception:
         reporter.log_warning('Failed to update the cache', exc_info=True)
 
-def try_retrieve(reporter, name, destination, model_file, cache, num_attempts, start_download):
+def try_retrieve(reporter, destination, model_file, cache, num_attempts, start_download):
     destination.parent.mkdir(parents=True, exist_ok=True)
 
     if try_retrieve_from_cache(reporter, cache, [[model_file.sha256, destination]]):
@@ -255,7 +255,7 @@ def main():
 
                 destination = output / model_file.name
 
-                if not try_retrieve(model_file_reporter, model.name, destination, model_file, cache, args.num_attempts,
+                if not try_retrieve(model_file_reporter, destination, model_file, cache, args.num_attempts,
                         lambda: model_file.source.start_download(session, CHUNK_SIZE)):
                     shutil.rmtree(str(output))
                     failed_models.add(model.name)
