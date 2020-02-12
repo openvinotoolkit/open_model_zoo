@@ -64,7 +64,7 @@ class Launcher(ClassProvider):
 
     __provider_type__ = 'launcher'
 
-    def __init__(self, config_entry, model_name, *args, **kwargs):
+    def __init__(self, config_entry, *args, model_name='', **kwargs):
         self._model_name = model_name
         self.config = config_entry
         self.default_layout = 'NCHW'
@@ -177,7 +177,7 @@ def unsupported_launcher(name, error_message=None):
     return UnsupportedLauncher
 
 
-def create_launcher(launcher_config, model_name, delayed_model_loading=False):
+def create_launcher(launcher_config, model_name='', delayed_model_loading=False):
     """
     Args:
         launcher_config: launcher configuration file entry.
@@ -195,4 +195,4 @@ def create_launcher(launcher_config, model_name, delayed_model_loading=False):
     launcher_config_validator.validate(launcher_config)
     config_framework = launcher_config['framework']
 
-    return Launcher.provide(config_framework, launcher_config, model_name, delayed_model_loading=delayed_model_loading)
+    return Launcher.provide(config_framework, launcher_config, model_name=model_name, delayed_model_loading=delayed_model_loading)
