@@ -24,8 +24,8 @@ description: >-
 task_type: mono_depth
 files:
   - name: midasnet.py
-    size: 6464
-    sha256: a3680912f1e6839b5bc4d4684e78b2a8f5f669125ee86aff81b53dbe8d635a12
+    size: 6452
+    sha256: f3825b6954e4f43a41e0af9f20899ea74fa6b224b8360f7d2e02c45b8895afde
     source:
       $type: google_drive
       id: 1fL_UDsZ8pFUN3QnXqMF4BReVZmfmrKBj
