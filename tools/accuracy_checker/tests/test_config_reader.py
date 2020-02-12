@@ -132,7 +132,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'Missing local config'
 
     def test_missed_models_in_local_config_raises_value_error_exception(self, mocker):
@@ -143,7 +143,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'Accuracy Checker not_models mode is not supported. Please select between evaluations, models, pipelines'
 
     def test_empty_models_in_local_config_raises_value_error_exception(self, mocker):
@@ -154,7 +154,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'Missed "{}" in local config'.format('models')
 
     def test_missed_name_in_model_raises_value_error_exception(self, mocker):
@@ -165,7 +165,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'Each model must specify {}'.format(', '.join(['name', 'launchers', 'datasets']))
 
     def test_missed_launchers_in_model_raises_value_error_exception(self, mocker):
@@ -176,7 +176,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'Each model must specify {}'.format(', '.join(['name', 'launchers', 'datasets']))
 
     def test_missed_datasets_in_model_raises_value_error_exception(self, mocker):
@@ -187,7 +187,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'Each model must specify {}'.format(', '.join(['name', 'launchers', 'datasets']))
 
     def test_invalid_model_raises_value_error_exception(self, mocker):
@@ -198,7 +198,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'Each model must specify {}'.format(', '.join(['name', 'launchers', 'datasets']))
 
     def test_empty_pipeline_in_local_config_raises_value_error_exception(self, mocker):
@@ -209,7 +209,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'Missed "{}" in local config'.format('pipelines')
 
     def test_missed_name_in_pipeline_raises_value_error_exception(self, mocker):
@@ -220,7 +220,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'Each pipeline must specify {}'.format(', '.join(['name', 'stages']))
 
     def test_missed_stages_in_pipeline_raises_value_error_exception(self, mocker):
@@ -231,7 +231,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'Each pipeline must specify {}'.format(', '.join(['name', 'stages']))
 
     def test_invalid_pipeline_raises_value_error_exception(self, mocker):
@@ -242,7 +242,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'Each pipeline must specify {}'.format(', '.join(['name', 'stages']))
 
     def test_pipeline_empty_stages_raises_value_error_exception(self, mocker):
@@ -253,7 +253,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'Each pipeline must specify {}'.format(', '.join(['name', 'stages']))
 
     def test_pipeline_first_stage_does_not_contain_dataset_raises_value_error_exception(self, mocker):
@@ -266,7 +266,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'First stage should contain dataset'
 
     def test_pipeline_contains_several_datasets_raises_value_error_exception(self, mocker):
@@ -293,7 +293,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'Exactly one dataset per pipeline is supported'
 
     def test_pipeline_without_launchers_raises_value_error_exception(self, mocker):
@@ -313,7 +313,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'Launchers are not specified'
 
     def test_pipeline_without_metrics_raises_value_error_exception(self, mocker):
@@ -332,7 +332,7 @@ class TestConfigReader:
         with pytest.raises(ConfigError) as exception:
             ConfigReader.merge(self.arguments)
 
-        error_message = str(exception).split(sep=': ')[-1]
+        error_message = str(exception.value).split(sep=': ')[-1]
         assert error_message == 'Metrics are not specified'
 
     def test_merge_datasets_with_definitions(self, mocker):
