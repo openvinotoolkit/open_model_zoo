@@ -755,15 +755,18 @@ class DLSDKLauncher(Launcher):
         self.load_network(log=log)
 
     def automatic_model_search(self, model_dir):
-        models_list =list(Path(model_dir).glob('{}.xml'.format(self._model_name)))
+        models_list = list(Path(model_dir).glob('{}.xml'.format(self._model_name)))
         if not models_list:
-            models_list = list(Path(model_dir).glob('*.xml'.format(self._model_name)))
+            models_list = list(Path(model_dir).glob('*.xml'))
         if not models_list:
             raise ConfigError('Suitable model is not detected')
         if len(models_list) != 1:
             raise ConfigError('Several suitable models found, please specify required model')
-        weights = models_list[0].parent / (models_list[0].name.split('xml')[0] + 'bin')
-        return models_list[0] , weights
+        model = models_list[0]
+        weights = model.parent / model.name.replace('xml', 'bin')
+        print_info('Found model {}'.format(model))
+        print_info('Found weights {}'.format(get_path(weights)))
+        return model, weights
 
     @staticmethod
     def create_ie_network(model_xml, model_bin):

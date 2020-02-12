@@ -195,4 +195,7 @@ def create_launcher(launcher_config, model_name='', delayed_model_loading=False)
     launcher_config_validator.validate(launcher_config)
     config_framework = launcher_config['framework']
 
-    return Launcher.provide(config_framework, launcher_config, model_name=model_name, delayed_model_loading=delayed_model_loading)
+    return Launcher.provide(
+        config_framework, launcher_config,
+        model_name=model_name, delayed_model_loading=delayed_model_loading
+    )
