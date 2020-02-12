@@ -13,12 +13,9 @@ For more information about the pre-trained models, refer to the [model documenta
 
 ## How It Works
 
-On the start-up, the application reads command line parameters and loads one network to the Inference Engine for execution. 
-It might take some time for demo to read all input images.
-Then the demo performs inference of classification on images and places them on grid.
+On the start-up, the application reads command line parameters and loads a classification network to the Inference Engine for execution. It might take some time for demo to read all input images. Then the demo performs inference of classification on images and places them on grid.
 
-The demo starts in "Testing mode" with fixed grid size. After calculating the average FPS result, it will switch to
-normal mode and grid will be readjusted depending on model performance. Bigger grid means higher performance.
+The demo starts in "Testing mode" with fixed grid size. After calculating the average FPS result, it will switch to normal mode and grid will be readjusted depending on model performance. Bigger grid means higher performance.
 
 The text above each image shows whether the classification was correct: green means correct class prediction, red means wrong.
 
@@ -55,12 +52,7 @@ Options:
     -u                        Optional. List of monitors to show initially.
 ```
 
-The number of InferRequests is specified by -nireq flag.
-Each InferRequest acts as a "buffer": it waits in queue before being filled with images and sent for inference, then after
-the inference completes, it waits in queue before its results would be processed.
-Increasing the number of InferRequests usually increases performance, because in that case multiple InferRequests can be
-processed simultaneously if the device supports parallelization.
-However, big number of InferRequests increases latency because each image still needs to wait in queue.
+The number of InferRequests is specified by -nireq flag. Each InferRequest acts as a "buffer": it waits in queue before being filled with images and sent for inference, then after the inference completes, it waits in queue before its results would be processed. Increasing the number of InferRequests usually increases performance, because in that case multiple InferRequests can be processed simultaneously if the device supports parallelization. However, big number of InferRequests increases latency because each image still needs to wait in queue.
 
 For higher FPS, using nireq which slightly exceeds nstreams value summed over all used devices is recommended.
 
@@ -81,15 +73,14 @@ For example, use the following command line command to run the application:
 
 ## Demo Output
 
-The demo uses OpenCV to display the resulting image grid with classification results presented as a text above images.
-After the completion, it prints average metrics values to the console.
+The demo uses OpenCV to display the resulting image grid with classification results presented as a text above images. After the completion, it prints average metrics values to the console.
 
 ## Required files
 
-If you want to see classification results, you must use "-gt" and "-labels" flags to specify two .txt files
-containing lists of classes and labels.
+If you want to see classification results, you must use "-gt" and "-labels" flags to specify two .txt files containing lists of classes and labels.
 
 "Ground truth" file is used for matching image file names with correct object classes.
+
 It has the following format:
 
 ./ILSVRC2012_val_00000001.JPEG 65
@@ -100,10 +91,10 @@ It has the following format:
 
 ...
 
-Class index values must be in range from 0 to 1000. If you want to use "other" class, which is supported only by a small 
-subset of models, specify it with -1 index.
+Class index values must be in range from 0 to 1000. If you want to use "other" class, which is supported only by a small subset of models, specify it with -1 index.
 
 ["Labels" file](./synset_words.txt) contains the list of human-readable labels, one line for each class.
+
 It has the following format:
 
 n01440764 tench, Tinca tinca

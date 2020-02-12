@@ -14,28 +14,31 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core/core.hpp>
 
-using ImageInfoList = std::list<std::tuple<cv::Mat, std::string, int>>;
+enum class PredictionResult { Correct,
+                              Incorrect,
+                              Unknown };
+using ImageInfoList = std::list<std::tuple<cv::Mat, std::string, PredictionResult>>;
 
 class GridMat {
 public:
     cv::Mat outImg;
-    cv::Size size;
 
     explicit GridMat(Presenter& presenter,
                      const cv::Size maxDisp = cv::Size{1920, 1080},
                      const cv::Size aspectRatio = cv::Size{16, 9},
                      double targetFPS = 60
                      ):
-                     currSourceID{0} {
+                     currSourceId{0} {
         targetFPS = std::max(targetFPS, static_cast<double>(FLAGS_b));
-        size = cv::Size(static_cast<int>(std::round(sqrt(1. * targetFPS * aspectRatio.width / aspectRatio.height))),
+        cv::Size size = cv::Size(static_cast<int>(
+                                    std::round(sqrt(1. * targetFPS * aspectRatio.width / aspectRatio.height))),
                         static_cast<int>(std::round(sqrt(1. * targetFPS * aspectRatio.height / aspectRatio.width))));
         int minCellSize = std::min(maxDisp.width / size.width, maxDisp.height / size.height);
         cellSize = cv::Size(minCellSize, minCellSize);
 
         for (int i = 0; i < size.width; i++) {
             for (int j = 0; j < size.height; j++) {
-                points.push_back({cellSize.width * i, presenter.graphSize.height + cellSize.height * j});
+                points.emplace_back(cellSize.width * i, presenter.graphSize.height + cellSize.height * j);
             }
         }
 
@@ -90,40 +93,48 @@ public:
     }
 
     void updateMat(ImageInfoList& imageInfos) {
+        ImageInfoList imagesToDraw;
         if (!imageInfos.empty()) {
             imagesToDraw.splice(imagesToDraw.end(), imageInfos);
+        }
+
+        if (!prevImgs.empty()) {
+            int prevSourceId = currSourceId - FLAGS_b;
+            if (prevSourceId < 0) {
+                prevSourceId += points.size();
+            }
+            for (size_t i = 0; i < prevImgs.size(); i++, prevSourceId++) {
+                if (size_t(prevSourceId) >= points.size()) {
+                    prevSourceId -= points.size();
+                }
+
+                prevImgs.front().copyTo(outImg(cv::Rect(points[prevSourceId], cellSize)));
+                prevImgs.pop();
+            }   
         }
 
         while (!imagesToDraw.empty()) {
             cv::Mat frame = std::get<0>(imagesToDraw.front());
             std::string predictedLabel = std::get<1>(imagesToDraw.front());
-            int predictionResult = std::get<2>(imagesToDraw.front());
+            PredictionResult predictionResult = std::get<2>(imagesToDraw.front());
+            imagesToDraw.pop_front();
 
             cv::Scalar textColor;
             switch (predictionResult) {
-                case 1:
-                    textColor = cv::Scalar(75, 255, 75); break; // green
-                case -1:
-                    textColor = cv::Scalar(50, 50, 255); break; // red
+                case PredictionResult::Correct:
+                    textColor = cv::Scalar(75, 255, 75); break;     // green
+                case PredictionResult::Incorrect:
+                    textColor = cv::Scalar(50, 50, 255); break;     // red
+                case PredictionResult::Unknown:
+                    textColor = cv::Scalar(75, 255, 255); break;    // yellow
                 default:
-                    textColor = cv::Scalar(75, 255, 255); // yellow
+                    throw std::runtime_error("Undefined type of prediction result");
             }
-
-            imagesToDraw.pop_front();
-            if (prevImgs.size() >= FLAGS_b && points.size() > 1) {
-                int prevSourceID = currSourceID - FLAGS_b;
-                if (prevSourceID < 0) {
-                    prevSourceID += points.size();
-                }
-                prevImgs.front().copyTo(outImg(cv::Rect(points[prevSourceID], cellSize)));
-                prevImgs.pop();
-            }
-            
-            cv::resize(frame, frame, cellSize);
 
             int labelThickness = cellSize.width / 20;
             cv::Size labelTextSize = cv::getTextSize(predictedLabel, fontType, 1, 2, &baseline);
             double labelFontScale = static_cast<double>(cellSize.width - 2*labelThickness) / labelTextSize.width;
+            cv::resize(frame, frame, cellSize);
             cv::putText(frame,
                         predictedLabel,
                         cv::Point(labelThickness, cellSize.height - labelThickness - labelTextSize.height),
@@ -131,29 +142,22 @@ public:
             
             prevImgs.push(frame);
 
-            cv::Mat tmpFrame = frame.clone();
-            cv::rectangle(tmpFrame,
-                          {0, 0}, {frame.cols, frame.rows},
-                          cv::Scalar(255, 50, 50),
-                          labelThickness);
-            cv::resize(tmpFrame,
-                       outImg(cv::Rect(points[currSourceID], cellSize)),
-                       cellSize);
+            cv::Mat cell = outImg(cv::Rect(points[currSourceId], cellSize));                                         
+            frame.copyTo(cell);                                                                                      
+            cv::rectangle(cell, {0, 0}, {frame.cols, frame.rows}, {255, 50, 50}, labelThickness);
             
-
-            if (currSourceID == points.size() - 1) {
-                currSourceID = 0;
+            if (currSourceId == points.size() - 1) {
+                currSourceId = 0;
             } else {
-                currSourceID++;
+                currSourceId++;
             }
         }
     }
 
 private:
     std::queue<cv::Mat> prevImgs;
-    std::list<std::tuple<cv::Mat, std::string, int>> imagesToDraw;
     cv::Size cellSize;
-    size_t currSourceID;
+    size_t currSourceId;
     std::vector<cv::Point> points;
     int fontType;
     double fontScale;
