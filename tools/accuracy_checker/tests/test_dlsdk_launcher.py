@@ -491,10 +491,10 @@ class TestDLSDKLauncher:
         prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
-            'input_model': '/path/to/source_models/custom_model',
+            'input_model': str(Path('/path/to/source_models/custom_model')),
             'model_name': 'custom_model',
             'framework': 'tf',
-            'tensorflow_use_custom_operations_config': 'config/dir/ssd_v2_support.json'
+            'tensorflow_use_custom_operations_config': str(Path('config/dir/ssd_v2_support.json'))
         }
 
         mocker.patch(
@@ -502,7 +502,8 @@ class TestDLSDKLauncher:
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         DLSDKLauncher(config)
-        prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
+        mo_path = str(Path('/path/ModelOptimizer'))
+        prepare_args_patch.assert_called_once_with(mo_path, flag_options=[], value_options=args)
 
     def test_model_converted_from_tf_with_default_path_to_custom_tf_config(self, mocker):
         config = {
@@ -517,10 +518,10 @@ class TestDLSDKLauncher:
         prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
-            'input_model': '/path/to/source_models/custom_model',
+            'input_model': str(Path('/path/to/source_models/custom_model')),
             'model_name': 'custom_model',
             'framework': 'tf',
-            'tensorflow_use_custom_operations_config': '/path/extensions/front/tf/config.json'
+            'tensorflow_use_custom_operations_config': str(Path('/path/extensions/front/tf/config.json'))
         }
 
         mocker.patch(
@@ -528,7 +529,7 @@ class TestDLSDKLauncher:
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         DLSDKLauncher(config)
-        prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
+        prepare_args_patch.assert_called_once_with(str(Path('/path/ModelOptimizer')), flag_options=[], value_options=args)
 
     def test_model_converted_from_tf_with_default_path_to_obj_detection_api_config(self, mocker):
         config = {
@@ -544,10 +545,10 @@ class TestDLSDKLauncher:
         prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
-            'input_model': '/path/to/source_models/custom_model',
+            'input_model': str(Path('/path/to/source_models/custom_model')),
             'model_name': 'custom_model',
             'framework': 'tf',
-            'tensorflow_object_detection_api_pipeline_config': '/path/to/source_models/operations.config'
+            'tensorflow_object_detection_api_pipeline_config': str(Path('/path/to/source_models/operations.config'))
         }
 
         mocker.patch(
@@ -555,7 +556,7 @@ class TestDLSDKLauncher:
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         DLSDKLauncher(config)
-        prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
+        prepare_args_patch.assert_called_once_with(str(Path('/path/ModelOptimizer')), flag_options=[], value_options=args)
 
     def test_model_converted_from_tf_with_arg_path_to_obj_detection_api_config(self, mocker):
         config = {
@@ -571,10 +572,10 @@ class TestDLSDKLauncher:
         prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
-            'input_model': '/path/to/source_models/custom_model',
+            'input_model': str(Path('/path/to/source_models/custom_model')),
             'model_name': 'custom_model',
             'framework': 'tf',
-            'tensorflow_object_detection_api_pipeline_config': 'od_api/operations.config'
+            'tensorflow_object_detection_api_pipeline_config': str(Path('od_api/operations.config'))
         }
 
         mocker.patch(
@@ -624,10 +625,10 @@ class TestDLSDKLauncher:
         prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
-            'input_meta_graph': '/path/to/source_models/custom_model',
+            'input_meta_graph': str(Path('/path/to/source_models/custom_model')),
             'model_name': 'custom_model',
             'framework': 'tf',
-            'tensorflow_use_custom_operations_config': '/path/extensions/front/tf/config.json'
+            'tensorflow_use_custom_operations_config': str(Path('/path/extensions/front/tf/config.json'))
         }
 
         mocker.patch(
@@ -651,10 +652,10 @@ class TestDLSDKLauncher:
         prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
-            'input_meta_graph': '/path/to/source_models/custom_model',
+            'input_meta_graph': str(Path('/path/to/source_models/custom_model')),
             'model_name': 'custom_model',
             'framework': 'tf',
-            'tensorflow_object_detection_api_pipeline_config': '/path/to/source_models/operations.config'
+            'tensorflow_object_detection_api_pipeline_config': str(Path('/path/to/source_models/operations.config'))
         }
 
         mocker.patch(
@@ -679,10 +680,10 @@ class TestDLSDKLauncher:
         prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
-            'input_meta_graph': '/path/to/source_models/custom_model',
+            'input_meta_graph': str(Path('/path/to/source_models/custom_model')),
             'model_name': 'custom_model',
             'framework': 'tf',
-            'tensorflow_object_detection_api_pipeline_config': 'od_api/operations.config'
+            'tensorflow_object_detection_api_pipeline_config': str(Path('od_api/operations.config'))
         }
 
         mocker.patch(
@@ -690,7 +691,7 @@ class TestDLSDKLauncher:
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         DLSDKLauncher(config)
-        prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
+        prepare_args_patch.assert_called_once_with(str(Path('/path/ModelOptimizer')), flag_options=[], value_options=args)
 
     def test_model_converted_from_tf_checkpoint_with_arg_path_to_transformations_config(self, mocker):
         config = {
@@ -706,10 +707,10 @@ class TestDLSDKLauncher:
         prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
-            'input_meta_graph': '/path/to/source_models/custom_model',
+            'input_meta_graph': str(Path('/path/to/source_models/custom_model')),
             'model_name': 'custom_model',
             'framework': 'tf',
-            'transformations_config': 'config/dir/ssd_v2_support.json'
+            'transformations_config': str(Path('config/dir/ssd_v2_support.json'))
         }
 
         mocker.patch(
@@ -717,7 +718,7 @@ class TestDLSDKLauncher:
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         DLSDKLauncher(config)
-        prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
+        prepare_args_patch.assert_called_once_with(str(Path('/path/ModelOptimizer')), flag_options=[], value_options=args)
 
     def test_model_converted_from_tf_checkpoint_with_default_path_to_transformations_config(self, mocker):
         config = {
@@ -732,10 +733,10 @@ class TestDLSDKLauncher:
         prepare_args_patch = mocker.patch('accuracy_checker.launcher.model_conversion.prepare_args')
 
         args = {
-            'input_meta_graph': '/path/to/source_models/custom_model',
+            'input_meta_graph': str(Path('/path/to/source_models/custom_model')),
             'model_name': 'custom_model',
             'framework': 'tf',
-            'transformations_config': '/path/extensions/front/tf/config.json'
+            'transformations_config': str(Path('/path/extensions/front/tf/config.json'))
         }
 
         mocker.patch(
@@ -743,7 +744,7 @@ class TestDLSDKLauncher:
             return_value=subprocess.CompletedProcess(args, returncode=0)
         )
         DLSDKLauncher(config)
-        prepare_args_patch.assert_called_once_with('/path/ModelOptimizer', flag_options=[], value_options=args)
+        prepare_args_patch.assert_called_once_with(str(Path('/path/ModelOptimizer')), flag_options=[], value_options=args)
 
     def test_model_converted_from_mxnet(self, mocker):
         mock = mocker.patch(

@@ -104,7 +104,7 @@ class TestConfigReader:
     def test_read_configs_without_global_config(self, mocker):
         config = {'models': [{
             'name': 'model',
-            'launchers': [{'framework': 'dlsdk', 'model': Path('/absolute_path'), 'weights': Path('/absolute_path'), '_models_prefix': Path.cwd()}],
+            'launchers': [{'framework': 'dlsdk', 'model': Path('/absolute_path').absolute(), 'weights': Path('/absolute_path').absolute(), '_models_prefix': Path.cwd()}],
             'datasets': [{'name': 'global_dataset'}]
         }]}
         empty_args = Namespace(**{
@@ -338,7 +338,7 @@ class TestConfigReader:
     def test_merge_datasets_with_definitions(self, mocker):
         local_config = {'models': [{
             'name': 'model',
-            'launchers': [{'framework': 'dlsdk', 'model': '/absolute_path', 'weights': '/absolute_path'}],
+            'launchers': [{'framework': 'dlsdk', 'model': Path('/absolute_path').absolute(), 'weights': Path('/absolute_path').absolute()}],
             'datasets': [{'name': 'global_dataset'}]
         }]}
         mocker.patch(self.module + '._read_configs', return_value=(
@@ -356,7 +356,7 @@ class TestConfigReader:
     def test_merge_datasets_with_definitions_and_meta_is_not_modified(self, mocker):
         local_config = {'models': [{
             'name': 'model',
-            'launchers': [{'framework': 'dlsdk', 'model': '/absolute_path', 'weights': '/absolute_path'}],
+            'launchers': [{'framework': 'dlsdk', 'model': Path('/absolute_path').absolute(), 'weights': Path('/absolute_path').absolute()}],
             'datasets': [{'name': 'global_dataset', 'dataset_meta': '/absolute_path'}]
         }]}
         expected = self.global_datasets[0]
@@ -480,16 +480,16 @@ class TestConfigReader:
             'name': 'model',
             'datasets': [{
                 'name': 'global_dataset',
-                'dataset_meta': '/absolute_annotation_meta_path',
-                'data_source': '/absolute_source_path',
-                'annotation': '/absolute_annotation_path',
+                'dataset_meta': Path('/absolute_annotation_meta_path').absolute(),
+                'data_source': Path('/absolute_source_path').absolute(),
+                'annotation': Path('/absolute_annotation_path').absolute(),
             }]
         }]}
 
         expected = copy.deepcopy(local_config['models'][0]['datasets'][0])
-        expected['annotation'] = Path('/absolute_annotation_path')
-        expected['dataset_meta'] = Path('/absolute_annotation_meta_path')
-        expected['data_source'] = Path('/absolute_source_path')
+        expected['annotation'] = Path('/absolute_annotation_path').absolute()
+        expected['dataset_meta'] = Path('/absolute_annotation_meta_path').absolute()
+        expected['data_source'] = Path('/absolute_source_path').absolute()
 
         ConfigReader._merge_paths_with_prefixes(self.arguments, local_config)
 
@@ -503,7 +503,7 @@ class TestConfigReader:
                 'segmentation_masks_source': 'relative_source_path',
                 'annotation': 'relative_annotation_path'
             }
-        launcher_config = {'framework': 'dlsdk', 'model': '/absolute_path', 'weights': '/absolute_path'}
+        launcher_config = {'framework': 'dlsdk', 'model': Path('/absolute_path').absolute(), 'weights': '/absolute_path'}
         pipelines_config = [
             {
                 'name': 'pipeline', 'device_info': [{'framework': 'caffe', 'device': 'CPU'}],
@@ -571,11 +571,11 @@ class TestConfigReader:
     def test_merge_launcher_with_device_info(self, mocker):
         dataset_config = {
             'name': 'global_dataset',
-            'dataset_meta': '/absolute_annotation_meta_path',
-            'data_source': '/absolute_source_path',
-            'annotation': '/absolute_annotation_path'
+            'dataset_meta': Path('/absolute_annotation_meta_path').absolute(),
+            'data_source': Path('/absolute_source_path').absolute(),
+            'annotation': Path('/absolute_annotation_path').absolute()
         }
-        launcher_config = {'framework': 'caffe', 'model': Path('/absolute_path'), 'weights': Path('/absolute_path')}
+        launcher_config = {'framework': 'caffe', 'model': Path('/absolute_path').absolute(), 'weights': Path('/absolute_path').absolute()}
         device_info = {'device': 'CPU'}
         expected = copy.deepcopy(launcher_config)
         expected.update(device_info)
@@ -600,11 +600,11 @@ class TestConfigReader:
     def test_merge_launcher_with_target_deivce_in_pipeline(self, mocker):
         dataset_config = {
             'name': 'global_dataset',
-            'dataset_meta': '/absolute_annotation_meta_path',
-            'data_source': '/absolute_source_path',
-            'annotation': '/absolute_annotation_path'
+            'dataset_meta': Path('/absolute_annotation_meta_path').absolute(),
+            'data_source': Path('/absolute_source_path').absolute(),
+            'annotation': Path('/absolute_annotation_path').absolute()
         }
-        launcher_config = {'framework': 'caffe', 'model': Path('/absolute_path'), 'weights': Path('/absolute_path')}
+        launcher_config = {'framework': 'caffe', 'model': Path('/absolute_path').absolute(), 'weights': Path('/absolute_path').absolute()}
         device_info = {'device': 'CPU'}
         expected = copy.deepcopy(launcher_config)
         expected.update(device_info)
@@ -631,11 +631,11 @@ class TestConfigReader:
     def test_merge_launcher_with_2_device_info(self, mocker):
         dataset_config = {
             'name': 'global_dataset',
-            'dataset_meta': '/absolute_annotation_meta_path',
-            'data_source': '/absolute_source_path',
-            'annotation': '/absolute_annotation_path'
+            'dataset_meta': Path('/absolute_annotation_meta_path').absolute(),
+            'data_source': Path('/absolute_source_path').absolute(),
+            'annotation': Path('/absolute_annotation_path').absolute()
         }
-        launcher_config = {'framework': 'caffe', 'model': Path('/absolute_path'), 'weights': Path('/absolute_path')}
+        launcher_config = {'framework': 'caffe', 'model': Path('/absolute_path').absolute(), 'weights': Path('/absolute_path').absolute()}
         device_info = [{'device': 'CPU'}, {'device': 'GPU'}]
         expected = [copy.deepcopy(launcher_config), copy.deepcopy(launcher_config)]
         expected[0].update(device_info[0])
@@ -662,11 +662,11 @@ class TestConfigReader:
     def test_merge_launcher_with_2_target_devices(self, mocker):
         dataset_config = {
             'name': 'global_dataset',
-            'dataset_meta': '/absolute_annotation_meta_path',
-            'data_source': '/absolute_source_path',
-            'annotation': '/absolute_annotation_path'
+            'dataset_meta': Path('/absolute_annotation_meta_path').absolute(),
+            'data_source': Path('/absolute_source_path').absolute(),
+            'annotation': Path('/absolute_annotation_path').absolute()
         }
-        launcher_config = {'framework': 'caffe', 'model': Path('/absolute_path'), 'weights': Path('/absolute_path')}
+        launcher_config = {'framework': 'caffe', 'model': Path('/absolute_path').absolute(), 'weights': Path('/absolute_path').absolute()}
         device_info = [{'device': 'CPU'}, {'device': 'GPU'}]
         expected = [copy.deepcopy(launcher_config), copy.deepcopy(launcher_config)]
         expected[0].update(device_info[0])
@@ -719,11 +719,11 @@ class TestConfigReader:
     def test_merge_launchers_with_model_is_not_modified(self, mocker):
         local_config = {'models': [{
             'name': 'model',
-            'launchers': [{'framework': 'dlsdk', 'model': '/custom'}],
+            'launchers': [{'framework': 'dlsdk', 'model': Path('/custom').absolute()}],
             'datasets': [{'name': 'global_dataset'}]
         }]}
         expected = copy.deepcopy(self.get_global_launcher('dlsdk'))
-        expected['model'] = Path('/custom')
+        expected['model'] = Path('/custom').absolute()
         mocker.patch(self.module + '._read_configs', return_value=(
             self.global_config, local_config
         ))
@@ -786,15 +786,15 @@ class TestConfigReader:
         config_launchers = [
             {
                 'framework': 'dlsdk',
-                'model': '/absolute_path1',
-                'weights': '/absolute_path1',
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
             },
             {
                 'framework': 'dlsdk',
-                'model': '/absolute_path2',
-                'weights': '/absolute_path2',
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU',
             }
@@ -815,8 +815,8 @@ class TestConfigReader:
         config_launchers = [{
             'framework': 'dlsdk',
             'tags': ['some_tag'],
-            'model': Path('/absolute_path1'),
-            'weights': Path('/absolute_path1'),
+            'model': Path('/absolute_path1').absolute(),
+            'weights': Path('/absolute_path1').absolute(),
             'adapter': 'classification',
             'device': 'CPU',
             '_model_optimizer': self.arguments.model_optimizer,
@@ -841,8 +841,8 @@ class TestConfigReader:
             {
                 'framework': 'dlsdk',
                 'tags': ['some_tag'],
-                'model': Path('/absolute_path1'),
-                'weights': Path('/absolute_path1'),
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -851,8 +851,8 @@ class TestConfigReader:
             {
                 'framework': 'dlsdk',
                 'tags': ['some_tag'],
-                'model': Path('/absolute_path2'),
-                'weights': Path('/absolute_path2'),
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -881,8 +881,8 @@ class TestConfigReader:
             {
                 'framework': 'dlsdk',
                 'tags': ['some_tag'],
-                'model': '/absolute_path1',
-                'weights': '/absolute_path1',
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -891,8 +891,8 @@ class TestConfigReader:
             {
                 'framework': 'dlsdk',
                 'tags': ['some_tag'],
-                'model': '/absolute_path2',
-                'weights': '/absolute_path2',
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -916,8 +916,8 @@ class TestConfigReader:
             {
                 'framework': 'dlsdk',
                 'tags': ['tag1'],
-                'model': Path('/absolute_path1'),
-                'weights': Path('/absolute_path1'),
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -926,8 +926,8 @@ class TestConfigReader:
             {
                 'framework': 'caffe',
                 'tags': ['tag2'],
-                'model': Path('/absolute_path2'),
-                'weights': Path('/absolute_path2'),
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -954,8 +954,8 @@ class TestConfigReader:
             {
                 'framework': 'dlsdk',
                 'tags': ['tag1'],
-                'model': Path('/absolute_path1'),
-                'weights': Path('/absolute_path1'),
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -964,8 +964,8 @@ class TestConfigReader:
             {
                 'framework': 'caffe',
                 'tags': ['tag2'],
-                'model': Path('/absolute_path2'),
-                'weights': Path('/absolute_path2'),
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -992,8 +992,8 @@ class TestConfigReader:
             {
                 'framework': 'dlsdk',
                 'tags': ['tag1', 'tag2'],
-                'model': Path('/absolute_path1'),
-                'weights': Path('/absolute_path1'),
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1020,8 +1020,8 @@ class TestConfigReader:
             {
                 'framework': 'dlsdk',
                 'tags': ['tag1'],
-                'model': Path('/absolute_path1'),
-                'weights': Path('/absolute_path1'),
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1030,8 +1030,8 @@ class TestConfigReader:
             {
                 'framework': 'dlsdk',
                 'tags': ['tag2'],
-                'model': Path('/absolute_path2'),
-                'weights': Path('/absolute_path2'),
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1058,8 +1058,8 @@ class TestConfigReader:
     def test_launcher_is_not_filtered_by_the_same_framework(self, mocker):
         config_launchers = [{
             'framework': 'dlsdk',
-            'model': Path('/absolute_path1'),
-            'weights': Path('/absolute_path1'),
+            'model': Path('/absolute_path1').absolute(),
+            'weights': Path('/absolute_path1').absolute(),
             'adapter': 'classification',
             'device': 'CPU',
             '_model_optimizer': self.arguments.model_optimizer,
@@ -1083,8 +1083,8 @@ class TestConfigReader:
         config_launchers = [
             {
                 'framework': 'dlsdk',
-                'model': Path('/absolute_path1'),
-                'weights': Path('/absolute_path1'),
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1092,8 +1092,8 @@ class TestConfigReader:
             },
             {
                 'framework': 'dlsdk',
-                'model': Path('/absolute_path2'),
-                'weights': Path('/absolute_path2'),
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1120,8 +1120,8 @@ class TestConfigReader:
     def test_launcher_is_filtered_by_another_framework(self, mocker):
         config_launchers = [{
             'framework': 'dlsdk',
-            'model': Path('/absolute_path'),
-            'weights': Path('/absolute_path'),
+            'model': Path('/absolute_path').absolute(),
+            'weights': Path('/absolute_path').absolute(),
             'adapter': 'classification',
             '_model_optimizer': self.arguments.model_optimizer,
             '_models_prefix': self.arguments.models
@@ -1143,8 +1143,8 @@ class TestConfigReader:
         config_launchers = [
             {
                 'framework': 'dlsdk',
-                'model': '/absolute_path1',
-                'weights': '/absolute_path1',
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1152,8 +1152,8 @@ class TestConfigReader:
             },
             {
                 'framework': 'dlsdk',
-                'model': '/absolute_path2',
-                'weights': '/absolute_path2',
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1178,8 +1178,8 @@ class TestConfigReader:
         config_launchers = [
             {
                 'framework': 'dlsdk',
-                'model': Path('/absolute_path1'),
-                'weights': Path('/absolute_path1'),
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1187,8 +1187,8 @@ class TestConfigReader:
             },
             {
                 'framework': 'caffe',
-                'model': Path('/absolute_path2'),
-                'weights': Path('/absolute_path2'),
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU'
             }
@@ -1211,8 +1211,8 @@ class TestConfigReader:
     def test_launcher_is_not_filtered_by_the_same_device(self, mocker):
         config_launchers = [{
             'framework': 'dlsdk',
-            'model': Path('/absolute_path1'),
-            'weights': Path('/absolute_path1'),
+            'model': Path('/absolute_path1').absolute(),
+            'weights': Path('/absolute_path1').absolute(),
             'adapter': 'classification',
             'device': 'CPU',
             '_model_optimizer': self.arguments.model_optimizer,
@@ -1236,8 +1236,8 @@ class TestConfigReader:
         config_launchers = [
             {
                 'framework': 'dlsdk',
-                'model': Path('/absolute_path1'),
-                'weights': Path('/absolute_path1'),
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1245,8 +1245,8 @@ class TestConfigReader:
             },
             {
                 'framework': 'caffe',
-                'model': Path('/absolute_path2'),
-                'weights': Path('/absolute_path2'),
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU'
             }
@@ -1270,8 +1270,8 @@ class TestConfigReader:
     def test_launcher_is_filtered_by_another_device(self, mocker):
         config_launchers = [{
             'framework': 'dlsdk',
-            'model': Path('/absolute_path1'),
-            'weights': Path('/absolute_path1'),
+            'model': Path('/absolute_path1').absolute(),
+            'weights': Path('/absolute_path1').absolute(),
             'adapter': 'classification',
             'device': 'CPU',
             '_model_optimizer': self.arguments.model_optimizer,
@@ -1292,8 +1292,8 @@ class TestConfigReader:
         config_launchers = [
             {
                 'framework': 'dlsdk',
-                'model': Path('/absolute_path1'),
-                'weights': Path('/absolute_path1'),
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1301,8 +1301,8 @@ class TestConfigReader:
             },
             {
                 'framework': 'caffe',
-                'model': Path('/absolute_path2'),
-                'weights': Path('/absolute_path2'),
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU'
             }
@@ -1325,8 +1325,8 @@ class TestConfigReader:
         config_launchers = [
             {
                 'framework': 'dlsdk',
-                'model': Path('/absolute_path1'),
-                'weights': Path('/absolute_path1'),
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1334,8 +1334,8 @@ class TestConfigReader:
             },
             {
                 'framework': 'caffe',
-                'model': Path('/absolute_path2'),
-                'weights': Path('/absolute_path2'),
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU'
             }
@@ -1356,8 +1356,8 @@ class TestConfigReader:
         config_launchers = [
             {
                 'framework': 'dlsdk',
-                'model': Path('/absolute_path1'),
-                'weights': Path('/absolute_path1'),
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1365,8 +1365,8 @@ class TestConfigReader:
             },
             {
                 'framework': 'dlsdk',
-                'model': Path('/absolute_path1'),
-                'weights': Path('/absolute_path1'),
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'HETERO:CPU,GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1374,8 +1374,8 @@ class TestConfigReader:
             },
             {
                 'framework': 'caffe',
-                'model': Path('/absolute_path2'),
-                'weights': Path('/absolute_path2'),
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU',
             }
@@ -1401,15 +1401,15 @@ class TestConfigReader:
         config_launchers = [
             {
                 'framework': 'dlsdk',
-                'model': '/absolute_path1',
-                'weights': '/absolute_path1',
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
             },
             {
                 'framework': 'caffe',
-                'model': '/absolute_path2',
-                'weights': '/absolute_path2',
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU'
             }
@@ -1431,8 +1431,8 @@ class TestConfigReader:
         config_launchers = [
             {
                 'framework': 'dlsdk',
-                'model': Path('/absolute_path1'),
-                'weights': Path('/absolute_path1'),
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1440,8 +1440,8 @@ class TestConfigReader:
             },
             {
                 'framework': 'caffe',
-                'model': Path('/absolute_path2'),
-                'weights': Path('/absolute_path2'),
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU'
             }
@@ -1466,8 +1466,8 @@ class TestConfigReader:
         config_launchers = [
             {
                 'framework': 'dlsdk',
-                'model': Path('/absolute_path1'),
-                'weights': Path('/absolute_path1'),
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1475,8 +1475,8 @@ class TestConfigReader:
             },
             {
                 'framework': 'caffe',
-                'model': Path('/absolute_path2'),
-                'weights': Path('/absolute_path2'),
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'GPU'
             }
@@ -1499,8 +1499,8 @@ class TestConfigReader:
         model1_launchers = [
             {
                 'framework': 'dlsdk',
-                'model': Path('/absolute_path1'),
-                'weights': Path('/absolute_path1'),
+                'model': Path('/absolute_path1').absolute(),
+                'weights': Path('/absolute_path1').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
@@ -1508,8 +1508,8 @@ class TestConfigReader:
             },
             {
                 'framework': 'caffe',
-                'model': Path('/absolute_path2'),
-                'weights': Path('/absolute_path2'),
+                'model': Path('/absolute_path2').absolute(),
+                'weights': Path('/absolute_path2').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU'
             }
@@ -1517,7 +1517,7 @@ class TestConfigReader:
         model2_launchers = [
             {
                 'framework': 'tf',
-                'model': Path('/absolute_path3'),
+                'model': Path('/absolute_path3').absolute(),
                 'adapter': 'classification',
                 'device': 'CPU'
             }
@@ -1542,8 +1542,8 @@ class TestConfigReader:
                 'name': 'model',
                 'launchers': [{
                     'framework': 'caffe',
-                    'model': Path('/absolute_path2'),
-                    'weights': Path('/absolute_path2'),
+                    'model': Path('/absolute_path2').absolute(),
+                    'weights': Path('/absolute_path2').absolute(),
                     'adapter': 'classification',
             }],
                 'datasets': [{'name': 'dataset'}]}]
@@ -1563,8 +1563,8 @@ class TestConfigReader:
                 'name': 'model',
                 'launchers': [{
                     'framework': 'caffe',
-                    'model': Path('/absolute_path2'),
-                    'weights': Path('/absolute_path2'),
+                    'model': Path('/absolute_path2').absolute(),
+                    'weights': Path('/absolute_path2').absolute(),
                     'adapter': 'classification',
             }],
                 'datasets': [{'name': 'dataset'}]}]
