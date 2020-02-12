@@ -36,12 +36,15 @@ CHUNK_SIZE = 1 << 15 if sys.stdout.isatty() else 1 << 20
 def process_download(reporter, chunk_iterable, size, file):
     start_time = time.monotonic()
     progress_size = 0
+    hasher = hashlib.sha256()
 
     try:
         for chunk in chunk_iterable:
             if chunk:
                 duration = time.monotonic() - start_time
                 progress_size += len(chunk)
+                hasher.update(chunk)
+
                 if duration != 0:
                     speed = int(progress_size / (1024 * duration))
                     percent = str(progress_size * 100 // size)
@@ -56,7 +59,7 @@ def process_download(reporter, chunk_iterable, size, file):
                 if progress_size > size:
                     break
 
-        return progress_size
+        return progress_size, hasher.digest()
     finally:
         reporter.end_progress()
 
@@ -71,35 +74,29 @@ def try_download(reporter, file, num_attempts, start_download, size):
             chunk_iterable = start_download()
             file.seek(0)
             file.truncate()
-            actual_size = process_download(reporter, chunk_iterable, size, file)
+            actual_size, hash = process_download(reporter, chunk_iterable, size, file)
 
             if actual_size > size:
                 reporter.log_error("Remote file is longer than expected ({} B), download aborted", size)
                 # no sense in retrying - if the file is longer, there's no way it'll fix itself
-                return False
+                return None
             elif actual_size < size:
                 reporter.log_error("Downloaded file is shorter ({} B) than expected ({} B)",
                     actual_size, size)
                 # it's possible that we got disconnected before receiving the full file,
                 # so try again
             else:
-                return True
+                return hash
         except (requests.exceptions.RequestException, ssl.SSLError):
             reporter.log_error("Download failed", exc_info=True)
 
-    return False
+    return None
 
-def verify_hash(reporter, file, expected_hash, path):
-    actual_hash = hashlib.sha256()
-    while True:
-        chunk = file.read(1 << 20)
-        if not chunk: break
-        actual_hash.update(chunk)
-
-    if actual_hash.digest() != bytes.fromhex(expected_hash):
+def verify_hash(reporter, actual_hash, expected_hash, path):
+    if actual_hash != bytes.fromhex(expected_hash):
         reporter.log_error('Hash mismatch for "{}"', path)
         reporter.log_details('Expected: {}', expected_hash)
-        reporter.log_details('Actual:   {}', actual_hash.hexdigest())
+        reporter.log_details('Actual:   {}', actual_hash.hex())
         return False
     return True
 
@@ -174,11 +171,11 @@ def try_retrieve(reporter, destination, model_file, cache, num_attempts, start_d
     success = False
 
     with destination.open('w+b') as f:
-        if try_download(reporter, f, num_attempts, start_download, model_file.size):
-            f.seek(0)
-            if verify_hash(reporter, f, model_file.sha256, destination, name):
-                try_update_cache(reporter, cache, model_file.sha256, destination)
-                success = True
+        actual_hash = try_download(reporter, f, num_attempts, start_download, model_file.size)
+
+    if actual_hash and verify_hash(reporter, actual_hash, model_file.sha256, destination):
+        try_update_cache(reporter, cache, model_file.sha256, destination)
+        success = True
 
     reporter.print()
     return success
