@@ -92,32 +92,22 @@ public:
         }
     }
 
-    void updateMat(ImageInfoList& imageInfos) {
-        ImageInfoList imagesToDraw;
-        if (!imageInfos.empty()) {
-            imagesToDraw.splice(imagesToDraw.end(), imageInfos);
-        }
-
-        if (!prevImgs.empty()) {
-            int prevSourceId = currSourceId - FLAGS_b;
-            if (prevSourceId < 0) {
-                prevSourceId += points.size();
+    void updateMat(const ImageInfoList& imageInfos) {
+        size_t prevSourceId = (currSourceId + points.size() - prevImgs.size() % points.size()) % points.size();
+        while (!prevImgs.empty()) {
+            if (prevSourceId >= points.size()) {
+                prevSourceId -= points.size();
             }
-            for (size_t i = 0; i < prevImgs.size(); i++, prevSourceId++) {
-                if (size_t(prevSourceId) >= points.size()) {
-                    prevSourceId -= points.size();
-                }
 
-                prevImgs.front().copyTo(outImg(cv::Rect(points[prevSourceId], cellSize)));
-                prevImgs.pop();
-            }   
+            prevImgs.front().copyTo(outImg(cv::Rect(points[prevSourceId], cellSize)));
+            prevImgs.pop();
+            prevSourceId++;
         }
 
-        while (!imagesToDraw.empty()) {
-            cv::Mat frame = std::get<0>(imagesToDraw.front());
-            std::string predictedLabel = std::get<1>(imagesToDraw.front());
-            PredictionResult predictionResult = std::get<2>(imagesToDraw.front());
-            imagesToDraw.pop_front();
+        for (const auto & imageInfo : imageInfos) {
+            cv::Mat frame = std::get<0>(imageInfo);
+            std::string predictedLabel = std::get<1>(imageInfo);
+            PredictionResult predictionResult = std::get<2>(imageInfo);
 
             cv::Scalar textColor;
             switch (predictionResult) {

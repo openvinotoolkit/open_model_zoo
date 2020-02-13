@@ -33,7 +33,7 @@ using namespace InferenceEngine;
 struct InferRequestInfo {
     struct InferRequestImage {
         cv::Mat mat;
-        unsigned rightClass;
+        unsigned correctClass;
         std::chrono::time_point<std::chrono::steady_clock> startTime;
     };
 
@@ -78,18 +78,17 @@ cv::Mat resizeImage(cv::Mat& image, int modelInputResolution) {
         int fromWidth = resizedImage.cols/2 - modelInputResolution/2;
         imgROI = cv::Rect(fromWidth,
                           0,
-                          std::min(modelInputResolution, resizedImage.cols - fromWidth),
+                          resizedImage.cols - fromWidth,
                           modelInputResolution);
     } else {
         int fromHeight = resizedImage.rows/2 - modelInputResolution/2;
         imgROI = cv::Rect(0,
                           fromHeight,
                           modelInputResolution,
-                          std::min(modelInputResolution, resizedImage.rows - fromHeight));
+                          resizedImage.rows - fromHeight);
     }
-    resizedImage(imgROI).copyTo(resizedImage);
 
-    return resizedImage;
+    return resizedImage(imgROI);
 }
 
 std::vector<std::vector<unsigned>> topResults(Blob& inputBlob, unsigned numTop) {
@@ -149,12 +148,13 @@ int main(int argc, char *argv[]) {
         std::vector<unsigned> classIndices;
         if (!FLAGS_gt.empty()) {
             std::map<std::string, std::string> classIndicesMap;
-            std::ifstream inputClassesFile(FLAGS_gt);
+            std::ifstream inputGtFile(FLAGS_gt);
+            if (!inputGtFile.is_open()) throw std::runtime_error("Can't open the ground truth file.");
             while (true) {
                 std::string imageName;
                 std::string classIndex;
-                inputClassesFile >> imageName >> classIndex;
-                if (inputClassesFile.eof()) break;
+                inputGtFile >> imageName >> classIndex;
+                if (inputGtFile.eof()) break;
                 classIndicesMap.insert({imageName.substr(imageName.rfind('/') + 1), classIndex});
             }
             for (size_t i = 0; i < inputImagesCount; i++) {
@@ -174,6 +174,7 @@ int main(int argc, char *argv[]) {
         // --------------------------------------------Read labels--------------------------------------------
         std::vector<std::string> labels;
         std::ifstream inputLabelsFile(FLAGS_labels);
+        if (!inputLabelsFile.is_open()) throw std::runtime_error("Can't open the labels file.");
         std::string labelsLine;
         while (std::getline(inputLabelsFile, labelsLine)) {
             labels.push_back(labelsLine.substr(labelsLine.find(' ') + 1,
@@ -322,7 +323,6 @@ int main(int argc, char *argv[]) {
             height = std::stoi(gridMatRowsCols[1]);
         }
         GridMat gridMat = GridMat(presenter, cv::Size(width, height));
-        ImageInfoList shownImagesInfo;
         // ---------------------------------------------------------------------------------------------------
         
         // -----------------------------Prepare variables and data for main loop------------------------------
@@ -331,8 +331,7 @@ int main(int argc, char *argv[]) {
         double latencySum = 0;
         unsigned framesNum = 0;
         long long correctPredictionsCount = 0;
-        long long totalPredictionsCount = 0;
-        double accuracy;
+        double accuracy = 0;
         bool isTestMode = true;
         char key = 0;
         std::size_t nextImageIndex = 0;
@@ -353,13 +352,26 @@ int main(int argc, char *argv[]) {
         // ---------------------------------------------------------------------------------------------------
         
         // -------------------------------------Processing infer requests-------------------------------------
+        int framesNumOnCalculationStart = 0;
+        auto testDuration = std::chrono::seconds{3};
+        auto fpsCalculationDuration = std::chrono::seconds{1};
+        typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
         do {
-            if (isTestMode && elapsedSeconds >= std::chrono::seconds{3}) {
+            if (hasCallbackException) std::rethrow_exception(irCallbackException);
+
+            if (elapsedSeconds >= testDuration - fpsCalculationDuration && framesNumOnCalculationStart == 0) {
+                framesNumOnCalculationStart = framesNum;
+            }
+            if (isTestMode && elapsedSeconds >= testDuration) {
                 isTestMode = false;
-                gridMat = GridMat(presenter, cv::Size(width, height), cv::Size(16, 9), avgFPS);
+                gridMat = GridMat(presenter, cv::Size(width, height), cv::Size(16, 9),
+                                  (framesNum - framesNumOnCalculationStart) / std::chrono::duration_cast<Sec>(
+                                    fpsCalculationDuration).count());
                 startTickCount = std::chrono::steady_clock::now();
                 framesNum = 0;
                 latencySum = 0;
+                correctPredictionsCount = 0;
+                accuracy = 0;
             }
 
             std::unique_lock<std::mutex> lock(mutex);
@@ -370,20 +382,21 @@ int main(int argc, char *argv[]) {
                 emptyInferRequests.push({completedInferRequestInfo.inferRequest, 
                                          std::vector<InferRequestInfo::InferRequestImage>()});
 
-                std::vector<unsigned> rightClasses = {};
+                std::vector<unsigned> correctClasses = {};
                 for (size_t i = 0; i < completedInferRequestInfo.images.size(); i++) {
-                    rightClasses.push_back(completedInferRequestInfo.images[i].rightClass);
+                    correctClasses.push_back(completedInferRequestInfo.images[i].correctClass);
                 }
 
                 std::vector<std::vector<unsigned>> results = topResults(
                     *completedInferRequestInfo.inferRequest.GetBlob(outputName), FLAGS_nt);
                 std::vector<std::string> predictedLabels = {};
+                ImageInfoList shownImagesInfo;
                 for (size_t i = 0; i < FLAGS_b; i++) {
                     PredictionResult predictionResult = PredictionResult::Incorrect;
                     if (!FLAGS_gt.empty()) {
                         for (size_t j = 0; j < FLAGS_nt; j++) {
                             unsigned predictedClass = results[i][j];
-                            if (predictedClass == rightClasses[i]) {
+                            if (predictedClass == correctClasses[i]) {
                                 predictionResult = PredictionResult::Correct;
                                 predictedLabels.push_back(labels[predictedClass]);
                                 correctPredictionsCount++;
@@ -397,25 +410,22 @@ int main(int argc, char *argv[]) {
                     if (predictionResult != PredictionResult::Correct) {
                         predictedLabels.push_back(labels[results[i][0]]);
                     }
-                    totalPredictionsCount++;
 
                     shownImagesInfo.push_back(
                         std::make_tuple(completedInferRequestInfo.images[i].mat, predictedLabels[i], predictionResult));
                 }
 
                 framesNum += FLAGS_b;
-
-                typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
-                avgFPS = 1. * framesNum / std::chrono::duration_cast<Sec>(
+                
+                avgFPS = framesNum / std::chrono::duration_cast<Sec>(
                     std::chrono::steady_clock::now() - startTickCount).count();
                 gridMat.updateMat(shownImagesInfo);
                 auto processingEndTime = std::chrono::steady_clock::now();
-                for (size_t i = 0; i < FLAGS_b; i++) {
-                    latencySum += (1. * std::chrono::duration_cast<Sec>(
-                        processingEndTime - completedInferRequestInfo.images[i].startTime).count());
+                for (const auto & image : completedInferRequestInfo.images) {
+                    latencySum += (1. * std::chrono::duration_cast<Sec>(processingEndTime - image.startTime).count());
                 }
                 avgLatency = latencySum / framesNum;
-                accuracy = static_cast<double>(correctPredictionsCount) / totalPredictionsCount;
+                accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
                 gridMat.textUpdate(avgFPS, avgLatency, accuracy, isTestMode, !FLAGS_gt.empty(), presenter);
                 
                 if (!FLAGS_no_show) {
@@ -468,7 +478,6 @@ int main(int argc, char *argv[]) {
             
             lock.lock();
             while (emptyInferRequests.empty() && completedInferRequests.empty()) {
-                if (hasCallbackException) std::rethrow_exception(irCallbackException);
                 condVar.wait(lock);
             }
             lock.unlock();
