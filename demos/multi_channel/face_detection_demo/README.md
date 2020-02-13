@@ -100,7 +100,7 @@ Alternatively, you can just set `-nc 3`, which simplifies application usage.
 
 If your cameras are connected to PC with indexes gap (for example, `0,1,3`), use the `-i` parameter.
 
-IP сameras support:
+IP cameras support:
 ```
 -i rtsp://camera_address_1/ rtsp://camera_address_2/
 ```

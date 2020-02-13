@@ -154,7 +154,7 @@ make
 ```
 
 For the release configuration, the demo application binaries are in `<path_to_build_directory>/intel64/Release/`;
-for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
+for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
 
 ### <a name="build_demos_windows"></a>Build the Demos Applications on Microsoft Windows* OS
 
@@ -163,7 +163,7 @@ The recommended Windows* build environment is the following:
 * Microsoft Visual Studio* 2015, 2017, or 2019
 * CMake* version 2.8 or higher
 
-> **NOTE**: If you want to use Microsoft Visual Studio 2019, you are required to install CMake 3.14.
+> **NOTE**: If you want to use Microsoft Visual Studio 2019, you are required to install CMake 3.14.
 
 To build the demo applications for Windows, go to the directory with the `build_demos_msvc.bat`
 batch file and run it:

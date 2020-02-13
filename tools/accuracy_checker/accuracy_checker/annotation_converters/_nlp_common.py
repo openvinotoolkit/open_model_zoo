@@ -7,7 +7,7 @@ from ..config import ConfigError
 from ..utils import contains_all
 
 
-SPIECE_UNDERLINE = '▁'
+SPIECE_UNDERLINE = '\N{LOWER ONE EIGHTH BLOCK}'
 SEG_ID_A = 0
 SEG_ID_B = 1
 SEG_ID_CLS = 2
