@@ -152,9 +152,9 @@ instances, thus faster than previous, because network runs once.
 The task of monocular depth estimation is to predict a depth (or inverse depth) map based on a single input image.
 Since this task contains - in the general setting - some ambiguity, the resulting depth maps are often only defined up to an unknown scaling factor.
 
-| Model Name                  | Implementation                      | OMZ Model Name                | GFlops | mParams |
-| --------------------------- | ----------------------------------- | ----------------------------- | ------ | ------- |
-| midasnet                    | [PyTorch\*](./midasnet/midasnet.md) | midasnet                      | ?      | ?       |
+| Model Name                  | Implementation                      | OMZ Model Name                | GFlops    | mParams |
+| --------------------------- | ----------------------------------- | ----------------------------- | --------- | ------- |
+| midasnet                    | [PyTorch\*](./midasnet/midasnet.md) | midasnet                      | 207.4915  | ?       |
 
 ## Legal Information
 

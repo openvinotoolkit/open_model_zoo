@@ -20,7 +20,7 @@ See [here](https://github.com/intel-isl/MiDaS)
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Monodepth     |
-| GFLOPs            | ?             |
+| GFLOPs            | 207.4915      |
 | MParams           | ?             |
 | Source framework  | PyTorch\*     |
 
