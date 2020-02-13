@@ -242,13 +242,15 @@ class CaffeModelMixin:
     def release(self):
         del self.net
 
-    def fit_to_input(self, data, layer_name, layout):
+    def fit_to_input(self, data, layer_name, layout, precision):
         data_shape = np.shape(data)
         layer_shape = self.inputs[layer_name]
         if len(data_shape) == 5 and len(layer_shape) == 4:
             data = data[0]
             data_shape = np.shape(data)
         data = np.transpose(data, layout) if len(data_shape) == 4 else np.array(data)
+        if precision:
+            data = data.astype(precision)
 
         return data
 
@@ -281,13 +283,15 @@ class DLSDKModelMixin:
         del self.exec_network
         self.launcher.release()
 
-    def fit_to_input(self, data, layer_name, layout):
+    def fit_to_input(self, data, layer_name, layout, precision):
         layer_shape = tuple(self.inputs[layer_name].shape)
         data_shape = np.shape(data)
         if len(layer_shape) == 4:
             if len(data_shape) == 5:
                 data = data[0]
             data = np.transpose(data, layout)
+        if precision:
+            data = data.astype(precision)
 
         return data
 
