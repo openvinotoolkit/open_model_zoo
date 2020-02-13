@@ -18,7 +18,7 @@ import time
 import copy
 import pickle
 
-from ..utils import get_path, set_image_metadata, extract_image_representations
+from ..utils import get_path, extract_image_representations
 from ..dataset import Dataset
 from ..launcher import create_launcher, DummyLauncher, InputFeeder
 from ..launcher.loaders import PickleLoader
@@ -102,8 +102,7 @@ class ModelEvaluator(BaseEvaluator):
         batch_identifiers = [annotation.identifier for annotation in batch_annotation]
         batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
         for annotation, input_data in zip(batch_annotation, batch_input):
-            set_image_metadata(annotation, input_data)
-            annotation.metadata['data_source'] = self.reader.data_source
+            self.dataset.set_annotation_metadata(annotation, input_data, self.reader.data_source)
         batch_input = self.preprocessor.process(batch_input, batch_annotation)
         _, batch_meta = extract_image_representations(batch_input)
         filled_inputs = self.input_feeder.fill_inputs(batch_input)
