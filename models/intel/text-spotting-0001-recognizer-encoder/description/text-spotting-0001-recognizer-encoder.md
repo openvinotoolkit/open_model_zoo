@@ -35,7 +35,7 @@ Name: `input` , shape: [1x64x28x28]. Text recognition features obtained from det
 
 ## Outputs
 
-Name: `output`, shape: [1x256x64x64]. Encoded text recognition features.
+Name: `output`, shape: [1x256x28x28]. Encoded text recognition features.
 
 
 ## Legal Information

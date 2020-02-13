@@ -32,13 +32,13 @@ This model is 2D attention-based GRU decoder of text recognition head.
 
 ## Inputs
 
-1.	Name: `encoder_outputs` , shape: [1x256x64x64]. Encoded text recognition features.
+1.	Name: `encoder_outputs` , shape: [1x(28*28)x256]. Encoded text recognition features.
 1.	Name: `prev_symbol` , shape: [1x1]. Index in alphabet of previously generated symbol.
 1.	Name: `prev_hidden`, shape: [1x1x256]. Previous hidden state of GRU.
 
 ## Outputs
 
-1.	Name: `output`, shape: [1x256x64x64]. Encoded text recognition features.
+1.	Name: `output`, shape: [1x256x28x28]. Encoded text recognition features.
 1.	Name: `hidden`, shape: [1x1x256]. Current hidden state of GRU.
 
 
