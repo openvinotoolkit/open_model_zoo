@@ -28,7 +28,7 @@ See [here](https://github.com/intel-isl/MiDaS)
 
 ### Original Model
 
-Image, name - `data`, shape - `1,3,384,384`, format is `B,C,H,W` where:
+Image, name - `image`, shape - `1,3,384,384`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
@@ -37,9 +37,12 @@ Image, name - `data`, shape - `1,3,384,384`, format is `B,C,H,W` where:
 
 Channel order is `RGB`.
 
+- `mean_values` - `image[123.675, 116.28, 103.53]`
+- `scale_values` - `image[51.525, 50.4, 50.625]`
+
 ### Converted Model
 
-Image, name - `data`, shape - `1,3,384,384`, format is `B,C,H,W` where:
+Image, name - `image`, shape - `1,3,384,384`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
@@ -52,7 +55,7 @@ Channel order is `BGR`.
 
 ### Original Model
 
-Inverse depth map, name - `data`, shape - `1,384,384`, format is `B,H,W` where:
+Inverse depth map, name - `inverse_depth`, shape - `1,384,384`, format is `B,H,W` where:
 
 - `B` - batch size
 - `H` - height
@@ -62,7 +65,7 @@ Inverse depth map is defined up to an unknown scale factor.
 
 ### Converted Model
 
-Inverse depth map, name - `data`, shape - `1,384,384`, format is `B,H,W` where:
+Inverse depth map, name - `inverse_depth`, shape - `1,384,384`, format is `B,H,W` where:
 
 - `B` - batch size
 - `H` - height
