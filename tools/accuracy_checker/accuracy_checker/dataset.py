@@ -209,7 +209,7 @@ class Dataset:
         return list(subsample_set)
 
     def set_annotation_metadata(self, annotation, image, data_source):
-        set_image_metadata(annotation, image.data)
+        set_image_metadata(annotation, image)
         annotation.set_data_source(data_source)
         segmentation_mask_source = self.config.get('segmentation_masks_source')
         annotation.metadata['segmentation_masks_source'] = segmentation_mask_source
