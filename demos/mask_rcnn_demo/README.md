@@ -13,7 +13,7 @@ Upon the start-up, the demo application reads command line parameters and loads 
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./mask_rcnn_demo -h
 InferenceEngine:
     API version ............ <version>

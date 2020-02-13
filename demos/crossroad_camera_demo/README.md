@@ -36,7 +36,7 @@ REID value is assigned. Otherwise, the vector is added to a global list, and new
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./crossroad_camera_demo -h
 InferenceEngine:
     API version ............ <version>

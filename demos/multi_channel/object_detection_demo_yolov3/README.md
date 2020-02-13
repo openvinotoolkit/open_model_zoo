@@ -21,7 +21,7 @@ On the start-up, the application reads command line parameters and loads the spe
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 cd <samples_build_folder>/intel64/Release
 ./multi_channel_object_detection_demo_yolov3 -h
 
@@ -92,7 +92,7 @@ General parameter for input video source is `-i`. Use it to specify video files 
 
 To see all available web cameras, run the `ls /dev/video*` command. You will get output similar to the following:
 
-```sh
+```
 user@user-PC:~ $ ls /dev/video*
 /dev/video0  /dev/video1  /dev/video2
 ```

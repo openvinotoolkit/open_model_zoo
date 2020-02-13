@@ -29,7 +29,7 @@ output image and outputs data to the standard output stream.
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./object_detection_demo_faster_rcnn -h
 InferenceEngine:
     API version ............ <version>
