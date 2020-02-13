@@ -30,6 +30,6 @@ model_optimizer_args:
   - --scale_values=input[127.5]
   - --output=InceptionV4/Logits/Predictions
   - --input_model=$dl_dir/inception_v4.frozen.pb
-  - --reverse_input_channel
+  - --reverse_input_channels
 framework: tf
 license: https://github.com/tensorflow/models/blob/master/LICENSE
