@@ -96,6 +96,17 @@ To do inference for two video inputs using two asynchronous infer request on FPG
 ./security_barrier_camera_demo -i <path_to_video>/inputVideo_0.mp4 <path_to_video>/inputVideo_1.mp4 -m <path_to_model>/vehicle-license-plate-detection-barrier-0106.xml -m_va <path_to_model>/vehicle-attributes-recognition-barrier-0039.xml -m_lpr <path_to_model>/license-plate-recognition-barrier-0001.xml -d HETERO:FPGA,CPU -d_va HETERO:FPGA,CPU -d_lpr HETERO:FPGA,CPU -nireq 2
 ```
 
+To do inference for video inputs on Intel® Vision Accelerator Design with Intel® Movidius™ VPUs, some optimization hints are suggested to make good use of the computation ability:
+
+* configuring the number of allocated frames (`-n_iqs`) to provide enough inputs for inference;
+* configuring the number of infer request (`-nireq`) to achieve asynchronous inference;
+* configuring the number of threads (`-n_wt`) for multi-threaded processing.
+
+For example, to run the sample on one Intel® Vision Accelerator Design with Intel® Movidius™ VPUs Compact R card, run the following command:
+```sh
+./security_barrier_camera_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/vehicle-license-plate-detection-barrier-0106.xml -m_va <path_to_model>/vehicle-attributes-recognition-barrier-0039.xml -m_lpr <path_to_model>/license-plate-recognition-barrier-0001.xml -d HDDL -d_va HDDL -d_lpr HDDL -n_iqs 10 -n_wt 4 -nireq 10
+```
+
 > **NOTE**: For the `-tag` option (HDDL plugin only), you must specify the number of VPUs for each network in the `hddl_service.config` file located in the `<INSTALL_DIR>/deployment_tools/inference_engine/external/hddl/config/` directory using the following tags:
 > * `tagDetect` for the Vehicle and License Plate Detection network
 > * `tagAttr` for the Vehicle Attributes Recognition network
