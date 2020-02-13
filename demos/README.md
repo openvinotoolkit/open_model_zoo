@@ -167,14 +167,14 @@ The recommended Windows* build environment is the following:
 
 To build the demo applications for Windows, go to the directory with the `build_demos_msvc.bat`
 batch file and run it:
-```sh
+```bat
 build_demos_msvc.bat
 ```
 
 By default, the script automatically detects the highest Microsoft Visual Studio version installed on the machine and uses it to create and build
 a solution for a demo code. Optionally, you can also specify the preffered Microsoft Visual Studio version to be used by the script. Supported
 versions are: `VS2015`, `VS2017`, `VS2019`. For example, to build the demos using the Microsoft Visual Studio 2017, use the following command:
-```sh
+```bat
 build_demos_msvc.bat VS2017
 ```
 
@@ -243,7 +243,7 @@ list above.
 Before running compiled binary files, make sure your application can find the Inference Engine and OpenCV libraries.
 If you use a [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution to build demos,
 run the `setupvars` script to set all necessary environment variables:
-```sh
+```bat
 <INSTALL_DIR>\bin\setupvars.bat
 ```
 If you use your own Inference Engine and OpenCV binaries to build the demos please make sure you have added
@@ -265,7 +265,7 @@ For example, for the **Debug** configuration, go to the project's
 **Configuration Properties** to the **Debugging** category and set the `PATH`
 variable in the **Environment** field to the following:
 
-```sh
+```
 PATH=<INSTALL_DIR>\deployment_tools\inference_engine\bin\intel64\Debug;<INSTALL_DIR>\opencv\bin;%PATH%
 ```
 where `<INSTALL_DIR>` is the directory in which the OpenVINO toolkit is installed.

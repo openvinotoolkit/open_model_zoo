@@ -13,7 +13,7 @@ Upon the start-up the demo application reads command line parameters and loads a
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./segmentation_demo -h
 [ INFO ] InferenceEngine: <version>
 [ INFO ] Parsing input parameters

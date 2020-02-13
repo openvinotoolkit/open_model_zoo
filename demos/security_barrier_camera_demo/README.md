@@ -42,7 +42,7 @@ At the end of the sequence, the `VideoFrame` is destroyed and the sequence start
 ## Running
 
 Running the application with the <code>-h</code> option yields the following usage message:
-```sh
+```
 [ INFO ] InferenceEngine: <version>
 
 interactive_vehicle_detection [OPTION]
@@ -113,7 +113,7 @@ For example, to run the sample on one Intel® Vision Accelerator Design with Int
 > * `tagLPR` for the License Plate Recognition network
 >
 > For example, to run the sample on one Intel® Vision Accelerator Design with Intel® Movidius™ VPUs Compact R card with eight Intel&reg; Movidius&trade; X VPUs:
-> ```sh
+> ```json
 > "service_settings":
 > {
 >  "graph_tag_map":{"tagDetect": 6, "tagAttr": 1, "tagLPR": 1}
