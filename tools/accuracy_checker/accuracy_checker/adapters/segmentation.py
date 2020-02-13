@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 from ..adapters import Adapter
 from ..representation import SegmentationPrediction, BrainTumorSegmentationPrediction
-from ..config import ConfigValidator, BoolField
+from ..config import ConfigValidator, BoolField, ListField, NumberField
 
 
 class SegmentationAdapter(Adapter):
@@ -71,16 +71,67 @@ class SegmentationAdapter(Adapter):
         return {self.output_blob: restore_output}
 
 
-class BrainTumorSegmentationAdapter(Adapter):
-    __provider__ = 'brain_tumor_segmentation'
-    prediction_types = (BrainTumorSegmentationPrediction, )
+class SegmentationOneClassAdapter(Adapter):
+    __provider__ = 'segmentation_one_class'
+    prediction_types = (SegmentationPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'threshold': NumberField(
+                optional=True, value_type=float, min_value=0.0, default=0.5,
+                description='minimal probability threshold for separating predicted class from background'
+            )
+        })
+        return params
+
+    def configure(self):
+        self.threshold = self.get_value_from_config('threshold')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         frame_meta = frame_meta or [] * len(identifiers)
         raw_outputs = self._extract_predictions(raw, frame_meta)
         for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
-            result.append(BrainTumorSegmentationPrediction(identifier, output))
+            output = output > self.threshold
+            result.append(SegmentationPrediction(identifier, output))
+
+        return result
+
+
+class BrainTumorSegmentationAdapter(Adapter):
+    __provider__ = 'brain_tumor_segmentation'
+    prediction_types = (BrainTumorSegmentationPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'make_argmax': BoolField(
+                optional=True, default=False, description="Allows to apply argmax operation to output values."
+            ),
+            'label_order': ListField(
+                optional=True, default=[1, 2, 3], value_type=int, validate_values=True,
+                description="Specifies order of output labels, according to order of dataset labels"
+            )
+        })
+
+        return parameters
+
+    def configure(self):
+        self.argmax = self.get_value_from_config('make_argmax')
+        self.label_order = tuple(self.get_value_from_config('label_order'))
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        result = []
+        frame_meta = frame_meta or [] * len(identifiers)
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        for identifier, output in zip(identifiers, raw_outputs[self.output_blob]):
+            if self.argmax:
+                output = np.argmax(output, axis=0).astype(np.int8)
+                output = np.expand_dims(output, axis=0)
+            result.append(BrainTumorSegmentationPrediction(identifier, output, self.label_order))
 
         return result
 

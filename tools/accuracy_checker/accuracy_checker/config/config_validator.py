@@ -52,13 +52,16 @@ class BaseValidator:
 
         raise ConfigError(error_message.format(value, field_uri))
 
+
 class _ExtraArgumentBehaviour(enum.Enum):
     WARN = 'warn'
     IGNORE = 'ignore'
     ERROR = 'error'
 
+
 def _is_dict_like(entry):
     return hasattr(entry, '__iter__') and hasattr(entry, '__getitem__')
+
 
 class ConfigValidator(BaseValidator):
     WARN_ON_EXTRA_ARGUMENT = _ExtraArgumentBehaviour.WARN
@@ -170,8 +173,13 @@ class StringField(BaseField):
         super().__init__(**kwargs)
         self.choices = choices if case_sensitive or not choices else list(map(str.lower, choices))
         self.allow_own_choice = allow_own_choice
-        self._regex = re.compile(regex, flags=re.IGNORECASE if not case_sensitive else 0) if regex else None
         self.case_sensitive = case_sensitive
+        self.set_regex(regex)
+
+    def set_regex(self, regex):
+        if regex is None:
+            self._regex = regex
+        self._regex = re.compile(regex, flags=re.IGNORECASE if not self.case_sensitive else 0) if regex else None
 
     def validate(self, entry, field_uri=None):
         super().validate(entry, field_uri)
@@ -266,7 +274,8 @@ class ListField(BaseField):
 
 class InputField(BaseField):
     INPUTS_TYPES = ('CONST_INPUT', 'INPUT', 'IMAGE_INFO')
-    LAYOUT_TYPES = ['NCHW', 'NHWC', 'NCWH', 'NWHC']
+    LAYOUT_TYPES = ('NCHW', 'NHWC', 'NCWH', 'NWHC')
+    PRECISIONS = ('FP32', 'FP16', 'U8', 'U16', 'I8', 'I16', 'I32', 'I64')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -276,6 +285,7 @@ class InputField(BaseField):
         self.layout = StringField(optional=True, choices=InputField.LAYOUT_TYPES,
                                   description="Layout: " + ', '.join(InputField.LAYOUT_TYPES))
         self.shape = BaseField(optional=True, description="Input shape.")
+        self.precision = StringField(optional=True, description='Input precision', choices=InputField.PRECISIONS)
 
     def validate(self, entry, field_uri=None):
         entry['optional'] = entry['type'] != 'CONST_INPUT'

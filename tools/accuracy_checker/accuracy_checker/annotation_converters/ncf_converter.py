@@ -27,8 +27,8 @@ class MovieLensConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
             'rating_file': PathField(description="Path to rating file."),
             'negative_file': PathField(description="Path to negative file."),
             'users_max_number': NumberField(
@@ -36,7 +36,7 @@ class MovieLensConverter(BaseFormatConverter):
             )
         })
 
-        return parameters
+        return configuration_parameters
 
     def configure(self):
         self.rating_file = self.get_value_from_config('rating_file')

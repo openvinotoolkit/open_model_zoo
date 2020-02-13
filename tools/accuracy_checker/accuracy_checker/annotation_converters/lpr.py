@@ -26,8 +26,8 @@ class LPRConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
             'annotation_file': PathField(description="Path to annotation (.txt)."),
             'decoding_dictionary_file': PathField(
                 optional=True, description="Path to file containing dictionary for output decoding."
@@ -38,7 +38,7 @@ class LPRConverter(BaseFormatConverter):
             )
         })
 
-        return parameters
+        return configuration_parameters
 
     def configure(self, *args, **kwargs):
         self.annotation_file = self.get_value_from_config('annotation_file')

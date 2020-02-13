@@ -8,7 +8,7 @@
 #include <map>
 
 static std::map<std::string, std::string> parseConfig(const std::string &configName, char comment = '#') {
-    std::map<std::string, std::string> config = {};
+    std::map<std::string, std::string> config;
 
     std::ifstream file(configName);
     if (!file.is_open()) {

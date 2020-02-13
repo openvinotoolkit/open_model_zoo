@@ -8,7 +8,6 @@ models:
         model:   intel/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.xml
         weights: intel/vehicle-license-plate-detection-barrier-0106/FP32/vehicle-license-plate-detection-barrier-0106.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -16,15 +15,13 @@ models:
         model:   intel/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.xml
         weights: intel/vehicle-license-plate-detection-barrier-0106/FP16/vehicle-license-plate-detection-barrier-0106.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
-          - INT8
-        model:   intel/vehicle-license-plate-detection-barrier-0106/INT8/vehicle-license-plate-detection-barrier-0106.xml
-        weights: intel/vehicle-license-plate-detection-barrier-0106/INT8/vehicle-license-plate-detection-barrier-0106.bin
+          - FP32-INT8
+        model:   intel/vehicle-license-plate-detection-barrier-0106/FP32-INT8/vehicle-license-plate-detection-barrier-0106.xml
+        weights: intel/vehicle-license-plate-detection-barrier-0106/FP32-INT8/vehicle-license-plate-detection-barrier-0106.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
     datasets:
       - name: vehicle_license_plate_detection
@@ -55,3 +52,5 @@ models:
             allow_multiple_matches_per_ignored: True
             distinct_conf: False
             presenter: print_vector
+
+global_definitions: ../dataset_definitions.yml

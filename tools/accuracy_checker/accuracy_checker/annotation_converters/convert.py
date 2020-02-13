@@ -32,7 +32,7 @@ from .format_converter import BaseFormatConverter
 
 def build_argparser():
     parser = ArgumentParser(
-        description="Converts annotation form a arbitrary format to accuracy-checker specific format", add_help=False
+        description="Converts annotation form an arbitrary format to accuracy-checker specific format", add_help=False
     )
     parser.add_argument(
         "converter",
@@ -74,7 +74,7 @@ def make_subset(annotation, size, seed=666):
 
         subsample_set = OrderedSet()
         potential_ann_ind = np.random.choice(len(annotation), size, replace=False)
-        for ann_ind in potential_ann_ind:
+        for ann_ind in potential_ann_ind: # pylint: disable=E1133
             annotation_for_subset = annotation[ann_ind]
             positive_pairs = annotation_for_subset.positive_pairs
             negative_pairs = annotation_for_subset.negative_pairs
@@ -147,10 +147,16 @@ def main():
 
 def save_annotation(annotation, meta, annotation_file, meta_file):
     if annotation_file:
+        annotation_dir = annotation_file.parent
+        if not annotation_dir.exists():
+            annotation_dir.mkdir(parents=True)
         with annotation_file.open('wb') as file:
             for representation in annotation:
                 representation.dump(file)
     if meta_file and meta:
+        meta_dir = meta_file.parent
+        if not meta_dir.exists():
+            meta_dir.mkdir(parents=True)
         with meta_file.open('wt') as file:
             json.dump(meta, file)
 

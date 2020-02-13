@@ -71,4 +71,9 @@ Object classifier according to ImageNet classes, name - `prob`, shape - `1,1000`
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/readme.md]()
+The original model is distributed under the following
+[license](https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_alexnet/readme.md):
+
+```
+This model is released for unrestricted use.
+```

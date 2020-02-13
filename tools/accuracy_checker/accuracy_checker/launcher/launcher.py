@@ -137,10 +137,12 @@ class Launcher(ClassProvider):
         return meta
 
     @staticmethod
-    def fit_to_input(data, layer_name, layout):
+    def fit_to_input(data, layer_name, layout, precision):
         if len(np.shape(data)) == 4:
-            return np.transpose(data, layout)
-        return np.array(data)
+            data = np.transpose(data, layout)
+        else:
+            data = np.array(data)
+        return data.astype(precision) if precision else data
 
     def inputs_info_for_meta(self):
         return {
@@ -151,6 +153,7 @@ class Launcher(ClassProvider):
     @property
     def name(self):
         return self.__provider__
+
 
 def unsupported_launcher(name, error_message=None):
     class UnsupportedLauncher(Launcher):
@@ -179,6 +182,7 @@ def create_launcher(launcher_config, delayed_model_loading=False):
     """
     Args:
         launcher_config: launcher configuration file entry.
+        delayed_model_loading: allows postpone model loading to the launcher
     Returns:
         framework-specific launcher object.
     """

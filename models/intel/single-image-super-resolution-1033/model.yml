@@ -13,34 +13,32 @@
 # limitations under the License.
 
 description: >-
-  An Attention-Based Approach for Single Image Super Resolution <https://arxiv.org/pdf/1807.06779.pdf>
-  but with reduced number of channels and changes in network achitecture. It enhances
-  the resolution of the input image by a factor of 3.
+  Super resolution model
 task_type: image_processing
 files:
   - name: FP32/single-image-super-resolution-1033.xml
-    size: 23463
-    sha256: 7c5526e47a0299af889d206b5a64e96fbdccbd980701d16cc6886aa545173d3b
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.xml
+    size: 36334
+    sha256: 1d51ca5a62c9b35532414cffd9c7b6dd874d1dfa8e728079161f748e9729ca0e
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.xml
   - name: FP32/single-image-super-resolution-1033.bin
-    size: 121720
-    sha256: 4f788a5d05373a8e68a20df7bde17347dbaf1531db0ed7ca340977c0dcb18b7a
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.bin
+    size: 121812
+    sha256: 47b0c1d3b28c1193fdb7838cebdad29e010abfdc7664ef06257bd659f4f08474
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/single-image-super-resolution-1033/FP32/single-image-super-resolution-1033.bin
   - name: FP16/single-image-super-resolution-1033.xml
-    size: 23449
-    sha256: 8a2b2833ed71fbf2d6661bad264b61500169dabcc852f3181c8d87900f077865
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.xml
+    size: 36318
+    sha256: ede3cf9c574810450aeb6f14dfe7ddfbdfe5d1e47e277d7c5aea7987ca0bb802
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.xml
   - name: FP16/single-image-super-resolution-1033.bin
-    size: 60880
-    sha256: 0c0bd11d77f6a23242592db1c6ae0a3f0c8b472952aa3c2f5449cc448f68d90f
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.bin
-  - name: INT8/single-image-super-resolution-1033.xml
-    size: 36987
-    sha256: 68b7200b8d656473297f7febf9443965a260852061a724d4d7589a23bc93410a
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1033/INT8/single-image-super-resolution-1033.xml
-  - name: INT8/single-image-super-resolution-1033.bin
-    size: 121720
-    sha256: 02e947ddd1aa362f1a48cda45aa716637b32b0d19dae88b5bbe15bff0a4a2276
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/single-image-super-resolution-1033/INT8/single-image-super-resolution-1033.bin
+    size: 60970
+    sha256: 771dd5b865006aea3a04a6b5e858c34fe619913d8aa1279cd9b6a40c05ef0df7
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/single-image-super-resolution-1033/FP16/single-image-super-resolution-1033.bin
+  - name: FP32-INT8/single-image-super-resolution-1033.xml
+    size: 113556
+    sha256: 8e1b65fd3cdcc6d016b1495e7f73f5f353446df71151619800dc5950b2c23ad8
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/single-image-super-resolution-1033/FP32-INT8/single-image-super-resolution-1033.xml
+  - name: FP32-INT8/single-image-super-resolution-1033.bin
+    size: 124040
+    sha256: d066c186597ae2d74f42250945a8f0c315f284e4d1fd7126c263228cc94e8c13
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/single-image-super-resolution-1033/FP32-INT8/single-image-super-resolution-1033.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

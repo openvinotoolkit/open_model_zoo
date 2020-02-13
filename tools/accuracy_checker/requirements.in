@@ -1,0 +1,10 @@
+nibabel
+numpy>=1.11,<1.18
+pillow>=2.6.1
+py-cpuinfo<=4.0
+PyYAML
+scikit-learn
+scipy
+shapely
+tqdm
+yamlloader

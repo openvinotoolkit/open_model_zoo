@@ -17,7 +17,7 @@ const int TrackedObject::UNKNOWN_LABEL_IDX = -1;
 
 class KuhnMunkres::Impl {
 public:
-    Impl() : n_() {}
+    Impl(bool greedy) : n_(), greedy_(greedy) {}
 
     std::vector<size_t> Solve(const cv::Mat &dissimilarity_matrix) {
         CV_Assert(dissimilarity_matrix.type() == CV_32F);
@@ -131,6 +131,10 @@ public:
 
     void Run() {
         TrySimpleCase();
+
+        if (greedy_)
+            return;
+
         while (!CheckIfOptimumIsFound()) {
             while (true) {
                 auto point = FindUncoveredMinValPos();
@@ -188,9 +192,10 @@ private:
     std::vector<int> is_col_visited_;
 
     int n_;
+    bool greedy_;
 };
 
-KuhnMunkres::KuhnMunkres() { impl_ = std::make_shared<Impl>(); }
+KuhnMunkres::KuhnMunkres(bool greedy) { impl_ = std::make_shared<Impl>(greedy); }
 
 std::vector<size_t> KuhnMunkres::Solve(const cv::Mat &dissimilarity_matrix) {
     CV_Assert(impl_ != nullptr);

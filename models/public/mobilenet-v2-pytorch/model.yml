@@ -36,7 +36,7 @@ files:
       $type: google_drive
       id: 1jlto6HRVD3ipNkAl1lNhDbkBp7HylaqR
 framework: pytorch
-pytorch_to_onnx:
+conversion_to_onnx_args:
   - --model-name=MobileNetV2
   - --model-path=$dl_dir
   - --weights=$dl_dir/mobilenet-v2.pth

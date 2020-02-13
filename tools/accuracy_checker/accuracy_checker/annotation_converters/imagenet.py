@@ -18,10 +18,10 @@ import numpy as np
 
 from ..config import PathField, BoolField
 from ..representation import ClassificationAnnotation
-from ..utils import read_txt, get_path, check_file_existence
+from ..utils import read_txt, get_path, check_file_existence, read_json
 
 from ..topology_types import ImageClassification
-from .format_converter import BaseFormatConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 
 class ImageNetFormatConverter(BaseFormatConverter):
@@ -31,8 +31,8 @@ class ImageNetFormatConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
             'annotation_file': PathField(description="Path to annotation in txt format."),
             'labels_file': PathField(
                 optional=True,
@@ -46,15 +46,19 @@ class ImageNetFormatConverter(BaseFormatConverter):
             'images_dir': PathField(
                 is_directory=True, optional=True,
                 description='path to dataset images, used only for content existence check'
+            ),
+            'dataset_meta_file': PathField(
+                description='path to json file with dataset meta (e.g. label_map, color_encoding)', optional=True
             )
         })
-        return parameters
+        return configuration_parameters
 
     def configure(self):
         self.annotation_file = self.get_value_from_config('annotation_file')
         self.labels_file = self.get_value_from_config('labels_file')
         self.has_background = self.get_value_from_config('has_background')
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
+        self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotation = []
@@ -72,24 +76,37 @@ class ImageNetFormatConverter(BaseFormatConverter):
             if progress_callback is not None and image_id % progress_interval == 0:
                 progress_callback(image_id / num_iterations * 100)
 
-        meta = self._create_meta(self.labels_file, self.has_background) if self.labels_file else None
+        meta = self._create_meta(self.labels_file, self.dataset_meta, self.has_background) or None
 
         return ConverterReturn(annotation, meta, content_errors)
 
     @staticmethod
-    def _create_meta(labels_file, has_background=False):
+    def _create_meta(labels_file, dataset_meta, has_background=False):
         meta = {}
-        labels = {}
-        for i, line in enumerate(read_txt(get_path(labels_file))):
-            index_for_label = i if not has_background else i + 1
-            line = line.strip()
-            label = line[line.find(' ') + 1:]
-            labels[index_for_label] = label
+        label_map = {}
+        if dataset_meta:
+            meta = read_json(dataset_meta)
+            if 'labels' in dataset_meta and 'label_map' not in meta:
+                labels = ['background'] + meta['labels'] if has_background else meta['labels']
+                label_map = dict(enumerate(labels))
+                meta['label_map'] = label_map
+            else:
+                if 'label_map' in meta:
+                    meta['label_map'] = verify_label_map(meta['label_map'])
+                return meta
+
+        if labels_file:
+            label_map = {}
+            for i, line in enumerate(read_txt(get_path(labels_file))):
+                index_for_label = i if not has_background else i + 1
+                line = line.strip()
+                label = line[line.find(' ') + 1:]
+                label_map[index_for_label] = label
+
+            meta['label_map'] = label_map
 
         if has_background:
-            labels[0] = 'background'
-            meta['backgound_label'] = 0
-
-        meta['label_map'] = labels
+            label_map[0] = 'background'
+            meta['background_label'] = 0
 
         return meta

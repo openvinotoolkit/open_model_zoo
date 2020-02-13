@@ -15,14 +15,14 @@ limitations under the License.
 """
 
 from ..config import ConfigValidator, StringField
-from .preprocessor import Preprocessor
+from .preprocessor import Preprocessor, MULTI_INFER_PREPROCESSORS
 
 
 class PreprocessingExecutor:
     def __init__(self, processors=None, dataset_name='custom', dataset_meta=None, input_shapes=None):
         self.processors = []
         self.dataset_meta = dataset_meta
-        self.input_shapes = input_shapes
+        self._multi_infer_transformations = False
 
         if not processors:
             return
@@ -36,10 +36,15 @@ class PreprocessingExecutor:
             type_ = processor.get(identifier)
             preprocessor_config.validate(processor, type_)
             preprocessor = Preprocessor.provide(
-                processor[identifier], config=processor, name=type_, input_shapes=input_shapes
+                processor[identifier], config=processor, name=type_
             )
+            if processor[identifier] in MULTI_INFER_PREPROCESSORS:
+                self._multi_infer_transformations = True
 
             self.processors.append(preprocessor)
+
+        if input_shapes is not None:
+            self.input_shapes = input_shapes
 
     def __call__(self, context, *args, **kwargs):
         batch_data = context.data_batch
@@ -54,6 +59,20 @@ class PreprocessingExecutor:
                 )
 
         return images
+
+    @property
+    def has_multi_infer_transformations(self):
+        return self._multi_infer_transformations
+
+    @property
+    def input_shapes(self):
+        return self._input_shapes
+
+    @input_shapes.setter
+    def input_shapes(self, input_shapes):
+        self._input_shapes = input_shapes
+        for preprocessor in self.processors:
+            preprocessor.set_input_shape(input_shapes)
 
 
 class PreprocessorConfig(ConfigValidator):

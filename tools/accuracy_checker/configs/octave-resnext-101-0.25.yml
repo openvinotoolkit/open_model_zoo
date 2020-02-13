@@ -6,7 +6,7 @@ models:
       - framework: mxnet
         model: public/octave-resnext-101-0.25/checkpoint-0-0000.params
         adapter: classification
-        inputs: 
+        inputs:
           - name: 'data'
             type: INPUT
             shape: 3,224,224
@@ -28,9 +28,9 @@ models:
 
           - type: normalization
             mean: (124,117,104)
-            std: 59.88  
+            std: 59.88
 
-        # Using accuracy metric, achieved result of public model - 79.6 / 94.5 (top 1 and top 5 respectively)
+            # Using accuracy metric, achieved result of public model - 79.6 / 94.5 (top 1 and top 5 respectively)
 
   # DLSDK inference
   - name: octave-resnext-101-0.25
@@ -42,7 +42,6 @@ models:
         model:   public/octave-resnext-101-0.25/FP32/octave-resnext-101-0.25.xml
         weights: public/octave-resnext-101-0.25/FP32/octave-resnext-101-0.25.bin
         adapter: classification
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -50,7 +49,6 @@ models:
         model:   public/octave-resnext-101-0.25/FP16/octave-resnext-101-0.25.xml
         weights: public/octave-resnext-101-0.25/FP16/octave-resnext-101-0.25.bin
         adapter: classification
-        cpu_extensions: AUTO
 
     datasets:
       - name: imagenet_1000_classes
@@ -65,4 +63,5 @@ models:
           - type: crop
             size: 224
 
-        # Using accuracy metric, achieved result of public model - 79.6 / 94.5 (top 1 and top 5 respectively)
+            # Using accuracy metric, achieved result of public model - 79.6 / 94.5 (top 1 and top 5 respectively)
+global_definitions: ../dataset_definitions.yml

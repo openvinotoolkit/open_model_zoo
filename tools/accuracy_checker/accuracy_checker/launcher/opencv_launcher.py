@@ -30,11 +30,13 @@ BACKEND_REGEX = r'(?P<backend>ocv|ie)?'
 
 class OpenCVLauncherConfigValidator(LauncherConfigValidator):
     def validate(self, entry, field_uri=None):
+        self.fields['inputs'].optional = self.delayed_model_loading
         super().validate(entry, field_uri)
-        inputs = entry.get('inputs')
-        for input_layer in inputs:
-            if 'shape' not in input_layer:
-                raise ConfigError('input value should have shape field')
+        if not self.delayed_model_loading:
+            inputs = entry.get('inputs')
+            for input_layer in inputs:
+                if 'shape' not in input_layer:
+                    raise ConfigError('input value should have shape field')
 
 
 class OpenCVLauncher(Launcher):
@@ -75,22 +77,16 @@ class OpenCVLauncher(Launcher):
 
     def __init__(self, config_entry: dict, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
+        self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
-        opencv_launcher_config = OpenCVLauncherConfigValidator('OpenCV_Launcher', fields=self.parameters())
+        opencv_launcher_config = OpenCVLauncherConfigValidator(
+            'OpenCV_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
+        )
         opencv_launcher_config.validate(self.config)
-
-        self.model = str(self.get_value_from_config('model'))
-        self.weights = str(self.get_value_from_config('weights'))
-
-        self.network = cv2.dnn.readNet(self.model, self.weights)
-
         match = re.match(BACKEND_REGEX, self.get_value_from_config('backend').lower())
         selected_backend = match.group('backend')
         print_info('backend: {}'.format(selected_backend))
-        backend = OpenCVLauncher.OPENCV_BACKENDS.get(selected_backend)
-
-        self.network.setPreferableBackend(backend)
-
+        self.backend = OpenCVLauncher.OPENCV_BACKENDS.get(selected_backend)
         match = re.match(DEVICE_REGEX, self.get_value_from_config('device').lower())
         selected_device = match.group('device')
 
@@ -99,21 +95,18 @@ class OpenCVLauncher(Launcher):
             if ('FP16' in tags) and (selected_device == 'gpu'):
                 selected_device = 'gpu_fp16'
 
-        target = OpenCVLauncher.TARGET_DEVICES.get(selected_device)
+        self.target = OpenCVLauncher.TARGET_DEVICES.get(selected_device)
 
-        if target is None:
+        if self.target is None:
             raise ConfigError('{} is not supported device'.format(selected_device))
 
-        self.network.setPreferableTarget(target)
-
-        inputs = self.config['inputs']
-
-        def parse_shape_value(shape):
-            return tuple([1, *[int(elem) for elem in get_or_parse_value(shape, ())]])
-
-        self._inputs_shapes = OrderedDict({elem.get('name'): parse_shape_value(elem.get('shape')) for elem in inputs})
-        self.network.setInputsNames(list(self._inputs_shapes.keys()))
-        self.output_names = self.network.getUnconnectedOutLayersNames()
+        if not self._delayed_model_loading:
+            self.model = self.get_value_from_config('model')
+            self.weights = self.get_value_from_config('weights')
+            self.network = self.create_network(self.model, self.weights)
+            self._inputs_shapes = self.get_inputs_from_config(self.config)
+            self.network.setInputsNames(list(self._inputs_shapes.keys()))
+            self.output_names = self.network.getUnconnectedOutLayersNames()
 
     @property
     def inputs(self):
@@ -144,9 +137,7 @@ class OpenCVLauncher(Launcher):
             for blob_name in self._inputs_shapes:
                 self.network.setInput(input_blobs[blob_name].astype(np.float32), blob_name)
             list_prediction = self.network.forward(self.output_names)
-            dict_result = {
-                output_name: output_value for output_name, output_value in zip(self.output_names, list_prediction)
-            }
+            dict_result = dict(zip(self.output_names, list_prediction))
             results.append(dict_result)
 
         if metadata is not None:
@@ -157,6 +148,24 @@ class OpenCVLauncher(Launcher):
 
     def predict_async(self, *args, **kwargs):
         raise ValueError('OpenCV Launcher does not support async mode yet')
+
+    def create_network(self, model, weights):
+        network = cv2.dnn.readNet(str(model), str(weights))
+        network.setPreferableBackend(self.backend)
+        network.setPreferableTarget(self.target)
+
+        return network
+
+    @staticmethod
+    def get_inputs_from_config(config):
+        inputs = config.get('inputs')
+        if not inputs:
+            raise ConfigError('inputs should be provided in config')
+
+        def parse_shape_value(shape):
+            return tuple([1, *[int(elem) for elem in get_or_parse_value(shape, ())]])
+
+        return OrderedDict([(elem.get('name'), parse_shape_value(elem.get('shape'))) for elem in inputs])
 
     def release(self):
         """
