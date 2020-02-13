@@ -1,0 +1,35 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  ResNet-152 <https://arxiv.org/pdf/1512.03385.pdf>
+task_type: classification
+files:
+  - name: resnet-152.prototxt
+    size: 98034
+    sha256: 9e0fc0df6ac038048a87c63d56fd534471b6b4f39d55651beaf201763e028489
+    source: https://onedrive.live.com/download?cid=4006CBB8476FF777&resid=4006CBB8476FF777%2117893&authkey=AAFW2-FVoxeVRck
+  - name: resnet-152.caffemodel
+    size: 241444171
+    sha256: 6253c4c4132c0b25c112b166629aa57dcaeec044a4c68ac9f003b6c801329d55
+    source: https://onedrive.live.com/download?cid=4006CBB8476FF777&resid=4006CBB8476FF777%2117897&authkey=AAFW2-FVoxeVRck
+model_optimizer_args:
+  - --input_shape=[1,3,224,224]
+  - --mean_values=data[104.0,117.0,123.0]
+  - --input=data
+  - --output=prob
+  - --input_model=$dl_dir/resnet-152.caffemodel
+  - --input_proto=$dl_dir/resnet-152.prototxt
+framework: caffe
+license: https://raw.githubusercontent.com/KaimingHe/deep-residual-networks/master/LICENSE

@@ -5,5 +5,4 @@
 ie_add_sample(NAME mask_rcnn_demo
               SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
               HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/mask_rcnn_demo.h"
-              DEPENDENCIES format_reader
               OPENCV_DEPENDENCIES imgcodecs)

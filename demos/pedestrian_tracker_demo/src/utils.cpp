@@ -14,7 +14,6 @@
 #include <string>
 #include <set>
 #include <memory>
-#include <ext_list.hpp>
 
 using namespace InferenceEngine;
 
@@ -83,7 +82,6 @@ LoadInferenceEngine(const std::vector<std::string>& devices,
 
         /** Load extensions for the CPU device **/
         if ((device.find("CPU") != std::string::npos)) {
-            ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
             if (!custom_cpu_library.empty()) {
                 // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                 auto extension_ptr = make_so_pointer<IExtension>(custom_cpu_library);
@@ -92,12 +90,6 @@ LoadInferenceEngine(const std::vector<std::string>& devices,
         } else if (!custom_cldnn_kernels.empty()) {
             // Load Extensions for other plugins not CPU
             ie.SetConfig({{PluginConfigParams::KEY_CONFIG_FILE, custom_cldnn_kernels}}, "GPU");
-        }
-
-        if (device.find("CPU") != std::string::npos) {
-            ie.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}}, "CPU");
-        } else if (device.find("GPU") != std::string::npos) {
-            ie.SetConfig({{PluginConfigParams::KEY_DYN_BATCH_ENABLED, PluginConfigParams::YES}}, "GPU");
         }
 
         if (should_use_perf_counter)

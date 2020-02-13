@@ -1,0 +1,45 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Multiclass (BG -  road -  curbs -  marks) segmentation based on ENET -  using depthwise
+  convolutions and without ELU operations and without concatenation
+task_type: semantic_segmentation
+files:
+  - name: FP32/road-segmentation-adas-0001.xml
+    size: 357682
+    sha256: 7c1fabbec883c4297e7b82037afd8262c8f1afba3bb23863bbcc6177fce91706
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.xml
+  - name: FP32/road-segmentation-adas-0001.bin
+    size: 737200
+    sha256: ae43e7d5dd1ad62cbe62a2d8aa5dd3721b7581f26763ba3c69660da2a91c3d87
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/road-segmentation-adas-0001/FP32/road-segmentation-adas-0001.bin
+  - name: FP16/road-segmentation-adas-0001.xml
+    size: 357527
+    sha256: 0e90b547c84bdac869f5d9e227fc2df9da64f4de787886ac4d5c0d89b73344d7
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.xml
+  - name: FP16/road-segmentation-adas-0001.bin
+    size: 368632
+    sha256: ddbc38aaee27ed8166d1190519380a91cdea8cf7f4bc71585d939fd6ead6b159
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/road-segmentation-adas-0001/FP16/road-segmentation-adas-0001.bin
+  - name: FP32-INT8/road-segmentation-adas-0001.xml
+    size: 1057411
+    sha256: 44d6a4fac2f88498c465ebe83d2a2189e16e12f389f7fc4c33a564cc99836a0c
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/road-segmentation-adas-0001/FP32-INT8/road-segmentation-adas-0001.xml
+  - name: FP32-INT8/road-segmentation-adas-0001.bin
+    size: 783048
+    sha256: 6c6cb1de3831c294f79cc6d693edb5d36874608dd4bfd45b2ee88dc6df390b98
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/road-segmentation-adas-0001/FP32-INT8/road-segmentation-adas-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

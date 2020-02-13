@@ -34,9 +34,10 @@ public:
     static const char unknown_label[];
     static const int unknown_id;
     EmbeddingsGallery(const std::string& ids_list, double threshold, int min_size_fr,
-                      bool crop_gallery, detection::FaceDetection& detector,
+                      bool crop_gallery, const detection::DetectorConfig &detector_config,
                       const VectorCNN& landmarks_det,
-                      const VectorCNN& image_reid);
+                      const VectorCNN& image_reid,
+                      bool use_greedy_matcher=false);
     size_t size() const;
     std::vector<int> GetIDsByEmbeddings(const std::vector<cv::Mat>& embeddings) const;
     std::string GetLabelByID(int id) const;
@@ -55,6 +56,7 @@ private:
     std::vector<int> idx_to_id;
     double reid_threshold;
     std::vector<GalleryObject> identities;
+    bool use_greedy_matcher;
 };
 
 void AlignFaces(std::vector<cv::Mat>* face_images,

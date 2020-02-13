@@ -8,7 +8,7 @@ The demo also relies on the following auxiliary networks:
 * `head-pose-estimation-adas-0001`, which estimates head pose in Tait-Bryan angles, serving as an input for gaze estimation model
 * `facial-landmarks-35-adas-0002`, which estimates coordinates of facial landmarks for detected faces. The keypoints at the corners of eyes are used to locate eyes regions required for the gaze estimation model
 
-For more information about the pre-trained models, refer to the [model documentation](../../intel_models/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
 Other demo objectives are:
 * Video/Camera as inputs, via OpenCV*
@@ -52,6 +52,7 @@ Options:
     -pc                      Optional. Enable per-layer performance report.
     -r                       Optional. Output inference results as raw values.
     -t                       Optional. Probability threshold for Face Detector. The default value is 0.5.
+    -u                       Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields an error message.

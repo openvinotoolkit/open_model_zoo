@@ -72,9 +72,8 @@ In a mean time your app can continue :
 
 ```cpp
 // load network
-CNNNetReader network_reader;
-network_reader.ReadNetwork("Model.xml");
-network_reader.ReadWeights("Model.bin");
+InferenceEngine::Core ie;
+auto network = ie.ReadNetwork("Model.xml");
 // populate inputs etc
 auto input = async_infer_request.GetBlob(input_name);
 ...
@@ -120,6 +119,8 @@ Options:
     -r                        Optional. Inference results as raw values.
     -t                        Optional. Probability threshold for detections.
     -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
+    -no_show                  Optional. Do not show processed video.
+    -u                        Optional. List of monitors to show initially.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

@@ -18,6 +18,11 @@ from enum import Enum
 
 import numpy as np
 
+try:
+    import pycocotools.mask as maskUtils
+except ImportError:
+    maskUtils = None
+
 from .base_representation import BaseRepresentation
 from ..data_readers import BaseReader
 from ..utils import remove_difficult
@@ -29,6 +34,16 @@ class GTMaskLoader(Enum):
     SCIPY = 2
     NIFTI = 3
     NUMPY = 4
+    NIFTI_CHANNELS_FIRST = 5
+
+LOADERS_MAPPING = {
+    'opencv': GTMaskLoader.OPENCV,
+    'pillow': GTMaskLoader.PILLOW,
+    'scipy': GTMaskLoader.SCIPY,
+    'nifti': GTMaskLoader.NIFTI,
+    'nifti_channels_first': GTMaskLoader.NIFTI_CHANNELS_FIRST,
+    'numpy': GTMaskLoader.NUMPY
+}
 
 
 class SegmentationRepresentation(BaseRepresentation):
@@ -41,6 +56,7 @@ class SegmentationAnnotation(SegmentationRepresentation):
         GTMaskLoader.OPENCV: 'opencv_imread',
         GTMaskLoader.SCIPY: 'scipy_imread',
         GTMaskLoader.NIFTI: 'nifti_reader',
+        GTMaskLoader.NIFTI_CHANNELS_FIRST: {'type': 'nifti_reader', 'channels_first': True},
         GTMaskLoader.NUMPY: 'numpy_reader'
     }
 
@@ -67,7 +83,12 @@ class SegmentationAnnotation(SegmentationRepresentation):
 
     def _load_mask(self):
         if self._mask is None:
-            loader = BaseReader.provide(self.LOADERS.get(self._mask_loader), self.metadata['data_source'])
+            loader_config = self.LOADERS.get(self._mask_loader)
+            data_source = self.metadata.get('segmentation_masks_source', self.metadata['data_source'])
+            if isinstance(loader_config, str):
+                loader = BaseReader.provide(loader_config, data_source)
+            else:
+                loader = BaseReader.provide(loader_config['type'], data_source, config=loader_config)
             if self._mask_loader == GTMaskLoader.PILLOW:
                 loader.convert_to_rgb = False
             mask = loader.read(self._mask_path)
@@ -95,15 +116,14 @@ class BrainTumorSegmentationAnnotation(SegmentationAnnotation):
 
 
 class BrainTumorSegmentationPrediction(SegmentationPrediction):
-    pass
+    def __init__(self, identifiers, mask, label_order=(0, 1, 2, 3)):
+        super().__init__(identifiers, mask)
+        self.label_order = label_order
 
 
 class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
     def __init__(self, identifier, mask, labels):
-        try:
-            # pylint: disable=W0611
-            import pycocotools.mask as maskUtils
-        except ImportError:
+        if not maskUtils:
             raise ValueError('can not create representation')
         super().__init__(identifier)
         self.raw_mask = mask
@@ -128,10 +148,10 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
 
     @staticmethod
     def _convert_mask(mask, height, width):
-        if isinstance(mask, list):
+        if maskUtils and isinstance(mask, list):
             rles = maskUtils.frPyObjects(mask, height, width)
             rle = maskUtils.merge(rles)
-        elif isinstance(mask['counts'], list):
+        elif maskUtils and isinstance(mask['counts'], list):
             # uncompressed RLE
             rle = maskUtils.frPyObjects(mask, height, width)
         else:
@@ -155,7 +175,7 @@ class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):
         masks = self.mask
         areas = []
         for mask in masks:
-            areas.append(pycocotools.mask.area(mask))
+            areas.append(maskUtils.area(mask))
         return areas
 
 

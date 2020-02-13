@@ -1,0 +1,6 @@
+joblib==0.14.1            # via scikit-learn
+nibabel==3.0.1
+numpy==1.18.1 ; python_version >= "3.4"
+scikit-learn==0.22.1
+scipy==1.4.1
+tqdm==4.42.0

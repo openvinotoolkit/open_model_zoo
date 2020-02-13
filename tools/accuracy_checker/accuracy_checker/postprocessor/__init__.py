@@ -42,7 +42,11 @@ from .zoom_segmentation_mask import ZoomSegMask
 from .crop_segmentation_mask import CropSegmentationMask
 from .clip_segmentation_mask import ClipSegmentationMask
 from .normalize_boxes import NormalizeBoxes
-from .resample_segmentation_prediction import SegmentationPredictionResample
+from .brats_postprocessing import SegmentationPredictionResample, TransformBratsPrediction
+from .extract_answers_tokens import ExtractSQUADPrediction
+from .translate_3d_poses import Translate3dPoses
+from .normalize_recomendation import MinMaxNormalizeRecommendation, SigmoidNormalizeRecommendation
+from .resize_super_resolution import ResizeSuperResolution
 
 __all__ = [
     'Postprocessor',
@@ -71,7 +75,18 @@ __all__ = [
     'ZoomSegMask',
     'CropSegmentationMask',
     'ClipSegmentationMask',
-    'SegmentationPredictionResample',
 
-    'NormalizeLandmarksPoints'
+    'SegmentationPredictionResample',
+    'TransformBratsPrediction',
+
+    'NormalizeLandmarksPoints',
+
+    'ExtractSQUADPrediction',
+
+    'Translate3dPoses',
+
+    'SigmoidNormalizeRecommendation',
+    'MinMaxNormalizeRecommendation',
+
+    'ResizeSuperResolution'
 ]

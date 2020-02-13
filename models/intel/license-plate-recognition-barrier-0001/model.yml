@@ -1,0 +1,44 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Chinese license plate recognition
+task_type: optical_character_recognition
+files:
+  - name: FP32/license-plate-recognition-barrier-0001.xml
+    size: 48904
+    sha256: 1440ca7fe1057204c53f977a14b47b51750fd2a6b43b82f9a22720837aca7228
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.xml
+  - name: FP32/license-plate-recognition-barrier-0001.bin
+    size: 4871940
+    sha256: 3ef022a17b5f303c676c9c3a23669d09a257a54acdb894b6db295acc141cc4dd
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/license-plate-recognition-barrier-0001/FP32/license-plate-recognition-barrier-0001.bin
+  - name: FP16/license-plate-recognition-barrier-0001.xml
+    size: 48885
+    sha256: 7af8d4457e30826bf292f7b4058546cac6f498afa46cf1ae64b923b93f0dc739
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.xml
+  - name: FP16/license-plate-recognition-barrier-0001.bin
+    size: 2436038
+    sha256: 184d9312c71b660639898edb46b85a99477e8d6a756b2b611e71a3afad5f25c1
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/license-plate-recognition-barrier-0001/FP16/license-plate-recognition-barrier-0001.bin
+  - name: FP32-INT8/license-plate-recognition-barrier-0001.xml
+    size: 105464
+    sha256: 77a4a1eed9f54439cbddffb5e5f0068327af530e023135b273bff8b4b43c81f9
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/license-plate-recognition-barrier-0001/FP32-INT8/license-plate-recognition-barrier-0001.xml
+  - name: FP32-INT8/license-plate-recognition-barrier-0001.bin
+    size: 4882552
+    sha256: 309f08580e1284a702c4d661ffc64cb370dfeb66622724b8dfb1e2ebee646720
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/license-plate-recognition-barrier-0001/FP32-INT8/license-plate-recognition-barrier-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

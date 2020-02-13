@@ -15,9 +15,9 @@ limitations under the License.
 """
 
 from collections import namedtuple
-from enum import Enum
 import numpy as np
 
+from .utils import Color, color_format
 from .dependency import ClassProvider
 from .logging import print_info
 
@@ -28,28 +28,20 @@ EvaluationResult = namedtuple(
 )
 
 
-class Color(Enum):
-    PASSED = 0
-    FAILED = 1
-
-
-def color_format(s, color=Color.PASSED):
-    if color == Color.PASSED:
-        return "\x1b[0;32m{}\x1b[0m".format(s)
-    return "\x1b[0;31m{}\x1b[0m".format(s)
-
-
 class BasePresenter(ClassProvider):
     __provider_type__ = "presenter"
 
-    def write_result(self, evaluation_result, output_callback=None, ignore_results_formatting=False):
+    def write_result(self, evaluation_result, ignore_results_formatting=False):
+        raise NotImplementedError
+
+    def extract_result(self, evaluation_result):
         raise NotImplementedError
 
 
 class ScalarPrintPresenter(BasePresenter):
     __provider__ = "print_scalar"
 
-    def write_result(self, evaluation_result: EvaluationResult, output_callback=None, ignore_results_formatting=False):
+    def write_result(self, evaluation_result: EvaluationResult, ignore_results_formatting=False):
         value, reference, name, _, threshold, meta = evaluation_result
         value = np.mean(value)
         postfix, scale, result_format = get_result_format_parameters(meta, ignore_results_formatting)
@@ -61,11 +53,21 @@ class ScalarPrintPresenter(BasePresenter):
             value, name, threshold, difference, postfix=postfix, scale=scale, result_format=result_format
         )
 
+    def extract_result(self, evaluation_result):
+        value, ref, name, metric_type, _, meta = evaluation_result
+        result_dict = {
+            'name': name,
+            'value': np.mean(value),
+            'type': metric_type,
+            'ref': ref or ''
+        }
+        return result_dict, meta
+
 
 class VectorPrintPresenter(BasePresenter):
     __provider__ = "print_vector"
 
-    def write_result(self, evaluation_result: EvaluationResult, output_callback=None, ignore_results_formatting=False):
+    def write_result(self, evaluation_result: EvaluationResult, ignore_results_formatting=False):
         value, reference, name, _, threshold, meta = evaluation_result
         if threshold:
             threshold = float(threshold)
@@ -109,6 +111,37 @@ class VectorPrintPresenter(BasePresenter):
                 result_format=result_format
             )
 
+    def extract_result(self, evaluation_result):
+        value, reference, name, metric_type, _, meta = evaluation_result
+        value_names = ['{}@{}'.format(name, value_name) for value_name in meta.get('names', range(0, len(value)))]
+        if np.isscalar(value) or np.size(value) == 1:
+            if not np.isscalar(value):
+                value = value[0]
+            result_dict = {
+                'name': value_names[0] if 'names' in meta else name,
+                'value':value,
+                'type': metric_type,
+                'ref': reference or ''
+            }
+            return result_dict, meta
+        if meta.get('calculate_mean', True):
+            value_names.append('{}@mean'.format(name))
+            mean_value = np.mean(value)
+            value = np.append(value, mean_value)
+            meta['names'] = value_names
+        per_value_meta = [meta for _ in value_names]
+        results = []
+        for idx, value_item in enumerate(value):
+            results.append(
+                {
+                    'name': value_names[idx],
+                    'value': value_item,
+                    'type': metric_type,
+                    'ref': ''
+                }
+            )
+        return results, per_value_meta
+
 
 def write_scalar_result(
         res_value, name, threshold=None, diff_with_ref=None, value_name=None,
@@ -131,14 +164,6 @@ def write_scalar_result(
 
 def compare_with_ref(reference, res_value, scale):
     return abs(reference - (res_value * scale))
-
-
-class ReturnValuePresenter(BasePresenter):
-    __provider__ = "return_value"
-
-    def write_result(self, evaluation_result: EvaluationResult, output_callback=None, ignore_results_formatting=False):
-        if output_callback:
-            output_callback(evaluation_result)
 
 
 def get_result_format_parameters(meta, use_default_formatting):

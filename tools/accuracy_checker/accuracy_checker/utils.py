@@ -20,27 +20,37 @@ import itertools
 import json
 import os
 import pickle
+from enum import Enum
 
 from pathlib import Path
 from typing import Union
 from warnings import warn
+from collections import MutableSet
 
-from shapely.geometry.polygon import Polygon
 import numpy as np
 import yaml
-import yamlloader
 
 try:
     import lxml.etree as et
 except ImportError:
     import xml.etree.cElementTree as et
 
+try:
+    from shapely.geometry.polygon import Polygon
+except ImportError:
+    Polygon = None
+
+try:
+    from yamlloader.ordereddict import Loader as orddict_loader
+except ImportError:
+    orddict_loader = None
+
 
 def concat_lists(*lists):
     return list(itertools.chain(*lists))
 
 
-def get_path(entry: Union[str, Path], is_directory=False, check_exists=True):
+def get_path(entry: Union[str, Path], is_directory=False, check_exists=True, file_or_directory=False):
     try:
         path = Path(entry)
     except TypeError:
@@ -53,12 +63,13 @@ def get_path(entry: Union[str, Path], is_directory=False, check_exists=True):
     if not os.path.exists(str(path)):
         raise FileNotFoundError('{}: {}'.format(os.strerror(errno.ENOENT), path))
 
-    if is_directory and not path.is_dir():
-        raise NotADirectoryError('{}: {}'.format(os.strerror(errno.ENOTDIR), path))
+    if not file_or_directory:
+        if is_directory and not path.is_dir():
+            raise NotADirectoryError('{}: {}'.format(os.strerror(errno.ENOTDIR), path))
 
-    # if it exists it is either file (or valid symlink to file) or directory (or valid symlink to directory)
-    if not is_directory and not path.is_file():
-        raise IsADirectoryError('{}: {}'.format(os.strerror(errno.EISDIR), path))
+        # if it exists it is either file (or valid symlink to file) or directory (or valid symlink to directory)
+        if not is_directory and not path.is_file():
+            raise IsADirectoryError('{}: {}'.format(os.strerror(errno.EISDIR), path))
 
     return path
 
@@ -89,7 +100,7 @@ def string_to_tuple(string, casting_type=float):
     processed = processed.replace(')', '')
     processed = processed.split(',')
 
-    return tuple([casting_type(entry) for entry in processed])
+    return tuple([casting_type(entry) for entry in processed]) if not casting_type is None else tuple(processed)
 
 
 def string_to_list(string):
@@ -213,11 +224,13 @@ def in_interval(value, interval):
 
     return minimum <= value < maximum
 
+
 def is_config_input(input_name, config_inputs):
     for config_input in config_inputs:
         if config_input['name'] == input_name:
             return True
     return False
+
 
 def finalize_metric_result(values, names):
     result_values, result_names = [], []
@@ -260,8 +273,8 @@ def read_txt(file: Union[str, Path], sep='\n', **kwargs):
     def is_empty(string):
         return not string or string.isspace()
 
-    with get_path(file).open() as content:
-        content = content.read(**kwargs).split(sep)
+    with get_path(file).open(**kwargs) as content:
+        content = content.read().split(sep)
         content = list(filter(lambda string: not is_empty(string), content))
 
         return list(map(str.strip, content))
@@ -269,6 +282,7 @@ def read_txt(file: Union[str, Path], sep='\n', **kwargs):
 
 def read_xml(file: Union[str, Path], *args, **kwargs):
     return et.parse(str(get_path(file)), *args, **kwargs).getroot()
+
 
 def read_json(file: Union[str, Path], *args, **kwargs):
     with get_path(file).open() as content:
@@ -282,7 +296,10 @@ def read_pickle(file: Union[str, Path], *args, **kwargs):
 
 def read_yaml(file: Union[str, Path], *args, **kwargs):
     with get_path(file).open() as content:
-        return yaml.load(content, *args, Loader=yamlloader.ordereddict.Loader, **kwargs)
+        loader = orddict_loader or yaml.SafeLoader
+        if not orddict_loader:
+            warn('yamlloader is not installed. YAML files order is not preserved. it can be sufficient for some cases')
+        return yaml.load(content, *args, Loader=loader, **kwargs)
 
 
 def read_csv(file: Union[str, Path], *args, **kwargs):
@@ -301,28 +318,34 @@ def convert_bboxes_xywh_to_x1y1x2y2(x_coord, y_coord, width, height):
     return x_coord, y_coord, x_coord + width, y_coord + height
 
 
-def get_or_parse_value(item, supported_values, default=None):
+def get_or_parse_value(item, supported_values=None, default=None, casting_type=float):
     if isinstance(item, str):
         item = item.lower()
-        if item in supported_values:
+        if supported_values and item in supported_values:
             return supported_values[item]
 
         try:
-            return string_to_tuple(item)
+            return string_to_tuple(item, casting_type=casting_type)
         except ValueError:
-            message = 'Invalid value "{}", expected one of precomputed: ({}) or list of values'.format(
-                item, ', '.join(supported_values.keys())
+            message = 'Invalid value "{}", expected {}list of values'.format(
+                item,
+                'one of precomputed: ({}) or '.format(', '.join(supported_values.keys())) if supported_values else ''
             )
             raise ValueError(message)
 
     if isinstance(item, (float, int)):
-        return (item, )
+        return (casting_type(item), )
+
+    if isinstance(item, list):
+        return item
 
     return default
 
 
-def string_to_bool(string):
-    return string.lower() in ['yes', 'true', 't', '1']
+def cast_to_bool(entry):
+    if isinstance(entry, str):
+        return entry.lower() in ['yes', 'true', 't', '1']
+    return bool(entry)
 
 
 def get_key_by_value(container, target):
@@ -342,6 +365,8 @@ def to_lower_register(str_list):
 
 
 def polygon_from_points(points):
+    if Polygon is None:
+        raise ValueError('shapely is not installed, please install it')
     return Polygon(points)
 
 
@@ -382,7 +407,7 @@ def set_image_metadata(annotation, images):
     if not isinstance(data, list):
         data = [data]
     for image in data:
-        data_shape = np.shape(image) if not np.isscalar(image) else 1
+        data_shape = image.shape if not np.isscalar(image) else 1
         image_sizes.append(data_shape)
     annotation.set_image_size(image_sizes)
 
@@ -404,6 +429,65 @@ def find_nearest(array, value, mode=None):
         return idx + 1 if array[idx] < value else idx
     return idx
 
+
+class OrderedSet(MutableSet):
+    def __init__(self, iterable=None):
+        self.end = end = []
+        end += [None, end, end]
+        self.map = {}
+        if iterable is not None:
+            self |= iterable
+
+    def __len__(self):
+        return len(self.map)
+
+    def __contains__(self, key):
+        return key in self.map
+
+    def add(self, key):
+        if key not in self.map:
+            end = self.end
+            curr = end[1]
+            curr[2] = end[1] = self.map[key] = [key, curr, end]
+
+    def discard(self, key):
+        if key in self.map:
+            key, prev_value, next_value = self.map.pop(key)
+            prev_value[2] = next_value
+            next_value[1] = prev_value
+
+    def __iter__(self):
+        end = self.end
+        curr = end[2]
+        while curr is not end:
+            yield curr[0]
+            curr = curr[2]
+
+    def __reversed__(self):
+        end = self.end
+        curr = end[1]
+        while curr is not end:
+            yield curr[0]
+            curr = curr[1]
+
+    def pop(self, last=True):
+        if not self:
+            raise KeyError('set is empty')
+        key = self.end[1][0] if last else self.end[2][0]
+        self.discard(key)
+        return key
+
+    def __repr__(self):
+        if not self:
+            return '{}()'.format(self.__class__.__name__,)
+        return '{}({})'.format(self.__class__.__name__, list(self))
+
+    def __eq__(self, other):
+        if isinstance(other, OrderedSet):
+            return len(self) == len(other) and list(self) == list(other)
+        return set(self) == set(other)
+
+
 def get_parameter_value_from_config(config, parameters, key):
     if key not in parameters.keys():
         return None
@@ -411,3 +495,22 @@ def get_parameter_value_from_config(config, parameters, key):
     value = config.get(key, field.default)
     field.validate(value)
     return value
+
+
+def check_file_existence(file):
+    try:
+        get_path(file)
+        return True
+    except (FileNotFoundError, IsADirectoryError):
+        return False
+
+
+class Color(Enum):
+    PASSED = 0
+    FAILED = 1
+
+
+def color_format(s, color=Color.PASSED):
+    if color == Color.PASSED:
+        return "\x1b[0;32m{}\x1b[0m".format(s)
+    return "\x1b[0;31m{}\x1b[0m".format(s)

@@ -31,7 +31,7 @@ labels = []
 objects = {}
 
 for file in files_list:
-    label = file.split(os.sep)[-1].split('.')[0]
+    label = file.rpartition(os.sep)[2].rpartition('.')[0]
     path = os.path.abspath(file)
 
     if label in labels:
@@ -41,4 +41,4 @@ for file in files_list:
         objects[label] = [path]
 
 with open('faces_gallery.json', 'w') as outfile:
-    json.dump(objects, outfile)
+    json.dump(objects, outfile, indent=4)

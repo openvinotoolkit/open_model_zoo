@@ -14,13 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from PIL import Image
 import numpy as np
 from ..config import PathField, BoolField
 from ..representation import ClassificationAnnotation
-from ..utils import read_csv
+from ..utils import read_csv, check_file_existence, read_json
 
-from .format_converter import BaseFormatConverter
+from .format_converter import BaseFormatConverter, ConverterReturn
+
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 
 class MNISTCSVFormatConverter(BaseFormatConverter):
@@ -35,8 +39,8 @@ class MNISTCSVFormatConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
             'annotation_file': PathField(description="Path to csv file which contain dataset."),
             'convert_images': BoolField(
                 optional=True,
@@ -46,9 +50,12 @@ class MNISTCSVFormatConverter(BaseFormatConverter):
             'converted_images_dir': PathField(
                 optional=True, is_directory=True, check_exists=False, description="Path to converted images location."
             ),
+            'dataset_meta_file': PathField(
+                description='path to json file with dataset meta (e.g. label_map, color_encoding)', optional=True
+            )
         })
 
-        return parameters
+        return configuration_parameters
 
     def configure(self):
         """
@@ -63,7 +70,13 @@ class MNISTCSVFormatConverter(BaseFormatConverter):
             if not self.converted_images_dir.exists():
                 self.converted_images_dir.mkdir(parents=True)
 
-    def convert(self):
+        if self.convert_images and Image is None:
+            raise ValueError(
+                "conversion mnist images requires Pillow installation, please install it before usage"
+            )
+        self.dataset_meta = self.get_value_from_config('dataset_meta_file')
+
+    def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         """
         This method is executed automatically when convert.py is started.
         All arguments are automatically got from command line arguments or config file in method configure
@@ -73,20 +86,37 @@ class MNISTCSVFormatConverter(BaseFormatConverter):
             meta: dictionary with additional dataset level metadata.
         """
         annotations = []
+        check_images = check_content and not self.convert_images
+        meta = self.generate_meta()
+        labels_to_id = meta['label_map']
+        content_errors = None
+        if check_content:
+            self.converted_images_dir = self.converted_images_dir or self.test_csv_file.parent / 'converted_images'
+
+        if self.converted_images_dir and check_content:
+            if not self.converted_images_dir.exists():
+                content_errors = ['{}: does not exist'.format(self.converted_images_dir)]
+                check_images = False
         # read original dataset annotation
         annotation_table = read_csv(self.test_csv_file)
+        num_iterations = len(annotation_table)
         for index, annotation in enumerate(annotation_table):
             identifier = '{}.png'.format(index)
-            label = int(annotation['label'])
+            label = labels_to_id.get(annotation['label'], int(annotation['label']))
             if self.convert_images:
                 image = Image.fromarray(self.convert_image(annotation))
                 image = image.convert("L")
                 image.save(str(self.converted_images_dir / identifier))
             annotations.append(ClassificationAnnotation(identifier, label))
+            if check_images:
+                if not check_file_existence(self.converted_images_dir / identifier):
+                    # add error to errors list if file not found
+                    content_errors.append('{}: does not exist'.format(self.converted_images_dir / identifier))
 
-        meta = {'label_map': {str(i): i for i in range(10)}}
+            if progress_callback is not None and index % progress_interval == 0:
+                progress_callback(index / num_iterations * 100)
 
-        return annotations, meta
+        return ConverterReturn(annotations, meta, content_errors)
 
     @staticmethod
     def convert_image(features):
@@ -98,3 +128,14 @@ class MNISTCSVFormatConverter(BaseFormatConverter):
                 image[x, y] = pixel
 
         return image
+
+    def generate_meta(self):
+        if not self.dataset_meta:
+            return {'label_map': {str(i): i for i in range(10)}}
+        dataset_meta = read_json(self.dataset_meta)
+        label_map = dataset_meta.get('label_map')
+        if 'labels' in dataset_meta:
+            label_map = dict(enumerate(dataset_meta['labels']))
+        dataset_meta['label_map'] = label_map or {str(i): i for i in range(10)}
+
+        return dataset_meta

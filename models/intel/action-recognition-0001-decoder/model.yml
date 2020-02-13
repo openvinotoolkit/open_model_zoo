@@ -1,0 +1,37 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  General-purpose action recognition model for Kinetics-400 dataset based on Video
+  Transformer Network approach. Decoder part
+task_type: action_recognition
+files:
+  - name: FP32/action-recognition-0001-decoder.xml
+    size: 117064
+    sha256: 662329658703c2e69659be688f48d900fe56adf7a467d1f7511e18443e2ef87a
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.xml
+  - name: FP32/action-recognition-0001-decoder.bin
+    size: 30238776
+    sha256: 94b20a3d531c2f72fa4230aaed22ed9140f8923ed60907cbf1a0a48147d7663d
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/action-recognition-0001-decoder/FP32/action-recognition-0001-decoder.bin
+  - name: FP16/action-recognition-0001-decoder.xml
+    size: 117024
+    sha256: cee9b6fd416bfab880fe1e782d1705ee799d60b7ef84615a7c26c80d92efef43
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.xml
+  - name: FP16/action-recognition-0001-decoder.bin
+    size: 15119512
+    sha256: 04108ac97f6815a1929b0cf3a6a5b539b28236ea7cf6bd4329011ca768257f23
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/action-recognition-0001-decoder/FP16/action-recognition-0001-decoder.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

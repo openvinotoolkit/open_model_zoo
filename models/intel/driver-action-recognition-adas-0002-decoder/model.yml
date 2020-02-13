@@ -1,0 +1,36 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Video Transformer Network for driver action recognition. Decoder part
+task_type: action_recognition
+files:
+  - name: FP32/driver-action-recognition-adas-0002-decoder.xml
+    size: 120891
+    sha256: 94efc539bd05250ce27b5a9ed14463a415d8455fcf0b7bd13e027d1ebebd5ebf
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.xml
+  - name: FP32/driver-action-recognition-adas-0002-decoder.bin
+    size: 29436428
+    sha256: 80deefba45d9b002c9780c9d9bcd2285b7be3f6b2ca319e2705898e725bd57c4
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/driver-action-recognition-adas-0002-decoder/FP32/driver-action-recognition-adas-0002-decoder.bin
+  - name: FP16/driver-action-recognition-adas-0002-decoder.xml
+    size: 120851
+    sha256: 76d2fee0612c9bdb14cbbc3e8345e63cea4d09824bc6dee0b6393a82dd9effe2
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.xml
+  - name: FP16/driver-action-recognition-adas-0002-decoder.bin
+    size: 14718330
+    sha256: 1a6a163af7f634d8efff026855971445056fa6bff1da48e44cd35b1ea6c4cb43
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/driver-action-recognition-adas-0002-decoder/FP16/driver-action-recognition-adas-0002-decoder.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

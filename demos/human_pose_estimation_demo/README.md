@@ -4,7 +4,7 @@ This demo showcases the work of multi-person 2D pose estimation algorithm. The t
 
 * `human-pose-estimation-0001`, which is a human pose estimation network, that produces two feature vectors. The algorithm uses these feature vectors to predict human poses.
 
-For more information about the pre-trained model, refer to the [model documentation](../../intel_models/index.md).
+For more information about the pre-trained model, refer to the [model documentation](../../models/intel/index.md).
 
 The input frame height is scaled to model height, frame width is scaled to preserve initial aspect ratio and padded to multiple of 8.
 
@@ -36,8 +36,9 @@ Options:
     -d "<device>"              Optional. Specify the target device for Human Pose Estimation (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -pc                        Optional. Enable per-layer performance report.
     -no_show                   Optional. Do not show processed video.
+    -black                     Optional. Show black background.
     -r                         Optional. Output inference results as raw values.
-
+    -u                         Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields an error message.

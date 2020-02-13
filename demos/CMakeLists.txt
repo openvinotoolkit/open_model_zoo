@@ -2,9 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 2.8.12)
 
 project(Demos)
+
+option(ENABLE_PYTHON "Whether to build extension modules for Python demos" OFF)
 
 if (CMAKE_BUILD_TYPE STREQUAL "")
     message(STATUS "CMAKE_BUILD_TYPE not defined, 'Release' will be used")
@@ -97,7 +99,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 endif()
 
-add_subdirectory(common/format_reader)
+add_subdirectory(common)
 
 # samples build can be switched off during whole IE build
 if (IE_MAIN_SOURCE_DIR AND NOT ENABLE_SAMPLES)
@@ -175,7 +177,7 @@ macro(ie_add_sample)
     target_include_directories(${IE_SAMPLE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../common")
 
     target_link_libraries(${IE_SAMPLE_NAME} PRIVATE ${OpenCV_LIBRARIES} ${InferenceEngine_LIBRARIES}
-                                                    ${IE_SAMPLE_DEPENDENCIES} IE::ie_cpu_extension gflags)
+                                                    ${IE_SAMPLE_DEPENDENCIES} gflags)
 
     if(UNIX)
         target_link_libraries(${IE_SAMPLE_NAME} PRIVATE pthread)
@@ -208,3 +210,10 @@ file(GLOB samples_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
 # skip building of unnecessary subdirectories
 list(REMOVE_ITEM samples_dirs common thirdparty)
 add_samples_to_build(${samples_dirs})
+
+if(ENABLE_PYTHON)
+    find_package(PythonInterp 3.5 REQUIRED)
+    find_package(PythonLibs "${PYTHON_VERSION_STRING}" EXACT REQUIRED)
+
+    add_subdirectory(python_demos/human_pose_estimation_3d_demo/pose_extractor)
+endif()

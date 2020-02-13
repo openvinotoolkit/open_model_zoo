@@ -1,0 +1,56 @@
+diff --git a/research/slim/freeze.py b/research/slim/freeze.py
+new file mode 100644
+index 0000000..411001d
+--- /dev/null
++++ b/research/slim/freeze.py
+@@ -0,0 +1,62 @@
++import argparse
++import os
++import tensorflow as tf
++from tensorflow.python.framework import graph_io
++
++from nets import nets_factory
++
++def parse_args():
++    """Parse input arguments"""
++
++    parser = argparse.ArgumentParser(description='Freeze models from TF Slim')
++
++    parser.add_argument('--ckpt', type=str, required=True,
++                        help='Path to .ckpt file')
++    parser.add_argument('--name', type=str, required=True,
++                        help='Model name')
++    parser.add_argument('--num_classes', type=int, required=True,
++                        help='Number of classes')
++    parser.add_argument('--output', type=str, required=True,
++                        help='Name of output node')
++    return parser.parse_args()
++
++def convert(model_name, ckpt, num_classes, output=None):
++    tf.logging.set_verbosity(tf.logging.INFO)
++
++    with tf.Graph().as_default() as graph, tf.Session() as sess:
++        network_fn = nets_factory.get_network_fn(model_name, num_classes=num_classes, is_training=False)
++
++        size = network_fn.default_image_size
++        placeholder = tf.placeholder(name='input', dtype=tf.float32, shape=(1, size, size, 3))
++        network_fn(placeholder)
++
++        frozen = ckpt.replace('ckpt', 'frozen.pb')
++
++        tf.train.Saver().restore(sess, ckpt)
++        frozen_graph_def = tf.graph_util.convert_variables_to_constants(
++            sess, graph.as_graph_def(), [output])
++
++        print('Writing {}'.format(frozen))
++        graph_io.write_graph(frozen_graph_def, os.path.dirname(frozen), frozen, as_text=False)
++
++def main():
++    args = parse_args()
++    convert(args.name, args.ckpt, args.num_classes, args.output)
++
++    print('Done')
++
++
++if __name__ == '__main__':
++    main()

@@ -28,9 +28,9 @@ from action_recognition_demo.steps import run_pipeline
 from os import path
 
 
-def video_demo(encoder, decoder, videos, fps=30, labels=None):
+def video_demo(encoder, decoder, videos, no_show, fps=30, labels=None):
     """Continuously run demo on provided video list"""
-    result_presenter = ResultRenderer(labels=labels)
+    result_presenter = ResultRenderer(no_show=no_show, labels=labels)
     run_pipeline(videos, encoder, decoder, result_presenter.render_frame, fps=fps)
 
 
@@ -41,7 +41,9 @@ def build_argparser():
     args.add_argument("-m_en", "--m_encoder", help="Required. Path to encoder model", required=True, type=str)
     args.add_argument("-m_de", "--m_decoder", help="Required. Path to decoder model", required=True, type=str)
     args.add_argument("-i", "--input",
-                      help="Required. Path to a video or a .txt file with a list of video files (one video per line)", type=str)
+                      help="Required. Id of the video capturing device to open (to open default camera just pass 0), "
+                           "path to a video or a .txt file with a list of ids or video files (one object per line)",
+                      required=True, type=str)
     args.add_argument("-l", "--cpu_extension",
                       help="Optional. For CPU custom layers, if any. Absolute path to a shared library with the "
                            "kernels implementation.", type=str, default=None)
@@ -52,6 +54,7 @@ def build_argparser():
                       default="CPU", type=str)
     args.add_argument("--fps", help="Optional. FPS for renderer", default=30, type=int)
     args.add_argument("-lb", "--labels", help="Optional. Path to file with label names", type=str)
+    args.add_argument("--no_show", action='store_true', help="Optional. Don't show output")
 
     return parser
 
@@ -100,7 +103,7 @@ def main():
     encoder = IEModel(encoder_xml, encoder_bin, ie, encoder_target_device,
                       num_requests=(3 if args.device == 'MYRIAD' else 1))
     decoder = IEModel(decoder_xml, decoder_bin, ie, decoder_target_device, num_requests=2)
-    video_demo(encoder, decoder, videos, args.fps, labels)
+    video_demo(encoder, decoder, videos, args.no_show, args.fps, labels)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,45 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Vehicle detector based on SSD + MobileNet with reduced number of channels and depthwise
+  head.
+task_type: detection
+files:
+  - name: FP32/vehicle-detection-adas-0002.xml
+    size: 216043
+    sha256: b58c126cc2cf025442dd614159b0a6061c236eaecf8ae5f9d136b7b312499b31
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.xml
+  - name: FP32/vehicle-detection-adas-0002.bin
+    size: 4314552
+    sha256: 6d0e114769bed9c8bd6666e098f891d7c158508bd7db6ba2bd4d09de17db1b69
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.bin
+  - name: FP16/vehicle-detection-adas-0002.xml
+    size: 215993
+    sha256: 3f68133b27949aae53f2fa118be8d980c91a87f8112f8fd84ab2dc0c77e13754
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.xml
+  - name: FP16/vehicle-detection-adas-0002.bin
+    size: 2157328
+    sha256: e119b3bec50bc836f2eb26a56a40a6d5e3c33bde819f3e6d00f829978092742b
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.bin
+  - name: FP32-INT8/vehicle-detection-adas-0002.xml
+    size: 438606
+    sha256: b7b2531985b025f42e40251ae1151a204e38c8db83ae1d4b565a8ce729cf1156
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/vehicle-detection-adas-0002/FP32-INT8/vehicle-detection-adas-0002.xml
+  - name: FP32-INT8/vehicle-detection-adas-0002.bin
+    size: 4389736
+    sha256: 9fe53648e0a377c00e8b985817cd25dad320008e8d0a1048af4ac88aabf1a929
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/vehicle-detection-adas-0002/FP32-INT8/vehicle-detection-adas-0002.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

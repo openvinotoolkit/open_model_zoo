@@ -20,10 +20,11 @@ import math
 import numpy as np
 
 from ..representation import HitRatioAnnotation, HitRatioPrediction
-from .metric import FullDatasetEvaluationMetric
+from .metric import PerImageEvaluationMetric
 from ..config import NumberField
 
-class BaseRecommenderMetric(FullDatasetEvaluationMetric):
+
+class BaseRecommenderMetric(PerImageEvaluationMetric):
     annotation_types = (HitRatioAnnotation, )
     prediction_types = (HitRatioPrediction, )
 
@@ -56,19 +57,25 @@ class BaseRecommenderMetric(FullDatasetEvaluationMetric):
             self.gt_items[annotation.user] = annotation.item
 
     def evaluate(self, annotations, predictions):
-        iter_num = len(self.pred_per_user[0])
-
         measure = []
         for user in range(self.users_num):
+            if not self.pred_per_user[user]:
+                continue
             map_item_score = {}
+            iter_num = len(self.pred_per_user[user])
             for j in range(iter_num):
                 item = self.pred_per_user[user][j][0]
                 score = self.pred_per_user[user][j][1]
                 map_item_score[item] = score
             ranklist = heapq.nlargest(10, map_item_score, key=map_item_score.get)
-            measure.append(self.discounter(self.gt_items[user], ranklist))
+            if user in self.gt_items.keys():
+                measure.append(self.discounter(self.gt_items[user], ranklist))
 
         return np.mean(measure)
+
+    def reset(self):
+        self.pred_per_user = {i: [] for i in range(self.users_num)}
+        self.gt_items = {}
 
 
 def hit_ratio_discounter(item, rank):
@@ -102,3 +109,28 @@ class NDSGMetric(BaseRecommenderMetric):
 
     def __init__(self, *args, **kwargs):
         super().__init__(ndcg_discounter, *args, **kwargs)
+
+
+class LogLoss(PerImageEvaluationMetric):
+    __provider__ = 'log_loss'
+
+    annotation_types = (HitRatioAnnotation, )
+    prediction_types = (HitRatioPrediction, )
+
+    def configure(self):
+        self.losses = []
+        self.meta.update({
+            'scale': 1, 'postfix': ' ', 'calculate_mean': False, 'target': 'higher-worse'
+        })
+
+    def update(self, annotation, prediction):
+        score = np.clip(prediction.scores, 1e-15, 1 - 1e-15)
+        loss = -np.log(score) if annotation.positive else -np.log(1. - score)
+        self.losses.append(loss)
+        return loss
+
+    def evaluate(self, annotations, predictions):
+        return np.mean(self.losses)
+
+    def reset(self):
+        self.losses = []
