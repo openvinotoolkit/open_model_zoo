@@ -38,9 +38,10 @@ This model is 2D attention-based GRU decoder of text recognition head.
 
 ## Outputs
 
-1.	Name: `output`, shape: [1x256x28x28]. Encoded text recognition features.
+1.	Name: `output`, shape: [1x38]. Encoded text recognition features.
 1.	Name: `hidden`, shape: [1x1x256]. Current hidden state of GRU.
 
 
 ## Legal Information
+
 [*] Other names and brands may be claimed as the property of others.
