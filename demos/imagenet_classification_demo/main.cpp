@@ -76,16 +76,10 @@ cv::Mat resizeImage(cv::Mat& image, int modelInputResolution) {
     cv::Rect imgROI;
     if (resizedImage.cols >= resizedImage.rows) {
         int fromWidth = resizedImage.cols/2 - modelInputResolution/2;
-        imgROI = cv::Rect(fromWidth,
-                          0,
-                          resizedImage.cols - fromWidth,
-                          modelInputResolution);
+        imgROI = cv::Rect(fromWidth, 0, modelInputResolution, modelInputResolution);
     } else {
         int fromHeight = resizedImage.rows/2 - modelInputResolution/2;
-        imgROI = cv::Rect(0,
-                          fromHeight,
-                          modelInputResolution,
-                          resizedImage.rows - fromHeight);
+        imgROI = cv::Rect(0, fromHeight, modelInputResolution, modelInputResolution);
     }
 
     return resizedImage(imgROI);
@@ -248,14 +242,14 @@ int main(int argc, char *argv[]) {
             devices.insert(device);
         }
         std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(devices, FLAGS_nstreams);
-        for (auto& device : devices) {
+        for (auto & device : devices) {
             if (device == "CPU") {  // CPU supports a few special performance-oriented keys
                 // limit threading for CPU portion of inference
                 if (FLAGS_nthreads != 0)
                     ie.SetConfig({{ CONFIG_KEY(CPU_THREADS_NUM), std::to_string(FLAGS_nthreads) }}, device);
 
-                if ((FLAGS_d.find("MULTI") != std::string::npos) &&
-                    (FLAGS_d.find("GPU") != std::string::npos)) {
+                if (FLAGS_d.find("MULTI") != std::string::npos
+                    && devices.find("GPU") != devices.end()) {
                     ie.SetConfig({{ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO) }}, device);
                 } else {
                     // pin threads for CPU portion of inference
@@ -264,19 +258,19 @@ int main(int argc, char *argv[]) {
 
                 // for CPU execution, more throughput-oriented execution via streams
                 ie.SetConfig({{ CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
-                                (deviceNstreams.count(device) > 0 ? std::to_string(deviceNstreams.at(device)) :
-                                                                                 "CPU_THROUGHPUT_AUTO") }}, device);
+                                (deviceNstreams.count(device) > 0 ? std::to_string(deviceNstreams.at(device))
+                                                                  : "CPU_THROUGHPUT_AUTO") }}, device);
                 deviceNstreams[device] = std::stoi(
                     ie.GetConfig(device, CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
             } else if (device == "GPU") {
                 ie.SetConfig({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
-                                (deviceNstreams.count(device) > 0 ? std::to_string(deviceNstreams.at(device)) :
-                                                                         "GPU_THROUGHPUT_AUTO") }}, device);
+                                (deviceNstreams.count(device) > 0 ? std::to_string(deviceNstreams.at(device))
+                                                                  : "GPU_THROUGHPUT_AUTO") }}, device);
                 deviceNstreams[device] = std::stoi(
                     ie.GetConfig(device, CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
 
-                if ((FLAGS_d.find("MULTI") != std::string::npos) &&
-                    (FLAGS_d.find("CPU") != std::string::npos)) {
+                if (FLAGS_d.find("MULTI") != std::string::npos
+                    && devices.find("CPU") != devices.end()) {
                     // multi-device execution with the CPU + GPU performs best with GPU throttling hint,
                     // which releases another CPU thread (that is otherwise used by the GPU driver for active polling)
                     ie.SetConfig({{ CLDNN_CONFIG_KEY(PLUGIN_THROTTLE), "1" }}, "GPU");
@@ -326,9 +320,10 @@ int main(int argc, char *argv[]) {
         // ---------------------------------------------------------------------------------------------------
         
         // -----------------------------Prepare variables and data for main loop------------------------------
+        typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
         double avgFPS = 0;
         double avgLatency = 0;
-        double latencySum = 0;
+        std::chrono::steady_clock::duration latencySum = std::chrono::steady_clock::duration::zero();
         unsigned framesNum = 0;
         long long correctPredictionsCount = 0;
         double accuracy = 0;
@@ -355,7 +350,6 @@ int main(int argc, char *argv[]) {
         int framesNumOnCalculationStart = 0;
         auto testDuration = std::chrono::seconds{3};
         auto fpsCalculationDuration = std::chrono::seconds{1};
-        typedef std::chrono::duration<double, std::chrono::seconds::period> Sec;
         do {
             if (hasCallbackException) std::rethrow_exception(irCallbackException);
 
@@ -369,7 +363,7 @@ int main(int argc, char *argv[]) {
                                     fpsCalculationDuration).count());
                 startTickCount = std::chrono::steady_clock::now();
                 framesNum = 0;
-                latencySum = 0;
+                latencySum = std::chrono::steady_clock::duration::zero();
                 correctPredictionsCount = 0;
                 accuracy = 0;
             }
@@ -422,9 +416,9 @@ int main(int argc, char *argv[]) {
                 gridMat.updateMat(shownImagesInfo);
                 auto processingEndTime = std::chrono::steady_clock::now();
                 for (const auto & image : completedInferRequestInfo.images) {
-                    latencySum += (1. * std::chrono::duration_cast<Sec>(processingEndTime - image.startTime).count());
+                    latencySum += (processingEndTime - image.startTime);
                 }
-                avgLatency = latencySum / framesNum;
+                avgLatency = std::chrono::duration_cast<Sec>(latencySum).count() / framesNum;
                 accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
                 gridMat.textUpdate(avgFPS, avgLatency, accuracy, isTestMode, !FLAGS_gt.empty(), presenter);
                 

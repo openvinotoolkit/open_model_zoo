@@ -137,7 +137,8 @@ NATIVE_DEMOS = [
             ModelArg('mobilenet-v2'),
             ModelArg('googlenet-v4'),
             ModelArg('densenet-169'),
-            ModelArg('resnet-50')),
+            ModelArg('resnet-50'),
+            ModelArg('densenet-121-tf')),
     )),
 
     NativeDemo(subdirectory='interactive_face_detection_demo',
