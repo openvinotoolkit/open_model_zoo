@@ -1,6 +1,8 @@
 import argparse
-from pathlib import Path
+import importlib
 import sys
+
+from pathlib import Path
 
 import onnx
 import torch
@@ -82,7 +84,7 @@ def load_model(model_name, weights, from_torchvision, model_path, module_name, m
     else:
         sys.path.append(model_path)
         try:
-            module = __import__(module_name)
+            module = importlib.import_module(module_name)
             creator = getattr(module, model_name)
             model = creator(**model_params)
         except ImportError as err:
