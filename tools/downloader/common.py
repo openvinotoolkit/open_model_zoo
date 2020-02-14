@@ -54,10 +54,10 @@ KNOWN_TASK_TYPES = {
     'human_pose_estimation',
     'image_processing',
     'instance_segmentation',
+    'mono_depth',
     'object_attributes',
     'optical_character_recognition',
     'semantic_segmentation',
-    'mono_depth',
 }
 
 RE_MODEL_NAME = re.compile(r'[0-9a-zA-Z._-]+')

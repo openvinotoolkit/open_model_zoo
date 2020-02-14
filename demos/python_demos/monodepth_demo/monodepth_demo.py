@@ -101,7 +101,7 @@ def main():
     if disp_max - disp_min > 1e-6:
         disp = (disp - disp_min) / (disp_max - disp_min)
     else:
-        disp = 0.5
+        disp.fill(0.5)
 
     # pfm
     out = os.path.join(os.path.dirname(__file__), 'disp.pfm')
