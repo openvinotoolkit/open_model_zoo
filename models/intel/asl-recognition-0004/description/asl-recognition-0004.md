@@ -1,4 +1,4 @@
-# asl-recognition-0003
+# asl-recognition-0004
 
 ## Use Case and High-Level Description
 
@@ -12,15 +12,15 @@ on the input clip.
 
 ## Example
 
-![](./asl-recognition-0003.jpg)
+![](./asl-recognition-0004.jpg)
 
 ## Specification
 
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
-| Top-1 accuracy (MS-ASL-100\*)   | 0.836                                     |
-| GFlops                          | 6.651                                     |
-| MParams                         | 4.129                                     |
+| Top-1 accuracy (MS-ASL-100\*)   | 0.847                                     |
+| GFlops                          | 6.660                                     |
+| MParams                         | 4.133                                     |
 | Source framework                | PyTorch\*                                 |
 
 
