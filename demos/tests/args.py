@@ -18,7 +18,8 @@ import shutil
 from pathlib import Path
 
 ArgContext = collections.namedtuple('ArgContext',
-    ['test_data_dir', 'dl_dir', 'model_info', 'image_sequences', 'image_sequence_dir'])
+    ['source_dir', 'test_data_dir', 'dl_dir', 'model_info', 'data_sequences', 'data_sequence_dir'])
+
 
 class TestDataArg:
     def __init__(self, rel_path):
@@ -27,8 +28,18 @@ class TestDataArg:
     def resolve(self, context):
         return str(context.test_data_dir / self.rel_path)
 
+
 def image_net_arg(id):
     return TestDataArg('ILSVRC2012_img_val/ILSVRC2012_val_{}.JPEG'.format(id))
+
+
+def brats_arg(id):
+    return TestDataArg('BraTS/{}'.format(id))
+
+
+def image_retrieval_arg(id):
+    return TestDataArg('Image_Retrieval/{}'.format(id))
+
 
 class ModelArg:
     def __init__(self, name, precision='FP32'):
@@ -38,16 +49,17 @@ class ModelArg:
     def resolve(self, context):
         return str(context.dl_dir / context.model_info[self.name]["subdirectory"] / self.precision / (self.name + '.xml'))
 
-class ImagePatternArg:
+
+class DataPatternArg:
     def __init__(self, sequence_name):
         self.sequence_name = sequence_name
 
     def resolve(self, context):
-        seq_dir = context.image_sequence_dir / self.sequence_name
-        seq = [Path(image.resolve(context))
-            for image in context.image_sequences[self.sequence_name]]
+        seq_dir = context.data_sequence_dir / self.sequence_name
+        seq = [Path(data.resolve(context))
+            for data in context.data_sequences[self.sequence_name]]
 
-        assert len(set(image.suffix for image in seq)) == 1, "all images in the sequence must have the same extension"
+        assert len(set(data.suffix for data in seq)) == 1, "all images in the sequence must have the same extension"
         assert '%' not in seq[0].suffix
 
         name_format = 'input-%04d' + seq[0].suffix
@@ -55,15 +67,24 @@ class ImagePatternArg:
         if not seq_dir.is_dir():
             seq_dir.mkdir(parents=True)
 
-            for index, image in enumerate(context.image_sequences[self.sequence_name]):
-                shutil.copyfile(image.resolve(context), str(seq_dir / (name_format % index)))
+            for index, data in enumerate(context.data_sequences[self.sequence_name]):
+                shutil.copyfile(data.resolve(context), str(seq_dir / (name_format % index)))
 
         return str(seq_dir / name_format)
 
-class ImageDirectoryArg:
+
+class DataDirectoryArg:
     def __init__(self, sequence_name):
-        self.backend = ImagePatternArg(sequence_name)
+        self.backend = DataPatternArg(sequence_name)
 
     def resolve(self, context):
         pattern = self.backend.resolve(context)
         return str(Path(pattern).parent)
+
+
+class DemoFileArg:
+    def __init__(self, file_name):
+        self.file_name = file_name
+
+    def resolve(self, context):
+        return str(context.source_dir / self.file_name)

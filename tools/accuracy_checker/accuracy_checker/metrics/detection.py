@@ -23,12 +23,12 @@ import numpy as np
 
 from ..utils import finalize_metric_result
 from .overlap import Overlap, IOA
-from ..config import BoolField, NumberField, StringField
+from ..config import BoolField, NumberField, StringField, ConfigError
 from ..representation import (
     DetectionAnnotation, DetectionPrediction,
     ActionDetectionPrediction, ActionDetectionAnnotation
 )
-from .metric import Metric, FullDatasetEvaluationMetric
+from .metric import Metric, FullDatasetEvaluationMetric, PerImageEvaluationMetric
 
 
 class APIntegralType(enum.Enum):
@@ -82,8 +82,14 @@ class BaseDetectionMetricMixin(Metric):
         self.use_filtered_tp = self.get_value_from_config('use_filtered_tp')
 
         label_map = self.config.get('label_map', 'label_map')
+        if not self.dataset.metadata:
+            raise ConfigError('detection metrics require label_map providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
         labels = self.dataset.metadata.get(label_map, {})
-        self.labels = labels.keys()
+        if not labels:
+            raise ConfigError('detection metrics require label_map providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
+        self.labels = list(labels.keys())
         valid_labels = list(filter(lambda x: x != self.dataset.metadata.get('background_label'), self.labels))
         self.meta['names'] = [labels[name] for name in valid_labels]
 
@@ -127,8 +133,14 @@ class BaseDetectionMetricMixin(Metric):
     def evaluate(self, annotations, predictions):
         pass
 
+    def reset(self):
+        label_map = self.config.get('label_map', 'label_map')
+        dataset_labels = self.dataset.metadata.get(label_map, {})
+        valid_labels = list(filter(lambda x: x != self.dataset.metadata.get('background_label'), dataset_labels))
+        self.meta['names'] = [dataset_labels[name] for name in valid_labels]
 
-class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
+
+class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEvaluationMetric):
     """
     Class for evaluating mAP metric of detection models.
     """
@@ -156,7 +168,19 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
         super().configure()
         self.integral = APIntegralType(self.get_value_from_config('integral'))
 
+    def update(self, annotation, prediction):
+        return self._calculate_map([annotation], [prediction])
+
     def evaluate(self, annotations, predictions):
+        average_precisions = self._calculate_map(annotations, predictions)
+        average_precisions, self.meta['names'] = finalize_metric_result(average_precisions, self.meta['names'])
+        if not average_precisions:
+            warnings.warn("No detections to compute mAP")
+            average_precisions.append(0)
+
+        return average_precisions
+
+    def _calculate_map(self, annotations, predictions):
         valid_labels = get_valid_labels(self.labels, self.dataset.metadata.get('background_label'))
         labels_stat = self.per_class_detection_statistics(annotations, predictions, valid_labels)
 
@@ -170,15 +194,10 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
             else:
                 average_precisions.append(np.nan)
 
-        average_precisions, self.meta['names'] = finalize_metric_result(average_precisions, self.meta['names'])
-        if not average_precisions:
-            warnings.warn("No detections to compute mAP")
-            average_precisions.append(0)
-
         return average_precisions
 
 
-class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
+class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEvaluationMetric):
     """
     Class for evaluating Miss Rate metric of detection models.
     """
@@ -200,6 +219,21 @@ class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
         super().configure()
         self.fppi_level = self.get_value_from_config('fppi_level')
 
+    def update(self, annotation, prediction):
+        valid_labels = get_valid_labels(self.labels, self.dataset.metadata.get('background_label'))
+        labels_stat = self.per_class_detection_statistics([annotation], [prediction], valid_labels)
+        miss_rates = []
+        for label in labels_stat:
+            label_miss_rate = 1.0 - labels_stat[label]['recall']
+            label_fppi = labels_stat[label]['fppi']
+
+            position = bisect.bisect_left(label_fppi, self.fppi_level)
+            m0 = max(0, position - 1)
+            m1 = position if position < len(label_miss_rate) else m0
+            miss_rates.append(0.5 * (label_miss_rate[m0] + label_miss_rate[m1]))
+
+        return miss_rates
+
     def evaluate(self, annotations, predictions):
         valid_labels = get_valid_labels(self.labels, self.dataset.metadata.get('background_label'))
         labels_stat = self.per_class_detection_statistics(annotations, predictions, valid_labels)
@@ -217,7 +251,7 @@ class MissRate(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
         return miss_rates
 
 
-class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
+class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerImageEvaluationMetric):
     """
     Class for evaluating recall metric of detection models.
     """
@@ -227,7 +261,19 @@ class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
     annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
     prediction_types = (DetectionPrediction, ActionDetectionPrediction)
 
+    def update(self, annotation, prediction):
+        return self._calculate_recall([annotation], [prediction])
+
     def evaluate(self, annotations, predictions):
+        recalls = self._calculate_recall(annotations, predictions)
+        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['names'])
+        if not recalls:
+            warnings.warn("No detections to compute mAP")
+            recalls.append(0)
+
+        return recalls
+
+    def _calculate_recall(self, annotations, predictions):
         valid_labels = get_valid_labels(self.labels, self.dataset.metadata.get('background_label'))
         labels_stat = self.per_class_detection_statistics(annotations, predictions, valid_labels)
 
@@ -240,15 +286,10 @@ class Recall(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
             else:
                 recalls.append(np.nan)
 
-        recalls, self.meta['names'] = finalize_metric_result(recalls, self.meta['names'])
-        if not recalls:
-            warnings.warn("No detections to compute mAP")
-            recalls.append(0)
-
         return recalls
 
 
-class DetectionAccuracyMetric(BaseDetectionMetricMixin, FullDatasetEvaluationMetric):
+class DetectionAccuracyMetric(BaseDetectionMetricMixin, PerImageEvaluationMetric):
     __provider__ = 'detection_accuracy'
 
     annotation_types = (DetectionAnnotation, ActionDetectionAnnotation)
@@ -277,29 +318,32 @@ class DetectionAccuracyMetric(BaseDetectionMetricMixin, FullDatasetEvaluationMet
         self.ignore_label = self.get_value_from_config('ignore_label')
         fast_match = self.get_value_from_config('fast_match')
         self.match_func = match_detections_class_agnostic if not fast_match else fast_match_detections_class_agnostic
+        self.cm = np.zeros([len(self.labels), len(self.labels)], dtype=np.int32)
+
+    def update(self, annotation, prediction):
+        matches = self.match_func(prediction, annotation, self.overlap_threshold, self.overlap_method)
+        update_cm = confusion_matrix(matches, prediction, annotation, len(self.labels), self.ignore_label)
+        self.cm += update_cm
+        if self.use_normalization:
+            return np.mean(normalize_confusion_matrix(update_cm).diagonal())
+        return float(np.sum(update_cm.diagonal())) / float(np.maximum(1, np.sum(update_cm)))
 
     def evaluate(self, annotations, predictions):
-        all_matches = self.match_func(
-            predictions, annotations, self.overlap_threshold, self.overlap_method
-        )
-        cm = confusion_matrix(all_matches, predictions, annotations, len(self.labels), self.ignore_label)
         if self.use_normalization:
-            return np.mean(normalize_confusion_matrix(cm).diagonal())
+            return np.mean(normalize_confusion_matrix(self.cm).diagonal())
 
-        return float(np.sum(cm.diagonal())) / float(np.maximum(1, np.sum(cm)))
+        return float(np.sum(self.cm.diagonal())) / float(np.maximum(1, np.sum(self.cm)))
 
 
-def confusion_matrix(all_matched_ids, predicted_data, gt_data, num_classes, ignore_label=None):
+def confusion_matrix(matched_ids, prediction, gt, num_classes, ignore_label=None):
     out_cm = np.zeros([num_classes, num_classes], dtype=np.int32)
-    for gt, prediction in zip(gt_data, predicted_data):
-        for match_pair in all_matched_ids[gt.identifier]:
-            gt_label = int(gt.labels[match_pair[0]])
+    for match_pair in matched_ids:
+        gt_label = int(gt.labels[match_pair[0]])
+        if ignore_label and gt_label == ignore_label:
+            continue
 
-            if ignore_label and gt_label == ignore_label:
-                continue
-
-            pred_label = int(prediction.labels[match_pair[1]])
-            out_cm[gt_label, pred_label] += 1
+        pred_label = int(prediction.labels[match_pair[1]])
+        out_cm[gt_label, pred_label] += 1
 
     return out_cm
 
@@ -309,91 +353,72 @@ def normalize_confusion_matrix(cm):
     return cm.astype(np.float32) / row_sums
 
 
-def match_detections_class_agnostic(predicted_data, gt_data, min_iou, overlap_method):
-    all_matches = {}
-    total_gt_bbox_num = 0
-    matched_gt_bbox_num = 0
+def match_detections_class_agnostic(prediction, gt, min_iou, overlap_method):
+    gt_bboxes = np.stack((gt.x_mins, gt.y_mins, gt.x_maxs, gt.y_maxs), axis=-1)
+    predicted_bboxes = np.stack(
+        (prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs), axis=-1
+    )
+    predicted_scores = prediction.scores
 
-    for gt, prediction in zip(gt_data, predicted_data):
-        gt_bboxes = np.stack((gt.x_mins, gt.y_mins, gt.x_maxs, gt.y_maxs), axis=-1)
+    gt_bboxes_num = len(gt_bboxes)
+    predicted_bboxes_num = len(predicted_bboxes)
+
+    sorted_ind = np.argsort(-predicted_scores)
+    predicted_bboxes = predicted_bboxes[sorted_ind]
+    predicted_original_ids = np.arange(predicted_bboxes_num)[sorted_ind]
+
+    similarity_matrix = calculate_similarity_matrix(predicted_bboxes, gt_bboxes, overlap_method)
+
+    matches = []
+    visited_gt = np.zeros(gt_bboxes_num, dtype=np.bool)
+    for predicted_id in range(predicted_bboxes_num):
+        best_overlap = 0.0
+        best_gt_id = -1
+        for gt_id in range(gt_bboxes_num):
+            if visited_gt[gt_id]:
+                continue
+
+            overlap_value = similarity_matrix[predicted_id, gt_id]
+            if overlap_value > best_overlap:
+                best_overlap = overlap_value
+                best_gt_id = gt_id
+
+        if best_gt_id >= 0 and best_overlap > min_iou:
+            visited_gt[best_gt_id] = True
+
+            matches.append((best_gt_id, predicted_original_ids[predicted_id]))
+            if len(matches) >= gt_bboxes_num:
+                break
+
+    return matches
+
+
+def fast_match_detections_class_agnostic(prediction, gt, min_iou, overlap_method):
+    matches = []
+    gt_bboxes = np.stack((gt.x_mins, gt.y_mins, gt.x_maxs, gt.y_maxs), axis=-1)
+    if prediction.size:
         predicted_bboxes = np.stack(
             (prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs), axis=-1
         )
-        predicted_scores = prediction.scores
 
-        gt_bboxes_num = len(gt_bboxes)
-        predicted_bboxes_num = len(predicted_bboxes)
+        similarity_matrix = calculate_similarity_matrix(gt_bboxes, predicted_bboxes, overlap_method)
 
-        sorted_ind = np.argsort(-predicted_scores)
-        predicted_bboxes = predicted_bboxes[sorted_ind]
-        predicted_original_ids = np.arange(predicted_bboxes_num)[sorted_ind]
+        for _ in gt_bboxes:
+            best_match_pos = np.unravel_index(similarity_matrix.argmax(), similarity_matrix.shape)
+            best_match_value = similarity_matrix[best_match_pos]
 
-        similarity_matrix = calculate_similarity_matrix(predicted_bboxes, gt_bboxes, overlap_method)
+            if best_match_value <= min_iou:
+                break
 
-        matches = []
-        visited_gt = np.zeros(gt_bboxes_num, dtype=np.bool)
-        for predicted_id in range(predicted_bboxes_num):
-            best_overlap = 0.0
-            best_gt_id = -1
-            for gt_id in range(gt_bboxes_num):
-                if visited_gt[gt_id]:
-                    continue
+            gt_id = best_match_pos[0]
+            predicted_id = best_match_pos[1]
 
-                overlap_value = similarity_matrix[predicted_id, gt_id]
-                if overlap_value > best_overlap:
-                    best_overlap = overlap_value
-                    best_gt_id = gt_id
+            similarity_matrix[gt_id, :] = 0.0
+            similarity_matrix[:, predicted_id] = 0.0
 
-            if best_gt_id >= 0 and best_overlap > min_iou:
-                visited_gt[best_gt_id] = True
+            matches.append((gt_id, predicted_id))
 
-                matches.append((best_gt_id, predicted_original_ids[predicted_id]))
-                if len(matches) >= gt_bboxes_num:
-                    break
-
-        all_matches[gt.identifier] = matches
-
-        total_gt_bbox_num += gt_bboxes_num
-        matched_gt_bbox_num += len(matches)
-
-    return all_matches
-
-
-def fast_match_detections_class_agnostic(predicted_data, gt_data, min_iou, overlap_method):
-    all_matches = {}
-    total_gt_bbox_num = 0
-    matched_gt_bbox_num = 0
-
-    for gt, prediction in zip(gt_data, predicted_data):
-        gt_bboxes = np.stack((gt.x_mins, gt.y_mins, gt.x_maxs, gt.y_maxs), axis=-1)
-        matches = []
-        total_gt_bbox_num += len(gt_bboxes)
-        if prediction.size:
-            predicted_bboxes = np.stack(
-                (prediction.x_mins, prediction.y_mins, prediction.x_maxs, prediction.y_maxs), axis=-1
-            )
-
-            similarity_matrix = calculate_similarity_matrix(gt_bboxes, predicted_bboxes, overlap_method)
-
-            for _ in gt_bboxes:
-                best_match_pos = np.unravel_index(similarity_matrix.argmax(), similarity_matrix.shape)
-                best_match_value = similarity_matrix[best_match_pos]
-
-                if best_match_value <= min_iou:
-                    break
-
-                gt_id = best_match_pos[0]
-                predicted_id = best_match_pos[1]
-
-                similarity_matrix[gt_id, :] = 0.0
-                similarity_matrix[:, predicted_id] = 0.0
-
-                matches.append((gt_id, predicted_id))
-                matched_gt_bbox_num += 1
-
-        all_matches[gt.identifier] = matches
-
-    return all_matches
+    return matches
 
 
 def calculate_similarity_matrix(set_a, set_b, overlap):
@@ -540,7 +565,8 @@ def _prepare_annotation_boxes(annotation, ignore_difficult, label):
 
         difficult_boxes[ground_truth.identifier] = difficult_box_mask
         if ignore_difficult:
-            num_ground_truth -= np.sum(difficult_box_mask)
+            if np.size(difficult_box_mask) > 0:
+                num_ground_truth -= np.sum(difficult_box_mask)
 
     return used_boxes, num_ground_truth, difficult_boxes
 

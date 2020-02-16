@@ -1,11 +1,11 @@
-# Security Barrier Camera С++ Demo
+# Security Barrier Camera C++ Demo
 
 This demo showcases Vehicle and License Plate Detection network followed by the Vehicle Attributes Recognition and License Plate Recognition networks applied on top
 of the detection results. You can use a set of the following pre-trained models with the demo:
-* `vehicle-license-plate-detection-barrier-0106`, which is a primary detection network to find the vehicles and license plates
+* `vehicle-license-plate-detection-barrier-0106` or `vehicle-license-plate-detection-barrier-0123`, which is primary detection network to find the vehicles and license plates
 * `vehicle-attributes-recognition-barrier-0039`, which is executed on top of the results from the first network and
 reports general vehicle attributes, for example, vehicle type (car/van/bus/track) and color
-* `license-plate-recognition-barrier-0001`, which is executed on top of the results from the first network
+* `license-plate-recognition-barrier-0001` or `license-plate-recognition-barrier-0007`, which is executed on top of the results from the first network
 and reports a string per recognized license plate
 
 For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
@@ -42,10 +42,8 @@ At the end of the sequence, the `VideoFrame` is destroyed and the sequence start
 ## Running
 
 Running the application with the <code>-h</code> option yields the following usage message:
-```sh
-[ INFO ] InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
+```
+[ INFO ] InferenceEngine: <version>
 
 interactive_vehicle_detection [OPTION]
 Options:
@@ -78,7 +76,7 @@ Options:
     -tag                       Required for HDDL plugin only. If not set, the performance on Intel(R) Movidius(TM) X VPUs will not be optimal. Running each network on a set of Intel(R) Movidius(TM) X VPUs with a specific tag. You must specify the number of VPUs for each network in the hddl_service.config file. Refer to the corresponding README file for more information.
     -nstreams "<integer>"      Optional. Number of streams to use for inference on the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format <device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)
     -nthreads "<integer>"      Optional. Number of threads to use for inference on the CPU (including HETERO and MULTI cases).
-
+    -u                         Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields an error message.
@@ -98,13 +96,24 @@ To do inference for two video inputs using two asynchronous infer request on FPG
 ./security_barrier_camera_demo -i <path_to_video>/inputVideo_0.mp4 <path_to_video>/inputVideo_1.mp4 -m <path_to_model>/vehicle-license-plate-detection-barrier-0106.xml -m_va <path_to_model>/vehicle-attributes-recognition-barrier-0039.xml -m_lpr <path_to_model>/license-plate-recognition-barrier-0001.xml -d HETERO:FPGA,CPU -d_va HETERO:FPGA,CPU -d_lpr HETERO:FPGA,CPU -nireq 2
 ```
 
-> **NOTE**: For the `-tag` option (HDDL plugin only), you must specify the number of VPUs for each network in the `hddl_service.config` file located in the `<INSTALL_DIR>/deployment_tools/inference_engine/external/hddl/config/` direcrtory using the following tags:
+To do inference for video inputs on Intel® Vision Accelerator Design with Intel® Movidius™ VPUs, some optimization hints are suggested to make good use of the computation ability:
+
+* configuring the number of allocated frames (`-n_iqs`) to provide enough inputs for inference;
+* configuring the number of infer request (`-nireq`) to achieve asynchronous inference;
+* configuring the number of threads (`-n_wt`) for multi-threaded processing.
+
+For example, to run the sample on one Intel® Vision Accelerator Design with Intel® Movidius™ VPUs Compact R card, run the following command:
+```sh
+./security_barrier_camera_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/vehicle-license-plate-detection-barrier-0106.xml -m_va <path_to_model>/vehicle-attributes-recognition-barrier-0039.xml -m_lpr <path_to_model>/license-plate-recognition-barrier-0001.xml -d HDDL -d_va HDDL -d_lpr HDDL -n_iqs 10 -n_wt 4 -nireq 10
+```
+
+> **NOTE**: For the `-tag` option (HDDL plugin only), you must specify the number of VPUs for each network in the `hddl_service.config` file located in the `<INSTALL_DIR>/deployment_tools/inference_engine/external/hddl/config/` directory using the following tags:
 > * `tagDetect` for the Vehicle and License Plate Detection network
 > * `tagAttr` for the Vehicle Attributes Recognition network
 > * `tagLPR` for the License Plate Recognition network
 >
 > For example, to run the sample on one Intel® Vision Accelerator Design with Intel® Movidius™ VPUs Compact R card with eight Intel&reg; Movidius&trade; X VPUs:
-> ```sh
+> ```json
 > "service_settings":
 > {
 >  "graph_tag_map":{"tagDetect": 6, "tagAttr": 1, "tagLPR": 1}
@@ -114,7 +123,7 @@ To do inference for two video inputs using two asynchronous infer request on FPG
 
 ### Optimization Hints for Heterogeneous Scenarios with FPGA
 
-If you build the Inference Engine with the OMP, you can use the following parameters for Heterogeneous scenarois:
+If you build the Inference Engine with the OMP, you can use the following parameters for Heterogeneous scenarios:
 
 * `OMP_NUM_THREADS`: Specifies number of threads to use. For heterogeneous scenarios with FPGA, when several inference requests are used asynchronously, limiting the number of CPU threads with `OMP_NUM_THREADS` allows to avoid competing for resources between threads. For the Security Barrier Camera Demo, recommended value is `OMP_NUM_THREADS=1`.
 * `KMP_BLOCKTIME`: Sets the time, in milliseconds, that a thread should wait, after completing the execution of a parallel region, before sleeping. The default value is 200ms, which is not optimal for the demo. Recommended value is `KMP_BLOCKTIME=1`.
@@ -123,7 +132,7 @@ If you build the Inference Engine with the OMP, you can use the following parame
 
 The demo uses OpenCV to display the resulting frame with detections rendered as bounding boxes and text.
 
-> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
+> **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies:
 >* `license-plate-recognition-barrier-0001`
 >* `vehicle-attributes-recognition-barrier-0039`
 >* `vehicle-license-plate-detection-barrier-0106`

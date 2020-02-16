@@ -20,7 +20,7 @@ If text recognition model is provided, the demo prints recognized text as well.
 ## Running
 
 Running the application with the <code>-h</code> option yields the following usage message:
-```sh
+```
 ./text_detection_demo -h
 
 text_detection_demo [OPTION]
@@ -32,7 +32,7 @@ Options:
     -m_tr "<path>"               Required. Path to the Text Recognition model (.xml) file.
     -dt "<input_data_type>"      Required. Input data type: "image" (for a single image), "list" (for a text file where images paths are listed), "video" (for a saved video), "webcam" (for a webcamera device). By default, it is "image".
     -m_tr_ss "<value>"           Optional. Symbol set for the Text Recognition model.
-    -cc                          Optional. If it is set, then in case of absence of the Text Detector, the Text Reconition model takes a central image crop as an input, but not full frame.
+    -cc                          Optional. If it is set, then in case of absence of the Text Detector, the Text Recognition model takes a central image crop as an input, but not full frame.
     -w_td "<value>"              Optional. Input image width for Text Detection model.
     -h_td "<value>"              Optional. Input image height for Text Detection model.
     -thr "<value>"               Optional. Specify a recognition confidence threshold. Text detection candidates with text recognition confidence below specified threshold are rejected.
@@ -45,6 +45,8 @@ Options:
     -c "<absolute_path>"         Optional. Absolute path to the GPU kernels implementation for custom layers.
     -no_show                     Optional. If it is true, then detected text will not be shown on image frame. By default, it is false.
     -r                           Optional. Output Inference results as raw values.
+    -u                           Optional. List of monitors to show initially.
+    -b                           Optional. Bandwidth for CTC beam search decoder. Default value is 0, in this case CTC greedy decoder will be used.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

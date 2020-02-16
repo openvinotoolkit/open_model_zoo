@@ -16,9 +16,9 @@ limitations under the License.
 
 from ..config import NumberField, PathField
 from ..representation import DetectionAnnotation
-from ..utils import convert_bboxes_xywh_to_x1y1x2y2, read_txt, check_file_existence
+from ..utils import convert_bboxes_xywh_to_x1y1x2y2, read_txt, check_file_existence, read_json
 
-from .format_converter import BaseFormatConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 
 class WiderFormatConverter(BaseFormatConverter):
@@ -27,8 +27,8 @@ class WiderFormatConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
             'annotation_file': PathField(
                 description="Path to xml file, which contains ground truth data in WiderFace dataset format."
             ),
@@ -40,23 +40,25 @@ class WiderFormatConverter(BaseFormatConverter):
             'images_dir': PathField(
                 is_directory=True, optional=True,
                 description='path to dataset images, used only for content existence check'
+            ),
+            'dataset_meta_file': PathField(
+                description='path to json file with dataset meta (e.g. label_map, color_encoding)', optional=True
             )
         })
 
-        return parameters
+        return configuration_parameters
 
     def configure(self):
         self.annotation_file = self.get_value_from_config('annotation_file')
         self.label_start = self.get_value_from_config('label_start')
         self.images_dir = self.get_value_from_config('images_dir') or self.annotation_file.parent
+        self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         image_annotations = read_txt(self.annotation_file)
         content_errors = None if not check_content else []
-        image_ids = []
-        for image_id, line in enumerate(image_annotations):
-            if '.jpg' in line:
-                image_ids.append(image_id)
+        image_ids = [image_id for image_id, line in enumerate(image_annotations) if '.jpg' in line]
+        meta = self.generate_meta()
 
         annotations = []
         num_iterations = len(image_ids)
@@ -84,6 +86,30 @@ class WiderFormatConverter(BaseFormatConverter):
             if progress_callback and index % progress_interval == 0:
                 progress_callback(index * 100 / num_iterations)
 
-        meta = {'label_map': {0: '__background__', self.label_start: 'face'}, 'background_label': 0}
-
         return ConverterReturn(annotations, meta, content_errors)
+
+    def generate_meta(self):
+        if not self.dataset_meta:
+            if self.label_start != 0:
+                return {'label_map': {0: '__background__', self.label_start: 'face'}, 'background_label': 0}
+            return {'label_map': {self.label_start: 'face'}}
+        dataset_meta = read_json(self.dataset_meta)
+        background_label = dataset_meta.get('background_label', -1)
+        labels = dataset_meta.get('labels')
+        label_map = {0: '__background__', self.label_start: 'face'}
+        if labels:
+            label_map = {
+                label_id + self.label_start if label not in ('background', '__background__') else 0: label
+                for label_id, label in enumerate(labels)
+            }
+            label_map[background_label] = '__background__'
+
+        label_map = verify_label_map(dataset_meta.get('label_map', label_map))
+        valid_labels = [key for key in label_map if key != background_label]
+        self.background_label = background_label
+        self.label_start = sorted(valid_labels)[0]
+        meta = {'label_map': label_map}
+        if background_label != -1:
+            meta['background_label'] = background_label
+
+        return meta

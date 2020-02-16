@@ -21,7 +21,7 @@ performs upscale using super resolution model.
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./super_resolution_demo -h
 InferenceEngine:
     API version ............ <version>

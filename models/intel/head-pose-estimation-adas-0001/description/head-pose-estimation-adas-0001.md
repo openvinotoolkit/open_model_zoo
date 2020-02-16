@@ -53,7 +53,7 @@ Output layer names in Caffe* format:
 
 
 Each output contains one float value that represents value in Tait-Bryan angles
-(yaw, pitсh or roll).
+(yaw, pitch or roll).
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

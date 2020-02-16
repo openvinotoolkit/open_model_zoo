@@ -15,12 +15,19 @@
 namespace human_pose_estimation {
 class HumanPoseEstimator {
 public:
-    static const size_t keypointsNumber;
+    static const size_t keypointsNumber = 18;
 
     HumanPoseEstimator(const std::string& modelPath,
                        const std::string& targetDeviceName,
                        bool enablePerformanceReport = false);
-    std::vector<HumanPose> estimate(const cv::Mat& image);
+    std::vector<HumanPose> postprocessCurr();
+    void reshape(const cv::Mat& image);
+    void frameToBlobCurr(const cv::Mat& image);
+    void frameToBlobNext(const cv::Mat& image);
+    void startCurr();
+    void startNext();
+    bool readyCurr();
+    void swapRequest();
     ~HumanPoseEstimator();
 
 private:
@@ -47,13 +54,14 @@ private:
     float foundMidPointsRatioThreshold;
     float minSubsetScore;
     cv::Size inputLayerSize;
+    cv::Size imageSize;
     int upsampleRatio;
     InferenceEngine::Core ie;
     std::string targetDeviceName;
     InferenceEngine::CNNNetwork network;
     InferenceEngine::ExecutableNetwork executableNetwork;
-    InferenceEngine::InferRequest request;
-    InferenceEngine::CNNNetReader netReader;
+    InferenceEngine::InferRequest::Ptr requestNext;
+    InferenceEngine::InferRequest::Ptr requestCurr;
     std::string pafsBlobName;
     std::string heatmapsBlobName;
     bool enablePerformanceReport;

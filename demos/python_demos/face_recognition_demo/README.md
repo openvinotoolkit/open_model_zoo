@@ -71,15 +71,18 @@ pip install -r requirements.txt
 Running the application with the `-h` option or without
 any arguments yields the following message:
 
-``` sh
+```
 python ./face_recognition_demo.py -h
 
 usage: face_recognition_demo.py [-h] [-i PATH] [-o PATH] [--no_show] [-tl]
-                                [-cw CROP_WIDTH] [-ch CROP_HEIGHT] -fg PATH
+                                [-cw CROP_WIDTH] [-ch CROP_HEIGHT]
+                                [--match_algo {HUNGARIAN,MIN_DIST}] -fg PATH
                                 [--run_detector] -m_fd PATH -m_lm PATH -m_reid
-                                PATH [-d_fd {CPU,GPU,FPGA,MYRIAD,HETERO}]
-                                [-d_lm {CPU,GPU,FPGA,MYRIAD,HETERO}]
-                                [-d_reid {CPU,GPU,FPGA,MYRIAD,HETERO}]
+                                PATH [-fd_iw FD_INPUT_WIDTH]
+                                [-fd_ih FD_INPUT_HEIGHT]
+                                [-d_fd {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
+                                [-d_lm {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
+                                [-d_reid {CPU,GPU,FPGA,MYRIAD,HETERO,HDDL}]
                                 [-l PATH] [-c PATH] [-v] [-pc] [-t_fd [0..1]]
                                 [-t_id [0..1]] [-exp_r_fd NUMBER]
 
@@ -102,6 +105,9 @@ General:
                         (optional) Crop the input stream to this height
                         (default: no crop). Both -cw and -ch parameters should
                         be specified to use crop.
+  --match_algo {HUNGARIAN,MIN_DIST}
+                        (optional)algorithm for face matching(default:
+                        HUNGARIAN)
 
 Faces database:
   -fg PATH              Path to the face images directory
@@ -122,6 +128,16 @@ Models:
   -m_fd PATH            Path to the Face Detection model XML file
   -m_lm PATH            Path to the Facial Landmarks Regression model XML file
   -m_reid PATH          Path to the Face Reidentification model XML file
+  -fd_iw FD_INPUT_WIDTH, --fd_input_width FD_INPUT_WIDTH
+                        (optional) specify the input width of detection model
+                        (default: use default input width of model).
+                        Both -fd_iw and -fd_ih parameters should be specified
+                        for reshape.
+  -fd_ih FD_INPUT_HEIGHT, --fd_input_height FD_INPUT_HEIGHT
+                        (optional) specify the input height of detection model
+                        (default: use default input height of model). 
+                        Both -fd_iw and -fd_ih parameters should be specified
+                        for reshape.
 
 Inference options:
   -d_fd {CPU,GPU,FPGA,MYRIAD,HETERO}
@@ -163,14 +179,13 @@ python ./face_recognition_demo.py \
 -m_fd <path_to_model>/face-detection-retail-0004.xml \
 -m_lm <path_to_model>/landmarks-regression-retail-0009.xml \
 -m_reid <path_to_model>/face-reidentification-retail-0095.xml \
--l <path_to_cpu_extensions>/libcpu_extension_sse4.so \
 --verbose \
 -fg "/home/face_gallery"
 ```
 
 Windows (`cmd`, `powershell`) (assuming OpenVINO installed in `C:/Intel/openvino`):
 
-``` powershell
+```bat
 # Set up the environment
 call C:/Intel/openvino/bin/setupvars.bat
 
@@ -178,7 +193,6 @@ python ./face_recognition_demo.py ^
 -m_fd <path_to_model>/face-detection-retail-0004.xml ^
 -m_lm <path_to_model>/landmarks-regression-retail-0009.xml ^
 -m_reid <path_to_model>/face-reidentification-retail-0095.xml ^
--l <path_to_cpu_extensions>/cpu_extension_avx2.dll ^
 --verbose ^
 -fg "C:/face_gallery"
 ```

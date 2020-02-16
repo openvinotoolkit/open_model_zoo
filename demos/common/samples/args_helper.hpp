@@ -34,7 +34,7 @@
 inline void readInputFilesArguments(std::vector<std::string> &files, const std::string& arg) {
     struct stat sb;
     if (stat(arg.c_str(), &sb) != 0) {
-        if (arg.find("rtsp:") != 0) {
+        if (arg.compare(0, 5, "rtsp:") != 0) {
             slog::warn << "File " << arg << " cannot be opened!" << slog::endl;
             return;
         }
@@ -103,15 +103,18 @@ inline std::vector<std::string> split(const std::string &s, char delim) {
 }
 
 inline std::vector<std::string> parseDevices(const std::string& device_string) {
-    std::string comma_separated_devices = device_string;
-    const std::string::size_type colon_position = comma_separated_devices.find(":");
+    const std::string::size_type colon_position = device_string.find(":");
     if (colon_position != std::string::npos) {
-        comma_separated_devices = comma_separated_devices.substr(colon_position + 1);
+        std::string device_type = device_string.substr(0, colon_position);
+        if (device_type == "HETERO" || device_type == "MULTI") {
+            std::string comma_separated_devices = device_string.substr(colon_position + 1);
+            std::vector<std::string> devices = split(comma_separated_devices, ',');
+            for (auto& device : devices)
+                device = device.substr(0, device.find("("));
+            return devices;
+        }
     }
-    auto devices = split(comma_separated_devices, ',');
-    for (auto& device : devices)
-        device = device.substr(0, device.find("("));
-    return devices;
+    return {device_string};
 }
 
 inline std::map<std::string, uint32_t> parseValuePerDevice(const std::set<std::string>& devices,

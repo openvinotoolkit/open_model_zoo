@@ -32,7 +32,7 @@ from accuracy_checker.preprocessor import (
     GeometricOperationMetadata
 )
 from accuracy_checker.preprocessor.preprocessing_executor import PreprocessingExecutor
-from accuracy_checker.preprocessor.geometric_transformations import _OpenCVResizer
+from accuracy_checker.preprocessor.resize import _OpenCVResizer
 from accuracy_checker.data_readers import DataRepresentation
 
 
@@ -47,7 +47,7 @@ class TestResize:
         assert resize.dst_width == 200
         assert resize.dst_height == 200
         cv2_resize_mock.assert_called_once_with(
-            input_mock, (200, 200), interpolation=_OpenCVResizer.supported_interpolations['LINEAR']
+            input_mock, (200, 200), interpolation=_OpenCVResizer.supported_interpolations()['LINEAR']
         )
 
     def test_custom_resize(self, mocker):
@@ -65,7 +65,7 @@ class TestResize:
         assert resize.dst_height == 128
         cv2_resize_mock.assert_called_once_with(
             input_mock, (126, 128),
-            interpolation=_OpenCVResizer.supported_interpolations['CUBIC']
+            interpolation=_OpenCVResizer.supported_interpolations()['CUBIC']
         )
 
     def test_resize_without_save_aspect_ratio(self):
@@ -186,7 +186,8 @@ class TestResize:
 class TestAutoResize:
     def test_default_auto_resize(self, mocker):
         cv2_resize_mock = mocker.patch('accuracy_checker.preprocessor.geometric_transformations.cv2.resize')
-        resize = Preprocessor.provide('auto_resize', {'type': 'auto_resize'}, input_shapes={'data': [1, 3, 200, 200]})
+        resize = Preprocessor.provide('auto_resize', {'type': 'auto_resize'})
+        resize.set_input_shape({'data': (1, 3, 200, 200)})
 
         input_mock = mocker.Mock()
         resize(DataRepresentation(input_mock))
@@ -195,20 +196,19 @@ class TestAutoResize:
         assert resize.dst_height == 200
         cv2_resize_mock.assert_called_once_with(input_mock, (200, 200))
 
-    def test_auto_resize_input_shape_not_provided_raise_config_error(self):
+    def test_auto_resize_input_shape_not_provided_raise_config_error(self, mocker):
+        input_mock = mocker.Mock()
         with pytest.raises(ConfigError):
-            Preprocessor.provide('auto_resize', {'type': 'auto_resize'})
+            Preprocessor.provide('auto_resize', {'type': 'auto_resize'})(DataRepresentation(input_mock))
 
     def test_auto_resize_with_several_input_shapes_raise_config_error(self):
         with pytest.raises(ConfigError):
-            Preprocessor.provide(
-                'auto_resize', {'type': 'auto_resize'},
-                input_shapes={'data': [1, 3, 200, 200], 'data2': [1, 3, 300, 300]}
-            )
+            Preprocessor.provide('auto_resize', {'type': 'auto_resize'}).set_input_shape({'data': [1, 3, 200, 200], 'data2': [1, 3, 300, 300]})
+
 
     def test_auto_resize_empty_input_shapes_raise_config_error(self):
         with pytest.raises(ConfigError):
-            Preprocessor.provide('auto_resize', {'type': 'auto_resize'}, input_shapes={})
+            Preprocessor.provide('auto_resize', {'type': 'auto_resize'}).set_input_shape({})
 
 
 class TestNormalization:
@@ -697,9 +697,7 @@ class TestPreprocessorExtraArgs:
 
     def test_auto_resize_raise_config_error_on_extra_args(self):
         with pytest.raises(ConfigError):
-            Preprocessor.provide('auto_resize', {'type': 'auto_resize', 'something_extra': 'extra'},
-                                 input_shapes={'data': [1, 3, 200, 200]}
-                                 )
+            Preprocessor.provide('auto_resize', {'type': 'auto_resize', 'something_extra': 'extra'},)
 
     def test_normalization_raise_config_error_on_extra_args(self):
         with pytest.raises(ConfigError):

@@ -71,4 +71,3 @@ def test_missed_weights_in_create_caffe_launcher_raises_config_error_exception()
 
     with pytest.raises(ConfigError):
         create_launcher(launcher)
-

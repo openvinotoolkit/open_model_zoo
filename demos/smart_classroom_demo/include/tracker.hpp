@@ -40,7 +40,10 @@ using TrackedObjects = std::vector<TrackedObject>;
 ///
 class KuhnMunkres {
 public:
-    KuhnMunkres();
+    ///
+    /// \brief Initializes the class for assignment problem solving.
+    /// \param[in] greedy If a faster greedy matching algorithm should be used.
+    explicit KuhnMunkres(bool greedy = false);
 
     ///
     /// \brief Solves the assignment problem for given dissimilarity matrix.
@@ -180,7 +183,6 @@ public:
     explicit Tracker(const TrackerParams &params = TrackerParams())
         : params_(params),
           tracks_counter_(0),
-          valid_tracks_counter_(0),
           frame_size_() {}
 
     ///
@@ -209,12 +211,6 @@ public:
     /// \brief Reset the pipeline.
     ///
     void Reset();
-
-    ///
-    /// \brief Returns number of counted tracks.
-    /// \return a number of counted tracks.
-    ///
-    size_t Count() const;
 
     ///
     /// \brief Returns recently detected objects.
@@ -275,8 +271,6 @@ public:
     void DropForgottenTracks();
 
 private:
-    void DropForgottenTrack(size_t track_id);
-
     const std::set<size_t> &active_track_ids() const { return active_track_ids_; }
 
     float ShapeAffinity(const cv::Rect &trk, const cv::Rect &det);
@@ -331,9 +325,6 @@ private:
 
     // Number of all current tracks.
     size_t tracks_counter_;
-
-    // Number of dropped valid tracks.
-    size_t valid_tracks_counter_;
 
     cv::Size frame_size_;
 };

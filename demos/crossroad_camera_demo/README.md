@@ -5,7 +5,7 @@ This demo provides an inference pipeline for persons' detection, recognition and
 * `person-vehicle-bike-detection-crossroad-0078`, which is a primary detection network for finding the persons (and other objects if needed)
 * `person-attributes-recognition-crossroad-0230`, which is executed on top of the results from the first network and
 reports person attributes like gender, has hat, has long-sleeved clothes
-* `person-reidentification-retail-0079`, which is executed on top of the results from the first network and prints
+* `person-reidentification-retail-0031`, which is executed on top of the results from the first network and prints
 a vector of features for each detected person. This vector is used to conclude if it is already detected person or not.
 
 For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
@@ -36,7 +36,7 @@ REID value is assigned. Otherwise, the vector is added to a global list, and new
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./crossroad_camera_demo -h
 InferenceEngine:
     API version ............ <version>
@@ -62,6 +62,7 @@ Options:
     -t_reid                      Optional. Cosine similarity threshold between two vectors for person reidentification.
     -no_show                     Optional. No show processed video.
     -auto_resize                 Optional. Enables resizable input with support of ROI crop & auto resize.
+    -u                           Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.
@@ -87,7 +88,7 @@ If Person Attributes Recognition or Person Reidentification Retail are enabled, 
 
 > **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo has been tested on the following Model Downloader available topologies: 
 >* `person-attributes-recognition-crossroad-0230`
->* `person-reidentification-retail-0079`
+>* `person-reidentification-retail-0031`
 >* `person-vehicle-bike-detection-crossroad-0078`
 > Other models may produce unexpected results on these devices.
 

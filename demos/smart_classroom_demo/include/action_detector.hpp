@@ -55,9 +55,9 @@ using SSDHeads = std::vector<SSDHead>;
 * @brief Config for the Action Detection model
 */
 struct ActionDetectorConfig : public CnnConfig {
-    explicit ActionDetectorConfig(const std::string& path_to_model,
-                                  const std::string& path_to_weights)
-        : CnnConfig(path_to_model, path_to_weights) {}
+    explicit ActionDetectorConfig(const std::string& path_to_model)
+        : CnnConfig(path_to_model) {}
+
     /** @brief Name of output blob with location info */
     std::string old_loc_blob_name{"mbox_loc1/out/conv/flat"};
     /** @brief Name of output blob with detection confidence info */
@@ -95,7 +95,7 @@ struct ActionDetectorConfig : public CnnConfig {
     /** @brief Number of SSD anchors for the new network version */
     std::vector<int> new_anchors{1, 4};
     /** @brief Number of actions to detect */
-    int num_action_classes = 3;
+    size_t num_action_classes = 3;
     /** @brief Async execution flag */
     bool is_async = true;
     /** @brief  SSD bbox encoding variances */
@@ -108,14 +108,17 @@ struct ActionDetectorConfig : public CnnConfig {
 };
 
 
-class ActionDetection : public BaseCnnDetection {
+class ActionDetection : public AsyncDetection<DetectedAction>, public BaseCnnDetection {
 public:
     explicit ActionDetection(const ActionDetectorConfig& config);
 
-    DetectedActions results;
     void submitRequest() override;
-    void enqueue(const cv::Mat &frame);
-    void fetchResults();
+    void enqueue(const cv::Mat &frame) override;
+    void wait() override { BaseCnnDetection::wait(); }
+    void printPerformanceCounts(const std::string &fullDeviceName) override {
+        BaseCnnDetection::printPerformanceCounts(fullDeviceName);
+    }
+    DetectedActions fetchResults() override;
 
 private:
     ActionDetectorConfig config_;
@@ -126,7 +129,6 @@ private:
     int enqueued_frames_ = 0;
     float width_ = 0;
     float height_ = 0;
-    bool results_fetched_ = false;
     bool new_network_ = false;
     std::vector<int> head_ranges_;
     std::vector<int> head_step_sizes_;
@@ -157,14 +159,13 @@ private:
     * @param add_conf Action conf buffer
     * @param priorboxes Priorboxes buffer
     * @param frame_size Size of input image (WxH)
-    * @param detections Detected objects
+    * @return Detected objects
     */
-    void GetDetections(const cv::Mat& loc,
-                       const cv::Mat& main_conf,
-                       const cv::Mat& priorboxes,
-                       const std::vector<cv::Mat>& add_conf,
-                       const cv::Size& frame_size,
-                       DetectedActions* detections) const;
+    DetectedActions GetDetections(const cv::Mat& loc,
+                                  const cv::Mat& main_conf,
+                                  const cv::Mat& priorboxes,
+                                  const std::vector<cv::Mat>& add_conf,
+                                  const cv::Size& frame_size) const;
 
      /**
     * @brief Translate input buffer to BBox

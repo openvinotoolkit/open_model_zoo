@@ -8,7 +8,6 @@ models:
         model:   intel/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.xml
         weights: intel/vehicle-detection-adas-0002/FP32/vehicle-detection-adas-0002.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -16,15 +15,13 @@ models:
         model:   intel/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.xml
         weights: intel/vehicle-detection-adas-0002/FP16/vehicle-detection-adas-0002.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
-          - INT8
-        model:   intel/vehicle-detection-adas-0002/INT8/vehicle-detection-adas-0002.xml
-        weights: intel/vehicle-detection-adas-0002/INT8/vehicle-detection-adas-0002.bin
+          - FP32-INT8
+        model:   intel/vehicle-detection-adas-0002/FP32-INT8/vehicle-detection-adas-0002.xml
+        weights: intel/vehicle-detection-adas-0002/FP32-INT8/vehicle-detection-adas-0002.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
     datasets:
       - name: vehicle_detection_dataset
@@ -49,3 +46,5 @@ models:
             include_boundaries: True
             allow_multiple_matches_per_ignored: True
             use_filtered_tp: True
+
+global_definitions: ../dataset_definitions.yml

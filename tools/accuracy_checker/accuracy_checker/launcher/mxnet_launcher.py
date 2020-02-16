@@ -39,7 +39,7 @@ class MxNetLauncherConfigValidator(LauncherConfigValidator):
 
 class MxNetLauncher(Launcher):
     """
-    Class for infer model using MxNet framework
+    Class for infer model using MXNet framework
     """
     __provider__ = 'mxnet'
 
@@ -57,59 +57,63 @@ class MxNetLauncher(Launcher):
 
     def __init__(self, config_entry: dict, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
+        self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
 
-        mxnet_launcher_config = MxNetLauncherConfigValidator('MxNet_Launcher', fields=self.parameters())
-        mxnet_launcher_config.validate(self.config)
-
-        # Get model name, prefix, epoch
-        self.model = self.config['model']
-        model_path, model_file = self.model.parent, self.model.name
-        model_name = model_file.rsplit('.', 1)[0]
-        model_prefix, model_epoch = model_name.rsplit('-', 1)
-
-        # Get device and set device context
-        match = re.match(DEVICE_REGEX, self.config['device'].lower())
-        if match.group('device') == 'gpu':
-            identifier = match.group('identifier')
-            if identifier is None:
-                identifier = 0
-            device_context = mxnet.gpu(int(identifier))
-        else:
-            device_context = mxnet.cpu()
-
-        # Get batch from config or 1
-        self._batch = self.config.get('batch', 1)
-
-        # Get input shapes
-        input_shapes = []
-
-        for input_config in self.config['inputs']:
-            input_shape = input_config['shape']
-            input_shape = string_to_tuple(input_shape, casting_type=int)
-            input_shapes.append((input_config['name'], (self._batch, *input_shape)))
-
-        # Load checkpoints
-        sym, arg_params, aux_params = mxnet.model.load_checkpoint(
-            model_path / model_prefix, int(model_epoch)
+        mxnet_launcher_config = MxNetLauncherConfigValidator(
+            'MxNet_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
         )
-        self._inputs = OrderedDict(input_shapes)
-        # Create a module
-        self.module = mxnet.mod.Module(symbol=sym, context=device_context, label_names=None)
-        self.module.bind(for_training=False, data_shapes=input_shapes)
-        self.module.set_params(arg_params, aux_params, allow_missing=True)
+        mxnet_launcher_config.validate(self.config)
+        if not self._delayed_model_loading:
+            # Get model name, prefix, epoch
+            self.model = self.config['model']
+            model_path, model_file = self.model.parent, self.model.name
+            model_name = model_file.rsplit('.', 1)[0]
+            model_prefix, model_epoch = model_name.rsplit('-', 1)
+
+            # Get device and set device context
+            match = re.match(DEVICE_REGEX, self.config['device'].lower())
+            if match.group('device') == 'gpu':
+                identifier = match.group('identifier')
+                if identifier is None:
+                    identifier = 0
+                device_context = mxnet.gpu(int(identifier))
+            else:
+                device_context = mxnet.cpu()
+
+            # Get batch from config or 1
+            self._batch = self.config.get('batch', 1)
+
+            # Get input shapes
+            input_shapes = []
+
+            for input_config in self.config['inputs']:
+                input_shape = input_config['shape']
+                input_shape = string_to_tuple(input_shape, casting_type=int)
+                input_shapes.append((input_config['name'], (self._batch, *input_shape)))
+
+            # Load checkpoints
+            sym, arg_params, aux_params = mxnet.model.load_checkpoint(
+                model_path / model_prefix, int(model_epoch)
+            )
+            self._inputs = OrderedDict(input_shapes)
+            # Create a module
+            self.module = mxnet.mod.Module(symbol=sym, context=device_context, label_names=None)
+            self.module.bind(for_training=False, data_shapes=input_shapes)
+            self.module.set_params(arg_params, aux_params, allow_missing=True)
 
     @property
     def batch(self):
         return self._batch
 
-    def fit_to_input(self, data, input_layer, layout):
-        return mxnet.nd.array(np.transpose(data, layout))
+    def fit_to_input(self, data, input_layer, layout, precision):
+        data = np.transpose(data, layout)
+        return mxnet.nd.array(data.astype(precision) if precision else data)
 
     @property
     def inputs(self):
         return self._inputs
 
-    def predict(self, inputs, metadata, *args, **kwargs):
+    def predict(self, inputs, metadata=None, **kwargs):
         """
         Args:
             inputs: dictionary where keys are input layers names and values are data for them.
@@ -130,13 +134,14 @@ class MxNetLauncher(Launcher):
                 infer_res[layer.replace('_output', '')] = out.asnumpy()
             results.append(infer_res)
 
-        for meta_ in metadata:
-            meta_['input_shape'] = self.inputs_info_for_meta()
+        if metadata is not None:
+            for meta_ in metadata:
+                meta_['input_shape'] = self.inputs_info_for_meta()
 
         return results
 
     def predict_async(self, *args, **kwargs):
-        raise ValueError('MxNet Launcher does not support async mode yet')
+        raise ValueError('MXNet Launcher does not support async mode yet')
 
     @property
     def output_blob(self):

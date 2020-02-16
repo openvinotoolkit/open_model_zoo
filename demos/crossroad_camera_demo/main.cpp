@@ -23,12 +23,10 @@
 
 #include <inference_engine.hpp>
 
+#include <monitors/presenter.h>
 #include <samples/slog.hpp>
 #include <samples/ocv_common.hpp>
 #include "crossroad_camera_demo.hpp"
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 using namespace InferenceEngine;
 
@@ -66,13 +64,13 @@ struct BaseDetection {
     std::string inputName;
     std::string outputName;
 
-    BaseDetection(std::string &commandLineFlag, std::string topoName)
+    BaseDetection(std::string &commandLineFlag, const std::string &topoName)
             : commandLineFlag(commandLineFlag), topoName(topoName) {}
 
     ExecutableNetwork * operator ->() {
         return &net;
     }
-    virtual CNNNetwork read()  = 0;
+    virtual CNNNetwork read(const Core& ie)  = 0;
 
     virtual void setRoiBlob(const Blob::Ptr &roiBlob) {
         if (!enabled())
@@ -160,23 +158,19 @@ struct PersonDetection : BaseDetection{
     }
 
     PersonDetection() : BaseDetection(FLAGS_m, "Person Detection"), maxProposalCount(0), objectSize(0) {}
-    CNNNetwork read() override {
+    CNNNetwork read(const Core& ie) override {
         slog::info << "Loading network files for PersonDetection" << slog::endl;
-        CNNNetReader netReader;
         /** Read network model **/
-        netReader.ReadNetwork(FLAGS_m);
+        auto network = ie.ReadNetwork(FLAGS_m);
         /** Set batch size to 1 **/
         slog::info << "Batch size is forced to  1" << slog::endl;
-        netReader.getNetwork().setBatchSize(1);
-        /** Extract model name and load it's weights **/
-        std::string binFileName = fileNameNoExt(FLAGS_m) + ".bin";
-        netReader.ReadWeights(binFileName);
+        network.setBatchSize(1);
         // -----------------------------------------------------------------------------------------------------
 
         /** SSD-based network should have one input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
         slog::info << "Checking Person Detection inputs" << slog::endl;
-        InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+        InputsDataMap inputInfo(network.getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Detection network should have only one input");
         }
@@ -194,7 +188,7 @@ struct PersonDetection : BaseDetection{
 
         // ---------------------------Check outputs ------------------------------------------------------
         slog::info << "Checking Person Detection outputs" << slog::endl;
-        OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
+        OutputsDataMap outputInfo(network.getOutputsInfo());
         if (outputInfo.size() != 1) {
             throw std::logic_error("Person Detection network should have only one output");
         }
@@ -213,7 +207,7 @@ struct PersonDetection : BaseDetection{
         _output->setLayout(Layout::NCHW);
 
         slog::info << "Loading Person Detection model to the "<< FLAGS_d << " device" << slog::endl;
-        return netReader.getNetwork();
+        return network;
     }
 
     void fetchResults() {
@@ -282,22 +276,19 @@ struct PersonAttribsDetection : BaseDetection {
                     10, cv::KMEANS_RANDOM_CENTERS, centers);
         centers.convertTo(centers, CV_8U);
         centers = centers.reshape(0, clusterCount);
-        std::map<int, cv::Vec3b, std::greater<int>> max_color;
         std::vector<int> freq(clusterCount);
 
         for (int i = 0; i < labels.rows * labels.cols; ++i) {
             freq[labels.at<int>(i)]++;
         }
 
-        for (size_t i = 0; i < freq.size(); ++i) {
-            max_color[freq[i]] = centers.at<cv::Vec3b>(i);
-        }
+        auto freqArgmax = std::max_element(freq.begin(), freq.end()) - freq.begin();
 
-        return max_color.begin()->second;
+        return centers.at<cv::Vec3b>(freqArgmax);
     }
 
     AttributesAndColorPoints GetPersonAttributes() {
-        static const std::vector<std::string> attributesVec = {
+        static const char *const attributeStrings[] = {
                 "is male", "has_bag", "has_backpack" , "has hat", "has longsleeves", "has longpants", "has longhair", "has coat_jacket"
         };
 
@@ -308,10 +299,10 @@ struct PersonAttribsDetection : BaseDetection {
         size_t numOfTCPointChannels = topColorPointBlob->getTensorDesc().getDims().at(1);
         size_t numOfBCPointChannels = bottomColorPointBlob->getTensorDesc().getDims().at(1);
 
-        if (numOfAttrChannels != attributesVec.size()) {
+        if (numOfAttrChannels != arraySize(attributeStrings)) {
             throw std::logic_error("Output size (" + std::to_string(numOfAttrChannels) + ") of the "
-                                   "Person Attributes Recognition network is not equal to used person "
-                                   "attributes vector size (" + std::to_string(attributesVec.size()) + ")");
+                                   "Person Attributes Recognition network is not equal to expected "
+                                   "number of attributes (" + std::to_string(arraySize(attributeStrings)) + ")");
         }
         if (numOfTCPointChannels != 2) {
             throw std::logic_error("Output size (" + std::to_string(numOfTCPointChannels) + ") of the "
@@ -334,31 +325,27 @@ struct PersonAttribsDetection : BaseDetection {
         returnValue.bottom_color_point.x = outputBCPointValues[0];
         returnValue.bottom_color_point.y = outputBCPointValues[1];
 
-        for (size_t i = 0; i < attributesVec.size(); i++) {
-            returnValue.attributes_strings.push_back(attributesVec[i]);
+        for (size_t i = 0; i < arraySize(attributeStrings); i++) {
+            returnValue.attributes_strings.push_back(attributeStrings[i]);
             returnValue.attributes_indicators.push_back(outputAttrValues[i] > 0.5);
         }
 
         return returnValue;
     }
 
-    CNNNetwork read() override {
+    CNNNetwork read(const Core& ie) override {
         slog::info << "Loading network files for PersonAttribs" << slog::endl;
-        CNNNetReader netReader;
         /** Read network model **/
-        netReader.ReadNetwork(FLAGS_m_pa);
-        netReader.getNetwork().setBatchSize(1);
-        slog::info << "Batch size is forced to 1 for Person Attribs" << slog::endl;
-
+        auto network = ie.ReadNetwork(FLAGS_m_pa);
         /** Extract model name and load it's weights **/
-        std::string binFileName = fileNameNoExt(FLAGS_m_pa) + ".bin";
-        netReader.ReadWeights(binFileName);
+        network.setBatchSize(1);
+        slog::info << "Batch size is forced to 1 for Person Attribs" << slog::endl;
         // -----------------------------------------------------------------------------------------------------
 
         /** Person Attribs network should have one input two outputs **/
         // ---------------------------Check inputs ------------------------------------------------------
         slog::info << "Checking PersonAttribs inputs" << slog::endl;
-        InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+        InputsDataMap inputInfo(network.getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Attribs topology should have only one input");
         }
@@ -375,7 +362,7 @@ struct PersonAttribsDetection : BaseDetection {
 
         // ---------------------------Check outputs ------------------------------------------------------
         slog::info << "Checking Person Attribs outputs" << slog::endl;
-        OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
+        OutputsDataMap outputInfo(network.getOutputsInfo());
         if (outputInfo.size() != 3) {
              throw std::logic_error("Person Attribs Network expects networks having one output");
         }
@@ -385,7 +372,7 @@ struct PersonAttribsDetection : BaseDetection {
         outputNameForBottomColorPoint = (it++)->second->getName();  // bottom color location
         slog::info << "Loading Person Attributes Recognition model to the "<< FLAGS_d_pa << " device" << slog::endl;
         _enabled = true;
-        return netReader.getNetwork();
+        return network;
     }
 };
 
@@ -395,12 +382,11 @@ struct PersonReIdentification : BaseDetection {
     PersonReIdentification() : BaseDetection(FLAGS_m_reid, "Person Reidentification Retail") {}
 
     unsigned long int findMatchingPerson(const std::vector<float> &newReIdVec) {
-        float cosSim;
         auto size = globalReIdVec.size();
 
         /* assigned REID is index of the matched vector from the globalReIdVec */
         for (size_t i = 0; i < size; ++i) {
-            cosSim = cosineSimilarity(newReIdVec, globalReIdVec[i]);
+            float cosSim = cosineSimilarity(newReIdVec, globalReIdVec[i]);
             if (FLAGS_r) {
                 std::cout << "cosineSimilarity: " << cosSim << std::endl;
             }
@@ -419,14 +405,8 @@ struct PersonReIdentification : BaseDetection {
         Blob::Ptr attribsBlob = request.GetBlob(outputName);
 
         auto numOfChannels = attribsBlob->getTensorDesc().getDims().at(1);
-        /* output descriptor of Person Reidentification Recognition network has size 256 */
-        if (numOfChannels != 256) {
-            throw std::logic_error("Output size (" + std::to_string(numOfChannels) + ") of the "
-                                   "Person Reidentification network is not equal to 256");
-        }
-
         auto outputValues = attribsBlob->buffer().as<float*>();
-        return std::vector<float>(outputValues, outputValues + 256);
+        return std::vector<float>(outputValues, outputValues + numOfChannels);
     }
 
     template <typename T>
@@ -453,21 +433,16 @@ struct PersonReIdentification : BaseDetection {
         return mul / (sqrt(denomA) * sqrt(denomB));
     }
 
-    CNNNetwork read() override {
+    CNNNetwork read(const Core& ie) override {
         slog::info << "Loading network files for Person Reidentification" << slog::endl;
-        CNNNetReader netReader;
         /** Read network model **/
-        netReader.ReadNetwork(FLAGS_m_reid);
+        auto network = ie.ReadNetwork(FLAGS_m_reid);
         slog::info << "Batch size is forced to  1 for Person Reidentification Network" << slog::endl;
-        netReader.getNetwork().setBatchSize(1);
-        /** Extract model name and load it's weights **/
-        std::string binFileName = fileNameNoExt(FLAGS_m_reid) + ".bin";
-        netReader.ReadWeights(binFileName);
-
+        network.setBatchSize(1);
         /** Person Reidentification network should have 1 input and one output **/
         // ---------------------------Check inputs ------------------------------------------------------
         slog::info << "Checking Person Reidentification Network input" << slog::endl;
-        InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+        InputsDataMap inputInfo(network.getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("Person Reidentification Retail should have 1 input");
         }
@@ -484,7 +459,7 @@ struct PersonReIdentification : BaseDetection {
 
         // ---------------------------Check outputs ------------------------------------------------------
         slog::info << "Checking Person Reidentification Network output" << slog::endl;
-        OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
+        OutputsDataMap outputInfo(network.getOutputsInfo());
         if (outputInfo.size() != 1) {
             throw std::logic_error("Person Reidentification Network should have 1 output");
         }
@@ -492,7 +467,7 @@ struct PersonReIdentification : BaseDetection {
         slog::info << "Loading Person Reidentification Retail model to the "<< FLAGS_d_reid << " device" << slog::endl;
 
         _enabled = true;
-        return netReader.getNetwork();
+        return network;
     }
 };
 
@@ -502,7 +477,7 @@ struct Load {
 
     void into(Core & ie, const std::string & deviceName) const {
         if (detector.enabled()) {
-            detector.net = ie.LoadNetwork(detector.read(), deviceName);
+            detector.net = ie.LoadNetwork(detector.read(ie), deviceName);
         }
     }
 };
@@ -559,10 +534,6 @@ int main(int argc, char *argv[]) {
             std::cout << ie.GetVersions(flag) << std::endl;
 
             if ((flag.find("CPU") != std::string::npos)) {
-#ifdef WITH_EXTENSIONS
-                /** Load default extensions lib for the CPU device (e.g. SSD's DetectionOutput)**/
-                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-#endif
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
@@ -607,6 +578,9 @@ int main(int argc, char *argv[]) {
             std::cout << " or switch to the output window and press ESC key";
         }
         std::cout << std::endl;
+
+        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
+        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
 
         do {
             // get and enqueue the next frame (in case of video)
@@ -780,6 +754,8 @@ int main(int argc, char *argv[]) {
                 }
             }
 
+            presenter.drawGraphs(frame);
+
             // --------------------------- Execution statistics ------------------------------------------------
             std::ostringstream out;
             out << "Person detection time  : " << std::fixed << std::setprecision(2) << detection.count()
@@ -820,6 +796,7 @@ int main(int argc, char *argv[]) {
                 const int key = cv::waitKey(isVideo ? 1 : 0);
                 if (27 == key)  // Esc
                     break;
+                presenter.handleKey(key);
             }
         } while (isVideo);
 
@@ -843,6 +820,8 @@ int main(int argc, char *argv[]) {
                 personReId.printPerformanceCounts(getFullDeviceName(mapDevices, FLAGS_d_reid));
             }
         }
+
+        std::cout << presenter.reportMeans() << '\n';
         // -----------------------------------------------------------------------------------------------------
     }
     catch (const std::exception& error) {

@@ -8,7 +8,6 @@ models:
         model:   public/license-plate-recognition-barrier-0007/FP32/license-plate-recognition-barrier-0007.xml
         weights: public/license-plate-recognition-barrier-0007/FP32/license-plate-recognition-barrier-0007.bin
         adapter: lpr
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -16,15 +15,11 @@ models:
         model:   public/license-plate-recognition-barrier-0007/FP16/license-plate-recognition-barrier-0007.xml
         weights: public/license-plate-recognition-barrier-0007/FP16/license-plate-recognition-barrier-0007.bin
         adapter: lpr
-        cpu_extensions: AUTO
 
     datasets:
       - name: synthetic_chinese_license_plates
 
-        preprocessing:
-          - type: resize
-            dst_width: 94
-            dst_height: 24
-
         metrics:
           - type: character_recognition_accuracy
+
+global_definitions: ../dataset_definitions.yml

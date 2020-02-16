@@ -18,13 +18,16 @@ from collections import defaultdict
 
 import cv2
 import numpy as np
-from shapely.geometry import Polygon
 
 
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, NumberField, BoolField, ConfigError
 from ..representation import TextDetectionPrediction, CharacterRecognitionPrediction
 from ..postprocessor import NMS
+try:
+    from shapely.geometry import Polygon
+except ImportError:
+    Polygon = None
 
 
 class TextDetectionAdapter(Adapter):
@@ -305,6 +308,8 @@ class TextProposalsDetectionAdapter(Adapter):
         self.line_min_score = self.get_value_from_config('line_min_score')
         self.text_proposals_width = self.get_value_from_config('text_proposals_width')
         self.min_num_proposals = self.get_value_from_config('min_num_proposals')
+        if Polygon is None:
+            raise ValueError("east_text_detection adapter requires shapely, please install it")
         self.text_proposal_connector = TextProposalConnector()
 
     def process(self, raw, identifiers=None, frame_meta=None):
@@ -667,11 +672,9 @@ class LPRAdapter(Adapter):
     __provider__ = 'lpr'
     prediction_types = (CharacterRecognitionPrediction,)
 
-    def configure(self):
+    def process(self, raw, identifiers=None, frame_meta=None):
         if not self.label_map:
             raise ConfigError('LPR adapter requires dataset label map for correct decoding.')
-
-    def process(self, raw, identifiers=None, frame_meta=None):
         raw_output = self._extract_predictions(raw, frame_meta)
         predictions = raw_output[self.output_blob]
         result = []
@@ -714,16 +717,15 @@ class BeamSearchDecoder(Adapter):
 
     def validate_config(self):
         super().validate_config(on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT)
-
-    def configure(self):
-        if not self.label_map:
-            raise ConfigError('Beam Search Decoder requires dataset label map for correct decoding.')
-
         self.beam_size = self.get_value_from_config('beam_size')
-        self.blank_label = self.launcher_config.get('blank_label', len(self.label_map))
+        self.blank_label = self.launcher_config.get('blank_label')
         self.softmaxed_probabilities = self.get_value_from_config('softmaxed_probabilities')
 
     def process(self, raw, identifiers=None, frame_meta=None):
+        if not self.label_map:
+            raise ConfigError('Beam Search Decoder requires dataset label map for correct decoding.')
+        if self.blank_label is None:
+            self.blank_label = len(self.label_map)
         raw_output = self._extract_predictions(raw, frame_meta)
         output = raw_output[self.output_blob]
         output = np.swapaxes(output, 0, 1)
@@ -830,6 +832,8 @@ class EASTTextDetectionAdapter(Adapter):
         self.score_map_thresh = self.get_value_from_config('score_map_threshold')
         self.nms_thresh = self.get_value_from_config('nms_threshold')
         self.box_thresh = self.get_value_from_config('box_threshold')
+        if Polygon is None:
+            raise ValueError("east_text_detection adapter requires shapely, please install it")
 
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_outputs = self._extract_predictions(raw, frame_meta)

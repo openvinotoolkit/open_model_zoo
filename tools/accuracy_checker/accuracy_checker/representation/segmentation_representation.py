@@ -34,12 +34,14 @@ class GTMaskLoader(Enum):
     SCIPY = 2
     NIFTI = 3
     NUMPY = 4
+    NIFTI_CHANNELS_FIRST = 5
 
 LOADERS_MAPPING = {
     'opencv': GTMaskLoader.OPENCV,
     'pillow': GTMaskLoader.PILLOW,
     'scipy': GTMaskLoader.SCIPY,
-    'nifty': GTMaskLoader.NIFTI,
+    'nifti': GTMaskLoader.NIFTI,
+    'nifti_channels_first': GTMaskLoader.NIFTI_CHANNELS_FIRST,
     'numpy': GTMaskLoader.NUMPY
 }
 
@@ -54,6 +56,7 @@ class SegmentationAnnotation(SegmentationRepresentation):
         GTMaskLoader.OPENCV: 'opencv_imread',
         GTMaskLoader.SCIPY: 'scipy_imread',
         GTMaskLoader.NIFTI: 'nifti_reader',
+        GTMaskLoader.NIFTI_CHANNELS_FIRST: {'type': 'nifti_reader', 'channels_first': True},
         GTMaskLoader.NUMPY: 'numpy_reader'
     }
 
@@ -80,7 +83,12 @@ class SegmentationAnnotation(SegmentationRepresentation):
 
     def _load_mask(self):
         if self._mask is None:
-            loader = BaseReader.provide(self.LOADERS.get(self._mask_loader), self.metadata['data_source'])
+            loader_config = self.LOADERS.get(self._mask_loader)
+            data_source = self.metadata.get('segmentation_masks_source', self.metadata['data_source'])
+            if isinstance(loader_config, str):
+                loader = BaseReader.provide(loader_config, data_source)
+            else:
+                loader = BaseReader.provide(loader_config['type'], data_source, config=loader_config)
             if self._mask_loader == GTMaskLoader.PILLOW:
                 loader.convert_to_rgb = False
             mask = loader.read(self._mask_path)
@@ -108,7 +116,9 @@ class BrainTumorSegmentationAnnotation(SegmentationAnnotation):
 
 
 class BrainTumorSegmentationPrediction(SegmentationPrediction):
-    pass
+    def __init__(self, identifiers, mask, label_order=(0, 1, 2, 3)):
+        super().__init__(identifiers, mask)
+        self.label_order = label_order
 
 
 class CoCoInstanceSegmentationRepresentation(SegmentationRepresentation):

@@ -17,7 +17,7 @@ limitations under the License.
 import numpy as np
 from .metric import PerImageEvaluationMetric
 from ..representation import MultiLabelRecognitionAnnotation, MultiLabelRecognitionPrediction
-from ..config import StringField, BoolField, ConfigValidator
+from ..config import StringField, BoolField, ConfigValidator, ConfigError
 
 
 class MultiLabelMetric(PerImageEvaluationMetric):
@@ -40,21 +40,20 @@ class MultiLabelMetric(PerImageEvaluationMetric):
         return parameters
 
     def configure(self):
+        if not self.dataset.metadata:
+            raise ConfigError('multi label metrics require  dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
         self.labels = self.dataset.metadata.get(self.get_value_from_config('label_map'))
+        if not self.labels:
+            raise ConfigError('multi label metrics require label_map providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
         self.calculate_average = self.get_value_from_config('calculate_average')
-
-        self.meta['scale'] = 1
-        self.meta['postfix'] = ''
-        self.meta['calculate_mean'] = False
-        self.meta['names'] = list(self.labels.values())
-        if self.calculate_average:
-            self.meta['names'].append('average')
         self.tp = np.zeros_like(list(self.labels.keys()), dtype=np.float)
         self.fp = np.zeros_like(list(self.labels.keys()), dtype=np.float)
         self.tn = np.zeros_like(list(self.labels.keys()), dtype=np.float)
         self.fn = np.zeros_like(list(self.labels.keys()), dtype=np.float)
-
         self.counter = np.zeros_like(list(self.labels.keys()), dtype=np.float)
+        self._create_meta()
 
     def update(self, annotation, prediction):
         def loss(annotation_labels, prediction_labels):
@@ -99,12 +98,21 @@ class MultiLabelMetric(PerImageEvaluationMetric):
     def evaluate(self, annotations, predictions):
         pass
 
+    def _create_meta(self):
+        self.meta['scale'] = 1
+        self.meta['postfix'] = ''
+        self.meta['calculate_mean'] = False
+        self.meta['names'] = list(self.labels.values())
+        if self.calculate_average:
+            self.meta['names'].append('average')
+
     def reset(self):
         self.tp = np.zeros_like(list(self.labels.keys()), dtype=np.float)
         self.fp = np.zeros_like(list(self.labels.keys()), dtype=np.float)
         self.tn = np.zeros_like(list(self.labels.keys()), dtype=np.float)
         self.fn = np.zeros_like(list(self.labels.keys()), dtype=np.float)
         self.counter = np.zeros_like(list(self.labels.keys()), dtype=np.float)
+        self._create_meta()
 
 
 class MultiLabelAccuracy(MultiLabelMetric):
@@ -177,17 +185,16 @@ class F1Score(PerImageEvaluationMetric):
         ).validate(self.config)
 
     def configure(self):
+        if not self.dataset.metadata:
+            raise ConfigError('f1-score metric requires dataset metadata providing'
+                              'Please provide dataset meta file or regenerated annotation')
         label_map = self.get_value_from_config('label_map')
         self.labels = self.dataset.metadata.get(label_map)
+        if not self.labels:
+            raise ConfigError('f1-score metric requires label_map providing in dataset_meta'
+                              'Please provide dataset meta file or regenerated annotation')
         self.calculate_average = self.get_value_from_config('calculate_average')
-        self.meta['names'] = list(self.labels.values())
-        if self.calculate_average:
-            self.meta['names'].append('average')
-
-        self.meta['scale'] = 1
-        self.meta['postfix'] = ''
-        self.meta['calculate_mean'] = False
-        self.meta['names'] = list(self.labels.values()) + ['average']
+        self._create_meta()
 
     def update(self, annotation, prediction):
         self.precision.update(annotation, prediction)
@@ -214,3 +221,12 @@ class F1Score(PerImageEvaluationMetric):
     def reset(self):
         self.precision.reset()
         self.recall.reset()
+        self._create_meta()
+
+    def _create_meta(self):
+        self.meta['names'] = list(self.labels.values())
+        if self.calculate_average:
+            self.meta['names'].append('average')
+        self.meta['scale'] = 1
+        self.meta['postfix'] = ''
+        self.meta['calculate_mean'] = False

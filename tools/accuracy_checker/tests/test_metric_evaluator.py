@@ -16,7 +16,7 @@ limitations under the License.
 
 import pytest
 from accuracy_checker.config import ConfigError
-from accuracy_checker.metrics import ClassificationAccuracy, MetricsExecutor
+from accuracy_checker.metrics import ClassificationAccuracy, MetricsExecutor, PerImageMetricResult
 from accuracy_checker.metrics.metric import Metric
 from accuracy_checker.representation import (
     ClassificationAnnotation,
@@ -70,7 +70,7 @@ class TestMetric:
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1, 'annotation_source': 'a'}], None)
         with pytest.raises(ConfigError):
-            dispatcher.update_metrics_on_batch(annotations, predictions)
+            dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
     def test_accuracy_with_wrong_annotation_type_raise_config_error_exception(self):
         annotations = [DetectionAnnotation('identifier', 3)]
@@ -78,7 +78,7 @@ class TestMetric:
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
         with pytest.raises(ConfigError):
-            dispatcher.update_metrics_on_batch(annotations, predictions)
+            dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
     def test_accuracy_with_unsupported_annotations_in_container_raise_config_error_exception(self):
         annotations = [ContainerAnnotation({'annotation': DetectionAnnotation('identifier', 3)})]
@@ -86,7 +86,7 @@ class TestMetric:
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
         with pytest.raises(ConfigError):
-            dispatcher.update_metrics_on_batch(annotations, predictions)
+            dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
     def test_accuracy_with_unsupported_annotation_type_as_annotation_source_for_container_raises_config_error(self):
         annotations = [ContainerAnnotation({'annotation': DetectionAnnotation('identifier', 3)})]
@@ -94,7 +94,7 @@ class TestMetric:
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1, 'annotation_source': 'annotation'}], None)
         with pytest.raises(ConfigError):
-            dispatcher.update_metrics_on_batch(annotations, predictions)
+            dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
     def test_accuracy_on_annotation_container_with_several_suitable_representations_config_value_error_exception(self):
         annotations = [ContainerAnnotation({
@@ -105,7 +105,7 @@ class TestMetric:
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
         with pytest.raises(ConfigError):
-            dispatcher.update_metrics_on_batch(annotations, predictions)
+            dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
     def test_accuracy_with_wrong_prediction_type_raise_config_error_exception(self):
         annotations = [ClassificationAnnotation('identifier', 3)]
@@ -113,7 +113,7 @@ class TestMetric:
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
         with pytest.raises(ConfigError):
-            dispatcher.update_metrics_on_batch(annotations, predictions)
+            dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
     def test_accuracy_with_unsupported_prediction_in_container_raise_config_error_exception(self):
         annotations = [ClassificationAnnotation('identifier', 3)]
@@ -121,7 +121,7 @@ class TestMetric:
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
         with pytest.raises(ConfigError):
-            dispatcher.update_metrics_on_batch(annotations, predictions)
+            dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
     def test_accuracy_with_unsupported_prediction_type_as_prediction_source_for_container_raises_config_error(self):
         annotations = [ClassificationAnnotation('identifier', 3)]
@@ -129,7 +129,7 @@ class TestMetric:
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1, 'prediction_source': 'prediction'}], None)
         with pytest.raises(ConfigError):
-            dispatcher.update_metrics_on_batch(annotations, predictions)
+            dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
     def test_accuracy_on_prediction_container_with_several_suitable_representations_raise_config_error_exception(self):
         annotations = [ClassificationAnnotation('identifier', 3)]
@@ -140,14 +140,14 @@ class TestMetric:
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
         with pytest.raises(ConfigError):
-            dispatcher.update_metrics_on_batch(annotations, predictions)
+            dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
     def test_complete_accuracy(self):
         annotations = [ClassificationAnnotation('identifier', 3)]
         predictions = [ClassificationPrediction('identifier', [1.0, 1.0, 1.0, 4.0])]
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result.name == 'accuracy'
@@ -160,7 +160,7 @@ class TestMetric:
         predictions = [ContainerPrediction({'p': ClassificationPrediction('identifier', [1.0, 1.0, 1.0, 4.0])})]
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result.name == 'accuracy'
@@ -174,7 +174,7 @@ class TestMetric:
         config = [{'type': 'accuracy', 'top_k': 1, 'annotation_source': 'a', 'prediction_source': 'p'}]
 
         dispatcher = MetricsExecutor(config, None)
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result.name == 'accuracy'
@@ -199,7 +199,7 @@ class TestMetric:
         predictions = [ClassificationPrediction('identifier', [1.0, 3.0, 4.0, 2.0])]
 
         dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 3}], None)
-        dispatcher.update_metrics_on_batch(annotations, predictions)
+        dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotations, predictions):
             assert evaluation_result.name == 'accuracy'
@@ -248,7 +248,7 @@ class TestMetric:
         prediction = ClassificationPrediction('identifier', [1.0, 2.0])
         dataset = DummyDataset(label_map={0: '0', 1: '1'})
         dispatcher = MetricsExecutor([{'type': 'accuracy_per_class', 'top_k': 1}], dataset)
-        dispatcher.update_metrics_on_batch([annotation], [prediction])
+        dispatcher.update_metrics_on_batch(range(1), [annotation], [prediction])
         for _, evaluation_result in dispatcher.iterate_metrics([annotation], [prediction]):
             assert evaluation_result.name == 'accuracy_per_class'
             assert len(evaluation_result.evaluated_value) == 2
@@ -263,7 +263,7 @@ class TestMetric:
         dataset = DummyDataset(label_map={0: '0', 1: '1'})
         dispatcher = MetricsExecutor([{'type': 'accuracy_per_class', 'top_k': 1}], dataset)
 
-        dispatcher.update_metrics_on_batch(annotation, prediction)
+        dispatcher.update_metrics_on_batch(range(len(annotation)), annotation, prediction)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotation, prediction):
             assert evaluation_result.name == 'accuracy_per_class'
@@ -282,7 +282,7 @@ class TestMetric:
         dataset = DummyDataset(label_map={0: '0', 1: '1'})
         dispatcher = MetricsExecutor([{'type': 'accuracy_per_class', 'top_k': 1}], dataset)
 
-        dispatcher.update_metrics_on_batch(annotation, prediction)
+        dispatcher.update_metrics_on_batch(range(len(annotation)), annotation, prediction)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotation, prediction):
             assert evaluation_result.name == 'accuracy_per_class'
@@ -306,7 +306,7 @@ class TestMetric:
         dataset = DummyDataset(label_map={0: '0', 1: '1'})
         dispatcher = MetricsExecutor([{'type': 'accuracy_per_class', 'top_k': 1}], dataset)
 
-        dispatcher.update_metrics_on_batch(annotation, prediction)
+        dispatcher.update_metrics_on_batch(range(len(annotation)), annotation, prediction)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotation, prediction):
             assert evaluation_result.name == 'accuracy_per_class'
@@ -325,7 +325,7 @@ class TestMetric:
         dataset = DummyDataset(label_map={0: '0', 1: '1', 2: '2', 3: '3'})
         dispatcher = MetricsExecutor([{'type': 'accuracy_per_class', 'top_k': 3}], dataset)
 
-        dispatcher.update_metrics_on_batch(annotation, prediction)
+        dispatcher.update_metrics_on_batch(range(len(annotation)), annotation, prediction)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotation, prediction):
             assert evaluation_result.name == 'accuracy_per_class'
@@ -346,7 +346,7 @@ class TestMetric:
         dataset = DummyDataset(label_map={0: '0', 1: '1', 2: '2', 3: '3'})
         dispatcher = MetricsExecutor([{'type': 'accuracy_per_class', 'top_k': 3}], dataset)
 
-        dispatcher.update_metrics_on_batch(annotation, prediction)
+        dispatcher.update_metrics_on_batch(range(len(annotation)), annotation, prediction)
 
         for _, evaluation_result in dispatcher.iterate_metrics(annotation, prediction):
             assert evaluation_result.name == 'accuracy_per_class'
@@ -357,6 +357,82 @@ class TestMetric:
             assert evaluation_result.evaluated_value[3] == pytest.approx(0.0)
             assert evaluation_result.reference_value is None
             assert evaluation_result.threshold is None
+
+
+class TestMetricPerInstanceResult:
+    def test_classification_accuracy_result_for_batch_1(self):
+        annotations = [ClassificationAnnotation('identifier', 3)]
+        predictions = [ClassificationPrediction('identifier', [1.0, 1.0, 1.0, 4.0])]
+
+        dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
+        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        expected_metric_result = PerImageMetricResult('accuracy', 'accuracy', 1.0, 'higher-better')
+        assert len(metric_result) == 1
+        assert 0 in metric_result
+        assert len(metric_result[0]) == 1
+        assert metric_result[0][0] == expected_metric_result
+
+    def test_classification_accuracy_result_for_batch_1_with_named_metric(self):
+        annotations = [ClassificationAnnotation('identifier', 3)]
+        predictions = [ClassificationPrediction('identifier', [1.0, 1.0, 1.0, 4.0])]
+
+        dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1, 'name': 'accuracy@top1'}], None)
+        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        expected_metric_result = PerImageMetricResult('accuracy@top1', 'accuracy', 1.0, 'higher-better')
+        assert len(metric_result) == 1
+        assert 0 in metric_result
+        assert len(metric_result[0]) == 1
+        assert metric_result[0][0] == expected_metric_result
+
+    def test_classification_accuracy_result_for_batch_1_with_2_metrics(self):
+        annotations = [ClassificationAnnotation('identifier', 3)]
+        predictions = [ClassificationPrediction('identifier', [1.0, 1.0, 1.0, 4.0])]
+
+        dispatcher = MetricsExecutor([
+            {'name': 'top1', 'type': 'accuracy', 'top_k': 1}, {'name': 'top3', 'type': 'accuracy', 'top_k': 3}
+        ], None)
+        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        expected_metric_result = [
+            PerImageMetricResult('top1', 'accuracy', 1.0, 'higher-better'),
+            PerImageMetricResult('top3', 'accuracy', 1.0, 'higher-better')
+        ]
+        assert len(metric_result) == 1
+        assert 0 in metric_result
+        assert len(metric_result[0]) == 2
+        assert metric_result[0][0] == expected_metric_result[0]
+        assert metric_result[0][1] == expected_metric_result[1]
+
+    def test_classification_accuracy_result_for_batch_2(self):
+        annotations = [ClassificationAnnotation('identifier', 3), ClassificationAnnotation('identifier1', 1)]
+        predictions = [ClassificationPrediction('identifier', [1.0, 1.0, 1.0, 4.0]), ClassificationPrediction('identifier2', [1.0, 1.0, 1.0, 4.0])]
+
+        dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
+        metric_result = dispatcher.update_metrics_on_batch(range(len(annotations)), annotations, predictions)
+        expected_metric_result = [PerImageMetricResult('accuracy', 'accuracy', 1.0, 'higher-better'),
+                                  PerImageMetricResult('accuracy', 'accuracy', 0.0, 'higher-better')]
+        assert len(metric_result) == 2
+        assert 0 in metric_result
+        assert len(metric_result[0]) == 1
+        assert metric_result[0][0] == expected_metric_result[0]
+        assert 1 in metric_result
+        assert len(metric_result[1]) == 1
+        assert metric_result[1][0] == expected_metric_result[1]
+
+    def test_classification_accuracy_result_for_batch_2_with_not_ordered_ids(self):
+        annotations = [ClassificationAnnotation('identifier', 3), ClassificationAnnotation('identifier1', 1)]
+        predictions = [ClassificationPrediction('identifier', [1.0, 1.0, 1.0, 4.0]), ClassificationPrediction('identifier2', [1.0, 1.0, 1.0, 4.0])]
+
+        dispatcher = MetricsExecutor([{'type': 'accuracy', 'top_k': 1}], None)
+        metric_result = dispatcher.update_metrics_on_batch([42, 17], annotations, predictions)
+        expected_metric_result = [PerImageMetricResult('accuracy', 'accuracy', 1.0, 'higher-better'),
+                                  PerImageMetricResult('accuracy', 'accuracy', 0.0, 'higher-better')]
+        assert len(metric_result) == 2
+        assert 42 in metric_result
+        assert len(metric_result[42]) == 1
+        assert metric_result[42][0] == expected_metric_result[0]
+        assert 17 in metric_result
+        assert len(metric_result[17]) == 1
+        assert metric_result[17][0] == expected_metric_result[1]
 
 
 class TestMetricExtraArgs:

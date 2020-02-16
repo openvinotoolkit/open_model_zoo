@@ -18,6 +18,7 @@ import argparse
 import concurrent.futures
 import os
 import platform
+import queue
 import re
 import shlex
 import string
@@ -28,6 +29,53 @@ import threading
 from pathlib import Path
 
 import common
+
+class JobContext:
+    def printf(self, format, *args, flush=False):
+        raise NotImplementedError
+
+    def subprocess(self, args):
+        raise NotImplementedError
+
+
+class DirectOutputContext(JobContext):
+    def printf(self, format, *args, flush=False):
+        print(format.format(*args), flush=flush)
+
+    def subprocess(self, args):
+        return subprocess.run(args).returncode == 0
+
+
+class QueuedOutputContext(JobContext):
+    def __init__(self, output_queue):
+        self._output_queue = output_queue
+
+    def printf(self, format, *args, flush=False):
+        self._output_queue.put(format.format(*args) + '\n')
+
+    def subprocess(self, args):
+        with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                universal_newlines=True) as p:
+            for line in p.stdout:
+                self._output_queue.put(line)
+            return p.wait() == 0
+
+
+class JobWithQueuedOutput():
+    def __init__(self, output_queue, future):
+        self._output_queue = output_queue
+        self._future = future
+        self._future.add_done_callback(lambda future: self._output_queue.put(None))
+
+    def complete(self):
+        for fragment in iter(self._output_queue.get, None):
+            print(fragment, end='', flush=True) # for simplicity, flush every fragment
+
+        return self._future.result()
+
+    def cancel(self):
+        self._future.cancel()
+
 
 def quote_windows(arg):
     if not arg: return '""'
@@ -40,34 +88,22 @@ if platform.system() == 'Windows':
 else:
     quote_arg = shlex.quote
 
-def prefixed_printf(prefix, format, *args, **kwargs):
-    if prefix is None:
-        print(format.format(*args), **kwargs)
-    else:
-        print(prefix + ': ' + format.format(*args), **kwargs)
+def convert_to_onnx(context, model, output_dir, args):
+    context.printf('========= {}Converting {} to ONNX',
+                   '(DRY RUN) ' if args.dry_run else '', model.name)
 
-def prefixed_subprocess(prefix, args):
-    if prefix is None:
-        return subprocess.run(args).returncode == 0
+    conversion_to_onnx_args = [string.Template(arg).substitute(conv_dir=output_dir / model.subdirectory,
+                                                               dl_dir=args.download_dir / model.subdirectory)
+                               for arg in model.conversion_to_onnx_args]
+    cmd = [str(args.python), str(Path(__file__).absolute().parent / model.converter_to_onnx), *conversion_to_onnx_args]
 
-    with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-            universal_newlines=True) as p:
-        for line in p.stdout:
-            sys.stdout.write(prefix + ': ' + line)
-        return p.wait() == 0
+    context.printf('Conversion to ONNX command: {}', ' '.join(map(quote_arg, cmd)))
+    context.printf('')
 
-def convert_to_onnx(model, output_dir, args, stdout_prefix):
-    pytorch_converter = Path(__file__).absolute().parent / 'pytorch_to_onnx.py'
-    prefixed_printf(stdout_prefix, '========= {}Converting {} to ONNX',
-        '(DRY RUN) ' if args.dry_run else '', model.name)
+    success = True if args.dry_run else context.subprocess(cmd)
+    context.printf('')
 
-    pytorch_to_onnx_args = [string.Template(arg).substitute(conv_dir=output_dir / model.subdirectory,
-                                                            dl_dir=args.download_dir / model.subdirectory)
-                            for arg in model.pytorch_to_onnx_args]
-    cmd = [str(args.python), str(pytorch_converter), *pytorch_to_onnx_args]
-    prefixed_printf(stdout_prefix, 'Conversion to ONNX command: {}', ' '.join(map(quote_arg, cmd)))
-
-    return True if args.dry_run else prefixed_subprocess(stdout_prefix, cmd)
+    return success
 
 def num_jobs_arg(value_str):
     if value_str == 'auto':
@@ -83,8 +119,6 @@ def num_jobs_arg(value_str):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config', type=Path, metavar='CONFIG.YML',
-        help='model configuration file (deprecated)')
     parser.add_argument('-d', '--download_dir', type=Path, metavar='DIR',
         default=Path.cwd(), help='root of the directory tree with downloaded model files')
     parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',
@@ -131,26 +165,22 @@ def main():
 
     output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
-    def convert(model, do_prefix_stdout=True):
-        stdout_prefix = None
-        if do_prefix_stdout:
-            stdout_prefix = threading.current_thread().name
-
+    def convert(context, model):
         if model.mo_args is None:
-            prefixed_printf(stdout_prefix, '========= Skipping {} (no conversions defined)', model.name)
-            prefixed_printf(stdout_prefix, '')
+            context.printf('========= Skipping {} (no conversions defined)', model.name)
+            context.printf('')
             return True
 
         model_precisions = requested_precisions & model.precisions
         if not model_precisions:
-            prefixed_printf(stdout_prefix, '========= Skipping {} (all conversions skipped)', model.name)
-            prefixed_printf(stdout_prefix, '')
+            context.printf('========= Skipping {} (all conversions skipped)', model.name)
+            context.printf('')
             return True
 
         model_format = model.framework
 
-        if model.pytorch_to_onnx_args:
-            if not convert_to_onnx(model, output_dir, args, stdout_prefix):
+        if model.conversion_to_onnx_args:
+            if not convert_to_onnx(context, model, output_dir, args):
                 return False
             model_format = 'onnx'
 
@@ -160,7 +190,7 @@ def main():
                                             conv_dir=output_dir / model.subdirectory)
             for arg in model.mo_args]
 
-        for model_precision in model_precisions:
+        for model_precision in sorted(model_precisions):
             mo_cmd = [str(args.python), '--', str(mo_path),
                 '--framework={}'.format(model_format),
                 '--data_type={}'.format(model_precision),
@@ -168,26 +198,39 @@ def main():
                 '--model_name={}'.format(model.name),
                 *expanded_mo_args, *extra_mo_args]
 
-            prefixed_printf(stdout_prefix, '========= {}Converting {} to IR ({})',
+            context.printf('========= {}Converting {} to IR ({})',
                 '(DRY RUN) ' if args.dry_run else '', model.name, model_precision)
 
-            prefixed_printf(stdout_prefix, 'Conversion command: {}', ' '.join(map(quote_arg, mo_cmd)))
+            context.printf('Conversion command: {}', ' '.join(map(quote_arg, mo_cmd)))
 
             if not args.dry_run:
-                prefixed_printf(stdout_prefix, '', flush=True)
+                context.printf('', flush=True)
 
-                if not prefixed_subprocess(stdout_prefix, mo_cmd):
+                if not context.subprocess(mo_cmd):
                     return False
 
-            prefixed_printf(stdout_prefix, '')
+            context.printf('')
 
         return True
 
     if args.jobs == 1 or args.dry_run:
-        results = [convert(model, do_prefix_stdout=False) for model in models]
+        context = DirectOutputContext()
+        results = [convert(context, model) for model in models]
     else:
         with concurrent.futures.ThreadPoolExecutor(args.jobs) as executor:
-            results = list(executor.map(convert, models))
+            def start(model):
+                output_queue = queue.Queue()
+                return JobWithQueuedOutput(
+                    output_queue,
+                    executor.submit(convert, QueuedOutputContext(output_queue), model))
+
+            jobs = list(map(start, models))
+
+            try:
+                results = [job.complete() for job in jobs]
+            except:
+                for job in jobs: job.cancel()
+                raise
 
     failed_models = [model.name for model, successful in zip(models, results) if not successful]
 

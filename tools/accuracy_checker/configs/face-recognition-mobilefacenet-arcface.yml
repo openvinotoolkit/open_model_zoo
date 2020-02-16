@@ -6,28 +6,22 @@ models:
         model: public/face-recognition-mobilefacenet-arcface/model-y1-test2/model-0000.params
         adapter: reid
         inputs:
-        - name: data
-          type: INPUT
-          shape: 3, 112, 112
+          - name: data
+            type: INPUT
+            shape: 3, 112, 112
 
     datasets:
-        - name: lfw
-          data_source: LFW/lfw
-          annotation_conversion:
-            converter: lfw
-            pairs_file: LFW/annotation/pairs.txt
-            landmarks_file: LFW/annotation/lfw_landmark.txt
-          annotation: lfw.pickle
+      - name: lfw
 
-          preprocessing:
-            - type: bgr_to_rgb
-            - type: point_alignment
-              size: 400
-            - type: resize
-              size: 112
+        preprocessing:
+          - type: bgr_to_rgb
+          - type: point_alignment
+            size: 400
+          - type: resize
+            size: 112
 
-          metrics:
-            - type: pairwise_accuracy_subsets
+        metrics:
+          - type: pairwise_accuracy_subsets
 
   - name: face-recognition-mobilefacenet-arcface
 
@@ -48,12 +42,6 @@ models:
 
     datasets:
       - name: lfw
-        data_source: LFW/lfw
-        annotation_conversion:
-          converter: lfw
-          pairs_file: LFW/annotation/pairs.txt
-          landmarks_file: LFW/annotation/lfw_landmark.txt
-        annotation: lfw.pickle
 
         preprocessing:
           - type: point_alignment
@@ -61,5 +49,4 @@ models:
           - type: resize
             size: 112
 
-        metrics:
-          - type: pairwise_accuracy_subsets
+global_definitions: ../dataset_definitions.yml

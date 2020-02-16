@@ -24,14 +24,14 @@ from .wider import WiderFormatConverter
 from .detection_opencv_storage import DetectionOpenCVStorageFormatConverter
 from .lfw import LFWConverter
 from .vgg_face_regression import VGGFaceRegressionConverter
-from .super_resolution_converter import SRConverter
+from .super_resolution_converter import SRConverter, SRMultiFrameConverter
 from .imagenet import ImageNetFormatConverter
 from .icdar import ICDAR13RecognitionDatasetConverter, ICDAR15DetectionDatasetConverter
-from .ms_coco import MSCocoDetectionConverter, MSCocoKeypointsConverter
+from .ms_coco import MSCocoDetectionConverter, MSCocoKeypointsConverter, MSCocoSingleKeypointsConverter
 from .cityscapes import CityscapesConverter
 from .ncf_converter import MovieLensConverter
 from .brats import BratsConverter, BratsNumpyConverter
-from .cifar10 import Cifar10FormatConverter
+from .cifar import CifarFormatConverter
 from .mnist import MNISTCSVFormatConverter
 from .wmt import WMTConverter
 from .common_semantic_segmentation import CommonSegmentationConverter
@@ -46,6 +46,18 @@ from .cvat_text_recognition import CVATTextRecognitionConverter
 from .cvat_multilabel_recognition import CVATMultilabelAttributesRecognitionConverter
 from .cvat_human_pose import CVATPoseEstimationConverter
 from .cvat_person_detection_action_recognition import CVATPersonDetectionActionRecognitionConverter
+from .squad import SQUADConverter
+from .text_classification import (
+    XNLIDatasetConverter,
+    BertXNLITFRecordConverter,
+    IMDBConverter,
+    MRPCConverter,
+    CoLAConverter
+)
+from .cmu_panoptic import CmuPanopticKeypointsConverter
+from .action_recognition import ActionRecognitionConverter
+from .ms_asl_continuous import MSASLContiniousConverter
+from .fashion_mnist import FashionMnistConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -63,15 +75,17 @@ __all__ = [
     'LFWConverter',
     'VGGFaceRegressionConverter',
     'SRConverter',
+    'SRMultiFrameConverter',
     'ICDAR13RecognitionDatasetConverter',
     'ICDAR15DetectionDatasetConverter',
     'MSCocoKeypointsConverter',
+    'MSCocoSingleKeypointsConverter',
     'MSCocoDetectionConverter',
     'CityscapesConverter',
     'MovieLensConverter',
     'BratsConverter',
     'BratsNumpyConverter',
-    'Cifar10FormatConverter',
+    'CifarFormatConverter',
     'MNISTCSVFormatConverter',
     'WMTConverter',
     'CommonSegmentationConverter',
@@ -85,5 +99,15 @@ __all__ = [
     'CVATTextRecognitionConverter',
     'CVATMultilabelAttributesRecognitionConverter',
     'CVATPoseEstimationConverter',
-    'CVATPersonDetectionActionRecognitionConverter'
+    'CVATPersonDetectionActionRecognitionConverter',
+    'SQUADConverter',
+    'XNLIDatasetConverter',
+    'BertXNLITFRecordConverter',
+    'IMDBConverter',
+    'MRPCConverter',
+    'CoLAConverter',
+    'CmuPanopticKeypointsConverter',
+    'ActionRecognitionConverter',
+    'MSASLContiniousConverter',
+    'FashionMnistConverter'
 ]

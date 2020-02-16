@@ -14,7 +14,6 @@ ImageGrabber::ImageGrabber(const std::string& fname) {
     } else {
         is_opened = cap.open(fname);
     }
-    cap_frame_index = -1;
     current_video_idx = 0;
     videos.push_back(fname);
     current_frame_idx = 0;
@@ -30,12 +29,7 @@ int ImageGrabber::GetFPS() const {
 
 bool ImageGrabber::IsOpened() const { return is_opened; }
 
-int ImageGrabber::GetFrameIndex() const { return cap_frame_index; }
-
-bool ImageGrabber::NextVideo() { return true; }
-
 bool ImageGrabber::GrabNext() {
-    cap_frame_index++;
     return cap.grab();
 }
 

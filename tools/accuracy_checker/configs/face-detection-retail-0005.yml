@@ -8,7 +8,6 @@ models:
         model:   intel/face-detection-retail-0005/FP32/face-detection-retail-0005.xml
         weights: intel/face-detection-retail-0005/FP32/face-detection-retail-0005.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -16,15 +15,13 @@ models:
         model:   intel/face-detection-retail-0005/FP16/face-detection-retail-0005.xml
         weights: intel/face-detection-retail-0005/FP16/face-detection-retail-0005.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
-          - INT8
-        model:   intel/face-detection-retail-0005/INT8/face-detection-retail-0005.xml
-        weights: intel/face-detection-retail-0005/INT8/face-detection-retail-0005.bin
+          - FP32-INT8
+        model:   intel/face-detection-retail-0005/FP32-INT8/face-detection-retail-0005.xml
+        weights: intel/face-detection-retail-0005/FP32-INT8/face-detection-retail-0005.bin
         adapter: ssd
-        cpu_extensions: AUTO
 
     datasets:
       - name: wider
@@ -50,3 +47,5 @@ models:
             include_boundaries: False
             allow_multiple_matches_per_ignored: True
             distinct_conf: False
+
+global_definitions: ../dataset_definitions.yml

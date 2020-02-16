@@ -13,14 +13,19 @@ The models can be downloaded via Model Downloader
 | ----------------- | ---------------| -------------- | -------- | ------ | ------- |
 | AlexNet           | [Caffe\*](./alexnet/alexnet.md)       | alexnet   | | 1.5 | 60.965 |
 | CaffeNet          | [Caffe\*](./caffenet/caffenet.md)     | caffenet  | | 1.5 | 60.965 |
-| DenseNet 121      | [Caffe\*](./densenet-121/densenet-121.md)<br>[TensorFlow\*](./densenet-121-tf/densenet-121-tf.md)  | densenet-121<br>densenet-121-tf | | 5.289~5.724    | 7.971 |
+| DenseNet 121      | [Caffe\*](./densenet-121/densenet-121.md)<br>[TensorFlow\*](./densenet-121-tf/densenet-121-tf.md)<br>[Caffe2\*](./densenet-121-caffe2/densenet-121-caffe2.md)  | densenet-121<br>densenet-121-tf<br>densenet-121-caffe2 | | 5.289~5.724    | 7.971 |
 | DenseNet 161      | [Caffe\*](./densenet-161/densenet-161.md)<br> [TensorFlow\*](./densenet-161-tf/densenet-161-tf.md) | densenet-161<br>densenet-161-tf | | 14.128~15.561  | 28.666 |
 | DenseNet 169      | [Caffe\*](./densenet-169/densenet-169.md)<br>[TensorFlow\*](./densenet-169-tf/densenet-169-tf.md)  | densenet-169<br>densenet-169-tf | | 6.16~6.788 | 14.139 |
 | DenseNet 201      | [Caffe\*](./densenet-201/densenet-201.md) | densenet-201 | | 8.673  | 20.001  |
-| Inception (GoogleNet) V1 | [Caffe\*](./googlenet-v1/googlenet-v1.md) | googlenet-v1 | | 3.266 | 6.999 |
+| EfficientNet B0   | [TensorFlow\*](./efficientnet-b0/efficientnet-b0.md)<br>[PyTorch\*](./efficientnet-b0-pytorch/efficientnet-b0-pytorch.md) | efficientnet-b0<br>efficientnet-b0-pytorch | 75.70/92.76<br>76.91/93.21 | 0.819 | 5.268 |
+| EfficientNet B0 AutoAugment  | [TensorFlow\*](./efficientnet-b0_auto_aug/efficientnet-b0_auto_aug.md) | efficientnet-b0_auto_aug | 76.43/93.04 | 0.819 | 5.268 |
+| EfficientNet B5   | [TensorFlow\*](./efficientnet-b5/efficientnet-b5.md)<br>[PyTorch\*](./efficientnet-b5-pytorch/efficientnet-b5-pytorch.md) | efficientnet-b5<br>efficientnet-b5-pytorch | 83.33/96.67<br>83.69/96.71 | 21.252 | 30.303 | 
+| EfficientNet B7   | [PyTorch\*](./efficientnet-b7-pytorch/efficientnet-b7-pytorch.md) | efficientnet-b7-pytorch | 84.42/96.91 | 77.618  | 66.193 |
+| EfficientNet B7 AutoAugment  | [TensorFlow\*](./efficientnet-b7_auto_aug/efficientnet-b7_auto_aug.md) | efficientnet-b7_auto_aug | 84.68/97.09 | 77.618  | 66.193 |
+| Inception (GoogleNet) V1 | [Caffe\*](./googlenet-v1/googlenet-v1.md)<br>[TensorFlow\*](./googlenet-v1-tf/googlenet-v1-tf.md) | googlenet-v1<br>googlenet-v1-tf | | 3.016~3.266 | 6.619~6.999 |
 | Inception (GoogleNet) V2 | [Caffe\*](./googlenet-v2/googlenet-v2.md) | googlenet-v2 | | 4.058 | 11.185 |
 | Inception (GoogleNet) V3 | [Caffe\*](./googlenet-v3/googlenet-v3.md)<br>[PyTorch\*](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | googlenet-v3 <br> googlenet-v3-pytorch |  | 11.469 | 23.817 |
-| Inception (GoogleNet) V4 | [Caffe\*](./googlenet-v4/googlenet-v4.md) | googlenet-v4| | 24.584 | 42.648 |
+| Inception (GoogleNet) V4 | [Caffe\*](./googlenet-v4/googlenet-v4.md)<br>[TensorFlow\*](./googlenet-v4-tf/googlenet-v4-tf.md) | googlenet-v4<br>googlenet-v4-tf | | 24.584 | 42.648 |
 | Inception-ResNet V2      | [Caffe\*](./inception-resnet-v2/inception-resnet-v2.md)<br>[TensorFlow\*](./inception-resnet-v2-tf/inception-resnet-v2-tf.md) | inception-resnet-v2 <br>  inception-resnet-v2-tf | | 22.227~26.405 | 30.223~55.813 |
 | MobileNet V1 0.25 128 | [Caffe\*](./mobilenet-v1-0.25-128/mobilenet-v1-0.25-128.md) | mobilenet-v1-0.25-128 | | 0.028 | 0.468 | 
 | MobileNet V1 0.5 160 | [Caffe\*](./mobilenet-v1-0.50-160/mobilenet-v1-0.50-160.md)  | mobilenet-v1-0.50-160 | | 0.156 | 1.327 |
@@ -28,7 +33,7 @@ The models can be downloaded via Model Downloader
 | MobileNet V1 1.0 224 | [Caffe\*](./mobilenet-v1-1.0-224/mobilenet-v1-1.0-224.md)<br>[TensorFlow\*](./mobilenet-v1-1.0-224-tf/mobilenet-v1-1.0-224-tf.md) | mobilenet-v1-1.0-224 <br> mobilenet-v1-1.0-224-tf | | 1.148 | 4.221 |
 | MobileNet V2 1.0 224 | [Caffe\*](./mobilenet-v2/mobilenet-v2.md)<br>[TensorFlow\*](./mobilenet-v2-1.0-224/mobilenet-v2-1.0-224.md)<br>[PyTorch\*](./mobilenet-v2-pytorch/mobilenet-v2-pytorch.md) | mobilenet-v2 <br>  mobilenet-v2-1.0-224 <br> mobilenet-v2-pytorch | | 0.615~0.876 | 3.489 |
 | MobileNet V2 1.4 224 | [TensorFlow\*](./mobilenet-v2-1.4-224/mobilenet-v2-1.4-224.md)  | mobilenet-v2-1.4-224 | | 1.183  | 6.087 |
-| ResNet 50            | [Caffe\*](./resnet-50/resnet-50.md) <br> [PyTorch\*](./resnet-50-pytorch/resnet-50-pytorch.md) | resnet-50 <br> resnet-50-pytorch | | 6.996~8.216 | 25.53 |
+| ResNet 50            | [Caffe\*](./resnet-50/resnet-50.md) <br> [PyTorch\*](./resnet-50-pytorch/resnet-50-pytorch.md)<br>[Caffe2\*](./resnet-50-caffe2/resnet-50-caffe2.md)<br>[TensorFlow\*](./resnet-50-tf/resnet-50-tf.md) | resnet-50 <br> resnet-50-pytorch<br>resnet-50-caffe2<br>resnet-50-tf | | 6.996~8.216 | 25.53 |
 | ResNet 101           | [Caffe\*](./resnet-101/resnet-101.md) | resnet-101 | | 14.441 | 44.496 |
 | ResNet 152           | [Caffe\*](./resnet-152/resnet-152.md) | resnet-152 | | 21.89 | 60.117 |
 | SE-Inception         | [Caffe\*](./se-inception/se-inception.md)      | se-inception | | 4.091 | 11.922 |
@@ -38,9 +43,9 @@ The models can be downloaded via Model Downloader
 | SE-ResNeXt 50        | [Caffe\*](./se-resnext-50/se-resnext-50.md)    | se-resnext-50 | | 8.533 | 27.526|
 | SE-ResNeXt 101       | [Caffe\*](./se-resnext-101/se-resnext-101.md)  | se-resnext-101 | | 16.054 | 48.886 |
 | SqueezeNet v1.0      | [Caffe\*](./squeezenet1.0/squeezenet1.0.md)    | squeezenet1.0| | 1.737 | 1.248 |
-| SqueezeNet v1.1      | [Caffe\*](./squeezenet1.1/squeezenet1.1.md)    | squeezenet1.1| | 0.785 | 1.236 |
+| SqueezeNet v1.1      | [Caffe\*](./squeezenet1.1/squeezenet1.1.md)<br>[Caffe2\*](./squeezenet1.1-caffe2/squeezenet1.1-caffe2.md)    | squeezenet1.1<br>squeezenet1.1-caffe2| | 0.785 | 1.236 |
 | VGG 16               | [Caffe\*](./vgg16/vgg16.md) | vgg16 | | 30.974 | 138.358 |
-| VGG 19               | [Caffe\*](./vgg19/vgg19.md) | vgg19 | | 39.3 | 143.667  |
+| VGG 19               | [Caffe\*](./vgg19/vgg19.md)<br>[Caffe2\*](./vgg19-caffe2/vgg19-caffe2.md) | vgg19<br>vgg19-caffe2 | | 39.3 | 143.667  |
 
 **Octave Convolutions Networks**
 
@@ -100,11 +105,14 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
 | ------------------------- | -------------- | -------------- | ------ | ------- |
 | CTPN                      | [TensorFlow\*](./ctpn/ctpn.md) | ctpn | 55.813 | 17.237 | |
+| CenterNet (CTDET with DLAV0) 384x384 | [ONNX\*](./ctdet_coco_dlav0_384/ctdet_coco_dlav0_384.md) | ctdet_coco_dlav0_384| 34.994 | 17.911 | |
+| CenterNet (CTDET with DLAV0) 512x512 | [ONNX\*](./ctdet_coco_dlav0_512/ctdet_coco_dlav0_512.md) | ctdet_coco_dlav0_512| 62.211 | 17.911 | |
 | Faster R-CNN with Inception-ResNet v2 | [TensorFlow\*](./faster_rcnn_inception_resnet_v2_atrous_coco/faster_rcnn_inception_resnet_v2_atrous_coco.md) | faster_rcnn_inception_resnet_v2_atrous_coco| 30.687 | 13.307 |
 | Faster R-CNN with Inception v2 | [TensorFlow\*](./faster_rcnn_inception_v2_coco/faster_rcnn_inception_v2_coco.md) | faster_rcnn_inception_v2_coco | 30.687 | 13.307 |
 | Faster R-CNN with ResNet 50    | [TensorFlow\*](./faster_rcnn_resnet50_coco/faster_rcnn_resnet50_coco.md) | faster_rcnn_resnet50_coco | 57.203 | 29.162 |
 | Faster R-CNN with ResNet 101   | [TensorFlow\*](./faster_rcnn_resnet101_coco/faster_rcnn_resnet101_coco.md) |faster_rcnn_resnet101_coco | 112.052 | 48.128 |
 | MTCNN                     | Caffe\*: <br>[proposal](./mtcnn-p/mtcnn-p.md) <br>[refine](./mtcnn-r/mtcnn-r.md) <br> [output](./mtcnn-o/mtcnn-o.md) | <br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| | |
+| R-FCN with Resnet-101     | [TensorFlow\*](./rfcn-resnet101-coco-tf/rfcn-resnet101-coco-tf.md) | rfcn-resnet101-coco-tf | 53.462 | 171.85 |
 | SSD 300                   | [Caffe\*](./ssd300/ssd300.md) | ssd300 | 62.815 | 26.285 |
 | SSD 512                   | [Caffe\*](./ssd512/ssd512.md) | ssd512 | 180.611 | 27.189 |
 | SSD with MobileNet        | [Caffe\*](./mobilenet-ssd/mobilenet-ssd.md) <br>[TensorFlow\*](./ssd_mobilenet_v1_coco/ssd_mobilenet_v1_coco.md) | mobilenet-ssd <br>ssd_mobilenet_v1_coco | 2.316~2.494 | 5.783~6.807 |
@@ -122,6 +130,22 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | LResNet100E-IR,ArcFace@ms1m-refine-v2 | [MXNet\*](./face-recognition-resnet100-arcface/face-recognition-resnet100-arcface.md) | face-recognition-resnet100-arcface | 24.209 | 65.131 |
 | MobileFaceNet,ArcFace@ms1m-refine-v1 | [MXNet\*](./face-recognition-mobilefacenet-arcface/face-recognition-mobilefacenet-arcface.md) | face-recognition-mobilefacenet-arcface | 0.449 | 0.993 |
 | SphereFace                | [Caffe\*](./Sphereface/Sphereface.md) | Sphereface | 3.504 | 22.671 |
+
+## Human Pose Estimation
+
+Human pose estimation task is to predict a pose: body skeleton, which consists
+of keypoints and connections between them, for every person in an input image or
+video. Keypoints are body joints, i.e. ears, eyes, nose, shoulders, knees, etc.
+There are two major groups of such metods: top-down and bottom-up.  The first
+detects persons in a given frame, crops or rescales detections, then runs pose
+estimation network for every detection. These methods are very accurate. The
+second finds all keypoints in a given frame, then groups them by person
+instances, thus faster than previous, because network runs once.
+
+| Model Name                    | Implementation                                                                            | OMZ Model Name                | GFlops | mParams |
+|------------------------------ | ----------------------------------------------------------------------------------------- | ----------------------------- | ------ | ------- |
+| human-pose-estimation-3d-0001 | [PyTorch\*](./human-pose-estimation-3d-0001/description/human-pose-estimation-3d-0001.md) | human-pose-estimation-3d-0001 | 18.998 |  5.074  |
+|single-human-pose-estimation-0001| [PyTorch\*](./single-human-pose-estimation-0001/description/single-human-pose-estimation-0001.md) | single-human-pose-estimation-0001 | 60.125 | 33.165 |
 
 ## Legal Information
 

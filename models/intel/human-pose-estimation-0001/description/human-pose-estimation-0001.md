@@ -2,7 +2,9 @@
 
 ## Use Case and High-Level Description
 
-This is a multi-person 2D pose estimation network (based on the OpenPose approach) with tuned MobileNet v1 as a feature extractor. It finds a human pose: body skeleton, which consists of keypoints and connections between them, for every person inside image. The pose may contain up to 18 keypoints: ears, eyes, nose, neck, shoulders, elbows, wrists, hips, knees and ankles.
+This is a multi-person 2D pose estimation network (based on the OpenPose approach) with tuned MobileNet v1 as a feature extractor. 
+For every person in an image, the network detects a human pose: a body skeleton consisting of keypoints and connections between them.
+The pose may contain up to 18 keypoints: ears, eyes, nose, neck, shoulders, elbows, wrists, hips, knees, and ankles.
 
 ## Example
 
@@ -19,13 +21,13 @@ This is a multi-person 2D pose estimation network (based on the OpenPose approac
 
 Average Precision metric described in [COCO Keypoint Evaluation site](http://cocodataset.org/#keypoints-eval).
 
-Tested on a COCO validation subset from the original paper: Cao et al. ["Realtime Multi-Person 2D Pose Estimation using Part Affinity Fields"](https://arxiv.org/pdf/1611.08050.pdf).
+Tested on a COCO validation subset from the original paper [Realtime Multi-Person 2D Pose Estimation using Part Affinity Fields](https://arxiv.org/pdf/1611.08050.pdf).
 
 ## Performance
 
 ## Inputs
 
-1. name: "input" , shape: [1x3x256x456] - An input image in the format [BxCxHxW],
+1. Name: `input` , shape: [1x3x256x456]. An input image in the [BxCxHxW] format ,
   where:
     - B - batch size
     - C - number of channels
@@ -35,7 +37,7 @@ Tested on a COCO validation subset from the original paper: Cao et al. ["Realtim
 
 ## Outputs
 
-1. The net outputs two blobs with shapes: [1, 38, 32, 57] and [1, 19, 32, 57]. The first blob contains keypoint pairwise relations (part affinity fields), the second one contains keypoint heatmaps.
+The net outputs two blobs with the [1, 38, 32, 57] and [1, 19, 32, 57] shapes. The first blob contains keypoint pairwise relations (part affinity fields), while the second blob contains keypoint heatmaps.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

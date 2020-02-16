@@ -15,14 +15,13 @@ limitations under the License.
 """
 
 from pathlib import Path
-from tqdm import tqdm
 
 from ..topology_types import ObjectDetection
 from ..config import PathField, BoolField
 from ..representation import DetectionAnnotation, SegmentationAnnotation
 from ..representation.segmentation_representation import GTMaskLoader
-from ..utils import get_path, read_txt, read_xml, check_file_existence
-from .format_converter import BaseFormatConverter, ConverterReturn
+from ..utils import get_path, read_txt, read_xml, check_file_existence, read_json
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 _VOC_CLASSES_DETECTION = (
     'aeroplane', 'bicycle', 'bird', 'boat',
@@ -43,18 +42,31 @@ _SEGMENTATION_COLORS = ((
 ))
 
 
-def prepare_detection_labels(has_background=True):
-    num_classes = len(_VOC_CLASSES_DETECTION)
+def reverse_label_map(label_map):
+    return {value: key for key, value in label_map.items()}
+
+
+def prepare_detection_labels(dataset_meta, has_background=True):
     labels_shift = 1 if has_background else 0
+    if dataset_meta:
+        meta = read_json(dataset_meta)
+        if 'label_map' in meta:
+            meta['label_map'] = verify_label_map(meta['label_map'])
+            return reverse_label_map(meta['label_map'])
+        if 'labels' in meta:
+            labels = meta['labels']
+            num_classes = len(labels)
+            reversed_label_map = dict(zip(labels, list(range(labels_shift, num_classes + labels_shift))))
+            if has_background:
+                reversed_label_map['__background__'] = 0
+            return reversed_label_map
+
+    num_classes = len(_VOC_CLASSES_DETECTION)
     reversed_label_map = dict(zip(_VOC_CLASSES_DETECTION, list(range(labels_shift, num_classes + labels_shift))))
     if has_background:
         reversed_label_map['__background__'] = 0
 
     return reversed_label_map
-
-
-def reverse_label_map(label_map):
-    return {value: key for key, value in label_map.items()}
 
 
 class PascalVOCSegmentationConverter(BaseFormatConverter):
@@ -63,8 +75,8 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
             'imageset_file': PathField(description="Path to file with validation image list."),
             'images_dir': PathField(
                 optional=True, is_directory=True,
@@ -74,14 +86,19 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
                 optional=True, is_directory=True,
                 description="Path to directory with ground truth segmentation masks related to devkit root "
                             "(default SegmentationClass)."
+            ),
+            'dataset_meta_file': PathField(
+                description='path to json file with dataset meta (e.g. label_map, color_encoding)', optional=True
             )
         })
 
-        return parameters
+        return configuration_parameters
 
     def configure(self):
         self.image_set_file = self.get_value_from_config('imageset_file')
         self.image_dir = self.get_value_from_config('images_dir')
+        dataset_meta_file = self.get_value_from_config('dataset_meta_file')
+        self.dataset_meta = {} if not dataset_meta_file else read_json(dataset_meta_file)
         if not self.image_dir:
             self.image_dir = get_path(self.image_set_file.parents[-2] / 'JPEGImages', is_directory=True)
 
@@ -114,9 +131,9 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
                 progress_callback(image_id / num_iterations * 100)
 
         meta = {
-            'label_map': dict(enumerate(_VOC_CLASSES_SEGMENTATION)),
+            'label_map': self.dataset_meta.get('label_map', dict(enumerate(_VOC_CLASSES_SEGMENTATION))),
             'background_label': 0,
-            'segmentation_colors': _SEGMENTATION_COLORS
+            'segmentation_colors': self.dataset_meta.get('segmentation_colors', _SEGMENTATION_COLORS)
         }
 
         return ConverterReturn(annotations, meta, content_check_errors)
@@ -139,6 +156,9 @@ class PascalVOCDetectionConverter(BaseFormatConverter):
             ),
             'has_background': BoolField(
                 optional=True, default=True, description="Allows convert dataset with/without adding background_label."
+            ),
+            'dataset_meta_file': PathField(
+                description='path to json file with dataset meta (e.g. label_map, color_encoding)', optional=True
             )
         })
         return parameters
@@ -150,15 +170,16 @@ class PascalVOCDetectionConverter(BaseFormatConverter):
             self.image_dir = get_path(self.image_set_file.parents[-2] / 'JPEGImages')
         self.annotations_dir = self.get_value_from_config('annotations_dir')
         self.has_background = self.get_value_from_config('has_background')
+        self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
-        class_to_ind = prepare_detection_labels(self.has_background)
+        class_to_ind = prepare_detection_labels(self.dataset_meta, self.has_background)
         content_check_errors = [] if check_content else None
 
         detections = []
         image_set = read_txt(self.image_set_file, sep=None)
         num_iterations = len(image_set)
-        for (image_id, image) in tqdm(enumerate(image_set)):
+        for (image_id, image) in enumerate(image_set):
             root = read_xml(self.annotations_dir / '{}.xml'.format(image))
 
             identifier = root.find('.//filename').text

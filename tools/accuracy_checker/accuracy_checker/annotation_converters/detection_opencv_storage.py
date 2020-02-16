@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ..config import PathField, NumberField
+from ..config import PathField, NumberField, ConfigError
 from ..representation import DetectionAnnotation
-from ..utils import convert_bboxes_xywh_to_x1y1x2y2, read_xml, read_txt, check_file_existence
+from ..utils import convert_bboxes_xywh_to_x1y1x2y2, read_xml, read_txt, check_file_existence, read_json
 
-from .format_converter import BaseFormatConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 
 class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
@@ -27,8 +27,8 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
+        configuration_parameters = super().parameters()
+        configuration_parameters.update({
             'annotation_file': PathField(description="Path to annotation in xml format."),
             'image_names_file': PathField(
                 optional=True,
@@ -48,9 +48,13 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
             'data_dir': PathField(
                 is_directory=True, optional=True,
                 description='this parameter used only for dataset image existence validation purposes.'
+            ),
+            'dataset_meta_file': PathField(
+                description='path to json file with dataset meta (e.g. label_map, color_encoding)', optional=True
             )
         })
-        return parameters
+
+        return configuration_parameters
 
     def configure(self):
         self.annotation_file = self.get_value_from_config('annotation_file')
@@ -60,6 +64,7 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
         self.data_dir = self.get_value_from_config('data_dir')
         if self.data_dir is None:
             self.data_dir = self.annotation_file.parent
+        self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         def update_progress(frame_id):
@@ -67,15 +72,9 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
                 progress_callback(frame_id / num_iterations * 100)
 
         root = read_xml(self.annotation_file)
+        class_to_ind, meta = self.generate_meta(root)
 
-        labels_set = self.get_label_set(root)
-
-        labels_set = sorted(labels_set)
-        class_to_ind = dict(zip(labels_set, list(range(self.label_start, len(labels_set) + self.label_start + 1))))
-        label_map = {}
         content_check_errors = None
-        for class_label, ind in class_to_ind.items():
-            label_map[ind] = class_label
 
         annotations = []
         for frames in root:
@@ -119,12 +118,6 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
                 if not check_file_existence(self.data_dir / annotation.identifier):
                     content_check_errors.append('{}: file not found'.format(self.data_dir / annotation.identifier))
 
-        meta = {}
-        if self.background_label:
-            label_map[self.background_label] = '__background__'
-            meta['background_label'] = self.background_label
-        meta['label_map'] = label_map
-
         return ConverterReturn(annotations, meta, content_check_errors)
 
     @staticmethod
@@ -133,7 +126,6 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
             annotation.identifier = image
 
         return annotation_list
-
 
     @staticmethod
     def get_label_set(xml_root):
@@ -148,3 +140,37 @@ class DetectionOpenCVStorageFormatConverter(BaseFormatConverter):
                     labels_set.add(label)
 
         return labels_set
+
+    def generate_meta(self, root):
+        if self.dataset_meta:
+            meta = read_json(self.dataset_meta)
+            if 'labels' in meta and 'label_map' not in meta:
+                labels_set = meta['labels']
+                class_to_ind = dict(
+                    zip(labels_set, list(range(self.label_start, len(labels_set) + self.label_start + 1)))
+                )
+                meta['label_map'] = {'label_map': {value: key for key, value in class_to_ind.items()}}
+                if self.background_label:
+                    meta['label_map'][self.background_label] = '__background__'
+                    meta['background_label'] = 0
+            label_map = meta.get('label_map')
+            if not label_map:
+                raise ConfigError('dataset_meta_file should contains labels or label_map')
+            label_map = verify_label_map(label_map)
+            class_to_ind = {value: key for key, value in label_map.items()}
+
+            return class_to_ind, meta
+
+        labels_set = self.get_label_set(root)
+        labels_set = sorted(labels_set)
+        class_to_ind = dict(zip(labels_set, list(range(self.label_start, len(labels_set) + self.label_start + 1))))
+        label_map = {}
+        for class_label, ind in class_to_ind.items():
+            label_map[ind] = class_label
+        meta = {}
+        if self.background_label:
+            label_map[self.background_label] = '__background__'
+            meta['background_label'] = self.background_label
+        meta['label_map'] = label_map
+
+        return class_to_ind, meta
