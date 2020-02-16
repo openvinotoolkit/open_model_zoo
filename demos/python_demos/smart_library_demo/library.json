@@ -1,0 +1,19 @@
+{
+    "books": 
+    [
+        {
+            "id": 1,
+            "title": "book 1",
+            "author": "Author 1, Author 2",
+            "publisher": "pub",
+            "year": 2018
+        },
+        {
+            "id": 2,
+            "title": "book 2",
+            "author": "Author 1, Author 2",
+            "publisher": "pub",
+            "year": 2017
+        } 
+    ]
+}
