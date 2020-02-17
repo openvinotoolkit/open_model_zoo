@@ -37,7 +37,7 @@ Image, name - `image`, shape - `1,3,384,384`, format is `B,C,H,W` where:
 
 Channel order is `RGB`.
 
-- `mean_values` - `image[123.675, 116.28, 103.53]`
+Mean values - [123.675, 116.28, 103.53].
 - `scale_values` - `image[51.525, 50.4, 50.625]`
 
 ### Converted Model
