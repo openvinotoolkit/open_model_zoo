@@ -231,9 +231,7 @@ class EncoderDLSDKModel(BaseModel):
             model_xml = str(network_info['model'])
             model_bin = str(network_info['weights'])
         self.network = launcher.create_ie_network(model_xml, model_bin)
-        if not hasattr(launcher, 'plugin'):
-            launcher.create_ie_plugin()
-        self.exec_network = launcher.plugin.load(self.network)
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.input_blob = next(iter(self.network.inputs))
         self.output_blob = next(iter(self.network.outputs))
 
@@ -261,11 +259,7 @@ class DecoderDLSDKModel(BaseModel):
             model_bin = str(network_info['weights'])
 
         self.network = launcher.create_ie_network(model_xml, model_bin)
-        if hasattr(launcher, 'plugin'):
-            self.exec_network = launcher.plugin.load(self.network)
-        else:
-            launcher.load_network(self.network)
-            self.exec_network = launcher.exec_network
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.input_blob = next(iter(self.network.inputs))
         self.output_blob = next(iter(self.network.outputs))
         self.adapter = create_adapter('classification')

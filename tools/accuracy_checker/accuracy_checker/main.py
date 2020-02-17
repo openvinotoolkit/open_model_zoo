@@ -204,6 +204,12 @@ def build_arguments_parser():
         default=False,
         type=cast_to_bool
     )
+    parser.add_argument(
+        '-dc', '--device_config',
+        help='Inference Engine device specific config file',
+        type=get_path,
+        required=False
+    )
 
     return parser
 

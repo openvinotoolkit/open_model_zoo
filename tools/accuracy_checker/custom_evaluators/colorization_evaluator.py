@@ -146,9 +146,7 @@ class ColorizationTestModel(BaseModel):
         model_xml, model_bin = self.check_format(network_info['model'], network_info['weights'])
         self.network = launcher.create_ie_network(model_xml, model_bin)
         self.network.batch_size = 1
-        if not hasattr(launcher, 'plugin'):
-            launcher.create_ie_plugin()
-        self.exec_network = launcher.plugin.load(self.network)
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.input_blob = next(iter(self.network.inputs))
         self.output_blob = next(iter(self.network.outputs))
         self.color_coeff = np.load(network_info['color_coeff'])
@@ -193,11 +191,7 @@ class ColorizationCheckModel(BaseModel):
         model_xml, model_bin = self.check_format(network_info['model'], network_info['weights'])
         self.adapter = create_adapter(network_info['adapter'])
         self.network = launcher.create_ie_network(model_xml, model_bin)
-        if hasattr(launcher, 'plugin'):
-            self.exec_network = launcher.plugin.load(self.network)
-        else:
-            launcher.load_network(self.network)
-            self.exec_network = launcher.exec_network
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.input_blob = next(iter(self.network.inputs))
         self.output_blob = next(iter(self.network.outputs))
         self.adapter.output_blob = self.output_blob

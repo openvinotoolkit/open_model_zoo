@@ -243,9 +243,7 @@ class DetectorDLSDKModel(BaseModel):
         model_xml = str(network_info['model'])
         model_bin = str(network_info['weights'])
         self.network = launcher.create_ie_network(model_xml, model_bin)
-        if not hasattr(launcher, 'plugin'):
-            launcher.create_ie_plugin()
-        self.exec_network = launcher.plugin.load(self.network)
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.im_info_name = [x for x in self.network.inputs if len(self.network.inputs[x].shape) == 2][0]
         self.im_data_name = [x for x in self.network.inputs if len(self.network.inputs[x].shape) == 4][0]
 
@@ -279,11 +277,7 @@ class RecognizerDLSDKModel(BaseModel):
         model_bin = str(network_info['weights'])
 
         self.network = launcher.create_ie_network(model_xml, model_bin)
-        if hasattr(launcher, 'plugin'):
-            self.exec_network = launcher.plugin.load(self.network)
-        else:
-            launcher.load_network(self.network)
-            self.exec_network = launcher.exec_network
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
 
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(input_data)
