@@ -147,7 +147,7 @@ instances, thus faster than previous, because network runs once.
 | human-pose-estimation-3d-0001 | [PyTorch\*](./human-pose-estimation-3d-0001/description/human-pose-estimation-3d-0001.md) | human-pose-estimation-3d-0001 | 18.998 |  5.074  |
 |single-human-pose-estimation-0001| [PyTorch\*](./single-human-pose-estimation-0001/description/single-human-pose-estimation-0001.md) | single-human-pose-estimation-0001 | 60.125 | 33.165 |
 
-## MonoDepth Estimation
+## Monocular Depth Estimation
 
 The task of monocular depth estimation is to predict a depth (or inverse depth) map based on a single input image.
 Since this task contains - in the general setting - some ambiguity, the resulting depth maps are often only defined up to an unknown scaling factor.
