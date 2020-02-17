@@ -30,8 +30,10 @@ class LauncherConfigValidator(ConfigValidator):
         if self.delayed_model_loading:
             if 'model' in self.fields:
                 self.fields['model'].optional = True
+                self.fields['model'].check_exists = False
             if 'weights' in self.fields:
                 self.fields['weights'].optional = True
+                self.fields['weights'].check_exists = False
         super().validate(entry, field_uri)
         inputs = entry.get('inputs')
         count_non_const_inputs = 0
