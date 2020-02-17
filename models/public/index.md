@@ -154,7 +154,7 @@ Since this task contains - in the general setting - some ambiguity, the resultin
 
 | Model Name                  | Implementation                      | OMZ Model Name                | GFlops    | mParams |
 | --------------------------- | ----------------------------------- | ----------------------------- | --------- | ------- |
-| midasnet                    | [PyTorch\*](./midasnet/midasnet.md) | midasnet                      | 207.4915  | ?       |
+| midasnet                    | [PyTorch\*](./midasnet/midasnet.md) | midasnet                      | 207.4915  |         |
 
 ## Legal Information
 
