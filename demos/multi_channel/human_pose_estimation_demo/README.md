@@ -76,7 +76,7 @@ On the top of the screen, the demo reports throughput in frames per second. You 
 
 ## Input Video Sources
 
-General parameter for input video source is `-i`. Use it to specify video files and web cameras (**USB cameras**) as input video source. You can add the parameter to a sample command line as follows:
+General parameter for input video source is `-i`. Use it to specify video files or web cameras as input video sources. You can add the parameter to a sample command line as follows:
 ```
 -i <file1> <file2>
 ```
@@ -100,7 +100,10 @@ Alternatively, you can just set `-nc 3`, which simplifies application usage.
 
 If your cameras are connected to PC with indexes gap (for example, `0,1,3`), use the `-i` parameter.
 
-IP-cameras through RSTP URI interface are not supported.
+To connect to IP cameras, use RTSP URIs:
+```
+-i rtsp://camera_address_1/ rtsp://camera_address_2/
+```
 
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)
