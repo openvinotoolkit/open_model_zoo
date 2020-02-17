@@ -15,12 +15,14 @@ limitations under the License.
 """
 
 import re
+from pathlib import Path
 
 import caffe
 import numpy as np
 
-from ..config import PathField, StringField, NumberField, BoolField
+from ..config import PathField, StringField, NumberField, BoolField, ConfigError
 from .launcher import Launcher, LauncherConfigValidator
+from ..logging import print_info
 
 DEVICE_REGEX = r'(?P<device>cpu$|gpu)(_(?P<identifier>\d+))?'
 
@@ -43,9 +45,8 @@ class CaffeLauncher(Launcher):
         self._do_reshape = False
 
         if not self._delayed_model_loading:
-            self.model = str(self.get_value_from_config('model'))
-            self.weights = str(self.get_value_from_config('weights'))
-            self.network = caffe.Net(self.model, self.weights, caffe.TEST)
+            self.model, self.weights = self.automatic_model_search()
+            self.network = caffe.Net(str(self.model), str(self.weights), caffe.TEST)
         self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
 
         match = re.match(DEVICE_REGEX, self.get_value_from_config('device').lower())
@@ -61,8 +62,8 @@ class CaffeLauncher(Launcher):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'model': PathField(description="Path to model."),
-            'weights': PathField(description="Path to model."),
+            'model': PathField(description="Path to model.", file_or_directory=True),
+            'weights': PathField(description="Path to weights.", optional=True, file_or_directory=True),
             'device': StringField(regex=DEVICE_REGEX, description="Device name."),
             'batch': NumberField(
                 value_type=int, min_value=1, optional=True, default=1, description="Batch size."
@@ -104,6 +105,35 @@ class CaffeLauncher(Launcher):
             self._do_reshape = True
 
         return data.astype(precision) if precision else precision
+
+    def automatic_model_search(self):
+        model = self.get_value_from_config('model')
+        weights = self.get_value_from_config('weights')
+        if Path(model).is_dir():
+            models_list = list(Path(model).glob('{}.prototxt'.format(self._model_name)))
+            if not models_list:
+                models_list = list(Path(model).glob('*.prototxt'))
+            if not models_list:
+                raise ConfigError('Suitable model description is not detected')
+            if len(models_list) != 1:
+                raise ConfigError('Several suitable models found, please specify required model')
+            model = models_list[0]
+            print_info('Found model {}'.format(model))
+        model = Path(model)
+        if weights is None or Path(weights).is_dir():
+            weights_dir = weights or model.parent
+            weights = weights / model.name.replace('prototxt', 'caffemodel')
+            if not weights.exists():
+                weights_list = list(Path(weights_dir).glob('*.caffemodel'))
+                if not weights_list:
+                    raise ConfigError('Suitable weights is not detected')
+                if len(weights_list) != 1:
+                    raise ConfigError('Several suitable weights found, please specify required explicitly')
+                weights = weights_list[0]
+            print_info('Found weights {}'.format(weights))
+        weights = Path(weights)
+
+        return model, weights
 
     def predict(self, inputs, metadata=None, **kwargs):
         """

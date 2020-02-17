@@ -141,6 +141,15 @@ class TestDLSDKLauncherInfer:
         assert np.argmax(result[0][dlsdk_test_model.output_blob]) == 7
         assert image.metadata['input_shape'] == {'data': [1, 3, 32, 32]}
 
+    def test_dlsdk_laucher_model_search(self, models_dir):
+        config_update = {
+            'model': str(models_dir),
+            'weights': str(models_dir)
+        }
+        dlsdk_test_model = get_dlsdk_test_model(models_dir, config_update)
+        assert dlsdk_test_model._model == models_dir / 'SampLeNet.xml'
+        assert dlsdk_test_model._weights == models_dir / 'SampLeNet.bin'
+
 
 class TestDLSDKLauncherAffinity:
     @pytest.mark.usefixtures('mock_affinity_map_exists')
