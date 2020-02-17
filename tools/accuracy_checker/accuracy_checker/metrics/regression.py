@@ -64,11 +64,12 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
 
     def _calculate_diff_depth_estimation_rep(self, annotation, prediction):
         diff = annotation.mask * self.value_differ(annotation.depth_map, prediction.depth_map)
+        ret = 0
 
         if np.sum(annotation.mask) > 0:
-            return np.sum(diff) / np.sum(annotation.mask)
-        else:
-            return 0
+            ret = np.sum(diff) / np.sum(annotation.mask)
+
+        return ret
 
     def evaluate(self, annotations, predictions):
         return np.mean(self.magnitude), np.std(self.magnitude)
@@ -190,7 +191,7 @@ class RootMeanSquaredError(BaseRegressionMetric):
         super().__init__(mse_differ, *args, **kwargs)
 
     def update(self, annotation, prediction):
-        rmse =  np.sqrt(self.calculate_diff(annotation, prediction))
+        rmse = np.sqrt(self.calculate_diff(annotation, prediction))
         self.magnitude.append(rmse)
         return rmse
 

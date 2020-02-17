@@ -11,9 +11,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import numpy as np
 from .postprocessor import Postprocessor
 from ..representation import DepthEstimationAnnotation, DepthEstimationPrediction
-import numpy as np
 
 class AlignDepth(Postprocessor):
     __provider__ = 'align_prediction_depth_map'
