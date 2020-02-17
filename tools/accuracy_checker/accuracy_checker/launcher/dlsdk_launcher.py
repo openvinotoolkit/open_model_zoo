@@ -505,7 +505,7 @@ class DLSDKLauncher(Launcher):
     def num_requests(self, num_ireq: int):
         if num_ireq != self._num_requests:
             self._num_requests = num_ireq
-        self.load_network(log=False)
+            self.load_network(self.network, log=False)
 
     @property
     def infer_requests(self):
