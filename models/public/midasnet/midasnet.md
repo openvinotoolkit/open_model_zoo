@@ -75,7 +75,7 @@ Inverse depth map is defined up to an unknown scale factor.
 
 ## Legal Information
 
-The original model is released under the following [license](https://drive.google.com/open?id=1p_7P7VKSpD1xM8Ex6p0epZ4TdYFPYjss):
+The original model is released under the following [license](https://raw.githubusercontent.com/intel-isl/MiDaS/master/LICENSE):
 
 ```
 MIT License
