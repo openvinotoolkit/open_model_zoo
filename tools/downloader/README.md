@@ -352,7 +352,7 @@ describing a single model. Each such object has the following keys:
   * `human_pose_estimation`
   * `image_processing`
   * `instance_segmentation`
-  * `mono_depth`
+  * `monocular_depth_estimation`
   * `object_attributes`
   * `optical_character_recognition`
   * `semantic_segmentation`
