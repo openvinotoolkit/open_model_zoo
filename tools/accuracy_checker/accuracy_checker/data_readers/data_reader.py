@@ -182,11 +182,32 @@ class ReaderCombiner(BaseReader):
         raise ConfigError('suitable data reader for {} not found'.format(data_id))
 
 
+OPENCV_IMREAD_FLAGS = {
+    'color': cv2.IMREAD_COLOR,
+    'gray': cv2.IMREAD_GRAYSCALE,
+    'unchanged': cv2.IMREAD_UNCHANGED
+}
+
+
+class OpenCVImageReaderConfig(ConfigValidator):
+    type = StringField(optional=True)
+    reading_flag = StringField(optional=True, choices=OPENCV_IMREAD_FLAGS, default='color')
+
+
 class OpenCVImageReader(BaseReader):
     __provider__ = 'opencv_imread'
 
+    def validate_config(self):
+        if self.config:
+            config_validator = OpenCVImageReaderConfig('opencv_imread_config')
+            config_validator.validate(self.config)
+
+    def configure(self):
+        self.flag = OPENCV_IMREAD_FLAGS[self.config.get('reading_flag', 'color') if self.config else 'color']
+
+
     def read(self, data_id):
-        return cv2.imread(str(get_path(self.data_source / data_id)))
+        return cv2.imread(str(get_path(self.data_source / data_id)), self.flag)
 
 
 class PillowImageReader(BaseReader):

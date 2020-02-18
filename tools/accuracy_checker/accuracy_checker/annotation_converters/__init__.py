@@ -57,6 +57,9 @@ from .text_classification import (
 from .cmu_panoptic import CmuPanopticKeypointsConverter
 from .action_recognition import ActionRecognitionConverter
 from .ms_asl_continuous import MSASLContiniousConverter
+
+from .monocular_depth_perception import ReDWebDatasetConverter
+
 from .fashion_mnist import FashionMnistConverter
 
 __all__ = [
@@ -109,5 +112,6 @@ __all__ = [
     'CmuPanopticKeypointsConverter',
     'ActionRecognitionConverter',
     'MSASLContiniousConverter',
+    'ReDWebDatasetConverter',
     'FashionMnistConverter'
 ]

@@ -12,8 +12,8 @@ reader: opencv_imread
 
 ```yml
 reader:
-  type: json_reader
-  key: data
+  type: opencv_imread
+  reading_flag: gray
 ```
 
 In case, when you have model with several inputs which should use data stored in different format (e. g. images and json) you can use `combine_reader`.
@@ -28,7 +28,8 @@ reader:
 ```
 
 AccuracyChecker supports following list of data readers:
-* `opencv_imread` - read images using OpenCV library. Default color space is BGR.
+* `opencv_imread` - read images using OpenCV library. Default color space is BGR. 
+   * `reading_flag` - (Optional) flag which specifies the way image should be read: `color` - default, loads color image, `gray` - loads image in grayscale mode, `unchanged` - loads image as such including alpha channel.
 * `pillow_imread` - read images using Pillow library. Default color space is RGB.
 * `scipy_imread` - read images using similar approach as in `scipy.misc.imread` 
 ```

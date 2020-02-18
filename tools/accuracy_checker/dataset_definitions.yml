@@ -660,3 +660,12 @@ datasets:
       out_fps: 15
       clip_length: 16
     annotation: msasl/msasl_action_recognition.pickle
+
+  - name: ReDWeb_V1
+    data_source: ReDWeb_V1
+    annotation_conversion:
+      converter: redweb
+      data_dir: ReDWeb_V1
+      annotation_file: ReDWeb_validation_360.txt
+    annotation: mono_depth.pickle
+    

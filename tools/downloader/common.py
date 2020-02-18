@@ -54,6 +54,7 @@ KNOWN_TASK_TYPES = {
     'human_pose_estimation',
     'image_processing',
     'instance_segmentation',
+    'monocular_depth_estimation',
     'object_attributes',
     'optical_character_recognition',
     'semantic_segmentation',

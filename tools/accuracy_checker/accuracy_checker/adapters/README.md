@@ -169,3 +169,4 @@ AccuracyChecker supports following set of adapters:
 * `fcos_person` - converting output of FCOS (single class) model to `DetectionPrediction` representation.
   * `output_blob` - name of output layer with bboxes.
   * `scale` - scalar value to normalize bbox coordinates.
+* `mono_depth` - converting output of monocular depth estimation model to `DepthEstimationPrediction`.
