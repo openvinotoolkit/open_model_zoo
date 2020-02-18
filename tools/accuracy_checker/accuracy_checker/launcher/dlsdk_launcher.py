@@ -214,7 +214,6 @@ class DLSDKLauncher(Launcher):
                             "In multi device mode allows setting comma-separated list for numbers "
                             "or one value which will be used for all devices"
             ),
-            '_models_prefix': PathField(is_directory=True, optional=True, description="Model prefix."),
             '_model_optimizer': PathField(optional=True, is_directory=True, description="Model optimizer."),
             '_tf_obj_detection_api_config_dir': PathField(
                 optional=True, is_directory=True, description="TF Object Detection API Config."
