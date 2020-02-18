@@ -417,6 +417,10 @@ int main(int argc, char* argv[]) {
         const auto duplicateFactor = (1 + FLAGS_duplicate_num);
         size_t numberOfInputs = (FLAGS_nc + files.size()) * duplicateFactor;
 
+        if (numberOfInputs == 0) {
+            throw std::runtime_error("No valid inputs were supplied");
+        }
+
         DisplayParams params = prepareDisplayParams(numberOfInputs);
 
         slog::info << "\tNumber of input channels:    " << numberOfInputs << slog::endl;
