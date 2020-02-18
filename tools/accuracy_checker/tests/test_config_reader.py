@@ -104,7 +104,7 @@ class TestConfigReader:
     def test_read_configs_without_global_config(self, mocker):
         config = {'models': [{
             'name': 'model',
-            'launchers': [{'framework': 'dlsdk', 'model': Path('/absolute_path').absolute(), 'weights': Path('/absolute_path').absolute(), '_models_prefix': Path.cwd()}],
+            'launchers': [{'framework': 'dlsdk', 'model': Path('/absolute_path').absolute(), 'weights': Path('/absolute_path').absolute()}],
             'datasets': [{'name': 'global_dataset'}]
         }]}
         empty_args = Namespace(**{
@@ -771,7 +771,6 @@ class TestConfigReader:
             expected['cpu_extensions'] = prefix / self.arguments.extensions / 'relative_extensions_path'
             expected['gpu_extensions'] = prefix / self.arguments.extensions / 'relative_extensions_path'
             expected['bitstream'] = prefix / self.arguments.bitstreams / 'relative_bitstreams_path'
-            expected['_models_prefix'] = prefix / self.arguments.models
             args = copy.deepcopy(self.arguments)
             args.model_optimizer = None
             args.converted_models = None
@@ -821,7 +820,6 @@ class TestConfigReader:
             'adapter': 'classification',
             'device': 'CPU',
             '_model_optimizer': self.arguments.model_optimizer,
-            '_models_prefix': self.arguments.models
         }]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
@@ -847,7 +845,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'dlsdk',
@@ -857,7 +854,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
@@ -887,7 +883,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'dlsdk',
@@ -897,7 +892,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
@@ -922,7 +916,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'caffe',
@@ -932,7 +925,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
@@ -960,7 +952,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'caffe',
@@ -970,7 +961,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
@@ -998,7 +988,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
@@ -1026,7 +1015,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'dlsdk',
@@ -1036,7 +1024,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
@@ -1064,7 +1051,6 @@ class TestConfigReader:
             'adapter': 'classification',
             'device': 'CPU',
             '_model_optimizer': self.arguments.model_optimizer,
-            '_models_prefix': self.arguments.models
         }]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
@@ -1089,7 +1075,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'dlsdk',
@@ -1098,7 +1083,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
@@ -1125,7 +1109,6 @@ class TestConfigReader:
             'weights': Path('/absolute_path').absolute(),
             'adapter': 'classification',
             '_model_optimizer': self.arguments.model_optimizer,
-            '_models_prefix': self.arguments.models
         }]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
@@ -1149,7 +1132,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'dlsdk',
@@ -1158,7 +1140,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             }
         ]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
@@ -1184,7 +1165,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'caffe',
@@ -1217,7 +1197,6 @@ class TestConfigReader:
             'adapter': 'classification',
             'device': 'CPU',
             '_model_optimizer': self.arguments.model_optimizer,
-            '_models_prefix': self.arguments.models
         }]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
@@ -1242,7 +1221,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'caffe',
@@ -1276,7 +1254,6 @@ class TestConfigReader:
             'adapter': 'classification',
             'device': 'CPU',
             '_model_optimizer': self.arguments.model_optimizer,
-            '_models_prefix': self.arguments.models
         }]
         local_config = {'models': [{'name': 'name', 'launchers': config_launchers, 'datasets': [{'name': 'dataset'}]}]}
         mocker.patch(self.module + '._read_configs', return_value=(None, local_config))
@@ -1298,7 +1275,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'caffe',
@@ -1331,7 +1307,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'caffe',
@@ -1362,7 +1337,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'dlsdk',
@@ -1371,7 +1345,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'HETERO:CPU,GPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'caffe',
@@ -1437,7 +1410,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'caffe',
@@ -1472,7 +1444,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'caffe',
@@ -1505,7 +1476,6 @@ class TestConfigReader:
                 'adapter': 'classification',
                 'device': 'CPU',
                 '_model_optimizer': self.arguments.model_optimizer,
-                '_models_prefix': self.arguments.models
             },
             {
                 'framework': 'caffe',

@@ -44,7 +44,6 @@ PREPROCESSING_PATHS = {
 }
 
 LIST_ENTRIES_PATHS = {
-    'launchers': {
         'model': 'models',
         'weights': 'models',
         'color_coeff': 'models',
@@ -55,7 +54,7 @@ LIST_ENTRIES_PATHS = {
         'mxnet_weights': 'models',
         'onnx_model': 'models',
         'kaldi_model': 'models',
-}}
+}
 
 COMMAND_LINE_ARGS_AS_ENV_VARS = {
     'source': 'DATA_DIR',
@@ -67,13 +66,14 @@ COMMAND_LINE_ARGS_AS_ENV_VARS = {
 DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
 CONFIG_SHARED_PARAMETERS = ['bitstream']
 ACCEPTABLE_MODEL = [
-                'caffe_model', 'caffe_weights',
-                'tf_model', 'tf_meta',
-                'mxnet_model',
-                'onnx_model',
-                'kaldi_model',
-                'model',
-            ]
+    'caffe_model', 'caffe_weights',
+    'tf_model', 'tf_meta',
+    'mxnet_model',
+    'onnx_model',
+    'kaldi_model',
+    'model'
+]
+
 
 
 class ConfigReader:
@@ -349,7 +349,9 @@ class ConfigReader:
             entries_paths.update({'reader': {'data_source': 'source'}})
             for pipeline in config['pipelines']:
                 for stage in pipeline['stages']:
-                    process_config(stage, entries_paths, args, 'dataset', 'launcher', identifiers_mapping)
+                    process_config(
+                        stage, entries_paths, args, 'dataset', 'launcher', identifiers_mapping, pipeline=True
+                    )
 
         def process_modules(config, entries_paths):
             for evaluation in config['evaluations']:
@@ -383,7 +385,7 @@ class ConfigReader:
                 model_paths = arguments.models
                 updated_launchers = []
                 model_paths = [model_paths] if not isinstance(model_paths, list) else model_paths
-                for launcher_id, launcher in enumerate(launchers):
+                for launcher in launchers:
                     if contains_any(launcher, ACCEPTABLE_MODEL):
                         updated_launchers.append(launcher)
                         continue
@@ -707,7 +709,7 @@ def filter_modules(config, target_devices, args):
 
 def process_config(
         config_item, entries_paths, args, dataset_identifier='datasets',
-        launchers_idenitfier='launchers', identifers_mapping=None
+        launchers_idenitfier='launchers', identifers_mapping=None, pipeline=False
 ):
     def process_dataset(datasets_configs):
         if not isinstance(datasets_configs, list):
@@ -728,12 +730,30 @@ def process_config(
         if not isinstance(launchers_configs, list):
             launchers_configs = [launchers_configs]
 
-        for launcher_id, launcher_config in enumerate(launchers_configs):
-            adapter_config = launcher_config.get('adapter')
-            if not isinstance(adapter_config, dict):
-                continue
-            command_line_adapter = (create_command_line_mapping(adapter_config, 'models'))
-            merge_entry_paths(command_line_adapter, adapter_config, args, launcher_id)
+        updated_launchers = []
+        for launcher_config in launchers_configs:
+            if 'models' not in args and not args['models']:
+                updated_launchers.append(launcher_config)
+            models = args['models']
+            if isinstance(models, list):
+                for model_id, _ in enumerate(models):
+                    new_launcher = copy.deepcopy(launcher_config)
+                    merge_entry_paths(LIST_ENTRIES_PATHS, new_launcher, args, model_id)
+                    adapter_config = new_launcher.get('adapter')
+                    if isinstance(adapter_config, dict):
+                        command_line_adapter = (create_command_line_mapping(adapter_config, 'models'))
+                        merge_entry_paths(command_line_adapter, adapter_config, args, model_id)
+                    if not updated_launchers or new_launcher != updated_launchers[-1]:
+                        updated_launchers.append(new_launcher)
+            else:
+                merge_entry_paths(LIST_ENTRIES_PATHS, launcher_config, args)
+                adapter_config = launcher_config.get('adapter')
+                if isinstance(adapter_config, dict):
+                    command_line_adapter = (create_command_line_mapping(adapter_config, 'models'))
+                    merge_entry_paths(command_line_adapter, adapter_config, args)
+                updated_launchers.append(launcher_config)
+
+        return updated_launchers
 
     for entry, command_line_arg in entries_paths.items():
         entry_id = entry if not identifers_mapping else identifers_mapping[entry]
@@ -745,13 +765,14 @@ def process_config(
 
         if entry_id == launchers_idenitfier:
             launchers_configs = config_item[entry_id]
-            process_launchers(launchers_configs)
+            processed_launcher = process_launchers(launchers_configs)
+            config_item[entry_id] = processed_launcher if not pipeline else processed_launcher[0]
 
         config_entries = config_item[entry_id]
         if not isinstance(config_entries, list):
             config_entries = [config_entries]
-        for entry_id, config_entry in enumerate(config_entries):
-            merge_entry_paths(command_line_arg, config_entry, args, entry_id)
+        for config_entry in config_entries:
+            merge_entry_paths(command_line_arg, config_entry, args)
 
 
 def merge_entry_paths(keys, value, args, value_id=0):
