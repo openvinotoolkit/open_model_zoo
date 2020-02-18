@@ -518,15 +518,10 @@ class DLSDKLauncher(Launcher):
     def async_mode(self, flag):
         if flag:
             if 'CPU' in self._devices_list():
-                self.plugin.set_config({'CPU_THROUGHPUT_STREAMS': 'CPU_THROUGHPUT_AUTO'})
+                self.ie_core.set_config({'CPU_THROUGHPUT_STREAMS': 'CPU_THROUGHPUT_AUTO'}, 'CPU')
             if 'GPU' in self._devices_list():
-                self.plugin.set_config({'GPU_THROUGHPUT_STREAMS': 'GPU_THROUGHPUT_AUTO'})
+                self.ie_core.set_config({'GPU_THROUGHPUT_STREAMS': 'GPU_THROUGHPUT_AUTO'}, 'GPU')
         self._async_mode = flag
-
-
-    @property
-    def infer_requests(self):
-        return self.exec_network.requests
 
     def get_async_requests(self):
         return [AsyncInferRequestWrapper(ireq_id, ireq) for ireq_id, ireq in enumerate(self.exec_network.requests)]
@@ -578,20 +573,6 @@ class DLSDKLauncher(Launcher):
         return data.reshape(input_shape)
 
     def _prepare_ie(self, log=True):
-        def set_nireq():
-            num_requests = self.config.get('num_requests')
-            if num_requests is not None:
-                num_requests = get_or_parse_value(num_requests, casting_type=int)
-                if len(num_requests) != 1:
-                    raise ConfigError('Several values for _num_requests specified')
-                self._num_requests = num_requests[0]
-                if self._num_requests != 1 and not self.async_mode:
-                    warning('{} infer requests in sync mode is not supported. Only 1 infer request will be used.')
-                    self._num_requests = 1
-            elif not self.async_mode:
-                self._num_requests = 1
-            else:
-                self._num_requests = self.auto_num_requests()
         if log:
             print_info('IE version: {}'.format(ie.get_version()))
         if self._is_multi():
@@ -605,10 +586,6 @@ class DLSDKLauncher(Launcher):
         self._device_specific_configuration()
 
     def _device_specific_configuration(self):
-        if self._device_ids:
-            correct_id = [device_id for device_id in self._device_ids if device_id is not None]
-            if correct_id:
-                self.plugin.set_config({'DEVICE_ID': correct_id[0]})
         cpu_extensions = self.config.get('cpu_extensions')
         if 'CPU' in self._devices_list():
             if cpu_extensions:
@@ -632,6 +609,9 @@ class DLSDKLauncher(Launcher):
             if log_level:
                 for device in devices:
                     self.ie_core.set_config({'LOG_LEVEL': log_level}, device)
+        device_config = self.config.get('_device_config')
+        if device_config:
+            self._set_device_config(device_config)
 
     def _set_nireq(self):
         num_requests = self.config.get('num_requests')
@@ -708,7 +688,7 @@ class DLSDKLauncher(Launcher):
             for device, nreq in zip(device_list, num_per_device_requests):
                 print_info('    {} - {}'.format(device, nreq))
 
-    def set_device_config(self, device_config):
+    def _set_device_config(self, device_config):
         device_specific_configuration = read_yaml(device_config)
         if not isinstance(device_specific_configuration, dict):
             raise ConfigError('device configuration should be a dict-like')

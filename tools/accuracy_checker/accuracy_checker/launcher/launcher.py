@@ -129,10 +129,6 @@ class Launcher(ClassProvider):
     def predict_async(self, *args, **kwargs):
         raise NotImplementedError('Launcher does not support async mode')
 
-    @property
-    def infer_requests(self):
-        return []
-
     def _provide_inputs_info_to_meta(self, meta):
         meta['input_shape'] = self.inputs
 
