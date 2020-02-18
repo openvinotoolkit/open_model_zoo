@@ -695,13 +695,14 @@ class TestConfigReader:
     def test_merge_launchers_with_definitions(self, mocker):
         local_config = {'models': [{
             'name': 'model',
-            'launchers': [{'framework': 'dlsdk'}],
+            'launchers': [{'framework': 'dlsdk', 'model': 'model'}],
             'datasets': [{'name': 'global_dataset'}]
         }]}
         mocker.patch(self.module + '._read_configs', return_value=(
             self.global_config, local_config
         ))
         expected = copy.deepcopy(self.get_global_launcher('dlsdk'))
+        expected['model'] = 'model'
         with mock_filesystem(['bitstreams/', 'extensions/']) as prefix:
             expected['bitstream'] = prefix / self.arguments.bitstreams / expected['bitstream']
             expected['cpu_extensions'] = prefix / self.arguments.extensions / expected['cpu_extensions']

@@ -188,7 +188,7 @@ class DLSDKLauncher(Launcher):
         parameters = super().parameters()
         parameters.update({
             'model': PathField(description="Path to model.", file_or_directory=True),
-            'weights': PathField(description="Path to model.", optional=True, file_or_directory=True),
+            'weights': PathField(description="Path to weights.", optional=True, file_or_directory=True),
             'device': StringField(description="Device name."),
             'caffe_model': PathField(optional=True, description="Path to Caffe model file."),
             'caffe_weights': PathField(optional=True, description="Path to Caffe weights file."),
@@ -199,7 +199,7 @@ class DLSDKLauncher(Launcher):
             'kaldi_model': PathField(optional=True, description="Path to Kaldi model file."),
             'cpu_extensions': CPUExtensionPathField(optional=True, description="Path to CPU extensions."),
             'gpu_extensions': PathField(optional=True, description="Path to GPU extensions."),
-            'bitstream': PathField(optional=True, description="Bistream (FPGA only)."),
+            'bitstream': PathField(optional=True, description="Bitream (FPGA only)."),
             'mo_params': DictField(optional=True, description="Model Optimizer parameters."),
             'mo_flags': ListField(optional=True, description="Model Optimizer flags."),
             'outputs': ListField(optional=True, description="Outputs."),
@@ -355,6 +355,48 @@ class DLSDKLauncher(Launcher):
                     )
                 )
             layers[layer_name].affinity = device
+
+    def automatic_model_search(self):
+        def get_model():
+            is_blob = False
+            model = Path(self.get_value_from_config('model'))
+            if not model.is_dir():
+                if model.suffix == '.blob':
+                    return model, True
+                return model, False
+            models_list = list(model.glob('{}.xml'.format(self._model_name)))
+            blobs_list = list(Path(model).glob('{}.blob'.format(self._model_name)))
+            if models_list:
+                model = models_list[0]
+            elif blobs_list:
+                model = blobs_list[0]
+                is_blob = True
+            else:
+                models_list = list(model.glob('*.xml'))
+                blobs_list = list(Path(model).glob('*.blob'))
+                if not models_list and not blobs_list:
+                    raise ConfigError('suitable model is not found')
+                if models_list:
+                    if len(models_list) != 1:
+                        raise ConfigError('More than one model matched, please specify explicitly')
+                    model = models_list[0]
+                elif blobs_list:
+                    if len(blobs_list) != 1:
+                        raise ConfigError('More than one compiled network matched, please specify explicitly')
+                    model = blobs_list[0]
+                    is_blob = True
+            print_info('Found model {}'.format(model))
+            return model, is_blob
+
+        model, is_blob = get_model()
+        if is_blob:
+            return model, None
+        weights = self.get_value_from_config('weights')
+        if weights is None or Path(weights).is_dir():
+            weights_dir = weights or model.parent
+            weights = Path(weights_dir) / model.name.replace('xml', 'bin')
+            print_info('Found weights {}'.format(get_path(weights)))
+        return model, weights
 
     def _is_fpga(self):
         device_list = map(lambda device: device.split('.')[0], self._devices_list())
@@ -694,7 +736,8 @@ class DLSDKLauncher(Launcher):
             ))
 
     def _create_network(self, input_shapes=None):
-        compiled_model = Path(self._model).suffix == '.blob'
+        model_path = Path(self._model)
+        compiled_model = model_path.suffix == '.blob'
         if compiled_model:
             self.network = None
             self.exec_network = self.ie_core.import_network(str(self._model), self._device)
@@ -704,6 +747,8 @@ class DLSDKLauncher(Launcher):
             batch_pos = input_info.layout.find('N')
             self._batch = input_info.shape[batch_pos] if batch_pos != -1 else 1
             return
+        if self._weights is None:
+            self._weights = model_path.parent / (model_path.name.split(model_path.suffix)[0] + '.bin')
         self.network = ie.IENetwork(model=str(self._model), weights=str(self._weights))
 
         self.original_outputs = self.network.outputs
@@ -748,47 +793,6 @@ class DLSDKLauncher(Launcher):
         self._model = xml_path
         self._weights = bin_path
         self.load_network(log=log)
-
-    def automatic_model_search(self):
-        def get_model():
-            is_blob = False
-            model = Path(self.get_value_from_config('model'))
-            if not model.is_dir():
-                if model.suffix == '.blob':
-                    return model, True
-                return model, False
-            models_list = list(model.glob('{}.xml'.format(self._model_name)))
-            blobs_list = list(Path(model).glob('{}.blob'.format(self._model_name)))
-            if models_list:
-                model = models_list[0]
-            elif blobs_list:
-                model = blobs_list[0]
-                is_blob = True
-            else:
-                models_list = list(model.glob('*.xml'))
-                blobs_list = list(Path(model).glob('*.blob'))
-                if not models_list and not blobs_list:
-                    raise ConfigError('suitable model is not found')
-                if models_list:
-                    if len(models_list) != 1:
-                        raise ConfigError('More than one model matched, please specify explicitly')
-                    model = models_list[0]
-                elif blobs_list:
-                    if len(blobs_list) != 1:
-                        raise ConfigError('More than one compiled network matched, please specify explicitly')
-                    model = blobs_list[0]
-                    is_blob = True
-            print_info('Found model {}'.format(model))
-            return model, is_blob
-        model, is_blob = get_model()
-        if is_blob:
-            return model, None
-        weights = self.get_value_from_config('weights')
-        if weights is None or Path(weights).is_dir():
-            weights_dir = weights or model.parent
-            weights = Path(weights_dir) / model.name.replace('xml', 'bin')
-            print_info('Found weights {}'.format(get_path(weights)))
-        return model, weights
 
     @staticmethod
     def create_ie_network(model_xml, model_bin):
