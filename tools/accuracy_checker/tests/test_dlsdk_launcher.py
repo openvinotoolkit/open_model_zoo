@@ -76,7 +76,6 @@ def get_dlsdk_test_model(models_dir, config_update=None):
         'model': str(models_dir / 'SampLeNet.xml'),
         'device': 'CPU',
         'adapter': 'classification',
-        '_models_prefix': str(models_dir)
     }
     if config_update:
         config.update(config_update)
@@ -201,14 +200,13 @@ class TestDLSDKLauncher:
             'device': 'fpga',
             'bitstream': Path('custom_bitstream'),
             'adapter': 'classification',
-            '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
         launcher = create_launcher(config, 'model')
         subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
         launcher.release()
 
-    def test_program_bitsream_when_fpga_in_hetero_device(self, mocker):
+    def test_program_bitstream_when_fpga_in_hetero_device(self, mocker):
         subprocess_mock = mocker.patch('subprocess.run')
         config = {
             'framework': 'dlsdk',
@@ -217,14 +215,13 @@ class TestDLSDKLauncher:
             'device': 'hetero:fpga,cpu',
             'bitstream': Path('custom_bitstream'),
             'adapter': 'classification',
-            '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
         launcher = create_launcher(config, 'model')
         subprocess_mock.assert_called_once_with(['aocl', 'program', 'acl0', 'custom_bitstream'], check=True)
         launcher.release()
 
-    def test_does_not_program_bitsream_when_device_is_not_fpga(self, mocker):
+    def test_does_not_program_bitstream_when_device_is_not_fpga(self, mocker):
         subprocess_mock = mocker.patch('subprocess.run')
         config = {
             'framework': 'dlsdk',
@@ -233,13 +230,12 @@ class TestDLSDKLauncher:
             'device': 'cpu',
             'bitstream': Path('custom_bitstream'),
             'adapter': 'classification',
-            '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
         create_launcher(config, 'model')
         subprocess_mock.assert_not_called()
 
-    def test_does_not_program_bitsream_when_hetero_without_fpga(self, mocker):
+    def test_does_not_program_bitstream_when_hetero_without_fpga(self, mocker):
         subprocess_mock = mocker.patch('subprocess.run')
 
         config = {
@@ -249,7 +245,6 @@ class TestDLSDKLauncher:
             'device': 'hetero:cpu,cpu',
             'bitstream': Path('custom_bitstream'),
             'adapter': 'classification',
-            '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
         create_launcher(config, 'model')
@@ -266,7 +261,6 @@ class TestDLSDKLauncher:
             'device': 'hetero:fpga,cpu',
             'bitstream': Path('custom_bitstream'),
             'adapter': 'classification',
-            '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
         create_launcher(config, 'model')
@@ -284,7 +278,6 @@ class TestDLSDKLauncher:
             'device': 'fpga',
             'bitstream': Path('custom_bitstream'),
             'adapter': 'classification',
-            '_models_prefix': 'prefix',
             '_aocl': Path('aocl')
         }
         create_launcher(config, 'model')
@@ -301,7 +294,6 @@ class TestDLSDKLauncher:
             'device': 'fpga',
             'bitstream': Path('custom_bitstream'),
             'adapter': 'classification',
-            '_models_prefix': 'prefix'
         }
         create_launcher(config, 'model')
 
@@ -317,7 +309,6 @@ class TestDLSDKLauncher:
             'device': 'hetero:fpga,cpu',
             'bitstream': Path('custom_bitstream'),
             'adapter': 'classification',
-            '_models_prefix': 'prefix'
         }
         create_launcher(config, 'model')
         os.environ.__setitem__.assert_called_once_with('DLA_AOCX', 'custom_bitstream')
@@ -332,7 +323,6 @@ class TestDLSDKLauncher:
             'device': 'cpu',
             'bitstream': 'custom_bitstream',
             'adapter': 'classification',
-            '_models_prefix': 'prefix'
         }
         create_launcher(config, 'model')
 
@@ -348,7 +338,6 @@ class TestDLSDKLauncher:
             'device': 'hetero:cpu,cpu',
             'bitstream': 'custom_bitstream',
             'adapter': 'classification',
-            '_models_prefix': 'prefix'
         }
         create_launcher(config, 'model')
 
@@ -365,7 +354,6 @@ class TestDLSDKLauncher:
             'device': 'hetero:fpga,cpu',
             'bitstream': 'custom_bitstream',
             'adapter': 'classification',
-            '_models_prefix': 'prefix'
         }
         create_launcher(config, 'model')
 
@@ -382,7 +370,6 @@ class TestDLSDKLauncher:
             'device': 'fpga',
             'bitstream': 'custom_bitstream',
             'adapter': 'classification',
-            '_models_prefix': 'prefix'
         }
         create_launcher(config, 'model')
 
@@ -400,7 +387,6 @@ class TestDLSDKLauncher:
             'caffe_weights': '/path/to/source_models/custom_weights',
             "device": 'cpu',
             'bitstream': Path('custom_bitstream'),
-            '_models_prefix': '/path/to/source_models',
             'adapter': 'classification',
             'should_log_cmd': False
         }
@@ -424,7 +410,6 @@ class TestDLSDKLauncher:
             'caffe_weights': '/path/to/source_models/custom_weights',
             'device': 'cpu',
             'bitstream': Path('custom_bitstream'),
-            '_models_prefix': '/path/to/source_models',
             'mo_params': {'data_type': 'FP16'},
             'adapter': 'classification',
             'should_log_cmd': False
@@ -449,7 +434,6 @@ class TestDLSDKLauncher:
             'caffe_weights': '/path/to/source_models/custom_weights',
             'device': 'cpu',
             'bitstream': Path('custom_bitstream'),
-            '_models_prefix': '/path/to/source_models',
             'mo_flags': ['reverse_input_channels'],
             'adapter': 'classification',
             'should_log_cmd': False
@@ -468,7 +452,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_model': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'output_dir': '/path/to/output/models'}
         }
@@ -498,7 +481,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_model': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to/source_models',
             'adapter': 'classification',
             'should_log_cmd': False
         }
@@ -618,7 +600,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_model': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'tensorflow_object_detection_api_pipeline_config': 'operations.config'},
             '_tf_obj_detection_api_pipeline_config_path': 'od_api'
@@ -645,7 +626,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_meta': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'tensorflow_use_custom_operations_config': 'ssd_v2_support.json'},
             '_tf_custom_op_config_dir': 'config/dir'
@@ -672,7 +652,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_meta': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'tensorflow_use_custom_operations_config': 'config.json'}
         }
@@ -698,7 +677,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_meta': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'tensorflow_object_detection_api_pipeline_config': 'operations.config'},
             '_tf_obj_detection_api_pipeline_config_path': None
@@ -725,7 +703,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_meta': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'tensorflow_object_detection_api_pipeline_config': 'operations.config'},
             '_tf_custom_op_config_dir': 'config/dir',
@@ -754,7 +731,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_meta': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'transformations_config': 'ssd_v2_support.json'},
             '_transformations_config_dir': 'config/dir'
@@ -782,7 +758,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'tf_meta': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to',
             'adapter': 'classification',
             'mo_params': {'transformations_config': 'config.json'}
         }
@@ -814,7 +789,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'mxnet_weights': '/path/to/source_models/custom_weights',
             'device': 'cpu',
-            '_models_prefix': '/path/to/source_models',
             'adapter': 'classification',
             'should_log_cmd': False
         }
@@ -836,7 +810,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'onnx_model': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to/source_models',
             'adapter': 'classification',
             'should_log_cmd': False
         }
@@ -858,7 +831,6 @@ class TestDLSDKLauncher:
             'framework': 'dlsdk',
             'kaldi_model': '/path/to/source_models/custom_model',
             'device': 'cpu',
-            '_models_prefix': '/path/to/source_models',
             'adapter': 'classification',
             'should_log_cmd': False
         }
@@ -878,7 +850,6 @@ class TestDLSDKLauncher:
             'model': 'custom_model',
             'weights': 'custom_weights',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -891,7 +862,6 @@ class TestDLSDKLauncher:
             'model': 'custom_model',
             'weights': 'custom_weights',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -904,7 +874,6 @@ class TestDLSDKLauncher:
             'model': 'custom_model',
             'weights': 'custom_weights',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -917,7 +886,6 @@ class TestDLSDKLauncher:
             'model': 'custom_model',
             'weights': 'custom_weights',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -930,7 +898,6 @@ class TestDLSDKLauncher:
             'model': 'custom_model',
             'weights': 'custom_weights',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -943,7 +910,6 @@ class TestDLSDKLauncher:
             'caffe_model': 'caffe_model',
             'caffe_weights': 'caffe_weights',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -957,7 +923,6 @@ class TestDLSDKLauncher:
             'caffe_model': 'caffe_model',
             'caffe_weights': 'caffe_weights',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -971,7 +936,6 @@ class TestDLSDKLauncher:
             'caffe_model': 'caffe_model',
             'caffe_weights': 'caffe_weights',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -983,7 +947,6 @@ class TestDLSDKLauncher:
             'mxnet_weights': 'mxnet_weights',
             'tf_model': 'tf_model',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -995,7 +958,6 @@ class TestDLSDKLauncher:
             'onnx_model': 'onnx_model',
             'tf_model': 'tf_model',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -1009,7 +971,6 @@ class TestDLSDKLauncher:
             'caffe_weights': 'caffe_weights',
             'tf_model': 'tf_model',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -1024,7 +985,6 @@ class TestDLSDKLauncher:
             'caffe_weights': 'caffe_weights',
             'tf_model': 'tf_model',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -1039,7 +999,6 @@ class TestDLSDKLauncher:
             'caffe_weights': 'caffe_weights',
             'onnx_model': 'onnx_model',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -1054,7 +1013,6 @@ class TestDLSDKLauncher:
             'caffe_weights': 'caffe_weights',
             'mxnet_weights': 'mxnet_weights',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -1068,7 +1026,6 @@ class TestDLSDKLauncher:
             'mxnet_weights': 'mxnet_weights',
             'tf_model': 'tf_model',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -1082,7 +1039,6 @@ class TestDLSDKLauncher:
             'onnx_model': 'onnx_model',
             'tf_model': 'tf_model',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -1099,7 +1055,6 @@ class TestDLSDKLauncher:
             'onnx_model': 'onnx_model',
             'tf_model': 'tf_model',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
         with pytest.raises(ConfigError):
             DLSDKLauncher(config, 'model')
@@ -1114,7 +1069,6 @@ class TestDLSDKLauncher:
             'mxnet_weights': 'mxnet_weights',
             'tf_model': 'tf_model',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -1131,7 +1085,6 @@ class TestDLSDKLauncher:
             'tf_model': 'tf_model',
             'tf_meta': 'tf_meta',
             'device': 'cpu',
-            '_models_prefix': 'prefix'
         }
 
         with pytest.raises(ConfigError):
@@ -1147,7 +1100,6 @@ class TestDLSDKLauncherConfig:
             'device': 'CPU',
             'framework': 'dlsdk',
             'adapter': 'classification',
-            '_models_prefix': 'prefix'
         }
         self.config = DLSDKLauncherConfigValidator('dlsdk_launcher', fields=DLSDKLauncher.parameters())
 
@@ -1233,7 +1185,3 @@ class TestDLSDKLauncherConfig:
 
         with pytest.raises(ValueError):
             create_launcher(launcher_config, 'model')
-
-
-def dummy_adapter():
-    pass
