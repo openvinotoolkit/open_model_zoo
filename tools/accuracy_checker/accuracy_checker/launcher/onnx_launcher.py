@@ -15,13 +15,15 @@ limitations under the License.
 """
 
 import re
+from pathlib import Path
 import numpy as np
 import onnxruntime.backend as backend
 import onnxruntime as onnx_rt
 from ..logging import warning
-from ..config import PathField, StringField, ListField
+from ..config import PathField, StringField, ListField, ConfigError
 from .launcher import Launcher, LauncherConfigValidator
 from ..utils import contains_all
+from ..logging import print_info
 
 
 DEVICE_REGEX = r'(?P<device>cpu$|gpu)'
@@ -39,8 +41,8 @@ class ONNXLauncher(Launcher):
         )
         onnx_launcher_config.validate(self.config)
         if not self._delayed_model_loading:
-            self.model = self.get_value_from_config('model')
-            self._inference_session = self.create_inference_session(self.model)
+            self.model = self.automatic_model_search()
+            self._inference_session = self.create_inference_session(str(self.model))
             outputs = self._inference_session.get_outputs()
             self.output_names = [output.name for output in outputs]
 
@@ -48,7 +50,7 @@ class ONNXLauncher(Launcher):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'model': PathField(description="Path to model."),
+            'model': PathField(description="Path to model.", file_or_directory=True),
             'device': StringField(regex=DEVICE_REGEX, description="Device name.", optional=True, default='CPU'),
             'execution_providers': ListField(
                 value_type=StringField(description="Execution provider name.", ),
@@ -70,6 +72,21 @@ class ONNXLauncher(Launcher):
     @property
     def batch(self):
         return 1
+
+    def automatic_model_search(self):
+        model = Path(self.get_value_from_config('model'))
+        if model.is_dir():
+            model_list = list(model.glob('{}.onnx'.format(self._model_name)))
+            if not model_list:
+                model_list = model.glob('*.onnx')
+                if not model_list:
+                    raise ConfigError('Model not found')
+            if len(model_list) != 1:
+                raise ConfigError('Several suitable models found, please specify explicitly')
+            model = model_list[0]
+            print_info('Found model: {}'.format(model))
+
+        return model
 
     def create_inference_session(self, model):
         if 'execution_providers' in self.config:

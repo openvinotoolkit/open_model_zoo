@@ -23,6 +23,7 @@ import numpy as np
 from accuracy_checker.launcher.launcher import create_launcher
 from accuracy_checker.config import ConfigError
 
+
 def old_onnxrunitme(models_dir):
     import onnxruntime as rt
     sess = rt.InferenceSession(str(models_dir / "samplenet.onnx"))
@@ -31,6 +32,7 @@ def old_onnxrunitme(models_dir):
         return False
     except AttributeError:
         return True
+
 
 def get_onnx_test_model(models_dir, device=None, ep=None):
     config = {
@@ -72,6 +74,16 @@ class TestONNXRuntimeLauncher:
         img_resized = cv2.resize(img_rgb, (w, h))
         input_blob = np.transpose([img_resized], (0, 3, 1, 2))
         res = onnx_test_model.predict([{'data': input_blob.astype(np.float32)}], [{}])
+
+        assert np.argmax(res[0]['fc3']) == 7
+
+    def test_auto_model_search(self, models_dir):
+        config = {
+            "framework": "onnx_runtime",
+            "model": models_dir,
+        }
+        launcher = create_launcher(config, 'samplenet')
+        assert launcher.model == models_dir / "samplenet.onnx"
 
 
 @pytest.mark.usefixtures('mock_path_exists')
