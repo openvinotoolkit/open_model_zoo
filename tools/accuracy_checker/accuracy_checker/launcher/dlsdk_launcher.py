@@ -38,12 +38,21 @@ from ..utils import (
 from .launcher import Launcher, LauncherConfigValidator
 from .model_conversion import convert_model, FrameworkParameters
 from ..logging import print_info
-
+from .input_feeder import LAYER_LAYOUT_TO_IMAGE_LAYOUT
 try:
     from cpuinfo import get_cpu_info
 except ImportError:
     get_cpu_info = None
 
+try:
+    from openvino.inference_engine import IEBlob, IETensorDesc
+except ImportError:
+    IEBlob, IETensorDesc = None, None
+
+DIM_IDS_TO_LAYOUT = {
+    (0, 3, 1, 2): 'NCHW',
+    (0, 1, 2, 3): 'NHWC',
+}
 
 HETERO_KEYWORD = 'HETERO:'
 MULTI_DEVICE_KEYWORD = 'MULTI:'
@@ -267,6 +276,7 @@ class DLSDKLauncher(Launcher):
         else:
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
         self._do_reshape = False
+        self._use_set_blob = False
 
     @property
     def device(self):
@@ -304,14 +314,23 @@ class DLSDKLauncher(Launcher):
             if self._do_reshape:
                 input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
                 self._reshape_input(input_shapes)
+            if self._use_set_blob:
+                for key, input_data in infer_inputs.items():
+                    tensor_desc = IETensorDesc(
+                        self.exec_network.inputs[key].precision,
+                        self.exec_network.inputs[key].shape,
+                        self.exec_network.inputs[key].layout
+                    )
+                    self.exec_network.requests[0].set_blob(key, IEBlob(tensor_desc, input_data))
 
-            result = self.exec_network.infer(infer_inputs)
+            result = self.exec_network.infer(infer_inputs) if not self._use_set_blob else self.exec_network.infer()
             results.append(result)
 
         if metadata is not None:
             for meta_ in metadata:
                 meta_['input_shape'] = self.inputs_info_for_meta()
         self._do_reshape = False
+        self._use_set_blob = False
 
         return results
 
@@ -590,7 +609,7 @@ class DLSDKLauncher(Launcher):
 
         self.network.reshape({**const_inputs_shapes, **new_non_const_input_shapes})
 
-    def _align_data_shape(self, data, input_blob):
+    def _align_data_shape(self, data, input_blob, data_layout):
         input_shape = self.inputs[input_blob].shape
         data_batch_size = data.shape[0]
         input_batch_size = input_shape[0]
@@ -603,6 +622,13 @@ class DLSDKLauncher(Launcher):
             diff_number = input_batch_size - data_batch_size
             filled_part = [data[-1]] * diff_number
             data = np.concatenate([data, filled_part])
+        if len(data.shape) == 4 and len(input_shape) == 4:
+            data_layout = DIM_IDS_TO_LAYOUT.get(tuple(data_layout))
+            input_layout = self.inputs[input_blob].layout
+            if input_layout != data_layout and IEBlob is not None:
+                data = data.transpose(LAYER_LAYOUT_TO_IMAGE_LAYOUT[input_layout])
+                self._use_set_blob = True
+                return data
 
         return data.reshape(input_shape)
 
@@ -840,7 +866,7 @@ class DLSDKLauncher(Launcher):
                 self._do_reshape = True
                 return data
 
-        return self._align_data_shape(data, layer_name)
+        return self._align_data_shape(data, layer_name, layout)
 
     def _set_precision(self):
         config_inputs = self.config.get('inputs', [])
