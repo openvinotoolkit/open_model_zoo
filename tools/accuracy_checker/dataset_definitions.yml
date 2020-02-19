@@ -668,4 +668,10 @@ datasets:
       data_dir: ReDWeb_V1
       annotation_file: ReDWeb_validation_360.txt
     annotation: mono_depth.pickle
-    
+
+  - name: Kondate
+    data_source: Kondate/test_data
+    annotation_conversion:
+      converter: kondate_recognition
+      decoding_char_file: Kondate/kondate_char_list.txt
+      annotation_file: Kondate/test_img_id_gt.txt

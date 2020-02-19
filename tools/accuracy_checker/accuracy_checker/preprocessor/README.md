@@ -81,6 +81,7 @@ Accuracy Checker supports following set of preprocessors:
     You can also use `size` instead in case when destination sizes are equal for both dimensions.
   * `pad_type` - padding space location. Supported: `center`, `left_top`, `right_bottom` (Default is `center`).
   * `use_numpy` - allow to use numpy for padding instead default OpenCV.
+  * `numpy_pad_mode` - if using numpy for padding, numpy padding mode, including constant, edge, mean, etc. (Default is `constant`)
 * `tiling` - image tiling.
   * `margin` - margin for tiled fragment of image.
   * `dst_width` and `dst_height` are destination width and height of tiled fragment respectively.

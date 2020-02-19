@@ -998,3 +998,72 @@ class EASTTextDetectionAdapter(Adapter):
             new_p_1 = np.zeros((0, 4, 2))
 
         return np.concatenate([new_p_0, new_p_1])
+
+
+class CTCGreedySearchDecoder(Adapter):
+    __provider__ = 'ctc_greedy_search_decoder'
+    prediction_types = (CharacterRecognitionPrediction, )
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'blank_label': NumberField(
+                optional=True, value_type=int, min_value=0, description="Index of the CTC blank label."
+            )
+        })
+        return parameters
+
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT)
+        self.blank_label = self.launcher_config.get('blank_label')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        if not self.label_map:
+            raise ConfigError('CTCGreedy Search Decoder requires dataset label map for correct decoding.')
+        if self.blank_label is None:
+            self.blank_label = 0
+        raw_output = self._extract_predictions(raw, frame_meta)
+        output = raw_output[self.output_blob]
+        preds_index = np.argmax(output, 2)
+        preds_index = preds_index.transpose(1,0)
+
+        result = []
+        for identifier, data in zip(identifiers, preds_index):
+            data = data[None, :]
+            seq = self.decode(data, self.blank_label)
+            decoded = ''.join(str(self.label_map[char]) for char in seq)
+            result.append(CharacterRecognitionPrediction(identifier, decoded))
+
+        return result
+
+    @staticmethod
+    def decode(probabilities, blank_id=None):
+        """
+         Decode given output probabilities to sequence of labels.
+        Arguments:
+            probabilities: The output log probabilities for each time step.
+            blank_id (int): Index of the CTC blank label.
+        Returns the output label sequence.
+        """
+        preds_sizes = np.array([probabilities.shape[1]] * probabilities.shape[0])
+        preds_index = probabilities.reshape(-1)
+
+        text_index = preds_index
+        length = preds_sizes
+
+        char_list = []
+        index = 0
+        for l in length:
+            t = text_index[index:index + l]
+
+            # NOTE: t might be zero size
+            if t.shape[0] == 0:
+                continue
+
+            for i in range(l):
+                # removing repeated characters and blank.
+                if t[i] != blank_id and (not (i > blank_id and t[i - 1] == t[i])):
+                    char_list.append(t[i])
+            index += l
+        return char_list

@@ -132,6 +132,8 @@ AccuracyChecker supports following set of adapters:
   * `beam_size` -  size of the beam to use during decoding (default 10).
   * `blank_label` - index of the CTC blank label.
   * `softmaxed_probabilities` - indicator that model uses softmax for output layer (default False).
+* `ctc_greedy_search_decoder` - realization CTC Greedy Search decoder for symbol sequence recognition, converting model output to `CharacterRecognitionPrediction`.
+  * `blank_label` - index of the CTC blank label (default 0).
 * `gaze_estimation` - converting output of gaze estimation model to `GazeVectorPrediction`.
 * `hit_ratio_adapter` - converting output NCF model to `HitRatioPrediction`.
 * `brain_tumor_segmentation` - converting output of brain tumor segmentation model to `BrainTumorSegmentationPrediction`.

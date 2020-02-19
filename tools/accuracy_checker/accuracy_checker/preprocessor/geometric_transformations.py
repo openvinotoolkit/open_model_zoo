@@ -16,6 +16,7 @@ limitations under the License.
 
 import math
 from collections import namedtuple
+from functools import partial
 
 import cv2
 import numpy as np
@@ -380,6 +381,9 @@ class Padding(Preprocessor):
             ),
             'use_numpy': BoolField(
                 optional=True, default=False, description="Allow to use numpy for padding instead default OpenCV."
+            ),
+            'numpy_pad_mode': StringField(
+                optional=True, default='constant', description="If use_numpy is True, Numpy padding mode,including constant, edge, mean, etc."
             )
         })
 
@@ -395,6 +399,7 @@ class Padding(Preprocessor):
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
         self.pad_func = padding_func[self.get_value_from_config('pad_type')]
         self.use_numpy = self.get_value_from_config('use_numpy')
+        self.numpy_pad_mode = self.get_value_from_config('numpy_pad_mode')
 
     def process(self, image, annotation_meta=None):
         height, width, _ = image.data.shape
@@ -406,7 +411,7 @@ class Padding(Preprocessor):
         pref_width = math.ceil(pref_width / float(self.stride)) * self.stride
         pad = self.pad_func(pref_width, pref_height, width, height)
         image.metadata['padding'] = pad
-        padding_realization_func = self._opencv_padding if not self.use_numpy else self._numpy_padding
+        padding_realization_func = self._opencv_padding if not self.use_numpy else partial(self._numpy_padding, mode=self.numpy_pad_mode)
         image.data = padding_realization_func(image.data, pad)
 
         image.metadata.setdefault('geometric_operations', []).append(
@@ -428,16 +433,22 @@ class Padding(Preprocessor):
             image, pad[0], pad[2], pad[1], pad[3], cv2.BORDER_CONSTANT, value=self.pad_value
         )
 
-    def _numpy_padding(self, image, pad):
+    def _numpy_padding(self, image, pad, mode):
         pad_values = (
             (self.pad_value[0], self.pad_value[0]),
             (self.pad_value[1], self.pad_value[1]),
             (self.pad_value[2], self.pad_value[2])
         )
-        return np.pad(
-            image, ((pad[0], pad[2]), (pad[1], pad[3]), (0, 0)),
-            mode='constant', constant_values=pad_values
-        )
+        if mode=='edge':
+            return np.pad(
+                image, ((pad[0], pad[2]), (pad[1], pad[3]), (0, 0)),
+                mode=mode
+            )
+        else:
+            return np.pad(
+                image, ((pad[0], pad[2]), (pad[1], pad[3]), (0, 0)),
+                mode=mode, constant_values=pad_values
+            )
 
 
 class Tiling(Preprocessor):

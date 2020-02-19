@@ -22,7 +22,8 @@ from .text_detection import (
     TextProposalsDetectionAdapter,
     EASTTextDetectionAdapter,
     LPRAdapter,
-    BeamSearchDecoder
+    BeamSearchDecoder,
+    CTCGreedySearchDecoder
 )
 
 from .image_processing import SuperResolutionAdapter
@@ -106,6 +107,7 @@ __all__ = [
 
     'BeamSearchDecoder',
     'LPRAdapter',
+    'CTCGreedySearchDecoder',
 
     'HumanPoseAdapter',
     'HumanPose3dAdapter',

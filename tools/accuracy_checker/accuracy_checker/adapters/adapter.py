@@ -112,5 +112,4 @@ def create_adapter(adapter_config, launcher=None, dataset=None):
 
     if launcher:
         adapter.output_blob = launcher.output_blob
-
     return adapter

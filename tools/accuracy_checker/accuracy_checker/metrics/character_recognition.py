@@ -13,11 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
+import editdistance
 from ..representation import CharacterRecognitionAnnotation, CharacterRecognitionPrediction
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
-
+from .average_editdistance_meter import AverageEditdistanceMeter
 
 class CharacterRecognitionAccuracy(PerImageEvaluationMetric):
     __provider__ = 'character_recognition_accuracy'
@@ -31,6 +31,25 @@ class CharacterRecognitionAccuracy(PerImageEvaluationMetric):
     def update(self, annotation, prediction):
         return self.accuracy.update(annotation.label, prediction.label)
 
+
+    def evaluate(self, annotations, predictions):
+        return self.accuracy.evaluate()
+
+    def reset(self):
+        self.accuracy.reset()
+
+
+class LabelLevelRecognitionAccuracy(PerImageEvaluationMetric):
+    __provider__ = 'label_level_recognition_accuracy'
+
+    annotation_types = (CharacterRecognitionAnnotation, )
+    prediction_types = (CharacterRecognitionPrediction, )
+
+    def configure(self):
+        self.accuracy = AverageEditdistanceMeter(lambda annotation, prediction: editdistance.eval(prediction, annotation))
+
+    def update(self, annotation, prediction):
+        return self.accuracy.update(annotation.label, prediction.label)
 
     def evaluate(self, annotations, predictions):
         return self.accuracy.evaluate()
