@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import NumberField, StringField, ConfigValidator, ListField, ConfigError
+from ..config import BoolField, NumberField, StringField, ConfigValidator, ListField, ConfigError
 from ..representation import DetectionPrediction
 from ..topology_types import YoloV1Tiny, YoloV2, YoloV2Tiny, YoloV3, YoloV3Tiny
 from ..utils import get_or_parse_value
@@ -112,6 +112,10 @@ class YoloV2Adapter(Adapter):
             'cells': NumberField(
                 value_type=int, optional=True, min_value=1, default=13,
                 description="Number of cells across width and height"
+            ),
+            'raw_output': BoolField(
+                optional=True, default=False,
+                description="Indicates, that output is in raw format"
             )
         })
         return parameters
@@ -125,6 +129,7 @@ class YoloV2Adapter(Adapter):
         self.num = self.get_value_from_config('num')
         self.anchors = get_or_parse_value(self.get_value_from_config('anchors'), YoloV2Adapter.PRECOMPUTED_ANCHORS)
         self.cells = self.get_value_from_config('cells')
+        self.raw_output = self.get_value_from_config('raw_output')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         """
@@ -136,47 +141,69 @@ class YoloV2Adapter(Adapter):
         """
         predictions = self._extract_predictions(raw, frame_meta)[self.output_blob]
 
-        cells_x, cells_y = self.cells, self.cells
-
         result = []
         for identifier, prediction in zip(identifiers, predictions):
-            labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []
-            if len(np.shape(prediction)) == 3:
-                prediction = prediction.flatten()
-            for y, x, n in np.ndindex((cells_y, cells_x, self.num)):
-                index = n * cells_y * cells_x + y * cells_x + x
-
-                box_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, 0)
-                obj_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, self.coords)
-
-                scale = prediction[obj_index]
-
-                box = [
-                    (x + prediction[box_index + 0 * (cells_y * cells_x)]) / cells_x,
-                    (y + prediction[box_index + 1 * (cells_y * cells_x)]) / cells_y,
-                    np.exp(prediction[box_index + 2 * (cells_y * cells_x)]) * self.anchors[2 * n + 0] / cells_x,
-                    np.exp(prediction[box_index + 3 * (cells_y * cells_x)]) * self.anchors[2 * n + 1] / cells_y
-                ]
-
-                classes_prob = np.empty(self.classes)
-                for cls in range(self.classes):
-                    cls_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, self.coords + 1 + cls)
-                    classes_prob[cls] = prediction[cls_index]
-
-                classes_prob = classes_prob * scale
-
-                label = np.argmax(classes_prob)
-
-                labels.append(label)
-                scores.append(classes_prob[label])
-                x_mins.append(box[0] - box[2] / 2.0)
-                y_mins.append(box[1] - box[3] / 2.0)
-                x_maxs.append(box[0] + box[2] / 2.0)
-                y_maxs.append(box[1] + box[3] / 2.0)
+            if len(prediction.shape) == 1:
+                prediction = np.reshape(prediction,
+                                        (self.num * (self.classes + self.coords + 1), self.cells, self.cells))
+            labels, scores, x_mins, y_mins, x_maxs, y_maxs = self.parse_output(prediction)
 
             result.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
 
         return result
+
+    def parse_output(self, predictions):
+        def get_cell_bbox(prediction, i, j, n):
+            box_size = self.coords + 1 + self.classes
+            if prediction.shape[0] == prediction.shape[1]:
+                return prediction[i, j, n*box_size:(n + 1)*box_size]
+            else:
+                return prediction[n*box_size:(n + 1)*box_size, i, j]
+
+        def sigmoid(x):
+            return 1.0 / (1.0 + np.exp(-x))
+
+        cells_x, cells_y = self.cells, self.cells
+
+        labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []
+
+        for x, y, n in np.ndindex((cells_x, cells_y, self.num)):
+            bbox = get_cell_bbox(predictions, y, x, n)
+
+            scale = bbox[4]
+
+            classes_prob = bbox[5:]
+
+            if self.raw_output:
+                box = [
+                    (x + sigmoid(bbox[0])) / cells_x,
+                    (y + sigmoid(bbox[1])) / cells_y,
+                    np.exp(bbox[2]) * self.anchors[2 * n + 0] / cells_x,
+                    np.exp(bbox[3]) * self.anchors[2 * n + 1] / cells_y
+                ]
+
+                classes_prob = np.exp(classes_prob) / np.sum(np.exp(classes_prob))
+                scale = sigmoid(scale)
+            else:
+                box = [
+                    (x + bbox[0]) / cells_x,
+                    (y + bbox[1]) / cells_y,
+                    np.exp(bbox[2]) * self.anchors[2 * n + 0] / cells_x,
+                    np.exp(bbox[3]) * self.anchors[2 * n + 1] / cells_y
+                ]
+
+            classes_prob = classes_prob * scale
+
+            label = np.argmax(classes_prob)
+
+            labels.append(label)
+            scores.append(classes_prob[label])
+            x_mins.append(box[0] - box[2] / 2.0)
+            y_mins.append(box[1] - box[3] / 2.0)
+            x_maxs.append(box[0] + box[2] / 2.0)
+            y_maxs.append(box[1] + box[3] / 2.0)
+
+        return labels, scores, x_mins, y_mins, x_maxs, y_maxs
 
 
 class YoloV3Adapter(Adapter):

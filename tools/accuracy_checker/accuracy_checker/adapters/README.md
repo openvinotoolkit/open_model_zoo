@@ -33,6 +33,7 @@ AccuracyChecker supports following set of adapters:
   * `coords` - number of bbox coordinates (default 4).
   * `num` - num parameter from DarkNet configuration file (default 5).
   * `cells` - number of cells across width and height (default 13).
+  * `raw_output` - enabling additional preprocessing for raw YOLO output format (defaut `False`).
 * `yolo_v3` - converting output of YOLO v3 family models to `DetectionPrediction` representation.
   * `classes` - number of detection classes (default 80).
   * `anchors` - anchor values provided as comma-separited list or precomputed:
