@@ -42,12 +42,13 @@ class DatasetConfig(ConfigValidator):
     subsample_seed = NumberField(value_type=int, min_value=0, optional=True)
     analyze_dataset = BaseField(optional=True)
     segmentation_masks_source = PathField(is_directory=True, optional=True)
+    batch = NumberField(value_type=int, min_value=1, optional=True)
 
 
 class Dataset:
     def __init__(self, config_entry, delayed_annotation_loading=False):
         self._config = config_entry
-        self.batch = 1
+        self.batch = self.config.get('batch')
         self.iteration = 0
         dataset_config = DatasetConfig('Dataset')
         dataset_config.validate(self._config)
@@ -127,6 +128,8 @@ class Dataset:
         context.input_ids_batch = batch_input_ids
 
     def __getitem__(self, item):
+        if self.batch is None:
+            self.batch = 1
         if self.size <= item * self.batch:
             raise IndexError
 
@@ -270,13 +273,15 @@ class DatasetWrapper:
         self.tag = tag
         self.data_reader = data_reader
         self.annotation_reader = annotation_reader
-        self._batch = 1
+        self._batch = 1 if not annotation_reader else annotation_reader.batch
         self.subset = None
         self.dataset_config = dataset_config or {}
         if not annotation_reader:
             self._identifiers = [file.name for file in self.data_reader.data_source.glob('*')]
 
     def __getitem__(self, item):
+        if self.batch is None:
+            self.batch = 1
         if self.size <= item * self.batch:
             raise IndexError
         batch_annotation = []

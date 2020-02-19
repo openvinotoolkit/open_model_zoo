@@ -28,6 +28,7 @@ from ..utils import (
     get_parameter_value_from_config
 )
 
+
 class Postprocessor(ClassProvider):
     __provider_type__ = 'postprocessor'
 
