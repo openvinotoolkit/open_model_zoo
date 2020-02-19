@@ -73,9 +73,11 @@ python asl_recognition_demo.py \
 -c ./classes.json
 ```
 
+The demo starts in person tracking mode and to switch it in the action recognition mode you should press `0-9` button with appropriate detection ID (the number in top-left of each bounding box). After that you can switch back to tracking mode by pressing space button.
+
 An example of file with class names can be found [here](./classes.json).
 
-> **NOTE**: To run the demo application with video examples of ASL gestures specify the `-s` key with valid path to the directory with video samples. The name of each video sample should be the valid name of gesture from the `./classes.json` file. To navigate between samples use key 'n' and 'p' for iterating next and previous respectively video sample.
+> **NOTE**: To run the demo application with video examples of ASL gestures specify the `-s` key with valid path to the directory with video samples (you can find some ASL gesture video samples [here](https://github.com/intel-iot-devkit/sample-videos)). The name of each video sample should be the valid name of gesture from the `./classes.json` file. To navigate between samples use arrows key 'left' and 'right' for iterating next and previous respectively video sample.
 
 ## Demo Output
 

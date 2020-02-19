@@ -106,9 +106,11 @@ class VideoStream:
 
         if self._frame_generator_process is not None:
             self._frame_generator_process.terminate()
+            self._frame_generator_process.join()
 
         if self._producer_process is not None:
             self._producer_process.terminate()
+            self._producer_process.join()
 
     @staticmethod
     def _frame_generator(input_source, out_frame, frame_shape, finish_flag):
