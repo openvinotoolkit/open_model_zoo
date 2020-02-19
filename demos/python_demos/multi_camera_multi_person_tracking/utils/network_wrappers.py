@@ -20,7 +20,7 @@ import cv2
 import numpy as np
 
 from utils.ie_tools import load_ie_model
-from .segm_postrocess import postprocess
+from .segm_postprocess import postprocess
 
 
 class DetectorInterface(ABC):

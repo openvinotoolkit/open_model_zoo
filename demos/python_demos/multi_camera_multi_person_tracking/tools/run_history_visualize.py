@@ -24,7 +24,7 @@ from tqdm import tqdm
 from tools.run_evaluate import read_gt_tracks, get_detections_from_tracks
 from utils.misc import check_pressed_keys, set_log_config
 from utils.video import MulticamCapture
-from utils.visualization import visualize_multicam_detections, plot_timeline, get_terget_size
+from utils.visualization import visualize_multicam_detections, plot_timeline, get_target_size
 
 set_log_config()
 
@@ -122,7 +122,7 @@ def calc_output_video_params(input_sizes, fps, gt, merge_det_gt_windows,
     if gt and merge_det_gt_windows:
         target_width *= 2
     vis = np.zeros((target_height, target_width, 3), dtype='uint8')
-    target_width, target_height = get_terget_size(input_sizes, vis, max_window_size, stack_frames)
+    target_width, target_height = get_target_size(input_sizes, vis, max_window_size, stack_frames)
     target_fps = min(fps)
     return (target_width, target_height), target_fps
 

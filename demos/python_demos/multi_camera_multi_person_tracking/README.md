@@ -33,7 +33,7 @@ and then for each detected object it extracts embeddings using re-identification
 To install required dependencies run
 
 ```bash
-cat requirements.txt | xargs -n 1 -L 1 pip3 install
+pip3 install -r requirements.txt
 ```
 
 ### Command line arguments
@@ -91,28 +91,28 @@ Minimum command examples to run the demo:
 # videos
 python multi_camera_multi_person_tracking.py \
     -i path/to/video_1.avi path/to/video_2.avi \
-    -d path/to/person-detection-retail-0013.xml \
-    -r path/to/person-reidentification-retail-0103.xml \
+    --m_detector path/to/person-detection-retail-0013.xml \
+    --m_reid path/to/person-reidentification-retail-0103.xml \
     --config config.py
 
 # videos with instance segmentation model
 python multi_camera_multi_person_tracking.py \
     -i path/to/video_1.avi path/to/video_2.avi \
-    -d path/to/instance-segmentation-security-0050.xml \
-    -r path/to/person-reidentification-retail-0107.xml \
+    --m_segmentation path/to/instance-segmentation-security-0050.xml \
+    --m_reid path/to/person-reidentification-retail-0107.xml \
     --config config.py
 
 # web-cameras
 python multi_camera_multi_person_tracking.py \
     -i 0 1 \
-    -d path/to/person-detection-retail-0013.xml \
-    -r path/to/person-reidentification-retail-0103.xml \
+    --m_detector path/to/person-detection-retail-0013.xml \
+    --m_reid path/to/person-reidentification-retail-0103.xml \
     --config config.py
 ```
 
-The demo can use file in JSON format with detections instead person detector.
-Structure of this file should be the next:
-```
+The demo can use a JSON file with detections instead of a person detector.
+The structure of this file should be as follows:
+```json
 [
     {
         'frame_id': 0
@@ -132,6 +132,11 @@ Structure of this file should be the next:
 The demo displays bounding boxes of tracked objects and unique IDs of those objects.
 To save output video with the result please use the option  `--output_video`,
 to change configuration parameters please open the `config.py` file and edit it.
+
+Visualization can be controlled using the following keys:
+ * `space` - pause or next frame
+ * `enter` - resume video
+ * `esc` - exit
 
 Also demo can dump resulting tracks to a json file. To specify the file use the
 `--history_file` argument.

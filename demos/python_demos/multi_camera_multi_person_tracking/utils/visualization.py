@@ -38,7 +38,7 @@ def draw_detections(frame, detections, show_all_detections=True):
             cv.putText(frame, label, (left, top), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
 
 
-def get_terget_size(frame_sizes, vis=None, max_window_size=(1920, 1080), stack_frames='vertical', **kwargs):
+def get_target_size(frame_sizes, vis=None, max_window_size=(1920, 1080), stack_frames='vertical', **kwargs):
     if vis is None:
         width = 0
         height = 0
@@ -79,7 +79,7 @@ def visualize_multicam_detections(frames, all_objects, fps='', show_all_detectio
         else:
             vis = frame
 
-    target_width, target_height = get_terget_size(frames, vis, max_window_size, stack_frames)
+    target_width, target_height = get_target_size(frames, vis, max_window_size, stack_frames)
 
     vis = cv.resize(vis, (target_width, target_height))
 

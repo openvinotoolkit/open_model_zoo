@@ -18,6 +18,7 @@ from threading import Thread
 import json
 import logging as log
 import random
+import sys
 
 import cv2 as cv
 
@@ -26,7 +27,7 @@ from mc_tracker.mct import MultiCameraTracker
 from utils.analyzer import save_embeddings
 from utils.misc import read_py_config, check_pressed_keys, AverageEstimator, set_log_config
 from utils.video import MulticamCapture, NormalizerCLAHE
-from utils.visualization import visualize_multicam_detections, get_terget_size
+from utils.visualization import visualize_multicam_detections, get_target_size
 from openvino.inference_engine import IECore  # pylint: disable=import-error,E0611
 
 set_log_config()
@@ -93,7 +94,7 @@ def run(params, config, capture, detector, reid):
 
     if len(params.output_video):
         frame_size, fps = capture.get_source_parameters()
-        target_width, target_height = get_terget_size(frame_size, None, **config['visualization_config'])
+        target_width, target_height = get_target_size(frame_size, None, **config['visualization_config'])
         video_output_size = (target_width, target_height)
         fourcc = cv.VideoWriter_fourcc(*'XVID')
         output_video = cv.VideoWriter(params.output_video, fourcc, min(fps), video_output_size)
@@ -202,7 +203,7 @@ def main():
         config = read_py_config(args.config)
     else:
         log.error('No configuration file specified. Please specify parameter \'--config\'')
-        return 1
+        sys.exit()
 
     random.seed(config['random_seed'])
     capture = MulticamCapture(args.i)

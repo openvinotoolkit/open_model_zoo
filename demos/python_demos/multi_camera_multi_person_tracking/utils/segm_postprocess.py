@@ -16,7 +16,6 @@
 
 import cv2
 import numpy as np
-import pycocotools.mask as mask_util
 
 
 def expand_boxes(boxes, scale):
@@ -36,54 +35,6 @@ def expand_boxes(boxes, scale):
     boxes_exp[:, 3] = y_c + h_half
 
     return boxes_exp
-
-
-def postprocess_batch(batch_ids, scores, classes, boxes, raw_cls_masks,
-                      batch_size, im_h, im_w, im_scale_y=None, im_scale_x=None, im_scale=None,
-                      full_image_masks=True, encode_masks=False,
-                      confidence_threshold=0.0):
-    boxes_all = [np.empty((0, 4), dtype=np.float32) for _ in range(batch_size)]
-    scores_all = [np.empty((0, ), dtype=np.float32) for _ in range(batch_size)]
-    classes_all = [np.empty((0, ), dtype=np.float32) for _ in range(batch_size)]
-    raw_masks_all = [None for _ in range(batch_size)]
-    masks_all = [[] for _ in range(batch_size)]
-
-    if batch_ids is None:
-        return scores_all, classes_all, boxes_all, masks_all
-
-    scale_x = im_scale_x
-    scale_y = im_scale_y
-    if im_scale is not None:
-        scale_x = im_scale
-        scale_y = im_scale
-    assert len(scale_x) == len(scale_y)
-
-    num_objs_per_batch = []
-    for i in range(batch_size):
-        num_objs_per_batch.append(np.count_nonzero(batch_ids == i))
-
-    begin = 0
-    for i in range(0, len(num_objs_per_batch)):
-        end = begin + num_objs_per_batch[i]
-        # Scale boxes back to the original image
-        boxes_all[i] = boxes[begin:end]
-        scores_all[i] = scores[begin:end]
-        classes_all[i] = classes[begin:end]
-        if raw_cls_masks is not None:
-            raw_masks_all[i] = raw_cls_masks[begin:end]
-        else:
-            raw_masks_all[i] = None
-        begin = end
-
-    # Resize segmentation masks to fit corresponding bounding boxes.
-    for i in range(batch_size):
-        scores_all[i], classes_all[i], boxes_all[i], masks_all[i] = \
-            postprocess(scores_all[i], classes_all[i], boxes_all[i], raw_masks_all[i],
-                        im_h[i], im_w[i], scale_y[i], scale_x[i], None,
-                        full_image_masks, encode_masks,
-                        confidence_threshold)
-
-    return scores_all, classes_all, boxes_all, masks_all
 
 
 def postprocess(scores, classes, boxes, raw_cls_masks,
@@ -148,9 +99,4 @@ def segm_postprocess(box, raw_cls_mask, im_h, im_w, full_image_mask=True, encode
         x1, y1 = np.clip(original_box[2:] + 1, a_min=0, a_max=[im_w, im_h])
         im_mask = np.ascontiguousarray(mask[(y0 - original_box[1]):(y1 - original_box[1]),
                                             (x0 - original_box[0]):(x1 - original_box[0])])
-
-    if encode:
-        im_mask = mask_util.encode(np.array(im_mask[:, :, np.newaxis].astype(np.uint8), order='F'))[0]
-        im_mask['counts'] = im_mask['counts'].decode('utf-8')
-
     return im_mask

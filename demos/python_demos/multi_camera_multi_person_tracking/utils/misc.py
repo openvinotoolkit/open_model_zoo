@@ -80,7 +80,7 @@ def check_pressed_keys(key):
         key = cv.waitKey(1)
     if key == 32:  # Pause
         while True:
-            key = cv.waitKey(1)
+            key = cv.waitKey(0)
             if key == 27 or key == 32 or key == 13:  # enter: resume, space: next frame, esc: exit
                 break
     return key
