@@ -261,13 +261,10 @@ class DLSDKLauncher(Launcher):
                 self._weights = self.get_value_from_config('weights')
 
             self.load_network(log=True)
-
-        self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
+            self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
+        else:
+            self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
         self._do_reshape = False
-        # It is an important switch -- while the FASTER RCNN is not reshaped correctly, the
-        # whole network should be recreated during reshape
-        # it can not be used in case delayed initialization
-        self.reload_network = not delayed_model_loading
 
     @property
     def device(self):
@@ -512,14 +509,8 @@ class DLSDKLauncher(Launcher):
         return self.exec_network.requests
 
     def _reshape_input(self, shapes):
-        if self.reload_network:
-            # Should recreate the whole network
-            del self.exec_network
-            del self.network
-            self._create_network(shapes)
-        else:
-            del self.exec_network
-            self.network.reshape(shapes)
+        del self.exec_network
+        self.network.reshape(shapes)
 
         self.exec_network = self.ie_core.load_network(self.network, self.device, num_requests=self._num_requests)
 
