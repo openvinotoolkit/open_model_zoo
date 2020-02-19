@@ -121,7 +121,7 @@ class MaskRCNN(DetectorInterface):
     """Wrapper class for a network returning masks of objects"""
 
     def __init__(self, ie, model_path, conf=.6, device='CPU', ext_path='',
-                 max_reqs=100, mean_pixel=(102.9801, 115.9465, 122.7717)):
+                 max_reqs=100):
         self.max_reqs = max_reqs
         self.confidence = conf
         self.net = load_ie_model(ie, model_path, device, None, ext_path, num_reqs=self.max_reqs)
@@ -138,7 +138,6 @@ class MaskRCNN(DetectorInterface):
         self.transforms = self.Compose(
             [
                 self.Resize(max_size=None, window_size=(self.h, self.w), size=None),
-                self.Normalize(mean=mean_pixel, std=[1., 1., 1.]),
             ]
         )
 
@@ -263,19 +262,8 @@ class MaskRCNN(DetectorInterface):
             if 'gt_masks' in sample:
                 sample['gt_masks'] = [[np.clip(part * [scale_x, scale_y], 0, [w - 1, h - 1]) for part in obj]
                                       for obj in sample['gt_masks']]
-
-            return sample
-
-    class Normalize(object):
-        def __init__(self, mean, std):
-            self.mean = mean
-            self.std = std
-
-        def __call__(self, sample):
             sample['image'] = sample['image'].astype('float32').transpose(2, 0, 1)
-            sample['image'][:, :, 0] = (sample['image'][:, :, 0] - self.mean[0]) / self.std[0]
-            sample['image'][:, :, 1] = (sample['image'][:, :, 1] - self.mean[1]) / self.std[1]
-            sample['image'][:, :, 2] = (sample['image'][:, :, 2] - self.mean[2]) / self.std[2]
+
             return sample
 
 
