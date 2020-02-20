@@ -859,10 +859,6 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
         return launcher_entry
 
     launcher_entry.update(update_launcher_entry)
-    models_prefix = arguments.models if 'models' in arguments else None
-    if models_prefix:
-        launcher_entry['_models_prefix'] = models_prefix
-
     _convert_models_args(launcher_entry)
     _async_evaluation_args(launcher_entry)
     _fpga_specific_args(launcher_entry)
