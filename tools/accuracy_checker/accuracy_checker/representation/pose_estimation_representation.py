@@ -66,5 +66,5 @@ class PoseEstimationPrediction(PoseEstimationRepresentation):
         super().__init__(identifier, x_values, y_values, visibility, labels)
         self.scores = scores if scores.any() else np.array([])
 
-    def to_annotation(self):
+    def to_annotation(self, **kwargs):
         return PoseEstimationAnnotation(self.identifier, self.x_values, self.y_values, self.visibility, self.labels)

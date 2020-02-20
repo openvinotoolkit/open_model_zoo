@@ -113,7 +113,7 @@ class SegmentationPrediction(SegmentationRepresentation):
         super().__init__(identifiers)
         self.mask = mask
 
-    def to_annotation(self):
+    def to_annotation(self, **kwargs):
         mask_source = Path.cwd() / 'dumped_masks'
         if not mask_source.exists():
             mask_source.mkdir()
@@ -229,5 +229,5 @@ class CoCocInstanceSegmentationPrediction(CoCoInstanceSegmentationRepresentation
 
         self.metadata['difficult_boxes'] = new_difficult_boxes
 
-    def to_annotation(self):
+    def to_annotation(self, **kwargs):
         return CoCoInstanceSegmentationAnnotation(self.identifier, self.mask, self.labels)

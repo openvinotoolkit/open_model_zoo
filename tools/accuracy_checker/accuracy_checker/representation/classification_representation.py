@@ -15,6 +15,7 @@ limitations under the License.
 """
 
 import numpy as np
+from scipy.special import softmax
 
 from .base_representation import BaseRepresentation
 
@@ -43,8 +44,12 @@ class ClassificationPrediction(Classification):
     def top_k(self, k):
         return np.argpartition(self.scores, -k)[-k:]
 
-    def to_annotation(self):
-        return ClassificationAnnotation(self.identifier, self.label)
+    def to_annotation(self, **kwargs):
+        scores = softmax(self.scores) if self.scores.max() > 1.0 or self.scores.min() < 0.0 else self.scores
+        threshold = kwargs.get('threshold', 0.0)
+        if scores.max() > threshold:
+            return ClassificationAnnotation(self.identifier, self.label)
+        return None
 
 
 class ArgMaxClassificationPrediction(ClassificationPrediction):

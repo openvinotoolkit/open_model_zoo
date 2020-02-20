@@ -29,7 +29,7 @@ class RegressionAnnotation(RegressionRepresentation):
 
 
 class RegressionPrediction(RegressionRepresentation):
-    def to_annotation(self):
+    def to_annotation(self, **kwargs):
         return RegressionAnnotation(self.identifier, self.value)
 
 
@@ -45,7 +45,7 @@ class GazeVectorAnnotation(GazeVectorRepresentation):
 
 
 class GazeVectorPrediction(GazeVectorRepresentation):
-    def to_annotation(self):
+    def to_annotation(self, **kwargs):
         return GazeVectorAnnotation(self.identifier, self.value)
 
 
