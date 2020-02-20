@@ -17,8 +17,10 @@ limitations under the License.
 import importlib
 import re
 import sys
+import warnings
 from setuptools import find_packages, setup
 from setuptools.command.test import test as test_command
+from setuptools.command.install import install as install_command
 from pathlib import Path
 
 
@@ -44,6 +46,10 @@ def read(*path):
         return file.read()
 
 
+class CoreInstall(install_command):
+    pass
+
+
 def find_version(*path):
     version_file = read(*path)
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
@@ -56,11 +62,14 @@ def find_version(*path):
 long_description = read("README.md")
 version = find_version("accuracy_checker", "__init__.py")
 
-requirements = [read("requirements.in")]
+requirements = [read('requirements-core.in') + read("requirements.in") if 'install_core' not in sys.argv else '']
 
 try:
     importlib.import_module('cv2')
-except ImportError:
+except ImportError as opencv_import_error:
+    warnings.warn(
+        "Problem with cv2 import: \n{}\n opencv-python will be added to requirements".format(opencv_import_error)
+    )
     requirements.append('opencv-python')
 
 setup(
@@ -78,5 +87,5 @@ setup(
     python_requires='>=3.5',
     install_requires=requirements,
     tests_require=[read("requirements-test.in")],
-    cmdclass={'test': PyTest}
+    cmdclass={'test': PyTest, 'install_core': CoreInstall}
 )
