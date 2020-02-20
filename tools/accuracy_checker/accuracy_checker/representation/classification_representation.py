@@ -15,9 +15,9 @@ limitations under the License.
 """
 
 import numpy as np
-from scipy.special import softmax
 
 from .base_representation import BaseRepresentation
+from ..utils import softmax
 
 
 class Classification(BaseRepresentation):
