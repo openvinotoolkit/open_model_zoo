@@ -34,6 +34,13 @@ from tests.common import update_dict
 from accuracy_checker.data_readers import DataRepresentation
 from accuracy_checker.utils import contains_all
 
+def no_available_myriad():
+    try:
+        from openvino.inference_engine import IECore
+        return 'MYRIAD' not in IECore().availabe_devices
+    except:
+        return True
+
 
 @pytest.fixture()
 def mock_inference_engine(mocker):
@@ -54,6 +61,20 @@ def get_dlsdk_test_model(models_dir, config_update=None):
         'weights': str(models_dir / 'SampLeNet.bin'),
         'model': str(models_dir / 'SampLeNet.xml'),
         'device': 'CPU',
+        'adapter': 'classification',
+        '_models_prefix': str(models_dir)
+    }
+    if config_update:
+        config.update(config_update)
+
+    return create_launcher(config)
+
+
+def get_dlsdk_test_blob(models_dir, config_update=None):
+    config = {
+        'framework': 'dlsdk',
+        'model': str(models_dir / 'SampLeNet.blob'),
+        'device': 'MYRIAD',
         'adapter': 'classification',
         '_models_prefix': str(models_dir)
     }
@@ -91,9 +112,20 @@ class TestDLSDKLauncherInfer:
         assert contains_all(outputs, ['fc1', 'fc2', 'fc3'])
         assert dlsdk_test_model.output_blob == 'fc3'
 
-    def test_dlsd_launcher_set_batch_size(self, models_dir):
+    def test_dlsdk_launcher_set_batch_size(self, models_dir):
         dlsdk_test_model = get_dlsdk_test_model(models_dir, {'batch': 2})
         assert dlsdk_test_model.batch == 2
+
+    @pytest.mark.skipif(no_available_myriad(), reason='no myriad device in the system')
+    def test_dlsdk_launcher_import_network(self, data_dir, models_dir):
+        dlsdk_test_model = get_dlsdk_test_blob(models_dir)
+        image = get_image(data_dir / '1.jpg', dlsdk_test_model.inputs['data'].shape)
+        input_blob = np.transpose([image.data], (0, 3, 1, 2))
+        result = dlsdk_test_model.predict([{'data': input_blob.astype(np.float32)}], [image.metadata])
+        assert dlsdk_test_model.output_blob == 'fc3'
+
+        assert np.argmax(result[0][dlsdk_test_model.output_blob]) == 7
+        assert image.metadata['input_shape'] == {'data': [1, 3, 32, 32]}
 
 
 @pytest.mark.usefixtures('mock_path_exists')
