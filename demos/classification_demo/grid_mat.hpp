@@ -12,12 +12,19 @@
 
 #include <monitors/presenter.h>
 #include <opencv2/imgproc.hpp>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
+
+#include "classification_demo.hpp"
 
 enum class PredictionResult { Correct,
                               Incorrect,
                               Unknown };
-using ImageInfoList = std::list<std::tuple<cv::Mat, std::string, PredictionResult>>;
+
+struct LabeledImage {
+    cv::Mat mat;
+    std::string label;
+    PredictionResult predictionResult;
+};
 
 class GridMat {
 public:
@@ -30,28 +37,23 @@ public:
                      ):
                      currSourceId{0} {
         targetFPS = std::max(targetFPS, static_cast<double>(FLAGS_b));
-        cv::Size size = cv::Size(static_cast<int>(
-                                    std::round(sqrt(1. * targetFPS * aspectRatio.width / aspectRatio.height))),
-                        static_cast<int>(std::round(sqrt(1. * targetFPS * aspectRatio.height / aspectRatio.width))));
+        cv::Size size(static_cast<int>(std::round(sqrt(1. * targetFPS * aspectRatio.width / aspectRatio.height))),
+                      static_cast<int>(std::round(sqrt(1. * targetFPS * aspectRatio.height / aspectRatio.width))));
         int minCellSize = std::min(maxDisp.width / size.width, maxDisp.height / size.height);
         cellSize = cv::Size(minCellSize, minCellSize);
 
-        for (int i = 0; i < size.width; i++) {
-            for (int j = 0; j < size.height; j++) {
-                points.emplace_back(cellSize.width * i, presenter.graphSize.height + cellSize.height * j);
+        for (int i = 0; i < size.height; i++) {
+            for (int j = 0; j < size.width; j++) {
+                points.emplace_back(cellSize.width * j, presenter.graphSize.height + cellSize.height * i);
             }
         }
 
         outImg.create((cellSize.height * size.height) + presenter.graphSize.height,
                        cellSize.width * size.width, CV_8UC3);
         outImg.setTo(0);
-
-        fontType = cv::FONT_HERSHEY_PLAIN;
-        fontScale = 1.5;
-        thickness = 2;
+        
         textSize = cv::getTextSize("", fontType, fontScale, thickness, &baseline);
         accuracyMessageSize = cv::getTextSize("Accuracy (top 0): 0.000", fontType, fontScale, thickness, &baseline);
-        testMessage = "Testing, please wait...";
         testMessageSize = cv::getTextSize(testMessage, fontType, fontScale, thickness, &baseline);
     }
 
@@ -92,25 +94,23 @@ public:
         }
     }
 
-    void updateMat(const ImageInfoList& imageInfos) {
+    void updateMat(const std::list<LabeledImage>& imageInfos) {
         size_t prevSourceId = (currSourceId + points.size() - prevImgs.size() % points.size()) % points.size();
         while (!prevImgs.empty()) {
-            if (prevSourceId >= points.size()) {
-                prevSourceId -= points.size();
-            }
-
             prevImgs.front().copyTo(outImg(cv::Rect(points[prevSourceId], cellSize)));
             prevImgs.pop();
             prevSourceId++;
+
+            if (prevSourceId >= points.size()) {
+                prevSourceId -= points.size();
+            }
         }
 
         for (const auto & imageInfo : imageInfos) {
-            cv::Mat frame = std::get<0>(imageInfo);
-            std::string predictedLabel = std::get<1>(imageInfo);
-            PredictionResult predictionResult = std::get<2>(imageInfo);
+            cv::Mat frame = imageInfo.mat;
 
             cv::Scalar textColor;
-            switch (predictionResult) {
+            switch (imageInfo.predictionResult) {
                 case PredictionResult::Correct:
                     textColor = cv::Scalar(75, 255, 75); break;     // green
                 case PredictionResult::Incorrect:
@@ -122,11 +122,11 @@ public:
             }
 
             int labelThickness = cellSize.width / 20;
-            cv::Size labelTextSize = cv::getTextSize(predictedLabel, fontType, 1, 2, &baseline);
+            cv::Size labelTextSize = cv::getTextSize(imageInfo.label, fontType, 1, 2, &baseline);
             double labelFontScale = static_cast<double>(cellSize.width - 2*labelThickness) / labelTextSize.width;
             cv::resize(frame, frame, cellSize);
             cv::putText(frame,
-                        predictedLabel,
+                        imageInfo.label,
                         cv::Point(labelThickness, cellSize.height - labelThickness - labelTextSize.height),
                         fontType, labelFontScale, textColor, 2);
             
@@ -149,12 +149,14 @@ private:
     cv::Size cellSize;
     size_t currSourceId;
     std::vector<cv::Point> points;
-    int fontType;
-    double fontScale;
-    int thickness;
+    static const int fontType = cv::FONT_HERSHEY_PLAIN;
+    static constexpr double fontScale = 1.5;
+    static const int thickness = 2;
+    static const std::string testMessage;
     int baseline;
     cv::Size textSize;
     cv::Size accuracyMessageSize;
-    std::string testMessage;
     cv::Size testMessageSize;
 };
+
+const std::string GridMat::testMessage = "Testing, please wait...";

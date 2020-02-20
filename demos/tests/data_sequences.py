@@ -87,7 +87,7 @@ DATA_SEQUENCES = {
         image_net_arg('00048311'),
     ],
 
-    'imagenet-classification': [
+    'classification': [
         image_net_arg('00000002'),
         image_net_arg('00000003'),
         image_net_arg('00000012'),

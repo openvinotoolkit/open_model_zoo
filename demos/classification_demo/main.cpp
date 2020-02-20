@@ -25,7 +25,7 @@
 #include <vpu/vpu_plugin_config.hpp>
 #include <cldnn/cldnn_config.hpp>
 
-#include "imagenet_classification_demo.hpp"
+#include "classification_demo.hpp"
 #include "grid_mat.hpp"
 
 using namespace InferenceEngine;
@@ -291,7 +291,7 @@ int main(int argc, char *argv[]) {
                 nireq = executableNetwork.GetMetric(key).as<unsigned int>();
             } catch (const details::InferenceEngineException& ex) {
                 THROW_IE_EXCEPTION
-                        << "Every device used with the imagenet_classification_demo should "
+                        << "Every device used with the classification_demo should "
                         << "support OPTIMAL_NUMBER_OF_INFER_REQUESTS ExecutableNetwork metric. "
                         << "Failed to query the metric for the " << FLAGS_d << " with error:" << ex.what();
             }
@@ -384,7 +384,7 @@ int main(int argc, char *argv[]) {
                 std::vector<std::vector<unsigned>> results = topResults(
                     *completedInferRequestInfo.inferRequest.GetBlob(outputName), FLAGS_nt);
                 std::vector<std::string> predictedLabels = {};
-                ImageInfoList shownImagesInfo;
+                std::list<LabeledImage> shownImagesInfo;
                 for (size_t i = 0; i < FLAGS_b; i++) {
                     PredictionResult predictionResult = PredictionResult::Incorrect;
                     if (!FLAGS_gt.empty()) {
@@ -406,7 +406,7 @@ int main(int argc, char *argv[]) {
                     }
 
                     shownImagesInfo.push_back(
-                        std::make_tuple(completedInferRequestInfo.images[i].mat, predictedLabels[i], predictionResult));
+                        LabeledImage{completedInferRequestInfo.images[i].mat, predictedLabels[i], predictionResult});
                 }
 
                 framesNum += FLAGS_b;
@@ -416,14 +416,14 @@ int main(int argc, char *argv[]) {
                 gridMat.updateMat(shownImagesInfo);
                 auto processingEndTime = std::chrono::steady_clock::now();
                 for (const auto & image : completedInferRequestInfo.images) {
-                    latencySum += (processingEndTime - image.startTime);
+                    latencySum += processingEndTime - image.startTime;
                 }
                 avgLatency = std::chrono::duration_cast<Sec>(latencySum).count() / framesNum;
                 accuracy = static_cast<double>(correctPredictionsCount) / framesNum;
                 gridMat.textUpdate(avgFPS, avgLatency, accuracy, isTestMode, !FLAGS_gt.empty(), presenter);
                 
                 if (!FLAGS_no_show) {
-                    cv::imshow("imagenet_classification_demo", gridMat.outImg);
+                    cv::imshow("classification_demo", gridMat.outImg);
                     key = static_cast<char>(cv::waitKey(1));
                     presenter.handleKey(key);
                 }
