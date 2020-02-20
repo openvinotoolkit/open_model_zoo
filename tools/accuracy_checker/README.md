@@ -61,11 +61,11 @@ If all prerequisite are installed, then you are ready to install **accuracy chec
 python3 setup.py install
 ```
 
-Accuracy Checker is modular tool and have some task-specific dependencies, all required modules can be found in `requirements.in` file.
-You can install tool without dependencies and manage them by your-self using following command instead of standard installation:
+Accuracy Checker is modular tool and have some task-specific dependencies, all specific required modules can be found in `requirements.in` file.
+You can install only core part of the tool without additional dependencies and manage them by your-self using following command instead of standard installation:
 
 ```bash
-pip install . --no-dependencies
+python setup.py install_core
 ```
 
 #### Usage
