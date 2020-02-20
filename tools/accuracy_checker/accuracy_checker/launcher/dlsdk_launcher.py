@@ -23,6 +23,7 @@ import re
 import numpy as np
 import openvino.inference_engine as ie
 
+from .dlsdk_async_request import AsyncInferRequestWrapper
 from ..config import ConfigError, NumberField, PathField, StringField, DictField, ListField, BoolField, BaseField
 from ..logging import warning
 from ..utils import (
@@ -249,6 +250,8 @@ class DLSDKLauncher(Launcher):
         dlsdk_launcher_config.validate(self.config, ie_core=self.ie_core)
         device = self.config['device'].split('.')
         self._device = '.'.join((device[0].upper(), device[1])) if len(device) > 1 else device[0].upper()
+        self._set_variable = False
+        self._async_mode = False
         self._prepare_bitstream_firmware(self.config)
         self._prepare_ie()
         self._delayed_model_loading = delayed_model_loading
@@ -313,12 +316,12 @@ class DLSDKLauncher(Launcher):
 
         return results
 
-    def predict_async(self, ir, inputs, metadata=None, **kwargs):
+    def predict_async(self, ir, inputs, metadata=None, context=None, **kwargs):
         infer_inputs = inputs[0]
-        ir.async_infer(inputs=infer_inputs)
         if metadata is not None:
             for meta_ in metadata:
                 meta_['input_shape'] = self.inputs_info_for_meta()
+        ir.infer(infer_inputs, metadata, context)
 
     def _is_hetero(self):
         return self._device.startswith(HETERO_KEYWORD)
@@ -505,8 +508,20 @@ class DLSDKLauncher(Launcher):
             self.load_network(self.network, log=False)
 
     @property
-    def infer_requests(self):
-        return self.exec_network.requests
+    def async_mode(self):
+        return self._async_mode
+
+    @async_mode.setter
+    def async_mode(self, flag):
+        if flag:
+            if 'CPU' in self._devices_list():
+                self.ie_core.set_config({'CPU_THROUGHPUT_STREAMS': 'CPU_THROUGHPUT_AUTO'}, 'CPU')
+            if 'GPU' in self._devices_list():
+                self.ie_core.set_config({'GPU_THROUGHPUT_STREAMS': 'GPU_THROUGHPUT_AUTO'}, 'GPU')
+        self._async_mode = flag
+
+    def get_async_requests(self):
+        return [AsyncInferRequestWrapper(ireq_id, ireq) for ireq_id, ireq in enumerate(self.exec_network.requests)]
 
     def _reshape_input(self, shapes):
         del self.exec_network
@@ -549,93 +564,65 @@ class DLSDKLauncher(Launcher):
         return data.reshape(input_shape)
 
     def _prepare_ie(self, log=True):
-        def set_nireq():
-            num_requests = self.config.get('num_requests')
-            if num_requests is not None:
-                num_requests = get_or_parse_value(num_requests, casting_type=int)
-                if len(num_requests) != 1:
-                    raise ConfigError('Several values for _num_requests specified')
-                self._num_requests = num_requests[0]
-                if self._num_requests != 1 and not self.async_mode:
-                    warning('{} infer requests in sync mode is not supported. Only 1 infer request will be used.')
-                    self._num_requests = 1
-            elif not self.async_mode:
-                self._num_requests = 1
-            else:
-                self._num_requests = self.auto_num_requests()
         if log:
             print_info('IE version: {}'.format(ie.get_version()))
         if self._is_multi():
             self._prepare_multi_device(log)
         else:
             self.async_mode = self.get_value_from_config('async_mode')
-            set_nireq()
+            self._set_nireq()
 
             if log:
                 self._log_versions()
+        self._device_specific_configuration()
 
+    def _device_specific_configuration(self):
         cpu_extensions = self.config.get('cpu_extensions')
-        if cpu_extensions and 'CPU' in self._devices_list():
-            selection_mode = self.config.get('_cpu_extensions_mode')
-            cpu_extensions = DLSDKLauncher.get_cpu_extension(cpu_extensions, selection_mode)
-            self.ie_core.add_extension(str(cpu_extensions), 'CPU')
+        if 'CPU' in self._devices_list():
+            if cpu_extensions:
+                selection_mode = self.config.get('_cpu_extensions_mode')
+                cpu_extensions = DLSDKLauncher.get_cpu_extension(cpu_extensions, selection_mode)
+                self.ie_core.add_extension(str(cpu_extensions), 'CPU')
+            self.ie_core.set_config({'CPU_BIND_THREAD': 'YES' if not self._is_multi() else 'NO'}, 'CPU')
         gpu_extensions = self.config.get('gpu_extensions')
-        if gpu_extensions and 'GPU' in self._devices_list():
-            self.ie_core.set_config({'CONFIG_FILE': str(gpu_extensions)}, 'GPU')
+        if 'GPU' in self._devices_list():
+            config = {}
+            if gpu_extensions:
+                config['CONFIG_FILE'] = str(gpu_extensions)
+            if self._is_multi() and 'CPU' in self._devices_list():
+                config['CLDNN_PLUGIN_THROTTLE'] = '1'
+            if config:
+                self.ie_core.set_config(config, 'GPU')
         if self._is_vpu():
+            device_list = map(lambda device: device.split('.')[0], self._devices_list())
+            devices = [vpu_device for vpu_device in VPU_PLUGINS if vpu_device in device_list]
             log_level = self.config.get('_vpu_log_level')
             if log_level:
-                self.ie_core.set_config({'LOG_LEVEL': log_level}, self._device)
+                for device in devices:
+                    self.ie_core.set_config({'LOG_LEVEL': log_level}, device)
         device_config = self.config.get('_device_config')
         if device_config:
-            self.set_device_config(device_config)
+            self._set_device_config(device_config)
 
-    def _prepare_multi_device(self, log=True):
-        async_mode = self.get_value_from_config('async_mode')
-        if not async_mode:
-            warning('Using multi device in sync mode non-applicable. Async mode will be used.')
-        self.async_mode = True
-        num_per_device_req = re.findall(NIREQ_REGEX, self._device)
-        device_list = self._devices_list()
-        num_devices = len(device_list)
-        if num_per_device_req:
-            brackets = r"(\()|(\))"
-            num_per_device_requests = [int(re.sub(brackets, '', nreq)) for nreq in num_per_device_req]
-            if 'num_requests' in self.config:
-                warning(
-                    "number requests already provided in device name specification. "
-                    "'num_requests' option will be ignored."
-                )
+    def _set_nireq(self):
+        num_requests = self.config.get('num_requests')
+        if num_requests is not None and num_requests != 'AUTO':
+            num_requests = get_or_parse_value(num_requests, casting_type=int)
+            if len(num_requests) != 1:
+                raise ConfigError('Several values for _num_requests specified')
+            self._num_requests = num_requests[0]
+            if self._num_requests != 1 and not self.async_mode:
+                warning('{} infer requests in sync mode is not supported. Only 1 infer request will be used.')
+                self._num_requests = 1
+        elif not self.async_mode:
+            self._num_requests = 1
         else:
-            num_per_device_requests = get_or_parse_value(self.config.get('num_requests', 1), casting_type=int)
-        if len(num_per_device_requests) == 1:
-            num_per_device_requests = [num_per_device_requests[0]] * len(device_list)
+            self._num_requests = self.auto_num_requests()
+        if self.async_mode:
+            print_info('Async mode activated')
+            print_info('Infer requests number:{}'.format(self.num_requests))
 
-        if num_devices != len(num_per_device_requests):
-            raise ConfigError('num requests for all {} should be specified'.format(num_devices))
-        self._num_requests = sum(num_per_device_requests) * 2
-        if log:
-            self._log_versions()
-            print_info('Request number for each device:')
-            for device, nreq in zip(device_list, num_per_device_requests):
-                print_info('    {} - {}'.format(device, nreq))
-
-    def set_device_config(self, device_config):
-        device_specific_configuration = read_yaml(device_config)
-        if not isinstance(device_specific_configuration, dict):
-            raise ConfigError('device configuration should be a dict-like')
-        self.ie_core.set_config(device_specific_configuration, self.device)
-
-    def _log_versions(self):
-        versions = self.ie_core.get_versions(self._device)
-        print_info("Loaded {} plugin version:".format(self._device))
-        for device_name, device_version in versions.items():
-            print_info("    {device_name} - {descr}: {maj}.{min}.{num}".format(
-                device_name=device_name, descr=device_version.description, maj=device_version.major,
-                min=device_version.minor, num=device_version.build_number
-            ))
-
-    def auto_num_requests(self):
+    def auto_num_requests(self, return_list=False):
         concurrency_device = {
             'CPU': 1,
             'GPU': 1,
@@ -649,13 +636,63 @@ class DLSDKLauncher(Launcher):
             cpu_count = multiprocessing.cpu_count()
             for min_request in min_requests:
                 if cpu_count % min_request == 0:
-                    return max(min_request, cpu_count / min_request)
+                    num_req = max(min_request, cpu_count / min_request)
+                    return num_req if not return_list else [num_req]
         if 'GPU' in platform_list and len(platform_list) == 1:
-            return 2
-        concurrency = 0
+            return 2 if not return_list else [2]
+        per_device_requests = []
         for device in platform_list:
-            concurrency += concurrency_device.get(device, 1)
-        return concurrency
+            per_device_requests.append(concurrency_device.get(device, 1))
+
+        return per_device_requests if return_list else sum(per_device_requests)
+
+    def _prepare_multi_device(self, log=True):
+        async_mode = self.get_value_from_config('async_mode')
+        if not async_mode:
+            warning('Using multi device in sync mode non-applicable. Async mode will be used.')
+        num_per_device_req = re.findall(NIREQ_REGEX, self._device)
+        device_list = self._devices_list()
+        num_devices = len(device_list)
+        if num_per_device_req:
+            brackets = r"(\()|(\))"
+            num_per_device_requests = [int(re.sub(brackets, '', nreq)) for nreq in num_per_device_req]
+            if 'num_requests' in self.config:
+                warning(
+                    "number requests already provided in device name specification. "
+                    "'num_requests' option will be ignored."
+                )
+        elif 'num_requests' in self.config and self.config['num_requests'] != 'AUTO':
+            num_per_device_requests = get_or_parse_value(self.config['num_request'], casting_type=int)
+        else:
+            num_per_device_requests = self.auto_num_requests(return_list=True)
+
+        if len(num_per_device_requests) == 1:
+            num_per_device_requests = [num_per_device_requests[0]] * len(device_list)
+
+        if num_devices != len(num_per_device_requests):
+            raise ConfigError('num requests for all {} should be specified'.format(num_devices))
+        self._num_requests = sum(num_per_device_requests) * 2
+        if log:
+            self._log_versions()
+            print_info('Async mode activated')
+            print_info('Request number for each device:')
+            for device, nreq in zip(device_list, num_per_device_requests):
+                print_info('    {} - {}'.format(device, nreq))
+
+    def _set_device_config(self, device_config):
+        device_specific_configuration = read_yaml(device_config)
+        if not isinstance(device_specific_configuration, dict):
+            raise ConfigError('device configuration should be a dict-like')
+        self.ie_core.set_config(device_specific_configuration, self.device)
+
+    def _log_versions(self):
+        versions = self.ie_core.get_versions(self._device)
+        print_info("Loaded {} plugin version:".format(self._device))
+        for device_name, device_version in versions.items():
+            print_info("    {device_name} - {descr}: {maj}.{min}.{num}".format(
+                device_name=device_name, descr=device_version.description, maj=device_version.major,
+                min=device_version.minor, num=device_version.build_number
+            ))
 
     def _create_network(self, input_shapes=None):
         model_path = Path(self._model)
@@ -776,7 +813,7 @@ class DLSDKLauncher(Launcher):
         for name, output_info in network_outputs.items():
             print_info('\tLayer name: {}'.format(name))
             print_info('\tprecision: {}'.format(output_info.precision))
-            print_info('\tshape {}\n'.format(output_info.shape))
+            print_info('\tshape: {}\n'.format(output_info.shape))
 
     def release(self):
         if 'network' in self.__dict__:

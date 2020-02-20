@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import time
 import copy
 import numpy as np
 
@@ -94,10 +93,17 @@ class ModelEvaluator:
                 self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
 
         def _set_number_infer_requests(nreq):
+            self.launcher.async_mode = True
             if nreq is None:
                 nreq = self.launcher.auto_num_requests()
             if self.launcher.num_requests != nreq:
                 self.launcher.num_requests = nreq
+
+        def completion_callback(status_code, request_id):
+            if status_code:
+                warning('Request {} failed with status code {}'.format(request_id, status_code))
+            queued_irs.remove(request_id)
+            ready_irs.append(request_id)
 
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
@@ -111,41 +117,34 @@ class ModelEvaluator:
 
         self.dataset.batch = self.launcher.batch
         self.preprocessor.input_shapes = self.launcher.inputs_info_for_meta()
-        progress_reporter = None
 
         _create_subset(subset, num_images)
 
-        if check_progress:
-            progress_reporter = self._create_progress_reporter(check_progress, self.dataset.size)
+        progress_reporter = self._create_progress_reporter(
+            check_progress, self.dataset.size
+        ) if check_progress else None
 
         dataset_iterator = iter(enumerate(self.dataset))
-
-        free_irs = self.launcher.infer_requests
-        queued_irs = []
-        wait_time = 0.01
-
-        while free_irs or queued_irs:
-            self._fill_free_irs(free_irs, queued_irs, dataset_iterator, **kwargs)
+        free_irs, queued_irs, ready_irs = [], [], []
+        infer_requests_pool = self._prepare_requests_pool(completion_callback)
+        free_irs = list(infer_requests_pool)
+        while free_irs or queued_irs or ready_irs:
+            self._fill_free_irs(free_irs, queued_irs, infer_requests_pool, dataset_iterator, **kwargs)
             free_irs[:] = []
 
-            ready_irs, queued_irs = self._wait_for_any(queued_irs)
             if ready_irs:
-                wait_time = 0.01
                 while ready_irs:
-                    ready_data = ready_irs.pop(0)
+                    ready_ir_id = ready_irs.pop(0)
+                    ready_data = infer_requests_pool[ready_ir_id].get_result()
                     (
-                        batch_id,
-                        batch_input_ids,
-                        batch_annotation,
-                        batch_identifiers,
+                        (batch_id, batch_input_ids, batch_annotation, batch_identifiers),
                         batch_meta,
                         batch_raw_predictions,
-                        ir
                     ) = ready_data
                     batch_predictions = _process_ready_predictions(
                         batch_raw_predictions, batch_identifiers, batch_meta, self.adapter
                     )
-                    free_irs.append(ir)
+                    free_irs.append(ready_ir_id)
                     annotations, predictions = self.postprocessor.process_batch(
                         batch_annotation, batch_predictions, batch_meta
                     )
@@ -169,9 +168,6 @@ class ModelEvaluator:
 
                     if progress_reporter:
                         progress_reporter.update(batch_id, len(batch_predictions))
-            else:
-                time.sleep(wait_time)
-                wait_time = max(wait_time * 2, .16)
 
         if progress_reporter:
             progress_reporter.finish()
@@ -261,16 +257,17 @@ class ModelEvaluator:
 
         return result, irs
 
-    def _fill_free_irs(self, free_irs, queued_irs, dataset_iterator, **kwargs):
-        for ir in free_irs:
+    def _fill_free_irs(self, free_irs, queued_irs, infer_requests_pool, dataset_iterator, **kwargs):
+        for ir_id in free_irs:
             try:
                 batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) = next(dataset_iterator)
             except StopIteration:
                 break
 
             batch_input, batch_meta = self._get_batch_input(batch_inputs, batch_annotation)
-            self.launcher.predict_async(ir, batch_input, batch_meta, **kwargs)
-            queued_irs.append((batch_id, batch_input_ids, batch_annotation, batch_identifiers, batch_meta, ir))
+            self.launcher.predict_async(infer_requests_pool[ir_id], batch_input, batch_meta,
+                                        context=tuple([batch_id, batch_input_ids, batch_annotation, batch_identifiers]))
+            queued_irs.append(ir_id)
 
         return free_irs, queued_irs
 
@@ -281,6 +278,13 @@ class ModelEvaluator:
             pr_kwargs = {"print_interval": check_progress}
 
         return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
+
+    def _prepare_requests_pool(self, completion_callback):
+        infer_requests_pool = {ir.request_id: ir for ir in self.launcher.get_async_requests()}
+        for _, async_request in infer_requests_pool.items():
+            async_request.set_completion_callback(completion_callback)
+
+        return infer_requests_pool
 
     def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if not self.metric_executor:
