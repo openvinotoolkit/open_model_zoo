@@ -203,6 +203,7 @@ class OpenCVImageReader(BaseReader):
             config_validator.validate(self.config)
 
     def configure(self):
+        super().configure()
         self.flag = OPENCV_IMREAD_FLAGS[self.config.get('reading_flag', 'color') if self.config else 'color']
 
 
