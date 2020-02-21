@@ -18,7 +18,7 @@ the "Barrier" use case.
 | Car pose                        | Front facing cars                          |
 | Min plate width                 | 96 pixels                                  |
 | Max objects to detect           | 200                                        |
-| GFlops                          | 8.666                                      |
+| GFlops                          | 0.271                                      |
 | MParams                         | 0.547                                      |
 | Source framework                | TensorFlow*                                |
 
