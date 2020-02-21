@@ -116,9 +116,9 @@ class Tracker:  # pylint: disable=too-few-public-methods
         row_ind, col_ind = linear_sum_assignment(cost_matrix)
         affinity_values = 1.0 - cost_matrix[row_ind, col_ind]
 
-        valid_mathces = affinity_values > self._iou_threshold
-        row_ind = row_ind[valid_mathces]
-        col_ind = col_ind[valid_mathces]
+        valid_matches = affinity_values > self._iou_threshold
+        row_ind = row_ind[valid_matches]
+        col_ind = col_ind[valid_matches]
 
         out_detections = []
         for src_id, trg_id in zip(row_ind, col_ind):
@@ -130,7 +130,7 @@ class Tracker:  # pylint: disable=too-few-public-methods
             det.conf = filtered_conf[trg_id]
             out_detections.append(det)
 
-        unmatched_src_ind = set(list(range(len(last_detections)))) - set(row_ind.tolist())
+        unmatched_src_ind = set(range(len(last_detections))) - set(row_ind.tolist())
         for src_id in unmatched_src_ind:
             det = last_detections[src_id]
             det.waiting += 1
@@ -189,11 +189,8 @@ class Tracker:  # pylint: disable=too-few-public-methods
             out_detections.sort(key=lambda x: x.conf, reverse=True)
             out_detections = out_detections[:max_num_detections]
 
-        src_det_ids = set([det.id for det in out_detections])
-        trg_det_ids = set(list(labels_map.keys()))
-        matched_det_ids = src_det_ids.intersection(trg_det_ids)
-        unused_det_ids = list(set(list(range(max_num_detections))) - matched_det_ids)
-        unused_det_ids.sort()
+        matched_det_ids = set(det.id for det in out_detections) & labels_map.keys()
+        unused_det_ids = sorted(set(range(max_num_detections)) - matched_det_ids)
 
         out_labels_map = dict()
         for det in out_detections:

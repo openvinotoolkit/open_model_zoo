@@ -134,10 +134,11 @@ class VideoStream:
 
             end_time = time.perf_counter()
             elapsed_time = end_time - start_time
-            start_time = end_time
             rest_time = trg_time_step - elapsed_time
             if rest_time > 0.0:
                 time.sleep(rest_time)
+
+            start_time = time.perf_counter()
 
         finish_flag.value = True
         cap.release()
@@ -172,7 +173,8 @@ class VideoStream:
 
             end_time = time.perf_counter()
             elapsed_time = end_time - start_time
-            start_time = end_time
             rest_time = trg_time_step - elapsed_time
             if rest_time > 0.0:
                 time.sleep(rest_time)
+
+            start_time = time.perf_counter()

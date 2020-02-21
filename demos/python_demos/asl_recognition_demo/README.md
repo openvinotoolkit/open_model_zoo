@@ -77,7 +77,7 @@ The demo starts in person tracking mode and to switch it in the action recogniti
 
 An example of file with class names can be found [here](./classes.json).
 
-> **NOTE**: To run the demo application with video examples of ASL gestures specify the `-s` key with valid path to the directory with video samples (you can find some ASL gesture video samples [here](https://github.com/intel-iot-devkit/sample-videos)). The name of each video sample should be the valid name of gesture from the `./classes.json` file. To navigate between samples use arrows key 'left' and 'right' for iterating next and previous respectively video sample.
+> **NOTE**: To run the demo application with video examples of ASL gestures specify the `-s` key with valid path to the directory with video samples (you can find some ASL gesture video samples [here](https://github.com/intel-iot-devkit/sample-videos)). The name of each video sample should be the valid name of gesture from the `./classes.json` file. To navigate between samples use 'f' and 'b' buttom keys for iterating next and previous respectively video sample.
 
 ## Demo Output
 

@@ -35,7 +35,6 @@ class VideoLibrary:
         assert len(self.source_paths) > 0, "Can't find videos in " + str(source_dir)
 
         self.cur_source_id = Value('i', 0, lock=True)
-        self.changed_source_flag = Value('i', False, lock=True)
 
         self._trg_time_step = 1. / float(trg_fps)
         self.visualizer = visualizer
@@ -83,9 +82,6 @@ class VideoLibrary:
             if self.cur_source_id.value >= self.num_sources:
                 self.cur_source_id.value = 0
 
-        with self.changed_source_flag.get_lock():
-            self.changed_source_flag.value = True
-
     def prev(self):
         """Moves pointer to the previous video source"""
 
@@ -93,9 +89,6 @@ class VideoLibrary:
             self.cur_source_id.value -= 1
             if self.cur_source_id.value < 0:
                 self.cur_source_id.value = self.num_sources - 1
-
-        with self.changed_source_flag.get_lock():
-            self.changed_source_flag.value = True
 
     def start(self):
         """Starts internal threads"""
@@ -106,7 +99,7 @@ class VideoLibrary:
         self._play_process = \
             Process(target=self._play,
                     args=(self.visualizer, self.cur_source_id, self.source_paths,
-                          self.changed_source_flag, self.max_size, self._trg_time_step))
+                          self.max_size, self._trg_time_step))
         self._play_process.daemon = True
         self._play_process.start()
 
@@ -120,19 +113,18 @@ class VideoLibrary:
         self._play_process = None
 
     @staticmethod
-    def _play(visualizer, cur_source_id, source_paths, changed_source_flag, max_image_size, trg_time_step):
+    def _play(visualizer, cur_source_id, source_paths, max_image_size, trg_time_step):
         """Produces live frame from the active video source"""
 
         cap = None
+        last_source_id = cur_source_id.value
 
         start_time = time.perf_counter()
         while True:
-            if changed_source_flag.value:
+            if cur_source_id.value != last_source_id:
+                last_source_id = cur_source_id.value
                 cap.release()
                 cap = None
-
-                with changed_source_flag.get_lock():
-                    changed_source_flag.value = False
 
             source_name, source_path = source_paths[cur_source_id.value]
 
@@ -163,7 +155,8 @@ class VideoLibrary:
 
             end_time = time.perf_counter()
             elapsed_time = end_time - start_time
-            start_time = end_time
             rest_time = trg_time_step - elapsed_time
             if rest_time > 0.0:
                 time.sleep(rest_time)
+
+            start_time = time.perf_counter()

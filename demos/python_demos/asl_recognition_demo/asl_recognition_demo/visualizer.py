@@ -36,17 +36,16 @@ class Visualizer:
         """Allocates resources for the new window"""
 
         if self._worker_process is not None and self._worker_process.is_alive():
-            raise EnvironmentError('Cannot add the window for running visualizer')
+            raise RuntimeError('Cannot add the window for running visualizer')
 
         self._tasks[name] = Queue(1)
 
     def get_key(self):
         """Returns the value of pressed key"""
 
-        out_key = self._last_key.value
-        if out_key != -1:
-            with self._last_key.get_lock():
-                self._last_key.value = -1
+        with self._last_key.get_lock():
+            out_key = self._last_key.value
+            self._last_key.value = -1
 
         return out_key
 
@@ -82,8 +81,6 @@ class Visualizer:
             self._need_stop.value = True
             self._worker_process.join()
 
-        cv2.destroyAllWindows()
-
     @staticmethod
     def _worker(tasks, last_key, trg_time_step, need_stop):
         """Shows new frames in appropriate screens"""
@@ -98,15 +95,12 @@ class Visualizer:
 
             key = cv2.waitKey(1)
             if key != -1:
-                with last_key.get_lock():
-                    last_key.value = key
+                last_key.value = key
 
             end_time = time.perf_counter()
             elapsed_time = end_time - start_time
-            start_time = end_time
             rest_time = trg_time_step - elapsed_time
             if rest_time > 0.0:
                 time.sleep(rest_time)
 
-        for frame_queue in tasks.values():
-            frame_queue.close()
+            start_time = time.perf_counter()

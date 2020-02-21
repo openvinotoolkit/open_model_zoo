@@ -41,7 +41,7 @@ ACTION_NUM_CLASSES = 100
 ACTION_IMAGE_SCALE = 256
 ACTION_SCORE_THRESHOLD = 0.8
 SAMPLES_MAX_WINDOW_SIZE = 1000
-SAMPLES_TRG_FPS = 10
+SAMPLES_TRG_FPS = 20
 VISUALIZER_TRG_FPS = 60
 OBJECT_IDS = [ord(str(n)) for n in range(10)]
 
@@ -146,8 +146,8 @@ def main():
         detections, tracker_labels_map = person_tracker.add_frame(
             frame, len(OBJECT_IDS), tracker_labels_map)
         if detections is None:
-           active_object_id = -1
-           last_caption = None
+            active_object_id = -1
+            last_caption = None
 
         if active_object_id >= 0:
             cur_det = [det for det in detections if det.id == active_object_id]
@@ -209,9 +209,9 @@ def main():
                 active_object_id = local_bbox_id
 
         if samples_library is not None:
-            if key == 83:  # right
+            if key == ord('f'):  # forward
                 samples_library.next()
-            elif key == 81:  # left
+            elif key == ord('b'):  # backward
                 samples_library.prev()
 
     if samples_library is not None:
