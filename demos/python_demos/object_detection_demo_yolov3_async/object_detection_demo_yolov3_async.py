@@ -55,6 +55,7 @@ def build_argparser():
                       action="store_true")
     args.add_argument("-r", "--raw_output_message", help="Optional. Output inference results raw values showing",
                       default=False, action="store_true")
+    args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
     return parser
 
 
@@ -334,23 +335,25 @@ def main():
         cv2.putText(frame, parsing_message, (15, 30), cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
 
         start_time = time()
-        cv2.imshow("DetectionResults", frame)
+        if not args.no_show:
+            cv2.imshow("DetectionResults", frame)
         render_time = time() - start_time
 
         if is_async_mode:
             cur_request_id, next_request_id = next_request_id, cur_request_id
             frame = next_frame
 
-        key = cv2.waitKey(wait_key_code)
-
-        # ESC key
-        if key == 27:
-            break
-        # Tab key
-        if key == 9:
-            exec_net.requests[cur_request_id].wait()
-            is_async_mode = not is_async_mode
-            log.info("Switched to {} mode".format("async" if is_async_mode else "sync"))
+        if not args.no_show:
+            key = cv2.waitKey(wait_key_code)
+    
+            # ESC key
+            if key == 27:
+                break
+            # Tab key
+            if key == 9:
+                exec_net.requests[cur_request_id].wait()
+                is_async_mode = not is_async_mode
+                log.info("Switched to {} mode".format("async" if is_async_mode else "sync"))
 
     cv2.destroyAllWindows()
 
