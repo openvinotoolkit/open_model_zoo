@@ -64,7 +64,7 @@ class Visualizer:
             return
 
         if len(self._tasks) == 0:
-            raise EnvironmentError('Cannot start without registered windows')
+            raise RuntimeError('Cannot start without registered windows')
 
         self._need_stop.value = False
 
@@ -85,8 +85,9 @@ class Visualizer:
     def _worker(tasks, last_key, trg_time_step, need_stop):
         """Shows new frames in appropriate screens"""
 
-        start_time = time.perf_counter()
         while not need_stop.value:
+            start_time = time.perf_counter()
+
             for name, frame_queue in tasks.items():
                 if not frame_queue.empty():
                     frame = frame_queue.get(True)
@@ -102,5 +103,3 @@ class Visualizer:
             rest_time = trg_time_step - elapsed_time
             if rest_time > 0.0:
                 time.sleep(rest_time)
-
-            start_time = time.perf_counter()

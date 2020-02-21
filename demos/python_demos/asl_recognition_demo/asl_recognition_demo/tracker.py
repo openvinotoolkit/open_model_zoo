@@ -138,7 +138,7 @@ class Tracker:  # pylint: disable=too-few-public-methods
             if det.waiting < self._max_waiting:
                 out_detections.append(det)
 
-        unmatched_trg_ind = set(list(range(len(filtered_rois)))) - set(col_ind.tolist())
+        unmatched_trg_ind = set(range(len(filtered_rois))) - set(col_ind.tolist())
         for trg_id in unmatched_trg_ind:
             new_roi = filtered_rois[trg_id]
             new_roi_conf = filtered_conf[trg_id]

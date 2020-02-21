@@ -119,8 +119,9 @@ class VideoLibrary:
         cap = None
         last_source_id = cur_source_id.value
 
-        start_time = time.perf_counter()
         while True:
+            start_time = time.perf_counter()
+
             if cur_source_id.value != last_source_id:
                 last_source_id = cur_source_id.value
                 cap.release()
@@ -158,5 +159,3 @@ class VideoLibrary:
             rest_time = trg_time_step - elapsed_time
             if rest_time > 0.0:
                 time.sleep(rest_time)
-
-            start_time = time.perf_counter()
