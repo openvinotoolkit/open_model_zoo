@@ -29,10 +29,7 @@ models:
           - type: filter
             apply_to: prediction
             min_confidence: 0.001
-            #min_confidence: 0.005
             remove_filtered: True
-          #- type: correct_yolo_v2_boxes
-          #  size: 416
           - type: nms
             overlap: 0.5
           - type: clip_boxes
@@ -41,7 +38,6 @@ models:
         metrics:
           - type: map
             integral: 11point
-            #ignore_difficult: true
             ignore_difficult: False
             presenter: print_scalar
           - type: coco_precision
@@ -96,7 +92,6 @@ models:
         metrics:
           - type: map
             integral: 11point
-            #ignore_difficult: true
             ignore_difficult: False
             presenter: print_scalar
           - type: coco_precision
