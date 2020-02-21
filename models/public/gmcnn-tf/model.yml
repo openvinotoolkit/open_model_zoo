@@ -22,7 +22,7 @@ files:
   - name: gmcnn_frozen_model.pb
     size: 49774892
     sha256: 6cb11def99dde1672094b91d7cde64e9d9d955e479a5d21ed0ee1ed1b5639198
-    source:
+    source: https://download.01.org/opencv/public_models/022020/gmcnn/frozen_model.pb
 model_optimizer_args:
   - --input_model=$dl_dir/gmcnn_frozen_model.pb
   - --input_shape=[1,512,680,3],[1,512,680,1]
