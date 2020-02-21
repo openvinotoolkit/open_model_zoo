@@ -107,22 +107,21 @@ class CaffeLauncher(Launcher):
         return data.astype(precision) if precision else precision
 
     def automatic_model_search(self):
-        model = self.get_value_from_config('model')
+        model = Path(self.get_value_from_config('model'))
         weights = self.get_value_from_config('weights')
-        if Path(model).is_dir():
-            models_list = list(Path(model).glob('{}.prototxt'.format(self._model_name)))
+        if model.is_dir():
+            models_list = list(model.glob('{}.prototxt'.format(self._model_name)))
             if not models_list:
-                models_list = list(Path(model).glob('*.prototxt'))
+                models_list = list(model.glob('*.prototxt'))
             if not models_list:
                 raise ConfigError('Suitable model description is not detected')
             if len(models_list) != 1:
                 raise ConfigError('Several suitable models found, please specify required model')
             model = models_list[0]
             print_info('Found model {}'.format(model))
-        model = Path(model)
         if weights is None or Path(weights).is_dir():
             weights_dir = weights or model.parent
-            weights = weights / model.name.replace('prototxt', 'caffemodel')
+            weights = Path(weights_dir) / model.name.replace('prototxt', 'caffemodel')
             if not weights.exists():
                 weights_list = list(Path(weights_dir).glob('*.caffemodel'))
                 if not weights_list:
