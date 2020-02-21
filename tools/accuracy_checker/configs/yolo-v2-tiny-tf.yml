@@ -39,7 +39,6 @@ models:
             apply_to: prediction
 
         metrics:
-          #- type: coco_orig_precision
           - type: map
             integral: 11point
             #ignore_difficult: true
@@ -80,8 +79,6 @@ models:
       - name: ms_coco_detection_80_class_without_backgound
 
         preprocessing:
-          #- type: normalization
-          #  std: 255.0
           - type: resize
             size: 416
 
@@ -90,17 +87,13 @@ models:
           - type: filter
             apply_to: prediction
             min_confidence: 0.001
-            #min_confidence: 0.005
             remove_filtered: True
-          #- type: correct_yolo_v2_boxes
-          #  size: 416
           - type: nms
             overlap: 0.5
           - type: clip_boxes
             apply_to: prediction
 
         metrics:
-          #- type: coco_orig_precision
           - type: map
             integral: 11point
             #ignore_difficult: true
