@@ -411,6 +411,8 @@ class ConfigReader:
                 module_config = evaluation.get('module_config')
                 if not module_config:
                     continue
+                if 'models' in arguments and arguments.models:
+                    module_config['_models'] = arguments.models
                 if 'launchers' not in module_config:
                     continue
                 for launcher in module_config['launchers']:
