@@ -48,6 +48,9 @@ ENTRIES_PATHS = {
         'data_source': 'source',
     },
 }
+PREPROCESSING_PATHS = {
+    'mask_dir': 'source'
+}
 
 COMMAND_LINE_ARGS_AS_ENV_VARS = {
     'source': 'DATA_DIR',
@@ -578,11 +581,12 @@ class ConfigReader:
         return config
 
 
-def create_command_line_mapping(config, value):
+def create_command_line_mapping(config, default_value, value_map=None):
     mapping = {}
+    value_map = value_map or {}
     for key in config:
         if key.endswith('file') or key.endswith('dir'):
-            mapping[key] = value
+            mapping[key] = value_map.get(key, default_value)
 
     return mapping
 
@@ -686,7 +690,9 @@ def process_config(
                 merge_entry_paths(command_line_conversion, annotation_conversion_config, args)
             if 'preprocessing' in datasets_config:
                 for preprocessor in datasets_config['preprocessing']:
-                    command_line_preprocessing = (create_command_line_mapping(preprocessor, 'models'))
+                    command_line_preprocessing = (
+                        create_command_line_mapping(preprocessor, 'models', PREPROCESSING_PATHS)
+                    )
                     merge_entry_paths(command_line_preprocessing, preprocessor, args)
 
     def process_launchers(launchers_configs):
