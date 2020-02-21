@@ -6,8 +6,13 @@ For enabling OpenVINO™ launcher you need to add `framework: dlsdk` in launcher
 Heterogeneous plugin as `HETERO:target_device,fallback_device` and Multi device plugin as `MULTI:target_device1,target_device2`.
 If you have several MYRIAD devices in your machine, you are able to provide specific device id in such way: `MYRIAD.<DEVICE_ID>` (e.g. `MYRIAD.1.2-ma2480`)
 It is possible to specify one or more devices via `-td, --target devices` command line argument. Target device will be selected from command line (in case when several devices provided, evaluations will be run one by one with all specified devices).
-* `model` - path to xml file with Caffe model for your topology.
-* `weights` - path to bin file with weights for your topology.
+* `model` - path to xml file with model for your topology or compiled executable network.
+* `weights` - path to bin file with weights for your topology (Optional, the argument can be omitted if bin file stored in the same directory with model xml or if you use compiled blob).
+
+**Note:** 
+   You can generate executable blob using [compile_tool](http://docs.openvinotoolkit.org/latest/_inference_engine_tools_compile_tool_README.html).
+   Before evaluation executable blob, please make sure that selected device support it.
+
 
 launcher may optionally provide model parameters in source framework format which will be converted to Inference Engine IR using Model Optimizer.
 If you want to use Model Optimizer for model conversion, please view [Model Optimizer Developer Guide](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
