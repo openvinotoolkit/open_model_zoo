@@ -363,6 +363,7 @@ class ConfigReader:
                     networks_info = module_config['network_info']
                     if isinstance(networks_info, dict):
                         for _, params in networks_info.items():
+                            entries_paths['launchers'].update(LIST_ENTRIES_PATHS)
                             merge_entry_paths(entries_paths['launchers'], params, args)
                     if isinstance(networks_info, list):
                         merge_entry_paths(entries_paths['launchers'], networks_info, args)
@@ -412,7 +413,7 @@ class ConfigReader:
                 if not module_config:
                     continue
                 if 'models' in arguments and arguments.models:
-                    module_config['_models'] = arguments.modelsl
+                    module_config['_models'] = arguments.models
                 if 'launchers' not in module_config:
                     continue
                 for launcher in module_config['launchers']:

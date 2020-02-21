@@ -52,7 +52,7 @@ class TextSpottingEvaluator(BaseEvaluator):
         preprocessing = PreprocessingExecutor(dataset_config.get('preprocessing', []), dataset.name)
         metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
         launcher = create_launcher(config['launchers'][0], delayed_model_loading=True)
-        model = SequentialModel(config.get('network_info', {}), launcher, config.get('models', []))
+        model = SequentialModel(config.get('network_info', {}), launcher, config.get('_models', []))
         return cls(dataset, reader, preprocessing, metrics_executor, launcher, model)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
@@ -199,7 +199,6 @@ def create_recognizer(model_config, launcher, suffix):
 
 class SequentialModel:
     def __init__(self, network_info, launcher, models_args):
-        super().__init__(network_info, launcher)
         detector = network_info.get('detector', {})
         recognizer_encoder = network_info.get('recognizer_encoder', {})
         recognizer_decoder = network_info.get('recognizer_decoder', {})

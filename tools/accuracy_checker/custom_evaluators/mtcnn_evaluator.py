@@ -263,7 +263,7 @@ class CaffeModelMixin:
         return data
 
     def automatic_model_search(self, network_info):
-        model = Path(network_info['model'])
+        model = Path(network_info.get('model', ''))
         weights = network_info.get('weights')
         if model.is_dir():
             models_list = list(Path(model).glob('{}.prototxt'.format(self.default_model_name)))
@@ -364,7 +364,7 @@ class DLSDKModelMixin:
         return model, weights
 
     def auto_model_search(self, network_info):
-        model = Path(network_info['model'])
+        model = Path(network_info.get('model', ''))
         weights = network_info.get('weights')
         if model.is_dir():
             models_list = list(Path(model).glob('{}.xml'.format(self.default_model_name)))
@@ -419,7 +419,7 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         super().__init__(model_info, preprocessor)
         model_xml, model_bin = self.prepare_model(launcher)
         self.network = launcher.create_ie_network(str(model_xml), str(model_bin))
-        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
         pnet_outs = model_info['outputs']
@@ -433,7 +433,7 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
         super().__init__(model_info, preprocessor)
         model_xml, model_bin = self.prepare_model(launcher)
         self.network = launcher.create_ie_network(str(model_xml), str(model_bin))
-        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
 
@@ -443,7 +443,7 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
         super().__init__(model_info,  preprocessor)
         model_xml, model_bin = self.prepare_model(launcher)
         self.network = launcher.create_ie_network(str(model_xml), str(model_bin))
-        self.exec_network = self.launcher.ie_core.load_network(self.network, self.launcher.device)
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
 
