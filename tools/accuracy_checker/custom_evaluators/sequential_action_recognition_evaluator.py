@@ -52,7 +52,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
         preprocessing = PreprocessingExecutor(dataset_config.get('preprocessing', []), dataset.name)
         metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
         launcher = create_launcher(config['launchers'][0], delayed_model_loading=True)
-        model = SequentialModel(config.get('network_info', {}), launcher, config.get('_models'))
+        model = SequentialModel(config.get('network_info', {}), launcher, config.get('_models', []))
         return cls(dataset, reader, preprocessing, metrics_executor, launcher, model)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, ** kwargs):
@@ -184,9 +184,9 @@ class SequentialModel(BaseModel):
         if models_args:
             encoder = network_info.get('encoder', {})
             decoder = network_info.get('decoder', {})
-            if not contains_any(encoder, ['model', 'onnx_model']):
+            if not contains_any(encoder, ['model', 'onnx_model']) and models_args:
                 encoder['model'] = models_args[0]
-            if not contains_any(decoder, ['model', 'onnx_model']):
+            if not contains_any(decoder, ['model', 'onnx_model']) and models_args:
                 decoder['model'] = models_args[1 if len(models_args) > 1 else 0]
             network_info.update({'encoder': encoder, 'decoder': decoder})
         if not contains_all(network_info, ['encoder', 'decoder']):
