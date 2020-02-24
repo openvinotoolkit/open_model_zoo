@@ -60,15 +60,7 @@ if(MULTICHANNEL_DEMO_USE_TBB)
     endif()
 endif()
 
-if(TARGET IE::ie_cpu_extension)
-    add_definitions(-DWITH_EXTENSIONS)
-endif()
-
 target_link_libraries(${TARGET_NAME} ${InferenceEngine_LIBRARIES} gflags ${OpenCV_LIBRARIES} common)
-
-if(TARGET IE::ie_cpu_extension)
-    target_link_libraries(${TARGET_NAME} IE::ie_cpu_extension)
-endif()
 
 if(UNIX)
     target_link_libraries( ${TARGET_NAME} pthread)
@@ -83,3 +75,5 @@ if(NOT TARGET ie_samples)
 endif()
 
 add_dependencies(ie_samples ${TARGET_NAME})
+
+target_link_libraries(${TARGET_NAME} monitors)

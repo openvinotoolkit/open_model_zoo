@@ -17,7 +17,7 @@ description: >-
 task_type: face_recognition
 files:
   - name: model-r100-arcface-ms1m-refine-v2.zip
-    size: 162345348
+    size: 243494890
     sha256: eab0e5bcca81c070f56ffb11a1c32d7b2e574a8bb94f32590e7b48b355c13d1f
     source: https://www.dropbox.com/s/tj96fsm6t6rq8ye/model-r100-arcface-ms1m-refine-v2.zip?dl=1
 postprocessing:

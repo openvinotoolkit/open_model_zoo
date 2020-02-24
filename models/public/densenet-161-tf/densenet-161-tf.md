@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-This is an Tensorflow\* version of `densenet-161` model, one of the DenseNet
+This is a TensorFlow\* version of `densenet-161` model, one of the DenseNet
 group of models designed to perform image classification. The weights were converted from DenseNet-Keras Models. For details see [repository](https://github.com/pudae/tensorflow-densenet/), [paper](https://arxiv.org/pdf/1608.06993.pdf).
 
 ## Example
@@ -57,4 +57,6 @@ Floating point values in a range [0, 1], which represent probabilities for class
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE]()
+The original model is distributed under the
+[Apache License, Version 2.0](https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE).
+A copy of the license is provided in [APACHE-2.0-TF-DenseNet.txt](../licenses/APACHE-2.0-TF-DenseNet.txt).

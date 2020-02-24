@@ -1,4 +1,4 @@
 onnx
 scipy           # via torchvision
-torch
+torch>=1.4
 torchvision

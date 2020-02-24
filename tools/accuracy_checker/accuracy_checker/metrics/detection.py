@@ -23,7 +23,7 @@ import numpy as np
 
 from ..utils import finalize_metric_result
 from .overlap import Overlap, IOA
-from ..config import BoolField, NumberField, StringField
+from ..config import BoolField, NumberField, StringField, ConfigError
 from ..representation import (
     DetectionAnnotation, DetectionPrediction,
     ActionDetectionPrediction, ActionDetectionAnnotation
@@ -82,8 +82,14 @@ class BaseDetectionMetricMixin(Metric):
         self.use_filtered_tp = self.get_value_from_config('use_filtered_tp')
 
         label_map = self.config.get('label_map', 'label_map')
+        if not self.dataset.metadata:
+            raise ConfigError('detection metrics require label_map providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
         labels = self.dataset.metadata.get(label_map, {})
-        self.labels = labels.keys()
+        if not labels:
+            raise ConfigError('detection metrics require label_map providing in dataset_meta'
+                              'Please provide dataset meta file or regenerate annotation')
+        self.labels = list(labels.keys())
         valid_labels = list(filter(lambda x: x != self.dataset.metadata.get('background_label'), self.labels))
         self.meta['names'] = [labels[name] for name in valid_labels]
 
@@ -187,6 +193,7 @@ class DetectionMAP(BaseDetectionMetricMixin, FullDatasetEvaluationMetric, PerIma
                 average_precisions.append(ap)
             else:
                 average_precisions.append(np.nan)
+
         return average_precisions
 
 
@@ -558,7 +565,8 @@ def _prepare_annotation_boxes(annotation, ignore_difficult, label):
 
         difficult_boxes[ground_truth.identifier] = difficult_box_mask
         if ignore_difficult:
-            num_ground_truth -= np.sum(difficult_box_mask)
+            if np.size(difficult_box_mask) > 0:
+                num_ground_truth -= np.sum(difficult_box_mask)
 
     return used_boxes, num_ground_truth, difficult_boxes
 

@@ -10,8 +10,8 @@ models:
         adapter:
           type: action_detection
           priorbox_out: mbox/priorbox
-          loc_out: mbox_loc1/out/conv/flat/Reshape
-          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat/Reshape
+          loc_out: mbox_loc1/out/conv/flat
+          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat
           add_conf_out_prefix: out/anchor
           add_conf_out_count: 4
           num_action_classes: 3
@@ -27,8 +27,8 @@ models:
         adapter:
           type: action_detection
           priorbox_out: mbox/priorbox
-          loc_out: mbox_loc1/out/conv/flat/Reshape
-          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat/Reshape
+          loc_out: mbox_loc1/out/conv/flat
+          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat
           add_conf_out_prefix: out/anchor
           add_conf_out_count: 4
           num_action_classes: 3
@@ -38,14 +38,14 @@ models:
 
       - framework: dlsdk
         tags:
-          - INT8
-        model:   intel/person-detection-action-recognition-0005/INT8/person-detection-action-recognition-0005.xml
-        weights: intel/person-detection-action-recognition-0005/INT8/person-detection-action-recognition-0005.bin
+          - FP32-INT8
+        model:   intel/person-detection-action-recognition-0005/FP32-INT8/person-detection-action-recognition-0005.xml
+        weights: intel/person-detection-action-recognition-0005/FP32-INT8/person-detection-action-recognition-0005.bin
         adapter:
           type: action_detection
           priorbox_out: mbox/priorbox
-          loc_out: mbox_loc1/out/conv/flat/Reshape
-          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat/Reshape
+          loc_out: mbox_loc1/out/conv/flat
+          main_conf_out: mbox_main_conf/out/conv/flat/softmax/flat
           add_conf_out_prefix: out/anchor
           add_conf_out_count: 4
           num_action_classes: 3
@@ -95,4 +95,5 @@ models:
             prediction_source: action_prediction
             label_map: action_label_map
             ignore_label: 3
+
 global_definitions: ../dataset_definitions.yml

@@ -96,7 +96,7 @@ class Postprocessor(ClassProvider):
         return self.process_image(annotation, prediction)
 
     def process(self, annotation, prediction, image_metadata=None):
-        image_size = annotation[0].metadata.get('image_size') if not None in annotation else None
+        image_size = annotation[0].metadata.get('image_size') if None not in annotation else None
         self.image_size = None
         if image_size:
             self.image_size = image_size[0]

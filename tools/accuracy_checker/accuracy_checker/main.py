@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import sys
 from pathlib import Path
 from argparse import ArgumentParser
 from functools import partial
@@ -21,7 +22,7 @@ from functools import partial
 import cv2
 
 from .config import ConfigReader
-from .logging import print_info, add_file_handler
+from .logging import print_info, add_file_handler, exception
 from .evaluators import ModelEvaluator, PipeLineEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
 from .utils import get_path, cast_to_bool
@@ -114,6 +115,14 @@ def build_arguments_parser():
         required=False
     )
     parser.add_argument(
+        '--transformations_config_dir',
+        help='path to directory with Model Optimizer transformations configuration files',
+        type=partial(get_path, is_directory=True),
+        # there is no default value because if user did not specify it we use specific location
+        # defined in model_conversion.py
+        required=False
+    )
+    parser.add_argument(
         '--tf_obj_detection_api_pipeline_config_path',
         help='path to directory with tensorflow object detection api pipeline configuration files for model optimizer',
         type=partial(get_path, is_directory=True),
@@ -188,11 +197,38 @@ def build_arguments_parser():
         choices=['LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG'],
         default='LOG_WARNING'
     )
+    parser.add_argument(
+        '--deprecated_ir_v7',
+        help='Allow generation IR v7 via Model Optimizer',
+        required=False,
+        default=False,
+        type=cast_to_bool
+    )
+    parser.add_argument(
+        '-dc', '--device_config',
+        help='Inference Engine device specific config file',
+        type=get_path,
+        required=False
+    )
+
+    parser.add_argument(
+        '--async_mode',
+        help='Allow evaluation in async mode',
+        required=False,
+        default=False,
+        type=cast_to_bool
+    )
+    parser.add_argument(
+        '--num_requests',
+        help='the number of infer requests',
+        required=False,
+    )
 
     return parser
 
 
 def main():
+    return_code = 0
     args = build_arguments_parser().parse_args()
     progress_bar_provider = args.progress if ':' not in args.progress else args.progress.split(':')[0]
     progress_reporter = ProgressReporter.provide(progress_bar_provider, None, print_interval=args.progress_interval)
@@ -204,12 +240,18 @@ def main():
     if not evaluator_class:
         raise ValueError('Unknown evaluation mode')
     for config_entry in config[mode]:
-        processing_info = evaluator_class.get_processing_info(config_entry)
-        print_processing_info(*processing_info)
-        evaluator = evaluator_class.from_configs(config_entry)
-        evaluator.process_dataset(args.stored_predictions, progress_reporter=progress_reporter)
-        evaluator.compute_metrics(ignore_results_formatting=args.ignore_result_formatting)
-        evaluator.release()
+        try:
+            processing_info = evaluator_class.get_processing_info(config_entry)
+            print_processing_info(*processing_info)
+            evaluator = evaluator_class.from_configs(config_entry)
+            evaluator.process_dataset(args.stored_predictions, progress_reporter=progress_reporter)
+            evaluator.compute_metrics(ignore_results_formatting=args.ignore_result_formatting)
+            evaluator.release()
+        except Exception as e:  # pylint:disable=W0703
+            exception(e)
+            return_code = 1
+            continue
+    sys.exit(return_code)
 
 
 def print_processing_info(model, launcher, device, tags, dataset):

@@ -16,9 +16,7 @@
 #include <cldnn/cldnn_config.hpp>
 #include <inference_engine.hpp>
 #include <vpu/vpu_plugin_config.hpp>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
+#include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/args_helper.hpp>
 
@@ -59,7 +57,7 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
 struct BboxAndDescr {
     enum class ObjectType {
         NONE,
-        VEHICCLE,
+        VEHICLE,
         PLATE,
     } objectType;
     cv::Rect rect;
@@ -67,22 +65,19 @@ struct BboxAndDescr {
 };
 
 struct InferRequestsContainer {
-    explicit InferRequestsContainer(std::vector<InferRequest> inferRequests):
-        actualInferRequests{inferRequests} {
-        for (auto& ir : actualInferRequests) {
-            inferRequests.push_back(ir);
-        }
-    }
     InferRequestsContainer() = default;
-    InferRequestsContainer& operator=(const InferRequestsContainer& other) {  // copy assignment
-        if (this != &other) {  // self-assignment check expected
-            this->actualInferRequests = other.actualInferRequests;
-            for (auto& ir : this->actualInferRequests) {
-                this->inferRequests.container.push_back(ir);
-            }
+    InferRequestsContainer(const InferRequestsContainer&) = delete;
+    InferRequestsContainer& operator=(const InferRequestsContainer&) = delete;
+
+    void assign(const std::vector<InferRequest>& inferRequests) {
+        actualInferRequests = inferRequests;
+        this->inferRequests.container.clear();
+
+        for (auto& ir : this->actualInferRequests) {
+            this->inferRequests.container.push_back(ir);
         }
-        return *this;
     }
+
     std::vector<InferRequest> getActualInferRequests() {
         return actualInferRequests;
     }
@@ -97,7 +92,7 @@ struct Context {  // stores all global data for tasks
             const Detector& detector, const std::weak_ptr<Worker>& inferTasksWorker,
             const VehicleAttributesClassifier& vehicleAttributesClassifier, const Lpr& lpr, const std::weak_ptr<Worker>& detectionsProcessorsWorker,
             int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
-                const std::weak_ptr<Worker>& drawersWorker,
+                const std::weak_ptr<Worker>& drawersWorker, const std::string& monitorsStr,
             uint64_t lastFrameId,
             const std::weak_ptr<Worker> resAggregatorsWorker,
             uint64_t nireq,
@@ -106,7 +101,7 @@ struct Context {  // stores all global data for tasks
         readersContext{inputChannels, readersWorker, std::vector<int64_t>(inputChannels.size(), -1), std::vector<std::mutex>(inputChannels.size())},
         inferTasksContext{detector, inferTasksWorker},
         detectionsProcessorsContext{vehicleAttributesClassifier, lpr, detectionsProcessorsWorker},
-        drawersContext{pause, gridParam, displayResolution, showPeriod, drawersWorker},
+        drawersContext{pause, gridParam, displayResolution, showPeriod, drawersWorker, monitorsStr},
         videoFramesContext{std::vector<uint64_t>(inputChannels.size(), lastFrameId), std::vector<std::mutex>(inputChannels.size())},
         resAggregatorsWorker{resAggregatorsWorker},
         nireq{nireq},
@@ -128,9 +123,9 @@ struct Context {  // stores all global data for tasks
             return detectionsProcessorsContext.vehicleAttributesClassifier.createInferRequest();});
         std::generate_n(std::back_inserter(lprInferRequests), nrecognizersireq, [&]{
             return detectionsProcessorsContext.lpr.createInferRequest();});
-        detectorsInfers = InferRequestsContainer(detectorInferRequests);
-        attributesInfers = InferRequestsContainer(attributesInferRequests);
-        platesInfers = InferRequestsContainer(lprInferRequests);
+        detectorsInfers.assign(detectorInferRequests);
+        attributesInfers.assign(attributesInferRequests);
+        platesInfers.assign(lprInferRequests);
     }
     struct {
         std::vector<std::shared_ptr<InputChannel>> inputChannels;
@@ -149,9 +144,12 @@ struct Context {  // stores all global data for tasks
     } detectionsProcessorsContext;
     struct DrawersContext {
         DrawersContext(int pause, const std::vector<cv::Size>& gridParam, cv::Size displayResolution, std::chrono::steady_clock::duration showPeriod,
-                       const std::weak_ptr<Worker>& drawersWorker):
+                       const std::weak_ptr<Worker>& drawersWorker, const std::string& monitorsStr):
             pause{pause}, gridParam{gridParam}, displayResolution{displayResolution}, showPeriod{showPeriod}, drawersWorker{drawersWorker},
-            lastShownframeId{0}, prevShow{std::chrono::steady_clock::time_point()}, framesAfterUpdate{0}, updateTime{std::chrono::steady_clock::time_point()} {}
+            lastShownframeId{0}, prevShow{std::chrono::steady_clock::time_point()}, framesAfterUpdate{0}, updateTime{std::chrono::steady_clock::time_point()},
+            presenter{monitorsStr,
+                GridMat(gridParam, displayResolution).outimg.rows - 70,
+                cv::Size{GridMat(gridParam, displayResolution).outimg.cols / 4, 60}} {}
         int pause;
         std::vector<cv::Size> gridParam;
         cv::Size displayResolution;
@@ -164,6 +162,7 @@ struct Context {  // stores all global data for tasks
         std::ostringstream outThroughput;
         unsigned framesAfterUpdate;
         std::chrono::steady_clock::time_point updateTime;
+        Presenter presenter;
     } drawersContext;
     struct {
         std::vector<uint64_t> lastframeIds;
@@ -360,6 +359,8 @@ void Drawer::process() {
         }
         cv::putText(mat, context.drawersContext.outThroughput.str(), cv::Point2f(15, 35), cv::FONT_HERSHEY_TRIPLEX, 0.7, cv::Scalar{255, 255, 255});
 
+        context.drawersContext.presenter.drawGraphs(mat);
+
         cv::imshow("Detection results", firstGridIt->second.getMat());
         context.drawersContext.prevShow = std::chrono::steady_clock::now();
         const int key = cv::waitKey(context.drawersContext.pause);
@@ -369,6 +370,8 @@ void Drawer::process() {
             } catch (const std::bad_weak_ptr&) {}
         } else if (key == 32) {
             context.drawersContext.pause = (context.drawersContext.pause + 1) & 1;
+        } else {
+            context.drawersContext.presenter.handleKey(key);
         }
         firstGridIt->second.clear();
         gridMats.emplace((--gridMats.end())->first + 1, firstGridIt->second);
@@ -386,7 +389,7 @@ void ResAggregator::process() {
             switch (bboxAndDescr.objectType) {
                 case BboxAndDescr::ObjectType::NONE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {255, 255, 0},  4);
                                                      break;
-                case BboxAndDescr::ObjectType::VEHICCLE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 255, 0},  4);
+                case BboxAndDescr::ObjectType::VEHICLE: cv::rectangle(sharedVideoFrame->frame, bboxAndDescr.rect, {0, 255, 0},  4);
                                                          cv::putText(sharedVideoFrame->frame, bboxAndDescr.descr,
                                                                      cv::Point{bboxAndDescr.rect.x, bboxAndDescr.rect.y + 35},
                                                                      cv::FONT_HERSHEY_COMPLEX, 1.3, cv::Scalar(0, 255, 0), 4);
@@ -497,7 +500,7 @@ void DetectionsProcessor::process() {
                                 classifiersAggreagator->rawAttributes.lockedPush_back("Vehicle Attributes results:" + attributes.first + ';'
                                                                                       + attributes.second + '\n');
                             }
-                            classifiersAggreagator->push(BboxAndDescr{BboxAndDescr::ObjectType::VEHICCLE, rect, attributes.first + ' ' + attributes.second});
+                            classifiersAggreagator->push(BboxAndDescr{BboxAndDescr::ObjectType::VEHICLE, rect, attributes.first + ' ' + attributes.second});
                             context.attributesInfers.inferRequests.lockedPush_back(attributesRequest);
                         }, classifiersAggreagator,
                            std::ref(attributesRequest),
@@ -711,11 +714,6 @@ int main(int argc, char* argv[]) {
             std::cout << ie.GetVersions(device) << std::endl;
 
             if ("CPU" == device) {
-#ifdef WITH_EXTENSIONS
-                /** Load default extensions lib for the CPU device (e.g. SSD's DetectionOutput)**/
-                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-#endif
-
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
@@ -816,7 +814,7 @@ int main(int argc, char* argv[]) {
         Context context{inputChannels, worker,
                         detector, worker,
                         vehicleAttributesClassifier, lpr, worker,
-                        pause, gridParam, displayResolution, showPeriod, worker,
+                        pause, gridParam, displayResolution, showPeriod, worker, FLAGS_u,
                         FLAGS_n_iqs - 1,
                         worker,
                         nireq,
@@ -869,6 +867,8 @@ int main(int argc, char* argv[]) {
                 / (frameCounter * context.nireq) * 100;
             std::cout << "Detection InferRequests usage: " << detectionsInfersUsage << "%\n";
         }
+
+        std::cout << context.drawersContext.presenter.reportMeans() << '\n';
     } catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;
         return 1;

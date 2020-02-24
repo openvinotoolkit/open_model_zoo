@@ -42,7 +42,7 @@ class LogStream {
 
 public:
     /**
-     * @brief A constructor. Creates an LogStream object
+     * @brief A constructor. Creates a LogStream object
      * @param prefix The prefix to print
      */
     LogStream(const std::string &prefix, std::ostream& log_stream)

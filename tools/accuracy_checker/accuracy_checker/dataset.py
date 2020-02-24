@@ -41,6 +41,7 @@ class DatasetConfig(ConfigValidator):
     subsample_size = BaseField(optional=True)
     subsample_seed = NumberField(value_type=int, min_value=0, optional=True)
     analyze_dataset = BaseField(optional=True)
+    segmentation_masks_source = PathField(is_directory=True, optional=True)
 
 
 class Dataset:
@@ -104,7 +105,7 @@ class Dataset:
             save_annotation(annotation, meta, Path(annotation_name), meta_name)
 
         self._annotation = annotation
-        self._meta = meta
+        self._meta = meta or {}
         self.name = self._config.get('name')
         self.subset = None
 
@@ -157,21 +158,21 @@ class Dataset:
 
         return batch_ids, self._annotation[batch_start:batch_end]
 
-    def make_subset(self, ids=None, start=0, step=1, end=None):
+    def make_subset(self, ids=None, start=0, step=1, end=None, accept_pairs=False):
         pairwise_subset = isinstance(
             self._annotation[0], (ReIdentificationAnnotation, ReIdentificationClassificationAnnotation)
         )
         if ids:
-            self.subset = ids if not pairwise_subset else self._make_subset_pairwise(ids)
+            self.subset = ids if not pairwise_subset else self._make_subset_pairwise(ids, accept_pairs)
             return
         if not end:
             end = self.size
         ids = range(start, end, step)
-        self.subset = ids if not pairwise_subset else self._make_subset_pairwise(ids)
+        self.subset = ids if not pairwise_subset else self._make_subset_pairwise(ids, accept_pairs)
 
-    def _make_subset_pairwise(self, ids, cut_to_final_size=True):
-        final_size = len(ids)
+    def _make_subset_pairwise(self, ids, add_pairs=False):
         subsample_set = OrderedSet()
+        pairs_set = OrderedSet()
         if isinstance(self._annotation[0], ReIdentificationClassificationAnnotation):
             identifier_to_index = {annotation.identifier: index for index, annotation in enumerate(self._annotation)}
             for idx in ids:
@@ -180,41 +181,38 @@ class Dataset:
                 positive_pairs = [
                     identifier_to_index[pair_identifier] for pair_identifier in current_annotation.positive_pairs
                 ]
-                subsample_set |= positive_pairs
+                pairs_set |= positive_pairs
                 negative_pairs = [
                     identifier_to_index[pair_identifier] for pair_identifier in current_annotation.positive_pairs
                 ]
-                subsample_set |= negative_pairs
+                pairs_set |= negative_pairs
         else:
             for idx in ids:
+                subsample_set.add(idx)
                 selected_annotation = self._annotation[idx]
                 if not selected_annotation.query:
-                    continue
-                gallery_for_person = [
-                    idx for idx, annotation in enumerate(self._annotation)
-                    if annotation.person_id == selected_annotation.person_id
-                ]
-                subsample_set |= OrderedSet(gallery_for_person)
+                    query_for_person = [
+                        idx for idx, annotation in enumerate(self._annotation)
+                        if annotation.person_id == selected_annotation.person_id and annotation.query
+                    ]
+                    pairs_set |= OrderedSet(query_for_person)
+                else:
+                    gallery_for_person = [
+                        idx for idx, annotation in enumerate(self._annotation)
+                        if annotation.person_id == selected_annotation.person_id and not annotation.query
+                    ]
+                    pairs_set |= OrderedSet(gallery_for_person)
 
-        subsample_set = list(subsample_set)
-        if cut_to_final_size and len(subsample_set) > final_size:
-            subsample_set = subsample_set[:final_size]
+        if add_pairs:
+            subsample_set |= pairs_set
 
-        return subsample_set
-
-    @staticmethod
-    def set_image_metadata(annotation, images):
-        image_sizes = []
-        data = images.data
-        if not isinstance(data, list):
-            data = [data]
-        for image in data:
-            image_sizes.append(image.shape)
-        annotation.set_image_size(image_sizes)
+        return list(subsample_set)
 
     def set_annotation_metadata(self, annotation, image, data_source):
-        self.set_image_metadata(annotation, image.data)
+        set_image_metadata(annotation, image)
         annotation.set_data_source(data_source)
+        segmentation_mask_source = self.config.get('segmentation_masks_source')
+        annotation.metadata['segmentation_masks_source'] = segmentation_mask_source
 
     def _load_meta(self):
         meta_data_file = self._config.get('dataset_meta')
@@ -274,6 +272,8 @@ class DatasetWrapper:
             for annotation, input_data in zip(batch_annotation, batch_input):
                 set_image_metadata(annotation, input_data)
                 annotation.metadata['data_source'] = self.data_reader.data_source
+                segmentation_mask_source = self.annotation_reader.config.get('segmentation_masks_source')
+                annotation.metadata['segmentation_masks_source'] = segmentation_mask_source
             return batch_annotation_ids, batch_annotation, batch_input, batch_identifiers
         batch_start = item * self.batch
         batch_end = min(self.size, batch_start + self.batch)
@@ -290,9 +290,9 @@ class DatasetWrapper:
             return len(self.subset)
         return len(self._identifiers)
 
-    def make_subset(self, ids=None, start=0, step=1, end=None):
+    def make_subset(self, ids=None, start=0, step=1, end=None, accept_pairs=False):
         if self.annotation_reader:
-            self.annotation_reader.make_subset(ids, start, step, end)
+            self.annotation_reader.make_subset(ids, start, step, end, accept_pairs)
         if ids:
             self.subset = ids
             return

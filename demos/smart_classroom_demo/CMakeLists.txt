@@ -9,5 +9,7 @@ ie_add_sample(NAME smart_classroom_demo
               SOURCES ${SOURCES}
               HEADERS ${HEADERS}
               INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/include"
-              DEPENDENCIES format_reader
+              DEPENDENCIES monitors
               OPENCV_DEPENDENCIES highgui)
+
+target_link_libraries(smart_classroom_demo PRIVATE ngraph::ngraph)

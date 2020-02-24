@@ -28,6 +28,8 @@ class PostprocessingExecutor:
 
         self.state = state or {}
 
+        self.allow_image_postprocessor = True
+
         if not processors:
             return
 
@@ -37,19 +39,7 @@ class PostprocessingExecutor:
                 on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
             )
             postprocessor_config.validate(config)
-            postprocessor = Postprocessor.provide(config['type'], config, config['type'], self.dataset_meta, state)
-            self._processors.append(postprocessor)
-
-        allow_image_postprocessor = True
-        for processor in self._processors:
-            if overrides(processor, 'process_all', Postprocessor):
-                allow_image_postprocessor = False
-                self._dataset_processors.append(processor)
-            else:
-                if allow_image_postprocessor:
-                    self._image_processors.append(processor)
-                else:
-                    self._dataset_processors.append(processor)
+            self.register_postprocessor(config)
 
     def process_dataset(self, annotations, predictions):
         for method in self._dataset_processors:
@@ -90,6 +80,18 @@ class PostprocessingExecutor:
         context.batch_annotation, context.batch_prediction = self.process_batch(batch_annotation,
                                                                                 batch_prediction,
                                                                                 batch_meta)
+
+    def register_postprocessor(self, config):
+        postprocessor = Postprocessor.provide(config['type'], config, config['type'], self.dataset_meta, self.state)
+        self._processors.append(postprocessor)
+        if overrides(postprocessor, 'process_all', Postprocessor):
+            self.allow_image_postprocessor = False
+            self._dataset_processors.append(postprocessor)
+            return
+        if self.allow_image_postprocessor:
+            self._image_processors.append(postprocessor)
+        else:
+            self._dataset_processors.append(postprocessor)
 
 
 class PostprocessorConfig(ConfigValidator):

@@ -15,14 +15,13 @@ limitations under the License.
 """
 
 from pathlib import Path
-from tqdm import tqdm
 
 from ..topology_types import ObjectDetection
 from ..config import PathField, BoolField
 from ..representation import DetectionAnnotation, SegmentationAnnotation
 from ..representation.segmentation_representation import GTMaskLoader
 from ..utils import get_path, read_txt, read_xml, check_file_existence, read_json
-from .format_converter import BaseFormatConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 _VOC_CLASSES_DETECTION = (
     'aeroplane', 'bicycle', 'bird', 'boat',
@@ -52,6 +51,7 @@ def prepare_detection_labels(dataset_meta, has_background=True):
     if dataset_meta:
         meta = read_json(dataset_meta)
         if 'label_map' in meta:
+            meta['label_map'] = verify_label_map(meta['label_map'])
             return reverse_label_map(meta['label_map'])
         if 'labels' in meta:
             labels = meta['labels']
@@ -98,8 +98,7 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
         self.image_set_file = self.get_value_from_config('imageset_file')
         self.image_dir = self.get_value_from_config('images_dir')
         dataset_meta_file = self.get_value_from_config('dataset_meta_file')
-        if dataset_meta_file:
-            self.dataset_meta = {}
+        self.dataset_meta = {} if not dataset_meta_file else read_json(dataset_meta_file)
         if not self.image_dir:
             self.image_dir = get_path(self.image_set_file.parents[-2] / 'JPEGImages', is_directory=True)
 
@@ -180,7 +179,7 @@ class PascalVOCDetectionConverter(BaseFormatConverter):
         detections = []
         image_set = read_txt(self.image_set_file, sep=None)
         num_iterations = len(image_set)
-        for (image_id, image) in tqdm(enumerate(image_set)):
+        for (image_id, image) in enumerate(image_set):
             root = read_xml(self.annotations_dir / '{}.xml'.format(image))
 
             identifier = root.find('.//filename').text

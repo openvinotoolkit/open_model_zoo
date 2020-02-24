@@ -2,9 +2,17 @@
 
 For enabling OpenVINO™ launcher you need to add `framework: dlsdk` in launchers section of your configuration file and provide following parameters:
 
-* `device` - specifies which device will be used for infer. Supported: `CPU`, `GPU`, `FPGA`, `MYRIAD`, Heterogeneous plugin as `HETERO:target_device,fallback_device` and Multi device plugin as `MULTI:target_device1,target_device2`. You are able to not specify device intently and provide one or several devices via `-td, --target devices` command line argument. Target device will be selected from command line (in turn when several devices provided, evaluations will be run one by one with all specified devices).
-* `model` - path to xml file with Caffe model for your topology.
-* `weights` - path to bin file with weights for your topology.
+* `device` - specifies which device will be used for infer. Supported: `CPU`, `GPU`, `FPGA`, `MYRIAD`, `HDDL`,
+Heterogeneous plugin as `HETERO:target_device,fallback_device` and Multi device plugin as `MULTI:target_device1,target_device2`.
+If you have several MYRIAD devices in your machine, you are able to provide specific device id in such way: `MYRIAD.<DEVICE_ID>` (e.g. `MYRIAD.1.2-ma2480`)
+It is possible to specify one or more devices via `-td, --target devices` command line argument. Target device will be selected from command line (in case when several devices provided, evaluations will be run one by one with all specified devices).
+* `model` - path to xml file with model for your topology or compiled executable network.
+* `weights` - path to bin file with weights for your topology (Optional, the argument can be omitted if bin file stored in the same directory with model xml or if you use compiled blob).
+
+**Note:** 
+   You can generate executable blob using [compile_tool](http://docs.openvinotoolkit.org/latest/_inference_engine_tools_compile_tool_README.html).
+   Before evaluation executable blob, please make sure that selected device support it.
+
 
 launcher may optionally provide model parameters in source framework format which will be converted to Inference Engine IR using Model Optimizer.
 If you want to use Model Optimizer for model conversion, please view [Model Optimizer Developer Guide](https://software.intel.com/en-us/articles/OpenVINO-ModelOptimizer).
@@ -35,9 +43,10 @@ Additionally you can provide device specific parameters:
 * `gpu_extensions` (path to extension *.xml file with OpenCL kernel description for gpu).
 * `bitstream` for running on FPGA.
 
-Beside that, you can launch model in `async_mode`, enable this option and provide the number of infer requests (`num_requests`), which will be used in evaluation process. 
-For multi device configuration async mode used automatically. You can provide number requests for each device as part device specification: `MULTI:device_1(num_req_1),device_2(num_req_2)` or in `num_requests` config section (for this case comma-separated list of integer numbers or one value if number requests for all devices equal can be used).
+Beside that, you can launch model in `async_mode`, enable this option and optionally provide the number of infer requests (`num_requests`), which will be used in evaluation process. By default, if `num_requests` not provided or used value `AUTO`, automatic number request assignment for specific device will be performed
+For multi device configuration async mode used always. You can provide number requests for each device as part device specification: `MULTI:device_1(num_req_1),device_2(num_req_2)` or in `num_requests` config section (for this case comma-separated list of integer numbers or one value if number requests for all devices equal can be used).
 
+**Note:** not all models support async execution, in cases when evaluation can not be run in async, the inference will be switched to sync.
 ## Specifying model inputs in config.
 
 In case when you model has several inputs you should provide list of input layers in launcher config section using key `inputs`.
@@ -47,7 +56,8 @@ Each input description should has following info:
     * `CONST_INPUT` - input will be filled using constant provided in config. It also requires to provide `value`.
     * `IMAGE_INFO` - specific key for setting information about input shape to layer (used in Faster RCNN based topologies). You do not need provide `value`, because it will be calculated in runtime. Format value is `Nx[H, W, S]`, where `N` is batch size, `H` - original image height, `W` - original image width, `S` - scale of original image (default 1).
     * `INPUT` - network input for main data stream (e. g. images). If you have several data inputs, you should provide regular expression for identifier as `value` for specifying which one data should be provided in specific input.
-    Optionally you can determine `shape` of input (actually does not used, DLSDK launcher uses info given from network) and `layout` in case when your model was trained with non-standard data layout (For DLSDK default layout is `NCHW`).
+    Optionally you can determine `shape` of input (actually does not used, DLSDK launcher uses info given from network), `layout` in case when your model was trained with non-standard data layout (For DLSDK default layout is `NCHW`)
+    and `precision` (Supported precisions: `FP32` - float, `FP16` - signed shot, `U8`  - unsigned char, `U16` - unsigned short int, `I8` - signed char, `I16` - short int, `I32` - int, `I64` - long int).
 
 OpenVINO™ launcher config example:
 

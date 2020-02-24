@@ -20,12 +20,13 @@ models:
 
       - framework: dlsdk
         tags:
-          - INT8
-        model:   intel/text-image-super-resolution-0001/INT8/text-image-super-resolution-0001.xml
-        weights: intel/text-image-super-resolution-0001/INT8/text-image-super-resolution-0001.bin
+          - FP32-INT8
+        model:   intel/text-image-super-resolution-0001/FP32-INT8/text-image-super-resolution-0001.xml
+        weights: intel/text-image-super-resolution-0001/FP32-INT8/text-image-super-resolution-0001.bin
         adapter:
           type: super_resolution
 
     datasets:
       - name: text_super_resolution_x3
+
 global_definitions: ../dataset_definitions.yml

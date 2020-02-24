@@ -8,7 +8,7 @@ models:
         model: public/octave-resnet-200-0.125/checkpoint-0-0000.params
         adapter: classification
         cpu_extensions: AUTO
-        inputs: 
+        inputs:
           - name: 'data'
             type: INPUT
             shape: 3,224,224
@@ -38,7 +38,7 @@ models:
             mean: (124,117,104)
             std: 59.88
 
-        # Using accuracy metric, achieved result of public model - 80.0 / 94.9 (top 1 and top 5 respectively)
+            # Using accuracy metric, achieved result of public model - 80.0 / 94.9 (top 1 and top 5 respectively)
 
   # DLSDK inference
   - name: octave-resnet-200-0.125
@@ -54,8 +54,8 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        model: octave-resnet-200-0.125/FP16/octave-resnet-200-0.125.xml
-        weights: octave-resnet-200-0.125/FP16/octave-resnet-200-0.125.bin
+        model:   public/octave-resnet-200-0.125/FP16/octave-resnet-200-0.125.xml
+        weights: public/octave-resnet-200-0.125/FP16/octave-resnet-200-0.125.bin
         adapter: classification
 
     datasets:
@@ -71,5 +71,6 @@ models:
           - type: crop
             size: 224
 
-        # Using accuracy metric, achieved result of public model - 80.0 / 94.9 (top 1 and top 5 respectively)
+            # Using accuracy metric, achieved result of public model - 80.0 / 94.9 (top 1 and top 5 respectively)
+
 global_definitions: ../dataset_definitions.yml

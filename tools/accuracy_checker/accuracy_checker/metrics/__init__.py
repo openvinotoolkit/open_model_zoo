@@ -17,7 +17,13 @@ limitations under the License.
 from .metric_executor import MetricsExecutor
 from .metric import Metric, PerImageMetricResult
 
-from .classification import ClassificationAccuracy, ClassificationAccuracyClasses, ClipAccuracy
+from .classification import (
+    ClassificationAccuracy,
+    ClassificationAccuracyClasses,
+    ClipAccuracy,
+    ClassificationF1Score,
+    MetthewsCorrelation
+)
 from .detection import (DetectionMAP, MissRate, Recall, DetectionAccuracyMetric)
 from .reid import CMCScore, ReidMAP, PairwiseAccuracy, PairwiseAccuracySubsets
 from .semantic_segmentation import SegmentationAccuracy, SegmentationIOU, SegmentationMeanAccuracy, SegmentationFWAcc
@@ -48,13 +54,15 @@ from .text_detection import (
     IncidentalSceneTextLocalizationRecall,
     IncidentalSceneTextLocalizationHMean
 )
-from .coco_metrics import MSCOCOAveragePrecision, MSCOCORecall
+from .coco_metrics import MSCOCOAveragePrecision, MSCOCORecall, MSCOCOKeypointsPrecision, MSCOCOKeypointsRecall
 from .coco_orig_metrics import (
     MSCOCOorigAveragePrecision,
     MSCOCOorigRecall,
 
     MSCOCOOrigSegmAveragePrecision,
-    MSCOCOorigSegmRecall
+    MSCOCOorigSegmRecall,
+
+    MSCOCOOrigKeyPointsAveragePrecision,
 )
 from .hit_ratio import HitRatioMetric, NDSGMetric
 from .machine_translation import BilingualEvaluationUnderstudy
@@ -70,6 +78,7 @@ __all__ = [
     'ClassificationAccuracy',
     'ClassificationAccuracyClasses',
     'ClipAccuracy',
+    'ClassificationF1Score',
 
     'DetectionMAP',
     'MissRate',
@@ -113,10 +122,13 @@ __all__ = [
 
     'MSCOCOAveragePrecision',
     'MSCOCORecall',
+    'MSCOCOKeypointsPrecision',
+    'MSCOCOKeypointsRecall',
     'MSCOCOorigAveragePrecision',
     'MSCOCOorigRecall',
     'MSCOCOOrigSegmAveragePrecision',
     'MSCOCOorigSegmRecall',
+    'MSCOCOOrigKeyPointsAveragePrecision',
 
     'HitRatioMetric',
     'NDSGMetric',

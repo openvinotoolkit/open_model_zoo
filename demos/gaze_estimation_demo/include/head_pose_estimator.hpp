@@ -25,5 +25,6 @@ public:
 
 private:
     IEWrapper ieWrapper;
+    std::string inputBlobName;
 };
 }  // namespace gaze_estimation

@@ -30,8 +30,10 @@ class LauncherConfigValidator(ConfigValidator):
         if self.delayed_model_loading:
             if 'model' in self.fields:
                 self.fields['model'].optional = True
+                self.fields['model'].check_exists = False
             if 'weights' in self.fields:
                 self.fields['weights'].optional = True
+                self.fields['weights'].check_exists = False
         super().validate(entry, field_uri)
         inputs = entry.get('inputs')
         count_non_const_inputs = 0
@@ -127,20 +129,18 @@ class Launcher(ClassProvider):
     def predict_async(self, *args, **kwargs):
         raise NotImplementedError('Launcher does not support async mode')
 
-    @property
-    def infer_requests(self):
-        return []
-
     def _provide_inputs_info_to_meta(self, meta):
         meta['input_shape'] = self.inputs
 
         return meta
 
     @staticmethod
-    def fit_to_input(data, layer_name, layout):
+    def fit_to_input(data, layer_name, layout, precision):
         if len(np.shape(data)) == 4:
-            return np.transpose(data, layout)
-        return np.array(data)
+            data = np.transpose(data, layout)
+        else:
+            data = np.array(data)
+        return data.astype(precision) if precision else data
 
     def inputs_info_for_meta(self):
         return {
@@ -180,6 +180,7 @@ def create_launcher(launcher_config, delayed_model_loading=False):
     """
     Args:
         launcher_config: launcher configuration file entry.
+        delayed_model_loading: allows postpone model loading to the launcher
     Returns:
         framework-specific launcher object.
     """

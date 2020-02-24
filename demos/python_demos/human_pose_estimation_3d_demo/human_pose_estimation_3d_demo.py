@@ -124,7 +124,7 @@ if __name__ == '__main__':
         if args.no_show:
             continue
         cv2.imshow(canvas_3d_window_name, canvas_3d)
-        cv2.imshow('ICV 3D Human Pose Estimation', frame)
+        cv2.imshow('3D Human Pose Estimation', frame)
 
         key = cv2.waitKey(delay)
         if key == esc_code:

@@ -20,21 +20,30 @@ import itertools
 import json
 import os
 import pickle
+from enum import Enum
 
 from pathlib import Path
 from typing import Union
 from warnings import warn
 from collections import MutableSet
 
-from shapely.geometry.polygon import Polygon
 import numpy as np
-import yamlloader
 import yaml
 
 try:
     import lxml.etree as et
 except ImportError:
     import xml.etree.cElementTree as et
+
+try:
+    from shapely.geometry.polygon import Polygon
+except ImportError:
+    Polygon = None
+
+try:
+    from yamlloader.ordereddict import Loader as orddict_loader
+except ImportError:
+    orddict_loader = None
 
 
 def concat_lists(*lists):
@@ -287,7 +296,10 @@ def read_pickle(file: Union[str, Path], *args, **kwargs):
 
 def read_yaml(file: Union[str, Path], *args, **kwargs):
     with get_path(file).open() as content:
-        return yaml.load(content, *args, Loader=yamlloader.ordereddict.Loader, **kwargs)
+        loader = orddict_loader or yaml.SafeLoader
+        if not orddict_loader:
+            warn('yamlloader is not installed. YAML files order is not preserved. it can be sufficient for some cases')
+        return yaml.load(content, *args, Loader=loader, **kwargs)
 
 
 def read_csv(file: Union[str, Path], *args, **kwargs):
@@ -353,6 +365,8 @@ def to_lower_register(str_list):
 
 
 def polygon_from_points(points):
+    if Polygon is None:
+        raise ValueError('shapely is not installed, please install it')
     return Polygon(points)
 
 
@@ -489,3 +503,14 @@ def check_file_existence(file):
         return True
     except (FileNotFoundError, IsADirectoryError):
         return False
+
+
+class Color(Enum):
+    PASSED = 0
+    FAILED = 1
+
+
+def color_format(s, color=Color.PASSED):
+    if color == Color.PASSED:
+        return "\x1b[0;32m{}\x1b[0m".format(s)
+    return "\x1b[0;31m{}\x1b[0m".format(s)

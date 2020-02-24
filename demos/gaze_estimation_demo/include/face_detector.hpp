@@ -28,6 +28,11 @@ public:
 
 private:
     IEWrapper ieWrapper;
+    std::string inputBlobName;
+    std::vector<unsigned long> inputBlobDims;
+    std::string outputBlobName;
+    std::size_t numTotalDetections;
+
     double detectionThreshold;
     bool enableReshape;
 

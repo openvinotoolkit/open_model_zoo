@@ -39,7 +39,7 @@ Options:
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
-                        Required. Path to a image/video file. (Specify 'cam'
+                        Required. Path to an image/video file. (Specify 'cam'
                         to work with camera)
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         Optional. Required for CPU custom layers. Absolute

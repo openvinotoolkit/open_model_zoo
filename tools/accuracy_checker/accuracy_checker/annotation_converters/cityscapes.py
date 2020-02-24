@@ -18,7 +18,7 @@ from pathlib import Path
 from ..representation import SegmentationAnnotation
 from ..representation.segmentation_representation import GTMaskLoader
 from ..config import PathField, StringField, BoolField
-from .format_converter import BaseFormatConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 from ..utils import check_file_existence, read_json
 
 
@@ -113,9 +113,9 @@ class CityscapesConverter(BaseFormatConverter):
         num_iterations = len(images)
         for idx, image in enumerate(images):
             identifier = str(Path(self.images_dir).joinpath(*image.parts[-2:]))
-            mask = Path(self.masks_dir) / image.parts[-2] / self.masks_suffix.join(
+            mask = str(Path(self.masks_dir) / image.parts[-2] / self.masks_suffix.join(
                 str(image.name).split(self.images_suffix)
-            )
+            ))
             if check_content:
                 if not check_file_existence(self.dataset_root / mask):
                     content_errors.append('{}: does not exist'.format(self.dataset_root / mask))
@@ -128,7 +128,9 @@ class CityscapesConverter(BaseFormatConverter):
     def generate_meta(self):
         if self.dataset_meta_file is not None:
             meta = read_json(self.dataset_meta_file)
-            if 'labels' in meta:
+            if 'label_map' in meta:
+                meta['label_map'] = verify_label_map(meta['label_map'])
+            if 'labels' in meta and 'label_map' not in meta:
                 meta['label_map'] = dict(enumerate(meta['labels']))
             return meta
         return full_dataset_meta if self.use_full_label_map else train_meta

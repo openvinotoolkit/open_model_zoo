@@ -37,8 +37,17 @@ from .attributes_recognition import (
 
 from .reidentification import ReidAdapter
 from .detection import (
-    TinyYOLOv1Adapter, SSDAdapter, FacePersonAdapter, YoloV2Adapter, YoloV3Adapter, TFObjectDetectionAPIAdapter
+    SSDAdapter,
+    FacePersonAdapter,
+    TFObjectDetectionAPIAdapter,
+    SSDAdapterMxNet,
+    PyTorchSSDDecoder,
+    SSDONNXAdapter,
+    MTCNNPAdapter,
+    RetinaNetAdapter,
+    FCOSPersonAdapter
 )
+from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter
 from .pose_estimation import HumanPoseAdapter
@@ -49,8 +58,13 @@ from .dummy_adapters import XML2DetectionAdapter
 from .hit_ratio import HitRatioAdapter
 
 from .mask_rcnn import MaskRCNNAdapter
+from .mask_rcnn_with_text import MaskRCNNWithTextAdapter
 
 from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter
+
+from .centernet import CTDETAdapter
+
+from .mono_depth import MonoDepthAdapter
 
 __all__ = [
     'Adapter',
@@ -62,11 +76,15 @@ __all__ = [
     'ClassificationAdapter',
 
     'SSDAdapter',
-    'TinyYOLOv1Adapter',
-    'YoloV2Adapter',
-    'YoloV3Adapter',
     'FacePersonAdapter',
     'TFObjectDetectionAPIAdapter',
+    'SSDAdapterMxNet',
+    'SSDONNXAdapter',
+    'PyTorchSSDDecoder',
+    'MTCNNPAdapter',
+    'CTDETAdapter',
+    'RetinaNetAdapter',
+    'FCOSPersonAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
@@ -97,7 +115,10 @@ __all__ = [
     'HitRatioAdapter',
 
     'MaskRCNNAdapter',
+    'MaskRCNNWithTextAdapter',
 
     'MachineTranslationAdapter',
-    'QuestionAnsweringAdapter'
+    'QuestionAnsweringAdapter',
+
+    'MonoDepthAdapter',
 ]

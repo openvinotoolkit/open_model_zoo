@@ -28,6 +28,7 @@
 
 #include <inference_engine.hpp>
 
+#include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
@@ -49,9 +50,6 @@
 #include "utils.hpp"
 
 #include <ie_iextension.h>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 using namespace InferenceEngine;
 using namespace gaze_estimation;
@@ -153,7 +151,8 @@ int main(int argc, char *argv[]) {
 
         int delay = 1;
         std::string windowName = "Gaze estimation demo";
-        double overallTime = 0., inferenceTime = 0.;
+        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
+        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
         auto tIterationBegins = cv::getTickCount();
         do {
             if (flipImage) {
@@ -172,11 +171,11 @@ int main(int argc, char *argv[]) {
 
             // Measure FPS
             auto tIterationEnds = cv::getTickCount();
-            overallTime = (tIterationEnds - tIterationBegins) * 1000. / cv::getTickFrequency();
+            double overallTime = (tIterationEnds - tIterationBegins) * 1000. / cv::getTickFrequency();
             overallTimeAverager.updateValue(overallTime);
             tIterationBegins = tIterationEnds;
 
-            inferenceTime = (tInferenceEnds - tInferenceBegins) * 1000. / cv::getTickFrequency();
+            double inferenceTime = (tInferenceEnds - tInferenceBegins) * 1000. / cv::getTickFrequency();
             inferenceTimeAverager.updateValue(inferenceTime);
 
             if (FLAGS_pc) {
@@ -196,6 +195,8 @@ int main(int argc, char *argv[]) {
                 continue;
             }
 
+            presenter.drawGraphs(frame);
+
             // Display the results
             for (auto const& inferenceResult : inferenceResults) {
                 resultsMarker.mark(frame, inferenceResult);
@@ -213,7 +214,10 @@ int main(int argc, char *argv[]) {
                 break;
             else if (key == 'f')
                 flipImage = !flipImage;
+            else
+                presenter.handleKey(key);
         } while (cap.read(frame));
+        std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
         slog::err << error.what() << slog::endl;

@@ -52,15 +52,22 @@ You may refer to `-h, --help` to full list of command line options. Some optiona
 ### Supported converters
 
 Accuracy Checker supports following list of annotation converters and specific for them parameters:
-* `cifar10` - converts CIFAR 10 classification dataset to `ClassificationAnnotation`
+* `cifar` - converts [CIFAR](https://www.cs.toronto.edu/~kriz/cifar.html) classification dataset to `ClassificationAnnotation`
   * `data_batch_file` - path to pickle file which contain dataset batch (e.g. test_batch)
-  * `has_background` - allows to add background label to original labels and convert dataset for 11 classes instead 10 (default value is False).
+  * `has_background` - allows to add background label to original labels (Optional, default value is False).
   * `convert_images` - allows to convert images from pickle file to user specified directory (default value is False).
   * `converted_images_dir` - path to converted images location.
+  * `num_classes` - the number of classes in the dataset - 10 or 100 (Optional, default 10)
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `mnist_csv` - convert MNIST dataset for handwritten digit recognition stored in csv format to `ClassificationAnnotation`.
   * `annotation_file` - path to dataset file in csv format.
   * `convert_images` - allows to convert images from annotation file to user specified directory (default value is False).
+  * `converted_images_dir` - path to converted images location if enabled `convert_images`.
+  * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding). Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+* `fashion_mnist` - convert [Fashion-MNIST](https://github.com/zalandoresearch/fashion-mnist) dataset to `ClassificationAnnotation`.
+  * `annotation_file` - path to labels file in binary format.
+  * `data_file` - path to images file in binary format.
+  * `convert_images` - allows to convert images from data file to user specified directory (default value is False).
   * `converted_images_dir` - path to converted images location if enabled `convert_images`.
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding). Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
 * `imagenet` - convert ImageNet dataset for image classification task to `ClassificationAnnotation`.
@@ -144,11 +151,14 @@ Accuracy Checker supports following list of annotation converters and specific f
     * `number_input_frames` - the number of input frames per inference.
 * `icdar_detection` - converts ICDAR13 and ICDAR15 datasets for text detection challenge to `TextDetectionAnnotation`.
   * `data_dir` - path to folder with annotations on txt format.
+  * `word_spotting` - if it is true then transcriptions that have lengths less than 3 symbols or transcriptions containing non-alphanumeric symbols will be marked as difficult.
 * `icdar13_recognition` - converts ICDAR13 dataset for text recognition task to `CharecterRecognitionAnnotation`.
   * `annotation_file` - path to annotation file in txt format.
 * `brats` - converts BraTS dataset format to `BrainTumorSegmentationAnnotation` format.
   * `data_dir` - dataset root directory, which contain subdirectories with validation data (`imagesTr`) and ground truth labels (`labelsTr`).
   Optionally you can provide relative path for these subdirectories (if they have different location) using `image_folder` and `mask_folder` parameters respectively.
+  * `mask_channels_first` - allows read gt mask nifti files and transpose in order where channels first (Optional, default False)
+  * `labels_file` - path to file, which contains labels (optional, if omitted no labels will be shown)
 * `movie_lens_converter` - converts Movie Lens Datasets format to `HitRatioAnnotation` format.
   * `rating_file` - path to file which contains movieId with top score for each userID (for example ml-1m-test-ratings.csv)
   * `negative_file` - path to file which contains negative examples.
@@ -220,12 +230,43 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False)
 * `xnli` - converts The Cross-lingual Natural Language Inference Corpus ([XNLI](https://github.com/facebookresearch/XNLI)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
   * `annotation_file` - path to dataset annotation file in tsv format.
-  * `vocab_file` - path to model co vocabulary file.
+  * `vocab_file` -  path to model vocabulary file for WordPiece tokinezation (Optional in case, when another tokenization approach used).
+  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
   * `max_seq_length` - maximum total input sequence length after word-piece tokenization (Optional, default value is 128).
   * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
   * `language_filter` - comma-separated list of used in annotation language tags for selecting records for specific languages only. (Optional, if not used full annotation will be converted).
-* `bert_xnli_tf_record` - converts The Cross-lingual Natural Language Inference Corpus ([XNLI](https://github.com/facebookresearch/XNLI)) stored in tf records format. This converter usage requires Tensorflow installation. Please make sure that Tensorflow installed before conversion.
-  * `annotattion_file` - path to annotattion file in tf records format.
+* `mnli` - converts The Multi-Genre Natural Language Inference Corpus ([MNLI](http://www.nyu.edu/projects/bowman/multinli/)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+  * `annotation_file` - path to dataset annotation file in tsv format.
+  * `vocab_file` - path to model vocabulary file for WordPiece tokinezation. (Optional, can be not provided in case, when another tokenization approach used.)
+  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
+  * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+* `mrpc` - converts The Microsoft Research Paraphrase Corpus ([MRPC](https://www.microsoft.com/en-us/download/details.aspx?id=52398)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+  * `annotation_file` - path to dataset annotation file in tsv format.
+  * `vocab_file` - path to model vocabulary file for WordPiece tokenization. (Optional, can be not provided in case, when another tokenization approach used.)
+  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
+  * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+* `cola` - converts The Corpus of Linguistic Acceptability ([CoLA](https://nyu-mll.github.io/CoLA/)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+  * `annotation_file` - path to dataset annotation file in tsv format.
+  * `vocab_file` - path to model vocabulary file for WordPiece tokinezation. (Optional, can be not provided in case, when another tokenization approach used.)
+  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
+  * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+* `cola` - converts The Corpus of Linguistic Acceptability ([CoLA](https://nyu-mll.github.io/CoLA/)) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+  * `annotation_file` - path to dataset annotation file in tsv format.
+  * `vocab_file` - path to model vocabulary file for WordPiece tokenization. (Optional, can be not provided in case, when another tokenization approach used.)
+  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
+  * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+* `imdb` - converts [IMDB sentiment dataset](https://ai.stanford.edu/~amaas/data/sentiment/) to `TextClassificationAnnotattion`. **Note: This converter not only converts data to metric specific format but also tokenize and encodes input for BERT.**
+  * `annotation_file` - path to dataset annotation file in tsv format.
+  * `vocab_file` - path to model vocabulary file for WordPiece tokinezation. (Optional, can be not provided in case, when another tokenization approach used.)
+  * `sentence_piece_model_file` - model used for [SentencePiece](https://github.com/google/sentencepiece) tokenization (Optional in case, when another tokenization approach used).
+  * `max_seq_length` - maximum total input sequence length after tokenization (Optional, default value is 128).
+  * `lower_case` - allows switching tokens to lower case register. It is useful for working with uncased models (Optional, default value is False).
+* `bert_xnli_tf_record` - converts The Cross-lingual Natural Language Inference Corpus ([XNLI](https://github.com/facebookresearch/XNLI)) stored in tf records format. This converter usage requires TensorFlow installation. Please make sure that TensorFlow installed before conversion.
+  * `annotattion_file` - path to annotation file in tf records format.
 * `cmu_panoptic_keypoints` - converts CMU Panoptic dataset to `PoseEstimation3dAnnotation` format.
   * `data_dir` - dataset root directory, which contain subdirectories with validation scenes data.
 * `clip_action_recognition` - converts annotation video-based action recognition datasets. Before conversion validation set should be preprocessed using approach described [here](https://github.com/opencv/openvino_training_extensions/tree/develop/pytorch_toolkit/action_recognition#preparation).
@@ -234,8 +275,17 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `clips_per_video` - number of clips per video (Optional, default 3).
   * `clip_duration` - clip duration (Optional, default 16)
   * `temporal_stride` - temporal stride for frames selection (Optional, default 2).
+  * `numpy_input` - allows usage numpy files instead images. It can be useful if data required difficult preprocessing steps (e.g. conversion to optical flow) (Optional, default `False`)
   * `subset` - dataset split: `train`, `validation` or `test` (Optional, default `validation`).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+* `continuous_clip_action_recognition` - converts annotation of video-based MS-ASL dataset to `ClassificationAnnotation`.
+  * `annotation_file` - path to annotation file in txt format.
+  * `data_dir` - dataset root directory, which contains subdirectories with extracted video frames.
+  * `out_fps` - output frame rate of generated video clips.
+  * `clip_length` - number of frames of generated video clips.
+* `redweb` - converts [ReDWeb](https://sites.google.com/site/redwebcvpr18) dataset for monocular relative depth perception to `DepthEstimationAnnotation`
+   * `data_dir` - the dataset root directory, where `imgs` - directory with RGB images and `RD` - directory with relative depth maps are located (Optional, if you want to provide `annotation_file`)
+  * `annotation_file`- the file in txt format which contains pairs of image and depth map files. (Optional, if not provided full content of `data_dir` will be considered as dataset.)
 
 ### Customizing dataset meta
 There are situations when we need customize some default dataset parameters (e.g. replace original dataset label map with own.)

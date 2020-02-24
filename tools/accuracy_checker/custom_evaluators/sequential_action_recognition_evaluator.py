@@ -16,7 +16,7 @@ limitations under the License.
 from pathlib import Path
 import pickle
 import numpy as np
-from accuracy_checker.evaluators.base_evaluator import BaseEvaluator
+from accuracy_checker.evaluators import BaseEvaluator
 from accuracy_checker.dataset import Dataset
 from accuracy_checker.adapters import create_adapter
 from accuracy_checker.data_readers import BaseReader
@@ -78,7 +78,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
         if self.model.store_encoder_predictions:
             self.model.save_encoder_predictions()
 
-    def compute_metrics(self, print_results=True, output_callback=None, ignore_results_formatting=False):
+    def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if self._metrics_results:
             del self._metrics_results
             self._metrics_results = []
@@ -87,17 +87,36 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
                 self._annotations, self._predictions):
             self._metrics_results.append(evaluated_metric)
             if print_results:
-                result_presenter.write_result(evaluated_metric, output_callback, ignore_results_formatting)
+                result_presenter.write_result(evaluated_metric, ignore_results_formatting)
 
         return self._metrics_results
 
-    def print_metrics_results(self, output_callback=None, ignore_results_formatting=False):
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
         if not self._metrics_results:
-            self.compute_metrics(True, output_callback, ignore_results_formatting)
+            self.compute_metrics(False, ignore_results_formatting)
+
+        result_presenters = self.metric_executor.get_metric_presenters()
+        extracted_results, extracted_meta = [], []
+        for presenter, metric_result in zip(result_presenters, self._metrics_results):
+            result, metadata = presenter.extract_result(metric_result)
+            if isinstance(result, list):
+                extracted_results.extend(result)
+                extracted_meta.extend(metadata)
+            else:
+                extracted_results.append(result)
+                extracted_meta.append(metadata)
+            if print_results:
+                presenter.write_result(metric_result, ignore_results_formatting)
+
+        return extracted_results, extracted_meta
+
+    def print_metrics_results(self, ignore_results_formatting=False):
+        if not self._metrics_results:
+            self.compute_metrics(True, ignore_results_formatting)
             return
         result_presenters = self.metric_executor.get_metric_presenters()
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
-            presenter.write_results(metric_result, output_callback, ignore_results_formatting)
+            presenter.write_result(metric_result, ignore_results_formatting)
 
     def release(self):
         self.model.release()
@@ -114,7 +133,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
         dataset_config = module_specific_params['datasets'][0]
         launcher_config = module_specific_params['launchers'][0]
         return (
-            model_name,launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
+            model_name, launcher_config['framework'], launcher_config['device'], launcher_config.get('tags'),
             dataset_config['name']
         )
 
@@ -132,7 +151,7 @@ class BaseModel:
 
 def create_encoder(model_config, launcher):
     launcher_model_mapping = {
-        'dlsdk': EncoderModelDLSDKL,
+        'dlsdk': EncoderDLSDKModel,
         'onnx_runtime': EncoderONNXModel,
         'opencv': EncoderOpenCVModel,
         'dummy': DummyEncoder
@@ -148,14 +167,14 @@ def create_encoder(model_config, launcher):
 
 def create_decoder(model_config, launcher):
     launcher_model_mapping = {
-        'dlsdk': DecoderModelDLSDKL,
+        'dlsdk': DecoderDLSDKModel,
         'onnx_runtime': DecoderONNXModel,
         'opencv': DecoderOpenCVModel,
     }
     framework = launcher.config['framework']
     model_class = launcher_model_mapping.get(framework)
     if not model_class:
-        raise ValueError('model for framework {] is not supported'.format(framework))
+        raise ValueError('model for framework {} is not supported'.format(framework))
     return model_class(model_config, launcher)
 
 
@@ -202,7 +221,7 @@ class SequentialModel(BaseModel):
                 pickle.dump(self._encoder_predictions, file)
 
 
-class EncoderModelDLSDKL(BaseModel):
+class EncoderDLSDKModel(BaseModel):
     def __init__(self, network_info, launcher):
         super().__init__(network_info, launcher)
         if 'onnx_model' in network_info:
@@ -212,9 +231,7 @@ class EncoderModelDLSDKL(BaseModel):
             model_xml = str(network_info['model'])
             model_bin = str(network_info['weights'])
         self.network = launcher.create_ie_network(model_xml, model_bin)
-        if not hasattr(launcher, 'plugin'):
-            launcher.create_ie_plugin()
-        self.exec_network = launcher.plugin.load(self.network)
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.input_blob = next(iter(self.network.inputs))
         self.output_blob = next(iter(self.network.outputs))
 
@@ -231,7 +248,7 @@ class EncoderModelDLSDKL(BaseModel):
         return {self.input_blob: input_data}
 
 
-class DecoderModelDLSDKL(BaseModel):
+class DecoderDLSDKModel(BaseModel):
     def __init__(self, network_info, launcher):
         super().__init__(network_info, launcher)
         if 'onnx_model' in network_info:
@@ -242,11 +259,7 @@ class DecoderModelDLSDKL(BaseModel):
             model_bin = str(network_info['weights'])
 
         self.network = launcher.create_ie_network(model_xml, model_bin)
-        if hasattr(launcher, 'plugin'):
-            self.exec_network = launcher.plugin.load(self.network)
-        else:
-            launcher.load_network(self.network)
-            self.exec_network = launcher.exec_network
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.input_blob = next(iter(self.network.inputs))
         self.output_blob = next(iter(self.network.outputs))
         self.adapter = create_adapter('classification')

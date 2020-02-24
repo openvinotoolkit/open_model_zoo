@@ -27,6 +27,7 @@ ENTRIES_PATHS = {
     'launchers': {
         'model': 'models',
         'weights': 'models',
+        'color_coeff': 'models',
         'caffe_model': 'models',
         'caffe_weights': 'models',
         'tf_model': 'models',
@@ -47,6 +48,20 @@ ENTRIES_PATHS = {
         'data_source': 'source',
     },
 }
+PREPROCESSING_PATHS = {
+    'mask_dir': 'source'
+}
+
+COMMAND_LINE_ARGS_AS_ENV_VARS = {
+    'source': 'DATA_DIR',
+    'annotations': 'ANNOTATIONS_DIR',
+    'bitstreams': 'BITSTREAMS_DIR',
+    'models': 'MODELS_DIR',
+    'extensions': 'EXTENSIONS_DIR',
+}
+DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
+CONFIG_SHARED_PARAMETERS = ['bitstream']
+
 
 
 class ConfigReader:
@@ -83,11 +98,12 @@ class ConfigReader:
         ConfigReader._provide_cmd_arguments(arguments, config, mode)
         ConfigReader._filter_launchers(config, arguments, mode)
         ConfigReader._separate_evaluations(config, mode)
+        ConfigReader._previous_configuration_parameters_sharing(config, mode)
 
     @staticmethod
     def _read_configs(arguments):
         local_config = read_yaml(arguments.config)
-        definitions = os.environ.get('DEFINITIONS_FILE') or local_config.get('global_definitions')
+        definitions = os.environ.get(DEFINITION_ENV_VAR) or local_config.get('global_definitions')
         if definitions:
             definitions = read_yaml(Path(arguments.config).parent / definitions)
         global_config = read_yaml(arguments.definitions) if arguments.definitions else definitions
@@ -161,7 +177,7 @@ class ConfigReader:
         if not isinstance(config, dict):
             raise ConfigError('local config should has dictionary based structure')
 
-        eval_mode = next(iter(config))
+        eval_mode = get_mode(config)
         config_checker_func = config_checkers.get(eval_mode)
         if config_checker_func is None:
             raise ConfigError('Accuracy Checker {} mode is not supported. Please select between {}'. format(
@@ -223,7 +239,7 @@ class ConfigReader:
         raw_pipelines = local_config['pipelines']
         for pipeline in raw_pipelines:
             device_infos = pipeline.get('device_info', [])
-            if not device_infos:
+            if not device_infos and 'target_devices' in args and args.target_devices:
                 device_infos = [{'device': device} for device in args.target_devices]
             per_device_pipelines = []
             for device_info in device_infos:
@@ -306,14 +322,7 @@ class ConfigReader:
     @staticmethod
     def _merge_paths_with_prefixes(arguments, config, mode='models'):
         args = arguments if isinstance(arguments, dict) else vars(arguments)
-        commandline_arg_to_env_var = {
-            'source': 'DATA_DIR',
-            'annotations': 'ANNOTATIONS_DIR',
-            'bitstreams': 'BITSTREAMS_DIR',
-            'models': 'MODELS_DIR',
-            'extensions': 'EXTENSIONS_DIR',
-        }
-        for argument, env_var in commandline_arg_to_env_var.items():
+        for argument, env_var in COMMAND_LINE_ARGS_AS_ENV_VARS.items():
             if argument not in args or args[argument] is None:
                 env_var_value = os.environ.get(env_var)
                 if env_var_value is not None:
@@ -355,53 +364,6 @@ class ConfigReader:
 
     @staticmethod
     def _provide_cmd_arguments(arguments, config, mode):
-        def merge_converted_model_path(converted_models_dir, mo_output_dir):
-            if mo_output_dir:
-                mo_output_dir = Path(mo_output_dir)
-                if mo_output_dir.is_absolute():
-                    return mo_output_dir
-                return converted_models_dir / mo_output_dir
-            return converted_models_dir
-
-        def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
-            if launcher_entry['framework'].lower() != 'dlsdk':
-                return launcher_entry
-
-            launcher_entry.update(update_launcher_entry)
-            models_prefix = arguments.models if 'models' in arguments else None
-            if models_prefix:
-                launcher_entry['_models_prefix'] = models_prefix
-
-            if 'converted_models' not in arguments or not arguments.converted_models:
-                return launcher_entry
-
-            mo_params = launcher_entry.get('mo_params', {})
-
-            mo_params.update({
-                'output_dir': merge_converted_model_path(arguments.converted_models, mo_params.get('output_dir'))
-            })
-
-            launcher_entry['mo_params'] = mo_params
-
-            if 'aocl' in arguments and arguments.aocl:
-                launcher_entry['_aocl'] = arguments.aocl
-
-            if 'bitstream' not in launcher_entry and 'bitstreams' in arguments and arguments.bitstreams:
-                if not arguments.bitstreams.is_dir():
-                    launcher_entry['bitstream'] = arguments.bitstreams
-
-            if 'cpu_extensions' not in launcher_entry and 'extensions' in arguments and arguments.extensions:
-                extensions = arguments.extensions
-                if not extensions.is_dir() or extensions.name == 'AUTO':
-                    launcher_entry['cpu_extensions'] = arguments.extensions
-
-            if 'affinity_map' not in launcher_entry and 'affinity_map' in arguments and arguments.affinity_map:
-                am = arguments.affinity_map
-                if not am.is_dir():
-                    launcher_entry['affinity_map'] = arguments.affinity_map
-
-            return launcher_entry
-
         def merge_models(config, arguments, update_launcher_entry):
             for model in config['models']:
                 for launcher_entry in model['launchers']:
@@ -432,7 +394,8 @@ class ConfigReader:
         additional_keys = [
             'model_optimizer', 'tf_custom_op_config_dir',
             'tf_obj_detection_api_pipeline_config_path',
-            'cpu_extensions_mode', 'vpu_log_level'
+            'transformations_config_dir',
+            'cpu_extensions_mode', 'vpu_log_level', 'device_config'
         ]
         arguments_dict = arguments if isinstance(arguments, dict) else vars(arguments)
         update_launcher_entry = {}
@@ -522,7 +485,64 @@ class ConfigReader:
         separator(config)
 
     @staticmethod
+    def _previous_configuration_parameters_sharing(config, mode='models'):
+        def _share_params_models(models_config):
+            shared_params = {parameter: None for parameter in CONFIG_SHARED_PARAMETERS}
+            for model in models_config['models']:
+                launchers = model['launchers']
+                if not launchers:
+                    continue
+                for launcher in model['launchers']:
+                    for parameter in CONFIG_SHARED_PARAMETERS:
+                        if parameter in launcher:
+                            if shared_params[parameter] is not None:
+                                launcher['_prev_{}'.format(parameter)] = shared_params[parameter]
+                            shared_params[parameter] = launcher[parameter]
+
+        def _share_params_modules(modules_config):
+            shared_params = {parameter: None for parameter in CONFIG_SHARED_PARAMETERS}
+            for evaluation in modules_config['evaluations']:
+                if 'module_config' not in evaluation:
+                    continue
+                launchers = evaluation['module_config'].get('launchers')
+                for launcher in launchers:
+                    for parameter in CONFIG_SHARED_PARAMETERS:
+                        if parameter in launcher:
+                            if shared_params[parameter] is not None:
+                                launcher['_prev_{}'.format(parameter)] = shared_params[parameter]
+                            shared_params[parameter] = launcher[parameter]
+
+        def _share_params_pipelines(pipelines_config):
+            shared_params = {parameter: None for parameter in CONFIG_SHARED_PARAMETERS}
+            for pipeline in pipelines_config['pipelines']:
+                for stage in pipeline['stages']:
+                    launcher = stage.get('launcher', {})
+                    for parameter in CONFIG_SHARED_PARAMETERS:
+                        if parameter in launcher:
+                            if shared_params[parameter] is not None:
+                                launcher['_prev_{}'.format(parameter)] = shared_params[parameter]
+                            shared_params[parameter] = launcher[parameter]
+        mode_func = {
+            'models': _share_params_models,
+            'evaluations': _share_params_modules,
+            'pipelines': _share_params_pipelines
+        }
+
+        processor = mode_func.get(mode)
+        if not processor:
+            return
+        processor(config)
+
+    @staticmethod
     def convert_paths(config):
+        definitions = os.environ.get(DEFINITION_ENV_VAR)
+        if definitions:
+            definitions = read_yaml(Path(definitions))
+            ConfigReader._prepare_global_configs(definitions)
+            config = ConfigReader._merge_configs(definitions, config, {}, 'models')
+        if COMMAND_LINE_ARGS_AS_ENV_VARS['source'] in os.environ:
+            ConfigReader._merge_paths_with_prefixes({}, config, 'models')
+
         def convert_launcher_paths(launcher_config):
             for key, path in launcher_config.items():
                 if key not in ENTRIES_PATHS['launchers']:
@@ -545,7 +565,7 @@ class ConfigReader:
                 for preprocessor in dataset_config['preprocessing']:
                     path_preprocessing = (create_command_line_mapping(preprocessor, None))
                     for path in path_preprocessing:
-                        preprocessor[path] = Path(path_preprocessing[path])
+                        preprocessor[path] = Path(preprocessor[path])
 
             for key, path in dataset_config.items():
                 if key not in ENTRIES_PATHS['datasets']:
@@ -558,13 +578,15 @@ class ConfigReader:
             datasets = model['datasets'].values() if isinstance(model['datasets'], dict) else model['datasets']
             for dataset_config in datasets:
                 convert_dataset_paths(dataset_config)
+        return config
 
 
-def create_command_line_mapping(config, value):
+def create_command_line_mapping(config, default_value, value_map=None):
     mapping = {}
+    value_map = value_map or {}
     for key in config:
         if key.endswith('file') or key.endswith('dir'):
-            mapping[key] = value
+            mapping[key] = value_map.get(key, default_value)
 
     return mapping
 
@@ -668,7 +690,9 @@ def process_config(
                 merge_entry_paths(command_line_conversion, annotation_conversion_config, args)
             if 'preprocessing' in datasets_config:
                 for preprocessor in datasets_config['preprocessing']:
-                    command_line_preprocessing = (create_command_line_mapping(preprocessor, 'models'))
+                    command_line_preprocessing = (
+                        create_command_line_mapping(preprocessor, 'models', PREPROCESSING_PATHS)
+                    )
                     merge_entry_paths(command_line_preprocessing, preprocessor, args)
 
     def process_launchers(launchers_configs):
@@ -717,3 +741,81 @@ def merge_entry_paths(keys, value, args):
         if not args[argument].is_dir():
             raise ConfigError('argument: {} should be a directory'.format(argument))
         value[field] = args[argument] / config_path
+
+
+def get_mode(config):
+    evaluation_keys = [key for key in config if key != 'global_definitions']
+    if not evaluation_keys:
+        raise ConfigError('Invalid config structure. No evaluations detected.')
+    if len(evaluation_keys) > 1:
+        raise ConfigError('Multiple evaluation types in the one config is not supported. '
+                          'Please separate on several configs.')
+    return next(iter(evaluation_keys))
+
+
+def merge_converted_model_path(converted_models_dir, mo_output_dir):
+    if mo_output_dir:
+        mo_output_dir = Path(mo_output_dir)
+        if mo_output_dir.is_absolute():
+            return mo_output_dir
+        return converted_models_dir / mo_output_dir
+    return converted_models_dir
+
+
+def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
+    def _convert_models_args(launcher_entry):
+        if 'deprecated_ir_v7' in arguments and arguments.deprecated_ir_v7:
+            mo_flags = launcher_entry.get('mo_flags', [])
+            mo_flags.append('generate_deprecated_IR_V7')
+            launcher_entry['mo_flags'] = mo_flags
+        if 'converted_models' in arguments and arguments.converted_models:
+            mo_params = launcher_entry.get('mo_params', {})
+            mo_params.update({
+                'output_dir': merge_converted_model_path(arguments.converted_models,
+                                                         mo_params.get('output_dir'))
+            })
+
+            launcher_entry['mo_params'] = mo_params
+
+        return launcher_entry
+
+    def _fpga_specific_args(launcher_entry):
+        if 'aocl' in arguments and arguments.aocl:
+            launcher_entry['_aocl'] = arguments.aocl
+
+        if 'bitstream' not in launcher_entry and 'bitstreams' in arguments and arguments.bitstreams:
+            if not arguments.bitstreams.is_dir():
+                launcher_entry['bitstream'] = arguments.bitstreams
+
+    def _async_evaluation_args(launcher_entry):
+        if 'async_mode' in arguments:
+            launcher_entry['async_mode'] = arguments.async_mode
+
+        if 'num_requests' in arguments and arguments.num_requests is not None:
+            launcher_entry['num_requests'] = arguments.num_requests
+
+        return launcher_entry
+
+    if launcher_entry['framework'].lower() != 'dlsdk':
+        return launcher_entry
+
+    launcher_entry.update(update_launcher_entry)
+    models_prefix = arguments.models if 'models' in arguments else None
+    if models_prefix:
+        launcher_entry['_models_prefix'] = models_prefix
+
+    _convert_models_args(launcher_entry)
+    _async_evaluation_args(launcher_entry)
+    _fpga_specific_args(launcher_entry)
+
+    if 'cpu_extensions' not in launcher_entry and 'extensions' in arguments and arguments.extensions:
+        extensions = arguments.extensions
+        if not extensions.is_dir() or extensions.name == 'AUTO':
+            launcher_entry['cpu_extensions'] = arguments.extensions
+
+    if 'affinity_map' not in launcher_entry and 'affinity_map' in arguments and arguments.affinity_map:
+        am = arguments.affinity_map
+        if not am.is_dir():
+            launcher_entry['affinity_map'] = arguments.affinity_map
+
+    return launcher_entry

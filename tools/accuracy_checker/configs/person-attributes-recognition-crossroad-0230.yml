@@ -20,6 +20,16 @@ models:
           type: person_attributes
           attributes_recognition_out: "453"
 
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   intel/person-attributes-recognition-crossroad-0230/FP32-INT8/person-attributes-recognition-crossroad-0230.xml
+        weights: intel/person-attributes-recognition-crossroad-0230/FP32-INT8/person-attributes-recognition-crossroad-0230.bin
+        adapter:
+          type: person_attributes
+          attributes_recognition_out: "453"
+
+
     datasets:
       - name: person_8_attributes
 
@@ -33,4 +43,5 @@ models:
           - type: f1-score
             calculate_average: False
             presenter: print_vector
+
 global_definitions: ../dataset_definitions.yml

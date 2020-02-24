@@ -42,7 +42,7 @@ class PyTorchLauncher(Launcher):
     def __init__(self, config_entry: dict, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
         try:
-            # Pytorch import affects performance of common pipeline
+            # PyTorch import affects performance of common pipeline
             # it is the reason, why it is imported only when it used
             import torch # pylint: disable=C0415
         except ImportError as import_error:
@@ -99,7 +99,7 @@ class PyTorchLauncher(Launcher):
             if checkpoint:
                 checkpoint = self._torch.load(checkpoint)
                 state = checkpoint if not state_key else checkpoint[state_key]
-                module.load_state_dict(state)
+                module.load_state_dict(state, strict=False)
             if self.cuda:
                 module.cuda()
             else:
@@ -107,9 +107,9 @@ class PyTorchLauncher(Launcher):
             module.eval()
             return module
 
-    def fit_to_input(self, data, layer_name, layout):
+    def fit_to_input(self, data, layer_name, layout, precision):
         data = np.transpose(data, layout)
-        tensor = self._torch.from_numpy(data.astype(np.float32))
+        tensor = self._torch.from_numpy(data.astype(np.float32 if not precision else precision))
         if self.cuda:
             tensor = tensor.cuda()
         with self._torch.no_grad():
@@ -130,7 +130,7 @@ class PyTorchLauncher(Launcher):
         return results
 
     def predict_async(self, *args, **kwargs):
-        raise ValueError('Pytorch Launcher does not support async mode yet')
+        raise ValueError('PyTorch Launcher does not support async mode yet')
 
     def release(self):
         del self.module

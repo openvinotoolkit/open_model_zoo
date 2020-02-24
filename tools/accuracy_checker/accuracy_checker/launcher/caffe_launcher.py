@@ -35,9 +35,11 @@ class CaffeLauncher(Launcher):
     def __init__(self, config_entry: dict, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
 
-        caffe_launcher_config = LauncherConfigValidator('Caffe_Launcher', fields=self.parameters())
-        caffe_launcher_config.validate(self.config)
         self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
+        caffe_launcher_config = LauncherConfigValidator(
+            'Caffe_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
+        )
+        caffe_launcher_config.validate(self.config)
         self._do_reshape = False
 
         if not self._delayed_model_loading:
@@ -90,7 +92,7 @@ class CaffeLauncher(Launcher):
     def output_blob(self):
         return next(iter(self.network.outputs))
 
-    def fit_to_input(self, data, layer_name, layout):
+    def fit_to_input(self, data, layer_name, layout, precision):
         data_shape = np.shape(data)
         layer_shape = self.inputs[layer_name]
         if len(data_shape) == 5 and len(layer_shape) == 4:
@@ -101,7 +103,7 @@ class CaffeLauncher(Launcher):
         if layer_shape != data_shape:
             self._do_reshape = True
 
-        return data
+        return data.astype(precision) if precision else precision
 
     def predict(self, inputs, metadata=None, **kwargs):
         """
@@ -127,6 +129,10 @@ class CaffeLauncher(Launcher):
 
     def predict_async(self, *args, **kwargs):
         raise ValueError('Caffe Launcher does not support async mode')
+
+    @staticmethod
+    def create_network(model, weights):
+        return caffe.Net(str(model), str(weights), caffe.TEST)
 
     def release(self):
         """

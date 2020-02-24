@@ -16,6 +16,13 @@ models:
         weights: intel/handwritten-score-recognition-0003/FP16/handwritten-score-recognition-0003.bin
         adapter: beam_search_decoder
 
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   intel/handwritten-score-recognition-0003/FP32-INT8/handwritten-score-recognition-0003.xml
+        weights: intel/handwritten-score-recognition-0003/FP32-INT8/handwritten-score-recognition-0003.bin
+        adapter: beam_search_decoder
+
     datasets:
       - name: handwritten_score_recognition
 
@@ -27,4 +34,5 @@ models:
 
         metrics:
           - type: character_recognition_accuracy
+
 global_definitions: ../dataset_definitions.yml

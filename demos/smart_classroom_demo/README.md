@@ -29,7 +29,7 @@ To recognize faces on a frame, the demo needs a gallery of reference images. Eac
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./smart_classroom_demo -h
 InferenceEngine:
     API version ............ <version>
@@ -52,6 +52,7 @@ Options:
     -d_lm '<device>'               Optional. Specify the target device for Landmarks Regression Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -d_reid '<device>'             Optional. Specify the target device for Face Reidentification Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -out_v  '<path>'               Optional. File to write output video with visualization to.
+    -greedy_reid_matching          Optional. Use faster greedy matching algorithm in face reid.
     -pc                            Optional. Enables per-layer performance statistics.
     -r                             Optional. Output Inference results as raw values.
     -ad                            Optional. Output file name to save per-person action statistics in.
@@ -77,6 +78,7 @@ Options:
     -min_size_fr                   Optional. Minimum input size for faces during database registration.
     -al                            Optional. Output file name to save per-person action detections in.
     -ss_t                          Optional. Number of frames to smooth actions.
+    -u                             Optional. List of monitors to show initially.
 ```
 
 Running the application with the empty list of options yields an error message.
