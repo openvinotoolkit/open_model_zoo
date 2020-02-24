@@ -675,3 +675,5 @@ datasets:
       converter: kondate_recognition
       decoding_char_file: Kondate/kondate_char_list.txt
       annotation_file: Kondate/test_img_id_gt.txt
+    annotation: kondate_recognition.pickle
+    dataset_meta: kondate_recognition.json
