@@ -81,7 +81,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
             # Modifies `tokens_a` and `tokens_b` in place so that the total
             # length is less than the specified length.
             # Account for two [SEP] & one [CLS] with "- 3"
-            truncate_seq_pair(tokens_a, tokens_b, max_seq_length - 3)
+            truncate_seq_pair(tokens_a, tokens_b, self.max_seq_length - 3)
         else:
             # Account for one [SEP] & one [CLS] with "- 2"
             if len(tokens_a) > self.max_seq_length - 2:
