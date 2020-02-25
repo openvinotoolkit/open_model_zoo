@@ -6,5 +6,7 @@ class Author:
         self.middle_name = middle_name
         
     def _print(self):
-        log.log("{} {} {} {}".format(self.author_id, self.first_name, 
-            self.last_name, self.middle_name))
+        print(self.author_id)
+        print(self.first_name)
+        print(self.last_name)
+        print(self.middle_name)

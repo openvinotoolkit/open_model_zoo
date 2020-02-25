@@ -240,16 +240,21 @@ def main():
                                             (22, 163, 245), 1, 2)
                 os.system('cls')
                 DB.printUsers()
-                cv.imshow('window',  img)
-                cv.waitKey(1000)
+
+                if not args.no_show: 
+                    cv.imshow('window',  img)
+                    cv.waitKey(1000)
             
+            if ch == ord('q'):
+                break
+
+            if args.no_show:
+                continue
+
             cv.imshow('window',  img)
             if ch == ord('f'):
                 count = count + 1 
                 PrintInfo(count % 3, DB)
-
-            if ch == ord('q'):
-                break
 
         cap.release()
         

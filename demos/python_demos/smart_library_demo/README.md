@@ -61,11 +61,21 @@ usage: smart_library_demo.py [-h] -fr FREC -m_rd RDMODEL -fd FDDET -m_fd
                              [-w_fd FDWIDTH] [-h_fd FDHEIGHT]
                              [-t_fd FDTHRESHOLD] [-w_lm LMWIDTH]
                              [-h_lm LMHEIGHT] [-br BR] [-lib LIB] [-w WEB]
+                             [--no_show]
 
 Smart Library Sample
 
-Optional arguments:
+optional arguments:
   -h, --help         show this help message and exit
+  -fr FREC           Required. Type of recognizer. Available DNN face
+                     recognizer - DNNfr
+  -m_rd RDMODEL      Required. Path to .xml file
+  -fd FDDET          Required. Type of detector. Available DNN face detector -
+                     DNNfd
+  -m_fd FDMODEL      Required. Path to .xml file
+  -lm LMDET          Required. Type of detector. Available DNN landmarks
+                     regression - DNNlm
+  -m_lm LMMODEL      Required. Path to .xml file
   -w_rd RDWIDTH      Optional. Image width to resize
   -h_rd RDHEIGHT     Optional. Image height to resize
   -t_rd RDTHRESHOLD  Optional. Probability threshold for face detections.
@@ -78,17 +88,7 @@ Optional arguments:
   -lib LIB           Optional. Path to library.
   -w WEB             Optional. Specify index of web-camera to open. Default is
                      0
-
-Models:
-  -fr FREC           Required. Type of recognizer. Available DNN face
-                     recognizer - DNNfr
-  -m_rd RDMODEL      Required. Path to .xml file
-  -fd FDDET          Required. Type of detector. Available DNN face detector -
-                     DNNfd
-  -m_fd FDMODEL      Required. Path to .xml file
-  -lm LMDET          Required. Type of detector. Available DNN landmarks
-                     regression - DNNlm
-  -m_lm LMMODEL      Required. Path to .xml file
+  --no_show          Optional. Don't show output
 ```
 
 Example of a valid command line to run the application:
