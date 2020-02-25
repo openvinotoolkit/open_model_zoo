@@ -20,6 +20,7 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, NumberField, BoolField, ListField
 from ..representation import DetectionPrediction, ActionDetectionPrediction, ContainerPrediction
+from ..utils import contains_all
 
 
 class ActionDetection(Adapter):
@@ -293,5 +294,8 @@ class ActionDetection(Adapter):
 
         self.loc_out = find_layer(loc_out_regex, 'loc', raw_outputs)
         self.main_conf_out = find_layer(main_conf_out_regex, 'main confidence', raw_outputs)
+        add_conf_with_bias = [layer_name + '/add_' for layer_name in self.add_conf_outs]
+        if not contains_all(raw_outputs, self.add_conf_outs) and contains_all(raw_outputs, add_conf_with_bias):
+            self.add_conf_outs = add_conf_with_bias
 
         self.outputs_verified = True
