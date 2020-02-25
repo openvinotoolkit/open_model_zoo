@@ -1,9 +1,9 @@
-# gmcnn-tf
+# gmcnn-places2-tf
 
 ## Use Case and High-Level Description
 
-The `gmcnn-tf` is the TensorFlow implementation of GMCNN Image Inpainting model,
-aimed to estimate suitable pixel information to fill holes in images. `gmcnn-tf`
+The `gmcnn-places2-tf` is the TensorFlow implementation of GMCNN Image Inpainting model,
+aimed to estimate suitable pixel information to fill holes in images. `gmcnn-places2-tf`
 is trained on Places2 dataset with free-form masks. Originally redistributed as checkpoint files,
 it was converted to a frozen graph. For details see [repository](https://github.com/shepnerd/inpainting_gmcnn).
 
@@ -37,8 +37,8 @@ python3 freeze_model.py --ckpt_dir path/to/downloaded_weights --save_dir path/to
 | Metric                          | Value                                     |
 |---------------------------------|-------------------------------------------|
 | Type                            | Image Inpainting                          |
-| GFlops                          | 371.2                                     |
-| MParams                         |                                           |
+| GFlops                          | -                                         |
+| MParams                         | -                                         |
 | Source framework                | TensorFlow\*                              |
 
 ## Accuracy
