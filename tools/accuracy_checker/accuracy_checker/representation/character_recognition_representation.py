@@ -28,5 +28,5 @@ class CharacterRecognitionAnnotation(CharacterRecognition):
 
 
 class CharacterRecognitionPrediction(CharacterRecognition):
-    def to_annotation(self):
+    def to_annotation(self, **kwargs):
         return CharacterRecognitionAnnotation(self.identifier, self.label)

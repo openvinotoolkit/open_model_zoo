@@ -55,5 +55,5 @@ class TextDetectionAnnotation(TextDetectionRepresentation):
 
 
 class TextDetectionPrediction(TextDetectionRepresentation):
-    def to_annotation(self):
+    def to_annotation(self, **kwargs):
         return TextDetectionAnnotation(self.identifier, self.points, self.description)

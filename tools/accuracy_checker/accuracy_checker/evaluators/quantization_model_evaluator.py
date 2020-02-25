@@ -140,7 +140,12 @@ class ModelEvaluator:
                         batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
                     )
                     if dump_prediction_to_annotation:
-                        annotations = [prediction.to_annotation() for prediction in predictions]
+                        threshold = kwargs.get('annotation_conf_threshold', 0.0)
+                        annotations = []
+                        for prediction in predictions:
+                            generated_annotation = prediction.to_annotation(threshold=threshold)
+                            if generated_annotation:
+                                annotations.append(generated_annotation)
                         self._dumped_annotations.extend(annotations)
                     metrics_result = None
                     if self.metric_executor:
@@ -162,23 +167,22 @@ class ModelEvaluator:
                     if progress_reporter:
                         progress_reporter.update(batch_id, len(batch_predictions))
 
-        if dump_prediction_to_annotation and self._dumped_annotations:
-            self.register_annotations(self._dumped_annotations)
+        if dump_prediction_to_annotation:
+            self.register_dumped_annotations()
 
         if progress_reporter:
             progress_reporter.finish()
 
-    def register_annotations(self, annotations):
-        annotation_reader = Dataset(self.dataset.dataset_config, True)
-        annotation_reader.set_annotation(annotations)
-        self.dataset.annotation_reader = annotation_reader
+    def register_dumped_annotations(self):
+        if not self._dumped_annotations:
+            return
+        if self.dataset.annotation_reader is None:
+            self.dataset.annotation_reader = Dataset(self.dataset.dataset_config, True)
+        self.dataset.annotation_reader.set_annotation(self._dumped_annotations)
 
     def select_dataset(self, dataset_tag):
         if self.dataset is not None and isinstance(self.dataset_config, list):
-            if self.dataset.annotation_reader is None and self._dumped_annotations:
-                self.register_annotations(self._dumped_annotations)
             return
-
         dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag, self._dumped_annotations)
         self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
         if self.dataset.annotation_reader and self.dataset.annotation_reader.metadata:
@@ -237,7 +241,12 @@ class ModelEvaluator:
                 batch_annotation, batch_predictions, batch_meta, dump_prediction_to_annotation
             )
             if dump_prediction_to_annotation:
-                annotations = [prediction.to_annotation() for prediction in predictions]
+                threshold = kwargs.get('annotation_conf_threshold', 0.0)
+                annotations = []
+                for prediction in predictions:
+                    generated_annotation = prediction.to_annotation(threshold=threshold)
+                    if generated_annotation:
+                        annotations.append(generated_annotation)
                 self._dumped_annotations.extend(annotations)
             metrics_result = None
             if self.metric_executor:
@@ -259,8 +268,8 @@ class ModelEvaluator:
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_predictions))
 
-        if dump_prediction_to_annotation and self._dumped_annotations:
-            self.register_annotations(self._dumped_annotations)
+        if dump_prediction_to_annotation:
+            self.register_dumped_annotations()
 
         if progress_reporter:
             progress_reporter.finish()
