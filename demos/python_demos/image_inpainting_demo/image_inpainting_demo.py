@@ -31,10 +31,10 @@ def build_argparser():
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. The demo will look for a suitable plugin for device specified. "
                            "Default value is CPU", default="CPU", type=str)
-    args.add_argument("-p", "--parts", help="Optional. Number of parts to draw mask.", default=8)
-    args.add_argument("-mbw", "--max_brush_width", help="Optional. Max width of brush to draw mask.", default=24)
-    args.add_argument("-ml", "--max_length", help="Optional. Max strokes length to draw mask.", default=100)
-    args.add_argument("-mv", "--max_vertex", help="Optional. Max number of vertex to draw mask.", default=20)
+    args.add_argument("-p", "--parts", help="Optional. Number of parts to draw mask.", default=8, type=int)
+    args.add_argument("-mbw", "--max_brush_width", help="Optional. Max width of brush to draw mask.", default=24, type=int)
+    args.add_argument("-ml", "--max_length", help="Optional. Max strokes length to draw mask.", default=100, type=int)
+    args.add_argument("-mv", "--max_vertex", help="Optional. Max number of vertex to draw mask.", default=20, type=int)
     args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
 
     return parser
@@ -48,9 +48,6 @@ def main():
 
     img = cv2.imread(args.input, cv2.IMREAD_COLOR)
     masked_image, output_image = inpainting_processor.process(img)
-    masked_image = np.transpose(masked_image, (0, 2, 3, 1)).astype(np.uint8)
-    output_image = np.transpose(output_image, (0, 2, 3, 1)).astype(np.uint8)
-    output_image[0] = cv2.cvtColor(output_image[0], cv2.COLOR_RGB2BGR)
     concat_imgs = np.hstack((masked_image[0], output_image[0]))
     cv2.putText(concat_imgs, 'summary: {:.1f} FPS'.format(
             float(1 / inpainting_processor.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))

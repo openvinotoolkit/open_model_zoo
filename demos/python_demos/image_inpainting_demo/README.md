@@ -8,16 +8,16 @@ to fill holes in images.
 Running the application with the <code>-h</code> option yields the following usage message:
 
 ```
-usage: image_inpainting_demo.py [-h] -m MODEL [-i INPUT [INPUT ...]]
-                                [-d DEVICE] [-p PARTS] [-mbw MAX_BRUSH_WIDTH]
+usage: image_inpainting_demo.py [-h] -m MODEL [-i INPUT] [-d DEVICE]
+                                [-p PARTS] [-mbw MAX_BRUSH_WIDTH]
                                 [-ml MAX_LENGTH] [-mv MAX_VERTEX] [--no_show]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
-  -i INPUT [INPUT ...], --input INPUT [INPUT ...]
-                        path to video or image/images
+  -i INPUT, --input INPUT
+                        path to image.
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL or MYRIAD is acceptable. The demo will
@@ -28,7 +28,7 @@ Options:
   -mbw MAX_BRUSH_WIDTH, --max_brush_width MAX_BRUSH_WIDTH
                         Optional. Max width of brush to draw mask.
   -ml MAX_LENGTH, --max_length MAX_LENGTH
-                        Optional. Max brush length to draw mask.
+                        Optional. Max strokes length to draw mask.
   -mv MAX_VERTEX, --max_vertex MAX_VERTEX
                         Optional. Max number of vertex to draw mask.
   --no_show             Optional. Don't show output

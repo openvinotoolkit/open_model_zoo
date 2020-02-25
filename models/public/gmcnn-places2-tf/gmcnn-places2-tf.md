@@ -118,7 +118,7 @@ Restored image, name: `Cast`, shape: [1x3x512x680], format: [BxCxHxW]
     - H - image height
     - W - image width
 
-   Expected color order: BGR.
+   Expected color order: RGB.
 
 ## Legal Information
 
