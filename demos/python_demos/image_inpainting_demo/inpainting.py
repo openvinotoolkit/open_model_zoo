@@ -18,7 +18,7 @@ import numpy as np
 from openvino.inference_engine import IENetwork, IECore
 
 class ImageInpainting(object):
-    def __init__(self, ie, model_path, device='CPU', parts=8, max_brush_width=24, max_length=100, max_vertex=20):
+    def __init__(self, ie, model_path, parts, max_brush_width, max_length, max_vertex, device='CPU'):
         model = IENetwork(model=model_path, weights=os.path.splitext(model_path)[0] + '.bin')
 
         assert len(model.inputs) == 2, "Expected 2 input blob"
@@ -49,13 +49,13 @@ class ImageInpainting(object):
     @staticmethod
     def _free_form_mask(max_vertex, max_length, max_brush_width, h, w, max_angle=360):
         mask = np.zeros((h, w, 1), np.float32)
-        num_vertex = np.random.randint(max_vertex + 1)
+        num_strokes = np.random.randint(max_vertex + 1)
         start_y = np.random.randint(h)
         start_x = np.random.randint(w)
         brush_width = 0
-        for i in range(num_vertex):
-            angle = np.random.randint(max_angle + 1)
-            angle = angle / 360.0 * 2 * np.pi
+        cv2.circle(mask, (start_y, start_x), brush_width // 2, 2)
+        for i in range(num_strokes):
+            angle = np.random.random() * np.deg2rad(max_angle)
             if i % 2 == 0:
                 angle = 2 * np.pi - angle
             length = np.random.randint(max_length + 1)
@@ -63,13 +63,12 @@ class ImageInpainting(object):
             next_y = start_y + length * np.cos(angle)
             next_x = start_x + length * np.sin(angle)
 
-            next_y = np.maximum(np.minimum(next_y, h - 1), 0).astype(np.int)
-            next_x = np.maximum(np.minimum(next_x, w - 1), 0).astype(np.int)
+            next_y = np.clip(next_y, 0, h - 1).astype(np.int)
+            next_x = np.clip(next_x, 0, w- 1).astype(np.int)
             cv2.line(mask, (start_y, start_x), (next_y, next_x), 1, brush_width)
             cv2.circle(mask, (start_y, start_x), brush_width // 2, 2)
 
             start_y, start_x = next_y, next_x
-        cv2.circle(mask, (start_y, start_x), brush_width // 2, 2)
         return mask
 
     def preprocess(self, image):
@@ -81,8 +80,6 @@ class ImageInpainting(object):
                                          self.input_height, self.input_width)
         mask = np.minimum(mask, 1.0)
 
-        if len(mask.shape) == 2:
-            mask = np.expand_dims(mask, axis=2)
         image = image * (1 - mask) + 255 * mask
         image = np.transpose(image, (2, 0, 1))
         mask = np.transpose(mask, (2, 0, 1))

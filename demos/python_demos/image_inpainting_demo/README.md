@@ -1,4 +1,4 @@
-# Image Inpaiting Python Demo
+# Image Inpainting Python Demo
 
 This demo showcases Image Inpainting with GMCNN. The task is to estimate suitable pixel information
 to fill holes in images.

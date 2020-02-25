@@ -350,6 +350,7 @@ describing a single model. Each such object has the following keys:
   * `feature_extraction`
   * `head_pose_estimation`
   * `human_pose_estimation`
+  * `image_inpainting`
   * `image_processing`
   * `instance_segmentation`
   * `monocular_depth_estimation`

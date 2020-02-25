@@ -2,7 +2,7 @@ models:
   - name: inpainting-gmcnn
     launchers:
       - framework: tf
-        model: public/gmcnn-tf/places2_512x680_freeform/frozen_model.pb
+        model: public/gmcnn-tf/frozen_model.pb
         adapter: inpainting
         inputs:
           - name: "Placeholder"

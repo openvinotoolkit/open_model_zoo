@@ -3,9 +3,9 @@
 ## Use Case and High-Level Description
 
 The `gmcnn-tf` is the TensorFlow implementation of GMCNN Image Inpainting model,
-aimed to estimate suitable pixel information tofill holes in images. The `gmcnn-tf`
+aimed to estimate suitable pixel information to fill holes in images. `gmcnn-tf`
 is trained on Places2 dataset with free-form masks. Originally redistributed as checkpoint files,
-was converted to frozen graph.For details see repository <https://github.com/shepnerd/inpainting_gmcnn>.
+it was converted to a frozen graph. For details see [repository](https://github.com/shepnerd/inpainting_gmcnn).
 
 ### Steps to Reproduce Conversion to Frozen Graph
 
@@ -18,10 +18,14 @@ cd inpainting_gmcnn/tensorflow
 ```sh
 git checkout ba7f710
 ```
-3. Install the [original dependencies](https://github.com/shepnerd/inpainting_gmcnn#prerequisites).
-(TensoFlow\* version used - 1.14.0, CPU).
-4. Download the [pretrained weights](https://drive.google.com/file/d/1aakVS0CPML_Qg-PuXGE1Xaql96hNEKOU/view?usp=sharing)
-5. Run sample [conversion script](./freeze_model.py):
+3. Apply `freeze_model.patch` patch
+```sh
+git apply path/to/freeze_model.patch
+```
+4. Install the [original dependencies](https://github.com/shepnerd/inpainting_gmcnn#prerequisites).
+(TensorFlow\* version used - 1.14.0, CPU).
+5. Download the [pretrained weights](https://drive.google.com/file/d/1aakVS0CPML_Qg-PuXGE1Xaql96hNEKOU/view?usp=sharing)
+6. Run sample conversion script:
 ```sh
 python3 freeze_model.py --ckpt_dir path/to/downloaded_weights --save_dir path/to/save_directory
 ```
@@ -60,7 +64,7 @@ and disguised at random positions with pre-generated free-form masks.
     - W - image width
     - C - number of channels
 
-   Expected color order: RGB.
+   Expected color order: BGR.
 
 2. Mask, name: `Placeholder_1`, shape: [1x512x680x1], format: [BxHxWxC]
   where:

@@ -26,14 +26,14 @@ def build_argparser():
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
     args.add_argument("-m", "--model", help="Required. Path to an .xml file with a trained model.",
                       required=True, type=str)
-    args.add_argument("-i", "--input", type=str, nargs='+', default='', help="path to video or image/images")
+    args.add_argument("-i", "--input", type=str, default='', help="path to image.")
     args.add_argument("-d", "--device",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL or MYRIAD is "
                            "acceptable. The demo will look for a suitable plugin for device specified. "
                            "Default value is CPU", default="CPU", type=str)
     args.add_argument("-p", "--parts", help="Optional. Number of parts to draw mask.", default=8)
     args.add_argument("-mbw", "--max_brush_width", help="Optional. Max width of brush to draw mask.", default=24)
-    args.add_argument("-ml", "--max_length", help="Optional. Max brush length to draw mask.", default=100)
+    args.add_argument("-ml", "--max_length", help="Optional. Max strokes length to draw mask.", default=100)
     args.add_argument("-mv", "--max_vertex", help="Optional. Max number of vertex to draw mask.", default=20)
     args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
 
@@ -43,10 +43,10 @@ def main():
     args = build_argparser().parse_args()
 
     ie = IECore()
-    inpainting_processor = ImageInpainting(ie, args.model, args.device, args.parts,
-                                           args.max_brush_width, args.max_length, args.max_vertex)
+    inpainting_processor = ImageInpainting(ie, args.model, args.parts,
+                                           args.max_brush_width, args.max_length, args.max_vertex, args.device)
 
-    img = cv2.imread(args.input[0], cv2.IMREAD_COLOR)
+    img = cv2.imread(args.input, cv2.IMREAD_COLOR)
     masked_image, output_image = inpainting_processor.process(img)
     masked_image = np.transpose(masked_image, (0, 2, 3, 1)).astype(np.uint8)
     output_image = np.transpose(output_image, (0, 2, 3, 1)).astype(np.uint8)

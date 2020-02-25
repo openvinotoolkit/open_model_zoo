@@ -19,12 +19,12 @@ description: >-
   For details see repository <https://github.com/shepnerd/inpainting_gmcnn>.
 task_type: image_inpainting
 files:
-  - name: gmcnn_frozen_model.pb
+  - name: frozen_model.pb
     size: 49774888
     sha256: 2bef90eb90a11a7bf552df66e6d3c86969c922283236686ef8225dc4ee21c39d
     source: https://download.01.org/opencv/public_models/022020/gmcnn/frozen_model.pb
 model_optimizer_args:
-  - --input_model=$dl_dir/gmcnn_frozen_model.pb
+  - --input_model=$dl_dir/frozen_model.pb
   - --input_shape=[1,512,680,3],[1,512,680,1]
   - --input=Placeholder,Placeholder_1
   - --output=Minimum

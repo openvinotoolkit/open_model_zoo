@@ -59,8 +59,8 @@ class FreeFormMask(Preprocessor):
             next_y = start_y + length * np.cos(angle)
             next_x = start_x + length * np.sin(angle)
 
-            next_y = np.maximum(np.minimum(next_y, h - 1), 0).astype(np.int)
-            next_x = np.maximum(np.minimum(next_x, w - 1), 0).astype(np.int)
+            next_y = np.clip(next_y, 0, h - 1).astype(np.int)
+            next_x = np.clip(next_x, 0, w- 1).astype(np.int)
             cv2.line(mask, (start_y, start_x), (next_y, next_x), 1, brush_width)
             cv2.circle(mask, (start_y, start_x), brush_width // 2, 2)
 
@@ -76,9 +76,6 @@ class FreeFormMask(Preprocessor):
         for _ in range(self.parts):
             mask += self._free_form_mask(self.max_vertex, self.max_length, self.max_brush_width, img_height, img_width)
         mask = np.minimum(mask, 1.0)
-
-        if len(mask.shape) == 2:
-            mask = np.expand_dims(mask, axis=2)
 
         img = img * (1 - mask) + 255 * mask
         image.data = [img, mask]
