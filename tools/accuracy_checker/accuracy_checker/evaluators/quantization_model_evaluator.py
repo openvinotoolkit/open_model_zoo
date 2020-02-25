@@ -167,9 +167,6 @@ class ModelEvaluator:
                     if progress_reporter:
                         progress_reporter.update(batch_id, len(batch_predictions))
 
-        if dump_prediction_to_annotation and self._dumped_annotations:
-            self.register_annotations(self._dumped_annotations)
-
         if dump_prediction_to_annotation:
             self.register_dumped_annotations()
 
@@ -185,9 +182,7 @@ class ModelEvaluator:
 
     def select_dataset(self, dataset_tag):
         if self.dataset is not None and isinstance(self.dataset_config, list):
-            self.register_dumped_annotations()
             return
-
         dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag, self._dumped_annotations)
         self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
         if self.dataset.annotation_reader and self.dataset.annotation_reader.metadata:
