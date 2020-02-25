@@ -29,4 +29,5 @@ class MultiLabelRecognitionAnnotation(MultiLabelRecognitionRepresentation):
 
 
 class MultiLabelRecognitionPrediction(MultiLabelRecognitionRepresentation):
-    pass
+    def to_annotation(self):
+        return MultiLabelRecognitionAnnotation(self.identifier, self.multi_label)

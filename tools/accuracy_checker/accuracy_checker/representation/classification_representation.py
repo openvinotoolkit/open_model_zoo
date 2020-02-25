@@ -43,6 +43,9 @@ class ClassificationPrediction(Classification):
     def top_k(self, k):
         return np.argpartition(self.scores, -k)[-k:]
 
+    def to_annotation(self):
+        return ClassificationAnnotation(self.identifier, self.label)
+
 
 class ArgMaxClassificationPrediction(ClassificationPrediction):
     def __init__(self, identifier='', label=None):

@@ -45,35 +45,16 @@ class DatasetConfig(ConfigValidator):
 
 
 class Dataset:
-    def __init__(self, config_entry):
+    def __init__(self, config_entry, delayed_annotation_loading=False):
         self._config = config_entry
         self.batch = 1
         self.iteration = 0
         dataset_config = DatasetConfig('Dataset')
         dataset_config.validate(self._config)
-        self._images_dir = Path(self._config.get('data_source', ''))
-        self._load_annotation()
+        if not delayed_annotation_loading:
+            self._load_annotation()
 
     def _load_annotation(self):
-        def create_subset(subsample_size, subsample_seed):
-            if isinstance(subsample_size, str):
-                if subsample_size.endswith('%'):
-                    try:
-                        subsample_size = float(subsample_size[:-1])
-                    except ValueError:
-                        raise ConfigError('invalid value for subsample_size: {}'.format(subsample_size))
-                    if subsample_size <= 0:
-                        raise ConfigError('subsample_size should be > 0')
-                    subsample_size *= len(annotation) / 100
-                    subsample_size = int(subsample_size) or 1
-            try:
-                subsample_size = int(subsample_size)
-            except ValueError:
-                raise ConfigError('invalid value for subsample_size: {}'.format(subsample_size))
-            if subsample_size < 1:
-                raise ConfigError('subsample_size should be > 0')
-            return make_subset(annotation, subsample_size, subsample_seed)
-
         annotation, meta = None, None
         use_converted_annotation = True
         if 'annotation' in self._config:
@@ -92,7 +73,7 @@ class Dataset:
         if subsample_size is not None:
             subsample_seed = self._config.get('subsample_seed', 666)
 
-            annotation = create_subset(subsample_size, subsample_seed)
+            annotation = create_subset(annotation, subsample_size, subsample_seed)
 
         if self._config.get('analyze_dataset', False):
             analyze_dataset(annotation, meta)
@@ -236,6 +217,20 @@ class Dataset:
         if reload_annotation:
             self._load_annotation()
 
+    def set_annotation(self, annotation):
+        subsample_size = self._config.get('subsample_size')
+        if subsample_size is not None:
+            subsample_seed = self._config.get('subsample_seed', 666)
+
+            annotation = create_subset(annotation, subsample_size, subsample_seed)
+
+        if self._config.get('analyze_dataset', False):
+            analyze_dataset(annotation, self.metadata)
+
+        self._annotation = annotation
+        self.name = self._config.get('name')
+        self.subset = None
+
 
 def read_annotation(annotation_file: Path):
     annotation_file = get_path(annotation_file)
@@ -251,13 +246,33 @@ def read_annotation(annotation_file: Path):
     return result
 
 
+def create_subset(annotation, subsample_size, subsample_seed):
+    if isinstance(subsample_size, str):
+        if subsample_size.endswith('%'):
+            try:
+                subsample_size = float(subsample_size[:-1])
+            except ValueError:
+                raise ConfigError('invalid value for subsample_size: {}'.format(subsample_size))
+            if subsample_size <= 0:
+                raise ConfigError('subsample_size should be > 0')
+            subsample_size *= len(annotation) / 100
+            subsample_size = int(subsample_size) or 1
+    try:
+        subsample_size = int(subsample_size)
+    except ValueError:
+        raise ConfigError('invalid value for subsample_size: {}'.format(subsample_size))
+    if subsample_size < 1:
+        raise ConfigError('subsample_size should be > 0')
+    return make_subset(annotation, subsample_size, subsample_seed)
+
 class DatasetWrapper:
-    def __init__(self, data_reader, annotation_reader=None, tag=''):
+    def __init__(self, data_reader, annotation_reader=None, tag='', dataset_config=None):
         self.tag = tag
         self.data_reader = data_reader
         self.annotation_reader = annotation_reader
         self._batch = 1
         self.subset = None
+        self.dataset_config = dataset_config or {}
         if not annotation_reader:
             self._identifiers = [file.name for file in self.data_reader.data_source.glob('*')]
 
