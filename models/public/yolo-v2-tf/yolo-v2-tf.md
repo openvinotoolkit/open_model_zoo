@@ -9,8 +9,8 @@ YOLO v2 is a real-time object detection model from TensorFlow framework. This mo
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Detection     |
-| GFLOPs            | -        |
-| MParams           | -        |
+| GFLOPs            | 63.03         |
+| MParams           | 50.95         |
 | Source framework  | TensorFlow\*  |
 
 ## Accuracy

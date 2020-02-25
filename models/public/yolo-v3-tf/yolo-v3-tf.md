@@ -9,8 +9,8 @@ YOLO v3 is a real-time object detection model implemented with Keras\* from this
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Detection     |
-| GFLOPs            | -        |
-| MParams           | -        |
+| GFLOPs            | 65.984        |
+| MParams           | 61.922        |
 | Source framework  | TensorFlow\*  |
 
 ## Input
