@@ -69,6 +69,7 @@ class ModelEvaluator:
 
         return filled_inputs, batch_meta
 
+    # pylint: disable=R0912,R1702
     def process_dataset_async(
             self,
             nreq=None,
@@ -209,6 +210,7 @@ class ModelEvaluator:
         self.dataset.batch = self.launcher.batch
         self.preprocessor.input_shapes = self.launcher.inputs_info_for_meta()
 
+    # pylint: disable=R0912
     def process_dataset(
             self,
             subset=None,
