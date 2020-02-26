@@ -32,7 +32,7 @@ def get_pth_test_model(models_dir):
         "device": 'cpu',
     }
 
-    return create_launcher(config, 'model')
+    return create_launcher(config)
 
 
 class TestPytorchLauncher:
@@ -59,4 +59,4 @@ class TestMxNetLauncherConfig:
         config = {'framework': 'pytorch'}
 
         with pytest.raises(ConfigError):
-            create_launcher(config, 'model')
+            create_launcher(config)

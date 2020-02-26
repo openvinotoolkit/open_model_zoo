@@ -34,7 +34,7 @@ def get_opencv_test_caffe_model(models_dir):
         "backend": "ocv",
         "inputs": [{"name": "input", "type": "INPUT", "shape": "(3, 32, 32)"}]
     }
-    return create_launcher(config, 'model')
+    return create_launcher(config)
 
 
 def get_opencv_test_onnx_model(models_dir):
@@ -46,7 +46,7 @@ def get_opencv_test_onnx_model(models_dir):
         "backend": "ocv",
         "inputs": [{"name": "input", "type": "INPUT", "shape": "(3, 32, 32)"}]
     }
-    return create_launcher(config, 'model')
+    return create_launcher(config)
 
 
 list_models = [get_opencv_test_caffe_model, get_opencv_test_onnx_model]
@@ -90,7 +90,7 @@ class TestOpenCVLauncherConfig:
             'inputs': [{'name': 'data', 'type': 'INPUT'}]
         }
         with pytest.raises(KeyError):
-            create_launcher(config, 'model')
+            create_launcher(config)
 
     def test_missed_model_in_create_opencv_launcher_raises_config_error_exception(self):
         config = {
@@ -116,7 +116,7 @@ class TestOpenCVLauncherConfig:
             'inputs': [{'name': 'data', 'type': 'INPUT'}]
         }
         with pytest.raises(ConfigError):
-            create_launcher(config, 'model')
+            create_launcher(config)
 
     def test_missed_backend_in_create_opencv_launcher_raises_config_error_exception(self):
         config = {
@@ -129,7 +129,7 @@ class TestOpenCVLauncherConfig:
             'inputs': [{'name': 'data', 'type': 'INPUT'}]
         }
         with pytest.raises(ConfigError):
-            create_launcher(config, 'model')
+            create_launcher(config)
 
     def test_missed_adapter_in_create_opencv_launcher_raises_config_error_exception(self):
         config = {
@@ -142,7 +142,7 @@ class TestOpenCVLauncherConfig:
             'inputs': [{'name': 'data', 'type': 'INPUT'}]
         }
         with pytest.raises(ConfigError):
-            create_launcher(config, 'model')
+            create_launcher(config)
 
     def test_missed_inputs_in_create_opencv_launcher_raises_config_error_exception(self):
         config = {
@@ -155,4 +155,4 @@ class TestOpenCVLauncherConfig:
             # 'inputs': [{'name': 'data', 'type': 'INPUT'}]
         }
         with pytest.raises(ConfigError):
-            create_launcher(config, 'model')
+            create_launcher(config)

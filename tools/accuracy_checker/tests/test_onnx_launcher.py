@@ -44,7 +44,7 @@ def get_onnx_test_model(models_dir, device=None, ep=None):
         config['device'] = device
     if ep is not None:
         config['execution_providers'] = ep
-    return create_launcher(config, 'model')
+    return create_launcher(config)
 
 
 class TestONNXRuntimeLauncher:
@@ -92,10 +92,10 @@ class TestONNXRuntimeLauncherConfig:
         config = {'framework': 'onnx_runtime'}
 
         with pytest.raises(ConfigError):
-            create_launcher(config, 'model')
+            create_launcher(config)
 
     def test_unsupported_device_in_create_onnx_launcher_raises_config_error_exception(self):
         config = {'framework': 'onnx_runtime', 'model': 'model.onnx', 'device': 'UNSUPPORTED'}
 
         with pytest.raises(ConfigError):
-            create_launcher(config, 'model')
+            create_launcher(config)

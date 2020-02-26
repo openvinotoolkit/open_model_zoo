@@ -34,7 +34,7 @@ def get_caffe_test_model(models_dir):
         "device": "cpu"
     }
 
-    return create_launcher(config, 'model')
+    return create_launcher(config)
 
 
 class TestCaffeLauncher:
@@ -75,11 +75,11 @@ def test_missed_model_in_create_caffe_launcher_raises_config_error_exception():
     launcher = {'framework': 'caffe', 'weights': 'custom', 'adapter': 'classification'}
 
     with pytest.raises(ConfigError):
-        create_launcher(launcher, 'model')
+        create_launcher(launcher)
 
 
 def test_missed_weights_in_create_caffe_launcher_raises_config_error_exception():
     launcher = {'framework': 'caffe', 'model': 'custom', 'adapter': 'ssd'}
 
     with pytest.raises(ConfigError):
-        create_launcher(launcher, 'model')
+        create_launcher(launcher)
