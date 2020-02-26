@@ -36,7 +36,7 @@ Optionally you can provide `module_config` section which contains config for cus
     * [mtcnn-r](../configs/mtcnn-r.yml) - running only refine stage of MTCNN using dumped proposal stage results.
     * [mtcnn-o](../configs/mtcnn-o.yml) - running full MTCNN pipeline.
 
-* **Text Spotting Evaluator** demonstrates how to evaluate text-spotting-0001 model via Accuracy Checker.
+* **Text Spotting Evaluator** demonstrates how to evaluate text-spotting-0002 model via Accuracy Checker.
   [Evaluator code](text_spotting_evaluator.py)
   Configuration file examples:
-    * [text-spotting-0001](../configs/text-spotting-0001.yml)
+    * [text-spotting-0002](../configs/text-spotting-0002.yml)

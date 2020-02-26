@@ -1,4 +1,4 @@
-# text-spotting-0001-detector
+# text-spotting-0002-detector
 
 ## Use Case and High-Level Description
 
@@ -13,14 +13,13 @@ This model is a Mask-RCNN-based text detector with ResNet50 backbone and additio
 
 ## Example
 
-![](./text-spotting-0001.png)
+![](./text-spotting-0002.png)
 
 ## Specification
 
 | Metric                                        | Value     |
 |-----------------------------------------------|-----------|
-| Word spotting hmean ICDAR2015, without a dictionary | 59.04%    |
-| Detection hmean ICDAR2015                     | 87.09%    |
+| Word spotting hmean ICDAR2015, without a dictionary | 61.01%    |
 | GFlops                                        | 185.169   |
 | MParams                                       | 26.497    |
 | Source framework                              | PyTorch\* |
@@ -32,7 +31,7 @@ This model is a Mask-RCNN-based text detector with ResNet50 backbone and additio
 
 ## Inputs
 
-1.	Name: `im_data` , shape: [1x3x768x1280]. An input image in the [1xCxHxW] format. 
+1.	Name: `im_data` , shape: [1x3x768x1280]. An input image in the [1xCxHxW] format.
     The expected channel order is BGR.
 2.	Name: `im_info`, shape: [1x3]. Image information: processed image height,
     processed image width and processed image scale with respect to the original image resolution.
@@ -41,7 +40,7 @@ This model is a Mask-RCNN-based text detector with ResNet50 backbone and additio
 
 1.	Name: `classes`, shape: [100]. Contiguous integer class ID for every
     detected object, `0` for background (no object detected).
-1.	Name: `scores`, shape: [100]. Detection confidence scores in the [0, 1] range 
+1.	Name: `scores`, shape: [100]. Detection confidence scores in the [0, 1] range
     for every object.
 1.	Name: `boxes`, shape: [100x4]. Bounding boxes around every detected object
     in the (top_left_x, top_left_y, bottom_right_x, bottom_right_y) format.
