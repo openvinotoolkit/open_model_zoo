@@ -51,6 +51,7 @@ class ModelEvaluator(BaseEvaluator):
 
     @classmethod
     def from_configs(cls, model_config):
+        model_name = model_config['name']
         launcher_config = model_config['launchers'][0]
         dataset_config = model_config['datasets'][0]
         dataset_name = dataset_config['name']
@@ -68,7 +69,7 @@ class ModelEvaluator(BaseEvaluator):
         if data_reader_type in REQUIRES_ANNOTATIONS:
             data_source = dataset.annotation
         data_reader = BaseReader.provide(data_reader_type, data_source, data_reader_config)
-        launcher = create_launcher(launcher_config)
+        launcher = create_launcher(launcher_config, model_name)
         async_mode = launcher.async_mode if hasattr(launcher, 'async_mode') else False
         config_adapter = launcher_config.get('adapter')
         adapter = None if not config_adapter else create_adapter(config_adapter, launcher, dataset)

@@ -343,11 +343,13 @@ class NumberField(BaseField):
     def type(self):
         return self._value_type
 
+
 class PathField(BaseField):
-    def __init__(self, is_directory=False, check_exists=True, **kwargs):
+    def __init__(self, is_directory=False, check_exists=True, file_or_directory=False, **kwargs):
         super().__init__(**kwargs)
         self.is_directory = is_directory
         self.check_exists = check_exists
+        self.file_or_directory = file_or_directory
 
     def validate(self, entry, field_uri=None):
         super().validate(entry, field_uri)
@@ -356,7 +358,7 @@ class PathField(BaseField):
 
         field_uri = field_uri or self.field_uri
         try:
-            get_path(entry, self.is_directory, self.check_exists)
+            get_path(entry, self.is_directory, self.check_exists, self.file_or_directory)
         except TypeError:
             self.raise_error(entry, field_uri, "values is expected to be path-like")
         except FileNotFoundError:

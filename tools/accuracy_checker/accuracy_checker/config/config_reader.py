@@ -25,16 +25,6 @@ from .config_validator import ConfigError
 
 ENTRIES_PATHS = {
     'launchers': {
-        'model': 'models',
-        'weights': 'models',
-        'color_coeff': 'models',
-        'caffe_model': 'models',
-        'caffe_weights': 'models',
-        'tf_model': 'models',
-        'tf_meta': 'models',
-        'mxnet_weights': 'models',
-        'onnx_model': 'models',
-        'kaldi_model': 'models',
         'cpu_extensions': 'extensions',
         'gpu_extensions': 'extensions',
         'bitstream': 'bitstreams',
@@ -48,8 +38,22 @@ ENTRIES_PATHS = {
         'data_source': 'source',
     },
 }
+
 PREPROCESSING_PATHS = {
     'mask_dir': 'source'
+}
+
+LIST_ENTRIES_PATHS = {
+        'model': 'models',
+        'weights': 'models',
+        'color_coeff': 'models',
+        'caffe_model': 'models',
+        'caffe_weights': 'models',
+        'tf_model': 'models',
+        'tf_meta': 'models',
+        'mxnet_weights': 'models',
+        'onnx_model': 'models',
+        'kaldi_model': 'models',
 }
 
 COMMAND_LINE_ARGS_AS_ENV_VARS = {
@@ -61,6 +65,14 @@ COMMAND_LINE_ARGS_AS_ENV_VARS = {
 }
 DEFINITION_ENV_VAR = 'DEFINITIONS_FILE'
 CONFIG_SHARED_PARAMETERS = ['bitstream']
+ACCEPTABLE_MODEL = [
+    'caffe_model', 'caffe_weights',
+    'tf_model', 'tf_meta',
+    'mxnet_model',
+    'onnx_model',
+    'kaldi_model',
+    'model'
+]
 
 
 
@@ -337,7 +349,9 @@ class ConfigReader:
             entries_paths.update({'reader': {'data_source': 'source'}})
             for pipeline in config['pipelines']:
                 for stage in pipeline['stages']:
-                    process_config(stage, entries_paths, args, 'dataset', 'launcher', identifiers_mapping)
+                    process_config(
+                        stage, entries_paths, args, 'dataset', 'launcher', identifiers_mapping, pipeline=True
+                    )
 
         def process_modules(config, entries_paths):
             for evaluation in config['evaluations']:
@@ -349,6 +363,7 @@ class ConfigReader:
                     networks_info = module_config['network_info']
                     if isinstance(networks_info, dict):
                         for _, params in networks_info.items():
+                            entries_paths['launchers'].update(LIST_ENTRIES_PATHS)
                             merge_entry_paths(entries_paths['launchers'], params, args)
                     if isinstance(networks_info, list):
                         merge_entry_paths(entries_paths['launchers'], networks_info, args)
@@ -365,9 +380,26 @@ class ConfigReader:
     @staticmethod
     def _provide_cmd_arguments(arguments, config, mode):
         def merge_models(config, arguments, update_launcher_entry):
+            def provide_models(launchers):
+                if 'models' not in arguments or not arguments.models:
+                    return launchers
+                model_paths = arguments.models
+                updated_launchers = []
+                model_paths = [model_paths] if not isinstance(model_paths, list) else model_paths
+                for launcher in launchers:
+                    if contains_any(launcher, ACCEPTABLE_MODEL):
+                        updated_launchers.append(launcher)
+                        continue
+                    for model_path in model_paths:
+                        copy_launcher = copy.deepcopy(launcher)
+                        copy_launcher['model'] = model_path
+                        updated_launchers.append(copy_launcher)
+                return updated_launchers
+
             for model in config['models']:
                 for launcher_entry in model['launchers']:
                     merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry)
+                model['launchers'] = provide_models(model['launchers'])
 
         def merge_pipelines(config, arguments, update_launcher_entry):
             for pipeline in config['pipelines']:
@@ -380,6 +412,8 @@ class ConfigReader:
                 module_config = evaluation.get('module_config')
                 if not module_config:
                     continue
+                if 'models' in arguments and arguments.models:
+                    module_config['_models'] = arguments.models
                 if 'launchers' not in module_config:
                     continue
                 for launcher in module_config['launchers']:
@@ -678,7 +712,7 @@ def filter_modules(config, target_devices, args):
 
 def process_config(
         config_item, entries_paths, args, dataset_identifier='datasets',
-        launchers_idenitfier='launchers', identifers_mapping=None
+        launchers_idenitfier='launchers', identifers_mapping=None, pipeline=False
 ):
     def process_dataset(datasets_configs):
         if not isinstance(datasets_configs, list):
@@ -699,12 +733,30 @@ def process_config(
         if not isinstance(launchers_configs, list):
             launchers_configs = [launchers_configs]
 
+        updated_launchers = []
         for launcher_config in launchers_configs:
-            adapter_config = launcher_config.get('adapter')
-            if not isinstance(adapter_config, dict):
-                continue
-            command_line_adapter = (create_command_line_mapping(adapter_config, 'models'))
-            merge_entry_paths(command_line_adapter, adapter_config, args)
+            if 'models' not in args and not args['models']:
+                updated_launchers.append(launcher_config)
+            models = args['models']
+            if isinstance(models, list):
+                for model_id, _ in enumerate(models):
+                    new_launcher = copy.deepcopy(launcher_config)
+                    merge_entry_paths(LIST_ENTRIES_PATHS, new_launcher, args, model_id)
+                    adapter_config = new_launcher.get('adapter')
+                    if isinstance(adapter_config, dict):
+                        command_line_adapter = (create_command_line_mapping(adapter_config, 'models'))
+                        merge_entry_paths(command_line_adapter, adapter_config, args, model_id)
+                    if not updated_launchers or new_launcher != updated_launchers[-1]:
+                        updated_launchers.append(new_launcher)
+            else:
+                merge_entry_paths(LIST_ENTRIES_PATHS, launcher_config, args)
+                adapter_config = launcher_config.get('adapter')
+                if isinstance(adapter_config, dict):
+                    command_line_adapter = (create_command_line_mapping(adapter_config, 'models'))
+                    merge_entry_paths(command_line_adapter, adapter_config, args)
+                updated_launchers.append(launcher_config)
+
+        return updated_launchers
 
     for entry, command_line_arg in entries_paths.items():
         entry_id = entry if not identifers_mapping else identifers_mapping[entry]
@@ -716,16 +768,17 @@ def process_config(
 
         if entry_id == launchers_idenitfier:
             launchers_configs = config_item[entry_id]
-            process_launchers(launchers_configs)
+            processed_launcher = process_launchers(launchers_configs)
+            config_item[entry_id] = processed_launcher if not pipeline else processed_launcher[0]
 
-        config_entires = config_item[entry_id]
-        if not isinstance(config_entires, list):
-            config_entires = [config_entires]
-        for config_entry in config_entires:
+        config_entries = config_item[entry_id]
+        if not isinstance(config_entries, list):
+            config_entries = [config_entries]
+        for config_entry in config_entries:
             merge_entry_paths(command_line_arg, config_entry, args)
 
 
-def merge_entry_paths(keys, value, args):
+def merge_entry_paths(keys, value, args, value_id=0):
     for field, argument in keys.items():
         if field not in value:
             continue
@@ -735,12 +788,21 @@ def merge_entry_paths(keys, value, args):
             value[field] = Path(value[field])
             continue
 
-        if not argument in args or not args[argument]:
+        if argument not in args or not args[argument]:
             continue
 
-        if not args[argument].is_dir():
+        selected_argument = args[argument]
+        if isinstance(selected_argument, list):
+            if len(selected_argument) > 1:
+                if len(selected_argument) <= value_id:
+                    raise ValueError('list of arguments for {} less than number of evaluations')
+                selected_argument = selected_argument[value_id]
+            else:
+                selected_argument = selected_argument[0]
+
+        if not selected_argument.is_dir():
             raise ConfigError('argument: {} should be a directory'.format(argument))
-        value[field] = args[argument] / config_path
+        value[field] = selected_argument / config_path
 
 
 def get_mode(config):
@@ -800,10 +862,6 @@ def merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry):
         return launcher_entry
 
     launcher_entry.update(update_launcher_entry)
-    models_prefix = arguments.models if 'models' in arguments else None
-    if models_prefix:
-        launcher_entry['_models_prefix'] = models_prefix
-
     _convert_models_args(launcher_entry)
     _async_evaluation_args(launcher_entry)
     _fpga_specific_args(launcher_entry)

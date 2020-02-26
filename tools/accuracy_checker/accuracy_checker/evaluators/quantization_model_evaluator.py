@@ -52,9 +52,10 @@ class ModelEvaluator:
     @classmethod
     def from_configs(cls, config):
         model_config = config['models'][0]
+        model_name = model_config['name']
         dataset_config = model_config['datasets']
         launcher_config = model_config['launchers'][0]
-        launcher = create_launcher(launcher_config, delayed_model_loading=True)
+        launcher = create_launcher(launcher_config, model_name, delayed_model_loading=True)
         config_adapter = launcher_config.get('adapter')
         adapter = None if not config_adapter else create_adapter(config_adapter, None, None)
 

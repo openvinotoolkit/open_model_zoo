@@ -52,7 +52,8 @@ def build_arguments_parser():
         '-m', '--models',
         help='prefix path to the models and weights',
         type=partial(get_path, is_directory=True),
-        required=False
+        required=False,
+        nargs='+'
     )
     parser.add_argument(
         '-s', '--source',

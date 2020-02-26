@@ -187,8 +187,8 @@ class DLSDKLauncher(Launcher):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'model': PathField(description="Path to model."),
-            'weights': PathField(description="Path to model.", optional=True),
+            'model': PathField(description="Path to model.", file_or_directory=True),
+            'weights': PathField(description="Path to weights.", optional=True, file_or_directory=True),
             'device': StringField(description="Device name."),
             'caffe_model': PathField(optional=True, description="Path to Caffe model file."),
             'caffe_weights': PathField(optional=True, description="Path to Caffe weights file."),
@@ -214,7 +214,6 @@ class DLSDKLauncher(Launcher):
                             "In multi device mode allows setting comma-separated list for numbers "
                             "or one value which will be used for all devices"
             ),
-            '_models_prefix': PathField(is_directory=True, optional=True, description="Model prefix."),
             '_model_optimizer': PathField(optional=True, is_directory=True, description="Model optimizer."),
             '_tf_obj_detection_api_config_dir': PathField(
                 optional=True, is_directory=True, description="TF Object Detection API Config."
@@ -237,8 +236,8 @@ class DLSDKLauncher(Launcher):
 
         return parameters
 
-    def __init__(self, config_entry, delayed_model_loading=False):
-        super().__init__(config_entry)
+    def __init__(self, config_entry, model_name='', delayed_model_loading=False):
+        super().__init__(config_entry, model_name)
 
         self._set_variable = False
         self.ie_config = self.config.get('ie_config')
@@ -260,8 +259,7 @@ class DLSDKLauncher(Launcher):
             if dlsdk_launcher_config.need_conversion:
                 self._model, self._weights = DLSDKLauncher.convert_model(self.config, dlsdk_launcher_config.framework)
             else:
-                self._model = self.get_value_from_config('model')
-                self._weights = self.get_value_from_config('weights')
+                self._model, self._weights = self.automatic_model_search()
 
             self.load_network(log=True)
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
@@ -356,6 +354,48 @@ class DLSDKLauncher(Launcher):
                     )
                 )
             layers[layer_name].affinity = device
+
+    def automatic_model_search(self):
+        def get_model():
+            is_blob = False
+            model = Path(self.get_value_from_config('model'))
+            if not model.is_dir():
+                if model.suffix == '.blob':
+                    return model, True
+                return model, False
+            models_list = list(model.glob('{}.xml'.format(self._model_name)))
+            blobs_list = list(Path(model).glob('{}.blob'.format(self._model_name)))
+            if models_list:
+                model = models_list[0]
+            elif blobs_list:
+                model = blobs_list[0]
+                is_blob = True
+            else:
+                models_list = list(model.glob('*.xml'))
+                blobs_list = list(Path(model).glob('*.blob'))
+                if not models_list and not blobs_list:
+                    raise ConfigError('suitable model is not found')
+                if models_list:
+                    if len(models_list) != 1:
+                        raise ConfigError('More than one model matched, please specify explicitly')
+                    model = models_list[0]
+                elif blobs_list:
+                    if len(blobs_list) != 1:
+                        raise ConfigError('More than one compiled network matched, please specify explicitly')
+                    model = blobs_list[0]
+                    is_blob = True
+            print_info('Found model {}'.format(model))
+            return model, is_blob
+
+        model, is_blob = get_model()
+        if is_blob:
+            return model, None
+        weights = self.get_value_from_config('weights')
+        if weights is None or Path(weights).is_dir():
+            weights_dir = weights or model.parent
+            weights = Path(weights_dir) / model.name.replace('xml', 'bin')
+            print_info('Found weights {}'.format(get_path(weights)))
+        return model, weights
 
     def _is_fpga(self):
         device_list = map(lambda device: device.split('.')[0], self._devices_list())

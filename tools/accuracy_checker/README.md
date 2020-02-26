@@ -81,7 +81,7 @@ accuracy_check -c path/to/configuration_file -m /path/to/models -s /path/to/sour
 All relative paths in config files will be prefixed with values specified in command line:
 
 - `-c, --config` path to configuration file.
-- `-m, --models` specifies directory in which models and weights declared in config file will be searched.
+- `-m, --models` specifies directory in which models and weights declared in config file will be searched. You also can specify space separated list of directories if you want to run the same configuration several times with models located in different directories or if you have the pipeline with several models.
 - `-s, --source` specifies directory in which input images will be searched.
 - `-a, --annotations` specifies directory in which annotation and meta files will be searched.
 

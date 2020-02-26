@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from pathlib import Path
 import numpy as np
 import cv2
 
@@ -24,7 +25,7 @@ from accuracy_checker.config import ConfigError
 from accuracy_checker.preprocessor import PreprocessingExecutor
 from accuracy_checker.metrics import MetricsExecutor
 from accuracy_checker.launcher import create_launcher
-from accuracy_checker.utils import extract_image_representations, get_path, contains_all
+from accuracy_checker.utils import extract_image_representations, contains_all
 
 
 class ColorizationEvaluator(BaseEvaluator):
@@ -58,6 +59,17 @@ class ColorizationEvaluator(BaseEvaluator):
             raise ConfigError('{} framework not supported'.format(launcher_settings['framework']))
         launcher = create_launcher(launcher_settings, delayed_model_loading=True)
         network_info = config.get('network_info', {})
+        colorization_network = network_info.get('colorization_network', {})
+        verification_network = network_info.get('verification_network', {})
+        model_args = config.get('_models', [])
+        if 'model' not in colorization_network and model_args:
+            colorization_network['model'] = model_args[0]
+        if 'model' not in verification_network and model_args:
+            verification_network['model'] = model_args[1 if len(model_args) > 1 else 0]
+        network_info.update({
+            'colorization_network': colorization_network,
+            'verification_network': verification_network
+        })
         if not contains_all(network_info, ['colorization_network', 'verification_network']):
             raise ConfigError('configuration for colorization_network/verification_network does not exist')
 
@@ -124,14 +136,45 @@ class ColorizationEvaluator(BaseEvaluator):
             dataset_config['name']
         )
 
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
+        if not self._metrics_results:
+            self.compute_metrics(False, ignore_results_formatting)
+
+        result_presenters = self.metric_executor.get_metric_presenters()
+        extracted_results, extracted_meta = [], []
+        for presenter, metric_result in zip(result_presenters, self._metrics_results):
+            result, metadata = presenter.extract_result(metric_result)
+            if isinstance(result, list):
+                extracted_results.extend(result)
+                extracted_meta.extend(metadata)
+            else:
+                extracted_results.append(result)
+                extracted_meta.append(metadata)
+            if print_results:
+                presenter.write_result(metric_result, ignore_results_formatting)
+
+        return extracted_results, extracted_meta
+
 
 class BaseModel:
-    def check_format(self, model_xml, model_bin):
-        if not get_path(model_xml).suffix == '.xml':
-            raise ConfigError('{} format not supported'.format(model_xml))
-        if not get_path(model_bin).suffix == '.bin':
-            raise ConfigError('{} format not supported'.format(model_bin))
-        return str(model_xml), str(model_bin)
+    @staticmethod
+    def auto_model_search(network_info):
+        model = Path(network_info['model'])
+        if model.is_dir():
+            model_list = list(model.glob('*.xml'))
+            blob_list = list(model.glob('*.blob'))
+            if not model_list:
+                model_list = blob_list
+            if not model_list:
+                raise ConfigError('Suitable model not found')
+            if len(model_list) > 1:
+                raise ConfigError('Several suitable models found')
+            model = model_list[0]
+        if model.suffix == '.blob':
+            return model, None
+        weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
+
+        return model, weights
 
     def predict(self, idenitifers, input_data):
         raise NotImplementedError
@@ -143,12 +186,15 @@ class BaseModel:
 class ColorizationTestModel(BaseModel):
     def __init__(self, network_info, launcher):
         super().__init__()
-        model_xml, model_bin = self.check_format(network_info['model'], network_info['weights'])
-        self.network = launcher.create_ie_network(model_xml, model_bin)
-        self.network.batch_size = 1
-        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-        self.input_blob = next(iter(self.network.inputs))
-        self.output_blob = next(iter(self.network.outputs))
+        model, weights = self.auto_model_search(network_info)
+        if weights:
+            network = launcher.create_ie_network(str(model), str(weights))
+            network.batch_size = 1
+            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+        else:
+            launcher.ie_core.import_network(str(model))
+        self.input_blob = next(iter(self.exec_network.inputs))
+        self.output_blob = next(iter(self.exec_network.outputs))
         self.color_coeff = np.load(network_info['color_coeff'])
 
     def data_preparation(self, input_data):
@@ -181,19 +227,23 @@ class ColorizationTestModel(BaseModel):
         del self.exec_network
 
     def fit_to_input(self, input_data):
-        input_data = np.reshape(input_data, self.network.inputs[self.input_blob].shape)
+        input_data = np.reshape(input_data, self.exec_network.inputs[self.input_blob].shape)
         return {self.input_blob: input_data}
 
 
 class ColorizationCheckModel(BaseModel):
     def __init__(self, network_info, launcher):
         super().__init__()
-        model_xml, model_bin = self.check_format(network_info['model'], network_info['weights'])
+        model, weights = self.auto_model_search(network_info)
+        if weights:
+            network = launcher.create_ie_network(str(model), str(weights))
+            network.batch_size = 1
+            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+        else:
+            launcher.ie_core.import_network(str(model))
+        self.input_blob = next(iter(self.exec_network.inputs))
+        self.output_blob = next(iter(self.exec_network.outputs))
         self.adapter = create_adapter(network_info['adapter'])
-        self.network = launcher.create_ie_network(model_xml, model_bin)
-        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-        self.input_blob = next(iter(self.network.inputs))
-        self.output_blob = next(iter(self.network.outputs))
         self.adapter.output_blob = self.output_blob
 
     def predict(self, identifiers, input_data):
