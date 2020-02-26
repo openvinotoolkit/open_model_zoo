@@ -113,7 +113,7 @@ class MultiCameraTracker:
                         f_complex_dist = clusters_distance(track1.f_clust, track2.f_clust)
                     else:
                         f_complex_dist = track1.f_orient.dist_to_other(track2.f_orient)
-                    f_avg_dist = cosine(track1.f_avg.get(), track2.f_avg.get())
+                    f_avg_dist = 0.5 * cosine(track1.f_avg.get(), track2.f_avg.get())
                     distance_matrix[i, j] = min(f_avg_dist, f_complex_dist)
                 else:
                     distance_matrix[i, j] = THE_BIGGEST_DISTANCE

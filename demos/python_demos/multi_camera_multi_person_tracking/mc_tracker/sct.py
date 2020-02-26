@@ -100,28 +100,28 @@ class OrientationFeature:
         distances = [1.]
         for f1, f2 in zip(self.orientation_features, other.orientation_features):
             if f1.is_valid() and f2.is_valid():
-                distances.append(cosine(f1.get(), f2.get()))
+                distances.append(0.5 * cosine(f1.get(), f2.get()))
         return min(distances)
 
     def dist_to_vec(self, vec, orientation):
         assert orientation < len(self.orientation_features)
         if orientation >= 0 and self.orientation_features[orientation].is_valid():
-            return cosine(vec, self.orientation_features[orientation].get())
+            return 0.5 * cosine(vec, self.orientation_features[orientation].get())
         return 1.
 
 
 def clusters_distance(clusters1, clusters2):
     if len(clusters1) > 0 and len(clusters2) > 0:
-        distances = cdist(clusters1.get_clusters_matrix(),
-                          clusters2.get_clusters_matrix(), 'cosine')
+        distances = 0.5 * cdist(clusters1.get_clusters_matrix(),
+                                clusters2.get_clusters_matrix(), 'cosine')
         return np.amin(distances)
     return 1.
 
 
 def clusters_vec_distance(clusters, feature):
     if len(clusters) > 0 and feature is not None:
-        distances = cdist(clusters.get_clusters_matrix(),
-                          feature.reshape(1, -1), 'cosine')
+        distances = 0.5 * cdist(clusters.get_clusters_matrix(),
+                                feature.reshape(1, -1), 'cosine')
         return np.amin(distances)
     return 1.
 
@@ -454,7 +454,7 @@ class SingleCameraTracker:
             or track2.get_start_time() > track1.get_end_time()) \
                 and track1.f_avg.is_valid() and track2.f_avg.is_valid() \
                 and self._check_tracks_velocity_constraint(track1, track2):
-            f_avg_dist = cosine(track1.f_avg.get(), track2.f_avg.get())
+            f_avg_dist = 0.5 * cosine(track1.f_avg.get(), track2.f_avg.get())
             if track1.f_orient.is_valid():
                 f_complex_dist = track1.f_orient.dist_to_other(track2.f_orient)
             else:
@@ -500,18 +500,19 @@ class SingleCameraTracker:
                                          self.n_clusters, crop, None))
 
     def _compute_detections_assignment_cost(self, active_tracks_idx, detections, features):
-        affinity_matrix = np.zeros((len(detections), len(active_tracks_idx)), dtype=np.float32)
+        cost_matrix = np.zeros((len(detections), len(active_tracks_idx)), dtype=np.float32)
         if self.analyzer and len(self.tracks) > 0:
             self.analyzer.prepare_distances(self.tracks, self.current_detections)
 
         for i, idx in enumerate(active_tracks_idx):
             track_box = self.tracks[idx].get_last_box()
             for j, d in enumerate(detections):
-                iou = 0.5 * self._giou(d, track_box) + 0.5
-                reid_sim_curr, reid_sim_avg, reid_sim_clust = None, None, None
-                if self.tracks[idx].f_avg.is_valid() and features[j] is not None:
-                    reid_sim_avg = 1 - cosine(self.tracks[idx].f_avg.get(), features[j])
-                    reid_sim_curr = 1 - cosine(self.tracks[idx].get_last_feature(), features[j])
+                iou_dist = 0.5 * (1 - self._giou(d, track_box))
+                reid_dist_curr, reid_dist_avg, reid_dist_clust = None, None, None
+                if self.tracks[idx].f_avg.is_valid() and features[j] is not None \
+                        and self.tracks[idx].get_last_feature() is not None:
+                    reid_dist_avg = 0.5 * cosine(self.tracks[idx].f_avg.get(), features[j])
+                    reid_dist_curr = 0.5 * cosine(self.tracks[idx].get_last_feature(), features[j])
 
                     if self.process_curr_features_number > 0:
                         num_features = len(self.tracks[idx])
@@ -520,19 +521,19 @@ class SingleCameraTracker:
                         start_index = 0 if self.process_curr_features_number > 1 else num_features - 1
                         for s in range(start_index, num_features - 1, step):
                             if self.tracks[idx].features[s] is not None:
-                                reid_sim_curr = max(reid_sim_curr, 1 - cosine(self.tracks[idx].features[s], features[j]))
+                                reid_dist_curr = min(reid_dist_curr, 0.5 * cosine(self.tracks[idx].features[s], features[j]))
 
-                    reid_sim_clust = 1 - clusters_vec_distance(self.tracks[idx].f_clust, features[j])
-                    reid_sim = max(reid_sim_avg, reid_sim_curr, reid_sim_clust)
+                    reid_dist_clust = clusters_vec_distance(self.tracks[idx].f_clust, features[j])
+                    reid_dist = min(reid_dist_avg, reid_dist_curr, reid_dist_clust)
                 else:
-                    reid_sim = 0.5
-                affinity_matrix[j, i] = iou * reid_sim
+                    reid_dist = 0.5
+                cost_matrix[j, i] = iou_dist * reid_dist
                 if self.analyzer:
-                    self.analyzer.visualize_distances(idx, j, [reid_sim_curr, reid_sim_avg, reid_sim_clust, iou])
+                    self.analyzer.visualize_distances(idx, j, [reid_dist_curr, reid_dist_avg, reid_dist_clust, 1 - iou_dist])
         if self.analyzer:
-            self.analyzer.visualize_distances(affinity_matrix=affinity_matrix, active_tracks_idx=active_tracks_idx)
+            self.analyzer.visualize_distances(affinity_matrix=1 - cost_matrix, active_tracks_idx=active_tracks_idx)
             self.analyzer.show_all_dist_imgs(self.time, len(self.tracks))
-        return 1 - affinity_matrix
+        return cost_matrix
 
     @staticmethod
     def _area(box):
@@ -609,7 +610,7 @@ class SingleCameraTracker:
         dt = abs(det2_time - det1_time)
         avg_size = 0
         for det in [detection1, detection2]:
-            avg_size += 0.5*(abs(det[0] - det[1]) + abs(det[2] - det[3]))
+            avg_size += 0.5 * (abs(det[2] - det[0]) + abs(det[3] - det[1]))
         avg_size *= 0.5
         shifts = [abs(x - y) for x, y in zip(detection1, detection2)]
         velocity = sum(shifts) / len(shifts) / dt / avg_size
