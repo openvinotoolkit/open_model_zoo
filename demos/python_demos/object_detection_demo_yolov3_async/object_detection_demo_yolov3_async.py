@@ -69,7 +69,8 @@ class YoloParams:
                         198.0,
                         373.0, 326.0] if 'anchors' not in param else [float(a) for a in param['anchors'].split(',')]
 
-        if 'mask' in param:
+        self.isYoloV3 = 'mask' in param and param['mask'] is not '' # Weak way to determine but the only one.
+        if self.isYoloV3:
             mask = [int(idx) for idx in param['mask'].split(',')]
             self.num = len(mask)
 
@@ -79,8 +80,6 @@ class YoloParams:
             self.anchors = maskedAnchors
 
         self.side = side
-        self.isYoloV3 = 'mask' in param  # Weak way to determine but the only one.
-
 
     def log_params(self):
         params_to_print = {'classes': self.classes, 'num': self.num, 'coords': self.coords, 'anchors': self.anchors}
