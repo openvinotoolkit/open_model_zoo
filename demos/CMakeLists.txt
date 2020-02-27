@@ -93,13 +93,13 @@ set (GFLAGS_IS_SUBPROJECT TRUE)
 set (HAVE_SYS_STAT_H 1)
 set (HAVE_INTTYPES_H 1)
 
-add_subdirectory(thirdparty/gflags)
+add_subdirectory(cpp/thirdparty/gflags)
 
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 endif()
 
-add_subdirectory(common)
+add_subdirectory(cpp/common)
 
 # samples build can be switched off during whole IE build
 if (IE_MAIN_SOURCE_DIR AND NOT ENABLE_SAMPLES)
@@ -208,14 +208,14 @@ endif()
 find_package(ngraph REQUIRED)
 
 # collect all samples subdirectories
-file(GLOB samples_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
+file(GLOB samples_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} cpp/*)
 # skip building of unnecessary subdirectories
-list(REMOVE_ITEM samples_dirs common thirdparty)
+list(REMOVE_ITEM samples_dirs cpp/common cpp/thirdparty)
 add_samples_to_build(${samples_dirs})
 
 if(ENABLE_PYTHON)
     find_package(PythonInterp 3.5 REQUIRED)
     find_package(PythonLibs "${PYTHON_VERSION_STRING}" EXACT REQUIRED)
 
-    add_subdirectory(python_demos/human_pose_estimation_3d_demo/pose_extractor)
+    add_subdirectory(python/human_pose_estimation_3d_demo/pose_extractor)
 endif()
