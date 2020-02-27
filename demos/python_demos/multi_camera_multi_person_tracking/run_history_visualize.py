@@ -21,7 +21,7 @@ import motmetrics as mm
 import numpy as np
 from tqdm import tqdm
 
-from tools.run_evaluate import read_gt_tracks, get_detections_from_tracks
+from run_evaluate import read_gt_tracks, get_detections_from_tracks
 from utils.misc import check_pressed_keys, set_log_config
 from utils.video import MulticamCapture
 from utils.visualization import visualize_multicam_detections, plot_timeline, get_target_size
