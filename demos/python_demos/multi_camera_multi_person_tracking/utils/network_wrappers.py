@@ -136,7 +136,11 @@ class MaskRCNN(DetectorInterface):
         assert self.n == 1, 'Only batch 1 is supported.'
 
     def preprocess(self, frame):
-        processed_image = self.resize({'image': frame})['image']
+        image_height, image_width = frame.shape[:2]
+        scale = min(self.h / image_height, self.w / image_width)
+        processed_image = cv2.resize(frame, None, fx=scale, fy=scale)
+        processed_image = processed_image.astype('float32').transpose(2, 0, 1)
+
         sample = dict(original_image=frame,
                       meta=dict(original_size=frame.shape[:2],
                                 processed_size=processed_image.shape[1:3]),
@@ -198,13 +202,6 @@ class MaskRCNN(DetectorInterface):
 
     def wait_and_grab(self):
         return self.get_detections(self.frames)
-
-    def resize(self, sample):
-        image_height, image_width = sample['image'].shape[:2]
-        scale = min(self.h / image_height, self.w / image_width)
-        sample['image'] = cv2.resize(sample['image'], None, fx=scale, fy=scale)
-        sample['image'] = sample['image'].astype('float32').transpose(2, 0, 1)
-        return sample
 
 
 class DetectionsFromFileReader(DetectorInterface):
