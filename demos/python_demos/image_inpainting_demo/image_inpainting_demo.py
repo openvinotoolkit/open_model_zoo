@@ -48,7 +48,7 @@ def main():
 
     img = cv2.imread(args.input, cv2.IMREAD_COLOR)
     masked_image, output_image = inpainting_processor.process(img)
-    concat_imgs = np.hstack((masked_image[0], output_image[0]))
+    concat_imgs = np.hstack((masked_image, output_image))
     cv2.putText(concat_imgs, 'summary: {:.1f} FPS'.format(
             float(1 / inpainting_processor.infer_time)), (5, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 200))
     if not args.no_show:

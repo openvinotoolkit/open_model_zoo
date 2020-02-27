@@ -78,8 +78,6 @@ class ImageInpainting(object):
                                          self.input_height, self.input_width)
 
         image = image * (1 - mask) + 255 * mask
-        image = np.transpose(image, (2, 0, 1))
-        mask = np.transpose(mask, (2, 0, 1))
         return image, mask
 
     def infer(self, image, mask):
@@ -90,11 +88,13 @@ class ImageInpainting(object):
 
     def process(self, image):
         masked_image, mask = self.preprocess(image)
-        masked_image = np.expand_dims(masked_image, axis=0)
+        image = np.transpose(masked_image, (2, 0, 1))
+        mask = np.transpose(mask, (2, 0, 1))
+        image = np.expand_dims(image, axis=0)
         mask = np.expand_dims(mask, axis=0)
-        output = self.infer(masked_image, mask)
+        output = self.infer(image, mask)
 
-        masked_image = np.transpose(masked_image, (0, 2, 3, 1)).astype(np.uint8)
         output = np.transpose(output, (0, 2, 3, 1)).astype(np.uint8)
         output[0] = cv2.cvtColor(output[0], cv2.COLOR_RGB2BGR)
-        return masked_image, output
+        masked_image = masked_image.astype(np.uint8)
+        return masked_image, output[0]
