@@ -52,7 +52,8 @@ def build_arguments_parser():
         '-m', '--models',
         help='prefix path to the models and weights',
         type=partial(get_path, is_directory=True),
-        required=False
+        required=False,
+        nargs='+'
     )
     parser.add_argument(
         '-s', '--source',
@@ -203,6 +204,25 @@ def build_arguments_parser():
         required=False,
         default=False,
         type=cast_to_bool
+    )
+    parser.add_argument(
+        '-dc', '--device_config',
+        help='Inference Engine device specific config file',
+        type=get_path,
+        required=False
+    )
+
+    parser.add_argument(
+        '--async_mode',
+        help='Allow evaluation in async mode',
+        required=False,
+        default=False,
+        type=cast_to_bool
+    )
+    parser.add_argument(
+        '--num_requests',
+        help='the number of infer requests',
+        required=False,
     )
 
     return parser

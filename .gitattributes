@@ -9,6 +9,7 @@
 /tools/downloader/tests/** -omz.package
 
 /ci/requirements-ac.txt omz.ci.job-for-change.ac
+/ci/requirements-ac-test.txt omz.ci.job-for-change.ac
 /ci/requirements-conversion.txt omz.ci.job-for-change.demos omz.ci.job-for-change.models
 /ci/requirements-demos.txt omz.ci.job-for-change.demos
 /ci/requirements-downloader.txt omz.ci.job-for-change.demos omz.ci.job-for-change.models

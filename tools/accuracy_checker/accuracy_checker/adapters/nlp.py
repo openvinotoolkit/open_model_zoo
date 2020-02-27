@@ -75,19 +75,26 @@ class QuestionAnsweringAdapter(Adapter):
     __provider__ = 'bert_question_answering'
     prediction_types = (QuestionAnsweringPrediction, )
 
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'start_token_logits_output': StringField(description="Output layer name for answer start token logits."),
+            'end_token_logits_output': StringField(description="Output layer name for answer end token logits.")
+        })
+        return parameters
+
+    def configure(self):
+        self.start_token_logit_out = self.get_value_from_config('start_token_logits_output')
+        self.end_token_logit_out = self.get_value_from_config('end_token_logits_output')
+
     def process(self, raw, identifiers=None, frame_meta=None):
-        predictions = self._extract_predictions(raw, frame_meta)[self.output_blob]
+        raw_output = self._extract_predictions(raw, frame_meta)
         result = []
-        batch_size, seq_length, hidden_size = predictions.shape
-        output_weights = np.random.normal(scale=0.02, size=(2, hidden_size))
-        output_bias = np.zeros(2)
-        prediction_matrix = predictions.reshape((batch_size * seq_length, hidden_size))
-        predictions = np.matmul(prediction_matrix, output_weights.T)
-        predictions = predictions + output_bias
-        predictions = predictions.reshape((batch_size, seq_length, 2))
-        for identifier, prediction in zip(identifiers, predictions):
-            prediction = np.transpose(prediction, (1, 0))
-            result.append(QuestionAnsweringPrediction(identifier, prediction[0], prediction[1]))
+        for identifier, start_token_logits, end_token_logits in zip(identifiers,
+                                                                    raw_output[self.start_token_logit_out],
+                                                                    raw_output[self.end_token_logit_out]):
+            result.append(QuestionAnsweringPrediction(identifier, start_token_logits, end_token_logits))
 
         return result
 

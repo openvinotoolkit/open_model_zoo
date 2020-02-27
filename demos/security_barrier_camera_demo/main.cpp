@@ -16,9 +16,6 @@
 #include <cldnn/cldnn_config.hpp>
 #include <inference_engine.hpp>
 #include <vpu/vpu_plugin_config.hpp>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 #include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/args_helper.hpp>
@@ -68,22 +65,19 @@ struct BboxAndDescr {
 };
 
 struct InferRequestsContainer {
-    explicit InferRequestsContainer(std::vector<InferRequest> inferRequests):
-        actualInferRequests{inferRequests} {
-        for (auto& ir : actualInferRequests) {
-            inferRequests.push_back(ir);
-        }
-    }
     InferRequestsContainer() = default;
-    InferRequestsContainer& operator=(const InferRequestsContainer& other) {  // copy assignment
-        if (this != &other) {  // self-assignment check expected
-            this->actualInferRequests = other.actualInferRequests;
-            for (auto& ir : this->actualInferRequests) {
-                this->inferRequests.container.push_back(ir);
-            }
+    InferRequestsContainer(const InferRequestsContainer&) = delete;
+    InferRequestsContainer& operator=(const InferRequestsContainer&) = delete;
+
+    void assign(const std::vector<InferRequest>& inferRequests) {
+        actualInferRequests = inferRequests;
+        this->inferRequests.container.clear();
+
+        for (auto& ir : this->actualInferRequests) {
+            this->inferRequests.container.push_back(ir);
         }
-        return *this;
     }
+
     std::vector<InferRequest> getActualInferRequests() {
         return actualInferRequests;
     }
@@ -129,9 +123,9 @@ struct Context {  // stores all global data for tasks
             return detectionsProcessorsContext.vehicleAttributesClassifier.createInferRequest();});
         std::generate_n(std::back_inserter(lprInferRequests), nrecognizersireq, [&]{
             return detectionsProcessorsContext.lpr.createInferRequest();});
-        detectorsInfers = InferRequestsContainer(detectorInferRequests);
-        attributesInfers = InferRequestsContainer(attributesInferRequests);
-        platesInfers = InferRequestsContainer(lprInferRequests);
+        detectorsInfers.assign(detectorInferRequests);
+        attributesInfers.assign(attributesInferRequests);
+        platesInfers.assign(lprInferRequests);
     }
     struct {
         std::vector<std::shared_ptr<InputChannel>> inputChannels;
@@ -720,11 +714,6 @@ int main(int argc, char* argv[]) {
             std::cout << ie.GetVersions(device) << std::endl;
 
             if ("CPU" == device) {
-#ifdef WITH_EXTENSIONS
-                /** Load default extensions lib for the CPU device (e.g. SSD's DetectionOutput)**/
-                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-#endif
-
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);

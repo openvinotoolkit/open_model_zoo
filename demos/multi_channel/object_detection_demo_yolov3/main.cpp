@@ -26,6 +26,7 @@
 #endif
 
 #include <opencv2/opencv.hpp>
+#include <ngraph/ngraph.hpp>
 
 #include <monitors/presenter.h>
 #include <samples/slog.hpp>
@@ -108,12 +109,44 @@ static int EntryIndex(int side, int lcoords, int lclasses, int location, int ent
     return n * side * side * (lcoords + lclasses + 1) + entry * side * side + loc;
 }
 
-struct YoloParams {
-    int num;
-    int classes;
-    int coords;
+class YoloParams {
+    template <typename T>
+    void computeAnchors(const std::vector<float> & initialAnchors, const std::vector<T> & mask) {
+        anchors.resize(num * 2);
+        for (int i = 0; i < num; ++i) {
+            anchors[i * 2] = initialAnchors[mask[i] * 2];
+            anchors[i * 2 + 1] = initialAnchors[mask[i] * 2 + 1];
+        }
+    }
 
+public:
+    int num = 0, classes = 0, coords = 0;
     std::vector<float> anchors;
+
+    YoloParams() {}
+
+    YoloParams(const std::shared_ptr<ngraph::op::RegionYolo> regionYolo) {
+        coords = regionYolo->get_num_coords();
+        classes = regionYolo->get_num_classes();
+        auto initialAnchors = regionYolo->get_anchors();
+        auto mask = regionYolo->get_mask();
+        num = mask.size();
+
+        computeAnchors(initialAnchors, mask);
+    }
+
+    YoloParams(InferenceEngine::CNNLayer::Ptr layer) {
+        if (layer->type != "RegionYolo")
+            throw std::runtime_error("Invalid output type: " + layer->type + ". RegionYolo expected");
+
+        coords = layer->GetParamAsInt("coords");
+        classes = layer->GetParamAsInt("classes");
+        auto initialAnchors = layer->GetParamAsFloats("anchors");
+        auto mask = layer->GetParamAsInts("mask");
+        num = mask.size();
+
+        computeAnchors(initialAnchors, mask);
+    }
 };
 
 struct DetectionObject {
@@ -151,8 +184,8 @@ double IntersectionOverUnion(const DetectionObject &box_1, const DetectionObject
 }
 
 void ParseYOLOV3Output(InferenceEngine::InferRequest::Ptr req,
-                       const std::string outputName,
-                       const YoloParams yoloParams, const unsigned long resized_im_h,
+                       const std::string &outputName,
+                       const YoloParams &yoloParams, const unsigned long resized_im_h,
                        const unsigned long resized_im_w, const unsigned long original_im_h,
                        const unsigned long original_im_w,
                        const double threshold, std::vector<DetectionObject> &objects) {
@@ -248,30 +281,26 @@ std::map<std::string, YoloParams> GetYoloParams(const std::vector<std::string>& 
                                                 InferenceEngine::CNNNetwork &network) {
     std::map<std::string, YoloParams> __yoloParams;
 
-    for (auto &output_name :outputDataBlobNames) {
-        InferenceEngine::CNNLayerPtr layer = network.getLayerByName(output_name.c_str());
+    for (auto &output_name : outputDataBlobNames) {
+        YoloParams params;
 
-        if (layer->type != "RegionYolo")
-            throw std::runtime_error("Invalid output type: " + layer->type + ". RegionYolo expected");
+        if (auto ngraphFunction = network.getFunction()) {
+            for (const auto op : ngraphFunction->get_ops()) {
+                if (op->get_friendly_name() == output_name) {
+                    auto regionYolo = std::dynamic_pointer_cast<ngraph::op::RegionYolo>(op);
+                    if (!regionYolo) {
+                        throw std::runtime_error("Invalid output type: " +
+                            std::string(regionYolo->get_type_info().name) + ". RegionYolo expected");
+                    }
 
-        auto num = layer->GetParamAsInt("num");
-        auto coords = layer->GetParamAsInt("coords");
-        auto classes = layer->GetParamAsInt("classes");
-
-        std::vector<float> anchors = layer->GetParamAsFloats("anchors");
-
-        auto mask = layer->GetParamAsInts("mask");
-        num = mask.size();
-
-        std::vector<float> maskedAnchors(num * 2);
-        for (int i = 0; i < num; ++i) {
-            maskedAnchors[i * 2] = anchors[mask[i] * 2];
-            maskedAnchors[i * 2 + 1] = anchors[mask[i] * 2 + 1];
+                    params = regionYolo;
+                    break;
+                }
+            }
+        } else {
+            params = network.getLayerByName(output_name.c_str());
         }
-        anchors = maskedAnchors;
-
-        YoloParams param{num, classes, coords, anchors};
-        __yoloParams.insert(std::pair<std::string, YoloParams>(output_name.c_str(), param));
+        __yoloParams.insert(std::pair<std::string, YoloParams>(output_name.c_str(), params));
     }
 
     return __yoloParams;
@@ -281,7 +310,7 @@ void displayNSources(const std::vector<std::shared_ptr<VideoFrame>>& data,
                      float time,
                      const std::string& stats,
                      const DisplayParams& params,
-                     const std::vector<cv::Scalar> colors,
+                     const std::vector<cv::Scalar> &colors,
                      Presenter& presenter) {
     cv::Mat windowImage = cv::Mat::zeros(params.windowSize, CV_8UC3);
     auto loopBody = [&](size_t i) {
@@ -387,6 +416,10 @@ int main(int argc, char* argv[]) {
 
         const auto duplicateFactor = (1 + FLAGS_duplicate_num);
         size_t numberOfInputs = (FLAGS_nc + files.size()) * duplicateFactor;
+
+        if (numberOfInputs == 0) {
+            throw std::runtime_error("No valid inputs were supplied");
+        }
 
         DisplayParams params = prepareDisplayParams(numberOfInputs);
 

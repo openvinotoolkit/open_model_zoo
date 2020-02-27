@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-description: Face Detection (SqNet1.0modif+single scale) with BatchNormalization trained with negatives
+description: >-
+  Face detector based on SqueezeNet light (half-channels) as a backbone with a single
+  SSD for indoor/outdoor scenes shot by a front-facing camera. The backbone consists
+  of fire modules to reduce the number of computations. The single SSD head from 1/16
+  scale feature map has nine clustered prior boxes.
 task_type: detection
 files:
   - name: face-detection-retail-0044.prototxt

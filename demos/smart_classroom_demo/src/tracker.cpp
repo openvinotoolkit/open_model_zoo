@@ -17,7 +17,7 @@ const int TrackedObject::UNKNOWN_LABEL_IDX = -1;
 
 class KuhnMunkres::Impl {
 public:
-    Impl(bool greedy) : n_(), greedy_(greedy) {}
+    explicit Impl(bool greedy) : n_(), greedy_(greedy) {}
 
     std::vector<size_t> Solve(const cv::Mat &dissimilarity_matrix) {
         CV_Assert(dissimilarity_matrix.type() == CV_32F);
@@ -195,7 +195,7 @@ private:
     bool greedy_;
 };
 
-KuhnMunkres::KuhnMunkres(bool greedy) { impl_ = std::make_shared<Impl>(greedy); }
+KuhnMunkres::KuhnMunkres(bool greedy) : impl_(std::make_shared<Impl>(greedy)) {}
 
 std::vector<size_t> KuhnMunkres::Solve(const cv::Mat &dissimilarity_matrix) {
     CV_Assert(impl_ != nullptr);
@@ -374,23 +374,12 @@ void Tracker::DropForgottenTracks() {
             new_tracks.emplace(reassign_id ? counter : pair.first, pair.second);
             new_active_tracks.emplace(reassign_id ? counter : pair.first);
             counter++;
-
-        } else {
-            if (IsTrackValid(pair.first)) {
-                valid_tracks_counter_++;
-            }
         }
     }
     tracks_.swap(new_tracks);
     active_track_ids_.swap(new_active_tracks);
 
     tracks_counter_ = reassign_id ? counter : tracks_counter_;
-}
-
-void Tracker::DropForgottenTrack(size_t track_id) {
-    CV_Assert(IsTrackForgotten(track_id));
-    CV_Assert(active_track_ids_.count(track_id) == 0);
-    tracks_.erase(track_id);
 }
 
 float Tracker::ShapeAffinity(const cv::Rect &trk, const cv::Rect &det) {
@@ -500,17 +489,8 @@ void Tracker::Reset() {
     detections_.clear();
 
     tracks_counter_ = 0;
-    valid_tracks_counter_ = 0;
 
     frame_size_ = cv::Size();
-}
-
-size_t Tracker::Count() const {
-    size_t count = valid_tracks_counter_;
-    for (const auto &pair : tracks_) {
-        count += (IsTrackValid(pair.first) ? 1 : 0);
-    }
-    return count;
 }
 
 TrackedObjects Tracker::TrackedDetections() const {

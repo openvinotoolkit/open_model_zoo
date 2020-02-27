@@ -13,12 +13,15 @@ Every metric has parameters available for configuration.
 Accuracy Checker supports following set of metrics:
 
 * `accuracy` - classification accuracy metric, defined as the number of correct predictions divided by the total number of predictions.
-Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`
+Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
 * `accuracy_per_class` - classification accuracy metric which represents results for each class. Supported representation: `ClassificationAnnotation`, `ClassificationPrediction`.
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
-  * `label_map` - the field in annotation metadata, which contains dataset label map.
+  * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
 * `character_recognition_accuracy` - accuracy metric for character recognition task. Supported representation: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
+* `classification_f1-score` - [F1 score](https://en.wikipedia.org/wiki/F1_score) metric for classification task. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
+* `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
+* `metthews_correlation_coef` - [Matthews correlation coefficient (MCC)](https://en.wikipedia.org/wiki/Matthews_correlation_coefficient) for binary classification. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
 * `map` - mean average precision. Supported representations: `DetectionAnnotation`, `DetectionPrediction`.
   * `overlap_threshold` - minimal value for intersection over union that allows to make decision that prediction bounding box is true positive.
   * `overlap_method` - method for calculation bbox overlap. You can choose between intersection over union (`iou`), defined as area of intersection divided by union of annotation and prediction boxes areas, and intersection over area (`ioa`), defined as area of intersection divided by ara of prediction box.
@@ -26,7 +29,7 @@ Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotat
   * `ignore_difficult` - allows to ignore difficult annotation boxes in metric calculation. In this case, difficult boxes are filtered annotations from postprocessing stage.
   * `distinct_conf` - select only values for distinct confidences.
   * `allow_multiple_matches_per_ignored` - allows multiple matches per ignored.
-  * `label_map` - the field in annotation metadata, which contains dataset label map.
+  * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
   * `integral` - integral type for average precision calculation. Pascal VOC `11point` and `max` approaches are available.
 * `miss_rate` - miss rate metric of detection models.  Supported representations: `DetectionAnnotation`, `DetectionPrediction`.
   * `overlap_threshold` - minimal value for intersection over union that allows to make decision that prediction bounding box is true positive.
@@ -35,7 +38,7 @@ Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotat
   * `ignore_difficult` - allows to ignore difficult annotation boxes in metric calculation. In this case, difficult boxes are filtered annotations from postprocessing stage.
   * `distinct_conf` - select only values for distinct confidences.
   * `allow_multiple_matches_per_ignored` - allows multiple matches per ignored.
-  * `label_map` - the field in annotation metadata, which contains dataset label map.
+  * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
   * `fppi_level` - false positive per image level.
 * `recall` - recall metric of detection models. Supported representations: `DetectionAnnotation`, `DetectionPrediction`.
   * `overlap_threshold` - minimal value for intersection over union that allows to make decision that prediction bounding box is true positive.
@@ -44,12 +47,12 @@ Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotat
   * `ignore_difficult` - allows to ignore difficult annotation boxes in metric calculation. In this case, difficult boxes are filtered annotations from postprocessing stage.
   * `distinct_conf` - select only values for distinct confidences.
   * `allow_multiple_matches_per_ignored` - allows multiple matches per ignored.
-  * `label_map` - the field in annotation metadata, which contains dataset label map.
+  * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
 * `detection_accuracy` - accuracy for detection models. Supported representations: `DetectionAnnotation`, `DetectionPrediction`.
   * `overlap_threshold` - minimal value for intersection over union that allows to make decision that prediction bounding box is true positive.
   * `overlap_method` - method for calculation bbox overlap. You can choose between intersection over union (`iou`), defined as area of intersection divided by union of annotation and prediction boxes areas, and intersection over area (`ioa`), defined as area of intersection divided by ara of prediction box.
   * `include_boundaries` - allows include boundaries in overlap calculation process. If it is True then width and height of box is calculated by max - min + 1.
-  * `label_map` - the field in annotation metadata, which contains dataset label map.
+  * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
   * `use_normalization` - allows to normalize confusion_matrix for metric calculation.
 * `segmentation_accuracy` - pixel accuracy for semantic segmentation models. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
   * `use_argmax` - allows to use argmax for prediction mask.
@@ -72,17 +75,17 @@ More detailed information about calculation segmentation metrics you can find [h
   * `min_score` - min score for determining that objects are different. You can provide value or use `train_median` value which will be calculated if annotations has training subset.
 * `pairwise_accuracy_subsets` - object reidentification pairwise accuracy with division dataset on test and train subsets for calculation mean score. Supported representations: `ReIdentificationClassificationAnnotation`, `ReIdentificationPrediction`.
   * `subset_number` - number of subsets for separating.
-* `mae` - [Mean Absolute Error](https://en.wikipedia.org/wiki/Mean_absolute_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
+* `mae` - [Mean Absolute Error](https://en.wikipedia.org/wiki/Mean_absolute_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`.
 * `mae_on_intervals` - Mean Absolute Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
   * `ignore_values_not_in_interval` - allows create additional intervals for values less than minimal value in interval and greater than maximal.
   * `start` , `step`, `end` - way to generate range of intervals from `start` to `end` with length `step`.
-* `mse` - [Mean Squared Error](https://en.wikipedia.org/wiki/Mean_squared_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
+* `mse` - [Mean Squared Error](https://en.wikipedia.org/wiki/Mean_squared_error). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`.
 * `mse_on_intervals` - Mean Squared Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
   * `ignore_values_not_in_interval` - allows create additional intervals for values less than minimal value in interval and greater than maximal.
   * `start`, `step`, `end` - generate range of intervals from `start` to `end` with length `step`.
-* `rmse` - [Root Mean Squared Error](https://en.wikipedia.org/wiki/Root-mean-square_deviation). Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
+* `rmse` - [Root Mean Squared Error](https://en.wikipedia.org/wiki/Root-mean-square_deviation). Supported representations: `RegressionAnnotation`, `RegressionPrediction`, `DepthEstimationAnnotation`, `DepthEstimationPrediction`.
 * `rmse_on_intervals` - Root Mean Squared Error estimated magnitude for specific value range. Supported representations: `RegressionAnnotation`, `RegressionPrediction`.
   * `intervals` - comma-separated list of interval boundaries.
   * `ignore_values_not_in_interval` - allows create additional intervals for values less than minimal value in interval and greater than maximal.
@@ -95,16 +98,16 @@ More detailed information about calculation segmentation metrics you can find [h
   * `color_order` - the field specified which color order `BGR` or `RGB` will be used during metric calculation (Optional. Default value is RGB).
 * `angle_error` - Mean angle error and Standard deviation of angle error for gaze estimation. Supported representations: `GazeVectorAnnotation`, `GazeVectorPrediction`.
 * `multi_accuracy` - accuracy for multilabel recognition task. Supported representations: `MultiLabelRecognitionAnnotation`, `MultiLabelRecognitionPrediction`.
-  * `label_map` - the field in annotation metadata, which contains dataset label map.
+  * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
   * `calculate_average` - allows calculation of average accuracy (default value: `True`).
 * `multi_precision` - precision metric for multilabel recognition. Supported representations: `MultiLabelRecognitionAnnotation`, `MultiLabelRecognitionPrediction`.
-  * `label_map` - the field in annotation metadata, which contains dataset label map.
+  * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
   * `calculate_average` - allows calculation of average precision (default value: `True`).
 * `multi_recall` - recall metric for multilabel recognition. Supported representations: `MultiLabelRecognitionAnnotation`, `MultiLabelRecognitionPrediction`.
-  * `label_map` - the field in annotation metadata, which contains dataset label map.
+  * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
   * `calculate_average` - allows calculation of average recall (default value: `True`).
 * `f1_score` - [F score](https://en.wikipedia.org/wiki/F1_score) metric for multilabel recognition. Supported representations: `MultiLabelRecognitionAnnotation`, `MultiLabelRecognitionPrediction`.
-  * `label_map` - the field in annotation metadata, which contains dataset label map.
+  * `label_map` - the field in annotation metadata, which contains dataset label map  (Optional, should be provided if different from default).
   * `calculate_average` - allows calculation of average f-score (default value: `True`).
 * `focused_text_hmean` - Harmonic mean of precision and recall for focused scene text detection task introduced in [Robust Reading Competition challenge 2](https://rrc.cvc.uab.es/?ch=2&com=introduction). Supported representations: `TextDetectionAnnotation`, `TextDetectionPrediction`.
   * `ignore_difficult` - allows to ignore difficult ground truth text polygons in metric calculation.

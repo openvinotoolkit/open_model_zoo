@@ -185,6 +185,8 @@ class PipeLineEvaluator(BaseEvaluator):
         self.stages = stages
         self.create_connectors()
         self.context = next(iter(stages.values())).evaluation_context
+        self._metrics_results = []
+        self._metrics_result_presenters = []
 
     @classmethod
     def from_configs(cls, pipeline_config):
@@ -246,13 +248,46 @@ class PipeLineEvaluator(BaseEvaluator):
     def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         def eval_metrics(metrics_executor, annotations, predictions):
             for result_presenter, evaluated_metric in metrics_executor.iterate_metrics(annotations, predictions):
-                result_presenter.write_result(evaluated_metric, ignore_results_formatting)
+                self._metrics_results.append(evaluated_metric)
+                self._metrics_result_presenters.append(result_presenter)
+                if print_results:
+                    result_presenter.write_result(evaluated_metric, ignore_results_formatting)
+
+        if self._metrics_results:
+            del self._metrics_results
+            self._metrics_results = []
+            self._metrics_result_presenters = []
 
         for _, stage in self.stages.items():
             metrics_executors = stage.evaluation_context.metrics_executor
             for metrics_executor in metrics_executors:
                 eval_context = stage.evaluation_context
                 eval_metrics(metrics_executor, eval_context.annotations, eval_context.predictions)
+        return self._metrics_results
+
+    def print_metrics_results(self, ignore_results_formatting=False):
+        if not self._metrics_results:
+            self.compute_metrics(True, ignore_results_formatting)
+        for presenter, metric_result in zip(self._metrics_result_presenters, self._metrics_results):
+            presenter.write_result(metric_result, ignore_results_formatting)
+
+    def extract_metrics_results(self, print_results=True, ignore_results_formatting=False):
+        if not self._metrics_results:
+            self.compute_metrics(False, ignore_results_formatting)
+
+        extracted_results, extracted_meta = [], []
+        for presenter, metric_result in zip(self._metrics_result_presenters, self._metrics_results):
+            result, metadata = presenter.extract_result(metric_result)
+            if isinstance(result, list):
+                extracted_results.extend(result)
+                extracted_meta.extend(metadata)
+            else:
+                extracted_results.append(result)
+                extracted_meta.append(metadata)
+            if print_results:
+                presenter.write_result(metric_result, ignore_results_formatting)
+
+        return extracted_results, extracted_meta
 
     def release(self):
         for _, stage in self.stages.items():

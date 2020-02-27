@@ -153,7 +153,7 @@ class CTDETAdapter(Adapter):
             im_size = meta.get('image_size')
             scale = max(im_size)
             center = np.array(im_size[:2])/2.0
-            dets = self._transform(detections, np.flip(center), scale, height, width)
+            dets = self._transform(detections, np.flip(center, 0), scale, height, width)
             x_min, y_min, x_max, y_max, scores, classes = dets.transpose(1, 0)
             result.append(DetectionPrediction(identifier, classes, scores, x_min, y_min, x_max, y_max))
         return result

@@ -38,7 +38,7 @@ models:
           #  In order to do this you need to provide your own annotation converter,
           # i.e. implement BaseFormatConverter interface.
           # All annotation converters are stored in accuracy_checker/annotation_converters directory.
-          converter: cifar10
+          converter: cifar
           # converter specific parameters.
           # Full range available options you can find in accuracy_checker/annotation_converters/README.md
           # relative paths will be merged with "-s/--source" option
@@ -48,6 +48,8 @@ models:
           convert_images: True
           # path to save converted images.
           converted_images_dir: sample_dataset/test
+          # number of classes in the dataset, used for label_map generation
+          num_classes: 10
 
         # list of preprocessing, applied to each image during validation
         # order of entries matters

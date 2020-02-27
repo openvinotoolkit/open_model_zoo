@@ -64,6 +64,8 @@ from .nlp import MachineTranslationAdapter, QuestionAnsweringAdapter
 
 from .centernet import CTDETAdapter
 
+from .mono_depth import MonoDepthAdapter
+
 __all__ = [
     'Adapter',
     'AdapterField',
@@ -117,4 +119,6 @@ __all__ = [
 
     'MachineTranslationAdapter',
     'QuestionAnsweringAdapter',
+
+    'MonoDepthAdapter',
 ]

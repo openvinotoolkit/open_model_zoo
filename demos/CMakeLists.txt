@@ -157,10 +157,6 @@ macro(ie_add_sample)
         endif()
     endif()
 
-    if(TARGET IE::ie_cpu_extension)
-        add_definitions(-DWITH_EXTENSIONS)
-    endif()
-
     # Create named folders for the sources within the .vcproj
     # Empty name lists them directly under the .vcproj
     source_group("src" FILES ${IE_SAMPLES_SOURCES})
@@ -179,10 +175,6 @@ macro(ie_add_sample)
         target_include_directories(${IE_SAMPLE_NAME} PRIVATE ${IE_SAMPLE_INCLUDE_DIRECTORIES})
     endif()
     target_include_directories(${IE_SAMPLE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../common")
-
-    if(TARGET IE::ie_cpu_extension)
-        target_link_libraries(${IE_SAMPLE_NAME} PRIVATE IE::ie_cpu_extension)
-    endif()
 
     target_link_libraries(${IE_SAMPLE_NAME} PRIVATE ${OpenCV_LIBRARIES} ${InferenceEngine_LIBRARIES}
                                                     ${IE_SAMPLE_DEPENDENCIES} gflags)
@@ -212,6 +204,8 @@ if (IE_NOT_FOUND_MESSAGE)
 else()
     find_package(InferenceEngine 2.0 REQUIRED)
 endif()
+
+find_package(ngraph REQUIRED)
 
 # collect all samples subdirectories
 file(GLOB samples_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)

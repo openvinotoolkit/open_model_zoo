@@ -15,8 +15,12 @@ limitations under the License.
 """
 
 import time
+import warnings
 
-from tqdm import tqdm
+try:
+    from tqdm import tqdm
+except ImportError:
+    tqdm = None
 
 from .dependency import ClassProvider
 from .logging import print_info
@@ -85,17 +89,33 @@ class PrintProgressReporter(ProgressReporter):
 class TQDMReporter(ProgressReporter):
     __provider__ = 'bar'
 
-    def update(self, _batch_id, batch_size):
+    def __init__(self, dataset_size=None, **kwargs):
+        super().__init__(dataset_size)
+        if tqdm is None:
+            warnings.warn('tqdm is not available, progress switched to print')
+        self.tqdm_reporter = tqdm
+        self.progress_printer = PrintProgressReporter(dataset_size, print_interval=1)
+
+    def update(self, batch_id, batch_size):
         self.current += batch_size
-        self.tqdm.update(batch_size)
+        if self.tqdm_reporter:
+            self.tqdm_reporter.update(batch_size)
+        else:
+            self.progress_printer.update(batch_id, batch_size)
 
     def finish(self, objects_processed=True):
-        self.tqdm.close()
-        super().finish(objects_processed)
+        if self.tqdm_reporter:
+            self.tqdm_reporter.close() #pylint: disable=E1120
+            super().finish(objects_processed)
+        else:
+            self.progress_printer.finish(objects_processed)
 
     def reset(self, dataset_size):
         super().reset(dataset_size)
-        self.tqdm = tqdm(
-            total=self.dataset_size, unit='frames', leave=False,
-            bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]'
-        )
+        if self.tqdm_reporter:
+            self.tqdm_reporter = tqdm(
+                total=self.dataset_size, unit='frames', leave=False,
+                bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]'
+            )
+        else:
+            self.progress_printer.reset(dataset_size)

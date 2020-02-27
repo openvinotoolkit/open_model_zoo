@@ -1,4 +1,4 @@
-# Security Barrier Camera С++ Demo
+# Security Barrier Camera C++ Demo
 
 This demo showcases Vehicle and License Plate Detection network followed by the Vehicle Attributes Recognition and License Plate Recognition networks applied on top
 of the detection results. You can use a set of the following pre-trained models with the demo:
@@ -42,10 +42,8 @@ At the end of the sequence, the `VideoFrame` is destroyed and the sequence start
 ## Running
 
 Running the application with the <code>-h</code> option yields the following usage message:
-```sh
-[ INFO ] InferenceEngine:
-    API version ............ <version>
-    Build .................. <number>
+```
+[ INFO ] InferenceEngine: <version>
 
 interactive_vehicle_detection [OPTION]
 Options:
@@ -98,13 +96,24 @@ To do inference for two video inputs using two asynchronous infer request on FPG
 ./security_barrier_camera_demo -i <path_to_video>/inputVideo_0.mp4 <path_to_video>/inputVideo_1.mp4 -m <path_to_model>/vehicle-license-plate-detection-barrier-0106.xml -m_va <path_to_model>/vehicle-attributes-recognition-barrier-0039.xml -m_lpr <path_to_model>/license-plate-recognition-barrier-0001.xml -d HETERO:FPGA,CPU -d_va HETERO:FPGA,CPU -d_lpr HETERO:FPGA,CPU -nireq 2
 ```
 
+To do inference for video inputs on Intel® Vision Accelerator Design with Intel® Movidius™ VPUs, some optimization hints are suggested to make good use of the computation ability:
+
+* configuring the number of allocated frames (`-n_iqs`) to provide enough inputs for inference;
+* configuring the number of infer request (`-nireq`) to achieve asynchronous inference;
+* configuring the number of threads (`-n_wt`) for multi-threaded processing.
+
+For example, to run the sample on one Intel® Vision Accelerator Design with Intel® Movidius™ VPUs Compact R card, run the following command:
+```sh
+./security_barrier_camera_demo -i <path_to_video>/inputVideo.mp4 -m <path_to_model>/vehicle-license-plate-detection-barrier-0106.xml -m_va <path_to_model>/vehicle-attributes-recognition-barrier-0039.xml -m_lpr <path_to_model>/license-plate-recognition-barrier-0001.xml -d HDDL -d_va HDDL -d_lpr HDDL -n_iqs 10 -n_wt 4 -nireq 10
+```
+
 > **NOTE**: For the `-tag` option (HDDL plugin only), you must specify the number of VPUs for each network in the `hddl_service.config` file located in the `<INSTALL_DIR>/deployment_tools/inference_engine/external/hddl/config/` directory using the following tags:
 > * `tagDetect` for the Vehicle and License Plate Detection network
 > * `tagAttr` for the Vehicle Attributes Recognition network
 > * `tagLPR` for the License Plate Recognition network
 >
 > For example, to run the sample on one Intel® Vision Accelerator Design with Intel® Movidius™ VPUs Compact R card with eight Intel&reg; Movidius&trade; X VPUs:
-> ```sh
+> ```json
 > "service_settings":
 > {
 >  "graph_tag_map":{"tagDetect": 6, "tagAttr": 1, "tagLPR": 1}

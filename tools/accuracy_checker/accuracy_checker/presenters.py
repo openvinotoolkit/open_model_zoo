@@ -34,6 +34,9 @@ class BasePresenter(ClassProvider):
     def write_result(self, evaluation_result, ignore_results_formatting=False):
         raise NotImplementedError
 
+    def extract_result(self, evaluation_result):
+        raise NotImplementedError
+
 
 class ScalarPrintPresenter(BasePresenter):
     __provider__ = "print_scalar"
@@ -49,6 +52,16 @@ class ScalarPrintPresenter(BasePresenter):
         write_scalar_result(
             value, name, threshold, difference, postfix=postfix, scale=scale, result_format=result_format
         )
+
+    def extract_result(self, evaluation_result):
+        value, ref, name, metric_type, _, meta = evaluation_result
+        result_dict = {
+            'name': name,
+            'value': np.mean(value),
+            'type': metric_type,
+            'ref': ref or ''
+        }
+        return result_dict, meta
 
 
 class VectorPrintPresenter(BasePresenter):
@@ -97,6 +110,37 @@ class VectorPrintPresenter(BasePresenter):
                 postfix=postfix[-1] if not np.isscalar(postfix) else postfix, scale=1,
                 result_format=result_format
             )
+
+    def extract_result(self, evaluation_result):
+        value, reference, name, metric_type, _, meta = evaluation_result
+        value_names = ['{}@{}'.format(name, value_name) for value_name in meta.get('names', range(0, len(value)))]
+        if np.isscalar(value) or np.size(value) == 1:
+            if not np.isscalar(value):
+                value = value[0]
+            result_dict = {
+                'name': value_names[0] if 'names' in meta else name,
+                'value':value,
+                'type': metric_type,
+                'ref': reference or ''
+            }
+            return result_dict, meta
+        if meta.get('calculate_mean', True):
+            value_names.append('{}@mean'.format(name))
+            mean_value = np.mean(value)
+            value = np.append(value, mean_value)
+            meta['names'] = value_names
+        per_value_meta = [meta for _ in value_names]
+        results = []
+        for idx, value_item in enumerate(value):
+            results.append(
+                {
+                    'name': value_names[idx],
+                    'value': value_item,
+                    'type': metric_type,
+                    'ref': ''
+                }
+            )
+        return results, per_value_meta
 
 
 def write_scalar_result(

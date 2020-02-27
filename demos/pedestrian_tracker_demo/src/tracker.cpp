@@ -141,26 +141,11 @@ void ValidateParams(const TrackerParams &p) {
     }
 }
 
-// Returns confusion matrix as:
-//   |tp fn|
-//   |fp tn|
-cv::Mat PedestrianTracker::ConfusionMatrix(const std::vector<Match> &matches) {
-    const bool kNegative = false;
-    cv::Mat conf_mat(2, 2, CV_32F, cv::Scalar(0));
-    for (const auto &m : matches) {
-        conf_mat.at<float>(m.gt_label == kNegative, m.pr_label == kNegative)++;
-    }
-
-    return conf_mat;
-}
-
 PedestrianTracker::PedestrianTracker(const TrackerParams &params)
     : params_(params),
     descriptor_strong_(nullptr),
     distance_strong_(nullptr),
-    collect_matches_(true),
     tracks_counter_(0),
-    valid_tracks_counter_(0),
     frame_size_(0, 0),
     prev_timestamp_(std::numeric_limits<uint64_t>::max()) {
         ValidateParams(params);
@@ -168,12 +153,6 @@ PedestrianTracker::PedestrianTracker(const TrackerParams &params)
 
 // Pipeline parameters getter.
 const TrackerParams &PedestrianTracker::params() const { return params_; }
-
-// Pipeline parameters setter.
-void PedestrianTracker::set_params(const TrackerParams &params) {
-    ValidateParams(params);
-    params_ = params;
-}
 
 // Descriptor fast getter.
 const PedestrianTracker::Descriptor &PedestrianTracker::descriptor_fast() const {
@@ -222,25 +201,6 @@ const std::set<size_t> &PedestrianTracker::active_track_ids() const {
 // Returns detection log which is used for tracks saving.
 DetectionLog PedestrianTracker::GetDetectionLog(const bool valid_only) const {
     return ConvertTracksToDetectionLog(all_tracks(valid_only));
-}
-
-// Returns decisions made by heuristic based on fast distance/descriptor and
-// shape, motion and time affinity.
-const std::vector<PedestrianTracker::Match> &
-PedestrianTracker::base_classifier_matches() const {
-    return base_classifier_matches_;
-}
-
-// Returns decisions made by heuristic based on strong distance/descriptor
-// and
-// shape, motion and time affinity.
-const std::vector<PedestrianTracker::Match> &PedestrianTracker::reid_based_classifier_matches() const {
-    return reid_based_classifier_matches_;
-}
-
-// Returns decisions made by strong distance/descriptor affinity.
-const std::vector<PedestrianTracker::Match> &PedestrianTracker::reid_classifier_matches() const {
-    return reid_classifier_matches_;
 }
 
 TrackedObjects PedestrianTracker::FilterDetections(
@@ -458,13 +418,6 @@ void PedestrianTracker::Process(const cv::Mat &frame,
             auto last_det = tracks_.at(track_id).objects.back();
             last_det.rect = tracks_.at(track_id).predicted_rect;
 
-            if (collect_matches_ && last_det.object_id >= 0 &&
-                detections[det_id].object_id >= 0) {
-                base_classifier_matches_.emplace_back(
-                    tracks_.at(track_id).objects.back(), last_det.rect,
-                    detections[det_id], conf > params_.aff_thr_fast);
-            }
-
             if (conf > params_.aff_thr_fast) {
                 AppendToTrack(frame, track_id, detections[det_id],
                               descriptors_fast[det_id], cv::Mat());
@@ -527,23 +480,12 @@ void PedestrianTracker::DropForgottenTracks() {
             new_tracks.emplace(reassign_id ? counter : pair.first, pair.second);
             new_active_tracks.emplace(reassign_id ? counter : pair.first);
             counter++;
-
-        } else {
-            if (IsTrackValid(pair.first)) {
-                valid_tracks_counter_++;
-            }
         }
     }
     tracks_.swap(new_tracks);
     active_track_ids_.swap(new_active_tracks);
 
     tracks_counter_ = reassign_id ? counter : tracks_counter_;
-}
-
-void PedestrianTracker::DropForgottenTrack(size_t track_id) {
-    PT_CHECK(IsTrackForgotten(track_id));
-    PT_CHECK(active_track_ids_.count(track_id) == 0);
-    tracks_.erase(track_id);
 }
 
 float PedestrianTracker::ShapeAffinity(float weight, const cv::Rect &trk,
@@ -691,17 +633,6 @@ PedestrianTracker::StrongMatching(
 
         float affinity = static_cast<float>(reid_affinity) * Affinity(last_det, detection);
 
-        if (collect_matches_ && last_det.object_id >= 0 &&
-            detection.object_id >= 0) {
-            reid_classifier_matches_.emplace_back(track.objects.back(), last_det.rect,
-                                                  detection,
-                                                  reid_affinity > params_.reid_thr);
-
-            reid_based_classifier_matches_.emplace_back(
-                track.objects.back(), last_det.rect, detection,
-                affinity > params_.aff_thr_strong);
-        }
-
         bool is_detection_matching =
             reid_affinity > params_.reid_thr && affinity > params_.aff_thr_strong;
 
@@ -835,14 +766,6 @@ bool PedestrianTracker::IsTrackForgotten(const Track &track) const {
     return (track.lost > params_.forget_delay);
 }
 
-size_t PedestrianTracker::Count() const {
-    size_t count = valid_tracks_counter_;
-    for (const auto &pair : tracks_) {
-        count += (IsTrackValid(pair.first) ? 1 : 0);
-    }
-    return count;
-}
-
 std::unordered_map<size_t, std::vector<cv::Point>>
 PedestrianTracker::GetActiveTracks() const {
     std::unordered_map<size_t, std::vector<cv::Point>> active_tracks;
@@ -891,41 +814,6 @@ cv::Mat PedestrianTracker::DrawActiveTracks(const cv::Mat &frame) {
     }
 
     return out_frame;
-}
-
-const cv::Size kMinFrameSize = cv::Size(320, 240);
-const cv::Size kMaxFrameSize = cv::Size(1920, 1080);
-
-void PedestrianTracker::PrintConfusionMatrices() const {
-    std::cout << "Base classifier quality: " << std::endl;
-    {
-        auto cm = ConfusionMatrix(base_classifier_matches());
-        std::cout << cm << std::endl;
-        std::cout << "or" << std::endl;
-        cm.row(0) = cm.row(0) / std::max(1.0, cv::sum(cm.row(0))[0]);
-        cm.row(1) = cm.row(1) / std::max(1.0, cv::sum(cm.row(1))[0]);
-        std::cout << cm << std::endl << std::endl;
-    }
-
-    std::cout << "Reid-based classifier quality: " << std::endl;
-    {
-        auto cm = ConfusionMatrix(reid_based_classifier_matches());
-        std::cout << cm << std::endl;
-        std::cout << "or" << std::endl;
-        cm.row(0) = cm.row(0) / std::max(1.0, cv::sum(cm.row(0))[0]);
-        cm.row(1) = cm.row(1) / std::max(1.0, cv::sum(cm.row(1))[0]);
-        std::cout << cm << std::endl << std::endl;
-    }
-
-    std::cout << "Reid only classifier quality: " << std::endl;
-    {
-        auto cm = ConfusionMatrix(reid_classifier_matches());
-        std::cout << cm << std::endl;
-        std::cout << "or" << std::endl;
-        cm.row(0) = cm.row(0) / std::max(1.0, cv::sum(cm.row(0))[0]);
-        cm.row(1) = cm.row(1) / std::max(1.0, cv::sum(cm.row(1))[0]);
-        std::cout << cm << std::endl << std::endl;
-    }
 }
 
 void PedestrianTracker::PrintReidPerformanceCounts(std::string fullDeviceName) const {

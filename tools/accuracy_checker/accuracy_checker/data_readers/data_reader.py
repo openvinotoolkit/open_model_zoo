@@ -19,13 +19,22 @@ from functools import singledispatch
 from collections import OrderedDict, namedtuple
 import re
 import cv2
-from PIL import Image
 import numpy as np
-import nibabel as nib
+
 try:
     import tensorflow as tf
 except ImportError as import_error:
     tf = None
+
+try:
+    from PIL import Image
+except ImportError as import_error:
+    Image = None
+
+try:
+    import nibabel as nib
+except ImportError:
+    nib = None
 
 from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
 from ..dependency import ClassProvider
@@ -156,10 +165,9 @@ class ReaderCombiner(BaseReader):
         scheme = self.config['scheme']
         reading_scheme = OrderedDict()
         for pattern, reader_config in scheme.items():
-            reader = BaseReader.provide(
-                reader_config['type'] if isinstance(reader_config, dict) else reader_config,
-                self.data_source, reader_config
-            )
+            reader_type = reader_config['type'] if isinstance(reader_config, dict) else reader_config
+            reader_configuration = reader_config if isinstance(reader_config, dict) else None
+            reader = BaseReader.provide(reader_type, self.data_source, reader_configuration)
             pattern = re.compile(pattern)
             reading_scheme[pattern] = reader
 
@@ -173,11 +181,33 @@ class ReaderCombiner(BaseReader):
         raise ConfigError('suitable data reader for {} not found'.format(data_id))
 
 
+OPENCV_IMREAD_FLAGS = {
+    'color': cv2.IMREAD_COLOR,
+    'gray': cv2.IMREAD_GRAYSCALE,
+    'unchanged': cv2.IMREAD_UNCHANGED
+}
+
+
+class OpenCVImageReaderConfig(ConfigValidator):
+    type = StringField(optional=True)
+    reading_flag = StringField(optional=True, choices=OPENCV_IMREAD_FLAGS, default='color')
+
+
 class OpenCVImageReader(BaseReader):
     __provider__ = 'opencv_imread'
 
+    def validate_config(self):
+        if self.config:
+            config_validator = OpenCVImageReaderConfig('opencv_imread_config')
+            config_validator.validate(self.config)
+
+    def configure(self):
+        super().configure()
+        self.flag = OPENCV_IMREAD_FLAGS[self.config.get('reading_flag', 'color') if self.config else 'color']
+
+
     def read(self, data_id):
-        return cv2.imread(str(get_path(self.data_source / data_id)))
+        return cv2.imread(str(get_path(self.data_source / data_id)), self.flag)
 
 
 class PillowImageReader(BaseReader):
@@ -185,6 +215,8 @@ class PillowImageReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
+        if Image is None:
+            raise ValueError('Pillow is not installed, please install it')
         self.convert_to_rgb = True
 
     def read(self, data_id):
@@ -196,6 +228,11 @@ class PillowImageReader(BaseReader):
 
 class ScipyImageReader(BaseReader):
     __provider__ = 'scipy_imread'
+
+    def __init__(self, data_source, config=None, **kwargs):
+        super().__init__(data_source, config)
+        if Image is None:
+            raise ValueError('Pillow is not installed, please install it')
 
     def read(self, data_id):
         # reimplementation scipy.misc.imread
@@ -294,6 +331,8 @@ class NiftiImageReader(BaseReader):
             config_validator.validate(self.config)
 
     def configure(self):
+        if nib is None:
+            raise ImportError('nifty backend for image reading requires nibabel. Please install it before usage.')
         self.channels_first = self.config.get('channels_first', False) if self.config else False
 
     def read(self, data_id):

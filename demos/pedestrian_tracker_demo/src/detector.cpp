@@ -10,6 +10,8 @@
 #include <opencv2/core/core.hpp>
 #include <inference_engine.hpp>
 
+#include <ngraph/ngraph.hpp>
+
 using namespace InferenceEngine;
 
 #define SSD_EMPTY_DETECTIONS_INDICATOR -1.0
@@ -132,15 +134,28 @@ ObjectDetector::ObjectDetector(
     DataPtr& _output = outputInfo.begin()->second;
     output_name_ = outputInfo.begin()->first;
 
-    const CNNLayerPtr outputLayer = cnnNetwork.getLayerByName(output_name_.c_str());
-    if (outputLayer->type != "DetectionOutput") {
-        THROW_IE_EXCEPTION << "Person Detection network output layer(" + outputLayer->name +
-            ") should be DetectionOutput, but was " +  outputLayer->type;
-    }
+    if (auto ngraphFunction = cnnNetwork.getFunction()) {
+        for (const auto op : ngraphFunction->get_ops()) {
+            if (op->get_friendly_name() == output_name_) {
+                auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
+                if (!detOutput) {
+                    THROW_IE_EXCEPTION << "Person Detection network output layer(" + op->get_friendly_name() +
+                        ") should be DetectionOutput, but was " +  op->get_type_info().name;
+                }
+                break;
+            }
+        }
+    } else {
+        const CNNLayerPtr outputLayer = cnnNetwork.getLayerByName(output_name_.c_str());
+        if (outputLayer->type != "DetectionOutput") {
+            THROW_IE_EXCEPTION << "Person Detection network output layer(" + outputLayer->name +
+                ") should be DetectionOutput, but was " +  outputLayer->type;
+        }
 
-    if (outputLayer->params.find("num_classes") == outputLayer->params.end()) {
-        THROW_IE_EXCEPTION << "Person Detection network output layer (" +
-            output_name_ + ") should have num_classes integer attribute";
+        if (outputLayer->params.find("num_classes") == outputLayer->params.end()) {
+            THROW_IE_EXCEPTION << "Person Detection network output layer (" +
+                output_name_ + ") should have num_classes integer attribute";
+        }
     }
 
     const SizeVector outputDims = _output->getTensorDesc().getDims();

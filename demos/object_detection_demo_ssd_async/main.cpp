@@ -18,15 +18,13 @@
 #include <algorithm>
 
 #include <inference_engine.hpp>
+#include <ngraph/ngraph.hpp>
 
 #include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
 #include "object_detection_demo_ssd_async.hpp"
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 using namespace InferenceEngine;
 
@@ -101,18 +99,6 @@ int main(int argc, char *argv[]) {
 
         /** Load extensions for the plugin **/
 
-#ifdef WITH_EXTENSIONS
-        /** Loading default extensions **/
-        if (FLAGS_d.find("CPU") != std::string::npos) {
-            /**
-             * cpu_extensions library is compiled from "extension" folder containing
-             * custom MKLDNNPlugin layer implementations. These layers are not supported
-             * by mkldnn, but they can be useful for inferring custom topologies.
-            **/
-            ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-        }
-#endif
-
         if (!FLAGS_l.empty()) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
             IExtensionPtr extension_ptr = make_so_pointer<IExtension>(FLAGS_l.c_str());
@@ -186,7 +172,32 @@ int main(int argc, char *argv[]) {
         }
         DataPtr& output = outputInfo.begin()->second;
         auto outputName = outputInfo.begin()->first;
-        const int num_classes = cnnNetwork.getLayerByName(outputName.c_str())->GetParamAsInt("num_classes");
+
+        int num_classes = 0;
+
+        if (auto ngraphFunction = cnnNetwork.getFunction()) {
+            for (const auto op : ngraphFunction->get_ops()) {
+                if (op->get_friendly_name() == outputName) {
+                    auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
+                    if (!detOutput) {
+                        THROW_IE_EXCEPTION << "Object Detection network output layer(" + op->get_friendly_name() +
+                            ") should be DetectionOutput, but was " +  op->get_type_info().name;
+                    }
+
+                    num_classes = detOutput->get_attrs().num_classes;
+                    break;
+                }
+            }
+        } else {
+            const CNNLayerPtr outputLayer = cnnNetwork.getLayerByName(outputName.c_str());
+            if (outputLayer->type != "DetectionOutput") {
+                throw std::logic_error("Object Detection network output layer(" + outputLayer->name +
+                                       ") should be DetectionOutput, but was " +  outputLayer->type);
+            }
+
+            num_classes = outputLayer->GetParamAsInt("num_classes");
+        }
+
         if (static_cast<int>(labels.size()) != num_classes) {
             if (static_cast<int>(labels.size()) == (num_classes - 1))  // if network assumes default "background" class, having no label
                 labels.insert(labels.begin(), "fake");
@@ -239,7 +250,7 @@ int main(int argc, char *argv[]) {
         typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
         auto total_t0 = std::chrono::high_resolution_clock::now();
         auto wallclock = std::chrono::high_resolution_clock::now();
-        double ocv_decode_time = 0, ocv_render_time = 0;
+        double ocv_render_time = 0;
 
         std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and press ESC key" << std::endl;
         std::cout << "To switch between sync/async modes, press TAB key in the output window" << std::endl;
@@ -269,7 +280,7 @@ int main(int argc, char *argv[]) {
             }
 
             auto t1 = std::chrono::high_resolution_clock::now();
-            ocv_decode_time = std::chrono::duration_cast<ms>(t1 - t0).count();
+            double ocv_decode_time = std::chrono::duration_cast<ms>(t1 - t0).count();
 
             t0 = std::chrono::high_resolution_clock::now();
             // Main sync point:

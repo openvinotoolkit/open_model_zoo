@@ -20,6 +20,7 @@ from ..config import NumberField
 from ..preprocessor import Crop3D
 from ..utils import get_size_3d_from_config
 
+
 class CropSegmentationMask(PostprocessorWithSpecificTargets):
     __provider__ = 'crop_segmentation_mask'
 
