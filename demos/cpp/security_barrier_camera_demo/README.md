@@ -8,7 +8,7 @@ reports general vehicle attributes, for example, vehicle type (car/van/bus/track
 * `license-plate-recognition-barrier-0001` or `license-plate-recognition-barrier-0007`, which is executed on top of the results from the first network
 and reports a string per recognized license plate
 
-For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
 Other demo objectives are:
 * Video/Camera as inputs, via OpenCV\*
@@ -139,6 +139,6 @@ The demo uses OpenCV to display the resulting frame with detections rendered as 
 > Other models may produce unexpected results on these devices.
 
 ## See Also
-* [Using Open Model Zoo demos](../README.md)
+* [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/downloader/README.md)

@@ -4,7 +4,7 @@ This demo showcases the work of multi-person 2D pose estimation algorithm. The t
 
 * `human-pose-estimation-0001`, which is a human pose estimation network, that produces two feature vectors. The algorithm uses these feature vectors to predict human poses.
 
-For more information about the pre-trained model, refer to the [model documentation](../../models/intel/index.md).
+For more information about the pre-trained model, refer to the [model documentation](../../../models/intel/index.md).
 
 The input frame height is scaled to model height, frame width is scaled to preserve initial aspect ratio and padded to multiple of 8.
 
@@ -61,6 +61,6 @@ The demo uses OpenCV to display the resulting frame with estimated poses and tex
 > Other models may produce unexpected results on these devices.
 
 ## See Also
-* [Using Open Model Zoo demos](../README.md)
+* [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/downloader/README.md)

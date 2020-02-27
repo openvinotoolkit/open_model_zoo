@@ -6,7 +6,7 @@ You can use a set of the following pre-trained models with the demo:
 * _person-detection-retail-0013_, which is the primary detection network for finding pedestrians
 * _person-reidentification-retail-0031_, which is the network that is executed on top of the results from inference of the first network and makes reidentification of the pedestrians
 
-For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
 ## How It Works
 
@@ -77,6 +77,6 @@ The demo uses OpenCV to display the resulting frame with detections rendered as 
 >* `person-reidentification-retail-0031`
 > Other models may produce unexpected results on these devices.
 ## See Also
-* [Using Open Model Zoo demos](../README.md)
+* [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../tools/downloader/README.md)
+* [Model Downloader](../../../tools/downloader/README.md)

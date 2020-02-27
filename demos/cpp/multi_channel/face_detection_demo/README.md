@@ -3,7 +3,7 @@
 This demo provides an inference pipeline for multi-channel face detection. The demo uses Face Detection network. You can use the following pre-trained model with the demo:
 * `face-detection-retail-0004`, which is a primary detection network for finding faces
 
-For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../../models/intel/index.md).
 
 Other demo objectives are:
 
@@ -106,6 +106,6 @@ To connect to IP cameras, use RTSP URIs:
 ```
 
 ## See Also
-* [Using Open Model Zoo demos](../../README.md)
+* [Using Open Model Zoo demos](../../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
-* [Model Downloader](../../../tools/downloader/README.md)
+* [Model Downloader](../../../../tools/downloader/README.md)

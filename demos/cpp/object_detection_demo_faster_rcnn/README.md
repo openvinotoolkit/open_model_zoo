@@ -70,7 +70,7 @@ rectangles to the standard output stream.
 > **NOTE**: On VPU devices (Intel® Movidius™ Neural Compute Stick, Intel® Neural Compute Stick 2, and Intel® Vision Accelerator Design with Intel® Movidius™ VPUs) this demo is not supported with any of the Model Downloader available topologies. Other models may work incorrectly on these devices as well.
 
 ## See Also
-* [Using Open Model Zoo demos](../README.md)
-* [Model Downloader](../../tools/downloader/README.md)
+* [Using Open Model Zoo demos](../../README.md)
+* [Model Downloader](../../../tools/downloader/README.md)
 * [Converting a Model Using General Conversion Parameters](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Converting_Model_General.html)
 * [Converting a Caffe Model](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_Convert_Model_From_Caffe.html)

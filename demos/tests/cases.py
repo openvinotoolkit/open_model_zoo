@@ -30,7 +30,7 @@ class Demo:
 
 class NativeDemo(Demo):
     def __init__(self, subdirectory, device_keys, test_cases):
-        self.subdirectory = subdirectory
+        self.subdirectory = "cpp/" + subdirectory
 
         self.device_keys = device_keys
 
@@ -50,7 +50,7 @@ class NativeDemo(Demo):
 
 class PythonDemo(Demo):
     def __init__(self, subdirectory, device_keys, test_cases):
-        self.subdirectory = 'python_demos/' + subdirectory
+        self.subdirectory = 'python/' + subdirectory
 
         self.device_keys = device_keys
 
@@ -68,7 +68,7 @@ class PythonDemo(Demo):
     def fixed_args(self, source_dir, build_dir):
         cpu_extension_path = build_dir / 'lib/libcpu_extension.so'
 
-        return [sys.executable, str(source_dir / 'python_demos' / self._name / (self._name + '.py')),
+        return [sys.executable, str(source_dir / 'python' / self._name / (self._name + '.py')),
             *(['-l', str(cpu_extension_path)] if cpu_extension_path.exists() else [])]
 
 def join_cases(*args):
