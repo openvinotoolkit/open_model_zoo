@@ -215,18 +215,18 @@ class DetectionsFromFileReader(DetectorInterface):
     ]
     """
 
-    def __init__(self, input_files, score_thresh):
-        self.input_files = input_files
+    def __init__(self, input_file, score_thresh):
+        self.input_file = input_file
         self.score_thresh = score_thresh
         self.detections = []
-        for input_file in input_files:
-            log.info('Loading {}'.format(input_file))
-            with open(input_file) as f:
-                detections = json.load(f)
-                detections_dict = {}
-                for det in detections:
-                    detections_dict[det['frame_id']] = {'boxes': det['boxes'], 'scores': det['scores']}
-                self.detections.append(detections_dict)
+        log.info('Loading {}'.format(input_file))
+        with open(input_file) as f:
+            all_detections = json.load(f)
+        for source_detections in all_detections:
+            detections_dict = {}
+            for det in source_detections:
+                detections_dict[det['frame_id']] = {'boxes': det['boxes'], 'scores': det['scores']}
+            self.detections.append(detections_dict)
 
     def run_async(self, frames, index):
         self.last_index = index

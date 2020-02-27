@@ -51,6 +51,7 @@ usage: multi_camera_multi_person_tracking.py [-h] -i I [I ...]
                                              --m_reid M_REID
                                              [--output_video OUTPUT_VIDEO]
                                              [--history_file HISTORY_FILE]
+                                             [--save_detections SAVE_DETECTIONS]
                                              [--no_show] [-d DEVICE]
                                              [-l CPU_EXTENSION]
 
@@ -77,6 +78,9 @@ optional arguments:
   --history_file HISTORY_FILE
                         Optional. Path to file in JSON format to save results
                         of the demo
+  --save_detections SAVE_DETECTIONS
+                        Optional. Path to file in JSON format to save
+                        detections
   --no_show             Optional. Don't show output
   -d DEVICE, --device DEVICE
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
@@ -112,19 +116,37 @@ The demo can use a JSON file with detections instead of a person detector.
 The structure of this file should be as follows:
 ```json
 [
-    {
-        "frame_id": 0,
-        "boxes": [[x0, y0, x1, y1], [x0, y0, x1, y1], ...],  # N bounding boxes
-        "scores": [score0, score1, ...],  # N scores
-    },
-    {
-        "frame_id": 1,
-        "boxes": [[x0, y0, x1, y1], [x0, y0, x1, y1], ...],
-        "scores": [score0, score1, ...],
-    },
+    [  # Source#0
+        {
+            "frame_id": 0,
+            "boxes": [[x0, y0, x1, y1], [x0, y0, x1, y1], ...],  # N bounding boxes
+            "scores": [score0, score1, ...],  # N scores
+        },
+        {
+            "frame_id": 1,
+            "boxes": [[x0, y0, x1, y1], [x0, y0, x1, y1], ...],
+            "scores": [score0, score1, ...],
+        },
+        ...
+    ],
+    [  # Source#1
+        {
+            "frame_id": 0,
+            "boxes": [[x0, y0, x1, y1], [x0, y0, x1, y1], ...],  # N bounding boxes
+            "scores": [score0, score1, ...],  # N scores
+        },
+        {
+            "frame_id": 1,
+            "boxes": [[x0, y0, x1, y1], [x0, y0, x1, y1], ...],
+            "scores": [score0, score1, ...],
+        },
+        ...
+    ],
     ...
 ]
 ```
+Such file with detections can be saved from the demo. Specify the argument
+`--save_detections` with path to an output file.
 
 ## Demo Output
 
@@ -148,8 +170,8 @@ During the demo execution are available two options for analysis the process:
 
 By default these options are disabled.
 To enable the first one please set in configuration file for `analyzer` parameter
-`enable` to `True`, for the second one for `embeddings` set parameter `path` to
-specify directory where data related to embeddings will be saved
+`enable` to `True`, for the second one for `embeddings` specify parameter `path`
+that is a directory where data related to embeddings will be saved
 (if it is an empty string the option is disabled). In `embeddings` is a parameter
 `use_images`. If it is `True` for every embedding will be drawn an image with a person.
 In this case the script needs `PyTorch`. Basically the demo does not need

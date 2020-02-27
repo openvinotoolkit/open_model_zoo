@@ -52,6 +52,23 @@ def check_detectors(args):
     return det_number
 
 
+def update_detections(output, detections, frame_number):
+    for i, detection in enumerate(detections):
+        entry = {'frame_id': frame_number, 'scores': [], 'boxes': []}
+        for det in detection:
+            entry['boxes'].append(det[0])
+            entry['scores'].append(det[1])
+        output[i].append(entry)
+
+
+def save_json_file(save_path, data):
+    save_dir = os.path.dirname(save_path)
+    if save_dir and not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    with open(save_path, 'w') as outfile:
+        json.dump(data, outfile)
+
+
 class FramesThreadBody:
     def __init__(self, capture, max_queue_length=2):
         self.process = True
@@ -75,6 +92,7 @@ def run(params, config, capture, detector, reid):
     win_name = 'Multi camera tracking'
     frame_number = 0
     avg_latency = AverageEstimator()
+    output_detections = [[] for _ in range(capture.get_num_sources())]
     key = -1
 
     if config['normalizer_config']['enabled']:
@@ -118,8 +136,10 @@ def run(params, config, capture, detector, reid):
         if frames is None:
             continue
 
-        frame_number += 1
         all_detections = detector.wait_and_grab()
+        if params.save_detections:
+            update_detections(output_detections, all_detections, frame_number)
+        frame_number += 1
         detector.run_async(frames, frame_number)
 
         all_masks = [[] for _ in range(len(all_detections))]
@@ -150,12 +170,9 @@ def run(params, config, capture, detector, reid):
     frames_thread.join()
 
     if len(params.history_file):
-        history = tracker.get_all_tracks_history()
-        save_dir = os.path.dirname(params.history_file)
-        if save_dir and not os.path.exists(save_dir):
-            os.makedirs(save_dir)
-        with open(params.history_file, 'w') as outfile:
-            json.dump(history, outfile)
+        save_json_file(params.history_file, tracker.get_all_tracks_history())
+    if len(params.save_detections):
+        save_json_file(params.save_detections, output_detections)
 
     if len(config['embeddings']['save_path']):
         save_embeddings(tracker.scts, **config['embeddings'])
@@ -170,8 +187,7 @@ def main():
     parser.add_argument('--config', type=str, default='config.py', required=False,
                         help='Configuration file')
 
-    parser.add_argument('--detections', type=str, nargs='+',
-                        help='JSON files with detections')
+    parser.add_argument('--detections', type=str, help='JSON file with detections')
 
     parser.add_argument('-m', '--m_detector', type=str, required=False,
                         help='Path to the person detection model')
@@ -190,6 +206,8 @@ def main():
                         help='Optional. Path to output video')
     parser.add_argument('--history_file', type=str, default='', required=False,
                         help='Optional. Path to file in JSON format to save results of the demo')
+    parser.add_argument('--save_detections', type=str, default='', required=False,
+                        help='Optional. Path to file in JSON format to save detections')
     parser.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
 
     parser.add_argument('-d', '--device', type=str, default='CPU')
