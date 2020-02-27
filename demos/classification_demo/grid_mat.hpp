@@ -96,6 +96,8 @@ public:
 
     void updateMat(const std::list<LabeledImage>& imageInfos) {
         size_t prevSourceId = (currSourceId + points.size() - prevImgs.size() % points.size()) % points.size();
+
+        // redraw images from previous batch in order to remove borders
         while (!prevImgs.empty()) {
             prevImgs.front().copyTo(outImg(cv::Rect(points[prevSourceId], cellSize)));
             prevImgs.pop();
@@ -134,7 +136,7 @@ public:
 
             cv::Mat cell = outImg(cv::Rect(points[currSourceId], cellSize));                                         
             frame.copyTo(cell);                                                                                      
-            cv::rectangle(cell, {0, 0}, {frame.cols, frame.rows}, {255, 50, 50}, labelThickness);
+            cv::rectangle(cell, {0, 0}, {frame.cols, frame.rows}, {255, 50, 50}, labelThickness); // draw a border
             
             if (currSourceId == points.size() - 1) {
                 currSourceId = 0;

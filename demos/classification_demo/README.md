@@ -82,10 +82,14 @@ If you want to see classification results, you must use "-gt" and "-labels" flag
 "Ground truth" file is used for matching image file names with correct object classes.
 
 It has the following format:
+
 <code>
 ./ILSVRC2012_val_00000001.JPEG 65
+
 ./ILSVRC2012_val_00000002.JPEG 970
+
 ./ILSVRC2012_val_00000003.JPEG 230
+
 ...
 </code>
 

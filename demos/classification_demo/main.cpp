@@ -22,7 +22,6 @@
 #include <samples/args_helper.hpp>
 #include <samples/ocv_common.hpp>
 
-#include <vpu/vpu_plugin_config.hpp>
 #include <cldnn/cldnn_config.hpp>
 
 #include "classification_demo.hpp"
@@ -94,8 +93,7 @@ std::vector<std::vector<unsigned>> topResults(Blob& inputBlob, unsigned numTop) 
     std::vector<std::vector<unsigned>> output(batchSize);
     for (size_t i = 0; i < batchSize; i++) {
         size_t offset = i * (tblob.size() / batchSize);
-        currentBlobType *batchData = tblob.data();
-        batchData += offset;
+        currentBlobType *batchData = tblob.data() + offset;
         std::vector<unsigned> indices(tblob.size() / batchSize);
         std::iota(std::begin(indices), std::end(indices), 0);
         std::partial_sort(std::begin(indices), std::begin(indices) + numTop, std::end(indices),
@@ -104,7 +102,7 @@ std::vector<std::vector<unsigned>> topResults(Blob& inputBlob, unsigned numTop) 
                           });
 
         indices.resize(numTop);
-        output[i] = std::move(indices);
+        output[i].assign(indices.begin(), indices.begin() + numTop);
     }
     
     return output;
@@ -120,20 +118,22 @@ int main(int argc, char *argv[]) {
         std::vector<std::string> imageNames;
         std::vector<cv::Mat> inputImages;
         parseInputFilesArguments(imageNames);
-        size_t inputImagesCount = imageNames.size();
-        if (inputImagesCount == 0) throw std::runtime_error("No images provided");
+        if (imageNames.empty()) throw std::runtime_error("No images provided");
         std::sort(imageNames.begin(), imageNames.end());
-        for (size_t i = 0; i < inputImagesCount; i++) {
+        for (size_t i = 0; i < imageNames.size(); i++) {
             const std::string& name = imageNames[i];
             const cv::Mat& tmpImage = cv::imread(name);
             if (tmpImage.data == nullptr) {
                 std::cerr << "Could not read image " << name << '\n';
                 imageNames.erase(imageNames.begin() + i);
-                inputImagesCount--;
                 i--;
             } else {
                 inputImages.push_back(tmpImage);
-                imageNames[i] = name.substr(name.rfind('/') + 1);
+                size_t lastSlashIdx = name.rfind('/');
+                if (lastSlashIdx == std::string::npos) {
+                    lastSlashIdx = name.rfind('\\'); // for compatibility with Windows
+                }
+                imageNames[i] = name.substr(lastSlashIdx + 1);
             }
         }
         // ---------------------------------------------------------------------------------------------------
@@ -144,14 +144,25 @@ int main(int argc, char *argv[]) {
             std::map<std::string, std::string> classIndicesMap;
             std::ifstream inputGtFile(FLAGS_gt);
             if (!inputGtFile.is_open()) throw std::runtime_error("Can't open the ground truth file.");
-            while (true) {
-                std::string imageName;
-                std::string classIndex;
-                inputGtFile >> imageName >> classIndex;
-                if (inputGtFile.eof()) break;
-                classIndicesMap.insert({imageName.substr(imageName.rfind('/') + 1), classIndex});
+            
+            std::string line;
+            while (std::getline(inputGtFile, line))
+            {
+                size_t separatorIdx = line.find(' ');
+                if (separatorIdx == std::string::npos) {
+                    throw std::runtime_error("The ground truth file has incorrect format.");
+                }
+                std::string imagePath = line.substr(0, separatorIdx);
+                size_t imagePathEndIdx = imagePath.rfind('/');
+                std::string classIndex = line.substr(separatorIdx + 1);
+                if (!std::all_of(classIndex.begin(), classIndex.end() - 1, ::isdigit)
+                    || imagePathEndIdx != 1 || imagePath[0] != '.') { // check whether path starts with ./
+                    throw std::runtime_error("The ground truth file has incorrect format.");
+                }
+                classIndicesMap.insert({imagePath.substr(imagePathEndIdx + 1), classIndex});
             }
-            for (size_t i = 0; i < inputImagesCount; i++) {
+
+            for (size_t i = 0; i < imageNames.size(); i++) {
                 auto imageSearchResult = classIndicesMap.find(imageNames[i]);
                 if (imageSearchResult != classIndicesMap.end()) {
                     classIndices.push_back(static_cast<unsigned>(std::stoul(imageSearchResult->second)));
@@ -171,8 +182,17 @@ int main(int argc, char *argv[]) {
         if (!inputLabelsFile.is_open()) throw std::runtime_error("Can't open the labels file.");
         std::string labelsLine;
         while (std::getline(inputLabelsFile, labelsLine)) {
-            labels.push_back(labelsLine.substr(labelsLine.find(' ') + 1,
-                                               labelsLine.find(',') - (labelsLine.find(' ') + 1)));
+            size_t labelBeginIdx = labelsLine.find(' ');
+            size_t labelEndIdx = labelsLine.find(','); // can be npos when class has only one label
+            if (labelBeginIdx == std::string::npos) {
+                throw std::runtime_error("The labels file has incorrect format.");
+            }
+            labels.push_back(labelsLine.substr(labelBeginIdx + 1, labelEndIdx - (labelBeginIdx + 1)));
+        }
+
+        if (!std::all_of(classIndices.begin(), classIndices.end(),
+                         [&labels](unsigned classIdx){ return classIdx < labels.size(); })) {
+            throw std::runtime_error("One of class indices is outside the range supported by the model.");
         }
         // ---------------------------------------------------------------------------------------------------
 
@@ -228,7 +248,8 @@ int main(int argc, char *argv[]) {
             for (size_t i = 0; i < classIndices.size(); i++) {
                 classIndices[i]++;
             }
-        } else if (layerDataDims[1] != labels.size() || layerDataDims[0] != FLAGS_b) {
+        }
+        if (layerDataDims[1] != labels.size() || layerDataDims[0] != FLAGS_b) {
             throw std::logic_error("Incorrect size of model output layer. Must be BatchSize x NumberOfClasses.");
         }
 
@@ -237,8 +258,7 @@ int main(int argc, char *argv[]) {
 
         // ----------------------------------Set device and device settings-----------------------------------
         std::set<std::string> devices;
-        for (std::string& device : parseDevices(FLAGS_d)) {
-            std::transform(device.begin(), device.end(), device.begin(), ::toupper);
+        for (const std::string& device : parseDevices(FLAGS_d)) {
             devices.insert(device);
         }
         std::map<std::string, unsigned> deviceNstreams = parseValuePerDevice(devices, FLAGS_nstreams);
@@ -253,7 +273,7 @@ int main(int argc, char *argv[]) {
                     ie.SetConfig({{ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO) }}, device);
                 } else {
                     // pin threads for CPU portion of inference
-                    ie.SetConfig({{ CONFIG_KEY(CPU_BIND_THREAD), "YES" }}, device);
+                    ie.SetConfig({{ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(YES) }}, device);
                 }
 
                 // for CPU execution, more throughput-oriented execution via streams
@@ -316,7 +336,7 @@ int main(int argc, char *argv[]) {
             width = std::stoi(gridMatRowsCols[0]);
             height = std::stoi(gridMatRowsCols[1]);
         }
-        GridMat gridMat = GridMat(presenter, cv::Size(width, height));
+        GridMat gridMat(presenter, cv::Size(width, height));
         // ---------------------------------------------------------------------------------------------------
         
         // -----------------------------Prepare variables and data for main loop------------------------------
@@ -330,7 +350,6 @@ int main(int argc, char *argv[]) {
         bool isTestMode = true;
         char key = 0;
         std::size_t nextImageIndex = 0;
-        auto startTickCount = std::chrono::steady_clock::now();
         std::condition_variable condVar;
         std::mutex mutex;
         std::atomic<bool> hasCallbackException(false);
@@ -361,28 +380,35 @@ int main(int argc, char *argv[]) {
                 gridMat = GridMat(presenter, cv::Size(width, height), cv::Size(16, 9),
                                   (framesNum - framesNumOnCalculationStart) / std::chrono::duration_cast<Sec>(
                                     fpsCalculationDuration).count());
-                startTickCount = std::chrono::steady_clock::now();
+                startTime = std::chrono::steady_clock::now();
                 framesNum = 0;
                 latencySum = std::chrono::steady_clock::duration::zero();
                 correctPredictionsCount = 0;
                 accuracy = 0;
             }
 
-            std::unique_lock<std::mutex> lock(mutex);
-            if (!completedInferRequests.empty()) {
-                auto completedInferRequestInfo = completedInferRequests.front();
-                completedInferRequests.pop();
-                lock.unlock();
-                emptyInferRequests.push({completedInferRequestInfo.inferRequest, 
+            std::unique_ptr<InferRequestInfo> completedInferRequestInfo;
+            bool hasCompletedRequest = false;
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+
+                if (!completedInferRequests.empty()) {
+                    hasCompletedRequest = true;
+                    completedInferRequestInfo.reset(new InferRequestInfo(completedInferRequests.front()));
+                    completedInferRequests.pop();
+                }
+            }
+            if (hasCompletedRequest) {
+                emptyInferRequests.push({completedInferRequestInfo->inferRequest, 
                                          std::vector<InferRequestInfo::InferRequestImage>()});
 
                 std::vector<unsigned> correctClasses = {};
-                for (size_t i = 0; i < completedInferRequestInfo.images.size(); i++) {
-                    correctClasses.push_back(completedInferRequestInfo.images[i].correctClass);
+                for (size_t i = 0; i < completedInferRequestInfo->images.size(); i++) {
+                    correctClasses.push_back(completedInferRequestInfo->images[i].correctClass);
                 }
 
                 std::vector<std::vector<unsigned>> results = topResults(
-                    *completedInferRequestInfo.inferRequest.GetBlob(outputName), FLAGS_nt);
+                    *completedInferRequestInfo->inferRequest.GetBlob(outputName), FLAGS_nt);
                 std::vector<std::string> predictedLabels = {};
                 std::list<LabeledImage> shownImagesInfo;
                 for (size_t i = 0; i < FLAGS_b; i++) {
@@ -406,16 +432,16 @@ int main(int argc, char *argv[]) {
                     }
 
                     shownImagesInfo.push_back(
-                        LabeledImage{completedInferRequestInfo.images[i].mat, predictedLabels[i], predictionResult});
+                        LabeledImage{completedInferRequestInfo->images[i].mat, predictedLabels[i], predictionResult});
                 }
 
                 framesNum += FLAGS_b;
                 
                 avgFPS = framesNum / std::chrono::duration_cast<Sec>(
-                    std::chrono::steady_clock::now() - startTickCount).count();
+                    std::chrono::steady_clock::now() - startTime).count();
                 gridMat.updateMat(shownImagesInfo);
                 auto processingEndTime = std::chrono::steady_clock::now();
-                for (const auto & image : completedInferRequestInfo.images) {
+                for (const auto & image : completedInferRequestInfo->images) {
                     latencySum += processingEndTime - image.startTime;
                 }
                 avgLatency = std::chrono::duration_cast<Sec>(latencySum).count() / framesNum;
@@ -428,7 +454,6 @@ int main(int argc, char *argv[]) {
                     presenter.handleKey(key);
                 }
             } else if (!emptyInferRequests.empty()) {
-                lock.unlock();
                 auto inferRequestStartTime = std::chrono::steady_clock::now();
                 cv::Mat nextImage = resizeImage(inputImages[nextImageIndex], modelInputResolution);
                 emptyInferRequests.front().images.push_back(
@@ -436,7 +461,7 @@ int main(int argc, char *argv[]) {
                                                      classIndices[nextImageIndex],
                                                      inferRequestStartTime});
                 nextImageIndex++;
-                if (nextImageIndex == inputImagesCount) {
+                if (nextImageIndex == imageNames.size()) {
                     nextImageIndex = 0;
                 }
                 if (emptyInferRequests.front().images.size() == FLAGS_b) {
@@ -449,14 +474,17 @@ int main(int argc, char *argv[]) {
                                                       &condVar,
                                                       &hasCallbackException,
                                                       &irCallbackException] {
-                        try {
-                            std::lock_guard<std::mutex> callback_lock(mutex);
-                            completedInferRequests.push({emptyInferRequest.inferRequest, emptyInferRequest.images});
-                        }
-                        catch(...) {
-                            if (!hasCallbackException) {
-                                irCallbackException = std::current_exception();
-                                hasCallbackException = true;
+                        {
+                            std::lock_guard<std::mutex> callbackLock(mutex);
+                        
+                            try {
+                                completedInferRequests.push(emptyInferRequest);
+                            }
+                            catch(...) {
+                                if (!hasCallbackException) {
+                                    irCallbackException = std::current_exception();
+                                    hasCallbackException = true;
+                                }
                             }
                         }
                         condVar.notify_one();
@@ -469,12 +497,15 @@ int main(int argc, char *argv[]) {
                     emptyInferRequest.inferRequest.StartAsync();
                 }
             }
-            
-            lock.lock();
-            while (emptyInferRequests.empty() && completedInferRequests.empty()) {
-                condVar.wait(lock);
+
+            {
+                std::unique_lock<std::mutex> lock(mutex);
+
+                while (!hasCallbackException
+                       && emptyInferRequests.empty() && completedInferRequests.empty()) {
+                    condVar.wait(lock);
+                }
             }
-            lock.unlock();
 
             elapsedSeconds = std::chrono::steady_clock::now() - startTime;
         } while (key != 27 && key != 'q' && key != 'Q'
