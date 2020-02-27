@@ -50,11 +50,12 @@ def build_argparser():
                       default=0.5, type=float)
     args.add_argument("-iout", "--iou_threshold", help="Optional. Intersection over union threshold for overlapping "
                                                        "detections filtering", default=0.4, type=float)
-    args.add_argument("-ni", "--number_iter", help="Optional. Number of inference iterations", default=1, type=int)
     args.add_argument("-pc", "--perf_counts", help="Optional. Report performance counters", default=False,
                       action="store_true")
     args.add_argument("-r", "--raw_output_message", help="Optional. Output inference results raw values showing",
                       default=False, action="store_true")
+    args.add_argument("-nireq", "--num_infer_requests", help="Optional. Number of infer requests",
+                      default=2, type=int)
     args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
     return parser
 
@@ -199,9 +200,6 @@ def main():
     # ---------------------------------------------- 4. Preparing inputs -----------------------------------------------
     log.info("Preparing inputs")
     input_blob = next(iter(net.inputs))
-
-    #  Defaulf batch_size is 1
-    net.batch_size = 1
 
     # Read and pre-process input images
     n, c, h, w = net.inputs[input_blob].shape

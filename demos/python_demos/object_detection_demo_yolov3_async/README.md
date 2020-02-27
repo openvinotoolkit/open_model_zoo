@@ -31,8 +31,8 @@ The command yields the following usage message:
 usage: object_detection_demo_yolov3_async.py [-h] -m MODEL -i INPUT
                                        [-l CPU_EXTENSION] [-d DEVICE]
                                        [--labels LABELS] [-t PROB_THRESHOLD]
-                                       [-iout IOU_THRESHOLD] [-ni NUMBER_ITER]
-                                       [-pc] [-r]
+                                       [-iout IOU_THRESHOLD] [-pc] [-r]
+                                       [-nireq]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -57,11 +57,11 @@ Options:
   -iout IOU_THRESHOLD, --iou_threshold IOU_THRESHOLD
                         Optional. Intersection over union threshold for
                         overlapping detections filtering
-  -ni NUMBER_ITER, --number_iter NUMBER_ITER
-                        Optional. Number of inference iterations
   -pc, --perf_counts    Optional. Report performance counters
   -r, --raw_output_message
                         Optional. Output inference results raw values showing
+  -nireq, --num_infer_requests
+                        Optional. Number of infer requests
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
