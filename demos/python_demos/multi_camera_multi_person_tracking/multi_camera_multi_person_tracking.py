@@ -46,9 +46,7 @@ def check_detectors(args):
         log.error('No detector specified, please specify one of the following parameters: '
                   '\'--m_detector\', \'--m_segmentation\' or \'--detections\'')
     elif det_number > 1:
-        det_string = ''
-        for det in non_empty_detectors:
-            det_string += '\n\t{} = {}'.format(det[0], det[1])
+        det_string = ''.join('\n\t{} = {}'.format(det[0], det[1]) for det in non_empty_detectors)
         log.error('Only one detector expected but got {}, please specify one of them:{}'
                   .format(len(non_empty_detectors), det_string))
     return det_number
