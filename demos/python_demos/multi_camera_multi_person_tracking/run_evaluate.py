@@ -20,10 +20,6 @@ import numpy as np
 from lxml import etree
 from tqdm import tqdm
 
-import os
-import sys
-sys.path.append(os.path.realpath(os.path.dirname(__file__)) + '/..')
-
 from mc_tracker.sct import TrackedObj
 from utils.misc import set_log_config
 

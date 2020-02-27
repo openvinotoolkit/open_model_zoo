@@ -21,10 +21,6 @@ import motmetrics as mm
 import numpy as np
 from tqdm import tqdm
 
-import os
-import sys
-sys.path.append(os.path.realpath(os.path.dirname(__file__)) + '/..')
-
 from tools.run_evaluate import read_gt_tracks, get_detections_from_tracks
 from utils.misc import check_pressed_keys, set_log_config
 from utils.video import MulticamCapture
