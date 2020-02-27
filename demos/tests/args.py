@@ -63,18 +63,20 @@ class DataPatternArg:
         assert len(set(data.suffix for data in seq)) == 1, "all images in the sequence must have the same extension"
         assert '%' not in seq[0].suffix
 
+        name_format = 'input-%04d' + seq[0].suffix
+
         if not seq_dir.is_dir():
             seq_dir.mkdir(parents=True)
 
             if self.rename:
-                name_format = 'input-%04d' + seq[0].suffix
                 for index, data in enumerate(context.data_sequences[self.sequence_name]):
                     shutil.copyfile(data.resolve(context), str(seq_dir / (name_format % index)))
-                return str(seq_dir / name_format)
             else:
                 for index, data in enumerate(context.data_sequences[self.sequence_name]):
                     shutil.copyfile(data.resolve(context), str(seq_dir / (seq[index].stem + seq[0].suffix)))
                 return str(seq_dir / ("original-file-name" + seq[0].suffix))
+                
+        return str(seq_dir / name_format)
 
 
 class DataDirectoryArg:
