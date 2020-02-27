@@ -21,6 +21,10 @@ import motmetrics as mm
 import numpy as np
 from tqdm import tqdm
 
+import os
+import sys
+sys.path.append(os.path.realpath(os.path.dirname(__file__)) + '/..')
+
 from tools.run_evaluate import read_gt_tracks, get_detections_from_tracks
 from utils.misc import check_pressed_keys, set_log_config
 from utils.video import MulticamCapture
@@ -30,25 +34,11 @@ set_log_config()
 
 
 def find_max_id(all_tracks):
-    def find_max(tracks):
-        max_id = 0
-        for track in tracks:
-            if track['id'] > max_id:
-                max_id = track['id']
-        return max_id
-
-    output = []
-    for cam_tracks in all_tracks:
-        output.append(find_max(cam_tracks))
-    return max(output)
+    return max(track['id'] for cam_tracks in all_tracks for track in cam_tracks)
 
 
 def find_max_frame_num(tracks):
-    output = [0 for _ in tracks]
-    for i, cam_tracks in enumerate(tracks):
-        for track in cam_tracks:
-            output[i] = max(output[i], track['timestamps'][-1])
-    return min(output)
+    return min(max(track['timestamps'][-1] for track in cam_tracks) for cam_tracks in tracks)
 
 
 def accumulate_mot_metrics(accs, gt_tracks, history):
@@ -128,10 +118,10 @@ def calc_output_video_params(input_sizes, fps, gt, merge_det_gt_windows,
 
 
 def main():
-    """Prepares data for the person recognition demo"""
+    """Visualize the results of the multi camera multi person tracker demo"""
     parser = argparse.ArgumentParser(description='Multi camera multi person \
                                                   tracking visualization demo script')
-    parser.add_argument('--videos', type=str, nargs='+',
+    parser.add_argument('-i', type=str, nargs='+',
                         help='Input videos')
     parser.add_argument('--history_file', type=str, default='', required=True,
                         help='File with tracker history')
@@ -148,7 +138,7 @@ def main():
 
     args = parser.parse_args()
 
-    capture = MulticamCapture(args.videos)
+    capture = MulticamCapture(args.i)
     with open(args.history_file) as hist_f:
         history = json.load(hist_f)
 
@@ -167,7 +157,7 @@ def main():
             output_path = args.output_video[:len(args.output_video) - len(ext) - 1] + '_gt.' + ext
             output_video_gt = cv.VideoWriter(output_path, fourcc, fps, video_output_size)
 
-    # Create GT tracks if necessary
+    # Read GT tracks if necessary
     if args.gt_files:
         assert len(args.gt_files) == capture.get_num_sources()
         gt_tracks, _ = read_gt_tracks(args.gt_files)

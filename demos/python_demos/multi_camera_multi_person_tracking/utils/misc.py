@@ -76,13 +76,13 @@ def read_py_config(filename):
 
 
 def check_pressed_keys(key):
-    if key != 32:  # If was pressed space, use per-frame mode via pressing space key
-        key = cv.waitKey(1)
     if key == 32:  # Pause
         while True:
             key = cv.waitKey(0)
             if key == 27 or key == 32 or key == 13:  # enter: resume, space: next frame, esc: exit
                 break
+    else:
+        key = cv.waitKey(1)
     return key
 
 

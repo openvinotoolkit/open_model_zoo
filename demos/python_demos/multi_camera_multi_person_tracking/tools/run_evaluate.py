@@ -20,6 +20,10 @@ import numpy as np
 from lxml import etree
 from tqdm import tqdm
 
+import os
+import sys
+sys.path.append(os.path.realpath(os.path.dirname(__file__)) + '/..')
+
 from mc_tracker.sct import TrackedObj
 from utils.misc import set_log_config
 
@@ -84,7 +88,7 @@ def check_contain_duplicates(all_detections):
 
 
 def main():
-    """Computes MOT metrics for the person recognition demo"""
+    """Computes MOT metrics for the multi camera multi person tracker"""
     parser = argparse.ArgumentParser(description='Multi camera multi person \
                                                   tracking visualization demo script')
     parser.add_argument('--history_file', type=str, default='', required=True,
@@ -133,8 +137,6 @@ def main():
             distances = mm.distances.iou_matrix(np.array(gt_boxes),
                                                 np.array(ht_boxes), max_iou=0.5)
             accs[i].update(gt_labels, ht_labels, distances)
-
-        time += 1
 
     log.info('Computing MOT metrics...')
     mh = mm.metrics.create()

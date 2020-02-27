@@ -40,21 +40,18 @@ def check_detectors(args):
         '--m_segmentation': args.m_segmentation,
         '--detections': args.detections
     }
-    det_counter = 0
-    for _, value in detectors.items():
-        if value:
-            det_counter += 1
-    if det_counter == 0:
-        log.error('No detector specified, please specify one of the next parameters: '
+    non_empty_detectors = [(det, value) for det, value in detectors.items() if value]
+    det_number = len(non_empty_detectors)
+    if det_number == 0:
+        log.error('No detector specified, please specify one of the following parameters: '
                   '\'--m_detector\', \'--m_segmentation\' or \'--detections\'')
-    elif det_counter > 1:
-        non_empty_detectors = [{det: value} for det, value in detectors.items() if value]
+    elif det_number > 1:
         det_string = ''
         for det in non_empty_detectors:
-            det_string += '\n\t{}'.format(det)
+            det_string += '\n\t{} = {}'.format(det[0], det[1])
         log.error('Only one detector expected but got {}, please specify one of them:{}'
                   .format(len(non_empty_detectors), det_string))
-    return det_counter
+    return det_number
 
 
 class FramesThreadBody:
@@ -83,8 +80,12 @@ def run(params, config, capture, detector, reid):
     key = -1
 
     if config['normalizer_config']['enabled']:
-        del config['normalizer_config']['enabled']
-        capture.add_transform(NormalizerCLAHE(**config['normalizer_config']))
+        capture.add_transform(
+            NormalizerCLAHE(
+                config['normalizer_config']['clip_limit'],
+                config['normalizer_config']['tile_size'],
+            )
+        )
 
     tracker = MultiCameraTracker(capture.get_num_sources(), reid, config['sct_config'], **config['mct_config'],
                                  visual_analyze=config['analyzer'])
@@ -103,12 +104,13 @@ def run(params, config, capture, detector, reid):
         output_video = None
 
     prev_frames = thread_body.frames_queue.get()
-    detector.run_asynch(prev_frames, frame_number)
+    detector.run_async(prev_frames, frame_number)
 
     while thread_body.process:
-        key = check_pressed_keys(key)
-        if key == 27:
-            break
+        if not params.no_show:
+            key = check_pressed_keys(key)
+            if key == 27:
+                break
         start = time.time()
         try:
             frames = thread_body.frames_queue.get_nowait()
@@ -120,7 +122,7 @@ def run(params, config, capture, detector, reid):
 
         frame_number += 1
         all_detections = detector.wait_and_grab()
-        detector.run_asynch(frames, frame_number)
+        detector.run_async(frames, frame_number)
 
         all_masks = [[] for _ in range(len(all_detections))]
         for i, detections in enumerate(all_detections):
@@ -200,14 +202,14 @@ def main():
 
     args = parser.parse_args()
     if check_detectors(args) != 1:
-        return 1
+        sys.exit(1)
 
     if len(args.config):
         log.info('Reading configuration file {}'.format(args.config))
         config = read_py_config(args.config)
     else:
         log.error('No configuration file specified. Please specify parameter \'--config\'')
-        sys.exit()
+        sys.exit(1)
 
     random.seed(config['random_seed'])
     capture = MulticamCapture(args.i)

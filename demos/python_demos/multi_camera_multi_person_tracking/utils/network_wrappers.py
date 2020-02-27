@@ -25,7 +25,7 @@ from .segm_postprocess import postprocess
 
 class DetectorInterface(ABC):
     @abstractmethod
-    def run_asynch(self, frames, index):
+    def run_async(self, frames, index):
         pass
 
     @abstractmethod
@@ -42,7 +42,7 @@ class Detector(DetectorInterface):
         self.expand_ratio = (1., 1.)
         self.max_num_frames = max_num_frames
 
-    def run_asynch(self, frames, index):
+    def run_async(self, frames, index):
         assert len(frames) <= self.max_num_frames
         self.shapes = []
         for i in range(len(frames)):
@@ -59,7 +59,7 @@ class Detector(DetectorInterface):
 
     def get_detections(self, frames):
         """Returns all detections on frames"""
-        self.run_asynch(frames)
+        self.run_async(frames)
         return self.wait_and_grab()
 
     def __decode_detections(self, out, frame_shape):
@@ -137,7 +137,7 @@ class MaskRCNN(DetectorInterface):
 
         self.transforms = self.Compose(
             [
-                self.Resize(max_size=None, window_size=(self.h, self.w), size=None),
+                self.Resize(self.h, self.w),
             ]
         )
 
@@ -199,7 +199,7 @@ class MaskRCNN(DetectorInterface):
             outputs.append(frame_output)
         return outputs
 
-    def run_asynch(self, frames, index):
+    def run_async(self, frames, index):
         self.frames = frames
 
     def wait_and_grab(self):
@@ -215,55 +215,16 @@ class MaskRCNN(DetectorInterface):
             return sample
 
     class Resize(object):
-        def __init__(self, max_size=None, window_size=None, size=None):
+        def __init__(self, max_window_height, max_window_width):
             super().__init__()
-            assert int(max_size is not None) + int(window_size is not None) + int(size is not None) == 1
-
-            self.short_side_max = None
-            self.long_side_max = None
-            if max_size is not None:
-                self.short_side_max, self.long_side_max = max_size
-
-            self.height_max = None
-            self.width_max = None
-            if window_size is not None:
-                self.height_max, self.width_max = window_size
-
-            self.height = None
-            self.width = None
-            if size is not None:
-                self.height, self.width = size
-
-        def get_scale(self, image_size):
-            if self.height is not None:
-                scale_x, scale_y = self.width / image_size[1], self.height / image_size[0]
-            elif self.height_max is not None:
-                im_scale = min(self.height_max / image_size[0], self.width_max / image_size[1])
-                scale_x, scale_y = im_scale, im_scale
-            else:
-                im_scale = min(self.short_side_max / min(image_size), self.long_side_max / max(image_size))
-                scale_x, scale_y = im_scale, im_scale
-            return scale_x, scale_y
+            self.max_window_height = max_window_height
+            self.max_window_width = max_window_width
 
         def __call__(self, sample):
-            image_size = sample['image'].shape[:2]
-            scale_x, scale_y = self.get_scale(image_size)
-
-            # Resize image.
-            sample['image'] = cv2.resize(sample['image'], None, fx=scale_x, fy=scale_y)
-            h, w = sample['image'].shape[:2]
-
-            # Resize boxes.
-            if 'gt_boxes' in sample:
-                sample['gt_boxes'] *= [scale_x, scale_y, scale_x, scale_y]
-                sample['gt_boxes'] = np.clip(sample['gt_boxes'], 0, [w - 1, h - 1, w - 1, h - 1])
-
-            # Resize masks.
-            if 'gt_masks' in sample:
-                sample['gt_masks'] = [[np.clip(part * [scale_x, scale_y], 0, [w - 1, h - 1]) for part in obj]
-                                      for obj in sample['gt_masks']]
+            image_height, image_width = sample['image'].shape[:2]
+            scale = min(self.max_window_height / image_height, self.max_window_width / image_width)
+            sample['image'] = cv2.resize(sample['image'], None, fx=scale, fy=scale)
             sample['image'] = sample['image'].astype('float32').transpose(2, 0, 1)
-
             return sample
 
 
@@ -291,7 +252,7 @@ class DetectionsFromFileReader(DetectorInterface):
                     detections_dict[det['frame_id']] = {'boxes': det['boxes'], 'scores': det['scores']}
                 self.detections.append(detections_dict)
 
-    def run_asynch(self, frames, index):
+    def run_async(self, frames, index):
         self.last_index = index
 
     def wait_and_grab(self):

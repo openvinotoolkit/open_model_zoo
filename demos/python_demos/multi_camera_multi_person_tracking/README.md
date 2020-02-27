@@ -54,7 +54,6 @@ usage: multi_camera_multi_person_tracking.py [-h] -i I [I ...]
                                              [--no_show] [-d DEVICE]
                                              [-l CPU_EXTENSION]
 
-
 Multi camera multi person tracking live demo script
 
 optional arguments:
@@ -83,7 +82,6 @@ optional arguments:
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         MKLDNN (CPU)-targeted custom layers.Absolute path to a
                         shared library with the kernels impl.
-
 ```
 Minimum command examples to run the demo:
 
@@ -115,15 +113,16 @@ The structure of this file should be as follows:
 ```json
 [
     {
-        'frame_id': 0
-        'boxes': [[x0, y0, x1, y1], [x0, y0, x1, y1], ...]  # N bounding boxes
-        'scores': [score0, score1, ...]  # N scores
+        "frame_id": 0,
+        "boxes": [[x0, y0, x1, y1], [x0, y0, x1, y1], ...],  # N bounding boxes
+        "scores": [score0, score1, ...],  # N scores
     },
     {
-        'frame_id': 1
-        'boxes': [[x0, y0, x1, y1], [x0, y0, x1, y1], ...]
-        'scores': [score0, score1, ...]
-    }
+        "frame_id": 1,
+        "boxes": [[x0, y0, x1, y1], [x0, y0, x1, y1], ...],
+        "scores": [score0, score1, ...],
+    },
+    ...
 ]
 ```
 
@@ -140,3 +139,18 @@ Visualization can be controlled using the following keys:
 
 Also demo can dump resulting tracks to a json file. To specify the file use the
 `--history_file` argument.
+
+## Process analysis
+
+During the demo execution are available two options for analysis the process:
+1. Visualize distances between embeddings that are criterion for matching tracks.
+2. Save and visualize embeddings (via `tensorboard`).
+
+By default these options are disabled.
+To enable the first one please set in configuration file for `analyzer` parameter
+`enable` to `True`, for the second one for `embeddings` set parameter `path` to
+specify directory where data related to embeddings will be saved
+(if it is an empty string the option is disabled). In `embeddings` is a parameter
+`use_images`. If it is `True` for every embedding will be drawn an image with a person.
+In this case the script needs `PyTorch`. Basically the demo does not need
+`PyTorch` and this module is not installed automatically, please do it manually.
