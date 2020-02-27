@@ -152,7 +152,7 @@ def run(params, config, capture, detector, reid):
     if len(params.history_file):
         history = tracker.get_all_tracks_history()
         save_dir = os.path.dirname(params.history_file)
-        if not os.path.exists(save_dir):
+        if save_dir and not os.path.exists(save_dir):
             os.makedirs(save_dir)
         with open(params.history_file, 'w') as outfile:
             json.dump(history, outfile)
