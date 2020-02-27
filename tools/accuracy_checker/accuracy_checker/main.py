@@ -18,7 +18,6 @@ import sys
 from pathlib import Path
 from argparse import ArgumentParser
 from functools import partial
-from copy import deepcopy
 from csv import DictWriter
 
 import cv2
@@ -288,20 +287,18 @@ def write_csv_result(csv_file, processing_info, metric_results):
         'tags': ' '.join(tags) if tags else '',
         'dataset': dataset
     }
-    rows = []
-    for metric_result in metric_results:
-        result = deepcopy(main_info)
-        result.update({
-            'metric_name': metric_result['name'],
-            'metric_type': metric_result['type'],
-            'metric_value': metric_result['value']
-        })
-        rows.append(result)
+
     with open(csv_file, 'a+', newline='') as f:
         writer = DictWriter(f, fieldnames=field_names)
         if new_file:
             writer.writeheader()
-        writer.writerows(rows)
+        for metric_result in metric_results:
+            writer.writerow({
+                **main_info,
+                'metric_name': metric_result['name'],
+                'metric_type': metric_result['type'],
+                'metric_value': metric_result['value']
+            })
 
 
 if __name__ == '__main__':
