@@ -135,14 +135,8 @@ class MaskRCNN(DetectorInterface):
         self.n, self.c, self.h, self.w = self.net.inputs_info['im_data'].shape
         assert self.n == 1, 'Only batch 1 is supported.'
 
-        self.transforms = self.Compose(
-            [
-                self.Resize(self.h, self.w),
-            ]
-        )
-
     def preprocess(self, frame):
-        processed_image = self.transforms({'image': frame})['image']
+        processed_image = self.resize({'image': frame})['image']
         sample = dict(original_image=frame,
                       meta=dict(original_size=frame.shape[:2],
                                 processed_size=processed_image.shape[1:3]),
@@ -205,27 +199,12 @@ class MaskRCNN(DetectorInterface):
     def wait_and_grab(self):
         return self.get_detections(self.frames)
 
-    class Compose(object):
-        def __init__(self, transforms):
-            self.transforms = transforms
-
-        def __call__(self, sample):
-            for t in self.transforms:
-                sample = t(sample)
-            return sample
-
-    class Resize(object):
-        def __init__(self, max_window_height, max_window_width):
-            super().__init__()
-            self.max_window_height = max_window_height
-            self.max_window_width = max_window_width
-
-        def __call__(self, sample):
-            image_height, image_width = sample['image'].shape[:2]
-            scale = min(self.max_window_height / image_height, self.max_window_width / image_width)
-            sample['image'] = cv2.resize(sample['image'], None, fx=scale, fy=scale)
-            sample['image'] = sample['image'].astype('float32').transpose(2, 0, 1)
-            return sample
+    def resize(self, sample):
+        image_height, image_width = sample['image'].shape[:2]
+        scale = min(self.h / image_height, self.w / image_width)
+        sample['image'] = cv2.resize(sample['image'], None, fx=scale, fy=scale)
+        sample['image'] = sample['image'].astype('float32').transpose(2, 0, 1)
+        return sample
 
 
 class DetectionsFromFileReader(DetectorInterface):
