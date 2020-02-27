@@ -24,7 +24,7 @@ The models can be downloaded via Model Downloader
 | EfficientNet B7 AutoAugment  | [TensorFlow\*](./efficientnet-b7_auto_aug/efficientnet-b7_auto_aug.md) | efficientnet-b7_auto_aug | 84.68/97.09 | 77.618  | 66.193 |
 | Inception (GoogleNet) V1 | [Caffe\*](./googlenet-v1/googlenet-v1.md) | googlenet-v1 | | 3.266 | 6.999 |
 | Inception (GoogleNet) V2 | [Caffe\*](./googlenet-v2/googlenet-v2.md) | googlenet-v2 | | 4.058 | 11.185 |
-| Inception (GoogleNet) V3 | [Caffe\*](./googlenet-v3/googlenet-v3.md)<br>[PyTorch\*](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | googlenet-v3 <br> googlenet-v3-pytorch |  | 11.469 | 23.817 |
+| Inception (GoogleNet) V3 | [TensorFlow\*](./googlenet-v3/googlenet-v3.md)<br>[PyTorch\*](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | googlenet-v3 <br> googlenet-v3-pytorch |  | 11.469 | 23.817 |
 | Inception (GoogleNet) V4 | [Caffe\*](./googlenet-v4/googlenet-v4.md) | googlenet-v4| | 24.584 | 42.648 |
 | Inception-ResNet V2      | [Caffe\*](./inception-resnet-v2/inception-resnet-v2.md)<br>[TensorFlow\*](./inception-resnet-v2-tf/inception-resnet-v2-tf.md) | inception-resnet-v2 <br>  inception-resnet-v2-tf | | 22.227~26.405 | 30.223~55.813 |
 | MobileNet V1 0.25 128 | [Caffe\*](./mobilenet-v1-0.25-128/mobilenet-v1-0.25-128.md) | mobilenet-v1-0.25-128 | | 0.028 | 0.468 | 
