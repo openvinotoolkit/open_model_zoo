@@ -9,7 +9,7 @@ Please refer to the [kinetics](https://deepmind.com/research/open-source/open-so
 
 ![](./demo.png)
 
-## Encoder model spcification
+## Encoder model specification
 
 The [encoder model](../action-recognition-0001-encoder) accepts video frame and produces embedding.
 Video frames should be sampled to cover ~1 second fragment (i.e. skip every second frame in 30 fps video).
@@ -39,7 +39,7 @@ Video frames should be sampled to cover ~1 second fragment (i.e. skip every seco
 The model outputs a tensor with the shape [1x512x1x1], representing embedding of processed frame.
 
 
-## Decoder model spcification
+## Decoder model specification
 
 The [decoder model](../action-recognition-0001-decoder) accepts stack of frame embeddings, computed by [encoder model](../action-recognition-0001-encoder).
 
