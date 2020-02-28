@@ -17,37 +17,21 @@
 import logging as log
 import os.path as osp
 
-from openvino.inference_engine import IEPlugin
+from openvino.inference_engine import IECore
 
 class InferenceContext:
-    def __init__(self):
-        self.plugins = {}
+    def __init__(self, devices, cpu_ext, gpu_ext, perf_count):
+        self.ie_core = IECore()
+        self.gpu_ext = gpu_ext
+        self.perf_count = perf_count
 
-    def load_plugins(self, devices, cpu_ext="", gpu_ext=""):
-        log.info("Loading plugins for devices: %s" % (devices))
-
-        plugins = { d: IEPlugin(d) for d in devices }
-        if 'CPU' in plugins and not len(cpu_ext) == 0:
+        if cpu_ext and 'CPU' in devices:
             log.info("Using CPU extensions library '%s'" % (cpu_ext))
-            assert osp.isfile(cpu_ext), "Failed to open CPU extensions library"
-            plugins['CPU'].add_cpu_extension(cpu_ext)
-
-        if 'GPU' in plugins and not len(gpu_ext) == 0:
-            assert osp.isfile(gpu_ext), "Failed to open GPU definitions file"
-            plugins['GPU'].set_config({"CONFIG_FILE": gpu_ext})
-
-        self.plugins = plugins
-
-        log.info("Plugins are loaded")
-
-    def get_plugin(self, device):
-        return self.plugins.get(device, None)
+            self.ie_core.add_extension(cpu_ext, "CPU")
 
     def check_model_support(self, net, device):
-        plugin = self.plugins[device]
-
-        if plugin.device == "CPU":
-            supported_layers = plugin.get_supported_layers(net)
+        if device == "CPU":
+            supported_layers = self.ie_core.query_network(net, device)
             not_supported_layers = [l for l in net.layers.keys() \
                                     if l not in supported_layers]
             if len(not_supported_layers) != 0:
@@ -62,9 +46,15 @@ class InferenceContext:
 
     def deploy_model(self, model, device, max_requests=1):
         self.check_model_support(model, device)
-        plugin = self.plugins[device]
-        deployed_model = plugin.load(network=model, num_requests=max_requests)
-        return deployed_model
+
+        config = {
+            "PERF_COUNT": "YES" if self.perf_count else "NO",
+        }
+
+        if device == 'GPU' and self.gpu_ext:
+            config['CONFIG_FILE'] = self.gpu_ext
+
+        return self.ie_core.load_network(model, device, config=config, num_requests=max_requests)
 
 
 
