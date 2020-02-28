@@ -208,7 +208,8 @@ class ModelEvaluator:
         if dump_prediction_to_annotation:
             self._dumped_annotations = []
 
-        self.dataset.batch = self.launcher.batch
+        if self.dataset.batch is None:
+            self.dataset.batch = self.launcher.batch
         self.preprocessor.input_shapes = self.launcher.inputs_info_for_meta()
 
     # pylint: disable=R0912
