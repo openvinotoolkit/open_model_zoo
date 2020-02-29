@@ -735,8 +735,9 @@ def process_config(
 
         updated_launchers = []
         for launcher_config in launchers_configs:
-            if 'models' not in args and not args['models']:
+            if 'models' not in args or not args['models']:
                 updated_launchers.append(launcher_config)
+                continue
             models = args['models']
             if isinstance(models, list):
                 for model_id, _ in enumerate(models):
