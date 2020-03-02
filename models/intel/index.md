@@ -201,8 +201,9 @@ that predict an actual labels are called *decoder*.
 |---------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [driver-action-recognition-adas-0002-encoder](./driver-action-recognition-adas-0002-encoder/description/driver-action-recognition-adas-0002-encoder.md) | 0.676                | 2.863      |
 | [driver-action-recognition-adas-0002-decoder](./driver-action-recognition-adas-0002-decoder/description/driver-action-recognition-adas-0002-decoder.md) | 0.147                | 4.205      |
-| [action-recognition-0001-encoder](./action-recognition-0001/description/action-recognition-0001.md)                                                     | 7.340                | 21.276     |
-| [action-recognition-0001-decoder](./action-recognition-0001/description/action-recognition-0001.md)                                                     | 0.147                | 4.405      |
+| [action-recognition-0001](./action-recognition-0001/description/action-recognition-0001.md)                                                             |                      |            |
+|   action-recognition-0001-encoder                                                                                                                       | 7.340                | 21.276     |
+|   action-recognition-0001-decoder                                                                                                                       | 0.147                | 4.405      |
 | [asl-recognition-0004](./asl-recognition-0004/description/asl-recognition-0004.md)                                                                      | 6.660                | 4.133      |
 
 ## Image Retrieval
