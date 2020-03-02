@@ -128,7 +128,7 @@ NATIVE_DEMOS = [
         TestCase(options={
             '-no_show': None,
             '-time': '5',
-            '-i': DataDirectoryArg('classification', rename=False),
+            '-i': DataDirectoryOrigFileNamesArg('classification'),
             '-labels': DemoFileArg('synset_words.txt'),
             '-gt': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt"),
             '-b': '8'}),

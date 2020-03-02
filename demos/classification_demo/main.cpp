@@ -101,7 +101,6 @@ std::vector<std::vector<unsigned>> topResults(Blob& inputBlob, unsigned numTop) 
                               return batchData[l] > batchData[r];
                           });
 
-        indices.resize(numTop);
         output[i].assign(indices.begin(), indices.begin() + numTop);
     }
     
@@ -129,11 +128,12 @@ int main(int argc, char *argv[]) {
                 i--;
             } else {
                 inputImages.push_back(tmpImage);
-                size_t lastSlashIdx = name.rfind('/');
-                if (lastSlashIdx == std::string::npos) {
-                    lastSlashIdx = name.rfind('\\'); // for compatibility with Windows
+                size_t lastSlashIdx = name.find_last_of("/\\");
+                if (lastSlashIdx != std::string::npos) {
+                    imageNames[i] = name.substr(lastSlashIdx + 1);
+                } else {
+                    imageNames[i] = name;
                 }
-                imageNames[i] = name.substr(lastSlashIdx + 1);
             }
         }
         // ---------------------------------------------------------------------------------------------------
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
         // ----------------------------------------Read image classes-----------------------------------------
         std::vector<unsigned> classIndices;
         if (!FLAGS_gt.empty()) {
-            std::map<std::string, std::string> classIndicesMap;
+            std::map<std::string, unsigned> classIndicesMap;
             std::ifstream inputGtFile(FLAGS_gt);
             if (!inputGtFile.is_open()) throw std::runtime_error("Can't open the ground truth file.");
             
@@ -154,9 +154,8 @@ int main(int argc, char *argv[]) {
                 }
                 std::string imagePath = line.substr(0, separatorIdx);
                 size_t imagePathEndIdx = imagePath.rfind('/');
-                std::string classIndex = line.substr(separatorIdx + 1);
-                if (!std::all_of(classIndex.begin(), classIndex.end() - 1, ::isdigit)
-                    || imagePathEndIdx != 1 || imagePath[0] != '.') { // check whether path starts with ./
+                unsigned classIndex = static_cast<unsigned>(std::stoul(line.substr(separatorIdx + 1)));
+                if ((imagePathEndIdx != 1 || imagePath[0] != '.') && imagePathEndIdx != std::string::npos) {
                     throw std::runtime_error("The ground truth file has incorrect format.");
                 }
                 classIndicesMap.insert({imagePath.substr(imagePathEndIdx + 1), classIndex});
@@ -165,7 +164,7 @@ int main(int argc, char *argv[]) {
             for (size_t i = 0; i < imageNames.size(); i++) {
                 auto imageSearchResult = classIndicesMap.find(imageNames[i]);
                 if (imageSearchResult != classIndicesMap.end()) {
-                    classIndices.push_back(static_cast<unsigned>(std::stoul(imageSearchResult->second)));
+                    classIndices.push_back(imageSearchResult->second);
                 } else {
                     throw std::runtime_error("No class specified for image " + imageNames[i]);
                 }
@@ -190,9 +189,11 @@ int main(int argc, char *argv[]) {
             labels.push_back(labelsLine.substr(labelBeginIdx + 1, labelEndIdx - (labelBeginIdx + 1)));
         }
 
-        if (!std::all_of(classIndices.begin(), classIndices.end(),
-                         [&labels](unsigned classIdx){ return classIdx < labels.size(); })) {
-            throw std::runtime_error("One of class indices is outside the range supported by the model.");
+        for (const auto & classIndex : classIndices) {
+            if (classIndex >= labels.size()) {
+                throw std::runtime_error("Class index " + std::to_string(classIndex)
+                                         + " is outside the range supported by the model.");
+            }
         }
         // ---------------------------------------------------------------------------------------------------
 
@@ -279,13 +280,13 @@ int main(int argc, char *argv[]) {
                 // for CPU execution, more throughput-oriented execution via streams
                 ie.SetConfig({{ CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
                                 (deviceNstreams.count(device) > 0 ? std::to_string(deviceNstreams.at(device))
-                                                                  : "CPU_THROUGHPUT_AUTO") }}, device);
+                                                                  : CONFIG_VALUE(CPU_THROUGHPUT_AUTO)) }}, device);
                 deviceNstreams[device] = std::stoi(
                     ie.GetConfig(device, CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
             } else if (device == "GPU") {
                 ie.SetConfig({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
                                 (deviceNstreams.count(device) > 0 ? std::to_string(deviceNstreams.at(device))
-                                                                  : "GPU_THROUGHPUT_AUTO") }}, device);
+                                                                  : CONFIG_VALUE(GPU_THROUGHPUT_AUTO)) }}, device);
                 deviceNstreams[device] = std::stoi(
                     ie.GetConfig(device, CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
 
@@ -352,7 +353,6 @@ int main(int argc, char *argv[]) {
         std::size_t nextImageIndex = 0;
         std::condition_variable condVar;
         std::mutex mutex;
-        std::atomic<bool> hasCallbackException(false);
         std::exception_ptr irCallbackException;
         
         std::queue<InferRequestInfo> emptyInferRequests;
@@ -370,7 +370,7 @@ int main(int argc, char *argv[]) {
         auto testDuration = std::chrono::seconds{3};
         auto fpsCalculationDuration = std::chrono::seconds{1};
         do {
-            if (hasCallbackException) std::rethrow_exception(irCallbackException);
+            if (irCallbackException) std::rethrow_exception(irCallbackException);
 
             if (elapsedSeconds >= testDuration - fpsCalculationDuration && framesNumOnCalculationStart == 0) {
                 framesNumOnCalculationStart = framesNum;
@@ -388,17 +388,15 @@ int main(int argc, char *argv[]) {
             }
 
             std::unique_ptr<InferRequestInfo> completedInferRequestInfo;
-            bool hasCompletedRequest = false;
             {
                 std::lock_guard<std::mutex> lock(mutex);
 
                 if (!completedInferRequests.empty()) {
-                    hasCompletedRequest = true;
                     completedInferRequestInfo.reset(new InferRequestInfo(completedInferRequests.front()));
                     completedInferRequests.pop();
                 }
             }
-            if (hasCompletedRequest) {
+            if (completedInferRequestInfo) {
                 emptyInferRequests.push({completedInferRequestInfo->inferRequest, 
                                          std::vector<InferRequestInfo::InferRequestImage>()});
 
@@ -453,6 +451,8 @@ int main(int argc, char *argv[]) {
                     key = static_cast<char>(cv::waitKey(1));
                     presenter.handleKey(key);
                 }
+
+                completedInferRequestInfo.reset();
             } else if (!emptyInferRequests.empty()) {
                 auto inferRequestStartTime = std::chrono::steady_clock::now();
                 cv::Mat nextImage = resizeImage(inputImages[nextImageIndex], modelInputResolution);
@@ -472,7 +472,6 @@ int main(int argc, char *argv[]) {
                                                       &completedInferRequests,
                                                       &mutex,
                                                       &condVar,
-                                                      &hasCallbackException,
                                                       &irCallbackException] {
                         {
                             std::lock_guard<std::mutex> callbackLock(mutex);
@@ -481,9 +480,8 @@ int main(int argc, char *argv[]) {
                                 completedInferRequests.push(emptyInferRequest);
                             }
                             catch(...) {
-                                if (!hasCallbackException) {
+                                if (!irCallbackException) {
                                     irCallbackException = std::current_exception();
-                                    hasCallbackException = true;
                                 }
                             }
                         }
@@ -501,7 +499,7 @@ int main(int argc, char *argv[]) {
             {
                 std::unique_lock<std::mutex> lock(mutex);
 
-                while (!hasCallbackException
+                while (!irCallbackException
                        && emptyInferRequests.empty() && completedInferRequests.empty()) {
                     condVar.wait(lock);
                 }

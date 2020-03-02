@@ -51,9 +51,8 @@ class ModelArg:
 
 
 class DataPatternArg:
-    def __init__(self, sequence_name, rename=True):
+    def __init__(self, sequence_name):
         self.sequence_name = sequence_name
-        self.rename = rename
 
     def resolve(self, context):
         seq_dir = context.data_sequence_dir / self.sequence_name
@@ -68,24 +67,49 @@ class DataPatternArg:
         if not seq_dir.is_dir():
             seq_dir.mkdir(parents=True)
 
-            if self.rename:
-                for index, data in enumerate(context.data_sequences[self.sequence_name]):
-                    shutil.copyfile(data.resolve(context), str(seq_dir / (name_format % index)))
-            else:
-                for index, data in enumerate(context.data_sequences[self.sequence_name]):
-                    shutil.copyfile(data.resolve(context), str(seq_dir / (seq[index].stem + seq[0].suffix)))
-                return str(seq_dir / ("original-file-name" + seq[0].suffix))
-                
+            for index, data in enumerate(context.data_sequences[self.sequence_name]):
+                shutil.copyfile(data.resolve(context), str(seq_dir / (name_format % index)))
+
         return str(seq_dir / name_format)
 
 
+class DataOrigFileNamesArg:
+    def __init__(self, sequence_name):
+        self.sequence_name = sequence_name
+
+    def resolve(self, context):
+        seq_dir = context.data_sequence_dir / self.sequence_name
+        seq = [Path(data.resolve(context))
+            for data in context.data_sequences[self.sequence_name]]
+            
+        assert len(set(data.suffix for data in seq)) == 1, "all images in the sequence must have the same extension"
+        assert '%' not in seq[0].suffix
+
+        if not seq_dir.is_dir():
+            seq_dir.mkdir(parents=True)
+
+            for index, data in enumerate(context.data_sequences[self.sequence_name]):
+                shutil.copyfile(data.resolve(context), str(seq_dir / (seq[index].stem + seq[0].suffix)))
+                
+        return str(seq_dir)
+
+
 class DataDirectoryArg:
-    def __init__(self, sequence_name, rename=True):
-        self.backend = DataPatternArg(sequence_name, rename)
+    def __init__(self, sequence_name):
+        self.backend = DataPatternArg(sequence_name)
 
     def resolve(self, context):
         pattern = self.backend.resolve(context)
         return str(Path(pattern).parent)
+
+
+class DataDirectoryOrigFileNamesArg:
+    def __init__(self, sequence_name):
+        self.backend = DataOrigFileNamesArg(sequence_name)
+
+    def resolve(self, context):
+        pattern = self.backend.resolve(context)
+        return str(Path(pattern))
 
 
 class DemoFileArg:

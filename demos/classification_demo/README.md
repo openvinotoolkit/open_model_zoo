@@ -83,15 +83,12 @@ If you want to see classification results, you must use "-gt" and "-labels" flag
 
 It has the following format:
 
-<code>
+```sh
 ./ILSVRC2012_val_00000001.JPEG 65
-
 ./ILSVRC2012_val_00000002.JPEG 970
-
 ./ILSVRC2012_val_00000003.JPEG 230
-
 ...
-</code>
+```
 
 Class index values must be in range from 0 to 1000. If you want to use "other" class, which is supported only by a small subset of models, specify it with -1 index.
 
