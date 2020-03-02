@@ -63,7 +63,7 @@ optional arguments:
                         files)
   --config CONFIG       Configuration file
   --detections DETECTIONS [DETECTIONS ...]
-                        JSON files with detections
+                        JSON file with bounding boxes
   -m M_DETECTOR, --m_detector M_DETECTOR
                         Path to the person detection model
   --t_detector T_DETECTOR
@@ -80,7 +80,7 @@ optional arguments:
                         of the demo
   --save_detections SAVE_DETECTIONS
                         Optional. Path to file in JSON format to save
-                        detections
+                        bounding boxes
   --no_show             Optional. Don't show output
   -d DEVICE, --device DEVICE
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION

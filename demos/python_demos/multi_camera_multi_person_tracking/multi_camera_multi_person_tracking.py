@@ -46,7 +46,7 @@ def check_detectors(args):
         log.error('No detector specified, please specify one of the following parameters: '
                   '\'--m_detector\', \'--m_segmentation\' or \'--detections\'')
     elif det_number > 1:
-        det_string = ''.join('\n\t{} = {}'.format(det[0], det[1]) for det in non_empty_detectors)
+        det_string = ''.join('\n\t{}={}'.format(det[0], det[1]) for det in non_empty_detectors)
         log.error('Only one detector expected but got {}, please specify one of them:{}'
                   .format(len(non_empty_detectors), det_string))
     return det_number
@@ -61,12 +61,14 @@ def update_detections(output, detections, frame_number):
         output[i].append(entry)
 
 
-def save_json_file(save_path, data):
+def save_json_file(save_path, data, description=''):
     save_dir = os.path.dirname(save_path)
     if save_dir and not os.path.exists(save_dir):
         os.makedirs(save_dir)
     with open(save_path, 'w') as outfile:
         json.dump(data, outfile)
+    if description:
+        log.info('{} saved to {}'.format(description, save_path))
 
 
 class FramesThreadBody:
@@ -170,9 +172,9 @@ def run(params, config, capture, detector, reid):
     frames_thread.join()
 
     if len(params.history_file):
-        save_json_file(params.history_file, tracker.get_all_tracks_history())
+        save_json_file(params.history_file, tracker.get_all_tracks_history(), description='History file')
     if len(params.save_detections):
-        save_json_file(params.save_detections, output_detections)
+        save_json_file(params.save_detections, output_detections, description='Detections')
 
     if len(config['embeddings']['save_path']):
         save_embeddings(tracker.scts, **config['embeddings'])
@@ -187,7 +189,7 @@ def main():
     parser.add_argument('--config', type=str, default='config.py', required=False,
                         help='Configuration file')
 
-    parser.add_argument('--detections', type=str, help='JSON file with detections')
+    parser.add_argument('--detections', type=str, help='JSON file with bounding boxes')
 
     parser.add_argument('-m', '--m_detector', type=str, required=False,
                         help='Path to the person detection model')
@@ -207,7 +209,7 @@ def main():
     parser.add_argument('--history_file', type=str, default='', required=False,
                         help='Optional. Path to file in JSON format to save results of the demo')
     parser.add_argument('--save_detections', type=str, default='', required=False,
-                        help='Optional. Path to file in JSON format to save detections')
+                        help='Optional. Path to file in JSON format to save bounding boxes')
     parser.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
 
     parser.add_argument('-d', '--device', type=str, default='CPU')
