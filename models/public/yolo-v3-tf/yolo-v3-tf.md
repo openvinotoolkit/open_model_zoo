@@ -19,6 +19,15 @@ YOLO v3 is a real-time object detection model implemented with Keras\* from this
 | MParams           | 61.922        |
 | Source framework  | Keras\*       |
 
+## Accuracy
+
+Accuracy metrics obtained on COCO\* validation dataset for converted model.
+
+| Metric | Value |
+| ------ | ------|
+| mAP    | 62.27 |
+| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 67.7 |
+
 ## Input
 
 ### Original model

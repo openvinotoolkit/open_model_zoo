@@ -28,6 +28,14 @@ YOLO v1 Tiny is a real-time object detection model from TensorFlow.js\* framewor
 | MParams           | 15.858        |
 | Source framework  | TensorFlow.js\*  |
 
+## Accuracy
+
+Accuracy metric obtained on VOC2012\* validation dataset for converted model.
+
+| Metric | Value |
+| ------ | ------|
+| mAP    | 72.16 |
+
 ## Input
 
 ### Original model
