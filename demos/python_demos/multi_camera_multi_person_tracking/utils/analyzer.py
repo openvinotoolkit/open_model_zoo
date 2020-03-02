@@ -162,13 +162,11 @@ def save_embeddings(scts, save_path, use_images=False, step=0):
     def make_label_img(label_img, crop, target_size=(32, 32)):
         img = cv2.resize(crop, target_size)  # Resize, size must be square
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # BGR to RGB
-        img = torch.Tensor(img.transpose(2, 0, 1)) / 255  # Scale
-        label_img = img.unsqueeze(0) if label_img is None else \
-            torch.cat((label_img, img.unsqueeze(0)))
+        img = np.transpose(img, (2, 0, 1)) / 255  # Scale
+        label_img = np.expand_dims(img, 0) if label_img is None else \
+            np.concatenate((label_img, np.expand_dims(img, 0)))
         return label_img
 
-    if use_images:
-        import torch
     summary_writer = SummaryWriter(save_path)
     embeddings_all = None
     embeddings_avg = None
@@ -181,6 +179,11 @@ def save_embeddings(scts, save_path, use_images=False, step=0):
     label_img_clust = None
     for i, sct in enumerate(scts):
         for track in tqdm(sct.tracks, 'Processing embeddings: SCT#{}...'.format(i)):
+            if use_images and len(track.crops) == 1 and track.crops[0] is None:
+                log.warning('For embeddings was enabled parameter \'use_images\' but images were not found!'
+                            '\'use_images\' switched off. Please check if parameter \'enable\' for analyzer'
+                            'is set to True')
+                use_images = False
             # Collect average embeddings
             if isinstance(track.f_avg.avg, int):
                 continue
@@ -220,3 +223,4 @@ def save_embeddings(scts, save_path, use_images=False, step=0):
                                  label_img=label_img_clust, global_step=step, tag='Clustered')
     log.info('Embeddings have been saved successfully. To see the result use the following command: '
              'tensorboard --logdir={}'.format(save_path))
+    summary_writer.close()
