@@ -5,7 +5,7 @@
 CenterNet object detection model `ctdet_coco_dlav0_512` originally trained on PyTorch\*
 then converted to ONNX\* format. CenterNet models an object as a single point - the center point of its bounding box
 and uses keypoint estimation to find center points and regresses to object size.
-For details see [paper](http://arxiv.org/abs/1904.07850), [repository](https://github.com/xingyizhou/CenterNet/).
+For details see [paper](https://arxiv.org/abs/1904.07850), [repository](https://github.com/xingyizhou/CenterNet/).
 
 ### Steps to Reproduce PyTorch to ONNX Conversion
 Model is provided in ONNX format, which was obtained by the following steps.
