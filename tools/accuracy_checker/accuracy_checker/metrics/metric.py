@@ -39,7 +39,7 @@ class Metric(ClassProvider):
 
     description = ""
 
-    def __init__(self, config, dataset, name=None, state=None):
+    def __init__(self, config, dataset, name=None, state=None, profiler=None):
         self.config = config
         self.name = name
         self.dataset = dataset
@@ -47,6 +47,7 @@ class Metric(ClassProvider):
         self._update_iter = 0
         self.meta = {'target': 'higher-better'}
         self._initial_state = copy.deepcopy(state)
+        self._profiler = profiler
 
         self.validate_config()
         self.configure()
@@ -181,6 +182,8 @@ class Metric(ClassProvider):
         if self.state:
             self.state = copy.deepcopy(self._initial_state)
             self._update_iter = 0
+        if self._profiler:
+            self._profiler.reset()
 
 
 class PerImageEvaluationMetric(Metric):

@@ -19,6 +19,7 @@ from collections import namedtuple, OrderedDict
 from ..presenters import BasePresenter, EvaluationResult
 from ..config import StringField
 from .metric import Metric, FullDatasetEvaluationMetric
+from .metric_profiler  import create_profiler
 from ..config import ConfigValidator, ConfigError
 
 MetricInstance = namedtuple(
@@ -31,7 +32,7 @@ class MetricsExecutor:
     Class for evaluating metrics according to dataset configuration entry.
     """
 
-    def __init__(self, metrics_config, dataset=None, state=None):
+    def __init__(self, metrics_config, dataset=None, state=None, profile=False):
         self.state = state or {}
         dataset_name = dataset.name if dataset else ''
         message_prefix = '{}'.format(dataset_name)
@@ -43,7 +44,7 @@ class MetricsExecutor:
         self.metrics = []
         self.need_store_predictions = False
         for metric_config_entry in metrics_config:
-            self.register_metric(metric_config_entry)
+            self.register_metric(metric_config_entry, profile)
 
     @classmethod
     def parameters(cls):
@@ -109,7 +110,7 @@ class MetricsExecutor:
                 meta=functor.meta,
             )
 
-    def register_metric(self, metric_config_entry):
+    def register_metric(self, metric_config_entry, profile=False):
         type_ = 'type'
         identifier = 'name'
         reference = 'reference'
@@ -123,9 +124,13 @@ class MetricsExecutor:
         metric_config_validator.validate(metric_config_entry, type_)
 
         metric_identifier = metric_config_entry.get(identifier, metric_type)
+        metric_kwargs = {}
+        if profile:
+            profiler = create_profiler(metric_type, metric_identifier)
+            metric_kwargs['profiler'] = profiler
 
         metric_fn = Metric.provide(
-            metric_type, metric_config_entry, self.dataset, metric_identifier, state=self.state
+            metric_type, metric_config_entry, self.dataset, metric_identifier, state=self.state, **metric_kwargs
         )
         metric_presenter = BasePresenter.provide(metric_config_entry.get(presenter, 'print_scalar'))
 

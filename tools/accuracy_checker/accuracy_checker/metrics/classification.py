@@ -80,10 +80,14 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
             accuracy = self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
         else:
             accuracy = accuracy_score(annotation.label, prediction.label)
+            if self._profiler:
+                self._profiler.update(annotation.identifier, annotation.label, prediction.label, accuracy)
             self.accuracy.append(accuracy)
         return accuracy
 
     def evaluate(self, annotations, predictions):
+        if self._profiler:
+            self._profiler.finish()
         if not self.match:
             accuracy = self.accuracy.evaluate()
         else:
@@ -95,6 +99,9 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
             self.accuracy.reset()
         else:
             self.accuracy = []
+
+        if self._profiler:
+            self._profiler.reset()
 
 
 class ClassificationAccuracyClasses(PerImageEvaluationMetric):
@@ -147,13 +154,21 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
         self.accuracy = AverageMeter(loss, counter)
 
     def update(self, annotation, prediction):
-        return self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
+        result = self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
+        if self._profiler:
+            self._profiler.update(annotation.identifier, annotation.label, prediction.top_k(self.top_k), result)
+
+        return result
 
     def evaluate(self, annotations, predictions):
         self.meta['names'] = list(self.labels.values())
+        if self._profiler:
+            self._profiler.finish()
         return self.accuracy.evaluate()
 
     def reset(self):
+        if self._profiler:
+            self._profiler.reset()
         self.accuracy.reset()
 
 
@@ -192,17 +207,23 @@ class ClipAccuracy(PerImageEvaluationMetric):
 
         self.previous_video_id = video_id
         self.previous_video_label = annotation.label
+        if self._profiler:
+            self._profiler.update(annotation.identifier, prediction.label, clip_accuracy, video_avg)
 
         return clip_accuracy
 
     def evaluate(self, annotations, predictions):
         self.meta['names'] = ['clip_accuracy', 'video_accuracy']
+        if self._profiler:
+            self._profiler.finish()
         return [self.clip_accuracy.evaluate(), self.video_accuracy.evaluate()]
 
     def reset(self):
         self.clip_accuracy.reset()
         self.video_accuracy.reset()
         self.video_avg_prob.reset()
+        if self._profiler:
+            self._profiler.reset()
 
 
 class ClassificationF1Score(PerImageEvaluationMetric):
@@ -232,7 +253,10 @@ class ClassificationF1Score(PerImageEvaluationMetric):
 
     def update(self, annotation, prediction):
         self.cm[prediction.label] += 1
-        return annotation.label == prediction.label
+        result = annotation.label == prediction.label
+        if self._profiler:
+            self._profiler.update(annotation.identifier, annotation.label, prediction.label, result)
+        return result
 
     def evaluate(self, annotations, predictions):
         cm_diagonal = self.cm.diagonal()
@@ -249,10 +273,14 @@ class ClassificationF1Score(PerImageEvaluationMetric):
             precision * recall, sum_precision_recall, out=np.zeros_like(cm_diagonal, dtype=float),
             where=sum_precision_recall != 0
         )
+        if self._profiler:
+            self._profiler.finish()
         return f1_score if len(f1_score) == 2 else f1_score[0]
 
     def reset(self):
         self.cm = np.zeros((len(self.labels), len(self.labels)))
+        if self._profiler:
+            self._profiler.reset()
 
 
 class MetthewsCorrelation(PerImageEvaluationMetric):
