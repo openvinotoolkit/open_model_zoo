@@ -4,7 +4,7 @@
 
 YOLO v3 is a real-time object detection model implemented with Keras\* from this [repository](https://github.com/david8862/keras-YOLOv3-model-set) and converted to TensorFlow\* framework. This model was pretrained on COCO\* dataset with 80 classes.
 
-## Converstion
+## Conversion
 
 1. Download or clone the official [repository](https://github.com/david8862/keras-YOLOv3-model-set).
 2. Follow the instructions in README.md file in that repository to get original model and convert it to Keras\* format.
