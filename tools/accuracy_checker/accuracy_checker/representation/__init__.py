@@ -69,6 +69,7 @@ from .nlp_representation import (
     QuestionAnsweringPrediction,
     TextClassificationAnnotation
 )
+from .image_inpainting import ImageInpaintingAnnotation, ImageInpaintingPrediction
 
 from .depth_estimation import DepthEstimationAnnotation, DepthEstimationPrediction
 
@@ -141,5 +142,7 @@ __all__ = [
     'TextClassificationAnnotation',
 
     'DepthEstimationAnnotation',
-    'DepthEstimationPrediction'
+    'DepthEstimationPrediction',
+    'ImageInpaintingAnnotation',
+    'ImageInpaintingPrediction'
 ]

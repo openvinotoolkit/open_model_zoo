@@ -170,3 +170,4 @@ AccuracyChecker supports following set of adapters:
   * `output_blob` - name of output layer with bboxes.
   * `scale` - scalar value to normalize bbox coordinates.
 * `mono_depth` - converting output of monocular depth estimation model to `DepthEstimationPrediction`.
+* `inpainting` - converting output of Image Inpainting model to `ImageInpaintingPrediction` representation.

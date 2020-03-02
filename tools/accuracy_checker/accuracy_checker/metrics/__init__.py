@@ -42,6 +42,7 @@ from .regression import (
     FacialLandmarksNormedError,
 
     PeakSignalToNoiseRatio,
+    StructuralSimilarity,
 
     AngleError
 )
@@ -106,6 +107,7 @@ __all__ = [
     'FacialLandmarksPerPointNormedError',
     'FacialLandmarksNormedError',
     'PeakSignalToNoiseRatio',
+    'StructuralSimilarity',
     'AngleError',
 
     'MultiLabelAccuracy',

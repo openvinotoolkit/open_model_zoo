@@ -156,6 +156,14 @@ Since this task contains - in the general setting - some ambiguity, the resultin
 | --------------------------- | ----------------------------------- | ----------------------------- | --------- | ------- |
 | midasnet                    | [PyTorch\*](./midasnet/midasnet.md) | midasnet                      | 207.4915  |         |
 
+## Image Inpainting
+
+Image inpainting task is to estimate suitable pixel information to fill holes in images.
+
+| Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
+| ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
+| GMCNN Inpainting          | [TensorFlow\*](./gmcnn-places2-tf/gmcnn-places2-tf.md) | gmcnn-places2-tf | 33.47Db | | |
+
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.
