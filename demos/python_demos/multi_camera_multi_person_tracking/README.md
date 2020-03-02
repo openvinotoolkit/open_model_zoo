@@ -162,6 +162,79 @@ Visualization can be controlled using the following keys:
 Also demo can dump resulting tracks to a json file. To specify the file use the
 `--history_file` argument.
 
+## Quality measuring
+
+The demo provides tools for measure quality of the multi camera multi person tracker:
+* Evaluation MOT metrics
+* Visualize the demo results from a history file
+
+For MOT metrics evaluation we use [py-motmetrics](https://github.com/cheind/py-motmetrics) module.
+It is necessary to have ground truth annotation file for the evaluation. Supported format
+of the ground truth annotation can be obtained via the annotation tool [CVAT](https://github.com/opencv/cvat).
+The annotation must includes the following labels and attributes:
+```json
+[
+  {
+    "name": "person",
+    "id": 0,
+    "attributes": [
+      {
+        "id": 0,
+        "name": "id",
+        "type": "text",
+        "mutable": false,
+        "values": [
+          " "
+        ]
+      }
+    ]
+  }
+]
+```
+
+To run evaluation MOT metrics use the following command:
+```bash
+python run_evaluate.py \
+    --history_file path/to/history/file.json \
+    --gt_files \
+      path/to/ground/truth/annotation/for/source_0.xml \
+      path/to/ground/truth/annotation/for/source_1.xml \
+```
+Number of ground truth files depends on the number of used video sources.
+
+For the visualization of the demo results please use the next command:
+```
+python run_history_visualize.py \
+    -i path/to/video_1.avi path/to/video_2.avi \
+    --history_file path/to/history/file.json \
+```
+This a minimum arguments set for the script. To show all available arguments
+run the command:
+```
+python3 run_history_visualize.py -h
+usage: run_history_visualize.py [-h] [-i I [I ...]] --history_file
+                                HISTORY_FILE [--output_video OUTPUT_VIDEO]
+                                [--gt_files GT_FILES [GT_FILES ...]]
+                                [--timeline TIMELINE] [--match_gt_ids]
+                                [--merge_outputs]
+
+Multi camera multi person tracking visualization demo script
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i I [I ...]          Input videos
+  --history_file HISTORY_FILE
+                        File with tracker history
+  --output_video OUTPUT_VIDEO
+                        Output video file
+  --gt_files GT_FILES [GT_FILES ...]
+                        Files with ground truth annotation
+  --timeline TIMELINE   Plot and save timeline
+  --match_gt_ids        Match GT ids to ids from history
+  --merge_outputs       Merge GT and history tracks into one frame
+```
+Ground truth files have the same format was described in the MOT metrics evaluation part.
+
 ## Process analysis
 
 During the demo execution are available two options for analysis the process:
