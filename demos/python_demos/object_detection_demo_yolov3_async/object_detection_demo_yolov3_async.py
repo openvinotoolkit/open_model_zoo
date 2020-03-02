@@ -73,7 +73,7 @@ class YoloParams:
 
         self.isYoloV3 = False
 
-        if 'mask' in param and param['mask']:
+        if param.get('mask'):
             mask = [int(idx) for idx in param['mask'].split(',')]
             self.num = len(mask)
 
@@ -326,7 +326,7 @@ def main():
         render_time_message = "OpenCV rendering time: {:.3f} ms".format(render_time * 1e3)
         async_mode_message = "Async mode is on. Processing request {}".format(cur_request_id) if is_async_mode else \
             "Async mode is off. Processing request {}".format(cur_request_id)
-        parsing_message = "YOLO parsing time is {:.3f}".format(parsing_time * 1e3)
+        parsing_message = "YOLO parsing time is {:.3f} ms".format(parsing_time * 1e3)
 
         cv2.putText(frame, inf_time_message, (15, 15), cv2.FONT_HERSHEY_COMPLEX, 0.5, (200, 10, 10), 1)
         cv2.putText(frame, render_time_message, (15, 45), cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
