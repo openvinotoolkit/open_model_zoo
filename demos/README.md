@@ -113,7 +113,7 @@ You can also build demos manually using Inference Engine binaries from the
 [dldt](https://github.com/opencv/dldt/tree/master) repo. In this case please set `InferenceEngine_DIR` to a CMake folder you built the dldt project from, for example `<dldt_repo>/inference-engine/build`.
 Please also set the `OpenCV_DIR` variable pointing to the required OpenCV package. The same OpenCV
 version should be used both for the inference engine and demos build.
-Please refer to the Inference Engine [build instructions](https://github.com/opencv/dldt/tree/master/inference-engine/README.md)
+Please refer to the Inference Engine [build instructions](https://github.com/opencv/dldt/blob/master/inference-engine/README.md)
 for details. Please also add path to built Inference Engine libraries to `LD_LIBRARY_PATH` (Linux*) or `PATH` (Windows*) variable before building the demos.
 
 ### <a name="build_demos_linux"></a>Build the Demo Applications on Linux*
