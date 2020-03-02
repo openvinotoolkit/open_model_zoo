@@ -246,6 +246,5 @@ To enable the first one please set in configuration file for `analyzer` paramete
 `enable` to `True`, for the second one for `embeddings` specify parameter `path`
 that is a directory where data related to embeddings will be saved
 (if it is an empty string the option is disabled). In `embeddings` is a parameter
-`use_images`. If it is `True` for every embedding will be drawn an image with a person.
-In this case the script needs `PyTorch`. Basically the demo does not need
-`PyTorch` and this module is not installed automatically, please do it manually.
+`use_images`. If it is `True` for every embedding will be drawn an image with a person
+instead a point.
