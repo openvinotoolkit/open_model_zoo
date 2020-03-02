@@ -2,9 +2,22 @@
 
 ## Use Case and High-Level Description
 
-YOLO v2 Tiny is a real-time object detection model from TensorFlow JS\* framework. This model was pretrained on COCO\* dataset with 80 classes.
+YOLO v2 Tiny is a real-time object detection model from TensorFlow.js\* framework. This model was pretrained on COCO\* dataset with 80 classes.
 
-## Example
+## Conversion
+
+0. Install additional dependencies:
+    ```
+    h5py
+    keras
+    tensorflowjs
+    ```
+1. Download the model from [here](https://github.com/shaqian/tfjs-yolo-demo/tree/master/dist/model/v2tiny).
+2. Convert the model to Keras\* format using `tensorflowjs_converter` script, e.g.:
+    ```
+    tensorflowjs_converter --input_format tfjs_layers_model --output_format keras <model_in>.json <model_out>.h5
+    ```
+3. Convert the produced model to protobuf format.
 
 ## Specification
 
@@ -13,7 +26,7 @@ YOLO v2 Tiny is a real-time object detection model from TensorFlow JS\* framewor
 | Type              | Detection     |
 | GFLOPs            | 5.424         |
 | MParams           | 11.229        |
-| Source framework  | TensorFlow\*  |
+| Source framework  | TensorFlow.js\*  |
 
 ## Input
 
@@ -44,10 +57,10 @@ Channel order is `BGR`.
 
 ### Original model
 
-The array of detection summary info, name - `conv2d_9/BiasAdd`,  shape - `1,13,13,425`, format is `N,Cx,Cy,B*5` where
-- `N` - batch size
+The array of detection summary info, name - `conv2d_9/BiasAdd`,  shape - `1,13,13,425`, format is `B,Cx,Cy,N*85` where
+- `B` - batch size
 - `Cx`, `Cy` - cell index
-- `B` - detection box for cell
+- `N` - number of detection boxes for cell
 
 Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_80`], where:
 - (`x`,`y`) - coordinates of box center, relative to cell
@@ -55,11 +68,13 @@ Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_80
 - `conf` - confidence of detection box
 - `class_no_1`,...,`class_no_80` - score for each class in logits format
 
+The anchor values are `0.57273,0.677385, 1.87446,2.06253, 3.33843,5.47434, 7.88282,3.52778, 9.77052,9.16828`.
+
 ### Converted model
 
-The array of detection summary info, name - `conv2d_9/BiasAdd/YoloRegion`,  shape - `1,71825`, which could be reshaped to `1, 425, 13, 13` with format `N,B*5,Cx,Cy` where
-- `N` - batch size
-- `B` - detection box for cell
+The array of detection summary info, name - `conv2d_9/BiasAdd/YoloRegion`,  shape - `1,71825`, which could be reshaped to `1, 425, 13, 13` with format `B,N*85,Cx,Cy` where
+- `B` - batch size
+- `N` - number of detection boxes for cell
 - `Cx`, `Cy` - cell index
 
 Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_80`], where:
@@ -67,6 +82,8 @@ Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_80
 - `h`,`w` - normalized height and width of box
 - `conf` - confidence of detection box
 - `class_no_1`,...,`class_no_80` - score for each class in the [0,1] range
+
+The anchor values are `0.57273,0.677385, 1.87446,2.06253, 3.33843,5.47434, 7.88282,3.52778, 9.77052,9.16828`.
 
 ## Legal Information
 

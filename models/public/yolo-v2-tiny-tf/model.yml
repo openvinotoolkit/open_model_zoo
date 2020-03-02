@@ -13,7 +13,8 @@
 # limitations under the License.
 
 description: >-
-    " "
+  YOLO v2 Tiny is a real-time object detection model from TensorFlow.js* framework.
+  This model was pretrained on COCO* dataset with 80 classes.
 task_type: detection
 files:
   - name: yolo-v2-tiny.pb

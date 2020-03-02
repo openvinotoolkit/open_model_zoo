@@ -119,10 +119,10 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | SSD with MobileNet FPN    | [TensorFlow\*](./ssd_mobilenet_v1_fpn_coco/ssd_mobilenet_v1_fpn_coco.md) | ssd_mobilenet_v1_fpn_coco | 123.309 | 36.188 |
 | SSD with MobileNet V2     | [TensorFlow\*](./ssd_mobilenet_v2_coco/ssd_mobilenet_v2_coco.md) | ssd_mobilenet_v2_coco | 3.775 | 16.818 |
 | SSD lite with MobileNet V2 | [TensorFlow\*](./ssdlite_mobilenet_v2/ssdlite_mobilenet_v2.md)  | ssdlite_mobilenet_v2 | 1.525 | 4.475 |
-| YOLO v1 Tiny              | [TensorFlow\*](./yolo-v1-tiny-tf/yolo-v1-tiny-tf.md) | yolo-v1-tiny-tf | 6.9883	 |	15.8587 |
-| YOLO v2 Tiny              | [TensorFlow\*](./yolo-v2-tiny-tf/yolo-v2-tiny-tf.md) | yolo-v2-tiny-tf | 5.4236	 |	11.2295 |
-| YOLO v2                   | [TensorFlow\*](./yolo-v2-tf/yolo-v2-tf.md) | yolo-v2-tf | 63.0301	 |	50.9526 |
-| YOLO v3                   | [TensorFlow\*](./yolo-v3-tf/yolo-v3-tf.md) | yolo-v3-tf | 65.9843	 |	61.9221 |
+| YOLO v1 Tiny              | [TensorFlow.js\*](./yolo-v1-tiny-tf/yolo-v1-tiny-tf.md) | yolo-v1-tiny-tf | 6.9883	 |	15.8587 |
+| YOLO v2 Tiny              | [TensorFlow.js\*](./yolo-v2-tiny-tf/yolo-v2-tiny-tf.md) | yolo-v2-tiny-tf | 5.4236	 |	11.2295 |
+| YOLO v2                   | [Keras\*](./yolo-v2-tf/yolo-v2-tf.md) | yolo-v2-tf | 63.0301	 |	50.9526 |
+| YOLO v3                   | [Keras\*](./yolo-v3-tf/yolo-v3-tf.md) | yolo-v3-tf | 65.9843	 |	61.9221 |
 
 ## Face Recognition
 

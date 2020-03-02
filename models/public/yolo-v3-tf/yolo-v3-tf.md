@@ -2,7 +2,13 @@
 
 ## Use Case and High-Level Description
 
-YOLO v3 is a real-time object detection model implemented with Keras\* from this [repository](https://github.com/david8862/keras-YOLOv3-model-set) and converted to TensorFlow\*. This model was pretrained on COCO\* dataset with 80 classes.
+YOLO v3 is a real-time object detection model implemented with Keras\* from this [repository](https://github.com/david8862/keras-YOLOv3-model-set) and converted to TensorFlow\* framework. This model was pretrained on COCO\* dataset with 80 classes.
+
+## Converstion
+
+1. Download or clone the official [repository](https://github.com/david8862/keras-YOLOv3-model-set).
+2. Follow the instructions in README.md file in that repository to get original model and convert it to Keras\* format.
+3. Convert the produced model to protobuf format.
 
 ## Specification
 
@@ -11,7 +17,7 @@ YOLO v3 is a real-time object detection model implemented with Keras\* from this
 | Type              | Detection     |
 | GFLOPs            | 65.984        |
 | MParams           | 61.922        |
-| Source framework  | TensorFlow\*  |
+| Source framework  | Keras\*       |
 
 ## Input
 
@@ -42,16 +48,16 @@ Channel order is `BGR`.
 
 ### Original model
 
-1. The array of detection summary info, name - `conv2d_58/BiasAdd`,  shape - `1,13,13,255`.
+1. The array of detection summary info, name - `conv2d_58/BiasAdd`,  shape - `1,13,13,255`. The anchor values are `116,90,  156,198,  373,326`.
 
-2. The array of detection summary info, name - `conv2d_66/BiasAdd`,  shape - `1,26,26,255`.
+2. The array of detection summary info, name - `conv2d_66/BiasAdd`,  shape - `1,26,26,255`. The anchor values are `30,61,  62,45,  59,119`.
 
-3. The array of detection summary info, name - `conv2d_74/BiasAdd`,  shape - `1,52,52,255`.
+3. The array of detection summary info, name - `conv2d_74/BiasAdd`,  shape - `1,52,52,255`. The anchor values are `10,13,  16,30,  33,23`.
 
-For each case format is `N,Cx,Cy,B*3,`, where
-    - `N` - batch size
+For each case format is `B,Cx,Cy,N*85,`, where
+    - `B` - batch size
     - `Cx`, `Cy` - cell index
-    - `B` - detection box for cell
+    - `N` - number of detection boxes for cell
 
 Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_80`], where:
 - (`x`,`y`) - coordinates of box center, relative to cell
@@ -61,15 +67,15 @@ Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_80
 
 ### Converted model
 
-1. The array of detection summary info, name - `conv2d_58/BiasAdd/YoloRegion`,  shape - `1,255,13,13`.
+1. The array of detection summary info, name - `conv2d_58/BiasAdd/YoloRegion`,  shape - `1,255,13,13`. The anchor values are `116,90,  156,198,  373,326`.
 
-2. The array of detection summary info, name - `conv2d_66/BiasAdd/YoloRegion`,  shape - `1,255,26,26`.
+2. The array of detection summary info, name - `conv2d_66/BiasAdd/YoloRegion`,  shape - `1,255,26,26`. The anchor values are `30,61,  62,45,  59,119`.
 
-3. The array of detection summary info, name - `conv2d_74/BiasAdd/YoloRegion`,  shape - `1,255,52,52`.
+3. The array of detection summary info, name - `conv2d_74/BiasAdd/YoloRegion`,  shape - `1,255,52,52`. The anchor values are `10,13,  16,30,  33,23`.
 
-For each case format is `N,B*3,Cx,Cy`, where
-    - `N` - batch size
-    - `B` - detection box for cell
+For each case format is `B,N*85,Cx,Cy`, where
+    - `B` - batch size
+    - `N` - number of detection boxes for cell
     - `Cx`, `Cy` - cell index
 Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_80`], where:
 - (`x`,`y`) - coordinates of box center, relative to cell

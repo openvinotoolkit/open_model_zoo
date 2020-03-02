@@ -2,9 +2,22 @@
 
 ## Use Case and High-Level Description
 
-YOLO v1 Tiny is a real-time object detection model from TensorFlow JS\* framework. This model was pretrained on VOC\* dataset with 20 classes.
+YOLO v1 Tiny is a real-time object detection model from TensorFlow.js\* framework. This model was pretrained on VOC\* dataset with 20 classes.
 
-## Example
+## Conversion
+
+0. Install additional dependencies:
+    ```
+    h5py
+    keras
+    tensorflowjs
+    ```
+1. Download model from [here](https://github.com/shaqian/tfjs-yolo-demo/tree/master/dist/model/v1tiny).
+2. Convert model to Keras\* format using `tensorflowjs_converter` script, e.g.:
+    ```
+    tensorflowjs_converter --input_format tfjs_layers_model --output_format keras <model_in>.json <model_out>.h5
+    ```
+3. Convert produced model to protobuf format.
 
 ## Specification
 
@@ -13,13 +26,13 @@ YOLO v1 Tiny is a real-time object detection model from TensorFlow JS\* framewor
 | Type              | Detection     |
 | GFLOPs            | 6.988         |
 | MParams           | 15.858        |
-| Source framework  | TensorFlow\*  |
+| Source framework  | TensorFlow.js\*  |
 
 ## Input
 
 ### Original model
 
-Image, name - ``, shape - `1,416,416,3`, format is `B,H,W,C` where:
+Image, name - `input_1`, shape - `1,416,416,3`, format is `B,H,W,C` where:
 
 - `B` - batch size
 - `H` - height
@@ -31,7 +44,7 @@ Scale value - 255.
 
 ### Converted model
 
-Image, name - ``, shape - `1,3,416,416`, format is `B,C,H,W` where:
+Image, name - `input_1`, shape - `1,3,416,416`, format is `B,C,H,W` where:
 
 - `B` - batch size
 - `C` - channel
@@ -44,9 +57,9 @@ Channel order is `BGR`.
 
 ### Original model
 
-The array of detection summary info, name - `conv2d_9/BiasAdd`,  shape - `1,13,13,125`, format is `N,Cx,Cy,B*5` where
-- `N` - batch size
-- `B` - detection box for cell
+The array of detection summary info, name - `conv2d_9/BiasAdd`,  shape - `1,13,13,125`, format is `B,Cx,Cy,N*25` where
+- `B` - batch size
+- `N` - number of detection boxes for cell
 - `Cx`, `Cy` - cell index
 
 Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_20`], where:
@@ -55,11 +68,13 @@ Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_20
 - `conf` - confidence of detection box
 - `class_no_1`,...,`class_no_20` - score for each class in logits format
 
+The anchor values are `1.08,1.19, 3.42,4.41, 6.63,11.38, 9.42,5.11, 16.62,10.52`.
+
 ### Converted model
 
-The array of detection summary info, name - `conv2d_9/BiasAdd/YoloRegion`,  shape - `1,21125`, which could be reshaped to `1, 125, 13, 13`, format is `N,B*5,Cx,Cy` where
-- `N` - batch size
-- `B` - detection box for cell
+The array of detection summary info, name - `conv2d_9/BiasAdd/YoloRegion`,  shape - `1,21125`, which could be reshaped to `1, 125, 13, 13`, format is `B,N*25,Cx,Cy` where
+- `B` - batch size
+- `N` - number of detection boxes for cell
 - `Cx`, `Cy` - cell index
 
 Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_20`], where:
@@ -67,6 +82,8 @@ Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_20
 - `h`,`w` - normalized height and width of box
 - `conf` - confidence of detection box
 - `class_no_1`,...,`class_no_20` - score for each class in the [0,1] range
+
+The anchor values are `1.08,1.19, 3.42,4.41, 6.63,11.38, 9.42,5.11, 16.62,10.52`.
 
 ## Legal Information
 
