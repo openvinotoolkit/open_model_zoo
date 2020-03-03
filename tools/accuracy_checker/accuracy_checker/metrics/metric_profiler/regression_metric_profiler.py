@@ -65,3 +65,4 @@ class PointRegression(MetricProfiler):
             self.fields.append('diff')
         else:
             self.fields.extend(['diff {}'.format(err_id) for err_id, _ in enumerate(error)])
+        self.updated_fields = True

@@ -5,10 +5,10 @@ from ...dependency import ClassProvider
 PROFILERS_MAPPING = {
     (
         'accuracy',
-        'character_recognition_accuracy',
         'accuracy_per_class',
         'classification_f1-score'
     ): 'classification',
+    ('character_recognition_accuracy', ): 'char_accyracy',
     ('clip_accuracy', ): 'clip_accuracy',
     (
         'metthews_correlation_coef',
@@ -27,7 +27,8 @@ PROFILERS_MAPPING = {
         'angle_error'
     ): 'regression',
     ('psnr', 'ssim'): 'complex_regression',
-    ('normed_error', 'per_point_normed_error'): 'point_regression'
+    ('normed_error', 'per_point_normed_error'): 'point_regression',
+    ('segmentation_accuracy', 'mean_iou', 'mean_accuracy', 'frequency_weighted_accuracy'): 'segmentation'
 }
 
 

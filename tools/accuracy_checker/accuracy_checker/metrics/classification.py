@@ -81,13 +81,16 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
         else:
             accuracy = accuracy_score(annotation.label, prediction.label)
             self.accuracy.append(accuracy)
-        if self._profiler:
-            self._profiler.update(annotation.identifier, annotation.label, prediction.top_k(self.top_k), accuracy)
+        if self.profiler:
+            self.profiler.update(
+                annotation.identifier, annotation.label, prediction.top_k(self.top_k), accuracy,
+                prediction.scores
+            )
         return accuracy
 
     def evaluate(self, annotations, predictions):
-        if self._profiler:
-            self._profiler.finish()
+        if self.profiler:
+            self.profiler.finish()
         if not self.match:
             accuracy = self.accuracy.evaluate()
         else:
@@ -100,8 +103,8 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
         else:
             self.accuracy = []
 
-        if self._profiler:
-            self._profiler.reset()
+        if self.profiler:
+            self.profiler.reset()
 
 
 class ClassificationAccuracyClasses(PerImageEvaluationMetric):
@@ -156,7 +159,9 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
     def update(self, annotation, prediction):
         result = self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
         if self.profiler:
-            self.profiler.update(annotation.identifier, annotation.label, prediction.top_k(self.top_k), result)
+            self.profiler.update(
+                annotation.identifier, annotation.label, prediction.top_k(self.top_k), result, prediction.scores
+            )
 
         return result
 
@@ -255,7 +260,7 @@ class ClassificationF1Score(PerImageEvaluationMetric):
         self.cm[prediction.label] += 1
         result = annotation.label == prediction.label
         if self.profiler:
-            self.profiler.update(annotation.identifier, annotation.label, prediction.label, result)
+            self.profiler.update(annotation.identifier, annotation.label, prediction.label, result, prediction.scores)
         return result
 
     def evaluate(self, annotations, predictions):

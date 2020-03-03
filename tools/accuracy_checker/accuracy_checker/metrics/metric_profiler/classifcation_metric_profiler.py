@@ -15,16 +15,29 @@ def preprocess_prediction_label(prediction_label):
 
 class ClassificationMetricProfiler(MetricProfiler):
     __provider__ = 'classification'
+    fields = ['identifier', 'annotation_label', 'prediction_label', 'predicted_scores', 'result']
+
+    def generate_profiling_data(self, identifier, annotation_label, prediction_label, metric_result, probs):
+        return {
+            'identifier': identifier,
+            'annotation_label': annotation_label,
+            'prediction_label': preprocess_prediction_label(prediction_label),
+            'predicted_scores': probs,
+            'result': metric_result
+        }
+
+
+class CharRecognitionMetricProfiler(MetricProfiler):
+    __provider__ = 'char_classification'
     fields = ['identifier', 'annotation_label', 'prediction_label', 'result']
 
-    def generate_profiling_data(self, identifier, annotation_label, prediction_label, metric_result):
+    def generate_profiling_data(self, identifier, annotation_label, prediction_label, metric_result, probs):
         return {
             'identifier': identifier,
             'annotation_label': annotation_label,
             'prediction_label': preprocess_prediction_label(prediction_label),
             'result': metric_result
         }
-
 
 class ClipAccuracyProfiler(MetricProfiler):
     __provider__ = 'clip_accuracy'
