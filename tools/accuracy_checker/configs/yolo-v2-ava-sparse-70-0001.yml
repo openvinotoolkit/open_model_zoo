@@ -44,3 +44,5 @@ models:
             include_boundaries: True
             presenter: print_scalar
             allow_multiple_matches_per_ignored: True
+
+global_definitions: dataset_definitions.yml
