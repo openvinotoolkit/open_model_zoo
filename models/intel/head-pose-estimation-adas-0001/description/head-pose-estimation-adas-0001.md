@@ -8,7 +8,7 @@ one output.
 
 ## Validation Dataset
 
-[Biwi Kinect Head Pose Database](https://www.vision.ee.ethz.ch/en/datasets/)
+[Biwi Kinect Head Pose Database](https://icu.ee.ethz.ch/research/datsets.html)
 
 ## Example
 
