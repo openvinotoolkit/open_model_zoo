@@ -208,7 +208,7 @@ class ClipAccuracy(PerImageEvaluationMetric):
         self.previous_video_id = video_id
         self.previous_video_label = annotation.label
         if self.profiler:
-            self.profiler.update(annotation.identifier, prediction.label, clip_accuracy, video_avg)
+            self.profiler.update(annotation.identifier, prediction.label, clip_accuracy)
 
         return clip_accuracy
 

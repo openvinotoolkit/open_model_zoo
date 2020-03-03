@@ -2,6 +2,30 @@ from csv import DictWriter
 from pathlib import Path
 from ...dependency import ClassProvider
 
+PROFILERS_MAPPING = {
+    (
+        'accuracy',
+        'character_recognition_accuracy',
+        'accuracy_per_class',
+        'classification_f1-score'
+    ): 'classification',
+    ('clip_accuracy', ): 'clip_accuracy',
+    (
+        'metthews_correlation_coef',
+        'multi_accuracy',
+        'multi_recall',
+        'multi_precision',
+        'f1-score'
+    ): 'binary_classification',
+    (
+        'mae',
+        'mse',
+        'rmse',
+        'normed_error',
+        'angle_error'
+    ): 'regression'
+}
+
 
 class MetricProfiler(ClassProvider):
     __provider_class__ = 'metric_profiler'
@@ -37,24 +61,6 @@ class MetricProfiler(ClassProvider):
             if new_file:
                 writer.writeheader()
             writer.writerows(self.storage)
-
-
-PROFILERS_MAPPING = {
-    (
-        'accuracy',
-        'character_recognition_accuracy',
-        'accuracy_per_class',
-        'classification_f1-score'
-    ): 'classification',
-    ('clip_accuracy', ): 'clip_accuracy',
-    (
-        'metthews_correlation_coef',
-        'multi_accuracy',
-        'multi_recall',
-        'nulti_precision',
-        'f1-score'
-    ): 'binary_classification'
-}
 
 
 def create_profiler(metric_type, metric_name):
