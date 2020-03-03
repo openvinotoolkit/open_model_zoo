@@ -67,7 +67,7 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         if self.profiler:
             if isinstance(annotation, RegressionAnnotation):
                 ann_value, pred_value = annotation.value, prediction.value
-                self.profiler.update(annotation.identifier, ann_value, pred_value, diff)
+                self.profiler.update(annotation.identifier, diff, ann_value, pred_value)
             else:
                 self.profiler.update(annotation.identifier, '', '', diff)
         self.magnitude.append(diff)
@@ -156,6 +156,8 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
         index = find_interval(annotation.value, self.intervals)
         diff = self.value_differ(annotation.value, prediction.value)
         self.magnitude[index].append(diff)
+        if self.profiler:
+            self.profiler.update(annotation.identifier, diff, annotation.value, prediction.value)
 
         return diff
 
@@ -169,6 +171,9 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
         if not result:
             warnings.warn("No values in given interval")
             result.append(0)
+
+        if self.profiler:
+            self.profiler.finish()
 
         return result
 
@@ -188,6 +193,8 @@ class BaseRegressionOnIntervals(PerImageEvaluationMetric):
     def reset(self):
         self.magnitude = [[] for _ in range(len(self.intervals) + 1)]
         self._create_meta()
+        if self.profiler:
+            self.profiler.finish()
 
 
 class MeanAbsoluteError(BaseRegressionMetric):
@@ -215,9 +222,9 @@ class RootMeanSquaredError(BaseRegressionMetric):
         if self.profiler:
             if isinstance(annotation, RegressionAnnotation):
                 ann_value, pred_value = annotation.value, prediction.value
-                self.profiler.update(annotation.identifier, ann_value, pred_value, rmse)
+                self.profiler.update(annotation.identifier, rmse, ann_value, pred_value)
             else:
-                self.profiler.update(annotation.identifier, '', '', rmse)
+                self.profiler.update(annotation.identifier, rmse)
         self.magnitude.append(rmse)
         return rmse
 
@@ -260,6 +267,8 @@ class RootMeanSquaredErrorOnInterval(BaseRegressionOnIntervals):
         if not result:
             warnings.warn("No values in given interval")
             result.append(0)
+        if self.profiler:
+            self.profiler.finish()
 
         return result
 
@@ -282,6 +291,13 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
         )
         result /= np.maximum(annotation.interocular_distance, np.finfo(np.float64).eps)
         self.magnitude.append(result)
+        if self.profiler:
+            self.profiler.update(
+                annotation.identifier,
+                annotation.x_values, annotation.y_values,
+                prediction.x_values, prediction.y_values,
+                result
+            )
 
         return result
 
@@ -291,11 +307,15 @@ class FacialLandmarksPerPointNormedError(PerImageEvaluationMetric):
         self.meta['names'] = [point_result_name_pattern.format(point_id) for point_id in range(num_points)]
         per_point_rmse = np.mean(self.magnitude, axis=0)
         per_point_rmse, self.meta['names'] = finalize_metric_result(per_point_rmse, self.meta['names'])
+        if self.profiler:
+            self.profiler.finish()
 
         return per_point_rmse
 
     def reset(self):
         self.magnitude = []
+        if self.profiler:
+            self.profiler.reset()
 
 
 class FacialLandmarksNormedError(PerImageEvaluationMetric):
@@ -337,6 +357,13 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
         )
         avg_result = np.sum(per_point_result) / len(per_point_result)
         avg_result /= np.maximum(annotation.interocular_distance, np.finfo(np.float64).eps)
+        if self.profiler:
+            self.profiler.update(
+                annotation.identifier,
+                annotation.x_values, annotation.y_values,
+                prediction.x_values, prediction.y_values,
+                avg_result
+            )
         self.magnitude.append(avg_result)
 
         return avg_result
@@ -355,10 +382,15 @@ class FacialLandmarksNormedError(PerImageEvaluationMetric):
             result.append(sorted_magnitude[int(index)])
             self.meta['names'].append('{}th percentile'.format(self.percentile))
 
+        if self.profiler:
+            self.profiler.finish()
+
         return result
 
     def reset(self):
         self.magnitude = []
+        if self.profiler:
+            self.profiler.reset()
 
 
 class NormalizedMeanError(PerImageEvaluationMetric):

@@ -21,9 +21,13 @@ PROFILERS_MAPPING = {
         'mae',
         'mse',
         'rmse',
-        'normed_error',
+        'mae_on_interval',
+        'mse_on_interval',
+        'rmse_on_interval',
         'angle_error'
-    ): 'regression'
+    ): 'regression',
+    ('psnr', 'ssim'): 'complex_regression',
+    ('normed_error', 'per_point_normed_error'): 'point_regression'
 }
 
 
