@@ -69,13 +69,16 @@ optional arguments:
   -h, --help         show this help message and exit
   -fr FREC           Required. Type of recognizer. Available DNN face
                      recognizer - DNNfr
-  -m_rd RDMODEL      Required. Path to .xml file
+  -m_rd RDMODEL      Required. Path to reidentification model .xml file. Default
+                     model is face-reidentification-retail-0095.xml
   -fd FDDET          Required. Type of detector. Available DNN face detector -
                      DNNfd
-  -m_fd FDMODEL      Required. Path to .xml file
+  -m_fd FDMODEL      Required. Path to face detection model .xml file. Default
+                     model is face-detection-retail-0004.xml
   -lm LMDET          Required. Type of detector. Available DNN landmarks
                      regression - DNNlm
-  -m_lm LMMODEL      Required. Path to .xml file
+  -m_lm LMMODEL      Required. Path to face keypoints model .xml file. Default
+                     model is landmarks-regression-retail-0009.xml
   -w_rd RDWIDTH      Optional. Image width to resize
   -h_rd RDHEIGHT     Optional. Image height to resize
   -t_rd RDTHRESHOLD  Optional. Probability threshold for face detections.
