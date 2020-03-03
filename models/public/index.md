@@ -164,6 +164,15 @@ Image inpainting task is to estimate suitable pixel information to fill holes in
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
 | GMCNN Inpainting          | [TensorFlow\*](./gmcnn-places2-tf/gmcnn-places2-tf.md) | gmcnn-places2-tf | 33.47Db | | |
 
+## Action Recognition
+
+The task of action recognition is to predict action that is being performed on a short video clip
+(tensor formed by stacking sampled frames from input video).
+
+| Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
+| ------------------------- | ---------------| -------------- | ------ | ------- |
+| RGB-I3D, pretrained on ImageNet\* | [TensorFlow\*](./i3d-rgb-tf/i3d-rgb-tf.md) | i3d-rgb-tf | | |
+
 ## Legal Information
 
 [*] Other names and brands may be claimed as the property of others.
