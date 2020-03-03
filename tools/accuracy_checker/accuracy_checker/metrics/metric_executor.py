@@ -32,7 +32,7 @@ class MetricsExecutor:
     Class for evaluating metrics according to dataset configuration entry.
     """
 
-    def __init__(self, metrics_config, dataset=None, state=None, profile=False):
+    def __init__(self, metrics_config, dataset=None, state=None):
         self.state = state or {}
         dataset_name = dataset.name if dataset else ''
         message_prefix = '{}'.format(dataset_name)
@@ -40,11 +40,12 @@ class MetricsExecutor:
             raise ConfigError('{} dataset config must specify "{}"'.format(message_prefix, 'metrics'))
 
         self._dataset = dataset
+        profile_metrics = False if dataset is None else dataset.config.get('_profile', False)
 
         self.metrics = []
         self.need_store_predictions = False
         for metric_config_entry in metrics_config:
-            self.register_metric(metric_config_entry, profile)
+            self.register_metric(metric_config_entry, profile_metrics)
 
     @classmethod
     def parameters(cls):
@@ -61,8 +62,12 @@ class MetricsExecutor:
     @dataset.setter
     def _set_dataset(self, dataset):
         self._dataset = dataset
+        profile = dataset.config.get('_profile')
         for metric in self.metrics:
             metric.metric_fn.dataset = dataset
+            if profile:
+                profiler = create_profiler(metric.metric_type, metric.name)
+                metric.metric_fn.profiler = profiler
 
     def __call__(self, context, *args, **kwargs):
         self.update_metrics_on_batch(

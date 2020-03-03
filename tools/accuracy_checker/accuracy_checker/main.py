@@ -258,6 +258,12 @@ def build_arguments_parser():
         '--version', action='version', version='%(prog)s {version}'.format(version=__version__),
         help='show tool version and exit'
     )
+    parser.add_argument(
+        '--profile',
+        help='Activate metric profiling mode',
+        required=False,
+        type=cast_to_bool
+    )
 
     return parser
 

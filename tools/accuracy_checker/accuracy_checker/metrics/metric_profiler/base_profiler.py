@@ -8,7 +8,6 @@ class MetricProfiler(ClassProvider):
     fields = ['identifier', 'result']
 
     def __init__(self, metric_name, dump_iterations=100):
-        self.iteration = 0
         self.report_file = '{}.csv'.format(metric_name)
         self.dump_iterations = dump_iterations
         self.storage = []
@@ -21,9 +20,9 @@ class MetricProfiler(ClassProvider):
         self.storage.append(profiling_data)
         if len(self.storage) % self.dump_iterations == 0:
             self.write_result()
-        self.storage = []
+            self.storage = []
 
-    def evaluate(self):
+    def finish(self):
         if self.storage:
             self.write_result()
 

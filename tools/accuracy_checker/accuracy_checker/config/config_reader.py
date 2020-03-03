@@ -359,12 +359,18 @@ class ConfigReader:
                 for launcher_entry in model['launchers']:
                     merge_dlsdk_launcher_args(arguments, launcher_entry, update_launcher_entry)
                 model['launchers'] = provide_models(model['launchers'])
+
                 for dataset_entry in model['datasets']:
                     _add_subset_specific_arg(dataset_entry)
+
                     if 'ie_preprocessing' in arguments and arguments.ie_preprocessing:
                         dataset_entry['_ie_preprocessing'] = arguments.ie_preprocessing
 
+                    if 'profile' in arguments and arguments.profile:
+                        dataset_entry['_profile'] = arguments.profile
+
         def merge_modules(config, arguments, update_launcher_entry):
+            profile_dataset = 'profile' in arguments and arguments.profile
             for evaluation in config['evaluations']:
                 module_config = evaluation.get('module_config')
                 if not module_config:
@@ -377,8 +383,12 @@ class ConfigReader:
                     continue
                 for launcher in module_config['launchers']:
                     merge_dlsdk_launcher_args(arguments, launcher, update_launcher_entry)
+
+                if 'datasets' not in module_config:
+                    continue
                 for dataset in module_config['datasets']:
                     _add_subset_specific_arg(dataset)
+                    dataset['_profile'] = profile_dataset
 
         functors_by_mode = {
             'models': merge_models,

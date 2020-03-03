@@ -47,7 +47,7 @@ class Metric(ClassProvider):
         self._update_iter = 0
         self.meta = {'target': 'higher-better'}
         self._initial_state = copy.deepcopy(state)
-        self._profiler = profiler
+        self.profiler = profiler
 
         self.validate_config()
         self.configure()
@@ -182,8 +182,8 @@ class Metric(ClassProvider):
         if self.state:
             self.state = copy.deepcopy(self._initial_state)
             self._update_iter = 0
-        if self._profiler:
-            self._profiler.reset()
+        if self.profiler:
+            self.profiler.reset()
 
 
 class PerImageEvaluationMetric(Metric):
