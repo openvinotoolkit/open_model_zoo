@@ -4,14 +4,14 @@ import json
 sys.path.append("src/modules")
 import QR_generator as qr
 
-def createArgparse():
+def create_argparse():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', type=str, dest = 'lib',  default='library.json')
     parser.add_argument('-o', type=str, dest = 'out',  default='qr-codes')
     return parser.parse_args()
 
 def main():
-    args = createArgparse()
+    args = create_argparse()
     gen = qr.QRgenerator()
     if (args.lib != None and  os.path.isfile(args.lib) and args.out != None):
         try:

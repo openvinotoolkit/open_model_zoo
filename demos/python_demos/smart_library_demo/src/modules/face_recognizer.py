@@ -69,7 +69,7 @@ class DNNLandmarks(ABC):
         self.net.setPreferableBackend(backendId)
         self.net.setPreferableTarget(targetId)
 
-    def findLandmarks(self, img):
+    def find_landmarks(self, img):
         try:    
             blob = cv.dnn.blobFromImage(img,  size=(self.width, self.height))
             self.net.setInput(blob)
@@ -83,7 +83,7 @@ class DNNLandmarks(ABC):
             print('exception: ' + str(e))
             return np.zeros((5, 2), dtype=np.float32)
 
-    def getTransform(self, src, dst):
+    def get_transform(self, src, dst):
         col_mean_src = cv.reduce(src, 0, cv.REDUCE_AVG)
         for row in src:
             row-=col_mean_src[0]
@@ -117,7 +117,7 @@ class DNNLandmarks(ABC):
            point[0] = int(point[0]*img.shape[1])
            refPoint[1] = int(refPoint[1]*img.shape[0])
            refPoint[0] = int(refPoint[0]*img.shape[1])
-        m = self.getTransform(landmarks, refLandmarksCopy)
+        m = self.get_transform(landmarks, refLandmarksCopy)
         aligned_face = cv.warpAffine(aligned_face, m, 
                             (aligned_face.shape[1], aligned_face.shape[0])) 
         return aligned_face
@@ -181,12 +181,12 @@ class DNNRecognizer(FaceRecognizer):
         else:
           return np.zeros((1, 1))
 
-    def getFeatures(self, img):
+    def get_features(self, img):
         faces = self.det.detect(img)
         if len(faces) == 1:
             face = faces[0]
             roi = img[face[0][1]:face[1][1], face[0][0]:face[1][0]]
-            landmarks = self.fl.findLandmarks(roi)
+            landmarks = self.fl.find_landmarks(roi)
             alignFace = self.fl.align(roi, landmarks, refLandmarks)
             blob = cv.dnn.blobFromImage(alignFace,  size=(self.width, self.height))
             self.net.setInput(blob)
@@ -197,11 +197,11 @@ class DNNRecognizer(FaceRecognizer):
         return (faces, featureVec)
 
     def recognize(self, img):
-        faces, fVec = self.getFeatures(img)
+        faces, fVec = self.get_features(img)
         return (faces, self.similarity(fVec, self.bd))
     
     def register(self, img, ID = 0):
-        _, vec = self.getFeatures(img)
+        _, vec = self.get_features(img)
         self.bd = np.append(self.bd, [vec], axis=0)
         self.counter = self.bd.shape[0]
         return self.counter

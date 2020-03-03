@@ -18,15 +18,15 @@ class DynamicDB():
         self.Books = []
         self.BBooks = []
 
-    def addUser(self, userID):
+    def add_user(self, userID):
         user = User(userID, '', 'User# ' +str(userID), '', '')
         user._print()
         self.Users.append(user)
     
-    def deleteUser(self):
+    def delete_user(self):
         ''' '''
     
-    def addBook(self, bookID, title, author,  publisher, date):
+    def add_book(self, bookID, title, author,  publisher, date):
         lAuthors = []
         authors = author.split(', ')
         for a in authors:
@@ -42,10 +42,10 @@ class DynamicDB():
         book = Book(bookID, '', title, date, publisher, lAuthors)
         self.Books.append(book)
     
-    def deleteBook(self):
+    def delete_book(self):
         ''' '''    
      
-    def getRetBook(self, userID, bookID):
+    def get_ret_book(self, userID, bookID):
         dateNow = str(datetime.now()).split(' ')[0]
         find = False
         isBorrowed = False
@@ -75,13 +75,13 @@ class DynamicDB():
             
         return find
            
-    def printUsers(self):
+    def print_users(self):
         print('{:<10}{:<10}'.format('ID', 'Name'))
         for user in self.Users:
             print('{:<10}{:<10}'.format(user.user_id, user.first_name))
 
 
-    def printBooks(self):
+    def print_books(self):
         authorsStr = ''
         print('{:<10}{:<30}{:<40}{:<10}{:<20}'.format('ID', 'Author','Title',
         'Publisher', 'Publication date'))
@@ -101,7 +101,7 @@ class DynamicDB():
             print('{:<10}{:<30}{:<40}{:<10}{:<20}'.format(book.book_id, authorsStr,
                 book.title, book.publisher, book.year))
 
-    def printBBooks(self):
+    def print_borrowed_books(self):
         print('{:<10}{:<10}{:<20}{:<40}{:<20}{:<20}'.format('User ID', 'Book ID', 'First name',
              'Title',  'Borrow date','Return date'))
         for bbook in self.BBooks:

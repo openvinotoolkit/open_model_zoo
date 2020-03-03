@@ -17,7 +17,7 @@ from DynamicDatabase import *
 uknownID = -1
 count = 0
 
-def CreateArgparse():
+def create_argparse():
     parser = argparse.ArgumentParser(description='Smart Library Sample') 
     parser.add_argument('-fr', type = str,
                         dest = 'fRec', required=True, 
@@ -84,14 +84,14 @@ def CreateArgparse():
     args = parser.parse_args()
     return args
 
-def CreateLibrary(libPath, DB):
+def create_library(libPath, DB):
     with open(libPath, 'r', encoding='utf-8') as lib:
         data = json.load(lib)
     for book in data['books']:
-        DB.addBook(book['id'], book['title'],  book['author'],
+        DB.add_book(book['id'], book['title'],  book['author'],
                    book['publisher'], book['year'])
 
-def PutText(img, text, pos, ix, iy, font, color, scale, thickness, rect = 1):
+def put_text(img, text, pos, ix, iy, font, color, scale, thickness, rect = 1):
 
     textSize = cv.getTextSize(text, font, scale, thickness) 
     if rect:
@@ -100,57 +100,57 @@ def PutText(img, text, pos, ix, iy, font, color, scale, thickness, rect = 1):
     cv.putText(img, text, (pos[0], pos[1] + iy),
                font, scale, color, thickness)
 
-def PutInfo(img):
+def put_info(img):
     indent = 10
     text = 'Show book'
-    PutText(img, text, (5,  img.shape[0]), 5, -5, cv.FONT_HERSHEY_SIMPLEX, 
+    put_text(img, text, (5,  img.shape[0]), 5, -5, cv.FONT_HERSHEY_SIMPLEX, 
             (22, 163, 245), 1, 2)
 
     text = 'Press:'
-    PutText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
+    put_text(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
             (22, 163, 245), 1, 1, 0)
     txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN, 1, 2) 
 
     indent += txtSize[0][1] + 5
     text = 'r - register'
-    PutText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
+    put_text(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
                         (22, 163, 245), 1, 1, 0)
     txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1) 
 
     indent += txtSize[0][1] + 5
     text = 'b - to get or ret a book'
     txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1) 
-    PutText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
+    put_text(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
             (22, 163, 245), 1, 1, 0)
 
     indent += txtSize[0][1] + 5
     text = 'f - get info' 
     txtSize = cv.getTextSize(text, cv.FONT_HERSHEY_PLAIN , 1, 1)
-    PutText(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
+    put_text(img, text, (5,  indent), 0, 0, cv.FONT_HERSHEY_PLAIN, 
             (22, 163, 245), 1, 1, 0)
 
-def RecognizeUser(img, faceRec):
+def recognize_user(img, faceRec):
     faces, out = faceRec.recognize(img)
     userID = uknownID
     for face in faces:
         if len(faces) > 1:
             text = 'No more than one person at a time'
-            PutText(img, text, (0,30), 0, -5, cv.FONT_HERSHEY_SIMPLEX, 
+            put_text(img, text, (0,30), 0, -5, cv.FONT_HERSHEY_SIMPLEX, 
                                            (22, 163, 245), 1, 2)
 
         if np.amax(out) > faceRec.threshold:
             userID = int(np.argmax(out) + 1)
             text = 'User #' + str(userID)
-            PutText(img, text, face[0], face[0][0], -5, cv.FONT_HERSHEY_SIMPLEX, 
+            put_text(img, text, face[0], face[0][0], -5, cv.FONT_HERSHEY_SIMPLEX, 
                                            (22, 163, 245), 1, 2)
         else:
             text = 'Unknown'
-            PutText(img, text, face[0], face[0][0], -5, cv.FONT_HERSHEY_SIMPLEX, 
+            put_text(img, text, face[0], face[0][0], -5, cv.FONT_HERSHEY_SIMPLEX, 
                                            (22, 163, 245), 1, 2)     
         cv.rectangle(img, face[0], face[1], (22, 163, 245), 2)
     return userID
 
-def PrintInfo(count, DB):
+def print_info(count, DB):
     os.system('cls')
     if count == 0:
         DB.printUsers()
@@ -159,7 +159,7 @@ def PrintInfo(count, DB):
     elif count == 2:
         DB.printBBooks()
 
-def RecognizeBook(img, bookRec):
+def recognize_book(img, bookRec):
     data = bookRec.recognize(img)
     try: 
         bID = int(data.split(' ')[0])
@@ -169,7 +169,7 @@ def RecognizeBook(img, bookRec):
         return -1
 
 def main():
-    args = CreateArgparse()
+    args = create_argparse()
     brArgs = dict(name='')
     rdArgs = dict(name = '', rdXML = '', rdWidth= 0, rdHeight= 0, 
                   rdThreshold= 0, fdName = '', fdXML = '', fdWidth = 0,
@@ -213,7 +213,7 @@ def main():
         if (args.web != None): 
             src = args.web
         
-        CreateLibrary(lib, DB)
+        create_library(lib, DB)
         bookRec = br.BookRecognizer.create(brArgs)
         faceRec = fr.FaceRecognizer.create(rdArgs)
         cap = cv.VideoCapture(src)
@@ -221,12 +221,12 @@ def main():
         while(True):
             _, img = cap.read()
             ch = cv.waitKey(5) & 0xFF
-            userID = RecognizeUser(img, faceRec)   
+            userID = recognize_user(img, faceRec)   
     
             if userID != uknownID:
-                PutInfo(img)
+                put_info(img)
                 if ch == ord('b'):
-                    bookID = RecognizeBook(img, bookRec)
+                    bookID = recognize_book(img, bookRec)
                     os.system('cls')
                     print(bookID)
                     DB.getRetBook(userID, bookID)
@@ -236,7 +236,7 @@ def main():
                 n = faceRec.register(img)
                 DB.addUser(n)
                 text = 'You are user #' +  str(n)
-                PutText(img, text, (5,  25), 5, -5, cv.FONT_HERSHEY_SIMPLEX, 
+                put_text(img, text, (5,  25), 5, -5, cv.FONT_HERSHEY_SIMPLEX, 
                                             (22, 163, 245), 1, 2)
                 os.system('cls')
                 DB.printUsers()
@@ -254,7 +254,7 @@ def main():
             cv.imshow('window',  img)
             if ch == ord('f'):
                 count = count + 1 
-                PrintInfo(count % 3, DB)
+                print_info(count % 3, DB)
 
         cap.release()
         

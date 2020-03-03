@@ -9,7 +9,7 @@ class QRgenerator(object):
         error_correction=qrcode.constants.ERROR_CORRECT_M)
 
     # Creating Qr-code
-    def makeQR(self, data):
+    def make_QR(self, data):
         """Add data to this QR Code."""
         self.generator.data_list.clear()
         self.generator.add_data(data)
