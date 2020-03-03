@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `squeezenet1.1` updated version of the [SqueezeNet](https://arxiv.org/pdf/1602.07360) topology. It is designed to perform image classification.  It requires 2.4x less computation than [SqueezeNet v1.0](../squeezenet1.0/squeezenet1.0.md) without diminishing accuracy. The SqueezeNet models have been pre-trained on the ImageNet image database. For details about this family of models, check out the [repository](https://github.com/forresti/SqueezeNet).
+The `squeezenet1.1` updated version of the [SqueezeNet](https://arxiv.org/abs/1602.07360) topology. It is designed to perform image classification.  It requires 2.4x less computation than [SqueezeNet v1.0](../squeezenet1.0/squeezenet1.0.md) without diminishing accuracy. The SqueezeNet models have been pre-trained on the ImageNet image database. For details about this family of models, check out the [repository](https://github.com/forresti/SqueezeNet).
 
 The model input is a blob that consists of a single image of 1x3x227x227 in BGR order. The BGR mean values need to be subtracted as follows: [104, 117, 123] before passing the image blob into the network.
 

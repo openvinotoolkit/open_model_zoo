@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  The "squeezenet1.1" updated version of the SqueezeNet <https://arxiv.org/pdf/1602.07360>
+  The "squeezenet1.1" updated version of the SqueezeNet <https://arxiv.org/abs/1602.07360>
   topology. It is designed to perform image classification.  It requires 2.4x less
   computation than SqueezeNet v1.0 <../squeezenet1.0/squeezenet1.0.md> without diminishing
   accuracy. The SqueezeNet models have been pre-trained on the ImageNet image database.

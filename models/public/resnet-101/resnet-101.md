@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-[ResNet-101](https://arxiv.org/pdf/1512.03385.pdf)
+[ResNet-101](https://arxiv.org/abs/1512.03385)
 
 ## Example
 

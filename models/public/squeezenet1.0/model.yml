@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  The "squeezenet1.0" model is one of the SqueezeNet <https://arxiv.org/pdf/1602.07360>
+  The "squeezenet1.0" model is one of the SqueezeNet <https://arxiv.org/abs/1602.07360>
   topology models, is designed to perform image classification. The SqueezeNet models
   have been pre-trained on the ImageNet image database. For details about this family
   of models, check out the repository <https://github.com/forresti/SqueezeNet>.

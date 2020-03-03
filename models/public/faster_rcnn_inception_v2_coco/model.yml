@@ -14,7 +14,7 @@
 
 description: >-
   Faster R-CNN with Inception v2. Used for object detection. For details, see the
-  paper <https://arxiv.org/pdf/1506.01497v3.pdf>.
+  paper <https://arxiv.org/abs/1506.01497v3>.
 task_type: detection
 files:
   - name: faster_rcnn_inception_v2_coco.tar.gz

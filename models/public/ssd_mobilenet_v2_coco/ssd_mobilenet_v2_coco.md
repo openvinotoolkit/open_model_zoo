@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `ssd_mobilenet_v2_coco` model is a [Single-Shot multibox Detection (SSD)](https://arxiv.org/pdf/1801.04381.pdf) network intended to perform object detection. The model has been trained from the Common Objects in Context (COCO) image dataset.
+The `ssd_mobilenet_v2_coco` model is a [Single-Shot multibox Detection (SSD)](https://arxiv.org/abs/1801.04381) network intended to perform object detection. The model has been trained from the Common Objects in Context (COCO) image dataset.
 
 The model input is a blob that consists of a single image of 1x3x300x300 in RGB order.
 
