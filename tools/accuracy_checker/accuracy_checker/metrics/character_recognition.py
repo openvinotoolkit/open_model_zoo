@@ -46,7 +46,7 @@ class LabelLevelRecognitionAccuracy(PerImageEvaluationMetric):
     prediction_types = (CharacterRecognitionPrediction, )
 
     def configure(self):
-        self.accuracy = AverageEditdistanceMeter(lambda annotation, prediction: editdistance.eval(prediction, annotation))
+        self.accuracy = AverageEditdistanceMeter(editdistance.eval)
 
     def update(self, annotation, prediction):
         return self.accuracy.update(annotation.label, prediction.label)

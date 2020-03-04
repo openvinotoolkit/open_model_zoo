@@ -17,8 +17,8 @@ limitations under the License.
 import editdistance
 
 class AverageEditdistanceMeter:
-    def __init__(self, loss=None, counter=None):
-        self.loss = loss or (lambda x, y: editdistance(x, y))
+    def __init__(self, loss):
+        self.loss = loss
         self.total = 0
         self.nchars = 0
         self.curr_err_rate = 0
