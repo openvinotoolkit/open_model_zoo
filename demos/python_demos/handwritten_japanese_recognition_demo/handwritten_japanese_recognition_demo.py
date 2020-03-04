@@ -21,7 +21,7 @@ from argparse import ArgumentParser, SUPPRESS
 import cv2
 import numpy as np
 
-from openvino.inference_engine import IENetwork, IEPlugin
+from openvino.inference_engine import IENetwork, IECore
 from utils.codec import CTCCodec
 
 def build_argparser():
@@ -75,12 +75,12 @@ def preprocess_input(image_name, height=96, width=2000):
     tw = int(th * ratio)
     rsz = cv2.resize(src, (tw, th), interpolation=cv2.INTER_AREA).astype(np.float32)
 
-    # NormalizeEdge PAD, normalize the image to [-1, 1]
+    # Normalize the image to [-1, 1]
     rsz = (rsz - 127.5) / 127.5
     # [h,w] -> [c,h,w]
     img = rsz[None, :, :]
     c, h, w = img.shape
-    # right bottom padding
+    # right edge padding
     pad_num = [0, 0, height - h, width -  w]
     pad_img = np.pad(img, ((0, 0), (pad_num[0], pad_num[2]), (pad_num[1], pad_num[3])), mode='edge')
     return pad_img
@@ -92,16 +92,11 @@ def main():
     model_xml = args.model
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
 
-    # Plugin initialization for specified device and load extensions library if specified
-    #---------really important -----------
-    plugin = IEPlugin(device=args.device, plugin_dirs=None)
-    #-------------------------------------
-
+    # Plugin initialization
+    ie = IECore()
     # Read IR
     log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
-    # ---------really important -----------
     net = IENetwork(model=model_xml, weights=model_bin)
-    #-------------------------------------
 
     assert len(net.inputs.keys()) == 1, "Sample supports only single input topologies"
     #assert len(net.outputs) == 1, "Sample supports only single output topologies"
@@ -119,9 +114,9 @@ def main():
     # Loading model to the plugin
     log.info("Loading model to the plugin")
     t0 = time.time()
-    exec_net = plugin.load(network=net)
-
+    exec_net = ie.load_network(network=net, device_name=args.device)
     log.info("Plugin loading time: {} minutes".format((time.time()-t0)/60))
+
     # Start sync inference
     log.info("Starting inference ({} iterations)".format(args.number_iter))
     infer_time = []
