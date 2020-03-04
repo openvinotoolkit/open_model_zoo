@@ -38,3 +38,10 @@ Used options: `-c` path to evaluation config, `-m` directory where models are st
 If everything worked correctly, you should be able to get `75.02%` accuracy.
 
 Now try edit config, to run SampLeNet on other device or framework (e.g. Caffe, MXNet or OpenCV), or go directly to your topology!
+
+
+###  Additional useful resources
+
+* [config](opencv_sample_config.yml) for running SampleNet via [OpenCV launcher](../accuracy_checker/launcher/opencv_launcher_readme.md)
+* [config](sample_blob_config.yml) for running SampleNet using compiled executable network blob.
+**Note: Not all OpenVINO plugins support compiled network blob execution**

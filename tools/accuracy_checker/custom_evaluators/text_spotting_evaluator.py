@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from pathlib import Path
 import numpy as np
 
 from accuracy_checker.adapters import create_adapter
@@ -51,12 +52,13 @@ class TextSpottingEvaluator(BaseEvaluator):
         preprocessing = PreprocessingExecutor(dataset_config.get('preprocessing', []), dataset.name)
         metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
         launcher = create_launcher(config['launchers'][0], delayed_model_loading=True)
-        model = SequentialModel(config.get('network_info', {}), launcher)
+        model = SequentialModel(config.get('network_info', {}), launcher, config.get('_models', []))
         return cls(dataset, reader, preprocessing, metrics_executor, launcher, model)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
-        self._annotations, self._predictions = ([],
-                                                []) if self.metric_executor.need_store_predictions else None, None
+        self._annotations, self._predictions = (
+                                                   [], []
+                                               ) if self.metric_executor.need_store_predictions else None, None
         if progress_reporter:
             progress_reporter.reset(self.dataset.size)
 
@@ -140,7 +142,8 @@ class TextSpottingEvaluator(BaseEvaluator):
 
 
 class BaseModel:
-    def __init__(self, network_info, launcher):
+    def __init__(self, network_info, launcher, default_model_suffix):
+        self.default_model_suffix = default_model_suffix
         self.network_info = network_info
 
     def predict(self, idenitifers, input_data):
@@ -148,6 +151,28 @@ class BaseModel:
 
     def release(self):
         pass
+
+    def automatic_model_search(self, network_info):
+        model = Path(network_info['model'])
+        if model.is_dir():
+            model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
+            blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
+            if not model_list:
+                model_list = blob_list or list(model.glob('*.xml'))
+                if not blob_list:
+                    blob_list = list(model.glob('*.blob'))
+                if not model_list:
+                    model_list = blob_list
+            if not model_list:
+                raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
+            if len(model_list) > 1:
+                raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
+            model = model_list[0]
+        if model.suffix == '.blob':
+            return model, None
+        weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
+
+        return model, weights
 
 
 def create_detector(model_config, launcher):
@@ -161,7 +186,7 @@ def create_detector(model_config, launcher):
     return model_class(model_config, launcher)
 
 
-def create_recognizer(model_config, launcher):
+def create_recognizer(model_config, launcher, suffix):
     launcher_model_mapping = {
         'dlsdk': RecognizerDLSDKModel
     }
@@ -169,17 +194,30 @@ def create_recognizer(model_config, launcher):
     model_class = launcher_model_mapping.get(framework)
     if not model_class:
         raise ValueError('model for framework {} is not supported'.format(framework))
-    return model_class(model_config, launcher)
+    return model_class(model_config, launcher, suffix)
 
 
-class SequentialModel(BaseModel):
-    def __init__(self, network_info, launcher):
-        super().__init__(network_info, launcher)
+class SequentialModel:
+    def __init__(self, network_info, launcher, models_args):
+        detector = network_info.get('detector', {})
+        recognizer_encoder = network_info.get('recognizer_encoder', {})
+        recognizer_decoder = network_info.get('recognizer_decoder', {})
+        if 'model' not in detector:
+            detector['model'] = models_args[0]
+        if 'model' not in recognizer_encoder:
+            recognizer_encoder['model'] = models_args[1 if len(models_args) > 1 else 0]
+        if 'model' not in recognizer_decoder:
+            recognizer_decoder['model'] = models_args[2 if len(models_args) > 2 else 0]
+        network_info.update({
+            'detector': detector,
+            'recognizer_encoder': recognizer_encoder,
+            'recognizer_decoder': recognizer_decoder
+        })
         if not contains_all(network_info, ['detector', 'recognizer_encoder', 'recognizer_decoder']):
             raise ConfigError('network_info should contains detector, encoder and decoder fields')
         self.detector = create_detector(network_info['detector'], launcher)
-        self.recognizer_encoder = create_recognizer(network_info['recognizer_encoder'], launcher)
-        self.recognizer_decoder = create_recognizer(network_info['recognizer_decoder'], launcher)
+        self.recognizer_encoder = create_recognizer(network_info['recognizer_encoder'], launcher, 'encoder')
+        self.recognizer_decoder = create_recognizer(network_info['recognizer_decoder'], launcher, 'decoder')
         self.recognizer_decoder_inputs = network_info['recognizer_decoder_inputs']
         self.recognizer_decoder_outputs = network_info['recognizer_decoder_outputs']
         self.max_seq_len = int(network_info['max_seq_len'])
@@ -200,8 +238,9 @@ class SequentialModel(BaseModel):
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
             feature = np.transpose(feature, (0, 2, 1))
 
-            hidden_shape = self.recognizer_decoder.network.inputs[
-                self.recognizer_decoder_inputs['prev_hidden']].shape
+            hidden_shape = (
+                self.recognizer_decoder.exec_network.inputs[self.recognizer_decoder_inputs['prev_hidden']].shape
+            )
             hidden = np.zeros(hidden_shape)
             prev_symbol_index = np.ones((1,)) * self.sos_index
 
@@ -239,13 +278,16 @@ class SequentialModel(BaseModel):
 
 class DetectorDLSDKModel(BaseModel):
     def __init__(self, network_info, launcher):
-        super().__init__(network_info, launcher)
-        model_xml = str(network_info['model'])
-        model_bin = str(network_info['weights'])
-        self.network = launcher.create_ie_network(model_xml, model_bin)
-        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-        self.im_info_name = [x for x in self.network.inputs if len(self.network.inputs[x].shape) == 2][0]
-        self.im_data_name = [x for x in self.network.inputs if len(self.network.inputs[x].shape) == 4][0]
+        super().__init__(network_info, launcher, 'detector')
+        model, weights = self.automatic_model_search(network_info)
+        if weights is not None:
+            network = launcher.create_ie_network(str(model), str(weights))
+            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+        else:
+            self.exec_network = launcher.ie_core.import_network(str(model))
+
+        self.im_info_name = [x for x in self.exec_network.inputs if len(self.exec_network.inputs[x].shape) == 2][0]
+        self.im_data_name = [x for x in self.exec_network.inputs if len(self.exec_network.inputs[x].shape) == 4][0]
 
     def predict(self, identifiers, input_data):
         input_data = np.array(input_data)
@@ -265,19 +307,20 @@ class DetectorDLSDKModel(BaseModel):
 
     def fit_to_input(self, input_data):
         input_data = np.transpose(input_data, (0, 3, 1, 2))
-        input_data = input_data.reshape(self.network.inputs[self.im_data_name].shape)
+        input_data = input_data.reshape(self.exec_network.inputs[self.im_data_name].shape)
 
         return input_data
 
 
 class RecognizerDLSDKModel(BaseModel):
-    def __init__(self, network_info, launcher):
-        super().__init__(network_info, launcher)
-        model_xml = str(network_info['model'])
-        model_bin = str(network_info['weights'])
-
-        self.network = launcher.create_ie_network(model_xml, model_bin)
-        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+    def __init__(self, network_info, launcher, suffix):
+        super().__init__(network_info, launcher, suffix)
+        model, weights = self.automatic_model_search(network_info)
+        if weights is not None:
+            network = launcher.create_ie_network(str(model), str(weights))
+            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+        else:
+            self.exec_network = launcher.ie_core.import_network(str(model))
 
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(input_data)

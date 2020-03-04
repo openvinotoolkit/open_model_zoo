@@ -23,6 +23,7 @@ import numpy as np
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, ConfigError
 from ..representation import PoseEstimationPrediction
+from ..utils import contains_any
 
 
 class HumanPoseAdapter(Adapter):
@@ -67,15 +68,25 @@ class HumanPoseAdapter(Adapter):
                     'human_pose_estimation adapter should contains both: keypoints_heatmap_out '
                     'and part_affinity_fields_out or not contain them at all (in single output model case)'
                 )
+        self._keypoints_heatmap_bias = self.keypoints_heatmap + '/add_'
+        self._part_affinity_fileds_bias = self.part_affinity_fields + '/add_'
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.concat_out:
-            raw_output = zip(
-                identifiers, raw_outputs[self.keypoints_heatmap],
-                raw_outputs[self.part_affinity_fields], frame_meta
-            )
+            if not contains_any(raw_outputs, [self.part_affinity_fields, self._part_affinity_fileds_bias]):
+                raise ConfigError('part affinity fields output not found')
+            if not contains_any(raw_outputs, [self.keypoints_heatmap, self._keypoints_heatmap_bias]):
+                raise ConfigError('keypoints heatmap output not found')
+            keypoints_heatmap = raw_outputs[
+                self.keypoints_heatmap if self.keypoints_heatmap in raw_outputs else self._keypoints_heatmap_bias
+            ]
+            pafs = raw_outputs[
+                self.part_affinity_fields if self.part_affinity_fields in raw_outputs
+                else self._part_affinity_fileds_bias
+            ]
+            raw_output = zip(identifiers, keypoints_heatmap, pafs, frame_meta)
         else:
             concat_out = raw_outputs[self.output_blob]
             keypoints_num = concat_out.shape[1] // 3

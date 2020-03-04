@@ -38,7 +38,10 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
                 description='The maximum total input sequence length after tokenization.',
                 optional=True, default=128
             ),
-            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register')
+            'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register'),
+            'class_token_first': BoolField(
+                optional=True, default=True,
+                description='Add [CLS] token to the begin of sequence. If False, will be added as the last token.')
         })
 
         return params
@@ -50,6 +53,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
         self.tokenizer = get_tokenizer(self.config, self.lower_case)
         self.reversed_label_map = {value: key for key, value in self.label_map.items()}
         self.support_vocab = 'vocab_file' in self.config
+        self.class_token_first = self.get_value_from_config('class_token_first')
 
     def read_tsv(self):
         lines = []
@@ -81,7 +85,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
             # Modifies `tokens_a` and `tokens_b` in place so that the total
             # length is less than the specified length.
             # Account for two [SEP] & one [CLS] with "- 3"
-            truncate_seq_pair(tokens_a, tokens_b, max_seq_length - 3)
+            truncate_seq_pair(tokens_a, tokens_b, self.max_seq_length - 3)
         else:
             # Account for one [SEP] & one [CLS] with "- 2"
             if len(tokens_a) > self.max_seq_length - 2:
@@ -89,6 +93,9 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
 
         tokens = []
         segment_ids = []
+        if self.class_token_first:
+            tokens.append("[CLS]" if self.support_vocab else CLS_ID)
+            segment_ids.append(SEG_ID_CLS)
         for token in tokens_a:
             tokens.append(token)
             segment_ids.append(SEG_ID_A)
@@ -102,21 +109,20 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
             tokens.append('[SEP]' if self.support_vocab else SEP_ID)
             segment_ids.append(SEG_ID_B)
 
-        tokens.append("[CLS]" if self.support_vocab else CLS_ID)
-        segment_ids.append(SEG_ID_CLS)
+        if not self.class_token_first:
+            tokens.append("[CLS]" if self.support_vocab else CLS_ID)
+            segment_ids.append(SEG_ID_CLS)
 
         input_ids = self.tokenizer.convert_tokens_to_ids(tokens) if self.support_vocab else tokens
+        input_mask = [0 if not self.class_token_first else 1] * len(input_ids)
 
-        # The mask has 0 for real tokens and 1 for padding tokens. Only real
-        # tokens are attended to.
-        input_mask = [0] * len(input_ids)
-
-        # Zero-pad up to the sequence length.
         if len(input_ids) < self.max_seq_length:
             delta_len = self.max_seq_length - len(input_ids)
-            input_ids = [0] * delta_len + input_ids
-            input_mask = [1] * delta_len + input_mask
-            segment_ids = [SEG_ID_PAD] * delta_len + segment_ids
+            input_ids = [0] * delta_len + input_ids if not self.class_token_first else input_ids + [0] * delta_len
+            input_mask = [1] * delta_len + input_mask if not self.class_token_first else input_mask + [0] * delta_len
+            segment_ids = (
+                [SEG_ID_PAD] * delta_len + segment_ids if not self.class_token_first else segment_ids + [0] * delta_len
+            )
 
         return TextClassificationAnnotation(
             identifier, example.label, np.array(input_ids), np.array(input_mask), np.array(segment_ids), tokens

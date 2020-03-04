@@ -514,3 +514,7 @@ def color_format(s, color=Color.PASSED):
     if color == Color.PASSED:
         return "\x1b[0;32m{}\x1b[0m".format(s)
     return "\x1b[0;31m{}\x1b[0m".format(s)
+
+
+def softmax(x):
+    return np.exp(x) / sum(np.exp(x))

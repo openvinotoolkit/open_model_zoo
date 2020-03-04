@@ -62,6 +62,7 @@ from .ms_asl_continuous import MSASLContiniousConverter
 from .monocular_depth_perception import ReDWebDatasetConverter
 
 from .fashion_mnist import FashionMnistConverter
+from .inpainting import InpaintingConverter
 
 __all__ = [
     'BaseFormatConverter',
@@ -115,5 +116,6 @@ __all__ = [
     'ActionRecognitionConverter',
     'MSASLContiniousConverter',
     'ReDWebDatasetConverter',
-    'FashionMnistConverter'
+    'FashionMnistConverter',
+    'InpaintingConverter'
 ]

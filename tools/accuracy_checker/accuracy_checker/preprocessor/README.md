@@ -100,3 +100,19 @@ Accuracy Checker supports following set of preprocessors:
 * `centernet_affine_transform` - CenterNet affine transformation, used for image resizing.
   * `dst_width` and `dst_height` are destination width, and height for image. You can also use size instead in case when destination sizes are equal.
   * `scale` - scale factor for image (default is 1).
+* `free_form_mask` - Applies free-form mask to the image.
+  * `parts` - Number of parts to draw mask.
+  * `max_brush_width` - Maximum brush width to draw mask.
+  * `max_length` - Maximum line length to draw mask.
+  * `max_vertex` - Maximum number vertex to draw mask.
+* `rect_mask` - Applies rectangle mask to the image.
+  * `dst_width` and `dst_height` are width, and height of mask. You can also use `size` instead in case when destination sizes are equal.
+* `custom_mask` - Applies masks from custom mask dataset.
+  * `mask_dir` - path to mask dataset to be used for inpainting.
+  * `inverse_mask` - inverse mask before apply
+  * `mask_loader` - which reader to use to load masks. The following readers can be used:
+    * `opencv_imread` - read images using OpenCV library. Default color space is BGR.
+    * `pillow_imread` - read images using Pillow library. Default color space is RGB.
+    * `scipy_imread` - read images using similar approach as in `scipy.misc.imread`.
+    * `numpy_reader` - read numpy dumped files.
+    * `tf_imread`- read images using TensorFlow. Default color space is RGB. Requires TensorFlow installation.

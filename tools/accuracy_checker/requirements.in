@@ -1,7 +1,3 @@
-# core components
-numpy>=1.11,<1.18
-PyYAML
-
 # progress bar
 tqdm
 
@@ -26,3 +22,6 @@ scipy
 
 # nlp, tokenization
 sentencepiece
+
+# editdistance calculation
+editdistance

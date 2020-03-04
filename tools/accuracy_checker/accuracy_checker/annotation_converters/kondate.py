@@ -55,7 +55,7 @@ class KondateRecognitionDatasetConverter(FileBasedAnnotationConverter):
             content_errors = []
             self.images_dir = self.images_dir or self.annotation_file.parent
 
-        original_annotations = read_txt(self.annotation_file)
+        original_annotations = read_txt(self.annotation_file, encoding='utf-8')
         num_iterations = len(original_annotations)
 
         for line_id, line in enumerate(original_annotations):

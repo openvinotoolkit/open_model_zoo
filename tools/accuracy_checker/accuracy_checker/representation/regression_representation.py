@@ -29,7 +29,8 @@ class RegressionAnnotation(RegressionRepresentation):
 
 
 class RegressionPrediction(RegressionRepresentation):
-    pass
+    def to_annotation(self, **kwargs):
+        return RegressionAnnotation(self.identifier, self.value)
 
 
 class GazeVectorRepresentation(RegressionRepresentation):
@@ -38,12 +39,14 @@ class GazeVectorRepresentation(RegressionRepresentation):
             value = np.array([])
         super().__init__(identifier, value)
 
+
 class GazeVectorAnnotation(GazeVectorRepresentation):
     pass
 
-class GazeVectorPrediction(GazeVectorRepresentation):
-    pass
 
+class GazeVectorPrediction(GazeVectorRepresentation):
+    def to_annotation(self, **kwargs):
+        return GazeVectorAnnotation(self.identifier, self.value)
 
 
 class FacialLandmarksRepresentation(BaseRepresentation):

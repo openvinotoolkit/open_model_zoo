@@ -165,10 +165,9 @@ class ReaderCombiner(BaseReader):
         scheme = self.config['scheme']
         reading_scheme = OrderedDict()
         for pattern, reader_config in scheme.items():
-            reader = BaseReader.provide(
-                reader_config['type'] if isinstance(reader_config, dict) else reader_config,
-                self.data_source, reader_config
-            )
+            reader_type = reader_config['type'] if isinstance(reader_config, dict) else reader_config
+            reader_configuration = reader_config if isinstance(reader_config, dict) else None
+            reader = BaseReader.provide(reader_type, self.data_source, reader_configuration)
             pattern = re.compile(pattern)
             reading_scheme[pattern] = reader
 
@@ -203,6 +202,7 @@ class OpenCVImageReader(BaseReader):
             config_validator.validate(self.config)
 
     def configure(self):
+        super().configure()
         self.flag = OPENCV_IMREAD_FLAGS[self.config.get('reading_flag', 'color') if self.config else 'color']
 
 
