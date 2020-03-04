@@ -411,7 +411,9 @@ class Padding(Preprocessor):
                 optional=True, default=False, description="Allow to use numpy for padding instead default OpenCV."
             ),
             'numpy_pad_mode': StringField(
-                optional=True, default='constant', choices=['constant', 'edge', 'maximum', 'minimum', 'mean', 'median', 'wrap'], description="If use_numpy is True, Numpy padding mode,including constant, edge, mean, etc."
+                optional=True, default='constant',
+                choices=['constant', 'edge', 'maximum', 'minimum', 'mean', 'median', 'wrap'],
+                description="If use_numpy is True, Numpy padding mode,including constant, edge, mean, etc."
             )
         })
 
@@ -472,11 +474,10 @@ class Padding(Preprocessor):
                 image, ((pad[0], pad[2]), (pad[1], pad[3]), (0, 0)),
                 mode=self.numpy_pad_mode
             )
-        else:
-            return np.pad(
-                image, ((pad[0], pad[2]), (pad[1], pad[3]), (0, 0)),
-                mode=self.numpy_pad_mode, constant_values=pad_values
-            )
+        return np.pad(
+            image, ((pad[0], pad[2]), (pad[1], pad[3]), (0, 0)),
+            mode=self.numpy_pad_mode, constant_values=pad_values
+        )
 
 
 class Tiling(Preprocessor):

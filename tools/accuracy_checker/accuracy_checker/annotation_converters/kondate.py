@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import numpy as np
 from typing import Union
 from pathlib import Path
 from ..representation import CharacterRecognitionAnnotation
@@ -36,7 +35,7 @@ class KondateRecognitionDatasetConverter(FileBasedAnnotationConverter):
                     is_directory=True, optional=True,
                     description='path to dataset images, used only for content existence check'
                 ),
-                'decoding_char_file': PathField(description='path to decoding_char_file, consisting of all supported characters'
+                'decoding_char_file': PathField(description='path to decoding_char_file'
                 )
             }
         )

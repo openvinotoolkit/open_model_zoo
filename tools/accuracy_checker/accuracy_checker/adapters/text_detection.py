@@ -1026,7 +1026,7 @@ class CTCGreedySearchDecoder(Adapter):
         raw_output = self._extract_predictions(raw, frame_meta)
         output = raw_output[self.output_blob]
         preds_index = np.argmax(output, 2)
-        preds_index = preds_index.transpose(1,0)
+        preds_index = preds_index.transpose(1, 0)
 
         result = []
         for identifier, data in zip(identifiers, preds_index):
