@@ -16,7 +16,6 @@ limitations under the License.
 
 import math
 from collections import namedtuple
-from functools import partial
 
 import cv2
 import numpy as np
@@ -440,7 +439,7 @@ class Padding(Preprocessor):
         pref_width = math.ceil(pref_width / float(self.stride)) * self.stride
         pad = self.pad_func(pref_width, pref_height, width, height)
         image.metadata['padding'] = pad
-        padding_realization_func = self._opencv_padding if not self.use_numpy else partial(self._numpy_padding, mode=self.numpy_pad_mode)
+        padding_realization_func = self._opencv_padding if not self.use_numpy else self._numpy_padding
         image.data = padding_realization_func(image.data, pad)
 
         image.metadata.setdefault('geometric_operations', []).append(
@@ -462,21 +461,21 @@ class Padding(Preprocessor):
             image, pad[0], pad[2], pad[1], pad[3], cv2.BORDER_CONSTANT, value=self.pad_value
         )
 
-    def _numpy_padding(self, image, pad, mode):
+    def _numpy_padding(self, image, pad):
         pad_values = (
             (self.pad_value[0], self.pad_value[0]),
             (self.pad_value[1], self.pad_value[1]),
             (self.pad_value[2], self.pad_value[2])
         )
-        if mode != 'constant':
+        if self.numpy_pad_mode != 'constant':
             return np.pad(
                 image, ((pad[0], pad[2]), (pad[1], pad[3]), (0, 0)),
-                mode=mode
+                mode=self.numpy_pad_mode
             )
         else:
             return np.pad(
                 image, ((pad[0], pad[2]), (pad[1], pad[3]), (0, 0)),
-                mode=mode, constant_values=pad_values
+                mode=self.numpy_pad_mode, constant_values=pad_values
             )
 
 
