@@ -4,7 +4,7 @@ This example demonstrates an approach to recognize handwritten japanese text lin
 
 ## How It Works
 
-The demo expects the next models in the Intermediate Representation (IR) format:
+The demo expects the next model in the Intermediate Representation (IR) format:
 
    * handwritten-japanese-recognition-0001
 
@@ -23,7 +23,7 @@ The demo firstly reads an image and perform the preprocessing such as resize, no
 The demo depends on:
 - OpenVINO library (2019R3.1 or newer)
 - Python (3.5+, which is supported by OpenVINO)
-- python-opencv
+- opencv-python
 - numpy
 
 To install all the required Python modules you can use:
@@ -40,7 +40,7 @@ usage: handwritten_japanese_recognition_demo.py [-h] -m MODEL
                                                 [-i INPUT [INPUT ...]]
                                                 [-ih INPUT_HEIGHT]
                                                 [-iw INPUT_WIDTH] [-d DEVICE]
-                                                [-ni NUMBER_ITER] [-lang LANG]
+                                                [-ni NUMBER_ITER]
                                                 [-b BATCHSIZE] [-cl CHARLIST]
 
 Options:
@@ -60,8 +60,6 @@ Options:
                         specified. Default value is CPU
   -ni NUMBER_ITER, --number_iter NUMBER_ITER
                         Optional. Number of inference iterations
-  -lang LANG, --lang LANG
-                        Language supported, default value is Japanese
   -b BATCHSIZE, --batchsize BATCHSIZE
                         Batch size for inference
   -cl CHARLIST, --charlist CHARLIST
