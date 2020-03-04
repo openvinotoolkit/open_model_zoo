@@ -24,3 +24,4 @@ tqdm==4.42.1
 wcwidth==0.1.8            # via pytest
 yamlloader==0.5.5
 zipp==1.1.0               # via importlib-metadata
+editdistance==0.5.3
