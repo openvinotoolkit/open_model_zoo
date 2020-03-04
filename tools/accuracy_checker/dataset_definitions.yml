@@ -677,3 +677,11 @@ datasets:
       annotation_file: Kondate/test_img_id_gt.txt
     annotation: kondate_recognition.pickle
     dataset_meta: kondate_recognition.json
+
+  - name: inpainting_free_form_masks
+    data_source: VOCdevkit/VOC2012/JPEGImages/
+    annotation_conversion:
+      converter: inpainting
+      images_dir: VOCdevkit/VOC2012/JPEGImages/
+      masks_dir: free_form_masks/masks_2k
+    annotation: inpainting_voc12_masks2k.pickle

@@ -52,6 +52,7 @@ KNOWN_TASK_TYPES = {
     'feature_extraction',
     'head_pose_estimation',
     'human_pose_estimation',
+    'image_inpainting',
     'image_processing',
     'instance_segmentation',
     'monocular_depth_estimation',

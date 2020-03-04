@@ -61,11 +61,11 @@ If all prerequisite are installed, then you are ready to install **accuracy chec
 python3 setup.py install
 ```
 
-Accuracy Checker is modular tool and have some task-specific dependencies, all required modules can be found in `requirements.in` file.
-You can install tool without dependencies and manage them by your-self using following command instead of standard installation:
+Accuracy Checker is modular tool and have some task-specific dependencies, all specific required modules can be found in `requirements.in` file.
+You can install only core part of the tool without additional dependencies and manage them by your-self using following command instead of standard installation:
 
 ```bash
-pip install . --no-dependencies
+python setup.py install_core
 ```
 
 #### Usage
@@ -81,7 +81,7 @@ accuracy_check -c path/to/configuration_file -m /path/to/models -s /path/to/sour
 All relative paths in config files will be prefixed with values specified in command line:
 
 - `-c, --config` path to configuration file.
-- `-m, --models` specifies directory in which models and weights declared in config file will be searched.
+- `-m, --models` specifies directory in which models and weights declared in config file will be searched. You also can specify space separated list of directories if you want to run the same configuration several times with models located in different directories or if you have the pipeline with several models.
 - `-s, --source` specifies directory in which input images will be searched.
 - `-a, --annotations` specifies directory in which annotation and meta files will be searched.
 
@@ -94,6 +94,8 @@ You may refer to `-h, --help` to full list of command line options. Some optiona
 - `-C, '--converted_models` directory to store Model Optimizer converted models (used for DLSDK launcher only).
 - `-tf, --target_framework` framework for infer.
 - `-td, --target_devices` devices for infer. You can specify several devices using space as a delimiter.
+- `--async_mode` allows run the tool in async mode if launcher support it.
+- `--num_requests` number requests for async execution. Allows override provided in config info. Default is `AUTO`
 
 You are also able to replace some command line arguments with environment variables for path prefixing. Supported following list of variables:
 * `DATA_DIR` -  equivalent of `-s`, `--source`.

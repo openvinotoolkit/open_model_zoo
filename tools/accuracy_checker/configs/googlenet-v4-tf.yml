@@ -5,7 +5,7 @@ models:
         model: public/googlenet-v4-tf/inception_v4.frozen.pb
         adapter: classification
 
-    dataset: 
+    datasets:
       - name: imagenet_1001_classes
         preprocessing:
           - type: bgr_to_rgb

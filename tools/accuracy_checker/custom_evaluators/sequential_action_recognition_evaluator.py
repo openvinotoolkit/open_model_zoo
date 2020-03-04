@@ -24,7 +24,7 @@ from accuracy_checker.config import ConfigError
 from accuracy_checker.preprocessor import PreprocessingExecutor
 from accuracy_checker.metrics import MetricsExecutor
 from accuracy_checker.launcher import create_launcher
-from accuracy_checker.utils import contains_all, extract_image_representations, read_pickle
+from accuracy_checker.utils import contains_all, contains_any, extract_image_representations, read_pickle
 
 
 class SequentialActionRecognitionEvaluator(BaseEvaluator):
@@ -52,7 +52,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
         preprocessing = PreprocessingExecutor(dataset_config.get('preprocessing', []), dataset.name)
         metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
         launcher = create_launcher(config['launchers'][0], delayed_model_loading=True)
-        model = SequentialModel(config.get('network_info', {}), launcher)
+        model = SequentialModel(config.get('network_info', {}), launcher, config.get('_models', []))
         return cls(dataset, reader, preprocessing, metrics_executor, launcher, model)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, ** kwargs):
@@ -142,7 +142,7 @@ class BaseModel:
     def __init__(self, network_info, launcher):
         self.network_info = network_info
 
-    def predict(self, idenitifers, input_data):
+    def predict(self, idenitifiers, input_data):
         raise NotImplementedError
 
     def release(self):
@@ -179,8 +179,16 @@ def create_decoder(model_config, launcher):
 
 
 class SequentialModel(BaseModel):
-    def __init__(self, network_info, launcher):
+    def __init__(self, network_info, launcher, models_args):
         super().__init__(network_info, launcher)
+        if models_args:
+            encoder = network_info.get('encoder', {})
+            decoder = network_info.get('decoder', {})
+            if not contains_any(encoder, ['model', 'onnx_model']) and models_args:
+                encoder['model'] = models_args[0]
+            if not contains_any(decoder, ['model', 'onnx_model']) and models_args:
+                decoder['model'] = models_args[1 if len(models_args) > 1 else 0]
+            network_info.update({'encoder': encoder, 'decoder': decoder})
         if not contains_all(network_info, ['encoder', 'decoder']):
             raise ConfigError('network_info should contains encoder and decoder fields')
         self.num_processing_frames = network_info['decoder'].get('num_processing_frames', 16)
@@ -222,18 +230,24 @@ class SequentialModel(BaseModel):
 
 
 class EncoderDLSDKModel(BaseModel):
+    default_model_suffix = 'encoder'
+
     def __init__(self, network_info, launcher):
         super().__init__(network_info, launcher)
         if 'onnx_model' in network_info:
             network_info.update(launcher.config)
-            model_xml, model_bin = launcher.convert_model(network_info)
+            model, weights = launcher.convert_model(network_info)
         else:
-            model_xml = str(network_info['model'])
-            model_bin = str(network_info['weights'])
-        self.network = launcher.create_ie_network(model_xml, model_bin)
-        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-        self.input_blob = next(iter(self.network.inputs))
-        self.output_blob = next(iter(self.network.outputs))
+            model, weights = self.automatic_model_search(network_info)
+        if weights is not None:
+            network = launcher.create_ie_network(str(model), str(weights))
+            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+            self.input_blob = next(iter(network.inputs))
+            self.output_blob = next(iter(network.outputs))
+        else:
+            self.exec_network = launcher.ie_core.import_network(str(model))
+            self.input_blob = next(iter(self.exec_network.inputs))
+            self.output_blob = next(iter(self.exec_network.outputs))
 
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(self.fit_to_input(input_data))[self.output_blob]
@@ -243,25 +257,54 @@ class EncoderDLSDKModel(BaseModel):
 
     def fit_to_input(self, input_data):
         input_data = np.transpose(input_data, (0, 3, 1, 2))
-        input_data = input_data.reshape(self.network.inputs[self.input_blob].shape)
+        input_data = input_data.reshape(self.exec_network.inputs[self.input_blob].shape)
 
         return {self.input_blob: input_data}
 
+    def automatic_model_search(self, network_info):
+        model = Path(network_info['model'])
+        if model.is_dir():
+            model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
+            blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
+            if not model_list:
+                model_list = blob_list or list(model.glob('*.xml'))
+                if not blob_list:
+                    blob_list = list(model.glob('*.blob'))
+                if not model_list:
+                    model_list = blob_list
+            if not model_list:
+                raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
+            if len(model_list) > 1:
+                raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
+            model = model_list[0]
+        if model.suffix == '.blob':
+            return model, None
+        weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
+
+        return model, weights
+
 
 class DecoderDLSDKModel(BaseModel):
+    default_model_suffix = 'decoder'
+
     def __init__(self, network_info, launcher):
         super().__init__(network_info, launcher)
         if 'onnx_model' in network_info:
             network_info.update(launcher.config)
-            model_xml, model_bin = launcher.convert_model(network_info)
+            model, weights = launcher.convert_model(network_info)
         else:
-            model_xml = str(network_info['model'])
-            model_bin = str(network_info['weights'])
+            model, weights = self.automatic_model_search(network_info)
+        if weights is not None:
+            network = launcher.create_ie_network(str(model), str(weights))
+            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+            self.input_blob = next(iter(network.inputs))
+            self.output_blob = next(iter(network.outputs))
+        else:
+            self.network = None
+            self.exec_network = launcher.ie_core.import_network(str(model))
+            self.input_blob = next(iter(self.exec_network.inputs))
+            self.output_blob = next(iter(self.exec_network.outputs))
 
-        self.network = launcher.create_ie_network(model_xml, model_bin)
-        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-        self.input_blob = next(iter(self.network.inputs))
-        self.output_blob = next(iter(self.network.outputs))
         self.adapter = create_adapter('classification')
         self.adapter.output_blob = self.output_blob
         self.num_processing_frames = network_info.get('num_processing_frames', 16)
@@ -276,14 +319,39 @@ class DecoderDLSDKModel(BaseModel):
         del self.exec_network
 
     def fit_to_input(self, input_data):
-        input_data = np.reshape(input_data, self.network.inputs[self.input_blob].shape)
+        input_data = np.reshape(input_data, self.exec_network.inputs[self.input_blob].shape)
         return {self.input_blob: input_data}
+
+    def automatic_model_search(self, network_info):
+        model = Path(network_info['model'])
+        if model.is_dir():
+            model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
+            blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
+            if not model_list:
+                model_list = blob_list or list(model.glob('*.xml'))
+                if not blob_list:
+                    blob_list = list(model.glob('*.blob'))
+                if not model_list:
+                    model_list = blob_list
+            if not model_list:
+                raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
+            if len(model_list) > 1:
+                raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
+            model = model_list[0]
+        if model.suffix == '.blob':
+            return model, None
+        weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
+
+        return model, weights
 
 
 class EncoderONNXModel(BaseModel):
+    default_model_suffix = 'encoder'
+
     def __init__(self, network_info, launcher):
         super().__init__(network_info, launcher)
-        self.inference_session = launcher.create_inference_session(network_info['model'])
+        model = self.automatic_model_search(network_info)
+        self.inference_session = launcher.create_inference_session(str(model))
         self.input_blob = next(iter(self.inference_session.get_inputs()))
         self.output_blob = next(iter(self.inference_session.get_outputs()))
 
@@ -299,8 +367,24 @@ class EncoderONNXModel(BaseModel):
     def release(self):
         del self.inference_session
 
+    def automatic_model_search(self, metwork_info):
+        model = Path(metwork_info['model'])
+        if model.is_dir():
+            model_list = list(model.glob('*{}.onnx'.format(self.default_model_suffix)))
+            if not model_list:
+                model_list = list(model.glob('*.onnx'))
+            if not model_list:
+                raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
+            if len(model_list) > 1:
+                raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
+            model = model_list[0]
+
+        return model
+
 
 class DecoderONNXModel(BaseModel):
+    default_model_suffix = 'decoder'
+
     def __init__(self, network_info, launcher):
         super().__init__(network_info, launcher)
         self.inference_session = launcher.create_inference_session(network_info['model'])
@@ -320,6 +404,20 @@ class DecoderONNXModel(BaseModel):
 
     def release(self):
         del self.inference_session
+
+    def automatic_model_search(self, metwork_info):
+        model = Path(metwork_info['model'])
+        if model.is_dir():
+            model_list = list(model.glob('*{}.onnx'.format(self.default_model_suffix)))
+            if not model_list:
+                model_list = list(model.glob('*.onnx'))
+            if not model_list:
+                raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
+            if len(model_list) > 1:
+                raise ConfigError('Several suitable models for {} found'.format(self.default_model_suffix))
+            model = model_list[0]
+
+        return model
 
 
 class DummyEncoder(BaseModel):

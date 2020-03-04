@@ -19,6 +19,7 @@ from ..postprocessor.postprocessor import Postprocessor
 from ..utils import get_size_from_config
 from ..config import NumberField
 
+
 class FRCNNPostprocessingBboxResize(Postprocessor):
     """
     Resize normalized predicted bounding boxes coordinates (i.e. from [0, 1] range) to input image shape.

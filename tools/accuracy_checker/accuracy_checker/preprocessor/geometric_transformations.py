@@ -24,6 +24,7 @@ import numpy as np
 from ..config import ConfigError, NumberField, StringField, BoolField
 from ..preprocessor import Preprocessor
 from ..utils import get_size_from_config, string_to_tuple, get_size_3d_from_config
+from ..logging import warning
 
 try:
     from PIL import Image
@@ -112,56 +113,65 @@ class Crop(Preprocessor):
         is_simple_case = not isinstance(image.data, list) # otherwise -- pyramid, tiling, etc
         data = image.data
 
-        def process_data(data, dst_height, dst_width, central_fraction, use_pillow):
-            height, width = data.shape[:2]
-            if not central_fraction:
-                new_height = dst_height
-                new_width = dst_width
-            else:
-                new_height = int(height * central_fraction)
-                new_width = int(width * central_fraction)
-
-            if use_pillow:
-                i = int(round((height - new_height) / 2.))
-                j = int(round((width - new_width) / 2.))
-                cropped_data = Image.fromarray(data).crop((j, i, j + new_width, i + new_height))
-                return np.array(cropped_data)
-
-            if width < new_width or height < new_height:
-                resized = np.array([width, height])
-                if resized[0] < new_width:
-                    resized = resized * new_width / resized[0]
-                if resized[1] < new_height:
-                    resized = resized * new_height / resized[1]
-                data = cv2.resize(data, tuple(np.ceil(resized).astype(int)))
-
-            height, width = data.shape[:2]
-            start_height = (height - new_height) // 2
-            start_width = (width - new_width) // 2
-
-            if is_simple_case:
-                # support GeometricOperationMetadata array for simple case only -- without tiling, pyramids, etc
-                image.metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop', {}))
-
-            return data[start_height:start_height + new_height, start_width:start_width + new_width]
-
-        image.data = process_data(
-            data, self.dst_height, self.dst_width, self.central_fraction, self.use_pillow
+        image.data = self.process_data(
+            data, self.dst_height, self.dst_width, self.central_fraction,
+            self.use_pillow, is_simple_case, image.metadata
         ) if not isinstance(data, list) else [
-            process_data(
-                fragment, self.dst_height, self.dst_width, self.central_fraction, self.use_pillow
+            self.process_data(
+                fragment, self.dst_height, self.dst_width, self.central_fraction,
+                self.use_pillow, is_simple_case, image.metadata
             ) for fragment in image.data
         ]
 
         return image
+
+    @staticmethod
+    def process_data(data, dst_height, dst_width, central_fraction, use_pillow, is_simple_case, metadata):
+        height, width = data.shape[:2]
+        if not central_fraction:
+            new_height = dst_height
+            new_width = dst_width
+        else:
+            new_height = int(height * central_fraction)
+            new_width = int(width * central_fraction)
+
+        if use_pillow:
+            i = int(round((height - new_height) / 2.))
+            j = int(round((width - new_width) / 2.))
+            cropped_data = Image.fromarray(data).crop((j, i, j + new_width, i + new_height))
+            return np.array(cropped_data)
+
+        if width < new_width or height < new_height:
+            resized = np.array([width, height])
+            if resized[0] < new_width:
+                resized = resized * new_width / resized[0]
+            if resized[1] < new_height:
+                resized = resized * new_height / resized[1]
+            data = cv2.resize(data, tuple(np.ceil(resized).astype(int)))
+
+        height, width = data.shape[:2]
+        start_height = (height - new_height) // 2
+        start_width = (width - new_width) // 2
+        if is_simple_case:
+            # support GeometricOperationMetadata array for simple case only -- without tiling, pyramids, etc
+            metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('crop', {}))
+
+        return data[start_height:start_height + new_height, start_width:start_width + new_width]
 
 
 class CropRect(Preprocessor):
     __provider__ = 'crop_rect'
 
     def process(self, image, annotation_meta=None):
+        if not annotation_meta:
+            warning('operation *crop_rect* required annotation metadata')
+            return image
         rect = annotation_meta.get('rect')
         if not rect:
+            warning(
+                'operation *crop_rect* rect key in annotation meta, please use annotation converter '
+                'which allows such transformation'
+            )
             return image
 
         rows, cols = image.data.shape[:2]
@@ -193,6 +203,16 @@ class ExtendAroundRect(Preprocessor):
         self.augmentation_param = self.get_value_from_config('augmentation_param')
 
     def process(self, image, annotation_meta=None):
+        if not annotation_meta:
+            warning('operation *extend_around_rect* required annotation metadata')
+            return image
+        rect = annotation_meta.get('rect')
+        if not rect:
+            warning(
+                'operation *extend_around_rect* require rect key in annotation meta, please use annotation converter '
+                'which allows such transformation'
+            )
+            return image
         rect = annotation_meta.get('rect')
         rows, cols = image.data.shape[:2]
 
@@ -278,7 +298,16 @@ class PointAligner(Preprocessor):
         self.dst_height, self.dst_width = get_size_from_config(self.config)
 
     def process(self, image, annotation_meta=None):
+        if not annotation_meta:
+            warning('operation *point_alignment* required annotation metadata')
+            return image
         keypoints = annotation_meta.get('keypoints')
+        if not keypoints:
+            warning(
+                'operation *point_alignment* require keypoints key in annotation meta, please use annotation converter '
+                'which allows such transformation'
+            )
+            return image
         image.data = self.align(image.data, keypoints)
         image.metadata.setdefault('geometric_operations', []).append(GeometricOperationMetadata('point_alignment', {}))
         return image
@@ -612,7 +641,6 @@ class TransformedCropWithAutoScale(Preprocessor):
         scale = np.array([bbox[2] / 200., bbox[3] / 200.], np.float32) * 1.25
 
         return center, scale
-
 
     @staticmethod
     def get_transformation_matrix(center, scale, output_size, key=0):
