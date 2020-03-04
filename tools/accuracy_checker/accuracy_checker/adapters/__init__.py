@@ -20,10 +20,13 @@ from .action_recognition import ActionDetection
 from .text_detection import (
     TextDetectionAdapter,
     TextProposalsDetectionAdapter,
-    EASTTextDetectionAdapter,
-    LPRAdapter,
+    EASTTextDetectionAdapter
+)
+
+from .text_recognition import (
     BeamSearchDecoder,
-    CTCGreedySearchDecoder
+    CTCGreedySearchDecoder,
+    LPRAdapter
 )
 
 from .image_processing import SuperResolutionAdapter
