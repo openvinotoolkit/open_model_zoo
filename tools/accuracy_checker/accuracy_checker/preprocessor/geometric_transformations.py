@@ -412,7 +412,7 @@ class Padding(Preprocessor):
                 optional=True, default=False, description="Allow to use numpy for padding instead default OpenCV."
             ),
             'numpy_pad_mode': StringField(
-                optional=True, default='constant', description="If use_numpy is True, Numpy padding mode,including constant, edge, mean, etc."
+                optional=True, default='constant', choices=['constant', 'edge', 'maximum', 'minimum', 'mean', 'median', 'wrap'], description="If use_numpy is True, Numpy padding mode,including constant, edge, mean, etc."
             )
         })
 
@@ -468,7 +468,7 @@ class Padding(Preprocessor):
             (self.pad_value[1], self.pad_value[1]),
             (self.pad_value[2], self.pad_value[2])
         )
-        if mode=='edge':
+        if mode != 'constant':
             return np.pad(
                 image, ((pad[0], pad[2]), (pad[1], pad[3]), (0, 0)),
                 mode=mode

@@ -1009,7 +1009,7 @@ class CTCGreedySearchDecoder(Adapter):
         parameters = super().parameters()
         parameters.update({
             'blank_label': NumberField(
-                optional=True, value_type=int, min_value=0, description="Index of the CTC blank label."
+                optional=True, value_type=int, min_value=0, default=0, description="Index of the CTC blank label."
             )
         })
         return parameters
