@@ -174,9 +174,9 @@ Deep Learning models for text spotting (simultaneous detection and recognition).
 
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
-| [text-spotting-0001-detector](./text-spotting-0001-detector/description/text-spotting-0001-detector.md)                                        | 185.169             | 26.497    |
-| [text-spotting-0001-recognizer-encoder](./text-spotting-0001-recognizer-encoder/description/text-spotting-0001-recognizer-encoder.md)          | 2.082                | 1.328      |
-| [text-spotting-0001-recognizer-decoder](./text-spotting-0001-recognizer-decoder/description/text-spotting-0001-recognizer-decoder.md)          | 0.002                | 0.273      |
+| [text-spotting-0002-detector](./text-spotting-0002-detector/description/text-spotting-0002-detector.md)                                        | 185.169             | 26.497    |
+| [text-spotting-0002-recognizer-encoder](./text-spotting-0002-recognizer-encoder/description/text-spotting-0002-recognizer-encoder.md)          | 2.082                | 1.328      |
+| [text-spotting-0002-recognizer-decoder](./text-spotting-0002-recognizer-decoder/description/text-spotting-0002-recognizer-decoder.md)          | 0.002                | 0.273      |
 
 ## Action Recognition Models
 

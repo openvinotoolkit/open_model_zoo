@@ -1,4 +1,4 @@
-# text-spotting-0001-recognizer-encoder
+# text-spotting-0002-recognizer-encoder
 
 ## Use Case and High-Level Description
 
@@ -13,7 +13,7 @@ This model is a fully-convolutional encoder of text recognition head.
 
 ## Example
 
-![](./text-spotting-0001.png)
+![](./text-spotting-0002.png)
 
 ## Specification
 

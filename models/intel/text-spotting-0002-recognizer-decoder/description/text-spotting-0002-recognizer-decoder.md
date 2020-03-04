@@ -1,4 +1,4 @@
-# text-spotting-0001-recognizer-decoder
+# text-spotting-0002-recognizer-decoder
 
 ## Use Case and High-Level Description
 
@@ -14,7 +14,7 @@ This model is 2D attention-based GRU decoder of text recognition head.
 
 ## Example
 
-![](./text-spotting-0001.png)
+![](./text-spotting-0002.png)
 
 ## Specification
 
