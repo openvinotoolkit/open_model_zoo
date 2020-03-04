@@ -35,8 +35,7 @@ class KondateRecognitionDatasetConverter(FileBasedAnnotationConverter):
                     is_directory=True, optional=True,
                     description='path to dataset images, used only for content existence check'
                 ),
-                'decoding_char_file': PathField(description='path to decoding_char_file'
-                )
+                'decoding_char_file': PathField(description='path to decoding_char_file')
             }
         )
         return parameters
