@@ -14,15 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from collections import defaultdict
-
 import cv2
 import numpy as np
 
-
 from ..adapters import Adapter
-from ..config import ConfigValidator, StringField, NumberField, BoolField, ConfigError
-from ..representation import TextDetectionPrediction, CharacterRecognitionPrediction
+from ..config import ConfigValidator, StringField, NumberField
+from ..representation import TextDetectionPrediction
 from ..postprocessor import NMS
 try:
     from shapely.geometry import Polygon
