@@ -88,16 +88,16 @@ class DataDirectoryOrigFileNamesArg:
 
     def resolve(self, context):
         seq_dir = context.data_sequence_dir / self.sequence_name
-        seq = [Path(data.resolve(context))
+        seq = [data.resolve(context)
             for data in context.data_sequences[self.sequence_name]]
 
         if not seq_dir.is_dir():
             seq_dir.mkdir(parents=True)
 
-            for index, data in enumerate(context.data_sequences[self.sequence_name]):
-                shutil.copyfile(seq[index], str(seq_dir / (seq[index].stem + seq[index].suffix)))
-                
-        return str(Path(seq_dir))
+            for seq_item in seq:
+                shutil.copyfile(seq_item, str(seq_dir / Path(seq_item).name))
+
+        return str(seq_dir)
 
 
 class DemoFileArg:
