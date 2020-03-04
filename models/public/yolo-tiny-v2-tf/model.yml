@@ -17,7 +17,7 @@ description: >-
   This model was pretrained on COCO* dataset with 80 classes.
 task_type: detection
 files:
-  - name: yolo-v2-tiny.pb
+  - name: yolo-tiny-v2.pb
     size: 44978237
     sha256: 665620ba84d9baaf728da5f4842cd3ec494e37b0121526263602bc9cee342da4
     source: https://download.01.org/opencv/public_models/022020/tiny_yolo_v2/saved_model.pb
@@ -27,6 +27,6 @@ model_optimizer_args:
   - --scale_values=input_1[255]
   - --reverse_input_channels
   - --transformations_config=$mo_dir/extensions/front/tf/yolo_v2_tiny.json
-  - --input_model=$dl_dir/yolo-v2-tiny.pb
+  - --input_model=$dl_dir/yolo-tiny-v2.pb
 framework: tf
 license: https://raw.githubusercontent.com/shaqian/tfjs-yolo/master/LICENSE

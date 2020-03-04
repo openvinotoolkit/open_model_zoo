@@ -17,7 +17,7 @@ description: >-
   This model was pretrained on VOC* dataset with 20 classes.
 task_type: detection
 files:
-  - name: yolo-v1-tiny.pb
+  - name: yolo-tiny-v1.pb
     size: 63501195
     sha256: b0643910184ea5efbb93f708339eee3e0bc8c9c6b8bf67d51c5cfc32f329a507
     source: https://download.01.org/opencv/public_models/022020/tiny_yolo_v1/saved_model.pb
@@ -27,6 +27,6 @@ model_optimizer_args:
   - --scale_values=input_1[255]
   - --reverse_input_channels
   - --transformations_config=$mo_dir/extensions/front/tf/yolo_v2_tiny_voc.json
-  - --input_model=$dl_dir/yolo-v1-tiny.pb
+  - --input_model=$dl_dir/yolo-tiny-v1.pb
 framework: tf
 license: https://raw.githubusercontent.com/shaqian/tfjs-yolo/master/LICENSE

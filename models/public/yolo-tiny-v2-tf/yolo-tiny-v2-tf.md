@@ -1,8 +1,8 @@
-# yolo-v1-tiny-tf
+# yolo-tiny-v2-tf
 
 ## Use Case and High-Level Description
 
-YOLO v1 Tiny is a real-time object detection model from TensorFlow.js\* framework. This model was pretrained on VOC\* dataset with 20 classes.
+YOLO v2 Tiny is a real-time object detection model from TensorFlow.js\* framework. This model was pretrained on COCO\* dataset with 80 classes.
 
 ## Conversion
 
@@ -12,8 +12,8 @@ YOLO v1 Tiny is a real-time object detection model from TensorFlow.js\* framewor
     keras
     tensorflowjs
     ```
-1. Download model from [here](https://github.com/shaqian/tfjs-yolo-demo/tree/master/dist/model/v1tiny) (tested on `aa4354c` commit).
-2. Convert model to Keras\* format using `tensorflowjs_converter` script, e.g.:
+1. Download the model from [here](https://github.com/shaqian/tfjs-yolo-demo/tree/master/dist/model/v2tiny) (tested on `aa4354c` commit).
+2. Convert the model to Keras\* format using `tensorflowjs_converter` script, e.g.:
     ```
     tensorflowjs_converter --input_format tfjs_layers_model --output_format keras <model_in>.json <model_out>.h5
     ```
@@ -36,23 +36,23 @@ YOLO v1 Tiny is a real-time object detection model from TensorFlow.js\* framewor
         python keras_to_tensorflow.py --input_model=<model_in>.h5 --output_model=<model_out>.pb
         ```
 
-
 ## Specification
 
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Detection     |
-| GFLOPs            | 6.988         |
-| MParams           | 15.858        |
+| GFLOPs            | 5.424         |
+| MParams           | 11.229        |
 | Source framework  | TensorFlow.js\*  |
 
 ## Accuracy
 
-Accuracy metric obtained on VOC2012\* validation dataset for converted model.
+Accuracy metrics obtained on COCO\* validation dataset for converted model.
 
 | Metric | Value |
 | ------ | ------|
-| mAP    | 72.16 |
+| mAP    | 27.34 |
+| [COCO\* mAP](http://cocodataset.org/#detection-eval) | 29.11 |
 
 ## Input
 
@@ -83,33 +83,33 @@ Channel order is `BGR`.
 
 ### Original model
 
-The array of detection summary info, name - `conv2d_9/BiasAdd`,  shape - `1,13,13,125`, format is `B,Cx,Cy,N*25` where
+The array of detection summary info, name - `conv2d_9/BiasAdd`,  shape - `1,13,13,425`, format is `B,Cx,Cy,N*85` where
 - `B` - batch size
-- `N` - number of detection boxes for cell
 - `Cx`, `Cy` - cell index
+- `N` - number of detection boxes for cell
 
-Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_20`], where:
+Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_80`], where:
 - (`x`,`y`) - coordinates of box center, relative to cell
 - `h`,`w` - normalized height and width of box
 - `conf` - confidence of detection box
-- `class_no_1`,...,`class_no_20` - score for each class in logits format
+- `class_no_1`,...,`class_no_80` - score for each class in logits format
 
-The anchor values are `1.08,1.19, 3.42,4.41, 6.63,11.38, 9.42,5.11, 16.62,10.52`.
+The anchor values are `0.57273,0.677385, 1.87446,2.06253, 3.33843,5.47434, 7.88282,3.52778, 9.77052,9.16828`.
 
 ### Converted model
 
-The array of detection summary info, name - `conv2d_9/BiasAdd/YoloRegion`,  shape - `1,21125`, which could be reshaped to `1, 125, 13, 13`, format is `B,N*25,Cx,Cy` where
+The array of detection summary info, name - `conv2d_9/BiasAdd/YoloRegion`,  shape - `1,71825`, which could be reshaped to `1, 425, 13, 13` with format `B,N*85,Cx,Cy` where
 - `B` - batch size
 - `N` - number of detection boxes for cell
 - `Cx`, `Cy` - cell index
 
-Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_20`], where:
+Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class_no_1`, ..., `class_no_80`], where:
 - (`x`,`y`) - coordinates of box center, relative to cell
 - `h`,`w` - normalized height and width of box
 - `conf` - confidence of detection box
-- `class_no_1`,...,`class_no_20` - score for each class in the [0,1] range
+- `class_no_1`,...,`class_no_80` - score for each class in the [0,1] range
 
-The anchor values are `1.08,1.19, 3.42,4.41, 6.63,11.38, 9.42,5.11, 16.62,10.52`.
+The anchor values are `0.57273,0.677385, 1.87446,2.06253, 3.33843,5.47434, 7.88282,3.52778, 9.77052,9.16828`.
 
 ## Legal Information
 

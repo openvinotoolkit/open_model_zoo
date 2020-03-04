@@ -1,32 +1,26 @@
 models:
-  - name: yolo-v1-tiny-tf
+  - name: yolo-tiny-v2-tf
 
     launchers:
       - framework: tf
         tags:
           - FP32
-        model: public/yolo-v1-tiny-tf/yolo-v1-tiny.pb
-        inputs:
-          - name: 'input_1'
-            type: INPUT
-            shape: 1,416,416,3
-        output_names: [conv2d_9/BiasAdd]
+        model:   public/yolo-tiny-v2-tf/yolo-tiny-v2.pb
         adapter:
             type: yolo_v2
-            anchors: "1.08,1.19, 3.42,4.41, 6.63,11.38, 9.42,5.11, 16.62,10.52"
+            anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
             num: 5
             coords: 4
-            classes: 20
+            classes: 80
             raw_output: True
 
     datasets:
-      - name: VOC2012_without_background
+      - name: ms_coco_detection_80_class_without_backgound
 
         preprocessing:
           - type: bgr_to_rgb
           - type: normalization
-            std: 255
-
+            std: 255.0
           - type: resize
             size: 416
 
@@ -44,38 +38,41 @@ models:
         metrics:
           - type: map
             integral: 11point
-            ignore_difficult: true
+            ignore_difficult: False
             presenter: print_scalar
+          - type: coco_precision
+            max_detections: 100
+            threshold: 0.5
 
-  - name: yolo-v1-tiny-tf
+  - name: yolo-tiny-v2-tf
 
     launchers:
       - framework: dlsdk
         tags:
           - FP32
-        model:   public/yolo-v1-tiny-tf/FP32/yolo-v1-tiny-tf.xml
-        weights: public/yolo-v1-tiny-tf/FP32/yolo-v1-tiny-tf.bin
+        model:   public/yolo-tiny-v2-tf/FP32/yolo-tiny-v2-tf.xml
+        weights: public/yolo-tiny-v2-tf/FP32/yolo-tiny-v2-tf.bin
         adapter:
             type: yolo_v2
-            anchors: "1.08,1.19, 3.42,4.41, 6.63,11.38, 9.42,5.11, 16.62,10.52"
+            anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
             num: 5
             coords: 4
-            classes: 20
+            classes: 80
 
       - framework: dlsdk
         tags:
           - FP16
-        model:   public/yolo-v1-tiny-tf/FP16/yolo-v1-tiny-tf.xml
-        weights: public/yolo-v1-tiny-tf/FP16/yolo-v1-tiny-tf.bin
+        model:   public/yolo-tiny-v2-tf/FP16/yolo-tiny-v2-tf.xml
+        weights: public/yolo-tiny-v2-tf/FP16/yolo-tiny-v2-tf.bin
         adapter:
             type: yolo_v2
-            anchors: "1.08,1.19, 3.42,4.41, 6.63,11.38, 9.42,5.11, 16.62,10.52"
+            anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
             num: 5
             coords: 4
-            classes: 20
+            classes: 80
 
     datasets:
-      - name: VOC2012_without_background
+      - name: ms_coco_detection_80_class_without_backgound
 
         preprocessing:
           - type: resize
@@ -95,7 +92,10 @@ models:
         metrics:
           - type: map
             integral: 11point
-            ignore_difficult: true
+            ignore_difficult: False
             presenter: print_scalar
+          - type: coco_precision
+            max_detections: 100
+            threshold: 0.5
 
-global_definitions: ../datasets_definitions.yml
+global_definitions: ../dataset_definitions.yml

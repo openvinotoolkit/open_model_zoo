@@ -345,7 +345,7 @@ def main():
 
         if not args.no_show:
             key = cv2.waitKey(wait_key_code)
-    
+
             # ESC key
             if key == 27:
                 break

@@ -1,5 +1,5 @@
 # This file can be used with the --list option of the model downloader.
-yolo-v1-tiny-tf
-yolo-v2-tiny-tf
+yolo-tiny-v1-tf
+yolo-tiny-v2-tf
 yolo-v2-tf
 yolo-v3-tf
