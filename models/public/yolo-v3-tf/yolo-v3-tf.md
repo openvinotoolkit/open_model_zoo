@@ -6,9 +6,27 @@ YOLO v3 is a real-time object detection model implemented with Keras\* from this
 
 ## Conversion
 
-1. Download or clone the official [repository](https://github.com/david8862/keras-YOLOv3-model-set).
+1. Download or clone the official [repository](https://github.com/david8862/keras-YOLOv3-model-set) (tested on `ffede5` commit).
 2. Follow the instructions in README.md file in that repository to get original model and convert it to Keras\* format.
 3. Convert the produced model to protobuf format.
+
+    1. Get conversion script from [repository](https://github.com/amir-abdi/keras_to_tensorflow):
+        ```buildoutcfg
+        git clone https://github.com/amir-abdi/keras_to_tensorflow
+        ```
+    1. (Optional) Checkout the commit that the conversion was tested on:
+        ```
+        git checkout c841508a88faa5aa1ffc7a4947c3809ea4ec1228
+        ```
+    1. Apply `keras_to_tensorflow.py.patch`:
+        ```
+        git apply keras_to_tensorflow.py.patch
+        ```
+    1. Run script:
+        ```
+        python keras_to_tensorflow.py --input_model=<model_in>.h5 --output_model=<model_out>.pb
+        ```
+
 
 ## Specification
 

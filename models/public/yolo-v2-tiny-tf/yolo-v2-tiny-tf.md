@@ -12,12 +12,29 @@ YOLO v2 Tiny is a real-time object detection model from TensorFlow.js\* framewor
     keras
     tensorflowjs
     ```
-1. Download the model from [here](https://github.com/shaqian/tfjs-yolo-demo/tree/master/dist/model/v2tiny).
+1. Download the model from [here](https://github.com/shaqian/tfjs-yolo-demo/tree/master/dist/model/v2tiny) (tested on `aa4354c` commit).
 2. Convert the model to Keras\* format using `tensorflowjs_converter` script, e.g.:
     ```
     tensorflowjs_converter --input_format tfjs_layers_model --output_format keras <model_in>.json <model_out>.h5
     ```
 3. Convert the produced model to protobuf format.
+
+    1. Get conversion script from [repository](https://github.com/amir-abdi/keras_to_tensorflow):
+        ```buildoutcfg
+        git clone https://github.com/amir-abdi/keras_to_tensorflow
+        ```
+    1. (Optional) Checkout the commit that the conversion was tested on:
+        ```
+        git checkout c841508a88faa5aa1ffc7a4947c3809ea4ec1228
+        ```
+    1. Apply `keras_to_tensorflow.py.patch`:
+        ```
+        git apply keras_to_tensorflow.py.patch
+        ```
+    1. Run script:
+        ```
+        python keras_to_tensorflow.py --input_model=<model_in>.h5 --output_model=<model_out>.pb
+        ```
 
 ## Specification
 
