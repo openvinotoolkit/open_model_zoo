@@ -43,8 +43,6 @@ def build_argparser():
                            "value is CPU")
     args.add_argument("-ni", "--number_iter", type=int, default=1,
                       help="Optional. Number of inference iterations")
-    args.add_argument("-lang", "--lang", type=str, default='jp',
-                      help="Language supported, default value is Japanese")
     args.add_argument("-b", "--batchsize", default=1, type=int, help="Batch size for inference")
     args.add_argument("-cl", "--charlist", type=str, default="./kondate_char_list.txt", help="Path to the decoding char list file")
     return parser
@@ -53,16 +51,10 @@ def build_argparser():
 def get_characters(args):
     '''Get characters'''
     characters = ''
-    chrs_list_file = ''
-    if args.lang == 'jp':
-        chrs_list_file = args.charlist
-        with open(chrs_list_file, 'r') as f:
-            for line in f.readlines():
-                line = line.strip('\n')
-                characters += line
-    else:
-        print("Error! %s language is not supported"% args.lang)
-        sys.exit(0)
+    with open(args.charlist, 'r', encoding='utf-8') as f:
+        for line in f.readlines():
+            line = line.strip('\n')
+            characters += line
     return characters
 
 
