@@ -75,8 +75,6 @@ def preprocess_input(image_name, height=96, width=2000):
     tw = int(th * ratio)
     rsz = cv2.resize(src, (tw, th), interpolation=cv2.INTER_AREA).astype(np.float32)
 
-    # Normalize the image to [-1, 1]
-    rsz = (rsz - 127.5) / 127.5
     # [h,w] -> [c,h,w]
     img = rsz[None, :, :]
     c, h, w = img.shape
