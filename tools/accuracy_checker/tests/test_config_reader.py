@@ -41,8 +41,8 @@ class TestConfigReader:
         self.global_datasets = [
             {
                 'name': 'global_dataset',
-                'annotation': Path('/pascal_voc_2007_annotation.pickle'),
-                'data_source': Path('/VOCdevkit/VOC2007/JPEGImages'),
+                'annotation': Path('/pascal_voc_2007_annotation.pickle').absolute(),
+                'data_source': Path('/VOCdevkit/VOC2007/JPEGImages').absolute(),
                 'preprocessing': [
                     {
                         'type': 'resize',
@@ -357,10 +357,10 @@ class TestConfigReader:
         local_config = {'models': [{
             'name': 'model',
             'launchers': [{'framework': 'dlsdk', 'model': Path('/absolute_path').absolute(), 'weights': Path('/absolute_path').absolute()}],
-            'datasets': [{'name': 'global_dataset', 'dataset_meta': '/absolute_path'}]
+            'datasets': [{'name': 'global_dataset', 'dataset_meta': Path('/absolute_path').absolute()}]
         }]}
         expected = self.global_datasets[0]
-        expected['dataset_meta'] = Path('/absolute_path')
+        expected['dataset_meta'] = Path('/absolute_path').absolute()
         mocker.patch(self.module + '._read_configs', return_value=(
             self.global_config, local_config
         ))
@@ -503,7 +503,11 @@ class TestConfigReader:
                 'segmentation_masks_source': 'relative_source_path',
                 'annotation': 'relative_annotation_path'
             }
-        launcher_config = {'framework': 'dlsdk', 'model': Path('/absolute_path').absolute(), 'weights': '/absolute_path'}
+        launcher_config = {
+            'framework': 'dlsdk',
+            'model': Path('/absolute_path').absolute(),
+            'weights': Path('/absolute_path').absolute(),
+        }
         pipelines_config = [
             {
                 'name': 'pipeline', 'device_info': [{'framework': 'caffe', 'device': 'CPU'}],
@@ -537,11 +541,15 @@ class TestConfigReader:
     def test_not_modify_absolute_paths_in_pipeline_stage_dataset_config_using_command_line(self, mocker):
         dataset_config = {
             'name': 'global_dataset',
-            'dataset_meta': '/absolute_annotation_meta_path',
-            'data_source': '/absolute_source_path',
-            'annotation': '/absolute_annotation_path'
+            'dataset_meta': Path('/absolute_annotation_meta_path').absolute(),
+            'data_source': Path('/absolute_source_path').absolute(),
+            'annotation': Path('/absolute_annotation_path').absolute()
         }
-        launcher_config = {'framework': 'dlsdk', 'model': '/absolute_path', 'weights': '/absolute_path'}
+        launcher_config = {
+            'framework': 'dlsdk',
+            'model': Path('/absolute_path').absolute(),
+            'weights': Path('/absolute_path').absolute(),
+        }
         pipelines_config = [
             {
                 'name': 'pipeline', 'device_info': [{'device': 'CPU'}],
@@ -557,9 +565,9 @@ class TestConfigReader:
         ))
 
         expected = copy.deepcopy(dataset_config)
-        expected['annotation'] = Path('/absolute_annotation_path')
-        expected['dataset_meta'] = Path('/absolute_annotation_meta_path')
-        expected['data_source'] = Path('/absolute_source_path')
+        expected['annotation'] = Path('/absolute_annotation_path').absolute()
+        expected['dataset_meta'] = Path('/absolute_annotation_meta_path').absolute()
+        expected['data_source'] = Path('/absolute_source_path').absolute()
         arguments = copy.deepcopy(self.arguments)
         arguments.bitstreams = None
         arguments.extensions = None
