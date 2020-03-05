@@ -198,7 +198,7 @@ def set_path_to_tf_custom_operation_configs(
     if tf_custom_op_config_dir:
         prefix_dir = Path(tf_custom_op_config_dir)
     else:
-        prefix_dir = Path('/').joinpath(*mo_path.parts[:-1]) / 'extensions' / 'front' / 'tf'
+        prefix_dir = mo_path.parent / 'extensions' / 'front' / 'tf'
 
     config_path = Path(tf_custom_op_config_path)
     if not config_path.is_absolute():
@@ -216,7 +216,7 @@ def set_path_to_transformation_configs(mo_params, framework, transformation_conf
     if transformation_config_dir:
         prefix_dir = Path(transformation_config_dir)
     else:
-        prefix_dir = Path('/').joinpath(*mo_path.parts[:-1]) / 'extensions' / 'front' / framework.name
+        prefix_dir = mo_path.parent / 'extensions' / 'front' / framework.name
     config_path = Path(transformation_config_path)
     if not config_path.is_absolute():
         config_path = prefix_dir / config_path
