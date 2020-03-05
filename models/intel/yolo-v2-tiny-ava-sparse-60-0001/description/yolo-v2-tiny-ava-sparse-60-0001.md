@@ -1,4 +1,4 @@
-# yolo-tiny-v2-ava-sparse-60-0001
+# yolo-v2-tiny-ava-sparse-60-0001
 
 ## Use Case and High-Level Description
 
