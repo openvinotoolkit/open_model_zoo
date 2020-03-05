@@ -24,7 +24,7 @@ models:
         adapter: reid
 
     datasets:
-      - name: globalme-reid
+      - name: reid_dataset
 
         preprocessing:
           - type: resize

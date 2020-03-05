@@ -428,12 +428,9 @@ datasets:
       data_dir: Market-1501-v15.09.15
     annotation: market1501_reid.pickle
 
-  - name: globalme-reid
-    data_source: GlobalMe-reID
-    annotation_conversion:
-      converter: market1501_reid
-      data_dir: globalme-reid/GlobalMe-reID
-    annotation: globalme-reid.pickle
+  - name: reid_dataset
+    data_source: reid
+    annotation: reid.pickle
 
   - name: vgg2face
     data_source: VGGFaces2/test
