@@ -167,7 +167,6 @@ class CTCGreedySearchDecoder(Adapter):
 
         result = []
         for identifier, data in zip(identifiers, preds_index):
-            data = data[None, :]
             seq = self.decode(data, self.blank_label)
             decoded = ''.join(str(self.label_map[char]) for char in seq)
             result.append(CharacterRecognitionPrediction(identifier, decoded))
@@ -175,35 +174,21 @@ class CTCGreedySearchDecoder(Adapter):
         return result
 
     @staticmethod
-    def decode(probabilities, blank_id=None):
+    def decode(probabilities_index, blank_id):
         """
          Decode given output probabilities to sequence of labels.
         Arguments:
-            probabilities: The output log probabilities for each time step.
+            probabilities_index: The max index along the probabilities dimension.
             blank_id (int): Index of the CTC blank label.
         Returns the output label sequence.
         """
-        preds_sizes = np.array([probabilities.shape[1]] * probabilities.shape[0])
-        preds_index = probabilities.reshape(-1)
-
-        text_index = preds_index
-        length = preds_sizes
-
-        char_list = []
-        index = 0
-        for l in length:
-            t = text_index[index:index + l]
-
-            # NOTE: t might be zero size
-            if t.shape[0] == 0:
-                continue
-
-            for i in range(l):
-                # removing repeated characters and blank.
-                if t[i] != blank_id and (not (i > blank_id and t[i - 1] == t[i])):
-                    char_list.append(t[i])
-            index += l
-        return char_list
+        index_length = probabilities_index.shape[0]
+        selected_index = []
+        for i in range(index_length):
+            # removing repeated characters and blank.
+            if probabilities_index[i] != blank_id and (not (i > blank_id and probabilities_index[i - 1] == probabilities_index[i])):
+                selected_index.append(probabilities_index[i])
+        return selected_index
 
 
 class LPRAdapter(Adapter):
