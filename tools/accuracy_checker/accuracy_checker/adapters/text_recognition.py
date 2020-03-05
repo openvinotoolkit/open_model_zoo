@@ -174,21 +174,20 @@ class CTCGreedySearchDecoder(Adapter):
         return result
 
     @staticmethod
-    def decode(probabilities_index, blank_id):
+    def decode(prob_index, blank_id):
         """
          Decode given output probabilities to sequence of labels.
         Arguments:
-            probabilities_index: The max index along the probabilities dimension.
+            prob_index: The max index along the probabilities dimension.
             blank_id (int): Index of the CTC blank label.
         Returns the output label sequence.
         """
-        index_length = probabilities_index.shape[0]
+        index_length = prob_index.shape[0]
         selected_index = []
         for i in range(index_length):
             # removing repeated characters and blank.
-            if probabilities_index[i] != blank_id and\
-                (not (i > blank_id and probabilities_index[i - 1] == probabilities_index[i])):
-                selected_index.append(probabilities_index[i])
+            if prob_index[i] != blank_id and (not (i > blank_id and prob_index[i - 1] == prob_index[i])):
+                selected_index.append(prob_index[i])
         return selected_index
 
 
