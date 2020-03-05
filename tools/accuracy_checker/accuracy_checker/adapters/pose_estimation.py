@@ -409,6 +409,7 @@ class SingleHumanPoseAdapter(Adapter):
 
         return result
 
+
     @staticmethod
     def extract_keypoints(heatmap, min_confidence=-100):
         ind = np.unravel_index(np.argmax(heatmap, axis=None), heatmap.shape)
@@ -417,6 +418,7 @@ class SingleHumanPoseAdapter(Adapter):
         else:
             ind = (int(ind[1]), int(ind[0]))
         return heatmap[ind[1]][ind[0]], ind
+
 
     @staticmethod
     def affine_transform(pt, t):
