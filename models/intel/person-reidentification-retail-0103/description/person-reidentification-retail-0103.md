@@ -16,8 +16,8 @@ feature map outputs an embedding vector of 256 floats.
 
 | Metric                            | Value                                     |
 |-----------------------------------|-------------------------------------------|
-| GlobalMe-reID rank@1 accuracy     | 93.5%                                     |
-| GlobalMe-reID mAP                 | 69.5%                                     |
+| Internal-reID-test rank@1 accuracy| 93.5%                                     |
+| Internal-reID-test mAP            | 69.5%                                     |
 | Pose coverage                     | Standing upright, parallel to image plane |
 | Support of occluded pedestrians   | YES                                       |
 | Occlusion coverage                | <50%                                      |
