@@ -186,7 +186,7 @@ class CTCGreedySearchDecoder(Adapter):
         selected_index = []
         for i in range(index_length):
             # removing repeated characters and blank.
-            if probabilities_index[i] != blank_id and \
+            if probabilities_index[i] != blank_id and\
                 (not (i > blank_id and probabilities_index[i - 1] == probabilities_index[i])):
                 selected_index.append(probabilities_index[i])
         return selected_index
