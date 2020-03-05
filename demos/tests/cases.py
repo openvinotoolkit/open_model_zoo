@@ -377,6 +377,16 @@ PYTHON_DEMOS = [
             ModelArg('vehicle-license-plate-detection-barrier-0106')),
     )),
 
+    PythonDemo(subdirectory='object_detection_demo_yolov3_async', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            '-i': DataPatternArg('object-detection-demo-ssd-async')}),
+        single_option_cases('-m',
+            ModelArg('yolo-v1-tiny-tf'),
+            ModelArg('yolo-v2-tiny-tf'),
+            ModelArg('yolo-v2-tf'),
+            ModelArg('yolo-v3-tf')),
+    )),
+    
     PythonDemo(subdirectory='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         [
             TestCase(options={
@@ -390,7 +400,7 @@ PYTHON_DEMOS = [
         ],
     )),
 
-    PythonDemo(subdirectory='text_detection_demo_opencv', device_keys=[] test_cases=combine_cases(
+    PythonDemo(subdirectory='text_detection_demo_opencv', device_keys=[], test_cases=combine_cases(
         device_cases('-d'),
         [
             TestCase(options={
