@@ -167,6 +167,7 @@ Deep Learning models for text recognition in various applications.
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [text-recognition-0012](./text-recognition-0012/description/text-recognition-0012.md)                                                          | 1.485                | 5.568      |
 | [handwritten-score-recognition-0003](./handwritten-score-recognition-0003/description/handwritten-score-recognition-0003.md)                   | 0.792                | 5.555      |
+| [handwritten-janapese-recognition-0001](./handwritten-japanese-recognition-0001/description/handwritten-japanese-recognition-0001.md)          | 117.136              | 15.31      |
 
 ## Text Spotting
 
