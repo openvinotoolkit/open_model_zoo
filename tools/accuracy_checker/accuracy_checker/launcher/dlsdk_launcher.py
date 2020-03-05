@@ -231,7 +231,8 @@ class DLSDKLauncher(Launcher):
                 optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
             ),
             '_prev_bitstream': PathField(optional=True, description="path to bitstream from previous run (FPGA only)"),
-            '_device_config': PathField(optional=True, description='path to file with device configuration')
+            '_device_config': PathField(optional=True, description='path to file with device configuration'),
+            '_model_is_blob': BoolField(optional=True, description='hint for auto model search')
         })
 
         return parameters
@@ -356,36 +357,38 @@ class DLSDKLauncher(Launcher):
             layers[layer_name].affinity = device
 
     def automatic_model_search(self):
+        def get_xml(model_dir):
+            models_list = list(model_dir.glob('{}.xml'.format(self._model_name)))
+            if not models_list:
+                models_list = list(model_dir.glob('*.xml'))
+            return models_list
+
+        def get_blob(model_dir):
+            blobs_list = list(Path(model_dir).glob('{}.blob'.format(self._model_name)))
+            if not blobs_list:
+                blobs_list = list(Path(model_dir).glob('*.blob'))
+            return blobs_list
+
         def get_model():
-            is_blob = False
             model = Path(self.get_value_from_config('model'))
+            model_is_blob = self.get_value_from_config('_model_is_blob')
             if not model.is_dir():
                 if model.suffix == '.blob':
                     return model, True
                 return model, False
-            models_list = list(model.glob('{}.xml'.format(self._model_name)))
-            blobs_list = list(Path(model).glob('{}.blob'.format(self._model_name)))
-            if models_list:
-                model = models_list[0]
-            elif blobs_list:
-                model = blobs_list[0]
-                is_blob = True
+            if model_is_blob:
+                model_list = get_blob(model)
             else:
-                models_list = list(model.glob('*.xml'))
-                blobs_list = list(Path(model).glob('*.blob'))
-                if not models_list and not blobs_list:
-                    raise ConfigError('suitable model is not found')
-                if models_list:
-                    if len(models_list) != 1:
-                        raise ConfigError('More than one model matched, please specify explicitly')
-                    model = models_list[0]
-                elif blobs_list:
-                    if len(blobs_list) != 1:
-                        raise ConfigError('More than one compiled network matched, please specify explicitly')
-                    model = blobs_list[0]
-                    is_blob = True
+                model_list = get_xml(model)
+                if not model_list and model_is_blob is None:
+                    model_list = get_blob(model)
+            if not model_list:
+                raise ConfigError('suitable model is not found')
+            if len(model_list) != 1:
+                raise ConfigError('More than one model matched, please specify explicitly')
+            model = model_list[0]
             print_info('Found model {}'.format(model))
-            return model, is_blob
+            return model, model.suffix == '.blob'
 
         model, is_blob = get_model()
         if is_blob:

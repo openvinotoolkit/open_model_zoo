@@ -52,7 +52,9 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
         preprocessing = PreprocessingExecutor(dataset_config.get('preprocessing', []), dataset.name)
         metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
         launcher = create_launcher(config['launchers'][0], delayed_model_loading=True)
-        model = SequentialModel(config.get('network_info', {}), launcher, config.get('_models', []))
+        model = SequentialModel(
+            config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob')
+        )
         return cls(dataset, reader, preprocessing, metrics_executor, launcher, model)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, ** kwargs):
@@ -179,15 +181,17 @@ def create_decoder(model_config, launcher):
 
 
 class SequentialModel(BaseModel):
-    def __init__(self, network_info, launcher, models_args):
+    def __init__(self, network_info, launcher, models_args, is_blob):
         super().__init__(network_info, launcher)
         if models_args:
             encoder = network_info.get('encoder', {})
             decoder = network_info.get('decoder', {})
             if not contains_any(encoder, ['model', 'onnx_model']) and models_args:
                 encoder['model'] = models_args[0]
+                encoder['_model_is_blob'] = is_blob
             if not contains_any(decoder, ['model', 'onnx_model']) and models_args:
                 decoder['model'] = models_args[1 if len(models_args) > 1 else 0]
+                decoder['_model_is_blob'] = is_blob
             network_info.update({'encoder': encoder, 'decoder': decoder})
         if not contains_all(network_info, ['encoder', 'decoder']):
             raise ConfigError('network_info should contains encoder and decoder fields')
@@ -264,14 +268,19 @@ class EncoderDLSDKModel(BaseModel):
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
         if model.is_dir():
-            model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
-            blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
-            if not model_list:
-                model_list = blob_list or list(model.glob('*.xml'))
-                if not blob_list:
-                    blob_list = list(model.glob('*.blob'))
+            is_blob = network_info.get('_model_is_blob')
+            if is_blob:
+                model_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
                 if not model_list:
-                    model_list = blob_list
+                    model_list = list(model.glob('*.blob'))
+            else:
+                model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
+                blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
+                if not model_list and not blob_list:
+                    model_list = list(model.glob('*.xml'.format(self.default_model_suffix)))
+                    blob_list = list(model.glob('*.blob'.format(self.default_model_suffix)))
+                    if not model_list:
+                        model_list = blob_list
             if not model_list:
                 raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
             if len(model_list) > 1:
@@ -325,13 +334,18 @@ class DecoderDLSDKModel(BaseModel):
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
         if model.is_dir():
-            model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
-            blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
-            if not model_list:
-                model_list = blob_list or list(model.glob('*.xml'))
-                if not blob_list:
-                    blob_list = list(model.glob('*.blob'))
+            is_blob = network_info.get('_model_is_blob')
+            if is_blob:
+                model_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
                 if not model_list:
+                    model_list = list(model.glob('*.blob'))
+            else:
+                model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
+                blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
+                if not model_list and not blob_list:
+                    model_list = list(model.glob('*.xml'.format(self.default_model_suffix)))
+                    blob_list = list(model.glob('*.blob'.format(self.default_model_suffix)))
+                if not model_list and is_blob is None:
                     model_list = blob_list
             if not model_list:
                 raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
@@ -341,7 +355,6 @@ class DecoderDLSDKModel(BaseModel):
         if model.suffix == '.blob':
             return model, None
         weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
-
         return model, weights
 
 
