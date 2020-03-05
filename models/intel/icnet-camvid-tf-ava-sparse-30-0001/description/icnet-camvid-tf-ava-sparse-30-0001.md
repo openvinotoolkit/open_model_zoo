@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-A trained model of ICNet for fast semantic segmentation, trained on the CamVid dataset from scratch using the TensorFlow framework. The trained model has 30% sparsity (ratio of 0's within all the covolution kernel weights). For more details about the original floating point model, check out the [paper](https://arxiv.org/abs/1704.08545).
+A trained model of ICNet for fast semantic segmentation, trained on the CamVid\* dataset from scratch using the TensorFlow\* framework. The trained model has 30% sparsity (ratio of 0's within all the convolution kernel weights). For more details about the original floating point model, check out the [paper](https://arxiv.org/abs/1704.08545).
 
 The model input is a blob that consists of a single image of "1x3x720x960" in BGR order. The pixel values are integers in the [0, 255] range.
 
@@ -18,7 +18,7 @@ The model output for `icnet-camvid-tf-ava-0001` is the predicted class index of 
 
 ## Accuracy
 
-The quality metrics were calculated on the CamVid validation dataset. The 'unlabeled' class had been ignored during metrics calculation.
+The quality metrics were calculated on the CamVid\* validation dataset. The 'unlabeled' class had been ignored during metrics calculation.
 
 | Metric                    | Value         |
 |---------------------------|---------------|
@@ -41,11 +41,11 @@ Image, shape - `1,3,720,960`, format is `B,C,H,W` where:
 - `H` - height
 - `W` - width
 
-Channel order is `BGR`
+Channel order is `BGR`.
 
 ## Output
 
-Semantic segmentation class prediction map, shape -`1,720,960`, output data format is `B,H,W` where:
+Semantic segmentation class prediction map, shape - `1,720,960`, output data format is `B,H,W` where:
 
 - `B` - batch size
 - `H` - horizontal coordinate of the input pixel
