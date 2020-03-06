@@ -1,4 +1,4 @@
-# face-detection-0100
+# face-detection-0101
 
 ## Use Case and High-Level Description
 
@@ -7,15 +7,15 @@ multiple SSD head for indoor/outdoor scenes shot by a front-facing camera.
 
 ## Example
 
-![](./face-detection-0100.png)
+![](./face-detection-0101.png)
 
 ## Specification
 
 | Metric                                                        | Value                   |
 |---------------------------------------------------------------|-------------------------|
-| AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 86.66%                  |
-| GFlops                                                        | 0.786                   |
-| MParams                                                       | 1.828                   |
+| AP ([WIDER](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/)) | 88.47%                  |
+| GFlops                                                        | 0.994                   |
+| MParams                                                       | 1.831                   |
 | Source framework                                              | PyTorch*                |
 
 Average Precision (AP) is defined as an area under the
@@ -27,7 +27,7 @@ curve. All numbers were evaluated by taking into account only faces bigger than
 
 ## Inputs
 
-1. name: "input" , shape: [1x3x256x256] - An input image in the format [BxCxHxW],
+1. name: "input" , shape: [1x3x288x288] - An input image in the format [BxCxHxW],
    where:
 
     - B - batch size
