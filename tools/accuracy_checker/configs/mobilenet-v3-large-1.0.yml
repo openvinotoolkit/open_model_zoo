@@ -1,0 +1,44 @@
+models:
+  - name: MobileNet-v3-large-1.0
+
+    launchers:
+      - framework: tf
+        model: public/mobilenet-v3-large-1.0/v3-large_224_1.0_float/v3-large_224_1.0_float.pb
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1001_classes
+        preprocessing:
+        - type: bgr_to_rgb
+        - type: resize
+          size: 256
+        - type: crop
+          size: 224
+        - type: normalization
+          mean: 127.5
+          std: 127.5
+
+  - name: MobileNet-v3-large-1.0
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   public/mobilenet-v3-large-1.0/FP32/mobilenet-v3-large-1.0.xml
+        weights: public/mobilenet-v3-large-1.0/FP32/mobilenet-v3-large-1.0.bin
+        adapter: classification
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   public/mobilenet-v3-large-1.0/FP16/mobilenet-v3-large-1.0.xml
+        weights: public/mobilenet-v3-large-1.0/FP16/mobilenet-v3-large-1.0.bin
+        adapter: classification
+
+    datasets:
+      - name: imagenet_1001_classes
+        preprocessing:
+        - type: resize
+          size: 256
+        - type: crop
+          size: 224
+global_definitions: ../dataset_definitions.yml
