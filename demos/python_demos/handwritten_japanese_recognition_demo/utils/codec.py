@@ -1,9 +1,8 @@
-
 import numpy as np
+
 
 class CTCCodec(object):
     """ Convert between text-label and text-index """
-
     def __init__(self, characters):
         # characters (str): set of the possible characters.
         dict_character = list(characters)

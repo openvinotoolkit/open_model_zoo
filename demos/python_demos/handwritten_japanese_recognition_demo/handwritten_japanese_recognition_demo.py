@@ -24,6 +24,7 @@ import numpy as np
 from openvino.inference_engine import IENetwork, IECore
 from utils.codec import CTCCodec
 
+
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
@@ -113,4 +114,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
