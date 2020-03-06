@@ -11,6 +11,11 @@ The model input is a blob that consists of a single image of "1x3x384x384" in `R
 
 The model output is an inverse depth map that is defined up to an unknown scale factor.
 
+> **NOTE**: Originally the model weights are stored at [Google Drive](https://drive.google.com/file/d/1nqW_Hwj86kslfsXR7EnXpEWdO2csz1cC),
+which is unstable to download from due to weights size. Weights were additionally uploaded to
+[https://download.01.org/opencv/public_models](https://download.01.org/opencv/public_models),
+OpenVINO [Model Downloader](../../../tools/downloader/README.md) uses this location for downloading.
+
 ## Example
 
 See [here](https://github.com/intel-isl/MiDaS)
