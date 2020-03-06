@@ -76,6 +76,66 @@ def entry_index(w, h, n_coords, n_classes, pos, entry):
     return row * w * h * (n_classes + n_coords + 1) + entry * w * h + col
 
 
+def parse_output(predictions, anchors, cells, num, box_size, raw_output, w=None, h=None):
+    def get_cell_bbox(prediction, i, j, n):
+        #box_size = self.coords + 1 + self.classes
+        if prediction.shape[0] == prediction.shape[1]:
+            return prediction[i, j, n*box_size:(n + 1)*box_size]
+        else:
+            return prediction[n*box_size:(n + 1)*box_size, i, j]
+
+    def sigmoid(x):
+        return 1.0 / (1.0 + np.exp(-x))
+
+    cells_x, cells_y = cells, cells
+
+    width_normalizer, height_normalizer = (w, h) if w and h else (cells, cells)
+
+    labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []
+
+    for x, y, n in np.ndindex((cells_x, cells_y, num)):
+        bbox = get_cell_bbox(predictions, y, x, n)
+
+        scale = bbox[4]
+
+        classes_prob = bbox[5:]
+
+        if raw_output:
+            box = [
+                (x + sigmoid(bbox[0])) / cells_x,
+                (y + sigmoid(bbox[1])) / cells_y,
+                np.exp(bbox[2]) * anchors[2 * n + 0] / width_normalizer,
+                np.exp(bbox[3]) * anchors[2 * n + 1] / height_normalizer
+            ]
+
+            classes_prob = sigmoid(classes_prob)
+            #classes_prob = np.exp(classes_prob) / np.sum(np.exp(classes_prob))
+            scale = sigmoid(scale)
+        else:
+            box = [
+                (x + bbox[0]) / cells_x,
+                (y + bbox[1]) / cells_y,
+                np.exp(bbox[2]) * anchors[2 * n + 0] / width_normalizer,
+                np.exp(bbox[3]) * anchors[2 * n + 1] / height_normalizer
+            ]
+
+        if scale < 0.001:
+            continue
+
+        classes_prob = classes_prob * scale
+
+        label = np.argmax(classes_prob)
+
+        labels.append(label)
+        scores.append(classes_prob[label])
+        x_mins.append(box[0] - box[2] / 2.0)
+        y_mins.append(box[1] - box[3] / 2.0)
+        x_maxs.append(box[0] + box[2] / 2.0)
+        y_maxs.append(box[1] + box[3] / 2.0)
+
+    return labels, scores, x_mins, y_mins, x_maxs, y_maxs
+
+
 class YoloV2Adapter(Adapter):
     """
     Class for converting output of YOLO v2 family models to DetectionPrediction representation
@@ -262,7 +322,11 @@ class YoloV3Adapter(Adapter):
                 description="The list of output layers names (optional),"
                             " if specified there should be exactly 3 output layers provided."
             ),
-            'anchor_masks': ListField(optional=True, description='per layer used anchors mask')
+            'anchor_masks': ListField(optional=True, description='per layer used anchors mask'),
+            'raw_output': BoolField(
+                optional=True, default=False,
+                description="Indicates, that output is in raw format"
+            )
         })
 
         return parameters
@@ -287,6 +351,7 @@ class YoloV3Adapter(Adapter):
                     layer_anchors += [self.anchors[idx * 2], self.anchors[idx * 2 + 1]]
                 per_layer_anchors.append(layer_anchors)
             self.masked_anchors = per_layer_anchors
+        self.raw_output = self.get_value_from_config('raw_output')
 
     def process(self, raw, identifiers=None, frame_meta=None):
         """
@@ -362,7 +427,21 @@ class YoloV3Adapter(Adapter):
             self.input_height = input_shape[2 if nchw_layout else 1]
 
             for layer_id, p in enumerate(prediction):
-                parse_yolo_v3_results(p, self.threshold, self.input_width, self.input_height, detections, layer_id)
+                #parse_yolo_v3_results(p, self.threshold, self.input_width, self.input_height, detections, layer_id)
+                anchors = self.masked_anchors[layer_id] if self.masked_anchors else self.anchors
+                num = len(anchors) // 2 if self.masked_anchors else self.num
+                cells = p.shape[1] if nchw_layout else p.shape[0]
+                labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, anchors, cells,
+                                                                              num,
+                                                                              self.classes + self.coords + 1,
+                                                                              self.raw_output,
+                                                                              self.input_width, self.input_height)
+                detections['labels'].extend(labels)
+                detections['scores'].extend(scores)
+                detections['x_mins'].extend(x_mins)
+                detections['y_mins'].extend(y_mins)
+                detections['x_maxs'].extend(x_maxs)
+                detections['y_maxs'].extend(y_maxs)
 
             result.append(DetectionPrediction(
                 identifier, detections['labels'], detections['scores'], detections['x_mins'], detections['y_mins'],
