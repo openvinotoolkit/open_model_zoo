@@ -62,10 +62,13 @@ class ColorizationEvaluator(BaseEvaluator):
         colorization_network = network_info.get('colorization_network', {})
         verification_network = network_info.get('verification_network', {})
         model_args = config.get('_models', [])
+        models_is_blob = config.get('_model_is_blob')
         if 'model' not in colorization_network and model_args:
             colorization_network['model'] = model_args[0]
+            colorization_network['_model_is_blob'] = models_is_blob
         if 'model' not in verification_network and model_args:
             verification_network['model'] = model_args[1 if len(model_args) > 1 else 0]
+            verification_network['_model_is_blob'] = models_is_blob
         network_info.update({
             'colorization_network': colorization_network,
             'verification_network': verification_network
@@ -160,11 +163,14 @@ class BaseModel:
     @staticmethod
     def auto_model_search(network_info):
         model = Path(network_info['model'])
+        is_blob = network_info.get('_model_is_blob')
         if model.is_dir():
-            model_list = list(model.glob('*.xml'))
-            blob_list = list(model.glob('*.blob'))
-            if not model_list:
-                model_list = blob_list
+            if is_blob:
+                model_list = list(model.glob('*.blob'))
+            else:
+                model_list = list(model.glob('*.xml'))
+                if not model_list and is_blob is None:
+                    model_list = list(model.glob('*.blob'))
             if not model_list:
                 raise ConfigError('Suitable model not found')
             if len(model_list) > 1:

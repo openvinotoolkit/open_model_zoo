@@ -393,6 +393,8 @@ class ConfigReader:
                     for model_path in model_paths:
                         copy_launcher = copy.deepcopy(launcher)
                         copy_launcher['model'] = model_path
+                        if launcher['framework'] == 'dlsdk' and 'model_is_blob' in arguments:
+                            copy_launcher['_model_is_blob'] = arguments.model_is_blob
                         updated_launchers.append(copy_launcher)
                 return updated_launchers
 
@@ -414,6 +416,8 @@ class ConfigReader:
                     continue
                 if 'models' in arguments and arguments.models:
                     module_config['_models'] = arguments.models
+                    if 'model_is_blob' in arguments:
+                        module_config['_model_is_blob'] = arguments.model_is_blob
                 if 'launchers' not in module_config:
                     continue
                 for launcher in module_config['launchers']:

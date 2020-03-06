@@ -230,6 +230,11 @@ def build_arguments_parser():
         help='file for results writing',
         required=False,
     )
+    parser.add_argument(
+        '--model_is_blob', help='the tip for automatic model search to use blob for dlsdk launcher',
+        required=False,
+        type=cast_to_bool
+    )
 
     return parser
 
