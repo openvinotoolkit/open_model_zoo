@@ -1,10 +1,10 @@
 
 # Handwritten Japanese Recognition Demo
-This example demonstrates an approach to recognize handwritten japanese text line using OpenVINO<sup>TM</sup>. This model supports all the characters in the [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) dataset.
+This example demonstrates an approach to recognize handwritten japanese text lines using OpenVINO™. This model supports all the characters in the [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) dataset.
 
 ## How It Works
 
-The demo expects the next model in the Intermediate Representation (IR) format:
+The demo expects the followings model in the Intermediate Representation (IR) format:
 
    * handwritten-japanese-recognition-0001
 
@@ -15,14 +15,12 @@ Please see more information about `Model downloader` [here](../../../tools/downl
 
 
 The demo workflow is the following:
-The demo firstly reads an image and perform the preprocessing such as resize, normalization and padding. Then after loading model to the IEPlugin, the inference will start. After decoding the returned indexes into chars, the demo will display the predicted text.
 
+The demo first reads an image and performs the preprocessing such as resize and padding. Then after loading model to the plugin, the inference will start. After decoding the returned indexes into chars, the demo will display the predicted text.
 
 ### Installation and dependencies
 
 The demo depends on:
-- OpenVINO library (2019R3.1 or newer)
-- Python (3.5+, which is supported by OpenVINO)
 - opencv-python
 - numpy
 
@@ -32,8 +30,6 @@ To install all the required Python modules you can use:
 pip install -r requirements.txt
 ```
 
-
-
 ### Command line arguments
 ```
 usage: handwritten_japanese_recognition_demo.py [-h] -m MODEL
@@ -41,7 +37,7 @@ usage: handwritten_japanese_recognition_demo.py [-h] -m MODEL
                                                 [-ih INPUT_HEIGHT]
                                                 [-iw INPUT_WIDTH] [-d DEVICE]
                                                 [-ni NUMBER_ITER]
-                                                [-b BATCHSIZE] [-cl CHARLIST]
+                                                [-cl CHARLIST]
 
 Options:
   -h, --help            Show this help message and exit.
@@ -60,8 +56,6 @@ Options:
                         specified. Default value is CPU
   -ni NUMBER_ITER, --number_iter NUMBER_ITER
                         Optional. Number of inference iterations
-  -b BATCHSIZE, --batchsize BATCHSIZE
-                        Batch size for inference
   -cl CHARLIST, --charlist CHARLIST
                         Path to the decoding char list file
 ```
@@ -73,7 +67,7 @@ python handwritten_japanese_recognition_demo.py -i data/test.png -m path/to/ir_x
 
 ```
 ## Demo Output
-The application use a terminal to show resulting recognition text and inference performance.
+The application uses the terminal to show resulting recognition text and inference performance.
 
 
 ## See Also
