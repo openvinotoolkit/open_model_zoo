@@ -43,7 +43,6 @@ curve. All numbers were evaluated by taking into account only faces bigger than
    bounding boxes. For each detection, the description has the format:
    [`x_min`, `y_min`, `x_max`, `y_max`, `conf`],
    where:
-    - `label` - predicted class ID
     - (`x_min`, `y_min`) - coordinates of the top left bounding box corner
     - (`x_max`, `y_max`) - coordinates of the bottom right bounding box corner.
     - `conf` - confidence for the predicted class
