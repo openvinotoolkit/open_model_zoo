@@ -90,6 +90,7 @@ FaceDetection::FaceDetection(const std::string &pathToModel,
     : BaseDetection("Face Detection", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
       detectionThreshold(detectionThreshold),
       maxProposalCount(0), objectSize(0), enquedFrames(0), width(0), height(0),
+      network_input_width(0), network_input_height(0),
       bb_enlarge_coefficient(bb_enlarge_coefficient), bb_dx_coefficient(bb_dx_coefficient),
       bb_dy_coefficient(bb_dy_coefficient), resultsFetched(false) {}
 
@@ -127,7 +128,6 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
     network.setBatchSize(maxBatch);
     // -----------------------------------------------------------------------------------------------------
 
-    /** SSD-based network should have one input and one output **/
     // ---------------------------Check inputs -------------------------------------------------------------
     slog::info << "Checking Face Detection network inputs" << slog::endl;
     InputsDataMap inputInfo(network.getInputsInfo());
@@ -136,27 +136,77 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
     }
     InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
     inputInfoFirst->setPrecision(Precision::U8);
+
+    const SizeVector inputDims = inputInfoFirst->getTensorDesc().getDims();
+    network_input_height = inputDims[2];
+    network_input_width = inputDims[3];
+
     // -----------------------------------------------------------------------------------------------------
 
     // ---------------------------Check outputs ------------------------------------------------------------
     slog::info << "Checking Face Detection network outputs" << slog::endl;
     OutputsDataMap outputInfo(network.getOutputsInfo());
-    if (outputInfo.size() != 1) {
-        throw std::logic_error("Face Detection network should have only one output");
+    if (outputInfo.size() == 1) {
+        DataPtr& _output = outputInfo.begin()->second;
+        output = outputInfo.begin()->first;
+
+        const SizeVector outputDims = _output->getTensorDesc().getDims();
+        maxProposalCount = outputDims[2];
+        objectSize = outputDims[3];
+        if (objectSize != 7) {
+            throw std::logic_error("Face Detection network output layer should have 7 as a last dimension");
+        }
+        if (outputDims.size() != 4) {
+            throw std::logic_error("Face Detection network output dimensions not compatible shoulld be 4, but was " +
+                                   std::to_string(outputDims.size()));
+
+        size_t num_classes = 0ul;
+
+        if (auto ngraphFunction = network.getFunction()) {
+            for (const auto & op : ngraphFunction->get_ops()) {
+                if (op->get_friendly_name() == output) {
+                    auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
+                    if (!detOutput) {
+                        THROW_IE_EXCEPTION << "Face Detection network output layer(" + op->get_friendly_name() +
+                            ") should be DetectionOutput, but was " +  op->get_type_info().name;
+                    }
+
+                    num_classes = detOutput->get_attrs().num_classes;
+                    break;
+                }
+            }
+        } else {
+            const CNNLayerPtr outputLayer = network.getLayerByName(output.c_str());
+            if (outputLayer->type != "DetectionOutput") {
+                throw std::logic_error("Face Detection network output layer(" + outputLayer->name +
+                                       ") should be DetectionOutput, but was " +  outputLayer->type);
+            }
+
+            if (outputLayer->params.find("num_classes") == outputLayer->params.end()) {
+                throw std::logic_error("Face Detection network output layer (" +
+                                       output + ") should have num_classes integer attribute");
+            }
+
+            num_classes = outputLayer->GetParamAsUInt("num_classes");
+        }
+        if (labels.size() != num_classes) {
+            if (labels.size() == (num_classes - 1))  // if network assumes default "background" class, which has no label
+                labels.insert(labels.begin(), "fake");
+            else
+                labels.clear();
+        }
+
+        _output->setPrecision(Precision::FP32);
+    } else {
+        for (const auto& outputLayer: outputInfo) {
+            const SizeVector outputDims = outputLayer.second->getTensorDesc().getDims();
+            if (outputDims.size() == 2 && outputDims[outputDims.size() - 1] == 5) {
+                output = outputLayer.first;
+                maxProposalCount = outputDims[0];
+                objectSize = outputDims[outputDims.size() - 1];
+            }
+        }
     }
-    DataPtr& _output = outputInfo.begin()->second;
-    output = outputInfo.begin()->first;
-    const SizeVector outputDims = _output->getTensorDesc().getDims();
-    maxProposalCount = outputDims[2];
-    objectSize = outputDims[3];
-    if (objectSize != 7) {
-        throw std::logic_error("Face Detection network output layer should have 7 as a last dimension");
-    }
-    if (outputDims.size() != 4) {
-        throw std::logic_error("Face Detection network output dimensions not compatible shoulld be 4, but was " +
-                               std::to_string(outputDims.size()));
-    }
-    _output->setPrecision(Precision::FP32);
 
     slog::info << "Loading Face Detection model to the " << deviceForInference << " device" << slog::endl;
     input = inputInfo.begin()->first;
@@ -170,7 +220,50 @@ void FaceDetection::fetchResults() {
     resultsFetched = true;
     const float *detections = request->GetBlob(output)->buffer().as<float *>();
 
-    for (int i = 0; i < maxProposalCount; i++) {
+    for (int i = 0; i < maxProposalCount && objectSize == 5; i++) {
+        Result r;
+        r.label = 1;
+        r.confidence = detections[i * objectSize + 4];
+
+        if (r.confidence <= detectionThreshold && !doRawOutputMessages) {
+            continue;
+        }
+
+        r.location.x = static_cast<int>(detections[i * objectSize + 0] / network_input_width * width);
+        r.location.y = static_cast<int>(detections[i * objectSize + 1] / network_input_height * height);
+        r.location.width = static_cast<int>(detections[i * objectSize + 2] / network_input_width * width - r.location.x);
+        r.location.height = static_cast<int>(detections[i * objectSize + 3] / network_input_height * height - r.location.y);
+
+        // Make square and enlarge face bounding box for more robust operation of face analytics networks
+        int bb_width = r.location.width;
+        int bb_height = r.location.height;
+
+        int bb_center_x = r.location.x + bb_width / 2;
+        int bb_center_y = r.location.y + bb_height / 2;
+
+        int max_of_sizes = std::max(bb_width, bb_height);
+
+        int bb_new_width = static_cast<int>(bb_enlarge_coefficient * max_of_sizes);
+        int bb_new_height = static_cast<int>(bb_enlarge_coefficient * max_of_sizes);
+
+        r.location.x = bb_center_x - static_cast<int>(std::floor(bb_dx_coefficient * bb_new_width / 2));
+        r.location.y = bb_center_y - static_cast<int>(std::floor(bb_dy_coefficient * bb_new_height / 2));
+
+        r.location.width = bb_new_width;
+        r.location.height = bb_new_height;
+
+        if (doRawOutputMessages) {
+            std::cout << "[" << i << "," << r.label << "] element, prob = " << r.confidence <<
+                         "    (" << r.location.x << "," << r.location.y << ")-(" << r.location.width << ","
+                      << r.location.height << ")"
+                      << ((r.confidence > detectionThreshold) ? " WILL BE RENDERED!" : "") << std::endl;
+        }
+        if (r.confidence > detectionThreshold) {
+            results.push_back(r);
+        }
+    }
+
+    for (int i = 0; i < maxProposalCount && objectSize == 7; i++) {
         float image_id = detections[i * objectSize + 0];
         if (image_id < 0) {
             break;
