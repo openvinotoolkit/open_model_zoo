@@ -302,7 +302,7 @@ int main(int argc, char* argv[]) {
             auto camIdx = currentFrame / duplicateFactor;
             currentFrame = (currentFrame + 1) % numberOfInputs;
             return sources.getFrame(camIdx, img);
-        }, [](InferenceEngine::InferRequest::Ptr req, const std::vector<std::string>& outputDataBlobNames, cv::Size frameSize) {
+        }, [](InferenceEngine::InferRequest::Ptr req, const std::vector<std::string>& outputDataBlobNames, cv::Size frameSize, std::size_t batchSize) {
             auto output = req->GetBlob(outputDataBlobNames[0]);
 
             float* dataPtr = output->buffer();
@@ -313,7 +313,7 @@ int main(int argc, char* argv[]) {
             }
 
 
-            std::vector<Detections> detections(getTensorHeight(output->getTensorDesc()) / 200);
+            std::vector<Detections> detections(batchSize);
             for (auto& d : detections) {
                 d.set(new std::vector<Face>);
             }

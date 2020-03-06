@@ -74,7 +74,7 @@ private:
 
     using GetterFunc = std::function<bool(VideoFrame&)>;
     GetterFunc getter;
-    using PostprocessingFunc = std::function<std::vector<Detections>(InferenceEngine::InferRequest::Ptr, const std::vector<std::string>&, cv::Size)>;
+    using PostprocessingFunc = std::function<std::vector<Detections>(InferenceEngine::InferRequest::Ptr, const std::vector<std::string>&, cv::Size, std::size_t)>;
     PostprocessingFunc postprocessing;
     using PostLoadFunc = std::function<void (const std::vector<std::string>&, InferenceEngine::CNNNetwork&)>;
     PostLoadFunc postLoad;

@@ -229,7 +229,7 @@ std::vector<std::shared_ptr<VideoFrame> > IEGraph::getBatchData(cv::Size frameSi
     }
 
     if (nullptr != req && InferenceEngine::OK == req->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY)) {
-        auto detections = postprocessing(req, outputDataBlobNames, frameSize);
+        auto detections = postprocessing(req, outputDataBlobNames, frameSize, batchSize);
         for (decltype(detections.size()) i = 0; i < detections.size(); i ++) {
             vframes[i]->detections = std::move(detections[i]);
         }

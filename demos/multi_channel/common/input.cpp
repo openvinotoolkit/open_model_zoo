@@ -484,10 +484,11 @@ void VideoSourceOCV::thread_fn(VideoSourceOCV *vs) {
         if (!result) {
             vs->running = false; // stop() also affects running, so override it only when out of frames
         }
-        if (vs->queue.size() < vs->queueSize || !result) { // queue has space or source run out of frames
-            std::unique_lock<std::mutex> lock(vs->mutex);
-            vs->queue.push({result, frame});
-        }
+        std::unique_lock<std::mutex> lock(vs->mutex);
+        vs->condVar.wait(lock, [&]() {
+            return vs->queue.size() < vs->queueSize || !vs->running;
+        });
+        vs->queue.push({result, frame});
         vs->hasFrame.notify_one();
     }
 }
