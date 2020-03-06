@@ -19,13 +19,16 @@ from ..dependency import ClassProvider
 from ..utils import get_parameter_value_from_config
 
 
+MULTI_INFER_PREPROCESSORS = ['tiling', 'normalize3d', 'image_pyramid']
+
+
 class Preprocessor(ClassProvider):
     __provider_type__ = 'preprocessor'
 
-    def __init__(self, config, name=None, input_shapes=None):
+    def __init__(self, config, name=None):
         self.config = config
         self.name = name
-        self.input_shapes = input_shapes
+        self.input_shapes = None
 
         self.validate_config()
         self.configure()
@@ -54,3 +57,6 @@ class Preprocessor(ClassProvider):
         ConfigValidator(
             self.name, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=self.parameters()
         ).validate(self.config)
+
+    def set_input_shape(self, input_shape):
+        pass

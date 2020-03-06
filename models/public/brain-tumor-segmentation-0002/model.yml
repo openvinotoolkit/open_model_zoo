@@ -1,0 +1,31 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This model was created for participation in the Brain Tumor Segmentation Challenge
+  <https://www.med.upenn.edu/cbica/brats2019/registration.html> (BraTS) 2019. It has
+  the UNet architecture trained with residual blocks.
+task_type: semantic_segmentation
+files:
+  - name: brain-tumor-segmentation-0002.onnx
+    size: 21735156
+    sha256: 97726901bc4f0f2c5e583d38d0ff4631d92ebcdb18bf5e2e859c3703a9b86d2d
+    source:
+      $type: google_drive
+      id: 1NhH51NgKJKhu0Bax_IKQ_Byvoe2bItPX
+model_optimizer_args:
+  - --input_shape=[1,4,128,128,128]
+  - --input_model=$dl_dir/brain-tumor-segmentation-0002.onnx
+framework: onnx
+license: https://raw.githubusercontent.com/lachinov/brats2019/master/LICENSE

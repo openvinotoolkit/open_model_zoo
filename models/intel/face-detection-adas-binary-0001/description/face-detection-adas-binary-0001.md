@@ -23,7 +23,7 @@ are binary that can be implemented using effective binary XNOR+POPCOUNT approach
 | GFlops                          | 0.611                 |
 | GI1ops                          | 2.224                 |
 | MParams                         | 1.053                 |
-| Source framework                | Pytorch*              |
+| Source framework                | PyTorch*              |
 
 Average Precision (AP) is defined as an area under the
 [precision/recall](https://en.wikipedia.org/wiki/Precision_and_recall)

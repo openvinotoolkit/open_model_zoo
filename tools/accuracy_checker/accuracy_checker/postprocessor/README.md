@@ -1,13 +1,13 @@
 # Postprocessors
 
-Postprocessor is function which processes prediction and/or annotation data after model infer and before metric calculation. For correct work postprocessors require specific representation format. 
-(e. g. clip boxes postprocessor expects detection annotation and detection prediction for processing). 
+Postprocessor is function which processes prediction and/or annotation data after model infer and before metric calculation. For correct work postprocessors require specific representation format.
+(e. g. clip boxes postprocessor expects detection annotation and detection prediction for processing).
 
-In case when you use complicated representation located in representation container, you can add options `annotation_source` and `prediction_source` in configuration file, 
-if you want process only specific representations, another way postprocessor will be used for all suitable representations. `annotation_source` and `prediction_source` should contain 
+In case when you use complicated representation located in representation container, you can add options `annotation_source` and `prediction_source` in configuration file,
+if you want process only specific representations, another way postprocessor will be used for all suitable representations. `annotation_source` and `prediction_source` should contain
 comma separated list of annotation identifiers and output layer names respectively.
 
-Every postprocessor has parameters available for configuration. 
+Every postprocessor has parameters available for configuration.
 
 Accuracy Checker supports following set of postprocessors:
 
@@ -22,7 +22,7 @@ Accuracy Checker supports following set of postprocessors:
   * `dst_width` and `dst_height` - destination width and height respectively. You can also use `size` instead in case when destination sizes are equal.
 * `resize_prediction_boxes` - resizing normalized detection prediction boxes according to image size. Supported representations: `DetectionAnotation`, `DetectionPrediction`.
 * `faster_rcnn_postprocessing_resize` - resizing normalized detection prediction boxes according to the original image size before preprocessing steps.
-    Supported representations: `DetectionAnotation`, `DetectionPrediction`.     
+    Supported representations: `DetectionAnotation`, `DetectionPrediction`.
     At the moment works in the following cases only:
    - the preprocessing steps contains only one operation changing input image size, and the operation is `resize`
    - the preprocessing steps contains only two operations changing input image size, and the operations are `resize` and then `padding`.
@@ -43,7 +43,7 @@ Accuracy Checker supports following set of postprocessors:
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
   **Note:** this postprocessing requires specific dataset meta: `segmentation_colors` for annotations and `prediction_to_gt_labels` for predictions.
 * `resize_segmentation_mask` - resizing segmentation mask. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`.
-  * `dst_width` and `dst_height` - destination width and height for box clipping respectively. You can also use `size` instead in case when destination sizes are equal. 
+  * `dst_width` and `dst_height` - destination width and height for resize respectively. You can also use `size` instead in case when destination sizes are equal.
     If any of these parameters are not specified, image size will be used as default.
   * `apply_to` - determines target masks for processing (`annotation` for ground truth and `prediction` for detection results, `all` for both).
 * `extend_segmentation_mask` - extending annotation segmentation mask to predicted mask size making border filled by specific value. Supported representations: `SegmentationAnotation`, `SegmentationPrediction`.
@@ -56,4 +56,16 @@ Accuracy Checker supports following set of postprocessors:
 * `clip_segmentation_mask` - clipping segmentation mask values. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`.
   * `min_value` - lower bound of range.
   * `max_value` - upper bound of range.
-* `segmentation-prediction-resample` - resamples output prediction in two steps: 1) resizes it to bounding box size; 2) extends to annotation size. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`. For correct bounding box size must be set via tag `boxes_file` in `brats_numpy` [converter](../annotation_converters/README.md).
+* `segmentation_prediction_resample` - resamples output prediction in two steps: 1) resizes it to bounding box size; 2) extends to annotation size. Supported representations: `BrainTumorSegmentationAnnotation`, `BrainTumorSegmentationPrediction`. For correct bounding box size must be set via tag `boxes_file` in `brats_numpy` [converter](../annotation_converters/README.md) or `crop_brats` [preprocessor](../preprocessor/README.md).
+  * `make_argmax` - applies argmax operation to prediction mask after resampling (by default `False`). Must be specified only one option `make_argmax`.
+* `transform_brats_prediction` - transforms prediction from `WT-TC-ET` format to `NCR/NET-ED-ET`. Sequentially fills one-channel mask with specified `values` for elements passing the threshold (threshold is `0.5`) from each prediction channel in specified `order`.
+  * `order` - specifies filling order for channels
+  * `values` - specifies values for each channel according to new order
+* `extract_prediction_answers` - extract predicted sequence of tokens from annotation text. Supported representations: `QuestionAnsweringAnnotation`, `QuestionAnsweringPrediction`.
+  * `max_answer` - maximum answer length (Optional, default value is 30).
+  * `n_best_size` - total number of n-best prediction size for the answer (Optional, default value is 20).
+* `translate_3d_poses` - translating 3D poses. Supported representations: `PoseEstimation3dAnnotation`, `PoseEstimation3dPrediction`. Shifts 3D coordinates of each predicted poses on corresponding translation vector.
+* `resize_super_resolution` - resizing super resolution predicted image. Supported representations: `SuperResolutionAnotation`, `SuperResolutionPrediction`.
+  * `dst_width` and `dst_height` - destination width and height for resizing respectively. You can also use `size` instead in case when destination sizes are equal.
+    If any of these parameters are not specified, gt high resolution image size will be used as default.
+* `crop_ground_truth_image` - croping ground truth image. Supported representations: `ImageInpaintingAnnotation`.

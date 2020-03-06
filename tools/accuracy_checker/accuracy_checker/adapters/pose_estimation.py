@@ -21,8 +21,9 @@ import cv2
 import numpy as np
 
 from ..adapters import Adapter
-from ..config import ConfigValidator, StringField
+from ..config import ConfigValidator, StringField, ConfigError
 from ..representation import PoseEstimationPrediction
+from ..utils import contains_any
 
 
 class HumanPoseAdapter(Adapter):
@@ -43,9 +44,12 @@ class HumanPoseAdapter(Adapter):
         parameters = super().parameters()
         parameters.update({
             'part_affinity_fields_out': StringField(
-                description="Name of output layer with keypoints pairwise relations (part affinity fields)."
+                description="Name of output layer with keypoints pairwise relations (part affinity fields).",
+                optional=True
             ),
-            'keypoints_heatmap_out': StringField(description="Name of output layer with keypoints heatmaps."),
+            'keypoints_heatmap_out': StringField(
+                description="Name of output layer with keypoints heatmaps.", optional=True
+            ),
         })
 
         return parameters
@@ -56,14 +60,39 @@ class HumanPoseAdapter(Adapter):
     def configure(self):
         self.part_affinity_fields = self.get_value_from_config('part_affinity_fields_out')
         self.keypoints_heatmap = self.get_value_from_config('keypoints_heatmap_out')
+        self.concat_out = self.part_affinity_fields is None and self.keypoints_heatmap is None
+        if not self.concat_out:
+            contains_both = self.part_affinity_fields is not None and self.keypoints_heatmap is not None
+            if not contains_both:
+                raise ConfigError(
+                    'human_pose_estimation adapter should contains both: keypoints_heatmap_out '
+                    'and part_affinity_fields_out or not contain them at all (in single output model case)'
+                )
+        self._keypoints_heatmap_bias = self.keypoints_heatmap + '/add_'
+        self._part_affinity_fileds_bias = self.part_affinity_fields + '/add_'
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        raw_output = zip(
-            identifiers, raw_outputs[self.keypoints_heatmap],
-            raw_outputs[self.part_affinity_fields], frame_meta
-        )
+        if not self.concat_out:
+            if not contains_any(raw_outputs, [self.part_affinity_fields, self._part_affinity_fileds_bias]):
+                raise ConfigError('part affinity fields output not found')
+            if not contains_any(raw_outputs, [self.keypoints_heatmap, self._keypoints_heatmap_bias]):
+                raise ConfigError('keypoints heatmap output not found')
+            keypoints_heatmap = raw_outputs[
+                self.keypoints_heatmap if self.keypoints_heatmap in raw_outputs else self._keypoints_heatmap_bias
+            ]
+            pafs = raw_outputs[
+                self.part_affinity_fields if self.part_affinity_fields in raw_outputs
+                else self._part_affinity_fileds_bias
+            ]
+            raw_output = zip(identifiers, keypoints_heatmap, pafs, frame_meta)
+        else:
+            concat_out = raw_outputs[self.output_blob]
+            keypoints_num = concat_out.shape[1] // 3
+            keypoints_heat_map = concat_out[:, :keypoints_num, :]
+            pafs = concat_out[:, keypoints_num:, :]
+            raw_output = zip(identifiers, keypoints_heat_map, pafs, frame_meta)
         for identifier, heatmap, paf, meta in raw_output:
             height, width, _ = meta['image_size']
             heatmap_avg = np.zeros((height, width, 19), dtype=np.float32)
@@ -96,6 +125,7 @@ class HumanPoseAdapter(Adapter):
     @staticmethod
     def find_peaks(heatmap, all_peaks, prev_peak_counter):
         heatmap[heatmap < 0.1] = 0
+        heatmap[np.isnan(heatmap)] = 0
         map_aug = np.zeros((heatmap.shape[0] + 2, heatmap.shape[1] + 2))
         map_left = np.zeros(map_aug.shape)
         map_right = np.zeros(map_aug.shape)
@@ -337,3 +367,59 @@ class HumanPoseAdapter(Adapter):
         scores = np.array(scores)
 
         return persons_keypoints_x, persons_keypoints_y, persons_keypoints_v, scores
+
+
+class SingleHumanPoseAdapter(Adapter):
+    __provider__ = 'single_human_pose_estimation'
+    prediction_types = (PoseEstimationPrediction, )
+
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        result = []
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+
+        outputs_batch = raw_outputs[self.output_blob]
+        for i, heatmaps in enumerate(outputs_batch):
+            heatmaps = np.transpose(heatmaps, (1, 2, 0))
+            sum_score = 0
+            sum_score_thr = 0
+            scores = []
+            x_values = []
+            y_values = []
+            num_kp_thr = 0
+            vis = [1] * outputs_batch.shape[1]
+            for kpt_idx in range(outputs_batch.shape[1]):
+                score, coord = self.extract_keypoints(heatmaps[:, :, kpt_idx])
+                scores.append(score)
+                x, y = self.affine_transform(coord, frame_meta[0]['rev_trans'])
+                x_values.append(x)
+                y_values.append(y)
+                if score > 0.2:
+                    sum_score_thr += score
+                    num_kp_thr += 1
+                sum_score += score
+            if num_kp_thr != 0:
+                pose_score = sum_score_thr / num_kp_thr
+            else:
+                pose_score = sum_score / outputs_batch.shape[1]
+            result.append(PoseEstimationPrediction(identifiers[i], np.array([x_values]),
+                                                   np.array([y_values]), np.array([vis]), np.array([pose_score])))
+
+        return result
+
+    @staticmethod
+    def extract_keypoints(heatmap, min_confidence=-100):
+        ind = np.unravel_index(np.argmax(heatmap, axis=None), heatmap.shape)
+        if heatmap[ind] < min_confidence:
+            ind = (-1, -1)
+        else:
+            ind = (int(ind[1]), int(ind[0]))
+        return heatmap[ind[1]][ind[0]], ind
+
+    @staticmethod
+    def affine_transform(pt, t):
+        new_pt = np.array([pt[0], pt[1], 1.])
+        new_pt = np.dot(t, new_pt)
+        return new_pt[:2]

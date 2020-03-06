@@ -14,8 +14,6 @@
 #include "peak.hpp"
 
 namespace human_pose_estimation {
-const size_t HumanPoseEstimator::keypointsNumber = 18;
-
 HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
                                        const std::string& targetDeviceName_,
                                        bool enablePerformanceReport)
@@ -36,27 +34,74 @@ HumanPoseEstimator::HumanPoseEstimator(const std::string& modelPath,
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_PERF_COUNT,
                        InferenceEngine::PluginConfigParams::YES}});
     }
-    netReader.ReadNetwork(modelPath);
-    std::string binFileName = fileNameNoExt(modelPath) + ".bin";
-    netReader.ReadWeights(binFileName);
-    network = netReader.getNetwork();
-    InferenceEngine::InputInfo::Ptr inputInfo = network.getInputsInfo().begin()->second;
-    inputLayerSize = cv::Size(inputInfo->getTensorDesc().getDims()[3], inputInfo->getTensorDesc().getDims()[2]);
-    inputInfo->setPrecision(InferenceEngine::Precision::U8);
+    network = ie.ReadNetwork(modelPath);
+
+    const auto& inputInfo = network.getInputsInfo();
+
+    if (inputInfo.size() != 1) {
+        throw std::runtime_error(modelPath + ": expected to have 1 input");
+    }
+
+    const auto& imageInputInfo = *inputInfo.begin();
+    const auto& imageInputDims = imageInputInfo.second->getTensorDesc().getDims();
+
+    if (imageInputDims.size() != 4 || imageInputDims[0] != 1 || imageInputDims[1] != 3) {
+        throw std::runtime_error(
+            modelPath + ": expected \"" + imageInputInfo.first + "\" to have dimensions 1x3xHxW");
+    }
+
+    inputLayerSize = cv::Size(imageInputDims[3], imageInputDims[2]);
+    imageInputInfo.second->setPrecision(InferenceEngine::Precision::U8);
 
     InferenceEngine::OutputsDataMap outputInfo = network.getOutputsInfo();
-    auto outputBlobsIt = outputInfo.begin();
-    pafsBlobName = outputBlobsIt->first;
-    heatmapsBlobName = (++outputBlobsIt)->first;
+
+    if (outputInfo.size() != 2) {
+        throw std::runtime_error(modelPath + ": expected to have 2 outputs");
+    }
+
+    auto outputIt = outputInfo.begin();
+
+    const auto& pafsOutputInfo = *outputIt++;
+
+    pafsBlobName = pafsOutputInfo.first;
+
+    const auto& pafsOutputDims = pafsOutputInfo.second->getTensorDesc().getDims();
+
+    if (pafsOutputDims.size() != 4 || pafsOutputDims[0] != 1
+            || pafsOutputDims[1] != 2 * (keypointsNumber + 1)) {
+        throw std::runtime_error(
+            modelPath + ": expected \"" + pafsBlobName + "\" to have dimensions "
+                "1x" + std::to_string(2 * (keypointsNumber + 1)) + "xHFMxWFM");
+    }
+
+    const auto& heatmapsOutputInfo = *outputIt++;
+
+    heatmapsBlobName = heatmapsOutputInfo.first;
+
+    const auto& heatmapsOutputDims = heatmapsOutputInfo.second->getTensorDesc().getDims();
+
+    if (heatmapsOutputDims.size() != 4 || heatmapsOutputDims[0] != 1
+            || heatmapsOutputDims[1] != keypointsNumber + 1) {
+        throw std::runtime_error(
+            modelPath + ": expected \"" + heatmapsBlobName + "\" to have dimensions "
+                "1x" + std::to_string(keypointsNumber + 1) + "xHFMxWFM");
+    }
+
+    if (pafsOutputDims[2] != heatmapsOutputDims[2] || pafsOutputDims[3] != heatmapsOutputDims[3]) {
+        throw std::runtime_error(
+            modelPath + ": expected \"" + pafsBlobName + "\" and \"" + heatmapsBlobName + "\""
+                "to have matching last two dimensions");
+    }
 
     executableNetwork = ie.LoadNetwork(network, targetDeviceName);
-    request = executableNetwork.CreateInferRequest();
+    requestNext = executableNetwork.CreateInferRequestPtr();
+    requestCurr = executableNetwork.CreateInferRequestPtr();
 }
 
-std::vector<HumanPose> HumanPoseEstimator::estimate(const cv::Mat& image) {
+void HumanPoseEstimator::reshape(const cv::Mat& image){
     CV_Assert(image.type() == CV_8UC3);
 
-    cv::Size imageSize = image.size();
+    imageSize = image.size();
     if (inputWidthIsChanged(imageSize)) {
         auto input_shapes = network.getInputShapes();
         std::string input_name;
@@ -67,19 +112,50 @@ std::vector<HumanPose> HumanPoseEstimator::estimate(const cv::Mat& image) {
         input_shapes[input_name] = input_shape;
         network.reshape(input_shapes);
         executableNetwork = ie.LoadNetwork(network, targetDeviceName);
-        request = executableNetwork.CreateInferRequest();
+        requestNext = executableNetwork.CreateInferRequestPtr();
+        requestCurr = executableNetwork.CreateInferRequestPtr();
+        std::cout << "Reshape needed" << std::endl;
     }
-    InferenceEngine::Blob::Ptr input = request.GetBlob(network.getInputsInfo().begin()->first);
+}
+
+void HumanPoseEstimator::frameToBlobCurr(const cv::Mat& image) {
+    CV_Assert(image.type() == CV_8UC3);
+    InferenceEngine::Blob::Ptr input = requestCurr->GetBlob(network.getInputsInfo().begin()->first);
     auto buffer = input->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type *>();
     preprocess(image, buffer);
+}
 
-    request.Infer();
+void HumanPoseEstimator::frameToBlobNext(const cv::Mat& image) {
+    CV_Assert(image.type() == CV_8UC3);
+    InferenceEngine::Blob::Ptr input = requestNext->GetBlob(network.getInputsInfo().begin()->first);
+    auto buffer = input->buffer().as<InferenceEngine::PrecisionTrait<InferenceEngine::Precision::U8>::value_type *>();
+    preprocess(image, buffer);
+}
 
-    InferenceEngine::Blob::Ptr pafsBlob = request.GetBlob(pafsBlobName);
-    InferenceEngine::Blob::Ptr heatMapsBlob = request.GetBlob(heatmapsBlobName);
-    CV_Assert(heatMapsBlob->getTensorDesc().getDims()[1] == keypointsNumber + 1);
-    InferenceEngine::SizeVector heatMapDims =
-            heatMapsBlob->getTensorDesc().getDims();
+void HumanPoseEstimator::startCurr() {
+    requestCurr->StartAsync();
+}
+
+void HumanPoseEstimator::startNext() {
+    requestNext->StartAsync();
+}
+
+bool HumanPoseEstimator::readyCurr() {
+    if (InferenceEngine::OK == requestCurr->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void HumanPoseEstimator::swapRequest() {
+    requestCurr.swap(requestNext);
+}
+
+std::vector<HumanPose> HumanPoseEstimator::postprocessCurr() {
+    InferenceEngine::Blob::Ptr pafsBlob = requestCurr->GetBlob(pafsBlobName);
+    InferenceEngine::Blob::Ptr heatMapsBlob = requestCurr->GetBlob(heatmapsBlobName);
+    InferenceEngine::SizeVector heatMapDims = heatMapsBlob->getTensorDesc().getDims();
     std::vector<HumanPose> poses = postprocess(
             heatMapsBlob->buffer(),
             heatMapDims[2] * heatMapDims[3],
@@ -101,8 +177,7 @@ void HumanPoseEstimator::preprocess(const cv::Mat& image, uint8_t* buffer) const
                        cv::BORDER_CONSTANT, meanPixel);
     std::vector<cv::Mat> planes(3);
     for (size_t pId = 0; pId < planes.size(); pId++) {
-        planes[pId] = cv::Mat(inputLayerSize, CV_8UC1,
-                              buffer + pId * inputLayerSize.area());
+        planes[pId] = cv::Mat(inputLayerSize, CV_8UC1, buffer + pId * inputLayerSize.area());
     }
     cv::split(paddedImage, planes);
 }
@@ -233,7 +308,7 @@ HumanPoseEstimator::~HumanPoseEstimator() {
     try {
         if (enablePerformanceReport) {
             std::cout << "Performance counts for " << modelPath << std::endl << std::endl;
-            printPerformanceCounts(request, std::cout, getFullDeviceName(ie, targetDeviceName), false);
+            printPerformanceCounts(*requestCurr, std::cout, getFullDeviceName(ie, targetDeviceName), false);
         }
     }
     catch (...) {

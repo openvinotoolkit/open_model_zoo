@@ -20,20 +20,30 @@ import itertools
 import json
 import os
 import pickle
+from enum import Enum
 
 from pathlib import Path
 from typing import Union
 from warnings import warn
+from collections.abc import MutableSet
 
-from shapely.geometry.polygon import Polygon
 import numpy as np
-import yamlloader
 import yaml
 
 try:
     import lxml.etree as et
 except ImportError:
     import xml.etree.cElementTree as et
+
+try:
+    from shapely.geometry.polygon import Polygon
+except ImportError:
+    Polygon = None
+
+try:
+    from yamlloader.ordereddict import Loader as orddict_loader
+except ImportError:
+    orddict_loader = None
 
 
 def concat_lists(*lists):
@@ -273,6 +283,7 @@ def read_txt(file: Union[str, Path], sep='\n', **kwargs):
 def read_xml(file: Union[str, Path], *args, **kwargs):
     return et.parse(str(get_path(file)), *args, **kwargs).getroot()
 
+
 def read_json(file: Union[str, Path], *args, **kwargs):
     with get_path(file).open() as content:
         return json.load(content, *args, **kwargs)
@@ -285,7 +296,10 @@ def read_pickle(file: Union[str, Path], *args, **kwargs):
 
 def read_yaml(file: Union[str, Path], *args, **kwargs):
     with get_path(file).open() as content:
-        return yaml.load(content, *args, Loader=yamlloader.ordereddict.Loader, **kwargs)
+        loader = orddict_loader or yaml.SafeLoader
+        if not orddict_loader:
+            warn('yamlloader is not installed. YAML files order is not preserved. it can be sufficient for some cases')
+        return yaml.load(content, *args, Loader=loader, **kwargs)
 
 
 def read_csv(file: Union[str, Path], *args, **kwargs):
@@ -351,6 +365,8 @@ def to_lower_register(str_list):
 
 
 def polygon_from_points(points):
+    if Polygon is None:
+        raise ValueError('shapely is not installed, please install it')
     return Polygon(points)
 
 
@@ -414,6 +430,64 @@ def find_nearest(array, value, mode=None):
     return idx
 
 
+class OrderedSet(MutableSet):
+    def __init__(self, iterable=None):
+        self.end = end = []
+        end += [None, end, end]
+        self.map = {}
+        if iterable is not None:
+            self |= iterable
+
+    def __len__(self):
+        return len(self.map)
+
+    def __contains__(self, key):
+        return key in self.map
+
+    def add(self, key):
+        if key not in self.map:
+            end = self.end
+            curr = end[1]
+            curr[2] = end[1] = self.map[key] = [key, curr, end]
+
+    def discard(self, key):
+        if key in self.map:
+            key, prev_value, next_value = self.map.pop(key)
+            prev_value[2] = next_value
+            next_value[1] = prev_value
+
+    def __iter__(self):
+        end = self.end
+        curr = end[2]
+        while curr is not end:
+            yield curr[0]
+            curr = curr[2]
+
+    def __reversed__(self):
+        end = self.end
+        curr = end[1]
+        while curr is not end:
+            yield curr[0]
+            curr = curr[1]
+
+    def pop(self, last=True):
+        if not self:
+            raise KeyError('set is empty')
+        key = self.end[1][0] if last else self.end[2][0]
+        self.discard(key)
+        return key
+
+    def __repr__(self):
+        if not self:
+            return '{}()'.format(self.__class__.__name__,)
+        return '{}({})'.format(self.__class__.__name__, list(self))
+
+    def __eq__(self, other):
+        if isinstance(other, OrderedSet):
+            return len(self) == len(other) and list(self) == list(other)
+        return set(self) == set(other)
+
+
 def get_parameter_value_from_config(config, parameters, key):
     if key not in parameters.keys():
         return None
@@ -429,3 +503,18 @@ def check_file_existence(file):
         return True
     except (FileNotFoundError, IsADirectoryError):
         return False
+
+
+class Color(Enum):
+    PASSED = 0
+    FAILED = 1
+
+
+def color_format(s, color=Color.PASSED):
+    if color == Color.PASSED:
+        return "\x1b[0;32m{}\x1b[0m".format(s)
+    return "\x1b[0;31m{}\x1b[0m".format(s)
+
+
+def softmax(x):
+    return np.exp(x) / sum(np.exp(x))

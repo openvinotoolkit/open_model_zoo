@@ -15,14 +15,15 @@ limitations under the License.
 """
 
 import subprocess
+import multiprocessing
 from pathlib import Path
 import os
 import platform
 import re
 import numpy as np
-from cpuinfo import get_cpu_info
 import openvino.inference_engine as ie
 
+from .dlsdk_async_request import AsyncInferRequestWrapper
 from ..config import ConfigError, NumberField, PathField, StringField, DictField, ListField, BoolField, BaseField
 from ..logging import warning
 from ..utils import (
@@ -38,21 +39,16 @@ from .launcher import Launcher, LauncherConfigValidator
 from .model_conversion import convert_model, FrameworkParameters
 from ..logging import print_info
 
+try:
+    from cpuinfo import get_cpu_info
+except ImportError:
+    get_cpu_info = None
+
 
 HETERO_KEYWORD = 'HETERO:'
 MULTI_DEVICE_KEYWORD = 'MULTI:'
 FPGA_COMPILER_MODE_VAR = 'CL_CONTEXT_COMPILER_MODE_INTELFPGA'
 NIREQ_REGEX = r"(\(\d+\))"
-HETERO_MODE_REGEX = r"(?:^{hetero}(?P<devices>(?:{devices})(?:,(?:{devices}))*)$)".format(
-    hetero=HETERO_KEYWORD, devices="|".join(ie.known_plugins)
-)
-MULTI_DEVICE_MODE_REGEX = r"(?:^{multi}(?P<devices_ireq>(?:{devices_ireq})(?:,(?:{devices_ireq}))*)$)".format(
-    multi=MULTI_DEVICE_KEYWORD, devices_ireq="{}?|".format(NIREQ_REGEX).join(ie.known_plugins)
-)
-DEVICE_REGEX = r"(?:^(?P<device>{devices})$)".format(devices="|".join(ie.known_plugins))
-SUPPORTED_DEVICE_REGEX = r"{multi}|{hetero}|{regular}".format(
-    multi=MULTI_DEVICE_MODE_REGEX, hetero=HETERO_MODE_REGEX, regular=DEVICE_REGEX
-)
 VPU_PLUGINS = ('HDDL', "MYRIAD")
 VPU_LOG_LEVELS = ('LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG')
 
@@ -86,28 +82,55 @@ class CPUExtensionPathField(PathField):
 
 
 class DLSDKLauncherConfigValidator(LauncherConfigValidator):
-    def __init__(self, config_uri, **kwargs):
-        super().__init__(config_uri, **kwargs)
+    def __init__(
+            self, config_uri, fields=None, delayed_model_loading=False, **kwargs
+    ):
+        super().__init__(config_uri, fields, delayed_model_loading, **kwargs)
         self.need_conversion = None
 
-    def validate(self, entry, field_uri=None):
+    def create_device_regex(self, available_devices):
+        self.regular_device_regex = r"(?:^(?P<device>{devices})$)".format(devices="|".join(available_devices))
+        self.hetero_regex = r"(?:^{hetero}(?P<devices>(?:{devices})(?:,(?:{devices}))*)$)".format(
+            hetero=HETERO_KEYWORD, devices="|".join(available_devices)
+        )
+        self.multi_device_regex = r"(?:^{multi}(?P<devices_ireq>(?:{devices_ireq})(?:,(?:{devices_ireq}))*)$)".format(
+            multi=MULTI_DEVICE_KEYWORD, devices_ireq="{}?|".format(NIREQ_REGEX).join(available_devices)
+        )
+        self.supported_device_regex = r"{multi}|{hetero}|{regular}".format(
+            multi=self.multi_device_regex, hetero=self.hetero_regex, regular=self.regular_device_regex
+        )
+        self.fields['device'].set_regex(self.supported_device_regex)
+
+    def validate(self, entry, field_uri=None, ie_core=None):
         """
         Validate that launcher entry meets all configuration structure requirements.
-
         Args:
             entry: launcher configuration file entry.
             field_uri: id of launcher entry.
+            ie_core: IECore instance.
         """
         if not self.delayed_model_loading:
             framework_parameters = self.check_model_source(entry)
             self._set_model_source(framework_parameters)
-            super().validate(entry, field_uri)
+        super().validate(entry, field_uri)
+        self.create_device_regex(ie.known_plugins)
+        try:
+            self.fields['device'].validate(entry['device'], field_uri)
+        except ConfigError as error:
+            if ie_core is not None:
+                self.create_device_regex(ie_core.available_devices)
+                try:
+                    self.fields['device'].validate(entry['device'], field_uri)
+                except ConfigError:
+                    # workaround for devices where this metric is non implemented
+                    warning('unknown device: {}'.format(entry['device']))
+            else:
+                raise error
 
     def _set_model_source(self, framework):
         self.need_conversion = framework.name != 'dlsdk'
         self.framework = framework
         self.fields['model'].optional = self.need_conversion
-        self.fields['weights'].optional = self.need_conversion
         self.fields['caffe_model'].optional = framework.name != 'caffe'
         self.fields['caffe_weights'].optional = framework.name != 'caffe'
         self.fields['mxnet_weights'].optional = framework.name != 'mxnet'
@@ -118,7 +141,7 @@ class DLSDKLauncherConfigValidator(LauncherConfigValidator):
 
     @staticmethod
     def check_model_source(entry):
-        dlsdk_model_options = ['model', 'weights']
+        dlsdk_model_options = ['model']
         caffe_model_options = ['caffe_model', 'caffe_weights']
         mxnet_model_options = ['mxnet_weights']
         tf_model_options = ['tf_model']
@@ -164,12 +187,12 @@ class DLSDKLauncher(Launcher):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'model': PathField(description="Path to model."),
-            'weights': PathField(description="Path to model."),
-            'device': StringField(regex=SUPPORTED_DEVICE_REGEX, description="Device name."),
+            'model': PathField(description="Path to model.", file_or_directory=True),
+            'weights': PathField(description="Path to weights.", optional=True, file_or_directory=True),
+            'device': StringField(description="Device name."),
             'caffe_model': PathField(optional=True, description="Path to Caffe model file."),
             'caffe_weights': PathField(optional=True, description="Path to Caffe weights file."),
-            'mxnet_weights': PathField(optional=True, description="Path to MxNet weights file."),
+            'mxnet_weights': PathField(optional=True, description="Path to MXNet weights file."),
             'tf_model': PathField(optional=True, description="Path to TF model file."),
             'tf_meta': PathField(optional=True, description="Path to TF meta file."),
             'onnx_model': PathField(optional=True, description="Path to ONNX model file."),
@@ -191,53 +214,63 @@ class DLSDKLauncher(Launcher):
                             "In multi device mode allows setting comma-separated list for numbers "
                             "or one value which will be used for all devices"
             ),
-            '_models_prefix': PathField(is_directory=True, optional=True, description="Model prefix."),
             '_model_optimizer': PathField(optional=True, is_directory=True, description="Model optimizer."),
             '_tf_obj_detection_api_config_dir': PathField(
                 optional=True, is_directory=True, description="TF Object Detection API Config."
             ),
             '_tf_custom_op_config_dir': PathField(
-                optional=True, is_directory=True, description="TF Custom Operation Config."
+                optional=True, is_directory=True, description="TF Custom Operation Config prefix."
             ),
+            '_transformations_config_dir': PathField(
+                optional=True, is_directory=True, description="Transformation config prefix for Model Optimizer"),
             '_tf_obj_detection_api_pipeline_config_path': PathField(
                 optional=True, is_directory=False, description="TF Custom Operation Pipeline Config."),
             '_cpu_extensions_mode': StringField(optional=True, description="CPU extensions mode."),
             '_aocl': PathField(optional=True, description="path to aocl (FPGA only)"),
             '_vpu_log_level': StringField(
                 optional=True, choices=VPU_LOG_LEVELS, description="VPU LOG level: {}".format(', '.join(VPU_LOG_LEVELS))
-            )
+            ),
+            '_prev_bitstream': PathField(optional=True, description="path to bitstream from previous run (FPGA only)"),
+            '_device_config': PathField(optional=True, description='path to file with device configuration'),
+            '_model_is_blob': BoolField(optional=True, description='hint for auto model search')
         })
 
         return parameters
 
-    def __init__(self, config_entry, delayed_model_loading=False):
-        super().__init__(config_entry)
+    def __init__(self, config_entry, model_name='', delayed_model_loading=False):
+        super().__init__(config_entry, model_name)
 
-        dlsdk_launcher_config = DLSDKLauncherConfigValidator(
-            'DLSDK_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading
-        )
-        dlsdk_launcher_config.validate(self.config)
-
-        self._device = self.config['device'].upper()
         self._set_variable = False
+        self.ie_config = self.config.get('ie_config')
+        self.ie_core = ie.IECore(xml_config_file=str(self.ie_config)) if self.ie_config is not None else ie.IECore()
+        self._delayed_model_loading = delayed_model_loading
+        dlsdk_launcher_config = DLSDKLauncherConfigValidator(
+            'DLSDK_Launcher', fields=self.parameters(), delayed_model_loading=delayed_model_loading,
+        )
+        dlsdk_launcher_config.validate(self.config, ie_core=self.ie_core)
+        device = self.config['device'].split('.')
+        self._device = '.'.join((device[0].upper(), device[1])) if len(device) > 1 else device[0].upper()
+        self._set_variable = False
+        self._async_mode = False
         self._prepare_bitstream_firmware(self.config)
+        self._prepare_ie()
         self._delayed_model_loading = delayed_model_loading
 
         if not delayed_model_loading:
             if dlsdk_launcher_config.need_conversion:
                 self._model, self._weights = DLSDKLauncher.convert_model(self.config, dlsdk_launcher_config.framework)
             else:
-                self._model = self.get_value_from_config('model')
-                self._weights = self.get_value_from_config('weights')
+                self._model, self._weights = self.automatic_model_search()
 
-            self.load_network()
-
-        self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
+            self.load_network(log=True)
+            self.allow_reshape_input = self.get_value_from_config('allow_reshape_input') and self.network is not None
+        else:
+            self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
         self._do_reshape = False
-        # It is an important switch -- while the FASTER RCNN is not reshaped correctly, the
-        # whole network should be recreated during reshape
-        # it can not be used in case delayed initialization
-        self.reload_network = not delayed_model_loading
+
+    @property
+    def device(self):
+        return self._device
 
     @property
     def inputs(self):
@@ -245,6 +278,9 @@ class DLSDKLauncher(Launcher):
         Returns:
             inputs in NCHW format.
         """
+        if self.network is None:
+            return self.exec_network.inputs
+
         return self.network.inputs
 
     @property
@@ -269,36 +305,22 @@ class DLSDKLauncher(Launcher):
                 input_shapes = {layer_name: data.shape for layer_name, data in infer_inputs.items()}
                 self._reshape_input(input_shapes)
 
-            benchmark = kwargs.get('benchmark')
-
-            if benchmark:
-                benchmark(infer_inputs)
-
             result = self.exec_network.infer(infer_inputs)
-
-            raw_outputs_callback = kwargs.get('output_callback')
-
-            if raw_outputs_callback:
-                raw_outputs_callback(result, network=self.network, exec_network=self.exec_network)
             results.append(result)
 
         if metadata is not None:
-            for image_meta in metadata:
-                image_meta['input_shape'] = self.inputs_info_for_meta()
-
+            for meta_ in metadata:
+                meta_['input_shape'] = self.inputs_info_for_meta()
         self._do_reshape = False
 
         return results
 
-    def predict_async(self, ir, inputs, metadata=None, **kwargs):
+    def predict_async(self, ir, inputs, metadata=None, context=None, **kwargs):
         infer_inputs = inputs[0]
-        benchmark = kwargs.get('benchmark')
-        if benchmark:
-            benchmark(infer_inputs)
-        ir.async_infer(inputs=infer_inputs)
         if metadata is not None:
             for meta_ in metadata:
                 meta_['input_shape'] = self.inputs_info_for_meta()
+        ir.infer(infer_inputs, metadata, context)
 
     def _is_hetero(self):
         return self._device.startswith(HETERO_KEYWORD)
@@ -317,25 +339,74 @@ class DLSDKLauncher(Launcher):
         return [platform_.upper().strip() for platform_ in device.split(',')]
 
     def _set_affinity(self, affinity_map_path):
-        self.plugin.set_initial_affinity(self.network)
-        layers = self.network.layers
-        for layer, device in read_yaml(affinity_map_path).items():
-            if layer not in layers:
+        automatic_affinity = self.ie_core.query_network(self.network, self._device)
+        custom_affinity = read_yaml(affinity_map_path)
+        for layer in custom_affinity:
+            if layer not in automatic_affinity:
                 raise ConfigError('Layer \'{layer}\' is not present in network'.format(layer=layer))
+        layers = self.network.layers
+        for layer_name in layers:
+            device = custom_affinity.get(layer_name, automatic_affinity[layer_name])
             if device not in self._devices_list():
                 raise ConfigError(
                     'Device \'{device}\' set for \'{layer}\' layer is not present in '
                     'provided configuration \'{configuration}\''.format(
-                        device=device, layer=layer, configuration=self._device
+                        device=device, layer=layer_name, configuration=self._device
                     )
                 )
-            layers[layer].affinity = device
+            layers[layer_name].affinity = device
+
+    def automatic_model_search(self):
+        def get_xml(model_dir):
+            models_list = list(model_dir.glob('{}.xml'.format(self._model_name)))
+            if not models_list:
+                models_list = list(model_dir.glob('*.xml'))
+            return models_list
+
+        def get_blob(model_dir):
+            blobs_list = list(Path(model_dir).glob('{}.blob'.format(self._model_name)))
+            if not blobs_list:
+                blobs_list = list(Path(model_dir).glob('*.blob'))
+            return blobs_list
+
+        def get_model():
+            model = Path(self.get_value_from_config('model'))
+            model_is_blob = self.get_value_from_config('_model_is_blob')
+            if not model.is_dir():
+                if model.suffix == '.blob':
+                    return model, True
+                return model, False
+            if model_is_blob:
+                model_list = get_blob(model)
+            else:
+                model_list = get_xml(model)
+                if not model_list and model_is_blob is None:
+                    model_list = get_blob(model)
+            if not model_list:
+                raise ConfigError('suitable model is not found')
+            if len(model_list) != 1:
+                raise ConfigError('More than one model matched, please specify explicitly')
+            model = model_list[0]
+            print_info('Found model {}'.format(model))
+            return model, model.suffix == '.blob'
+
+        model, is_blob = get_model()
+        if is_blob:
+            return model, None
+        weights = self.get_value_from_config('weights')
+        if weights is None or Path(weights).is_dir():
+            weights_dir = weights or model.parent
+            weights = Path(weights_dir) / model.name.replace('xml', 'bin')
+            print_info('Found weights {}'.format(get_path(weights)))
+        return model, weights
 
     def _is_fpga(self):
-        return 'FPGA' in self._devices_list()
+        device_list = map(lambda device: device.split('.')[0], self._devices_list())
+        return 'FPGA' in device_list
 
     def _is_vpu(self):
-        return contains_any(self._devices_list(), VPU_PLUGINS)
+        device_list = map(lambda device: device.split('.')[0], self._devices_list())
+        return contains_any(device_list, VPU_PLUGINS)
 
     def _prepare_bitstream_firmware(self, config):
         if not self._is_fpga():
@@ -347,20 +418,25 @@ class DLSDKLauncher(Launcher):
 
         bitstream = config.get('bitstream')
         if bitstream:
-            print_info('programming bitstream: {}'.format(bitstream.name))
-            aocl_executable = config.get('_aocl')
-            if aocl_executable:
-                subprocess.run([str(aocl_executable), 'program', 'acl0', str(bitstream)], check=True)
+            previous_bitstream = config.get('_prev_bitstream', '')
+            if str(previous_bitstream) != str(bitstream):
+                print_info('programming bitstream: {}'.format(bitstream.name))
+                aocl_executable = config.get('_aocl')
+                if aocl_executable:
+                    subprocess.run([str(aocl_executable), 'program', 'acl0', str(bitstream)], check=True)
+                    os.environ[FPGA_COMPILER_MODE_VAR] = '3'
+                    self._set_variable = True
+                else:
+                    aocx_variable = 'DLA_AOCX'
+                    previous_bitstream = os.environ.get(aocx_variable)
+                    if previous_bitstream == str(bitstream):
+                        return
+                    os.environ[aocx_variable] = str(bitstream)
+                    if not os.environ.get(aocx_variable):
+                        warning('Warning: {} has not been set'.format(aocx_variable))
+            else:
                 os.environ[FPGA_COMPILER_MODE_VAR] = '3'
                 self._set_variable = True
-            else:
-                aocx_variable = 'DLA_AOCX'
-                previous_bitstream = os.environ.get(aocx_variable)
-                if previous_bitstream == str(bitstream):
-                    return
-                os.environ[aocx_variable] = str(bitstream)
-                if not os.environ.get(aocx_variable):
-                    warning('Warning: {} has not been set'.format(aocx_variable))
 
     @staticmethod
     def get_cpu_extension(cpu_extensions, selection_mode):
@@ -371,6 +447,10 @@ class DLSDKLauncher(Launcher):
 
                 if extension_list:
                     return extension_list
+
+                if get_cpu_info is None:
+                    raise ValueError('CPU extensions automatic search requires pycpuinfo. '
+                                     'Please install it or set cpu extensions lib directly')
 
                 cpu_info_flags = get_cpu_info()['flags']
                 supported_flags = ['avx512', 'avx2', 'sse4_1', 'sse4_2']
@@ -451,8 +531,12 @@ class DLSDKLauncher(Launcher):
             get_parameter_value_from_config(config, DLSDKLauncher.parameters(), 'mo_params'),
             get_parameter_value_from_config(config, DLSDKLauncher.parameters(), 'mo_flags'),
             get_parameter_value_from_config(config, DLSDKLauncher.parameters(), '_tf_custom_op_config_dir'),
-            get_parameter_value_from_config(config, DLSDKLauncher.parameters(),
-                                            '_tf_obj_detection_api_pipeline_config_path'),
+            get_parameter_value_from_config(
+                config, DLSDKLauncher.parameters(), '_tf_obj_detection_api_pipeline_config_path'
+            ),
+            get_parameter_value_from_config(
+                config, DLSDKLauncher.parameters(), '_transformations_config_dir'
+            ),
             should_log_cmd=should_log_mo_cmd
         )
 
@@ -464,26 +548,29 @@ class DLSDKLauncher(Launcher):
     def num_requests(self, num_ireq: int):
         if num_ireq != self._num_requests:
             self._num_requests = num_ireq
-            if hasattr(self, 'exec_network'):
-                del self.exec_network
-                self.exec_network = self.plugin.load(self.network, num_requests=self._num_requests)
+            self.load_network(self.network, log=False)
 
     @property
-    def infer_requests(self):
-        return self.exec_network.requests
+    def async_mode(self):
+        return self._async_mode
+
+    @async_mode.setter
+    def async_mode(self, flag):
+        if flag:
+            if 'CPU' in self._devices_list():
+                self.ie_core.set_config({'CPU_THROUGHPUT_STREAMS': 'CPU_THROUGHPUT_AUTO'}, 'CPU')
+            if 'GPU' in self._devices_list():
+                self.ie_core.set_config({'GPU_THROUGHPUT_STREAMS': 'GPU_THROUGHPUT_AUTO'}, 'GPU')
+        self._async_mode = flag
+
+    def get_async_requests(self):
+        return [AsyncInferRequestWrapper(ireq_id, ireq) for ireq_id, ireq in enumerate(self.exec_network.requests)]
 
     def _reshape_input(self, shapes):
-        if self.reload_network:
-            # Should recreate the whole network
-            del self.exec_network
-            del self.network
-            self._create_network(shapes)
-        else:
-            del self.exec_network
-            self.network.reshape(shapes)
+        del self.exec_network
+        self.network.reshape(shapes)
 
-        self.exec_network = self.plugin.load(network=self.network, num_requests=self._num_requests)
-        self._do_reshape = False
+        self.exec_network = self.ie_core.load_network(self.network, self.device, num_requests=self._num_requests)
 
     def _set_batch_size(self, batch_size):
         # in some cases we can not use explicit property for setting batch size, so we need to use reshape instead
@@ -504,7 +591,7 @@ class DLSDKLauncher(Launcher):
         self.network.reshape({**const_inputs_shapes, **new_non_const_input_shapes})
 
     def _align_data_shape(self, data, input_blob):
-        input_shape = self.network.inputs[input_blob].shape
+        input_shape = self.inputs[input_blob].shape
         data_batch_size = data.shape[0]
         input_batch_size = input_shape[0]
 
@@ -517,49 +604,95 @@ class DLSDKLauncher(Launcher):
             filled_part = [data[-1]] * diff_number
             data = np.concatenate([data, filled_part])
 
-        if len(data.shape) > 1 and len(input_shape) > 1 and data.shape[1] != input_shape[1]:
-            data = data[:, :input_shape[1]]
-
         return data.reshape(input_shape)
 
-    def create_ie_plugin(self, log=True):
-        if hasattr(self, 'plugin'):
-            del self.plugin
+    def _prepare_ie(self, log=True):
         if log:
             print_info('IE version: {}'.format(ie.get_version()))
         if self._is_multi():
-            self._create_multi_device_plugin(log)
+            self._prepare_multi_device(log)
         else:
-            self.plugin = ie.IEPlugin(self._device)
             self.async_mode = self.get_value_from_config('async_mode')
-            num_requests = get_or_parse_value(self.config.get('num_requests', 1), casting_type=int)
+            self._set_nireq()
+
+            if log:
+                self._log_versions()
+        self._device_specific_configuration()
+
+    def _device_specific_configuration(self):
+        cpu_extensions = self.config.get('cpu_extensions')
+        if 'CPU' in self._devices_list():
+            if cpu_extensions:
+                selection_mode = self.config.get('_cpu_extensions_mode')
+                cpu_extensions = DLSDKLauncher.get_cpu_extension(cpu_extensions, selection_mode)
+                self.ie_core.add_extension(str(cpu_extensions), 'CPU')
+            self.ie_core.set_config({'CPU_BIND_THREAD': 'YES' if not self._is_multi() else 'NO'}, 'CPU')
+        gpu_extensions = self.config.get('gpu_extensions')
+        if 'GPU' in self._devices_list():
+            config = {}
+            if gpu_extensions:
+                config['CONFIG_FILE'] = str(gpu_extensions)
+            if self._is_multi() and 'CPU' in self._devices_list():
+                config['CLDNN_PLUGIN_THROTTLE'] = '1'
+            if config:
+                self.ie_core.set_config(config, 'GPU')
+        if self._is_vpu():
+            device_list = map(lambda device: device.split('.')[0], self._devices_list())
+            devices = [vpu_device for vpu_device in VPU_PLUGINS if vpu_device in device_list]
+            log_level = self.config.get('_vpu_log_level')
+            if log_level:
+                for device in devices:
+                    self.ie_core.set_config({'LOG_LEVEL': log_level}, device)
+        device_config = self.config.get('_device_config')
+        if device_config:
+            self._set_device_config(device_config)
+
+    def _set_nireq(self):
+        num_requests = self.config.get('num_requests')
+        if num_requests is not None and num_requests != 'AUTO':
+            num_requests = get_or_parse_value(num_requests, casting_type=int)
             if len(num_requests) != 1:
                 raise ConfigError('Several values for _num_requests specified')
             self._num_requests = num_requests[0]
             if self._num_requests != 1 and not self.async_mode:
                 warning('{} infer requests in sync mode is not supported. Only 1 infer request will be used.')
                 self._num_requests = 1
-            if log:
-                print_info('Loaded {} plugin version: {}'.format(self.plugin.device, self.plugin.version))
+        elif not self.async_mode:
+            self._num_requests = 1
+        else:
+            self._num_requests = self.auto_num_requests()
+        if self.async_mode:
+            print_info('Async mode activated')
+            print_info('Infer requests number:{}'.format(self.num_requests))
 
-        cpu_extensions = self.config.get('cpu_extensions')
-        if cpu_extensions and 'CPU' in self._devices_list():
-            selection_mode = self.config.get('_cpu_extensions_mode')
-            cpu_extensions = DLSDKLauncher.get_cpu_extension(cpu_extensions, selection_mode)
-            self.plugin.add_cpu_extension(str(cpu_extensions))
-        gpu_extensions = self.config.get('gpu_extensions')
-        if gpu_extensions and 'GPU' in self._devices_list():
-            self.plugin.set_config('CONFIG_FILE', str(gpu_extensions))
-        if self._is_vpu():
-            log_level = self.config.get('_vpu_log_level')
-            if log_level:
-                self.plugin.set_config({'VPU_LOG_LEVEL': log_level})
+    def auto_num_requests(self, return_list=False):
+        concurrency_device = {
+            'CPU': 1,
+            'GPU': 1,
+            'HDDL': 100,
+            'MYRIAD': 4,
+            'FPGA': 3
+        }
+        platform_list = self._devices_list()
+        if 'CPU' in platform_list and len(platform_list) == 1:
+            min_requests = [4, 5, 3]
+            cpu_count = multiprocessing.cpu_count()
+            for min_request in min_requests:
+                if cpu_count % min_request == 0:
+                    num_req = max(min_request, cpu_count / min_request)
+                    return num_req if not return_list else [num_req]
+        if 'GPU' in platform_list and len(platform_list) == 1:
+            return 2 if not return_list else [2]
+        per_device_requests = []
+        for device in platform_list:
+            per_device_requests.append(concurrency_device.get(device, 1))
 
-    def _create_multi_device_plugin(self, log=True):
+        return per_device_requests if return_list else sum(per_device_requests)
+
+    def _prepare_multi_device(self, log=True):
         async_mode = self.get_value_from_config('async_mode')
         if not async_mode:
             warning('Using multi device in sync mode non-applicable. Async mode will be used.')
-        self.async_mode = True
         num_per_device_req = re.findall(NIREQ_REGEX, self._device)
         device_list = self._devices_list()
         num_devices = len(device_list)
@@ -571,28 +704,53 @@ class DLSDKLauncher(Launcher):
                     "number requests already provided in device name specification. "
                     "'num_requests' option will be ignored."
                 )
+        elif 'num_requests' in self.config and self.config['num_requests'] != 'AUTO':
+            num_per_device_requests = get_or_parse_value(self.config['num_request'], casting_type=int)
         else:
-            num_per_device_requests = get_or_parse_value(self.config.get('num_requests', 1), casting_type=int)
+            num_per_device_requests = self.auto_num_requests(return_list=True)
+
         if len(num_per_device_requests) == 1:
             num_per_device_requests = [num_per_device_requests[0]] * len(device_list)
 
         if num_devices != len(num_per_device_requests):
             raise ConfigError('num requests for all {} should be specified'.format(num_devices))
-        device_strings = [
-            '{device}({nreq})'.format(device=device, nreq=nreq)
-            for device, nreq in zip(device_list, num_per_device_requests)
-        ]
-        self.plugin = ie.IEPlugin('MULTI:{}'.format(','.join(device_strings)))
-        self._num_requests = sum(num_per_device_requests)*2
+        self._num_requests = sum(num_per_device_requests) * 2
         if log:
-            print_info('Loaded {} plugin version: {}'.format(self.plugin.device, self.plugin.version))
+            self._log_versions()
+            print_info('Async mode activated')
             print_info('Request number for each device:')
             for device, nreq in zip(device_list, num_per_device_requests):
                 print_info('    {} - {}'.format(device, nreq))
 
-    def _create_network(self, input_shapes=None):
-        assert self.plugin, "create_ie_plugin should be called before _create_network"
+    def _set_device_config(self, device_config):
+        device_specific_configuration = read_yaml(device_config)
+        if not isinstance(device_specific_configuration, dict):
+            raise ConfigError('device configuration should be a dict-like')
+        self.ie_core.set_config(device_specific_configuration, self.device)
 
+    def _log_versions(self):
+        versions = self.ie_core.get_versions(self._device)
+        print_info("Loaded {} plugin version:".format(self._device))
+        for device_name, device_version in versions.items():
+            print_info("    {device_name} - {descr}: {maj}.{min}.{num}".format(
+                device_name=device_name, descr=device_version.description, maj=device_version.major,
+                min=device_version.minor, num=device_version.build_number
+            ))
+
+    def _create_network(self, input_shapes=None):
+        model_path = Path(self._model)
+        compiled_model = model_path.suffix == '.blob'
+        if compiled_model:
+            self.network = None
+            self.exec_network = self.ie_core.import_network(str(self._model), self._device)
+            self.original_outputs = list(self.exec_network.outputs.keys())
+            first_input = next(iter(self.exec_network.inputs))
+            input_info = self.exec_network.inputs[first_input]
+            batch_pos = input_info.layout.find('N')
+            self._batch = input_info.shape[batch_pos] if batch_pos != -1 else 1
+            return
+        if self._weights is None:
+            self._weights = model_path.parent / (model_path.name.split(model_path.suffix)[0] + '.bin')
         self.network = ie.IENetwork(model=str(self._model), weights=str(self._weights))
 
         self.original_outputs = self.network.outputs
@@ -603,6 +761,7 @@ class DLSDKLauncher(Launcher):
                 if len(output_tuple) == 1:
                     return output_string
                 return tuple([output_tuple[0], int(output_tuple[1])])
+
             preprocessed_outputs = [output_preprocessing(output) for output in outputs]
             self.network.add_outputs(preprocessed_outputs)
 
@@ -618,21 +777,24 @@ class DLSDKLauncher(Launcher):
         elif affinity_map_path:
             warning('affinity_map config is applicable only for HETERO device')
 
-    def load_network(self, network=None):
+    def load_network(self, network=None, log=False):
         if hasattr(self, 'exec_network'):
             del self.exec_network
-        if not hasattr(self, 'plugin'):
-            self.create_ie_plugin()
         if network is None:
             self._create_network()
         else:
             self.network = network
-        self.exec_network = self.plugin.load(network=self.network, num_requests=self.num_requests)
+        self._set_precision()
+        if log:
+            self._print_input_output_info()
 
-    def load_ir(self, xml_path, bin_path):
+        if self.network:
+            self.exec_network = self.ie_core.load_network(self.network, self._device, num_requests=self.num_requests)
+
+    def load_ir(self, xml_path, bin_path, log=False):
         self._model = xml_path
         self._weights = bin_path
-        self.load_network()
+        self.load_network(log=log)
 
     @staticmethod
     def create_ie_network(model_xml, model_bin):
@@ -644,7 +806,7 @@ class DLSDKLauncher(Launcher):
             if layer_name not in self.const_inputs + self.image_info_inputs
         }
 
-    def fit_to_input(self, data, layer_name, layout):
+    def fit_to_input(self, data, layer_name, layout, precision):
         def data_to_blob(layer_shape, data):
             data_shape = np.shape(data)
             if len(layer_shape) == 4:
@@ -652,14 +814,22 @@ class DLSDKLauncher(Launcher):
                     data = data[0]
                 return np.transpose(data, layout)
 
-            if len(layer_shape) == 2 and len(data_shape) == 1:
-                return np.transpose([data])
+            if len(layer_shape) == 2:
+                if len(data_shape) == 1:
+                    return np.transpose([data])
+                if len(layout) == 2:
+                    return np.transpose(data, layout)
+
+            if len(layer_shape) == 5 and len(layout) == 5:
+                return np.transpose(data, layout)
 
             return np.array(data)
 
         layer_shape = tuple(self.inputs[layer_name].shape)
 
         data = data_to_blob(layer_shape, data)
+        if precision:
+            data = data.astype(precision)
 
         data_shape = np.shape(data)
         if data_shape != layer_shape:
@@ -669,12 +839,35 @@ class DLSDKLauncher(Launcher):
 
         return self._align_data_shape(data, layer_name)
 
+    def _set_precision(self):
+        config_inputs = self.config.get('inputs', [])
+        for input_config in config_inputs:
+            if 'precision' in input_config:
+                if self.network:
+                    self.network.inputs[input_config['name']].precision = input_config['precision']
+                else:
+                    self.exec_network.inputs[input_config['name']].precision = input_config['precision']
+
+    def _print_input_output_info(self):
+        print_info('Input info:')
+        network_inputs = self.network.inputs if self.network else self.exec_network.inputs
+        network_outputs = self.network.outputs if self.network else self.exec_network.outputs
+        for name, input_info in network_inputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(input_info.precision))
+            print_info('\tshape {}\n'.format(input_info.shape))
+        print_info('Output info')
+        for name, output_info in network_outputs.items():
+            print_info('\tLayer name: {}'.format(name))
+            print_info('\tprecision: {}'.format(output_info.precision))
+            print_info('\tshape: {}\n'.format(output_info.shape))
+
     def release(self):
         if 'network' in self.__dict__:
             del self.network
         if 'exec_network' in self.__dict__:
             del self.exec_network
-        if 'plugin' in self.__dict__:
-            del self.plugin
+        if 'ie_core' in self.__dict__:
+            del self.ie_core
         if self._set_variable:
             del os.environ[FPGA_COMPILER_MODE_VAR]

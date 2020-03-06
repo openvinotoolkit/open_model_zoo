@@ -16,8 +16,8 @@ limitations under the License.
 
 import numpy as np
 
-from ..representation import ClassificationAnnotation, ClassificationPrediction
-from ..config import NumberField, StringField
+from ..representation import ClassificationAnnotation, ClassificationPrediction, TextClassificationAnnotation
+from ..config import NumberField, StringField, ConfigError
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
 
@@ -29,7 +29,7 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
 
     __provider__ = 'accuracy'
 
-    annotation_types = (ClassificationAnnotation, )
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
     prediction_types = (ClassificationPrediction, )
 
     @classmethod
@@ -54,7 +54,7 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
         self.accuracy = AverageMeter(loss)
 
     def update(self, annotation, prediction):
-        self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
+        return self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
 
     def evaluate(self, annotations, predictions):
         return self.accuracy.evaluate()
@@ -70,7 +70,7 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
 
     __provider__ = 'accuracy_per_class'
 
-    annotation_types = (ClassificationAnnotation, )
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
     prediction_types = (ClassificationPrediction, )
 
     @classmethod
@@ -89,8 +89,14 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
     def configure(self):
         self.top_k = self.get_value_from_config('top_k')
         label_map = self.get_value_from_config('label_map')
-        self.labels = self.dataset.metadata.get(label_map)
-        self.meta['names'] = list(self.labels.values())
+        if self.dataset.metadata:
+            self.labels = self.dataset.metadata.get(label_map)
+            if not self.labels:
+                raise ConfigError('accuracy per class metric requires label_map providing in dataset_meta'
+                                  'Please provide dataset meta file or regenerate annotation')
+        else:
+            raise ConfigError('accuracy per class metric requires dataset metadata'
+                              'Please provide dataset meta file or regenerate annotation')
 
         def loss(annotation_label, prediction_top_k_labels):
             result = np.zeros_like(list(self.labels.keys()))
@@ -107,9 +113,10 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
         self.accuracy = AverageMeter(loss, counter)
 
     def update(self, annotation, prediction):
-        self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
+        return self.accuracy.update(annotation.label, prediction.top_k(self.top_k))
 
     def evaluate(self, annotations, predictions):
+        self.meta['names'] = list(self.labels.values())
         return self.accuracy.evaluate()
 
     def reset(self):
@@ -147,10 +154,12 @@ class ClipAccuracy(PerImageEvaluationMetric):
 
         self.video_avg_prob.update(annotation.label, prediction.scores)
 
-        self.clip_accuracy.update(annotation.label, prediction.label)
+        clip_accuracy = self.clip_accuracy.update(annotation.label, prediction.label)
 
         self.previous_video_id = video_id
         self.previous_video_label = annotation.label
+
+        return clip_accuracy
 
     def evaluate(self, annotations, predictions):
         self.meta['names'] = ['clip_accuracy', 'video_accuracy']
@@ -160,3 +169,90 @@ class ClipAccuracy(PerImageEvaluationMetric):
         self.clip_accuracy.reset()
         self.video_accuracy.reset()
         self.video_avg_prob.reset()
+
+
+class ClassificationF1Score(PerImageEvaluationMetric):
+    __provider__ = 'classification_f1-score'
+
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
+    prediction_types = (ClassificationPrediction, )
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'label_map': StringField(optional=True, default='label_map', description="Label map.")
+        })
+        return parameters
+
+    def configure(self):
+        label_map = self.get_value_from_config('label_map')
+        if self.dataset.metadata:
+            self.labels = self.dataset.metadata.get(label_map)
+            if not self.labels:
+                raise ConfigError('classification_f1-score metric requires label_map providing in dataset_meta'
+                                  'Please provide dataset meta file or regenerate annotation')
+        else:
+            raise ConfigError('classification_f1-scores metric requires dataset metadata'
+                              'Please provide dataset meta file or regenerate annotation')
+        self.cm = np.zeros((len(self.labels), len(self.labels)))
+
+    def update(self, annotation, prediction):
+        self.cm[prediction.label] += 1
+        return annotation.label == prediction.label
+
+    def evaluate(self, annotations, predictions):
+        cm_diagonal = self.cm.diagonal()
+        cm_horizontal_sum = self.cm.sum(axis=1)
+        cm_vertical_sum = self.cm.sum(axis=0)
+        precision = np.divide(
+            cm_diagonal, cm_horizontal_sum, out=np.zeros_like(cm_diagonal, dtype=float), where=cm_horizontal_sum != 0
+        )
+        recall = np.divide(
+            cm_diagonal, cm_vertical_sum, out=np.zeros_like(cm_diagonal, dtype=float), where=cm_vertical_sum != 0
+        )
+        sum_precision_recall = precision + recall
+        f1_score = 2 * np.divide(
+            precision * recall, sum_precision_recall, out=np.zeros_like(cm_diagonal, dtype=float),
+            where=sum_precision_recall != 0
+        )
+        return f1_score if len(f1_score) == 2 else f1_score[0]
+
+    def reset(self):
+        self.cm = np.zeros((len(self.labels), len(self.labels)))
+
+
+class MetthewsCorrelation(PerImageEvaluationMetric):
+    __provider__ = 'metthews_correlation_coef'
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
+    prediction_types = (ClassificationPrediction, )
+
+    def configure(self):
+        label_map = self.dataset.metadata.get('label_map', [])
+        if label_map and len(label_map) != 2:
+            raise ConfigError('metthews_correlation_coefficient applicable only for binary classification task')
+        self.reset()
+
+    def update(self, annotation, prediction):
+        if annotation.label and prediction.label:
+            self.tp += 1
+            return 1
+        if not annotation.label and not prediction.label:
+            self.tn += 1
+            return 1
+        if not annotation.label and prediction.label:
+            self.fp += 1
+            return 0
+        if annotation.label and not prediction.label:
+            self.fn += 1
+            return 0
+        return -1
+
+    def evaluate(self, annotations, predictions):
+        delimeter_sum = (self.tp + self.fp) * (self.tp + self.fn) * (self.tn + self.fp) * (self.tn + self.fn)
+        return ((self.tp * self.tn) - (self.fp * self.fn)) / np.sqrt(delimeter_sum) if delimeter_sum != 0 else -1
+
+    def reset(self):
+        self.tp = 0
+        self.tn = 0
+        self.fp = 0
+        self.fn = 0

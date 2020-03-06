@@ -28,6 +28,7 @@ from ..utils import (
     get_parameter_value_from_config
 )
 
+
 class Postprocessor(ClassProvider):
     __provider_type__ = 'postprocessor'
 
@@ -83,23 +84,26 @@ class Postprocessor(ClassProvider):
         raise NotImplementedError
 
     def process_image_with_metadata(self, annotation, prediction, image_metadata=None):
-        # This is the default implementation.
-        # For the older postprocessor classes that do not know that
-        # postprocessing may be done with using image_metadata; in this case
-        # the postprocessor class overrides the method `process_image` only,
-        # and the overriden method will be called by this default
-        # implementation.
-        #
-        # Note that if a postprocessor class wants to use image_metadata,
-        # it MUST overrides this method `process_image_with_metadata`
-        # instead of `process_image`.
+        """
+        This is the default implementation.
+        For the older postprocessor classes that do not know that
+        postprocessing may be done with using image_metadata; in this case
+        the postprocessor class overrides the method `process_image` only,
+        and the overridden method will be called by this default implementation.
+
+        Note that if a postprocessor class wants to use image_metadata,
+        it MUST overrides this method `process_image_with_metadata`
+        instead of `process_image`.
+        """
         return self.process_image(annotation, prediction)
 
     def process(self, annotation, prediction, image_metadata=None):
-        image_size = annotation[0].metadata.get('image_size') if not None in annotation else None
+        image_size = annotation[0].metadata.get('image_size') if None not in annotation else None
         self.image_size = None
         if image_size:
             self.image_size = image_size[0]
+        if self.image_size is None and image_metadata:
+            self.image_size = image_metadata.get('image_size')
 
         self.process_image_with_metadata(annotation, prediction, image_metadata)
 
@@ -114,9 +118,9 @@ class Postprocessor(ClassProvider):
         pass
 
     def validate_config(self):
-        ConfigValidator(self.name,
-                        on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT,
-                        fields=self.parameters()).validate(self.config)
+        ConfigValidator(
+            self.name, on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT, fields=self.parameters()
+        ).validate(self.config)
 
     def get_entries(self, annotation, prediction):
         message_not_found = '{}: {} is not found in container'
@@ -157,14 +161,17 @@ class ApplyToOption(Enum):
     PREDICTION = 'prediction'
     ALL = 'all'
 
+
 class PostprocessorWithSpecificTargets(Postprocessor):
     @classmethod
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'apply_to' : StringField(optional=True, choices=enum_values(ApplyToOption),
-                                     description="determines target boxes for processing (annotation for ground truth "
-                                     "boxes and prediction for detection results, all for both).")
+            'apply_to': StringField(
+                optional=True, choices=enum_values(ApplyToOption),
+                description="determines target boxes for processing (annotation for ground truth "
+                            "boxes and prediction for detection results, all for both)."
+            )
         })
         return parameters
 
@@ -181,10 +188,12 @@ class PostprocessorWithSpecificTargets(Postprocessor):
         self.configure()
 
     def process(self, annotation, prediction, image_metadata=None):
-        image_size = annotation[0].metadata.get('image_size') if not None in annotation else None
+        image_size = annotation[0].metadata.get('image_size') if None not in annotation else None
         self.image_size = None
         if image_size:
             self.image_size = image_size[0]
+        if self.image_size is None and image_metadata:
+            self.image_size = image_metadata.get('image_size')
         target_annotations, target_predictions = None, None
         if self.annotation_source or self.prediction_source:
             target_annotations, target_predictions = self._choose_targets_using_sources(annotation, prediction)

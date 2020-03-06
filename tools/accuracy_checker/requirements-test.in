@@ -1,0 +1,10 @@
+pytest~=5.0
+pytest-mock~=2.0
+
+# pytest depends on atomicwrites, but only on Windows.
+# This means that if we use pip-compile on Linux, the resulting requirements.txt
+# will not include atomicwrites and thus will not work on Windows.
+# And we _can't_ use pip-compile on Windows, because sentencepiece does not have
+# Python 3.5 Windows wheels on PyPI.
+# So as a workaround, make the atomicwrites dependency unconditional.
+atomicwrites

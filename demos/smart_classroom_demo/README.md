@@ -23,13 +23,13 @@ On the start-up, the application reads command line parameters and loads four ne
 ## Creating a Gallery for Face Recognition
 
 To recognize faces on a frame, the demo needs a gallery of reference images. Each image should contain a tight crop of face. You can create the gallery from an arbitrary list of images:
-1. Put images containing tight crops of frontal-oriented faces to a separate empty folder. Each identity could have multiple images. Name images as `id_name.0.png, id_name.1.png, ...`.
+1. Put images containing tight crops of frontal-oriented faces (or use `-crop_gallery` key for the demo) to a separate empty folder. Each identity must have only one image. Name images as `id_name0.png, id_name1.png, ...`.
 2. Run the `create_list.py <path_to_folder_with_images>` command to get a list of files and identities in `.json` format.
 
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./smart_classroom_demo -h
 InferenceEngine:
     API version ............ <version>
@@ -52,6 +52,7 @@ Options:
     -d_lm '<device>'               Optional. Specify the target device for Landmarks Regression Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -d_reid '<device>'             Optional. Specify the target device for Face Reidentification Retail (the list of available devices is shown below). Default value is CPU. Use "-d HETERO:<comma-separated_devices_list>" format to specify HETERO plugin. The application looks for a suitable plugin for the specified device.
     -out_v  '<path>'               Optional. File to write output video with visualization to.
+    -greedy_reid_matching          Optional. Use faster greedy matching algorithm in face reid.
     -pc                            Optional. Enables per-layer performance statistics.
     -r                             Optional. Output Inference results as raw values.
     -ad                            Optional. Output file name to save per-person action statistics in.
@@ -77,6 +78,7 @@ Options:
     -min_size_fr                   Optional. Minimum input size for faces during database registration.
     -al                            Optional. Output file name to save per-person action detections in.
     -ss_t                          Optional. Number of frames to smooth actions.
+    -u                             Optional. List of monitors to show initially.
 ```
 
 Running the application with the empty list of options yields an error message.

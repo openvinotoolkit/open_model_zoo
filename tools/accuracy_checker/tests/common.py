@@ -57,10 +57,10 @@ def make_representation(bounding_boxes, is_ground_truth=False, score=None, meta=
 
     result = []
     for idx, box in enumerate(bounding_boxes):
-        arr = np.array(np.mat(box))
-
         if box == "":
             arr = np.array([]).reshape((0, 5))
+        else:
+            arr = np.array([np.fromstring(row, sep=' ') for row in box.split(';')])
 
         if is_ground_truth or score:
             assert arr.shape[1] == 5

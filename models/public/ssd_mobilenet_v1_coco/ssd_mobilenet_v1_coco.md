@@ -13,7 +13,7 @@ The `ssd_mobilenet_v1_coco` model is a [Single-Shot multibox Detection (SSD)](ht
 | Type              | Detection     |
 | GFLOPs            | 2.494         |
 | MParams           | 6.807         |
-| Source framework  | Tensorflow\*  |
+| Source framework  | TensorFlow\*  |
 
 ## Accuracy
 
@@ -69,4 +69,6 @@ bounding boxes. For each detection, the description has the format:
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/tensorflow/models/master/LICENSE]()
+The original model is distributed under the
+[Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
+A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).

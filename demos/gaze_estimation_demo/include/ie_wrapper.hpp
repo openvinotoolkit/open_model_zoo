@@ -30,15 +30,18 @@ public:
     // For setting input blobs containing vectors of data
     void setInputBlob(const std::string& blobName, const std::vector<float>& data);
 
-    // Get output blob content as a vector given its name (if there are more than one output blob)
+    // Get output blob content as a vector given its name
     void getOutputBlob(const std::string& blobName, std::vector<float>& output);
-    // Get output blob content as a vector (if there is only one output blob)
-    void getOutputBlob(std::vector<float>& output);
 
     void printPerlayerPerformance() const;
 
-    const std::map<std::string, std::vector<unsigned long>>& getIputBlobDimsInfo() const;
+    const std::map<std::string, std::vector<unsigned long>>& getInputBlobDimsInfo() const;
     const std::map<std::string, std::vector<unsigned long>>& getOutputBlobDimsInfo() const;
+
+    std::string expectSingleInput() const;
+    std::string expectSingleOutput() const;
+
+    void expectImageInput(const std::string& blobName) const;
 
     void reshape(const std::map<std::string, std::vector<unsigned long>>& newBlobsDimsInfo);
 
@@ -48,7 +51,6 @@ private:
     std::string modelPath;
     std::string deviceName;
     InferenceEngine::Core& ie;
-    InferenceEngine::CNNNetReader netReader;
     InferenceEngine::CNNNetwork network;
     InferenceEngine::ExecutableNetwork executableNetwork;
     InferenceEngine::InferRequest request;

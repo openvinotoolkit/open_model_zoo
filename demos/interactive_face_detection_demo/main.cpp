@@ -25,6 +25,7 @@
 
 #include <inference_engine.hpp>
 
+#include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
@@ -34,9 +35,6 @@
 #include "visualizer.hpp"
 
 #include <ie_iextension.h>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 using namespace InferenceEngine;
 
@@ -108,7 +106,7 @@ int main(int argc, char *argv[]) {
         Core ie;
 
         std::set<std::string> loadedDevices;
-        std::vector<std::pair<std::string, std::string>> cmdOptions = {
+        std::pair<std::string, std::string> cmdOptions[] = {
             {FLAGS_d, FLAGS_m},
             {FLAGS_d_ag, FLAGS_m_ag},
             {FLAGS_d_hp, FLAGS_m_hp},
@@ -138,9 +136,6 @@ int main(int argc, char *argv[]) {
 
             /** Loading extensions for the CPU device **/
             if ((deviceName.find("CPU") != std::string::npos)) {
-#ifdef WITH_EXTENSIONS
-                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-#endif
 
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
@@ -180,8 +175,6 @@ int main(int argc, char *argv[]) {
 
         std::ostringstream out;
         size_t framesCounter = 0;
-        bool frameReadStatus;
-        bool isLastFrame;
         int delay = 1;
         double msrate = -1;
         cv::Mat prev_frame, next_frame;
@@ -207,18 +200,23 @@ int main(int argc, char *argv[]) {
         prev_frame = frame.clone();
 
         // Reading the next frame
-        frameReadStatus = cap.read(frame);
+        bool frameReadStatus = cap.read(frame);
 
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press any key";
+            std::cout << " or switch to the output window and press Q or Esc";
         }
         std::cout << std::endl;
+
+        const cv::Point THROUGHPUT_METRIC_POSITION{10, 45};
+
+        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
+        Presenter presenter(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, graphSize);
 
         while (true) {
             timer.start("total");
             framesCounter++;
-            isLastFrame = !frameReadStatus;
+            bool isLastFrame = !frameReadStatus;
 
             // Retrieving face detection results for the previous frame
             faceDetector.wait();
@@ -289,7 +287,7 @@ int main(int argc, char *argv[]) {
                     float intensity_mean = calcMean(prev_frame(rect));
 
                     if ((face == nullptr) ||
-                        ((face != nullptr) && ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f))) {
+                        ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f)) {
                         face = std::make_shared<Face>(id++, rect);
                     } else {
                         prev_faces.remove(face);
@@ -330,12 +328,14 @@ int main(int argc, char *argv[]) {
                 faces.push_back(face);
             }
 
+            presenter.drawGraphs(prev_frame);
+
             //  Visualizing results
             if (!FLAGS_no_show || !FLAGS_o.empty()) {
                 out.str("");
                 out << "Total image throughput: " << std::fixed << std::setprecision(2)
                     << 1000.f / (timer["total"].getSmoothedDuration()) << " fps";
-                cv::putText(prev_frame, out.str(), cv::Point2f(10, 45), cv::FONT_HERSHEY_TRIPLEX, 1.2,
+                cv::putText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_TRIPLEX, 1,
                             cv::Scalar(255, 0, 0), 2);
 
                 // drawing faces
@@ -367,8 +367,12 @@ int main(int argc, char *argv[]) {
                     cv::waitKey(0);
                 }
                 break;
-            } else if (!FLAGS_no_show && -1 != cv::waitKey(delay)) {
-                break;
+            } else if (!FLAGS_no_show) {
+                int key = cv::waitKey(delay);
+                if (27 == key || 'Q' == key || 'q' == key) {
+                    break;
+                }
+                presenter.handleKey(key);
             }
         }
 
@@ -383,6 +387,8 @@ int main(int argc, char *argv[]) {
             emotionsDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_em));
             facialLandmarksDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_lm));
         }
+
+        std::cout << presenter.reportMeans() << '\n';
         // ---------------------------------------------------------------------------------------------------
 
         if (!FLAGS_o.empty()) {

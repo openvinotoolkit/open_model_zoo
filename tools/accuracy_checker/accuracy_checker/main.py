@@ -14,17 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import sys
 from pathlib import Path
 from argparse import ArgumentParser
 from functools import partial
+from csv import DictWriter
 
 import cv2
 
 from .config import ConfigReader
-from .logging import print_info, add_file_handler
-from .evaluators import ModelEvaluator, PipeLineEvaluator, get_processing_info
+from .logging import print_info, add_file_handler, exception
+from .evaluators import ModelEvaluator, PipeLineEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
-from .utils import get_path, cast_to_bool
+from .utils import get_path, cast_to_bool, check_file_existence
+
+EVALUATION_MODE = {
+    'models': ModelEvaluator,
+    'pipelines': PipeLineEvaluator,
+    'evaluations': ModuleEvaluator
+}
 
 
 def build_arguments_parser():
@@ -45,21 +53,19 @@ def build_arguments_parser():
         '-m', '--models',
         help='prefix path to the models and weights',
         type=partial(get_path, is_directory=True),
-        default=Path.cwd(),
-        required=False
+        required=False,
+        nargs='+'
     )
     parser.add_argument(
         '-s', '--source',
         help='prefix path to the data source',
         type=partial(get_path, is_directory=True),
-        default=Path.cwd(),
         required=False
     )
     parser.add_argument(
         '-a', '--annotations',
         help='prefix path to the converted annotations and datasets meta data',
         type=partial(get_path, is_directory=True),
-        default=Path.cwd(),
         required=False
     )
     parser.add_argument(
@@ -79,7 +85,6 @@ def build_arguments_parser():
         '-b', '--bitstreams',
         help='prefix path to bitstreams folder',
         type=partial(get_path, file_or_directory=True),
-        default=Path.cwd(),
         required=False
     )
     parser.add_argument(
@@ -106,6 +111,14 @@ def build_arguments_parser():
     parser.add_argument(
         '--tf_custom_op_config_dir',
         help='path to directory with tensorflow custom operation configuration files for model optimizer',
+        type=partial(get_path, is_directory=True),
+        # there is no default value because if user did not specify it we use specific location
+        # defined in model_conversion.py
+        required=False
+    )
+    parser.add_argument(
+        '--transformations_config_dir',
+        help='path to directory with Model Optimizer transformations configuration files',
         type=partial(get_path, is_directory=True),
         # there is no default value because if user did not specify it we use specific location
         # defined in model_conversion.py
@@ -186,11 +199,48 @@ def build_arguments_parser():
         choices=['LOG_NONE', 'LOG_WARNING', 'LOG_INFO', 'LOG_DEBUG'],
         default='LOG_WARNING'
     )
+    parser.add_argument(
+        '--deprecated_ir_v7',
+        help='Allow generation IR v7 via Model Optimizer',
+        required=False,
+        default=False,
+        type=cast_to_bool
+    )
+    parser.add_argument(
+        '-dc', '--device_config',
+        help='Inference Engine device specific config file',
+        type=get_path,
+        required=False
+    )
+
+    parser.add_argument(
+        '--async_mode',
+        help='Allow evaluation in async mode',
+        required=False,
+        default=False,
+        type=cast_to_bool
+    )
+    parser.add_argument(
+        '--num_requests',
+        help='the number of infer requests',
+        required=False,
+    )
+    parser.add_argument(
+        '--csv_result',
+        help='file for results writing',
+        required=False,
+    )
+    parser.add_argument(
+        '--model_is_blob', help='the tip for automatic model search to use blob for dlsdk launcher',
+        required=False,
+        type=cast_to_bool
+    )
 
     return parser
 
 
 def main():
+    return_code = 0
     args = build_arguments_parser().parse_args()
     progress_bar_provider = args.progress if ':' not in args.progress else args.progress.split(':')[0]
     progress_reporter = ProgressReporter.provide(progress_bar_provider, None, print_interval=args.progress_interval)
@@ -198,39 +248,26 @@ def main():
         add_file_handler(args.log_file)
 
     config, mode = ConfigReader.merge(args)
-    if mode == 'models':
-        model_evaluation_mode(config, progress_reporter, args)
-    else:
-        pipeline_evaluation_mode(config, progress_reporter, args)
-
-
-def model_evaluation_mode(config, progress_reporter, args):
-    for model in config['models']:
-        for launcher_config in model['launchers']:
-            for dataset_config in model['datasets']:
-                print_processing_info(
-                    model['name'],
-                    launcher_config['framework'],
-                    launcher_config['device'],
-                    launcher_config.get('tags'),
-                    dataset_config['name']
-                )
-                model_evaluator = ModelEvaluator.from_configs(launcher_config, dataset_config)
-                progress_reporter.reset(model_evaluator.dataset.size)
-                model_evaluator.dataset_processor(args.stored_predictions, progress_reporter=progress_reporter)
-                model_evaluator.compute_metrics(ignore_results_formatting=args.ignore_result_formatting)
-
-                model_evaluator.release()
-
-
-def pipeline_evaluation_mode(config, progress_reporter, args):
-    for pipeline_config in config['pipelines']:
-        print_processing_info(*get_processing_info(pipeline_config))
-        evaluator = PipeLineEvaluator.from_configs(pipeline_config['stages'])
-        evaluator.process_dataset(args.stored_predictions, progress_reporter=progress_reporter)
-        evaluator.compute_metrics(ignore_results_formatting=args.ignore_result_formatting)
-
-        evaluator.release()
+    evaluator_class = EVALUATION_MODE.get(mode)
+    if not evaluator_class:
+        raise ValueError('Unknown evaluation mode')
+    for config_entry in config[mode]:
+        try:
+            processing_info = evaluator_class.get_processing_info(config_entry)
+            print_processing_info(*processing_info)
+            evaluator = evaluator_class.from_configs(config_entry)
+            evaluator.process_dataset(args.stored_predictions, progress_reporter=progress_reporter)
+            metrics_results, _ = evaluator.extract_metrics_results(
+                print_results=True, ignore_results_formatting=args.ignore_result_formatting
+            )
+            if args.csv_result:
+                write_csv_result(args.csv_result, processing_info, metrics_results)
+            evaluator.release()
+        except Exception as e:  # pylint:disable=W0703
+            exception(e)
+            return_code = 1
+            continue
+    sys.exit(return_code)
 
 
 def print_processing_info(model, launcher, device, tags, dataset):
@@ -242,6 +279,31 @@ def print_processing_info(model, launcher, device, tags, dataset):
     print_info('device: {}'.format(device.upper()))
     print_info('dataset: {}'.format(dataset))
     print_info('OpenCV version: {}'.format(cv2.__version__))
+
+
+def write_csv_result(csv_file, processing_info, metric_results):
+    new_file = not check_file_existence(csv_file)
+    field_names = ['model', 'launcher', 'device', 'dataset', 'tags', 'metric_name', 'metric_type', 'metric_value']
+    model, launcher, device, tags, dataset = processing_info
+    main_info = {
+        'model': model,
+        'launcher': launcher,
+        'device': device.upper(),
+        'tags': ' '.join(tags) if tags else '',
+        'dataset': dataset
+    }
+
+    with open(csv_file, 'a+', newline='') as f:
+        writer = DictWriter(f, fieldnames=field_names)
+        if new_file:
+            writer.writeheader()
+        for metric_result in metric_results:
+            writer.writerow({
+                **main_info,
+                'metric_name': metric_result['name'],
+                'metric_type': metric_result['type'],
+                'metric_value': metric_result['value']
+            })
 
 
 if __name__ == '__main__':

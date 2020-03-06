@@ -42,7 +42,15 @@ from .zoom_segmentation_mask import ZoomSegMask
 from .crop_segmentation_mask import CropSegmentationMask
 from .clip_segmentation_mask import ClipSegmentationMask
 from .normalize_boxes import NormalizeBoxes
-from .resample_segmentation_prediction import SegmentationPredictionResample
+from .brats_postprocessing import SegmentationPredictionResample, TransformBratsPrediction
+from .extract_answers_tokens import ExtractSQUADPrediction
+from .translate_3d_poses import Translate3dPoses
+from .normalize_recomendation import MinMaxNormalizeRecommendation, SigmoidNormalizeRecommendation
+from .align_prediction_depth_map import AlignDepth
+from .resize_prediction_depth_map import ResizeDepthMap
+from .resize_super_resolution import ResizeSuperResolution
+from .crop_ground_truth_image import CropGTImage
+
 
 __all__ = [
     'Postprocessor',
@@ -71,7 +79,25 @@ __all__ = [
     'ZoomSegMask',
     'CropSegmentationMask',
     'ClipSegmentationMask',
-    'SegmentationPredictionResample',
 
-    'NormalizeLandmarksPoints'
+    'SegmentationPredictionResample',
+    'TransformBratsPrediction',
+
+    'NormalizeLandmarksPoints',
+
+    'ExtractSQUADPrediction',
+
+    'Translate3dPoses',
+
+    'SigmoidNormalizeRecommendation',
+    'MinMaxNormalizeRecommendation',
+
+    'MinMaxNormalizeRecommendation',
+
+    'AlignDepth',
+    'ResizeDepthMap',
+
+    'ResizeSuperResolution',
+
+    'CropGTImage'
 ]

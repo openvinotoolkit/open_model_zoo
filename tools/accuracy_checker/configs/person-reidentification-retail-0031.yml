@@ -18,26 +18,21 @@ models:
 
       - framework: dlsdk
         tags:
-          - INT8
-        device: CPU
-        model:   intel/person-reidentification-retail-0031/INT8/person-reidentification-retail-0031.xml
-        weights: intel/person-reidentification-retail-0031/INT8/person-reidentification-retail-0031.bin
+          - FP32-INT8
+        model:   intel/person-reidentification-retail-0031/FP32-INT8/person-reidentification-retail-0031.xml
+        weights: intel/person-reidentification-retail-0031/FP32-INT8/person-reidentification-retail-0031.bin
         adapter: reid
 
     datasets:
       - name: market1501
         reader: pillow_imread
-        data_source: Market-1501-v15.09.15
-        annotation_conversion:
-          converter: market1501_reid
-          data_dir: Market-1501-v15.09.15
 
         preprocessing:
           - type: bgr_to_rgb
           - type: resize
             dst_width: 48
             dst_height: 96
-            use_pil: True
+            use_pillow: True
             interpolation: ANTIALIAS
 
         metrics:
@@ -46,3 +41,5 @@ models:
             top_k: 1
 
           - type: reid_map
+
+global_definitions: ../dataset_definitions.yml

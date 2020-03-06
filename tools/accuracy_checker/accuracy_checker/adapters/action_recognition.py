@@ -14,11 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import re
 import numpy as np
 
 from ..adapters import Adapter
 from ..config import ConfigValidator, StringField, NumberField, BoolField, ListField
 from ..representation import DetectionPrediction, ActionDetectionPrediction, ContainerPrediction
+from ..utils import contains_all
 
 
 class ActionDetection(Adapter):
@@ -100,6 +102,7 @@ class ActionDetection(Adapter):
         self.action_threshold = self.get_value_from_config('action_confidence_threshold')
         self.action_scale = self.get_value_from_config('action_scale')
         add_conf_out_prefix = self.get_value_from_config('add_conf_out_prefix')
+        self.outputs_verified = False
 
         if self.multihead:
             self.in_sizes = self.get_value_from_config('in_sizes')
@@ -137,6 +140,8 @@ class ActionDetection(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
+        if not self.outputs_verified:
+            self._get_output_names(raw_outputs)
         prior_boxes = raw_outputs[self.priorbox_out][0][0].reshape(-1, 4) if not self.multihead else None
         prior_variances = raw_outputs[self.priorbox_out][0][1].reshape(-1, 4) if not self.multihead else None
 
@@ -272,3 +277,25 @@ class ActionDetection(Adapter):
         ]
 
         return normalized_bbox
+
+    def _get_output_names(self, raw_outputs):
+        loc_out_regex = re.compile(self.loc_out)
+        main_conf_out_regex = re.compile(self.main_conf_out)
+
+        def find_layer(regex, output_name, all_outputs):
+            suitable_layers = [layer_name for layer_name in all_outputs if regex.match(layer_name)]
+            if not suitable_layers:
+                raise ValueError('suitable layer for {} output is not found'.format(output_name))
+
+            if len(suitable_layers) > 1:
+                raise ValueError('more than 1 layers matched to regular expression, please specify more detailed regex')
+
+            return suitable_layers[0]
+
+        self.loc_out = find_layer(loc_out_regex, 'loc', raw_outputs)
+        self.main_conf_out = find_layer(main_conf_out_regex, 'main confidence', raw_outputs)
+        add_conf_with_bias = [layer_name + '/add_' for layer_name in self.add_conf_outs]
+        if not contains_all(raw_outputs, self.add_conf_outs) and contains_all(raw_outputs, add_conf_with_bias):
+            self.add_conf_outs = add_conf_with_bias
+
+        self.outputs_verified = True

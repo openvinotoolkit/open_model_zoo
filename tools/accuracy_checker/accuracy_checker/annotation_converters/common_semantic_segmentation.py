@@ -1,6 +1,7 @@
 from pathlib import Path
 from ..config import PathField, StringField
-from .format_converter import BaseFormatConverter, ConverterReturn
+from ..logging import warning
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 from ..representation.segmentation_representation import LOADERS_MAPPING
 from ..representation import SegmentationAnnotation
 from ..utils import read_json
@@ -11,8 +12,8 @@ class CommonSegmentationConverter(BaseFormatConverter):
 
     @classmethod
     def parameters(cls):
-        parameters = super().parameters()
-        parameters.update(
+        configuration_parameters = super().parameters()
+        configuration_parameters.update(
             {
                 'images_dir': PathField(description='path to input images directory', is_directory=True),
                 'masks_dir': PathField(description='path to gt masks directory', is_directory=True),
@@ -25,12 +26,12 @@ class CommonSegmentationConverter(BaseFormatConverter):
                     description='reader for gt masks. Supported: {}'.format(', '.join(LOADERS_MAPPING)),
                     default='pillow'
                 ),
-                'dataset_meta': PathField(
+                'dataset_meta_file': PathField(
                     description='path to json file with dataset meta (e.g. label_map, color_encoding', optional=True
                 )
             }
         )
-        return parameters
+        return configuration_parameters
 
     def configure(self):
         self.images_dir = self.get_value_from_config('images_dir')
@@ -40,7 +41,7 @@ class CommonSegmentationConverter(BaseFormatConverter):
         self.mask_prefix = self.get_value_from_config('mask_prefix')
         self.mask_postfix = self.get_value_from_config('mask_postfix')
         self.mask_loader = LOADERS_MAPPING[self.get_value_from_config('mask_loader')]
-        self.dataset_meta = self.get_value_from_config('dataset_meta')
+        self.dataset_meta = self.get_value_from_config('dataset_meta_file')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         annotations = []
@@ -72,6 +73,15 @@ class CommonSegmentationConverter(BaseFormatConverter):
             if progress_callback is not None and idx % progress_interval == 0:
                 progress_callback(idx / num_iterations * 100)
 
-        dataset_meta = read_json(self.dataset_meta) if self.dataset_meta else None
+        dataset_meta = None
+        if self.dataset_meta:
+            dataset_meta = read_json(self.dataset_meta)
+            if 'label_map' not in dataset_meta:
+                if 'labels' in dataset_meta:
+                    dataset_meta['label_map'] = dict(enumerate(dataset_meta['labels']))
+                else:
+                    warning("Information about dataset labels is provided. Please provide it for metric calculation.")
+            else:
+                dataset_meta['label_map'] = verify_label_map(dataset_meta['label_map'])
 
         return ConverterReturn(annotations, dataset_meta, content_errors)

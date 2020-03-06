@@ -13,28 +13,33 @@
 # limitations under the License.
 
 description: >-
-  This is a lightweight landmarks regressor for the Smart Classroom scenario.
-  It has a classic convolutional design: stacked 3x3 convolutions, batch normalizations,
-  PReLU activations, and poolings. Final regression is done by the global depthwise
-  pooling head and FullyConnected layers. The model predicts five facial landmarks:
-  two eyes, nose, and two lip corners.
+  Landmark's detection. Used in Smart Classroom. The model is identical to 0002 but
+  trained on internal dataset with improved regression loss.
 task_type: object_attributes
 files:
   - name: FP32/landmarks-regression-retail-0009.xml
-    size: 18089
-    sha256: c9890b8db9025e17998db19dd0e037082f0e50838cb704ea8a60c6b5ad876602
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
+    size: 42715
+    sha256: ef7aa8f3f2b9730df8612fc7221bd7beb423b6001202a452723efd86993358a3
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.xml
   - name: FP32/landmarks-regression-retail-0009.bin
     size: 762464
     sha256: 46795837d35e8199b7c5b57e1f76297827bf516a150c0d5643197d8c325f1dbc
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/landmarks-regression-retail-0009/FP32/landmarks-regression-retail-0009.bin
   - name: FP16/landmarks-regression-retail-0009.xml
-    size: 18074
-    sha256: 5bbd3da653942f7b9131f90f456f93fa79aa4825cbc24da19eeda954e37f082b
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
+    size: 42692
+    sha256: 01a0c7b4bbb0a12919351d78d551bbbe36a1fa62812c0f6ee1f49d7cc7bc10c0
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.xml
   - name: FP16/landmarks-regression-retail-0009.bin
-    size: 381232
-    sha256: 5d74c26cbb836b3de358ab05d4cbd92c4eb713dc74484cff9de82b2deb3d8527
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
+    size: 381248
+    sha256: 973b13e64b3576f754a690266b069438b531bc657233d09d7b382ca36e6cf1e4
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
+  - name: FP32-INT8/landmarks-regression-retail-0009.xml
+    size: 78229
+    sha256: 1bf202dd4ea57ebc17762ea3173e1c482c1c8efb2aeeec13fa073429bfd766a2
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/landmarks-regression-retail-0009/FP32-INT8/landmarks-regression-retail-0009.xml
+  - name: FP32-INT8/landmarks-regression-retail-0009.bin
+    size: 767188
+    sha256: 2a4bbc1f41d80e3ad2125d9297825d49379647ee2f61d982962135d1a146ecb7
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/landmarks-regression-retail-0009/FP32-INT8/landmarks-regression-retail-0009.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

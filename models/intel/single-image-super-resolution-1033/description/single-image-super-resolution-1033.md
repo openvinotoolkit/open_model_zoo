@@ -26,7 +26,7 @@ Super resolution:
 | PSNR                            | 30.97 dB                                  |
 | GFlops                          | 16.062                                    |
 | MParams                         | 0.030                                     |
-| Source framework                | Pytorch*                                  |
+| Source framework                | PyTorch*                                  |
 
 For reference, PSNR for bicubic upsampling on test dataset is 28.48 dB.
 

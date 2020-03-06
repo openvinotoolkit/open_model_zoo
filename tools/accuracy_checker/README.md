@@ -45,10 +45,11 @@ In order to evaluate some models required frameworks have to be installed. Accur
 
 - [OpenVINO](https://software.intel.com/en-us/openvino-toolkit/documentation/get-started).
 - [Caffe](accuracy_checker/launcher/caffe_installation_readme.md).
-- [MxNet](https://mxnet.incubator.apache.org/versions/master/).
+- [MXNet](https://mxnet.apache.org/).
 - [OpenCV DNN](https://docs.opencv.org/4.1.0/d2/de6/tutorial_py_setup_in_ubuntu.html).
 - [TensorFlow](https://www.tensorflow.org/).
 - [ONNX Runtime](https://github.com/microsoft/onnxruntime/blob/master/README.md).
+- [PyTorch](https://pytorch.org/)
 
 You can use any of them or several at a time.
 
@@ -58,6 +59,13 @@ If all prerequisite are installed, then you are ready to install **accuracy chec
 
 ```bash
 python3 setup.py install
+```
+
+Accuracy Checker is modular tool and have some task-specific dependencies, all specific required modules can be found in `requirements.in` file.
+You can install only core part of the tool without additional dependencies and manage them by your-self using following command instead of standard installation:
+
+```bash
+python setup.py install_core
 ```
 
 #### Usage
@@ -73,7 +81,7 @@ accuracy_check -c path/to/configuration_file -m /path/to/models -s /path/to/sour
 All relative paths in config files will be prefixed with values specified in command line:
 
 - `-c, --config` path to configuration file.
-- `-m, --models` specifies directory in which models and weights declared in config file will be searched.
+- `-m, --models` specifies directory in which models and weights declared in config file will be searched. You also can specify space separated list of directories if you want to run the same configuration several times with models located in different directories or if you have the pipeline with several models.
 - `-s, --source` specifies directory in which input images will be searched.
 - `-a, --annotations` specifies directory in which annotation and meta files will be searched.
 
@@ -86,6 +94,15 @@ You may refer to `-h, --help` to full list of command line options. Some optiona
 - `-C, '--converted_models` directory to store Model Optimizer converted models (used for DLSDK launcher only).
 - `-tf, --target_framework` framework for infer.
 - `-td, --target_devices` devices for infer. You can specify several devices using space as a delimiter.
+- `--async_mode` allows run the tool in async mode if launcher support it.
+- `--num_requests` number requests for async execution. Allows override provided in config info. Default is `AUTO`
+
+You are also able to replace some command line arguments with environment variables for path prefixing. Supported following list of variables:
+* `DATA_DIR` -  equivalent of `-s`, `--source`.
+* `MODELS_DIR` - equivalent of `-m`, `--models`.
+* `EXTENSIONS` - equivalent of `-e`, `--extensions`.
+* `ANNOTATIONS_DIR` - equivalent of `-a`, `--annotations`.
+* `BITSTREAMS_DIR` - equivalent of `-b`, `--bitstreams`.
 
 #### Configuration
 
@@ -110,6 +127,10 @@ models:
   datasets:
     - name: dataset_name
 ```
+Optionally you can use global configuration. It can be useful for avoiding duplication if you have several models which should be run on the same dataset.
+Example of global definitions file can be found [here](dataset_definitions.yml). Global definitions will be merged with evaluation config in the runtime by dataset name. 
+Parameters of global configuration can be overwritten by local config (e.g. if in definitions specified resize with destination size 224 and in the local config used resize with size 227, the value in config - 227 will be used as resize parameter)
+You can use field `global_definitions` for specifying path to global definitions directly in the model config or via command line arguments (`-d`, `--definitions`).
 
 ### Launchers
 
@@ -120,10 +141,11 @@ Please view:
 - [how to configure Caffe launcher](accuracy_checker/launcher/caffe_launcher_readme.md).
 - [how to configure DLSDK launcher](accuracy_checker/launcher/dlsdk_launcher_readme.md).
 - [how to configure OpenCV launcher](accuracy_checker/launcher/opencv_launcher_readme.md).
-- [how to configure MxNet Launcher](accuracy_checker/launcher/mxnet_launcher_readme.md).
+- [how to configure MXNet Launcher](accuracy_checker/launcher/mxnet_launcher_readme.md).
 - [how to configure TensorFlow Launcher](accuracy_checker/launcher/tf_launcher_readme.md).
 - [how to configure TensorFlow Lite Launcher](accuracy_checker/launcher/tf_lite_launcher_readme.md).
 - [how to configure ONNX Runtime Launcher](accuracy_checker/launcher/onnx_runtime_launcher_readme.md).
+- [how to configure PyTorch Launcher](accuracy_checker/launcher/pytorch_launcher_readme.md)
 
 ### Datasets
 
@@ -216,3 +238,9 @@ Typical workflow for testing new model include:
 1. Choose one of *adapters* or write your own. Adapter converts raw output produced by framework to high level problem specific representation (e.g. *ClassificationPrediction*, *DetectionPrediction*, etc).
 1. Reproduce preprocessing, metrics and postprocessing from canonical paper.
 1. Create entry in config file and execute.
+
+### Customizing Evaluation
+
+Standard Accuracy Checker validation pipeline: Annotation Reading -> Data Reading -> Preprocessing -> Inference -> Postprocessing -> Metrics.
+In some cases it can be unsuitable (e.g. if you have sequence of models). You are able to customize validation pipeline using own evaluator.
+More details about custom evaluations can be found in [related section](custom_evaluators/README.md).

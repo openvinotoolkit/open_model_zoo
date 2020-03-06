@@ -27,7 +27,7 @@ Other demo objectives are:
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./gaze_estimation_demo -h
 InferenceEngine:
     API version ............ <version>
@@ -52,6 +52,7 @@ Options:
     -pc                      Optional. Enable per-layer performance report.
     -r                       Optional. Output inference results as raw values.
     -t                       Optional. Probability threshold for Face Detector. The default value is 0.5.
+    -u                       Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields an error message.

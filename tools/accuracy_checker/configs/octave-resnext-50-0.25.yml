@@ -7,8 +7,7 @@ models:
         device: CPU
         model: public/octave-resnext-50-0.25/checkpoint-0-0000.params
         adapter: classification
-        cpu_extensions: AUTO
-        inputs: 
+        inputs:
           - name: 'data'
             type: INPUT
             shape: 3,224,224
@@ -32,7 +31,7 @@ models:
             mean: (124,117,104)
             std: 59.88
 
-        # Using accuracy metric, achieved result of public model - 78.8 / 94.2 (top 1 and top 5 respectively)
+            # Using accuracy metric, achieved result of public model - 78.8 / 94.2 (top 1 and top 5 respectively)
 
   # DLSDK inference
   - name: octave-resnext-50-0.25
@@ -44,7 +43,6 @@ models:
         model:   public/octave-resnext-50-0.25/FP32/octave-resnext-50-0.25.xml
         weights: public/octave-resnext-50-0.25/FP32/octave-resnext-50-0.25.bin
         adapter: classification
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -52,7 +50,6 @@ models:
         model:   public/octave-resnext-50-0.25/FP16/octave-resnext-50-0.25.xml
         weights: public/octave-resnext-50-0.25/FP16/octave-resnext-50-0.25.bin
         adapter: classification
-        cpu_extensions: AUTO
 
     datasets:
       - name: imagenet_1000_classes
@@ -67,4 +64,6 @@ models:
           - type: crop
             size: 224
 
-        # Using accuracy metric, achieved result of public model - 78.8 / 94.2 (top 1 and top 5 respectively)
+            # Using accuracy metric, achieved result of public model - 78.8 / 94.2 (top 1 and top 5 respectively)
+
+global_definitions: ../dataset_definitions.yml

@@ -6,4 +6,4 @@ ie_add_sample(NAME object_detection_demo_faster_rcnn
               SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
               HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/object_detection_demo_faster_rcnn.h"
                       "${CMAKE_CURRENT_SOURCE_DIR}/detectionoutput.h"
-              DEPENDENCIES format_reader)
+              OPENCV_DEPENDENCIES core imgcodecs imgproc)

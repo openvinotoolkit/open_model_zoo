@@ -14,9 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from .metric_executor import MetricsExecutor, Metric
+from .metric_executor import MetricsExecutor
+from .metric import Metric, PerImageMetricResult
 
-from .classification import ClassificationAccuracy, ClassificationAccuracyClasses, ClipAccuracy
+from .classification import (
+    ClassificationAccuracy,
+    ClassificationAccuracyClasses,
+    ClipAccuracy,
+    ClassificationF1Score,
+    MetthewsCorrelation
+)
 from .detection import (DetectionMAP, MissRate, Recall, DetectionAccuracyMetric)
 from .reid import CMCScore, ReidMAP, PairwiseAccuracy, PairwiseAccuracySubsets
 from .semantic_segmentation import SegmentationAccuracy, SegmentationIOU, SegmentationMeanAccuracy, SegmentationFWAcc
@@ -35,6 +42,7 @@ from .regression import (
     FacialLandmarksNormedError,
 
     PeakSignalToNoiseRatio,
+    StructuralSimilarity,
 
     AngleError
 )
@@ -47,25 +55,31 @@ from .text_detection import (
     IncidentalSceneTextLocalizationRecall,
     IncidentalSceneTextLocalizationHMean
 )
-from .coco_metrics import MSCOCOAveragePrecision, MSCOCORecall
+from .coco_metrics import MSCOCOAveragePrecision, MSCOCORecall, MSCOCOKeypointsPrecision, MSCOCOKeypointsRecall
 from .coco_orig_metrics import (
     MSCOCOorigAveragePrecision,
     MSCOCOorigRecall,
 
     MSCOCOOrigSegmAveragePrecision,
-    MSCOCOorigSegmRecall
+    MSCOCOorigSegmRecall,
+
+    MSCOCOOrigKeyPointsAveragePrecision,
 )
 from .hit_ratio import HitRatioMetric, NDSGMetric
 from .machine_translation import BilingualEvaluationUnderstudy
+from .question_answering import ExactMatchScore, ScoreF1
+from .mpjpe_multiperson import MpjpeMultiperson
 
 
 __all__ = [
     'Metric',
     'MetricsExecutor',
+    'PerImageMetricResult',
 
     'ClassificationAccuracy',
     'ClassificationAccuracyClasses',
     'ClipAccuracy',
+    'ClassificationF1Score',
 
     'DetectionMAP',
     'MissRate',
@@ -93,6 +107,7 @@ __all__ = [
     'FacialLandmarksPerPointNormedError',
     'FacialLandmarksNormedError',
     'PeakSignalToNoiseRatio',
+    'StructuralSimilarity',
     'AngleError',
 
     'MultiLabelAccuracy',
@@ -109,13 +124,21 @@ __all__ = [
 
     'MSCOCOAveragePrecision',
     'MSCOCORecall',
+    'MSCOCOKeypointsPrecision',
+    'MSCOCOKeypointsRecall',
     'MSCOCOorigAveragePrecision',
     'MSCOCOorigRecall',
     'MSCOCOOrigSegmAveragePrecision',
     'MSCOCOorigSegmRecall',
+    'MSCOCOOrigKeyPointsAveragePrecision',
 
     'HitRatioMetric',
     'NDSGMetric',
 
-    'BilingualEvaluationUnderstudy'
+    'BilingualEvaluationUnderstudy',
+
+    'ScoreF1',
+    'ExactMatchScore',
+
+    'MpjpeMultiperson'
 ]

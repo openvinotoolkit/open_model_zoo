@@ -159,17 +159,17 @@ cv::Mat decodeImageByJoin(const std::vector<float> &cls_data, const std::vector<
         link_mask[i] = link_data[i] >= link_conf_threshold;
     }
 
-    int neighbours = link_data_shape[3];
+    size_t neighbours = size_t(link_data_shape[3]);
     for (const auto &point : points) {
-        int neighbour = 0;
+        size_t neighbour = 0;
         for (int ny = point.y - 1; ny <= point.y + 1; ny++) {
             for (int nx = point.x - 1; nx <= point.x + 1; nx++) {
                 if (nx == point.x && ny == point.y)
                     continue;
                 if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-                    uchar pixel_value = pixel_mask[static_cast<size_t>(ny * w + nx)];
-                    uchar link_value = link_mask[static_cast<size_t>(point.y * w * neighbours +
-                                                                     point.x * neighbours + neighbour)];
+                    uchar pixel_value = pixel_mask[size_t(ny) * size_t(w) + size_t(nx)];
+                    uchar link_value = link_mask[
+                        (size_t(point.y) * size_t(w) + size_t(point.x)) * neighbours + neighbour];
                     if (pixel_value && link_value) {
                         join(point.x + point.y * w, nx + ny * w, &group_mask);
                     }

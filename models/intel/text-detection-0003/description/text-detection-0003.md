@@ -33,9 +33,11 @@ Text detector based on [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) archite
 
 ## Outputs
 
-1. The net outputs two blobs. Refer to [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) and demos for details.
-    - [1x2x192x320] - logits related to text/no-text classification for each pixel.
-    - [1x16x192x320] - logits related to linkage between pixels and their neighbors.
+1. name: "model/link\_logits\_/add", shape: [1x16x192x320] - logits related to linkage between pixels and their neighbors.
+
+2. name: "model/segm\_logits/add", shape: [1x2x192x320] - logits related to text/no-text classification for each pixel.
+
+Refer to [PixelLink](https://arxiv.org/pdf/1801.01315.pdf) and demos for details.
 
 ## Legal Information
 [*] Other names and brands may be claimed as the property of others.

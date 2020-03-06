@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `ssd_mobilenet_v2_coco` model is a [Single-Shot multibox Detection (SSD)](https://arxiv.org/pdf/1801.04381.pdf) network intended to perform object detection. The difference between this model and the `mobilenet-ssd` is that the while `mobilenet-ssd` detects faces only, the `ssd_mobilenet_v2_coco` model detects objects, as it has been trained from the Common Objects in Context (COCO) image dataset.
+The `ssd_mobilenet_v2_coco` model is a [Single-Shot multibox Detection (SSD)](https://arxiv.org/pdf/1801.04381.pdf) network intended to perform object detection. The model has been trained from the Common Objects in Context (COCO) image dataset.
 
 The model input is a blob that consists of a single image of 1x3x300x300 in RGB order.
 
@@ -17,7 +17,7 @@ The model output is a typical vector containing the tracked object data, as prev
 | Type              | Detection     |
 | GFLOPs            | 3.775         |
 | MParams           | 16.818        |
-| Source framework  | Tensorflow\*    |
+| Source framework  | TensorFlow\*    |
 
 ## Accuracy
 
@@ -74,4 +74,6 @@ The array of summary detection information, name - `detection_out`,  shape - `1,
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/tensorflow/models/master/LICENSE]()
+The original model is distributed under the
+[Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
+A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).

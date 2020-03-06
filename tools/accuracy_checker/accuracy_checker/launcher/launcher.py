@@ -30,8 +30,10 @@ class LauncherConfigValidator(ConfigValidator):
         if self.delayed_model_loading:
             if 'model' in self.fields:
                 self.fields['model'].optional = True
+                self.fields['model'].check_exists = False
             if 'weights' in self.fields:
                 self.fields['weights'].optional = True
+                self.fields['weights'].check_exists = False
         super().validate(entry, field_uri)
         inputs = entry.get('inputs')
         count_non_const_inputs = 0
@@ -62,7 +64,8 @@ class Launcher(ClassProvider):
 
     __provider_type__ = 'launcher'
 
-    def __init__(self, config_entry, *args, **kwargs):
+    def __init__(self, config_entry, *args, model_name='', **kwargs):
+        self._model_name = model_name
         self.config = config_entry
         self.default_layout = 'NCHW'
         self.const_inputs = self.config.get('_list_const_inputs', [])
@@ -127,20 +130,18 @@ class Launcher(ClassProvider):
     def predict_async(self, *args, **kwargs):
         raise NotImplementedError('Launcher does not support async mode')
 
-    @property
-    def infer_requests(self):
-        return []
-
     def _provide_inputs_info_to_meta(self, meta):
         meta['input_shape'] = self.inputs
 
         return meta
 
     @staticmethod
-    def fit_to_input(data, layer_name, layout):
-        if len(np.shape(data)) == 4:
-            return np.transpose(data, layout)
-        return np.array(data)
+    def fit_to_input(data, layer_name, layout, precision):
+        if len(np.shape(data)) == len(layout):
+            data = np.transpose(data, layout)
+        else:
+            data = np.array(data)
+        return data.astype(precision) if precision else data
 
     def inputs_info_for_meta(self):
         return {
@@ -151,6 +152,7 @@ class Launcher(ClassProvider):
     @property
     def name(self):
         return self.__provider__
+
 
 def unsupported_launcher(name, error_message=None):
     class UnsupportedLauncher(Launcher):
@@ -175,10 +177,12 @@ def unsupported_launcher(name, error_message=None):
     return UnsupportedLauncher
 
 
-def create_launcher(launcher_config, delayed_model_loading=False):
+def create_launcher(launcher_config, model_name='', delayed_model_loading=False):
     """
     Args:
         launcher_config: launcher configuration file entry.
+        model_name: evaluation model name
+        delayed_model_loading: allows postpone model loading to the launcher
     Returns:
         framework-specific launcher object.
     """
@@ -191,4 +195,7 @@ def create_launcher(launcher_config, delayed_model_loading=False):
     launcher_config_validator.validate(launcher_config)
     config_framework = launcher_config['framework']
 
-    return Launcher.provide(config_framework, launcher_config, delayed_model_loading=delayed_model_loading)
+    return Launcher.provide(
+        config_framework, launcher_config,
+        model_name=model_name, delayed_model_loading=delayed_model_loading
+    )

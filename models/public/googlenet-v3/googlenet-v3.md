@@ -13,7 +13,7 @@ The `googlenet-v3` model is the first of the Inception family of models designed
 | Type              | Classification|
 | GFLOPs            | 11.469        |
 | MParams           | 23.819        |
-| Source framework  | Tensorflow\*  |
+| Source framework  | TensorFlow\*  |
 
 ## Accuracy
 
@@ -55,4 +55,6 @@ Object classifier according to ImageNet classes, name: `InceptionV3/Predictions/
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/tensorflow/models/master/LICENSE]()
+The original model is distributed under the
+[Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
+A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).

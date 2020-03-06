@@ -21,6 +21,7 @@ from ..config import PathField, StringField
 from .loaders import Loader
 from .launcher import Launcher, LauncherConfigValidator
 
+
 class DummyLauncher(Launcher):
     """
     Class for using predictions from another tool.
@@ -46,7 +47,7 @@ class DummyLauncher(Launcher):
 
         self.data_path = get_path(self.get_value_from_config('data_path'))
 
-        self._loader = Loader.provide(self.get_value_from_config['loader'], self.data_path)
+        self._loader = Loader.provide(self.get_value_from_config('loader'), self.data_path)
 
         print_info("{} predictions objects loaded from {}".format(len(self._loader), self.data_path))
 

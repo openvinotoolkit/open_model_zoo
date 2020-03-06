@@ -15,12 +15,14 @@ limitations under the License.
 """
 
 import re
+from pathlib import Path
 
 import caffe
 import numpy as np
 
-from ..config import PathField, StringField, NumberField, BoolField
+from ..config import PathField, StringField, NumberField, BoolField, ConfigError
 from .launcher import Launcher, LauncherConfigValidator
+from ..logging import print_info
 
 DEVICE_REGEX = r'(?P<device>cpu$|gpu)(_(?P<identifier>\d+))?'
 
@@ -35,13 +37,16 @@ class CaffeLauncher(Launcher):
     def __init__(self, config_entry: dict, *args, **kwargs):
         super().__init__(config_entry, *args, **kwargs)
 
-        caffe_launcher_config = LauncherConfigValidator('Caffe_Launcher', fields=self.parameters())
+        self._delayed_model_loading = kwargs.get('delayed_model_loading', False)
+        caffe_launcher_config = LauncherConfigValidator(
+            'Caffe_Launcher', fields=self.parameters(), delayed_model_loading=self._delayed_model_loading
+        )
         caffe_launcher_config.validate(self.config)
+        self._do_reshape = False
 
-        self.model = str(self.get_value_from_config('model'))
-        self.weights = str(self.get_value_from_config('weights'))
-
-        self.network = caffe.Net(self.model, self.weights, caffe.TEST)
+        if not self._delayed_model_loading:
+            self.model, self.weights = self.automatic_model_search()
+            self.network = caffe.Net(str(self.model), str(self.weights), caffe.TEST)
         self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
 
         match = re.match(DEVICE_REGEX, self.get_value_from_config('device').lower())
@@ -57,8 +62,8 @@ class CaffeLauncher(Launcher):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'model': PathField(description="Path to model."),
-            'weights': PathField(description="Path to model."),
+            'model': PathField(description="Path to model.", file_or_directory=True),
+            'weights': PathField(description="Path to weights.", optional=True, file_or_directory=True),
             'device': StringField(regex=DEVICE_REGEX, description="Device name."),
             'batch': NumberField(
                 value_type=int, min_value=1, optional=True, default=1, description="Batch size."
@@ -88,16 +93,48 @@ class CaffeLauncher(Launcher):
     def output_blob(self):
         return next(iter(self.network.outputs))
 
-    def fit_to_input(self, data, layer_name, layout):
+    def fit_to_input(self, data, layer_name, layout, precision):
         data_shape = np.shape(data)
-        data = np.transpose(data, layout) if len(data_shape) == 4 else np.array(data)
         layer_shape = self.inputs[layer_name]
+        if len(data_shape) == 5 and len(layer_shape) == 4:
+            data = data[0]
+            data_shape = np.shape(data)
+        data = np.transpose(data, layout) if len(data_shape) == 4 else np.array(data)
+        data_shape = np.shape(data)
         if layer_shape != data_shape:
-            self.network.blobs[layer_name].reshape(*data.shape)
+            self._do_reshape = True
 
-        return data
+        return data.astype(precision) if precision else precision
 
-    def predict(self, inputs, metadata, *args, **kwargs):
+    def automatic_model_search(self):
+        model = Path(self.get_value_from_config('model'))
+        weights = self.get_value_from_config('weights')
+        if model.is_dir():
+            models_list = list(model.glob('{}.prototxt'.format(self._model_name)))
+            if not models_list:
+                models_list = list(model.glob('*.prototxt'))
+            if not models_list:
+                raise ConfigError('Suitable model description is not detected')
+            if len(models_list) != 1:
+                raise ConfigError('Several suitable models found, please specify required model')
+            model = models_list[0]
+            print_info('Found model {}'.format(model))
+        if weights is None or Path(weights).is_dir():
+            weights_dir = weights or model.parent
+            weights = Path(weights_dir) / model.name.replace('prototxt', 'caffemodel')
+            if not weights.exists():
+                weights_list = list(Path(weights_dir).glob('*.caffemodel'))
+                if not weights_list:
+                    raise ConfigError('Suitable weights is not detected')
+                if len(weights_list) != 1:
+                    raise ConfigError('Several suitable weights found, please specify required explicitly')
+                weights = weights_list[0]
+            print_info('Found weights {}'.format(weights))
+        weights = Path(weights)
+
+        return model, weights
+
+    def predict(self, inputs, metadata=None, **kwargs):
         """
         Args:
             inputs: dictionary where keys are input layers names and values are data for them.
@@ -107,7 +144,13 @@ class CaffeLauncher(Launcher):
         """
         results = []
         for infer_input in inputs:
+            if self._do_reshape:
+                for layer_name, data in infer_input.items():
+                    if data.shape != self.inputs[layer_name]:
+                        self.network.blobs[layer_name].reshape(*data.shape)
+
             results.append(self.network.forward(**infer_input))
+        if metadata is not None:
             for image_meta in metadata:
                 image_meta['input_shape'] = self.inputs_info_for_meta()
 
@@ -115,6 +158,10 @@ class CaffeLauncher(Launcher):
 
     def predict_async(self, *args, **kwargs):
         raise ValueError('Caffe Launcher does not support async mode')
+
+    @staticmethod
+    def create_network(model, weights):
+        return caffe.Net(str(model), str(weights), caffe.TEST)
 
     def release(self):
         """

@@ -21,6 +21,7 @@ from ..representation import SegmentationAnnotation, SegmentationPrediction
 from ..config import NumberField
 from ..logging import warning
 
+
 class ZoomSegMask(Postprocessor):
     """
     Zoom probabilities of segmentation prediction.
@@ -44,7 +45,6 @@ class ZoomSegMask(Postprocessor):
 
     def process_image(self, annotation, prediction):
         for annotation_, prediction_ in zip(annotation, prediction):
-            height, width = annotation_.mask.shape[:2]
             prob = prediction_.mask
             if len(prob.shape) == 2:
                 warning(
@@ -53,6 +53,9 @@ class ZoomSegMask(Postprocessor):
                 )
                 prob = prob[np.newaxis, :, :]
             channels, prediction_height, prediction_width = prob.shape
+            height, width = (
+                annotation_.mask.shape[:2] if annotation_ is not None else prediction_height, prediction_width
+            )
             zoom_prob = np.zeros((channels, height, width), dtype=np.float32)
             for c in range(channels):
                 for h in range(height):

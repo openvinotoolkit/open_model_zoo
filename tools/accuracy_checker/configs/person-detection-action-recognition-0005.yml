@@ -18,7 +18,6 @@ models:
           detection_threshold: 0.4
           action_confidence_threshold: 0.75
           action_scale: 3
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -36,13 +35,12 @@ models:
           detection_threshold: 0.4
           action_confidence_threshold: 0.75
           action_scale: 3
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
-          - INT8
-        model:   intel/person-detection-action-recognition-0005/INT8/person-detection-action-recognition-0005.xml
-        weights: intel/person-detection-action-recognition-0005/INT8/person-detection-action-recognition-0005.bin
+          - FP32-INT8
+        model:   intel/person-detection-action-recognition-0005/FP32-INT8/person-detection-action-recognition-0005.xml
+        weights: intel/person-detection-action-recognition-0005/FP32-INT8/person-detection-action-recognition-0005.bin
         adapter:
           type: action_detection
           priorbox_out: mbox/priorbox
@@ -54,7 +52,6 @@ models:
           detection_threshold: 0.4
           action_confidence_threshold: 0.75
           action_scale: 3
-        cpu_extensions: AUTO
 
     datasets:
       - name: action_detection_dataset_3_classes
@@ -98,3 +95,5 @@ models:
             prediction_source: action_prediction
             label_map: action_label_map
             ignore_label: 3
+
+global_definitions: ../dataset_definitions.yml

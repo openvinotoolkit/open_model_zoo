@@ -27,7 +27,7 @@ After that, the application displays the tracks and the latest detections on the
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./pedestrian_tracker_demo -h
 InferenceEngine:
     API version ............ <version>
@@ -37,7 +37,7 @@ pedestrian_tracker_demo [OPTION]
 Options:
 
     -h                           Print a usage message.
-    -i "<path>"                  Required. Path to a video file or a folder with images (all images should have names 0000000001.jpg, 0000000002.jpg, etc).
+    -i "<path>"                  Required. Video sequence to process.
     -m_det "<path>"              Required. Path to the Pedestrian Detection Retail model (.xml) file.
     -m_reid "<path>"             Required. Path to the Pedestrian Reidentification Retail model (.xml) file.
     -l "<absolute_path>"         Optional. For CPU custom layers, if any. Absolute path to a shared library with the kernels implementation.
@@ -50,8 +50,9 @@ Options:
     -no_show                     Optional. Do not show processed video.
     -delay                       Optional. Delay between frames used for visualization. If negative, the visualization is turned off (like with the option 'no_show'). If zero, the visualization is made frame-by-frame.
     -out "<path>"                Optional. The file name to write output log file with results of pedestrian tracking. The format of the log file is compatible with MOTChallenge format.
-    -first                       Optional. The index of the first frame of video sequence to process. This has effect only if it is positive and the source video sequence is an image folder.
-    -last                        Optional. The index of the last frame of video sequence to process. This has effect only if it is positive and the source video sequence is an image folder.
+    -first                       Optional. The index of the first frame of video sequence to process. This has effect only if it is positive. The actual first frame captured depends on cv::VideoCapture implementation and may have slightly different number.
+    -last                        Optional. The index of the last frame of video sequence to process. This has effect only if it is positive.
+    -u                           Optional. List of monitors to show initially.
 ```
 
 To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).

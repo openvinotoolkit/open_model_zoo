@@ -6,7 +6,7 @@ models:
       - framework: mxnet
         model: public/densenet-121-0.125/checkpoint-0-0000.params
         adapter: classification
-        inputs: 
+        inputs:
           - name: 'data'
             type: INPUT
             shape: 3,224,224
@@ -36,7 +36,7 @@ models:
             mean: (124,117,104)
             std: 59.88
 
-        # Using accuracy metric, achieved result of public model - 76.1 / 93.0 (top 1 and top 5 respectively)
+            # Using accuracy metric, achieved result of public model - 76.1 / 93.0 (top 1 and top 5 respectively)
 
   # DLSDK inference
   - name: octave-densenet-121-0.125
@@ -48,7 +48,6 @@ models:
         model:   public/octave-densenet-121-0.125/FP32/octave-densenet-121-0.125.xml
         weights: public/octave-densenet-121-0.125/FP32/octave-densenet-121-0.125.bin
         adapter: classification
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -70,4 +69,6 @@ models:
           - type: crop
             size: 224
 
-        # Using accuracy metric, achieved result of public model - 76.1 / 93.0 (top 1 and top 5 respectively)
+            # Using accuracy metric, achieved result of public model - 76.1 / 93.0 (top 1 and top 5 respectively)
+
+global_definitions: ../dataset_definitions.yml

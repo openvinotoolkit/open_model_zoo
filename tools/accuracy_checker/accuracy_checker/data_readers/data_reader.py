@@ -19,14 +19,28 @@ from functools import singledispatch
 from collections import OrderedDict, namedtuple
 import re
 import cv2
-from PIL import Image
-import scipy.misc
 import numpy as np
-import nibabel as nib
+
+try:
+    import tensorflow as tf
+except ImportError as import_error:
+    tf = None
+
+try:
+    from PIL import Image
+except ImportError as import_error:
+    Image = None
+
+try:
+    import nibabel as nib
+except ImportError:
+    nib = None
 
 from ..utils import get_path, read_json, zipped_transform, set_image_metadata, contains_all
 from ..dependency import ClassProvider
-from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField
+from ..config import BaseField, StringField, ConfigValidator, ConfigError, DictField, ListField, BoolField
+
+REQUIRES_ANNOTATIONS = ['annotation_features_extractor', ]
 
 
 class DataRepresentation:
@@ -39,10 +53,11 @@ class DataRepresentation:
         elif isinstance(data, list) and np.isscalar(data[0]):
             self.metadata['image_size'] = len(data)
         else:
-            self.metadata['image_size'] = data.shape if not isinstance(data, list) else data[0].shape
+            self.metadata['image_size'] = data.shape if not isinstance(data, list) else np.shape(data[0])
 
 
 ClipIdentifier = namedtuple('ClipIdentifier', ['video', 'clip_id', 'frames'])
+MultiFramesInputIdentifier = namedtuple('MultiFramesInputIdentifier', ['input_id', 'frames'])
 
 
 def create_reader(config):
@@ -80,6 +95,7 @@ class BaseReader(ClassProvider):
         self.read_dispatcher = singledispatch(self.read)
         self.read_dispatcher.register(list, self._read_list)
         self.read_dispatcher.register(ClipIdentifier, self._read_clip)
+        self.read_dispatcher.register(MultiFramesInputIdentifier, self._read_frames_multi_input)
 
         self.validate_config()
         self.configure()
@@ -117,8 +133,18 @@ class BaseReader(ClassProvider):
         frames_identifiers = [video / frame for frame in data_id.frames]
         return self.read_dispatcher(frames_identifiers)
 
+    def _read_frames_multi_input(self, data_id):
+        return self.read_dispatcher(data_id.frames)
+
     def read_item(self, data_id):
         return DataRepresentation(self.read_dispatcher(data_id), identifier=data_id)
+
+    @property
+    def name(self):
+        return self.__provider__
+
+    def reset(self):
+        pass
 
 
 class ReaderCombinerConfig(ConfigValidator):
@@ -139,10 +165,9 @@ class ReaderCombiner(BaseReader):
         scheme = self.config['scheme']
         reading_scheme = OrderedDict()
         for pattern, reader_config in scheme.items():
-            reader = BaseReader.provide(
-                reader_config['type'] if isinstance(reader_config, dict) else reader_config,
-                self.data_source, reader_config
-            )
+            reader_type = reader_config['type'] if isinstance(reader_config, dict) else reader_config
+            reader_configuration = reader_config if isinstance(reader_config, dict) else None
+            reader = BaseReader.provide(reader_type, self.data_source, reader_configuration)
             pattern = re.compile(pattern)
             reading_scheme[pattern] = reader
 
@@ -156,11 +181,33 @@ class ReaderCombiner(BaseReader):
         raise ConfigError('suitable data reader for {} not found'.format(data_id))
 
 
+OPENCV_IMREAD_FLAGS = {
+    'color': cv2.IMREAD_COLOR,
+    'gray': cv2.IMREAD_GRAYSCALE,
+    'unchanged': cv2.IMREAD_UNCHANGED
+}
+
+
+class OpenCVImageReaderConfig(ConfigValidator):
+    type = StringField(optional=True)
+    reading_flag = StringField(optional=True, choices=OPENCV_IMREAD_FLAGS, default='color')
+
+
 class OpenCVImageReader(BaseReader):
     __provider__ = 'opencv_imread'
 
+    def validate_config(self):
+        if self.config:
+            config_validator = OpenCVImageReaderConfig('opencv_imread_config')
+            config_validator.validate(self.config)
+
+    def configure(self):
+        super().configure()
+        self.flag = OPENCV_IMREAD_FLAGS[self.config.get('reading_flag', 'color') if self.config else 'color']
+
+
     def read(self, data_id):
-        return cv2.imread(str(get_path(self.data_source / data_id)))
+        return cv2.imread(str(get_path(self.data_source / data_id)), self.flag)
 
 
 class PillowImageReader(BaseReader):
@@ -168,6 +215,8 @@ class PillowImageReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
+        if Image is None:
+            raise ValueError('Pillow is not installed, please install it')
         self.convert_to_rgb = True
 
     def read(self, data_id):
@@ -180,8 +229,18 @@ class PillowImageReader(BaseReader):
 class ScipyImageReader(BaseReader):
     __provider__ = 'scipy_imread'
 
+    def __init__(self, data_source, config=None, **kwargs):
+        super().__init__(data_source, config)
+        if Image is None:
+            raise ValueError('Pillow is not installed, please install it')
+
     def read(self, data_id):
-        return np.array(scipy.misc.imread(str(get_path(self.data_source / data_id))))
+        # reimplementation scipy.misc.imread
+        image = Image.open(str(get_path(self.data_source / data_id)))
+        if image.mode == 'P':
+            image = image.convert('RGBA') if 'transparency' in image.info else image.convert('RGB')
+
+        return np.array(image)
 
 
 class OpenCVFrameReader(BaseReader):
@@ -213,6 +272,10 @@ class OpenCVFrameReader(BaseReader):
     def configure(self):
         self.data_source = get_path(self.data_source)
         self.videocap = cv2.VideoCapture(str(self.data_source))
+
+    def reset(self):
+        self.current = -1
+        self.videocap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
 
 class JSONReaderConfig(ConfigValidator):
@@ -254,15 +317,30 @@ class NCFDataReader(BaseReader):
         return float(data_id.split(":")[1])
 
 
+class NiftyReaderConfig(ConfigValidator):
+    type = StringField(optional=True)
+    channels_first = BoolField(optional=True, default=False)
+
+
 class NiftiImageReader(BaseReader):
     __provider__ = 'nifti_reader'
+
+    def validate_config(self):
+        if self.config:
+            config_validator = NiftyReaderConfig('nifti_reader_config')
+            config_validator.validate(self.config)
+
+    def configure(self):
+        if nib is None:
+            raise ImportError('nifty backend for image reading requires nibabel. Please install it before usage.')
+        self.channels_first = self.config.get('channels_first', False) if self.config else False
 
     def read(self, data_id):
         nib_image = nib.load(str(get_path(self.data_source / data_id)))
         image = np.array(nib_image.dataobj)
         if len(image.shape) != 4:  # Make sure 4D
             image = np.expand_dims(image, -1)
-        image = np.swapaxes(np.array(image), 0, -2)
+        image = np.transpose(image, (3, 0, 1, 2) if self.channels_first else (2, 1, 0, 3))
 
         return image
 
@@ -279,12 +357,8 @@ class TensorflowImageReader(BaseReader):
 
     def __init__(self, data_source, config=None, **kwargs):
         super().__init__(data_source, config)
-        try:
-            import tensorflow as tf
-        except ImportError as import_error:
-            raise ConfigError(
-                'tf_imread reader disabled.Please, install Tensorflow before using. \n{}'.format(import_error.msg)
-            )
+        if tf is None:
+            raise ImportError('tf backend for image reading requires TensorFlow. Please install it before usage.')
 
         tf.enable_eager_execution()
 
@@ -307,11 +381,6 @@ class AnnotationFeaturesConfig(ConfigValidator):
 class AnnotationFeaturesReader(BaseReader):
     __provider__ = 'annotation_features_extractor'
 
-    def __init__(self, data_source, config=None, annotations=None):
-        super().__init__(annotations, config)
-        self.counter = 0
-        self.data_source = annotations
-
     def configure(self):
         self.feature_list = self.config['features']
         if not contains_all(self.data_source[0].__dict__, self.feature_list):
@@ -319,9 +388,11 @@ class AnnotationFeaturesReader(BaseReader):
                 'annotation_class prototype does not contain provided features {}'.format(', '.join(self.feature_list))
             )
         self.single = len(self.feature_list) == 1
+        self.counter = 0
+        self.subset = range(len(self.data_source))
 
     def read(self, data_id):
-        relevant_annotation = self.data_source[self.counter]
+        relevant_annotation = self.data_source[self.subset[self.counter]]
         self.counter += 1
         features = [getattr(relevant_annotation, feature) for feature in self.feature_list]
         if self.single:
@@ -330,3 +401,7 @@ class AnnotationFeaturesReader(BaseReader):
 
     def _read_list(self, data_id):
         return self.read(data_id)
+
+    def reset(self):
+        self.subset = range(len(self.data_source))
+        self.counter = 0

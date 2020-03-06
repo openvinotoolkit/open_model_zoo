@@ -182,6 +182,114 @@ class TestAnnotationConversion:
             annotation = dataset.annotation
             assert annotation == converted_annotation
 
+    def test_annotation_conversion_with_zero_subset_size(self, mocker):
+        addition_options = {
+            'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
+            'subsample_size': 0
+        }
+        config = copy_dataset_config(self.dataset_config)
+        config.update(addition_options)
+        converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
+        mocker.patch(
+            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            return_value=ConverterReturn(converted_annotation, None, None)
+        )
+        with pytest.raises(ConfigError):
+            Dataset(config)
+
+    def test_annotation_conversion_with_negative_subset_size(self, mocker):
+        addition_options = {
+            'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
+            'subsample_size': -1
+        }
+        config = copy_dataset_config(self.dataset_config)
+        config.update(addition_options)
+        converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
+        mocker.patch(
+            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            return_value=ConverterReturn(converted_annotation, None, None)
+        )
+        with pytest.raises(ConfigError):
+            Dataset(config)
+
+    def test_annotation_conversion_negative_subset_ratio_raise_config_error(self, mocker):
+        addition_options = {
+            'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
+            'subsample_size': '-50%'
+        }
+        config = copy_dataset_config(self.dataset_config)
+        config.update(addition_options)
+        converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
+        mocker.patch(
+            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            return_value=ConverterReturn(converted_annotation, None, None)
+        )
+        with pytest.raises(ConfigError):
+            Dataset(config)
+
+    def test_annotation_conversion_zero_subset_ratio_raise_config_error(self, mocker):
+        addition_options = {
+            'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
+            'subsample_size': '0%'
+        }
+        config = copy_dataset_config(self.dataset_config)
+        config.update(addition_options)
+        converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
+        mocker.patch(
+            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            return_value=ConverterReturn(converted_annotation, None, None)
+        )
+        with pytest.raises(ConfigError):
+            Dataset(config)
+
+    def test_annotation_conversion_invalid_subset_ratio_raise_config_error(self, mocker):
+        addition_options = {
+            'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
+            'subsample_size': 'aaa%'
+        }
+        config = copy_dataset_config(self.dataset_config)
+        config.update(addition_options)
+        converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
+        mocker.patch(
+            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            return_value=ConverterReturn(converted_annotation, None, None)
+        )
+        with pytest.raises(ConfigError):
+            Dataset(config)
+
+    def test_annotation_conversion_invalid_subset_size_raise_config_error(self, mocker):
+        addition_options = {
+            'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
+            'subsample_size': 'aaa'
+        }
+        config = copy_dataset_config(self.dataset_config)
+        config.update(addition_options)
+        converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
+        mocker.patch(
+            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            return_value=ConverterReturn(converted_annotation, None, None)
+        )
+        with pytest.raises(ConfigError):
+            Dataset(config)
+
+    def test_annotation_conversion_closer_to_zero_subset_ratio(self, mocker):
+        addition_options = {
+            'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
+            'subsample_size': '0.001%'
+        }
+        config = copy_dataset_config(self.dataset_config)
+        config.update(addition_options)
+        converted_annotation = make_representation(['0 0 0 5 5', '0 1 1 10 10'], True)
+        mocker.patch(
+            'accuracy_checker.annotation_converters.WiderFormatConverter.convert',
+            return_value=ConverterReturn(converted_annotation, None, None)
+        )
+        subset_maker_mock = mocker.patch(
+            'accuracy_checker.dataset.make_subset'
+        )
+        Dataset(config)
+        subset_maker_mock.assert_called_once_with(converted_annotation, 1, 666)
+
     def test_annotation_conversion_subset_with_seed(self, mocker):
         addition_options = {
             'annotation_conversion': {'converter': 'wider', 'annotation_file': Path('file')},
