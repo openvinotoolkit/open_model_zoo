@@ -13,9 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
-from pathlib import Path
-
 from ..topology_types import ObjectDetection
 from ..config import PathField, BoolField
 from ..representation import DetectionAnnotation, SegmentationAnnotation
@@ -114,11 +111,7 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
         for image_id, image in enumerate(images_set):
             image_file = '{}.jpg'.format(image)
             mask_file = '{}.png'.format(image)
-            annotation = SegmentationAnnotation(
-                str(Path(self.image_dir.name) / image_file),
-                str(Path(self.mask_dir.name) / mask_file),
-                mask_loader=GTMaskLoader.SCIPY
-            )
+            annotation = SegmentationAnnotation(image_file, mask_file, mask_loader=GTMaskLoader.SCIPY)
             annotations.append(annotation)
             if check_content:
                 if not check_file_existence(self.image_dir / image_file):
