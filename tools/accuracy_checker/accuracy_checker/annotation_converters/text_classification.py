@@ -36,7 +36,7 @@ class BaseGLUETextClassificationConverter(BaseFormatConverter):
             'sentence_piece_model_file': PathField(description='sentence piece model for tokenization', optional=True),
             'max_seq_length': NumberField(
                 description='The maximum total input sequence length after tokenization.',
-                optional=True, default=128
+                optional=True, default=128, value_type=int
             ),
             'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register'),
             'class_token_first': BoolField(
@@ -303,7 +303,7 @@ class IMDBConverter(BaseGLUETextClassificationConverter):
             'sentence_piece_model_file': PathField(description='sentence piece model for tokenization', optional=True),
             'max_seq_length': NumberField(
                 description='The maximum total input sequence length after tokenization.',
-                optional=True, default=128
+                optional=True, default=128, value_type=int
             ),
             'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register')
         })
