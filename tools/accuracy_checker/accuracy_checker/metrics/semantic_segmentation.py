@@ -111,7 +111,7 @@ class SegmentationIOU(SegmentationMetric):
         iou = np.divide(diagonal, union, out=np.full_like(diagonal, np.nan), where=union != 0)
         cls_names = list(self.dataset.labels.values())
         if self.ignore_label is not None:
-            iou = np.delete(iou, self.ignore_index)
+            iou = np.delete(iou, self.ignore_label)
             cls_names = [cls_name for cls_id, cls_name in self.dataset.labels.items() if cls_id != self.ignore_label]
 
         values, names = finalize_metric_result(iou, cls_names)
