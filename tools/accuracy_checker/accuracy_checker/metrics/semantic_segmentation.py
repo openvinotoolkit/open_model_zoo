@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 
-from ..config import BoolField, ConfigError
+from ..config import BoolField, NumberField, ConfigError
 from ..representation import (
     SegmentationAnnotation,
     SegmentationPrediction,
@@ -39,7 +39,8 @@ class SegmentationMetric(PerImageEvaluationMetric):
         parameters.update({
             'use_argmax': BoolField(
                 optional=True, default=True, description="Allows to use argmax for prediction mask."
-            )
+            ),
+            'ignore_label': NumberField(optional=True, value_type=int, min_value=0)
         })
 
         return parameters
@@ -52,6 +53,7 @@ class SegmentationMetric(PerImageEvaluationMetric):
         if not self.dataset.labels:
             raise ConfigError('semantic segmentation metrics require label_map providing in dataset_meta'
                               'Please provide dataset meta file or regenerated annotation')
+        self.ignore_label = self.get_value_from_config('ignore_label')
 
     def update(self, annotation, prediction):
         n_classes = len(self.dataset.labels)
@@ -63,6 +65,9 @@ class SegmentationMetric(PerImageEvaluationMetric):
             mask = (label_true >= 0) & (label_true < n_classes) & (label_pred < n_classes) & (label_pred >= 0)
             hist = np.bincount(n_classes * label_true[mask].astype(int) + label_pred[mask], minlength=n_classes ** 2)
             hist = hist.reshape(n_classes, n_classes)
+            if self.ignore_label is not None:
+                hist[self.ignore_label, :] = 0
+                hist[:, self.ignore_label] = 0
 
             return hist
 
@@ -95,6 +100,8 @@ class SegmentationIOU(SegmentationMetric):
         diagonal = np.diag(cm).astype(float)
         union = cm.sum(axis=1) + cm.sum(axis=0) - diagonal
         iou = np.divide(diagonal, union, out=np.full_like(diagonal, np.nan), where=union != 0)
+        if self.ignore_label is not None:
+            iou = np.delete(iou, self.ignore_index)
 
         return iou
 
@@ -103,8 +110,12 @@ class SegmentationIOU(SegmentationMetric):
         diagonal = np.diag(confusion_matrix)
         union = confusion_matrix.sum(axis=1) + confusion_matrix.sum(axis=0) - diagonal
         iou = np.divide(diagonal, union, out=np.full_like(diagonal, np.nan), where=union != 0)
+        cls_names = list(self.dataset.labels.values())
+        if self.ignore_label is not None:
+            iou = np.delete(iou, self.ignore_index)
+            cls_names = [cls_name for cls_id, cls_name in self.dataset.labels.items() if cls_id != self.ignore_label]
 
-        values, names = finalize_metric_result(iou, list(self.dataset.labels.values()))
+        values, names = finalize_metric_result(iou, cls_names)
         self.meta['names'] = names
 
         return values
