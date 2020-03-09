@@ -15,7 +15,7 @@ The network is able to recognize japanese text (characters included in [Kondate]
 |------------------------------------------------|--------------------|
 | GFlops                                         | 117.136            |
 | MParams                                        | 15.31              |
-| Accuracy on the test set of Kondate            | 97.39%             |
+| Accuracy on Kondate test set and test set generated from Nakayosi           | 98.16%             |
 | Source framework                               | PyTorch\*          |
 
 

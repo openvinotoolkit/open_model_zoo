@@ -44,7 +44,7 @@ def build_argparser():
                            "value is CPU")
     args.add_argument("-ni", "--number_iter", type=int, default=1,
                       help="Optional. Number of inference iterations")
-    args.add_argument("-cl", "--charlist", type=str, default="data/kondate_char_list.txt", help="Path to the decoding char list file")
+    args.add_argument("-cl", "--charlist", type=str, default="data/kondate_nakayosi_char_list.txt", help="Path to the decoding char list file")
     return parser
 
 

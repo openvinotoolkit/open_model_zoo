@@ -22,8 +22,8 @@ from .format_converter import FileBasedAnnotationConverter, ConverterReturn
 from ..config import PathField
 
 
-class KondateRecognitionDatasetConverter(FileBasedAnnotationConverter):
-    __provider__ = 'kondate_recognition'
+class KondateNakayosiRecognitionDatasetConverter(FileBasedAnnotationConverter):
+    __provider__ = 'kondate_nakayosi_recognition'
     annotation_types = (CharacterRecognitionAnnotation, )
 
     @classmethod
