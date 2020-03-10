@@ -13,7 +13,6 @@ class CamVidConverter(FileBasedAnnotationConverter):
             0: 'Sky',
             1: 'Building',
             2: 'Pole',
-            #3: 'Road_marking',
             3: 'Road',
             4: 'Pavement',
             5: 'Tree',
@@ -24,7 +23,7 @@ class CamVidConverter(FileBasedAnnotationConverter):
             10: 'Bicyclist',
             11: 'Unlabelled'
         },
-        'background_label': 12,
+        'background_label': 11,
         'segmentation_colors': (
             (128, 128, 128), (128, 0, 0), (192, 192, 128), (128, 64, 128), (60, 40, 222), (128, 128, 0),
             (192, 128, 128), (64, 64, 128), (64, 0, 128), (64, 64, 0), (0, 128, 192), (0, 0, 0)

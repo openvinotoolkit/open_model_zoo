@@ -39,7 +39,10 @@ class SegmentationMetric(PerImageEvaluationMetric):
             'use_argmax': BoolField(
                 optional=True, default=True, description="Allows to use argmax for prediction mask."
             ),
-            'ignore_label': NumberField(optional=True, value_type=int, min_value=0)
+            'ignore_label': NumberField(
+                optional=True, value_type=int, min_value=0,
+                description='Ignore prediction and annotation of specified class during metric calculation'
+            )
         })
 
         return parameters
