@@ -136,7 +136,7 @@ NATIVE_DEMOS = [
             ModelArg('alexnet'),
             ModelArg('densenet-121-tf'),
             ModelArg('densenet-169'),
-            ModelArg('googlenet-v4'),
+            ModelArg('googlenet-v4-tf'),
             ModelArg('mobilenet-v2'),
             ModelArg('resnet-50')),
     )),
