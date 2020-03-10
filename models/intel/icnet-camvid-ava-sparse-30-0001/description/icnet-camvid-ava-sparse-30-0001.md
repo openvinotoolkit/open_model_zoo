@@ -1,12 +1,12 @@
-# icnet-camvid-ava-tf-0001
+# icnet-camvid-ava-sparse-30-0001
 
 ## Use Case and High-Level Description
 
-A trained model of ICNet for fast semantic segmentation, trained on the CamVid\* dataset from scratch using the TensorFlow\* framework. For more details about the original floating point model, check out the [paper](https://arxiv.org/abs/1704.08545).
+A trained model of ICNet for fast semantic segmentation, trained on the CamVid\* dataset from scratch using the TensorFlow\* framework. The trained model has 30% sparsity (ratio of 0's within all the convolution kernel weights). For more details about the original floating point model, check out the [paper](https://arxiv.org/abs/1704.08545).
 
 The model input is a blob that consists of a single image of "1x3x720x960" in BGR order. The pixel values are integers in the [0, 255] range.
 
-The model output for `icnet-camvid-ava-tf-0001` is the predicted class index of each input pixel belonging to one of the 12 classes of the CamVid dataset.
+The model output for `icnet-camvid-ava-sparse-30-0001` is the predicted class index of each input pixel belonging to one of the 12 classes of the CamVid dataset.
 
 ## Specification
 
@@ -22,7 +22,7 @@ The quality metrics were calculated on the CamVid\* validation dataset. The 'unl
 
 | Metric                    | Value         |
 |---------------------------|---------------|
-| mIoU                      |        69.54% |
+| mIoU                      |        69.99% |
 
 - `IOU=TP/(TP+FN+FP)`, where:
   - `TP` - number of true positive pixels for given class
