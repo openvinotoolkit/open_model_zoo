@@ -49,8 +49,14 @@ class Visualizer:
 
         return out_key
 
-    def show(self, frame, name):
-        """Shows frame in the specified window"""
+    def get_queue(self, name):
+        if name not in self._tasks:
+            raise ValueError('Unknown name of queue: {}'.format(name))
+
+        return self._tasks[name]
+
+    def put_queue(self, frame, name):
+        """Adds frame in the queue of the specified window"""
 
         if name not in self._tasks.keys():
             raise ValueError('Cannot show unregistered window: {}'.format(name))

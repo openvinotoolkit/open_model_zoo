@@ -125,8 +125,9 @@ def main():
         visualizer.register_window('Gesture library')
         visualizer.start()
 
+        librarry_queue = visualizer.get_queue('Gesture library')
         samples_library = VideoLibrary(args.samples_dir, SAMPLES_MAX_WINDOW_SIZE,
-                                       list(class_map.values()), visualizer, SAMPLES_TRG_FPS)
+                                       list(class_map.values()), librarry_queue, SAMPLES_TRG_FPS)
         samples_library.start()
     else:
         visualizer.start()
@@ -193,7 +194,7 @@ def main():
         if args.no_show:
             continue
 
-        visualizer.show(frame, 'Demo')
+        visualizer.put_queue(frame, 'Demo')
         key = visualizer.get_key()
 
         if key == 27:  # esc

@@ -72,11 +72,8 @@ class Tracker:  # pylint: disable=too-few-public-methods
         intersect_widths = np.maximum(0.0, intersect_xmax - intersect_xmin)
 
         intersect_areas = intersect_heights * intersect_widths
-        areas_set_a = ((set_a[:, 2] - set_a[:, 0]) * (set_a[:, 3] - set_a[:, 1])).reshape([-1, 1])
+        areas_set_a = (np.abs(set_a[:, 2] - set_a[:, 0]) * np.abs(set_a[:, 3] - set_a[:, 1])).reshape([-1, 1])
         areas_set_b = ((set_b[:, 2] - set_b[:, 0]) * (set_b[:, 3] - set_b[:, 1])).reshape([1, -1])
-
-        areas_set_a[np.less(areas_set_a, 0.0)] = 0.0
-        areas_set_b[np.less(areas_set_b, 0.0)] = 0.0
 
         union_areas = areas_set_a + areas_set_b - intersect_areas
 

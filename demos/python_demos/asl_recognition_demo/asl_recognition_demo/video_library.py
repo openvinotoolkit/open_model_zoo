@@ -26,7 +26,7 @@ import numpy as np
 class VideoLibrary:
     """ This class loads list of videos and plays each one in cycle. """
 
-    def __init__(self, source_dir, max_size, class_names, visualizer, trg_fps):
+    def __init__(self, source_dir, max_size, class_names, visualizer_queue, trg_fps):
         """Constructor"""
 
         self.max_size = max_size
@@ -36,8 +36,8 @@ class VideoLibrary:
 
         self.cur_source_id = Value('i', 0, lock=True)
 
+        self._visualizer_queue = visualizer_queue
         self._trg_time_step = 1. / float(trg_fps)
-        self.visualizer = visualizer
         self._play_process = None
 
     @property
@@ -98,7 +98,7 @@ class VideoLibrary:
 
         self._play_process = \
             Process(target=self._play,
-                    args=(self.visualizer, self.cur_source_id, self.source_paths,
+                    args=(self._visualizer_queue, self.cur_source_id, self.source_paths,
                           self.max_size, self._trg_time_step))
         self._play_process.daemon = True
         self._play_process.start()
@@ -113,7 +113,7 @@ class VideoLibrary:
         self._play_process = None
 
     @staticmethod
-    def _play(visualizer, cur_source_id, source_paths, max_image_size, trg_time_step):
+    def _play(visualizer_queue, cur_source_id, source_paths, max_image_size, trg_time_step):
         """Produces live frame from the active video source"""
 
         cap = None
@@ -152,7 +152,7 @@ class VideoLibrary:
             cv2.putText(frame, 'GT Gesture: {}'.format(source_name), (10, frame.shape[0] - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-            visualizer.show(frame, 'Gesture library')
+            visualizer_queue.put(np.copy(frame), True)
 
             end_time = time.perf_counter()
             elapsed_time = end_time - start_time
