@@ -56,7 +56,7 @@ class SQUADConverter(BaseFormatConverter):
 
     def configure(self):
         self.testing_file = self.get_value_from_config('testing_file')
-        self.max_seq_length = self.get_value_from_config('max_seq_length')
+        self.max_seq_length = int(self.get_value_from_config('max_seq_length'))
         self.max_query_length = self.get_value_from_config('max_query_length')
         self.doc_stride = self.get_value_from_config('doc_stride')
         self.lower_case = self.get_value_from_config('lower_case')
@@ -145,10 +145,13 @@ class SQUADConverter(BaseFormatConverter):
                 tokens.append("[SEP]" if self.support_vocab else SEP_ID)
                 segment_ids.append(0)
 
-                for i in range(doc_span.length):
-                    split_token_index = doc_span.start + i
-                    tokens.append(all_doc_tokens[split_token_index])
-                    segment_ids.append(1)
+                try:
+                    for i in range(doc_span.length):
+                        split_token_index = doc_span.start + i
+                        tokens.append(all_doc_tokens[split_token_index])
+                        segment_ids.append(1)
+                except TypeError as e:
+                    pass
                 tokens.append("[SEP]" if self.support_vocab else SEP_ID)
                 segment_ids.append(1)
                 input_ids = self.tokenizer.convert_tokens_to_ids(tokens) if self.support_vocab else tokens
