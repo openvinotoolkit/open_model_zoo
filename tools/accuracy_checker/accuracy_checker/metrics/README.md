@@ -56,12 +56,16 @@ Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotat
   * `use_normalization` - allows to normalize confusion_matrix for metric calculation.
 * `segmentation_accuracy` - pixel accuracy for semantic segmentation models. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
   * `use_argmax` - allows to use argmax for prediction mask.
+  * `ignore_label` - specified which class_id prediction should be ignored during metric calculation. (Optional, if not provided, all labels will be used)
 * `mean_iou` - mean intersection over union for semantic segmentation models. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
   * `use_argmax` - allows to use argmax for prediction mask.
+    * `ignore_label` - specified which class_id prediction should be ignored during metric calculation. (Optional, if not provided, all labels will be used)
 * `mean_accuracy` - mean accuracy for semantic segmentation models. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
   * `use_argmax` - allows to use argmax for prediction mask.
+    * `ignore_label` - specified which class_id prediction should be ignored during metric calculation. (Optional, if not provided, all labels will be used)
 * `frequency_weighted_accuracy` - frequency weighted accuracy for semantic segmentation models. Supported representations: `SegmentationAnnotation`, `SegmentationPrediction`.
   * `use_argmax` - allows to use argmax for prediction mask.
+  * `ignore_label` - specified which class_id prediction should be ignored during metric calculation. (Optional, if not provided, all labels will be used)
 More detailed information about calculation segmentation metrics you can find [here](https://arxiv.org/pdf/1411.4038v2.pdf).
 * `cmc` - Cumulative Matching Characteristics (CMC) score. Supported representations: `ReIdentificationAnnotation`, `ReIdentificationPrediction`.
   * `top_k` -  number of k highest ranked samples to consider when matching.
