@@ -89,12 +89,21 @@ class HumanPose3dAdapter(Adapter):
             panoptic_poses_3d, translations, panoptic_poses_2d = HumanPose3dAdapter._parse_poses(
                 features, poses_2d, scale_y, scale_x, 1 / scale_x
             )
-            frame_result = PoseEstimation3dPrediction(
-                identifier, panoptic_poses_2d[:, 0:-1:3], panoptic_poses_2d[:, 1:-1:3], panoptic_poses_2d[:, 2:-1:3],
-                panoptic_poses_2d[:, -1], x_3d_values=panoptic_poses_3d[:, 0::4],
-                y_3d_values=panoptic_poses_3d[:, 1::4], z_3d_values=panoptic_poses_3d[:, 2::4],
-                translations=translations
-            )
+            if panoptic_poses_2d.size:
+                frame_result = PoseEstimation3dPrediction(
+                    identifier, panoptic_poses_2d[:, 0:-1:3], panoptic_poses_2d[:, 1:-1:3],
+                    panoptic_poses_2d[:, 2:-1:3], panoptic_poses_2d[:, -1], x_3d_values=panoptic_poses_3d[:, 0::4],
+                    y_3d_values=panoptic_poses_3d[:, 1::4], z_3d_values=panoptic_poses_3d[:, 2::4],
+                    translations=translations
+                )
+            else:
+                frame_result = PoseEstimation3dPrediction(
+                    identifier, panoptic_poses_2d, panoptic_poses_2d,
+                    panoptic_poses_2d,
+                    panoptic_poses_2d, x_3d_values=panoptic_poses_3d,
+                    y_3d_values=panoptic_poses_3d, z_3d_values=panoptic_poses_3d,
+                    translations=translations
+                )
             result.append(frame_result)
 
         return result
@@ -254,6 +263,7 @@ class HumanPose3dAdapter(Adapter):
             translations.append(translation)
 
         # map 2d coordinates back to image space
-        poses_2d[:, 0:-1:3] *= scale_x
-        poses_2d[:, 1:-1:3] *= scale_y
+        if poses_2d.size:
+            poses_2d[:, 0:-1:3] *= scale_x
+            poses_2d[:, 1:-1:3] *= scale_y
         return poses_3d, np.array(translations, dtype=np.float32), poses_2d
