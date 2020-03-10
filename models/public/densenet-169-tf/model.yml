@@ -37,5 +37,6 @@ model_optimizer_args:
   - --scale_values=Placeholder[58.8235294117647]
   - --output=densenet169/predictions/Reshape_1
   - --input_meta_graph=$dl_dir/tf-densenet169.ckpt.meta
+  - --keep_shape_ops
 framework: tf
 license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE
