@@ -32,11 +32,14 @@ from .module_evaluator import ModuleEvaluator
 
 
 def create_model_evaluator(config):
-    cascade = 'evaluations' in config
-    if not cascade:
+    mode = [key for key in config.keys() if key in ['models', 'evaluations']]
+    if not mode:
+        raise ConfigError('Unknown evaluation mode')
+    mode = mode[0]
+    if mode == 'models':
         return ModelEvaluator.from_configs(config)
     else:
-        return PipelineEvaluator.from_configs(config['evaluations'][0], delayed_model_loading=True)
+        return PipelineEvaluator.from_configs(config)
 
 
 class ModelEvaluator:
