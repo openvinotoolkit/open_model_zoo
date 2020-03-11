@@ -70,24 +70,34 @@ class Tracker:  # pylint: disable=too-few-public-methods
 
         intersect_heights = np.maximum(0.0, intersect_ymax - intersect_ymin)
         intersect_widths = np.maximum(0.0, intersect_xmax - intersect_xmin)
-
         intersect_areas = intersect_heights * intersect_widths
-        areas_set_a = (np.abs(set_a[:, 2] - set_a[:, 0]) * np.abs(set_a[:, 3] - set_a[:, 1])).reshape([-1, 1])
+        
+        areas_set_a = ((set_a[:, 2] - set_a[:, 0]) * (set_a[:, 3] - set_a[:, 1])).reshape([-1, 1])
         areas_set_b = ((set_b[:, 2] - set_b[:, 0]) * (set_b[:, 3] - set_b[:, 1])).reshape([1, -1])
 
         union_areas = areas_set_a + areas_set_b - intersect_areas
 
-        iou_values = intersect_areas / union_areas
-        iou_values[np.less_equal(union_areas, 0.0)] = 0.0
+        return intersect_areas / union_areas
 
-        return iou_values
+    @staticmethod
+    def filter_rois(new_rois, score_threshold):
+        """Filters input ROIs by valid height/width and score threshold values"""
+
+        heights = new_rois[:, 2] - new_rois[:, 0]
+        widths = new_rois[:, 3] - new_rois[:, 1]
+        valid_sizes_mask = np.logical_and(heights > 0.0, widths > 0.0)
+        valid_conf_mask = new_rois[:, 4] > score_threshold
+
+        valid_roi_ids = np.where(np.logical_and(valid_sizes_mask, valid_conf_mask))[0]
+        filtered_rois = new_rois[valid_roi_ids, :4]
+        filtered_conf = new_rois[valid_roi_ids, 4]
+
+        return filtered_rois, filtered_conf
 
     def _track(self, last_detections, new_rois):
         """Updates current tracks according new observations"""
 
-        valid_roi_ids = np.where(new_rois[:, 4] > self._score_threshold)[0]
-        filtered_rois = new_rois[valid_roi_ids, :4]
-        filtered_conf = new_rois[valid_roi_ids, 4]
+        filtered_rois, filtered_conf = self.filter_rois(new_rois, self._score_threshold)
 
         if filtered_rois.shape[0] == 0:
             out_detections = []
