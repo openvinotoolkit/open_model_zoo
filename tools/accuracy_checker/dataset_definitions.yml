@@ -176,7 +176,8 @@ datasets:
       imageset_file: VOCdevkit/VOC2012/ImageSets/Segmentation/val.txt
       images_dir: VOCdevkit/VOC2012/JPEGImages/
       mask_dir: VOCdevkit/VOC2012/SegmentationClass/
-    data_source: VOCdevkit/VOC2012
+    data_source: VOCdevkit/VOC2012/JPEGImages/
+    segmentation_masks_source:  VOCdevkit/VOC2012/SegmentationClass/
     annotation: voc2012_segmentation.pickle
     dataset_meta: voc2012_segmentation.json
 
