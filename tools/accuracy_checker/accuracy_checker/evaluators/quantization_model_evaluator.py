@@ -32,13 +32,14 @@ from .module_evaluator import ModuleEvaluator
 
 
 def create_model_evaluator(config):
-    mode = next(iter(config))
+    mode = [key for key in config.keys() if key in ['models', 'evaluations']]
+    if not mode:
+        raise ConfigError('Unknown evaluation mode')
+    mode = mode[0]
     if mode == 'models':
         return ModelEvaluator.from_configs(config)
-    elif mode == 'evaluations':
-        return PipelineEvaluator.from_configs(config)
     else:
-        raise ConfigError('Unexpected mode {}'.format(mode))
+        return PipelineEvaluator.from_configs(config)
 
 
 class ModelEvaluator:
