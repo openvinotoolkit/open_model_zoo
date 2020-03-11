@@ -28,6 +28,17 @@ from ..adapters import create_adapter
 from ..config import ConfigError
 from ..data_readers import BaseReader, REQUIRES_ANNOTATIONS
 from ..progress_reporters import ProgressReporter
+from .module_evaluator import ModuleEvaluator
+
+
+def create_model_evaluator(config):
+    mode = next(iter(config))
+    if mode == 'models':
+        return ModelEvaluator.from_configs(config)
+    elif mode == 'evaluations':
+        return PipelineEvaluator.from_configs(config)
+    else:
+        raise ConfigError('Unexpected mode {}'.format(mode))
 
 
 class ModelEvaluator:
@@ -378,7 +389,8 @@ class ModelEvaluator:
         computed_metrics = copy.deepcopy(self._metrics_results)
         return computed_metrics
 
-    def load_network(self, network=None):
+    def load_network(self, network_dict=None):
+        network = next(iter(network_dict.values())) if network_dict is not None else None
         self.launcher.load_network(network)
         self.input_feeder = InputFeeder(
             self.launcher.config.get('inputs', []), self.launcher.inputs,
@@ -387,7 +399,9 @@ class ModelEvaluator:
         if self.adapter:
             self.adapter.output_blob = self.launcher.output_blob
 
-    def load_network_from_ir(self, xml_path, bin_path):
+    def load_network_from_ir(self, models_dict):
+        model_paths = next(iter(models_dict.values()))
+        xml_path, bin_path = model_paths['model'], model_paths['weights']
         self.launcher.load_ir(xml_path, bin_path)
         self.input_feeder = InputFeeder(
             self.launcher.config.get('inputs', []), self.launcher.inputs,
@@ -397,7 +411,7 @@ class ModelEvaluator:
             self.adapter.output_blob = self.launcher.output_blob
 
     def get_network(self):
-        return self.launcher.network
+        return {'': self.launcher.network}
 
     def get_metrics_attributes(self):
         if not self.metric_executor:
@@ -481,3 +495,29 @@ def create_dataset_attributes(config, tag, dumped_annotations=None):
         metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), annotation_reader)
 
     return dataset, metric_dispatcher, preprocessor, postprocessor
+
+
+class PipelineEvaluator(ModuleEvaluator):
+    def load_network(self, network=None):
+        self._internal_module.load_network(network)
+
+    def load_network_from_ir(self, models_dict):
+        self._internal_module.load_network_from_ir(models_dict)
+
+    def get_network(self):
+        return self._internal_module.get_network()
+
+    def get_metrics_attributes(self):
+        return self._internal_module.get_metrics_attributes()
+
+    def register_metric(self, metric_config):
+        self._internal_module.register_metric(metric_config)
+
+    def register_postprocessor(self, postprocessing_config):
+        self._internal_module.register_postprocessor(postprocessing_config)
+
+    def register_dumped_annotations(self):
+        self._internal_module.register_dumped_annotations()
+
+    def select_dataset(self, dataset_tag):
+        self._internal_module.select_dataset(dataset_tag)
