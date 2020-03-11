@@ -16,6 +16,7 @@ limitations under the License.
 
 from pathlib import Path
 import pickle
+from collections import OrderedDict
 from functools import partial
 import numpy as np
 
@@ -334,10 +335,6 @@ class SequentialModel(BaseModel):
         self.encoder.load_network(network_dict['encoder'], launcher)
         self.decoder.load_network(network_dict['decoder'], launcher)
 
-    def load_model(self, network_dict, launcher):
-        self.encoder.load_model(network_dict['encoder'], launcher)
-        self.decoder.load_model(network_dict['decoder'], launcher)
-
     def _add_raw_encoder_predictions(self, encoder_prediction):
         for key, output in encoder_prediction.items():
             if key not in self._raw_outs:
@@ -370,10 +367,6 @@ class EncoderDLSDKModel(BaseModel):
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
-<<<<<<< 37d09751581d15e0400aaf5bf30f32facec9581d
-=======
-
->>>>>>> fix model after renaming
 
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(self.fit_to_input(input_data))
@@ -517,6 +510,18 @@ class DecoderDLSDKModel(BaseModel):
             self.input_blob = next(iter(self.exec_network.inputs))
             self.output_blob = output_blob
             self.with_prefix = with_prefix
+=======
+            network = launcher.create_ie_network(str(model), str(weights))
+            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+            self.input_blob = next(iter(network.inputs))
+            self.output_blob = next(iter(network.outputs))
+        else:
+            self.network = None
+            self.exec_network = launcher.ie_core.import_network(str(model))
+            self.input_blob = next(iter(self.exec_network.inputs))
+            self.output_blob = next(iter(self.exec_network.outputs))
+        if self.adapter.output_blob is None:
+>>>>>>> try quantize encoder/decoder
             self.adapter.output_blob = self.output_blob
 
 
