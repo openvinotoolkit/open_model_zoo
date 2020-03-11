@@ -63,9 +63,9 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
             allow_pairwise_subset=False,
             dump_prediction_to_annotation=False,
             **kwargs):
-        self._annotations, self._predictions = ([], []) if self.metric_executor.need_store_predictions else None, None
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
+        self._annotations, self._predictions = [], []
         if dump_prediction_to_annotation:
             self._dumped_annotations = []
 
@@ -365,7 +365,7 @@ class EncoderDLSDKModel(BaseModel):
         else:
             model, weights = self.automatic_model_search(network_info)
         if weights is not None:
-            self.network = launcher.create_ie_network(str(model), str(weights))
+            self.network = launcher.read_network(str(model), str(weights))
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
@@ -489,7 +489,7 @@ class DecoderDLSDKModel(BaseModel):
         else:
             model, weights = self.automatic_model_search(network_info)
         if weights is not None:
-            self.network = launcher.create_ie_network(str(model), str(weights))
+            self.network = launcher.read_network(str(model), str(weights))
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
             self.network = None
