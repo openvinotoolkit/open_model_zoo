@@ -16,9 +16,9 @@ limitations under the License.
 
 from pathlib import Path
 import pickle
-from collections import OrderedDict
 from functools import partial
 import numpy as np
+
 from accuracy_checker.evaluators import BaseEvaluator
 from accuracy_checker.evaluators.quantization_model_evaluator import create_dataset_attributes
 from accuracy_checker.adapters import create_adapter
@@ -26,6 +26,7 @@ from accuracy_checker.config import ConfigError
 from accuracy_checker.launcher import create_launcher
 from accuracy_checker.utils import contains_all, contains_any, extract_image_representations, read_pickle
 from accuracy_checker.progress_reporters import ProgressReporter
+
 
 
 class SequentialActionRecognitionEvaluator(BaseEvaluator):
@@ -42,8 +43,12 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
 
     @classmethod
     def from_configs(cls, config, delayed_model_loading=False):
-        dataset_config = config['datasets'][0]
-        launcher = create_launcher(config['launchers'][0], delayed_model_loading=True)
+        dataset_config = config['datasets']
+        launcher_config = config['launchers'][0]
+        if launcher_config['framework'] == 'dlsdk' and 'devise' not in launcher_config:
+            launcher_config['device'] = 'CPU'
+
+        launcher = create_launcher(launcher_config, delayed_model_loading=True)
         model = SequentialModel(
             config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
             delayed_model_loading
@@ -177,7 +182,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
         networks_dict = {}
         for network_key, network_path in models_dict.items():
             networks_dict[network_key] = self.launcher.create_ie_network(
-                str(network_path['xml_path']), str(network_path['bin_path'])
+                str(network_path['model']), str(network_path['weights'])
             )
         self.model.load_network(networks_dict, self.launcher)
 
@@ -206,7 +211,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
     def select_dataset(self, dataset_tag):
         if self.dataset is not None and isinstance(self.dataset_config, list):
             return
-        dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag, self._dumped_annotations)
+        dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
         self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
 
     @staticmethod
