@@ -16,6 +16,7 @@ limitations under the License.
 
 from pathlib import Path
 import pickle
+from collections import OrderedDict
 from functools import partial
 import numpy as np
 
@@ -106,16 +107,16 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
 
             if output_callback:
                 output_callback(
-                    batch_raw_prediction[0],
-                        metrics_result=metrics_result,
-                        element_identifiers=batch_identifiers,
-                        dataset_indices=batch_input_ids
-                    )
-            if _progress_reporter:
-                _progress_reporter.update(batch_id, len(batch_prediction))
+                    batch_raw_prediction,
+                    metrics_result=metrics_result,
+                    element_identifiers=batch_identifiers,
+                    dataset_indices=batch_input_ids
+                )
+            if progress_reporter:
+                progress_reporter.update(batch_id, len(batch_prediction))
 
-        if _progress_reporter:
-            _progress_reporter.finish()
+        if progress_reporter:
+            progress_reporter.finish()
 
         if self.model.store_encoder_predictions:
             self.model.save_encoder_predictions()
@@ -296,8 +297,6 @@ class SequentialModel(BaseModel):
         self._encoder_predictions = [] if self.store_encoder_predictions else None
 
     def predict(self, identifiers, input_data, encoder_callback=None):
-        raw_outputs = []
-        predictions = []
         if len(np.shape(input_data)) == 5:
             input_data = input_data[0]
         for data in input_data:
@@ -308,10 +307,7 @@ class SequentialModel(BaseModel):
             if self.store_encoder_predictions:
                 self._encoder_predictions.append(encoder_prediction[self.encoder.output_blob])
             if len(self.processing_frames_buffer) == self.num_processing_frames:
-                raw_output, prediction = self.decoder.predict(identifiers, [self.processing_frames_buffer])
-                raw_outputs.append(raw_output)
-                predictions.append(prediction)
-                self.processing_frames_buffer = []
+                raw_outputs, predictions = self.decoder.predict(identifiers, [self.processing_frames_buffer])
 
         return raw_outputs, predictions
 
@@ -370,7 +366,6 @@ class EncoderDLSDKModel(BaseModel):
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
-
 
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(self.fit_to_input(input_data))
