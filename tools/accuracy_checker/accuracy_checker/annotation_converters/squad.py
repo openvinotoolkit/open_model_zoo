@@ -39,15 +39,15 @@ class SQUADConverter(BaseFormatConverter):
             'sentence_piece_model_file': PathField(description='sentence piece model for tokenization', optional=True),
             'max_seq_length': NumberField(
                 description='The maximum total input sequence length after WordPiece tokenization.',
-                optional=True, default=128
+                optional=True, default=128, value_type=int
             ),
             'max_query_length': NumberField(
                 description='The maximum number of tokens for the question.',
-                optional=True, default=64
+                optional=True, default=64, value_type=int
             ),
             'doc_stride': NumberField(
                 description="When splitting up a long document into chunks, how much stride to take between chunks.",
-                optional=True, default=128
+                optional=True, default=128, value_type=int
             ),
             'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register')
         })

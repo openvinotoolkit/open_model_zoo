@@ -75,9 +75,9 @@ class HumanPoseAdapter(Adapter):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
         if not self.concat_out:
-            if not contains_any(raw_outputs, self.part_affinity_fields, self._part_affinity_fileds_bias):
+            if not contains_any(raw_outputs, [self.part_affinity_fields, self._part_affinity_fileds_bias]):
                 raise ConfigError('part affinity fields output not found')
-            if not contains_any(raw_outputs, self.keypoints_heatmap, self._keypoints_heatmap_bias):
+            if not contains_any(raw_outputs, [self.keypoints_heatmap, self._keypoints_heatmap_bias]):
                 raise ConfigError('keypoints heatmap output not found')
             keypoints_heatmap = raw_outputs[
                 self.keypoints_heatmap if self.keypoints_heatmap in raw_outputs else self._keypoints_heatmap_bias
@@ -409,7 +409,6 @@ class SingleHumanPoseAdapter(Adapter):
 
         return result
 
-
     @staticmethod
     def extract_keypoints(heatmap, min_confidence=-100):
         ind = np.unravel_index(np.argmax(heatmap, axis=None), heatmap.shape)
@@ -418,7 +417,6 @@ class SingleHumanPoseAdapter(Adapter):
         else:
             ind = (int(ind[1]), int(ind[0]))
         return heatmap[ind[1]][ind[0]], ind
-
 
     @staticmethod
     def affine_transform(pt, t):

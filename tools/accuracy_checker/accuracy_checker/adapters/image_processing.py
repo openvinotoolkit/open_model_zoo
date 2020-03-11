@@ -19,7 +19,7 @@ import numpy as np
 
 from ..adapters import Adapter
 from ..representation import SuperResolutionPrediction
-from ..config import ConfigValidator, BoolField, BaseField, ConfigError
+from ..config import ConfigValidator, BoolField, BaseField, StringField, ConfigError
 from ..utils import get_or_parse_value
 from ..preprocessor import Normalize
 try:
@@ -48,7 +48,8 @@ class SuperResolutionAdapter(Adapter):
                 optional=True, default=255,
                 description='The value on which prediction pixels should be multiplied for scaling to range '
                             '[0, 255] (usually it is the same scale (std) used in preprocessing step))'
-            )
+            ),
+            'target_out': StringField(optional=True, description='Target super resolution model output')
         })
         return parameters
 
@@ -66,10 +67,15 @@ class SuperResolutionAdapter(Adapter):
         if not (len(self.std) == 3 or len(self.std) == 1):
             raise ConfigError('std should be one value or comma-separated list channel-wise values')
 
+        self.target_out = self.get_value_from_config('target_out')
+
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        for identifier, img_sr in zip(identifiers, raw_outputs[self.output_blob]):
+        if not self.target_out:
+            self.target_out = self.output_blob
+
+        for identifier, img_sr in zip(identifiers, raw_outputs[self.target_out]):
             img_sr *= self.std
             img_sr += self.mean
             img_sr = np.clip(img_sr, 0., 255.)

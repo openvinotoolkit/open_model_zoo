@@ -17,12 +17,12 @@ limitations under the License.
 import itertools
 import math
 import re
-
+import warnings
 import numpy as np
 
 from ..topology_types import SSD, FasterRCNN
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, StringField
+from ..config import ConfigValidator, NumberField, StringField, ConfigError
 from ..postprocessor.nms import NMS
 from ..representation import DetectionPrediction, ContainerPrediction
 
@@ -673,11 +673,10 @@ class FCOSPersonAdapter(Adapter):
         Returns:
             list of DetectionPrediction objects
         """
-
+        predictions = self._extract_predictions(raw, frame_meta)
         if self.out_blob_name is None:
-            self.out_blob_name = self.output_blob
-
-        prediction_batch = self._extract_predictions(raw, frame_meta)[self.out_blob_name]
+            self.out_blob_name = self._find_output(predictions)
+        prediction_batch = predictions[self.out_blob_name]
 
         result = []
         for identifier in identifiers:
@@ -691,3 +690,18 @@ class FCOSPersonAdapter(Adapter):
             result.append(DetectionPrediction(identifier, labels, scores, *zip(*bboxes)))
 
         return result
+
+    @staticmethod
+    def _find_output(predictions):
+        filter_outputs = [
+            output_name for output_name, out_data in predictions.items()
+            if len(np.shape(out_data)) == 2 and np.shape(out_data)[-1] == 5
+        ]
+        if not filter_outputs:
+            raise ConfigError('Suitable output layer not found')
+        if len(filter_outputs) > 1:
+            warnings.warn(
+                'There is several suitable outputs {}. The first will be used. '.format(', '.join(filter_outputs)) +
+                'If you need to use another layer, please specify it explicitly'
+            )
+        return filter_outputs[0]

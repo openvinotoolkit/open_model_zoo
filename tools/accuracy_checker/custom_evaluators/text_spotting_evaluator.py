@@ -52,7 +52,9 @@ class TextSpottingEvaluator(BaseEvaluator):
         preprocessing = PreprocessingExecutor(dataset_config.get('preprocessing', []), dataset.name)
         metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
         launcher = create_launcher(config['launchers'][0], delayed_model_loading=True)
-        model = SequentialModel(config.get('network_info', {}), launcher, config.get('_models', []))
+        model = SequentialModel(
+            config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob')
+        )
         return cls(dataset, reader, preprocessing, metrics_executor, launcher, model)
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
@@ -155,14 +157,19 @@ class BaseModel:
     def automatic_model_search(self, network_info):
         model = Path(network_info['model'])
         if model.is_dir():
-            model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
-            blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
-            if not model_list:
-                model_list = blob_list or list(model.glob('*.xml'))
-                if not blob_list:
-                    blob_list = list(model.glob('*.blob'))
+            is_blob = network_info.get('_model_is_blob')
+            if is_blob:
+                model_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
                 if not model_list:
-                    model_list = blob_list
+                    model_list = list(model.glob('*.blob'))
+            else:
+                model_list = list(model.glob('*{}.xml'.format(self.default_model_suffix)))
+                blob_list = list(model.glob('*{}.blob'.format(self.default_model_suffix)))
+                if not model_list and not blob_list:
+                    model_list = list(model.glob('*.xml'.format(self.default_model_suffix)))
+                    blob_list = list(model.glob('*.blob'.format(self.default_model_suffix)))
+                    if not model_list:
+                        model_list = blob_list
             if not model_list:
                 raise ConfigError('Suitable model for {} not found'.format(self.default_model_suffix))
             if len(model_list) > 1:
@@ -198,16 +205,19 @@ def create_recognizer(model_config, launcher, suffix):
 
 
 class SequentialModel:
-    def __init__(self, network_info, launcher, models_args):
+    def __init__(self, network_info, launcher, models_args, is_blob=None):
         detector = network_info.get('detector', {})
         recognizer_encoder = network_info.get('recognizer_encoder', {})
         recognizer_decoder = network_info.get('recognizer_decoder', {})
         if 'model' not in detector:
             detector['model'] = models_args[0]
+            detector['_model_is_blob'] = is_blob
         if 'model' not in recognizer_encoder:
             recognizer_encoder['model'] = models_args[1 if len(models_args) > 1 else 0]
+            recognizer_encoder['_model_is_blob'] = is_blob
         if 'model' not in recognizer_decoder:
             recognizer_decoder['model'] = models_args[2 if len(models_args) > 2 else 0]
+            recognizer_decoder['_model_is_blob'] = is_blob
         network_info.update({
             'detector': detector,
             'recognizer_encoder': recognizer_encoder,

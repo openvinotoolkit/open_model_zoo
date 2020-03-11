@@ -176,7 +176,8 @@ datasets:
       imageset_file: VOCdevkit/VOC2012/ImageSets/Segmentation/val.txt
       images_dir: VOCdevkit/VOC2012/JPEGImages/
       mask_dir: VOCdevkit/VOC2012/SegmentationClass/
-    data_source: VOCdevkit/VOC2012
+    data_source: VOCdevkit/VOC2012/JPEGImages/
+    segmentation_masks_source:  VOCdevkit/VOC2012/SegmentationClass/
     annotation: voc2012_segmentation.pickle
     dataset_meta: voc2012_segmentation.json
 
@@ -428,12 +429,9 @@ datasets:
       data_dir: Market-1501-v15.09.15
     annotation: market1501_reid.pickle
 
-  - name: globalme-reid
-    data_source: GlobalMe-reID
-    annotation_conversion:
-      converter: market1501_reid
-      data_dir: globalme-reid/GlobalMe-reID
-    annotation: globalme-reid.pickle
+  - name: reid_dataset
+    data_source: reid
+    annotation: reid.pickle
 
   - name: vgg2face
     data_source: VGGFaces2/test
@@ -668,4 +666,11 @@ datasets:
       data_dir: ReDWeb_V1
       annotation_file: ReDWeb_validation_360.txt
     annotation: mono_depth.pickle
-    
+
+  - name: inpainting_free_form_masks
+    data_source: VOCdevkit/VOC2012/JPEGImages/
+    annotation_conversion:
+      converter: inpainting
+      images_dir: VOCdevkit/VOC2012/JPEGImages/
+      masks_dir: free_form_masks/masks_2k
+    annotation: inpainting_voc12_masks2k.pickle

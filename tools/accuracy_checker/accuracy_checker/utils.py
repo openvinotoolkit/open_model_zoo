@@ -25,7 +25,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Union
 from warnings import warn
-from collections import MutableSet
+from collections.abc import MutableSet
 
 import numpy as np
 import yaml

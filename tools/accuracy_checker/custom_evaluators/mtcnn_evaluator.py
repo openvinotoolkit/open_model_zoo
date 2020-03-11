@@ -386,7 +386,7 @@ class DLSDKModelMixin:
                         raise ConfigError('Several suitable weights found, please specify required explicitly')
                     weights = weights_list[0]
             weights = Path(weights)
-            return model, weights
+        return model, weights
 
 
 class CaffeProposalStage(CaffeModelMixin, ProposalBaseStage):

@@ -99,6 +99,7 @@ AccuracyChecker supports following set of adapters:
   1. Multiply on `std`
   2. Add `mean`
   3. Reverse channels if this option enabled.
+  * `target_out` - super resolution model output layer name in case when model has several outputs.
 * `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction`.
 * `pixel_link_text_detection` - converting output of PixelLink like model for text detection to `TextDetectionPrediction`.
   * `pixel_class_out` - name of layer containing information related to text/no-text classification for each pixel.
@@ -170,3 +171,4 @@ AccuracyChecker supports following set of adapters:
   * `output_blob` - name of output layer with bboxes.
   * `scale` - scalar value to normalize bbox coordinates.
 * `mono_depth` - converting output of monocular depth estimation model to `DepthEstimationPrediction`.
+* `inpainting` - converting output of Image Inpainting model to `ImageInpaintingPrediction` representation.

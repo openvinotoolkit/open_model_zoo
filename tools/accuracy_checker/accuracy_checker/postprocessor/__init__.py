@@ -49,6 +49,7 @@ from .normalize_recomendation import MinMaxNormalizeRecommendation, SigmoidNorma
 from .align_prediction_depth_map import AlignDepth
 from .resize_prediction_depth_map import ResizeDepthMap
 from .resize_super_resolution import ResizeSuperResolution
+from .crop_ground_truth_image import CropGTImage
 
 
 __all__ = [
@@ -96,5 +97,7 @@ __all__ = [
     'AlignDepth',
     'ResizeDepthMap',
 
-    'ResizeSuperResolution'
+    'ResizeSuperResolution',
+
+    'CropGTImage'
 ]
