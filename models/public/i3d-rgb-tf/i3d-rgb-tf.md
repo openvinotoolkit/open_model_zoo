@@ -49,9 +49,9 @@ Accuracy validations performed on validation part of [Kinetics-400\*](https://ww
 
 ### Original Model
 
-Video clip, name - `Placeholder`, shape - `1,79,224,224,3`, format is `B,F,H,W,C`, whereL
+Video clip, name - `Placeholder`, shape - `1,79,224,224,3`, format is `B,F,H,W,C`, where:
 - `B` - batch size
-- `F` - frames
+- `D` - duration of input clip
 - `H` - height
 - `W` - width
 - `C` - channel
@@ -60,15 +60,14 @@ Channel order is `RGB`. Mean value - 127.5, scale value - 127.5.
 
 ### Converted Model
 
-Video clip, name - `Placeholder`, shape - `1,79,3,224,224`, format is `B,F,C,H,W`, whereL
+Video clip, name - `Placeholder`, shape - `1,79,3,224,224`, format is `B,F,C,H,W`, where:
 - `B` - batch size
-- `F` - frames
+- `D` - duration of input clip
 - `C` - channel
 - `H` - height
 - `W` - width
 
-
-Channel order is `BGR`.
+Channel order is `RGB`.
 
 ## Output
 

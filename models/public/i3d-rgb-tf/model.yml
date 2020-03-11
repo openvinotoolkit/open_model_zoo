@@ -31,6 +31,5 @@ model_optimizer_args:
   - --input_shape=[1,79,224,224,3]
   - --mean_values=Placeholder[127.5]
   - --scale_values=Placeholder[127.5]
-  - --reverse_input_channels
   - --input_model=$dl_dir/i3d-rgb.frozen.pb
 license: https://raw.githubusercontent.com/deepmind/kinetics-i3d/master/LICENSE
