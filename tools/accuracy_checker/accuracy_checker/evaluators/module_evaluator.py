@@ -11,12 +11,12 @@ class ModuleEvaluator(BaseEvaluator):
         self._internal_module = internal_module
 
     @classmethod
-    def from_configs(cls, config):
+    def from_configs(cls, config, *args, **kwargs):
         module = config['module']
         module_config = config.get('module_config')
         python_path = config.get('python_path')
 
-        return cls(load_module(module, python_path).from_configs(module_config))
+        return cls(load_module(module, python_path).from_configs(module_config, *args, **kwargs))
 
     def process_dataset(self, stored_predictions, progress_reporter, *args, **kwargs):
         self._internal_module.process_dataset(stored_predictions, progress_reporter, *args, **kwargs)

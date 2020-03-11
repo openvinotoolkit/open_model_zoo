@@ -32,14 +32,11 @@ from .module_evaluator import ModuleEvaluator
 
 
 def create_model_evaluator(config):
-    mode = [key for key in config.keys() if key in ['models', 'evaluations']]
-    if not mode:
-        raise ConfigError('Unknown evaluation mode')
-    mode = mode[0]
-    if mode == 'models':
+    cascade = 'evaluations' in config
+    if not cascade:
         return ModelEvaluator.from_configs(config)
     else:
-        return PipelineEvaluator.from_configs(config)
+        return PipelineEvaluator.from_configs(config['evaluations'][0], delayed_model_loading=True)
 
 
 class ModelEvaluator:
@@ -566,3 +563,7 @@ class PipelineEvaluator(ModuleEvaluator):
             dump_prediction_to_annotation=dump_prediction_to_annotation,
             **kwargs
         )
+
+    @property
+    def dataset(self):
+        return self._internal_module.dataset
