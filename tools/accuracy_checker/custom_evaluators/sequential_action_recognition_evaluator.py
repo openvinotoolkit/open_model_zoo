@@ -13,66 +13,97 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
 from pathlib import Path
 import pickle
+from collections import OrderedDict
+from functools import partial
 import numpy as np
 from accuracy_checker.evaluators import BaseEvaluator
-from accuracy_checker.dataset import Dataset
+from accuracy_checker.evaluators.quantization_model_evaluator import create_dataset_attributes
 from accuracy_checker.adapters import create_adapter
-from accuracy_checker.data_readers import BaseReader
 from accuracy_checker.config import ConfigError
-from accuracy_checker.preprocessor import PreprocessingExecutor
-from accuracy_checker.metrics import MetricsExecutor
 from accuracy_checker.launcher import create_launcher
 from accuracy_checker.utils import contains_all, contains_any, extract_image_representations, read_pickle
+from accuracy_checker.progress_reporters import ProgressReporter
 
 
 class SequentialActionRecognitionEvaluator(BaseEvaluator):
-    def __init__(self, dataset, reader, preprocessing, metric_executor, launcher, model):
-        self.dataset = dataset
-        self.preprocessing_executor = preprocessing
-        self.metric_executor = metric_executor
+    def __init__(self, dataset_config, launcher, model):
+        self.dataset_config = dataset_config
+        self.preprocessing_executor = None
+        self.preprocessor = None
+        self.dataset = None
+        self.postprocessor = None
+        self.metric_executor = None
         self.launcher = launcher
         self.model = model
-        self.reader = reader
         self._metrics_results = []
 
     @classmethod
-    def from_configs(cls, config):
+    def from_configs(cls, config, delayed_model_loading=False):
         dataset_config = config['datasets'][0]
-        dataset = Dataset(dataset_config)
-        data_reader_config = dataset_config.get('reader', 'opencv_imread')
-        data_source = dataset_config['data_source']
-        if isinstance(data_reader_config, str):
-            reader = BaseReader.provide(data_reader_config, data_source)
-        elif isinstance(data_reader_config, dict):
-            reader = BaseReader.provide(data_reader_config['type'], data_source, data_reader_config)
-        else:
-            raise ConfigError('reader should be dict or string')
-        preprocessing = PreprocessingExecutor(dataset_config.get('preprocessing', []), dataset.name)
-        metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
         launcher = create_launcher(config['launchers'][0], delayed_model_loading=True)
         model = SequentialModel(
-            config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob')
+            config.get('network_info', {}), launcher, config.get('_models', []), config.get('_model_is_blob'),
+            delayed_model_loading
         )
-        return cls(dataset, reader, preprocessing, metrics_executor, launcher, model)
+        return cls(dataset_config, launcher, model)
 
-    def process_dataset(self, stored_predictions, progress_reporter, *args, ** kwargs):
+    def process_dataset(
+            self, subset=None,
+            num_images=None,
+            check_progress=False,
+            dataset_tag='',
+            output_callback=None,
+            allow_pairwise_subset=False,
+            dump_prediction_to_annotation=False,
+            **kwargs):
         self._annotations, self._predictions = ([], []) if self.metric_executor.need_store_predictions else None, None
-        if progress_reporter:
-            progress_reporter.reset(self.dataset.size)
+        if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
+            self.select_dataset(dataset_tag)
+        if dump_prediction_to_annotation:
+            self._dumped_annotations = []
 
-        for batch_id, (dataset_indices, batch_annotation) in enumerate(self.dataset):
-            batch_identifiers = [annotation.identifier for annotation in batch_annotation]
-            batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
-            batch_input = self.preprocessing_executor.process(batch_input, batch_annotation)
-            batch_input, _ = extract_image_representations(batch_input)
-            batch_prediction = self.model.predict(batch_identifiers, batch_input)
-            self.metric_executor.update_metrics_on_batch(dataset_indices, batch_annotation, batch_prediction)
-            if self.metric_executor.need_store_predictions:
-                self._annotations.extend(batch_annotation)
-                self._predictions.extend(batch_prediction)
-            progress_reporter.update(batch_id, len(batch_prediction))
+        if self.dataset.batch is None:
+            self.dataset.batch = self.launcher.batch
+        self.preprocessor.input_shapes = self.launcher.inputs_info_for_meta()
+        if subset is not None:
+            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
+        elif num_images is not None:
+            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
+        progress_reporter = None if not check_progress else self._create_progress_reporter(
+            check_progress, self.dataset.size
+        )
+        for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
+            batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
+            _, batch_meta = extract_image_representations(batch_inputs)
+            encoder_callback=None
+            if output_callback:
+                encoder_callback = partial(output_callback,
+                                           metrics_result=None,
+                                           element_identifiers=batch_identifiers,
+                                           dataset_indices=batch_input_ids)
+
+            batch_raw_prediction, batch_prediction = self.model.predict(batch_identifiers, batch_inputs, encoder_callback=encoder_callback)
+            metrics_result = None
+            if self.metric_executor:
+                metrics_result = self.metric_executor.update_metrics_on_batch(
+                    batch_input_ids, batch_annotation, batch_prediction
+                )
+                if self.metric_executor.need_store_predictions:
+                    self._annotations.extend(batch_annotation)
+                    self._predictions.extend(batch_prediction)
+
+            if output_callback:
+                output_callback(
+                    batch_raw_prediction,
+                    metrics_result=metrics_result,
+                    element_identifiers=batch_identifiers,
+                    dataset_indices=batch_input_ids
+                )
+            if progress_reporter:
+                progress_reporter.update(batch_id, len(batch_prediction))
 
         if progress_reporter:
             progress_reporter.finish()
@@ -139,9 +170,56 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
             dataset_config['name']
         )
 
+    def load_network(self, network=None):
+        self.model.load_network(network, self.launcher)
+
+    def load_network_from_ir(self, models_dict):
+        networks_dict = {}
+        for network_key, network_path in models_dict.items():
+            networks_dict[network_key] = self.launcher.create_ie_network(
+                str(network_path['xml_path']), str(network_path['bin_path'])
+            )
+        self.model.load_network(networks_dict, self.launcher)
+
+    def get_network(self):
+        return self.model.get_network()
+
+    def get_metrics_attributes(self):
+        if not self.metric_executor:
+            return {}
+        return self.metric_executor.get_metrics_attributes()
+
+    def register_metric(self, metric_config):
+        if isinstance(metric_config, str):
+            self.metric_executor.register_metric({'type': metric_config})
+        elif isinstance(metric_config, dict):
+            self.metric_executor.register_metric(metric_config)
+        else:
+            raise ValueError('Unsupported metric configuration type {}'.format(type(metric_config)))
+
+    def register_postprocessor(self, postprocessing_config):
+        pass
+
+    def register_dumped_annotations(self):
+        pass
+
+    def select_dataset(self, dataset_tag):
+        if self.dataset is not None and isinstance(self.dataset_config, list):
+            return
+        dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag, self._dumped_annotations)
+        self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
+
+    @staticmethod
+    def _create_progress_reporter(check_progress, dataset_size):
+        pr_kwargs = {}
+        if isinstance(check_progress, int) and not isinstance(check_progress, bool):
+            pr_kwargs = {"print_interval": check_progress}
+
+        return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
+
 
 class BaseModel:
-    def __init__(self, network_info, launcher):
+    def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.network_info = network_info
 
     def predict(self, idenitifiers, input_data):
@@ -151,7 +229,7 @@ class BaseModel:
         pass
 
 
-def create_encoder(model_config, launcher):
+def create_encoder(model_config, launcher, delayed_model_loading=False):
     launcher_model_mapping = {
         'dlsdk': EncoderDLSDKModel,
         'onnx_runtime': EncoderONNXModel,
@@ -164,10 +242,10 @@ def create_encoder(model_config, launcher):
     model_class = launcher_model_mapping.get(framework)
     if not model_class:
         raise ValueError('model for framework {} is not supported'.format(framework))
-    return model_class(model_config, launcher)
+    return model_class(model_config, launcher, delayed_model_loading)
 
 
-def create_decoder(model_config, launcher):
+def create_decoder(model_config, launcher, delayed_model_loading):
     launcher_model_mapping = {
         'dlsdk': DecoderDLSDKModel,
         'onnx_runtime': DecoderONNXModel,
@@ -177,13 +255,13 @@ def create_decoder(model_config, launcher):
     model_class = launcher_model_mapping.get(framework)
     if not model_class:
         raise ValueError('model for framework {} is not supported'.format(framework))
-    return model_class(model_config, launcher)
+    return model_class(model_config, launcher, delayed_model_loading)
 
 
 class SequentialModel(BaseModel):
-    def __init__(self, network_info, launcher, models_args, is_blob):
+    def __init__(self, network_info, launcher, models_args, is_blob, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if models_args:
+        if models_args and not delayed_model_loading:
             encoder = network_info.get('encoder', {})
             decoder = network_info.get('decoder', {})
             if not contains_any(encoder, ['model', 'onnx_model']) and models_args:
@@ -193,29 +271,30 @@ class SequentialModel(BaseModel):
                 decoder['model'] = models_args[1 if len(models_args) > 1 else 0]
                 decoder['_model_is_blob'] = is_blob
             network_info.update({'encoder': encoder, 'decoder': decoder})
-        if not contains_all(network_info, ['encoder', 'decoder']):
+        if not contains_all(network_info, ['encoder', 'decoder']) and not delayed_model_loading:
             raise ConfigError('network_info should contains encoder and decoder fields')
         self.num_processing_frames = network_info['decoder'].get('num_processing_frames', 16)
         self.processing_frames_buffer = []
-        self.encoder = create_encoder(network_info['encoder'], launcher)
-        self.decoder = create_decoder(network_info['decoder'], launcher)
+        self.encoder = create_encoder(network_info['encoder'], launcher, delayed_model_loading)
+        self.decoder = create_decoder(network_info['decoder'], launcher, delayed_model_loading)
         self.store_encoder_predictions = network_info['encoder'].get('store_predictions', False)
         self._encoder_predictions = [] if self.store_encoder_predictions else None
 
-    def predict(self, idenitifiers, input_data):
+    def predict(self, identifiers, input_data, encoder_callback=None):
         predictions = []
         if len(np.shape(input_data)) == 5:
             input_data = input_data[0]
         for data in input_data:
-            encoder_prediction = self.encoder.predict(idenitifiers, [data])
+            encoder_prediction = self.encoder.predict(identifiers, [data])
+            if encoder_callback:
+                encoder_callback(encoder_prediction)
             self.processing_frames_buffer.append(encoder_prediction)
             if self.store_encoder_predictions:
                 self._encoder_predictions.append(encoder_prediction)
             if len(self.processing_frames_buffer) == self.num_processing_frames:
-                predictions.append(self.decoder.predict(idenitifiers, [self.processing_frames_buffer]))
-                self.processing_frames_buffer = []
+                raw_outputs, predictions = self.decoder.predict(identifiers, [self.processing_frames_buffer])
 
-        return predictions
+        return raw_outputs, predictions
 
     def reset(self):
         self.processing_frames_buffer = []
@@ -232,12 +311,27 @@ class SequentialModel(BaseModel):
             with prediction_file.open('wb') as file:
                 pickle.dump(self._encoder_predictions, file)
 
+    def load_network(self, network_dict, launcher):
+        self.encoder.load_network(network_dict['encoder'], launcher)
+        self.decoder.load_network(network_dict['decoder'], launcher)
+
+    def _add_raw_encoder_predictions(self, encoder_prediction):
+        for key, output in encoder_prediction.items():
+            if key not in self._raw_outs:
+                self._raw_outs[key] = []
+            self._raw_outs[key].append(output)
+
 
 class EncoderDLSDKModel(BaseModel):
     default_model_suffix = 'encoder'
 
-    def __init__(self, network_info, launcher):
+    def __init__(self, network_info, launcher, delayed_model_loading=False):
         super().__init__(network_info, launcher)
+        self.input_blob, self.output_blob = None, None
+        if not delayed_model_loading:
+            self.load_network(network_info, launcher)
+
+    def load_network(self, network_info, launcher):
         if 'onnx_model' in network_info:
             network_info.update(launcher.config)
             model, weights = launcher.convert_model(network_info)
@@ -246,12 +340,14 @@ class EncoderDLSDKModel(BaseModel):
         if weights is not None:
             network = launcher.create_ie_network(str(model), str(weights))
             self.exec_network = launcher.ie_core.load_network(network, launcher.device)
-            self.input_blob = next(iter(network.inputs))
-            self.output_blob = next(iter(network.outputs))
+            if self.input_blob is None:
+                self.input_blob = next(iter(network.inputs))
+                self.output_blob = next(iter(network.outputs))
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
-            self.input_blob = next(iter(self.exec_network.inputs))
-            self.output_blob = next(iter(self.exec_network.outputs))
+            if self.input_blob is None:
+                self.input_blob = next(iter(self.exec_network.inputs))
+                self.output_blob = next(iter(self.exec_network.outputs))
 
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(self.fit_to_input(input_data))[self.output_blob]
@@ -296,27 +392,13 @@ class EncoderDLSDKModel(BaseModel):
 class DecoderDLSDKModel(BaseModel):
     default_model_suffix = 'decoder'
 
-    def __init__(self, network_info, launcher):
+    def __init__(self, network_info, launcher, delayed_model_loading=False):
         super().__init__(network_info, launcher)
-        if 'onnx_model' in network_info:
-            network_info.update(launcher.config)
-            model, weights = launcher.convert_model(network_info)
-        else:
-            model, weights = self.automatic_model_search(network_info)
-        if weights is not None:
-            network = launcher.create_ie_network(str(model), str(weights))
-            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
-            self.input_blob = next(iter(network.inputs))
-            self.output_blob = next(iter(network.outputs))
-        else:
-            self.network = None
-            self.exec_network = launcher.ie_core.import_network(str(model))
-            self.input_blob = next(iter(self.exec_network.inputs))
-            self.output_blob = next(iter(self.exec_network.outputs))
-
+        self.input_blob, self.output_blob = None, None
         self.adapter = create_adapter('classification')
-        self.adapter.output_blob = self.output_blob
         self.num_processing_frames = network_info.get('num_processing_frames', 16)
+        if not delayed_model_loading:
+            self.load_network(network_info, launcher)
 
     def predict(self, identifiers, input_data):
         result = self.exec_network.infer(self.fit_to_input(input_data))
@@ -356,6 +438,25 @@ class DecoderDLSDKModel(BaseModel):
             return model, None
         weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
         return model, weights
+
+    def load_network(self, network_info, launcher):
+        if 'onnx_model' in network_info:
+            network_info.update(launcher.config)
+            model, weights = launcher.convert_model(network_info)
+        else:
+            model, weights = self.automatic_model_search(network_info)
+        if weights is not None:
+            network = launcher.create_ie_network(str(model), str(weights))
+            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+            self.input_blob = next(iter(network.inputs))
+            self.output_blob = next(iter(network.outputs))
+        else:
+            self.network = None
+            self.exec_network = launcher.ie_core.import_network(str(model))
+            self.input_blob = next(iter(self.exec_network.inputs))
+            self.output_blob = next(iter(self.exec_network.outputs))
+        if self.adapter.output_blob is None:
+            self.adapter.output_blob = self.output_blob
 
 
 class EncoderONNXModel(BaseModel):
