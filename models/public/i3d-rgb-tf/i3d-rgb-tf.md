@@ -49,7 +49,7 @@ Accuracy validations performed on validation part of [Kinetics-400\*](https://ww
 
 ### Original Model
 
-Video clip, name - `Placeholder`, shape - `1,79,224,224,3`, format is `B,F,H,W,C`, where:
+Video clip, name - `Placeholder`, shape - `1,79,224,224,3`, format is `B,D,H,W,C`, where:
 - `B` - batch size
 - `D` - duration of input clip
 - `H` - height
