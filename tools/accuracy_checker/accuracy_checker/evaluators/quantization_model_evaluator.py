@@ -493,3 +493,29 @@ def create_dataset_attributes(config, tag, dumped_annotations=None):
         metric_dispatcher = MetricsExecutor(dataset_config.get('metrics', []), annotation_reader)
 
     return dataset, metric_dispatcher, preprocessor, postprocessor
+
+
+class PipelineEvaluator(ModuleEvaluator):
+    def load_network(self, network=None):
+        self._internal_module.load_network(network)
+
+    def load_network_from_ir(self, models_dict):
+        self._internal_module.load_network_from_ir(models_dict)
+
+    def get_network(self):
+        return self._internal_module.get_network()
+
+    def get_metrics_attributes(self):
+        return self._internal_module.get_metrics_attributes()
+
+    def register_metric(self, metric_config):
+        self._internal_module.register_metric(metric_config)
+
+    def register_postprocessor(self, postprocessing_config):
+        self._internal_module.register_postprocessor(postprocessing_config)
+
+    def register_dumped_annotations(self):
+        self._internal_module.register_dumped_annotations()
+
+    def select_dataset(self, dataset_tag):
+        self._internal_module.select_dataset(dataset_tag)
