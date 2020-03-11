@@ -522,3 +522,47 @@ class PipelineEvaluator(ModuleEvaluator):
 
     def select_dataset(self, dataset_tag):
         self._internal_module.select_dataset(dataset_tag)
+
+    def process_dataset(
+            self,
+            subset=None,
+            num_images=None,
+            check_progress=False,
+            dataset_tag='',
+            output_callback=None,
+            allow_pairwise_subset=False,
+            dump_prediction_to_annotation=False,
+            **kwargs):
+        self._internal_module.process_dataset(
+            subset=subset,
+            num_images=num_images,
+            check_progress=check_progress,
+            dataset_tag=dataset_tag,
+            output_callback=output_callback,
+            allow_pairwise_subset=allow_pairwise_subset,
+            dump_prediction_to_annotation=dump_prediction_to_annotation,
+            **kwargs
+        )
+
+    def process_dataset_async(
+            self,
+            nreq=None,
+            subset=None,
+            num_images=None,
+            check_progress=False,
+            dataset_tag='',
+            output_callback=None,
+            allow_pairwise_subset=False,
+            dump_prediction_to_annotation=False,
+            **kwargs
+    ):
+        self._internal_module.process_dataset(
+            subset=subset,
+            num_images=num_images,
+            check_progress=check_progress,
+            dataset_tag=dataset_tag,
+            output_callback=output_callback,
+            allow_pairwise_subset=allow_pairwise_subset,
+            dump_prediction_to_annotation=dump_prediction_to_annotation,
+            **kwargs
+        )
