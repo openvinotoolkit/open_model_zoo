@@ -16,7 +16,6 @@ limitations under the License.
 
 from pathlib import Path
 import pickle
-from collections import OrderedDict
 from functools import partial
 import numpy as np
 
@@ -27,6 +26,7 @@ from accuracy_checker.config import ConfigError
 from accuracy_checker.launcher import create_launcher
 from accuracy_checker.utils import contains_all, contains_any, extract_image_representations, read_pickle
 from accuracy_checker.progress_reporters import ProgressReporter
+
 
 
 class SequentialActionRecognitionEvaluator(BaseEvaluator):
