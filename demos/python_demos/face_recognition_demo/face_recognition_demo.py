@@ -124,12 +124,8 @@ class FrameProcessor:
 
     def __init__(self, args):
         used_devices = set([args.d_fd, args.d_lm, args.d_reid])
-        self.context = InferenceContext()
+        self.context = InferenceContext(used_devices, args.cpu_lib, args.gpu_lib, args.perf_stats)
         context = self.context
-        context.load_plugins(used_devices, args.cpu_lib, args.gpu_lib)
-        for d in used_devices:
-            context.get_plugin(d).set_config({
-                "PERF_COUNT": "YES" if args.perf_stats else "NO"})
 
         log.info("Loading models")
         face_detector_net = self.load_model(args.m_fd)

@@ -22,18 +22,18 @@ The models can be downloaded via Model Downloader
 | EfficientNet B5   | [TensorFlow\*](./efficientnet-b5/efficientnet-b5.md)<br>[PyTorch\*](./efficientnet-b5-pytorch/efficientnet-b5-pytorch.md) | efficientnet-b5<br>efficientnet-b5-pytorch | 83.33/96.67<br>83.69/96.71 | 21.252 | 30.303 | 
 | EfficientNet B7   | [PyTorch\*](./efficientnet-b7-pytorch/efficientnet-b7-pytorch.md) | efficientnet-b7-pytorch | 84.42/96.91 | 77.618  | 66.193 |
 | EfficientNet B7 AutoAugment  | [TensorFlow\*](./efficientnet-b7_auto_aug/efficientnet-b7_auto_aug.md) | efficientnet-b7_auto_aug | 84.68/97.09 | 77.618  | 66.193 |
-| Inception (GoogleNet) V1 | [Caffe\*](./googlenet-v1/googlenet-v1.md) | googlenet-v1 | | 3.266 | 6.999 |
+| Inception (GoogleNet) V1 | [Caffe\*](./googlenet-v1/googlenet-v1.md)<br>[TensorFlow\*](./googlenet-v1-tf/googlenet-v1-tf.md) | googlenet-v1<br>googlenet-v1-tf | | 3.016~3.266 | 6.619~6.999 |
 | Inception (GoogleNet) V2 | [Caffe\*](./googlenet-v2/googlenet-v2.md) | googlenet-v2 | | 4.058 | 11.185 |
-| Inception (GoogleNet) V3 | [Caffe\*](./googlenet-v3/googlenet-v3.md)<br>[PyTorch\*](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | googlenet-v3 <br> googlenet-v3-pytorch |  | 11.469 | 23.817 |
-| Inception (GoogleNet) V4 | [Caffe\*](./googlenet-v4/googlenet-v4.md) | googlenet-v4| | 24.584 | 42.648 |
-| Inception-ResNet V2      | [Caffe\*](./inception-resnet-v2/inception-resnet-v2.md)<br>[TensorFlow\*](./inception-resnet-v2-tf/inception-resnet-v2-tf.md) | inception-resnet-v2 <br>  inception-resnet-v2-tf | | 22.227~26.405 | 30.223~55.813 |
+| Inception (GoogleNet) V3 | [TensorFlow\*](./googlenet-v3/googlenet-v3.md)<br>[PyTorch\*](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | googlenet-v3 <br> googlenet-v3-pytorch |  | 11.469 | 23.817 |
+| Inception (GoogleNet) V4 | [TensorFlow\*](./googlenet-v4-tf/googlenet-v4-tf.md) | googlenet-v4-tf | | 24.584 | 42.648 |
+| Inception-ResNet V2      | [TensorFlow\*](./inception-resnet-v2-tf/inception-resnet-v2-tf.md) | inception-resnet-v2-tf | | 22.227 | 30.223 |
 | MobileNet V1 0.25 128 | [Caffe\*](./mobilenet-v1-0.25-128/mobilenet-v1-0.25-128.md) | mobilenet-v1-0.25-128 | | 0.028 | 0.468 | 
 | MobileNet V1 0.5 160 | [Caffe\*](./mobilenet-v1-0.50-160/mobilenet-v1-0.50-160.md)  | mobilenet-v1-0.50-160 | | 0.156 | 1.327 |
 | MobileNet V1 0.5 224 | [Caffe\*](./mobilenet-v1-0.50-224/mobilenet-v1-0.50-224.md)  | mobilenet-v1-0.50-224 | | 0.304 | 1.327 |
 | MobileNet V1 1.0 224 | [Caffe\*](./mobilenet-v1-1.0-224/mobilenet-v1-1.0-224.md)<br>[TensorFlow\*](./mobilenet-v1-1.0-224-tf/mobilenet-v1-1.0-224-tf.md) | mobilenet-v1-1.0-224 <br> mobilenet-v1-1.0-224-tf | | 1.148 | 4.221 |
 | MobileNet V2 1.0 224 | [Caffe\*](./mobilenet-v2/mobilenet-v2.md)<br>[TensorFlow\*](./mobilenet-v2-1.0-224/mobilenet-v2-1.0-224.md)<br>[PyTorch\*](./mobilenet-v2-pytorch/mobilenet-v2-pytorch.md) | mobilenet-v2 <br>  mobilenet-v2-1.0-224 <br> mobilenet-v2-pytorch | | 0.615~0.876 | 3.489 |
 | MobileNet V2 1.4 224 | [TensorFlow\*](./mobilenet-v2-1.4-224/mobilenet-v2-1.4-224.md)  | mobilenet-v2-1.4-224 | | 1.183  | 6.087 |
-| ResNet 50            | [Caffe\*](./resnet-50/resnet-50.md) <br> [PyTorch\*](./resnet-50-pytorch/resnet-50-pytorch.md)<br>[Caffe2\*](./resnet-50-caffe2/resnet-50-caffe2.md) | resnet-50 <br> resnet-50-pytorch<br>resnet-50-caffe2 | | 6.996~8.216 | 25.53 |
+| ResNet 50            | [Caffe\*](./resnet-50/resnet-50.md) <br> [PyTorch\*](./resnet-50-pytorch/resnet-50-pytorch.md)<br>[Caffe2\*](./resnet-50-caffe2/resnet-50-caffe2.md)<br>[TensorFlow\*](./resnet-50-tf/resnet-50-tf.md) | resnet-50 <br> resnet-50-pytorch<br>resnet-50-caffe2<br>resnet-50-tf | | 6.996~8.216 | 25.53 |
 | ResNet 101           | [Caffe\*](./resnet-101/resnet-101.md) | resnet-101 | | 14.441 | 44.496 |
 | ResNet 152           | [Caffe\*](./resnet-152/resnet-152.md) | resnet-152 | | 21.89 | 60.117 |
 | SE-Inception         | [Caffe\*](./se-inception/se-inception.md)      | se-inception | | 4.091 | 11.922 |
@@ -112,12 +112,17 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | Faster R-CNN with ResNet 50    | [TensorFlow\*](./faster_rcnn_resnet50_coco/faster_rcnn_resnet50_coco.md) | faster_rcnn_resnet50_coco | 57.203 | 29.162 |
 | Faster R-CNN with ResNet 101   | [TensorFlow\*](./faster_rcnn_resnet101_coco/faster_rcnn_resnet101_coco.md) |faster_rcnn_resnet101_coco | 112.052 | 48.128 |
 | MTCNN                     | Caffe\*: <br>[proposal](./mtcnn-p/mtcnn-p.md) <br>[refine](./mtcnn-r/mtcnn-r.md) <br> [output](./mtcnn-o/mtcnn-o.md) | <br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| | |
+| R-FCN with Resnet-101     | [TensorFlow\*](./rfcn-resnet101-coco-tf/rfcn-resnet101-coco-tf.md) | rfcn-resnet101-coco-tf | 53.462 | 171.85 |
 | SSD 300                   | [Caffe\*](./ssd300/ssd300.md) | ssd300 | 62.815 | 26.285 |
 | SSD 512                   | [Caffe\*](./ssd512/ssd512.md) | ssd512 | 180.611 | 27.189 |
 | SSD with MobileNet        | [Caffe\*](./mobilenet-ssd/mobilenet-ssd.md) <br>[TensorFlow\*](./ssd_mobilenet_v1_coco/ssd_mobilenet_v1_coco.md) | mobilenet-ssd <br>ssd_mobilenet_v1_coco | 2.316~2.494 | 5.783~6.807 |
 | SSD with MobileNet FPN    | [TensorFlow\*](./ssd_mobilenet_v1_fpn_coco/ssd_mobilenet_v1_fpn_coco.md) | ssd_mobilenet_v1_fpn_coco | 123.309 | 36.188 |
 | SSD with MobileNet V2     | [TensorFlow\*](./ssd_mobilenet_v2_coco/ssd_mobilenet_v2_coco.md) | ssd_mobilenet_v2_coco | 3.775 | 16.818 |
 | SSD lite with MobileNet V2 | [TensorFlow\*](./ssdlite_mobilenet_v2/ssdlite_mobilenet_v2.md)  | ssdlite_mobilenet_v2 | 1.525 | 4.475 |
+| YOLO v1 Tiny              | [TensorFlow.js\*](./yolo-v1-tiny-tf/yolo-v1-tiny-tf.md) | yolo-v1-tiny-tf | 6.9883	 |	15.8587 |
+| YOLO v2 Tiny              | [TensorFlow.js\*](./yolo-v2-tiny-tf/yolo-v2-tiny-tf.md) | yolo-v2-tiny-tf | 5.4236	 |	11.2295 |
+| YOLO v2                   | [Keras\*](./yolo-v2-tf/yolo-v2-tf.md) | yolo-v2-tf | 63.0301	 |	50.9526 |
+| YOLO v3                   | [Keras\*](./yolo-v3-tf/yolo-v3-tf.md) | yolo-v3-tf | 65.9843	 |	61.9221 |
 
 ## Face Recognition
 
@@ -145,6 +150,23 @@ instances, thus faster than previous, because network runs once.
 |------------------------------ | ----------------------------------------------------------------------------------------- | ----------------------------- | ------ | ------- |
 | human-pose-estimation-3d-0001 | [PyTorch\*](./human-pose-estimation-3d-0001/description/human-pose-estimation-3d-0001.md) | human-pose-estimation-3d-0001 | 18.998 |  5.074  |
 |single-human-pose-estimation-0001| [PyTorch\*](./single-human-pose-estimation-0001/description/single-human-pose-estimation-0001.md) | single-human-pose-estimation-0001 | 60.125 | 33.165 |
+
+## Monocular Depth Estimation
+
+The task of monocular depth estimation is to predict a depth (or inverse depth) map based on a single input image.
+Since this task contains - in the general setting - some ambiguity, the resulting depth maps are often only defined up to an unknown scaling factor.
+
+| Model Name                  | Implementation                      | OMZ Model Name                | GFlops    | mParams |
+| --------------------------- | ----------------------------------- | ----------------------------- | --------- | ------- |
+| midasnet                    | [PyTorch\*](./midasnet/midasnet.md) | midasnet                      | 207.4915  |         |
+
+## Image Inpainting
+
+Image inpainting task is to estimate suitable pixel information to fill holes in images.
+
+| Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
+| ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
+| GMCNN Inpainting          | [TensorFlow\*](./gmcnn-places2-tf/gmcnn-places2-tf.md) | gmcnn-places2-tf | 33.47Db | | |
 
 ## Legal Information
 

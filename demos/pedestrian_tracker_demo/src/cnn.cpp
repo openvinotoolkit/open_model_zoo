@@ -61,7 +61,7 @@ void CnnBase::Load() {
 
 void CnnBase::InferBatch(
     const std::vector<cv::Mat>& frames,
-    std::function<void(const InferenceEngine::BlobMap&, size_t)> fetch_results) const {
+    const std::function<void(const InferenceEngine::BlobMap&, size_t)>& fetch_results) const {
     const size_t batch_size = input_blob_->getTensorDesc().getDims()[0];
 
     size_t num_imgs = frames.size();
@@ -83,7 +83,7 @@ void CnnBase::PrintPerformanceCounts(std::string fullDeviceName) const {
 }
 
 void CnnBase::Infer(const cv::Mat& frame,
-                    std::function<void(const InferenceEngine::BlobMap&, size_t)> fetch_results) const {
+                    const std::function<void(const InferenceEngine::BlobMap&, size_t)>& fetch_results) const {
     InferBatch({frame}, fetch_results);
 }
 

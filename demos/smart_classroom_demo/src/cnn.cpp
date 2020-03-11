@@ -45,7 +45,7 @@ void CnnDLSDKBase::Load() {
 
 void CnnDLSDKBase::InferBatch(
         const std::vector<cv::Mat>& frames,
-        std::function<void(const InferenceEngine::BlobMap&, size_t)> fetch_results) const {
+        const std::function<void(const InferenceEngine::BlobMap&, size_t)>& fetch_results) const {
     Blob::Ptr input = infer_request_.GetBlob(input_blob_name_);
     const size_t batch_size = input->getTensorDesc().getDims()[0];
 
@@ -74,7 +74,7 @@ void CnnDLSDKBase::PrintPerformanceCounts(std::string fullDeviceName) const {
 }
 
 void CnnDLSDKBase::Infer(const cv::Mat& frame,
-                         std::function<void(const InferenceEngine::BlobMap&, size_t)> fetch_results) const {
+                         const std::function<void(const InferenceEngine::BlobMap&, size_t)>& fetch_results) const {
     InferBatch({frame}, fetch_results);
 }
 

@@ -47,7 +47,7 @@ class TestResize:
         assert resize.dst_width == 200
         assert resize.dst_height == 200
         cv2_resize_mock.assert_called_once_with(
-            input_mock, (200, 200), interpolation=_OpenCVResizer.supported_interpolations['LINEAR']
+            input_mock, (200, 200), interpolation=_OpenCVResizer.supported_interpolations()['LINEAR']
         )
 
     def test_custom_resize(self, mocker):
@@ -65,7 +65,7 @@ class TestResize:
         assert resize.dst_height == 128
         cv2_resize_mock.assert_called_once_with(
             input_mock, (126, 128),
-            interpolation=_OpenCVResizer.supported_interpolations['CUBIC']
+            interpolation=_OpenCVResizer.supported_interpolations()['CUBIC']
         )
 
     def test_resize_without_save_aspect_ratio(self):

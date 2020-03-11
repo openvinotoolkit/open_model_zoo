@@ -40,6 +40,12 @@ network to detect objects of the same type better.
 | [vehicle-license-plate-detection-barrier-0106](./vehicle-license-plate-detection-barrier-0106/description/vehicle-license-plate-detection-barrier-0106.md)                          | 0.349                | 0.634      |       |         | X        |       | X              |         |
 | [product-detection-0001](./product-detection-0001/description/product-detection-0001.md)                                                                                            | 3.598                | 3.212      |       |         |          |       |                | X       |
 | [person-detection-asl-0001](./person-detection-asl-0001/description/person-detection-asl-0001.md)                                                                                   | 0.986                | 1.338      |       |      X  |          |       |                |         |
+| [yolo-v2-ava-0001](./yolo-v2-ava-0001/description/yolo-v2-ava-0001.md)                                                                                                              | 29.38                | 48.29      |       |      X  | X        | X     |                |         |
+| [yolo-v2-ava-sparse-35-0001](./yolo-v2-ava-sparse-35-0001/description/yolo-v2-ava-sparse-35-0001.md)                                                                                | 29.38                | 48.29      |       |      X  | X        | X     |                |         |
+| [yolo-v2-ava-sparse-70-0001](./yolo-v2-ava-sparse-70-0001/description/yolo-v2-ava-sparse-70-0001.md)                                                                                | 29.38                | 48.29      |       |      X  | X        | X     |                |         |
+| [yolo-v2-tiny-ava-0001](./yolo-v2-tiny-ava-0001/description/yolo-v2-tiny-ava-0001.md)                                                                                               | 6.975                | 15.12      |       |      X  | X        | X     |                |         |
+| [yolo-v2-tiny-ava-sparse-30-0001](./yolo-v2-tiny-ava-sparse-30-0001/description/yolo-v2-tiny-ava-sparse-30-0001.md)                                                                 | 6.975                | 15.12      |       |      X  | X        | X     |                |         |
+| [yolo-v2-tiny-ava-sparse-60-0001](./yolo-v2-tiny-ava-sparse-60-0001/description/yolo-v2-tiny-ava-sparse-60-0001.md)                                                                 | 6.975                | 15.12      |       |      X  | X        | X     |                |         |
 
 
 ## Object Recognition Models
@@ -103,6 +109,10 @@ detect areas with complex shape (for example, free space on the road).
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [road-segmentation-adas-0001](./road-segmentation-adas-0001/description/road-segmentation-adas-0001.md)                                        | 4.770                | 0.184      |
 | [semantic-segmentation-adas-0001](./semantic-segmentation-adas-0001/description/semantic-segmentation-adas-0001.md)                            | 58.572               | 6.686      |
+| [unet-camvid-onnx-0001](./unet-camvid-onnx-0001/description/unet-camvid-onnx-0001.md)                                                          | 260.1                | 31.03      |
+| [icnet-camvid-ava-0001](./icnet-camvid-ava-0001/description/icnet-camvid-ava-0001.md)                                                   | 151.82                | 25.45       |
+| [icnet-camvid-ava-sparse-30-0001](./icnet-camvid-ava-sparse-30-0001/description/icnet-camvid-ava-sparse-30-0001.md)                     | 151.82                | 25.45       |
+| [icnet-camvid-ava-sparse-60-0001](./icnet-camvid-ava-sparse-60-0001/description/icnet-camvid-ava-sparse-60-0001.md)                     | 151.82                | 25.45       |
 
 ## Instance Segmentation Models
 
@@ -167,9 +177,9 @@ Deep Learning models for text spotting (simultaneous detection and recognition).
 
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
-| [text-spotting-0001-detector](./text-spotting-0001-detector/description/text-spotting-0001-detector.md)                                        | 185.169             | 26.497    |
-| [text-spotting-0001-recognizer-encoder](./text-spotting-0001-recognizer-encoder/description/text-spotting-0001-recognizer-encoder.md)          | 2.082                | 1.328      |
-| [text-spotting-0001-recognizer-decoder](./text-spotting-0001-recognizer-decoder/description/text-spotting-0001-recognizer-decoder.md)          | 0.002                | 0.273      |
+| [text-spotting-0002-detector](./text-spotting-0002-detector/description/text-spotting-0002-detector.md)                                        | 185.169             | 26.497    |
+| [text-spotting-0002-recognizer-encoder](./text-spotting-0002-recognizer-encoder/description/text-spotting-0002-recognizer-encoder.md)          | 2.082                | 1.328      |
+| [text-spotting-0002-recognizer-decoder](./text-spotting-0002-recognizer-decoder/description/text-spotting-0002-recognizer-decoder.md)          | 0.002                | 0.273      |
 
 ## Action Recognition Models
 
@@ -185,7 +195,7 @@ that predict an actual labels are called *decoder*.
 | [driver-action-recognition-adas-0002-decoder](./driver-action-recognition-adas-0002-decoder/description/driver-action-recognition-adas-0002-decoder.md) | 0.147                | 4.205      |
 | [action-recognition-0001-encoder](./action-recognition-0001-encoder/description/action-recognition-0001-encoder.md)                                     | 7.340                | 21.276     |
 | [action-recognition-0001-decoder](./action-recognition-0001-decoder/description/action-recognition-0001-decoder.md)                                     | 0.147                | 4.405      |
-| [asl-recognition-0003](./asl-recognition-0003/description/asl-recognition-0003.md)                                                                      | 6.651                | 4.129      |
+| [asl-recognition-0004](./asl-recognition-0004/description/asl-recognition-0004.md)                                                                      | 6.660                | 4.133      |
 
 ## Image Retrieval
 

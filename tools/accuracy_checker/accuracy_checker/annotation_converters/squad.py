@@ -23,7 +23,7 @@ from ..utils import read_json
 from ..config import PathField, NumberField, BoolField
 
 from .format_converter import BaseFormatConverter, ConverterReturn
-from ._nlp_common import Tokenizer
+from ._nlp_common import get_tokenizer, CLS_ID, SEP_ID
 
 
 class SQUADConverter(BaseFormatConverter):
@@ -35,18 +35,19 @@ class SQUADConverter(BaseFormatConverter):
         configuration_parameters = super().parameters()
         configuration_parameters.update({
             'testing_file': PathField(description="Path to testing file."),
-            'vocab_file': PathField(description='Path to vocabulary file.'),
+            'vocab_file': PathField(description='Path to vocabulary file.', optional=True),
+            'sentence_piece_model_file': PathField(description='sentence piece model for tokenization', optional=True),
             'max_seq_length': NumberField(
                 description='The maximum total input sequence length after WordPiece tokenization.',
-                optional=True, default=128
+                optional=True, default=128, value_type=int
             ),
             'max_query_length': NumberField(
                 description='The maximum number of tokens for the question.',
-                optional=True, default=64
+                optional=True, default=64, value_type=int
             ),
             'doc_stride': NumberField(
                 description="When splitting up a long document into chunks, how much stride to take between chunks.",
-                optional=True, default=128
+                optional=True, default=128, value_type=int
             ),
             'lower_case': BoolField(optional=True, default=False, description='Switch tokens to lower case register')
         })
@@ -55,11 +56,12 @@ class SQUADConverter(BaseFormatConverter):
 
     def configure(self):
         self.testing_file = self.get_value_from_config('testing_file')
-        self.vocab_file = self.get_value_from_config('vocab_file')
         self.max_seq_length = self.get_value_from_config('max_seq_length')
         self.max_query_length = self.get_value_from_config('max_query_length')
         self.doc_stride = self.get_value_from_config('doc_stride')
         self.lower_case = self.get_value_from_config('lower_case')
+        self.tokenizer = get_tokenizer(self.config, self.lower_case)
+        self.support_vocab = 'vocab_file' in self.config
 
     @staticmethod
     def _load_examples(file):
@@ -108,17 +110,16 @@ class SQUADConverter(BaseFormatConverter):
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         examples, answers = self._load_examples(self.testing_file)
         annotations = []
-        tokenizer = Tokenizer(self.vocab_file, self.lower_case)
         unique_id = 1000000000
         DocSpan = namedtuple("DocSpan", ["start", "length"])
 
         for (example_index, example) in enumerate(examples):
-            query_tokens = tokenizer.tokenize(example['question_text'])
+            query_tokens = self.tokenizer.tokenize(example['question_text'])
             if len(query_tokens) > self.max_query_length:
                 query_tokens = query_tokens[:self.max_query_length]
             all_doc_tokens = []
             for (i, token) in enumerate(example['tokens']):
-                sub_tokens = tokenizer.tokenize(token)
+                sub_tokens = self.tokenizer.tokenize(token)
                 for sub_token in sub_tokens:
                     all_doc_tokens.append(sub_token)
             max_tokens_for_doc = self.max_seq_length - len(query_tokens) - 3
@@ -136,21 +137,21 @@ class SQUADConverter(BaseFormatConverter):
             for idx, doc_span in enumerate(doc_spans):
                 tokens = []
                 segment_ids = []
-                tokens.append("[CLS]")
+                tokens.append("[CLS]" if self.support_vocab else CLS_ID)
                 segment_ids.append(0)
                 for token in query_tokens:
                     tokens.append(token)
                     segment_ids.append(0)
-                tokens.append("[SEP]")
+                tokens.append("[SEP]" if self.support_vocab else SEP_ID)
                 segment_ids.append(0)
 
                 for i in range(doc_span.length):
                     split_token_index = doc_span.start + i
                     tokens.append(all_doc_tokens[split_token_index])
                     segment_ids.append(1)
-                tokens.append("[SEP]")
+                tokens.append("[SEP]" if self.support_vocab else SEP_ID)
                 segment_ids.append(1)
-                input_ids = tokenizer.convert_tokens_to_ids(tokens)
+                input_ids = self.tokenizer.convert_tokens_to_ids(tokens) if self.support_vocab else tokens
                 input_mask = [1] * len(input_ids)
 
                 while len(input_ids) < self.max_seq_length:

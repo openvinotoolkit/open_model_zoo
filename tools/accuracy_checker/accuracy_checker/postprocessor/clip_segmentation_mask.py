@@ -19,6 +19,7 @@ from .postprocessor import PostprocessorWithSpecificTargets
 from ..representation import BrainTumorSegmentationAnnotation, BrainTumorSegmentationPrediction
 from ..config import NumberField, ConfigError
 
+
 class ClipSegmentationMask(PostprocessorWithSpecificTargets):
     __provider__ = 'clip_segmentation_mask'
 

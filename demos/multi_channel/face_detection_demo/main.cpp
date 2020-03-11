@@ -110,7 +110,7 @@ struct Face {
     Face(cv::Rect2f r, float c, unsigned char a, unsigned char g): rect(r), confidence(c), age(a), gender(g) {}
 };
 
-void drawDetections(cv::Mat& img, const std::vector<Face> detections) {
+void drawDetections(cv::Mat& img, const std::vector<Face>& detections) {
     for (const Face& f : detections) {
         cv::Rect ri(static_cast<int>(f.rect.x*img.cols), static_cast<int>(f.rect.y*img.rows),
                     static_cast<int>(f.rect.width*img.cols), static_cast<int>(f.rect.height*img.rows));
@@ -251,6 +251,10 @@ int main(int argc, char* argv[]) {
 
         const auto duplicateFactor = (1 + FLAGS_duplicate_num);
         size_t numberOfInputs = (FLAGS_nc + files.size()) * duplicateFactor;
+
+        if (numberOfInputs == 0) {
+            throw std::runtime_error("No valid inputs were supplied");
+        }
 
         DisplayParams params = prepareDisplayParams(numberOfInputs);
 

@@ -27,9 +27,6 @@
 #include <samples/slog.hpp>
 #include <samples/ocv_common.hpp>
 #include "crossroad_camera_demo.hpp"
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 using namespace InferenceEngine;
 
@@ -67,7 +64,7 @@ struct BaseDetection {
     std::string inputName;
     std::string outputName;
 
-    BaseDetection(std::string &commandLineFlag, std::string topoName)
+    BaseDetection(std::string &commandLineFlag, const std::string &topoName)
             : commandLineFlag(commandLineFlag), topoName(topoName) {}
 
     ExecutableNetwork * operator ->() {
@@ -385,12 +382,11 @@ struct PersonReIdentification : BaseDetection {
     PersonReIdentification() : BaseDetection(FLAGS_m_reid, "Person Reidentification Retail") {}
 
     unsigned long int findMatchingPerson(const std::vector<float> &newReIdVec) {
-        float cosSim;
         auto size = globalReIdVec.size();
 
         /* assigned REID is index of the matched vector from the globalReIdVec */
         for (size_t i = 0; i < size; ++i) {
-            cosSim = cosineSimilarity(newReIdVec, globalReIdVec[i]);
+            float cosSim = cosineSimilarity(newReIdVec, globalReIdVec[i]);
             if (FLAGS_r) {
                 std::cout << "cosineSimilarity: " << cosSim << std::endl;
             }
@@ -538,10 +534,6 @@ int main(int argc, char *argv[]) {
             std::cout << ie.GetVersions(flag) << std::endl;
 
             if ((flag.find("CPU") != std::string::npos)) {
-#ifdef WITH_EXTENSIONS
-                /** Load default extensions lib for the CPU device (e.g. SSD's DetectionOutput)**/
-                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-#endif
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
                     auto extension_ptr = make_so_pointer<IExtension>(FLAGS_l);

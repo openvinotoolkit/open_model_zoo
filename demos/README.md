@@ -7,18 +7,21 @@ The Open Model Zoo includes the following demos:
 
 - [3D Human Pose Estimation Python* Demo](./python_demos/human_pose_estimation_3d_demo/README.md) - 3D human pose estimation demo.
 - [Action Recognition Python* Demo](./python_demos/action_recognition/README.md) - Demo application for Action Recognition algorithm, which classifies actions that are being performed on input video.
+- [Colorization Python* Demo](./python_demos/colorization_demo/README.md) - Colorization demo colorizes input frames.
 - [Crossroad Camera C++ Demo](./crossroad_camera_demo/README.md) - Person Detection followed by the Person Attributes Recognition and Person Reidentification Retail, supports images/video and camera inputs.
 - [Gaze Estimation C++ Demo](./gaze_estimation_demo/README.md) - Face detection followed by gaze estimation, head pose estimation and facial landmarks regression.
 - [Human Pose Estimation C++ Demo](./human_pose_estimation_demo/README.md) - Human pose estimation demo.
+- [Image Inpainting Python Demo](./python_demos/image_inpainting_demo/README.md) - Demo application for GMCNN inpainting network.
 - [Image Retrieval Python* Demo](./python_demos/image_retrieval_demo/README.md) - The demo demonstrates how to run Image Retrieval models using OpenVINO&trade;.
 - [Image Segmentation C++ Demo](./segmentation_demo/README.md) - Inference of image segmentation networks like FCN8 (the demo supports only images as inputs).
 - [Instance Segmentation Python* Demo](./python_demos/instance_segmentation_demo/README.md) - Inference of instance segmentation networks trained in `Detectron` or `maskrcnn-benchmark`.
 - [Interactive Face Detection C++ Demo](./interactive_face_detection_demo/README.md) - Face Detection coupled with Age/Gender, Head-Pose, Emotion, and Facial Landmarks detectors. Supports video and camera inputs.
 - [Interactive Face Recognition Python* Demo](./python_demos/face_recognition_demo/README.md) - Face Detection coupled with Head-Pose, Facial Landmarks and Face Recognition detectors. Supports video and camera inputs.
 - [Mask R-CNN C++ Demo for TensorFlow* Object Detection API](./mask_rcnn_demo/README.md) - Inference of instance segmentation networks created with TensorFlow\* Object Detection API.
+- [Monodepth Python* Demo](./python_demos/monodepth_demo/README.md) - The demo demonstrates how to run monocular depth estimation models.
 - [Multi-Camera Multi-Person Tracking Python* Demo](./python_demos/multi_camera_multi_person_tracking/README.md) Demo application for multiple persons tracking on multiple cameras.
 - [Multi-Channel C++ Demos](./multi_channel/README.md) - Several demo applications for multi-channel scenarios.
-- [Object Detection for CenterNet Python* Demo](./object_detection_demo_centernet/README.md) - Demo application for CenterNet object detection network.
+- [Object Detection for CenterNet Python* Demo](./python_demos/object_detection_demo_centernet/README.md) - Demo application for CenterNet object detection network.
 - [Object Detection for Faster R-CNN C++ Demo](./object_detection_demo_faster_rcnn/README.md) - Inference of object detection networks like Faster R-CNN (the demo supports only images as inputs).
 - [Object Detection for SSD C++ Demo](./object_detection_demo_ssd_async/README.md) - Demo application for SSD-based Object Detection networks, new Async API performance showcase, and simple OpenCV interoperability (supports video and camera inputs).
 - [Object Detection for YOLO V3 C++ Demo](./object_detection_demo_yolov3_async/README.md) - Demo application for YOLOV3-based Object Detection networks, new Async API performance showcase, and simple OpenCV interoperability (supports video and camera inputs).
@@ -153,7 +156,7 @@ make
 ```
 
 For the release configuration, the demo application binaries are in `<path_to_build_directory>/intel64/Release/`;
-for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
+for the debug configuration — in `<path_to_build_directory>/intel64/Debug/`.
 
 ### <a name="build_demos_windows"></a>Build the Demos Applications on Microsoft Windows* OS
 
@@ -162,18 +165,18 @@ The recommended Windows* build environment is the following:
 * Microsoft Visual Studio* 2015, 2017, or 2019
 * CMake* version 2.8 or higher
 
-> **NOTE**: If you want to use Microsoft Visual Studio 2019, you are required to install CMake 3.14.
+> **NOTE**: If you want to use Microsoft Visual Studio 2019, you are required to install CMake 3.14.
 
 To build the demo applications for Windows, go to the directory with the `build_demos_msvc.bat`
 batch file and run it:
-```sh
+```bat
 build_demos_msvc.bat
 ```
 
 By default, the script automatically detects the highest Microsoft Visual Studio version installed on the machine and uses it to create and build
 a solution for a demo code. Optionally, you can also specify the preffered Microsoft Visual Studio version to be used by the script. Supported
 versions are: `VS2015`, `VS2017`, `VS2019`. For example, to build the demos using the Microsoft Visual Studio 2017, use the following command:
-```sh
+```bat
 build_demos_msvc.bat VS2017
 ```
 
@@ -242,7 +245,7 @@ list above.
 Before running compiled binary files, make sure your application can find the Inference Engine and OpenCV libraries.
 If you use a [proprietary](https://software.intel.com/en-us/openvino-toolkit) distribution to build demos,
 run the `setupvars` script to set all necessary environment variables:
-```sh
+```bat
 <INSTALL_DIR>\bin\setupvars.bat
 ```
 If you use your own Inference Engine and OpenCV binaries to build the demos please make sure you have added
@@ -264,7 +267,7 @@ For example, for the **Debug** configuration, go to the project's
 **Configuration Properties** to the **Debugging** category and set the `PATH`
 variable in the **Environment** field to the following:
 
-```sh
+```
 PATH=<INSTALL_DIR>\deployment_tools\inference_engine\bin\intel64\Debug;<INSTALL_DIR>\opencv\bin;%PATH%
 ```
 where `<INSTALL_DIR>` is the directory in which the OpenVINO toolkit is installed.

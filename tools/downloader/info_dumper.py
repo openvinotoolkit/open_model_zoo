@@ -36,8 +36,6 @@ def to_info(model):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config', type=Path, metavar='CONFIG.YML',
-        help='model configuration file (deprecated)')
     parser.add_argument('--name', metavar='PAT[,PAT...]',
         help='only dump info for models whose names match at least one of the specified patterns')
     parser.add_argument('--list', type=Path, metavar='FILE.LST',

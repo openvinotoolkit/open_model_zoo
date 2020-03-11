@@ -13,10 +13,10 @@
 # limitations under the License.
 
 description: >-
-  This is a TensorFlow\* version of `densenet-121` model, one of the DenseNet
-  group of models designed to perform image classification. The weights were converted
-  from DenseNet-Keras Models. For details see repository <https://github.com/pudae/tensorflow-densenet/>,
-  paper <https://arxiv.org/pdf/1608.06993.pdf>
+  This is a TensorFlow* version of "densenet-121" model, one of the DenseNet* group
+  of models designed to perform image classification. The weights were converted from
+  DenseNet-Keras Models. For details, see repository <https://github.com/pudae/tensorflow-densenet/>
+  and paper <https://arxiv.org/pdf/1608.06993.pdf>.
 task_type: classification
 files:
   - name: tf-densenet121.tar.gz
@@ -37,5 +37,6 @@ model_optimizer_args:
   - --scale_values=Placeholder[58.8235294117647]
   - --output=densenet121/predictions/Reshape_1
   - --input_meta_graph=$dl_dir/tf-densenet121.ckpt.meta
+  - --keep_shape_ops
 framework: tf
 license: https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE

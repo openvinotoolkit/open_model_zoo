@@ -54,13 +54,16 @@ class PostprocessingExecutor:
 
         return annotation, prediction
 
-    def process_batch(self, annotations, predictions, metas=None):
+    def process_batch(self, annotations, predictions, metas=None, allow_empty_annotation=False):
+        if allow_empty_annotation and not annotations:
+            annotations = [None] * len(predictions)
         # FIX IT: remove zipped_transform here in the future -- it is too flexible and unpredictable
         if metas is None:
             zipped_result = zipped_transform(self.process_image, annotations, predictions)
         else:
             zipped_result = zipped_transform(self.process_image, annotations, predictions, metas)
-        return zipped_result[0:2] # return changed annotations and predictions only
+
+        return zipped_result[0:2]  # return changed annotations and predictions only
 
     def full_process(self, annotations, predictions, metas=None):
         return self.process_dataset(*self.process_batch(annotations, predictions, metas))

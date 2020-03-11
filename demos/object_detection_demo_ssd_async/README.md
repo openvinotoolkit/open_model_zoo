@@ -99,7 +99,7 @@ For more details on the requests-based Inference Engine API, including the Async
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./object_detection_demo_ssd_async -h
 InferenceEngine:
     API version ............ <version>

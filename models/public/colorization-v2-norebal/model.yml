@@ -1,0 +1,53 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+    The colorization-v2-norebal model is one of the colorization
+    group of models designed to perform image colorization. For details
+    about this family of models, check out the repository - https://github.com/richzhang/colorization.
+
+    This model differs from model `colorization-v2` in that metrics did not take into account
+    balancing of rare classes during training.
+
+    Model consumes as input L-channel of LAB-image.
+    Model give as output predict A- and B-channels of LAB-image.
+
+task_type: "colorization"
+files:
+  - name: colorization-v2-norebal.prototxt
+    sha256: d16418cef8df4ccd703a55ae0ef3960861d5010418f77c90d0a47689998a7169
+    source: https://raw.githubusercontent.com/richzhang/colorization/master/models/colorization_deploy_v2.prototxt
+    size: 9945
+  - name: colorization-v2-norebal.caffemodel
+    size: 128946454
+    sha256: 6ab42a7fa853eb7ca822b9a0a2997a08a29c819c985c3e70b460c6be9c8b2159
+    source: https://people.eecs.berkeley.edu/~rich.zhang/projects/2016_colorization/files/demo_v2/colorization_release_v2_norebal.caffemodel
+  - name: colorization-v2-norebal.npy
+    size: 5088
+    sha256: b5dec01315c34f43f1c8c089e84c45ae35d1838d8e77ed0e7ca930f79ffa450e
+    source: https://github.com/richzhang/colorization/raw/master/resources/pts_in_hull.npy
+model_optimizer_args:
+  - --input_shape=[1,1,224,224]
+  - --input=data_l
+  - --mean_values=data_l[50]
+  - --output=class8_313_rh
+  - --input_model=$dl_dir/colorization-v2-norebal.caffemodel
+  - --input_proto=$dl_dir/colorization-v2-norebal.prototxt
+postprocessing:
+  - $type: regex_replace
+    file: colorization-v2-norebal.prototxt
+    pattern: 'layer {\n  name: "Silence"\n  type: "Silence"\n  bottom: "class8_ab"\n}'
+    replacement: ''
+framework: caffe
+license: https://raw.githubusercontent.com/richzhang/colorization/master/LICENSE

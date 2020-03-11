@@ -244,15 +244,17 @@ NATIVE_DEMOS = [
     )),
 
     NativeDemo(subdirectory='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'-no_show': None, **MONITORS}),
         [
             TestCase(options={
                 '-m': ModelArg('road-segmentation-adas-0001'),
-                '-i': DataDirectoryArg('road-segmentation-adas'),
+                '-i': DataPatternArg('road-segmentation-adas'),
             }),
-            TestCase(options={
-                '-m': ModelArg('semantic-segmentation-adas-0001'),
-                '-i': DataDirectoryArg('semantic-segmentation-adas'),
-            }),
+            *combine_cases(
+                TestCase(options={'-i': DataPatternArg('semantic-segmentation-adas')}),
+                single_option_cases('-m',
+                    ModelArg('semantic-segmentation-adas-0001'),
+                    ModelArg('deeplabv3'))),
         ],
     )),
 
@@ -394,7 +396,15 @@ PYTHON_DEMOS = [
             ModelArg('vehicle-license-plate-detection-barrier-0106')),
     )),
 
-    # TODO: object_detection_demo_yolov3_async: no models.lst
+    PythonDemo(subdirectory='object_detection_demo_yolov3_async', device_keys=['-d'], test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+            '-i': DataPatternArg('object-detection-demo-ssd-async')}),
+        single_option_cases('-m',
+            ModelArg('yolo-v1-tiny-tf'),
+            ModelArg('yolo-v2-tiny-tf'),
+            ModelArg('yolo-v2-tf'),
+            ModelArg('yolo-v3-tf')),
+    )),
 
     PythonDemo(subdirectory='segmentation_demo', device_keys=['-d'], test_cases=combine_cases(
         [

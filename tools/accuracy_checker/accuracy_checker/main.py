@@ -18,6 +18,7 @@ import sys
 from pathlib import Path
 from argparse import ArgumentParser
 from functools import partial
+from csv import DictWriter
 
 import cv2
 
@@ -25,7 +26,7 @@ from .config import ConfigReader
 from .logging import print_info, add_file_handler, exception
 from .evaluators import ModelEvaluator, PipeLineEvaluator, ModuleEvaluator
 from .progress_reporters import ProgressReporter
-from .utils import get_path, cast_to_bool
+from .utils import get_path, cast_to_bool, check_file_existence
 
 EVALUATION_MODE = {
     'models': ModelEvaluator,
@@ -52,7 +53,8 @@ def build_arguments_parser():
         '-m', '--models',
         help='prefix path to the models and weights',
         type=partial(get_path, is_directory=True),
-        required=False
+        required=False,
+        nargs='+'
     )
     parser.add_argument(
         '-s', '--source',
@@ -204,6 +206,35 @@ def build_arguments_parser():
         default=False,
         type=cast_to_bool
     )
+    parser.add_argument(
+        '-dc', '--device_config',
+        help='Inference Engine device specific config file',
+        type=get_path,
+        required=False
+    )
+
+    parser.add_argument(
+        '--async_mode',
+        help='Allow evaluation in async mode',
+        required=False,
+        default=False,
+        type=cast_to_bool
+    )
+    parser.add_argument(
+        '--num_requests',
+        help='the number of infer requests',
+        required=False,
+    )
+    parser.add_argument(
+        '--csv_result',
+        help='file for results writing',
+        required=False,
+    )
+    parser.add_argument(
+        '--model_is_blob', help='the tip for automatic model search to use blob for dlsdk launcher',
+        required=False,
+        type=cast_to_bool
+    )
 
     return parser
 
@@ -226,7 +257,11 @@ def main():
             print_processing_info(*processing_info)
             evaluator = evaluator_class.from_configs(config_entry)
             evaluator.process_dataset(args.stored_predictions, progress_reporter=progress_reporter)
-            evaluator.compute_metrics(ignore_results_formatting=args.ignore_result_formatting)
+            metrics_results, _ = evaluator.extract_metrics_results(
+                print_results=True, ignore_results_formatting=args.ignore_result_formatting
+            )
+            if args.csv_result:
+                write_csv_result(args.csv_result, processing_info, metrics_results)
             evaluator.release()
         except Exception as e:  # pylint:disable=W0703
             exception(e)
@@ -244,6 +279,31 @@ def print_processing_info(model, launcher, device, tags, dataset):
     print_info('device: {}'.format(device.upper()))
     print_info('dataset: {}'.format(dataset))
     print_info('OpenCV version: {}'.format(cv2.__version__))
+
+
+def write_csv_result(csv_file, processing_info, metric_results):
+    new_file = not check_file_existence(csv_file)
+    field_names = ['model', 'launcher', 'device', 'dataset', 'tags', 'metric_name', 'metric_type', 'metric_value']
+    model, launcher, device, tags, dataset = processing_info
+    main_info = {
+        'model': model,
+        'launcher': launcher,
+        'device': device.upper(),
+        'tags': ' '.join(tags) if tags else '',
+        'dataset': dataset
+    }
+
+    with open(csv_file, 'a+', newline='') as f:
+        writer = DictWriter(f, fieldnames=field_names)
+        if new_file:
+            writer.writeheader()
+        for metric_result in metric_results:
+            writer.writerow({
+                **main_info,
+                'metric_name': metric_result['name'],
+                'metric_type': metric_result['type'],
+                'metric_value': metric_result['value']
+            })
 
 
 if __name__ == '__main__':

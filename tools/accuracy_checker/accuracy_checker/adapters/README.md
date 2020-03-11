@@ -32,6 +32,7 @@ AccuracyChecker supports following set of adapters:
     - `tiny_yolo_v2` - `[1.08, 1.19, 3.42, 4.41, 6.63, 11.38, 9.42, 5.11, 16.62, 10.52]`
   * `coords` - number of bbox coordinates (default 4).
   * `num` - num parameter from DarkNet configuration file (default 5).
+  * `cells` - number of cells across width and height (default 13).
 * `yolo_v3` - converting output of YOLO v3 family models to `DetectionPrediction` representation.
   * `classes` - number of detection classes (default 80).
   * `anchors` - anchor values provided as comma-separited list or precomputed:
@@ -91,6 +92,14 @@ AccuracyChecker supports following set of adapters:
   * `action_scale` - scale for correct action score calculation.
 * `super_resolution` - converting output of single image super resolution network to `SuperResolutionPrediction`.
   * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
+  * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
+  * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations. 
+  The order of actions:
+  1. Multiply on `std`
+  2. Add `mean`
+  3. Reverse channels if this option enabled.
+  * `target_out` - super resolution model output layer name in case when model has several outputs.
 * `landmarks_regression` - converting output of model for landmarks regression to `FacialLandmarksPrediction`.
 * `pixel_link_text_detection` - converting output of PixelLink like model for text detection to `TextDetectionPrediction`.
   * `pixel_class_out` - name of layer containing information related to text/no-text classification for each pixel.
@@ -161,3 +170,5 @@ AccuracyChecker supports following set of adapters:
 * `fcos_person` - converting output of FCOS (single class) model to `DetectionPrediction` representation.
   * `output_blob` - name of output layer with bboxes.
   * `scale` - scalar value to normalize bbox coordinates.
+* `mono_depth` - converting output of monocular depth estimation model to `DepthEstimationPrediction`.
+* `inpainting` - converting output of Image Inpainting model to `ImageInpaintingPrediction` representation.

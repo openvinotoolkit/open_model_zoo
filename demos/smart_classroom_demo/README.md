@@ -29,7 +29,7 @@ To recognize faces on a frame, the demo needs a gallery of reference images. Eac
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./smart_classroom_demo -h
 InferenceEngine:
     API version ............ <version>

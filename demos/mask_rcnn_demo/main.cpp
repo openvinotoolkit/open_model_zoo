@@ -17,9 +17,6 @@
 #include <iomanip>
 
 #include <inference_engine.hpp>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
@@ -69,18 +66,6 @@ int main(int argc, char *argv[]) {
         // ---------------------Load inference engine------------------------------------------------
         slog::info << "Loading Inference Engine" << slog::endl;
         Core ie;
-
-#ifdef WITH_EXTENSIONS
-        /** Loading default extensions **/
-        if (FLAGS_d.find("CPU") != std::string::npos) {
-            /**
-             * cpu_extensions library is compiled from "extension" folder containing
-             * custom MKLDNNPlugin layer implementations. These layers are not supported
-             * by mkldnn, but they can be useful for inferring custom topologies.
-            **/
-            ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-        }
-#endif
 
         if (!FLAGS_l.empty()) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
@@ -231,7 +216,7 @@ int main(int argc, char *argv[]) {
         const float PROBABILITY_THRESHOLD = 0.2f;
         const float MASK_THRESHOLD = 0.5f;  // threshold used to determine whether mask pixel corresponds to object or to background
         // amount of elements in each detected box description (batch, label, prob, x1, y1, x2, y2)
-        IE_ASSERT(do_blob->getTensorDesc().getDims().size() == 4);
+        IE_ASSERT(do_blob->getTensorDesc().getDims().size() == 2);
         size_t BOX_DESCRIPTION_SIZE = do_blob->getTensorDesc().getDims().back();
 
         const TensorDesc& masksDesc = masks_blob->getTensorDesc();

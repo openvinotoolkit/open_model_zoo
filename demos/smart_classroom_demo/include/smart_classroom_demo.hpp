@@ -15,27 +15,27 @@ static const char person_action_detection_model_message[] = "Required. Path to t
 static const char face_detection_model_message[] = "Required. Path to the Face Detection Retail model (.xml) file.";
 static const char facial_landmarks_model_message[] = "Required. Path to the Facial Landmarks Regression Retail model (.xml) file.";
 static const char face_reid_model_message[] = "Required. Path to the Face Reidentification Retail model (.xml) file.";
-static const char target_device_message_action_detection[] = "Optional. Specify the target device for Person/Action Detection Retail "\
-                                                             "(the list of available devices is shown below).Default value is CPU. " \
-                                                             "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+static const char target_device_message_action_detection[] = "Optional. Specify the target device for Person/Action Detection Retail "
+                                                             "(the list of available devices is shown below).Default value is CPU. "
+                                                             "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                              "The application looks for a suitable plugin for the specified device.";
-static const char target_device_message_face_detection[] = "Optional. Specify the target device for Face Detection Retail "\
-                                                           "(the list of available devices is shown below).Default value is CPU. " \
-                                                           "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+static const char target_device_message_face_detection[] = "Optional. Specify the target device for Face Detection Retail "
+                                                           "(the list of available devices is shown below).Default value is CPU. "
+                                                           "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                            "The application looks for a suitable plugin for the specified device.";
-static const char target_device_message_landmarks_regression[] = "Optional. Specify the target device for Landmarks Regression Retail "\
-                                                                 "(the list of available devices is shown below).Default value is CPU. " \
-                                                                 "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+static const char target_device_message_landmarks_regression[] = "Optional. Specify the target device for Landmarks Regression Retail "
+                                                                 "(the list of available devices is shown below).Default value is CPU. "
+                                                                 "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                                  "The application looks for a suitable plugin for the specified device.";
-static const char target_device_message_face_reid[] = "Optional. Specify the target device for Face Reidentification Retail "\
-                                                      "(the list of available devices is shown below).Default value is CPU. " \
-                                                      "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+static const char target_device_message_face_reid[] = "Optional. Specify the target device for Face Reidentification Retail "
+                                                      "(the list of available devices is shown below).Default value is CPU. "
+                                                      "Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                       "The application looks for a suitable plugin for the specified device.";
 static const char greedy_reid_matching_message[] = "Optional. Use faster greedy matching algorithm in face reid.";
 static const char performance_counter_message[] = "Optional. Enables per-layer performance statistics.";
-static const char custom_cldnn_message[] = "Optional. For GPU custom kernels, if any. "\
+static const char custom_cldnn_message[] = "Optional. For GPU custom kernels, if any. "
                                            "Absolute path to an .xml file with the kernels description.";
-static const char custom_cpu_library_message[] = "Optional. For CPU custom layers, if any. " \
+static const char custom_cpu_library_message[] = "Optional. For CPU custom layers, if any. "
                                                  "Absolute path to a shared library with the kernels implementation.";
 static const char face_threshold_output_message[] = "Optional. Probability threshold for face detections.";
 static const char person_threshold_output_message[] = "Optional. Probability threshold for person/action detection.";
@@ -57,7 +57,7 @@ static const char student_actions_message[] = "Optional. List of student actions
 static const char top_actions_message[] = "Optional. List of student actions (for top-k mode) separated by a comma.";
 static const char teacher_actions_message[] = "Optional. List of teacher actions separated by a comma.";
 static const char target_action_name_message[] = "Optional. Target action name.";
-static const char target_actions_num_message[] = "Optional. Number of first K students. If this parameter is positive,"\
+static const char target_actions_num_message[] = "Optional. Number of first K students. If this parameter is positive,"
                                                  "the demo detects first K persons with the action, pointed by the parameter 'top_id'";
 static const char crop_gallery_message[] = "Optional. Crop images during faces gallery creation.";
 static const char face_threshold_registration_output_message[] = "Optional. Probability threshold for face detections during database registration.";

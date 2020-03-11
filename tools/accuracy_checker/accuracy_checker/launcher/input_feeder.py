@@ -28,7 +28,9 @@ LAYER_LAYOUT_TO_IMAGE_LAYOUT = {
     'NWHC': [0, 2, 1, 3],
     'NCDHW': [0, 4, 1, 2, 3],
     'NDCHW': [0, 1, 4, 2, 3],
-    'NDHWC': [0, 1, 2, 3, 4]
+    'NDHWC': [0, 1, 2, 3, 4],
+    'NC': [0, 1],
+    'CN': [1, 0]
 }
 
 PRECISION_TO_DTYPE = {

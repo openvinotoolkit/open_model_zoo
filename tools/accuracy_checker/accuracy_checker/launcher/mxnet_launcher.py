@@ -16,6 +16,7 @@ limitations under the License.
 
 import re
 from collections import OrderedDict
+from pathlib import Path
 
 import numpy as np
 import mxnet
@@ -23,6 +24,7 @@ import mxnet
 from .launcher import Launcher, LauncherConfigValidator, ListInputsField
 from ..config import PathField, StringField, NumberField, ConfigError
 from ..utils import string_to_tuple
+from ..logging import print_info
 
 DEVICE_REGEX = r'(?P<device>cpu$|gpu)(_(?P<identifier>\d+))?'
 
@@ -47,7 +49,7 @@ class MxNetLauncher(Launcher):
     def parameters(cls):
         parameters = super().parameters()
         parameters.update({
-            'model': PathField(check_exists=True, is_directory=False, description="Path to model."),
+            'model': PathField(check_exists=True, file_or_directory=True, description="Path to model."),
             'device': StringField(regex=DEVICE_REGEX, description="Device name.", optional=True, default='CPU'),
             'batch': NumberField(value_type=float, min_value=1, optional=True, description="Batch size."),
             'output_name': StringField(optional=True, description="Output name."),
@@ -65,7 +67,7 @@ class MxNetLauncher(Launcher):
         mxnet_launcher_config.validate(self.config)
         if not self._delayed_model_loading:
             # Get model name, prefix, epoch
-            self.model = self.config['model']
+            self.model = self.automatic_model_search()
             model_path, model_file = self.model.parent, self.model.name
             model_name = model_file.rsplit('.', 1)[0]
             model_prefix, model_epoch = model_name.rsplit('-', 1)
@@ -146,6 +148,24 @@ class MxNetLauncher(Launcher):
     @property
     def output_blob(self):
         return self.config.get('output_name', next(iter(self.module.output_names))).replace('_output', '')
+
+    def automatic_model_search(self):
+        model = Path(self.get_value_from_config('model'))
+        if model.is_dir():
+            model_list = list(model.glob('{}*.params'.format(self._model_name)))
+            if not model_list:
+                model_list = list(model.glob('*.params'))
+                if not model_list:
+                    raise ConfigError('Suitable model checkpoint not found')
+
+            if len(model_list) != 1:
+                raise ConfigError(
+                    'Several model checkpoint found, please specify explicitly, which should be used for validation'
+                )
+            model = model_list[0]
+            print_info('Found model {}'.format(model))
+
+        return model
 
     def release(self):
         """

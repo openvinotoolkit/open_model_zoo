@@ -16,7 +16,7 @@ limitations under the License.
 
 from .preprocessing_executor import PreprocessingExecutor
 from .preprocessor import Preprocessor
-from .color_space_conversion import BgrToRgb, RgbToBgr, BgrToGray, RgbToGray, TfConvertImageDType
+from .color_space_conversion import BgrToRgb, RgbToBgr, BgrToGray, RgbToGray, TfConvertImageDType, SelectInputChannel
 from .normalization import Normalize, Normalize3d
 from .geometric_transformations import (
     GeometricOperationMetadata,
@@ -34,6 +34,7 @@ from .resize import Resize, AutoResize
 from .nlp_preprocessors import DecodeByVocabulary, PadWithEOS
 from .centernet_preprocessing import CenterNetAffineTransformation
 from .brats_preprocessing import Resize3D, NormalizeBrats, CropBraTS, SwapModalitiesBrats
+from .inpainting_preprocessor import FreeFormMask, RectMask, CustomMask
 
 __all__ = [
     'PreprocessingExecutor',
@@ -54,11 +55,13 @@ __all__ = [
     'CropBraTS',
     'TransformedCropWithAutoScale',
     'ImagePyramid',
+
     'BgrToGray',
     'BgrToRgb',
     'RgbToGray',
     'RgbToBgr',
     'TfConvertImageDType',
+    'SelectInputChannel',
 
     'Normalize3d',
     'Normalize',
@@ -69,5 +72,9 @@ __all__ = [
     'DecodeByVocabulary',
     'PadWithEOS',
 
-    'CenterNetAffineTransformation'
+    'CenterNetAffineTransformation',
+
+    'FreeFormMask',
+    'RectMask',
+    'CustomMask'
 ]

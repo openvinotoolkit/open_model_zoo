@@ -1,7 +1,4 @@
 onnx
 scipy           # via torchvision
-torch
+torch>=1.4
 torchvision
-
-# workaround for https://github.com/pytorch/vision/issues/1712
-pillow<7

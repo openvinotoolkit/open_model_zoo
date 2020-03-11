@@ -11,9 +11,6 @@
 #include <limits>
 
 #include <inference_engine.hpp>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -81,18 +78,6 @@ int main(int argc, char *argv[]) {
             ie.SetLogCallback(error_listener);
         }
 
-#ifdef WITH_EXTENSIONS
-        /*If CPU device, load default library with extensions that comes with the product*/
-        if (FLAGS_d.find("CPU") != std::string::npos) {
-            /**
-            * cpu_extensions library is compiled from "extension" folder containing
-            * custom MKLDNNPlugin layer implementations. These layers are not supported
-            * by mkldnn, but they can be useful for inferencing custom topologies.
-            **/
-            ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-        }
-#endif
-
         if (!FLAGS_l.empty()) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
             IExtensionPtr extension_ptr = make_so_pointer<IExtension>(FLAGS_l);
@@ -119,95 +104,9 @@ int main(int argc, char *argv[]) {
         /** Read network model **/
         CNNNetwork network = ie.ReadNetwork(FLAGS_m);
 
-        Precision precision = network.getPrecision();
         // -----------------------------------------------------------------------------------------------------
 
         // --------------------------- 3. Configure input & output ---------------------------------------------
-
-        // ------------------------------ Adding DetectionOutput -----------------------------------------------
-
-        /**
-         * The only meaningful difference between Faster-RCNN and SSD-like topologies is the interpretation
-         * of the output data. Faster-RCNN has 2 output layers which (the same format) are presented inside SSD.
-         *
-         * But SSD has an additional post-processing DetectionOutput layer that simplifies output filtering.
-         * So here we are adding 3 Reshapes and the DetectionOutput to the end of Faster-RCNN so it will return the
-         * same result as SSD and we can easily parse it.
-         */
-
-        std::string firstLayerName = network.getInputsInfo().begin()->first;
-
-        int inputWidth = network.getInputsInfo().begin()->second->getTensorDesc().getDims()[3];
-        int inputHeight = network.getInputsInfo().begin()->second->getTensorDesc().getDims()[2];
-
-        DataPtr bbox_pred_reshapeInPort = ((ICNNNetwork&)network).getData(FLAGS_bbox_name.c_str());
-        if (bbox_pred_reshapeInPort == nullptr) {
-            throw std::logic_error(std::string("Can't find output layer named ") + FLAGS_bbox_name);
-        }
-
-        SizeVector bbox_pred_reshapeOutDims = {
-            bbox_pred_reshapeInPort->getTensorDesc().getDims()[0] *
-            bbox_pred_reshapeInPort->getTensorDesc().getDims()[1], 1
-        };
-        DataPtr rois_reshapeInPort = ((ICNNNetwork&)network).getData(FLAGS_proposal_name.c_str());
-        if (rois_reshapeInPort == nullptr) {
-            throw std::logic_error(std::string("Can't find output layer named ") + FLAGS_proposal_name);
-        }
-
-        SizeVector rois_reshapeOutDims = {rois_reshapeInPort->getTensorDesc().getDims()[0] * rois_reshapeInPort->getTensorDesc().getDims()[1], 1};
-
-        DataPtr cls_prob_reshapeInPort = ((ICNNNetwork&)network).getData(FLAGS_prob_name.c_str());
-        if (cls_prob_reshapeInPort == nullptr) {
-            throw std::logic_error(std::string("Can't find output layer named ") + FLAGS_prob_name);
-        }
-
-        SizeVector cls_prob_reshapeOutDims = {cls_prob_reshapeInPort->getTensorDesc().getDims()[0] * cls_prob_reshapeInPort->getTensorDesc().getDims()[1], 1};
-
-        /*
-            Detection output
-        */
-
-        int normalized = 0;
-        int prior_size = normalized ? 4 : 5;
-        int num_priors = rois_reshapeOutDims[0] / prior_size;
-
-        // num_classes guessed from the output dims
-        if (bbox_pred_reshapeOutDims[0] % (num_priors * 4) != 0) {
-            throw std::logic_error("Can't guess number of classes. Something's wrong with output layers dims");
-        }
-        int num_classes = bbox_pred_reshapeOutDims[0] / (num_priors * 4);
-        slog::info << "num_classes guessed: " << num_classes << slog::endl;
-
-        LayerParams detectionOutParams;
-        detectionOutParams.name = "detection_out";
-        detectionOutParams.type = "DetectionOutput";
-        detectionOutParams.precision = precision;
-        CNNLayerPtr detectionOutLayer = CNNLayerPtr(new CNNLayer(detectionOutParams));
-        detectionOutLayer->params["background_label_id"] = "0";
-        detectionOutLayer->params["code_type"] = "caffe.PriorBoxParameter.CENTER_SIZE";
-        detectionOutLayer->params["eta"] = "1.0";
-        detectionOutLayer->params["input_height"] = std::to_string(inputHeight);
-        detectionOutLayer->params["input_width"] = std::to_string(inputWidth);
-        detectionOutLayer->params["keep_top_k"] = "200";
-        detectionOutLayer->params["nms_threshold"] = "0.3";
-        detectionOutLayer->params["normalized"] = std::to_string(normalized);
-        detectionOutLayer->params["num_classes"] = std::to_string(num_classes);
-        detectionOutLayer->params["share_location"] = "0";
-        detectionOutLayer->params["top_k"] = "400";
-        detectionOutLayer->params["variance_encoded_in_target"] = "1";
-        detectionOutLayer->params["visualize"] = "False";
-
-        detectionOutLayer->insData.push_back(bbox_pred_reshapeInPort);
-        detectionOutLayer->insData.push_back(cls_prob_reshapeInPort);
-        detectionOutLayer->insData.push_back(rois_reshapeInPort);
-
-        SizeVector detectionOutLayerOutDims = {1, 1, 200, 7};
-        DataPtr detectionOutLayerOutPort = DataPtr(new Data("detection_out", {precision, detectionOutLayerOutDims,
-                                                            TensorDesc::getLayoutByDims(detectionOutLayerOutDims)}));
-        detectionOutLayerOutPort->getCreatorLayer() = detectionOutLayer;
-        detectionOutLayer->outData.push_back(detectionOutLayerOutPort);
-
-        DetectionOutputPostProcessor detOutPostProcessor(detectionOutLayer.get());
 
         network.addOutput(FLAGS_bbox_name, 0);
         network.addOutput(FLAGS_prob_name, 0);
@@ -224,9 +123,6 @@ int main(int argc, char *argv[]) {
 
         std::string imageInputName, imInfoInputName;
 
-        InputInfo::Ptr inputInfo = inputsInfo.begin()->second;
-
-        SizeVector inputImageDims;
         /** Stores input image **/
 
         /** Iterating over all input blobs **/
@@ -258,8 +154,8 @@ int main(int argc, char *argv[]) {
 
         OutputsDataMap outputsInfo(network.getOutputsInfo());
 
-        const int maxProposalCount = detectionOutLayerOutDims[2];
-        const int objectSize = detectionOutLayerOutDims[3];
+        const size_t maxProposalCount = 200;
+        const size_t objectSize = 7;
 
         /** Set the precision of output data provided by the user, should be called before load of the network to the device **/
 
@@ -267,6 +163,23 @@ int main(int argc, char *argv[]) {
         outputsInfo[FLAGS_prob_name]->setPrecision(Precision::FP32);
         outputsInfo[FLAGS_proposal_name]->setPrecision(Precision::FP32);
         // -----------------------------------------------------------------------------------------------------
+
+        // ------------------------------ Adding DetectionOutput post-processor---------------------------------
+
+        /**
+         * The only meaningful difference between Faster-RCNN and SSD-like topologies is the interpretation
+         * of the output data. Faster-RCNN has 2 output layers which (the same format) are presented inside SSD.
+         *
+         * But SSD has an additional post-processing DetectionOutput layer that simplifies output filtering.
+         * So here we use a post-processor to convert the output of Faster-RCNN into the same format as SSD,
+         * so that we can easily parse it.
+         */
+
+        DetectionOutputPostProcessor detOutPostProcessor(
+            inputsInfo[imageInputName]->getTensorDesc().getDims(),
+            outputsInfo[FLAGS_bbox_name]->getTensorDesc().getDims(),
+            outputsInfo[FLAGS_prob_name]->getTensorDesc().getDims(),
+            outputsInfo[FLAGS_proposal_name]->getTensorDesc().getDims());
 
         // --------------------------- 4. Loading model to the device ------------------------------------------
         slog::info << "Loading model to the device" << slog::endl;
@@ -294,7 +207,7 @@ int main(int argc, char *argv[]) {
         size_t batchSize = network.getBatchSize();
         slog::info << "Batch size is " << std::to_string(batchSize) << slog::endl;
         if (batchSize != images.size()) {
-            slog::warn << "Number of images " + std::to_string(images.size()) + \
+            slog::warn << "Number of images " + std::to_string(images.size()) +
                 " doesn't match batch size " + std::to_string(batchSize) << slog::endl;
             batchSize = std::min(batchSize, images.size());
             slog::warn << "Number of images to be processed is "<< std::to_string(batchSize) << slog::endl;
@@ -337,7 +250,7 @@ int main(int argc, char *argv[]) {
 
         std::vector<Blob::Ptr> detOutInBlobs = { bbox_output_blob, prob_output_blob, rois_output_blob };
 
-        Blob::Ptr output_blob = std::make_shared<TBlob<float>>(TensorDesc(Precision::FP32, detectionOutLayerOutDims, Layout::NCHW));
+        Blob::Ptr output_blob = std::make_shared<TBlob<float>>(TensorDesc(Precision::FP32, {1, 1, maxProposalCount, objectSize}, Layout::NCHW));
         output_blob->allocate();
         std::vector<Blob::Ptr> detOutOutBlobs = { output_blob };
 
@@ -346,7 +259,7 @@ int main(int argc, char *argv[]) {
         const float* detection = static_cast<PrecisionTrait<Precision::FP32>::value_type*>(output_blob->buffer());
 
         /* Each detection has image_id that denotes processed image */
-        for (int curProposal = 0; curProposal < maxProposalCount; curProposal++) {
+        for (size_t curProposal = 0; curProposal < maxProposalCount; curProposal++) {
             auto image_id = static_cast<int>(detection[curProposal * objectSize + 0]);
             if (image_id < 0) {
                 break;
