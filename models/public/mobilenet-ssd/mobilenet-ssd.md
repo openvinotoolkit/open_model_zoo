@@ -37,7 +37,7 @@ Image, name - `prob`,  shape - `1,3,300,300`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `BGR`.
-Mean values - [127.5, 127.5, 127.5], scale value - 127.50223128904757.
+Mean values - [127.5, 127.5, 127.5], scale value - 127.5.
 
 ### Converted model
 
