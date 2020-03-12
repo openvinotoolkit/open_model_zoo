@@ -44,8 +44,7 @@ static std::vector<int> getShape(const std::string& header) {
     int value;
 
     std::vector<int> shape;
-    while (ss >> value)
-    {
+    while (ss >> value) {
         shape.push_back(value);
     }
     return shape;

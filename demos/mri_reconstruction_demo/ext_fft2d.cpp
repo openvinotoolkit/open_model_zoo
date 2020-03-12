@@ -43,8 +43,7 @@ namespace InferenceEngine {
 namespace Extensions {
 namespace Cpu {
 
-static cv::Mat infEngineBlobToMat(const InferenceEngine::Blob::Ptr& blob)
-{
+static cv::Mat infEngineBlobToMat(const InferenceEngine::Blob::Ptr& blob) {
     // NOTE: Inference Engine sizes are reversed.
     std::vector<size_t> dims = blob->getTensorDesc().getDims();
     std::vector<int> size(dims.begin(), dims.end());
@@ -70,8 +69,7 @@ public:
         const int h = inp.size[2];
         const int w = inp.size[3];
         cv::Mat complex(h, w, CV_32FC2), interleavedOut(h, w, CV_32FC2);
-        for (int i = 0; i < n; ++i)
-        {
+        for (int i = 0; i < n; ++i) {
             std::vector<cv::Mat> components = {
                 cv::Mat(h, w, CV_32F, inp.ptr<float>(i, 0)),
                 cv::Mat(h, w, CV_32F, inp.ptr<float>(i, 1))

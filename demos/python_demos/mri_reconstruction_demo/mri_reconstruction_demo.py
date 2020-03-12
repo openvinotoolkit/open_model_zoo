@@ -7,7 +7,8 @@ from openvino.inference_engine import IENetwork, IECore
 
 def kspace_to_image(kspace):
     assert(len(kspace.shape) == 3 and kspace.shape[-1] == 2)
-    img = np.abs(np.fft.ifft2(kspace[:,:,0] + 1j * kspace[:,:,1])).astype(np.float32)
+    fft = cv.idft(kspace, flags=cv.DFT_SCALE)
+    img = cv.magnitude(fft[:,:,0], fft[:,:,1])
     return cv.normalize(img, dst=None, alpha=255, beta=0, norm_type=cv.NORM_MINMAX, dtype=cv.CV_8U)
 
 
@@ -44,11 +45,13 @@ if __name__ == '__main__':
     data = np.load(args.input)
     num_slices, height, width = data.shape[0], data.shape[1], data.shape[2]
     pred = np.zeros((num_slices, height, width), dtype=np.uint8)
+    data /= np.sqrt(height * width)
 
     print('Compute...')
     start = time.time()
     for slice_id, kspace in enumerate(data):
-        kspace = kspace.copy() / np.sqrt(height * width)
+        kspace = kspace.copy()
+        img = kspace_to_image(kspace)
 
         # Apply sampling
         kspace[var_sampling_mask] = 0
@@ -72,7 +75,7 @@ if __name__ == '__main__':
         global slice_id
         slice_id = pos
 
-        kspace = data[slice_id] / np.sqrt(height * width)
+        kspace = data[slice_id]
         img = kspace_to_image(kspace)
 
         kspace[var_sampling_mask] = 0

@@ -141,9 +141,7 @@ cv::Mat kspaceToImage(const cv::Mat& kspace) {
 
     std::vector<cv::Mat> components;
     cv::split(img, components);
-    cv::pow(components[0], 2.0, components[0]);
-    cv::pow(components[1], 2.0, components[1]);
-    cv::sqrt(components[0] + components[1], img);
+    cv::magnitude(components[0], components[1], img);
     cv::normalize(img, img, 255, 0, cv::NORM_MINMAX, CV_8U);
     return img;
 }
