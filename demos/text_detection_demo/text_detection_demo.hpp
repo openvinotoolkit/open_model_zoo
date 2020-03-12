@@ -44,12 +44,14 @@ static const char input_data_type_message[] = "Required. Input data type: \"imag
                                               "\"webcam\" (for a webcamera device). By default, it is \"image\".";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 static const char decoder_bandwidth_message[] = "Optional. Bandwidth for CTC beam search decoder. Default value is 0, in this case CTC greedy decoder will be used.";
+static const char text_recognition_model_decoding_file_message[] = "Optional. Path to the decoding characters file.";
 
 DEFINE_bool(h, false, help_message);
 DEFINE_string(i, "", input_message);
 DEFINE_string(m_td, "", text_detection_model_message);
 DEFINE_string(m_tr, "", text_recognition_model_message);
 DEFINE_string(m_tr_ss, "0123456789abcdefghijklmnopqrstuvwxyz", text_recognition_model_symbols_set_message);
+DEFINE_string(m_tr_dec, "", text_recognition_model_decoding_file_message);
 DEFINE_bool(cc, false, text_central_image_crop_message);
 DEFINE_int32(w_td, 1280, image_width_for_text_detection_model_message);
 DEFINE_int32(h_td, 768, image_height_for_text_detection_model_message);
@@ -96,4 +98,5 @@ static void showUsage() {
     std::cout << "    -r                           " << raw_output_message << std::endl;
     std::cout << "    -u                           " << utilization_monitors_message << std::endl;
     std::cout << "    -b                           " << decoder_bandwidth_message << std::endl;
+    std::cout << "    -m_tr_dec \"<path>\"           " << text_recognition_model_decoding_file_message << std::endl;
 }

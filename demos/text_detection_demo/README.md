@@ -6,6 +6,7 @@ The demo shows an example of using neural networks to detect and recognize print
 * `text-detection-0004`, which is a lightweight detection network for finding text.
 * `text-recognition-0012`, which is a recognition network for recognizing text.
 * `handwritten-score-recognition-0001`, which is a recognition network for recognizing handwritten score marks like `<digit>` or `<digit>.<digit>`.
+* `handwritten-japanese-recognition-0001`, which is a recognition network for recognizing handwritten Japanese characters, should be run with the m_tr_dec argument.
 
 For more information about the pre-trained models, refer to the [model documentation](../../models/intel/index.md).
 
@@ -47,6 +48,7 @@ Options:
     -r                           Optional. Output Inference results as raw values.
     -u                           Optional. List of monitors to show initially.
     -b                           Optional. Bandwidth for CTC beam search decoder. Default value is 0, in this case CTC greedy decoder will be used.
+    -m_tr_dec "<path>"           Optional. Path to the decoding characters file.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
