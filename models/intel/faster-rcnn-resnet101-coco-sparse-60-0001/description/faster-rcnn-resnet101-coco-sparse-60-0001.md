@@ -40,4 +40,5 @@ Average Precision metric described in: ["COCO: Common Objects in Context"](http:
 
 ## Legal Information
 [\*] Other names and brands may be claimed as the property of others.
+
 [\**] May be different from the original implementation due to different input configurations.
