@@ -33,10 +33,12 @@ Average Precision metric described in: ["COCO: Common Objects in Context"](http:
 
 ## Outputs
 
-1. The net outputs a blob with the shape: [300, 7], where each row is consisted of [`box_id`, `class_id`, `confidence`, `x0`, `y0`, `x1`, `y1`'], respectively.
-    - `class_id`: ID of the detected class.
-    - `confidence`: [0, 1] detection score, the higher the value, the more confident the deteciton is on.
-    - `x0`, `y0`, `x1`, `y1`: normalized bounding box coordinates, range of [0, 1].
+1. The net outputs a blob with the shape: [300, 7], where each row is consisted of [`image_id`, `class_id`, `confidence`, `x0`, `y0`, `x1`, `y1`], respectively.
+    - `image_id` - image ID in the batch
+    - `class_id` - predicted class ID
+    - `confidence` - [0, 1] detection score, the higher the value, the more confident the deteciton is on
+    - (`x0`, `y0`) - normalized coordinates of the top left bounding box corner, in range of [0, 1]
+    - (`x1`, `y1`) - normalized coordinates of the bootm right bounding box corner, in range of [0, 1].
 
 ## Legal Information
 [\*] Other names and brands may be claimed as the property of others.
