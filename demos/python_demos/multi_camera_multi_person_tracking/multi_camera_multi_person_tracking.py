@@ -57,7 +57,7 @@ def update_detections(output, detections, frame_number):
         entry = {'frame_id': frame_number, 'scores': [], 'boxes': []}
         for det in detection:
             entry['boxes'].append(det[0])
-            entry['scores'].append(det[1])
+            entry['scores'].append(float(det[1]))
         output[i].append(entry)
 
 
