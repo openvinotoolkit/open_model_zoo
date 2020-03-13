@@ -486,7 +486,7 @@ void VideoSourceOCV::thread_fn(VideoSourceOCV *vs) {
         }
         std::unique_lock<std::mutex> lock(vs->mutex);
         vs->condVar.wait(lock, [&]() {
-            return vs->queue.size() < vs->queueSize || !vs->running;
+            return vs->queue.size() < vs->queueSize || !vs->running; // queue has space or source ran out of frames
         });
         vs->queue.push({result, frame});
         vs->hasFrame.notify_one();
