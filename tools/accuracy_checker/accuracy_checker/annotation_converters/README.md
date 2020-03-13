@@ -278,6 +278,7 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `numpy_input` - allows usage numpy files instead images. It can be useful if data required difficult preprocessing steps (e.g. conversion to optical flow) (Optional, default `False`)
   * `subset` - dataset split: `train`, `validation` or `test` (Optional, default `validation`).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `num_samples` - select first n samples from dataset.
 * `continuous_clip_action_recognition` - converts annotation of video-based MS-ASL dataset to `ClassificationAnnotation`.
   * `annotation_file` - path to annotation file in txt format.
   * `data_dir` - dataset root directory, which contains subdirectories with extracted video frames.
