@@ -2,11 +2,7 @@ models:
   - name: resnet-50-tf
     launchers:
       - framework: tf
-        model: public/resnet-50-tf/resnet_v1-50.pb
-        adapter: classification
-        inputs:
-          - name: map/TensorArrayStack/TensorArrayGatherV3
-            type: INPUT
+        # TODO
 
     datasets:
       - name: imagenet_1001_classes
