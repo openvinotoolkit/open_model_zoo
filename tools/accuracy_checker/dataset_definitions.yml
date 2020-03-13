@@ -430,8 +430,11 @@ datasets:
     annotation: market1501_reid.pickle
 
   - name: reid_dataset
-    data_source: reid
-    annotation: reid.pickle
+    data_source: Market-1501-v15.09.15
+    annotation_conversion:
+      converter: market1501_reid
+      data_dir: Market-1501-v15.09.15
+    annotation: market1501_reid.pickle
 
   - name: vgg2face
     data_source: VGGFaces2/test
@@ -588,6 +591,28 @@ datasets:
       data_dir: kinetics/frames_val
     annotation: kinetics_action_recognition.pickle
     dataset_meta: kinetics_action_recognition.json
+
+  - name: kinetics-400-frames-79
+    data_source: kinetics/frames_val
+    annotation_conversion:
+      converter: clip_action_recognition
+      annotation_file: kinetics/kinetics_400.json
+      data_dir: kinetics/frames_val
+      clip_duration: 79
+    annotation: kinetics_action_recognition_79.pickle
+    dataset_meta: kinetics_action_recognition_79.json
+
+  - name: kinetics-400-frames-79-400
+    data_source: kinetics/frames_val
+    annotation_conversion:
+      converter: clip_action_recognition
+      annotation_file: kinetics/kinetics_400.json
+      data_dir: kinetics/frames_val
+      clip_duration: 79
+      temporal_stride: 1
+    subsample_size: 400
+    annotation: kinetics_action_recognition_79_400.pickle
+    dataset_meta: kinetics_action_recognition_79_400.json
 
   - name: driver_action_recognition_dataset
     data_source: kinetics/frames_val

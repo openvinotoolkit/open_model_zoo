@@ -119,4 +119,4 @@ models:
             max_detections: 100
             threshold: 0.5
 
-global_definitions: ../datasets_definitions.yml
+global_definitions: ../dataset_definitions.yml

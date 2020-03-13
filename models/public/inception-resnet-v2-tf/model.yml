@@ -31,7 +31,7 @@ model_optimizer_args:
   - --input_shape=[1,299,299,3]
   - --input=input
   - --mean_values=input[127.5,127.5,127.5]
-  - --scale_values=input[127.50000414375013]
+  - --scale_values=input[127.5]
   - --output=InceptionResnetV2/AuxLogits/Logits/BiasAdd
   - --input_model=$dl_dir/inception_resnet_v2.pb
 framework: tf

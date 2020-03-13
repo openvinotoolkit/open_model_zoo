@@ -16,26 +16,24 @@ void Cnn::Init(const std::string &model_path, Core & ie, const std::string & dev
 
     // --------------------------- 1. Reading network ----------------------------------------------------
     auto network = ie.ReadNetwork(model_path);
-    network.setBatchSize(1);
-
-    model_path_ = model_path;
 
     // --------------------------- Changing input shape if it is needed ----------------------------------
-    if (new_input_resolution != cv::Size()) {
-        InputsDataMap inputInfo(network.getInputsInfo());
-        if (inputInfo.size() != 1) {
-            THROW_IE_EXCEPTION << "The network should have only one input";
-        }
-        InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
+    InputsDataMap inputInfo(network.getInputsInfo());
+    if (inputInfo.size() != 1) {
+        THROW_IE_EXCEPTION << "The network should have only one input";
+    }
+    InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
 
-        SizeVector input_dims = inputInfoFirst->getInputData()->getTensorDesc().getDims();
+    SizeVector input_dims = inputInfoFirst->getInputData()->getTensorDesc().getDims();
+    input_dims[0] = 1;
+    if (new_input_resolution != cv::Size()) {
         input_dims[2] = static_cast<size_t>(new_input_resolution.height);
         input_dims[3] = static_cast<size_t>(new_input_resolution.width);
-
-        std::map<std::string, SizeVector> input_shapes;
-        input_shapes[network.getInputsInfo().begin()->first] = input_dims;
-        network.reshape(input_shapes);
     }
+
+    std::map<std::string, SizeVector> input_shapes;
+    input_shapes[network.getInputsInfo().begin()->first] = input_dims;
+    network.reshape(input_shapes);
 
     // ---------------------------------------------------------------------------------------------------
 

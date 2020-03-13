@@ -31,7 +31,7 @@ model_optimizer_args:
   - --input_shape=[1,299,299,3]
   - --input=input
   - --mean_values=input[127.5,127.5,127.5]
-  - --scale_values=input[127.50000414375013]
+  - --scale_values=input[127.5]
   - --output=InceptionV3/Predictions/Softmax
   - --input_model=$dl_dir/inception_v3_2016_08_28_frozen.pb
 framework: tf
