@@ -28,7 +28,6 @@ from accuracy_checker.utils import contains_all, contains_any, extract_image_rep
 from accuracy_checker.progress_reporters import ProgressReporter
 
 
-
 class SequentialActionRecognitionEvaluator(BaseEvaluator):
     def __init__(self, dataset_config, launcher, model):
         self.dataset_config = dataset_config
@@ -179,12 +178,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
         self.model.load_network(network, self.launcher)
 
     def load_network_from_ir(self, models_dict):
-        networks_dict = {}
-        for network_key, network_path in models_dict.items():
-            networks_dict[network_key] = self.launcher.create_ie_network(
-                str(network_path['model']), str(network_path['weights'])
-            )
-        self.model.load_network(networks_dict, self.launcher)
+        self.model.load_model(models_dict, self.launcher)
 
     def get_network(self):
         return self.model.get_network()
@@ -320,6 +314,10 @@ class SequentialModel(BaseModel):
         self.encoder.load_network(network_dict['encoder'], launcher)
         self.decoder.load_network(network_dict['decoder'], launcher)
 
+    def load_model(self, network_dict, launcher):
+        self.encoder.load_model(network_dict['encoder'], launcher)
+        self.decoder.load_model(network_dict['decoder'], launcher)
+
     def _add_raw_encoder_predictions(self, encoder_prediction):
         for key, output in encoder_prediction.items():
             if key not in self._raw_outs:
@@ -334,9 +332,9 @@ class EncoderDLSDKModel(BaseModel):
         super().__init__(network_info, launcher)
         self.input_blob, self.output_blob = None, None
         if not delayed_model_loading:
-            self.load_network(network_info, launcher)
+            self.load_model(network_info, launcher)
 
-    def load_network(self, network_info, launcher):
+    def load_model(self, network_info, launcher):
         if 'onnx_model' in network_info:
             network_info.update(launcher.config)
             model, weights = launcher.convert_model(network_info)
@@ -403,7 +401,7 @@ class DecoderDLSDKModel(BaseModel):
         self.adapter = create_adapter('classification')
         self.num_processing_frames = network_info.get('num_processing_frames', 16)
         if not delayed_model_loading:
-            self.load_network(network_info, launcher)
+            self.load_model(network_info, launcher)
 
     def predict(self, identifiers, input_data):
         result = self.exec_network.infer(self.fit_to_input(input_data))
@@ -444,14 +442,14 @@ class DecoderDLSDKModel(BaseModel):
         weights = network_info.get('weights', model.parent / model.name.replace('xml', 'bin'))
         return model, weights
 
-    def load_network(self, network_info, launcher):
+    def load_model(self, network_info, launcher):
         if 'onnx_model' in network_info:
             network_info.update(launcher.config)
             model, weights = launcher.convert_model(network_info)
         else:
             model, weights = self.automatic_model_search(network_info)
         if weights is not None:
-            network = launcher.create_ie_network(str(model), str(weights))
+            self.network = launcher.create_ie_network(str(model), str(weights))
             self.exec_network = launcher.ie_core.load_network(network, launcher.device)
             self.input_blob = next(iter(network.inputs))
             self.output_blob = next(iter(network.outputs))
