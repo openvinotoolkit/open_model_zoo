@@ -105,12 +105,17 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
                     self._predictions.extend(batch_prediction)
 
             if output_callback:
-                output_callback(
-                    batch_raw_prediction,
-                    metrics_result=metrics_result,
-                    element_identifiers=batch_identifiers,
-                    dataset_indices=batch_input_ids
-                )
+                if metrics_result is None:
+                    metrics_result = [None] * len(batch_prediction)
+                for raw_prediction, m_result in zip(
+                    batch_raw_prediction, metrics_result,
+                ):
+                    output_callback(
+                        raw_prediction,
+                        metrics_result=m_result,
+                        element_identifiers=batch_identifiers,
+                        dataset_indices=batch_input_ids
+                    )
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_prediction))
 
@@ -296,6 +301,8 @@ class SequentialModel(BaseModel):
         self._encoder_predictions = [] if self.store_encoder_predictions else None
 
     def predict(self, identifiers, input_data, encoder_callback=None):
+        raw_outputs = []
+        predictions = []
         if len(np.shape(input_data)) == 5:
             input_data = input_data[0]
         for data in input_data:
@@ -306,7 +313,9 @@ class SequentialModel(BaseModel):
             if self.store_encoder_predictions:
                 self._encoder_predictions.append(encoder_prediction[self.encoder.output_blob])
             if len(self.processing_frames_buffer) == self.num_processing_frames:
-                raw_outputs, predictions = self.decoder.predict(identifiers, [self.processing_frames_buffer])
+                raw_output, prediction = self.decoder.predict(identifiers, [self.processing_frames_buffer])
+                raw_outputs.append(raw_output)
+                predictions.append(prediction)
 
         return raw_outputs, predictions
 
@@ -509,6 +518,10 @@ class DecoderDLSDKModel(BaseModel):
             self.output_blob = output_blob
             self.with_prefix = with_prefix
             self.adapter.output_blob = self.output_blob
+
+    def load_network(self, network, launcher):
+        self.network = network
+        self.exec_network = launcher.ie_core.load_network(network, launcher.device)
 
 
 class EncoderONNXModel(BaseModel):
