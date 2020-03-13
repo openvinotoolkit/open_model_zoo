@@ -1,3 +1,4 @@
+editdistance==0.5.3
 joblib==0.14.1            # via scikit-learn
 nibabel==3.0.1
 numpy==1.17.5             # via nibabel, scikit-learn, scipy
