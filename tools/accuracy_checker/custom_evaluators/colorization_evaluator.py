@@ -89,7 +89,6 @@ class ColorizationEvaluator(BaseEvaluator):
         self._annotations, self._predictions = [], []
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
-
         if subset is not None:
             self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
         elif num_images is not None:
