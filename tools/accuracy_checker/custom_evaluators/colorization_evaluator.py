@@ -365,6 +365,8 @@ class ColorizationCheckModel(BaseModel):
 
     def predict(self, identifiers, input_data):
         raw_result = self.exec_network.infer(self.fit_to_input(input_data))
+        if self.adapter.output_blob is None:
+            self.adapter.output_blob = next(iter(self.exec_network.outputs))s
         result = self.adapter.process([raw_result], identifiers, [{}])
         return raw_result, result
 
