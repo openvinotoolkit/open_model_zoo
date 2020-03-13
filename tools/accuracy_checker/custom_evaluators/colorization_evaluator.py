@@ -297,7 +297,7 @@ class BaseModel:
 
     def load_network(self, network, launcher):
         self.network = network
-        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device
         self.set_input_and_output()
 
     def set_input_and_output(self):
