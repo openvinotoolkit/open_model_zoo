@@ -179,7 +179,7 @@ class Metric(ClassProvider):
 
     def reset(self):
         if self.state:
-            self.state = self._initial_state
+            self.state = copy.deepcopy(self._initial_state)
             self._update_iter = 0
 
 
