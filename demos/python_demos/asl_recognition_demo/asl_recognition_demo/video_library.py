@@ -14,37 +14,37 @@
  limitations under the License.
 """
 
+import time
 from os import listdir
 from os.path import join, isfile
+from multiprocessing import Process, Value
 
 import cv2
+import numpy as np
 
 
 class VideoLibrary:
     """ This class loads list of videos and plays each one in cycle. """
 
-    def __init__(self, source_dir, trg_size, class_names):
+    def __init__(self, source_dir, max_size, class_names, visualizer_queue, trg_fps):
         """Constructor"""
 
-        self.trg_size = trg_size
+        self.max_size = max_size
 
         self.source_paths = self.parse_source_paths(source_dir, class_names)
         assert len(self.source_paths) > 0, "Can't find videos in " + str(source_dir)
 
-        self.cur_source_id = 0
-        self.cap = None
+        self.cur_source_id = Value('i', 0, lock=True)
+
+        self._visualizer_queue = visualizer_queue
+        self._trg_time_step = 1. / float(trg_fps)
+        self._play_process = None
 
     @property
     def num_sources(self):
         """Returns number of videos in the library"""
 
         return len(self.source_paths)
-
-    @property
-    def cur_source(self):
-        """Returns the path to the current video source"""
-
-        return self.source_paths[self.cur_source_id]
 
     @staticmethod
     def parse_source_paths(input_dir, valid_names):
@@ -74,48 +74,88 @@ class VideoLibrary:
 
         return out_file_paths
 
-    def release(self):
-        """Release internal storages"""
-
-        if self.cap is not None:
-            self.cap.release()
-
-        self.cap = None
-
     def next(self):
         """Moves pointer to the next video source"""
 
-        self.release()
-
-        self.cur_source_id += 1
-        if self.cur_source_id >= self.num_sources:
-            self.cur_source_id = 0
+        with self.cur_source_id.get_lock():
+            self.cur_source_id.value += 1
+            if self.cur_source_id.value >= self.num_sources:
+                self.cur_source_id.value = 0
 
     def prev(self):
         """Moves pointer to the previous video source"""
 
-        self.release()
+        with self.cur_source_id.get_lock():
+            self.cur_source_id.value -= 1
+            if self.cur_source_id.value < 0:
+                self.cur_source_id.value = self.num_sources - 1
 
-        self.cur_source_id -= 1
-        if self.cur_source_id < 0:
-            self.cur_source_id = self.num_sources - 1
+    def start(self):
+        """Starts internal threads"""
 
-    def get_frame(self):
-        """Returns current frame from the active video source"""
+        if self._play_process is not None and self._play_process.is_alive():
+            return
 
-        source_name, source_path = self.cur_source
+        self._play_process = \
+            Process(target=self._play,
+                    args=(self._visualizer_queue, self.cur_source_id, self.source_paths,
+                          self.max_size, self._trg_time_step))
+        self._play_process.daemon = True
+        self._play_process.start()
 
-        if self.cap is None:
-            self.cap = cv2.VideoCapture(source_path)
+    def release(self):
+        """Stops playing and releases internal storages"""
 
-        _, frame = self.cap.read()
-        if frame is None:
-            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            _, frame = self.cap.read()
-            assert frame is not None
+        if self._play_process is not None:
+            self._play_process.terminate()
+            self._play_process.join()
 
-        frame = cv2.resize(frame, self.trg_size)
-        cv2.putText(frame, 'Gesture: {}'.format(source_name), (10, frame.shape[0] - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        self._play_process = None
 
-        return frame
+    @staticmethod
+    def _play(visualizer_queue, cur_source_id, source_paths, max_image_size, trg_time_step):
+        """Produces live frame from the active video source"""
+
+        cap = None
+        last_source_id = cur_source_id.value
+
+        while True:
+            start_time = time.perf_counter()
+
+            if cur_source_id.value != last_source_id:
+                last_source_id = cur_source_id.value
+                cap.release()
+                cap = None
+
+            source_name, source_path = source_paths[cur_source_id.value]
+
+            if cap is None:
+                cap = cv2.VideoCapture(source_path)
+                cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+
+            _, frame = cap.read()
+            if frame is None:
+                cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                _, frame = cap.read()
+                assert frame is not None
+
+            trg_frame_size = list(frame.shape[:2])
+            if np.max(trg_frame_size) > max_image_size:
+                if trg_frame_size[0] == np.max(trg_frame_size):
+                    trg_frame_size[1] = int(float(max_image_size) / float(trg_frame_size[0]) * float(trg_frame_size[1]))
+                    trg_frame_size[0] = max_image_size
+                else:
+                    trg_frame_size[0] = int(float(max_image_size) * float(trg_frame_size[0]) / float(trg_frame_size[1]))
+                    trg_frame_size[1] = max_image_size
+
+            frame = cv2.resize(frame, (trg_frame_size[1], trg_frame_size[0]))
+            cv2.putText(frame, 'GT Gesture: {}'.format(source_name), (10, frame.shape[0] - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+            visualizer_queue.put(np.copy(frame), True)
+
+            end_time = time.perf_counter()
+            elapsed_time = end_time - start_time
+            rest_time = trg_time_step - elapsed_time
+            if rest_time > 0.0:
+                time.sleep(rest_time)
