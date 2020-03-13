@@ -70,8 +70,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
             self._dumped_annotations = []
 
         if self.dataset.batch is None:
-            self.dataset.batch = self.launcher.batch
-        self.preprocessor.input_shapes = self.launcher.inputs_info_for_meta()
+            self.dataset.batch = 1
         if subset is not None:
             self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
         elif num_images is not None:
@@ -81,7 +80,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
         )
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
-            _, batch_meta = extract_image_representations(batch_inputs)
+            batch_inputs_extr, batch_meta = extract_image_representations(batch_inputs)
             encoder_callback=None
             if output_callback:
                 encoder_callback = partial(output_callback,
@@ -89,7 +88,9 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
                                            element_identifiers=batch_identifiers,
                                            dataset_indices=batch_input_ids)
 
-            batch_raw_prediction, batch_prediction = self.model.predict(batch_identifiers, batch_inputs, encoder_callback=encoder_callback)
+            batch_raw_prediction, batch_prediction = self.model.predict(
+                batch_identifiers, batch_inputs_extr, encoder_callback=encoder_callback
+            )
             metrics_result = None
             if self.metric_executor:
                 metrics_result = self.metric_executor.update_metrics_on_batch(
@@ -100,12 +101,17 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
                     self._predictions.extend(batch_prediction)
 
             if output_callback:
-                output_callback(
-                    batch_raw_prediction,
-                    metrics_result=metrics_result,
-                    element_identifiers=batch_identifiers,
-                    dataset_indices=batch_input_ids
-                )
+                if metrics_result is None:
+                    metrics_result = [None] * len(batch_prediction)
+                for raw_prediction, m_result in zip(
+                    batch_raw_prediction, metrics_result,
+                ):
+                    output_callback(
+                        raw_prediction,
+                        metrics_result=m_result,
+                        element_identifiers=batch_identifiers,
+                        dataset_indices=batch_input_ids
+                    )
             if progress_reporter:
                 progress_reporter.update(batch_id, len(batch_prediction))
 
@@ -280,6 +286,7 @@ class SequentialModel(BaseModel):
         self._encoder_predictions = [] if self.store_encoder_predictions else None
 
     def predict(self, identifiers, input_data, encoder_callback=None):
+        raw_outputs = []
         predictions = []
         if len(np.shape(input_data)) == 5:
             input_data = input_data[0]
@@ -287,11 +294,13 @@ class SequentialModel(BaseModel):
             encoder_prediction = self.encoder.predict(identifiers, [data])
             if encoder_callback:
                 encoder_callback(encoder_prediction)
-            self.processing_frames_buffer.append(encoder_prediction)
+            self.processing_frames_buffer.append(encoder_prediction[self.encoder.output_blob])
             if self.store_encoder_predictions:
-                self._encoder_predictions.append(encoder_prediction)
+                self._encoder_predictions.append(encoder_prediction[self.encoder.output_blob])
             if len(self.processing_frames_buffer) == self.num_processing_frames:
-                raw_outputs, predictions = self.decoder.predict(identifiers, [self.processing_frames_buffer])
+                raw_output, prediction = self.decoder.predict(identifiers, [self.processing_frames_buffer])
+                raw_outputs.append(raw_output)
+                predictions.append(prediction)
 
         return raw_outputs, predictions
 
@@ -324,6 +333,9 @@ class SequentialModel(BaseModel):
                 self._raw_outs[key] = []
             self._raw_outs[key].append(output)
 
+    def get_network(self):
+        return {'encoder': self.encoder.network, 'decoder': self.decoder.network}
+
 
 class EncoderDLSDKModel(BaseModel):
     default_model_suffix = 'encoder'
@@ -341,11 +353,11 @@ class EncoderDLSDKModel(BaseModel):
         else:
             model, weights = self.automatic_model_search(network_info)
         if weights is not None:
-            network = launcher.create_ie_network(str(model), str(weights))
-            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+            self.network = launcher.create_ie_network(str(model), str(weights))
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
             if self.input_blob is None:
-                self.input_blob = next(iter(network.inputs))
-                self.output_blob = next(iter(network.outputs))
+                self.input_blob = next(iter(self.network.inputs))
+                self.output_blob = next(iter(self.network.outputs))
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
             if self.input_blob is None:
@@ -353,7 +365,7 @@ class EncoderDLSDKModel(BaseModel):
                 self.output_blob = next(iter(self.exec_network.outputs))
 
     def predict(self, identifiers, input_data):
-        return self.exec_network.infer(self.fit_to_input(input_data))[self.output_blob]
+        return self.exec_network.infer(self.fit_to_input(input_data))
 
     def release(self):
         del self.exec_network
@@ -391,6 +403,10 @@ class EncoderDLSDKModel(BaseModel):
 
         return model, weights
 
+    def load_network(self, network, launcher):
+        self.network = network
+        self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+
 
 class DecoderDLSDKModel(BaseModel):
     default_model_suffix = 'decoder'
@@ -404,10 +420,10 @@ class DecoderDLSDKModel(BaseModel):
             self.load_model(network_info, launcher)
 
     def predict(self, identifiers, input_data):
-        result = self.exec_network.infer(self.fit_to_input(input_data))
-        result = self.adapter.process([result], identifiers, [{}])
+        raw_result = self.exec_network.infer(self.fit_to_input(input_data))
+        result = self.adapter.process([raw_result], identifiers, [{}])
 
-        return result
+        return raw_result, result
 
     def release(self):
         del self.exec_network
@@ -450,9 +466,10 @@ class DecoderDLSDKModel(BaseModel):
             model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.create_ie_network(str(model), str(weights))
-            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
-            self.input_blob = next(iter(network.inputs))
-            self.output_blob = next(iter(network.outputs))
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+            if self.input_blob is None:
+                self.input_blob = next(iter(self.network.inputs))
+                self.output_blob = next(iter(self.network.outputs))
         else:
             self.network = None
             self.exec_network = launcher.ie_core.import_network(str(model))
@@ -460,6 +477,10 @@ class DecoderDLSDKModel(BaseModel):
             self.output_blob = next(iter(self.exec_network.outputs))
         if self.adapter.output_blob is None:
             self.adapter.output_blob = self.output_blob
+
+    def load_network(self, network, launcher):
+        self.network = network
+        self.exec_network = launcher.ie_core.load_network(network, launcher.device)
 
 
 class EncoderONNXModel(BaseModel):
