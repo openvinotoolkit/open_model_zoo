@@ -430,8 +430,11 @@ datasets:
     annotation: market1501_reid.pickle
 
   - name: reid_dataset
-    data_source: reid
-    annotation: reid.pickle
+    data_source: Market-1501-v15.09.15
+    annotation_conversion:
+      converter: market1501_reid
+      data_dir: Market-1501-v15.09.15
+    annotation: market1501_reid.pickle
 
   - name: vgg2face
     data_source: VGGFaces2/test

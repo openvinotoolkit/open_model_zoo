@@ -45,11 +45,11 @@ models:
                      [107.651852, 45.8114572],
                      [142.595732, 63.31491832],
                      [201.107692, 93.5070856]]]
-        variance: [0.1, 0.1, 0.2, 0.2]
-        in_sizes: [400, 680]
-        num_action_classes: 6
-        detection_threshold: 0.3
-        action_scale: 16.0
+          variance: [0.1, 0.1, 0.2, 0.2]
+          in_sizes: [400, 680]
+          num_action_classes: 6
+          detection_threshold: 0.3
+          action_scale: 16.0
 
       - framework: dlsdk
         tags:

@@ -17,7 +17,6 @@ models:
 
     datasets:
       - name: imagenet_1000_classes
-        data_source: ImageNet
         annotation: imagenet1000.pickle
         reader: pillow_imread
 
