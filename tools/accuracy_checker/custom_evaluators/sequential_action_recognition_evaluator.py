@@ -28,7 +28,6 @@ from accuracy_checker.utils import contains_all, contains_any, extract_image_rep
 from accuracy_checker.progress_reporters import ProgressReporter
 
 
-
 class SequentialActionRecognitionEvaluator(BaseEvaluator):
     def __init__(self, dataset_config, launcher, model):
         self.dataset_config = dataset_config
@@ -335,6 +334,10 @@ class SequentialModel(BaseModel):
         self.encoder.load_network(network_dict['encoder'], launcher)
         self.decoder.load_network(network_dict['decoder'], launcher)
 
+    def load_model(self, network_dict, launcher):
+        self.encoder.load_model(network_dict['encoder'], launcher)
+        self.decoder.load_model(network_dict['decoder'], launcher)
+
     def _add_raw_encoder_predictions(self, encoder_prediction):
         for key, output in encoder_prediction.items():
             if key not in self._raw_outs:
@@ -510,18 +513,6 @@ class DecoderDLSDKModel(BaseModel):
             self.input_blob = next(iter(self.exec_network.inputs))
             self.output_blob = output_blob
             self.with_prefix = with_prefix
-=======
-            network = launcher.create_ie_network(str(model), str(weights))
-            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
-            self.input_blob = next(iter(network.inputs))
-            self.output_blob = next(iter(network.outputs))
-        else:
-            self.network = None
-            self.exec_network = launcher.ie_core.import_network(str(model))
-            self.input_blob = next(iter(self.exec_network.inputs))
-            self.output_blob = next(iter(self.exec_network.outputs))
-        if self.adapter.output_blob is None:
->>>>>>> try quantize encoder/decoder
             self.adapter.output_blob = self.output_blob
 
 
