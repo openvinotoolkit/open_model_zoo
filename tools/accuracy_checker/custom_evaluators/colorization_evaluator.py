@@ -18,85 +18,118 @@ import numpy as np
 import cv2
 
 from accuracy_checker.evaluators.base_evaluator import BaseEvaluator
-from accuracy_checker.dataset import Dataset
+from accuracy_checker.evaluators.quantization_model_evaluator import create_dataset_attributes
 from accuracy_checker.adapters import create_adapter
-from accuracy_checker.data_readers import BaseReader
 from accuracy_checker.config import ConfigError
-from accuracy_checker.preprocessor import PreprocessingExecutor
-from accuracy_checker.metrics import MetricsExecutor
 from accuracy_checker.launcher import create_launcher
 from accuracy_checker.utils import extract_image_representations, contains_all
+from accuracy_checker.progress_reporters import ProgressReporter
 
 
 class ColorizationEvaluator(BaseEvaluator):
-    def __init__(self, dataset, reader, preprocessing, metric_executor, launcher, test_model, check_model):
-        self.dataset = dataset
-        self.preprocessing_executor = preprocessing
-        self.metric_executor = metric_executor
+    def __init__(self, dataset_config, launcher, test_model, check_model):
+        self.dataset_config = dataset_config
+        self.preprocessing_executor = None
+        self.preprocessor = None
+        self.dataset = None
+        self.postprocessor = None
+        self.metric_executor = None
         self.launcher = launcher
         self.test_model = test_model
         self.check_model = check_model
-        self.reader = reader
         self._metrics_results = []
 
     @classmethod
-    def from_configs(cls, config):
-        dataset_config = config['datasets'][0]
-        dataset = Dataset(dataset_config)
-        data_reader_config = dataset_config.get('reader', 'opencv_imread')
-        data_source = dataset_config['data_source']
-        if isinstance(data_reader_config, str):
-            reader = BaseReader.provide(data_reader_config, data_source)
-        elif isinstance(data_reader_config, dict):
-            reader = BaseReader.provide(data_reader_config['type'], data_source, data_reader_config)
-        else:
-            raise ConfigError('reader should be dict or string')
-        preprocessing = PreprocessingExecutor(dataset_config.get('preprocessing', []), dataset.name)
-        metrics_executor = MetricsExecutor(dataset_config['metrics'], dataset)
+    def from_configs(cls, config, delayed_model_loading=False):
+        dataset_config = config['datasets']
         launcher_settings = config['launchers'][0]
         supported_frameworks = ['dlsdk']
         if not launcher_settings['framework'] in supported_frameworks:
             raise ConfigError('{} framework not supported'.format(launcher_settings['framework']))
+        if 'device' not in launcher_settings:
+            launcher_settings['device'] = 'CPU'
         launcher = create_launcher(launcher_settings, delayed_model_loading=True)
         network_info = config.get('network_info', {})
-        colorization_network = network_info.get('colorization_network', {})
-        verification_network = network_info.get('verification_network', {})
-        model_args = config.get('_models', [])
-        models_is_blob = config.get('_model_is_blob')
-        if 'model' not in colorization_network and model_args:
-            colorization_network['model'] = model_args[0]
-            colorization_network['_model_is_blob'] = models_is_blob
-        if 'model' not in verification_network and model_args:
-            verification_network['model'] = model_args[1 if len(model_args) > 1 else 0]
-            verification_network['_model_is_blob'] = models_is_blob
-        network_info.update({
-            'colorization_network': colorization_network,
-            'verification_network': verification_network
-        })
-        if not contains_all(network_info, ['colorization_network', 'verification_network']):
-            raise ConfigError('configuration for colorization_network/verification_network does not exist')
+        if not delayed_model_loading:
+            colorization_network = network_info.get('colorization_network', {})
+            verification_network = network_info.get('verification_network', {})
+            model_args = config.get('_models', [])
+            models_is_blob = config.get('_model_is_blob')
+            if 'model' not in colorization_network and model_args:
+                colorization_network['model'] = model_args[0]
+                colorization_network['_model_is_blob'] = models_is_blob
+            if 'model' not in verification_network and model_args:
+                verification_network['model'] = model_args[1 if len(model_args) > 1 else 0]
+                verification_network['_model_is_blob'] = models_is_blob
+            network_info.update({
+                'colorization_network': colorization_network,
+                'verification_network': verification_network
+            })
+            if not contains_all(network_info, ['colorization_network', 'verification_network']):
+                raise ConfigError('configuration for colorization_network/verification_network does not exist')
 
-        test_model = ColorizationTestModel(network_info['colorization_network'], launcher)
-        check_model = ColorizationCheckModel(network_info['verification_network'], launcher)
-        return cls(dataset, reader, preprocessing, metrics_executor, launcher, test_model, check_model)
+        test_model = ColorizationTestModel(network_info.get(
+            'colorization_network', {}), launcher, delayed_model_loading
+        )
+        check_model = ColorizationCheckModel(
+            network_info.get('verification_network', {}), launcher, delayed_model_loading
+        )
+        return cls(dataset_config, launcher, test_model, check_model)
 
-    def process_dataset(self, _, progress_reporter):
+    def process_dataset(
+            self, subset=None,
+            num_images=None,
+            check_progress=False,
+            dataset_tag='',
+            output_callback=None,
+            allow_pairwise_subset=False,
+            dump_prediction_to_annotation=False,
+            **kwargs):
+
         self._annotations, self._predictions = ([], []) if self.metric_executor.need_store_predictions else None, None
-        if progress_reporter:
-            progress_reporter.reset(self.dataset.size)
+        if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
+            self.select_dataset(dataset_tag)
 
-        for batch_id, (dataset_indices, batch_annotation) in enumerate(self.dataset):
-            batch_identifiers = [annotation.identifier for annotation in batch_annotation]
-            batch_input = [self.reader(identifier=identifier) for identifier in batch_identifiers]
-            batch_input = self.preprocessing_executor.process(batch_input, batch_annotation)
-            batch_input, _ = extract_image_representations(batch_input)
-            batch_out = self.test_model.predict(batch_annotation, batch_input)
-            batch_prediction = self.check_model.predict(batch_identifiers, batch_out)
-            self.metric_executor.update_metrics_on_batch(dataset_indices, batch_annotation, batch_prediction)
-            if self.metric_executor.need_store_predictions:
-                self._annotations.extend(batch_annotation)
-                self._predictions.extend(batch_prediction)
-            progress_reporter.update(batch_id, len(batch_prediction))
+        if self.dataset.batch is None:
+            self.dataset.batch = self.launcher.batch
+        self.preprocessor.input_shapes = self.launcher.inputs_info_for_meta()
+        if subset is not None:
+            self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
+        elif num_images is not None:
+            self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
+        progress_reporter = None if not check_progress else self._create_progress_reporter(
+            check_progress, self.dataset.size
+        )
+        for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
+            batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
+            _, batch_meta = extract_image_representations(batch_inputs)
+            metrics_result = None
+            batch_raw_prediction, batch_out = self.test_model.predict(batch_identifiers, batch_inputs)
+            if output_callback:
+                output_callback(
+                    batch_raw_prediction,
+                    metrics_result=metrics_result,
+                    element_identifiers=batch_identifiers,
+                    dataset_indices=batch_input_ids
+                )
+            batch_raw_prediction = batch_prediction = self.check_model.predict(batch_identifiers, batch_out)
+            if self.metric_executor:
+                metrics_result = self.metric_executor.update_metrics_on_batch(
+                    batch_input_ids, batch_annotation, batch_prediction
+                )
+                if self.metric_executor.need_store_predictions:
+                    self._annotations.extend(batch_annotation)
+                    self._predictions.extend(batch_prediction)
+
+            if output_callback:
+                output_callback(
+                    batch_raw_prediction,
+                    metrics_result=metrics_result,
+                    element_identifiers=batch_identifiers,
+                    dataset_indices=batch_input_ids
+                )
+            if progress_reporter:
+                progress_reporter.update(batch_id, len(batch_prediction))
 
         if progress_reporter:
             progress_reporter.finish()
@@ -158,8 +191,58 @@ class ColorizationEvaluator(BaseEvaluator):
 
         return extracted_results, extracted_meta
 
+    def load_network(self, network=None):
+        self.test_model.load_network(network['colorization_network'], self.launcher)
+        self.check_model.load_network(network['verification_network'], self.launcher)
+
+    def load_network_from_ir(self, models_dict):
+        self.test_model.load_model(models_dict['colorization_network'], self.launcher)
+        self.check_model.load_model(models_dict['verification_network'], self.launcher)
+
+    def get_network(self):
+        return {'colorization_network': self.test_model.network, 'verification_network': self.check_model.network}
+
+    def get_metrics_attributes(self):
+        if not self.metric_executor:
+            return {}
+        return self.metric_executor.get_metrics_attributes()
+
+    def register_metric(self, metric_config):
+        if isinstance(metric_config, str):
+            self.metric_executor.register_metric({'type': metric_config})
+        elif isinstance(metric_config, dict):
+            self.metric_executor.register_metric(metric_config)
+        else:
+            raise ValueError('Unsupported metric configuration type {}'.format(type(metric_config)))
+
+    def register_postprocessor(self, postprocessing_config):
+        pass
+
+    def register_dumped_annotations(self):
+        pass
+
+    def select_dataset(self, dataset_tag):
+        if self.dataset is not None and isinstance(self.dataset_config, list):
+            return
+        dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
+        self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
+
+    @staticmethod
+    def _create_progress_reporter(check_progress, dataset_size):
+        pr_kwargs = {}
+        if isinstance(check_progress, int) and not isinstance(check_progress, bool):
+            pr_kwargs = {"print_interval": check_progress}
+
+        return ProgressReporter.provide('print', dataset_size, **pr_kwargs)
+
 
 class BaseModel:
+    def __init__(self, network_info, launcher, delayed_model_loading=False):
+        self.input_blob = None
+        self.output_blob = None
+        if not delayed_model_loading:
+            self.load_model(network_info, launcher)
+
     @staticmethod
     def auto_model_search(network_info):
         model = Path(network_info['model'])
@@ -188,19 +271,26 @@ class BaseModel:
     def release(self):
         pass
 
-
-class ColorizationTestModel(BaseModel):
-    def __init__(self, network_info, launcher):
-        super().__init__()
+    def load_model(self, network_info, launcher):
         model, weights = self.auto_model_search(network_info)
         if weights:
-            network = launcher.create_ie_network(str(model), str(weights))
-            network.batch_size = 1
-            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+            self.network = launcher.create_ie_network(str(model), str(weights))
+            self.network.batch_size = 1
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
+            self.network = None
             launcher.ie_core.import_network(str(model))
         self.input_blob = next(iter(self.exec_network.inputs))
         self.output_blob = next(iter(self.exec_network.outputs))
+
+    def load_network(self, network, launcher):
+        self.network = network
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+
+
+class ColorizationTestModel(BaseModel):
+    def __init__(self, network_info, launcher, delayed_model_loading=False):
+        super().__init__(network_info, launcher, delayed_model_loading)
         self.color_coeff = np.load(network_info['color_coeff'])
 
     def data_preparation(self, input_data):
@@ -221,15 +311,14 @@ class ColorizationTestModel(BaseModel):
 
     def predict(self, identifiers, input_data):
         img_l, img_l_rs = self.data_preparation(input_data)
-
-        output_blob = next(iter(self.exec_network.outputs))
         h_orig, w_orig = input_data[0].shape[:2]
         res = self.exec_network.infer(inputs={self.input_blob: [img_l_rs]})
 
-        new_result = self.postprocessing(res, img_l, output_blob, (w_orig, h_orig))
-        return np.array(new_result)
+        new_result = self.postprocessing(res, img_l, self.output_blob, (w_orig, h_orig))
+        return res, np.array(new_result)
 
     def release(self):
+        del self.network
         del self.exec_network
 
     def fit_to_input(self, input_data):
@@ -238,26 +327,18 @@ class ColorizationTestModel(BaseModel):
 
 
 class ColorizationCheckModel(BaseModel):
-    def __init__(self, network_info, launcher):
-        super().__init__()
-        model, weights = self.auto_model_search(network_info)
-        if weights:
-            network = launcher.create_ie_network(str(model), str(weights))
-            network.batch_size = 1
-            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
-        else:
-            launcher.ie_core.import_network(str(model))
-        self.input_blob = next(iter(self.exec_network.inputs))
-        self.output_blob = next(iter(self.exec_network.outputs))
+    def __init__(self, network_info, launcher, delayed_model_loading=False):
+        super().__init__(network_info, launcher, delayed_model_loading)
         self.adapter = create_adapter(network_info['adapter'])
         self.adapter.output_blob = self.output_blob
 
     def predict(self, identifiers, input_data):
-        result = self.exec_network.infer(self.fit_to_input(input_data))
-        result = self.adapter.process([result], identifiers, [{}])
-        return result
+        raw_result = self.exec_network.infer(self.fit_to_input(input_data))
+        result = self.adapter.process([raw_result], identifiers, [{}])
+        return raw_result, result
 
     def release(self):
+        del self.network
         del self.exec_network
 
     def fit_to_input(self, input_data):
