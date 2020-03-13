@@ -98,4 +98,4 @@ models:
             ignore_difficult: true
             presenter: print_scalar
 
-global_definitions: ../datasets_definitions.yml
+global_definitions: ../dataset_definitions.yml
