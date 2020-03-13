@@ -9,9 +9,11 @@
 */
 
 #include <vector>
+#include <chrono>
 
 #include <inference_engine.hpp>
 
+#include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 
 #include "human_pose_estimation_demo.hpp"
@@ -60,12 +62,15 @@ int main(int argc, char* argv[]) {
         }
 
         int delay = 33;
-        double inferenceTime = 0.0;
-        cv::Mat image;
-        if (!cap.read(image)) {
+
+        // read input (video) frame
+        cv::Mat curr_frame; cap >> curr_frame;
+        cv::Mat next_frame;
+        if (!cap.grab()) {
             throw std::logic_error("Failed to get frame from cv::VideoCapture");
         }
-        estimator.estimate(image);  // Do not measure network reshape, if it happened
+
+        estimator.reshape(curr_frame);  // Do not measure network reshape, if it happened
 
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
@@ -74,50 +79,159 @@ int main(int argc, char* argv[]) {
         }
         std::cout << std::endl;
 
-        do {
-            double t1 = static_cast<double>(cv::getTickCount());
-            std::vector<HumanPose> poses = estimator.estimate(image);
-            double t2 = static_cast<double>(cv::getTickCount());
-            if (inferenceTime == 0) {
-                inferenceTime = (t2 - t1) / cv::getTickFrequency() * 1000;
-            } else {
-                inferenceTime = inferenceTime * 0.95 + 0.05 * (t2 - t1) / cv::getTickFrequency() * 1000;
+        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
+        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
+        std::vector<HumanPose> poses;
+        bool isLastFrame = false;
+        bool isAsyncMode = false; // execution is always started in SYNC mode
+        bool isModeChanged = false; // set to true when execution mode is changed (SYNC<->ASYNC)
+        bool blackBackground = FLAGS_black;
+
+        typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
+        auto total_t0 = std::chrono::high_resolution_clock::now();
+        auto wallclock = std::chrono::high_resolution_clock::now();
+        double render_time = 0;
+
+        while (true) {
+            auto t0 = std::chrono::high_resolution_clock::now();
+            //here is the first asynchronus point:
+            //in the async mode we capture frame to populate the NEXT infer request
+            //in the regular mode we capture frame to the current infer request
+
+            if (!cap.read(next_frame)) {
+                if (next_frame.empty()) {
+                    isLastFrame = true; //end of video file
+                } else {
+                    throw std::logic_error("Failed to get frame from cv::VideoCapture");
+                }
             }
-            if (FLAGS_r) {
-                for (HumanPose const& pose : poses) {
-                    std::stringstream rawPose;
-                    rawPose << std::fixed << std::setprecision(0);
-                    for (auto const& keypoint : pose.keypoints) {
-                        rawPose << keypoint.x << "," << keypoint.y << " ";
+            if (isAsyncMode) {
+                if (isModeChanged) {
+                    estimator.frameToBlobCurr(curr_frame);
+                }
+                if (!isLastFrame) {
+                    estimator.frameToBlobNext(next_frame);
+                }
+            } else if (!isModeChanged) {
+                estimator.frameToBlobCurr(curr_frame);
+            }
+            auto t1 = std::chrono::high_resolution_clock::now();
+            double decode_time = std::chrono::duration_cast<ms>(t1 - t0).count();
+
+            t0 = std::chrono::high_resolution_clock::now();
+            // Main sync point:
+            // in the trully Async mode we start the NEXT infer request, while waiting for the CURRENT to complete
+            // in the regular mode we start the CURRENT request and immediately wait for it's completion
+            if (isAsyncMode) {
+                if (isModeChanged) {
+                    estimator.startCurr();
+                }
+                if (!isLastFrame) {
+                    estimator.startNext();
+                }
+            } else if (!isModeChanged) {
+                estimator.startCurr();
+            }
+
+            if (estimator.readyCurr()) {
+                t1 = std::chrono::high_resolution_clock::now();
+                ms detection = std::chrono::duration_cast<ms>(t1 - t0);
+                t0 = std::chrono::high_resolution_clock::now();
+                ms wall = std::chrono::duration_cast<ms>(t0 - wallclock);
+                wallclock = t0;
+
+                t0 = std::chrono::high_resolution_clock::now();
+
+                if (!FLAGS_no_show) {
+                    if (blackBackground) {
+                        curr_frame = cv::Mat::zeros(curr_frame.size(), curr_frame.type());
                     }
-                    rawPose << pose.score;
-                    std::cout << rawPose.str() << std::endl;
+                    std::ostringstream out;
+                    out << "OpenCV cap/render time: " << std::fixed << std::setprecision(2)
+                        << (decode_time + render_time) << " ms";
+
+                    cv::putText(curr_frame, out.str(), cv::Point2f(0, 25),
+                                cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 255, 0));
+                    out.str("");
+                    out << "Wallclock time " << (isAsyncMode ? "(TRUE ASYNC):      " : "(SYNC, press Tab): ");
+                    out << std::fixed << std::setprecision(2) << wall.count()
+                        << " ms (" << 1000.f / wall.count() << " fps)";
+                    cv::putText(curr_frame, out.str(), cv::Point2f(0, 50),
+                                cv::FONT_HERSHEY_TRIPLEX, 0.6, cv::Scalar(0, 0, 255));
+                    if (!isAsyncMode) {  // In the true async mode, there is no way to measure detection time directly
+                        out.str("");
+                        out << "Detection time  : " << std::fixed << std::setprecision(2) << detection.count()
+                        << " ms ("
+                        << 1000.f / detection.count() << " fps)";
+                        cv::putText(curr_frame, out.str(), cv::Point2f(0, 75), cv::FONT_HERSHEY_TRIPLEX, 0.6,
+                            cv::Scalar(255, 0, 0));
+                    }
+                }
+
+                poses = estimator.postprocessCurr();
+
+                if (FLAGS_r) {
+                    if (!poses.empty()) {
+                        std::time_t result = std::time(nullptr);
+                        char timeString[sizeof("2020-01-01 00:00:00: ")];
+                        std::strftime(timeString, sizeof(timeString), "%Y-%m-%d %H:%M:%S: ", std::localtime(&result));
+                        std::cout << timeString;
+                     }
+
+                    for (HumanPose const& pose : poses) {
+                        std::stringstream rawPose;
+                        rawPose << std::fixed << std::setprecision(0);
+                        for (auto const& keypoint : pose.keypoints) {
+                            rawPose << keypoint.x << "," << keypoint.y << " ";
+                        }
+                        rawPose << pose.score;
+                        std::cout << rawPose.str() << std::endl;
+                    }
+                }
+
+                if (!FLAGS_no_show) {
+                    presenter.drawGraphs(curr_frame);
+                    renderHumanPose(poses, curr_frame);
+                    cv::imshow("Human Pose Estimation on " + FLAGS_d, curr_frame);
+                    t1 = std::chrono::high_resolution_clock::now();
+                    render_time = std::chrono::duration_cast<ms>(t1 - t0).count();
                 }
             }
 
-            if (FLAGS_no_show) {
-                continue;
-            }
-
-            renderHumanPose(poses, image);
-
-            cv::Mat fpsPane(35, 155, CV_8UC3);
-            fpsPane.setTo(cv::Scalar(153, 119, 76));
-            cv::Mat srcRegion = image(cv::Rect(8, 8, fpsPane.cols, fpsPane.rows));
-            cv::addWeighted(srcRegion, 0.4, fpsPane, 0.6, 0, srcRegion);
-            std::stringstream fpsSs;
-            fpsSs << "FPS: " << int(1000.0f / inferenceTime * 100) / 100.0f;
-            cv::putText(image, fpsSs.str(), cv::Point(16, 32),
-                        cv::FONT_HERSHEY_COMPLEX, 0.8, cv::Scalar(0, 0, 255));
-            cv::imshow("ICV Human Pose Estimation", image);
-
-            int key = cv::waitKey(delay) & 255;
-            if (key == 'p') {
-                delay = (delay == 0) ? 33 : 0;
-            } else if (key == 27) {
+            if (isLastFrame) {
                 break;
             }
-        } while (cap.read(image));
+
+            if (isModeChanged) {
+                isModeChanged = false;
+            }
+
+            // Final point:
+            // in the truly Async mode we swap the NEXT and CURRENT requests for the next iteration
+            curr_frame = next_frame;
+            next_frame = cv::Mat();
+            if (isAsyncMode) {
+                estimator.swapRequest();
+            }
+
+            const int key = cv::waitKey(delay) & 255;
+            if (key == 'p') {
+                delay = (delay == 0) ? 33 : 0;
+            } else if (27 == key) { // Esc
+                break;
+            } else if (9 == key) { // Tab
+                isAsyncMode ^= true;
+                isModeChanged = true;
+            } else if (32 == key) { // Space
+                blackBackground ^= true;
+            }
+            presenter.handleKey(key);
+        }
+
+        auto total_t1 = std::chrono::high_resolution_clock::now();
+        ms total = std::chrono::duration_cast<ms>(total_t1 - total_t0);
+        std::cout << "Total Inference time: " << total.count() << std::endl;
+        std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;

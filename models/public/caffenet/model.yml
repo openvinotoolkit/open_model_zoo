@@ -13,8 +13,7 @@
 # limitations under the License.
 
 description: >-
-  CaffeNet model. Used for classification. For details see paper
-  <https://arxiv.org/abs/1408.5093>.
+  CaffeNet* model is used for classification. For details see paper <https://arxiv.org/abs/1408.5093>.
 task_type: classification
 files:
   - name: bvlc_reference_caffenet.caffemodel

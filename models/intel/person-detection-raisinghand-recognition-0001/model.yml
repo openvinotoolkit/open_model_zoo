@@ -13,29 +13,32 @@
 # limitations under the License.
 
 description: >-
-  This is an action detector for the Smart Classroom scenario. It is based on
-  the RMNet backbone that includes depth-wise convolutions to reduce the amount
-  of computations for the 3x3 convolution block. The first SSD head from 1/16
-  scale feature map has four clustered prior boxes and outputs detected persons
-  (two class detector). The second SSD-based head predicts actions of the detected
-  persons. Possible actions: raising hand and other.
+  Raising-hand action detection (SSD-based) model to use in Smart Classroom environment.
 task_type: detection
 files:
   - name: FP32/person-detection-raisinghand-recognition-0001.xml
-    size: 282101
-    sha256: eb4ece57971d7cb1d3eaa154bf3e28f1f9b38a83b3876eda6f2c49ea37bf24b6
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.xml
+    size: 651616
+    sha256: a94101be18b2501395c355c7751750538b62bcff8692bdc7e812382a176f7c78
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.xml
   - name: FP32/person-detection-raisinghand-recognition-0001.bin
-    size: 7799752
-    sha256: 327aeec1ddc53cc03406ca28c45d4b8b9965030b353142d9cc0c13f229991a61
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.bin
+    size: 7799848
+    sha256: 5183cc9d4d71e208a2cc70db9ea98bf14657d07b2bfafd050aeae9687e4359c4
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-raisinghand-recognition-0001/FP32/person-detection-raisinghand-recognition-0001.bin
   - name: FP16/person-detection-raisinghand-recognition-0001.xml
-    size: 281857
-    sha256: fe23745d025815ec52301b8ea7f4cc7dbc8aece9b621a8fd79b38bc6d34286e3
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.xml
+    size: 651372
+    sha256: bae03b3a203b70ccdb39a77342d446642039522e7dae6e6a8b1efeedcf7a8582
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.xml
   - name: FP16/person-detection-raisinghand-recognition-0001.bin
-    size: 3899882
-    sha256: 58ff7bba9d4f10665dd52aa011fcfe6184cccfbd48f3ecfef79b90033de1e6a5
-    source: https://download.01.org/opencv/2019/open_model_zoo/R3/20190905_163000_models_bin/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.bin
+    size: 3899978
+    sha256: 601543473374722d45eb56b3aa8f7f250f33e1bb548d63e392332441e97c87d8
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-raisinghand-recognition-0001/FP16/person-detection-raisinghand-recognition-0001.bin
+  - name: FP32-INT8/person-detection-raisinghand-recognition-0001.xml
+    size: 1697233
+    sha256: 31d964647910358bc31f4ce2a165a6dbce21812997ecb7bb166a8fb75a0f87b1
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-raisinghand-recognition-0001/FP32-INT8/person-detection-raisinghand-recognition-0001.xml
+  - name: FP32-INT8/person-detection-raisinghand-recognition-0001.bin
+    size: 7971992
+    sha256: 7d7e37fb6404d15a9adedbf89f62b7748043c0f7cb98fea907467c9e78609e9d
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-raisinghand-recognition-0001/FP32-INT8/person-detection-raisinghand-recognition-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

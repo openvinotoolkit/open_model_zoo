@@ -60,8 +60,7 @@ RegistrationStatus EmbeddingsGallery::RegisterIdentity(const std::string& identi
       detector.enqueue(image);
       detector.submitRequest();
       detector.wait();
-      detector.fetchResults();
-      detection::DetectedObjects faces = detector.results;
+      detection::DetectedObjects faces = detector.fetchResults();
       if (faces.size() == 0) {
         return RegistrationStatus::FAILURE_NOT_DETECTED;
       }
@@ -82,7 +81,7 @@ RegistrationStatus EmbeddingsGallery::RegisterIdentity(const std::string& identi
 
 EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
                                      double threshold, int min_size_fr,
-                                     bool crop_gallery, detection::FaceDetection& detector,
+                                     bool crop_gallery, const detection::DetectorConfig &detector_config,
                                      const VectorCNN& landmarks_det,
                                      const VectorCNN& image_reid,
                                      bool use_greedy_matcher)
@@ -92,13 +91,10 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
         return;
     }
 
-    if (!landmarks_det.Enabled() || !image_reid.Enabled()) {
-        return;
-    }
+    detection::FaceDetection detector(detector_config);
 
     cv::FileStorage fs(ids_list, cv::FileStorage::Mode::READ);
     cv::FileNode fn = fs.root();
-    int total_images = 0;
     int id = 0;
     for (cv::FileNodeIterator fit = fn.begin(); fit != fn.end(); ++fit) {
         cv::FileNode item = *fit;
@@ -126,7 +122,6 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
             if (status == RegistrationStatus::SUCCESS) {
                 embeddings.push_back(emb);
                 idx_to_id.push_back(id);
-                total_images++;
                 identities.emplace_back(embeddings, label, id);
                 ++id;
             }
@@ -136,7 +131,7 @@ EmbeddingsGallery::EmbeddingsGallery(const std::string& ids_list,
 
 std::vector<int> EmbeddingsGallery::GetIDsByEmbeddings(const std::vector<cv::Mat>& embeddings) const {
     if (embeddings.empty() || idx_to_id.empty())
-        return std::vector<int>();
+        return std::vector<int>(embeddings.size(), unknown_id);
 
     cv::Mat distances(static_cast<int>(embeddings.size()), static_cast<int>(idx_to_id.size()), CV_32F);
 

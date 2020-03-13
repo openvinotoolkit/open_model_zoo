@@ -37,7 +37,7 @@ The new Async API operates with a new notion of the Infer Request that encapsula
 
 Running the application with the `-h` option yields the following usage message:
 
-```sh
+```
 ./interactive_face_detection_demo -h
 InferenceEngine:
     API version ............ <version>
@@ -83,6 +83,7 @@ Options:
     -loop_video                Optional. Enable playing video on a loop
     -no_smooth                 Optional. Do not smooth person attributes
     -no_show_emotion_bar       Optional. Do not show emotion bar
+    -u                         Optional. List of monitors to show initially.
 ```
 
 Running the application with an empty list of options yields the usage message given above and an error message.

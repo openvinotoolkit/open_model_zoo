@@ -13,7 +13,7 @@ DeepLab is a state-of-art deep learning model for semantic image segmentation. F
 | Type              | Semantic segmentation|
 | GFLOPs            | 11.469               |
 | MParams           | 23.819               |
-| Source framework  | Tensorflow\*         |
+| Source framework  | TensorFlow\*         |
 
 ## Accuracy
 
@@ -69,4 +69,6 @@ Integer values in a range [0, 20], which represent an index of a predicted class
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/tensorflow/models/master/LICENSE]()
+The original model is distributed under the
+[Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
+A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).

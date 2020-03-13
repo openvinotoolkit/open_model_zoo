@@ -6,9 +6,9 @@ models:
         model: public/face-recognition-resnet50-arcface/model-r50-am-lfw/model-0000.params
         adapter: reid
         inputs:
-        - name: data
-          type: INPUT
-          shape: 3, 112, 112
+          - name: data
+            type: INPUT
+            shape: 3, 112, 112
 
     datasets:
       - name: lfw
@@ -33,7 +33,6 @@ models:
         weights: public/face-recognition-resnet50-arcface//FP32/face-recognition-resnet50-arcface.bin
         adapter: reid
 
-
       - framework: dlsdk
         tags:
           - FP16
@@ -49,4 +48,5 @@ models:
             size: 400
           - type: resize
             size: 112
+
 global_definitions: ../dataset_definitions.yml

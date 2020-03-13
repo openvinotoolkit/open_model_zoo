@@ -30,11 +30,12 @@ class IEModel(): # pylint: disable=too-few-public-methods
 
     def __init__(self, model_path, device, cpu_extension):
         ie = IECore()
-        if device == 'CPU':
+        if cpu_extension and device == 'CPU':
             ie.add_extension(cpu_extension, 'CPU')
 
         path = '.'.join(model_path.split('.')[:-1])
         self.net = IENetwork(model=path + '.xml', weights=path + '.bin')
+        self.output_name = list(self.net.outputs.keys())[0]
         self.exec_net = ie.load_network(network=self.net, device_name=device)
 
     def predict(self, image):
@@ -42,9 +43,7 @@ class IEModel(): # pylint: disable=too-few-public-methods
 
         assert len(image.shape) == 4
         image = np.transpose(image, (0, 3, 1, 2))
-        out = self.exec_net.infer(inputs={'Placeholder': image})[
-            'model/tf_op_layer_mul/mul/Normalize']
-        out = out / np.linalg.norm(out, axis=-1)
+        out = self.exec_net.infer(inputs={'Placeholder': image})[self.output_name]
         return out
 
 

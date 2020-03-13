@@ -1,0 +1,37 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This is a MobileNetV2 + SSD-based vehicle and (Chinese) license plate detector for
+  the "Barrier" use case.
+task_type: detection
+files:
+  - name: ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
+    size: 4387714
+    sha256: de6744bc72339f29109f595bc51b47383595ffb06ed15a7438f2ae9cb8a2a77c
+    source: https://download.01.org/opencv/openvino_training_extensions/models/ssd_detector/ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: ssd-mobilenet-v2-0.35.1-barrier-256x256-0123.tar.gz
+model_optimizer_args:
+  - --reverse_input_channels
+  - --input_shape=[1,256,256,3]
+  - --scale=127.5
+  - --mean_values=[127.5,127.5,127.5]
+  - --transformations_config=$dl_dir/model/model.tfmo.json
+  - --output=ssd_heads/concat_reshape_softmax/mbox_loc_final,ssd_heads/concat_reshape_softmax/mbox_conf_final,ssd_heads/concat_reshape_softmax/mbox_priorbox
+  - --input_model=$dl_dir/model/model.pb.frozen
+framework: tf
+license: https://raw.githubusercontent.com/opencv/training_toolbox_tensorflow/develop/LICENSE

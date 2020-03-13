@@ -17,9 +17,9 @@ limitations under the License.
 from ..utils import read_json, read_txt, check_file_existence
 from ..representation import ClassificationAnnotation
 from ..data_readers import ClipIdentifier
-from ..config import PathField, NumberField, StringField
+from ..config import PathField, NumberField, StringField, BoolField
 
-from .format_converter import BaseFormatConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 
 class ActionRecognitionConverter(BaseFormatConverter):
@@ -47,7 +47,8 @@ class ActionRecognitionConverter(BaseFormatConverter):
             ),
             'dataset_meta_file': PathField(
                 description='path to json file with dataset meta (e.g. label_map)', optional=True
-            )
+            ),
+            'numpy_input': BoolField(description='use numpy arrays instead of images', optional=True, default=False)
         })
 
         return params
@@ -60,14 +61,17 @@ class ActionRecognitionConverter(BaseFormatConverter):
         self.temporal_stride = self.get_value_from_config('temporal_stride')
         self.subset = self.get_value_from_config('subset')
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
+        self.numpy_input = self.get_value_from_config('numpy_input')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         full_annotation = read_json(self.annotation_file)
+        data_ext = 'jpg' if not self.numpy_input else 'npy'
         label_map = dict(enumerate(full_annotation['labels']))
         if self.dataset_meta:
             dataset_meta = read_json(self.dataset_meta)
             if 'label_map' in dataset_meta:
                 label_map = dataset_meta['label_map']
+                label_map = verify_label_map(label_map)
             elif 'labels' in dataset_meta:
                 label_map = dict(enumerate(dataset_meta['labels']))
         video_names, annotation = self.get_video_names_and_annotations(full_annotation['database'], self.subset)
@@ -82,7 +86,7 @@ class ActionRecognitionConverter(BaseFormatConverter):
             n_frames_file = video_path / 'n_frames'
             n_frames = (
                 int(read_txt(n_frames_file)[0].rstrip('\n\r')) if n_frames_file.exists()
-                else len(list(video_path.glob('*.jpg')))
+                else len(list(video_path.glob('*.{}'.format(data_ext))))
             )
             if n_frames <= 0:
                 continue
@@ -104,7 +108,7 @@ class ActionRecognitionConverter(BaseFormatConverter):
 
         clips = []
         for video in videos:
-            for clip in self.get_clips(video, self.clips_per_video, self.clip_duration, self.temporal_stride):
+            for clip in self.get_clips(video, self.clips_per_video, self.clip_duration, self.temporal_stride, data_ext):
                 clips.append(clip)
 
         annotations = []
@@ -124,7 +128,7 @@ class ActionRecognitionConverter(BaseFormatConverter):
         return ConverterReturn(annotations, {'label_map': label_map}, content_errors)
 
     @staticmethod
-    def get_clips(video, clips_per_video, clip_duration, temporal_stride=1):
+    def get_clips(video, clips_per_video, clip_duration, temporal_stride=1, file_ext='jpg'):
         num_frames = video['n_frames']
         clip_duration *= temporal_stride
 
@@ -147,7 +151,7 @@ class ActionRecognitionConverter(BaseFormatConverter):
 
             clip = dict(video)
             frames_idx = clip_idxs[::temporal_stride]
-            clip['frames'] = ['image_{:05d}.jpg'.format(frame_idx) for frame_idx in frames_idx]
+            clip['frames'] = ['image_{:05d}.{}'.format(frame_idx, file_ext) for frame_idx in frames_idx]
             yield clip
 
     @staticmethod

@@ -21,7 +21,7 @@ On the start-up, the application reads command line parameters and loads the spe
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 cd <samples_build_folder>/intel64/Release
 ./multi_channel_object_detection_demo_yolov3 -h
 
@@ -47,7 +47,7 @@ Options:
     -duplicate_num               Optional. Enable and specify number of channel additionally copied from real sources
     -real_input_fps              Optional. Disable input frames caching, for maximum throughput pipeline
     -i                           Optional. Specify full path to input video files
-
+    -u                           Optional. List of monitors to show initially.
 ```
 
 To run the demo, you can use public pre-train model and follow [this](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_prepare_model_convert_model_tf_specific_Convert_YOLO_From_Tensorflow.html) page for instruction of how to convert it to IR model. 
@@ -83,7 +83,7 @@ On the top of the screen, the demo reports throughput in frames per second. You 
 
 ## Input Video Sources
 
-General parameter for input video source is `-i`. Use it to specify video files and web cameras (**USB cameras**) as input video source. You can add the parameter to a sample command line as follows:
+General parameter for input video source is `-i`. Use it to specify video files or web cameras as input video sources. You can add the parameter to a sample command line as follows:
 ```
 -i <file1> <file2>
 ```
@@ -92,7 +92,7 @@ General parameter for input video source is `-i`. Use it to specify video files 
 
 To see all available web cameras, run the `ls /dev/video*` command. You will get output similar to the following:
 
-```sh
+```
 user@user-PC:~ $ ls /dev/video*
 /dev/video0  /dev/video1  /dev/video2
 ```
@@ -107,7 +107,10 @@ Alternatively, you can just set `-nc 3`, which simplifies application usage.
 
 If your cameras are connected to PC with indexes gap (for example, `0,1,3`), use the `-i` parameter.
 
-IP-cameras through RSTP URI interface are not supported.
+To connect to IP cameras, use RTSP URIs:
+```
+-i rtsp://camera_address_1/ rtsp://camera_address_2/
+```
 
 ## See Also
 * [Using Open Model Zoo demos](../../README.md)

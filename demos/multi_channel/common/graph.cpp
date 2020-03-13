@@ -38,19 +38,9 @@ void loadImgToIEGraph(const cv::Mat& img, size_t batch, void* ieBuffer) {
 }  // namespace
 
 void IEGraph::initNetwork(const std::string& deviceName) {
-    InferenceEngine::CNNNetReader netReader;
-
-    netReader.ReadNetwork(modelPath);
-    netReader.ReadWeights(weightsPath);
-
-    if (!netReader.isParseSuccess()) {
-        throw std::logic_error("Failed to parse model!");
-    }
+    auto cnnNetwork = ie.ReadNetwork(modelPath);
 
     if (deviceName.find("CPU") != std::string::npos) {
-#ifdef WITH_EXTENSIONS
-        ie.AddExtension(std::make_shared<InferenceEngine::Extensions::Cpu::CpuExtensions>(), "CPU");
-#endif
         ie.SetConfig({{InferenceEngine::PluginConfigParams::KEY_CPU_BIND_THREAD, "NO"}}, "CPU");
     }
     if (!cpuExtensionPath.empty()) {
@@ -67,26 +57,26 @@ void IEGraph::initNetwork(const std::string& deviceName) {
 
     // Set batch size
     if (batchSize > 1) {
-        auto inShapes = netReader.getNetwork().getInputShapes();
+        auto inShapes = cnnNetwork.getInputShapes();
         for (auto& pair : inShapes) {
             auto& dims = pair.second;
             if (!dims.empty()) {
                 dims[0] = batchSize;
             }
         }
-        netReader.getNetwork().reshape(inShapes);
+        cnnNetwork.reshape(inShapes);
     }
 
     InferenceEngine::ExecutableNetwork network;
-    network = ie.LoadNetwork(netReader.getNetwork(), deviceName);
+    network = ie.LoadNetwork(cnnNetwork, deviceName);
 
-    InferenceEngine::InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+    InferenceEngine::InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
     if (inputInfo.size() != 1) {
         throw std::logic_error("Face Detection network should have only one input");
     }
     inputDataBlobName = inputInfo.begin()->first;
 
-    InferenceEngine::OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
+    InferenceEngine::OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
     outputDataBlobNames.reserve(outputInfo.size());
     for (const auto& i : outputInfo) {
         outputDataBlobNames.push_back(i.first);
@@ -98,7 +88,7 @@ void IEGraph::initNetwork(const std::string& deviceName) {
     }
 
     if (postLoad != nullptr)
-        postLoad(outputDataBlobNames, netReader);
+        postLoad(outputDataBlobNames, cnnNetwork);
 
     availableRequests.front()->StartAsync();
     availableRequests.front()->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
@@ -198,7 +188,7 @@ IEGraph::IEGraph(const InitParams& p):
     perfTimerPreprocess(p.collectStats ? PerfTimer::DefaultIterationsCount : 0),
     perfTimerInfer(p.collectStats ? PerfTimer::DefaultIterationsCount : 0),
     confidenceThreshold(0.5f), batchSize(p.batchSize),
-    modelPath(p.modelPath), weightsPath(p.weightsPath),
+    modelPath(p.modelPath),
     cpuExtensionPath(p.cpuExtPath), cldnnConfigPath(p.cldnnConfigPath),
     printPerfReport(p.reportPerf), deviceName(p.deviceName),
     maxRequests(p.maxRequests) {

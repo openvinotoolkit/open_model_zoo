@@ -142,6 +142,7 @@ class FocusedTextLocalizationMetric(PerImageEvaluationMetric):
         self.one_to_one_match_score = self.get_value_from_config('one_to_one_match_score')
         self.one_to_many_match_score = self.get_value_from_config('one_to_many_match_score')
         self.many_to_one_match_score = self.get_value_from_config('many_to_one_match_score')
+        self.word_spotting = self.get_value_from_config('word_spotting')
         self.num_valid_gt = 0
         self.num_valid_detections = 0
         self.precision_sum = 0
@@ -420,6 +421,10 @@ class IncidentalSceneTextLocalizationMetric(PerImageEvaluationMetric):
                 min_value=0, max_value=1, optional=True, default=0.5,
                 description="Minimal value for intersection over union that allows to make decision "
                             "that prediction polygon matched with ignored annotation."
+            ),
+            'word_spotting': BoolField(
+                optional=True, default=False,
+                description="Allows to use transcriptions in order to compute word spotting metrics"
             )
         })
 
@@ -429,13 +434,18 @@ class IncidentalSceneTextLocalizationMetric(PerImageEvaluationMetric):
         self.iou_constrain = self.get_value_from_config('iou_constrain')
         self.area_precision_constrain = self.get_value_from_config('area_precision_constrain')
         self.ignore_difficult = self.get_value_from_config('ignore_difficult')
+        self.word_spotting = self.get_value_from_config('word_spotting')
         self.number_matched_detections = 0
         self.number_valid_annotations = 0
         self.number_valid_detections = 0
 
     def update(self, annotation, prediction):
         gt_polygons = list(map(polygon_from_points, annotation.points))
+        gt_texts = list(annotation.description)
+
         prediction_polygons = list(map(polygon_from_points, prediction.points))
+        prediction_texts = list(prediction.description)
+
         num_gt = len(gt_polygons)
         num_det = len(prediction_polygons)
         gt_difficult_mask = np.full(num_gt, False)
@@ -449,7 +459,8 @@ class IncidentalSceneTextLocalizationMetric(PerImageEvaluationMetric):
             for det_id, detection_polygon in enumerate(prediction_polygons):
                 for gt_difficult_id in gt_difficult_inds:
                     gt_difficult_polygon = gt_polygons[gt_difficult_id]
-                    intersected_area = get_intersection_area(gt_difficult_polygon, detection_polygon)
+                    intersected_area = get_intersection_area(gt_difficult_polygon,
+                                                             detection_polygon)
                     pd_dimensions = detection_polygon.area
                     precision = 0 if pd_dimensions == 0 else intersected_area / pd_dimensions
 
@@ -468,7 +479,12 @@ class IncidentalSceneTextLocalizationMetric(PerImageEvaluationMetric):
                     not_matched_before = gt_matched[gt_id] == 0 and det_matched[pred_id] == 0
                     not_difficult = not gt_difficult_mask[gt_id] and not prediction_difficult_mask[pred_id]
                     if not_matched_before and not_difficult:
-                        if iou_matrix[gt_id, pred_id] >= self.iou_constrain:
+                        iou_big_enough = iou_matrix[gt_id, pred_id] >= self.iou_constrain
+                        if not self.word_spotting:
+                            transcriptions_equal = True
+                        else:
+                            transcriptions_equal = gt_texts[gt_id].lower() == prediction_texts[pred_id].lower()
+                        if iou_big_enough and transcriptions_equal:
                             gt_matched[gt_id] = 1
                             det_matched[pred_id] = 1
                             num_det_matched += 1

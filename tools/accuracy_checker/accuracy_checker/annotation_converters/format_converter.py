@@ -18,7 +18,7 @@ from argparse import ArgumentParser
 from collections import namedtuple
 
 from ..topology_types import GenericTopology
-from ..config import ConfigValidator, StringField, PathField
+from ..config import ConfigValidator, StringField, PathField, ConfigError
 from ..dependency import ClassProvider
 from ..utils import format_key, get_parameter_value_from_config
 
@@ -124,3 +124,16 @@ class DirectoryBasedAnnotationConverter(BaseFormatConverter):
 
     def convert(self, check_content=False, **kwargs):
         pass
+
+
+def verify_label_map(label_map):
+    valid_label_map = {}
+    for class_id, class_name in label_map.items():
+        try:
+            int_class_id = int(class_id)
+            valid_label_map[int_class_id] = class_name
+        except ValueError:
+            raise ConfigError(
+                'class_id {} is invalid. `label_map` should have integer keys.'.format(class_id)
+            )
+    return valid_label_map

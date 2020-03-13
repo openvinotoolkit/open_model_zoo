@@ -13,16 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
-from pathlib import Path
-from tqdm import tqdm
-
 from ..topology_types import ObjectDetection
 from ..config import PathField, BoolField
 from ..representation import DetectionAnnotation, SegmentationAnnotation
 from ..representation.segmentation_representation import GTMaskLoader
 from ..utils import get_path, read_txt, read_xml, check_file_existence, read_json
-from .format_converter import BaseFormatConverter, ConverterReturn
+from .format_converter import BaseFormatConverter, ConverterReturn, verify_label_map
 
 _VOC_CLASSES_DETECTION = (
     'aeroplane', 'bicycle', 'bird', 'boat',
@@ -52,6 +48,7 @@ def prepare_detection_labels(dataset_meta, has_background=True):
     if dataset_meta:
         meta = read_json(dataset_meta)
         if 'label_map' in meta:
+            meta['label_map'] = verify_label_map(meta['label_map'])
             return reverse_label_map(meta['label_map'])
         if 'labels' in meta:
             labels = meta['labels']
@@ -114,11 +111,7 @@ class PascalVOCSegmentationConverter(BaseFormatConverter):
         for image_id, image in enumerate(images_set):
             image_file = '{}.jpg'.format(image)
             mask_file = '{}.png'.format(image)
-            annotation = SegmentationAnnotation(
-                str(Path(self.image_dir.name) / image_file),
-                str(Path(self.mask_dir.name) / mask_file),
-                mask_loader=GTMaskLoader.SCIPY
-            )
+            annotation = SegmentationAnnotation(image_file, mask_file, mask_loader=GTMaskLoader.SCIPY)
             annotations.append(annotation)
             if check_content:
                 if not check_file_existence(self.image_dir / image_file):
@@ -179,7 +172,7 @@ class PascalVOCDetectionConverter(BaseFormatConverter):
         detections = []
         image_set = read_txt(self.image_set_file, sep=None)
         num_iterations = len(image_set)
-        for (image_id, image) in tqdm(enumerate(image_set)):
+        for (image_id, image) in enumerate(image_set):
             root = read_xml(self.annotations_dir / '{}.xml'.format(image))
 
             identifier = root.find('.//filename').text

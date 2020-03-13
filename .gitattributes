@@ -7,3 +7,19 @@
 /demos/build_demos_msvc.bat omz.package=w
 /demos/tests/** -omz.package
 /tools/downloader/tests/** -omz.package
+
+/ci/requirements-ac.txt omz.ci.job-for-change.ac
+/ci/requirements-ac-test.txt omz.ci.job-for-change.ac
+/ci/requirements-conversion.txt omz.ci.job-for-change.demos omz.ci.job-for-change.models
+/ci/requirements-demos.txt omz.ci.job-for-change.demos
+/ci/requirements-downloader.txt omz.ci.job-for-change.demos omz.ci.job-for-change.models
+
+/demos/** omz.ci.job-for-change.demos
+/demos/**/*.md -omz.ci.job-for-change.demos
+
+/models/** omz.ci.job-for-change.documentation
+/models/**/*.yml -omz.ci.job-for-change.documentation
+
+/tools/accuracy_checker/** omz.ci.job-for-change.ac
+/tools/downloader/** omz.ci.job-for-change.downloader
+/tools/**/*.md -omz.ci.job-for-change.ac -omz.ci.job-for-change.downloader

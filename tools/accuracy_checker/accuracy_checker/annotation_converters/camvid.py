@@ -1,4 +1,4 @@
-from .format_converter import FileBasedAnnotationConverter, ConverterReturn
+from .format_converter import FileBasedAnnotationConverter, ConverterReturn, verify_label_map
 from ..utils import read_txt, check_file_existence
 from ..representation import SegmentationAnnotation
 from ..config import PathField
@@ -63,6 +63,8 @@ class CamVidConverter(FileBasedAnnotationConverter):
         meta = self.meta
         if self.dataset_meta:
             meta = read_json(self.dataset_meta)
+            if 'label_map' in meta:
+                meta['label_map'] = verify_label_map(meta['label_map'])
             if 'labels' in meta and 'label_map' not in meta:
                 meta['label_map'] = dict(enumerate(meta['labels']))
 

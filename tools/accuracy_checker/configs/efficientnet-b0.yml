@@ -8,21 +8,20 @@ models:
         output_names:
           - logits
         inputs:
-           - name: IteratorGetNext
-             type: INPUT
+          - name: IteratorGetNext
+            type: INPUT
 
     datasets:
       - name: imagenet_1000_classes
         preprocessing:
-        - type: bgr_to_rgb
-        - type: crop
-          central_fraction: 0.875
-          use_pillow: True
-        - type: resize
-          size: 224
-          use_pillow: True
-          interpolation: BICUBIC
-
+          - type: bgr_to_rgb
+          - type: crop
+            central_fraction: 0.875
+            use_pillow: True
+          - type: resize
+            size: 224
+            use_pillow: True
+            interpolation: BICUBIC
 
   - name: efficientnet-b0
 
@@ -33,7 +32,6 @@ models:
         model:   public/efficientnet-b0/FP32/efficientnet-b0.xml
         weights: public/efficientnet-b0/FP32/efficientnet-b0.bin
         adapter: classification
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -41,16 +39,16 @@ models:
         model:   public/efficientnet-b0/FP16/efficientnet-b0.xml
         weights: public/efficientnet-b0/FP16/efficientnet-b0.bin
         adapter: classification
-        cpu_extensions: AUTO
 
     datasets:
       - name: imagenet_1000_classes
         preprocessing:
-        - type: crop
-          central_fraction: 0.875
-          use_pillow: True
-        - type: resize
-          size: 224
-          use_pillow: True
-          interpolation: BICUBIC
+          - type: crop
+            central_fraction: 0.875
+            use_pillow: True
+          - type: resize
+            size: 224
+            use_pillow: True
+            interpolation: BICUBIC
+
 global_definitions: ../dataset_definitions.yml

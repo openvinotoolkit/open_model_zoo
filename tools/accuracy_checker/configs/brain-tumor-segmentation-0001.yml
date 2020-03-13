@@ -7,17 +7,18 @@ models:
           - FP32
         model:   public/brain-tumor-segmentation-0001/FP32/brain-tumor-segmentation-0001.xml
         weights: public/brain-tumor-segmentation-0001/FP32/brain-tumor-segmentation-0001.bin
-        adapter: 
-            type: brain_tumor_segmentation
+        adapter:
+          type: brain_tumor_segmentation
+          make_argmax: True
 
       - framework: dlsdk
         tags:
           - FP16
-        device: GPU
         model:   public/brain-tumor-segmentation-0001/FP16/brain-tumor-segmentation-0001.xml
         weights: public/brain-tumor-segmentation-0001/FP16/brain-tumor-segmentation-0001.bin
         adapter:
-            type: brain_tumor_segmentation
+          type: brain_tumor_segmentation
+          make_argmax: True
 
     datasets:
       - name: BraTS
@@ -30,4 +31,5 @@ models:
           - type: dice_index
             median: True
             presenter: print_vector
+
 global_definitions: ../dataset_definitions.yml

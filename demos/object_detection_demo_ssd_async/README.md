@@ -72,9 +72,8 @@ In a mean time your app can continue :
 
 ```cpp
 // load network
-CNNNetReader network_reader;
-network_reader.ReadNetwork("Model.xml");
-network_reader.ReadWeights("Model.bin");
+InferenceEngine::Core ie;
+auto network = ie.ReadNetwork("Model.xml");
 // populate inputs etc
 auto input = async_infer_request.GetBlob(input_name);
 ...
@@ -100,7 +99,7 @@ For more details on the requests-based Inference Engine API, including the Async
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./object_detection_demo_ssd_async -h
 InferenceEngine:
     API version ............ <version>
@@ -121,6 +120,7 @@ Options:
     -t                        Optional. Probability threshold for detections.
     -auto_resize              Optional. Enables resizable input with support of ROI crop & auto resize.
     -no_show                  Optional. Do not show processed video.
+    -u                        Optional. List of monitors to show initially.
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

@@ -18,18 +18,13 @@
 * @brief Base class of config for network
 */
 struct CnnConfig {
-    explicit CnnConfig(const std::string& path_to_model,
-                       const std::string& path_to_weights)
-        : path_to_model(path_to_model), path_to_weights(path_to_weights) {}
+    explicit CnnConfig(const std::string& path_to_model)
+        : path_to_model(path_to_model) {}
 
     /** @brief Path to model description */
     std::string path_to_model;
-    /** @brief Path to model weights */
-    std::string path_to_weights;
     /** @brief Maximal size of batch */
     int max_batch_size{1};
-    /** @brief Enabled/disabled status */
-    bool enabled{true};
 
     /** @brief Inference Engine */
     InferenceEngine::Core ie;
@@ -64,11 +59,6 @@ public:
     */
     void PrintPerformanceCounts(std::string fullDeviceName) const;
 
-    /**
-    * @brief Indicates whether model enabled or not
-    */
-    bool Enabled() const;
-
 protected:
     /**
    * @brief Run network
@@ -77,7 +67,7 @@ protected:
    * @param results_fetcher Callback to fetch inference results
    */
     void Infer(const cv::Mat& frame,
-               std::function<void(const InferenceEngine::BlobMap&, size_t)> results_fetcher) const;
+               const std::function<void(const InferenceEngine::BlobMap&, size_t)>& results_fetcher) const;
 
     /**
    * @brief Run network in batch mode
@@ -86,7 +76,7 @@ protected:
    * @param results_fetcher Callback to fetch inference results
    */
     void InferBatch(const std::vector<cv::Mat>& frames,
-                    std::function<void(const InferenceEngine::BlobMap&, size_t)> results_fetcher) const;
+                    const std::function<void(const InferenceEngine::BlobMap&, size_t)>& results_fetcher) const;
 
     /** @brief Config */
     Config config_;
@@ -114,21 +104,43 @@ public:
                  std::vector<cv::Mat>* vectors, cv::Size outp_shape = cv::Size()) const;
 };
 
-class BaseCnnDetection {
+class AsyncAlgorithm {
+public:
+    virtual ~AsyncAlgorithm() {}
+    virtual void enqueue(const cv::Mat &frame) = 0;
+    virtual void submitRequest() = 0;
+    virtual void wait() = 0;
+    virtual void printPerformanceCounts(const std::string &fullDeviceName) = 0;
+};
+
+template <typename T>
+class AsyncDetection : public AsyncAlgorithm {
+public:
+    virtual std::vector<T> fetchResults() = 0;
+};
+
+template <typename T>
+class NullDetection : public AsyncDetection<T> {
+public:
+    void enqueue(const cv::Mat &) override {}
+    void submitRequest() override {}
+    void wait() override {}
+    void printPerformanceCounts(const std::string &) override {}
+    std::vector<T> fetchResults() override { return {}; }
+};
+
+class BaseCnnDetection : public AsyncAlgorithm {
 protected:
     InferenceEngine::InferRequest::Ptr request;
     const bool isAsync;
-    const bool enabledFlag;
     std::string topoName;
 
 public:
-    explicit BaseCnnDetection(bool enabled = true, bool isAsync = false) :
-                              isAsync(isAsync), enabledFlag(enabled) {}
+    explicit BaseCnnDetection(bool isAsync = false) :
+                              isAsync(isAsync) {}
 
-    virtual ~BaseCnnDetection() {}
-
-    virtual void submitRequest() {
-        if (!enabled() || request == nullptr) return;
+    void submitRequest() override {
+        if (request == nullptr) return;
         if (isAsync) {
             request->StartAsync();
         } else {
@@ -136,19 +148,12 @@ public:
         }
     }
 
-    virtual void wait() {
-        if (!enabled()|| !request || !isAsync) return;
+    void wait() override {
+        if (!request || !isAsync) return;
         request->Wait(InferenceEngine::IInferRequest::WaitMode::RESULT_READY);
     }
 
-    bool enabled() const  {
-        return enabledFlag;
-    }
-
-    void PrintPerformanceCounts(std::string fullDeviceName) {
-        if (!enabled()) {
-            return;
-        }
+    void printPerformanceCounts(const std::string &fullDeviceName) override {
         std::cout << "Performance counts for " << topoName << std::endl << std::endl;
         ::printPerformanceCounts(*request, std::cout, fullDeviceName, false);
     }

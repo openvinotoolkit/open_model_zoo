@@ -34,19 +34,28 @@ KNOWN_FRAMEWORKS = {
     'caffe2': 'caffe2_to_onnx.py',
     'dldt': None,
     'mxnet': None,
+    'onnx': None,
     'pytorch': 'pytorch_to_onnx.py',
     'tf': None,
 }
-KNOWN_PRECISIONS = {'FP16', 'FP32', 'INT1', 'INT8'}
+KNOWN_PRECISIONS = {
+    'FP16', 'FP16-INT1', 'FP16-INT8',
+    'FP32', 'FP32-INT1', 'FP32-INT8',
+    'INT1', 'INT8',
+}
 KNOWN_TASK_TYPES = {
     'action_recognition',
     'classification',
+    'colorization',
     'detection',
     'face_recognition',
+    'feature_extraction',
     'head_pose_estimation',
     'human_pose_estimation',
+    'image_inpainting',
     'image_processing',
     'instance_segmentation',
+    'monocular_depth_estimation',
     'object_attributes',
     'optical_character_recognition',
     'semantic_segmentation',
@@ -393,45 +402,26 @@ def load_models(args):
     models = []
     model_names = set()
 
-    def add_model(model):
-        models.append(model)
+    model_root = (Path(__file__).resolve().parent / '../../models').resolve()
 
-        if models[-1].name in model_names:
-            raise DeserializationError(
-                'Duplicate model name "{}"'.format(models[-1].name))
-        model_names.add(models[-1].name)
+    for config_path in sorted(model_root.glob('**/model.yml')):
+        subdirectory = config_path.parent.relative_to(model_root)
 
-    if args.config is None: # per-model configs
-        model_root = (Path(__file__).resolve().parent / '../../models').resolve()
+        with config_path.open('rb') as config_file, \
+                deserialization_context('In config "{}"'.format(config_path)):
 
-        for config_path in sorted(model_root.glob('**/model.yml')):
-            subdirectory = config_path.parent.relative_to(model_root)
+            model = yaml.safe_load(config_file)
 
-            with config_path.open('rb') as config_file, \
-                    deserialization_context('In config "{}"'.format(config_path)):
+            for bad_key in ['name', 'subdirectory']:
+                if bad_key in model:
+                    raise DeserializationError('Unsupported key "{}"'.format(bad_key))
 
-                model = yaml.safe_load(config_file)
+            models.append(Model.deserialize(model, subdirectory.name, subdirectory))
 
-                for bad_key in ['name', 'subdirectory']:
-                    if bad_key in model:
-                        raise DeserializationError('Unsupported key "{}"'.format(bad_key))
-
-                add_model(Model.deserialize(model, subdirectory.name, subdirectory))
-
-    else: # monolithic config
-        print('########## Warning: the --config option is deprecated and will be removed in a future release',
-            file=sys.stderr)
-        with args.config.open('rb') as config_file, \
-                deserialization_context('In config "{}"'.format(args.config)):
-            for i, model in enumerate(yaml.safe_load(config_file)['topologies']):
-                with deserialization_context('In model #{}'.format(i)):
-                    name = validate_string('"name"', model['name'])
-                    if not name: raise DeserializationError('"name": must not be empty')
-
-                with deserialization_context('In model "{}"'.format(name)):
-                    subdirectory = validate_relative_path('"output"', model['output'])
-
-                add_model(Model.deserialize(model, name, subdirectory))
+            if models[-1].name in model_names:
+                raise DeserializationError(
+                    'Duplicate model name "{}"'.format(models[-1].name))
+            model_names.add(models[-1].name)
 
     return models
 

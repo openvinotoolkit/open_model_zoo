@@ -29,7 +29,7 @@ To recognize faces on a frame, the demo needs a gallery of reference images. Eac
 ## Running
 
 Running the application with the `-h` option yields the following usage message:
-```sh
+```
 ./smart_classroom_demo -h
 InferenceEngine:
     API version ............ <version>
@@ -78,6 +78,7 @@ Options:
     -min_size_fr                   Optional. Minimum input size for faces during database registration.
     -al                            Optional. Output file name to save per-person action detections in.
     -ss_t                          Optional. Number of frames to smooth actions.
+    -u                             Optional. List of monitors to show initially.
 ```
 
 Running the application with the empty list of options yields an error message.

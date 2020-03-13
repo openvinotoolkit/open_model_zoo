@@ -1,6 +1,5 @@
 """
 Copyright (c) 2019 Intel Corporation
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,7 +15,7 @@ limitations under the License.
 
 import numpy as np
 
-from ..config import BoolField
+from ..config import BoolField, NumberField, ConfigError
 from ..representation import (
     SegmentationAnnotation,
     SegmentationPrediction,
@@ -39,6 +38,10 @@ class SegmentationMetric(PerImageEvaluationMetric):
         parameters.update({
             'use_argmax': BoolField(
                 optional=True, default=True, description="Allows to use argmax for prediction mask."
+            ),
+            'ignore_label': NumberField(
+                optional=True, value_type=int, min_value=0,
+                description='Ignore prediction and annotation of specified class during metric calculation'
             )
         })
 
@@ -49,6 +52,10 @@ class SegmentationMetric(PerImageEvaluationMetric):
 
     def configure(self):
         self.use_argmax = self.get_value_from_config('use_argmax')
+        if not self.dataset.labels:
+            raise ConfigError('semantic segmentation metrics require label_map providing in dataset_meta'
+                              'Please provide dataset meta file or regenerated annotation')
+        self.ignore_label = self.get_value_from_config('ignore_label')
 
     def update(self, annotation, prediction):
         n_classes = len(self.dataset.labels)
@@ -60,6 +67,9 @@ class SegmentationMetric(PerImageEvaluationMetric):
             mask = (label_true >= 0) & (label_true < n_classes) & (label_pred < n_classes) & (label_pred >= 0)
             hist = np.bincount(n_classes * label_true[mask].astype(int) + label_pred[mask], minlength=n_classes ** 2)
             hist = hist.reshape(n_classes, n_classes)
+            if self.ignore_label is not None:
+                hist[self.ignore_label, :] = 0
+                hist[:, self.ignore_label] = 0
 
             return hist
 
@@ -70,6 +80,10 @@ class SegmentationMetric(PerImageEvaluationMetric):
 
         self._update_state(accumulate, self.CONFUSION_MATRIX_KEY, lambda: np.zeros((n_classes, n_classes)))
         return cm
+
+    def reset(self):
+        self.state = {}
+        self._update_iter = 0
 
 
 class SegmentationAccuracy(SegmentationMetric):
@@ -91,7 +105,9 @@ class SegmentationIOU(SegmentationMetric):
         cm = super().update(annotation, prediction)
         diagonal = np.diag(cm).astype(float)
         union = cm.sum(axis=1) + cm.sum(axis=0) - diagonal
-        iou = np.divide(diagonal, union, out=np.zeros_like(diagonal), where=union != 0)
+        iou = np.divide(diagonal, union, out=np.full_like(diagonal, np.nan), where=union != 0)
+        if self.ignore_label is not None:
+            iou = np.delete(iou, self.ignore_label)
 
         return iou
 
@@ -99,9 +115,13 @@ class SegmentationIOU(SegmentationMetric):
         confusion_matrix = self.state[self.CONFUSION_MATRIX_KEY]
         diagonal = np.diag(confusion_matrix)
         union = confusion_matrix.sum(axis=1) + confusion_matrix.sum(axis=0) - diagonal
-        iou = np.divide(diagonal, union, out=np.zeros_like(diagonal), where=union != 0)
+        iou = np.divide(diagonal, union, out=np.full_like(diagonal, np.nan), where=union != 0)
+        cls_names = list(self.dataset.labels.values())
+        if self.ignore_label is not None:
+            iou = np.delete(iou, self.ignore_label)
+            cls_names = [cls_name for cls_id, cls_name in self.dataset.labels.items() if cls_id != self.ignore_label]
 
-        values, names = finalize_metric_result(iou, list(self.dataset.labels.values()))
+        values, names = finalize_metric_result(iou, cls_names)
         self.meta['names'] = names
 
         return values
@@ -114,7 +134,7 @@ class SegmentationMeanAccuracy(SegmentationMetric):
         cm = super().update(annotation, prediction)
         diagonal = np.diag(cm).astype(float)
         per_class_count = cm.sum(axis=1)
-        acc_cls = np.divide(diagonal, per_class_count, out=np.zeros_like(diagonal), where=per_class_count != 0)
+        acc_cls = np.divide(diagonal, per_class_count, out=np.full_like(diagonal, np.nan), where=per_class_count != 0)
 
         return acc_cls
 
@@ -122,7 +142,7 @@ class SegmentationMeanAccuracy(SegmentationMetric):
         confusion_matrix = self.state[self.CONFUSION_MATRIX_KEY]
         diagonal = np.diag(confusion_matrix)
         per_class_count = confusion_matrix.sum(axis=1)
-        acc_cls = np.divide(diagonal, per_class_count, out=np.zeros_like(diagonal), where=per_class_count != 0)
+        acc_cls = np.divide(diagonal, per_class_count, out=np.full_like(diagonal, np.nan), where=per_class_count != 0)
 
         values, names = finalize_metric_result(acc_cls, list(self.dataset.labels.values()))
         self.meta['names'] = names
@@ -189,7 +209,6 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         parameters.update({
             'mean': BoolField(optional=True, default=True, description='Allows calculation mean value.'),
             'median': BoolField(optional=True, default=False, description='Allows calculation median value.'),
-            'use_argmax': BoolField(optional=True, default=True, description="Allows to use argmax for prediction mask")
         })
 
         return parameters
@@ -197,9 +216,9 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
     def configure(self):
         self.mean = self.get_value_from_config('mean')
         self.median = self.get_value_from_config('median')
-        self.use_argmax = self.get_value_from_config('use_argmax')
+        self.output_order = self.get_value_from_config('output_order')
 
-        labels = self.dataset.labels.values() if self.dataset.metadata else ['overall']
+        labels = list(self.dataset.labels.values()) if self.dataset.metadata else ['overall']
         self.classes = len(labels)
 
         names_mean = ['mean@{}'.format(name) for name in labels] if self.mean else []
@@ -214,11 +233,16 @@ class SegmentationDIAcc(PerImageEvaluationMetric):
         result = np.zeros(shape=self.classes)
 
         annotation_data = annotation.mask
-        prediction_data = np.argmax(prediction.mask, axis=0) if self.use_argmax else prediction.mask.astype('int64')
+        prediction_data = prediction.mask
 
-        for c in range(1, self.classes):
+        if prediction_data.shape[0] != 1 and len(prediction_data.shape) != 3:
+            raise RuntimeError("For '{}' metric prediction mask should has only 1 channel, but more found. "
+                               "Specify 'make_argmax' option in adapter or postprocessor."
+                               .format(self.__provider__))
+
+        for c, p in enumerate(prediction.label_order, 1):
             annotation_data_ = (annotation_data == c)
-            prediction_data_ = (prediction_data == c)
+            prediction_data_ = (prediction_data == p)
 
             intersection_count = np.logical_and(annotation_data_, prediction_data_).sum()
             union_count = annotation_data_.sum() + prediction_data_.sum()

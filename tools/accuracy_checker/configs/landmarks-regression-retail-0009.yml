@@ -16,6 +16,13 @@ models:
         weights: intel/landmarks-regression-retail-0009/FP16/landmarks-regression-retail-0009.bin
         adapter: landmarks_regression
 
+      - framework: dlsdk
+        tags:
+          - FP32-INT8
+        model:   intel/landmarks-regression-retail-0009/FP32-INT8/landmarks-regression-retail-0009.xml
+        weights: intel/landmarks-regression-retail-0009/FP32-INT8/landmarks-regression-retail-0009.bin
+        adapter: landmarks_regression
+
     datasets:
       - name: vgg2face
 
@@ -32,4 +39,5 @@ models:
           - type: per_point_normed_error
             presenter: print_vector
           - type: normed_error
+
 global_definitions: ../dataset_definitions.yml

@@ -16,6 +16,7 @@ limitations under the License.
 
 import warnings
 import math
+from functools import singledispatch
 import numpy as np
 
 from ..representation import (
@@ -26,7 +27,11 @@ from ..representation import (
     SuperResolutionAnnotation,
     SuperResolutionPrediction,
     GazeVectorAnnotation,
-    GazeVectorPrediction
+    GazeVectorPrediction,
+    DepthEstimationAnnotation,
+    DepthEstimationPrediction,
+    ImageInpaintingAnnotation,
+    ImageInpaintingPrediction
 )
 
 from .metric import PerImageEvaluationMetric
@@ -35,12 +40,14 @@ from ..utils import string_to_tuple, finalize_metric_result
 
 
 class BaseRegressionMetric(PerImageEvaluationMetric):
-    annotation_types = (RegressionAnnotation, )
-    prediction_types = (RegressionPrediction, )
+    annotation_types = (RegressionAnnotation, DepthEstimationAnnotation)
+    prediction_types = (RegressionPrediction, DepthEstimationPrediction)
 
     def __init__(self, value_differ, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.value_differ = value_differ
+        self.calculate_diff = singledispatch(self._calculate_diff_regression_rep)
+        self.calculate_diff.register(DepthEstimationAnnotation, self._calculate_diff_depth_estimation_rep)
 
     def configure(self):
         self.meta.update({
@@ -49,10 +56,22 @@ class BaseRegressionMetric(PerImageEvaluationMetric):
         self.magnitude = []
 
     def update(self, annotation, prediction):
-        diff = self.value_differ(annotation.value, prediction.value)
+        diff = self.calculate_diff(annotation, prediction)
         self.magnitude.append(diff)
 
         return diff
+
+    def _calculate_diff_regression_rep(self, annotation, prediction):
+        return self.value_differ(annotation.value, prediction.value)
+
+    def _calculate_diff_depth_estimation_rep(self, annotation, prediction):
+        diff = annotation.mask * self.value_differ(annotation.depth_map, prediction.depth_map)
+        ret = 0
+
+        if np.sum(annotation.mask) > 0:
+            ret = np.sum(diff) / np.sum(annotation.mask)
+
+        return ret
 
     def evaluate(self, annotations, predictions):
         return np.mean(self.magnitude), np.std(self.magnitude)
@@ -174,11 +193,12 @@ class RootMeanSquaredError(BaseRegressionMetric):
         super().__init__(mse_differ, *args, **kwargs)
 
     def update(self, annotation, prediction):
-        mse = super().update(annotation, prediction)
-        return np.sqrt(mse)
+        rmse = np.sqrt(self.calculate_diff(annotation, prediction))
+        self.magnitude.append(rmse)
+        return rmse
 
     def evaluate(self, annotations, predictions):
-        return np.sqrt(np.mean(self.magnitude)), np.sqrt(np.std(self.magnitude))
+        return np.mean(self.magnitude), np.std(self.magnitude)
 
 
 class MeanAbsoluteErrorOnInterval(BaseRegressionOnIntervals):
@@ -350,8 +370,8 @@ def point_regression_differ(annotation_val_x, annotation_val_y, prediction_val_x
 class PeakSignalToNoiseRatio(BaseRegressionMetric):
     __provider__ = 'psnr'
 
-    annotation_types = (SuperResolutionAnnotation, )
-    prediction_types = (SuperResolutionPrediction, )
+    annotation_types = (SuperResolutionAnnotation, ImageInpaintingAnnotation, )
+    prediction_types = (SuperResolutionPrediction, ImageInpaintingPrediction, )
 
     @classmethod
     def parameters(cls):
@@ -368,6 +388,7 @@ class PeakSignalToNoiseRatio(BaseRegressionMetric):
 
     def __init__(self, *args, **kwargs):
         super().__init__(self._psnr_differ, *args, **kwargs)
+        self.meta['target'] = 'higher-better'
 
     def configure(self):
         super().configure()
@@ -423,3 +444,27 @@ class AngleError(BaseRegressionMetric):
 
     def __init__(self, *args, **kwargs):
         super().__init__(angle_differ, *args, **kwargs)
+
+
+def _ssim(annotation_image, prediction_image):
+    prediction = np.asarray(prediction_image).astype(np.uint8)
+    ground_truth = np.asarray(annotation_image).astype(np.uint8)
+    mu_x = np.mean(prediction)
+    mu_y = np.mean(ground_truth)
+    var_x = np.var(prediction)
+    var_y = np.var(ground_truth)
+    sig_xy = np.mean((prediction - mu_x)*(ground_truth - mu_y))/(np.sqrt(var_x*var_y))
+    c1 = (0.01 * 2**32-1)**2
+    c2 = (0.03 * 2**32-1)**2
+    mssim = (2*mu_x*mu_y + c1)*(2*sig_xy + c2)/((mu_x**2 + mu_y**2 + c1)*(var_x + var_y + c2))
+    return mssim
+
+class StructuralSimilarity(BaseRegressionMetric):
+    __provider__ = 'ssim'
+
+    annotation_types = (ImageInpaintingAnnotation, )
+    prediction_types = (ImageInpaintingPrediction, )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(_ssim, *args, **kwargs)
+        self.meta['target'] = 'higher-better'

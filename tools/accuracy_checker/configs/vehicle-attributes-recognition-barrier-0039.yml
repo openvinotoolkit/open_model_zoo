@@ -24,9 +24,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - INT8
-        model:   intel/vehicle-attributes-recognition-barrier-0039/INT8/vehicle-attributes-recognition-barrier-0039.xml
-        weights: intel/vehicle-attributes-recognition-barrier-0039/INT8/vehicle-attributes-recognition-barrier-0039.bin
+          - FP32-INT8
+        model:   intel/vehicle-attributes-recognition-barrier-0039/FP32-INT8/vehicle-attributes-recognition-barrier-0039.xml
+        weights: intel/vehicle-attributes-recognition-barrier-0039/FP32-INT8/vehicle-attributes-recognition-barrier-0039.bin
         adapter:
           type: vehicle_attributes
           color_out: color
@@ -57,4 +57,5 @@ models:
             annotation_source: type
             prediction_source: type
             label_map: type_label_map
+
 global_definitions: ../dataset_definitions.yml

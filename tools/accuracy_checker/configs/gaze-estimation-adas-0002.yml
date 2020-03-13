@@ -2,7 +2,6 @@ models:
   - name: gaze-estimation-adas-0002
 
     launchers:
-
       - framework: dlsdk
         tags:
           - FP32
@@ -39,9 +38,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - INT8
-        model:   intel/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.xml
-        weights: intel/gaze-estimation-adas-0002/INT8/gaze-estimation-adas-0002.bin
+          - FP32-INT8
+        model:   intel/gaze-estimation-adas-0002/FP32-INT8/gaze-estimation-adas-0002.xml
+        weights: intel/gaze-estimation-adas-0002/FP32-INT8/gaze-estimation-adas-0002.bin
         inputs:
           - name: left_eye_image
             type: INPUT
@@ -60,4 +59,5 @@ models:
         metrics:
           - type: angle_error
             presenter: print_vector
+
 global_definitions: ../dataset_definitions.yml

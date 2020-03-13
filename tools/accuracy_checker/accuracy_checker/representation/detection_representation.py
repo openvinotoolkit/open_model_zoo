@@ -86,6 +86,11 @@ class DetectionPrediction(Detection):
     def __eq__(self, other):
         return np.array_equal(self.scores, other.scores) if super().__eq__(other) else False
 
+    def to_annotation(self, **kwargs):
+        return DetectionAnnotation(
+            self.identifier, self.labels, self.x_mins, self.y_mins, self.x_maxs, self.y_maxs, self.metadata
+        )
+
 
 class ActionDetectionAnnotation(DetectionAnnotation):
     pass
@@ -112,3 +117,8 @@ class ActionDetectionPrediction(DetectionPrediction):
 
     def __eq__(self, other):
         return np.array_equal(self.bbox_scores, other.bbox_scores) if super().__eq__(other) else False
+
+    def to_annotation(self, **kwargs):
+        return ActionDetectionAnnotation(
+            self.identifier, self.labels, self.x_mins, self.y_mins, self.x_maxs, self.y_maxs, self.metadata
+        )

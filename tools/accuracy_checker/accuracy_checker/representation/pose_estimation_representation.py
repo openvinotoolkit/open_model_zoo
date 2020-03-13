@@ -23,8 +23,8 @@ class PoseEstimationRepresentation(BaseRepresentation):
         super().__init__(identifier)
         self.x_values = x_values if np.size(x_values) > 0 else []
         self.y_values = y_values if np.size(y_values) > 0 else []
-        self.visibility = visibility if np.size(visibility) > 0 else [2] * len(x_values)
-        self.labels = labels if labels is not None else np.array([1]*len(x_values))
+        self.visibility = visibility if np.size(visibility) > 0 else [2] * len(self.x_values)
+        self.labels = labels if labels is not None else np.array([1]*len(self.x_values))
 
     @property
     def areas(self):
@@ -65,3 +65,6 @@ class PoseEstimationPrediction(PoseEstimationRepresentation):
     def __init__(self, identifier='', x_values=None, y_values=None, visibility=None, scores=None, labels=None):
         super().__init__(identifier, x_values, y_values, visibility, labels)
         self.scores = scores if scores.any() else np.array([])
+
+    def to_annotation(self, **kwargs):
+        return PoseEstimationAnnotation(self.identifier, self.x_values, self.y_values, self.visibility, self.labels)

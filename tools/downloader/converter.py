@@ -98,9 +98,12 @@ def convert_to_onnx(context, model, output_dir, args):
     cmd = [str(args.python), str(Path(__file__).absolute().parent / model.converter_to_onnx), *conversion_to_onnx_args]
 
     context.printf('Conversion to ONNX command: {}', ' '.join(map(quote_arg, cmd)))
+    context.printf('')
 
-    return True if args.dry_run else context.subprocess(cmd)
+    success = True if args.dry_run else context.subprocess(cmd)
+    context.printf('')
 
+    return success
 
 def num_jobs_arg(value_str):
     if value_str == 'auto':
@@ -116,8 +119,6 @@ def num_jobs_arg(value_str):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config', type=Path, metavar='CONFIG.YML',
-        help='model configuration file (deprecated)')
     parser.add_argument('-d', '--download_dir', type=Path, metavar='DIR',
         default=Path.cwd(), help='root of the directory tree with downloaded model files')
     parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',
@@ -189,7 +190,7 @@ def main():
                                             conv_dir=output_dir / model.subdirectory)
             for arg in model.mo_args]
 
-        for model_precision in model_precisions:
+        for model_precision in sorted(model_precisions):
             mo_cmd = [str(args.python), '--', str(mo_path),
                 '--framework={}'.format(model_format),
                 '--data_type={}'.format(model_precision),

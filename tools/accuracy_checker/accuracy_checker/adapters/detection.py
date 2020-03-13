@@ -17,330 +17,14 @@ limitations under the License.
 import itertools
 import math
 import re
-
+import warnings
 import numpy as np
 
-from ..topology_types import YoloV1Tiny, YoloV2, YoloV2Tiny, YoloV3, YoloV3Tiny, SSD, FasterRCNN
+from ..topology_types import SSD, FasterRCNN
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, StringField, ListField
+from ..config import ConfigValidator, NumberField, StringField, ConfigError
 from ..postprocessor.nms import NMS
 from ..representation import DetectionPrediction, ContainerPrediction
-from ..utils import get_or_parse_value
-
-
-class TinyYOLOv1Adapter(Adapter):
-    """
-    Class for converting output of Tiny YOLO v1 model to DetectionPrediction representation
-    """
-    __provider__ = 'tiny_yolo_v1'
-    prediction_types = (DetectionPrediction, )
-    topology_types = (YoloV1Tiny, )
-
-    def process(self, raw, identifiers=None, frame_meta=None):
-        """
-        Args:
-            identifiers: list of input data identifiers
-            raw: output of model
-        Returns:
-             list of DetectionPrediction objects
-        """
-        prediction = self._extract_predictions(raw, frame_meta)[self.output_blob]
-
-        PROBABILITY_SIZE = 980
-        CONFIDENCE_SIZE = 98
-        BOXES_SIZE = 392
-
-        CELLS_X, CELLS_Y = 7, 7
-        CLASSES = 20
-        OBJECTS_PER_CELL = 2
-
-        result = []
-        for identifier, output in zip(identifiers, prediction):
-            assert PROBABILITY_SIZE + CONFIDENCE_SIZE + BOXES_SIZE == output.shape[0]
-
-            probability, scale, boxes = np.split(output, [PROBABILITY_SIZE, PROBABILITY_SIZE + CONFIDENCE_SIZE])
-
-            probability = np.reshape(probability, (CELLS_Y, CELLS_X, CLASSES))
-            scale = np.reshape(scale, (CELLS_Y, CELLS_X, OBJECTS_PER_CELL))
-            boxes = np.reshape(boxes, (CELLS_Y, CELLS_X, OBJECTS_PER_CELL, 4))
-
-            confidence = np.zeros((CELLS_Y, CELLS_X, OBJECTS_PER_CELL, CLASSES + 4))
-            for cls in range(CLASSES):
-                confidence[:, :, 0, cls] = np.multiply(probability[:, :, cls], scale[:, :, 0])
-                confidence[:, :, 1, cls] = np.multiply(probability[:, :, cls], scale[:, :, 1])
-
-            labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []
-            for i, j, k in np.ndindex((CELLS_X, CELLS_Y, OBJECTS_PER_CELL)):
-                box = boxes[j, i, k]
-                box = [(box[0] + i) / float(CELLS_X), (box[1] + j) / float(CELLS_Y), box[2] ** 2, box[3] ** 2]
-
-                label = np.argmax(confidence[j, i, k, :CLASSES])
-                score = confidence[j, i, k, label]
-
-                labels.append(label)
-                scores.append(score)
-                x_mins.append(box[0] - box[2] / 2.0)
-                y_mins.append(box[1] - box[3] / 2.0)
-                x_maxs.append(box[0] + box[2] / 2.0)
-                y_maxs.append(box[1] + box[3] / 2.0)
-
-            result.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
-
-        return result
-
-
-def entry_index(w, h, n_coords, n_classes, pos, entry):
-    row = pos // (w * h)
-    col = pos % (w * h)
-    return row * w * h * (n_classes + n_coords + 1) + entry * w * h + col
-
-
-class YoloV2Adapter(Adapter):
-    """
-    Class for converting output of YOLO v2 family models to DetectionPrediction representation
-    """
-    __provider__ = 'yolo_v2'
-    prediction_types = (DetectionPrediction, )
-    topology_types = (YoloV2, YoloV2Tiny, )
-
-    PRECOMPUTED_ANCHORS = {
-        'yolo_v2': [1.3221, 1.73145, 3.19275, 4.00944, 5.05587, 8.09892, 9.47112, 4.84053, 11.2364, 10.0071],
-        'tiny_yolo_v2': [1.08, 1.19, 3.42, 4.41, 6.63, 11.38, 9.42, 5.11, 16.62, 10.52]
-    }
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'classes': NumberField(
-                value_type=int, optional=True, min_value=1, default=20, description="Number of detection classes."
-            ),
-            'coords': NumberField(
-                value_type=int, optional=True, min_value=1, default=4, description="Number of bbox coordinates."
-            ),
-            'num': NumberField(
-                value_type=int, optional=True, min_value=1, default=5,
-                description="Num parameter from DarkNet configuration file."
-            ),
-            'anchors': StringField(
-                optional=True, choices=YoloV2Adapter.PRECOMPUTED_ANCHORS,
-                allow_own_choice=True, default='yolo_v2',
-                description="Anchor values provided as comma-separated list or one of precomputed: "
-                            "{}".format(', '.join(YoloV2Adapter.PRECOMPUTED_ANCHORS)))
-        })
-        return parameters
-
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
-
-    def configure(self):
-        self.classes = self.get_value_from_config('classes')
-        self.coords = self.get_value_from_config('coords')
-        self.num = self.get_value_from_config('num')
-        self.anchors = get_or_parse_value(self.get_value_from_config('anchors'), YoloV2Adapter.PRECOMPUTED_ANCHORS)
-
-    def process(self, raw, identifiers=None, frame_meta=None):
-        """
-        Args:
-            identifiers: list of input data identifiers
-            raw: output of model
-        Returns:
-            list of DetectionPrediction objects
-        """
-        predictions = self._extract_predictions(raw, frame_meta)[self.output_blob]
-
-        cells_x, cells_y = 13, 13
-
-        result = []
-        for identifier, prediction in zip(identifiers, predictions):
-            labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []
-            for y, x, n in np.ndindex((cells_y, cells_x, self.num)):
-                index = n * cells_y * cells_x + y * cells_x + x
-
-                box_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, 0)
-                obj_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, self.coords)
-
-                scale = prediction[obj_index]
-
-                box = [
-                    (x + prediction[box_index + 0 * (cells_y * cells_x)]) / cells_x,
-                    (y + prediction[box_index + 1 * (cells_y * cells_x)]) / cells_y,
-                    np.exp(prediction[box_index + 2 * (cells_y * cells_x)]) * self.anchors[2 * n + 0] / cells_x,
-                    np.exp(prediction[box_index + 3 * (cells_y * cells_x)]) * self.anchors[2 * n + 1] / cells_y
-                ]
-
-                classes_prob = np.empty(self.classes)
-                for cls in range(self.classes):
-                    cls_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, self.coords + 1 + cls)
-                    classes_prob[cls] = prediction[cls_index]
-
-                classes_prob = classes_prob * scale
-
-                label = np.argmax(classes_prob)
-
-                labels.append(label)
-                scores.append(classes_prob[label])
-                x_mins.append(box[0] - box[2] / 2.0)
-                y_mins.append(box[1] - box[3] / 2.0)
-                x_maxs.append(box[0] + box[2] / 2.0)
-                y_maxs.append(box[1] + box[3] / 2.0)
-
-            result.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
-
-        return result
-
-
-class YoloV3Adapter(Adapter):
-    """
-    Class for converting output of YOLO v3 family models to DetectionPrediction representation
-    """
-    __provider__ = 'yolo_v3'
-    prediction_types = (DetectionPrediction, )
-    topology_types = (YoloV3, YoloV3Tiny, )
-
-    PRECOMPUTED_ANCHORS = {
-        'yolo_v3': [
-            10.0, 13.0,
-            16.0, 30.0,
-            33.0, 23.0,
-            30.0, 61.0,
-            62.0, 45.0,
-            59.0, 119.0,
-            116.0, 90.0,
-            156.0, 198.0,
-            373.0, 326.0
-        ],
-        'tiny_yolo_v3': [
-            10.0, 14.0,
-            23.0, 27.0,
-            37.0, 58.0,
-            81.0, 82.0,
-            135.0, 169.0,
-            344.0, 319.0
-        ]
-    }
-
-    @classmethod
-    def parameters(cls):
-        parameters = super().parameters()
-        parameters.update({
-            'classes': NumberField(
-                value_type=int, optional=True, min_value=1, default=80, description="Number of detection classes."
-            ),
-            'coords': NumberField(
-                value_type=int, optional=True, min_value=1, default=4, description="Number of bbox coordinates."
-            ),
-            'num': NumberField(
-                value_type=int, optional=True, min_value=1, default=3,
-                description="Num parameter from DarkNet configuration file."
-            ),
-            'anchors': StringField(
-                optional=True, choices=YoloV3Adapter.PRECOMPUTED_ANCHORS.keys(), allow_own_choice=True,
-                default='yolo_v3',
-                description="Anchor values provided as comma-separated list or one of precomputed: "
-                            "{}.".format(', '.join(YoloV3Adapter.PRECOMPUTED_ANCHORS.keys()))),
-            'threshold': NumberField(value_type=float, optional=True, min_value=0, default=0.001,
-                                     description="Minimal objectiveness score value for valid detections."),
-            'outputs': ListField(
-                optional=True, default=[],
-                description="The list of output layers names (optional),"
-                            " if specified there should be exactly 3 output layers provided."
-            )
-        })
-
-        return parameters
-
-    def validate_config(self):
-        super().validate_config(on_extra_argument=ConfigValidator.WARN_ON_EXTRA_ARGUMENT)
-
-    def configure(self):
-        self.classes = self.get_value_from_config('classes')
-        self.coords = self.get_value_from_config('coords')
-        self.num = self.get_value_from_config('num')
-        self.anchors = get_or_parse_value(self.get_value_from_config('anchors'), YoloV3Adapter.PRECOMPUTED_ANCHORS)
-        self.threshold = self.get_value_from_config('threshold')
-        self.outputs = self.get_value_from_config('outputs')
-
-    def process(self, raw, identifiers=None, frame_meta=None):
-        """
-        Args:
-            identifiers: list of input data identifiers
-            raw: output of model
-        Returns:
-            list of DetectionPrediction objects
-        """
-
-        def get_anchors_offset(x):
-            return int((self.num * 2) * (len(self.anchors) / (self.num * 2) - 1 - math.log2(x / 13)))
-
-        def parse_yolo_v3_results(prediction, threshold, w, h, det):
-            cells_x, cells_y = prediction.shape[1:]
-            prediction = prediction.flatten()
-            for y, x, n in np.ndindex((cells_y, cells_x, self.num)):
-                index = n * cells_y * cells_x + y * cells_x + x
-                anchors_offset = get_anchors_offset(cells_x)
-
-                box_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, 0)
-                obj_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, self.coords)
-
-                scale = prediction[obj_index]
-                if scale < threshold:
-                    continue
-
-                box = [
-                    (x + prediction[box_index + 0 * (cells_y * cells_x)]) / cells_x,
-                    (y + prediction[box_index + 1 * (cells_y * cells_x)]) / cells_y,
-                    np.exp(prediction[box_index + 2 * (cells_y * cells_x)]) * self.anchors[
-                        anchors_offset + 2 * n + 0] / w,
-                    np.exp(prediction[box_index + 3 * (cells_y * cells_x)]) * self.anchors[
-                        anchors_offset + 2 * n + 1] / h
-                ]
-
-                classes_prob = np.empty(self.classes)
-                for cls in range(self.classes):
-                    cls_index = entry_index(cells_x, cells_y, self.coords, self.classes, index,
-                                            self.coords + 1 + cls)
-                    classes_prob[cls] = prediction[cls_index] * scale
-
-                    det['labels'].append(cls)
-                    det['scores'].append(classes_prob[cls])
-                    det['x_mins'].append(box[0] - box[2] / 2.0)
-                    det['y_mins'].append(box[1] - box[3] / 2.0)
-                    det['x_maxs'].append(box[0] + box[2] / 2.0)
-                    det['y_maxs'].append(box[1] + box[3] / 2.0)
-
-            return det
-
-        result = []
-
-        raw_outputs = self._extract_predictions(raw, frame_meta)
-
-        if self.outputs:
-            outputs = self.outputs
-        else:
-            outputs = raw_outputs.keys()
-
-        batch = len(identifiers)
-        predictions = [[] for _ in range(batch)]
-        for blob in outputs:
-            for b in range(batch):
-                predictions[b].append(raw_outputs[blob][b])
-
-        for identifier, prediction, meta in zip(identifiers, predictions, frame_meta):
-            detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
-            input_shape = list(meta.get('input_shape', {'data': (1, 3, 416, 416)}).values())[0]
-            self.input_width = input_shape[3]
-            self.input_height = input_shape[2]
-
-            for p in prediction:
-                parse_yolo_v3_results(p, self.threshold, self.input_width, self.input_height, detections)
-
-            result.append(DetectionPrediction(
-                identifier, detections['labels'], detections['scores'], detections['x_mins'], detections['y_mins'],
-                detections['x_maxs'], detections['y_maxs']
-            ))
-
-        return result
 
 
 class SSDAdapter(Adapter):
@@ -625,7 +309,7 @@ class FacePersonAdapter(Adapter):
 
 class SSDAdapterMxNet(Adapter):
     """
-    Class for converting output of MxNet SSD model to DetectionPrediction representation
+    Class for converting output of MXNet SSD model to DetectionPrediction representation
     """
     __provider__ = 'ssd_mxnet'
 
@@ -703,3 +387,321 @@ class SSDONNXAdapter(Adapter):
         self.bboxes_out = find_layer(bboxes_regex, 'bboxes', raw_outputs)
 
         self.outputs_verified = True
+
+
+class MTCNNPAdapter(Adapter):
+    __provider__ = 'mtcnn_p'
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update(
+            {
+                'probability_out': StringField(description='Name of Output layer with detection boxes probabilities'),
+                'region_out': StringField(description='Name of output layer with detected regions'),
+                'regions_format': StringField(
+                    optional=True, choices=['hw', 'wh'], default='wh',
+                    description='determination of coordinates order in regions, wh uses order x1y1x2y2, hw - y1x1y2x2'
+                )
+            }
+        )
+
+        return parameters
+
+    def configure(self):
+        self.probability_out = self.get_value_from_config('probability_out')
+        self.region_out = self.get_value_from_config('region_out')
+        self.regions_format = self.get_value_from_config('regions_format')
+
+    @staticmethod
+    def nms(boxes, threshold, overlap_type):
+        """
+        Args:
+          boxes: [:,0:5]
+          threshold: 0.5 like
+          overlap_type: 'Min' or 'Union'
+        Returns:
+            indexes of passed boxes
+        """
+        if boxes.shape[0] == 0:
+            return np.array([])
+        x1 = boxes[:, 0]
+        y1 = boxes[:, 1]
+        x2 = boxes[:, 2]
+        y2 = boxes[:, 3]
+        scores = boxes[:, 4]
+        area = np.multiply(x2 - x1 + 1, y2 - y1 + 1)
+        inds = np.array(scores.argsort())
+
+        pick = []
+        while np.size(inds) > 0:
+            xx1 = np.maximum(x1[inds[-1]], x1[inds[0:-1]])
+            yy1 = np.maximum(y1[inds[-1]], y1[inds[0:-1]])
+            xx2 = np.minimum(x2[inds[-1]], x2[inds[0:-1]])
+            yy2 = np.minimum(y2[inds[-1]], y2[inds[0:-1]])
+            width = np.maximum(0.0, xx2 - xx1 + 1)
+            height = np.maximum(0.0, yy2 - yy1 + 1)
+            inter = width * height
+            if overlap_type == 'Min':
+                overlap = inter / np.minimum(area[inds[-1]], area[inds[0:-1]])
+            else:
+                overlap = inter / (area[inds[-1]] + area[inds[0:-1]] - inter)
+            pick.append(inds[-1])
+            inds = inds[np.where(overlap <= threshold)[0]]
+
+        return pick
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        total_boxes_batch = self._extract_predictions(raw, frame_meta)
+        results = []
+        for total_boxes, identifier in zip(total_boxes_batch, identifiers):
+            if np.size(total_boxes) == 0:
+                results.append(DetectionPrediction(identifier, [], [], [], [], [], []))
+                continue
+            pick = self.nms(total_boxes, 0.7, 'Union')
+            total_boxes = total_boxes[pick]
+            regh = total_boxes[:, 3] - total_boxes[:, 1]
+            regw = total_boxes[:, 2] - total_boxes[:, 0]
+            x_mins = total_boxes[:, 0] + total_boxes[:, 5] * regw
+            y_mins = total_boxes[:, 1] + total_boxes[:, 6] * regh
+            x_maxs = total_boxes[:, 2] + total_boxes[:, 7] * regw
+            y_maxs = total_boxes[:, 3] + total_boxes[:, 8] * regh
+            scores = total_boxes[:, 4]
+            results.append(
+                DetectionPrediction(identifier, np.full_like(scores, 1), scores, x_mins, y_mins, x_maxs, y_maxs)
+            )
+
+
+        return results
+
+    @staticmethod
+    def generate_bounding_box(mapping, reg, scale, t, r_format):
+        stride = 2
+        cellsize = 12
+        mapping = mapping.T
+        indexes = [0, 1, 2, 3] if r_format == 'wh' else [1, 0, 3, 2]
+        dx1 = reg[indexes[0], :, :].T
+        dy1 = reg[indexes[1], :, :].T
+        dx2 = reg[indexes[2], :, :].T
+        dy2 = reg[indexes[3], :, :].T
+        (x, y) = np.where(mapping >= t)
+
+        yy = y
+        xx = x
+
+        score = mapping[x, y]
+        reg = np.array([dx1[x, y], dy1[x, y], dx2[x, y], dy2[x, y]])
+
+        if reg.shape[0] == 0:
+            pass
+        bounding_box = np.array([yy, xx]).T
+
+        bb1 = np.fix((stride * bounding_box + 1) / scale).T  # matlab index from 1, so with "boundingbox-1"
+        bb2 = np.fix((stride * bounding_box + cellsize - 1 + 1) / scale).T  # while python don't have to
+        score = np.array([score])
+
+        bounding_box_out = np.concatenate((bb1, bb2, score, reg), axis=0)
+
+        return bounding_box_out.T
+
+    def _extract_predictions(self, outputs_list, meta):
+        if not meta[0] or 'scales' not in meta[0]:
+            return outputs_list[0]
+        scales = meta[0]['scales']
+        total_boxes = np.zeros((0, 9), np.float)
+        for idx, outputs in enumerate(outputs_list):
+            scale = scales[idx]
+            mapping = outputs[self.probability_out][0, 1, :, :]
+            regions = outputs[self.region_out][0]
+            boxes = self.generate_bounding_box(mapping, regions, scale, 0.6, self.regions_format)
+            if boxes.shape[0] != 0:
+                pick = self.nms(boxes, 0.5, 'Union')
+
+                if np.size(pick) > 0:
+                    boxes = np.array(boxes)[pick, :]
+
+            if boxes.shape[0] != 0:
+                total_boxes = np.concatenate((total_boxes, boxes), axis=0)
+
+        return [total_boxes]
+
+
+class RetinaNetAdapter(Adapter):
+    __provider__ = 'retinanet'
+
+    @classmethod
+    def parameters(cls):
+        params = super().parameters()
+        params.update({
+            'loc_out': StringField(description='boxes localization output'),
+            'class_out':  StringField(description="output with classes probabilities")
+        })
+        return params
+
+    def configure(self):
+        self.loc_out = self.get_value_from_config('loc_out')
+        self.cls_out = self.get_value_from_config('class_out')
+        self.pyramid_levels = [3, 4, 5, 6, 7]
+        self.strides = [2 ** x for x in self.pyramid_levels]
+        self.sizes = [2 ** (x + 2) for x in self.pyramid_levels]
+        self.ratios = np.array([0.5, 1, 2])
+        self.scales = np.array([2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)])
+        self.std = np.array([0.1, 0.1, 0.2, 0.2])
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+        results = []
+        for identifier, loc_pred, cls_pred, meta in zip(
+                identifiers, raw_outputs[self.loc_out], raw_outputs[self.cls_out], frame_meta
+        ):
+            _, _, h, w = next(iter(meta.get('input_shape', {'data': (1, 3, 800, 800)}).values()))
+            anchors = self.create_anchors([w, h])
+            transformed_anchors = self.regress_boxes(anchors, loc_pred)
+            labels, scores = np.argmax(cls_pred, axis=1), np.max(cls_pred, axis=1)
+            scores_mask = np.reshape(scores > 0.05, -1)
+            transformed_anchors = transformed_anchors[scores_mask, :]
+            x_mins, y_mins, x_maxs, y_maxs = transformed_anchors.T
+            results.append(DetectionPrediction(
+                identifier, labels[scores_mask], scores[scores_mask], x_mins / w, y_mins / h, x_maxs / w, y_maxs / h
+            ))
+
+        return results
+
+    def create_anchors(self, input_shape):
+        def _generate_anchors(base_size=16):
+            """
+            Generate anchor (reference) windows by enumerating aspect ratios X
+            scales w.r.t. a reference window.
+            """
+            num_anchors = len(self.ratios) * len(self.scales)
+            # initialize output anchors
+            anchors = np.zeros((num_anchors, 4))
+            # scale base_size
+            anchors[:, 2:] = base_size * np.tile(self.scales, (2, len(self.ratios))).T
+            # compute areas of anchors
+            areas = anchors[:, 2] * anchors[:, 3]
+            # correct for ratios
+            anchors[:, 2] = np.sqrt(areas / np.repeat(self.ratios, len(self.scales)))
+            anchors[:, 3] = anchors[:, 2] * np.repeat(self.ratios, len(self.scales))
+            # transform from (x_ctr, y_ctr, w, h) -> (x1, y1, x2, y2)
+            anchors[:, 0::2] -= np.tile(anchors[:, 2] * 0.5, (2, 1)).T
+            anchors[:, 1::2] -= np.tile(anchors[:, 3] * 0.5, (2, 1)).T
+
+            return anchors
+
+        def _shift(shape, stride, anchors):
+            shift_x = (np.arange(0, shape[1]) + 0.5) * stride
+            shift_y = (np.arange(0, shape[0]) + 0.5) * stride
+            shift_x, shift_y = np.meshgrid(shift_x, shift_y)
+
+            shifts = np.vstack((
+                shift_x.ravel(), shift_y.ravel(),
+                shift_x.ravel(), shift_y.ravel()
+            )).transpose()
+            a = anchors.shape[0]
+            k = shifts.shape[0]
+            all_anchors = (anchors.reshape((1, a, 4)) + shifts.reshape((1, k, 4)).transpose((1, 0, 2)))
+            all_anchors = all_anchors.reshape((k * a, 4))
+
+            return all_anchors
+
+        image_shapes = [(np.array(input_shape) + 2 ** x - 1) // (2 ** x) for x in self.pyramid_levels]
+        # compute anchors over all pyramid levels
+        all_anchors = np.zeros((0, 4)).astype(np.float32)
+        for idx, _ in enumerate(self.pyramid_levels):
+            anchors = _generate_anchors(base_size=self.sizes[idx])
+            shifted_anchors = _shift(image_shapes[idx], self.strides[idx], anchors)
+            all_anchors = np.append(all_anchors, shifted_anchors, axis=0)
+
+        return all_anchors
+
+    def regress_boxes(self, boxes, deltas):
+        widths = boxes[:, 2] - boxes[:, 0]
+        heights = boxes[:, 3] - boxes[:, 1]
+        ctr_x = boxes[:, 0] + 0.5 * widths
+        ctr_y = boxes[:, 1] + 0.5 * heights
+
+        dx = deltas[:, 0] * self.std[0]
+        dy = deltas[:, 1] * self.std[1]
+        dw = deltas[:, 2] * self.std[2]
+        dh = deltas[:, 3] * self.std[3]
+
+        pred_ctr_x = ctr_x + dx * widths
+        pred_ctr_y = ctr_y + dy * heights
+        pred_w = np.exp(dw) * widths
+        pred_h = np.exp(dh) * heights
+
+        pred_boxes_x1 = pred_ctr_x - 0.5 * pred_w
+        pred_boxes_y1 = pred_ctr_y - 0.5 * pred_h
+        pred_boxes_x2 = pred_ctr_x + 0.5 * pred_w
+        pred_boxes_y2 = pred_ctr_y + 0.5 * pred_h
+
+        pred_boxes = np.stack([pred_boxes_x1, pred_boxes_y1, pred_boxes_x2, pred_boxes_y2], axis=1)
+
+        return pred_boxes
+
+
+class FCOSPersonAdapter(Adapter):
+    """
+    Class for converting output of FCOS model to DetectionPrediction representation
+    """
+    __provider__ = 'fcos_person'
+    prediction_types = (DetectionPrediction, )
+
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'output_blob': StringField(optional=True, default=None, description="Output blob name."),
+            'scale': NumberField(optional=True, default=1.0, description="Scale factor for bboxes."),
+        })
+
+        return parameters
+
+    def configure(self):
+        self.out_blob_name = self.get_value_from_config('output_blob')
+        self.scale = self.get_value_from_config('scale')
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        """
+        Args:
+            identifiers: list of input data identifiers
+            raw: output of model
+        Returns:
+            list of DetectionPrediction objects
+        """
+        predictions = self._extract_predictions(raw, frame_meta)
+        if self.out_blob_name is None:
+            self.out_blob_name = self._find_output(predictions)
+        prediction_batch = predictions[self.out_blob_name]
+
+        result = []
+        for identifier in identifiers:
+            prediction_mask = np.where(prediction_batch[:, -1] > 0.0)
+            valid_detections = prediction_batch[prediction_mask]
+
+            bboxes = self.scale * valid_detections[:, :-1]
+            scores = valid_detections[:, -1]
+            labels = np.ones([len(scores)], dtype=np.int32)
+
+            result.append(DetectionPrediction(identifier, labels, scores, *zip(*bboxes)))
+
+        return result
+
+    @staticmethod
+    def _find_output(predictions):
+        filter_outputs = [
+            output_name for output_name, out_data in predictions.items()
+            if len(np.shape(out_data)) == 2 and np.shape(out_data)[-1] == 5
+        ]
+        if not filter_outputs:
+            raise ConfigError('Suitable output layer not found')
+        if len(filter_outputs) > 1:
+            warnings.warn(
+                'There is several suitable outputs {}. The first will be used. '.format(', '.join(filter_outputs)) +
+                'If you need to use another layer, please specify it explicitly'
+            )
+        return filter_outputs[0]

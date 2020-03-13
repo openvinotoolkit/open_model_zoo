@@ -1,4 +1,4 @@
-# emotion-recognition-retail-0003
+# emotions-recognition-retail-0003
 
 ## Use Case and High-Level Description
 
