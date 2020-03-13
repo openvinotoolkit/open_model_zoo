@@ -14,25 +14,25 @@ static const char image_message[] = "Required. Path to a folder with images or p
 static const char model_message[] = "Required. Path to an .xml file with a trained model.";
 static const char labels_message[] = "Required. Path to .txt file with labels.";
 static const char gt_message[] = "Optional. Path to ground truth .txt file.";
-static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available " \
-                                            "devices is shown below). Default value is CPU. " \
+static const char target_device_message[] = "Optional. Specify the target device to infer on (the list of available "
+                                            "devices is shown below). Default value is CPU. "
                                             "Sample will look for a suitable plugin for device specified.";
-static const char batch_size_message[] = "Optional. Specify batch to infer. " \
-                                         "Default value is 1. The following models: googlenet-v4-tf, " \
-                                         "resnet18-xnor-binary-onnx-0001, resnet50-binary-0001, support only default " \
+static const char batch_size_message[] = "Optional. Specify batch to infer. "
+                                         "Default value is 1. The following models: googlenet-v4-tf, "
+                                         "resnet18-xnor-binary-onnx-0001, resnet50-binary-0001, support only default "
                                          "batch size.";
 static const char num_threads_message[] = "Optional. Specify count of threads.";
 static const char num_streams_message[] = "Optional. Specify count of streams.";
 static const char num_inf_req_message[] = "Optional. Number of infer requests.";
-static const char image_grid_resolution_message[] = "Optional. Set image grid resolution in format WxH. " \
+static const char image_grid_resolution_message[] = "Optional. Set image grid resolution in format WxH. "
                                                     "Default value is 1920x1080.";
 static const char ntop_message[] = "Optional. Number of top results. Default value is 5. Must be >= 1.";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. " \
+static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
                                            "Absolute path to the .xml file with kernels description.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers." \
+static const char custom_cpu_library_message[] = "Required for CPU custom layers."
                                                  "Absolute path to a shared library with the kernels implementation.";
 static const char no_show_message[] = "Optional. Disable showing of processed images.";
-static const char execution_time_message[] = "Optional. Time in seconds to execute program. " \
+static const char execution_time_message[] = "Optional. Time in seconds to execute program. "
                                              "Default is -1 (infinite time).";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
