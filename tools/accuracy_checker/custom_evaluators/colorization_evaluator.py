@@ -90,9 +90,6 @@ class ColorizationEvaluator(BaseEvaluator):
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
 
-        if self.dataset.batch is None:
-            self.dataset.batch = self.launcher.batch
-        self.preprocessor.input_shapes = self.launcher.inputs_info_for_meta()
         if subset is not None:
             self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
         elif num_images is not None:
@@ -102,9 +99,9 @@ class ColorizationEvaluator(BaseEvaluator):
         )
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
-            _, batch_meta = extract_image_representations(batch_inputs)
+            extr_batch_inputs, batch_meta = extract_image_representations(batch_inputs)
             metrics_result = None
-            batch_raw_prediction, batch_out = self.test_model.predict(batch_identifiers, batch_inputs)
+            batch_raw_prediction, batch_out = self.test_model.predict(batch_identifiers, extr_batch_inputs)
             if output_callback:
                 output_callback(
                     batch_raw_prediction,
@@ -112,7 +109,7 @@ class ColorizationEvaluator(BaseEvaluator):
                     element_identifiers=batch_identifiers,
                     dataset_indices=batch_input_ids
                 )
-            batch_raw_prediction = batch_prediction = self.check_model.predict(batch_identifiers, batch_out)
+            batch_raw_prediction, batch_prediction = self.check_model.predict(batch_identifiers, batch_out)
             if self.metric_executor:
                 metrics_result = self.metric_executor.update_metrics_on_batch(
                     batch_input_ids, batch_annotation, batch_prediction
@@ -334,6 +331,8 @@ class ColorizationCheckModel(BaseModel):
 
     def predict(self, identifiers, input_data):
         raw_result = self.exec_network.infer(self.fit_to_input(input_data))
+        if self.adapter.output_blob is None:
+            self.adapter.output_blob = next(iter(self.exec_network.outputs))s
         result = self.adapter.process([raw_result], identifiers, [{}])
         return raw_result, result
 
