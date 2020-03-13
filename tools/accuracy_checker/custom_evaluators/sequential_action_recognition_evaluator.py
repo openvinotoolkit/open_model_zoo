@@ -105,6 +105,7 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
                     self._predictions.extend(batch_prediction)
 
             if output_callback:
+<<<<<<< 2952b9c18ffa66bfbc3e12c917183962b5a003cb
                 output_callback(
                     batch_raw_prediction[0],
                         metrics_result=metrics_result,
@@ -113,6 +114,21 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
                     )
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
+=======
+                if metrics_result is None:
+                    metrics_result = [None] * len(batch_prediction)
+                for raw_prediction, m_result in zip(
+                    batch_raw_prediction, metrics_result,
+                ):
+                    output_callback(
+                        raw_prediction,
+                        metrics_result=m_result,
+                        element_identifiers=batch_identifiers,
+                        dataset_indices=batch_input_ids
+                    )
+            if progress_reporter:
+                progress_reporter.update(batch_id, len(batch_prediction))
+>>>>>>> action recognition fix
 
         if _progress_reporter:
             _progress_reporter.finish()
@@ -429,7 +445,6 @@ class EncoderDLSDKModel(BaseModel):
             self.output_blob = output_blob
             self.with_prefix = with_prefix
 
-
 class DecoderDLSDKModel(BaseModel):
     default_model_suffix = 'decoder'
 
@@ -514,6 +529,10 @@ class DecoderDLSDKModel(BaseModel):
             self.output_blob = output_blob
             self.with_prefix = with_prefix
             self.adapter.output_blob = self.output_blob
+
+    def load_network(self, network, launcher):
+        self.network = network
+        self.exec_network = launcher.ie_core.load_network(network, launcher.device)
 
 
 class EncoderONNXModel(BaseModel):
