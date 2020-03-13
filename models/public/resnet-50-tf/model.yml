@@ -18,16 +18,20 @@ description: >-
   repository <https://github.com/tensorflow/models/tree/master/official/r1/resnet>.
 task_type: classification
 files:
-  - name: resnet_v1-50.pb
-    size: 102170160
-    sha256: 7c186a471a30682cdee02b246eeb0bfd93fc71d9fa53834d69f8101e664d12f8
-    source: https://download.01.org/opencv/public_models/012020/resnet-50-tf/resnet_v1-50.pb
+  - name: resnet_v1_fp32_savedmodel_NHWC.tar.gz
+    size: 95107041
+    sha256: 8d0e4268715937915bccfe9fa227e21f0ae2feb4ec0a2674b7ebf329db308fb0
+    source: http://download.tensorflow.org/models/official/20181001_resnet/savedmodels/resnet_v1_fp32_savedmodel_NHWC.tar.gz
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: resnet_v1_fp32_savedmodel_NHWC.tar.gz
 model_optimizer_args:
   - --input_shape=[1,224,224,3]
   - --mean_values=[123.68,116.78,103.94]
-  - --input=map/TensorArrayStack/TensorArrayGatherV3
+  - --input=input_tensor
   - --output=softmax_tensor
-  - --input_model=$dl_dir/resnet_v1-50.pb
+  - --saved_model_dir=$dl_dir/resnet_v1_fp32_savedmodel_NHWC/1538686669
   - --reverse_input_channels
 framework: tf
 license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE
