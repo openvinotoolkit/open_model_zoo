@@ -86,7 +86,7 @@ class ColorizationEvaluator(BaseEvaluator):
             dump_prediction_to_annotation=False,
             **kwargs):
 
-        self._annotations, self._predictions = ([], []) if self.metric_executor.need_store_predictions else None, None
+        self._annotations, self._predictions = [], []
         if self.dataset is None or (dataset_tag and self.dataset.tag != dataset_tag):
             self.select_dataset(dataset_tag)
 
@@ -96,6 +96,7 @@ class ColorizationEvaluator(BaseEvaluator):
             self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
         if 'progress_reporter' in kwargs:
             _progress_reporter = kwargs['progress_reporter']
+            _progress_reporter.reset(self.dataset.size)
         else:
             _progress_reporter = None if not check_progress else self._create_progress_reporter(
                 check_progress, self.dataset.size
@@ -287,7 +288,7 @@ class BaseModel:
     def load_model(self, network_info, launcher):
         model, weights = self.auto_model_search(network_info)
         if weights:
-            self.network = launcher.create_ie_network(str(model), str(weights))
+            self.network = launcher.read_network(str(model), str(weights))
             self.network.batch_size = 1
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
