@@ -28,7 +28,6 @@ from accuracy_checker.utils import contains_all, contains_any, extract_image_rep
 from accuracy_checker.progress_reporters import ProgressReporter
 
 
-
 class SequentialActionRecognitionEvaluator(BaseEvaluator):
     def __init__(self, dataset_config, launcher, model):
         self.dataset_config = dataset_config
@@ -496,8 +495,10 @@ class DecoderDLSDKModel(BaseModel):
         else:
             model, weights = self.automatic_model_search(network_info)
         if weights is not None:
-            self.network = launcher.read_network(str(model), str(weights))
-            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+            self.network = launcher.create_ie_network(str(model), str(weights))
+            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+            self.input_blob = next(iter(network.inputs))
+            self.output_blob = next(iter(network.outputs))
         else:
             self.network = None
             self.exec_network = launcher.ie_core.import_network(str(model))
