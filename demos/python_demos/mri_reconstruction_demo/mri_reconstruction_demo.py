@@ -40,7 +40,7 @@ if __name__ == '__main__':
     stats = np.array([2.20295299e-01, 1.11048916e+03, 4.16997984e+00, 4.71741395e+00], dtype=np.float32)
     # Hybrid-CS-Model-MRI/Data/sampling_mask_20perc.npy
     var_sampling_mask = np.load(args.pattern)  # TODO: can we generate it in runtime?
-    print('Sampling ratio:', var_sampling_mask.sum() / var_sampling_mask.size)
+    print('Sampling ratio:', 1.0 - var_sampling_mask.sum() / var_sampling_mask.size)
 
     data = np.load(args.input)
     num_slices, height, width = data.shape[0], data.shape[1], data.shape[2]
@@ -51,7 +51,6 @@ if __name__ == '__main__':
     start = time.time()
     for slice_id, kspace in enumerate(data):
         kspace = kspace.copy()
-        img = kspace_to_image(kspace)
 
         # Apply sampling
         kspace[var_sampling_mask] = 0

@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
     // Hybrid-CS-Model-MRI/Data/sampling_mask_20perc.npy
     MRIData mri;
     mri.samplingMask = blobFromNPY(FLAGS_p);
-    std::cout << "Sampling ratio: " << cv::mean(mri.samplingMask)[0] << std::endl;
+    std::cout << "Sampling ratio: " << 1.0 - cv::mean(mri.samplingMask)[0] << std::endl;
 
     mri.data = blobFromNPY(FLAGS_i);
     CV_Assert(mri.data.depth() == CV_64F);

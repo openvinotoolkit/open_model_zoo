@@ -20,9 +20,10 @@ files:
   - name: wnet_20.pb
     sha256: 12f505bca019700c10fdf2e063e2255763def3c198312db3038e747f397af327
     size: 45366876
-    source: ""
+    source: https://www.dropbox.com/s/8xp3p79w81q1e2s/wnet_20.pb?dl=1
 framework: tf
 model_optimizer_args:
   - --input_shape=[1,256,256,2]
-  - --input_model=$dl_dir/i3d-rgb.frozen.pb
+  - --input_model=$dl_dir/wnet_20.pb
+  - --extensions=./src/models/public/hybdrid_cs_model_mri/mo_extensions
 license: https://raw.githubusercontent.com/rmsouza01/Hybrid-CS-Model-MRI/master/LICENSE
