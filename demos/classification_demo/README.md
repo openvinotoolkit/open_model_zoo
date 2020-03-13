@@ -41,7 +41,7 @@ Options:
     -labels "<path>"          Required. Path to .txt file with labels.
     -gt "<path>"              Optional. Path to ground truth .txt file.
     -d "<device>"             Optional. Specify the target device to infer on (the list of available devices is shown below). Default value is CPU. Sample will look for a suitable plugin for device specified.
-    -b "<integer>"            Optional. Specify batch to infer. Default value is 1.
+    -b "<integer>"            Optional. Specify batch to infer. Default value is 1. The following models: googlenet-v4-tf, resnet18-xnor-binary-onnx-0001, resnet50-binary-0001, support only default batch size.
     -nthreads "<integer>"     Optional. Specify count of threads.
     -nstreams "<integer>"     Optional. Specify count of streams.
     -nireq "<integer>"        Optional. Number of infer requests.

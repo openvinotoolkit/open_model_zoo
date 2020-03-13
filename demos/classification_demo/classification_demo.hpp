@@ -18,7 +18,9 @@ static const char target_device_message[] = "Optional. Specify the target device
                                             "devices is shown below). Default value is CPU. " \
                                             "Sample will look for a suitable plugin for device specified.";
 static const char batch_size_message[] = "Optional. Specify batch to infer. " \
-                                         "Default value is 1.";
+                                         "Default value is 1. The following models: googlenet-v4-tf, " \
+                                         "resnet18-xnor-binary-onnx-0001, resnet50-binary-0001, support only default " \
+                                         "batch size.";
 static const char num_threads_message[] = "Optional. Specify count of threads.";
 static const char num_streams_message[] = "Optional. Specify count of streams.";
 static const char num_inf_req_message[] = "Optional. Number of infer requests.";

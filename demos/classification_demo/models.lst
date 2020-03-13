@@ -17,11 +17,11 @@ efficientnet-b5-pytorch
 efficientnet-b7_auto_aug
 efficientnet-b7-pytorch
 googlenet-v1
+googlenet-v1-tf
 googlenet-v2
 googlenet-v3
 googlenet-v3-pytorch
-googlenet-v4
-inception-resnet-v2
+googlenet-v4-tf
 inception-resnet-v2-tf
 mobilenet-v1-0.25-128
 mobilenet-v1-0.50-160
@@ -42,9 +42,13 @@ octave-resnext-50-0.25
 octave-se-resnet-50-0.125
 resnet-101
 resnet-152
+resnet-18-pytorch
 resnet-50
 resnet-50-caffe2
 resnet-50-pytorch
+resnet-50-tf
+resnet18-xnor-binary-onnx-0001
+resnet50-binary-0001
 se-inception
 se-resnet-101
 se-resnet-152
