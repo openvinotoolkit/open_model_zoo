@@ -28,7 +28,6 @@ from accuracy_checker.utils import contains_all, contains_any, extract_image_rep
 from accuracy_checker.progress_reporters import ProgressReporter
 
 
-
 class SequentialActionRecognitionEvaluator(BaseEvaluator):
     def __init__(self, dataset_config, launcher, model):
         self.dataset_config = dataset_config

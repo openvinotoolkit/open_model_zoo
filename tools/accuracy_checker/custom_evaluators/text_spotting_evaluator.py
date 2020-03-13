@@ -444,6 +444,7 @@ class DetectorDLSDKModel(BaseModel):
         self.im_data_name = None
         self.text_feats_out = 'text_features'
 
+
     def predict(self, identifiers, input_data):
 
         input_data = np.array(input_data)
