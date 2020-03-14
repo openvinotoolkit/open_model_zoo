@@ -31,23 +31,16 @@ pip install -r requirements.txt
 
 ### Command line arguments
 ```
-usage: handwritten_japanese_recognition_demo.py [-h] -m MODEL
-                                                [-i INPUT [INPUT ...]]
-                                                [-ih INPUT_HEIGHT]
-                                                [-iw INPUT_WIDTH] [-d DEVICE]
-                                                [-ni NUMBER_ITER]
+usage: handwritten_japanese_recognition_demo.py [-h] -m MODEL -i INPUT
+                                                [-d DEVICE] [-ni NUMBER_ITER]
                                                 [-cl CHARLIST]
 
 Options:
   -h, --help            Show this help message and exit.
   -m MODEL, --model MODEL
                         Path to an .xml file with a trained model.
-  -i INPUT [INPUT ...], --input INPUT [INPUT ...]
+  -i INPUT, --input INPUT
                         Required. Path to an image to infer
-  -ih INPUT_HEIGHT, --input-height INPUT_HEIGHT
-                        IR input image height
-  -iw INPUT_WIDTH, --input-width INPUT_WIDTH
-                        IR input image width
   -d DEVICE, --device DEVICE
                         Optional. Specify the target device to infer on; CPU,
                         GPU, FPGA, HDDL, MYRIAD or HETERO: is acceptable. The
