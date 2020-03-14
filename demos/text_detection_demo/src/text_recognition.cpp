@@ -76,36 +76,6 @@ std::string CTCGreedyDecoder(const std::vector<float> &data, const std::string& 
     return res;
 }
 
-// Use std::vector<std::string> instead of std::string to avoid bug dealing with utf-8
-std::string CTCGreedyDecoder_utf8(const std::vector<float> &data, const std::vector<std::string>& dict, std::string pad_symbol, double *conf) {
-    std::string res = "";
-    bool prev_pad = false;
-    *conf = 1;
-
-    const int num_classes = dict.size();
-    std::vector<std::string> stack_str;
-    for (std::vector<float>::const_iterator it = data.begin(); it != data.end(); it += num_classes) {
-      int argmax;
-      float prob;
-
-      softmax_and_choose(it, it + num_classes, &argmax, &prob);
-
-      (*conf) *= prob;
-
-      std::string symbol = dict.at(argmax);
-      if (symbol != pad_symbol) {
-          if (res.empty() || prev_pad || (!res.empty() && symbol != stack_str.at(stack_str.size()-1))) {
-            prev_pad = false;
-            res += symbol;
-            stack_str.push_back(res);
-          }
-      } else {
-        prev_pad = true;
-      }
-    }
-    return res;
-}
-
 std::string CTCBeamSearchDecoder(const std::vector<float> &data, const std::string& alphabet, char pad_symbol, double *conf, int bandwidth) {
     const int num_classes = alphabet.length();
 

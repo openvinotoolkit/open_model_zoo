@@ -19,7 +19,7 @@ class Cnn {
     void Init(const std::string &model_path, Core & ie, const std::string & deviceName,
               const cv::Size &new_input_resolution = cv::Size());
 
-    InferenceEngine::BlobMap Infer(const cv::Mat &frame, const std::string& dec_file);
+    InferenceEngine::BlobMap Infer(const cv::Mat &frame);
 
     bool is_initialized() const {return is_initialized_;}
 

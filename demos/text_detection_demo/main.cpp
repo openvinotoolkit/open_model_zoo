@@ -14,7 +14,6 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <fstream>
 
 #include <gflags/gflags.h>
 #include <opencv2/opencv.hpp>
@@ -89,22 +88,7 @@ int main(int argc, char *argv[]) {
         if (FLAGS_m_tr_ss.find(kPadSymbol) != FLAGS_m_tr_ss.npos)
             throw std::invalid_argument("Symbols set for the Text Recongition model must not contain the reserved symbol '#'");
 
-        std::string kAlphabet;
-        std::vector<std::string> string_decoding;
-        std::string kPadSymbol_string;
-        if (FLAGS_m_tr_dec.empty()){
-            kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
-        } else{
-            std::ifstream inFile;
-            inFile.open(FLAGS_m_tr_dec);
-            kPadSymbol_string = "#";
-            string_decoding.push_back(kPadSymbol_string);
-            std::string temp;
-            while(getline(inFile, temp))
-            {
-                string_decoding.push_back(temp);
-            }
-        }
+        std::string kAlphabet = FLAGS_m_tr_ss + kPadSymbol;
 
         const double min_text_recognition_confidence = FLAGS_thr;
 
@@ -146,7 +130,6 @@ int main(int argc, char *argv[]) {
         auto cls_conf_threshold = static_cast<float>(FLAGS_cls_pixel_thr);
         auto link_conf_threshold = static_cast<float>(FLAGS_link_pixel_thr);
         auto decoder_bandwidth = FLAGS_b;
-        auto decode_utf8 = FLAGS_m_tr_dec;
 
         slog::info << "Loading network files" << slog::endl;
         Cnn text_detection, text_recognition;
@@ -182,7 +165,7 @@ int main(int argc, char *argv[]) {
             std::chrono::steady_clock::time_point begin_frame = std::chrono::steady_clock::now();
             std::vector<cv::RotatedRect> rects;
             if (text_detection.is_initialized()) {
-                auto blobs = text_detection.Infer(image, decode_utf8);
+                auto blobs = text_detection.Infer(image);
                 std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
                 rects = postProcess(blobs, orig_image_size, cls_conf_threshold, link_conf_threshold);
                 std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
@@ -232,24 +215,15 @@ int main(int argc, char *argv[]) {
                 std::string res = "";
                 double conf = 1.0;
                 if (text_recognition.is_initialized()) {
-                    auto blobs = text_recognition.Infer(cropped_text, decode_utf8);
+                    auto blobs = text_recognition.Infer(cropped_text);
                     auto output_shape = blobs.begin()->second->getTensorDesc().getDims();
-                    if (decode_utf8.empty() && output_shape[2] != kAlphabet.length()){
+                    if (output_shape[2] != kAlphabet.length())
                         throw std::runtime_error("The text recognition model does not correspond to alphabet.");
-                    }
-                    if (!decode_utf8.empty() && output_shape[2] != string_decoding.size()){
-                        throw std::runtime_error("The text recognition model does not correspond to the decoding file.");
-                    }
+
                     float *output_data_pointer = blobs.begin()->second->buffer().as<PrecisionTrait<Precision::FP32>::value_type *>();
                     std::vector<float> output_data(output_data_pointer, output_data_pointer + output_shape[0] * output_shape[2]);
 
                     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-                    if (!decode_utf8.empty()){
-                        res = CTCGreedyDecoder_utf8(output_data, string_decoding, kPadSymbol_string, &conf);
-                        std::cout<<"Prediction: ";
-                        std::cout<<res<<std::endl;
-                        return EXIT_SUCCESS;
-                    }
                     if (decoder_bandwidth == 0) {
                         res = CTCGreedyDecoder(output_data, kAlphabet, kPadSymbol, &conf);
                     } else {

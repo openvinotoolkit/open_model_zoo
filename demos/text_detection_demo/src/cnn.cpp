@@ -76,7 +76,7 @@ void Cnn::Init(const std::string &model_path, Core & ie, const std::string & dev
     is_initialized_ = true;
 }
 
-InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame, const std::string& dec_file) {
+InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame) {
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
     cv::Mat image;
@@ -87,17 +87,7 @@ InferenceEngine::BlobMap Cnn::Infer(const cv::Mat &frame, const std::string& dec
     }
 
     image.convertTo(image, CV_32F);
-    if (dec_file.empty()){
-        cv::resize(image, image, input_size_);
-    } else{ // right edge padding
-        int h = image.rows;
-        int w = image.cols;
-        float ratio = static_cast<float>(h)/static_cast<float>(w);
-        int target_height = input_size_.height;
-        int target_width = std::min(input_size_.width, static_cast<int>(input_size_.height/ratio));
-        cv::resize(image, image, cv::Size(target_width,target_height), 0, 0, cv::INTER_AREA);
-        cv::copyMakeBorder(image, image, 0, 0, 0, input_size_.width-target_width, cv::BORDER_REPLICATE);
-    }
+    cv::resize(image, image, input_size_);
 
     int image_size = input_size_.area();
 
