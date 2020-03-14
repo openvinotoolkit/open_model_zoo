@@ -32,12 +32,8 @@ def build_argparser():
                       help='Show this help message and exit.')
     args.add_argument("-m", "--model", type=str, required=True,
                       help="Path to an .xml file with a trained model.")
-    args.add_argument("-i", "--input", type=str, nargs="+", required=False,
+    args.add_argument("-i", "--input", type=str, nargs="+", required=True,
                       help="Required. Path to an image to infer")
-    args.add_argument('-ih', '--input-height', default=96, type=int,
-                      help='IR input image height')
-    args.add_argument('-iw', '--input-width', default=2000, type=int,
-                      help='IR input image width')
     args.add_argument("-d", "--device", type=str, default="CPU",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL, MYRIAD or HETERO: is "
                            "acceptable. The sample will look for a suitable plugin for device specified. Default "
@@ -57,9 +53,8 @@ def get_characters(args):
 def preprocess_input(image_name, height, width):
     src = cv2.imread(image_name, cv2.IMREAD_GRAYSCALE)
     ratio = float(src.shape[1]) / float(src.shape[0])
-    th = height
-    tw = int(th * ratio)
-    rsz = cv2.resize(src, (tw, th), interpolation=cv2.INTER_AREA).astype(np.float32)
+    tw = int(height * ratio)
+    rsz = cv2.resize(src, (tw, height), interpolation=cv2.INTER_AREA).astype(np.float32)
     # [h,w] -> [c,h,w]
     img = rsz[None, :, :]
     _, h, w = img.shape
@@ -89,9 +84,12 @@ def main():
 
     characters = get_characters(args)
     codec = CTCCodec(characters)
+    assert len(codec.characters) == net.outputs[out_blob].shape[2], "The text recognition model does not correspond to decoding character list"
+
+    input_height, input_width= net.inputs[input_blob].shape[2:]
 
     # Read and pre-process input image (NOTE: one image only)
-    input_image = preprocess_input(args.input[0], height=args.input_height, width=args.input_width)[None,:,:,:]
+    input_image = preprocess_input(args.input[0], height=input_height, width=input_width)[None,:,:,:]
 
     # Loading model to the plugin
     log.info("Loading model to the plugin")

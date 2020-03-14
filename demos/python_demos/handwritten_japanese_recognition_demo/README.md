@@ -1,10 +1,9 @@
-
 # Handwritten Japanese Recognition Demo
 This example demonstrates an approach to recognize handwritten japanese text lines using OpenVINO™. This model supports all the characters in datasets [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html).
 
 ## How It Works
 
-The demo expects the followings model in the Intermediate Representation (IR) format:
+The demo expects the following model in the Intermediate Representation (IR) format:
 
    * handwritten-japanese-recognition-0001
 
