@@ -32,7 +32,7 @@ def build_argparser():
                       help='Show this help message and exit.')
     args.add_argument("-m", "--model", type=str, required=True,
                       help="Path to an .xml file with a trained model.")
-    args.add_argument("-i", "--input", type=str, nargs="+", required=True,
+    args.add_argument("-i", "--input", type=str, required=True,
                       help="Required. Path to an image to infer")
     args.add_argument("-d", "--device", type=str, default="CPU",
                       help="Optional. Specify the target device to infer on; CPU, GPU, FPGA, HDDL, MYRIAD or HETERO: is "
@@ -86,10 +86,12 @@ def main():
     codec = CTCCodec(characters)
     assert len(codec.characters) == net.outputs[out_blob].shape[2], "The text recognition model does not correspond to decoding character list"
 
-    input_height, input_width= net.inputs[input_blob].shape[2:]
+    input_batch_size, input_channel, input_height, input_width= net.inputs[input_blob].shape
 
     # Read and pre-process input image (NOTE: one image only)
-    input_image = preprocess_input(args.input[0], height=input_height, width=input_width)[None,:,:,:]
+    input_image = preprocess_input(args.input, height=input_height, width=input_width)[None,:,:,:]
+    assert input_batch_size == input_image.shape[0], "The network's batch size of input image should be equal to the input image's batch size "
+    assert input_channel == input_image.shape[1], "The network's input channel of input image should be equal to the input image's channel "
 
     # Loading model to the plugin
     log.info("Loading model to the plugin")
