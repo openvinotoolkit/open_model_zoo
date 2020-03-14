@@ -90,8 +90,8 @@ def main():
 
     # Read and pre-process input image (NOTE: one image only)
     input_image = preprocess_input(args.input, height=input_height, width=input_width)[None,:,:,:]
-    assert input_batch_size == input_image.shape[0], "The network's batch size of input image should be equal to the input image's batch size "
-    assert input_channel == input_image.shape[1], "The network's input channel of input image should be equal to the input image's channel "
+    assert input_batch_size == input_image.shape[0], "The net's input batch size should equal the input image's batch size "
+    assert input_channel == input_image.shape[1], "The net's input channel should equal the input image's channel"
 
     # Loading model to the plugin
     log.info("Loading model to the plugin")
