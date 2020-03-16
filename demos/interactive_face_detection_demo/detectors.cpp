@@ -200,7 +200,7 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
     } else {
         for (const auto& outputLayer: outputInfo) {
             const SizeVector outputDims = outputLayer.second->getTensorDesc().getDims();
-            if (outputDims.size() == 2 && outputDims[outputDims.size() - 1] == 5) {
+            if (outputDims.size() == 2 && outputDims.back() == 5) {
                 output = outputLayer.first;
                 maxProposalCount = outputDims[0];
                 objectSize = outputDims.back();
