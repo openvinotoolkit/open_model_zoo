@@ -19,6 +19,7 @@ Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotat
   * `top_k` - the number of classes with the highest probability, which will be used to decide if prediction is correct.
   * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
 * `character_recognition_accuracy` - accuracy metric for character recognition task. Supported representation: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
+* `label_level_recognition_accuracy` - [label level recognition accuracy](https://dl.acm.org/doi/abs/10.1145/1143844.1143891) metric for text line character recognition task using [editdistance](https://pypi.org/project/editdistance/). Supported representation: `CharacterRecognitionAnnotation`, `CharacterRecognitionPrediction`.
 * `classification_f1-score` - [F1 score](https://en.wikipedia.org/wiki/F1_score) metric for classification task. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.
 * `label_map` - the field in annotation metadata, which contains dataset label map (Optional, should be provided if different from default).
 * `metthews_correlation_coef` - [Matthews correlation coefficient (MCC)](https://en.wikipedia.org/wiki/Matthews_correlation_coefficient) for binary classification. Supported representation: `ClassificationAnnotation`, `TextClassificationAnnotation`, `ClassificationPrediction`.

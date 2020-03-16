@@ -409,6 +409,11 @@ class Padding(Preprocessor):
             ),
             'use_numpy': BoolField(
                 optional=True, default=False, description="Allow to use numpy for padding instead default OpenCV."
+            ),
+            'numpy_pad_mode': StringField(
+                optional=True, default='constant',
+                choices=['constant', 'edge', 'maximum', 'minimum', 'mean', 'median', 'wrap'],
+                description="If use_numpy is True, Numpy padding mode,including constant, edge, mean, etc."
             )
         })
 
@@ -424,6 +429,7 @@ class Padding(Preprocessor):
         self.dst_height, self.dst_width = get_size_from_config(self.config, allow_none=True)
         self.pad_func = padding_func[self.get_value_from_config('pad_type')]
         self.use_numpy = self.get_value_from_config('use_numpy')
+        self.numpy_pad_mode = self.get_value_from_config('numpy_pad_mode')
 
     def process(self, image, annotation_meta=None):
         height, width, _ = image.data.shape
@@ -463,9 +469,14 @@ class Padding(Preprocessor):
             (self.pad_value[1], self.pad_value[1]),
             (self.pad_value[2], self.pad_value[2])
         )
+        if self.numpy_pad_mode != 'constant':
+            return np.pad(
+                image, ((pad[0], pad[2]), (pad[1], pad[3]), (0, 0)),
+                mode=self.numpy_pad_mode
+            )
         return np.pad(
             image, ((pad[0], pad[2]), (pad[1], pad[3]), (0, 0)),
-            mode='constant', constant_values=pad_values
+            mode=self.numpy_pad_mode, constant_values=pad_values
         )
 
 
