@@ -17,28 +17,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/age-gender-recognition-retail-0013.xml
-    size: 30006
-    sha256: ca2c4826b9370038643d97a434bb9621adea4baf4279e5b9c3a83002456fd755
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.xml
+    size: 29987
+    sha256: 983ebe08280a155c3917c07a2db5d6b0a4d644e3590419e65aecc03576a3d36e
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/1/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.xml
   - name: FP32/age-gender-recognition-retail-0013.bin
     size: 8552076
-    sha256: 4dab79cfedebd628f3327367a91c9736a32fbf9cc733cbbf1629d16910d4ace7
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.bin
+    sha256: c7177ca11ad924b0bb34dacb92676b72acac1cb36a71bc336a951116556b6910
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/1/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.bin
   - name: FP16/age-gender-recognition-retail-0013.xml
-    size: 29996
-    sha256: a375a5d8617ff1913dfc1210f5bb07493d72293c0efa87c1abcdfe181ae8a2b0
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.xml
+    size: 29977
+    sha256: a34b7810aaefd7f799f845e5ddc5ac3dfcb12de3bae2a010ff4ffd78c04ad928
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/1/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.xml
   - name: FP16/age-gender-recognition-retail-0013.bin
     size: 4276038
     sha256: 401101e0a01b3d68add39deae833bcf9f54238d37dd13e3fb1534aa8fbe4719d
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin
-  - name: FP32-INT8/age-gender-recognition-retail-0013.xml
-    size: 64387
-    sha256: 930b5e2ef06d890a79e91f16ecbe54ce08abcb6923cfb56afa464750588d7a21
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/age-gender-recognition-retail-0013/FP32-INT8/age-gender-recognition-retail-0013.xml
-  - name: FP32-INT8/age-gender-recognition-retail-0013.bin
-    size: 8565952
-    sha256: 0efcef2c78fa5208d85d2eb5fc69955c6d97a2ba2948c67a75b0dcb3b74da41e
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/age-gender-recognition-retail-0013/FP32-INT8/age-gender-recognition-retail-0013.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/1/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin
+  - name: FP16-INT8/age-gender-recognition-retail-0013.xml
+    size: 69738
+    sha256: dd78582ef0e2799084434aff9e95b7f11848dcddfcf074ddf4aae239f9a2b5a8
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/1/age-gender-recognition-retail-0013/FP16-INT8/age-gender-recognition-retail-0013.xml
+  - name: FP16-INT8/age-gender-recognition-retail-0013.bin
+    size: 4282976
+    sha256: 7e50c16bbae6de2c9d378c2239b7c056c34a6c74dfb0b30840e2749fcba1f41f
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/1/age-gender-recognition-retail-0013/FP16-INT8/age-gender-recognition-retail-0013.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
