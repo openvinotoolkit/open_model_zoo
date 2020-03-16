@@ -23,6 +23,13 @@ models:
         weights: intel/person-reidentification-retail-0300/FP32-INT8/person-reidentification-retail-0300.bin
         adapter: reid
 
+      - framework: dlsdk
+        tags:
+          - FP16-INT8
+        model:   intel/person-reidentification-retail-0300/FP16-INT8/person-reidentification-retail-0300.xml
+        weights: intel/person-reidentification-retail-0300/FP16-INT8/person-reidentification-retail-0300.bin
+        adapter: reid
+
     datasets:
       - name: market1501
 
