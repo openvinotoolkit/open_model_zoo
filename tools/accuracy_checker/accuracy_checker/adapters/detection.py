@@ -22,7 +22,7 @@ import numpy as np
 
 from ..topology_types import SSD, FasterRCNN
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, StringField, ConfigError, ListField
+from ..config import ConfigValidator, NumberField, StringField, ConfigError, ListField, BoolField
 from ..postprocessor.nms import NMS
 from ..representation import DetectionPrediction, ContainerPrediction
 
@@ -87,6 +87,9 @@ class PyTorchSSDDecoder(Adapter):
             'feat_size': ListField(
                 optional=True, description='Feature sizes list',
                 value_type=ListField(value_type=NumberField(min_value=1, value_type=int))
+            ),
+            'do_softmax': BoolField(
+                optional=True, default=True, description='Softmax operation should be applied to scores or not'
             )
         })
 
@@ -98,6 +101,7 @@ class PyTorchSSDDecoder(Adapter):
         self.confidence_threshold = self.get_value_from_config('confidence_threshold')
         self.nms_threshold = self.get_value_from_config('nms_threshold')
         self.keep_top_k = self.get_value_from_config('keep_top_k')
+        self.do_softmax = self.get_value_from_config('do_softmax')
         feat_size = self.get_value_from_config('feat_size')
 
         # Set default values according to:
@@ -164,7 +168,8 @@ class PyTorchSSDDecoder(Adapter):
 
             # Scores
             scores = np.transpose(scores) if need_transpose else scores
-            scores = self.softmax(scores, axis=1)
+            if self.do_softmax:
+                scores = self.softmax(scores, axis=1)
 
             # Boxes
             boxes = np.transpose(boxes) if need_transpose else boxes
