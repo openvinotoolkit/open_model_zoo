@@ -1,0 +1,35 @@
+models:
+  - name: faceboxes
+
+    launchers:
+      - framework: dlsdk
+        tags:
+            - FP32
+        model:   intel/faceboxes/faceboxes.xml
+        weights: intel/faceboxes/faceboxes.bin
+        adapter:
+            type: faceboxes_ssd_decoder
+            boxes_out: "342"
+            scores_out: "353"
+
+    datasets:
+      - name: wider
+
+        preprocessing:
+          - type: resize
+            dst_width: 1024
+            dst_height: 1024
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: filter
+            apply_to: annotation
+            height_range: 100
+            is_empty: True
+
+        metrics:
+          - type: map
+            ignore_difficult: True
+            include_boundaries: False
+
+global_definitions: ../dataset_definitions.yml

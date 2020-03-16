@@ -705,3 +705,148 @@ class FCOSPersonAdapter(Adapter):
                 'If you need to use another layer, please specify it explicitly'
             )
         return filter_outputs[0]
+
+
+class FaceBoxesSSDDecoder(Adapter):
+    """
+    Class for converting output of FaceBoxes SSD models to DetectionPrediction representation
+    """
+    __provider__ = 'faceboxes_ssd_decoder'
+
+    def validate_config(self):
+        super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)
+
+    @classmethod
+    def parameters(cls):
+        parameters = super().parameters()
+        parameters.update({
+            'scores_out': StringField(description="Scores output layer name."),
+            'boxes_out': StringField(description="Boxes output layer name."),
+        })
+
+        return parameters
+
+    def configure(self):
+        self.scores_out = self.get_value_from_config('scores_out')
+        self.boxes_out = self.get_value_from_config('boxes_out')
+
+        # Set default values
+        self.min_sizes = [[32, 64, 128], [256], [512]]
+        self.steps = [32, 64, 128]
+        self.variance = [0.1, 0.2]
+        self.confidence_threshold = 0.05
+        self.nms_threshold = 0.3
+        self.keep_top_k = 750
+
+    @staticmethod
+    def prior_boxes(feature_maps, sizes, image_size, steps):
+        anchors = []
+        for k, f in enumerate(feature_maps):
+            min_sizes = sizes[k]
+            for i, j in itertools.product(range(f[0]), range(f[1])):
+                for min_size in min_sizes:
+                    s_kx = min_size / image_size[1]
+                    s_ky = min_size / image_size[0]
+                    if min_size == 32:
+                        dense_cx = [x * steps[k] / image_size[1] for x in
+                                    [j + 0, j + 0.25, j + 0.5, j + 0.75]]
+                        dense_cy = [y * steps[k] / image_size[0] for y in
+                                    [i + 0, i + 0.25, i + 0.5, i + 0.75]]
+                        for cy, cx in itertools.product(dense_cy, dense_cx):
+                            anchors.append([cx, cy, s_kx, s_ky])
+                    elif min_size == 64:
+                        dense_cx = [x * steps[k] / image_size[1] for x in [j + 0, j + 0.5]]
+                        dense_cy = [y * steps[k] / image_size[0] for y in [i + 0, i + 0.5]]
+                        for cy, cx in itertools.product(dense_cy, dense_cx):
+                            anchors.append([cx, cy, s_kx, s_ky])
+                    else:
+                        cx = (j + 0.5) * steps[k] / image_size[1]
+                        cy = (i + 0.5) * steps[k] / image_size[0]
+                        anchors.append([cx, cy, s_kx, s_ky])
+        anchors = np.clip(anchors, 0, 1)
+
+        return anchors
+
+    def process(self, raw, identifiers=None, frame_meta=None):
+        """
+        Args:
+            identifiers: list of input data identifiers
+            raw: output of model
+        Returns:
+            list of DetectionPrediction objects
+        """
+
+        raw_outputs = self._extract_predictions(raw, frame_meta)
+
+        batch_scores = raw_outputs[self.scores_out]
+        batch_boxes = raw_outputs[self.boxes_out]
+
+        result = []
+        for identifier, scores, boxes, meta in zip(identifiers, batch_scores, batch_boxes, frame_meta):
+            detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+            image_info = meta.get("image_info")[0:2]
+
+            # Prior boxes
+            feature_maps = [[math.ceil(image_info[0] / step), math.ceil(image_info[1] / step)] for step in
+                            self.steps]
+            prior_data = self.prior_boxes(feature_maps, self.min_sizes, image_info, self.steps)
+
+             # Boxes
+            boxes[:, :2] = self.variance[0] * boxes[:, :2]
+            boxes[:, 2:] = self.variance[1] * boxes[:, 2:]
+            boxes[:, :2] = boxes[:, :2] * prior_data[:, 2:] + prior_data[:, :2]
+            boxes[:, 2:] = np.exp(boxes[:, 2:]) * prior_data[:, 2:]
+
+            for label, score in enumerate(np.transpose(scores)):
+
+                # Skip background label
+                if label == 0:
+                    continue
+
+                # Filter out detections with score < confidence_threshold
+                mask = score > self.confidence_threshold
+                filtered_boxes, filtered_score = boxes[mask, :], score[mask]
+                if filtered_score.size == 0:
+                    continue
+
+                # Transform to format (x_min, y_min, x_max, y_max)
+                x_mins = (filtered_boxes[:, 0] - 0.5 * filtered_boxes[:, 2])
+                y_mins = (filtered_boxes[:, 1] - 0.5 * filtered_boxes[:, 3])
+                x_maxs = (filtered_boxes[:, 0] + 0.5 * filtered_boxes[:, 2])
+                y_maxs = (filtered_boxes[:, 1] + 0.5 * filtered_boxes[:, 3])
+
+                # Apply NMS
+                keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, filtered_score, self.nms_threshold,
+                               include_boundaries=False, keep_top_k=self.keep_top_k)
+
+                filtered_score = filtered_score[keep]
+                x_mins = x_mins[keep]
+                y_mins = y_mins[keep]
+                x_maxs = x_maxs[keep]
+                y_maxs = y_maxs[keep]
+
+                # Keep topK
+                # Applied just after NMS - no additional sorting is required for filtered_score array
+                filtered_score = filtered_score[:self.keep_top_k]
+                x_mins = x_mins[:self.keep_top_k]
+                y_mins = y_mins[:self.keep_top_k]
+                x_maxs = x_maxs[:self.keep_top_k]
+                y_maxs = y_maxs[:self.keep_top_k]
+
+                # Save detections
+                labels = np.full_like(filtered_score, label)
+                detections['labels'].extend(labels)
+                detections['scores'].extend(filtered_score)
+                detections['x_mins'].extend(x_mins)
+                detections['y_mins'].extend(y_mins)
+                detections['x_maxs'].extend(x_maxs)
+                detections['y_maxs'].extend(y_maxs)
+
+            result.append(
+                DetectionPrediction(
+                    identifier, detections['labels'], detections['scores'], detections['x_mins'],
+                    detections['y_mins'], detections['x_maxs'], detections['y_maxs']
+                )
+            )
+
+        return result
