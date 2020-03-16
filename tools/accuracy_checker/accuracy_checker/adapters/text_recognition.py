@@ -85,7 +85,7 @@ class BeamSearchDecoder(Adapter):
             if all(a == -np.inf for a in args):
                 return -np.inf
             a_max = np.max(args)
-            lsp = np.log(np.sum(np.exp(a - a_max) for a in args))
+            lsp = np.log(sum(np.exp(a - a_max) for a in args))
 
             return a_max + lsp
 
