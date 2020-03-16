@@ -203,7 +203,7 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
             if (outputDims.size() == 2 && outputDims[outputDims.size() - 1] == 5) {
                 output = outputLayer.first;
                 maxProposalCount = outputDims[0];
-                objectSize = outputDims[outputDims.size() - 1];
+                objectSize = outputDims.back();
             }
         }
     }
