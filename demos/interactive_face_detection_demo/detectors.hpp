@@ -80,7 +80,6 @@ struct FaceDetection : BaseDetection {
     float bb_dx_coefficient;
     float bb_dy_coefficient;
     bool resultsFetched;
-    std::vector<std::string> labels;
     std::vector<Result> results;
 
     FaceDetection(const std::string &pathToModel,
