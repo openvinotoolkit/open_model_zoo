@@ -204,7 +204,14 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
                 output = outputLayer.first;
                 maxProposalCount = outputDims[0];
                 objectSize = outputDims.back();
+                outputLayer.second->setPrecision(Precision::FP32);
+            } else if (outputDims.size() == 1 && outputLayer.second->getPrecision() == Precision::I32) {
+                labels_output = outputLayer.first;
             }
+        }
+        if (output.empty() || labels_output.empty()) {
+            throw std::logic_error("Face Detection network must contain ether single DetectionOutput or "
+                                   "'boxes' [nx5] and 'labels' [n] at least, where 'n' is a number of detected objects.");
         }
     }
 
@@ -219,10 +226,11 @@ void FaceDetection::fetchResults() {
     if (resultsFetched) return;
     resultsFetched = true;
     const float *detections = request->GetBlob(output)->buffer().as<float *>();
+    const int32_t *labels = !labels_output.empty() ? request->GetBlob(labels_output)->buffer().as<int32_t *>() : nullptr;
 
     for (int i = 0; i < maxProposalCount && objectSize == 5; i++) {
         Result r;
-        r.label = 1;
+        r.label = labels[i];
         r.confidence = detections[i * objectSize + 4];
 
         if (r.confidence <= detectionThreshold && !doRawOutputMessages) {

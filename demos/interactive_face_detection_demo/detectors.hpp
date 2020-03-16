@@ -70,6 +70,7 @@ struct FaceDetection : BaseDetection {
 
     std::string input;
     std::string output;
+    std::string labels_output;
     double detectionThreshold;
     int maxProposalCount;
     int objectSize;
