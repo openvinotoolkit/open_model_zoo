@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 This is a network for handwritten japanese text recognition scenario. It consists of VGG16-like backbone, reshape layer and a fully connected layer.
-The network is able to recognize japanese text (characters included in [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) dataset).
+The network is able to recognize japanese text (characters in datasets [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html)).
 
 ## Example
 
@@ -39,9 +39,9 @@ The net outputs a blob with the shape [186, 1, 1161] in the format [WxBxL],
 where:
   - W - output sequence length
   - B - batch size
-  - L - confidence distribution across the supported symbols in [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html)
+  - L - confidence distribution across the supported symbols in [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html).
 
-The network output can be decoded by CTC Greedy Decoder
+The network output can be decoded by CTC Greedy Decoder.
 
 
 
