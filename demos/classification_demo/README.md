@@ -4,7 +4,7 @@ The demo shows an example of using neural networks for image classification.
 
 You can use the following pre-trained models with the demo:
 
-* `googlenet-v4`
+* `alexnet`
 * `resnet-50`
 * `vgg19`
 * all other classification models (please, check [models.lst](./models.lst) file)
