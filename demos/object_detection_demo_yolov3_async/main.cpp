@@ -177,7 +177,7 @@ void ParseYOLOV3Output(const CNNNetwork &cnnNetwork, const std::string & output_
             }
         }
     } else {
-        params = cnnNetwork.getLayerByName(output_name.c_str());
+        throw std::runtime_error("Cant get ngraph::Function. Isn't the IR of version 10 provided?");
     }
 
     auto side = out_blob_h;
