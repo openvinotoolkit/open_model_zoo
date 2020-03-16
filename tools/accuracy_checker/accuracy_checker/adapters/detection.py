@@ -22,7 +22,7 @@ import numpy as np
 
 from ..topology_types import SSD, FasterRCNN
 from ..adapters import Adapter
-from ..config import ConfigValidator, NumberField, StringField, ConfigError
+from ..config import ConfigValidator, NumberField, StringField, ConfigError, ListField
 from ..postprocessor.nms import NMS
 from ..representation import DetectionPrediction, ContainerPrediction
 
@@ -83,7 +83,11 @@ class PyTorchSSDDecoder(Adapter):
             'boxes_out': StringField(description="Boxes output layer name."),
             'confidence_threshold': NumberField(optional=True, default=0.05, description="Confidence threshold."),
             'nms_threshold': NumberField(optional=True, default=0.5, description="NMS threshold."),
-            'keep_top_k': NumberField(optional=True, value_type=int, default=200, description="Keep top K.")
+            'keep_top_k': NumberField(optional=True, value_type=int, default=200, description="Keep top K."),
+            'feat_size': ListField(
+                optional=True, description='Feature sizes list',
+                value_type=ListField(value_type=NumberField(min_value=1, value_type=int))
+            )
         })
 
         return parameters
@@ -94,11 +98,12 @@ class PyTorchSSDDecoder(Adapter):
         self.confidence_threshold = self.get_value_from_config('confidence_threshold')
         self.nms_threshold = self.get_value_from_config('nms_threshold')
         self.keep_top_k = self.get_value_from_config('keep_top_k')
+        feat_size = self.get_value_from_config('feat_size')
 
         # Set default values according to:
         # https://github.com/mlperf/inference/tree/master/cloud/single_stage_detector
         self.aspect_ratios = [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
-        self.feat_size = [[50, 50], [25, 25], [13, 13], [7, 7], [3, 3], [3, 3]]
+        self.feat_size = [[50, 50], [25, 25], [13, 13], [7, 7], [3, 3], [3, 3]] if feat_size is None else feat_size
         self.scales = [21, 45, 99, 153, 207, 261, 315]
         self.strides = [3, 3, 2, 2, 2, 2]
         self.scale_xy = 0.1
@@ -147,6 +152,7 @@ class PyTorchSSDDecoder(Adapter):
 
         batch_scores = raw_outputs[self.scores_out]
         batch_boxes = raw_outputs[self.boxes_out]
+        need_transpose = np.shape(batch_boxes)[-1] != 4
 
         result = []
         for identifier, scores, boxes, meta in zip(identifiers, batch_scores, batch_boxes, frame_meta):
@@ -157,11 +163,11 @@ class PyTorchSSDDecoder(Adapter):
             dboxes = self.default_boxes(image_info, self.feat_size, self.scales, self.aspect_ratios)
 
             # Scores
-            scores = np.transpose(scores)
+            scores = np.transpose(scores) if need_transpose else scores
             scores = self.softmax(scores, axis=1)
 
             # Boxes
-            boxes = np.transpose(boxes)
+            boxes = np.transpose(boxes) if need_transpose else boxes
             boxes[:, :2] = self.scale_xy * boxes[:, :2]
             boxes[:, 2:] = self.scale_wh * boxes[:, 2:]
             boxes[:, :2] = boxes[:, :2] * dboxes[:, 2:] + dboxes[:, :2]
