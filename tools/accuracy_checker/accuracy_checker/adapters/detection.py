@@ -709,9 +709,9 @@ class FCOSPersonAdapter(Adapter):
 
 class FaceBoxesSSDDecoder(Adapter):
     """
-    Class for converting output of FaceBoxes SSD models to DetectionPrediction representation
+    Class for converting output of FaceBoxes models to DetectionPrediction representation
     """
-    __provider__ = 'faceboxes_ssd_decoder'
+    __provider__ = 'faceboxes'
 
     def validate_config(self):
         super().validate_config(on_extra_argument=ConfigValidator.ERROR_ON_EXTRA_ARGUMENT)

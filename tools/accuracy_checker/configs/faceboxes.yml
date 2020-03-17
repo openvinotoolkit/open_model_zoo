@@ -8,7 +8,7 @@ models:
         model:   intel/faceboxes/faceboxes.xml
         weights: intel/faceboxes/faceboxes.bin
         adapter:
-            type: faceboxes_ssd_decoder
+            type: faceboxes
             boxes_out: "342"
             scores_out: "353"
 
