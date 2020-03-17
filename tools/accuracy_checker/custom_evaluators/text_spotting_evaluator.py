@@ -158,8 +158,19 @@ class TextSpottingEvaluator(BaseEvaluator):
         self.launcher.release()
 
     def reset(self):
-        self.metric_executor.reset()
-        self.model.reset()
+        if self.metric_executor:
+            self.metric_executor.reset()
+        if hasattr(self, '_annotations'):
+            del self._annotations
+            del self._predictions
+            del self._input_ids
+        del self._metrics_results
+        self._annotations = []
+        self._predictions = []
+        self._input_ids = []
+        self._metrics_results = []
+        if self.dataset:
+            self.dataset.reset(self.postprocessor.has_processors)
 
     @staticmethod
     def get_processing_info(config):
@@ -315,11 +326,14 @@ class SequentialModel:
         )
         self.recognizer_decoder_inputs = network_info['recognizer_decoder_inputs']
         self.recognizer_decoder_outputs = network_info['recognizer_decoder_outputs']
+        self.recognizer_encoder_input = 'input'
+        self.recognizer_encoder_output = 'output'
         self.max_seq_len = int(network_info['max_seq_len'])
         self.adapter = create_adapter(network_info['adapter'])
         self.alphabet = network_info['alphabet']
         self.sos_index = int(network_info['sos_index'])
         self.eos_index = int(network_info['eos_index'])
+        self.with_prefix = False
 
     def predict(self, identifiers, input_data, frame_meta, output_callback):
         assert len(identifiers) == 1
@@ -329,11 +343,11 @@ class SequentialModel:
 
         texts = []
         for feature in text_features:
-            encoder_outputs = self.recognizer_encoder.predict(identifiers, {'input': feature})
+            encoder_outputs = self.recognizer_encoder.predict(identifiers, {self.recognizer_decoder_inputs: feature})
             if output_callback:
                 output_callback(encoder_outputs)
 
-            feature = encoder_outputs['output']
+            feature = encoder_outputs[self.recognizer_encoder_output]
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
             feature = np.transpose(feature, (0, 2, 1))
 
@@ -367,9 +381,6 @@ class SequentialModel:
         output = self.adapter.process(detector_outputs, identifiers, frame_meta)
         return detector_outputs, output
 
-    def reset(self):
-        pass
-
     def release(self):
         self.detector.release()
         self.recognizer_encoder.release()
@@ -379,11 +390,13 @@ class SequentialModel:
         self.detector.load_model(network_dict['detector'], launcher)
         self.recognizer_encoder.load_model(network_dict['recognize_encoder'], launcher)
         self.recognizer_decoder.load_model(network_dict['recognize_decoder'], launcher)
+        self.update_inputs_outputs_info(self)
 
     def load_network(self, network_dict, launcher):
         self.detector.load_network(network_dict['detector'], launcher)
         self.recognizer_encoder.load_network(network_dict['recognize_encoder'], launcher)
         self.recognizer_decoder.load_network(network_dict['recognize_decoder'], launcher)
+        self.update_inputs_outputs_info(self)
 
     def get_network(self):
         return {
@@ -391,6 +404,33 @@ class SequentialModel:
             'recognizer_encoder': self.recognizer_encoder.get_network(),
             'recognizer_decoder': self.recognizer_decoder.get_network()
         }
+
+    def update_inputs_outputs_info(self):
+        def generate_name(prefix, with_prefix, layer_name):
+            return prefix + layer_name if with_prefix else layer_name.split(prefix)[-1]
+
+        with_prefix = isinstance(self.detector.im_data_name, str) and self.detector.im_data_name.startswith('detector_')
+        if with_prefix != self.with_prefix:
+            self.detector.im_info_name = generate_name('detector_', with_prefix, self.detector.im_info_name)
+            self.detector.im_data_name = generate_name('detector_', with_prefix, self.detector.im_data_name)
+            self.adapter.classes_out = generate_name('detector_', with_prefix, self.adapter.classes_out)
+            self.adapter.scores_out = generate_name('detector_', with_prefix, self.adapter.scores_out)
+            self.adapter.boxes_out = generate_name('detector_', with_prefix, self.adapter.boxes_out)
+            self.adapter.num_detections_out = generate_name('detector_', with_prefix, self.adapter.num_detections_out)
+            self.adapter.raw_masks_out = generate_name('detector_', with_prefix, self.adapter.raw_masks_out)
+            self.recognizer_encoder_input = generate_name('recognizer_encoder_', with_prefix, self.recognizer_encoder_input)
+            self.recognizer_encoder_output = generate_name('recognizer_encoder_', with_prefix, self.recognizer_encoder_output)
+            recognizer_decoder_inputs = {
+                key: generate_name('recognizer_decoder_', with_prefix, value)
+                for key, value in self.recognizer_decoder_inputs.items()
+            }
+            recognizer_decoder_outputs = {
+                key: generate_name('recognizer_decoder_', with_prefix, value)
+                for key, value in self.recognizer_decoder_outputs.items()
+            }
+            self.recognizer_decoder_inputs = recognizer_decoder_inputs
+            self.recognizer_decoder_outputs = recognizer_decoder_outputs
+        self.with_prefix = with_prefix
 
 
 class DetectorDLSDKModel(BaseModel):
