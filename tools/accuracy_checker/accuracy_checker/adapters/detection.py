@@ -739,30 +739,41 @@ class FaceBoxesSSDDecoder(Adapter):
         self.keep_top_k = 750
 
     @staticmethod
-    def prior_boxes(feature_maps, sizes, image_size, steps):
+    def calculate_anchors(list_x, list_y, min_size, image_size, step):
+        anchors = []
+        s_kx = min_size / image_size[1]
+        s_ky = min_size / image_size[0]
+        dense_cx = [x * step / image_size[1] for x in list_x]
+        dense_cy = [y * step / image_size[0] for y in list_y]
+        for cy, cx in itertools.product(dense_cy, dense_cx):
+            anchors.append([cx, cy, s_kx, s_ky])
+        return anchors
+
+    def calculate_anchors_zero_level(self, f_x, f_y, min_sizes, image_size, step):
+        anchors = []
+        for min_size in min_sizes:
+            if min_size == 32:
+                list_x = [f_x + 0, f_x + 0.25, f_x + 0.5, f_x + 0.75]
+                list_y = [f_y + 0, f_y + 0.25, f_y + 0.5, f_y + 0.75]
+            elif min_size == 64:
+                list_x = [f_x + 0, f_x + 0.5]
+                list_y = [f_y + 0, f_y + 0.5]
+            else:
+                list_x = [f_x + 0.5]
+                list_y = [f_y + 0.5]
+            anchors.extend(self.calculate_anchors(list_x, list_y, min_size, image_size,step))
+        return anchors
+
+    def prior_boxes(self, feature_maps, image_size):
         anchors = []
         for k, f in enumerate(feature_maps):
-            min_sizes = sizes[k]
             for i, j in itertools.product(range(f[0]), range(f[1])):
-                for min_size in min_sizes:
-                    s_kx = min_size / image_size[1]
-                    s_ky = min_size / image_size[0]
-                    if min_size == 32:
-                        dense_cx = [x * steps[k] / image_size[1] for x in
-                                    [j + 0, j + 0.25, j + 0.5, j + 0.75]]
-                        dense_cy = [y * steps[k] / image_size[0] for y in
-                                    [i + 0, i + 0.25, i + 0.5, i + 0.75]]
-                        for cy, cx in itertools.product(dense_cy, dense_cx):
-                            anchors.append([cx, cy, s_kx, s_ky])
-                    elif min_size == 64:
-                        dense_cx = [x * steps[k] / image_size[1] for x in [j + 0, j + 0.5]]
-                        dense_cy = [y * steps[k] / image_size[0] for y in [i + 0, i + 0.5]]
-                        for cy, cx in itertools.product(dense_cy, dense_cx):
-                            anchors.append([cx, cy, s_kx, s_ky])
-                    else:
-                        cx = (j + 0.5) * steps[k] / image_size[1]
-                        cy = (i + 0.5) * steps[k] / image_size[0]
-                        anchors.append([cx, cy, s_kx, s_ky])
+                if k == 0:
+                    anchors.extend(self.calculate_anchors_zero_level(j, i, self.min_sizes[k],
+                                                                     image_size, self.steps[k]))
+                else:
+                    anchors.extend(self.calculate_anchors([j + 0.5], [i + 0.5], self.min_sizes[k][0],
+                                                          image_size, self.steps[k]))
         anchors = np.clip(anchors, 0, 1)
 
         return anchors
@@ -789,7 +800,7 @@ class FaceBoxesSSDDecoder(Adapter):
             # Prior boxes
             feature_maps = [[math.ceil(image_info[0] / step), math.ceil(image_info[1] / step)] for step in
                             self.steps]
-            prior_data = self.prior_boxes(feature_maps, self.min_sizes, image_info, self.steps)
+            prior_data = self.prior_boxes(feature_maps, image_info)
 
              # Boxes
             boxes[:, :2] = self.variance[0] * boxes[:, :2]
