@@ -4,6 +4,7 @@
 
 Face detector based on MobileNetV2 as a backbone with a
 multiple SSD head for indoor/outdoor scenes shot by a front-facing camera.
+During training of this model training images were resized to 256x256.
 
 ## Example
 
