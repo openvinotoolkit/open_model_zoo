@@ -846,7 +846,7 @@ class FaceBoxesSSDDecoder(Adapter):
                     y_maxs = y_maxs[:self.keep_top_k]
 
                 # Save detections
-                labels = np.full_like(filtered_score, label)
+                labels = np.full_like(filtered_score, label, dtype=int)
                 detections['labels'].extend(labels)
                 detections['scores'].extend(filtered_score)
                 detections['x_mins'].extend(x_mins)
