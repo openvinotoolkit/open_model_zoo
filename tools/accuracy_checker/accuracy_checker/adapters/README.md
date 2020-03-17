@@ -94,7 +94,7 @@ AccuracyChecker supports following set of adapters:
   * `reverse_channels` - allow switching output image channels e.g. RGB to BGR (Optional. Default value is False).
   * `mean` - value or list channel-wise values which should be added to result for getting values in range [0, 255] (Optional, default 0)
   * `std` - value or list channel-wise values on which result should be multiplied for getting values in range [0, 255] (Optional, default 255)
-  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations. 
+  **Important** Usually `mean` and `std` are the same which used in preprocessing, here they are used for reverting these preprocessing operations.
   The order of actions:
   1. Multiply on `std`
   2. Add `mean`
@@ -174,3 +174,6 @@ AccuracyChecker supports following set of adapters:
   * `scale` - scalar value to normalize bbox coordinates.
 * `mono_depth` - converting output of monocular depth estimation model to `DepthEstimationPrediction`.
 * `inpainting` - converting output of Image Inpainting model to `ImageInpaintingPrediction` representation.
+* `faceboxes` - converting output of FaceBoxes model to `DetectionPrediction` representation.
+  * `scores_out` - name of output layer with bounding boxes scores.
+  * `boxes_out` - name of output layer with bounding boxes coordinates.
