@@ -355,6 +355,7 @@ class EncoderDLSDKModel(BaseModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         super().__init__(network_info, launcher)
         self.input_blob, self.output_blob = None, None
+        self.with_prefix = None
         if not delayed_model_loading:
             self.load_model(network_info, launcher)
 
@@ -367,14 +368,10 @@ class EncoderDLSDKModel(BaseModel):
         if weights is not None:
             self.network = launcher.create_ie_network(str(model), str(weights))
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-            if self.input_blob is None:
-                self.input_blob = next(iter(self.network.inputs))
-                self.output_blob = next(iter(self.network.outputs))
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
-            if self.input_blob is None:
-                self.input_blob = next(iter(self.exec_network.inputs))
-                self.output_blob = next(iter(self.exec_network.outputs))
+        self.set_input_and_output()
+
 
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(self.fit_to_input(input_data))
@@ -419,6 +416,21 @@ class EncoderDLSDKModel(BaseModel):
         self.network = network
         self.exec_network = launcher.ie_core.load_network(network, launcher.device)
 
+    def set_input_and_output(self):
+        input_blob = next(iter(self.exec_network.inputs))
+        with_prefix = input_blob.startswith(self.default_model_suffix)
+        if self.input_blob is None or with_prefix != self.with_prefix:
+            if self.input_blob is None:
+                output_blob = next(iter(self.exec_network.outputs))
+            else:
+                output_blob = (
+                    '_'.join([self.default_model_suffix, self.output_blob])
+                    if with_prefix else self.output_blob.split(self.default_model_suffix + '_')[-1]
+                )
+            self.input_blob = next(iter(self.exec_network.inputs))
+            self.output_blob = output_blob
+            self.with_prefix = with_prefix
+
 
 class DecoderDLSDKModel(BaseModel):
     default_model_suffix = 'decoder'
@@ -430,6 +442,7 @@ class DecoderDLSDKModel(BaseModel):
         self.num_processing_frames = network_info.get('num_processing_frames', 16)
         if not delayed_model_loading:
             self.load_model(network_info, launcher)
+        self.with_prefix = False
 
     def predict(self, identifiers, input_data):
         raw_result = self.exec_network.infer(self.fit_to_input(input_data))
@@ -479,20 +492,30 @@ class DecoderDLSDKModel(BaseModel):
         if weights is not None:
             self.network = launcher.create_ie_network(str(model), str(weights))
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
-            if self.input_blob is None:
-                self.input_blob = next(iter(self.network.inputs))
-                self.output_blob = next(iter(self.network.outputs))
         else:
             self.network = None
             self.exec_network = launcher.ie_core.import_network(str(model))
-            self.input_blob = next(iter(self.exec_network.inputs))
-            self.output_blob = next(iter(self.exec_network.outputs))
-        if self.adapter.output_blob is None:
-            self.adapter.output_blob = self.output_blob
+        self.set_input_and_output()
 
     def load_network(self, network, launcher):
         self.network = network
         self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+
+    def set_input_and_output(self):
+        input_blob = next(iter(self.exec_network.inputs))
+        with_prefix = input_blob.startswith(self.default_model_suffix)
+        if self.input_blob is None or with_prefix != self.with_prefix:
+            if self.input_blob is None:
+                output_blob = next(iter(self.exec_network.outputs))
+            else:
+                output_blob = (
+                    '_'.join([self.default_model_suffix, self.output_blob])
+                    if with_prefix else self.output_blob.split(self.default_model_suffix + '_')[-1]
+                )
+            self.input_blob = next(iter(self.exec_network.inputs))
+            self.output_blob = output_blob
+            self.with_prefix = with_prefix
+            self.adapter.output_blob = self.output_blob
 
 
 class EncoderONNXModel(BaseModel):
