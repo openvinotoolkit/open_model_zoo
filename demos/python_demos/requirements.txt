@@ -1,5 +1,3 @@
-Cython
-lxml
 matplotlib
 motmetrics
 nibabel

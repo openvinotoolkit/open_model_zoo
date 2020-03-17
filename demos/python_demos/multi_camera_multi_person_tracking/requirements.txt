@@ -1,6 +1,4 @@
-Cython>=0.29.12
 setuptools
-lxml>=4.3.4
 matplotlib>=3.0.3
 motmetrics>=1.2.0
 opencv-python>=3.4.5.20

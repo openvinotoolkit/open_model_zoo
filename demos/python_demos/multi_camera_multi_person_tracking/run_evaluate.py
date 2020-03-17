@@ -17,7 +17,7 @@ import logging as log
 
 import motmetrics as mm
 import numpy as np
-from lxml import etree
+from xml.etree import ElementTree as etree
 from tqdm import tqdm
 
 from mc_tracker.sct import TrackedObj
