@@ -612,7 +612,7 @@ CNNNetwork FacialLandmarksDetection::read(const InferenceEngine::Core& ie) {
     const SizeVector& outSizeVector = data.getTensorDesc().getDims();
     if (outSizeVector.size() != 2 && outSizeVector.back() != 70) {
         throw std::logic_error("Facial Landmarks Estimation network output layer should have 2 dimensions and 70 as"
-                               " a last dimension");
+                               " the last dimension");
     }
 
     slog::info << "Loading Facial Landmarks Estimation model to the "<< deviceForInference << " plugin" << slog::endl;
