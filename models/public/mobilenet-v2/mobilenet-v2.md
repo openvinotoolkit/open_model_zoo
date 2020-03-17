@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-[MobileNet V2](https://arxiv.org/pdf/1801.04381.pdf)
+[MobileNet V2](https://arxiv.org/abs/1801.04381)
 
 ## Example
 

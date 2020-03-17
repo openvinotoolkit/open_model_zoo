@@ -5,7 +5,7 @@
 This is a Caffe2\* version of `squeezenet1.1` model, designed to perform image classification.
 This model was converted from Caffe\* to Caffe2\* format. 
 For details see repository <https://github.com/caffe2/models/tree/master/squeezenet>,
-paper <https://arxiv.org/pdf/1602.07360>.
+paper <https://arxiv.org/abs/1602.07360>.
 
 ## Example
 

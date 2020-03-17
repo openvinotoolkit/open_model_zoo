@@ -5,7 +5,7 @@
 This is a Caffe2\* version of `vgg19` model, designed to perform image classification.
 This model was converted from Caffe\* to Caffe2\* format. 
 For details see repository <https://github.com/caffe2/models/tree/master/vgg19>,
-paper <https://arxiv.org/pdf/1409.1556.pdf>.
+paper <https://arxiv.org/abs/1409.1556>.
 ## Example
 
 ## Specification

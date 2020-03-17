@@ -14,7 +14,7 @@
 
 description: >-
   Mask R-CNN Resnet50 Atrous trained on COCO dataset. It is used for object instance
-  segmentation. For details, see the paper <https://arxiv.org/pdf/1703.06870.pdf>.
+  segmentation. For details, see the paper <https://arxiv.org/abs/1703.06870>.
 task_type: instance_segmentation
 files:
   - name: mask_rcnn_resnet50_atrous_coco_2018_01_28.tar.gz

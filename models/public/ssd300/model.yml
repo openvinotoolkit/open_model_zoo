@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  The "ssd300" model is a Single-Shot multibox Detection <SSD> <https://arxiv.org/pdf/1512.02325.pdf>
+  The "ssd300" model is a Single-Shot multibox Detection <SSD> <https://arxiv.org/abs/1512.02325>
   network intended to perform face detection. This model is implemented using the
   Caffe* framework. For details about this model, check out the repository <https://github.com/weiliu89/caffe/tree/ssd>.
 
