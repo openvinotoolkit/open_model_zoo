@@ -8,7 +8,7 @@ models:
         model:   intel/face-detection-0105/FP32/face-detection-0105.xml
         weights: intel/face-detection-0105/FP32/face-detection-0105.bin
         adapter:
-          type: fcos_person
+          type: class_agnostic_detection
           scale: 0.00240384615
 
     datasets:

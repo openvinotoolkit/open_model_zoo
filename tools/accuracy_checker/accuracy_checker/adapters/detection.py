@@ -652,11 +652,12 @@ class RetinaNetAdapter(Adapter):
         return pred_boxes
 
 
-class FCOSPersonAdapter(Adapter):
+class ClassAgnosticDetectionAdapter(Adapter):
     """
-    Class for converting output of FCOS model to DetectionPrediction representation
+    Class for converting 'boxes' [n,5] output of detection model to
+    DetectionPrediction representation
     """
-    __provider__ = 'fcos_person'
+    __provider__ = 'class_agnostic_detection'
     prediction_types = (DetectionPrediction, )
 
     def validate_config(self):
