@@ -105,7 +105,6 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
                     self._predictions.extend(batch_prediction)
 
             if output_callback:
-<<<<<<< 2952b9c18ffa66bfbc3e12c917183962b5a003cb
                 output_callback(
                     batch_raw_prediction[0],
                         metrics_result=metrics_result,
@@ -114,21 +113,6 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
                     )
             if _progress_reporter:
                 _progress_reporter.update(batch_id, len(batch_prediction))
-=======
-                if metrics_result is None:
-                    metrics_result = [None] * len(batch_prediction)
-                for raw_prediction, m_result in zip(
-                    batch_raw_prediction, metrics_result,
-                ):
-                    output_callback(
-                        raw_prediction,
-                        metrics_result=m_result,
-                        element_identifiers=batch_identifiers,
-                        dataset_indices=batch_input_ids
-                    )
-            if progress_reporter:
-                progress_reporter.update(batch_id, len(batch_prediction))
->>>>>>> action recognition fix
 
         if _progress_reporter:
             _progress_reporter.finish()
@@ -386,6 +370,10 @@ class EncoderDLSDKModel(BaseModel):
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
+<<<<<<< 02153da7ac847e03108687cb1279e5e9a9a68663
+=======
+
+>>>>>>> fix model after renaming
 
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(self.fit_to_input(input_data))
@@ -444,6 +432,10 @@ class EncoderDLSDKModel(BaseModel):
             self.input_blob = next(iter(self.exec_network.inputs))
             self.output_blob = output_blob
             self.with_prefix = with_prefix
+<<<<<<< 02153da7ac847e03108687cb1279e5e9a9a68663
+=======
+
+>>>>>>> fix model after renaming
 
 class DecoderDLSDKModel(BaseModel):
     default_model_suffix = 'decoder'
@@ -509,6 +501,7 @@ class DecoderDLSDKModel(BaseModel):
             self.network = None
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
+<<<<<<< 02153da7ac847e03108687cb1279e5e9a9a68663
 
     def load_network(self, network, launcher):
         self.network = network
@@ -529,10 +522,28 @@ class DecoderDLSDKModel(BaseModel):
             self.output_blob = output_blob
             self.with_prefix = with_prefix
             self.adapter.output_blob = self.output_blob
+=======
+>>>>>>> fix model after renaming
 
     def load_network(self, network, launcher):
         self.network = network
         self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+
+    def set_input_and_output(self):
+        input_blob = next(iter(self.exec_network.inputs))
+        with_prefix = input_blob.startswith(self.default_model_suffix)
+        if self.input_blob is None or with_prefix != self.with_prefix:
+            if self.input_blob is None:
+                output_blob = next(iter(self.exec_network.outputs))
+            else:
+                output_blob = (
+                    '_'.join([self.default_model_suffix, self.output_blob])
+                    if with_prefix else self.output_blob.split(self.default_model_suffix + '_')[-1]
+                )
+            self.input_blob = next(iter(self.exec_network.inputs))
+            self.output_blob = output_blob
+            self.with_prefix = with_prefix
+            self.adapter.output_blob = self.output_blob
 
 
 class EncoderONNXModel(BaseModel):
