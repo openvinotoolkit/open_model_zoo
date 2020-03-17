@@ -181,12 +181,13 @@ def run(params, config, capture, detector, reid):
 
 
 def main():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
     """Prepares data for the person recognition demo"""
     parser = argparse.ArgumentParser(description='Multi camera multi person \
                                                   tracking live demo script')
     parser.add_argument('-i', type=str, nargs='+', help='Input sources (indexes \
                         of cameras or paths to video files)', required=True)
-    parser.add_argument('--config', type=str, default='config.py', required=False,
+    parser.add_argument('--config', type=str, default=os.path.join(current_dir, 'config.py'), required=False,
                         help='Configuration file')
 
     parser.add_argument('--detections', type=str, help='JSON file with bounding boxes')
