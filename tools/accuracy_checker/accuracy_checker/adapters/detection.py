@@ -827,11 +827,12 @@ class FaceBoxesSSDDecoder(Adapter):
 
                 # Keep topK
                 # Applied just after NMS - no additional sorting is required for filtered_score array
-                filtered_score = filtered_score[:self.keep_top_k]
-                x_mins = x_mins[:self.keep_top_k]
-                y_mins = y_mins[:self.keep_top_k]
-                x_maxs = x_maxs[:self.keep_top_k]
-                y_maxs = y_maxs[:self.keep_top_k]
+                if filtered_score.size > self.keep_top_k:
+                    filtered_score = filtered_score[:self.keep_top_k]
+                    x_mins = x_mins[:self.keep_top_k]
+                    y_mins = y_mins[:self.keep_top_k]
+                    x_maxs = x_maxs[:self.keep_top_k]
+                    y_maxs = y_maxs[:self.keep_top_k]
 
                 # Save detections
                 labels = np.full_like(filtered_score, label)
