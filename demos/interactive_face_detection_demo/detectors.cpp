@@ -125,13 +125,6 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
     /** Set batch size to 1 **/
     slog::info << "Batch size is set to " << maxBatch << slog::endl;
     network.setBatchSize(maxBatch);
-    /** Read labels (if any)**/
-    std::string labelFileName = fileNameNoExt(pathToModel) + ".labels";
-
-    std::ifstream inputFile(labelFileName);
-    std::copy(std::istream_iterator<std::string>(inputFile),
-              std::istream_iterator<std::string>(),
-              std::back_inserter(labels));
     // -----------------------------------------------------------------------------------------------------
 
     /** SSD-based network should have one input and one output **/
@@ -153,42 +146,6 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
     }
     DataPtr& _output = outputInfo.begin()->second;
     output = outputInfo.begin()->first;
-    size_t num_classes = 0ul;
-
-    if (auto ngraphFunction = network.getFunction()) {
-        for (const auto & op : ngraphFunction->get_ops()) {
-            if (op->get_friendly_name() == output) {
-                auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
-                if (!detOutput) {
-                    THROW_IE_EXCEPTION << "Face Detection network output layer(" + op->get_friendly_name() +
-                        ") should be DetectionOutput, but was " +  op->get_type_info().name;
-                }
-
-                num_classes = detOutput->get_attrs().num_classes;
-                break;
-            }
-        }
-    } else {
-        const CNNLayerPtr outputLayer = network.getLayerByName(output.c_str());
-        if (outputLayer->type != "DetectionOutput") {
-            throw std::logic_error("Face Detection network output layer(" + outputLayer->name +
-                                   ") should be DetectionOutput, but was " +  outputLayer->type);
-        }
-
-        if (outputLayer->params.find("num_classes") == outputLayer->params.end()) {
-            throw std::logic_error("Face Detection network output layer (" +
-                                   output + ") should have num_classes integer attribute");
-        }
-
-        num_classes = outputLayer->GetParamAsUInt("num_classes");
-    }
-
-    if (labels.size() != num_classes) {
-        if (labels.size() == (num_classes - 1))  // if network assumes default "background" class, which has no label
-            labels.insert(labels.begin(), "fake");
-        else
-            labels.clear();
-    }
     const SizeVector outputDims = _output->getTensorDesc().getDims();
     maxProposalCount = outputDims[2];
     objectSize = outputDims[3];
@@ -201,7 +158,7 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
     }
     _output->setPrecision(Precision::FP32);
 
-    slog::info << "Loading Face Detection model to the "<< deviceForInference << " device" << slog::endl;
+    slog::info << "Loading Face Detection model to the " << deviceForInference << " device" << slog::endl;
     input = inputInfo.begin()->first;
     return network;
 }
@@ -342,44 +299,10 @@ CNNNetwork AgeGenderDetection::read(const InferenceEngine::Core& ie) {
     DataPtr ptrAgeOutput = (it++)->second;
     DataPtr ptrGenderOutput = (it++)->second;
 
-    if (!ptrAgeOutput) {
-        throw std::logic_error("Age output data pointer is not valid");
-    }
-    if (!ptrGenderOutput) {
-        throw std::logic_error("Gender output data pointer is not valid");
-    }
-
-    auto genderCreatorLayer = ptrGenderOutput->getCreatorLayer().lock();
-    auto ageCreatorLayer = ptrAgeOutput->getCreatorLayer().lock();
-
-    if (!ageCreatorLayer) {
-        throw std::logic_error("Age creator layer pointer is not valid");
-    }
-    if (!genderCreatorLayer) {
-        throw std::logic_error("Gender creator layer pointer is not valid");
-    }
-
-    // if gender output is convolution, it can be swapped with age
-    if (genderCreatorLayer->type == "Convolution") {
-        std::swap(ptrAgeOutput, ptrGenderOutput);
-    }
-
-    if (ptrAgeOutput->getCreatorLayer().lock()->type != "Convolution") {
-        throw std::logic_error("In Age/Gender Recognition network, age layer (" + ageCreatorLayer->name +
-                               ") should be a Convolution, but was: " + ageCreatorLayer->type);
-    }
-
-    if (ptrGenderOutput->getCreatorLayer().lock()->type != "SoftMax") {
-        throw std::logic_error("In Age/Gender Recognition network, gender layer (" + genderCreatorLayer->name +
-                               ") should be a SoftMax, but was: " + genderCreatorLayer->type);
-    }
-    slog::info << "Age layer: " << ageCreatorLayer->name<< slog::endl;
-    slog::info << "Gender layer: " << genderCreatorLayer->name<< slog::endl;
-
     outputAge = ptrAgeOutput->getName();
     outputGender = ptrGenderOutput->getName();
 
-    slog::info << "Loading Age/Gender Recognition model to the "<< deviceForInference << " plugin" << slog::endl;
+    slog::info << "Loading Age/Gender Recognition model to the " << deviceForInference << " plugin" << slog::endl;
     _enabled = true;
     return network;
 }
@@ -460,43 +383,16 @@ CNNNetwork HeadPoseDetection::read(const InferenceEngine::Core& ie) {
     // ---------------------------Check outputs ------------------------------------------------------------
     slog::info << "Checking Head Pose Estimation network outputs" << slog::endl;
     OutputsDataMap outputInfo(network.getOutputsInfo());
-    if (outputInfo.size() != 3) {
-        throw std::logic_error("Head Pose Estimation network should have 3 outputs");
-    }
     for (auto& output : outputInfo) {
         output.second->setPrecision(Precision::FP32);
     }
-    std::map<std::string, bool> layerNames = {
-        {outputAngleR, false},
-        {outputAngleP, false},
-        {outputAngleY, false}
-    };
-
-    for (auto && output : outputInfo) {
-        CNNLayerPtr layer = output.second->getCreatorLayer().lock();
-        if (!layer) {
-            throw std::logic_error("Layer pointer is invalid");
+    for (const std::string& outName : {outputAngleR, outputAngleP, outputAngleY}) {
+        if (outputInfo.find(outName) == outputInfo.end()) {
+            throw std::logic_error("There is no " + outName + " output in Head Pose Estimation network");
         }
-        if (layerNames.find(layer->name) == layerNames.end()) {
-            throw std::logic_error("Head Pose Estimation network output layer unknown: " + layer->name + ", should be " +
-                                   outputAngleR + " or " + outputAngleP + " or " + outputAngleY);
-        }
-        if (layer->type != "FullyConnected") {
-            throw std::logic_error("Head Pose Estimation network output layer (" + layer->name + ") has invalid type: " +
-                                   layer->type + ", should be FullyConnected");
-        }
-        auto fc = dynamic_cast<FullyConnectedLayer*>(layer.get());
-        if (!fc) {
-            throw std::logic_error("Fully connected layer is not valid");
-        }
-        if (fc->_out_num != 1) {
-            throw std::logic_error("Head Pose Estimation network output layer (" + layer->name + ") has invalid out-size=" +
-                                   std::to_string(fc->_out_num) + ", should be 1");
-        }
-        layerNames[layer->name] = true;
     }
 
-    slog::info << "Loading Head Pose Estimation model to the "<< deviceForInference << " plugin" << slog::endl;
+    slog::info << "Loading Head Pose Estimation model to the " << deviceForInference << " plugin" << slog::endl;
 
     _enabled = true;
     return network;
@@ -607,29 +503,9 @@ CNNNetwork EmotionsDetection::read(const InferenceEngine::Core& ie) {
         output.second->setPrecision(Precision::FP32);
     }
 
-    DataPtr emotionsOutput = outputInfo.begin()->second;
+    outputEmotions = outputInfo.begin()->first;
 
-    if (!emotionsOutput) {
-        throw std::logic_error("Emotions output data pointer is invalid");
-    }
-
-    auto emotionsCreatorLayer = emotionsOutput->getCreatorLayer().lock();
-
-    if (!emotionsCreatorLayer) {
-        throw std::logic_error("Emotions creator layer pointer is invalid");
-    }
-
-    if (emotionsCreatorLayer->type != "SoftMax") {
-        throw std::logic_error("In Emotions Recognition network, Emotion layer ("
-                               + emotionsCreatorLayer->name +
-                               ") should be a SoftMax, but was: " +
-                               emotionsCreatorLayer->type);
-    }
-    slog::info << "Emotions layer: " << emotionsCreatorLayer->name<< slog::endl;
-
-    outputEmotions = emotionsOutput->getName();
-
-    slog::info << "Loading Emotions Recognition model to the "<< deviceForInference << " plugin" << slog::endl;
+    slog::info << "Loading Emotions Recognition model to the " << deviceForInference << " plugin" << slog::endl;
     _enabled = true;
     return network;
 }
@@ -720,33 +596,21 @@ CNNNetwork FacialLandmarksDetection::read(const InferenceEngine::Core& ie) {
     // ---------------------------Check outputs ------------------------------------------------------------
     slog::info << "Checking Facial Landmarks Estimation network outputs" << slog::endl;
     OutputsDataMap outputInfo(network.getOutputsInfo());
-    if (outputInfo.size() != 1) {
-        throw std::logic_error("Facial Landmarks Estimation network should have only one output");
+    const std::string outName = outputInfo.begin()->first;
+    if (outName != outputFacialLandmarksBlobName) {
+        throw std::logic_error("Facial Landmarks Estimation network output layer unknown: " + outName
+                               + ", should be " + outputFacialLandmarksBlobName);
     }
-    for (auto& output : outputInfo) {
-        output.second->setPrecision(Precision::FP32);
-    }
-    std::map<std::string, bool> layerNames = {
-        {outputFacialLandmarksBlobName, false}
-    };
-
-    for (auto && output : outputInfo) {
-        CNNLayerPtr layer = output.second->getCreatorLayer().lock();
-        if (!layer) {
-            throw std::logic_error("Layer pointer is invalid");
-        }
-        if (layerNames.find(layer->name) == layerNames.end()) {
-            throw std::logic_error("Facial Landmarks Estimation network output layer unknown: " + layer->name + ", should be " +
-                                   outputFacialLandmarksBlobName);
-        }
-        const SizeVector outputDims = output.second->getTensorDesc().getDims();
-        if (outputDims[1] != 70) {
-            throw std::logic_error("Facial Landmarks Estimation network output layer should have 70 as a last dimension");
-        }
-        layerNames[layer->name] = true;
+    Data& data = *outputInfo.begin()->second;
+    data.setPrecision(Precision::FP32);
+    const SizeVector& outSizeVector = data.getTensorDesc().getDims();
+    if (outSizeVector.size() != 2 && outSizeVector.back() != 70) {
+        throw std::logic_error("Facial Landmarks Estimation network output layer should have 2 dimensions and 70 as"
+                               " the last dimension");
     }
 
-    slog::info << "Loading Facial Landmarks Estimation model to the "<< deviceForInference << " plugin" << slog::endl;
+    slog::info << "Loading Facial Landmarks Estimation model to the " << deviceForInference << " plugin"
+        << slog::endl;
 
     _enabled = true;
     return network;
