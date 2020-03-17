@@ -149,7 +149,6 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
     if (outputInfo.size() == 1) {
         DataPtr& _output = outputInfo.begin()->second;
         output = outputInfo.begin()->first;
-
         const SizeVector outputDims = _output->getTensorDesc().getDims();
         maxProposalCount = outputDims[2];
         objectSize = outputDims[3];
@@ -159,43 +158,7 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
         if (outputDims.size() != 4) {
             throw std::logic_error("Face Detection network output dimensions not compatible shoulld be 4, but was " +
                                    std::to_string(outputDims.size()));
-
-        size_t num_classes = 0ul;
-
-        if (auto ngraphFunction = network.getFunction()) {
-            for (const auto & op : ngraphFunction->get_ops()) {
-                if (op->get_friendly_name() == output) {
-                    auto detOutput = std::dynamic_pointer_cast<ngraph::op::DetectionOutput>(op);
-                    if (!detOutput) {
-                        THROW_IE_EXCEPTION << "Face Detection network output layer(" + op->get_friendly_name() +
-                            ") should be DetectionOutput, but was " +  op->get_type_info().name;
-                    }
-
-                    num_classes = detOutput->get_attrs().num_classes;
-                    break;
-                }
-            }
-        } else {
-            const CNNLayerPtr outputLayer = network.getLayerByName(output.c_str());
-            if (outputLayer->type != "DetectionOutput") {
-                throw std::logic_error("Face Detection network output layer(" + outputLayer->name +
-                                       ") should be DetectionOutput, but was " +  outputLayer->type);
-            }
-
-            if (outputLayer->params.find("num_classes") == outputLayer->params.end()) {
-                throw std::logic_error("Face Detection network output layer (" +
-                                       output + ") should have num_classes integer attribute");
-            }
-
-            num_classes = outputLayer->GetParamAsUInt("num_classes");
         }
-        if (labels.size() != num_classes) {
-            if (labels.size() == (num_classes - 1))  // if network assumes default "background" class, which has no label
-                labels.insert(labels.begin(), "fake");
-            else
-                labels.clear();
-        }
-
         _output->setPrecision(Precision::FP32);
     } else {
         for (const auto& outputLayer: outputInfo) {
