@@ -345,11 +345,11 @@ class SequentialModel:
 
         texts = []
         for feature in text_features:
-            encoder_outputs = self.recognizer_encoder.predict(identifiers, {'input': feature})
+            encoder_outputs = self.recognizer_encoder.predict(identifiers, {self.recognizer_decoder_inputs: feature})
             if output_callback:
                 output_callback(encoder_outputs)
 
-            feature = encoder_outputs['output']
+            feature = encoder_outputs[self.recognizer_encoder_output]
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
             feature = np.transpose(feature, (0, 2, 1))
 
