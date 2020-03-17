@@ -158,7 +158,7 @@ CNNNetwork FaceDetection::read(const InferenceEngine::Core& ie)  {
     }
     _output->setPrecision(Precision::FP32);
 
-    slog::info << "Loading Face Detection model to the "<< deviceForInference << " device" << slog::endl;
+    slog::info << "Loading Face Detection model to the " << deviceForInference << " device" << slog::endl;
     input = inputInfo.begin()->first;
     return network;
 }
@@ -302,10 +302,7 @@ CNNNetwork AgeGenderDetection::read(const InferenceEngine::Core& ie) {
     outputAge = ptrAgeOutput->getName();
     outputGender = ptrGenderOutput->getName();
 
-    slog::info << "Age layer: " << outputAge << slog::endl;
-    slog::info << "Gender layer: " << outputGender << slog::endl;
-
-    slog::info << "Loading Age/Gender Recognition model to the "<< deviceForInference << " plugin" << slog::endl;
+    slog::info << "Loading Age/Gender Recognition model to the " << deviceForInference << " plugin" << slog::endl;
     _enabled = true;
     return network;
 }
@@ -395,7 +392,7 @@ CNNNetwork HeadPoseDetection::read(const InferenceEngine::Core& ie) {
         }
     }
 
-    slog::info << "Loading Head Pose Estimation model to the "<< deviceForInference << " plugin" << slog::endl;
+    slog::info << "Loading Head Pose Estimation model to the " << deviceForInference << " plugin" << slog::endl;
 
     _enabled = true;
     return network;
@@ -506,12 +503,9 @@ CNNNetwork EmotionsDetection::read(const InferenceEngine::Core& ie) {
         output.second->setPrecision(Precision::FP32);
     }
 
-    DataPtr emotionsOutput = outputInfo.begin()->second;
-
     outputEmotions = outputInfo.begin()->first;
-    slog::info << "Emotions layer: " << outputEmotions << slog::endl;
 
-    slog::info << "Loading Emotions Recognition model to the "<< deviceForInference << " plugin" << slog::endl;
+    slog::info << "Loading Emotions Recognition model to the " << deviceForInference << " plugin" << slog::endl;
     _enabled = true;
     return network;
 }
@@ -615,7 +609,8 @@ CNNNetwork FacialLandmarksDetection::read(const InferenceEngine::Core& ie) {
                                " the last dimension");
     }
 
-    slog::info << "Loading Facial Landmarks Estimation model to the "<< deviceForInference << " plugin" << slog::endl;
+    slog::info << "Loading Facial Landmarks Estimation model to the " << deviceForInference << " plugin"
+        << slog::endl;
 
     _enabled = true;
     return network;

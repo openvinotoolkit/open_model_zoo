@@ -177,7 +177,7 @@ void ParseYOLOV3Output(const CNNNetwork &cnnNetwork, const std::string & output_
             }
         }
     } else {
-        throw std::runtime_error("Cant get ngraph::Function. Isn't the IR of version 10 provided?");
+        throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
     }
 
     auto side = out_blob_h;
