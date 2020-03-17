@@ -156,7 +156,19 @@ class ColorizationEvaluator(BaseEvaluator):
         self.launcher.release()
 
     def reset(self):
-        self.metric_executor.reset()
+        if self.metric_executor:
+            self.metric_executor.reset()
+        if hasattr(self, '_annotations'):
+            del self._annotations
+            del self._predictions
+            del self._input_ids
+        del self._metrics_results
+        self._annotations = []
+        self._predictions = []
+        self._input_ids = []
+        self._metrics_results = []
+        if self.dataset:
+            self.dataset.reset(self.postprocessor.has_processors)
 
     @staticmethod
     def get_processing_info(config):
@@ -237,6 +249,7 @@ class BaseModel:
     def __init__(self, network_info, launcher, delayed_model_loading=False):
         self.input_blob = None
         self.output_blob = None
+        self.with_prefix = False
         if not delayed_model_loading:
             self.load_model(network_info, launcher)
 
@@ -277,12 +290,15 @@ class BaseModel:
         else:
             self.network = None
             launcher.ie_core.import_network(str(model))
-        self.input_blob = next(iter(self.exec_network.inputs))
-        self.output_blob = next(iter(self.exec_network.outputs))
+        self.set_input_and_output()
 
     def load_network(self, network, launcher):
         self.network = network
         self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
+        self.set_input_and_output()
+
+    def set_input_and_output(self):
+        pass
 
 
 class ColorizationTestModel(BaseModel):
@@ -322,6 +338,21 @@ class ColorizationTestModel(BaseModel):
         input_data = np.reshape(input_data, self.exec_network.inputs[self.input_blob].shape)
         return {self.input_blob: input_data}
 
+    def set_input_and_output(self):
+        input_blob = next(iter(self.exec_network.inputs))
+        with_prefix = input_blob.startswith('colorization_network_')
+        if self.input_blob is None or with_prefix != self.with_prefix:
+            if self.input_blob is None:
+                output_blob = next(iter(self.exec_network.outputs))
+            else:
+                output_blob = (
+                    '_'.join(['colorization_network', self.output_blob])
+                    if with_prefix else self.output_blob.split('colorization_network_')[-1]
+                )
+            self.input_blob = next(iter(self.exec_network.inputs))
+            self.output_blob = output_blob
+            self.with_prefix = with_prefix
+
 
 class ColorizationCheckModel(BaseModel):
     def __init__(self, network_info, launcher, delayed_model_loading=False):
@@ -331,8 +362,6 @@ class ColorizationCheckModel(BaseModel):
 
     def predict(self, identifiers, input_data):
         raw_result = self.exec_network.infer(self.fit_to_input(input_data))
-        if self.adapter.output_blob is None:
-            self.adapter.output_blob = next(iter(self.exec_network.outputs))
         result = self.adapter.process([raw_result], identifiers, [{}])
         return raw_result, result
 
@@ -345,3 +374,19 @@ class ColorizationCheckModel(BaseModel):
         input_data *= constant_normalization
         input_data = np.transpose(input_data, (0, 3, 1, 2))
         return {self.input_blob: input_data}
+
+    def set_input_and_output(self):
+        input_blob = next(iter(self.exec_network.inputs))
+        with_prefix = input_blob.startswith('verification_network_')
+        if self.input_blob is None or with_prefix != self.with_prefix:
+            if self.input_blob is None:
+                output_blob = next(iter(self.exec_network.outputs))
+            else:
+                output_blob = (
+                    '_'.join(['verification_network', self.output_blob])
+                    if with_prefix else self.output_blob.split('verification_network_')[-1]
+                )
+            self.input_blob = next(iter(self.exec_network.inputs))
+            self.output_blob = output_blob
+            self.with_prefix = with_prefix
+            self.adapter.output_blob = output_blob
