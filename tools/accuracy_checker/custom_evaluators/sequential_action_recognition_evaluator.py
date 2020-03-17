@@ -375,6 +375,10 @@ class EncoderDLSDKModel(BaseModel):
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
         self.set_input_and_output()
+<<<<<<< 37d09751581d15e0400aaf5bf30f32facec9581d
+=======
+
+>>>>>>> fix model after renaming
 
     def predict(self, identifiers, input_data):
         return self.exec_network.infer(self.fit_to_input(input_data))
@@ -519,10 +523,6 @@ class DecoderDLSDKModel(BaseModel):
             self.output_blob = output_blob
             self.with_prefix = with_prefix
             self.adapter.output_blob = self.output_blob
-
-    def load_network(self, network, launcher):
-        self.network = network
-        self.exec_network = launcher.ie_core.load_network(network, launcher.device)
 
 
 class EncoderONNXModel(BaseModel):
