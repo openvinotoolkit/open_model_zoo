@@ -5,8 +5,18 @@ models:
       - framework: dlsdk
         tags:
             - FP32
-        model:   intel/faceboxes/faceboxes.xml
-        weights: intel/faceboxes/faceboxes.bin
+        model:   intel/faceboxes/FP32/faceboxes.xml
+        weights: intel/faceboxes/FP32/faceboxes.bin
+        adapter:
+            type: faceboxes
+            boxes_out: "342"
+            scores_out: "353"
+
+      - framework: dlsdk
+        tags:
+            - FP16
+        model:   intel/faceboxes/FP16/faceboxes.xml
+        weights: intel/faceboxes/FP16/faceboxes.bin
         adapter:
             type: faceboxes
             boxes_out: "342"
