@@ -761,7 +761,7 @@ class FaceBoxesSSDDecoder(Adapter):
             else:
                 list_x = [f_x + 0.5]
                 list_y = [f_y + 0.5]
-            anchors.extend(self.calculate_anchors(list_x, list_y, min_size, image_size,step))
+            anchors.extend(self.calculate_anchors(list_x, list_y, min_size, image_size, step))
         return anchors
 
     def prior_boxes(self, feature_maps, image_size):
