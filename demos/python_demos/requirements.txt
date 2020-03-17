@@ -4,7 +4,6 @@ nibabel
 numpy
 scikit-learn
 scipy
-setuptools
 tensorboard
 tensorboardX
 tqdm
