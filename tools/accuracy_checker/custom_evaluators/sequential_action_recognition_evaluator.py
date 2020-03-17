@@ -166,8 +166,19 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
         self.launcher.release()
 
     def reset(self):
-        self.metric_executor.reset()
-        self.model.reset()
+        if self.metric_executor:
+            self.metric_executor.reset()
+        if hasattr(self, '_annotations'):
+            del self._annotations
+            del self._predictions
+            del self._input_ids
+        del self._metrics_results
+        self._annotations = []
+        self._predictions = []
+        self._input_ids = []
+        self._metrics_results = []
+        if self.dataset:
+            self.dataset.reset(self.postprocessor.has_processors)
 
     @staticmethod
     def get_processing_info(config):
