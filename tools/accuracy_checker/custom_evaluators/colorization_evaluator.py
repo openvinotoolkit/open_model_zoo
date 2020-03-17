@@ -297,7 +297,7 @@ class BaseModel:
 
     def load_network(self, network, launcher):
         self.network = network
-        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device
+        self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.set_input_and_output()
 
     def set_input_and_output(self):
@@ -365,8 +365,6 @@ class ColorizationCheckModel(BaseModel):
 
     def predict(self, identifiers, input_data):
         raw_result = self.exec_network.infer(self.fit_to_input(input_data))
-        if self.adapter.output_blob is None:
-            self.adapter.output_blob = next(iter(self.exec_network.outputs))
         result = self.adapter.process([raw_result], identifiers, [{}])
         return raw_result, result
 
