@@ -1,6 +1,60 @@
+absl-py==0.9.0            # via tensorboard
+attrs==19.3.0             # via pytest
+cachetools==4.0.0         # via google-auth
+certifi==2019.11.28       # via requests
+chardet==3.0.4            # via requests
+cycler==0.10.0            # via matplotlib
+cython==0.29.15
+entrypoints==0.3          # via flake8
+flake8-import-order==0.18.1  # via motmetrics
+flake8==3.7.9             # via motmetrics
+google-auth-oauthlib==0.4.1  # via tensorboard
+google-auth==1.11.3       # via google-auth-oauthlib, tensorboard
+grpcio==1.27.2            # via tensorboard
+idna==2.9                 # via requests
+importlib-metadata==1.5.0  # via pluggy, pytest
 joblib==0.14.1            # via scikit-learn
-nibabel==3.0.1
+kiwisolver==1.1.0         # via matplotlib
+lxml==4.5.0
+markdown==3.2.1           # via tensorboard
+matplotlib==3.0.3
+mccabe==0.6.1             # via flake8
+more-itertools==8.2.0     # via pytest
+motmetrics==1.2.0
+nibabel==3.0.2
 numpy==1.18.1 ; python_version >= "3.4"
-scikit-learn==0.22.1
+oauthlib==3.1.0           # via requests-oauthlib
+packaging==20.3           # via pytest
+pandas==0.24.2            # via motmetrics
+pathlib2==2.3.5           # via pytest
+pluggy==0.13.1            # via pytest
+protobuf==3.11.3          # via tensorboard, tensorboardx
+py-cpuinfo==5.0.0         # via pytest-benchmark
+py==1.8.1                 # via pytest
+pyasn1-modules==0.2.8     # via google-auth
+pyasn1==0.4.8             # via pyasn1-modules, rsa
+pycodestyle==2.5.0        # via flake8, flake8-import-order
+pyflakes==2.1.1           # via flake8
+pyparsing==2.4.6          # via matplotlib, packaging
+pytest-benchmark==3.2.3   # via motmetrics
+pytest==5.4.1             # via motmetrics, pytest-benchmark
+python-dateutil==2.8.1    # via matplotlib, pandas
+pytz==2019.3              # via pandas
+requests-oauthlib==1.3.0  # via google-auth-oauthlib
+requests==2.23.0          # via requests-oauthlib, tensorboard
+rsa==4.0                  # via google-auth
+scikit-learn==0.22.2.post1
 scipy==1.4.1
-tqdm==4.42.0
+six==1.14.0               # via absl-py, cycler, google-auth, grpcio, packaging, pathlib2, protobuf, python-dateutil, tensorboard, tensorboardx
+tensorboard==2.1.1
+tensorboardx==2.0
+tqdm==4.43.0
+urllib3==1.25.8           # via requests
+wcwidth==0.1.8            # via pytest
+werkzeug==1.0.0           # via tensorboard
+wheel==0.34.2             # via tensorboard
+xmltodict==0.12.0         # via motmetrics
+zipp==1.2.0               # via importlib-metadata
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools
