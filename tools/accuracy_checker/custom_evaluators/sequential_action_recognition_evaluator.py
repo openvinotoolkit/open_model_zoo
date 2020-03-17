@@ -316,6 +316,7 @@ class SequentialModel(BaseModel):
                 raw_output, prediction = self.decoder.predict(identifiers, [self.processing_frames_buffer])
                 raw_outputs.append(raw_output)
                 predictions.append(prediction)
+                self.processing_frames_buffer = []
 
         return raw_outputs, predictions
 
