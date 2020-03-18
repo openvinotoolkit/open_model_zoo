@@ -344,7 +344,8 @@ PYTHON_DEMOS = [
         single_option_cases('-m',
             ModelArg('instance-segmentation-security-0010'),
             ModelArg('instance-segmentation-security-0050'),
-            ModelArg('instance-segmentation-security-0083')),
+            ModelArg('instance-segmentation-security-0083'),
+            ModelArg('instance-segmentation-security-1025')),
     )),
 
     PythonDemo(subdirectory='multi_camera_multi_person_tracking', device_keys=['-d'], test_cases=combine_cases(
