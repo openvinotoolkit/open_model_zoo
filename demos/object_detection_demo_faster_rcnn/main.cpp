@@ -24,8 +24,6 @@
 
 using namespace InferenceEngine;
 
-ConsoleErrorListener error_listener;
-
 bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     // ---------------------------Parsing and validation of input args--------------------------------------
 
@@ -73,10 +71,6 @@ int main(int argc, char *argv[]) {
         // --------------------------- 1. Load inference engine -------------------------------------
         slog::info << "Loading Inference Engine" << slog::endl;
         Core ie;
-
-        if (FLAGS_p_msg) {
-            ie.SetLogCallback(error_listener);
-        }
 
         if (!FLAGS_l.empty()) {
             // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension

@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 This is a TensorFlow\* version of `densenet-121` model, one of the DenseNet\*
-group of models designed to perform image classification. The weights were converted from DenseNet-Keras Models. For details, see [repository](https://github.com/pudae/tensorflow-densenet/) and [paper](https://arxiv.org/pdf/1608.06993.pdf).
+group of models designed to perform image classification. The weights were converted from DenseNet-Keras Models. For details, see [repository](https://github.com/pudae/tensorflow-densenet/) and [paper](https://arxiv.org/abs/1608.06993).
 
 ## Example
 

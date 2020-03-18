@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  MobileNet V2 <https://arxiv.org/pdf/1801.04381.pdf>
+  MobileNet V2 <https://arxiv.org/abs/1801.04381>
 task_type: classification
 files:
   - name: mobilenet-v2.prototxt

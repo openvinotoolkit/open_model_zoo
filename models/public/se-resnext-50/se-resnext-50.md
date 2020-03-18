@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-[ResNext-50 with Squeeze-and-Excitation blocks](https://arxiv.org/pdf/1709.01507.pdf)
+[ResNext-50 with Squeeze-and-Excitation blocks](https://arxiv.org/abs/1709.01507)
 
 ## Example
 

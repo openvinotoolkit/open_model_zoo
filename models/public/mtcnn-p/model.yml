@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  The "mtcnn-p" model is one of the mtcnn <https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf>
+  The "mtcnn-p" model is one of the mtcnn <https://arxiv.org/abs/1604.02878>
   group of models designed to perform face detection. Short for "Multi-task Cascaded
   Convolutional Neural Network", it is implemented using the Caffe* framework. The
   "p" designation indicates that this model is the "proposal" network intended to
