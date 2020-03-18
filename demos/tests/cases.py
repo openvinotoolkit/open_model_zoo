@@ -98,7 +98,7 @@ NATIVE_DEMOS = [
             ModelArg('person-reidentification-retail-0031'),
             ModelArg('person-reidentification-retail-0103'),
             ModelArg('person-reidentification-retail-0107'),
-            ModelArg('person-reidentification-retail-0200')),
+            ModelArg('person-reidentification-retail-0300')),
     )),
 
     NativeDemo(subdirectory='gaze_estimation_demo',
@@ -225,7 +225,7 @@ NATIVE_DEMOS = [
             ModelArg('person-reidentification-retail-0031'),
             ModelArg('person-reidentification-retail-0103'),
             ModelArg('person-reidentification-retail-0107'),
-            ModelArg('person-reidentification-retail-0200')),
+            ModelArg('person-reidentification-retail-0300')),
     )),
 
     NativeDemo(subdirectory='security_barrier_camera_demo',
@@ -374,7 +374,7 @@ PYTHON_DEMOS = [
             ModelArg('person-reidentification-retail-0031'),
             ModelArg('person-reidentification-retail-0103'),
             ModelArg('person-reidentification-retail-0107'),
-            ModelArg('person-reidentification-retail-0200')),
+            ModelArg('person-reidentification-retail-0300')),
     )),
 
     PythonDemo(subdirectory='object_detection_demo_ssd_async', device_keys=['-d'], test_cases=combine_cases(

@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection. For details see the [paper](https://arxiv.org/pdf/1506.01497v3.pdf).
+Faster R-CNN with Inception Resnet v2 Atrous version. Used for object detection. For details see the [paper](https://arxiv.org/abs/1506.01497v3).
 
 ## Example
 

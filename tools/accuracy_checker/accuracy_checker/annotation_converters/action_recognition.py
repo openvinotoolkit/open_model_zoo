@@ -48,7 +48,10 @@ class ActionRecognitionConverter(BaseFormatConverter):
             'dataset_meta_file': PathField(
                 description='path to json file with dataset meta (e.g. label_map)', optional=True
             ),
-            'numpy_input': BoolField(description='use numpy arrays instead of images', optional=True, default=False)
+            'numpy_input': BoolField(description='use numpy arrays instead of images', optional=True, default=False),
+            'num_samples': NumberField(
+                description='number of samples used for annotation', optional=True, value_type=int, min_value=1
+            )
         })
 
         return params
@@ -62,6 +65,7 @@ class ActionRecognitionConverter(BaseFormatConverter):
         self.subset = self.get_value_from_config('subset')
         self.dataset_meta = self.get_value_from_config('dataset_meta_file')
         self.numpy_input = self.get_value_from_config('numpy_input')
+        self.num_samples = self.get_value_from_config('num_samples')
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         full_annotation = read_json(self.annotation_file)
@@ -103,6 +107,8 @@ class ActionRecognitionConverter(BaseFormatConverter):
             }
 
             videos.append(sample)
+            if self.num_samples and len(videos) == self.num_samples:
+                break
 
         videos = sorted(videos, key=lambda v: v['video_id'].split('/')[-1])
 

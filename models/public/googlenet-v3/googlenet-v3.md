@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `googlenet-v3` model is the first of the Inception family of models designed to perform image classification. For details about this family of models, check out the [paper](https://arxiv.org/pdf/1602.07261.pdf).
+The `googlenet-v3` model is the first of the Inception family of models designed to perform image classification. For details about this family of models, check out the [paper](https://arxiv.org/abs/1602.07261).
 
 ## Example
 

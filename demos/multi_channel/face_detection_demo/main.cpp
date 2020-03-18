@@ -313,7 +313,7 @@ int main(int argc, char* argv[]) {
             }
 
 
-            std::vector<Detections> detections(getTensorHeight(output->getTensorDesc()) / 200);
+            std::vector<Detections> detections(FLAGS_bs);
             for (auto& d : detections) {
                 d.set(new std::vector<Face>);
             }

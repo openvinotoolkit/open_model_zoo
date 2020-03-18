@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  The "densenet-169" model is one of the DenseNet <https://arxiv.org/pdf/1608.06993>
+  The "densenet-169" model is one of the DenseNet <https://arxiv.org/abs/1608.06993>
   group of models designed to perform image classification. The main difference with
   the "densenet-121" model is the size and accuracy of the model. The "densenet-169"
   is larger at just about 55MB in size vs the "densenet-121" model's roughly 31MB

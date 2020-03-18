@@ -1,5 +1,5 @@
 models:
-  - name:  ssd_mobilenet_v1_coco
+  - name:  ssd_mobilenet_v2_coco
     launchers:
       - framework: dlsdk
         tags:

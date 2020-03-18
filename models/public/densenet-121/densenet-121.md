@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `densenet-121` model is one of the [DenseNet*](https://arxiv.org/pdf/1608.06993)
+The `densenet-121` model is one of the [DenseNet*](https://arxiv.org/abs/1608.06993)
 group of models designed to perform image classification. The authors originally trained the models 
 on Torch\*, but then converted them into Caffe\* format. All DenseNet models have
 been pretrained on the ImageNet image database. For details about this family of

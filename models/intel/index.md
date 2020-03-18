@@ -20,10 +20,16 @@ network to detect objects of the same type better.
 
 | Model Name                                                                                                                                                                          | Complexity (GFLOPs)  | Size (Mp)  | Face  | Person  | Vehicle  | Bike  | License plate  | Product |
 |------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |--------------------- |----------- |------ |-------- |--------- |------ |--------------- |-------- |
+| [faster-rcnn-resnet101-coco-sparse-60-0001](./faster-rcnn-resnet101-coco-sparse-60-0001/description/faster-rcnn-resnet101-coco-sparse-60-0001.md)                                   | 364.21               | 52.79      |       | X       | X        | X     |                |         |
 | [face-detection-adas-0001](./face-detection-adas-0001/description/face-detection-adas-0001.md)                                                                                      | 2.835                | 1.053      | X     |         |          |       |                |         |
 | [face-detection-adas-binary-0001](./face-detection-adas-binary-0001/description/face-detection-adas-binary-0001.md)                                                                 | 0.819                | 1.053      | X     |         |          |       |                |         |
 | [face-detection-retail-0004](./face-detection-retail-0004/description/face-detection-retail-0004.md)                                                                                | 1.067                | 0.588      | X     |         |          |       |                |         |
 | [face-detection-retail-0005](./face-detection-retail-0005/description/face-detection-retail-0005.md)                                                                                | 0.982                | 1.021      | X     |         |          |       |                |         |
+| [face-detection-0100](./face-detection-0100/description/face-detection-0100.md)                                                                                                     | 0.785                | 1.828      | X     |         |          |       |                |         |
+| [face-detection-0102](./face-detection-0102/description/face-detection-0102.md)                                                                                                     | 1.767                | 1.842      | X     |         |          |       |                |         |
+| [face-detection-0104](./face-detection-0104/description/face-detection-0104.md)                                                                                                     | 2.405                | 1.851      | X     |         |          |       |                |         |
+| [face-detection-0105](./face-detection-0105/description/face-detection-0105.md)                                                                                                     | 2.853                | 2.392      | X     |         |          |       |                |         |
+| [face-detection-0106](./face-detection-0106/description/face-detection-0106.md)                                                                                                     | 339.597              | 69.920     | X     |         |          |       |                |         |
 | [person-detection-retail-0002](./person-detection-retail-0002/description/person-detection-retail-0002.md)                                                                          | 12.427               | 3.244      |       | X       |          |       |                |         |
 | [person-detection-retail-0013](./person-detection-retail-0013/description/person-detection-retail-0013.md)                                                                          | 2.300                | 0.723      |       | X       |          |       |                |         |
 | [person-detection-action-recognition-0005](./person-detection-action-recognition-0005/description/person-detection-action-recognition-0005.md)                                      | 7.140                | 1.951      |       | X       |          |       |                |         |
@@ -89,7 +95,7 @@ and accuracy (expect a bigger model to perform better).
 | [person-reidentification-retail-0031](./person-reidentification-retail-0031/description/person-reidentification-retail-0031.md)   | 0.028                | 0.280      | 92.11%            |
 | [person-reidentification-retail-0103](./person-reidentification-retail-0103/description/person-reidentification-retail-0103.md)   | 0.564                | 0.597      | 93.5%             |
 | [person-reidentification-retail-0107](./person-reidentification-retail-0107/description/person-reidentification-retail-0107.md)   | 0.174                | 0.183      | 91.7%             |
-| [person-reidentification-retail-0200](./person-reidentification-retail-0200/description/person-reidentification-retail-0200.md)   | 5.506                | 4.723      | 95.4%             |
+| [person-reidentification-retail-0300](./person-reidentification-retail-0300/description/person-reidentification-retail-0300.md)   | 3.521                | 5.289      | 96.3%             |
 
 | Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Pairwise accuracy |
 |-----------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |------------------ |
@@ -170,6 +176,7 @@ Deep Learning models for text recognition in various applications.
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
 | [text-recognition-0012](./text-recognition-0012/description/text-recognition-0012.md)                                                          | 1.485                | 5.568      |
 | [handwritten-score-recognition-0003](./handwritten-score-recognition-0003/description/handwritten-score-recognition-0003.md)                   | 0.792                | 5.555      |
+| [handwritten-japanese-recognition-0001](./handwritten-japanese-recognition-0001/description/handwritten-japanese-recognition-0001.md)          | 117.136              | 15.31      |
 
 ## Text Spotting
 

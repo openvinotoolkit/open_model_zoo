@@ -152,8 +152,11 @@ Accuracy Checker supports following list of annotation converters and specific f
 * `icdar_detection` - converts ICDAR13 and ICDAR15 datasets for text detection challenge to `TextDetectionAnnotation`.
   * `data_dir` - path to folder with annotations on txt format.
   * `word_spotting` - if it is true then transcriptions that have lengths less than 3 symbols or transcriptions containing non-alphanumeric symbols will be marked as difficult.
-* `icdar13_recognition` - converts ICDAR13 dataset for text recognition task to `CharecterRecognitionAnnotation`.
+* `icdar13_recognition` - converts ICDAR13 dataset for text recognition task to `CharacterRecognitionAnnotation`.
   * `annotation_file` - path to annotation file in txt format.
+* `kondate_nakayosi_recognition` - converts [Kondate](http://web.tuat.ac.jp/~nakagawa/database/en/kondate_about.html) dataset and [Nakayosi](http://web.tuat.ac.jp/~nakagawa/database/en/about_nakayosi.html) for handwritten Japanese text recognition task to `CharacterRecognitionAnnotation`.
+  * `annotation_file` - path to annotation file in txt format.
+  * `decoding_char_file` - path to decoding_char_file, consisting of all supported characters separated by '\n' in txt format.
 * `brats` - converts BraTS dataset format to `BrainTumorSegmentationAnnotation` format.
   * `data_dir` - dataset root directory, which contain subdirectories with validation data (`imagesTr`) and ground truth labels (`labelsTr`).
   Optionally you can provide relative path for these subdirectories (if they have different location) using `image_folder` and `mask_folder` parameters respectively.
@@ -278,6 +281,7 @@ Accuracy Checker supports following list of annotation converters and specific f
   * `numpy_input` - allows usage numpy files instead images. It can be useful if data required difficult preprocessing steps (e.g. conversion to optical flow) (Optional, default `False`)
   * `subset` - dataset split: `train`, `validation` or `test` (Optional, default `validation`).
   * `dataset_meta_file` - path path to json file with dataset meta (e.g. label_map, color_encoding).Optional, more details in [Customizing dataset meta](#customizing-dataset-meta) section.
+  * `num_samples` - select first n samples from dataset (Optional, if not provided full subset of samples will be used).
 * `continuous_clip_action_recognition` - converts annotation of video-based MS-ASL dataset to `ClassificationAnnotation`.
   * `annotation_file` - path to annotation file in txt format.
   * `data_dir` - dataset root directory, which contains subdirectories with extracted video frames.
