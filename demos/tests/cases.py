@@ -96,8 +96,8 @@ NATIVE_DEMOS = [
         single_option_cases('-m_reid',
             None,
             ModelArg('person-reidentification-retail-0031'),
-            ModelArg('person-reidentification-retail-0103'),
-            ModelArg('person-reidentification-retail-0107'),
+            ModelArg('person-reidentification-retail-0248'),
+            ModelArg('person-reidentification-retail-0249'),
             ModelArg('person-reidentification-retail-0300')),
     )),
 
@@ -205,8 +205,8 @@ NATIVE_DEMOS = [
         ],
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0031'),
-            ModelArg('person-reidentification-retail-0103'),
-            ModelArg('person-reidentification-retail-0107'),
+            ModelArg('person-reidentification-retail-0248'),
+            ModelArg('person-reidentification-retail-0249'),
             ModelArg('person-reidentification-retail-0300')),
     )),
 
@@ -354,8 +354,8 @@ PYTHON_DEMOS = [
             '-m': ModelArg('person-detection-retail-0013')}),
         single_option_cases('--m_reid',
             ModelArg('person-reidentification-retail-0031'),
-            ModelArg('person-reidentification-retail-0103'),
-            ModelArg('person-reidentification-retail-0107'),
+            ModelArg('person-reidentification-retail-0248'),
+            ModelArg('person-reidentification-retail-0249'),
             ModelArg('person-reidentification-retail-0300')),
     )),
 

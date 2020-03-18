@@ -1,4 +1,4 @@
-# person-reidentification-retail-0107
+# person-reidentification-retail-0249
 
 ## Use Case and High-Level Description
 
@@ -10,25 +10,25 @@ feature map outputs an embedding vector of 256 floats.
 
 ## Example
 
-![](./person-reidentification-retail-0107.jpg)
+![](./person-reidentification-retail-0249.jpg)
 
 ## Specification
 
 | Metric                            | Value                                     |
 |-----------------------------------|-------------------------------------------|
-| Internal-reID-test rank@1 accuracy| 91.7%                                     |
-| Internal-reID-test mAP            | 63.4%                                     |
+| Market-1501 rank@1 accuracy       |  %                                    |
+| Market-1501 mAP                   |  %                                    |
 | Pose coverage                     | Standing upright, parallel to image plane |
 | Support of occluded pedestrians   | YES                                       |
 | Occlusion coverage                | <50%                                      |
-| GFlops                            | 0.174                                     |
-| MParams                           | 0.183                                     |
+| GFlops                            | 0.564                                     |
+| MParams                           | 0.597                                     |
 | Source framework                  | PyTorch\*                                 |
 
 The cumulative matching curve (CMC) at rank-1 is accuracy denoting the possibility
 to locate at least one true positive in the top-1 rank.
-Mean Average Precision (mAP) is the mean across Average Precision (AP) of all queries.  AP is defined as
-the area under the
+Mean Average Precision (mAP) is the mean across Average Precision (AP) of all queries.
+AP is defined as the area under the
 [precision and recall](https://en.wikipedia.org/wiki/Precision_and_recall) curve.
 
 ## Performance
