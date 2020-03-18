@@ -16,8 +16,8 @@ feature map outputs an embedding vector of 256 floats.
 
 | Metric                            | Value                                     |
 |-----------------------------------|-------------------------------------------|
-| Market-1501 rank@1 accuracy       |  %                                    |
-| Market-1501 mAP                   |  %                                    |
+| Market-1501 rank@1 accuracy       | 84.3 %                                    |
+| Market-1501 mAP                   | 55.6 %                                    |
 | Pose coverage                     | Standing upright, parallel to image plane |
 | Support of occluded pedestrians   | YES                                       |
 | Occlusion coverage                | <50%                                      |
