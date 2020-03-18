@@ -36,19 +36,19 @@ models:
             layout: NCDHW
 
     datasets:
-    - name: msasl-100
+      - name: msasl-100
 
-      preprocessing:
-        - type: resize
-          size: 256
-          aspect_ratio_scale: greater
-        - type: crop
-          size: 224
-        - type: bgr_to_rgb
+        preprocessing:
+          - type: resize
+            size: 256
+            aspect_ratio_scale: greater
+          - type: crop
+            size: 224
+          - type: bgr_to_rgb
 
-      metrics:
-        - type: accuracy
-          name: rank@1
-          top_k: 1
+        metrics:
+          - type: accuracy
+            name: rank@1
+            top_k: 1
 
 global_definitions: ../dataset_definitions.yml
