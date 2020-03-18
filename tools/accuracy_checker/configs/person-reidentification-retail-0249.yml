@@ -26,8 +26,8 @@ models:
       - framework: dlsdk
         tags:
           - FP16-INT8
-        model:   intel/person-reidentification-retail-0300/FP16-INT8/person-reidentification-retail-0249.xml
-        weights: intel/person-reidentification-retail-0300/FP16-INT8/person-reidentification-retail-0249.bin
+        model:   intel/person-reidentification-retail-0249/FP16-INT8/person-reidentification-retail-0249.xml
+        weights: intel/person-reidentification-retail-0249/FP16-INT8/person-reidentification-retail-0249.bin
         adapter: reid
 
     datasets:
