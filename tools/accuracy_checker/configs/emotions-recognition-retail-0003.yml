@@ -18,9 +18,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model:   intel/emotions-recognition-retail-0003/FP32-INT8/emotions-recognition-retail-0003.xml
-        weights: intel/emotions-recognition-retail-0003/FP32-INT8/emotions-recognition-retail-0003.bin
+          - FP16-INT8
+        model:   intel/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.xml
+        weights: intel/emotions-recognition-retail-0003/FP16-INT8/emotions-recognition-retail-0003.bin
         adapter: classification
 
     datasets:

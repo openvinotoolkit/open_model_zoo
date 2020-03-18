@@ -26,9 +26,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model:   intel/license-plate-recognition-barrier-0001/FP32-INT8/license-plate-recognition-barrier-0001.xml
-        weights: intel/license-plate-recognition-barrier-0001/FP32-INT8/license-plate-recognition-barrier-0001.bin
+          - FP16-INT8
+        model:   intel/license-plate-recognition-barrier-0001/FP16-INT8/license-plate-recognition-barrier-0001.xml
+        weights: intel/license-plate-recognition-barrier-0001/FP16-INT8/license-plate-recognition-barrier-0001.bin
         adapter: lpr
         inputs:
           - name: seq_ind
