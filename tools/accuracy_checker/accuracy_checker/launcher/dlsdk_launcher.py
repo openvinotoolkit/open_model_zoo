@@ -751,7 +751,10 @@ class DLSDKLauncher(Launcher):
             return
         if self._weights is None:
             self._weights = model_path.parent / (model_path.name.split(model_path.suffix)[0] + '.bin')
-        self.network = ie.IENetwork(model=str(self._model), weights=str(self._weights))
+        if 'read_network' in ie.IECore.__dict__:
+            self.network = self.ie_core.read_network(model=str(self._model), weights=str(self._weights))
+        else:
+            self.network = ie.IENetwork(model=str(self._model), weights=str(self._weights))
 
         self.original_outputs = self.network.outputs
         outputs = self.config.get('outputs')
