@@ -18,9 +18,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model:   intel/vehicle-detection-adas-0002/FP32-INT8/vehicle-detection-adas-0002.xml
-        weights: intel/vehicle-detection-adas-0002/FP32-INT8/vehicle-detection-adas-0002.bin
+          - FP16-INT8
+        model:   intel/vehicle-detection-adas-0002/FP16-INT8/vehicle-detection-adas-0002.xml
+        weights: intel/vehicle-detection-adas-0002/FP16-INT8/vehicle-detection-adas-0002.bin
         adapter: ssd
 
     datasets:
