@@ -49,7 +49,6 @@ from .detection import (
     SSDONNXAdapter,
     MTCNNPAdapter,
     RetinaNetAdapter,
-    FCOSPersonAdapter,
     ClassAgnosticDetectionAdapter,
     FaceBoxesSSDDecoder
 )
