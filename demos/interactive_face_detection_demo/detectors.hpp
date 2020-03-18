@@ -70,12 +70,15 @@ struct FaceDetection : BaseDetection {
 
     std::string input;
     std::string output;
+    std::string labels_output;
     double detectionThreshold;
     int maxProposalCount;
     int objectSize;
     int enquedFrames;
     float width;
     float height;
+    float network_input_width;
+    float network_input_height;
     float bb_enlarge_coefficient;
     float bb_dx_coefficient;
     float bb_dy_coefficient;
