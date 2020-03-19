@@ -204,12 +204,12 @@ def main():
             devices_nstreams = {device.split(':')[0]: device.split(':')[1] for device in args.num_streams.split(',')}
         
         if 'CPU' in devices_nstreams:
-            ie_async.set_config({'CPU_THROUGHPUT_STREAMS': devices_nstreams['CPU'] \
+            ie_async.set_config({'CPU_THROUGHPUT_STREAMS': str(devices_nstreams['CPU']) \
                                                            if int(devices_nstreams['CPU']) > 0 \
                                                            else 'CPU_THROUGHPUT_AUTO'}, 'CPU')
 
         if 'GPU' in devices_nstreams:
-            ie_async.set_config({'GPU_THROUGHPUT_STREAMS': devices_nstreams['GPU'] \
+            ie_async.set_config({'GPU_THROUGHPUT_STREAMS': str(devices_nstreams['GPU']) \
                                                            if int(devices_nstreams['GPU']) > 0 \
                                                            else 'GPU_THROUGHPUT_AUTO'}, 'GPU')
 
@@ -261,7 +261,7 @@ def main():
 
     # ----------------------------------------- 5. Loading model to the plugin -----------------------------------------
     log.info("Loading model to the plugin")
-    exec_net_sync = ie_sync.load_network(network=net, num_requests=args.num_infer_requests, device_name=args.device)
+    exec_net_sync = ie_sync.load_network(network=net, num_requests=1, device_name=args.device)
     exec_net_async = ie_async.load_network(network=net, num_requests=args.num_infer_requests, device_name=args.device)
 
     next_request_id = 0
@@ -269,137 +269,158 @@ def main():
     for i in range(args.num_infer_requests):
         empty_request_ids.put(i)
     frames = [None] * args.num_infer_requests
+    frame_buffer = Queue()
     raw_frame = None
+    sync_frame = None
     render_time = 0
     parsing_time = 0
+    new_shape = None
 
     # ----------------------------------------------- 6. Doing inference -----------------------------------------------
     log.info("Starting inference...")
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     print("To switch between sync/async modes, press TAB key in the output window")
-    while cap.isOpened():
+
+    def process_infer_request_output(output, frame, next_request_id):
         objects = list()
+        render_time = 0
 
-        if ((not is_async_mode and exec_net_sync.requests[next_request_id].wait(0) == 0) \
-            or (is_async_mode and exec_net_async.requests[next_request_id].wait(0) == 0)) \
-           and not frames[next_request_id] is None:
+        start_time = time()
+        for layer_name, out_blob in output.items():
+            out_blob = out_blob.reshape(net.layers[net.layers[layer_name].parents[0]].out_data[0].shape)
+            layer_params = YoloParams(net.layers[layer_name].params, out_blob.shape[2])
+            log.info("Layer {} parameters: ".format(layer_name))
+            layer_params.log_params()
+            objects += parse_yolo_region(out_blob, new_shape,
+                                         raw_frame.shape[:-1], layer_params,
+                                         args.prob_threshold)
+        parsing_time = time() - start_time
 
-            if is_async_mode:
+        # Filtering overlapping boxes with respect to the --iou_threshold CLI parameter
+        objects = sorted(objects, key=lambda obj : obj['confidence'], reverse=True)
+        for i in range(len(objects)):
+            if objects[i]['confidence'] == 0:
+                continue
+            for j in range(i + 1, len(objects)):
+                if intersection_over_union(objects[i], objects[j]) > args.iou_threshold:
+                    objects[j]['confidence'] = 0
+
+        # Drawing objects with respect to the --prob_threshold CLI parameter
+        objects = [obj for obj in objects if obj['confidence'] >= args.prob_threshold]
+
+        if len(objects) and args.raw_output_message:
+            log.info("\nDetected boxes for batch {}:".format(1))
+            log.info(" Class ID | Confidence | XMIN | YMIN | XMAX | YMAX | COLOR ")
+
+        origin_im_size = frame.shape[:-1]
+        for obj in objects:
+            # Validation bbox of detected object
+            if obj['xmax'] > origin_im_size[1] or obj['ymax'] > origin_im_size[0] \
+               or obj['xmin'] < 0 or obj['ymin'] < 0:
+                continue
+            color = (int(min(obj['class_id'] * 12.5, 255)),
+                     min(obj['class_id'] * 7, 255), min(obj['class_id'] * 5, 255))
+            det_label = labels_map[obj['class_id']] if labels_map and len(labels_map) >= obj['class_id'] else \
+                str(obj['class_id'])
+
+            if args.raw_output_message:
+                log.info(
+                    "{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} | {} ".format(det_label, obj['confidence'],
+                                                                              obj['xmin'], obj['ymin'], obj['xmax'],
+                                                                              obj['ymax'],
+                                                                              color))
+
+            cv2.rectangle(frame, (obj['xmin'], obj['ymin']), (obj['xmax'], obj['ymax']), color, 2)
+            cv2.putText(frame,
+                        "#" + det_label + ' ' + str(round(obj['confidence'] * 100, 1)) + ' %',
+                        (obj['xmin'], obj['ymin'] - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
+
+        # Draw performance stats over frame
+        inf_time_message = "Inference time: N\A for async mode" if is_async_mode else \
+            "Inference time: {:.3f} ms".format(det_time * 1e3)
+        render_time_message = "OpenCV rendering time: {:.3f} ms".format(render_time * 1e3)
+        async_mode_message = "Async mode is on. Processing request {}".format(next_request_id) if is_async_mode \
+           else "Async mode is off. Processing request {}".format(next_request_id)
+        parsing_message = "YOLO parsing time is {:.3f} ms".format(parsing_time * 1e3)
+
+        # Background for messages with metrics
+        cv2.rectangle(frame, (10, 0), (335, 55), (0, 0, 0), -1)
+
+        cv2.putText(frame, inf_time_message, (15, 15),
+                    cv2.FONT_HERSHEY_COMPLEX, 0.5, (200, 10, 10), 1)
+        cv2.putText(frame, render_time_message, (15, 45),
+                    cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
+        cv2.putText(frame, async_mode_message, (10, int(origin_im_size[0] - 20)),
+                    cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
+        cv2.putText(frame, parsing_message, (15, 30),
+                    cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
+
+        start_time = time()
+        if not args.no_show:
+            cv2.imshow("DetectionResults", frame)
+        render_time = time() - start_time
+
+    while cap.isOpened():
+        if is_async_mode:
+            if exec_net_async.requests[next_request_id].wait(0) == 0 and not frames[next_request_id] is None:
                 output = exec_net_async.requests[next_request_id].outputs
-            else:
-                output = exec_net_sync.requests[next_request_id].outputs
 
-            start_time = time()
-            for layer_name, out_blob in output.items():
-                out_blob = out_blob.reshape(net.layers[net.layers[layer_name].parents[0]].out_data[0].shape)
-                layer_params = YoloParams(net.layers[layer_name].params, out_blob.shape[2])
-                log.info("Layer {} parameters: ".format(layer_name))
-                layer_params.log_params()
-                objects += parse_yolo_region(out_blob, new_shape,
-                                             raw_frame.shape[:-1], layer_params,
-                                             args.prob_threshold)
-            parsing_time = time() - start_time
+                process_infer_request_output(output, frames[next_request_id], next_request_id)
+                frames[next_request_id] = None
 
-            # Filtering overlapping boxes with respect to the --iou_threshold CLI parameter
-            objects = sorted(objects, key=lambda obj : obj['confidence'], reverse=True)
-            for i in range(len(objects)):
-                if objects[i]['confidence'] == 0:
-                    continue
-                for j in range(i + 1, len(objects)):
-                    if intersection_over_union(objects[i], objects[j]) > args.iou_threshold:
-                        objects[j]['confidence'] = 0
-
-            # Drawing objects with respect to the --prob_threshold CLI parameter
-            objects = [obj for obj in objects if obj['confidence'] >= args.prob_threshold]
-
-            if len(objects) and args.raw_output_message:
-                log.info("\nDetected boxes for batch {}:".format(1))
-                log.info(" Class ID | Confidence | XMIN | YMIN | XMAX | YMAX | COLOR ")
-
-            origin_im_size = frames[next_request_id].shape[:-1]
-            for obj in objects:
-                # Validation bbox of detected object
-                if obj['xmax'] > origin_im_size[1] or obj['ymax'] > origin_im_size[0] \
-                   or obj['xmin'] < 0 or obj['ymin'] < 0:
-                    continue
-                color = (int(min(obj['class_id'] * 12.5, 255)),
-                         min(obj['class_id'] * 7, 255), min(obj['class_id'] * 5, 255))
-                det_label = labels_map[obj['class_id']] if labels_map and len(labels_map) >= obj['class_id'] else \
-                    str(obj['class_id'])
-
-                if args.raw_output_message:
-                    log.info(
-                        "{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} | {} ".format(det_label, obj['confidence'],
-                                                                                  obj['xmin'], obj['ymin'], obj['xmax'],
-                                                                                  obj['ymax'],
-                                                                                  color))
-
-                cv2.rectangle(frames[next_request_id], (obj['xmin'], obj['ymin']), (obj['xmax'], obj['ymax']), color, 2)
-                cv2.putText(frames[next_request_id],
-                            "#" + det_label + ' ' + str(round(obj['confidence'] * 100, 1)) + ' %',
-                            (obj['xmin'], obj['ymin'] - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
-
-            # Draw performance stats over frame
-            inf_time_message = "Inference time: N\A for async mode" if is_async_mode else \
-                "Inference time: {:.3f} ms".format(det_time * 1e3)
-            render_time_message = "OpenCV rendering time: {:.3f} ms".format(render_time * 1e3)
-            async_mode_message = "Async mode is on. Processing request {}".format(next_request_id) if is_async_mode \
-               else "Async mode is off. Processing request {}".format(next_request_id)
-            parsing_message = "YOLO parsing time is {:.3f} ms".format(parsing_time * 1e3)
-
-            # Background for messages with metrics
-            cv2.rectangle(frames[next_request_id], (10, 0), (335, 55), (0, 0, 0), -1)
-
-            cv2.putText(frames[next_request_id], inf_time_message, (15, 15),
-                        cv2.FONT_HERSHEY_COMPLEX, 0.5, (200, 10, 10), 1)
-            cv2.putText(frames[next_request_id], render_time_message, (15, 45),
-                        cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
-            cv2.putText(frames[next_request_id], async_mode_message, (10, int(origin_im_size[0] - 20)),
-                        cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
-            cv2.putText(frames[next_request_id], parsing_message, (15, 30),
-                        cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
-
-            start_time = time()
-            if not args.no_show:
-                cv2.imshow("DetectionResults", frames[next_request_id])
-            render_time = time() - start_time
-
-            frames[next_request_id] = None
-
-            if is_async_mode:
                 empty_request_ids.put(next_request_id)
                 next_request_id += 1
                 if next_request_id == args.num_infer_requests:
                     next_request_id = 0
+            elif not empty_request_ids.empty():
+                if frame_buffer.empty():
+                    ret, frame = cap.read()
+                    if not ret:
+                        break
+                else:
+                    frame = frame_buffer.get()
+                raw_frame = frame.copy()
 
-        elif (not is_async_mode and frames[next_request_id] is None) \
-             or (is_async_mode and not empty_request_ids.empty()):
-            ret, frame = cap.read()
-
-            if not ret:
-                break
-
-            raw_frame = frame.copy()
-
-            if is_async_mode:
                 request_id = empty_request_ids.get()
-            else:
-                request_id = next_request_id
-            in_frame = cv2.resize(frame, (w, h))
+                in_frame = cv2.resize(frame, (w, h))
 
-            # resize input_frame to network size
-            in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-            in_frame = in_frame.reshape((n, c, h, w))
-            new_shape = in_frame.shape[2:]
-            frames[request_id] = raw_frame.copy()
+                # resize input_frame to network size
+                in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+                in_frame = in_frame.reshape((n, c, h, w))
+                new_shape = in_frame.shape[2:]
+                frames[request_id] = raw_frame.copy()
 
-            # Start inference
-            start_time = time()
-            if is_async_mode:
+                # Start inference
+                start_time = time()
                 exec_net_async.start_async(request_id=request_id, inputs={input_blob: in_frame})
-            else:
-                exec_net_sync.start_async(request_id=request_id, inputs={input_blob: in_frame})
-            det_time = time() - start_time
+                det_time = time() - start_time
+        else:
+            if exec_net_sync.requests[0].wait(0) == 0 and not sync_frame is None:
+                output = exec_net_sync.requests[0].outputs
+
+                process_infer_request_output(output, sync_frame, 0)
+                sync_frame = None
+            elif sync_frame is None:
+                if frame_buffer.empty():
+                    ret, frame = cap.read()
+                    if not ret:
+                        break
+                else:
+                    frame = frame_buffer.get()
+                raw_frame = frame.copy()
+                
+                in_frame = cv2.resize(frame, (w, h))
+
+                # resize input_frame to network size
+                in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+                in_frame = in_frame.reshape((n, c, h, w))
+                new_shape = in_frame.shape[2:]
+                sync_frame = raw_frame.copy()
+
+                # Start inference
+                start_time = time()
+                exec_net_sync.start_async(request_id=0, inputs={input_blob: in_frame})
+                det_time = time() - start_time
 
         if not args.no_show:
             key = cv2.waitKey(wait_key_code)
@@ -410,19 +431,25 @@ def main():
             # Tab key
             if key == 9:
                 if is_async_mode:
-                    exec_net_async.requests[next_request_id].wait(-1)
-                    frames[next_request_id] = None
+                    for i in range(next_request_id, args.num_infer_requests):
+                        if not frames[i] is None:
+                            frame_buffer.put(frames[i].copy())
+                            frames[i] = None
+                    for i in range(next_request_id):
+                        if not frames[i] is None:
+                            frame_buffer.put(frames[i].copy())
+                            frames[i] = None
                 else:
-                    for i in range(args.num_infer_requests):
-                        exec_net_async.requests[i].wait(-1)
-                        frames[i] = None
-
-                    next_request_id = 0
-                    empty_request_ids = Queue(maxsize=args.num_infer_requests)
-                    for i in range(args.num_infer_requests):
-                        empty_request_ids.put(i)
-                    frames = [None] * args.num_infer_requests
-                    raw_frame = None
+                    if not sync_frame is None:
+                        frame_buffer.put(sync_frame.copy())
+                        sync_frame = None
+                        
+                next_request_id = 0
+                empty_request_ids = Queue(maxsize=args.num_infer_requests)
+                for i in range(args.num_infer_requests):
+                    empty_request_ids.put(i)
+                frames = [None] * args.num_infer_requests
+                raw_frame = None
 
                 is_async_mode = not is_async_mode
                 log.info("Switched to {} mode".format("async" if is_async_mode else "sync"))
