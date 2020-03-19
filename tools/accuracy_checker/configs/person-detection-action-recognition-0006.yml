@@ -53,9 +53,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model:   intel/person-detection-action-recognition-0006/FP32-INT8/person-detection-action-recognition-0006.xml
-        weights: intel/person-detection-action-recognition-0006/FP32-INT8/person-detection-action-recognition-0006.bin
+          - FP16-INT8
+        model:   intel/person-detection-action-recognition-0006/FP16-INT8/person-detection-action-recognition-0006.xml
+        weights: intel/person-detection-action-recognition-0006/FP16-INT8/person-detection-action-recognition-0006.bin
         adapter:
           type: action_detection
           multihead_net: True

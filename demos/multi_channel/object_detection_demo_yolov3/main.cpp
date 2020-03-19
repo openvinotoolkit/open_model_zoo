@@ -298,7 +298,7 @@ std::map<std::string, YoloParams> GetYoloParams(const std::vector<std::string>& 
                 }
             }
         } else {
-            params = network.getLayerByName(output_name.c_str());
+            throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
         }
         __yoloParams.insert(std::pair<std::string, YoloParams>(output_name.c_str(), params));
     }

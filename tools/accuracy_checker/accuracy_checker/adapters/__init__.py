@@ -49,8 +49,8 @@ from .detection import (
     SSDONNXAdapter,
     MTCNNPAdapter,
     RetinaNetAdapter,
-    FCOSPersonAdapter,
-    FaceBoxesSSDDecoder
+    ClassAgnosticDetectionAdapter,
+    FaceBoxesAdapter
 )
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
 from .classification import ClassificationAdapter
@@ -91,8 +91,8 @@ __all__ = [
     'MTCNNPAdapter',
     'CTDETAdapter',
     'RetinaNetAdapter',
-    'FCOSPersonAdapter',
-    'FaceBoxesSSDDecoder',
+    'ClassAgnosticDetectionAdapter',
+    'FaceBoxesAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',

@@ -177,7 +177,7 @@ void ParseYOLOV3Output(const CNNNetwork &cnnNetwork, const std::string & output_
             }
         }
     } else {
-        params = cnnNetwork.getLayerByName(output_name.c_str());
+        throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
     }
 
     auto side = out_blob_h;
@@ -270,9 +270,6 @@ int main(int argc, char *argv[]) {
         slog::info << "Loading network files" << slog::endl;
         /** Reading network model **/
         auto cnnNetwork = ie.ReadNetwork(FLAGS_m);
-        /** Setting batch size to 1 **/
-        slog::info << "Batch size is forced to  1." << slog::endl;
-        cnnNetwork.setBatchSize(1);
         /** Reading labels (if specified) **/
         std::string labelFileName = fileNameNoExt(FLAGS_m) + ".labels";
         std::vector<std::string> labels;
@@ -299,6 +296,11 @@ int main(int argc, char *argv[]) {
         } else {
             input->getInputData()->setLayout(Layout::NCHW);
         }
+
+        ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
+        SizeVector& inSizeVector = inputShapes.begin()->second;
+        inSizeVector[0] = 1;  // set batch to 1
+        cnnNetwork.reshape(inputShapes);
         // --------------------------------- Preparing output blobs -------------------------------------------
         slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
         OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());

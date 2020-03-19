@@ -20,9 +20,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model:   intel/text-image-super-resolution-0001/FP32-INT8/text-image-super-resolution-0001.xml
-        weights: intel/text-image-super-resolution-0001/FP32-INT8/text-image-super-resolution-0001.bin
+          - FP16-INT8
+        model:   intel/text-image-super-resolution-0001/FP16-INT8/text-image-super-resolution-0001.xml
+        weights: intel/text-image-super-resolution-0001/FP16-INT8/text-image-super-resolution-0001.bin
         adapter:
           type: super_resolution
 

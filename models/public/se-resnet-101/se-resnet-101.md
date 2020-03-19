@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-[ResNet-101 with Squeeze-and-Excitation blocks](https://arxiv.org/pdf/1709.01507.pdf)
+[ResNet-101 with Squeeze-and-Excitation blocks](https://arxiv.org/abs/1709.01507)
 
 ## Example
 

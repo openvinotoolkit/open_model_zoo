@@ -11,9 +11,43 @@
  limitations under the License.
 """
 
+import cv2 as cv
+import logging as log
 import os.path as osp
 import sys
 from importlib import import_module
+
+
+class AverageEstimator(object):
+    def __init__(self, initial_val=None):
+        self.reset()
+        if initial_val is not None:
+            self.update(initial_val)
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
+
+    def is_valid(self):
+        return self.count > 0
+
+    def merge(self, other):
+        self.val = (self.val + other.val) * 0.5
+        self.sum += other.sum
+        self.count += other.count
+        if self.count > 0:
+            self.avg = self.sum / self.count
+
+    def get(self):
+        return self.avg
 
 
 def check_file_exist(filename, msg_tmpl='file "{}" does not exist'):
@@ -41,10 +75,20 @@ def read_py_config(filename):
     return cfg_dict
 
 
-def none_to_zero(a):
-    if a is not None:
-        return a
-    return 0
+def check_pressed_keys(key):
+    if key == 32:  # Pause
+        while True:
+            key = cv.waitKey(0)
+            if key == 27 or key == 32 or key == 13:  # enter: resume, space: next frame, esc: exit
+                break
+    else:
+        key = cv.waitKey(1)
+    return key
+
+
+def set_log_config():
+    log.basicConfig(stream=sys.stdout, format='%(levelname)s: %(asctime)s: %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S', level=log.DEBUG)
 
 
 COLOR_PALETTE = [[0, 113, 188],
