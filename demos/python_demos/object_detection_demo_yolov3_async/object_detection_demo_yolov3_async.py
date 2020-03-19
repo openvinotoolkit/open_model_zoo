@@ -431,18 +431,19 @@ def main():
             # Tab key
             if key == 9:
                 if is_async_mode:
-                    for i in range(next_request_id, args.num_infer_requests):
+                    for i in [*range(next_request_id, args.num_infer_requests), *range(next_request_id)]:
                         if not frames[i] is None:
                             frame_buffer.put(frames[i].copy())
                             frames[i] = None
-                    for i in range(next_request_id):
-                        if not frames[i] is None:
-                            frame_buffer.put(frames[i].copy())
-                            frames[i] = None
+                        else:
+                            break
+                            
+                    exec_net_sync.requests[0].wait(-1)
                 else:
-                    if not sync_frame is None:
-                        frame_buffer.put(sync_frame.copy())
-                        sync_frame = None
+                    sync_frame = None
+
+                    for i in range(args.num_infer_requests):
+                        exec_net_async.requests[i].wait(-1)
                         
                 next_request_id = 0
                 empty_request_ids = Queue(maxsize=args.num_infer_requests)
