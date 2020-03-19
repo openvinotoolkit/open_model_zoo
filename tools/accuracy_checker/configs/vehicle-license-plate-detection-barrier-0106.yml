@@ -18,9 +18,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model:   intel/vehicle-license-plate-detection-barrier-0106/FP32-INT8/vehicle-license-plate-detection-barrier-0106.xml
-        weights: intel/vehicle-license-plate-detection-barrier-0106/FP32-INT8/vehicle-license-plate-detection-barrier-0106.bin
+          - FP16-INT8
+        model:   intel/vehicle-license-plate-detection-barrier-0106/FP16-INT8/vehicle-license-plate-detection-barrier-0106.xml
+        weights: intel/vehicle-license-plate-detection-barrier-0106/FP16-INT8/vehicle-license-plate-detection-barrier-0106.bin
         adapter: ssd
 
     datasets:

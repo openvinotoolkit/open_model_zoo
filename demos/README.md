@@ -67,6 +67,7 @@ The table below shows the correlation between models, demos, and supported plugi
 | instance-segmentation-security-0010              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported |           |             | Supported       |
 | instance-segmentation-security-0050              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported |           |             | Supported       |
 | instance-segmentation-security-0083              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported |           |             | Supported       |
+| instance-segmentation-security-1025              | [Instance Segmentation Demo](./python_demos/instance_segmentation_demo/README.md) | Supported |           |             | Supported       |
 | age-gender-recognition-retail-0013               | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
 | emotions-recognition-retail-0003                 | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)        | Supported | Supported | Supported   | Supported       |
 | face-detection-adas-0001                         | [Interactive Face Detection Demo](./interactive_face_detection_demo/README.md)<br>[Interactive Face Recognition Python* Demo](./python_demos/face_recognition_demo/README.md)        | Supported | Supported | Supported   | Supported       |

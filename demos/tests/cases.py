@@ -96,8 +96,8 @@ NATIVE_DEMOS = [
         single_option_cases('-m_reid',
             None,
             ModelArg('person-reidentification-retail-0031'),
-            ModelArg('person-reidentification-retail-0103'),
-            ModelArg('person-reidentification-retail-0107'),
+            ModelArg('person-reidentification-retail-0248'),
+            ModelArg('person-reidentification-retail-0249'),
             ModelArg('person-reidentification-retail-0300')),
     )),
 
@@ -223,8 +223,8 @@ NATIVE_DEMOS = [
         ],
         single_option_cases('-m_reid',
             ModelArg('person-reidentification-retail-0031'),
-            ModelArg('person-reidentification-retail-0103'),
-            ModelArg('person-reidentification-retail-0107'),
+            ModelArg('person-reidentification-retail-0248'),
+            ModelArg('person-reidentification-retail-0249'),
             ModelArg('person-reidentification-retail-0300')),
     )),
 
@@ -362,7 +362,8 @@ PYTHON_DEMOS = [
         single_option_cases('-m',
             ModelArg('instance-segmentation-security-0010'),
             ModelArg('instance-segmentation-security-0050'),
-            ModelArg('instance-segmentation-security-0083')),
+            ModelArg('instance-segmentation-security-0083'),
+            ModelArg('instance-segmentation-security-1025')),
     )),
 
     PythonDemo(subdirectory='multi_camera_multi_person_tracking', device_keys=['-d'], test_cases=combine_cases(
@@ -372,8 +373,8 @@ PYTHON_DEMOS = [
             '-m': ModelArg('person-detection-retail-0013')}),
         single_option_cases('--m_reid',
             ModelArg('person-reidentification-retail-0031'),
-            ModelArg('person-reidentification-retail-0103'),
-            ModelArg('person-reidentification-retail-0107'),
+            ModelArg('person-reidentification-retail-0248'),
+            ModelArg('person-reidentification-retail-0249'),
             ModelArg('person-reidentification-retail-0300')),
     )),
 

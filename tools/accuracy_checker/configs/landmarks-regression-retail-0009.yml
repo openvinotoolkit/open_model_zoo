@@ -18,9 +18,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model:   intel/landmarks-regression-retail-0009/FP32-INT8/landmarks-regression-retail-0009.xml
-        weights: intel/landmarks-regression-retail-0009/FP32-INT8/landmarks-regression-retail-0009.bin
+          - FP16-INT8
+        model:   intel/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.xml
+        weights: intel/landmarks-regression-retail-0009/FP16-INT8/landmarks-regression-retail-0009.bin
         adapter: landmarks_regression
 
     datasets:

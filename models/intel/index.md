@@ -90,14 +90,14 @@ vectors that are "close" by L2 metric (Euclidean distance).
 There are multiple models that provide various trade-offs between performance
 and accuracy (expect a bigger model to perform better).
 
-| Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Rank-1 |
+| Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Rank-1 on Market-1501 |
 |-----------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |------------------ |
 | [person-reidentification-retail-0031](./person-reidentification-retail-0031/description/person-reidentification-retail-0031.md)   | 0.028                | 0.280      | 92.11%            |
-| [person-reidentification-retail-0103](./person-reidentification-retail-0103/description/person-reidentification-retail-0103.md)   | 0.564                | 0.597      | 93.5%             |
-| [person-reidentification-retail-0107](./person-reidentification-retail-0107/description/person-reidentification-retail-0107.md)   | 0.174                | 0.183      | 91.7%             |
+| [person-reidentification-retail-0248](./person-reidentification-retail-0248/description/person-reidentification-retail-0248.md)   | 0.174                | 0.183      | 84.3%             |
+| [person-reidentification-retail-0249](./person-reidentification-retail-0249/description/person-reidentification-retail-0249.md)   | 0.564                | 0.597      | 92.9%             |
 | [person-reidentification-retail-0300](./person-reidentification-retail-0300/description/person-reidentification-retail-0300.md)   | 3.521                | 5.289      | 96.3%             |
 
-| Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Pairwise accuracy |
+| Model Name                                                                                                                        | Complexity (GFLOPs)  | Size (Mp)  | Pairwise accuracy on LFW |
 |-----------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |------------------ |
 | [face-reidentification-retail-0095](./face-reidentification-retail-0095/description/face-reidentification-retail-0095.md)         | 0.588                | 1.107      | 99.33%            |
 
@@ -128,6 +128,7 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 
 | Model Name                                                                                                                                     | Complexity (GFLOPs)  | Size (Mp)  |
 |------------------------------------------------------------------------------------------------------------------------------------------------|--------------------- |----------- |
+| [instance-segmentation-security-1025](./instance-segmentation-security-1025/description/instance-segmentation-security-1025.md)                | 30.146               | 26.69      |
 | [instance-segmentation-security-0050](./instance-segmentation-security-0050/description/instance-segmentation-security-0050.md)                | 46.602               | 30.448     |
 | [instance-segmentation-security-0083](./instance-segmentation-security-0083/description/instance-segmentation-security-0083.md)                | 365.626              | 143.444    |
 | [instance-segmentation-security-0010](./instance-segmentation-security-0010/description/instance-segmentation-security-0010.md)                | 899.568              | 174.568    |

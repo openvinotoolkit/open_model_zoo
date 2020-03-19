@@ -26,9 +26,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model:   intel/head-pose-estimation-adas-0001/FP32-INT8/head-pose-estimation-adas-0001.xml
-        weights: intel/head-pose-estimation-adas-0001/FP32-INT8/head-pose-estimation-adas-0001.bin
+          - FP16-INT8
+        model:   intel/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.xml
+        weights: intel/head-pose-estimation-adas-0001/FP16-INT8/head-pose-estimation-adas-0001.bin
         adapter:
           type: head_pose
           angle_yaw: angle_y_fc
