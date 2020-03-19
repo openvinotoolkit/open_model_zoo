@@ -60,8 +60,18 @@ Options:
   -pc, --perf_counts    Optional. Report performance counters
   -r, --raw_output_message
                         Optional. Output inference results raw values showing
-  -nireq, --num_infer_requests
+  -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
                         Optional. Number of infer requests
+  -nstreams NUM_STREAMS, --num_streams NUM_STREAMS
+                        Optional. Number of streams to use for inference on
+                        the CPU or/and GPU in throughput mode (for HETERO and
+                        MULTI device cases use format
+                        <device1>:<nstreams1>,<device2>:<nstreams2> or just
+                        <nstreams>)
+  -nthreads NUMBER_THREADS, --number_threads NUMBER_THREADS
+                        Optional. Number of threads to use for inference on
+                        CPU (including HETERO cases)
+  --no_show             Optional. Don't show output
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.
