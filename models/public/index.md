@@ -95,6 +95,7 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 | Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
 | ------------------------- | -------------- | -------------- | ------ | ------- |
 | Brain Tumor Segmentation  | [MXNet\*](./brain-tumor-segmentation-0001/brain-tumor-segmentation-0001.md) | brain-tumor-segmentation-0001 | 409.996 | 38.192 |
+| Brain Tumor Segmentation 2  | [PyTorch\*](./brain-tumor-segmentation-0002/brain-tumor-segmentation-0002.md) | brain-tumor-segmentation-0002 | 300.801 | 4.51  |
 
 ## Object Detection
 
