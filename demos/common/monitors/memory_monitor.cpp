@@ -143,8 +143,8 @@ MemoryMonitor::MemoryMonitor() :
     swapSum{0.0},
     maxMem{0.0},
     maxSwap{0.0},
-    memTotal{::getMemTotal()},
-    maxMemTotal{memTotal} {}
+    memTotal{0.0},
+    maxMemTotal{0.0} {}
 
 // PerformanceCounter is incomplete in header and destructor can't be defined implicitly
 MemoryMonitor::~MemoryMonitor() = default;
@@ -152,6 +152,11 @@ MemoryMonitor::~MemoryMonitor() = default;
 void MemoryMonitor::setHistorySize(std::size_t size) {
     if (0 == historySize && 0 != size) {
         performanceCounter.reset(new MemoryMonitor::PerformanceCounter);
+        // memTotal is not initialized in constructor because for linux its initialization involves constructing
+        // std::regex which is unimplemented and throws an exception for gcc 4.8.5 (default for CentOS 7.4).
+        // Delaying initialization triggers the error only when the monitor is used
+        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53631
+        memTotal = ::getMemTotal();
     } else if (0 != historySize && 0 == size) {
         performanceCounter.reset();
     }
