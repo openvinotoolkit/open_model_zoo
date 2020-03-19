@@ -67,7 +67,8 @@ from .nlp_representation import (
     MachineTranslationPrediction,
     QuestionAnsweringAnnotation,
     QuestionAnsweringPrediction,
-    TextClassificationAnnotation
+    TextClassificationAnnotation,
+    RelationClassificationAnnotation
 )
 from .image_inpainting import ImageInpaintingAnnotation, ImageInpaintingPrediction
 
@@ -140,6 +141,7 @@ __all__ = [
     'QuestionAnsweringAnnotation',
     'QuestionAnsweringPrediction',
     'TextClassificationAnnotation',
+    'RelationClassificationAnnotation',
 
     'DepthEstimationAnnotation',
     'DepthEstimationPrediction',

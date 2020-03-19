@@ -47,6 +47,7 @@ from .cvat_multilabel_recognition import CVATMultilabelAttributesRecognitionConv
 from .cvat_human_pose import CVATPoseEstimationConverter
 from .cvat_person_detection_action_recognition import CVATPersonDetectionActionRecognitionConverter
 from .squad import SQUADConverter
+from .fewrel import ERNIEFewrelConverter
 from .text_classification import (
     XNLIDatasetConverter,
     BertXNLITFRecordConverter,
@@ -115,5 +116,6 @@ __all__ = [
     'MSASLContiniousConverter',
     'ReDWebDatasetConverter',
     'FashionMnistConverter',
-    'InpaintingConverter'
+    'InpaintingConverter',
+    'ERNIEFewrelConverter'
 ]

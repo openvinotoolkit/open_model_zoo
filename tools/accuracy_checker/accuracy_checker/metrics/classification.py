@@ -16,7 +16,7 @@ limitations under the License.
 
 import numpy as np
 
-from ..representation import ClassificationAnnotation, ClassificationPrediction, TextClassificationAnnotation
+from ..representation import ClassificationAnnotation, ClassificationPrediction, TextClassificationAnnotation, RelationClassificationAnnotation
 from ..config import NumberField, StringField, ConfigError
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
@@ -29,7 +29,7 @@ class ClassificationAccuracy(PerImageEvaluationMetric):
 
     __provider__ = 'accuracy'
 
-    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation, RelationClassificationAnnotation)
     prediction_types = (ClassificationPrediction, )
 
     @classmethod
@@ -70,7 +70,7 @@ class ClassificationAccuracyClasses(PerImageEvaluationMetric):
 
     __provider__ = 'accuracy_per_class'
 
-    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation, RelationClassificationAnnotation)
     prediction_types = (ClassificationPrediction, )
 
     @classmethod
@@ -223,7 +223,7 @@ class ClassificationF1Score(PerImageEvaluationMetric):
 
 class MetthewsCorrelation(PerImageEvaluationMetric):
     __provider__ = 'metthews_correlation_coef'
-    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation)
+    annotation_types = (ClassificationAnnotation, TextClassificationAnnotation, RelationClassificationAnnotation)
     prediction_types = (ClassificationPrediction, )
 
     def configure(self):

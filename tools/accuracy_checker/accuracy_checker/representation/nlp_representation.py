@@ -53,3 +53,14 @@ class TextClassificationAnnotation(ClassificationAnnotation):
         self.input_mask = input_mask
         self.segment_ids = segment_ids
         self.tokens = tokens
+
+class RelationClassificationAnnotation(ClassificationAnnotation):
+    def __init__(self, identifier, label, input_ids, input_mask, segment_ids, entity_ids, entity_mask, labels, tokens):
+        super().__init__(identifier, label)
+        self.input_ids = input_ids
+        self.input_mask = input_mask
+        self.segment_ids = segment_ids
+        self.entity_mask = entity_mask
+        self.entity_ids = entity_ids
+        self.label_ids = labels
+        self.tokens = tokens

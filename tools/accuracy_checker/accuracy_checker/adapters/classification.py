@@ -61,7 +61,7 @@ class ClassificationAdapter(Adapter):
         result = []
         for identifier, output in zip(identifiers, prediction):
             if self.argmax_output:
-                single_prediction = ArgMaxClassificationPrediction(identifier, output[0])
+                single_prediction = ArgMaxClassificationPrediction(identifier, output)
             else:
                 single_prediction = ClassificationPrediction(identifier, output)
             result.append(single_prediction)
