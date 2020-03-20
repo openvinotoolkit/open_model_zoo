@@ -29,7 +29,7 @@ pip install tensorflow==1.14.0
 ```
 6. Run
 ```sh
-python3 freeze.py --ckpt path/to/inception_v2.ckpt --name inception_v2 --num_classes 1001 --output InceptionV2/Logits/Predictions/Softmax
+python3 freeze.py --ckpt path/to/inception_v2.ckpt --name inception_v2 --num_classes 1001 --output InceptionV2/Predictions/Softmax
 ```
 
 ## Example
@@ -81,14 +81,14 @@ Channel order is `BGR`
 
 ### Original model
 
-Object classifier according to ImageNet classes, name - `InceptionV2/Logits/Predictions/Softmax`,  shape - `1,1001`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `InceptionV2/Predictions/Softmax`,  shape - `1,1001`, output data format is `B,C` where:
 
 - `B` - batch size
 - `C` - Predicted probabilities for each class in  [0, 1] range
 
 ### Converted model
 
-Object classifier according to ImageNet classes, name - `InceptionV2/Logits/Predictions/Softmax`,  shape - `1,1001`, output data format is `B,C` where:
+Object classifier according to ImageNet classes, name - `InceptionV2/Predictions/Softmax`,  shape - `1,1001`, output data format is `B,C` where:
 
 - `B` - batch size
 - `C` - Predicted probabilities for each class in  [0, 1] range

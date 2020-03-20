@@ -28,7 +28,7 @@ model_optimizer_args:
   - --input=input
   - --mean_values=input[127.5,127.5,127.5]
   - --scale_values=input[127.5]
-  - --output=InceptionV2/Logits/Predictions/Softmax
+  - --output=InceptionV2/Predictions/Softmax
   - --input_model=$dl_dir/inception_v2.frozen.pb
   - --reverse_input_channels
 framework: tf
