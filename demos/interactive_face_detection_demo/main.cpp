@@ -35,9 +35,6 @@
 #include "visualizer.hpp"
 
 #include <ie_iextension.h>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 using namespace InferenceEngine;
 
@@ -114,7 +111,8 @@ int main(int argc, char *argv[]) {
             {FLAGS_d_ag, FLAGS_m_ag},
             {FLAGS_d_hp, FLAGS_m_hp},
             {FLAGS_d_em, FLAGS_m_em},
-            {FLAGS_d_lm, FLAGS_m_lm}
+            {FLAGS_d_lm, FLAGS_m_lm},
+            {FLAGS_d_ey, FLAGS_m_ey}
         };
         FaceDetection faceDetector(FLAGS_m, FLAGS_d, 1, false, FLAGS_async, FLAGS_t, FLAGS_r,
                                    static_cast<float>(FLAGS_bb_enlarge_coef), static_cast<float>(FLAGS_dx_coef), static_cast<float>(FLAGS_dy_coef));
@@ -122,6 +120,7 @@ int main(int argc, char *argv[]) {
         HeadPoseDetection headPoseDetector(FLAGS_m_hp, FLAGS_d_hp, FLAGS_n_hp, FLAGS_dyn_hp, FLAGS_async, FLAGS_r);
         EmotionsDetection emotionsDetector(FLAGS_m_em, FLAGS_d_em, FLAGS_n_em, FLAGS_dyn_em, FLAGS_async, FLAGS_r);
         FacialLandmarksDetection facialLandmarksDetector(FLAGS_m_lm, FLAGS_d_lm, FLAGS_n_lm, FLAGS_dyn_lm, FLAGS_async, FLAGS_r);
+        EyeStateDetection eyeStateDetector(FLAGS_m_ey, FLAGS_d_ey, FLAGS_n_ey, FLAGS_dyn_ey, FLAGS_async, FLAGS_r);
 
         for (auto && option : cmdOptions) {
             auto deviceName = option.first;
@@ -139,9 +138,6 @@ int main(int argc, char *argv[]) {
 
             /** Loading extensions for the CPU device **/
             if ((deviceName.find("CPU") != std::string::npos)) {
-#ifdef WITH_EXTENSIONS
-                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-#endif
 
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
@@ -170,6 +166,7 @@ int main(int argc, char *argv[]) {
         Load(headPoseDetector).into(ie, FLAGS_d_hp, FLAGS_dyn_hp);
         Load(emotionsDetector).into(ie, FLAGS_d_em, FLAGS_dyn_em);
         Load(facialLandmarksDetector).into(ie, FLAGS_d_lm, FLAGS_dyn_lm);
+        Load(eyeStateDetector).into(ie, FLAGS_d_ey, FLAGS_dyn_ey);
         // ----------------------------------------------------------------------------------------------------
 
         // --------------------------- 3. Doing inference -----------------------------------------------------
@@ -177,12 +174,11 @@ int main(int argc, char *argv[]) {
         slog::info << "Start inference " << slog::endl;
 
         bool isFaceAnalyticsEnabled = ageGenderDetector.enabled() || headPoseDetector.enabled() ||
-                                      emotionsDetector.enabled() || facialLandmarksDetector.enabled();
+                                      emotionsDetector.enabled() || facialLandmarksDetector.enabled() || 
+                                      eyeStateDetector.enabled();
 
         std::ostringstream out;
         size_t framesCounter = 0;
-        bool frameReadStatus;
-        bool isLastFrame;
         int delay = 1;
         double msrate = -1;
         cv::Mat prev_frame, next_frame;
@@ -208,7 +204,7 @@ int main(int argc, char *argv[]) {
         prev_frame = frame.clone();
 
         // Reading the next frame
-        frameReadStatus = cap.read(frame);
+        bool frameReadStatus = cap.read(frame);
 
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
@@ -224,7 +220,7 @@ int main(int argc, char *argv[]) {
         while (true) {
             timer.start("total");
             framesCounter++;
-            isLastFrame = !frameReadStatus;
+            bool isLastFrame = !frameReadStatus;
 
             // Retrieving face detection results for the previous frame
             faceDetector.wait();
@@ -295,7 +291,7 @@ int main(int argc, char *argv[]) {
                     float intensity_mean = calcMean(prev_frame(rect));
 
                     if ((face == nullptr) ||
-                        ((face != nullptr) && ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f))) {
+                        ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f)) {
                         face = std::make_shared<Face>(id++, rect);
                     } else {
                         prev_faces.remove(face);
@@ -331,6 +327,20 @@ int main(int argc, char *argv[]) {
                                        i < facialLandmarksDetector.maxBatch));
                 if (face->isLandmarksEnabled()) {
                     face->updateLandmarks(facialLandmarksDetector[i]);
+                }
+
+                face->eyesStateEnable(eyeStateDetector.enabled() && facialLandmarksDetector.enabled() && 
+                                       i < facialLandmarksDetector.maxBatch);
+
+                if (isFaceAnalyticsEnabled && facialLandmarksDetector.enabled() &&
+                    eyeStateDetector.enabled()) {
+                    
+                    cv::Mat face_mat = prev_frame(face->_location);
+                    eyeStateDetector.enqueue(face_mat, face->getLandmarks());
+                    eyeStateDetector.submitRequest();
+                    eyeStateDetector.wait();
+                    eyeStateDetector[i];
+                    face->updateEyesState(eyeStateDetector[i]);
                 }
 
                 faces.push_back(face);

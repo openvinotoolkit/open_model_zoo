@@ -22,15 +22,12 @@
 #include <samples/slog.hpp>
 
 #include <ie_iextension.h>
-#ifdef WITH_EXTENSIONS
-#include <ext_list.hpp>
-#endif
 
 #include "detectors.hpp"
 
 using namespace InferenceEngine;
 
-BaseDetection::BaseDetection(std::string topoName,
+BaseDetection::BaseDetection(const std::string &topoName,
                              const std::string &pathToModel,
                              const std::string &deviceForInference,
                              int maxBatch, bool isBatchDynamic, bool isAsync,
@@ -244,6 +241,124 @@ void FaceDetection::fetchResults() {
             results.push_back(r);
         }
     }
+}
+
+
+EyeStateDetection::EyeStateDetection(const std::string &pathToModel,
+                                       const std::string &deviceForInference,
+                                       int maxBatch, bool isBatchDynamic, bool isAsync, bool doRawOutputMessages)
+    : BaseDetection("Eyes State", pathToModel, deviceForInference, maxBatch, isBatchDynamic, isAsync, doRawOutputMessages),
+      enquedFaces(0) {
+}
+
+
+void EyeStateDetection::submitRequest()  {
+    if (!enquedFaces)
+        return;
+    if (isBatchDynamic) {
+        request->SetBatch(enquedFaces);
+    }
+    BaseDetection::submitRequest();
+    enquedFaces = 0;
+}
+
+
+void EyeStateDetection::enqueue(const cv::Mat &face, const std::vector<float> &landmarks) {
+    if (!enabled()) {
+        return;
+    }
+    if (enquedFaces == maxBatch) {
+        slog::warn << "Number of detected faces more than maximum(" << maxBatch << ") processed by Eyes State Recognition network" << slog::endl;
+        return;
+    }
+    if (!request) {
+        request = net.CreateInferRequestPtr();
+    }
+
+
+
+    Blob::Ptr  inputBlob1 = request->GetBlob(input);
+    Blob::Ptr  inputBlob2 = request->GetBlob(input);
+
+    cv::Point l2 = cv::Point( face.cols * landmarks[0], face.rows * landmarks[1]);
+    cv::Point l1 = cv::Point( face.cols * landmarks[2], face.rows * landmarks[3]);
+
+    cv::Point r1 = cv::Point( face.cols * landmarks[4], face.rows * landmarks[5]);
+    cv::Point r2 = cv::Point( face.cols * landmarks[6], face.rows * landmarks[7]);
+
+    cv::Rect leftEye =  cv::Rect(l1.x * 0.95, (l1.y - (l2.x - l1.x) / 2) * 0.95, 
+                                 (l2.x - l1.x) * 1.05, (l2.x - l1.x) * 1.05);
+    cv::Rect rightEye = cv::Rect(r1.x * 0.95, (r1.y - (r2.x - r1.x) / 2) * 0.95, 
+                                 (r2.x - r1.x) * 1.05, (r2.x - r1.x) * 1.05);
+
+    matU8ToBlob<uint8_t>(face(leftEye), inputBlob1, enquedFaces);
+    matU8ToBlob<uint8_t>(face(rightEye), inputBlob2, enquedFaces + 1 );
+
+    enquedFaces+=2;
+}
+
+EyeStateDetection::Result EyeStateDetection::operator[] (int idx) const {
+    Blob::Ptr eyeStateBlob = request->GetBlob(output);
+    
+
+    bool leftEyeState = eyeStateBlob->buffer().as<float*>()[idx * 4] < eyeStateBlob->buffer().as<float*>()[idx * 4 + 1];
+    bool rightEyeState = eyeStateBlob->buffer().as<float*>()[idx * 4 + 2] < eyeStateBlob->buffer().as<float*>()[idx * 4 + 3];
+    EyeStateDetection::Result r;
+    r.leftEyeState = leftEyeState;    
+    r.rightEyeState = rightEyeState;
+
+
+    if (doRawOutputMessages) {
+        std::cout << "[" << idx << "] element, left eye = " << r.leftEyeState << ",right eye = " << r.rightEyeState << std::endl;
+    }
+
+    return r;
+}
+
+
+CNNNetwork EyeStateDetection::read(const InferenceEngine::Core& ie) {
+    slog::info << "Loading network files for Eye State Recognition network" << slog::endl;
+    // Read network
+    auto network = ie.ReadNetwork(pathToModel);
+
+    network.setBatchSize(maxBatch);
+    slog::info << "Batch size is set to " << network.getBatchSize() << " for Eye State Recognition network" << slog::endl;
+    
+    // ---------------------------Check inputs -------------------------------------------------------------
+    // Eye State Recognition network should have one input and two outputs
+    slog::info << "Checking Eye State Recognition network inputs" << slog::endl;
+    InputsDataMap inputInfo(network.getInputsInfo());
+    if (inputInfo.size() != 1) {
+        throw std::logic_error("Eye State Recognition network should have only one input");
+    }
+    InputInfo::Ptr& inputInfoFirst = inputInfo.begin()->second;
+    inputInfoFirst->setPrecision(Precision::U8);
+    input = inputInfo.begin()->first;
+    // -----------------------------------------------------------------------------------------------------
+    // ---------------------------Check outputs ------------------------------------------------------------
+    slog::info << "Checking Eye State Recognition network outputs" << slog::endl;
+    OutputsDataMap outputInfo(network.getOutputsInfo());
+    if (outputInfo.size() != 1) {
+        throw std::logic_error("Eye State Recognition network should have only one output layer");
+    }
+    auto it = outputInfo.begin();
+    DataPtr ptrEyeStateOutput = (it++)->second;
+    if (!ptrEyeStateOutput) {
+        throw std::logic_error("Eye State output data pointer is not valid");
+    }
+
+    auto eyeStateCreatorLayer = ptrEyeStateOutput->getCreatorLayer().lock();
+
+    if (!eyeStateCreatorLayer) {
+        throw std::logic_error("Eye State creator layer pointer is not valid");
+    }
+
+    output = ptrEyeStateOutput->getName();
+
+    slog::info << "Age layer: " << eyeStateCreatorLayer->name<< slog::endl;
+    
+     _enabled = true;
+    return network;
 }
 
 

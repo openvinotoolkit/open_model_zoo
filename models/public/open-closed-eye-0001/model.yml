@@ -1,0 +1,24 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Fully convolutional network for recognition of eye state ('opened', 'closed').
+task_type: object_attributes
+files:
+  - name: FP32/opened-closed-eye-0001.xml
+    size: 37686
+    sha256: 702e374b7dc11b369c13c2f9c5fc638c617d19a9c625eba5fdac9d190fddba41
+    source: https://download.01.org/opencv/openvino_training_extensions/models/open_closed_eye/open_closed_eye.onnx
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

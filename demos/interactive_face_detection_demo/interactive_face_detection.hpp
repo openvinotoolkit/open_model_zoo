@@ -18,39 +18,47 @@ static const char age_gender_model_message[] = "Optional. Path to an .xml file w
 static const char head_pose_model_message[] = "Optional. Path to an .xml file with a trained Head Pose Estimation model.";
 static const char emotions_model_message[] = "Optional. Path to an .xml file with a trained Emotions Recognition model.";
 static const char facial_landmarks_model_message[] = "Optional. Path to an .xml file with a trained Facial Landmarks Estimation model.";
-static const char plugin_message[] = "Plugin name. For example, CPU. If this parameter is specified, " \
+static const char eyes_state_model_message[] = "Optional. Path to an .xml file with a trained Eye State Estimation model.";
+static const char plugin_message[] = "Plugin name. For example, CPU. If this parameter is specified, "
                                      "the demo will look for this plugin only.";
-static const char target_device_message[] = "Optional. Target device for Face Detection network (the list of available devices is shown below). " \
-                                            "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+static const char target_device_message[] = "Optional. Target device for Face Detection network (the list of available devices is shown below). "
+                                            "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                             "The demo will look for a suitable plugin for a specified device.";
-static const char target_device_message_ag[] = "Optional. Target device for Age/Gender Recognition network (the list of available devices is shown below). " \
-                                               "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+static const char target_device_message_ag[] = "Optional. Target device for Age/Gender Recognition network (the list of available devices is shown below). "
+                                               "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                "The demo will look for a suitable plugin for a specified device.";
-static const char target_device_message_hp[] = "Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). " \
-                                               "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+static const char target_device_message_hp[] = "Optional. Target device for Head Pose Estimation network (the list of available devices is shown below). "
+                                               "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                "The demo will look for a suitable plugin for a specified device.";
-static const char target_device_message_em[] = "Optional. Target device for Emotions Recognition network (the list of available devices is shown below). " \
-                                               "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+static const char target_device_message_em[] = "Optional. Target device for Emotions Recognition network (the list of available devices is shown below). "
+                                               "Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                "The demo will look for a suitable plugin for a specified device.";
-static const char target_device_message_lm[] = "Optional. Target device for Facial Landmarks Estimation network " \
-                                               "(the list of available devices is shown below). Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. " \
+static const char target_device_message_lm[] = "Optional. Target device for Facial Landmarks Estimation network "
+                                               "(the list of available devices is shown below). Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
                                                "The demo will look for a suitable plugin for device specified.";
-static const char num_batch_ag_message[] = "Optional. Number of maximum simultaneously processed faces for Age/Gender Recognition network " \
+static const char target_device_message_ey[] = "Optional. Target device for Eye State Estimation network "
+                                               "(the list of available devices is shown below). Default value is CPU. Use \"-d HETERO:<comma-separated_devices_list>\" format to specify HETERO plugin. "
+                                               "The demo will look for a suitable plugin for device specified.";
+
+static const char num_batch_ag_message[] = "Optional. Number of maximum simultaneously processed faces for Age/Gender Recognition network "
                                            "(by default, it is 16)";
-static const char num_batch_hp_message[] = "Optional. Number of maximum simultaneously processed faces for Head Pose Estimation network " \
+static const char num_batch_hp_message[] = "Optional. Number of maximum simultaneously processed faces for Head Pose Estimation network "
                                            "(by default, it is 16)";
-static const char num_batch_em_message[] = "Optional. Number of maximum simultaneously processed faces for Emotions Recognition network " \
+static const char num_batch_em_message[] = "Optional. Number of maximum simultaneously processed faces for Emotions Recognition network "
                                            "(by default, it is 16)";
-static const char num_batch_lm_message[] = "Optional. Number of maximum simultaneously processed faces for Facial Landmarks Estimation network " \
+static const char num_batch_lm_message[] = "Optional. Number of maximum simultaneously processed faces for Facial Landmarks Estimation network "
                                            "(by default, it is 16)";
+static const char num_batch_ey_message[] = "Optional. Number of maximum simultaneously processed faces for Eye State Estimation network "
+                                           "(by default, it is 16)";                                          
 static const char dyn_batch_ag_message[] = "Optional. Enable dynamic batch size for Age/Gender Recognition network";
 static const char dyn_batch_hp_message[] = "Optional. Enable dynamic batch size for Head Pose Estimation network";
 static const char dyn_batch_em_message[] = "Optional. Enable dynamic batch size for Emotions Recognition network";
 static const char dyn_batch_lm_message[] = "Optional. Enable dynamic batch size for Facial Landmarks Estimation network";
+static const char dyn_batch_ey_message[] = "Optional. Enable dynamic batch size for Eye State Estimation network";
 static const char performance_counter_message[] = "Optional. Enable per-layer performance report";
-static const char custom_cldnn_message[] = "Required for GPU custom kernels. "\
+static const char custom_cldnn_message[] = "Required for GPU custom kernels. "
                                            "Absolute path to an .xml file with the kernels description.";
-static const char custom_cpu_library_message[] = "Required for CPU custom layers. " \
+static const char custom_cpu_library_message[] = "Required for CPU custom layers. "
                                                  "Absolute path to a shared library with the kernels implementation.";
 static const char thresh_output_message[] = "Optional. Probability threshold for detections";
 static const char bb_enlarge_coef_output_message[] = "Optional. Coefficient to enlarge/reduce the size of the bounding box around the detected face";
@@ -74,11 +82,13 @@ DEFINE_string(m_ag, "", age_gender_model_message);
 DEFINE_string(m_hp, "", head_pose_model_message);
 DEFINE_string(m_em, "", emotions_model_message);
 DEFINE_string(m_lm, "", facial_landmarks_model_message);
+DEFINE_string(m_ey, "", eyes_state_model_message);
 DEFINE_string(d, "CPU", target_device_message);
 DEFINE_string(d_ag, "CPU", target_device_message_ag);
 DEFINE_string(d_hp, "CPU", target_device_message_hp);
 DEFINE_string(d_em, "CPU", target_device_message_em);
 DEFINE_string(d_lm, "CPU", target_device_message_lm);
+DEFINE_string(d_ey, "CPU", target_device_message_ey);
 DEFINE_uint32(n_ag, 16, num_batch_ag_message);
 DEFINE_bool(dyn_ag, false, dyn_batch_ag_message);
 DEFINE_uint32(n_hp, 16, num_batch_hp_message);
@@ -87,6 +97,8 @@ DEFINE_uint32(n_em, 16, num_batch_em_message);
 DEFINE_bool(dyn_em, false, dyn_batch_em_message);
 DEFINE_uint32(n_lm, 16, num_batch_em_message);
 DEFINE_bool(dyn_lm, false, dyn_batch_em_message);
+DEFINE_uint32(n_ey, 16, num_batch_ey_message);
+DEFINE_bool(dyn_ey, false, dyn_batch_ey_message);
 DEFINE_bool(pc, false, performance_counter_message);
 DEFINE_string(c, "", custom_cldnn_message);
 DEFINE_string(l, "", custom_cpu_library_message);

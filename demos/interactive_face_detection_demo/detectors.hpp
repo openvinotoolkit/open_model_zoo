@@ -45,7 +45,7 @@ struct BaseDetection {
     mutable bool _enabled;
     const bool doRawOutputMessages;
 
-    BaseDetection(std::string topoName,
+    BaseDetection(const std::string &topoName,
                   const std::string &pathToModel,
                   const std::string &deviceForInference,
                   int maxBatch, bool isBatchDynamic, bool isAsync,
@@ -95,6 +95,30 @@ struct FaceDetection : BaseDetection {
 
     void enqueue(const cv::Mat &frame);
     void fetchResults();
+};
+
+struct EyeStateDetection : BaseDetection{
+    struct Result {
+        bool leftEyeState;
+        bool rightEyeState;
+    };
+
+    size_t enquedFaces;
+    std::string input;
+    std::string output;
+
+
+    EyeStateDetection(const std::string &pathToModel,
+                      const std::string &deviceForInference,
+                      int maxBatch, bool isBatchDynamic, bool isAsync,
+                      bool doRawOutputMessages);
+
+    InferenceEngine::CNNNetwork read(const InferenceEngine::Core& ie) override;
+    void submitRequest() override;
+
+    void enqueue(const cv::Mat &face, const std::vector<float> &landmarks);
+    Result operator[] (int idx) const;
+    
 };
 
 struct AgeGenderDetection : BaseDetection {

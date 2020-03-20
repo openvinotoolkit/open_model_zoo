@@ -19,6 +19,15 @@ datasets:
     dataset_meta: mscoco_mask_rcnn_short_80.json
     data_source: val2017
 
+
+  - name: mrlEyes_2018_01
+    annotation_conversion:
+      converter: mrlEyes_2018_01
+      annotation_file: annotation.txt
+    annotation: mrlEyes_2018_01.pickle
+    dataset_meta: mrlEyes_2018_01.json
+    data_source: mrlEyes_2018_01
+
   - name: ms_coco_mask_rcnn_short_91_classes
     annotation_conversion:
       converter: mscoco_mask_rcnn

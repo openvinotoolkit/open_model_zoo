@@ -2,13 +2,10 @@
 
 ## Use Case and High-Level Description
 
-Fully convolutional network for simultaneous Age/Gender recognition. The network
-is able to recognize age of people in [18, 75] years old range, it is not
-applicable for children since their faces were not in the training set.
+Fully convolutional network for eye state (opened/closed) recognition.
 
-## Validation Dataset - Internal
+## Validation Dataset - mrlEyes_2018_01
 
-~20,000 unique subjects representing diverse ages, genders, and ethnicities.
 
 ## Example
 
