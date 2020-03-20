@@ -281,9 +281,8 @@ def main():
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     print("To switch between sync/async modes, press TAB key in the output window")
 
-    def process_infer_request_output(output, frame, next_request_id):
+    def process_infer_request_output(output, frame, next_request_id, render_time):
         objects = list()
-        render_time = 0
 
         start_time = time()
         for layer_name, out_blob in output.items():
@@ -355,17 +354,16 @@ def main():
         cv2.putText(frame, parsing_message, (15, 30),
                     cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
 
-        start_time = time()
-        if not args.no_show:
-            cv2.imshow("DetectionResults", frame)
-        render_time = time() - start_time
-
     while cap.isOpened():
         if is_async_mode:
             if exec_net_async.requests[next_request_id].wait(0) == 0 and not frames[next_request_id] is None:
                 output = exec_net_async.requests[next_request_id].outputs
 
-                process_infer_request_output(output, frames[next_request_id], next_request_id)
+                process_infer_request_output(output, frames[next_request_id], next_request_id, render_time)
+                start_time = time()
+                if not args.no_show:
+                    cv2.imshow("DetectionResults", frames[next_request_id])
+                render_time = time() - start_time
                 frames[next_request_id] = None
 
                 empty_request_ids.put(next_request_id)
@@ -398,7 +396,11 @@ def main():
             if exec_net_sync.requests[0].wait(0) == 0 and not sync_frame is None:
                 output = exec_net_sync.requests[0].outputs
 
-                process_infer_request_output(output, sync_frame, 0)
+                process_infer_request_output(output, sync_frame, 0, render_time)
+                start_time = time()
+                if not args.no_show:
+                    cv2.imshow("DetectionResults", sync_frame)
+                render_time = time() - start_time
                 sync_frame = None
             elif sync_frame is None:
                 if frame_buffer.empty():
