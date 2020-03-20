@@ -19,10 +19,10 @@ from __future__ import print_function, division
 import logging
 import os
 import sys
+from collections import deque
 from argparse import ArgumentParser, SUPPRESS
 from math import exp as exp
 from time import time
-from queue import Queue
 
 import cv2
 from openvino.inference_engine import IENetwork, IECore
@@ -56,13 +56,13 @@ def build_argparser():
     args.add_argument("-r", "--raw_output_message", help="Optional. Output inference results raw values showing",
                       default=False, action="store_true")
     args.add_argument("-nireq", "--num_infer_requests", help="Optional. Number of infer requests",
-                      default=2, type=int)
+                      default=1, type=int)
     args.add_argument("-nstreams", "--num_streams", help="Optional. Number of streams to use for inference on "
                       "the CPU or/and GPU in throughput mode (for HETERO and MULTI device cases use format "
                       "<device1>:<nstreams1>,<device2>:<nstreams2> or just <nstreams>)",
                       default="", type=str)
-    args.add_argument('-nthreads', '--number_threads', type=int, required=False, default=None,
-                        help="Optional. Number of threads to use for inference on CPU (including HETERO cases)")
+    args.add_argument("-nthreads", "--number_threads", help="Optional. Number of threads to use for inference on CPU "
+                      "(including HETERO cases)", default=None, type=int)
     args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
     return parser
 
@@ -181,7 +181,7 @@ def main():
     model_xml = args.model
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
 
-    # -------------- 1. Load extensions library (if specified), configure numbers of threads and streams ---------------
+    # ----------------- 1. Load extensions library (if specified), set numbers of threads and streams ------------------
     log.info("Creating Inference Engine...")
     ie_sync = IECore()
     ie_async = IECore()
@@ -265,16 +265,14 @@ def main():
     exec_net_async = ie_async.load_network(network=net, num_requests=args.num_infer_requests, device_name=args.device)
 
     next_request_id = 0
-    empty_request_ids = Queue(maxsize=args.num_infer_requests)
-    for i in range(args.num_infer_requests):
-        empty_request_ids.put(i)
+    empty_request_ids = deque([*range(args.num_infer_requests)])
     frames = [None] * args.num_infer_requests
-    frame_buffer = Queue()
+    frame_buffer = deque()
     raw_frame = None
     sync_frame = None
+    new_frame_shape = None
     render_time = 0
     parsing_time = 0
-    new_shape = None
 
     # ----------------------------------------------- 6. Doing inference -----------------------------------------------
     log.info("Starting inference...")
@@ -290,7 +288,7 @@ def main():
             layer_params = YoloParams(net.layers[layer_name].params, out_blob.shape[2])
             log.info("Layer {} parameters: ".format(layer_name))
             layer_params.log_params()
-            objects += parse_yolo_region(out_blob, new_shape,
+            objects += parse_yolo_region(out_blob, new_frame_shape,
                                          raw_frame.shape[:-1], layer_params,
                                          args.prob_threshold)
         parsing_time = time() - start_time
@@ -354,39 +352,45 @@ def main():
         cv2.putText(frame, parsing_message, (15, 30),
                     cv2.FONT_HERSHEY_COMPLEX, 0.5, (10, 10, 200), 1)
 
+
+    def get_resized_in_frame(frame):
+        in_frame = cv2.resize(frame, (w, h))
+        in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
+        in_frame = in_frame.reshape((n, c, h, w))
+        return in_frame
+
+
     while cap.isOpened():
         if is_async_mode:
             if exec_net_async.requests[next_request_id].wait(0) == 0 and not frames[next_request_id] is None:
-                output = exec_net_async.requests[next_request_id].outputs
-
-                process_infer_request_output(output, frames[next_request_id], next_request_id, render_time)
+                process_infer_request_output(exec_net_async.requests[next_request_id].outputs,
+                                             frames[next_request_id], next_request_id, render_time)
+                
                 start_time = time()
                 if not args.no_show:
                     cv2.imshow("DetectionResults", frames[next_request_id])
                 render_time = time() - start_time
                 frames[next_request_id] = None
 
-                empty_request_ids.put(next_request_id)
+                empty_request_ids.append(next_request_id)
                 next_request_id += 1
                 if next_request_id == args.num_infer_requests:
                     next_request_id = 0
-            elif not empty_request_ids.empty():
-                if frame_buffer.empty():
+            elif empty_request_ids:
+                request_id = empty_request_ids.popleft()
+
+                if not frame_buffer:
                     ret, frame = cap.read()
                     if not ret:
                         break
                 else:
-                    frame = frame_buffer.get()
+                    frame = frame_buffer.popleft()
                 raw_frame = frame.copy()
-
-                request_id = empty_request_ids.get()
-                in_frame = cv2.resize(frame, (w, h))
+                frames[request_id] = raw_frame.copy()
 
                 # resize input_frame to network size
-                in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-                in_frame = in_frame.reshape((n, c, h, w))
-                new_shape = in_frame.shape[2:]
-                frames[request_id] = raw_frame.copy()
+                in_frame = get_resized_in_frame(frame)
+                new_frame_shape = in_frame.shape[2:]
 
                 # Start inference
                 start_time = time()
@@ -394,30 +398,26 @@ def main():
                 det_time = time() - start_time
         else:
             if exec_net_sync.requests[0].wait(0) == 0 and not sync_frame is None:
-                output = exec_net_sync.requests[0].outputs
+                process_infer_request_output(exec_net_sync.requests[0].outputs, sync_frame, 0, render_time)
 
-                process_infer_request_output(output, sync_frame, 0, render_time)
                 start_time = time()
                 if not args.no_show:
                     cv2.imshow("DetectionResults", sync_frame)
                 render_time = time() - start_time
                 sync_frame = None
             elif sync_frame is None:
-                if frame_buffer.empty():
+                if not frame_buffer:
                     ret, frame = cap.read()
                     if not ret:
                         break
                 else:
-                    frame = frame_buffer.get()
+                    frame = frame_buffer.popleft()
                 raw_frame = frame.copy()
-                
-                in_frame = cv2.resize(frame, (w, h))
-
-                # resize input_frame to network size
-                in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
-                in_frame = in_frame.reshape((n, c, h, w))
-                new_shape = in_frame.shape[2:]
                 sync_frame = raw_frame.copy()
+                
+                # resize input_frame to network size
+                in_frame = get_resized_in_frame(frame)
+                new_frame_shape = in_frame.shape[2:]
 
                 # Start inference
                 start_time = time()
@@ -435,7 +435,7 @@ def main():
                 if is_async_mode:
                     for i in [*range(next_request_id, args.num_infer_requests), *range(next_request_id)]:
                         if not frames[i] is None:
-                            frame_buffer.put(frames[i].copy())
+                            frame_buffer.append(frames[i].copy())
                             frames[i] = None
                         else:
                             break
@@ -448,9 +448,7 @@ def main():
                         exec_net_async.requests[i].wait(-1)
                         
                 next_request_id = 0
-                empty_request_ids = Queue(maxsize=args.num_infer_requests)
-                for i in range(args.num_infer_requests):
-                    empty_request_ids.put(i)
+                empty_request_ids = deque([*range(args.num_infer_requests)])
                 frames = [None] * args.num_infer_requests
                 raw_frame = None
 
