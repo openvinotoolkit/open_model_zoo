@@ -741,10 +741,19 @@ class RFCNCaffe(Adapter):
 
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_out = self._extract_predictions(raw, frame_meta)
+        predicted_classes = raw_out[self.cls_out]
+        predicted_boxes = raw_out[self.bbox_out]
+        assert len(predicted_classes.shape) == 2
+        assert predicted_boxes.shape[-1] == 8
+        predicted_locs, predicted_priors = predicted_boxes[:, :4], predicted_boxes[:, 4:]
+        x_mins, y_mins, x_maxs, y_maxs = self.bbox_transform_inv(predicted_priors, predicted_locs).T
+        pred_cls = np.argmax(predicted_classes[0])
+        pred_scores = predicted_classes[:, pred_cls]
+    
+        return [DetectionPrediction(identifiers[0], pred_cls, pred_scores, x_mins, y_mins, x_maxs, y_maxs)]
 
-
-
-    def bbox_transform_inv(self, boxes, deltas):
+    @staticmethod
+    def bbox_transform_inv(boxes, deltas):
         if boxes.shape[0] == 0:
             return np.zeros((0, deltas.shape[1]), dtype=deltas.dtype)
         boxes = boxes.astype(deltas.dtype, copy=False)
