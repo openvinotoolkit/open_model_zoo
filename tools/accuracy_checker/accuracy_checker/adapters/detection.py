@@ -720,7 +720,7 @@ class ClassAgnosticDetectionAdapter(Adapter):
 
 
 class RFCNCaffe(Adapter):
-    __provider__ = 'rfcn_loc_with_priors'
+    __provider__ = 'rfcn_class_agnostic'
 
     @classmethod
     def parameters(cls):
@@ -729,7 +729,7 @@ class RFCNCaffe(Adapter):
             {
                 'cls_out': StringField(description='bboxes predicted classes score out'),
                 'bbox_out': StringField(
-                    description='bboxes output  with shape [N, 8], where first 4 locs of boxes and last 4 for prior box'
+                    description='bboxes output with shape [N, 8]'
                 )
             }
         )
@@ -745,12 +745,29 @@ class RFCNCaffe(Adapter):
         predicted_boxes = raw_out[self.bbox_out]
         assert len(predicted_classes.shape) == 2
         assert predicted_boxes.shape[-1] == 8
-        predicted_locs, predicted_priors = predicted_boxes[:, :4], predicted_boxes[:, 4:]
-        x_mins, y_mins, x_maxs, y_maxs = self.bbox_transform_inv(predicted_priors, predicted_locs).T
-        pred_cls = np.argmax(predicted_classes[0])
-        pred_scores = predicted_classes[:, pred_cls]
-    
-        return [DetectionPrediction(identifiers[0], pred_cls, pred_scores, x_mins, y_mins, x_maxs, y_maxs)]
+        num_classes = predicted_classes.shape[-1] - 1 # skip background
+        x_mins, y_mins, x_maxs, y_maxs = predicted_boxes[:, 4:].T
+        detections = {'labels': [], 'score': {}, 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
+        for cls_id in range(num_classes):
+            cls_scores = predicted_classes[:, cls_id+1]
+            keep = NMS.nms(x_mins, y_mins, x_maxs, y_maxs, cls_scores, 0.3, include_boundaries=False)
+            filtered_score = cls_scores[keep]
+            x_mins = x_mins[keep]
+            y_mins = y_mins[keep]
+            x_maxs = x_maxs[keep]
+            y_maxs = y_maxs[keep]
+            # Save detections
+            labels = np.full_like(filtered_score, cls_id+1)
+            detections['labels'].extend(labels)
+            detections['scores'].extend(filtered_score)
+            detections['x_mins'].extend(x_mins)
+            detections['y_mins'].extend(y_mins)
+            detections['x_maxs'].extend(x_maxs)
+            detections['y_maxs'].extend(y_maxs)
+        return [DetectionPrediction(
+                    identifiers[0], detections['labels'], detections['scores'], detections['x_mins'],
+                    detections['y_mins'], detections['x_maxs'], detections['y_maxs']
+                )]
 
     @staticmethod
     def bbox_transform_inv(boxes, deltas):
@@ -776,3 +793,4 @@ class RFCNCaffe(Adapter):
         pred_boxes[:, 3::4] = pred_ctr_y + 0.5 * pred_h
 
         return pred_boxes
+
