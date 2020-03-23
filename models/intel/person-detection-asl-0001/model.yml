@@ -17,20 +17,20 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-asl-0001.xml
-    size: 566981
-    sha256: a65949d2129f3549197a1d7c103592c36cc040db0f93b5079476f767ff300917
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/1/person-detection-asl-0001/FP32/person-detection-asl-0001.xml
+    size: 566785
+    sha256: abe11d54888633c8eb70c829e962f2ece29f710e05eadb5e0feb510de9718b5c
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-asl-0001/FP32/person-detection-asl-0001.xml
   - name: FP32/person-detection-asl-0001.bin
     size: 4026860
     sha256: bb1974c01e703ba34f8b6f8dfe29d5b2c63b43665c738445fcf6274418de94da
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/1/person-detection-asl-0001/FP32/person-detection-asl-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-asl-0001/FP32/person-detection-asl-0001.bin
   - name: FP16/person-detection-asl-0001.xml
-    size: 566824
-    sha256: dc0cf8203042cf3962f457650e2c88c0e5be055d1d390d13ea4447f8c4c32a41
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/1/person-detection-asl-0001/FP16/person-detection-asl-0001.xml
+    size: 566628
+    sha256: e55563c5ef92f2a991d6edb8a4d9cd1cede2378e0b52c151281272e76991affe
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-asl-0001/FP16/person-detection-asl-0001.xml
   - name: FP16/person-detection-asl-0001.bin
     size: 2013892
     sha256: d1f55465a7e533b1bf0c4fc5c42acfb022a34fed1b52fedd27246b71aa9dc582
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/1/person-detection-asl-0001/FP16/person-detection-asl-0001.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-asl-0001/FP16/person-detection-asl-0001.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

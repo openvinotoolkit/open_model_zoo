@@ -1,0 +1,37 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Single embedding-based person reidentification model (the model is trade-off between
+  performance and accuracy)
+task_type: object_attributes
+files:
+  - name: FP32/person-reidentification-retail-0249.xml
+    size: 429131
+    sha256: 602ae093790c74ec26e0da42662dcc5d600e38439f9dcf8db33d283599b9f69d
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-reidentification-retail-0249/FP32/person-reidentification-retail-0249.xml
+  - name: FP32/person-reidentification-retail-0249.bin
+    size: 2365244
+    sha256: 286798a55939ffbec14fa657f09718c24447fb2c853cea1b4f09e9b6bc2e88f4
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-reidentification-retail-0249/FP32/person-reidentification-retail-0249.bin
+  - name: FP16/person-reidentification-retail-0249.xml
+    size: 428825
+    sha256: 785920d47fd02619e614311afe8710f964aba48c7527e7326f12d15ad35ecc06
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-reidentification-retail-0249/FP16/person-reidentification-retail-0249.xml
+  - name: FP16/person-reidentification-retail-0249.bin
+    size: 1182656
+    sha256: 88b31d97eae89ab2b28e3537ffadeacaade14f53013ff828e53c40085510d489
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-reidentification-retail-0249/FP16/person-reidentification-retail-0249.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
