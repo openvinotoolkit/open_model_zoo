@@ -51,6 +51,7 @@ class mrlEyes_2018_Converter(BaseFormatConverter):
         for converting from the command line or config.
         """
         self.data_dir = self.config['data_dir']
+        self.use_every = self.config['use_every']
 
     def convert(self, check_content=False, progress_callback=None, progress_interval=100, **kwargs):
         """
@@ -67,7 +68,7 @@ class mrlEyes_2018_Converter(BaseFormatConverter):
         annotations = []
         for i, file in enumerate(dataset_directory.rglob('*.png')):
                 subj_id, img_num, gender, glasses, eye_state, reflection, light_cond, sensor_type = file.stem.split("_")
-                if i % 10 == 0:
+                if i % 10 == 0 or self.use_every:
                     annotations.append(ClassificationAnnotation(full_path, int(eye_state)))
 
         annotations = self._convert_annotations(images_dir, labels, progress_callback, progress_interval)
