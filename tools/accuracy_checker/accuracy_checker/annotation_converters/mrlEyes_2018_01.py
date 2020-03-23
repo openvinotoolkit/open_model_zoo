@@ -15,6 +15,9 @@ limitations under the License.
 """
 
 import re
+import os
+
+from pathlib import Path
 
 from ..config import PathField
 from ..representation import ClassificationAnnotation
@@ -23,14 +26,14 @@ from ..utils import get_path, read_txt
 from .format_converter import BaseFormatConverter, ConverterReturn
 
 
-class SampleConverter(BaseFormatConverter):
+class mrlEyes_2018_Converter(BaseFormatConverter):
     """
-    Sample dataset converter. All annotation converters should be derived from BaseFormatConverter class.
+    mrlEyes_2018 dataset converter. 
     """
 
     # register name for this converter
     # this name will be used for converter class look up
-    __provider__ = 'sample'
+    __provider__ = 'mrlEyes_2018'
     annotation_types = (ClassificationAnnotation, )
 
     @classmethod
@@ -59,11 +62,13 @@ class SampleConverter(BaseFormatConverter):
             meta: dictionary with additional dataset level metadata (if provided)
         """
 
-        dataset_directory = get_path(self.data_dir, is_directory=True)
-
+        dataset_directory = Path(self.data_dir)
+       
         # read and convert annotation
 
         annotations = []
+
+
 
         for subdir, dirs, files in os.walk(root_folder):
             for i, file in enumerate(files):
