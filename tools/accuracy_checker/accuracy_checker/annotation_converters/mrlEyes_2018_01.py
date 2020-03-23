@@ -63,20 +63,10 @@ class mrlEyes_2018_Converter(BaseFormatConverter):
         """
 
         dataset_directory = Path(self.data_dir)
-       
-        # read and convert annotation
 
         annotations = []
-
-
-
-        for subdir, dirs, files in os.walk(root_folder):
-            for i, file in enumerate(files):
-                if file in ['stats_2018_01.ods', 'annotation.txt']:
-                    continue
-                full_path = os.path.join(subdir, file)
-                split =  file.split('.')[0].split("_")
-                subj_id, img_num, gender, glasses, eye_state, reflection, light_cond, sensor_type = split
+        for i, file in enumerate(dataset_directory.rglob('*.png')):
+                subj_id, img_num, gender, glasses, eye_state, reflection, light_cond, sensor_type = file.stem.split("_")
                 if i % 10 == 0:
                     annotations.append(ClassificationAnnotation(full_path, int(eye_state)))
 
