@@ -29,6 +29,7 @@ static const char show_statistics[] = "Optional. Enable statistics report";
 static const char duplication_channel_number[] = "Optional. Enable and specify the number of channels additionally copied from real sources";
 static const char real_input_fps[] = "Optional. Disable input frames caching, for maximum throughput pipeline";
 static const char input_video[] = "Optional. Specify full path to input video files";
+static const char loop_video_output_message[] = "Optional. Enable playing video on a loop.";
 static const char utilization_monitors_message[] = "Optional. List of monitors to show initially.";
 
 DEFINE_bool(h, false, help_message);
@@ -48,4 +49,5 @@ DEFINE_bool(show_stats, false, show_statistics);
 DEFINE_uint32(duplicate_num, 0, duplication_channel_number);
 DEFINE_bool(real_input_fps, false, real_input_fps);
 DEFINE_string(i, "", input_video);
+DEFINE_bool(loop_video, false, loop_video_output_message);
 DEFINE_string(u, "", utilization_monitors_message);

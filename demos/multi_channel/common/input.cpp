@@ -261,6 +261,7 @@ class VideoSourceOCV : public VideoSource {
     std::queue<std::pair<bool, cv::Mat>> queue;
 
     cv::VideoCapture source;
+    bool loopVideo;
 
     bool realFps;
 
@@ -274,7 +275,7 @@ class VideoSourceOCV : public VideoSource {
     void startImpl();
 
 public:
-    VideoSourceOCV(bool async, bool collectStats_, const std::string& name,
+    VideoSourceOCV(bool async, bool collectStats_, const std::string& name, bool loopVideo,
                 size_t queueSize_, size_t pollingTimeMSec_, bool realFps_);
 
     ~VideoSourceOCV();
@@ -442,17 +443,28 @@ template<bool CollectStats>
 bool VideoSourceOCV::readFrame(cv::Mat& frame) {
     if (CollectStats) {
         ScopedTimer st(perfTimer);
-        return source.read(frame);
+        bool captured = source.read(frame);
+        if (!captured && loopVideo) {
+            source.set(cv::CAP_PROP_POS_FRAMES, 0.0);
+            return source.read(frame);
+        }
+        return captured;
     } else {
-        return source.read(frame);
+        bool captured = source.read(frame);
+        if (!captured && loopVideo) {
+            source.set(cv::CAP_PROP_POS_FRAMES, 0.0);
+            return source.read(frame);
+        }
+        return captured;
     }
 }
 
 VideoSourceOCV::VideoSourceOCV(bool async, bool collectStats_,
-                         const std::string& name, size_t queueSize_,
+                         const std::string& name, bool loopVideo, size_t queueSize_,
                          size_t pollingTimeMSec_, bool realFps_):
         perfTimer(collectStats_ ? PerfTimer::DefaultIterationsCount : 0),
         isAsync(async), videoName(name),
+        loopVideo(loopVideo),
         realFps(realFps_),
         queueSize(queueSize_),
         pollingTimeMSec(pollingTimeMSec_) {
@@ -583,7 +595,7 @@ bool VideoSources::isRunning() const {
         [](const std::unique_ptr<VideoSource>& input){return input->isRunning();});
 }
 
-void VideoSources::openVideo(const std::string& source, bool native) {
+void VideoSources::openVideo(const std::string& source, bool native, bool loopVideo) {
 #ifdef USE_NATIVE_CAMERA_API
     if (native) {
         std::string dev;
@@ -609,13 +621,15 @@ void VideoSources::openVideo(const std::string& source, bool native) {
         const std::string extension = ".mjpeg";
         std::unique_ptr<VideoSource> newSrc;
         if (source.size() > extension.size() && std::equal(extension.rbegin(), extension.rend(), source.rbegin()))
+            if (loopVideo)
+                throw std::runtime_error("Looping video is not supported for .mjpeg when built with USE_LIBVA");
             newSrc.reset(new VideoSourceStreamFile(*this, isAsync, collectStats, source,
                                             queueSize, pollingTimeMSec, realFps));
         else
-            newSrc.reset(new VideoSourceOCV(isAsync, collectStats, source,
+            newSrc.reset(new VideoSourceOCV(isAsync, collectStats, source, loopVideo,
                                             queueSize, pollingTimeMSec, realFps));
 #else
-        std::unique_ptr<VideoSource> newSrc(new VideoSourceOCV(isAsync, collectStats, source,
+        std::unique_ptr<VideoSource> newSrc(new VideoSourceOCV(isAsync, collectStats, source, loopVideo,
                                             queueSize, pollingTimeMSec, realFps));
 #endif
         inputs.emplace_back(std::move(newSrc));
