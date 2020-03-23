@@ -726,7 +726,7 @@ int main(int argc, char* argv[]) {
                 ie.SetConfig({{ CONFIG_KEY(CPU_BIND_THREAD), CONFIG_VALUE(NO) }}, "CPU");
                 ie.SetConfig({{ CONFIG_KEY(CPU_THROUGHPUT_STREAMS),
                                 (device_nstreams.count("CPU") > 0 ? std::to_string(device_nstreams.at("CPU")) :
-                                                                   "CPU_THROUGHPUT_AUTO") }}, "CPU");
+                                                                    CONFIG_VALUE(CPU_THROUGHPUT_AUTO)) }}, "CPU");
                 device_nstreams["CPU"] = std::stoi(ie.GetConfig("CPU", CONFIG_KEY(CPU_THROUGHPUT_STREAMS)).as<std::string>());
             }
 
@@ -737,7 +737,7 @@ int main(int argc, char* argv[]) {
                 }
                 ie.SetConfig({{ CONFIG_KEY(GPU_THROUGHPUT_STREAMS),
                                 (device_nstreams.count("GPU") > 0 ? std::to_string(device_nstreams.at("GPU")) :
-                                                                    "GPU_THROUGHPUT_AUTO") }}, "GPU");
+                                                                    CONFIG_VALUE(GPU_THROUGHPUT_AUTO)) }}, "GPU");
                 device_nstreams["GPU"] = std::stoi(ie.GetConfig("GPU", CONFIG_KEY(GPU_THROUGHPUT_STREAMS)).as<std::string>());
                 if (devices.end() != devices.find("CPU")) {
                     // multi-device execution with the CPU + GPU performs best with GPU trottling hint,
