@@ -744,7 +744,7 @@ class RFCNCaffe(Adapter):
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_out = self._extract_predictions(raw, frame_meta)
         predicted_classes = raw_out[self.cls_out]
-        predicted_deltas= raw_out[self.bbox_out]
+        predicted_deltas = raw_out[self.bbox_out]
         predicted_proposals = raw_out[self.rois_out]
         x_scale = frame_meta[0]['scale_x']
         y_scale = frame_meta[0]['scale_y']
@@ -773,9 +773,9 @@ class RFCNCaffe(Adapter):
             detections['x_maxs'].extend(x_cls_maxs)
             detections['y_maxs'].extend(y_cls_maxs)
         return [DetectionPrediction(
-                    identifiers[0], detections['labels'], detections['scores'], detections['x_mins'],
-                    detections['y_mins'], detections['x_maxs'], detections['y_maxs']
-                )]
+            identifiers[0], detections['labels'], detections['scores'], detections['x_mins'],
+            detections['y_mins'], detections['x_maxs'], detections['y_maxs']
+        )]
 
     @staticmethod
     def bbox_transform_inv(boxes, deltas):
@@ -801,4 +801,3 @@ class RFCNCaffe(Adapter):
         pred_boxes[:, 3::4] = pred_ctr_y + 0.5 * pred_h
 
         return pred_boxes
-
