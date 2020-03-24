@@ -398,8 +398,9 @@ def main():
 
                     objects, parsing_time = get_objects(output, net, new_frame_shape, raw_frame, args)
                     objects = filter_objects(objects, args)
-                    report_metrics(objects, args, output_frame, labels_map, is_async_mode, det_time, render_time,
-                                   next_request_id, parsing_time)
+                    if is_async_mode:
+                        report_metrics(objects, args, output_frame, labels_map, is_async_mode, det_time, render_time,
+                                       next_request_id, parsing_time)
 
                     start_time = time()
                     if not args.no_show:
@@ -436,8 +437,9 @@ def main():
                 objects, parsing_time = get_objects(exec_net_sync.requests[0].outputs, net, new_frame_shape, raw_frame,
                                                     args)
                 objects = filter_objects(objects, args)
-                report_metrics(objects, args, sync_frame, labels_map, is_async_mode, det_time, render_time, 0,
-                               parsing_time)
+                if not is_async_mode:
+                    report_metrics(objects, args, sync_frame, labels_map, is_async_mode, det_time, render_time, 0,
+                                   parsing_time)
 
                 start_time = time()
                 if not args.no_show:
