@@ -38,7 +38,7 @@ files:
   - name: model.pt
     size: 422397766
     sha256: 5237e007f53f05d0a66f40590abfead08dbb662629089e3462daf741ac9932d6
-    source: https://download.01.org/opencv/public_models/032020/midasnet/model.pt
+    source: https://download.01.org/opencv/public_models/032020/midasnet/model-001.pt
 framework: pytorch
 postprocessing:
   - $type: regex_replace
