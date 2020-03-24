@@ -49,7 +49,8 @@ from .detection import (
     SSDONNXAdapter,
     MTCNNPAdapter,
     RetinaNetAdapter,
-    ClassAgnosticDetectionAdapter
+    ClassAgnosticDetectionAdapter,
+    RetinaFaceAdapter
 )
 from .retinaface import RetinaFaceAdapter
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
