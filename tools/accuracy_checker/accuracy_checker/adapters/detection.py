@@ -731,7 +731,7 @@ class RFCNCaffe(Adapter):
                 'bbox_out': StringField(
                     description='bboxes output with shape [N, 8]'
                 ),
-                'rois_out': StringField(description='rois features output')r
+                'rois_out': StringField(description='rois features output')
             }
         )
         return params
