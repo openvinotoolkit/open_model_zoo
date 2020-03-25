@@ -4,8 +4,8 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        model: retinaface-resnet-50/mxnet/FP32/retinaface-resnet-50.xml
-        weights: retinaface-resnet-50/mxnet/FP32/retinaface-resnet-50.bin
+        model:   public/retinaface-resnet-50/mxnet/FP32/retinaface-resnet-50.xml
+        weights: public/retinaface-resnet-50/mxnet/FP32/retinaface-resnet-50.bin
         adapter:
           type: retinaface
           bboxes_outputs:
@@ -19,8 +19,8 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        model: retinaface-resnet-50/mxnet/FP16/retinaface-resnet-50.xml
-        weights: retinaface-resnet-50/mxnet/FP16/retinaface-resnet-50.bin
+        model:   public/retinaface-resnet-50/mxnet/FP16/retinaface-resnet-50.xml
+        weights: public/retinaface-resnet-50/mxnet/FP16/retinaface-resnet-50.bin
         adapter:
           type: retinaface
           bboxes_outputs:
@@ -34,8 +34,8 @@ models:
       - framework: dlsdk
         tags:
           - FP32-INT8
-        model: retinaface-resnet-50/mxnet/FP32-INT8/retinaface-resnet-50.xml
-        weights: retinaface-resnet-50/mxnet/FP32-INT8/retinaface-resnet-50.bin
+        model:   public/retinaface-resnet-50/mxnet/FP32-INT8/retinaface-resnet-50.xml
+        weights: public/retinaface-resnet-50/mxnet/FP32-INT8/retinaface-resnet-50.bin
         adapter:
           type: retinaface
           bboxes_outputs:
@@ -49,8 +49,8 @@ models:
       - framework: dlsdk
         tags:
           - FP16-INT8
-        model: retinaface-resnet-50/mxnet/FP16-INT8/retinaface-resnet-50.xml
-        weights: retinaface-resnet-50/mxnet/FP16-INT8/retinaface-resnet-50.bin
+        model:   public/retinaface-resnet-50/mxnet/FP16-INT8/retinaface-resnet-50.xml
+        weights: public/retinaface-resnet-50/mxnet/FP16-INT8/retinaface-resnet-50.bin
         adapter:
           type: retinaface
           bboxes_outputs:
@@ -62,11 +62,11 @@ models:
             - face_rpn_cls_prob_reshape_stride16
             - face_rpn_cls_prob_reshape_stride8
     datasets:
-       - name: wider
-         preprocessing:
+      - name: wider
+        preprocessing:
           - type: resize
             size: 640
-         postprocessing:
+        postprocessing:
           - type: cast_to_int
           - type: clip_boxes
             size: 1024
@@ -76,7 +76,7 @@ models:
             height_range: 64, 1024
             is_empty: True
 
-         metrics:
+        metrics:
           - type: map
             ignore_difficult: True
             include_boundaries: False
