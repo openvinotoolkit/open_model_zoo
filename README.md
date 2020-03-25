@@ -5,6 +5,8 @@
 
 This repository includes optimized deep learning models and a set of demos to expedite development of high-performance deep learning inference applications. Use these free pre-trained models instead of training your own models to speed-up the development and production deployment process.
 
+
+
 ## Repository Components:
 * [Pre-Trained Models](models/intel/index.md)
 * [Public Models Description](models/public/index.md)
