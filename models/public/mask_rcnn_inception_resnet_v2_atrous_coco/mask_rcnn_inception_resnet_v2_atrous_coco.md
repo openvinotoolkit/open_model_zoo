@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Mask R-CNN Inception Resnet V2 Atrous  is trained on COCO dataset and used for object instance segmentation. For details, see a [paper](https://arxiv.org/pdf/1703.06870.pdf).
+Mask R-CNN Inception Resnet V2 Atrous  is trained on COCO dataset and used for object instance segmentation. For details, see a [paper](https://arxiv.org/abs/1703.06870).
 
 ## Example
 

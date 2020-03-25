@@ -10,7 +10,7 @@ It is possible to specify one or more devices via `-td, --target devices` comman
 * `weights` - path to bin file with weights for your topology (Optional, the argument can be omitted if bin file stored in the same directory with model xml or if you use compiled blob).
 
 **Note:** 
-   You can generate executable blob using [compile_tool](http://docs.openvinotoolkit.org/latest/_inference_engine_tools_compile_tool_README.html).
+   You can generate executable blob using [compile_tool](https://docs.openvinotoolkit.org/latest/_inference_engine_tools_compile_tool_README.html).
    Before evaluation executable blob, please make sure that selected device support it.
 
 

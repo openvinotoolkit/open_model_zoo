@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `densenet-201` model is also one of the [DenseNet](https://arxiv.org/pdf/1608.06993)
+The `densenet-201` model is also one of the [DenseNet](https://arxiv.org/abs/1608.06993)
 group of models designed to perform image classification. The main difference with
 the `densenet-121` model is the size and accuracy of the model. The `densenet-201`
 is larger at over 77MB in size vs the `densenet-121` model's roughly 31MB size.

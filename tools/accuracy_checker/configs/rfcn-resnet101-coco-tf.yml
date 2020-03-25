@@ -27,19 +27,19 @@ models:
       - name: ms_coco_detection_91_classes
 
         preprocessing:
-            -   type: resize
-                aspect_ratio_scale: fit_to_window
-                dst_height: 600
-                dst_width: 600
-            -   type: padding
-                dst_height: 600
-                dst_width: 600
-                pad_type: right_bottom
+          - type: resize
+            aspect_ratio_scale: fit_to_window
+            dst_height: 600
+            dst_width: 600
+          - type: padding
+            dst_height: 600
+            dst_width: 600
+            pad_type: right_bottom
 
         postprocessing:
-            -   type: faster_rcnn_postprocessing_resize
-                dst_height: 600
-                dst_width: 600
+          - type: faster_rcnn_postprocessing_resize
+            dst_height: 600
+            dst_width: 600
 
         metrics:
           - type: coco_precision

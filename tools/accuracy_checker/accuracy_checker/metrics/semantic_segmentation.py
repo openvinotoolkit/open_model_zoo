@@ -81,6 +81,10 @@ class SegmentationMetric(PerImageEvaluationMetric):
         self._update_state(accumulate, self.CONFUSION_MATRIX_KEY, lambda: np.zeros((n_classes, n_classes)))
         return cm
 
+    def reset(self):
+        self.state = {}
+        self._update_iter = 0
+
 
 class SegmentationAccuracy(SegmentationMetric):
     __provider__ = 'segmentation_accuracy'

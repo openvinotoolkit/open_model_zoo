@@ -86,7 +86,7 @@ public:
     explicit VideoSources(const InitParams& p);
     ~VideoSources();
 
-    void openVideo(const std::string& source, bool native);
+    void openVideo(const std::string& source, bool native, bool loopVideo);
 
     void start();
 

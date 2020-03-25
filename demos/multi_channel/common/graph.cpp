@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <string>
-#include <memory>
-#include <vector>
-#include <utility>
 #include <algorithm>
+#include <chrono>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "graph.hpp"
 #include "threading.hpp"

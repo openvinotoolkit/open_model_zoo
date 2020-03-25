@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  ResNet-101 with Squeeze-and-Excitation blocks <https://arxiv.org/pdf/1709.01507.pdf>
+  ResNet-101 with Squeeze-and-Excitation blocks <https://arxiv.org/abs/1709.01507>
 task_type: classification
 files:
   - name: se-resnet-101.prototxt

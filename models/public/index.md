@@ -95,6 +95,7 @@ instance instance segmentation model outputs pixel-wise masks for all instances.
 | Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
 | ------------------------- | -------------- | -------------- | ------ | ------- |
 | Brain Tumor Segmentation  | [MXNet\*](./brain-tumor-segmentation-0001/brain-tumor-segmentation-0001.md) | brain-tumor-segmentation-0001 | 409.996 | 38.192 |
+| Brain Tumor Segmentation 2  | [PyTorch\*](./brain-tumor-segmentation-0002/brain-tumor-segmentation-0002.md) | brain-tumor-segmentation-0002 | 300.801 | 4.51  |
 
 ## Object Detection
 
@@ -167,6 +168,15 @@ Image inpainting task is to estimate suitable pixel information to fill holes in
 | Model Name                | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ------------------------- | ---------------| -------------- | -------- | ------ | ------- |
 | GMCNN Inpainting          | [TensorFlow\*](./gmcnn-places2-tf/gmcnn-places2-tf.md) | gmcnn-places2-tf | 33.47Db | | |
+
+## Action Recognition
+
+The task of action recognition is to predict action that is being performed on a short video clip
+(tensor formed by stacking sampled frames from input video).
+
+| Model Name                | Implementation | OMZ Model Name | GFlops | mParams |
+| ------------------------- | ---------------| -------------- | ------ | ------- |
+| RGB-I3D, pretrained on ImageNet\* | [TensorFlow\*](./i3d-rgb-tf/i3d-rgb-tf.md) | i3d-rgb-tf | | |
 
 ## Legal Information
 
