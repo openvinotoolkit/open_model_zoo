@@ -68,8 +68,8 @@ class HumanPoseAdapter(Adapter):
                     'human_pose_estimation adapter should contains both: keypoints_heatmap_out '
                     'and part_affinity_fields_out or not contain them at all (in single output model case)'
                 )
-        self._keypoints_heatmap_bias = self.keypoints_heatmap + '/add_'
-        self._part_affinity_fileds_bias = self.part_affinity_fields + '/add_'
+            self._keypoints_heatmap_bias = self.keypoints_heatmap + '/add_'
+            self._part_affinity_fileds_bias = self.part_affinity_fields + '/add_'
 
     def process(self, raw, identifiers=None, frame_meta=None):
         result = []

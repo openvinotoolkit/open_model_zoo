@@ -12,7 +12,6 @@
 #include <vector>
 #include <time.h>
 #include <limits>
-#include <chrono>
 
 static const char help_message[] = "Print a usage message.";
 static const char image_message[] = "Required. Path to a .bmp image.";

@@ -1,0 +1,37 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  General purpose instance segmentation model. Mask R-CNN with Oct0.5ResNet50 backbone
+  -  FPN -  light RPN -  SERes detection head and dual attention segmentation head.
+task_type: instance_segmentation
+files:
+  - name: FP32/instance-segmentation-security-1025.xml
+    size: 689629
+    sha256: 55b7622e04856ced559e0d2b939c81b81421877425dc40e4b952f79024ac9cb2
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/instance-segmentation-security-1025/FP32/instance-segmentation-security-1025.xml
+  - name: FP32/instance-segmentation-security-1025.bin
+    size: 107603400
+    sha256: 666a559d560960dafaeebaa88b133959b5b1d953bf062acb626d48f4248ecaf7
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/instance-segmentation-security-1025/FP32/instance-segmentation-security-1025.bin
+  - name: FP16/instance-segmentation-security-1025.xml
+    size: 689349
+    sha256: e7816e5c4930ce1cb264431d1929c35c42a57a5f8c239a5458874602a338bf8d
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/instance-segmentation-security-1025/FP16/instance-segmentation-security-1025.xml
+  - name: FP16/instance-segmentation-security-1025.bin
+    size: 53801810
+    sha256: 2775b05f83f1645172b5ef9b6e0ce52824c5259bb3343a7de9f0a4c48b2a6742
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/instance-segmentation-security-1025/FP16/instance-segmentation-security-1025.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

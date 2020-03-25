@@ -36,9 +36,9 @@ files:
     sha256: ba87812d0b5b247966471511d2d1a47fd6f492afb372bc49af6de3a46f4cf6c7
     source: https://raw.githubusercontent.com/intel-isl/MiDaS/ffb70fd13361434114383ce7eb898c2f5bec6176/models/blocks.py
   - name: model.pt
-    size: 422388453
-    sha256: f46da7438f3dd46a46fa550cea1d5dcab4bb3192ba272f1fd2b08d23ba41d39e
-    source: https://download.01.org/opencv/public_models/032020/midasnet/model.pt
+    size: 422397766
+    sha256: 5237e007f53f05d0a66f40590abfead08dbb662629089e3462daf741ac9932d6
+    source: https://download.01.org/opencv/public_models/032020/midasnet/model-001.pt
 framework: pytorch
 postprocessing:
   - $type: regex_replace
