@@ -1,0 +1,42 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Hand pose estimation model based on "Hand Keypoint Detection in Single Images using Multiview Bootstrapping"
+  <https://arxiv.org/pdf/1704.07809.pdf> papers.
+
+  The model input is a blob that consists of a single image of "1x3x368x368" in
+  BGR order.
+
+  The model outputs is heatmap blob, which contains coordinates keypoint heatmaps.
+task_type: human_pose_estimation
+files:
+  - name: pose_iter_102000.caffemodel
+    size: 147344024
+    sha256: f313aa5ef031ac91606e1a0383daa14be241a6e1a91c1155283dd28503c79c2d
+    source: http://posefs1.perception.cs.cmu.edu/OpenPose/models/hand/pose_iter_102000.caffemodel
+  - name: pose_deploy.prototxt
+    size: 26452
+    sha256: d722796d87f251aadf8eb1af9dca03b3732e8a1d1bb524961a29c8e5073a8251
+    source: https://raw.githubusercontent.com/CMU-Perceptual-Computing-Lab/openpose/master/models/hand/pose_deploy.prototxt
+framework: caffe
+model_optimizer_args:
+  - --input_shape=[1,3,368,368]
+  - --input=image
+  - --scale_values=data[255.0,255.0,255.0]
+  - --reverse_input_channels
+  - --output=Mconv7_stage6
+  - --input_model=$dl_dir/pose_iter_102000.caffemodel
+  - --input_proto=$dl_dir/pose_deploy.prototxt
+license: https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/LICENSE
