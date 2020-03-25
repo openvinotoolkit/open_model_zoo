@@ -45,7 +45,6 @@ models:
             apply_to: annotation
             height_range: 64, 1024
             is_empty: True
-
         metrics:
           - type: map
             ignore_difficult: True
