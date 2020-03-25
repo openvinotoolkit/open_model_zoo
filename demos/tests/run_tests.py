@@ -85,17 +85,16 @@ def main():
     model_info = {model['name']: model for model in model_info_list}
 
     if args.demos is not None:
-        demos_to_test = set(args.demos.split(','))
+        names_of_demos_to_test = set(args.demos.split(','))
+        demos_to_test = [demo for demo in DEMOS if demo.full_name in names_of_demos_to_test]
     else:
-        demos_to_test = {demo.full_name for demo in DEMOS}
+        demos_to_test = DEMOS
 
     num_failures = 0
 
     os.putenv('PYTHONPATH',  "{}:{}/lib".format(os.environ['PYTHONPATH'], args.demo_build_dir))
 
-    for demo in DEMOS:
-        if demo.full_name not in demos_to_test: continue
-
+    for demo in demos_to_test:
         print('Testing {}...'.format(demo.full_name))
         print()
 
