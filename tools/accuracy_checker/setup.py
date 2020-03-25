@@ -82,7 +82,7 @@ def prepare_requirements():
     requirements_core = read('requirements-core.in').split('\n')
     if 'install_core' in sys.argv:
         return requirements_core
-    requirements = read("requirements.in").slit('\n')
+    requirements = read("requirements.in").split('\n')
     return requirements_core + requirements
 
 requirements = prepare_requirements()
