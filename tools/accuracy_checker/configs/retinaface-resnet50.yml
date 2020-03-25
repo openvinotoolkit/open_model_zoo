@@ -4,8 +4,8 @@ models:
       - framework: dlsdk
         tags:
           - FP32
-        model:   public/retinaface-resnet-50/mxnet/FP32/retinaface-resnet-50.xml
-        weights: public/retinaface-resnet-50/mxnet/FP32/retinaface-resnet-50.bin
+        model:   public/retinaface-resnet-50/FP32/retinaface-resnet-50.xml
+        weights: public/retinaface-resnet-50/FP32/retinaface-resnet-50.bin
         adapter:
           type: retinaface
           bboxes_outputs:
@@ -19,8 +19,8 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        model:   public/retinaface-resnet-50/mxnet/FP16/retinaface-resnet-50.xml
-        weights: public/retinaface-resnet-50/mxnet/FP16/retinaface-resnet-50.bin
+        model:   public/retinaface-resnet-50/FP16/retinaface-resnet-50.xml
+        weights: public/retinaface-resnet-50/FP16/retinaface-resnet-50.bin
         adapter:
           type: retinaface
           bboxes_outputs:
@@ -34,8 +34,8 @@ models:
       - framework: dlsdk
         tags:
           - FP32-INT8
-        model:   public/retinaface-resnet-50/mxnet/FP32-INT8/retinaface-resnet-50.xml
-        weights: public/retinaface-resnet-50/mxnet/FP32-INT8/retinaface-resnet-50.bin
+        model:   public/retinaface-resnet-50/FP32-INT8/retinaface-resnet-50.xml
+        weights: public/retinaface-resnet-50/FP32-INT8/retinaface-resnet-50.bin
         adapter:
           type: retinaface
           bboxes_outputs:
@@ -49,8 +49,8 @@ models:
       - framework: dlsdk
         tags:
           - FP16-INT8
-        model:   public/retinaface-resnet-50/mxnet/FP16-INT8/retinaface-resnet-50.xml
-        weights: public/retinaface-resnet-50/mxnet/FP16-INT8/retinaface-resnet-50.bin
+        model:   public/retinaface-resnet-50/FP16-INT8/retinaface-resnet-50.xml
+        weights: public/retinaface-resnet-50/FP16-INT8/retinaface-resnet-50.bin
         adapter:
           type: retinaface
           bboxes_outputs:
