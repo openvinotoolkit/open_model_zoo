@@ -24,7 +24,7 @@ from ..topology_types import SSD, FasterRCNN
 from ..adapters import Adapter
 from ..config import ConfigValidator, NumberField, StringField, ConfigError, ListField, BoolField
 from ..postprocessor.nms import NMS
-from ..representation import DetectionPrediction, ContainerPrediction
+from ..representation import DetectionPrediction, ContainerPrediction, FacialLandmarksPrediction
 
 
 class SSDAdapter(Adapter):
@@ -782,7 +782,6 @@ class RFCNCaffe(Adapter):
             identifiers[0], detections['labels'], detections['scores'], detections['x_mins'],
             detections['y_mins'], detections['x_maxs'], detections['y_maxs']
         )]
-
     @staticmethod
     def bbox_transform_inv(boxes, deltas):
         if boxes.shape[0] == 0:
