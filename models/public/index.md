@@ -2,7 +2,9 @@
 
 OpenVINO&trade; toolkit provides a set of public models
 that you can use for learning and demo purposes or for developing deep learning
-software. Most recent version is available in the [repo on Github](https://github.com/opencv/open_model_zoo).
+software. 
+
+Most recent version is available in the [repo on Github](https://github.com/opencv/open_model_zoo).
 
 The models can be downloaded via Model Downloader
 (`<OPENVINO_INSTALL_DIR>/deployment_tools/open_model_zoo/tools/downloader`).
@@ -11,7 +13,7 @@ The models can be downloaded via Model Downloader
 
 | Model Name        | Implementation | OMZ Model Name | Accuracy | GFlops | mParams |
 | ----------------- | ---------------| -------------- | -------- | ------ | ------- |
-| AlexNet           | [Caffe\*](./alexnet/alexnet.md)       | alexnet   | | 1.5 | 60.965 |
+| AlexNet           | [Caffe\*](./alexnet/alexnet.md )       | alexnet   | | 1.5 | 60.965 |
 | CaffeNet          | [Caffe\*](./caffenet/caffenet.md)     | caffenet  | | 1.5 | 60.965 |
 | DenseNet 121      | [Caffe\*](./densenet-121/densenet-121.md)<br>[TensorFlow\*](./densenet-121-tf/densenet-121-tf.md)<br>[Caffe2\*](./densenet-121-caffe2/densenet-121-caffe2.md)  | densenet-121<br>densenet-121-tf<br>densenet-121-caffe2 | | 5.289~5.724    | 7.971 |
 | DenseNet 161      | [Caffe\*](./densenet-161/densenet-161.md)<br> [TensorFlow\*](./densenet-161-tf/densenet-161-tf.md) | densenet-161<br>densenet-161-tf | | 14.128~15.561  | 28.666 |
