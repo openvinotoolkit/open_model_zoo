@@ -18,6 +18,9 @@ import importlib
 import re
 import sys
 import warnings
+import platform
+import subprocess
+from distutils.version import LooseVersion
 from setuptools import find_packages, setup
 from setuptools.command.test import test as test_command
 from setuptools.command.install import install as install_command
@@ -45,6 +48,19 @@ def read(*path):
     with version_file.open() as file:
         return file.read()
 
+def check_and_update_numpy(min_acceptable='1.15'):
+    try:
+        import numpy as np
+        update_required = LooseVersion(np.__version__) < LooseVersion(min_acceptable)
+    except ImportError:
+        update_required = True
+    if update_required:
+        subprocess.call(['pip3', 'install', 'numpy>={}'.format(min_acceptable)])
+
+
+class CoreInstall(install_command):
+    pass
+
 
 class CoreInstall(install_command):
     pass
@@ -67,10 +83,14 @@ requirements = [read('requirements-core.in') + read("requirements.in") if 'insta
 try:
     importlib.import_module('cv2')
 except ImportError as opencv_import_error:
-    warnings.warn(
-        "Problem with cv2 import: \n{}\n opencv-python will be added to requirements".format(opencv_import_error)
-    )
-    requirements.append('opencv-python')
+    if platform.processor() != 'aarch64':
+        warnings.warn(
+            "Problem with cv2 import: \n{}\n opencv-python will be added to requirements".format(opencv_import_error)
+        )
+        requirements.append('opencv-python')
+    else:
+        warnings.warn("Problem with cv2 import: \n{}.\n Probably due to unsuitable numpy version, will be updated".format(opencv_import_error))
+        check_and_update_numpy()
 
 setup(
     name="accuracy_checker",
