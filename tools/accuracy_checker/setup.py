@@ -57,9 +57,9 @@ def check_and_update_numpy(min_acceptable='1.15'):
     if update_required:
         subprocess.call(['pip3', 'install', 'numpy>={}'.format(min_acceptable)])
 
-
-class CoreInstall(install_command):
-    pass
+def install_dependencies_with_pip(dependencies):
+    for dep in dependencies:
+        subprocess.call(['pip3', 'install',  str(dep)])
 
 
 class CoreInstall(install_command):
@@ -74,11 +74,18 @@ def find_version(*path):
 
     raise RuntimeError("Unable to find version string.")
 
-
+is_arm = platform.processor() == 'aarch64'
 long_description = read("README.md")
 version = find_version("accuracy_checker", "__init__.py")
 
-requirements = [read('requirements-core.in') + read("requirements.in") if 'install_core' not in sys.argv else '']
+def prepare_requirements():
+    requirements_core = read('requirements-core.in').split('\n')
+    if 'install_core' in sys.argv:
+        return requirements_core
+    requirements = read("requirements.in").slit('\n')
+    return requirements_core + requirements
+
+requirements = prepare_requirements()
 
 try:
     importlib.import_module('cv2')
@@ -91,6 +98,9 @@ except ImportError as opencv_import_error:
     else:
         warnings.warn("Problem with cv2 import: \n{}.\n Probably due to unsuitable numpy version, will be updated".format(opencv_import_error))
         check_and_update_numpy()
+
+if is_arm:
+    install_dependencies_with_pip(requirements)
 
 setup(
     name="accuracy_checker",
@@ -105,7 +115,7 @@ setup(
     ]},
     zip_safe=False,
     python_requires='>=3.5',
-    install_requires=requirements,
+    install_requires=requirements if not is_arm else '',
     tests_require=[read("requirements-test.in")],
     cmdclass={'test': PyTest, 'install_core': CoreInstall}
 )
