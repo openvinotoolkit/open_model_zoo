@@ -1,0 +1,53 @@
+models:
+  - name: hand-pose-estimation
+
+    launchers:
+      - framework: dlsdk
+        device: CPU
+        tags:
+          - FP32
+        model:   public/hand-pose-estimation/FP32/hand-pose-estimation.xml
+        weights: public/hand-pose-estimation/FP32/hand-pose-estimation.bin
+        allow_reshape_input: True
+        adapter:
+          type: hand_pose_estimation
+          part_affinity_fields_out: Mconv7_stage6
+          keypoints_heatmap_out: Mconv7_stage6
+
+      - framework: dlsdk
+        device: CPU
+        tags:
+          - FP16
+        model:   public/hand-pose-estimation/FP16/hand-pose-estimation.xml
+        weights: public/hand-pose-estimation/FP16/hand-pose-estimation.bin
+        allow_reshape_input: True
+        adapter:
+          type: hand_pose_estimation
+          part_affinity_fields_out: Mconv7_stage6
+          keypoints_heatmap_out: Mconv7_stage6
+
+    datasets:
+      - name: ms_coco_hand_keypoints
+
+        preprocessing:
+          - type: resize
+            size: 368
+            interpolation: CUBIC
+            aspect_ratio_scale: width
+          - type: padding
+            stride: 8
+
+        postprocessing:
+          - type: filter
+            apply_to: annotation
+            area_range: 1, 10000000000
+          - type: filter
+            apply_to: prediction
+            area_range: 1, 10000000000
+
+        metrics:
+          - name: AP
+            type: coco_precision
+            max_detections: 20
+
+global_definitions: ../dataset_definitions.yml
