@@ -1,0 +1,40 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  FaceNet: A Unified Embedding for Face Recognition and Clustering. For details see
+  the repository <https://github.com/davidsandberg/facenet/>, paper <https://arxiv.org/abs/1503.03832>
+task_type: face_recognition
+files:
+  - name: 20180408-102900.zip
+    size: 195479980
+    sha256: 2a32a4d6b797b0e35e065c674dfa2d60e9eb2372aa10728bd0b221abe12490ac
+    source:
+      $type: google_drive
+      id: 1R77HmFADxe87GmoLwzfgMu_HY0IhcyBz
+postprocessing:
+  - $type: unpack_archive
+    format: zip
+    file: 20180408-102900.zip
+model_optimizer_args:
+  - --freeze_placeholder_with_value=phase_train->False
+  - --reverse_input_channels
+  - --input_shape=[1,160,160,3],[1]
+  - --input=image_batch,phase_train
+  - --mean_values=image_batch[127.5,127.5,127.5]
+  - --scale_values=image_batch[128.0]
+  - --output=embeddings
+  - --input_model=$dl_dir/20180408-102900/20180408-102900.pb
+framework: tf
+license: https://raw.githubusercontent.com/davidsandberg/facenet/master/LICENSE.md

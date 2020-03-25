@@ -28,6 +28,8 @@ class PostprocessingExecutor:
 
         self.state = state or {}
 
+        self.allow_image_postprocessor = True
+
         if not processors:
             return
 
@@ -37,19 +39,7 @@ class PostprocessingExecutor:
                 on_extra_argument=ConfigValidator.IGNORE_ON_EXTRA_ARGUMENT
             )
             postprocessor_config.validate(config)
-            postprocessor = Postprocessor.provide(config['type'], config, config['type'], self.dataset_meta, state)
-            self._processors.append(postprocessor)
-
-        allow_image_postprocessor = True
-        for processor in self._processors:
-            if overrides(processor, 'process_all', Postprocessor):
-                allow_image_postprocessor = False
-                self._dataset_processors.append(processor)
-            else:
-                if allow_image_postprocessor:
-                    self._image_processors.append(processor)
-                else:
-                    self._dataset_processors.append(processor)
+            self.register_postprocessor(config)
 
     def process_dataset(self, annotations, predictions):
         for method in self._dataset_processors:
@@ -64,13 +54,16 @@ class PostprocessingExecutor:
 
         return annotation, prediction
 
-    def process_batch(self, annotations, predictions, metas=None):
+    def process_batch(self, annotations, predictions, metas=None, allow_empty_annotation=False):
+        if allow_empty_annotation and not annotations:
+            annotations = [None] * len(predictions)
         # FIX IT: remove zipped_transform here in the future -- it is too flexible and unpredictable
         if metas is None:
             zipped_result = zipped_transform(self.process_image, annotations, predictions)
         else:
             zipped_result = zipped_transform(self.process_image, annotations, predictions, metas)
-        return zipped_result[0:2] # return changed annotations and predictions only
+
+        return zipped_result[0:2]  # return changed annotations and predictions only
 
     def full_process(self, annotations, predictions, metas=None):
         return self.process_dataset(*self.process_batch(annotations, predictions, metas))
@@ -79,6 +72,10 @@ class PostprocessingExecutor:
     def has_dataset_processors(self):
         return len(self._dataset_processors) != 0
 
+    @property
+    def has_processors(self):
+        return len(self._image_processors) + len(self._dataset_processors) != 0
+
     def __call__(self, context, *args, **kwargs):
         batch_annotation = context.annotation_batch
         batch_prediction = context.prediction_batch
@@ -86,6 +83,18 @@ class PostprocessingExecutor:
         context.batch_annotation, context.batch_prediction = self.process_batch(batch_annotation,
                                                                                 batch_prediction,
                                                                                 batch_meta)
+
+    def register_postprocessor(self, config):
+        postprocessor = Postprocessor.provide(config['type'], config, config['type'], self.dataset_meta, self.state)
+        self._processors.append(postprocessor)
+        if overrides(postprocessor, 'process_all', Postprocessor):
+            self.allow_image_postprocessor = False
+            self._dataset_processors.append(postprocessor)
+            return
+        if self.allow_image_postprocessor:
+            self._image_processors.append(postprocessor)
+        else:
+            self._dataset_processors.append(postprocessor)
 
 
 class PostprocessorConfig(ConfigValidator):

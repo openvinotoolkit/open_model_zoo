@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `mtcnn-o` model is the third of the [mtcnn](https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf) group of models designed to perform face detection. Short for "Multi-task Cascaded Convolutional Neural Network", it is implemented using the Caffe\* framework. The "o" designation indicates that this model is the "output" network intended to take the data returned from the "refine" `mtcnn-r` network, and transform it into the final output data.  For details about this family of models, check out the [repository](https://github.com/DuinoDu/mtcnn).
+The `mtcnn-o` model is the third of the [mtcnn](https://arxiv.org/abs/1604.02878) group of models designed to perform face detection. Short for "Multi-task Cascaded Convolutional Neural Network", it is implemented using the Caffe\* framework. The "o" designation indicates that this model is the "output" network intended to take the data returned from the "refine" `mtcnn-r` network, and transform it into the final output data.  For details about this family of models, check out the [repository](https://github.com/DuinoDu/mtcnn).
 
 The model input is a blob with a vector containing the refined face data, as returned by the `mtcnn-r` model. The mean values need to be subtracted as follows: [127.5, 127.5, 127.5] before passing the image blob into the network. In addition, values must be divided by 0.0078125.
 
@@ -64,4 +64,29 @@ Expected color order: `RGB`.
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/DuinoDu/mtcnn/master/LICENSE]()
+The original model is distributed under the following
+[license](https://raw.githubusercontent.com/DuinoDu/mtcnn/master/LICENSE):
+
+```
+MIT License
+
+Copyright (c) 2016 Kaipeng Zhang
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

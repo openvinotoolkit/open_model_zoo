@@ -2,8 +2,8 @@
 
 ## Use Case and High-Level Description
 
-This is an Tensorflow\* version of `densenet-169` model, one of the DenseNet
-group of models designed to perform image classification. The weights were converted from DenseNet-Keras Models. For details, see [repository](https://github.com/pudae/tensorflow-densenet/) and [paper](https://arxiv.org/pdf/1608.06993.pdf).
+This is a TensorFlow\* version of `densenet-169` model, one of the DenseNet
+group of models designed to perform image classification. The weights were converted from DenseNet-Keras Models. For details, see [repository](https://github.com/pudae/tensorflow-densenet/) and [paper](https://arxiv.org/abs/1608.06993).
 
 ## Example
 
@@ -14,7 +14,7 @@ group of models designed to perform image classification. The weights were conve
 | Type                            | Classification                            |
 | GFlops                          | 6.16                                      |
 | MParams                         | 14.139                                    |
-| Source framework                | Tensorflow\*                              |
+| Source framework                | TensorFlow\*                              |
 
 ## Performance
 
@@ -56,4 +56,6 @@ Name:`densenet169/predictions/Reshape_1`. Contains floating point values in a ra
 Name: `densenet169/predictions/Reshape_1/Transpose`, shape: [1, 1, 1, 1000]. Contains floating point values in a range [0, 1], which represent probabilities for classes in a dataset.
 
 ## Legal Information
-[https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE]()
+The original model is distributed under the
+[Apache License, Version 2.0](https://raw.githubusercontent.com/pudae/tensorflow-densenet/master/LICENSE).
+A copy of the license is provided in [APACHE-2.0-TF-DenseNet.txt](../licenses/APACHE-2.0-TF-DenseNet.txt).

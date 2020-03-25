@@ -1,0 +1,44 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  YOLO Tiny v2 trained on VOC dataset by AVA team with 0.3 sparsity level.
+task_type: detection
+files:
+  - name: FP32/yolo-v2-tiny-ava-sparse-30-0001.xml
+    size: 33290
+    sha256: dc76e9867a683bdb7c022dc801a965be120ed42f7581458582a26a4d0ef8676a
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/yolo-v2-tiny-ava-sparse-30-0001/FP32/yolo-v2-tiny-ava-sparse-30-0001.xml
+  - name: FP32/yolo-v2-tiny-ava-sparse-30-0001.bin
+    size: 63434896
+    sha256: 89199208d5a6491141f1dc469b8b98d0c9d43de22b10f8ab57cbbc656c57d200
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/yolo-v2-tiny-ava-sparse-30-0001/FP32/yolo-v2-tiny-ava-sparse-30-0001.bin
+  - name: FP16/yolo-v2-tiny-ava-sparse-30-0001.xml
+    size: 33269
+    sha256: 4948ffc8c4ec2db1d553fbc8d124db93803ab9d02993b67ded421134cfaeecd8
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/yolo-v2-tiny-ava-sparse-30-0001/FP16/yolo-v2-tiny-ava-sparse-30-0001.xml
+  - name: FP16/yolo-v2-tiny-ava-sparse-30-0001.bin
+    size: 31717450
+    sha256: 026eaff315755ad66f7dca256f99b02e2aed68dcf3fcc2641d403dfd88d21f2d
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/yolo-v2-tiny-ava-sparse-30-0001/FP16/yolo-v2-tiny-ava-sparse-30-0001.bin
+  - name: FP16-INT8/yolo-v2-tiny-ava-sparse-30-0001.xml
+    size: 79826
+    sha256: 7668b127118492b23f923710a9f05d74d47427cbef2ab0b8447a85e5ed0304e1
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/yolo-v2-tiny-ava-sparse-30-0001/FP16-INT8/yolo-v2-tiny-ava-sparse-30-0001.xml
+  - name: FP16-INT8/yolo-v2-tiny-ava-sparse-30-0001.bin
+    size: 15874678
+    sha256: a28520da3895d3d2b33027cd15d9d8001f76f337552fecfbf03166227fe94f57
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/yolo-v2-tiny-ava-sparse-30-0001/FP16-INT8/yolo-v2-tiny-ava-sparse-30-0001.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

@@ -1,0 +1,44 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Pedestrian detector based on ssd + mobilenet with reduced channels number.
+task_type: detection
+files:
+  - name: FP32/pedestrian-detection-adas-0002.xml
+    size: 245922
+    sha256: 6971adaa2fae85c2040e31e3a033ef055216fcee04d81a08bdc50084433483fc
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.xml
+  - name: FP32/pedestrian-detection-adas-0002.bin
+    size: 4660248
+    sha256: 249c964cbe38135cc5f2682288978652dd93aa4918e7043f96f894790f11c265
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/pedestrian-detection-adas-0002/FP32/pedestrian-detection-adas-0002.bin
+  - name: FP16/pedestrian-detection-adas-0002.xml
+    size: 245873
+    sha256: 2adcf25480f9b51845ec81828c9355ba202380e0e841bd122751e7f069947767
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.xml
+  - name: FP16/pedestrian-detection-adas-0002.bin
+    size: 2330176
+    sha256: 693753b7466da913b537016b31e3012f8ce6a885ac0897e3986eeca66d4ef8e6
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/pedestrian-detection-adas-0002/FP16/pedestrian-detection-adas-0002.bin
+  - name: FP16-INT8/pedestrian-detection-adas-0002.xml
+    size: 514627
+    sha256: 5ff0397f8aa3edfeccc631a2daf4170b3107a97e668bd3e2971b5e9b03da00e6
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/pedestrian-detection-adas-0002/FP16-INT8/pedestrian-detection-adas-0002.xml
+  - name: FP16-INT8/pedestrian-detection-adas-0002.bin
+    size: 1213098
+    sha256: cf3e9bb964e7f57211d1730234aaaf364b9f5b04065cb56f366e56436836dd16
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/pedestrian-detection-adas-0002/FP16-INT8/pedestrian-detection-adas-0002.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

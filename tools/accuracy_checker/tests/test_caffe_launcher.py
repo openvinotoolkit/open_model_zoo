@@ -58,6 +58,18 @@ class TestCaffeLauncher:
         launcher.predict([{'data': zeros.data}], [zeros.metadata])
         assert zeros.metadata['input_shape'] == {'data': (1, 3, 32, 32)}
 
+    def test_caffe_launcher_model_search(self, models_dir):
+        config = {
+            "framework": "caffe",
+            "weights": models_dir,
+            "model": models_dir,
+            "adapter": 'classification',
+            "device": "cpu"
+        }
+        caffe_model = create_launcher(config, 'SampleNet')
+        assert caffe_model.model == models_dir / 'SampleNet.prototxt'
+        assert caffe_model.weights == models_dir / 'SampleNet.caffemodel'
+
 
 def test_missed_model_in_create_caffe_launcher_raises_config_error_exception():
     launcher = {'framework': 'caffe', 'weights': 'custom', 'adapter': 'classification'}
@@ -71,4 +83,3 @@ def test_missed_weights_in_create_caffe_launcher_raises_config_error_exception()
 
     with pytest.raises(ConfigError):
         create_launcher(launcher)
-

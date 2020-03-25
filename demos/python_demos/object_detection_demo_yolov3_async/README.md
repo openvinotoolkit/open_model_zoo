@@ -29,7 +29,7 @@ python3 object_detection_demo_yolov3_async.py -h
 The command yields the following usage message:
 ```
 usage: object_detection_demo_yolov3_async.py [-h] -m MODEL -i INPUT
-                                       [-l CPU_EXTENSION] [-d DEVICE] 
+                                       [-l CPU_EXTENSION] [-d DEVICE]
                                        [--labels LABELS] [-t PROB_THRESHOLD]
                                        [-iout IOU_THRESHOLD] [-ni NUMBER_ITER]
                                        [-pc] [-r]
@@ -39,7 +39,7 @@ Options:
   -m MODEL, --model MODEL
                         Required. Path to an .xml file with a trained model.
   -i INPUT, --input INPUT
-                        Required. Path to a image/video file. (Specify 'cam'
+                        Required. Path to an image/video file. (Specify 'cam'
                         to work with camera)
   -l CPU_EXTENSION, --cpu_extension CPU_EXTENSION
                         Optional. Required for CPU custom layers. Absolute
@@ -88,3 +88,4 @@ In the default mode, the demo reports:
 * [Using Open Model Zoo demos](../../README.md)
 * [Model Optimizer](https://docs.openvinotoolkit.org/latest/_docs_MO_DG_Deep_Learning_Model_Optimizer_DevGuide.html)
 * [Model Downloader](../../../tools/downloader/README.md)
+* [YOLOv3 COCO labels](https://github.com/opencv/opencv/blob/master/samples/data/dnn/object_detection_classes_yolov3.txt), [VOC labels](https://github.com/opencv/opencv/blob/master/samples/data/dnn/object_detection_classes_pascal_voc.txt)

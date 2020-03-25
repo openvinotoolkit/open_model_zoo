@@ -10,13 +10,13 @@ Install prerequisites first:
 
 **accuracy checker** uses **Python 3**. Install it first:
 
-- [Python3][python3], [setuptools][setuptools]:
+- [Python3](https://www.python.org/downloads/), [setuptools](https://pypi.org/project/setuptools/):
 
 ```bash
 sudo apt-get install python3 python3-dev python3-setuptools python3-pip
 ```
 
-Python setuptools and python package manager (pip) install packages into system directory by default. Installation of accuracy checker tested only via [virtual environment][virtualenv].
+Python setuptools and python package manager (pip) install packages into system directory by default. Installation of accuracy checker tested only via [virtual environment](https://docs.python.org/3/tutorial/venv.html).
 
 In order to use virtual environment you should install it first:
 
@@ -43,12 +43,13 @@ The next step is installing backend frameworks for Accuracy Checker.
 
 In order to evaluate some models required frameworks have to be installed. Accuracy-Checker supports these frameworks:
 
-- [OpenVINO][openvino-get-started].
-- [Caffe][caffe-get-started].
-- [MxNet][mxnet-get-started]
-- [OpenCV DNN][opencv-dnn-get-started].
-- [TensorFlow][tf-get-started].
-- [ONNX Runtime][onnx-runtime-get-started].
+- [OpenVINO](https://software.intel.com/en-us/openvino-toolkit/documentation/get-started).
+- [Caffe](accuracy_checker/launcher/caffe_installation_readme.md).
+- [MXNet](https://mxnet.apache.org/).
+- [OpenCV DNN](https://docs.opencv.org/4.1.0/d2/de6/tutorial_py_setup_in_ubuntu.html).
+- [TensorFlow](https://www.tensorflow.org/).
+- [ONNX Runtime](https://github.com/microsoft/onnxruntime/blob/master/README.md).
+- [PyTorch](https://pytorch.org/)
 
 You can use any of them or several at a time.
 
@@ -60,9 +61,16 @@ If all prerequisite are installed, then you are ready to install **accuracy chec
 python3 setup.py install
 ```
 
+Accuracy Checker is modular tool and have some task-specific dependencies, all specific required modules can be found in `requirements.in` file.
+You can install only core part of the tool without additional dependencies and manage them by your-self using following command instead of standard installation:
+
+```bash
+python setup.py install_core
+```
+
 #### Usage
 
-You may test your installation and get familiar with accuracy checker by running [sample][sample-readme].
+You may test your installation and get familiar with accuracy checker by running [sample](sample/README.md).
 
 Once you installed accuracy checker you can evaluate your configurations with:
 
@@ -73,7 +81,7 @@ accuracy_check -c path/to/configuration_file -m /path/to/models -s /path/to/sour
 All relative paths in config files will be prefixed with values specified in command line:
 
 - `-c, --config` path to configuration file.
-- `-m, --models` specifies directory in which models and weights declared in config file will be searched.
+- `-m, --models` specifies directory in which models and weights declared in config file will be searched. You also can specify space separated list of directories if you want to run the same configuration several times with models located in different directories or if you have the pipeline with several models.
 - `-s, --source` specifies directory in which input images will be searched.
 - `-a, --annotations` specifies directory in which annotation and meta files will be searched.
 
@@ -86,6 +94,15 @@ You may refer to `-h, --help` to full list of command line options. Some optiona
 - `-C, '--converted_models` directory to store Model Optimizer converted models (used for DLSDK launcher only).
 - `-tf, --target_framework` framework for infer.
 - `-td, --target_devices` devices for infer. You can specify several devices using space as a delimiter.
+- `--async_mode` allows run the tool in async mode if launcher support it.
+- `--num_requests` number requests for async execution. Allows override provided in config info. Default is `AUTO`
+
+You are also able to replace some command line arguments with environment variables for path prefixing. Supported following list of variables:
+* `DATA_DIR` -  equivalent of `-s`, `--source`.
+* `MODELS_DIR` - equivalent of `-m`, `--models`.
+* `EXTENSIONS` - equivalent of `-e`, `--extensions`.
+* `ANNOTATIONS_DIR` - equivalent of `-a`, `--annotations`.
+* `BITSTREAMS_DIR` - equivalent of `-b`, `--bitstreams`.
 
 #### Configuration
 
@@ -110,6 +127,10 @@ models:
   datasets:
     - name: dataset_name
 ```
+Optionally you can use global configuration. It can be useful for avoiding duplication if you have several models which should be run on the same dataset.
+Example of global definitions file can be found [here](dataset_definitions.yml). Global definitions will be merged with evaluation config in the runtime by dataset name. 
+Parameters of global configuration can be overwritten by local config (e.g. if in definitions specified resize with destination size 224 and in the local config used resize with size 227, the value in config - 227 will be used as resize parameter)
+You can use field `global_definitions` for specifying path to global definitions directly in the model config or via command line arguments (`-d`, `--definitions`).
 
 ### Launchers
 
@@ -117,13 +138,14 @@ Launcher is a description of how your model should be executed.
 Each launcher configuration starts with setting `framework` name. Currently *caffe*, *dlsdk*, *mxnet*, *tf*, *tf_lite*, *opencv*, *onnx_runtime* supported. Launcher description can have differences.
 Please view:
 
-- [how to configure Caffe launcher][caffe-launcher-configuration].
-- [how to configure DLSDK launcher][dlsdk-launcher-configuration].
-- [how to configure OpenCV launcher][opencv-launcher-configuration].
-- [how to configure MxNet Launcher][mxnet-launcher-configuration].
-- [how to configure TensorFlow Launcher][tf-launcher-configuration].
-- [how to configure TensorFlow Lite Launcher][tf-lite-launcher-configuration].
-- [how to configure ONNX Runtime Launcher][onnx-runtime-launcher-configuration].
+- [how to configure Caffe launcher](accuracy_checker/launcher/caffe_launcher_readme.md).
+- [how to configure DLSDK launcher](accuracy_checker/launcher/dlsdk_launcher_readme.md).
+- [how to configure OpenCV launcher](accuracy_checker/launcher/opencv_launcher_readme.md).
+- [how to configure MXNet Launcher](accuracy_checker/launcher/mxnet_launcher_readme.md).
+- [how to configure TensorFlow Launcher](accuracy_checker/launcher/tf_launcher_readme.md).
+- [how to configure TensorFlow Lite Launcher](accuracy_checker/launcher/tf_lite_launcher_readme.md).
+- [how to configure ONNX Runtime Launcher](accuracy_checker/launcher/onnx_runtime_launcher_readme.md).
+- [how to configure PyTorch Launcher](accuracy_checker/launcher/pytorch_launcher_readme.md)
 
 ### Datasets
 
@@ -142,7 +164,7 @@ Each dataset must have:
 - `metrics`: list of metrics that should be computed.
 
 And optionally:
-- `preprocessing`: list of preprocessing steps applied to input data. If you want calculated metrics to match reported, you must reproduce preprocessing from canonical paper of your topology or ask topology author about required steps if it is ICV topology.
+- `preprocessing`: list of preprocessing steps applied to input data. If you want calculated metrics to match reported, you must reproduce preprocessing from canonical paper of your topology or ask topology author about required steps.
 - `postprocessing`: list of postprocessing steps.
 - `reader`: approach for data reading. Default reader is `opencv_imread`.
 
@@ -154,7 +176,7 @@ You can convert annotation inplace using:
 or use existing annotation file and dataset meta: 
 - `annotation` - path to annotation file, you must **convert annotation to representation of dataset problem first**, you may choose one of the converters from *annotation-converters* if there is already converter for your dataset or write your own.
 - `dataset_meta`: path to metadata file (generated by converter).
-More detailed information about annotation conversion you can find in [Annotation Conversion Guide][converters]
+More detailed information about annotation conversion you can find in [Annotation Conversion Guide](accuracy_checker/annotation_converters/README.md).
  
 example of dataset definition:
 
@@ -187,11 +209,11 @@ will be picked from *definitions* file.
 
 You can find useful following instructions:
 
-- [how to convert annotations][converters]
-- [how to use preprocessings][preprocessors].
-- [how to use postprocessings][postprocessors].
-- [how to use metrics][metrics].
-- [how to use readers][readers].
+- [how to convert annotations](accuracy_checker/annotation_converters/README.md)
+- [how to use preprocessings](accuracy_checker/preprocessor/README.md).
+- [how to use postprocessings](accuracy_checker/postprocessor/README.md).
+- [how to use metrics](accuracy_checker/metrics/README.md).
+- [how to use readers](accuracy_checker/data_readers/README.md).
 
 You may optionally provide `reference` field for metric, if you want calculated metric
 tested against specific value (i.e. reported in canonical paper).
@@ -212,31 +234,13 @@ metrics:
 
 Typical workflow for testing new model include:
 
-1. Convert annotation of your dataset. Use one of the converters from annotation-converters, or write your own if there is no converter for your dataset. You can find detailed instruction how to use converters in [Annotation Conversion Guide][converters].
+1. Convert annotation of your dataset. Use one of the converters from annotation-converters, or write your own if there is no converter for your dataset. You can find detailed instruction how to use converters in [Annotation Conversion Guide](accuracy_checker/annotation_converters/README.md).
 1. Choose one of *adapters* or write your own. Adapter converts raw output produced by framework to high level problem specific representation (e.g. *ClassificationPrediction*, *DetectionPrediction*, etc).
 1. Reproduce preprocessing, metrics and postprocessing from canonical paper.
 1. Create entry in config file and execute.
 
-[python3]: https://www.python.org/downloads/
-[setuptools]: https://pypi.python.org/pypi/setuptools
-[caffe-get-started]: accuracy_checker/launcher/caffe_installation_readme.md
-[virtual-environment]: https://docs.python.org/3/tutorial/venv.html
-[virtualenv]: https://virtualenv.pypa.io/en/stable
-[openvino-get-started]: https://software.intel.com/en-us/openvino-toolkit/documentation/get-started
-[mxnet-get-started]: https://mxnet.incubator.apache.org/versions/master/
-[tf-get-started]: https://www.tensorflow.org/
-[opencv-dnn-get-started]: https://docs.opencv.org/4.1.0/d2/de6/tutorial_py_setup_in_ubuntu.html
-[onnx-runtime-get-started]: https://github.com/microsoft/onnxruntime/blob/master/README.md
-[sample-readme]: sample/README.md
-[preprocessors]: accuracy_checker/preprocessor/README.md
-[postprocessors]: accuracy_checker/postprocessor/README.md
-[metrics]: accuracy_checker/metrics/README.md
-[converters]: accuracy_checker/annotation_converters/README.md
-[readers]: accuracy_checker/data_readers/README.md
-[caffe-launcher-configuration]: accuracy_checker/launcher/caffe_launcher_readme.md
-[dlsdk-launcher-configuration]: accuracy_checker/launcher/dlsdk_launcher_readme.md
-[opencv-launcher-configuration]: accuracy_checker/launcher/opencv_launcher_readme.md
-[mxnet-launcher-configuration]: accuracy_checker/launcher/mxnet_launcher_readme.md
-[tf-launcher-configuration]: accuracy_checker/launcher/tf_launcher_readme.md
-[tf-lite-launcher-configuration]: accuracy_checker/launcher/tf_lite_launcher_readme.md
-[onnx-runtime-launcher-configuration]: accuracy_checker/launcher/onnx_runtime_launcher_readme.md
+### Customizing Evaluation
+
+Standard Accuracy Checker validation pipeline: Annotation Reading -> Data Reading -> Preprocessing -> Inference -> Postprocessing -> Metrics.
+In some cases it can be unsuitable (e.g. if you have sequence of models). You are able to customize validation pipeline using own evaluator.
+More details about custom evaluations can be found in [related section](custom_evaluators/README.md).

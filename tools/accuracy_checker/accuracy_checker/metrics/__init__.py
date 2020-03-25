@@ -14,13 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from .metric_executor import MetricsExecutor, Metric
+from .metric_executor import MetricsExecutor
+from .metric import Metric, PerImageMetricResult
 
-from .classification import ClassificationAccuracy, ClassificationAccuracyClasses, ClipAccuracy
+from .classification import (
+    ClassificationAccuracy,
+    ClassificationAccuracyClasses,
+    ClipAccuracy,
+    ClassificationF1Score,
+    MetthewsCorrelation
+)
 from .detection import (DetectionMAP, MissRate, Recall, DetectionAccuracyMetric)
 from .reid import CMCScore, ReidMAP, PairwiseAccuracy, PairwiseAccuracySubsets
 from .semantic_segmentation import SegmentationAccuracy, SegmentationIOU, SegmentationMeanAccuracy, SegmentationFWAcc
-from .character_recognition import CharacterRecognitionAccuracy
+from .character_recognition import CharacterRecognitionAccuracy, LabelLevelRecognitionAccuracy
 from .regression import (
     MeanAbsoluteErrorOnInterval,
     MeanSquaredErrorOnInterval,
@@ -35,29 +42,44 @@ from .regression import (
     FacialLandmarksNormedError,
 
     PeakSignalToNoiseRatio,
+    StructuralSimilarity,
 
     AngleError
 )
 from .multilabel_recognition import MultiLabelRecall, MultiLabelPrecision, MultiLabelAccuracy, F1Score
-from .text_detection import TextDetectionMetric
-from .coco_metrics import MSCOCOAveragePresicion
+from .text_detection import (
+    FocusedTextLocalizationPrecision,
+    FocusedTextLocalizationRecall,
+    FocusedTextLocalizationHMean,
+    IncidentalSceneTextLocalizationPrecision,
+    IncidentalSceneTextLocalizationRecall,
+    IncidentalSceneTextLocalizationHMean
+)
+from .coco_metrics import MSCOCOAveragePrecision, MSCOCORecall, MSCOCOKeypointsPrecision, MSCOCOKeypointsRecall
 from .coco_orig_metrics import (
     MSCOCOorigAveragePrecision,
     MSCOCOorigRecall,
 
     MSCOCOOrigSegmAveragePrecision,
-    MSCOCOorigSegmRecall
+    MSCOCOorigSegmRecall,
+
+    MSCOCOOrigKeyPointsAveragePrecision,
 )
 from .hit_ratio import HitRatioMetric, NDSGMetric
+from .machine_translation import BilingualEvaluationUnderstudy
+from .question_answering import ExactMatchScore, ScoreF1
+from .mpjpe_multiperson import MpjpeMultiperson
 
 
 __all__ = [
     'Metric',
     'MetricsExecutor',
+    'PerImageMetricResult',
 
     'ClassificationAccuracy',
     'ClassificationAccuracyClasses',
     'ClipAccuracy',
+    'ClassificationF1Score',
 
     'DetectionMAP',
     'MissRate',
@@ -75,6 +97,7 @@ __all__ = [
     'SegmentationFWAcc',
 
     'CharacterRecognitionAccuracy',
+    'LabelLevelRecognitionAccuracy',
 
     'MeanAbsoluteError',
     'MeanSquaredError',
@@ -85,6 +108,7 @@ __all__ = [
     'FacialLandmarksPerPointNormedError',
     'FacialLandmarksNormedError',
     'PeakSignalToNoiseRatio',
+    'StructuralSimilarity',
     'AngleError',
 
     'MultiLabelAccuracy',
@@ -92,14 +116,30 @@ __all__ = [
     'MultiLabelPrecision',
     'F1Score',
 
-    'TextDetectionMetric',
+    'FocusedTextLocalizationHMean',
+    'FocusedTextLocalizationRecall',
+    'FocusedTextLocalizationPrecision',
+    'IncidentalSceneTextLocalizationPrecision',
+    'IncidentalSceneTextLocalizationRecall',
+    'IncidentalSceneTextLocalizationHMean',
 
-    'MSCOCOAveragePresicion',
+    'MSCOCOAveragePrecision',
+    'MSCOCORecall',
+    'MSCOCOKeypointsPrecision',
+    'MSCOCOKeypointsRecall',
     'MSCOCOorigAveragePrecision',
     'MSCOCOorigRecall',
     'MSCOCOOrigSegmAveragePrecision',
     'MSCOCOorigSegmRecall',
+    'MSCOCOOrigKeyPointsAveragePrecision',
 
     'HitRatioMetric',
-    'NDSGMetric'
+    'NDSGMetric',
+
+    'BilingualEvaluationUnderstudy',
+
+    'ScoreF1',
+    'ExactMatchScore',
+
+    'MpjpeMultiperson'
 ]

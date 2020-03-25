@@ -1,0 +1,45 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Single human pose estimation model based on https://arxiv.org/abs/1906.04104.
+task_type: human_pose_estimation
+files:
+  - name: single-human-pose-estimation-0001.tar.gz
+    sha256: 182c51075502643ada303a5f3a081b6adf943b711e5eddf80635582369588d34
+    size: 151979155
+    source: https://download.01.org/opencv/openvino_training_extensions/models/human_pose_estimation/single-human-pose-estimation-0001.tar.gz
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: single-human-pose-estimation-0001.tar.gz
+framework: pytorch
+conversion_to_onnx_args:
+  - --model-path=$dl_dir/single-human-pose-estimation-0001/
+  - --model-name=SinglePersonPoseEstimationWithMobileNet
+  - --import-module=models
+  - --weights=$dl_dir/single-human-pose-estimation-0001/single-human-pose-estimation-0001.pth
+  - --input-shape=1,3,384,288
+  - --input-names=data
+  - --output-names=heatmaps0,heatmaps1,heatmaps2,heatmaps3,heatmaps4,heatmaps
+  - --output-file=$conv_dir/single-human-pose-estimation-0001.onnx
+model_optimizer_args:
+  - --input=data
+  - --mean_values=data[123.675,116.28,103.53]
+  - --scale_values=data[58.395,57.12,57.375]
+  - --output=heatmaps
+  - --input_model=$conv_dir/single-human-pose-estimation-0001.onnx
+  - --reverse_input_channels
+  - --input_shape=[1,3,384,288]
+license: https://raw.githubusercontent.com/opencv/openvino_training_extensions/develop/LICENSE

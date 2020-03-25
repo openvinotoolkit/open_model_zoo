@@ -1,0 +1,36 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  This model uses a small-footprint network trained end-to-end to recognize Chinese
+  license plates in traffic.
+task_type: optical_character_recognition
+files:
+  - name: license-plate-recognition-barrier-0007.tar.gz
+    size: 20821887
+    sha256: 6c0b8651f0eead6de43e07491fd41809a4a7da141f1b5002dfd8dd207bdb1018
+    source: https://download.01.org/openvinotoolkit/training_toolbox_tensorflow/models/lpr/chinese_lp/license-plate-recognition-barrier-0007.tar.gz
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: license-plate-recognition-barrier-0007.tar.gz
+model_optimizer_args:
+  - --reverse_input_channels
+  - --input_shape=[1,24,94,3]
+  - --input=input
+  - --scale_values=input[255.0]
+  - --output=d_predictions
+  - --input_model=$dl_dir/license-plate-recognition-barrier-0007/graph.pb.frozen
+framework: tf
+license: https://raw.githubusercontent.com/opencv/training_toolbox_tensorflow/develop/LICENSE

@@ -1,0 +1,37 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  R-FCN Resnet-101 model, pretrained on COCO* dataset. Used for object detection.
+  For details, see the paper <https://arxiv.org/abs/1605.06409>.
+task_type: detection
+files:
+  - name: rfcn_resnet101_coco_2018_01_28.tar.gz
+    size: 652955004
+    sha256: e10d71260515cc0240d53ea8fc9e61669bc10c2df5e67ace682832113ac17205
+    source: http://download.tensorflow.org/models/object_detection/rfcn_resnet101_coco_2018_01_28.tar.gz
+postprocessing:
+  - $type: unpack_archive
+    format: gztar
+    file: rfcn_resnet101_coco_2018_01_28.tar.gz
+model_optimizer_args:
+  - --reverse_input_channels
+  - --input_shape=[1,600,600,3]
+  - --input=image_tensor
+  - --output=detection_scores,detection_boxes,num_detections
+  - --transformations_config=$mo_dir/extensions/front/tf/rfcn_support.json
+  - --tensorflow_object_detection_api_pipeline_config=$dl_dir/rfcn_resnet101_coco_2018_01_28/pipeline.config
+  - --input_model=$dl_dir/rfcn_resnet101_coco_2018_01_28/frozen_inference_graph.pb
+framework: tf
+license: https://raw.githubusercontent.com/tensorflow/models/master/LICENSE

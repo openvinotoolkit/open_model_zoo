@@ -26,7 +26,7 @@ def test_detection_adapter():
     raw = {
         'detection_out': np.array([[[[0, 3, 0.2, 0, 0, 1, 1], [0, 2, 0.5, 4, 4, 7, 7], [0, 5, 0.7, 3, 3, 9, 8]]]])
     }
-    expected = make_representation('0.2,3,0,0,1,1;0.5,2,4,4,7,7;0.7,5,3,3,9,8')
+    expected = make_representation('0.2 3 0 0 1 1;0.5 2 4 4 7 7;0.7 5 3 3 9 8')
 
     actual = SSDAdapter({}, output_blob='detection_out').process([raw], ['0'], [{}])
 
@@ -39,7 +39,7 @@ def test_detection_adapter_partially_filling_output_blob():
             [[[[0, 3, 0.2, 0, 0, 1, 1], [0, 2, 0.5, 4, 4, 7, 7], [0, 5, 0.7, 3, 3, 9, 8], [-1, 0, 0, 0, 0, 0, 0]]]]
         )
     }
-    expected = make_representation('0.2,3,0,0,1,1;0.5,2,4,4,7,7;0.7,5,3,3,9,8')
+    expected = make_representation('0.2 3 0 0 1 1;0.5 2 4 4 7 7;0.7 5 3 3 9 8')
 
     actual = SSDAdapter({}, output_blob='detection_out').process([raw], ['0'])
 
@@ -56,7 +56,7 @@ def test_detection_adapter_partially_filling_output_blob_with_zeros_at_the_end()
             [0,  0, 0,   0, 0, 0, 0]
         ]]])
     }
-    expected = make_representation('0.2,3,0,0,1,1;0.5,2,4,4,7,7;0.7,5,3,3,9,8')
+    expected = make_representation('0.2 3 0 0 1 1;0.5 2 4 4 7 7;0.7 5 3 3 9 8')
 
     actual = SSDAdapter({}, output_blob='detection_out').process([raw], ['0'])
 
@@ -67,7 +67,7 @@ def test_detection_adapter_batch_2():
     raw = {
         'detection_out': np.array([[[[0, 3, 0.2, 0, 0, 1, 1], [0, 2, 0.5, 4, 4, 7, 7], [1, 5, 0.7, 3, 3, 9, 8]]]])
     }
-    expected = make_representation(['0.2,3,0,0,1,1;0.5,2,4,4,7,7', '0.7,5,3,3,9,8'])
+    expected = make_representation(['0.2 3 0 0 1 1;0.5 2 4 4 7 7', '0.7 5 3 3 9 8'])
 
     actual = SSDAdapter({}, output_blob='detection_out').process([raw], ['0', '1'])
 

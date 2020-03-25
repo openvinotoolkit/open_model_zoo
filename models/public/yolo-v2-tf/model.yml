@@ -1,0 +1,33 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  YOLO v2 is a real-time object detection model implemented with Keras* from this
+  repository <https://github.com/allanzelener/YAD2K> and converted to TensorFlow*
+  framework. This model was pretrained on COCO* dataset with 80 classes.
+task_type: detection
+files:
+  - name: yolo-v2.pb
+    size: 204013999
+    sha256: 973d0d531dace080d7dd8028c875e0224b504d44c279da2da55d1db183bd7f64
+    source: https://download.01.org/opencv/public_models/022020/yolo_v2/yolov2.pb
+model_optimizer_args:
+  - --input_shape=[1,608,608,3]
+  - --input=input_1
+  - --scale_values=input_1[255]
+  - --reverse_input_channels
+  - --transformations_config=$mo_dir/extensions/front/tf/yolo_v2.json
+  - --input_model=$dl_dir/yolo-v2.pb
+framework: tf
+license: https://raw.githubusercontent.com/shaqian/tfjs-yolo/master/LICENSE

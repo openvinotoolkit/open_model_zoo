@@ -27,7 +27,9 @@ FrameworkParameters = namedtuple('FrameworkParameters', ['name', 'meta'])
 
 def convert_model(topology_name, model=None, weights=None, meta=None,
                   framework=FrameworkParameters('caffe', False), mo_search_paths=None, mo_params=None, mo_flags=None,
-                  tf_custom_op_config_dir=None, tf_object_detection_api_config_dir=None, should_log_cmd=False):
+                  tf_custom_op_config_dir=None, tf_object_detection_api_config_dir=None,
+                  transformations_config_dir=None,
+                  should_log_cmd=False):
     """
     Args:
         topology_name: name for converted model files.
@@ -38,8 +40,10 @@ def convert_model(topology_name, model=None, weights=None, meta=None,
         mo_search_paths: paths where ModelOptimizer may be found. If None only default paths is used.
         mo_params: value parameters for ModelOptimizer execution.
         mo_flags: flags parameters for ModelOptimizer execution.
-        tf_custom_op_config_dir: path to Tensor Flow custom operations directory.
+        tf_custom_op_config_dir: path to TensorFlow custom operations directory.
+        transformations_config_dir: path to Model Optimizer transformations extensions directory.
         tf_object_detection_api_config_dir: path to Tensor Flow directory with config for object detection API.
+        should_log_cmd: allows print out command line arguments for Model Downloader.
     Returns:
         paths to converted to IE IR model and weights.
     """
@@ -68,7 +72,10 @@ def convert_model(topology_name, model=None, weights=None, meta=None,
     mo_params['framework'] = framework.name
     mo_params.update(framework_specific_options.get(framework, {}))
 
-    set_path_to_custom_operation_configs(mo_params, framework, tf_custom_op_config_dir, model_optimizer_executable)
+    set_path_to_tf_custom_operation_configs(
+        mo_params, framework, tf_custom_op_config_dir, model_optimizer_executable
+    )
+    set_path_to_transformation_configs(mo_params, framework, transformations_config_dir, model_optimizer_executable)
     set_path_to_object_detection_api_pipeline_config(mo_params, framework, tf_object_detection_api_config_dir)
     args = prepare_args(str(model_optimizer_executable), flag_options=mo_flags, value_options=mo_params)
 
@@ -162,6 +169,7 @@ def print_cmd(args, indent=0):
     if arr_to_print:
         print_info(indent_str + " ".join(arr_to_print))
 
+
 def exec_mo_binary(args, timeout=None, should_log_cmd=False):
     """
     Args:
@@ -177,24 +185,42 @@ def exec_mo_binary(args, timeout=None, should_log_cmd=False):
     return subprocess.run(args, check=False, timeout=timeout)
 
 
-def set_path_to_custom_operation_configs(mo_params, framework, tf_custom_op_config_dir, mo_path):
+def set_path_to_tf_custom_operation_configs(
+        mo_params, framework, tf_custom_op_config_dir, mo_path
+):
     if framework.name != 'tf':
         return mo_params
 
-    config_path = mo_params.get('tensorflow_use_custom_operations_config')
-    if not config_path:
+    tf_custom_op_config_path = mo_params.get('tensorflow_use_custom_operations_config')
+    if not tf_custom_op_config_path:
         return mo_params
 
     if tf_custom_op_config_dir:
-        tf_custom_op_config_dir = Path(tf_custom_op_config_dir)
+        prefix_dir = Path(tf_custom_op_config_dir)
     else:
-        tf_custom_op_config_dir = Path('/').joinpath(*mo_path.parts[:-1]) / 'extensions' / 'front' / 'tf'
+        prefix_dir = mo_path.parent / 'extensions' / 'front' / 'tf'
 
-    config_path = Path(config_path)
+    config_path = Path(tf_custom_op_config_path)
     if not config_path.is_absolute():
-        config_path = tf_custom_op_config_dir / config_path
+        config_path = prefix_dir / config_path
+        mo_params['tensorflow_use_custom_operations_config'] = str(get_path(config_path))
 
-    mo_params['tensorflow_use_custom_operations_config'] = str(get_path(config_path))
+    return mo_params
+
+
+def set_path_to_transformation_configs(mo_params, framework, transformation_config_dir, mo_path):
+    transformation_config_path = mo_params.get('transformations_config')
+    if not transformation_config_path:
+        return mo_params
+
+    if transformation_config_dir:
+        prefix_dir = Path(transformation_config_dir)
+    else:
+        prefix_dir = mo_path.parent / 'extensions' / 'front' / framework.name
+    config_path = Path(transformation_config_path)
+    if not config_path.is_absolute():
+        config_path = prefix_dir / config_path
+        mo_params['transformations_config'] = str(get_path(config_path))
 
     return mo_params
 

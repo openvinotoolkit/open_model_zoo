@@ -48,8 +48,6 @@ struct TrackedObject {
 
 using TrackedObjects = std::deque<TrackedObject>;
 
-bool operator==(const TrackedObject& first, const TrackedObject& second);
-bool operator!=(const TrackedObject& first, const TrackedObject& second);
 /// (object id, detected objects) pairs collection.
 using ObjectTracks = std::unordered_map<int, TrackedObjects>;
 

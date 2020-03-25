@@ -1,0 +1,9 @@
+setuptools
+matplotlib>=3.0.3
+motmetrics>=1.2.0
+opencv-python>=3.4.5.20
+numpy>=1.16.4
+scipy>=1.3.0
+tensorboard>=2.1.0
+tensorboardX>=2.0
+tqdm>=4.32.2

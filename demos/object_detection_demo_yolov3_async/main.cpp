@@ -20,14 +20,13 @@
 #include <iterator>
 
 #include <inference_engine.hpp>
-#include <ie_utils.hpp>
+#include <ngraph/ngraph.hpp>
 
+#include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
 #include "object_detection_demo_yolov3_async.hpp"
-
-#include <ext_list.hpp>
 
 using namespace InferenceEngine;
 
@@ -103,37 +102,83 @@ double IntersectionOverUnion(const DetectionObject &box_1, const DetectionObject
     return area_of_overlap / area_of_union;
 }
 
-void ParseYOLOV3Output(const CNNLayerPtr &layer, const Blob::Ptr &blob, const unsigned long resized_im_h,
-                       const unsigned long resized_im_w, const unsigned long original_im_h,
-                       const unsigned long original_im_w,
-                       const double threshold, std::vector<DetectionObject> &objects) {
-    // --------------------------- Validating output parameters -------------------------------------
-    if (layer->type != "RegionYolo")
-        throw std::runtime_error("Invalid output type: " + layer->type + ". RegionYolo expected");
-    const int out_blob_h = static_cast<int>(blob->getTensorDesc().getDims()[2]);
-    const int out_blob_w = static_cast<int>(blob->getTensorDesc().getDims()[3]);
-    if (out_blob_h != out_blob_w)
-        throw std::runtime_error("Invalid size of output " + layer->name +
-        " It should be in NCHW layout and H should be equal to W. Current H = " + std::to_string(out_blob_h) +
-        ", current W = " + std::to_string(out_blob_h));
-    // --------------------------- Extracting layer parameters -------------------------------------
-    auto num = layer->GetParamAsInt("num");
-    auto coords = layer->GetParamAsInt("coords");
-    auto classes = layer->GetParamAsInt("classes");
-    std::vector<float> anchors = {10.0, 13.0, 16.0, 30.0, 33.0, 23.0, 30.0, 61.0, 62.0, 45.0, 59.0, 119.0, 116.0, 90.0,
-                                  156.0, 198.0, 373.0, 326.0};
-    try { anchors = layer->GetParamAsFloats("anchors"); } catch (...) {}
-    try {
-        auto mask = layer->GetParamAsInts("mask");
-        num = mask.size();
-
+class YoloParams {
+    template <typename T>
+    void computeAnchors(const std::vector<T> & mask) {
         std::vector<float> maskedAnchors(num * 2);
         for (int i = 0; i < num; ++i) {
             maskedAnchors[i * 2] = anchors[mask[i] * 2];
             maskedAnchors[i * 2 + 1] = anchors[mask[i] * 2 + 1];
         }
         anchors = maskedAnchors;
-    } catch (...) {}
+    }
+
+public:
+    int num = 0, classes = 0, coords = 0;
+    std::vector<float> anchors = {10.0, 13.0, 16.0, 30.0, 33.0, 23.0, 30.0, 61.0, 62.0, 45.0, 59.0, 119.0, 116.0, 90.0,
+                                  156.0, 198.0, 373.0, 326.0};
+
+    YoloParams() {}
+
+    YoloParams(const std::shared_ptr<ngraph::op::RegionYolo> regionYolo) {
+        coords = regionYolo->get_num_coords();
+        classes = regionYolo->get_num_classes();
+        anchors = regionYolo->get_anchors();
+        auto mask = regionYolo->get_mask();
+        num = mask.size();
+
+        computeAnchors(mask);
+    }
+
+    YoloParams(CNNLayer::Ptr layer) {
+        if (layer->type != "RegionYolo")
+            throw std::runtime_error("Invalid output type: " + layer->type + ". RegionYolo expected");
+
+        num = layer->GetParamAsInt("num");
+        coords = layer->GetParamAsInt("coords");
+        classes = layer->GetParamAsInt("classes");
+
+        try { anchors = layer->GetParamAsFloats("anchors"); } catch (...) {}
+        try {
+            auto mask = layer->GetParamAsInts("mask");
+            num = mask.size();
+
+            computeAnchors(mask);
+        } catch (...) {}
+    }
+};
+
+void ParseYOLOV3Output(const CNNNetwork &cnnNetwork, const std::string & output_name,
+                       const Blob::Ptr &blob, const unsigned long resized_im_h,
+                       const unsigned long resized_im_w, const unsigned long original_im_h,
+                       const unsigned long original_im_w,
+                       const double threshold, std::vector<DetectionObject> &objects) {
+
+    const int out_blob_h = static_cast<int>(blob->getTensorDesc().getDims()[2]);
+    const int out_blob_w = static_cast<int>(blob->getTensorDesc().getDims()[3]);
+    if (out_blob_h != out_blob_w)
+        throw std::runtime_error("Invalid size of output " + output_name +
+        " It should be in NCHW layout and H should be equal to W. Current H = " + std::to_string(out_blob_h) +
+        ", current W = " + std::to_string(out_blob_h));
+
+    // --------------------------- Extracting layer parameters -------------------------------------
+    YoloParams params;
+    if (auto ngraphFunction = cnnNetwork.getFunction()) {
+        for (const auto op : ngraphFunction->get_ops()) {
+            if (op->get_friendly_name() == output_name) {
+                auto regionYolo = std::dynamic_pointer_cast<ngraph::op::RegionYolo>(op);
+                if (!regionYolo) {
+                    throw std::runtime_error("Invalid output type: " +
+                        std::string(regionYolo->get_type_info().name) + ". RegionYolo expected");
+                }
+
+                params = regionYolo;
+                break;
+            }
+        }
+    } else {
+        throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
+    }
 
     auto side = out_blob_h;
     auto side_square = side * side;
@@ -142,18 +187,18 @@ void ParseYOLOV3Output(const CNNLayerPtr &layer, const Blob::Ptr &blob, const un
     for (int i = 0; i < side_square; ++i) {
         int row = i / side;
         int col = i % side;
-        for (int n = 0; n < num; ++n) {
-            int obj_index = EntryIndex(side, coords, classes, n * side * side + i, coords);
-            int box_index = EntryIndex(side, coords, classes, n * side * side + i, 0);
+        for (int n = 0; n < params.num; ++n) {
+            int obj_index = EntryIndex(side, params.coords, params.classes, n * side * side + i, params.coords);
+            int box_index = EntryIndex(side, params.coords, params.classes, n * side * side + i, 0);
             float scale = output_blob[obj_index];
             if (scale < threshold)
                 continue;
             double x = (col + output_blob[box_index + 0 * side_square]) / side * resized_im_w;
             double y = (row + output_blob[box_index + 1 * side_square]) / side * resized_im_h;
-            double height = std::exp(output_blob[box_index + 3 * side_square]) * anchors[2 * n + 1];
-            double width = std::exp(output_blob[box_index + 2 * side_square]) * anchors[2 * n];
-            for (int j = 0; j < classes; ++j) {
-                int class_index = EntryIndex(side, coords, classes, n * side_square + i, coords + 1 + j);
+            double height = std::exp(output_blob[box_index + 3 * side_square]) * params.anchors[2 * n + 1];
+            double width = std::exp(output_blob[box_index + 2 * side_square]) * params.anchors[2 * n];
+            for (int j = 0; j < params.classes; ++j) {
+                int class_index = EntryIndex(side, params.coords, params.classes, n * side_square + i, params.coords + 1 + j);
                 float prob = scale * output_blob[class_index];
                 if (prob < threshold)
                     continue;
@@ -205,15 +250,6 @@ int main(int argc, char *argv[]) {
 
         /**Loading extensions to the devices **/
 
-        /** Loading default extensions **/
-        if (FLAGS_d.find("CPU") != std::string::npos) {
-            /**
-             * cpu_extensions library is compiled from the "extension" folder containing
-             * custom CPU layer implementations.
-            **/
-            ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
-        }
-
         if (!FLAGS_l.empty()) {
             // CPU extensions are loaded as a shared library and passed as a pointer to the base extension
             IExtensionPtr extension_ptr = make_so_pointer<IExtension>(FLAGS_l.c_str());
@@ -232,15 +268,8 @@ int main(int argc, char *argv[]) {
 
         // --------------- 2. Reading the IR generated by the Model Optimizer (.xml and .bin files) ------------
         slog::info << "Loading network files" << slog::endl;
-        CNNNetReader netReader;
         /** Reading network model **/
-        netReader.ReadNetwork(FLAGS_m);
-        /** Setting batch size to 1 **/
-        slog::info << "Batch size is forced to  1." << slog::endl;
-        netReader.getNetwork().setBatchSize(1);
-        /** Extracting the model name and loading its weights **/
-        std::string binFileName = fileNameNoExt(FLAGS_m) + ".bin";
-        netReader.ReadWeights(binFileName);
+        auto cnnNetwork = ie.ReadNetwork(FLAGS_m);
         /** Reading labels (if specified) **/
         std::string labelFileName = fileNameNoExt(FLAGS_m) + ".labels";
         std::vector<std::string> labels;
@@ -254,7 +283,7 @@ int main(int argc, char *argv[]) {
         // --------------------------- 3. Configuring input and output -----------------------------------------
         // --------------------------------- Preparing input blobs ---------------------------------------------
         slog::info << "Checking that the inputs are as the demo expects" << slog::endl;
-        InputsDataMap inputInfo(netReader.getNetwork().getInputsInfo());
+        InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
         if (inputInfo.size() != 1) {
             throw std::logic_error("This demo accepts networks that have only one input");
         }
@@ -267,9 +296,14 @@ int main(int argc, char *argv[]) {
         } else {
             input->getInputData()->setLayout(Layout::NCHW);
         }
+
+        ICNNNetwork::InputShapes inputShapes = cnnNetwork.getInputShapes();
+        SizeVector& inSizeVector = inputShapes.begin()->second;
+        inSizeVector[0] = 1;  // set batch to 1
+        cnnNetwork.reshape(inputShapes);
         // --------------------------------- Preparing output blobs -------------------------------------------
         slog::info << "Checking that the outputs are as the demo expects" << slog::endl;
-        OutputsDataMap outputInfo(netReader.getNetwork().getOutputsInfo());
+        OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
         for (auto &output : outputInfo) {
             output.second->setPrecision(Precision::FP32);
             output.second->setLayout(Layout::NCHW);
@@ -278,7 +312,7 @@ int main(int argc, char *argv[]) {
 
         // --------------------------- 4. Loading model to the device ------------------------------------------
         slog::info << "Loading model to the device" << slog::endl;
-        ExecutableNetwork network = ie.LoadNetwork(netReader.getNetwork(), FLAGS_d);
+        ExecutableNetwork network = ie.LoadNetwork(cnnNetwork, FLAGS_d);
 
         // -----------------------------------------------------------------------------------------------------
 
@@ -297,10 +331,12 @@ int main(int argc, char *argv[]) {
         typedef std::chrono::duration<double, std::ratio<1, 1000>> ms;
         auto total_t0 = std::chrono::high_resolution_clock::now();
         auto wallclock = std::chrono::high_resolution_clock::now();
-        double ocv_decode_time = 0, ocv_render_time = 0;
+        double ocv_render_time = 0;
 
         std::cout << "To close the application, press 'CTRL+C' here or switch to the output window and press ESC key" << std::endl;
         std::cout << "To switch between sync/async modes, press TAB key in the output window" << std::endl;
+        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
+        Presenter presenter(FLAGS_u, static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT)) - graphSize.height - 10, graphSize);
         while (true) {
             auto t0 = std::chrono::high_resolution_clock::now();
             // Here is the first asynchronous point:
@@ -324,7 +360,7 @@ int main(int argc, char *argv[]) {
                 FrameToBlob(frame, async_infer_request_curr, inputName);
             }
             auto t1 = std::chrono::high_resolution_clock::now();
-            ocv_decode_time = std::chrono::duration_cast<ms>(t1 - t0).count();
+            double ocv_decode_time = std::chrono::duration_cast<ms>(t1 - t0).count();
 
             t0 = std::chrono::high_resolution_clock::now();
             // Main sync point:
@@ -350,6 +386,7 @@ int main(int argc, char *argv[]) {
                 wallclock = t0;
 
                 t0 = std::chrono::high_resolution_clock::now();
+                presenter.drawGraphs(frame);
                 std::ostringstream out;
                 out << "OpenCV cap/render time: " << std::fixed << std::setprecision(2)
                     << (ocv_decode_time + ocv_render_time) << " ms";
@@ -376,9 +413,8 @@ int main(int argc, char *argv[]) {
                 // Parsing outputs
                 for (auto &output : outputInfo) {
                     auto output_name = output.first;
-                    CNNLayerPtr layer = netReader.getNetwork().getLayerByName(output_name.c_str());
                     Blob::Ptr blob = async_infer_request_curr->GetBlob(output_name);
-                    ParseYOLOV3Output(layer, blob, resized_im_h, resized_im_w, height, width, FLAGS_t, objects);
+                    ParseYOLOV3Output(cnnNetwork, output_name, blob, resized_im_h, resized_im_w, height, width, FLAGS_t, objects);
                 }
                 // Filtering overlapping boxes
                 std::sort(objects.begin(), objects.end(), std::greater<DetectionObject>());
@@ -414,7 +450,9 @@ int main(int argc, char *argv[]) {
                     }
                 }
             }
-            cv::imshow("Detection results", frame);
+            if (!FLAGS_no_show) {
+                cv::imshow("Detection results", frame);
+            }
 
             t1 = std::chrono::high_resolution_clock::now();
             ocv_render_time = std::chrono::duration_cast<ms>(t1 - t0).count();
@@ -441,6 +479,8 @@ int main(int argc, char *argv[]) {
             if (9 == key) {  // Tab
                 isAsyncMode ^= true;
                 isModeChanged = true;
+            } else {
+                presenter.handleKey(key);
             }
         }
         // -----------------------------------------------------------------------------------------------------
@@ -452,6 +492,8 @@ int main(int argc, char *argv[]) {
         if (FLAGS_pc) {
             printPerformanceCounts(*async_infer_request_curr, std::cout, getFullDeviceName(ie, FLAGS_d));
         }
+
+        std::cout << presenter.reportMeans() << '\n';
     }
     catch (const std::exception& error) {
         std::cerr << "[ ERROR ] " << error.what() << std::endl;

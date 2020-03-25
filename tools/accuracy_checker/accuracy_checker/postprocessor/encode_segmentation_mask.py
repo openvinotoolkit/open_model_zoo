@@ -44,10 +44,13 @@ class EncodeSegMask(PostprocessorWithSpecificTargets):
 
         for annotation_ in annotation:
             mask = annotation_.mask.astype(int)
+            num_channels = len(mask.shape)
             encoded_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.int16)
             for label, color in enumerate(segmentation_colors):
-                encoded_mask[np.where(np.all(mask == color, axis=-1))[:2]] = label
-                annotation_.mask = encoded_mask
+                encoded_mask[np.where(
+                    np.all(mask == color, axis=-1) if num_channels >= 3 else mask == color
+                )[:2]] = label
+            annotation_.mask = encoded_mask.astype(np.int8)
 
         for prediction_ in prediction:
             mask = prediction_.mask
@@ -61,6 +64,6 @@ class EncodeSegMask(PostprocessorWithSpecificTargets):
 
             updated_mask[saved_mask >= len(prediction_to_gt_label)] = 255
 
-            prediction_.mask = updated_mask
+            prediction_.mask = updated_mask.astype(np.int8)
 
         return annotation, prediction

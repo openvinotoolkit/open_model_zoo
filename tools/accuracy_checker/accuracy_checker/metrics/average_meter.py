@@ -37,6 +37,12 @@ class AverageMeter:
             self.accumulator += loss
             self.total_count += increment
 
+        if np.isscalar(loss):
+            loss = float(loss)
+        else:
+            loss = loss.astype(float)
+        return np.divide(loss, increment, out=np.zeros_like(loss), where=increment != 0)
+
     def evaluate(self):
         if self.total_count is None:
             return 0.0
@@ -44,3 +50,7 @@ class AverageMeter:
         return np.divide(
             self.accumulator, self.total_count, out=np.zeros_like(self.accumulator), where=self.total_count != 0
         )
+
+    def reset(self):
+        self.accumulator = None
+        self.total_count = None

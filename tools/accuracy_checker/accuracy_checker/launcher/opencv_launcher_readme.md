@@ -6,7 +6,7 @@ For enabling OpenCV launcher you need to add `framework: opencv` in launchers se
 * `tags` - optional specifies which device bit type will be used for infer (`FP32` and `FP16`).
 * `backend` - specifies which backend OpenCV's will be used for infer (`ocv` and `ie`).
 * `model/weights` - path to configuration files with model and weights for your topology (`prototxt/caffemodel`, `xml/bin`, `pbtxt/pb` etc.) and preferably used in pairs .
-* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here][adapters].
+* `adapter` - approach how raw output will be converted to representation of dataset problem, some adapters can be specific to framework. You can find detailed instruction how to use adapters [here](../adapters/README.md).
 
 You also should specify all inputs for your model with their shapes to write inputs, using specific parameter: `inputs`.
 Each input description should has following info:
@@ -16,7 +16,7 @@ Each input description should has following info:
     * `IMAGE_INFO` - specific key for setting information about input shape to layer (used in Faster RCNN based topologies). You do not need provide `value`, because it will be calculated in runtime. Format value is `Nx[H, W, S]`, where `N` is batch size, `H` - original image height, `W` - original image width, `S` - scale of original image (default 1).
     * `INPUT` - network input for main data stream (e. g. images). If you have several data inputs, you should provide regular expression for identifier as `value` for specifying which one data should be provided in specific input.
   * `shape` - shape of input layer described as comma-separated of all dimensions size except batch size. 
-    Optionally you can determine `layout` in case when your model was trained with non-standard data layout (For OpenCV default layout is `NCHW`).
+    Optionally you can determine `layout` in case when your model was trained with non-standard data layout (For OpenCV default layout is `NCHW`) and `precision` (Supported precisions: `FP32` - float, `FP16` - signed shot, `U8`  - unsigned char, `U16` - unsigned short int, `I8` - signed char, `I16` - short int, `I32` - int, `I64` - long int).
 
 OpenCV launcher config example:
 
@@ -33,5 +33,3 @@ launchers:
         shape: 3, 32, 32
     adapter: classification
 ```
-        
-[adapters]: ../adapters/README.md

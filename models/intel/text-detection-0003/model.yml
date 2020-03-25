@@ -1,0 +1,44 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Detects oriented text.
+task_type: detection
+files:
+  - name: FP32/text-detection-0003.xml
+    size: 205742
+    sha256: 140c8b7b21f417446b3df9440a7965a176fad785964c4075a6754b1046c7e417
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/text-detection-0003/FP32/text-detection-0003.xml
+  - name: FP32/text-detection-0003.bin
+    size: 26986280
+    sha256: 1e2d51382f34750d5c878195e2fdac3207c3de58e74ad56ea624ed9ed2e3efb8
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/text-detection-0003/FP32/text-detection-0003.bin
+  - name: FP16/text-detection-0003.xml
+    size: 205662
+    sha256: 5ef8547b3b49cd09a91588a3dd5471b4eb24c83f7999ccb3714bd4b29bfbb35c
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/text-detection-0003/FP16/text-detection-0003.xml
+  - name: FP16/text-detection-0003.bin
+    size: 13493056
+    sha256: 30b6597325c90bdb48abd7873f71fb1d56f8233ff9d53305d177c2b9546b59a8
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/text-detection-0003/FP16/text-detection-0003.bin
+  - name: FP16-INT8/text-detection-0003.xml
+    size: 646070
+    sha256: 20b6b51342da6734ac5214dd1365b3b1adccd927be42c8b33d1bdd5bcc5cd9fd
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/text-detection-0003/FP16-INT8/text-detection-0003.xml
+  - name: FP16-INT8/text-detection-0003.bin
+    size: 6895098
+    sha256: a1f182e19a174e0f2b552e9e897d075879a784f5e0af2114957e36d2613ddbed
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/text-detection-0003/FP16-INT8/text-detection-0003.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

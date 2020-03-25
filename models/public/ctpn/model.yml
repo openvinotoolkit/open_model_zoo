@@ -1,0 +1,31 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Detecting Text in Natural Image with Connectionist Text Proposal Network. For
+  details see paper <https://arxiv.org/abs/1609.03605>.
+task_type: detection
+files:
+  - name: ctpn.pb
+    size: 71638063
+    sha256: 09b3a0cc57eb826dd6b6fa95a03e078ad435b7b5fb0186dad2abdb98a4fdf64a
+    source: https://github.com/eragonruan/text-detection-ctpn/releases/download/untagged-48d74c6337a71b6b5f87/ctpn.pb
+model_optimizer_args:
+  - --input_shape=[1,600,600,3]
+  - --input=Placeholder
+  - --mean_values=Placeholder[102.9801,115.9465,122.7717]
+  - --output=Reshape_2,rpn_bbox_pred/Reshape_1
+  - --input_model=$dl_dir/ctpn.pb
+framework: tf
+license: https://raw.githubusercontent.com/eragonruan/text-detection-ctpn/banjin-dev/LICENSE

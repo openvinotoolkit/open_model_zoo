@@ -1,0 +1,44 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  S3D MobileNet V3 based ASL recogniton network.
+task_type: action_recognition
+files:
+  - name: FP32/asl-recognition-0004.xml
+    size: 275908
+    sha256: 49457997135981d6448688f68c803d576680c35a96faad70e1b88eba0025aece
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/asl-recognition-0004/FP32/asl-recognition-0004.xml
+  - name: FP32/asl-recognition-0004.bin
+    size: 16530600
+    sha256: 0fb8a3f15377f9961940e3391d781bd68051441e8a634699dc83739bafadf4a3
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/asl-recognition-0004/FP32/asl-recognition-0004.bin
+  - name: FP16/asl-recognition-0004.xml
+    size: 275757
+    sha256: ad2911a9c703982b40d4805be443c120baefbb4ae555d01c08c7f4534094c99a
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/asl-recognition-0004/FP16/asl-recognition-0004.xml
+  - name: FP16/asl-recognition-0004.bin
+    size: 8265312
+    sha256: 698ee599c9869c9b759eb52b2229fd29a5845f763a420668d914e973ce762fee
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/asl-recognition-0004/FP16/asl-recognition-0004.bin
+  - name: FP16-INT8/asl-recognition-0004.xml
+    size: 989427
+    sha256: 9f13ee46ea556459044206de0b89f2e85af9575cc6f468544d20aa8e32302d81
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/asl-recognition-0004/FP16-INT8/asl-recognition-0004.xml
+  - name: FP16-INT8/asl-recognition-0004.bin
+    size: 4240041
+    sha256: bf084e672ee8bdf7d8121202a0db34f51b26184b899ad5c19e815924b06f05c0
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/asl-recognition-0004/FP16-INT8/asl-recognition-0004.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

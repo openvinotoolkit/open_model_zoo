@@ -1,0 +1,44 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Age & gender classification. Used in Audience Analytics.
+task_type: object_attributes
+files:
+  - name: FP32/age-gender-recognition-retail-0013.xml
+    size: 29987
+    sha256: ac6002aaea316428f263178aab6f90f02352a037cf426dbccdca2946ead517cd
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.xml
+  - name: FP32/age-gender-recognition-retail-0013.bin
+    size: 8552076
+    sha256: c7177ca11ad924b0bb34dacb92676b72acac1cb36a71bc336a951116556b6910
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/age-gender-recognition-retail-0013/FP32/age-gender-recognition-retail-0013.bin
+  - name: FP16/age-gender-recognition-retail-0013.xml
+    size: 29977
+    sha256: afa3a9ed293f77dd139d98e9b6825cb1508d03c69404e46dd4b10bfd23c499c6
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.xml
+  - name: FP16/age-gender-recognition-retail-0013.bin
+    size: 4276038
+    sha256: 401101e0a01b3d68add39deae833bcf9f54238d37dd13e3fb1534aa8fbe4719d
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/age-gender-recognition-retail-0013/FP16/age-gender-recognition-retail-0013.bin
+  - name: FP16-INT8/age-gender-recognition-retail-0013.xml
+    size: 72243
+    sha256: 202762b7eb79f6f00f1b57d59f2d836347a2202bd61fec24ebeaa6e5ebd7d16c
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/age-gender-recognition-retail-0013/FP16-INT8/age-gender-recognition-retail-0013.xml
+  - name: FP16-INT8/age-gender-recognition-retail-0013.bin
+    size: 2278576
+    sha256: a07a1c26a369b01a1edfee3fbd92823e6abfc720951b1a0a3ac062b576102ab8
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/age-gender-recognition-retail-0013/FP16-INT8/age-gender-recognition-retail-0013.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

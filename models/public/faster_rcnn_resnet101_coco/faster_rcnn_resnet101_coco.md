@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-Faster R-CNN Resnet-101 model. Used for object detection. For details, see [paper](https://arxiv.org/pdf/1801.04381.pdf).
+Faster R-CNN Resnet-101 model. Used for object detection. For details, see the [paper](https://arxiv.org/abs/1506.01497v3).
 
 ## Example
 
@@ -13,7 +13,7 @@ Faster R-CNN Resnet-101 model. Used for object detection. For details, see [pape
 | Type                            | Object detection                          |
 | GFlops                          | 112.052                                   |
 | MParams                         | 48.128                                    |
-| Source framework                | Tensorflow\*                              |
+| Source framework                | TensorFlow\*                              |
 
 ## Performance
 
@@ -21,7 +21,7 @@ Faster R-CNN Resnet-101 model. Used for object detection. For details, see [pape
 
 ### Original Model
 
-Image, name: `image_tensor`, shape: [1x600x600x3], format: [BxHxWxC],
+Image, name: `image_tensor`, shape: [1x600x1024x3], format: [BxHxWxC],
    where:
 
     - B - batch size
@@ -33,7 +33,7 @@ Image, name: `image_tensor`, shape: [1x600x600x3], format: [BxHxWxC],
 
 ### Converted Model
 
-1. Image, name: `image_tensor`, shape: [1x3x600x600], format: [BxCxHxW],
+1. Image, name: `image_tensor`, shape: [1x3x600x1024], format: [BxCxHxW],
    where:
 
     - B - batch size
@@ -73,4 +73,6 @@ bounding boxes. For each detection, the description has the format:
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/tensorflow/models/master/LICENSE]()
+The original model is distributed under the
+[Apache License, Version 2.0](https://raw.githubusercontent.com/tensorflow/models/master/LICENSE).
+A copy of the license is provided in [APACHE-2.0-TensorFlow.txt](../licenses/APACHE-2.0-TensorFlow.txt).

@@ -19,6 +19,22 @@ FaceDetector::FaceDetector(InferenceEngine::Core& ie,
              ieWrapper(ie, modelPath, deviceName),
              detectionThreshold(detectionConfidenceThreshold),
              enableReshape(enableReshape) {
+    const auto& inputInfo = ieWrapper.getInputBlobDimsInfo();
+
+    inputBlobName = ieWrapper.expectSingleInput();
+    ieWrapper.expectImageInput(inputBlobName);
+    inputBlobDims = inputInfo.at(inputBlobName);
+
+    const auto& outputInfo = ieWrapper.getOutputBlobDimsInfo();
+
+    outputBlobName = ieWrapper.expectSingleOutput();
+    const auto& outputBlobDims = outputInfo.at(outputBlobName);
+
+    if (outputBlobDims.size() != 4 || outputBlobDims[0] != 1 || outputBlobDims[1] != 1 || outputBlobDims[3] != 7) {
+        throw std::runtime_error(modelPath + ": expected \"" + outputBlobName + "\" to have shape 1x1xNx7");
+    }
+
+    numTotalDetections = outputBlobDims[2];
 }
 
 void FaceDetector::adjustBoundingBox(cv::Rect& boundingBox) const {
@@ -45,10 +61,6 @@ void FaceDetector::adjustBoundingBox(cv::Rect& boundingBox) const {
 std::vector<FaceInferenceResults> FaceDetector::detect(const cv::Mat& image) {
     std::vector<FaceInferenceResults> detectionResult;
 
-    auto ieInputBlobInfo = ieWrapper.getIputBlobDimsInfo().begin();
-    auto inputBlobName = ieInputBlobInfo->first;
-    auto inputBlobDims = ieInputBlobInfo->second;
-
     if (enableReshape) {
         double imageAspectRatio = std::round(100. * image.cols / image.rows) / 100.;
         double networkAspectRatio = std::round(100. * inputBlobDims[3] / inputBlobDims[2]) / 100.;
@@ -56,12 +68,11 @@ std::vector<FaceInferenceResults> FaceDetector::detect(const cv::Mat& image) {
 
          if (std::fabs(imageAspectRatio - networkAspectRatio) > aspectRatioThreshold) {
             std::cout << "Face Detection network is reshaped" << std::endl;
-            std::map<std::string, std::vector<unsigned long>> newBlobsDimsInfo;
-            auto newBlobDims(inputBlobDims);
+
             // Fix height and change width to make networkAspectRatio equal to imageAspectRatio
-            newBlobDims[3] = static_cast<unsigned long>(newBlobDims[2] * imageAspectRatio);
-            newBlobsDimsInfo[inputBlobName] = newBlobDims;
-            ieWrapper.reshape(newBlobsDimsInfo);
+            inputBlobDims[3] = static_cast<unsigned long>(inputBlobDims[2] * imageAspectRatio);
+
+            ieWrapper.reshape({{inputBlobName, inputBlobDims}});
         }
     }
 
@@ -69,27 +80,23 @@ std::vector<FaceInferenceResults> FaceDetector::detect(const cv::Mat& image) {
     ieWrapper.infer();
 
     std::vector<float> rawDetectionResults;
-    ieWrapper.getOutputBlob(rawDetectionResults);
-    auto outputBlobDims = ieWrapper.getOutputBlobDimsInfo().begin()->second;
-
-    auto nTotalDetections = outputBlobDims[2];
-    auto nInfoFields = outputBlobDims[3];
+    ieWrapper.getOutputBlob(outputBlobName, rawDetectionResults);
 
     FaceInferenceResults tmp;
 
     cv::Size imageSize(image.size());
     cv::Rect imageRect(0, 0, image.cols, image.rows);
 
-    for (unsigned long detectionID = 0; detectionID < nTotalDetections; ++detectionID) {
-        float confidence = rawDetectionResults[detectionID * nInfoFields + 2];
+    for (unsigned long detectionID = 0; detectionID < numTotalDetections; ++detectionID) {
+        float confidence = rawDetectionResults[detectionID * 7 + 2];
         if (static_cast<double>(confidence) < detectionThreshold) {
             break;
         }
 
-        auto x = rawDetectionResults[detectionID * nInfoFields + 3] * imageSize.width;
-        auto width = rawDetectionResults[detectionID * nInfoFields + 5] * imageSize.width - x;
-        auto y = rawDetectionResults[detectionID * nInfoFields + 4] * imageSize.height;
-        auto height = rawDetectionResults[detectionID * nInfoFields + 6] * imageSize.height - y;
+        auto x = rawDetectionResults[detectionID * 7 + 3] * imageSize.width;
+        auto width = rawDetectionResults[detectionID * 7 + 5] * imageSize.width - x;
+        auto y = rawDetectionResults[detectionID * 7 + 4] * imageSize.height;
+        auto height = rawDetectionResults[detectionID * 7 + 6] * imageSize.height - y;
 
         cv::Rect faceRect(static_cast<int>(x), static_cast<int>(y),
                           static_cast<int>(width), static_cast<int>(height));

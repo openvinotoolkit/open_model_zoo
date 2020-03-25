@@ -16,18 +16,15 @@ limitations under the License.
 
 import cv2
 import numpy as np
+try:
+    import pycocotools.mask as mask_util
+except ImportError:
+    mask_util = None
 from .adapter import Adapter
-from ..config import ConfigValidator, StringField, ConfigError
+from ..config import StringField, ConfigError
 from ..representation import CoCocInstanceSegmentationPrediction, DetectionPrediction, ContainerPrediction
+from ..postprocessor import FRCNNPostprocessingBboxResize
 from ..utils import contains_all
-
-class MaskRCNNAdapterConfig(ConfigValidator):
-    type = StringField()
-    classes_out = StringField(optional=True)
-    scores_out = StringField(optional=True)
-    boxes_out = StringField(optional=True)
-    detection_out = StringField(optional=True)
-    raw_masks_out = StringField()
 
 
 class MaskRCNNAdapter(Adapter):
@@ -35,11 +32,9 @@ class MaskRCNNAdapter(Adapter):
 
     def __init__(self, launcher_config, label_map=None, output_blob=None):
         super().__init__(launcher_config, label_map, output_blob)
-        try:
-            import pycocotools.mask as mask_util
-            self.encoder = mask_util.encode
-        except ImportError:
+        if mask_util is None:
             raise ImportError('pycocotools is not installed. Please install it before using mask_rcnn adapter.')
+        self.encoder = mask_util.encode
 
     @classmethod
     def parameters(cls):
@@ -63,6 +58,10 @@ class MaskRCNNAdapter(Adapter):
             'raw_masks_out': StringField(
                 description='Name of output layer with raw instances masks'
             ),
+            'num_detections_out': StringField(
+                optional=True, description='Name of output layer with number valid detections '
+                                           '(used in MaskRCNN models trained with TF Object Detection API)'
+            ),
             'detection_out': StringField(
                 description='SSD-like detection output layer name '
                             '(optional, if your model has scores_out, boxes_out and classes_out).',
@@ -71,12 +70,6 @@ class MaskRCNNAdapter(Adapter):
         })
 
         return parameters
-
-    def validate_config(self):
-        config_valiator = MaskRCNNAdapterConfig(
-            'MaskRCNN_adapter_config', MaskRCNNAdapterConfig.ERROR_ON_EXTRA_ARGUMENT
-        )
-        config_valiator.validate(self.launcher_config)
 
     def configure(self):
         box_outputs = ['classes_out', 'scores_out', 'boxes_out']
@@ -90,16 +83,66 @@ class MaskRCNNAdapter(Adapter):
             self.classes_out = self.get_value_from_config('classes_out')
             self.scores_out = self.get_value_from_config('scores_out')
             self.boxes_out = self.get_value_from_config('boxes_out')
+            self.num_detections_out = self.get_value_from_config('num_detections_out')
 
         self.raw_masks_out = self.get_value_from_config('raw_masks_out')
+        if self.detection_out:
+            self.realisation = self._process_detection_output
+            return
+
+        if self.num_detections_out:
+            self.realisation = self._process_tf_obj_detection_api_outputs
+            return
+
+        self.realisation = self._process_pytorch_outputs
 
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_outputs = self._extract_predictions(raw, frame_meta)
-        if not self.detection_out:
-            return self._process_original_outputs(raw_outputs, identifiers, frame_meta)
-        return self._process_detection_output(raw_outputs, identifiers, frame_meta)
+        return self.realisation(raw_outputs, identifiers, frame_meta)
 
-    def _process_original_outputs(self, raw_outputs, identifiers, frame_meta):
+    def _process_tf_obj_detection_api_outputs(self, raw_outputs, identifiers, frame_meta):
+        num_detections = raw_outputs[self.num_detections_out]
+        classes = raw_outputs[self.classes_out]
+        boxes = raw_outputs[self.boxes_out]
+        scores = raw_outputs[self.scores_out]
+        raw_masks = raw_outputs[self.raw_masks_out]
+
+        results = []
+
+        for identifier, image_meta, im_num_detections, im_classes, im_boxes, im_scores, im_raw_masks in zip(
+                identifiers, frame_meta, num_detections, classes, boxes, scores, raw_masks
+        ):
+            num_valid_detections = int(im_num_detections)
+            im_classes = im_classes[:num_valid_detections]
+            im_scores = im_scores[:num_valid_detections]
+            im_boxes = im_boxes[:num_valid_detections]
+            im_raw_masks = im_raw_masks[:num_valid_detections]
+            original_image_size = image_meta['image_size'][:2]
+            im_boxes[:, 1::2] *= original_image_size[1]
+            im_boxes[:, 0::2] *= original_image_size[0]
+            im_classes = im_classes.astype(np.uint32)
+            masks = []
+            for box, raw_cls_mask in zip(im_boxes, im_raw_masks):
+                box = np.array([box[1], box[0], box[3], box[2]])
+                mask = self.segm_postprocess(box, raw_cls_mask, *original_image_size, True, True)
+                masks.append(mask)
+            y_mins, x_mins, y_maxs, x_maxs = im_boxes.T
+            detection_prediction = DetectionPrediction(
+                identifier, im_classes, im_scores, x_mins, y_mins, x_maxs, y_maxs
+            )
+            instance_segmentation_prediction = CoCocInstanceSegmentationPrediction(
+                identifier, masks, im_classes, im_scores
+            )
+            instance_segmentation_prediction.metadata['rects'] = np.c_[x_mins, y_mins, x_maxs, y_maxs]
+            instance_segmentation_prediction.metadata['image_size'] = image_meta['image_size']
+            results.append(ContainerPrediction({
+                'detection_prediction': detection_prediction,
+                'segmentation_prediction': instance_segmentation_prediction
+            }))
+
+            return results
+
+    def _process_pytorch_outputs(self, raw_outputs, identifiers, frame_meta):
         classes = raw_outputs[self.classes_out]
         valid_detections_mask = classes > 0
         classes = classes[valid_detections_mask]
@@ -122,10 +165,18 @@ class MaskRCNNAdapter(Adapter):
             boxes[:, 1::2] /= im_scale_y
             classes = classes.astype(np.uint32)
             masks = []
-            for box, cls, raw_mask in zip(boxes, classes, raw_masks):
-                raw_cls_mask = raw_mask[cls, ...]
+            raw_mask_for_all_classes = np.shape(raw_masks)[1] != len(identifiers)
+            if raw_mask_for_all_classes:
+                per_obj_raw_masks = []
+                for cls, raw_mask in zip(classes, raw_masks):
+                    per_obj_raw_masks.append(raw_mask[cls, ...])
+            else:
+                per_obj_raw_masks = np.squeeze(raw_masks, axis=1)
+
+            for box, raw_cls_mask in zip(boxes, per_obj_raw_masks):
                 mask = self.segm_postprocess(box, raw_cls_mask, *original_image_size, True, True)
                 masks.append(mask)
+
             x_mins, y_mins, x_maxs, y_maxs = boxes.T
             detection_prediction = DetectionPrediction(identifier, classes, scores, x_mins, y_mins, x_maxs, y_maxs)
             instance_segmentation_prediction = CoCocInstanceSegmentationPrediction(identifier, masks, classes, scores)
@@ -151,6 +202,7 @@ class MaskRCNNAdapter(Adapter):
 
         for batch_index, identifier in enumerate(identifiers):
             image_size = frame_meta[batch_index]['image_size'][:2]
+            coeff_x, coeff_y = FRCNNPostprocessingBboxResize.get_coeff_x_y_from_metadata(frame_meta[batch_index])
             prediction_box_mask = np.where(detections_boxes[:, 0] == batch_index)
             filtered_detections_boxes = detections_boxes[prediction_box_mask]
             filtered_detections_boxes = filtered_detections_boxes[:, 1::]
@@ -160,8 +212,8 @@ class MaskRCNNAdapter(Adapter):
             for box, masks in zip(filtered_detections_boxes, filtered_masks):
                 label = box[0]
                 cls_mask = masks[int(label)-1, ...]
-                box[2::2] *= image_size[1]
-                box[3::2] *= image_size[0]
+                box[2::2] *= coeff_x
+                box[3::2] *= coeff_y
                 cls_mask = self.segm_postprocess(box[2:], cls_mask, *image_size, True, True)
                 instance_masks.append(cls_mask)
             instance_segmentation_prediction = CoCocInstanceSegmentationPrediction(
@@ -180,7 +232,7 @@ class MaskRCNNAdapter(Adapter):
         raw_cls_mask = np.pad(raw_cls_mask, ((1, 1), (1, 1)), 'constant', constant_values=0)
         extended_box = self.expand_boxes(box[np.newaxis, :], raw_cls_mask.shape[0] / (raw_cls_mask.shape[0] - 2.0))[0]
         extended_box = extended_box.astype(int)
-        w, h = np.maximum(extended_box[2:] - extended_box[:2] + 1, 1)
+        w, h = np.maximum(extended_box[2:] - extended_box[:2] + 1, 1)  # pylint: disable=E0633
         x0, y0 = np.clip(extended_box[:2], a_min=0, a_max=[im_w, im_h])
         x1, y1 = np.clip(extended_box[2:] + 1, a_min=0, a_max=[im_w, im_h])
 
@@ -190,10 +242,11 @@ class MaskRCNNAdapter(Adapter):
         if full_image_mask:
             # Put an object mask in an image mask.
             im_mask = np.zeros((im_h, im_w), dtype=np.uint8)
-            im_mask[y0:y1, x0:x1] = mask[
-                (y0 - extended_box[1]):(y1 - extended_box[1]),
-                (x0 - extended_box[0]):(x1 - extended_box[0])
-            ]
+            mask_start_y = y0 - extended_box[1]
+            mask_end_y = y1 - extended_box[1]
+            mask_start_x = x0 - extended_box[0]
+            mask_end_x = x1 - extended_box[0]
+            im_mask[y0:y1, x0:x1] = mask[mask_start_y:mask_end_y, mask_start_x:mask_end_x]
         else:
             original_box = box.astype(int)
             x0, y0 = np.clip(original_box[:2], a_min=0, a_max=[im_w, im_h])

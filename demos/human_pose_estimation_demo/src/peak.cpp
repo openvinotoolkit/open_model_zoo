@@ -6,6 +6,8 @@
 #include <utility>
 #include <vector>
 
+#include <samples/common.hpp>
+
 #include "peak.hpp"
 
 namespace human_pose_estimation {
@@ -112,11 +114,11 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
                                          const float foundMidPointsRatioThreshold,
                                          const int minJointsNumber,
                                          const float minSubsetScore) {
-    const std::vector<std::pair<int, int> > limbIdsHeatmap = {
+    static const std::pair<int, int> limbIdsHeatmap[] = {
         {2, 3}, {2, 6}, {3, 4}, {4, 5}, {6, 7}, {7, 8}, {2, 9}, {9, 10}, {10, 11}, {2, 12}, {12, 13}, {13, 14},
         {2, 1}, {1, 15}, {15, 17}, {1, 16}, {16, 18}, {3, 17}, {6, 18}
     };
-    const std::vector<std::pair<int, int> > limbIdsPaf = {
+    static const std::pair<int, int> limbIdsPaf[] = {
         {31, 32}, {39, 40}, {33, 34}, {35, 36}, {41, 42}, {43, 44}, {19, 20}, {21, 22}, {23, 24}, {25, 26},
         {27, 28}, {29, 30}, {47, 48}, {49, 50}, {53, 54}, {51, 52}, {55, 56}, {37, 38}, {45, 46}
     };
@@ -126,7 +128,7 @@ std::vector<HumanPose> groupPeaksToPoses(const std::vector<std::vector<Peak> >& 
          candidates.insert(candidates.end(), peaks.begin(), peaks.end());
     }
     std::vector<HumanPoseByPeaksIndices> subset(0, HumanPoseByPeaksIndices(keypointsNumber));
-    for (size_t k = 0; k < limbIdsPaf.size(); k++) {
+    for (size_t k = 0; k < arraySize(limbIdsPaf); k++) {
         std::vector<TwoJointsConnection> connections;
         const int mapIdxOffset = keypointsNumber + 1;
         std::pair<cv::Mat, cv::Mat> scoreMid = { pafs[limbIdsPaf[k].first - mapIdxOffset],

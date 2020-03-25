@@ -1,0 +1,44 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  Person detection (HyperNet+RFCN+DetectionOutput). Used in Audience Analytics.
+task_type: detection
+files:
+  - name: FP32/person-detection-retail-0002.xml
+    size: 267894
+    sha256: ebb780e4f86a25edef736bfd60a104e726dd1a016a129ffbd7ad0ddf1059186e
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-retail-0002/FP32/person-detection-retail-0002.xml
+  - name: FP32/person-detection-retail-0002.bin
+    size: 12976100
+    sha256: 8150eb7ea3352abb272276deb3ce64d0414464e9f4bf02739ec4f2770b8acb75
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-retail-0002/FP32/person-detection-retail-0002.bin
+  - name: FP16/person-detection-retail-0002.xml
+    size: 267771
+    sha256: b1fb99a92d3c228ff656bd62026bd197a3cb7e99a68e1e432c0b6e330a80361e
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-retail-0002/FP16/person-detection-retail-0002.xml
+  - name: FP16/person-detection-retail-0002.bin
+    size: 6488130
+    sha256: 32008b134ea50eb70a4f97d74562a0a2c542d3c30f19a5d7ef1b57e8615d7039
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-retail-0002/FP16/person-detection-retail-0002.bin
+  - name: FP16-INT8/person-detection-retail-0002.xml
+    size: 736904
+    sha256: 3d162d87691cafe2905fc7c32530d99db50ba9ac8a3fb7eb1e6845b99d49d778
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-retail-0002/FP16-INT8/person-detection-retail-0002.xml
+  - name: FP16-INT8/person-detection-retail-0002.bin
+    size: 3298628
+    sha256: 5b0dea7cfd08651599ef1de34676d2490c840b222e7f0106eedd8a5a13cb72ee
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-retail-0002/FP16-INT8/person-detection-retail-0002.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

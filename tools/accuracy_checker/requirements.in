@@ -1,0 +1,27 @@
+# progress bar
+tqdm
+
+# image reading and preprocessing
+pillow>=2.6.1
+
+# reid
+scikit-learn
+
+# pipelining mode
+yamlloader
+
+# cpu extension usage
+py-cpuinfo<=4.0
+
+# text detection
+shapely
+
+# brain tumor segmentation
+nibabel
+scipy
+
+# nlp, tokenization
+sentencepiece
+
+# editdistance calculation
+editdistance

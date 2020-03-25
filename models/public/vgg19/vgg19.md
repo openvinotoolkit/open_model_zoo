@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-The `vgg19` model is one of the [vgg](https://arxiv.org/pdf/1409.1556.pdf) models designed to perform image classification in Caffe\* format.
+The `vgg19` model is one of the [vgg](https://arxiv.org/abs/1409.1556) models designed to perform image classification in Caffe\* format.
 
 The model input is a blob that consists of a single image of 1x3x224x224 in BGR order. The BGR mean values need to be subtracted as follows: [103.939, 116.779, 123.68] before passing the image blob into the network.
 
@@ -66,4 +66,6 @@ Object classifier according to ImageNet classes, name - `prob`, shape - `1,1000`
 
 ## Legal Information
 
-[https://raw.githubusercontent.com/keras-team/keras/master/LICENSE]()
+The original model is distributed under the
+[Creative Commons Attribution 4.0 International Public License](https://creativecommons.org/licenses/by/4.0/legalcode.txt).
+A copy of the license is provided in [CC-BY-4.0.txt](../licenses/CC-BY-4.0.txt).

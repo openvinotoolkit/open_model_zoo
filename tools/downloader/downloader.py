@@ -33,70 +33,70 @@ import common
 
 CHUNK_SIZE = 1 << 15 if sys.stdout.isatty() else 1 << 20
 
-failed_topologies = set()
-
-def process_download(chunk_iterable, size, file):
+def process_download(reporter, chunk_iterable, size, file):
     start_time = time.monotonic()
     progress_size = 0
+    hasher = hashlib.sha256()
 
     try:
         for chunk in chunk_iterable:
             if chunk:
                 duration = time.monotonic() - start_time
                 progress_size += len(chunk)
-                if duration != 0:
-                    speed = progress_size // (1024 * duration)
-                    if size == 0:
-                        percent = '---'
-                    else:
-                        percent = str(min(progress_size * 100 // size, 100))
+                hasher.update(chunk)
 
-                    print('... %s%%, %d KB, %d KB/s, %d seconds passed' %
-                            (percent, progress_size / 1024, speed, duration),
-                        end='\r' if sys.stdout.isatty() else '\n', flush=True)
+                if duration != 0:
+                    speed = int(progress_size / (1024 * duration))
+                    percent = str(progress_size * 100 // size)
+
+                    reporter.print_progress('... {}%, {} KB, {} KB/s, {} seconds passed',
+                        percent, int(progress_size / 1024), speed, int(duration))
+                    reporter.emit_event('model_file_download_progress', size=progress_size)
 
                 file.write(chunk)
-    finally:
-        if sys.stdout.isatty():
-            print()
 
-def try_download(name, file, num_attempts, start_download):
+                # don't attempt to finish a file if it's bigger than expected
+                if progress_size > size:
+                    break
+
+        return progress_size, hasher.digest()
+    finally:
+        reporter.end_progress()
+
+def try_download(reporter, file, num_attempts, start_download, size):
     for attempt in range(num_attempts):
         if attempt != 0:
             retry_delay = 10
-            print("Will retry in {} seconds...".format(retry_delay))
+            reporter.print("Will retry in {} seconds...", retry_delay, flush=True)
             time.sleep(retry_delay)
 
         try:
-            chunk_iterable, size = start_download()
+            chunk_iterable = start_download()
             file.seek(0)
             file.truncate()
-            process_download(chunk_iterable, size, file)
-            return True
-        except requests.exceptions.ConnectionError as e:
-            print("Error Connecting:", e)
-        except requests.exceptions.Timeout as e:
-            print("Timeout Error:", e)
-        except requests.exceptions.TooManyRedirects as e:
-            print("Redirects Error: requests exceeds maximum number of redirects", e)
-        except (requests.exceptions.RequestException, ssl.SSLError) as e:
-            print(e)
+            actual_size, hash = process_download(reporter, chunk_iterable, size, file)
 
-    failed_topologies.add(name)
-    return False
+            if actual_size > size:
+                reporter.log_error("Remote file is longer than expected ({} B), download aborted", size)
+                # no sense in retrying - if the file is longer, there's no way it'll fix itself
+                return None
+            elif actual_size < size:
+                reporter.log_error("Downloaded file is shorter ({} B) than expected ({} B)",
+                    actual_size, size)
+                # it's possible that we got disconnected before receiving the full file,
+                # so try again
+            else:
+                return hash
+        except (requests.exceptions.RequestException, ssl.SSLError):
+            reporter.log_error("Download failed", exc_info=True)
 
-def verify_hash(file, expected_hash, path, top_name):
-    actual_hash = hashlib.sha256()
-    while True:
-        chunk = file.read(1 << 20)
-        if not chunk: break
-        actual_hash.update(chunk)
+    return None
 
-    if actual_hash.digest() != bytes.fromhex(expected_hash):
-        print('########## Error: Hash mismatch for "{}" ##########'.format(path))
-        print('##########     Expected: {}'.format(expected_hash))
-        print('##########     Actual:   {}'.format(actual_hash.hexdigest()))
-        failed_topologies.add(top_name)
+def verify_hash(reporter, actual_hash, expected_hash, path):
+    if actual_hash != bytes.fromhex(expected_hash):
+        reporter.log_error('Hash mismatch for "{}"', path)
+        reporter.log_details('Expected: {}', expected_hash)
+        reporter.log_details('Actual:   {}', actual_hash.hex())
         return False
     return True
 
@@ -140,43 +140,45 @@ class DirCache:
         hash_path.parent.mkdir(parents=True, exist_ok=True)
         staging_path.replace(self._hash_path(hash))
 
-def try_retrieve_from_cache(cache, files):
+def try_retrieve_from_cache(reporter, cache, files):
     try:
         if all(cache.has(file[0]) for file in files):
             for hash, destination in files:
-                print('========= Retrieving {} from the cache'.format(destination))
+                reporter.print_section_heading('Retrieving {} from the cache', destination)
                 cache.get(hash, destination)
-            print()
+            reporter.print()
             return True
-    except Exception as e:
-        print(e)
-        print('########## Warning: Cache retrieval failed; falling back to downloading ##########')
-        print()
+    except Exception:
+        reporter.log_warning('Cache retrieval failed; falling back to downloading', exc_info=True)
+        reporter.print()
 
     return False
 
-def try_update_cache(cache, hash, source):
+def try_update_cache(reporter, cache, hash, source):
     try:
         cache.put(hash, source)
-    except Exception as e:
-        print(e)
-        print('########## Warning: Failed to update the cache ##########')
+    except Exception:
+        reporter.log_warning('Failed to update the cache', exc_info=True)
 
-def try_retrieve(name, destination, expected_hash, cache, num_attempts, start_download):
+def try_retrieve(reporter, destination, model_file, cache, num_attempts, start_download):
     destination.parent.mkdir(parents=True, exist_ok=True)
 
-    if try_retrieve_from_cache(cache, [[expected_hash, destination]]):
-        return
+    if try_retrieve_from_cache(reporter, cache, [[model_file.sha256, destination]]):
+        return True
 
-    print('========= Downloading {}'.format(destination))
+    reporter.print_section_heading('Downloading {}', destination)
+
+    success = False
 
     with destination.open('w+b') as f:
-        if try_download(name, f, num_attempts, start_download):
-            f.seek(0)
-            if verify_hash(f, expected_hash, destination, name):
-                try_update_cache(cache, expected_hash, destination)
+        actual_hash = try_download(reporter, f, num_attempts, start_download, model_file.size)
 
-    print('')
+    if actual_hash and verify_hash(reporter, actual_hash, model_file.sha256, destination):
+        try_update_cache(reporter, cache, model_file.sha256, destination)
+        success = True
+
+    reporter.print()
+    return success
 
 class DownloaderArgumentParser(argparse.ArgumentParser):
     def error(self, message):
@@ -193,56 +195,93 @@ def positive_int_arg(value_str):
 
     raise argparse.ArgumentTypeError('must be a positive integer (got {!r})'.format(value_str))
 
-parser = DownloaderArgumentParser(epilog = 'list_topologies.yml - default configuration file')
-parser.add_argument('-c', '--config', type = Path, metavar = 'CONFIG.YML',
-    default = common.get_default_config_path(), help = 'path to YML configuration file')
-parser.add_argument('--name', metavar = 'PAT[,PAT...]',
-    help = 'download only topologies whose names match at least one of the specified patterns')
-parser.add_argument('--list', type = Path, metavar = 'FILE.LST',
-    help = 'download only topologies whose names match at least one of the patterns in the specified file')
-parser.add_argument('--all',  action = 'store_true', help = 'download all topologies from the configuration file')
-parser.add_argument('--print_all', action = 'store_true', help = 'print all available topologies')
-parser.add_argument('-o', '--output_dir', type = Path, metavar = 'DIR',
-    default = Path.cwd(), help = 'path where to save topologies')
-parser.add_argument('--cache_dir', type = Path, metavar = 'DIR',
-    help = 'directory to use as a cache for downloaded files')
-parser.add_argument('--num_attempts', type = positive_int_arg, metavar = 'N', default = 1,
-    help = 'attempt each download up to N times')
+def main():
+    parser = DownloaderArgumentParser()
+    parser.add_argument('--name', metavar='PAT[,PAT...]',
+        help='download only models whose names match at least one of the specified patterns')
+    parser.add_argument('--list', type=Path, metavar='FILE.LST',
+        help='download only models whose names match at least one of the patterns in the specified file')
+    parser.add_argument('--all',  action='store_true', help='download all available models')
+    parser.add_argument('--print_all', action='store_true', help='print all available models')
+    parser.add_argument('--precisions', metavar='PREC[,PREC...]',
+                        help='download only models with the specified precisions (actual for DLDT networks)')
+    parser.add_argument('-o', '--output_dir', type=Path, metavar='DIR',
+        default=Path.cwd(), help='path where to save models')
+    parser.add_argument('--cache_dir', type=Path, metavar='DIR',
+        help='directory to use as a cache for downloaded files')
+    parser.add_argument('--num_attempts', type=positive_int_arg, metavar='N', default=1,
+        help='attempt each download up to N times')
+    parser.add_argument('--progress_format', choices=('text', 'json'), default='text',
+        help='which format to use for progress reporting')
 
-args = parser.parse_args()
-cache = NullCache() if args.cache_dir is None else DirCache(args.cache_dir)
-topologies = common.load_topologies_from_args(parser, args)
+    args = parser.parse_args()
 
-print('')
-print('###############|| Downloading topologies ||###############')
-print('')
-with requests.Session() as session:
-    for top in topologies:
-        output = args.output_dir / top.subdirectory
-        output.mkdir(parents=True, exist_ok=True)
+    reporter = common.Reporter(
+        enable_human_output=args.progress_format == 'text',
+        enable_json_output=args.progress_format == 'json')
 
-        for top_file in top.files:
-            destination = output / top_file.name
+    cache = NullCache() if args.cache_dir is None else DirCache(args.cache_dir)
+    models = common.load_models_from_args(parser, args)
 
-            try_retrieve(top.name, destination, top_file.sha256, cache, args.num_attempts,
-                lambda: top_file.source.start_download(session, CHUNK_SIZE, top_file.size))
+    failed_models = set()
 
-            if top.name in failed_topologies:
-                shutil.rmtree(str(output))
-                break
+    if args.precisions is None:
+        requested_precisions = common.KNOWN_PRECISIONS
+    else:
+        requested_precisions = set(args.precisions.split(','))
+        unknown_precisions = requested_precisions - common.KNOWN_PRECISIONS
+        if unknown_precisions:
+            sys.exit('Unknown precisions specified: {}.'.format(', '.join(sorted(unknown_precisions))))
 
-print('')
-print('###############|| Post processing ||###############')
-print('')
-for top in topologies:
-    if top.name in failed_topologies: continue
+    reporter.print_group_heading('Downloading models')
+    with requests.Session() as session:
+        for model in models:
+            reporter.emit_event('model_download_begin', model=model.name, num_files=len(model.files))
 
-    output = args.output_dir / top.subdirectory
+            output = args.output_dir / model.subdirectory
+            output.mkdir(parents=True, exist_ok=True)
 
-    for postproc in top.postprocessing:
-        postproc.apply(output)
+            for model_file in model.files:
+                if len(model_file.name.parts) == 2:
+                    p = model_file.name.parts[0]
+                    if p in common.KNOWN_PRECISIONS and p not in requested_precisions:
+                        continue
 
-if failed_topologies:
-    print('FAILED:')
-    print(*sorted(failed_topologies), sep='\n')
-    sys.exit(1)
+                model_file_reporter = reporter.with_event_context(model=model.name, model_file=model_file.name.as_posix())
+                model_file_reporter.emit_event('model_file_download_begin', size=model_file.size)
+
+                destination = output / model_file.name
+
+                if not try_retrieve(model_file_reporter, destination, model_file, cache, args.num_attempts,
+                        lambda: model_file.source.start_download(session, CHUNK_SIZE)):
+                    shutil.rmtree(str(output))
+                    failed_models.add(model.name)
+                    model_file_reporter.emit_event('model_file_download_end', successful=False)
+                    reporter.emit_event('model_download_end', model=model.name, successful=False)
+                    break
+
+                model_file_reporter.emit_event('model_file_download_end', successful=True)
+            else:
+                reporter.emit_event('model_download_end', model=model.name, successful=True)
+
+    reporter.print_group_heading('Post-processing')
+    for model in models:
+        if model.name in failed_models or not model.postprocessing: continue
+
+        reporter.emit_event('model_postprocessing_begin', model=model.name)
+
+        output = args.output_dir / model.subdirectory
+
+        for postproc in model.postprocessing:
+            postproc.apply(reporter, output)
+
+        reporter.emit_event('model_postprocessing_end', model=model.name)
+
+    if failed_models:
+        reporter.print('FAILED:')
+        for failed_model_name in failed_models:
+            reporter.print(failed_model_name)
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()

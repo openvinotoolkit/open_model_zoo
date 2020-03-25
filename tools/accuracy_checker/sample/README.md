@@ -10,7 +10,7 @@ We will try to evaluate **SampLeNet** topology as an example.
 In this sample we will use toy dataset which we refer to as *sample dataset*, which contains 10k images 
 of 10 different classes (classification problem), which is actually CIFAR10 dataset converted to png (image conversion will be done automatically in evaluation process)
 
-You can download original CIFAR10 dataset from [official website][cifar_python_download].
+You can download original CIFAR10 dataset from [official website](https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz).
 
 Extract downloaded dataset to sample directory
 
@@ -37,6 +37,11 @@ Used options: `-c` path to evaluation config, `-m` directory where models are st
 
 If everything worked correctly, you should be able to get `75.02%` accuracy.
 
-Now try edit config, to run SampLeNet on other device or framework (e.g. Caffe, MxNet or OpenCV), or go directly to your topology!
+Now try edit config, to run SampLeNet on other device or framework (e.g. Caffe, MXNet or OpenCV), or go directly to your topology!
 
-[cifar_python_download]: https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz
+
+###  Additional useful resources
+
+* [config](opencv_sample_config.yml) for running SampleNet via [OpenCV launcher](../accuracy_checker/launcher/opencv_launcher_readme.md)
+* [config](sample_blob_config.yml) for running SampleNet using compiled executable network blob.
+**Note: Not all OpenVINO plugins support compiled network blob execution**

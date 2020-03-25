@@ -11,6 +11,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <inference_engine.hpp>
 
+#include <ngraph/ngraph.hpp>
+
 using namespace InferenceEngine;
 
 #define SSD_EMPTY_DETECTIONS_INDICATOR -1.0
@@ -50,14 +52,10 @@ cv::Rect IncreaseRect(const cv::Rect& r, float coeff_x,
 void FaceDetection::submitRequest() {
     if (!enqueued_frames_) return;
     enqueued_frames_ = 0;
-    results_fetched_ = false;
-    results.clear();
     BaseCnnDetection::submitRequest();
 }
 
 void FaceDetection::enqueue(const cv::Mat &frame) {
-    if (!enabled()) return;
-
     if (!request) {
         request = net_.CreateInferRequestPtr();
     }
@@ -73,72 +71,51 @@ void FaceDetection::enqueue(const cv::Mat &frame) {
 }
 
 FaceDetection::FaceDetection(const DetectorConfig& config) :
-    BaseCnnDetection(config.enabled, config.is_async), config_(config) {
-    if (config.enabled) {
-        topoName = "face detector";
-        CNNNetReader net_reader;
-        net_reader.ReadNetwork(config.path_to_model);
-        net_reader.ReadWeights(config.path_to_weights);
-        if (!net_reader.isParseSuccess()) {
-            THROW_IE_EXCEPTION << "Cannot load model";
-        }
+        BaseCnnDetection(config.is_async), config_(config) {
+    topoName = "face detector";
+    auto cnnNetwork = config.ie.ReadNetwork(config.path_to_model);
 
-        InputsDataMap inputInfo(net_reader.getNetwork().getInputsInfo());
-        if (inputInfo.size() != 1) {
-            THROW_IE_EXCEPTION << "Face Detection network should have only one input";
-        }
-        InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
-        inputInfoFirst->setPrecision(Precision::U8);
-        inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
-
-        SizeVector input_dims = inputInfoFirst->getInputData()->getTensorDesc().getDims();
-        input_dims[2] = config_.input_h;
-        input_dims[3] = config_.input_w;
-        std::map<std::string, SizeVector> input_shapes;
-        input_shapes[inputInfo.begin()->first] = input_dims;
-        net_reader.getNetwork().reshape(input_shapes);
-
-        OutputsDataMap outputInfo(net_reader.getNetwork().getOutputsInfo());
-        if (outputInfo.size() != 1) {
-            THROW_IE_EXCEPTION << "Face Detection network should have only one output";
-        }
-        DataPtr& _output = outputInfo.begin()->second;
-        output_name_ = outputInfo.begin()->first;
-
-        const CNNLayerPtr outputLayer = net_reader.getNetwork().getLayerByName(output_name_.c_str());
-        if (outputLayer->type != "DetectionOutput") {
-            THROW_IE_EXCEPTION << "Face Detection network output layer(" + outputLayer->name +
-                                  ") should be DetectionOutput, but was " +  outputLayer->type;
-        }
-
-        if (outputLayer->params.find("num_classes") == outputLayer->params.end()) {
-            THROW_IE_EXCEPTION << "Face Detection network output layer (" +
-                                  output_name_ + ") should have num_classes integer attribute";
-        }
-
-        const SizeVector outputDims = _output->getTensorDesc().getDims();
-        max_detections_count_ = outputDims[2];
-        object_size_ = outputDims[3];
-        if (object_size_ != 7) {
-            THROW_IE_EXCEPTION << "Face Detection network output layer should have 7 as a last dimension";
-        }
-        if (outputDims.size() != 4) {
-            THROW_IE_EXCEPTION << "Face Detection network output dimensions not compatible shoulld be 4, but was " +
-                                  std::to_string(outputDims.size());
-        }
-        _output->setPrecision(Precision::FP32);
-        _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
-
-        input_name_ = inputInfo.begin()->first;
-        net_ = config_.ie.LoadNetwork(net_reader.getNetwork(), config_.deviceName);
+    InputsDataMap inputInfo(cnnNetwork.getInputsInfo());
+    if (inputInfo.size() != 1) {
+        THROW_IE_EXCEPTION << "Face Detection network should have only one input";
     }
+    InputInfo::Ptr inputInfoFirst = inputInfo.begin()->second;
+    inputInfoFirst->setPrecision(Precision::U8);
+    inputInfoFirst->getInputData()->setLayout(Layout::NCHW);
+
+    SizeVector input_dims = inputInfoFirst->getInputData()->getTensorDesc().getDims();
+    input_dims[2] = config_.input_h;
+    input_dims[3] = config_.input_w;
+    std::map<std::string, SizeVector> input_shapes;
+    input_shapes[inputInfo.begin()->first] = input_dims;
+    cnnNetwork.reshape(input_shapes);
+
+    OutputsDataMap outputInfo(cnnNetwork.getOutputsInfo());
+    if (outputInfo.size() != 1) {
+        THROW_IE_EXCEPTION << "Face Detection network should have only one output";
+    }
+    DataPtr& _output = outputInfo.begin()->second;
+    output_name_ = outputInfo.begin()->first;
+
+    const SizeVector outputDims = _output->getTensorDesc().getDims();
+    max_detections_count_ = outputDims[2];
+    object_size_ = outputDims[3];
+    if (object_size_ != 7) {
+        THROW_IE_EXCEPTION << "Face Detection network output layer should have 7 as a last dimension";
+    }
+    if (outputDims.size() != 4) {
+        THROW_IE_EXCEPTION << "Face Detection network output dimensions not compatible shoulld be 4, but was " +
+                              std::to_string(outputDims.size());
+    }
+    _output->setPrecision(Precision::FP32);
+    _output->setLayout(TensorDesc::getLayoutByDims(_output->getDims()));
+
+    input_name_ = inputInfo.begin()->first;
+    net_ = config_.ie.LoadNetwork(cnnNetwork, config_.deviceName);
 }
 
-void FaceDetection::fetchResults() {
-    if (!enabled()) return;
-    results.clear();
-    if (results_fetched_) return;
-    results_fetched_ = true;
+DetectedObjects FaceDetection::fetchResults() {
+    DetectedObjects results;
     const float *data = request->GetBlob(output_name_)->buffer().as<float *>();
 
     for (int det_id = 0; det_id < max_detections_count_; ++det_id) {
@@ -176,4 +153,6 @@ void FaceDetection::fetchResults() {
             results.emplace_back(object);
         }
     }
+
+    return results;
 }
