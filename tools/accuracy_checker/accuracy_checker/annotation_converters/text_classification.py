@@ -319,6 +319,7 @@ class IMDBConverter(BaseGLUETextClassificationConverter):
         self.label_map = dict(enumerate(imdb_labels))
         self.reversed_label_map = {value: key for key, value in self.label_map.items()}
         self.support_vocab = 'vocab_file' in self.config
+        self.class_token_first = self.get_value_from_config('class_token_first')
 
     def _create_examples(self):
         examples = []
