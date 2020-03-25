@@ -18,20 +18,28 @@ description: >-
 task_type: object_attributes
 files:
   - name: FP32/person-attributes-recognition-crossroad-0230.xml
-    size: 173336
-    sha256: bd911ccf0926eb48aae0c75ba385fd4783e6ad1680b80135b274a731e99b9c67
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.xml
+    size: 173366
+    sha256: f04a5d3d193498fefd4728f34d31c0c2940fa3c2c9016ebb0914710e551d47f0
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.xml
   - name: FP32/person-attributes-recognition-crossroad-0230.bin
     size: 2939232
-    sha256: 01432edde876a4be8c7ef87801b7c45a09a442daec06551fd2db7c81f1d76407
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.bin
+    sha256: 669cff5a6af5afa9d6f54cfacb4286ba545f1d439e8328776e35e9c1fbeabc95
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-attributes-recognition-crossroad-0230/FP32/person-attributes-recognition-crossroad-0230.bin
   - name: FP16/person-attributes-recognition-crossroad-0230.xml
-    size: 173251
-    sha256: 20f6e12b608e8910bebf5e229b943fb1356d2f2a55265cda04f2a5a7d7afbb58
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.xml
+    size: 173281
+    sha256: 08601c0d555141bb9e83829314d92aeb69212f9e5f79b1cb44dc582fde23d1ea
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.xml
   - name: FP16/person-attributes-recognition-crossroad-0230.bin
     size: 1469624
     sha256: 61327cb5748a234c0320456e83dc8e42756c3a9856f15580a111493da47366fc
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-attributes-recognition-crossroad-0230/FP16/person-attributes-recognition-crossroad-0230.bin
+  - name: FP16-INT8/person-attributes-recognition-crossroad-0230.xml
+    size: 494436
+    sha256: 39756eada0a9e28ccfd50679287e0d103718b96a0b10e7e891314d8865a4fd70
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-attributes-recognition-crossroad-0230/FP16-INT8/person-attributes-recognition-crossroad-0230.xml
+  - name: FP16-INT8/person-attributes-recognition-crossroad-0230.bin
+    size: 753770
+    sha256: bf4ac3c0d18172995fe76db81cb2603d2e1219ee00ab8f0a7b3bdcf1b48024c7
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-attributes-recognition-crossroad-0230/FP16-INT8/person-attributes-recognition-crossroad-0230.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

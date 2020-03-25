@@ -18,9 +18,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model:   intel/person-vehicle-bike-detection-crossroad-0078/FP32-INT8/person-vehicle-bike-detection-crossroad-0078.xml
-        weights: intel/person-vehicle-bike-detection-crossroad-0078/FP32-INT8/person-vehicle-bike-detection-crossroad-0078.bin
+          - FP16-INT8
+        model:   intel/person-vehicle-bike-detection-crossroad-0078/FP16-INT8/person-vehicle-bike-detection-crossroad-0078.xml
+        weights: intel/person-vehicle-bike-detection-crossroad-0078/FP16-INT8/person-vehicle-bike-detection-crossroad-0078.bin
         adapter: ssd
 
     datasets:

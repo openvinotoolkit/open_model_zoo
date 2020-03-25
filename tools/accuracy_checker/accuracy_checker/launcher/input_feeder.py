@@ -245,3 +245,6 @@ class InputFeeder:
             )
 
         return [batch_data]
+
+    def release(self):
+        del self.network_inputs

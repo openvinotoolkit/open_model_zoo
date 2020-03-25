@@ -17,28 +17,28 @@ description: >-
 task_type: detection
 files:
   - name: FP32/person-detection-action-recognition-0005.xml
-    size: 651605
-    sha256: 7978b641bbc5fb9676ef18e35bec14d3541595b27454c95fab9ede178da0cc06
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.xml
+    size: 658139
+    sha256: 8a697050945ea30ded254ca4264361ba56e9ff9edcfd37e8e6f2e55e24f77f50
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.xml
   - name: FP32/person-detection-action-recognition-0005.bin
     size: 7800360
     sha256: 2982e6c2683229a450d674c362cc11abd640dce4e39e95925c7957a28011f147
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-action-recognition-0005/FP32/person-detection-action-recognition-0005.bin
   - name: FP16/person-detection-action-recognition-0005.xml
-    size: 651362
-    sha256: 1d01cf1af48403eeb8f503e10416f94461e56dec2b3a038ae3a34da0807760b7
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.xml
+    size: 657895
+    sha256: 803a5c4ecd0dabaca78a5f0e4f6fda545283d7cc4506f05263c0a4b99db5b998
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.xml
   - name: FP16/person-detection-action-recognition-0005.bin
     size: 3900234
     sha256: 159f52fdd28bef5a3ef3edd998fe08fd4d51c4a3fb2b9134b82a09f6a252c378
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.bin
-  - name: FP32-INT8/person-detection-action-recognition-0005.xml
-    size: 1697244
-    sha256: 0f8f73f28ab61f3a0a0ed8abb65ce341278e457647a6636d6ee7a8164b62b320
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-action-recognition-0005/FP32-INT8/person-detection-action-recognition-0005.xml
-  - name: FP32-INT8/person-detection-action-recognition-0005.bin
-    size: 7972512
-    sha256: cd8f809d2a6dfe12808a9a49c62fa3501c22fdff2c955961746a3c24e20d7db4
-    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.1/open_model_zoo/models_bin/1/person-detection-action-recognition-0005/FP32-INT8/person-detection-action-recognition-0005.bin
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-action-recognition-0005/FP16/person-detection-action-recognition-0005.bin
+  - name: FP16-INT8/person-detection-action-recognition-0005.xml
+    size: 1834221
+    sha256: bb64bc7a62e6cdd6dff7075cea9a5212ab36a5ce9e59210969a3243073e7974b
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-action-recognition-0005/FP16-INT8/person-detection-action-recognition-0005.xml
+  - name: FP16-INT8/person-detection-action-recognition-0005.bin
+    size: 2055164
+    sha256: fd8b7e8fdadb436efd2ecc86ce752234291781416fcaedbc668d1b0e7d2a16b3
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-detection-action-recognition-0005/FP16-INT8/person-detection-action-recognition-0005.bin
 framework: dldt
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

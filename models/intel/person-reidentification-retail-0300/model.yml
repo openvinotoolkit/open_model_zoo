@@ -1,0 +1,36 @@
+# Copyright (c) 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  High accuracy single embedding-based person reidentification model
+task_type: object_attributes
+files:
+  - name: FP32/person-reidentification-retail-0300.xml
+    size: 447855
+    sha256: 98196daf69bb2d5a447f7484d7d070549480634e9d52c4c80a7edbf89f88557f
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-reidentification-retail-0300/FP32/person-reidentification-retail-0300.xml
+  - name: FP32/person-reidentification-retail-0300.bin
+    size: 21059332
+    sha256: 396b43fe9ae7c10bb5b8e5b8b5a0d024f56b51b64561fe81e55053b5df01b6a3
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-reidentification-retail-0300/FP32/person-reidentification-retail-0300.bin
+  - name: FP16/person-reidentification-retail-0300.xml
+    size: 447724
+    sha256: ac8bb4fbe6215cc4ca0770a640a757f9e7789f4903e015c401f39b622b69693a
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-reidentification-retail-0300/FP16/person-reidentification-retail-0300.xml
+  - name: FP16/person-reidentification-retail-0300.bin
+    size: 10529712
+    sha256: 98ab444ac49800a07c59d4ca121f641b3f3b737451e27b675b6468dbf0450425
+    source: https://download.01.org/opencv/2020/openvinotoolkit/2020.2/open_model_zoo/models_bin/2/person-reidentification-retail-0300/FP16/person-reidentification-retail-0300.bin
+framework: dldt
+license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE

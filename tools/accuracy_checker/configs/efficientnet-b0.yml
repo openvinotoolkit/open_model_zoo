@@ -32,7 +32,6 @@ models:
         model:   public/efficientnet-b0/FP32/efficientnet-b0.xml
         weights: public/efficientnet-b0/FP32/efficientnet-b0.bin
         adapter: classification
-        cpu_extensions: AUTO
 
       - framework: dlsdk
         tags:
@@ -40,7 +39,6 @@ models:
         model:   public/efficientnet-b0/FP16/efficientnet-b0.xml
         weights: public/efficientnet-b0/FP16/efficientnet-b0.bin
         adapter: classification
-        cpu_extensions: AUTO
 
     datasets:
       - name: imagenet_1000_classes

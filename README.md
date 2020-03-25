@@ -43,7 +43,7 @@ Open Model Zoo is licensed under Apache License, Version 2.0. By contributing to
 Please report questions, issues and suggestions using:
 * [\#open_model_zoo](https://stackoverflow.com/search?q=%23open_model_zoo) tag on StackOverflow*
 * [GitHub* Issues](https://github.com/opencv/open_model_zoo/issues)
-* [Forum](https://software.intel.com/en-us/forums/computer-vision)
+* [Forum](https://software.intel.com/en-us/forums/intel-distribution-of-openvino-toolkit)
 * [Gitter](https://gitter.im/open_model_zoo/community)
 
 ---

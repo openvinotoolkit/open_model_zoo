@@ -27,7 +27,7 @@ from .classification import (
 from .detection import (DetectionMAP, MissRate, Recall, DetectionAccuracyMetric)
 from .reid import CMCScore, ReidMAP, PairwiseAccuracy, PairwiseAccuracySubsets
 from .semantic_segmentation import SegmentationAccuracy, SegmentationIOU, SegmentationMeanAccuracy, SegmentationFWAcc
-from .character_recognition import CharacterRecognitionAccuracy
+from .character_recognition import CharacterRecognitionAccuracy, LabelLevelRecognitionAccuracy
 from .regression import (
     MeanAbsoluteErrorOnInterval,
     MeanSquaredErrorOnInterval,
@@ -97,6 +97,7 @@ __all__ = [
     'SegmentationFWAcc',
 
     'CharacterRecognitionAccuracy',
+    'LabelLevelRecognitionAccuracy',
 
     'MeanAbsoluteError',
     'MeanSquaredError',

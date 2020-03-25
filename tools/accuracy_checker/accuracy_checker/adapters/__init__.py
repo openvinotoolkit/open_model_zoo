@@ -20,9 +20,13 @@ from .action_recognition import ActionDetection
 from .text_detection import (
     TextDetectionAdapter,
     TextProposalsDetectionAdapter,
-    EASTTextDetectionAdapter,
-    LPRAdapter,
-    BeamSearchDecoder
+    EASTTextDetectionAdapter
+)
+
+from .text_recognition import (
+    BeamSearchDecoder,
+    CTCGreedySearchDecoder,
+    LPRAdapter
 )
 
 from .image_processing import SuperResolutionAdapter
@@ -45,7 +49,7 @@ from .detection import (
     SSDONNXAdapter,
     MTCNNPAdapter,
     RetinaNetAdapter,
-    FCOSPersonAdapter
+    ClassAgnosticDetectionAdapter
 )
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
 from .classification import ClassificationAdapter
@@ -86,7 +90,7 @@ __all__ = [
     'MTCNNPAdapter',
     'CTDETAdapter',
     'RetinaNetAdapter',
-    'FCOSPersonAdapter',
+    'ClassAgnosticDetectionAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
@@ -108,6 +112,7 @@ __all__ = [
 
     'BeamSearchDecoder',
     'LPRAdapter',
+    'CTCGreedySearchDecoder',
 
     'HumanPoseAdapter',
     'HumanPose3dAdapter',

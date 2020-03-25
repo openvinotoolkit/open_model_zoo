@@ -38,9 +38,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model:   intel/gaze-estimation-adas-0002/FP32-INT8/gaze-estimation-adas-0002.xml
-        weights: intel/gaze-estimation-adas-0002/FP32-INT8/gaze-estimation-adas-0002.bin
+          - FP16-INT8
+        model:   intel/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.xml
+        weights: intel/gaze-estimation-adas-0002/FP16-INT8/gaze-estimation-adas-0002.bin
         inputs:
           - name: left_eye_image
             type: INPUT

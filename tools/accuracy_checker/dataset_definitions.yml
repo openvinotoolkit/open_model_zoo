@@ -430,8 +430,11 @@ datasets:
     annotation: market1501_reid.pickle
 
   - name: reid_dataset
-    data_source: reid
-    annotation: reid.pickle
+    data_source: Market-1501-v15.09.15
+    annotation_conversion:
+      converter: market1501_reid
+      data_dir: Market-1501-v15.09.15
+    annotation: market1501_reid.pickle
 
   - name: vgg2face
     data_source: VGGFaces2/test
@@ -589,6 +592,28 @@ datasets:
     annotation: kinetics_action_recognition.pickle
     dataset_meta: kinetics_action_recognition.json
 
+  - name: kinetics-400-frames-79
+    data_source: kinetics/frames_val
+    annotation_conversion:
+      converter: clip_action_recognition
+      annotation_file: kinetics/kinetics_400.json
+      data_dir: kinetics/frames_val
+      clip_duration: 79
+    annotation: kinetics_action_recognition_79.pickle
+    dataset_meta: kinetics_action_recognition_79.json
+
+  - name: kinetics-400-frames-79-400
+    data_source: kinetics/frames_val
+    annotation_conversion:
+      converter: clip_action_recognition
+      annotation_file: kinetics/kinetics_400.json
+      data_dir: kinetics/frames_val
+      clip_duration: 79
+      temporal_stride: 1
+      num_samples: 400
+    annotation: kinetics_action_recognition_79_400.pickle
+    dataset_meta: kinetics_action_recognition_79_400.json
+
   - name: driver_action_recognition_dataset
     data_source: kinetics/frames_val
     annotation_conversion:
@@ -666,6 +691,15 @@ datasets:
       data_dir: ReDWeb_V1
       annotation_file: ReDWeb_validation_360.txt
     annotation: mono_depth.pickle
+
+  - name: Kondate_nakayosi
+    data_source: Kondate_nakayosi/test_data
+    annotation_conversion:
+      converter: kondate_nakayosi_recognition
+      decoding_char_file: Kondate_nakayosi/kondate_nakayosi_char_list.txt
+      annotation_file: Kondate_nakayosi/test_img_id_gt.txt
+    annotation: kondate_nakayosi_recognition.pickle
+    dataset_meta: kondate_nakayosi_recognition.json
 
   - name: inpainting_free_form_masks
     data_source: VOCdevkit/VOC2012/JPEGImages/

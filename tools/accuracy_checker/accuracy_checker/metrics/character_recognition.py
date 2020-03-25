@@ -15,8 +15,14 @@ limitations under the License.
 """
 
 from ..representation import CharacterRecognitionAnnotation, CharacterRecognitionPrediction
+from ..config import ConfigError
 from .metric import PerImageEvaluationMetric
 from .average_meter import AverageMeter
+from .average_editdistance_meter import AverageEditdistanceMeter
+try:
+    import editdistance
+except ImportError:
+    editdistance = None
 
 
 class CharacterRecognitionAccuracy(PerImageEvaluationMetric):
@@ -31,6 +37,29 @@ class CharacterRecognitionAccuracy(PerImageEvaluationMetric):
     def update(self, annotation, prediction):
         return self.accuracy.update(annotation.label, prediction.label)
 
+
+    def evaluate(self, annotations, predictions):
+        return self.accuracy.evaluate()
+
+    def reset(self):
+        self.accuracy.reset()
+
+
+class LabelLevelRecognitionAccuracy(PerImageEvaluationMetric):
+    __provider__ = 'label_level_recognition_accuracy'
+
+    annotation_types = (CharacterRecognitionAnnotation, )
+    prediction_types = (CharacterRecognitionPrediction, )
+
+    def configure(self):
+        if editdistance is None:
+            raise ConfigError('Metric {} requires editdistance package installation. Please install it.'.format(
+                self.__provider__
+            ))
+        self.accuracy = AverageEditdistanceMeter(editdistance.eval)
+
+    def update(self, annotation, prediction):
+        return self.accuracy.update(annotation.label, prediction.label)
 
     def evaluate(self, annotations, predictions):
         return self.accuracy.evaluate()

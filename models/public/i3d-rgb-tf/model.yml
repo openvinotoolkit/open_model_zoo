@@ -1,0 +1,35 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  The "i3d-rgb-tf" is a model for video classification, based on paper "Quo Vadis,
+  Action Recognition? A New Model and the Kinetics Dataset" <https://arxiv.org/abs/1705.07750>.
+  This model use RGB input stream and trained on Kinetics-400* dataset   . Additionally,
+  this model has initialize values from Inception v1 model pretrained on ImageNet*
+  dataset.
+
+  Originally redistributed as a checkpoint file, was converted to frozen graph.
+task_type: action_recognition
+files:
+  - name: i3d-rgb.frozen.pb
+    sha256: 77b3239c74c78be2c4c6747edd803deef8d4c8c3cf466c4c402a3db4f9d4b3a0
+    size: 51046552
+    source: https://download.01.org/opencv/public_models/032020/i3d-rgb/rgb.frozen.pb
+framework: tf
+model_optimizer_args:
+  - --input_shape=[1,79,224,224,3]
+  - --mean_values=Placeholder[127.5]
+  - --scale_values=Placeholder[127.5]
+  - --input_model=$dl_dir/i3d-rgb.frozen.pb
+license: https://raw.githubusercontent.com/deepmind/kinetics-i3d/master/LICENSE

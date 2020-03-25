@@ -10,7 +10,7 @@ Install prerequisites first:
 
 **accuracy checker** uses **Python 3**. Install it first:
 
-- [Python3](https://www.python.org/downloads/), [setuptools](https://pypi.python.org/pypi/setuptools):
+- [Python3](https://www.python.org/downloads/), [setuptools](https://pypi.org/project/setuptools/):
 
 ```bash
 sudo apt-get install python3 python3-dev python3-setuptools python3-pip

@@ -68,6 +68,7 @@ void showUsage() {
     std::cout << "    -duplicate_num               " << duplication_channel_number << std::endl;
     std::cout << "    -real_input_fps              " << real_input_fps << std::endl;
     std::cout << "    -i                           " << input_video << std::endl;
+    std::cout << "    -loop_video                  " << loop_video_output_message << std::endl;
     std::cout << "    -u                           " << utilization_monitors_message << std::endl;
 }
 
@@ -298,7 +299,7 @@ std::map<std::string, YoloParams> GetYoloParams(const std::vector<std::string>& 
                 }
             }
         } else {
-            params = network.getLayerByName(output_name.c_str());
+            throw std::runtime_error("Can't get ngraph::Function. Make sure the provided model is in IR version 10 or greater.");
         }
         __yoloParams.insert(std::pair<std::string, YoloParams>(output_name.c_str(), params));
     }
@@ -440,7 +441,7 @@ int main(int argc, char* argv[]) {
             slog::info << "Trying to open input video ..." << slog::endl;
             for (auto& file : files) {
                 try {
-                    sources.openVideo(file, false);
+                    sources.openVideo(file, false, FLAGS_loop_video);
                 } catch (...) {
                     slog::info << "Cannot open video [" << file << "]" << slog::endl;
                     throw;
@@ -451,7 +452,7 @@ int main(int argc, char* argv[]) {
             slog::info << "Trying to connect " << FLAGS_nc << " web cams ..." << slog::endl;
             for (size_t i = 0; i < FLAGS_nc; ++i) {
                 try {
-                    sources.openVideo(std::to_string(i), true);
+                    sources.openVideo(std::to_string(i), true, false);
                 } catch (...) {
                     slog::info << "Cannot open web cam [" << i << "]" << slog::endl;
                     throw;
