@@ -1,12 +1,43 @@
-import math
-
 import numpy as np
+
+from collections import namedtuple
 
 from ..adapters import Adapter
 from ..config import BoolField, NumberField, StringField, ConfigValidator, ListField, ConfigError
 from ..representation import DetectionPrediction
 from ..topology_types import YoloV1Tiny, YoloV2, YoloV2Tiny, YoloV3, YoloV3Tiny
 from ..utils import get_or_parse_value
+
+DetectionBox = namedtuple('DetectionBox', ["x", "y", "w", "h", "confidence", "probabilities"])
+
+
+class YoloOutputProcessor:
+    def __init__(self, normalizers=[1, 1, 1, 1],
+                 coord_correct=lambda x: x, size_correct=lambda x: np.exp(x),
+                 conf_correct=lambda x: x, prob_correct=lambda x: x):
+        self.reset_normalizers(normalizers)
+        self.coord_correct = coord_correct
+        self.size_correct = size_correct
+        self.conf_correct = conf_correct
+        self.prob_correct = prob_correct
+
+    def reset_normalizers(self, normalizers):
+        self.x_normalizer = normalizers[0]
+        self.y_normalizer = normalizers[1]
+        self.width_normalizer = normalizers[2]
+        self.height_normalizer = normalizers[3]
+
+    def __call__(self, bbox, i, j, anchors=[1, 1]):
+        x = (self.coord_correct(bbox.x) + i) / self.x_normalizer
+        y = (self.coord_correct(bbox.y) + j) / self.y_normalizer
+
+        w = self.size_correct(bbox.w) * anchors[0] / self.width_normalizer
+        h = self.size_correct(bbox.h) * anchors[1] / self.height_normalizer
+
+        confidence = self.conf_correct(bbox.confidence)
+        probabilities = self.prob_correct(bbox.probabilities)
+
+        return DetectionBox(x, y, w, h, confidence, probabilities)
 
 
 class TinyYOLOv1Adapter(Adapter):
@@ -76,62 +107,32 @@ def entry_index(w, h, n_coords, n_classes, pos, entry):
     return row * w * h * (n_classes + n_coords + 1) + entry * w * h + col
 
 
-def parse_output(predictions, anchors, cells, num, box_size, raw_output, w=None, h=None):
-    def get_cell_bbox(prediction, i, j, n):
-        #box_size = self.coords + 1 + self.classes
-        if prediction.shape[0] == prediction.shape[1]:
-            return prediction[i, j, n*box_size:(n + 1)*box_size]
-        else:
-            return prediction[n*box_size:(n + 1)*box_size, i, j]
-
-    def sigmoid(x):
-        return 1.0 / (1.0 + np.exp(-x))
-
+def parse_output(predictions, cells, num, box_size, anchors, processor):
     cells_x, cells_y = cells, cells
-
-    width_normalizer, height_normalizer = (w, h) if w and h else (cells, cells)
 
     labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []
 
     for x, y, n in np.ndindex((cells_x, cells_y, num)):
-        bbox = get_cell_bbox(predictions, y, x, n)
-
-        scale = bbox[4]
-
-        classes_prob = bbox[5:]
-
-        if raw_output:
-            box = [
-                (x + sigmoid(bbox[0])) / cells_x,
-                (y + sigmoid(bbox[1])) / cells_y,
-                np.exp(bbox[2]) * anchors[2 * n + 0] / width_normalizer,
-                np.exp(bbox[3]) * anchors[2 * n + 1] / height_normalizer
-            ]
-
-            classes_prob = sigmoid(classes_prob)
-            #classes_prob = np.exp(classes_prob) / np.sum(np.exp(classes_prob))
-            scale = sigmoid(scale)
+        if predictions.shape[0] == predictions.shape[1]:
+            bbox = predictions[y, x, n*box_size:(n + 1)*box_size]
         else:
-            box = [
-                (x + bbox[0]) / cells_x,
-                (y + bbox[1]) / cells_y,
-                np.exp(bbox[2]) * anchors[2 * n + 0] / width_normalizer,
-                np.exp(bbox[3]) * anchors[2 * n + 1] / height_normalizer
-            ]
+            bbox = predictions[n * box_size:(n + 1) * box_size, y, x]
 
-        if scale < 0.001:
+        raw_bbox = DetectionBox(bbox[0], bbox[1], bbox[2], bbox[3], bbox[4], bbox[5:])
+        processed_box = processor(raw_bbox, x, y, anchors[2*n:2*n+2])
+
+        if processed_box.confidence < 0.001:
             continue
 
-        classes_prob = classes_prob * scale
-
+        classes_prob = processed_box.probabilities
         label = np.argmax(classes_prob)
 
         labels.append(label)
-        scores.append(classes_prob[label])
-        x_mins.append(box[0] - box[2] / 2.0)
-        y_mins.append(box[1] - box[3] / 2.0)
-        x_maxs.append(box[0] + box[2] / 2.0)
-        y_maxs.append(box[1] + box[3] / 2.0)
+        scores.append(processed_box.probabilities[label] * processed_box.confidence)
+        x_mins.append(processed_box.x - processed_box.w / 2.0)
+        y_mins.append(processed_box.y - processed_box.h / 2.0)
+        x_maxs.append(processed_box.x + processed_box.w / 2.0)
+        y_maxs.append(processed_box.y + processed_box.h / 2.0)
 
     return labels, scores, x_mins, y_mins, x_maxs, y_maxs
 
@@ -190,6 +191,13 @@ class YoloV2Adapter(Adapter):
         self.anchors = get_or_parse_value(self.get_value_from_config('anchors'), YoloV2Adapter.PRECOMPUTED_ANCHORS)
         self.cells = self.get_value_from_config('cells')
         self.raw_output = self.get_value_from_config('raw_output')
+        if self.raw_output:
+            self.processor = YoloOutputProcessor(normalizers=4*[self.cells],
+                                                 coord_correct= lambda x: 1./ (1 + np.exp(-x)),
+                                                 conf_correct= lambda x: 1./ (1 + np.exp(-x)),
+                                                 prob_correct= lambda x: np.exp(x) / np.sum(np.exp(x)))
+        else:
+            self.processor = YoloOutputProcessor(normalizers=4*[self.cells])
 
     def process(self, raw, identifiers=None, frame_meta=None):
         """
@@ -202,68 +210,18 @@ class YoloV2Adapter(Adapter):
         predictions = self._extract_predictions(raw, frame_meta)[self.output_blob]
 
         result = []
+
         for identifier, prediction in zip(identifiers, predictions):
             if len(prediction.shape) == 1:
                 prediction = np.reshape(prediction,
                                         (self.num * (self.classes + self.coords + 1), self.cells, self.cells))
-            labels, scores, x_mins, y_mins, x_maxs, y_maxs = self.parse_output(prediction)
+            labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(prediction, self.cells, self.num,
+                                                                          self.coords + 1 + self.classes,
+                                                                          self.anchors, self.processor)
 
             result.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
 
         return result
-
-    def parse_output(self, predictions):
-        def get_cell_bbox(prediction, i, j, n):
-            box_size = self.coords + 1 + self.classes
-            if prediction.shape[0] == prediction.shape[1]:
-                return prediction[i, j, n*box_size:(n + 1)*box_size]
-            else:
-                return prediction[n*box_size:(n + 1)*box_size, i, j]
-
-        def sigmoid(x):
-            return 1.0 / (1.0 + np.exp(-x))
-
-        cells_x, cells_y = self.cells, self.cells
-
-        labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []
-
-        for x, y, n in np.ndindex((cells_x, cells_y, self.num)):
-            bbox = get_cell_bbox(predictions, y, x, n)
-
-            scale = bbox[4]
-
-            classes_prob = bbox[5:]
-
-            if self.raw_output:
-                box = [
-                    (x + sigmoid(bbox[0])) / cells_x,
-                    (y + sigmoid(bbox[1])) / cells_y,
-                    np.exp(bbox[2]) * self.anchors[2 * n + 0] / cells_x,
-                    np.exp(bbox[3]) * self.anchors[2 * n + 1] / cells_y
-                ]
-
-                classes_prob = np.exp(classes_prob) / np.sum(np.exp(classes_prob))
-                scale = sigmoid(scale)
-            else:
-                box = [
-                    (x + bbox[0]) / cells_x,
-                    (y + bbox[1]) / cells_y,
-                    np.exp(bbox[2]) * self.anchors[2 * n + 0] / cells_x,
-                    np.exp(bbox[3]) * self.anchors[2 * n + 1] / cells_y
-                ]
-
-            classes_prob = classes_prob * scale
-
-            label = np.argmax(classes_prob)
-
-            labels.append(label)
-            scores.append(classes_prob[label])
-            x_mins.append(box[0] - box[2] / 2.0)
-            y_mins.append(box[1] - box[3] / 2.0)
-            x_maxs.append(box[0] + box[2] / 2.0)
-            y_maxs.append(box[1] + box[3] / 2.0)
-
-        return labels, scores, x_mins, y_mins, x_maxs, y_maxs
 
 
 class YoloV3Adapter(Adapter):
@@ -323,6 +281,9 @@ class YoloV3Adapter(Adapter):
                             " if specified there should be exactly 3 output layers provided."
             ),
             'anchor_masks': ListField(optional=True, description='per layer used anchors mask'),
+            'cells': ListField(
+                optional=True, default=[13, 26, 52],
+                description="Cell size for each layer, according 'outputs' filed"),
             'raw_output': BoolField(
                 optional=True, default=False,
                 description="Indicates, that output is in raw format"
@@ -351,7 +312,18 @@ class YoloV3Adapter(Adapter):
                     layer_anchors += [self.anchors[idx * 2], self.anchors[idx * 2 + 1]]
                 per_layer_anchors.append(layer_anchors)
             self.masked_anchors = per_layer_anchors
+        self.cells = self.get_value_from_config('cells')
+        if self.outputs and len(self.outputs) != len(self.cells):
+            raise ConfigError('Incorrect number of output layer ({}) or detection grid size ({})'
+                              'Must be equal with each other'.format(len(self.outputs), len(self.cells)))
         self.raw_output = self.get_value_from_config('raw_output')
+        if self.raw_output:
+            self.processor = YoloOutputProcessor(coord_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
+                                                 size_correct=lambda x: np.exp(x),
+                                                 conf_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
+                                                 prob_correct=lambda x: 1.0 / (1.0 + np.exp(-x)))
+        else:
+            self.processor = YoloOutputProcessor(size_correct=lambda x: np.exp(x))
 
     def process(self, raw, identifiers=None, frame_meta=None):
         """
@@ -361,46 +333,6 @@ class YoloV3Adapter(Adapter):
         Returns:
             list of DetectionPrediction objects
         """
-
-        def get_anchors_offset(x, num, anchors):
-            return int((num * 2) * (len(anchors) / (num * 2) - 1 - math.log2(x / 13)))
-
-        def parse_yolo_v3_results(prediction, threshold, w, h, det, layer_id):
-            cells_y, cells_x = prediction.shape[1:]
-            anchors = self.masked_anchors[layer_id] if self.masked_anchors else self.anchors
-            num = len(anchors) // 2 if self.masked_anchors else self.num
-            prediction = prediction.flatten()
-            for y, x, n in np.ndindex((cells_y, cells_x, num)):
-                index = n * cells_y * cells_x + y * cells_x + x
-                anchors_offset = get_anchors_offset(cells_x, num, anchors) if not self.masked_anchors else 0
-
-                box_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, 0)
-                obj_index = entry_index(cells_x, cells_y, self.coords, self.classes, index, self.coords)
-                scale = prediction[obj_index]
-                if scale < threshold:
-                    continue
-
-                box = [
-                    (x + prediction[box_index + 0 * (cells_y * cells_x)]) / cells_x,
-                    (y + prediction[box_index + 1 * (cells_y * cells_x)]) / cells_y,
-                    np.exp(prediction[box_index + 2 * (cells_y * cells_x)]) * anchors[anchors_offset + 2 * n + 0] / w,
-                    np.exp(prediction[box_index + 3 * (cells_y * cells_x)]) * anchors[anchors_offset + 2 * n + 1] / h
-                ]
-
-                classes_prob = np.empty(self.classes)
-                for cls in range(self.classes):
-                    cls_index = entry_index(cells_x, cells_y, self.coords, self.classes, index,
-                                            self.coords + 1 + cls)
-                    classes_prob[cls] = prediction[cls_index] * scale
-
-                    det['labels'].append(cls)
-                    det['scores'].append(classes_prob[cls])
-                    det['x_mins'].append(box[0] - box[2] / 2.0)
-                    det['y_mins'].append(box[1] - box[3] / 2.0)
-                    det['x_maxs'].append(box[0] + box[2] / 2.0)
-                    det['y_maxs'].append(box[1] + box[3] / 2.0)
-
-            return det
 
         result = []
 
@@ -423,19 +355,16 @@ class YoloV3Adapter(Adapter):
             detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
             input_shape = list(meta.get('input_shape', {'data': (1, 3, 416, 416)}).values())[0]
             nchw_layout = input_shape[1] == 3
-            self.input_width = input_shape[3 if nchw_layout else 2]
-            self.input_height = input_shape[2 if nchw_layout else 1]
-
-            for layer_id, p in enumerate(prediction):
-                #parse_yolo_v3_results(p, self.threshold, self.input_width, self.input_height, detections, layer_id)
+            self.processor.width_normalizer = input_shape[3 if nchw_layout else 2]
+            self.processor.height_normalizer = input_shape[2 if nchw_layout else 1]
+            for layer_id, (cells, p) in enumerate(zip(self.cells, prediction)):
                 anchors = self.masked_anchors[layer_id] if self.masked_anchors else self.anchors
                 num = len(anchors) // 2 if self.masked_anchors else self.num
-                cells = p.shape[1] if nchw_layout else p.shape[0]
-                labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, anchors, cells,
-                                                                              num,
+                self.processor.x_normalizer = cells
+                self.processor.y_normalizer = cells
+                labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num,
                                                                               self.classes + self.coords + 1,
-                                                                              self.raw_output,
-                                                                              self.input_width, self.input_height)
+                                                                              anchors, self.processor)
                 detections['labels'].extend(labels)
                 detections['scores'].extend(scores)
                 detections['x_mins'].extend(x_mins)
