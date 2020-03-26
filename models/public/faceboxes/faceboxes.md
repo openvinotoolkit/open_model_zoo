@@ -32,22 +32,27 @@ Image, name - `input.1` , shape - [1x3x1024x1024], format [BxCxHxW],
 
 ### Converted model
 
-The converted model has the same parameters as the original model.
+Image, name - `input.1` , shape - [1x3x1024x1024], format [BxCxHxW],
+   where:
+
+    - B - batch size
+    - C - number of channels
+    - H - image height
+    - W - image width
+
+   Expected color order - BGR.
 
 ## Output
 
 ### Original model
 
-Vectors of floating-point values - boxes,scores and ?
+Vectors of floating-point values - boxes and scores.
  - boxes_out, name - 342, shape - [1x21824x4]
  - scores_out, name - 353, shape - [1x21824x2]
- - ?, name - 354, shape - [2x21824x4]
 
 ### Converted model
 
-Vectors of floating-point values - boxes and scores.
- - boxes_out, name - 342, shape - [1x21824x4]
- - scores_out, name -353, shape - [1x21824x2]
+The converted model has the same parameters as the original model.
 
 ## Legal Information
 
