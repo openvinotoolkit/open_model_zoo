@@ -1,4 +1,4 @@
-# faceboxes
+# faceboxes-pytorch
 
 ## Use Case and High-Level Description
 
@@ -48,7 +48,7 @@ Image, name - `input.1` , shape - [1x3x1024x1024], format [BxCxHxW],
 
 1. Bounding boxes deltas , name: `342`, shape - [1x21824x4]. Presented in format [BxAx4],
     where:
-    
+
     - B - batch size
     - A - number of prior box anchors
 

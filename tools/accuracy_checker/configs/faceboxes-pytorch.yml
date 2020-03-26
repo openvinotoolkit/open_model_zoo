@@ -1,12 +1,12 @@
 models:
-  - name: faceboxes
+  - name: faceboxes-pytorch
 
     launchers:
       - framework: dlsdk
         tags:
           - FP32
-        model:   public/faceboxes/FP32/faceboxes.xml
-        weights: public/faceboxes/FP32/faceboxes.bin
+        model:   public/faceboxes-pytorch/FP32/faceboxes-pytorch.xml
+        weights: public/faceboxes-pytorch/FP32/faceboxes-pytorch.bin
         adapter:
           type: faceboxes
           boxes_out: "342"
@@ -15,8 +15,8 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        model:   public/faceboxes/FP16/faceboxes.xml
-        weights: public/faceboxes/FP16/faceboxes.bin
+        model:   public/faceboxes-pytorch/FP16/faceboxes-pytorch.xml
+        weights: public/faceboxes-pytorch/FP16/faceboxes-pytorch.bin
         adapter:
           type: faceboxes
           boxes_out: "342"
@@ -25,8 +25,8 @@ models:
       - framework: dlsdk
         tags:
           - FP32-INT8
-        model:   public/faceboxes/FP32-INT8/faceboxes.xml
-        weights: public/faceboxes/FP32-INT8/faceboxes.bin
+        model:   public/faceboxes-pytorch/FP32-INT8/faceboxes-pytorch.xml
+        weights: public/faceboxes-pytorch/FP32-INT8/faceboxes-pytorch.bin
         adapter:
           type: faceboxes
           boxes_out: "342"
@@ -35,8 +35,8 @@ models:
       - framework: dlsdk
         tags:
           - FP16-INT8
-        model:   public/faceboxes/FP16-INT8/faceboxes.xml
-        weights: public/faceboxes/FP16-INT8/faceboxes.bin
+        model:   public/faceboxes-pytorch/FP16-INT8/faceboxes-pytorch.xml
+        weights: public/faceboxes-pytorch/FP16-INT8/faceboxes-pytorch.bin
         adapter:
           type: faceboxes
           boxes_out: "342"
