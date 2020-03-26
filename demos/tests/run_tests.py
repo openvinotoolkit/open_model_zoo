@@ -27,6 +27,7 @@ For the tests to work, the test data directory must contain:
 
 import argparse
 import collections
+import contextlib
 import csv
 import itertools
 import json
@@ -72,6 +73,11 @@ def collect_result(demo_name, device, pipeline, execution_time, report_file):
             testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "ExecutionTime"])
         testwriter.writerow([demo_name, device, " ".join(pipeline), execution_time])
 
+@contextlib.contextmanager
+def temp_dir_as_path():
+    with tempfile.TemporaryDirectory() as temp_dir:
+        yield Path(temp_dir)
+
 def main():
     args = parse_args()
 
@@ -98,8 +104,8 @@ def main():
         print('Testing {}...'.format(demo.full_name))
         print()
 
-        with tempfile.TemporaryDirectory() as temp_dir:
-            dl_dir = Path(temp_dir) / 'models'
+        with temp_dir_as_path() as temp_dir:
+            dl_dir = temp_dir / 'models'
 
             print('Retrieving models...', flush=True)
 
@@ -135,7 +141,7 @@ def main():
             arg_context = ArgContext(
                 source_dir=demos_dir / demo.subdirectory,
                 dl_dir=dl_dir,
-                data_sequence_dir=Path(temp_dir) / 'data_seq',
+                data_sequence_dir=temp_dir / 'data_seq',
                 data_sequences=DATA_SEQUENCES,
                 model_info=model_info,
                 test_data_dir=args.test_data_dir,
