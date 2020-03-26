@@ -33,7 +33,7 @@ conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=FaceBoxes
   - --import-module=faceboxes
-  - --model-param="phase='test'"
+  - --model-param=phase='test'
   - --model-param=size=None
   - --model-param=num_classes=2
   - --weights=$dl_dir/FaceBoxesProd.pth
