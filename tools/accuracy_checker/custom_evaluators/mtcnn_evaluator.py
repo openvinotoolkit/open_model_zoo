@@ -34,12 +34,6 @@ from accuracy_checker.progress_reporters import ProgressReporter
 
 
 def build_stages(models_info, preprocessors_config, launcher, model_args, delayed_model_loading=False):
-    def merge_preprocessing(model_specific, common_preprocessing):
-        if model_specific:
-            model_specific.extend(common_preprocessing)
-            return model_specific
-        return common_preprocessing
-
     required_stages = ['pnet']
     stages_mapping = OrderedDict([
         ('pnet', {'caffe': CaffeProposalStage, 'dlsdk': DLSDKProposalStage, 'dummy': DummyProposalStage}),
@@ -47,6 +41,7 @@ def build_stages(models_info, preprocessors_config, launcher, model_args, delaye
         ('onet', {'caffe': CaffeOutputStage,'dlsdk': DLSDKOutputStage})
     ])
     framework = launcher.config['framework']
+    common_preprocessor = PreprocessingExecutor(preprocessors_config)
     stages = OrderedDict()
     for stage_name, stage_classes in stages_mapping.items():
         if stage_name not in models_info:
@@ -66,9 +61,11 @@ def build_stages(models_info, preprocessors_config, launcher, model_args, delaye
         stage = stage_classes.get(stage_framework)
         if not stage_classes:
             raise ConfigError('{} stage does not support {} framework'.format(stage_name, stage_framework))
-        stage_preprocess = merge_preprocessing(models_info[stage_name].get('preprocessing', []), preprocessors_config)
-        preprocessor = PreprocessingExecutor(stage_preprocess)
-        stages[stage_name] = stage(models_info[stage_name], preprocessor, launcher, delayed_model_loading)
+        stage_preprocess = models_info[stage_name].get('preprocessing', [])
+        model_specific_preprocessor = PreprocessingExecutor(stage_preprocess)
+        stages[stage_name] = stage(
+            models_info[stage_name], model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading
+        )
 
     if not stages:
         raise ConfigError('please provide information about MTCNN pipeline stages')
@@ -77,9 +74,10 @@ def build_stages(models_info, preprocessors_config, launcher, model_args, delaye
 
 
 class BaseStage:
-    def __init__(self, model_info, preprocessor, delayed_model_loading=False):
+    def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, delayed_model_loading=False):
         self.model_info = model_info
-        self.preprocessor = preprocessor
+        self.model_specific_preprocessor = model_specific_preprocessor
+        self.common_preprocessor = common_preprocessor
         self.input_feeder = None
         self.store = model_info.get('store_predictions', False)
         self.predictions = []
@@ -107,22 +105,21 @@ class BaseStage:
             pickle.dump(self._predictions, out_file)
 
     def update_preprocessing(self, preprocessor):
-        model_specific_preprocessor = PreprocessingExecutor(self.model_info.get('preprocessing', []))
-        model_specific_preprocessor.processors.extend(preprocessor.processors)
-        self.preprocessor = model_specific_preprocessor
+        self.common_preprocessor = preprocessor
 
 
 class ProposalBaseStage(BaseStage):
     default_model_name = 'mtcnn-p'
 
-    def __init__(self, model_info, preprocessor, delayed_model_loading=False):
-        super().__init__(model_info, preprocessor)
+    def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, delayed_model_loading=False):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.adapter = None
         self.input_feeder = None
         self._predictions = []
 
     def preprocess_data(self, batch_input, batch_annotation, *args, **kwargs):
-        batch_input = self.preprocessor.process(batch_input, batch_annotation)
+        batch_input = self.model_specific_preprocessor.process(batch_input, batch_annotation)
+        batch_input = self.common_preprocessor.process(batch_input, batch_annotation)
         _, batch_meta = extract_image_representations(batch_input)
         filled_inputs = self.input_feeder.fill_inputs(batch_input) if self.input_feeder else batch_input
         return filled_inputs, batch_meta
@@ -148,8 +145,8 @@ class ProposalBaseStage(BaseStage):
 
 
 class DummyProposalStage(ProposalBaseStage):
-    def __init__(self, model_info, preprocessor, *args, **kwargs):
-        super().__init__(model_info, preprocessor)
+    def __init__(self, model_info, model_specific_preprocessor, common_preprocessor, *args, **kwargs):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self._index = 0
         if 'predictions' not in self.model_info:
             raise ConfigError('predictions_file is not found')
@@ -176,7 +173,8 @@ class RefineBaseStage(BaseStage):
     default_model_name = 'mtcnn-r'
 
     def preprocess_data(self, batch_input, batch_annotation, previous_stage_prediction, *lrgs, **kwargs):
-        batch_input = self.preprocessor.process(batch_input, batch_annotation)
+        batch_input = self.model_specific_preprocessor.process(batch_input, batch_annotation)
+        batch_input = self.common_preprocessor.process(batch_input, batch_annotation)
         _, batch_meta = extract_image_representations(batch_input)
         batch_input = [
             cut_roi(input_image, prediction, self.input_size, include_bound=self.include_boundaries)
@@ -399,7 +397,7 @@ class DLSDKModelMixin:
         self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
 
     def load_model(self, network_info, launcher, model_prefix=None):
-        self.network = launcher.create_ie_network(str(network_info['model']), str(network_info['weights']))
+        self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
         self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.update_input_output_info(model_prefix)
@@ -430,8 +428,8 @@ class DLSDKModelMixin:
 
 
 class CaffeProposalStage(CaffeModelMixin, ProposalBaseStage):
-    def __init__(self,  model_info, preprocessor, launcher):
-        super().__init__(model_info, preprocessor)
+    def __init__(self,  model_info, model_specific_preprocessor, common_preprocessor, launcher, *args, **kwargs):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
         pnet_outs = model_info['outputs']
@@ -441,22 +439,24 @@ class CaffeProposalStage(CaffeModelMixin, ProposalBaseStage):
 
 
 class CaffeRefineStage(CaffeModelMixin, RefineBaseStage):
-    def __init__(self,  model_info, preprocessor, launcher):
-        super().__init__(model_info, preprocessor)
+    def __init__(self,  model_info, model_specific_preprocessor, common_preprocessor, launcher, *args, **kwargs):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs,  self.fit_to_input)
 
 
 class CaffeOutputStage(CaffeModelMixin, OutputBaseStage):
-    def __init__(self,  model_info, preprocessor, launcher):
-        super().__init__(model_info, preprocessor)
+    def __init__(self,  model_info, model_specific_preprocessor, common_preprocessor,launcher):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.net = launcher.create_network(self.model_info['model'], self.model_info['weights'])
         self.input_feeder = InputFeeder(model_info.get('inputs', []), self.inputs, self.fit_to_input)
 
 
 class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
-    def __init__(self,  model_info, preprocessor, launcher, delayed_model_loading=False):
-        super().__init__(model_info, preprocessor)
+    def __init__(
+        self,  model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False)\
+        :
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor)
         self.adapter = None
         if not delayed_model_loading:
             model_xml, model_bin = self.prepare_model(launcher)
@@ -476,7 +476,7 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         self.adapter = create_adapter(pnet_adapter_config)
 
     def load_model(self, network_info, launcher, model_prefix=None):
-        self.network = launcher.create_ie_network(str(network_info['model']), str(network_info['weights']))
+        self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
         self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.update_input_output_info(model_prefix)
@@ -494,8 +494,10 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
 
 
 class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
-    def __init__(self,  model_info, preprocessor, launcher, delayed_model_loading=False):
-        super().__init__(model_info, preprocessor)
+    def __init__(
+        self, model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False
+    ):
+        super().__init__(model_info, model_specific_preprocessor, common_preprocessor,)
         if not delayed_model_loading:
             model_xml, model_bin = self.prepare_model(launcher)
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'rnet_')
@@ -504,23 +506,33 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
         raw_outputs = self._infer(input_blobs, batch_meta)
 
         if output_callback:
-            output_callback(self.transform_for_callback(input_blobs, raw_outputs))
+            batch_size = np.shape(next(iter(input_blobs[0].values())))[0]
+            output_callback(self.transform_for_callback(batch_size, raw_outputs))
         return raw_outputs
 
-    def transform_for_callback(self, input_blobs, raw_outputs):
+    @staticmethod
+    def transform_for_callback(batch_size, raw_outputs):
         output_per_box = []
-        batch_size = np.shape(next(iter(input_blobs[0].values())))[0]
+        fq_weights = []
         for i in range(batch_size):
             box_outs = OrderedDict()
             for layer_name, data in raw_outputs[0].items():
-                box_outs[layer_name] = np.expand_dims(data[i], axis=0)
+                if layer_name in fq_weights:
+                    continue
+                if layer_name.endswith('fq_weights_1'):
+                    fq_weights.append(layer_name)
+                    box_outs[layer_name] = data
+                else:
+                    box_outs[layer_name] = np.expand_dims(data[i], axis=0)
             output_per_box.append(box_outs)
+
         return output_per_box
 
 
+
 class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
-    def __init__(self,  model_info, preprocessor, launcher, delayed_model_loading=False):
-        super().__init__(model_info,  preprocessor)
+    def __init__(self,  model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False):
+        super().__init__(model_info,  model_specific_preprocessor, common_preprocessor)
         if not delayed_model_loading:
             model_xml, model_bin = self.prepare_model(launcher)
             self.load_model({'model': model_xml, 'weights': model_bin}, launcher, 'onet_')
@@ -529,17 +541,23 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
         raw_outputs = self._infer(input_blobs, batch_meta)
         return raw_outputs
 
-    def transform_for_callback(self, input_blobs, raw_outputs):
+    @staticmethod
+    def transform_for_callback(batch_size, raw_outputs):
         output_per_box = []
-        batch_size = np.shape(next(iter(input_blobs[0].values())))[0]
+        fq_weights = []
         for i in range(batch_size):
             box_outs = OrderedDict()
             for layer_name, data in raw_outputs[0].items():
-                box_outs[layer_name] = np.expand_dims(data[i], axis=0)
+                if layer_name in fq_weights:
+                    continue
+                if layer_name.endswith('fq_weights_1'):
+                    fq_weights.append(layer_name)
+                    box_outs[layer_name] = data
+                else:
+                    box_outs[layer_name] = np.expand_dims(data[i], axis=0)
             output_per_box.append(box_outs)
+
         return output_per_box
-
-
 
 class MTCNNEvaluator(BaseEvaluator):
     def __init__(
@@ -591,20 +609,20 @@ class MTCNNEvaluator(BaseEvaluator):
                                                 metrics_result=None,
                                                 element_identifiers=batch_identifiers,
                                                 dataset_indices=batch_input_ids)
+            batch_size = 1
             for stage_id, stage in enumerate(self.stages.values()):
                 previous_stage_predictions = batch_prediction
                 filled_inputs, batch_meta = stage.preprocess_data(copy.deepcopy(batch_inputs), batch_annotation,
                                                                   previous_stage_predictions)
                 batch_raw_prediction = stage.predict(filled_inputs, batch_meta, intermediate_callback)
+                batch_size = np.shape(next(iter(filled_inputs[0].values())))[0]
                 batch_prediction = stage.postprocess_result(
                     batch_identifiers, batch_raw_prediction, batch_meta, previous_stage_predictions
                 )
                 if no_detections(batch_prediction):
                     break
 
-            self._annotations.extend(batch_annotation)
-            self._predictions.extend(batch_prediction)
-
+            batch_annotation, batch_predictions = self.postprocessor.process_batch(batch_annotation, batch_prediction)
             metrics_result = None
             if self.metric_executor:
                 metrics_result = self.metric_executor.update_metrics_on_batch(
@@ -616,7 +634,7 @@ class MTCNNEvaluator(BaseEvaluator):
 
             if output_callback:
                 output_callback(
-                    list(self.stages.values())[-1].transform_for_callback(filled_inputs, batch_raw_prediction),
+                    list(self.stages.values())[-1].transform_for_callback(batch_size, batch_raw_prediction),
                     metrics_result=metrics_result,
                     element_identifiers=batch_identifiers,
                     dataset_indices=batch_input_ids
