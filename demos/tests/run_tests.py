@@ -78,6 +78,57 @@ def temp_dir_as_path():
     with tempfile.TemporaryDirectory() as temp_dir:
         yield Path(temp_dir)
 
+def prepare_models(auto_tools_dir, downloader_cache_dir, mo_path, global_temp_dir, demos_to_test):
+    model_args = [arg
+        for demo in demos_to_test
+        for case in demo.test_cases
+        for arg in case.options.values()
+        if isinstance(arg, ModelArg)]
+
+    model_names = {arg.name for arg in model_args}
+    model_precisions = {arg.precision for arg in model_args}
+
+    dl_dir = global_temp_dir / 'models'
+    complete_models_lst_path = global_temp_dir / 'models.lst'
+
+    complete_models_lst_path.write_text(''.join(model + '\n' for model in model_names))
+
+    print('Retrieving models...', flush=True)
+
+    try:
+        subprocess.check_output(
+            [
+                sys.executable, '--', str(auto_tools_dir / 'downloader.py'),
+                '--output_dir', str(dl_dir), '--cache_dir', str(downloader_cache_dir),
+                '--list', str(complete_models_lst_path), '--precisions', ','.join(model_precisions),
+            ],
+            stderr=subprocess.STDOUT, universal_newlines=True)
+    except subprocess.CalledProcessError as e:
+        print(e.output)
+        print('Exit code:', e.returncode)
+        sys.exit(1)
+
+    print()
+    print('Converting models...', flush=True)
+
+    try:
+        subprocess.check_output(
+            [
+                sys.executable, '--', str(auto_tools_dir / 'converter.py'),
+                '--download_dir', str(dl_dir), '--list', str(complete_models_lst_path),
+                '--precisions', ','.join(model_precisions), '--jobs', 'auto',
+                *(['--mo', str(mo_path)] if mo_path else []),
+            ],
+            stderr=subprocess.STDOUT, universal_newlines=True)
+    except subprocess.CalledProcessError as e:
+        print(e.output)
+        print('Exit code:', e.returncode)
+        sys.exit(1)
+
+    print()
+
+    return dl_dir
+
 def main():
     args = parse_args()
 
@@ -96,98 +147,68 @@ def main():
     else:
         demos_to_test = DEMOS
 
-    num_failures = 0
+    with temp_dir_as_path() as global_temp_dir:
+        dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test)
 
-    os.putenv('PYTHONPATH',  "{}:{}/lib".format(os.environ['PYTHONPATH'], args.demo_build_dir))
+        num_failures = 0
 
-    for demo in demos_to_test:
-        print('Testing {}...'.format(demo.full_name))
-        print()
+        os.putenv('PYTHONPATH',  "{}:{}/lib".format(os.environ['PYTHONPATH'], args.demo_build_dir))
 
-        with temp_dir_as_path() as temp_dir:
-            dl_dir = temp_dir / 'models'
-
-            print('Retrieving models...', flush=True)
-
-            try:
-                subprocess.check_output(
-                    [
-                        sys.executable, '--', str(auto_tools_dir / 'downloader.py'),
-                        '--output_dir', str(dl_dir), '--cache_dir', str(args.downloader_cache_dir),
-                        '--list', str(demo.models_lst_path(demos_dir)),
-                    ],
-                    stderr=subprocess.STDOUT, universal_newlines=True)
-            except subprocess.CalledProcessError as e:
-                print(e.output)
-                print('Exit code:', e.returncode)
-                num_failures += len(demo.test_cases)
-                continue
-
-            try:
-                subprocess.check_output(
-                    [
-                        sys.executable, '--', str(auto_tools_dir / 'converter.py'),
-                        '--download_dir', str(dl_dir), '--list', str(demo.models_lst_path(demos_dir)), '--jobs', 'auto',
-                    ] + ([] if args.mo is None else ['--mo', str(args.mo)]),
-                    stderr=subprocess.STDOUT, universal_newlines=True)
-            except subprocess.CalledProcessError as e:
-                print(e.output)
-                print('Exit code:', e.returncode)
-                num_failures += len(demo.test_cases)
-                continue
-
+        for demo in demos_to_test:
+            print('Testing {}...'.format(demo.full_name))
             print()
 
-            arg_context = ArgContext(
-                source_dir=demos_dir / demo.subdirectory,
-                dl_dir=dl_dir,
-                data_sequence_dir=temp_dir / 'data_seq',
-                data_sequences=DATA_SEQUENCES,
-                model_info=model_info,
-                test_data_dir=args.test_data_dir,
-            )
+            with temp_dir_as_path() as temp_dir:
+                arg_context = ArgContext(
+                    source_dir=demos_dir / demo.subdirectory,
+                    dl_dir=dl_dir,
+                    data_sequence_dir=temp_dir / 'data_seq',
+                    data_sequences=DATA_SEQUENCES,
+                    model_info=model_info,
+                    test_data_dir=args.test_data_dir,
+                )
 
-            def resolve_arg(arg):
-                if isinstance(arg, str): return arg
-                return arg.resolve(arg_context)
+                def resolve_arg(arg):
+                    if isinstance(arg, str): return arg
+                    return arg.resolve(arg_context)
 
-            def option_to_args(key, value):
-                if value is None: return [key]
-                if isinstance(value, list): return [key, *map(resolve_arg, value)]
-                return [key, resolve_arg(value)]
+                def option_to_args(key, value):
+                    if value is None: return [key]
+                    if isinstance(value, list): return [key, *map(resolve_arg, value)]
+                    return [key, resolve_arg(value)]
 
-            fixed_args = demo.fixed_args(demos_dir, args.demo_build_dir)
+                fixed_args = demo.fixed_args(demos_dir, args.demo_build_dir)
 
-            print('Fixed arguments:', ' '.join(map(shlex.quote, fixed_args)))
+                print('Fixed arguments:', ' '.join(map(shlex.quote, fixed_args)))
+                print()
+                device_args = demo.device_args(args.devices.split())
+                for test_case_index, test_case in enumerate(demo.test_cases):
+
+                    case_args = [demo_arg
+                        for key, value in sorted(test_case.options.items())
+                        for demo_arg in option_to_args(key, value)]
+
+                    pipeline = [value.name for key, value in test_case.options.items() if isinstance(value, ModelArg)]
+
+                    for device, dev_arg in device_args.items():
+                        print('Test case #{}/{}:'.format(test_case_index, device),
+                            ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
+                        print(flush=True)
+                        try:
+                            start_time = timeit.default_timer()
+                            subprocess.check_output(fixed_args + dev_arg + case_args,
+                                stderr=subprocess.STDOUT, universal_newlines=True)
+                            execution_time = timeit.default_timer() - start_time
+                        except subprocess.CalledProcessError as e:
+                            print(e.output)
+                            print('Exit code:', e.returncode)
+                            num_failures += 1
+                            execution_time = -1
+
+                        if args.report_file:
+                            collect_result(demo.full_name, device, pipeline, execution_time, args.report_file)
+
             print()
-            device_args = demo.device_args(args.devices.split())
-            for test_case_index, test_case in enumerate(demo.test_cases):
-
-                case_args = [demo_arg
-                    for key, value in sorted(test_case.options.items())
-                    for demo_arg in option_to_args(key, value)]
-
-                pipeline = [value.name for key, value in test_case.options.items() if isinstance(value, ModelArg)]
-
-                for device, dev_arg in device_args.items():
-                    print('Test case #{}/{}:'.format(test_case_index, device),
-                        ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
-                    print(flush=True)
-                    try:
-                        start_time = timeit.default_timer()
-                        subprocess.check_output(fixed_args + dev_arg + case_args,
-                            stderr=subprocess.STDOUT, universal_newlines=True)
-                        execution_time = timeit.default_timer() - start_time
-                    except subprocess.CalledProcessError as e:
-                        print(e.output)
-                        print('Exit code:', e.returncode)
-                        num_failures += 1
-                        execution_time = -1
-
-                    if args.report_file:
-                        collect_result(demo.full_name, device, pipeline, execution_time, args.report_file)
-
-        print()
 
     print("Failures: {}".format(num_failures))
 
