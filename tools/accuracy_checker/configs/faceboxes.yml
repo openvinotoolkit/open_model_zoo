@@ -4,43 +4,43 @@ models:
     launchers:
       - framework: dlsdk
         tags:
-            - FP32
+          - FP32
         model:   public/faceboxes/FP32/faceboxes.xml
         weights: public/faceboxes/FP32/faceboxes.bin
         adapter:
-            type: faceboxes
-            boxes_out: "342"
-            scores_out: "353"
+          type: faceboxes
+          boxes_out: "342"
+          scores_out: "353"
 
       - framework: dlsdk
         tags:
-            - FP16
+          - FP16
         model:   public/faceboxes/FP16/faceboxes.xml
         weights: public/faceboxes/FP16/faceboxes.bin
         adapter:
-            type: faceboxes
-            boxes_out: "342"
-            scores_out: "353"
+          type: faceboxes
+          boxes_out: "342"
+          scores_out: "353"
 
       - framework: dlsdk
         tags:
-            - FP32-INT8
+          - FP32-INT8
         model:   public/faceboxes/FP32-INT8/faceboxes.xml
         weights: public/faceboxes/FP32-INT8/faceboxes.bin
         adapter:
-            type: faceboxes
-            boxes_out: "342"
-            scores_out: "353"
+          type: faceboxes
+          boxes_out: "342"
+          scores_out: "353"
 
       - framework: dlsdk
         tags:
-            - FP16-INT8
+          - FP16-INT8
         model:   public/faceboxes/FP16-INT8/faceboxes.xml
         weights: public/faceboxes/FP16-INT8/faceboxes.bin
         adapter:
-            type: faceboxes
-            boxes_out: "342"
-            scores_out: "353"
+          type: faceboxes
+          boxes_out: "342"
+          scores_out: "353"
 
     datasets:
       - name: wider
