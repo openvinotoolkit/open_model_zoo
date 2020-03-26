@@ -26,7 +26,9 @@ files:
   - name: FaceBoxesProd.pth
     size: 4072492
     sha256: c0cb2b1e40710c0aa5fc32a8759b1496a0fe0a126c907ca0ffe35b4bd0709d09
-    source: https://drive.google.com/file/d/1tRVwOlu0QtjvADQ2H7vqrRwsWEmaqioI
+    source:
+      $type: google_drive
+      id: 1tRVwOlu0QtjvADQ2H7vqrRwsWEmaqioI
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=FaceBoxes
