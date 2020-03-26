@@ -528,6 +528,7 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
         return output_per_box
 
 
+
 class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
     def __init__(self,  model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False):
         super().__init__(model_info,  model_specific_preprocessor, common_preprocessor)
@@ -556,7 +557,6 @@ class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
             output_per_box.append(box_outs)
 
         return output_per_box
-
 
 class MTCNNEvaluator(BaseEvaluator):
     def __init__(
@@ -609,7 +609,6 @@ class MTCNNEvaluator(BaseEvaluator):
                                                 element_identifiers=batch_identifiers,
                                                 dataset_indices=batch_input_ids)
             batch_size = 1
-
             for stage_id, stage in enumerate(self.stages.values()):
                 previous_stage_predictions = batch_prediction
                 filled_inputs, batch_meta = stage.preprocess_data(copy.deepcopy(batch_inputs), batch_annotation,
