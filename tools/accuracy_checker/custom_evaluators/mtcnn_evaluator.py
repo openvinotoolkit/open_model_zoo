@@ -528,7 +528,6 @@ class DLSDKRefineStage(DLSDKModelMixin, RefineBaseStage):
         return output_per_box
 
 
-
 class DLSDKOutputStage(DLSDKModelMixin, OutputBaseStage):
     def __init__(self,  model_info, model_specific_preprocessor, common_preprocessor, launcher, delayed_model_loading=False):
         super().__init__(model_info,  model_specific_preprocessor, common_preprocessor)
