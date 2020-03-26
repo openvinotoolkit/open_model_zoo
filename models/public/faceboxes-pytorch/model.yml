@@ -27,10 +27,6 @@ files:
     size: 4072492
     sha256: c0cb2b1e40710c0aa5fc32a8759b1496a0fe0a126c907ca0ffe35b4bd0709d09
     source: https://drive.google.com/file/d/1tRVwOlu0QtjvADQ2H7vqrRwsWEmaqioI
-  - name: ssd_faceboxes.json
-    size:
-    sha256:
-    source:
 conversion_to_onnx_args:
   - --model-path=$dl_dir
   - --model-name=FaceBoxes
@@ -48,7 +44,6 @@ model_optimizer_args:
   - --input=input.1
   - --input_model=$conv_dir/faceboxes-pytorch.onnx
   - --mean_values=input.1[104.0,117.0,123.0]
-  - --transformations_config=$dl_dir/ssd_faceboxes.json
   - --output=342,353
 framework: pytorch
 license: https://github.com/zisianw/FaceBoxes.PyTorch/blob/master/LICENSE
