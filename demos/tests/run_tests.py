@@ -66,12 +66,12 @@ def parse_args():
 
 def collect_result(demo_name, device, pipeline, execution_time, report_file):
     first_time = not report_file.exists()
-    pipeline.sort()
+
     with report_file.open('a+', newline='') as csvfile:
         testwriter = csv.writer(csvfile)
         if first_time:
             testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "ExecutionTime"])
-        testwriter.writerow([demo_name, device, " ".join(pipeline), execution_time])
+        testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)), execution_time])
 
 @contextlib.contextmanager
 def temp_dir_as_path():
@@ -158,6 +158,12 @@ def main():
             print('Testing {}...'.format(demo.full_name))
             print()
 
+            declared_model_names = {model['name']
+                for model in json.loads(subprocess.check_output(
+                    [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'),
+                        '--list', str(demo.models_lst_path(demos_dir))],
+                    universal_newlines=True))}
+
             with temp_dir_as_path() as temp_dir:
                 arg_context = ArgContext(
                     source_dir=demos_dir / demo.subdirectory,
@@ -188,7 +194,16 @@ def main():
                         for key, value in sorted(test_case.options.items())
                         for demo_arg in option_to_args(key, value)]
 
-                    pipeline = [value.name for key, value in test_case.options.items() if isinstance(value, ModelArg)]
+                    case_model_names = {arg.name for arg in test_case.options.values() if isinstance(arg, ModelArg)}
+
+                    undeclared_case_model_names = case_model_names - declared_model_names
+                    if undeclared_case_model_names:
+                        print("Test case #{}: models not listed in demo's models.lst: {}".format(
+                            test_case_index, ' '.join(sorted(undeclared_case_model_names))))
+                        print()
+
+                        num_failures += 1
+                        continue
 
                     for device, dev_arg in device_args.items():
                         print('Test case #{}/{}:'.format(test_case_index, device),
@@ -206,7 +221,7 @@ def main():
                             execution_time = -1
 
                         if args.report_file:
-                            collect_result(demo.full_name, device, pipeline, execution_time, args.report_file)
+                            collect_result(demo.full_name, device, case_model_names, execution_time, args.report_file)
 
             print()
 
