@@ -11,7 +11,7 @@ Other demo objectives are:
 You can copy and paste this code without pulling Open Model Zoo demos helpers into your application
 * Demonstration of the Async API in action. For this, the demo features two modes toggled by the **Tab** key:
     -  Old-style "Sync" way, where the frame captured with OpenCV executes back-to-back with the Detection
-    -  Truly "Async" way, where the detection is performed on a current frame, while OpenCV captures the next frame
+    -  Truly "Async" way, where the detection is performed on a current frame, while OpenCV captures the next frame <-------- change later
 
 ## How It Works
 
@@ -31,7 +31,7 @@ The command yields the following usage message:
 usage: object_detection_demo_yolov3_async.py [-h] -m MODEL -i INPUT
                                        [-l CPU_EXTENSION] [-d DEVICE]
                                        [--labels LABELS] [-t PROB_THRESHOLD]
-                                       [-iout IOU_THRESHOLD] [-pc] [-r]
+                                       [-iout IOU_THRESHOLD] [-r]
                                        [-nireq]
 
 Options:
@@ -57,7 +57,6 @@ Options:
   -iout IOU_THRESHOLD, --iou_threshold IOU_THRESHOLD
                         Optional. Intersection over union threshold for
                         overlapping detections filtering
-  -pc, --perf_counts    Optional. Report performance counters
   -r, --raw_output_message
                         Optional. Output inference results raw values showing
   -nireq NUM_INFER_REQUESTS, --num_infer_requests NUM_INFER_REQUESTS
