@@ -31,7 +31,7 @@ the 1000 different classifications matching those in the ImageNet database.
 
 ## Accuracy
 
-See [https://github.com/shicai/DenseNet-Caffe]().
+See [the original repository](https://github.com/shicai/DenseNet-Caffe).
 
 ## Performance
 
