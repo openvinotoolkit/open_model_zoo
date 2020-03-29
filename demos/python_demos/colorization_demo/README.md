@@ -17,15 +17,14 @@ Having received the image, the program:
 2) uses the L-channel to predict A and B channels
 3) restores the image, by converting it into BGR color space
 
-### Running the demo:
+### Running the demo
 
 Running the application with the `-h` option yields the following usage message:
 
 ```
-colorization_demo.py -h
-
 usage: colorization_demo.py [-h] -m MODEL --coeffs COEFFS [-d DEVICE] -i
                             "<path>" [--no_show] [-v]
+                            [-u UTILIZATION_MONITORS]
 
 Options:
   -h, --help            Help with the script.
@@ -39,6 +38,8 @@ Options:
                         Required. Input to process.
   --no_show             Optional. Disable display of results on screen.
   -v, --verbose         Optional. Enable display of processing logs on screen.
+  -u UTILIZATION_MONITORS, --utilization_monitors UTILIZATION_MONITORS
+                        Optional. List of monitors to show initially.
 ```
 
 To run the demo, you can use public or pre-trained models. To download the pre-trained models, use the OpenVINO [Model Downloader](../../../tools/downloader/README.md) or go to [https://download.01.org/opencv/](https://download.01.org/opencv/).

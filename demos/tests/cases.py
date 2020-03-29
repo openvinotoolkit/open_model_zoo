@@ -293,7 +293,7 @@ PYTHON_DEMOS = [
     )),
 
     PythonDemo(subdirectory='action_recognition', device_keys=['-d'], test_cases=combine_cases(
-        TestCase(options={'--no_show': None, '-i': DataPatternArg('action-recognition')}),
+        TestCase(options={'--no_show': None, **MONITORS, '-i': DataPatternArg('action-recognition')}),
         [
             TestCase(options={
                 '-m_en': ModelArg('action-recognition-0001-encoder'),
@@ -309,6 +309,7 @@ PYTHON_DEMOS = [
     PythonDemo(subdirectory='face_recognition_demo', device_keys=['-d_fd', '-d_lm', '-d_reid'],
                test_cases=combine_cases(
         TestCase(options={'--no_show': None,
+                          **MONITORS,
                           '-i': DataPatternArg('face-detection-adas'),
                           '-fg': DataDirectoryArg('face-recognition-gallery')
                           }),
@@ -324,12 +325,14 @@ PYTHON_DEMOS = [
 
     PythonDemo(subdirectory='human_pose_estimation_3d_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
+                          **MONITORS,
                           '-i': DataPatternArg('human-pose-estimation')}),
         TestCase(options={'-m': ModelArg('human-pose-estimation-3d-0001')}),
     )),
 
     PythonDemo(subdirectory='image_retrieval_demo', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show':None,
+                          **MONITORS,
                           '-m': ModelArg('image-retrieval-0001')}),
         single_option_cases('-i', *DATA_SEQUENCES['image-retrieval-video']),
         single_option_cases('-g', image_retrieval_arg('gallery.txt')),
@@ -337,6 +340,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(subdirectory='instance_segmentation_demo', device_keys=[], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
+            **MONITORS,
             '-i': DataPatternArg('instance-segmentation'),
             '--delay': '1',
             '-d': 'CPU',  # GPU is not supported
@@ -350,6 +354,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(subdirectory='multi_camera_multi_person_tracking', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
+            **MONITORS,
             '-i': [DataPatternArg('multi-camera-multi-person-tracking'),
                 DataPatternArg('multi-camera-multi-person-tracking/repeated')],
             '-m': ModelArg('person-detection-retail-0013')}),
@@ -362,6 +367,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(subdirectory='object_detection_demo_ssd_async', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
+            **MONITORS,
             '-i': DataPatternArg('object-detection-demo-ssd-async')}),
         single_option_cases('-m',
             ModelArg('face-detection-adas-0001'),
@@ -380,6 +386,7 @@ PYTHON_DEMOS = [
 
     PythonDemo(subdirectory='object_detection_demo_yolov3_async', device_keys=['-d'], test_cases=combine_cases(
         TestCase(options={'--no_show': None,
+            **MONITORS,
             '-i': DataPatternArg('object-detection-demo-ssd-async')}),
         single_option_cases('-m',
             ModelArg('yolo-v1-tiny-tf'),

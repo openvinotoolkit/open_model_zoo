@@ -30,6 +30,10 @@ from openvino.inference_engine import IENetwork, IECore
 from instance_segmentation_demo.tracker import StaticIOUTracker
 from instance_segmentation_demo.visualizer import Visualizer
 
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+import monitors
+sys.path.pop()
+
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
@@ -82,6 +86,8 @@ def build_argparser():
     args.add_argument("--no_show",
                       help="Optional. Don't show output",
                       action='store_true')
+    args.add_argument('-u', '--utilization_monitors', default='', type=str,
+                      help='Optional. List of monitors to show initially.')
     return parser
 
 
@@ -173,6 +179,8 @@ def main():
     with open(args.labels, 'rt') as labels_file:
         class_labels = labels_file.read().splitlines()
 
+    presenter = monitors.Presenter(args.utilization_monitors, 45,
+        (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
     visualizer = Visualizer(class_labels, show_boxes=args.show_boxes, show_scores=args.show_scores)
 
     render_time = 0
@@ -243,7 +251,7 @@ def main():
             masks_tracks_ids = tracker(masks, classes)
 
         # Visualize masks.
-        frame = visualizer(frame, boxes, classes, scores, masks, masks_tracks_ids)
+        frame = visualizer(frame, boxes, classes, scores, presenter, masks, masks_tracks_ids)
 
         # Draw performance stats.
         inf_time_message = 'Inference time: {:.3f} ms'.format(det_time * 1000)
@@ -272,7 +280,9 @@ def main():
             esc_code = 27
             if key == esc_code:
                 break
+            presenter.handleKey(key)
 
+    print(presenter.reportMeans())
     cv2.destroyAllWindows()
     cap.release()
 

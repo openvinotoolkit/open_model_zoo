@@ -19,7 +19,7 @@ import logging as log
 import sys
 import time
 import json
-from os.path import exists
+import os
 from argparse import ArgumentParser, SUPPRESS
 
 import cv2
@@ -32,6 +32,10 @@ from asl_recognition_demo.person_detector import PersonDetector
 from asl_recognition_demo.tracker import Tracker
 from asl_recognition_demo.action_recognizer import ActionRecognizer
 from asl_recognition_demo.visualizer import Visualizer
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+import monitors
+sys.path.pop()
 
 DETECTOR_OUTPUT_SHAPE = -1, 5
 TRACKER_SCORE_THRESHOLD = 0.4
@@ -80,13 +84,15 @@ def build_argparser():
     args.add_argument('--no_show', action='store_true',
                       help='Optional. Do not visualize inference results.')
 
+    args.add_argument('-u', '--utilization_monitors', default='', type=str,
+                      help='Optional. List of monitors to show initially.')
     return parser
 
 
 def load_class_map(file_path):
     """ Returns class names map. """
 
-    if file_path is not None and exists(file_path):
+    if file_path is not None and os.path.exists(file_path):
         with open(file_path, 'r') as input_stream:
             data = json.load(input_stream)
             class_map = dict(enumerate(data))
@@ -119,9 +125,10 @@ def main():
 
     visualizer = Visualizer(VISUALIZER_TRG_FPS)
     visualizer.register_window('Demo')
+    presenter = monitors.Presenter(args.utilization_monitors)
 
     samples_library = None
-    if args.samples_dir is not None and exists(args.samples_dir):
+    if args.samples_dir is not None and os.path.exists(args.samples_dir):
         visualizer.register_window('Gesture library')
         visualizer.start()
 
@@ -170,6 +177,7 @@ def main():
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time
         start_time = end_time
+        presenter.drawGraphs(frame)
         if active_object_id >= 0:
             current_fps = 1.0 / elapsed_time
             cv2.putText(frame, 'FPS: {:.2f}'.format(current_fps), (10, 40),
@@ -208,6 +216,8 @@ def main():
             local_bbox_id = int(chr(key))
             if local_bbox_id in tracker_labels:
                 active_object_id = local_bbox_id
+        else:
+            presenter.handleKey(key)
 
         if samples_library is not None:
             if key == ord('f'):  # forward
@@ -219,6 +229,7 @@ def main():
         samples_library.release()
     visualizer.release()
     video_stream.release()
+    print(presenter.reportMeans())
 
 
 if __name__ == '__main__':

@@ -218,4 +218,5 @@ if(ENABLE_PYTHON)
     find_package(PythonLibs "${PYTHON_VERSION_STRING}" EXACT REQUIRED)
 
     add_subdirectory(python_demos/human_pose_estimation_3d_demo/pose_extractor)
+    add_subdirectory(python_demos/monitors_extension)
 endif()

@@ -26,6 +26,11 @@ from time import time
 import cv2
 from openvino.inference_engine import IENetwork, IECore
 
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+import monitors
+sys.path.pop()
+
+
 logging.basicConfig(format="[ %(levelname)s ] %(message)s", level=logging.INFO, stream=sys.stdout)
 log = logging.getLogger()
 
@@ -56,6 +61,8 @@ def build_argparser():
     args.add_argument("-r", "--raw_output_message", help="Optional. Output inference results raw values showing",
                       default=False, action="store_true")
     args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
+    args.add_argument('-u', '--utilization_monitors', default='', type=str,
+                      help='Optional. List of monitors to show initially.')
     return parser
 
 
@@ -241,6 +248,8 @@ def main():
     log.info("Starting inference...")
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     print("To switch between sync/async modes, press TAB key in the output window")
+    presenter = monitors.Presenter(args.utilization_monitors, 55,
+        (round(cap.get(cv2.CAP_PROP_FRAME_WIDTH) / 4), round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) / 8)))
     while cap.isOpened():
         # Here is the first asynchronous point: in the Async mode, we capture frame to populate the NEXT infer request
         # in the regular mode, we capture frame to the CURRENT infer request
@@ -300,6 +309,7 @@ def main():
             log.info(" Class ID | Confidence | XMIN | YMIN | XMAX | YMAX | COLOR ")
 
         origin_im_size = frame.shape[:-1]
+        presenter.drawGraphs(frame)
         for obj in objects:
             # Validation bbox of detected object
             if obj['xmax'] > origin_im_size[1] or obj['ymax'] > origin_im_size[0] or obj['xmin'] < 0 or obj['ymin'] < 0:
@@ -354,6 +364,9 @@ def main():
                 exec_net.requests[cur_request_id].wait()
                 is_async_mode = not is_async_mode
                 log.info("Switched to {} mode".format("async" if is_async_mode else "sync"))
+            else:
+                presenter.handleKey(key)
+    print(presenter.reportMeans())
 
     cv2.destroyAllWindows()
 
