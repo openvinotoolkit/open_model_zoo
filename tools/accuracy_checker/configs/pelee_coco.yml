@@ -1,0 +1,34 @@
+models:
+  - name: peleenet-coco
+
+    launchers:
+      - framework: dlsdk
+        tags:
+          - FP32
+        model:   peleenet-coco/caffe/FP32/peleenet-coco.xml
+        weights: peleenet-coco/caffe/FP32/peleenet-coco.bin
+        adapter: ssd
+
+      - framework: dlsdk
+        tags:
+          - FP16
+        model:   peleenet-coco/caffe/FP16/peleenet-coco.xml
+        weights: peleenet-coco/caffe/FP16/peleenet-coco.bin
+        adapter: ssd
+
+    datasets:
+      - name: ms_coco_detection_80_class_with_backgound
+
+        preprocessing:
+          - type: resize
+            dst_width: 304
+            dst_height: 304
+
+        postprocessing:
+          - type: resize_prediction_boxes
+
+        metrics:
+          - type: coco_precision
+            max_detections: 100
+
+global_definitions: ../dataset_definitions.yml
