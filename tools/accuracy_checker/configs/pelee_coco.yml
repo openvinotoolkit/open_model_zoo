@@ -1,19 +1,19 @@
 models:
-  - name: peleenet-coco
+  - name: peleenet_coco
 
     launchers:
       - framework: dlsdk
         tags:
           - FP32
-        model:   peleenet-coco/caffe/FP32/peleenet-coco.xml
-        weights: peleenet-coco/caffe/FP32/peleenet-coco.bin
+        model:   peleenet_coco/FP32/peleenet_coco.xml
+        weights: peleenet_coco/FP32/peleenet_coco.bin
         adapter: ssd
 
       - framework: dlsdk
         tags:
           - FP16
-        model:   peleenet-coco/caffe/FP16/peleenet-coco.xml
-        weights: peleenet-coco/caffe/FP16/peleenet-coco.bin
+        model:   peleenet_coco/FP16/peleenet_coco.xml
+        weights: peleenet_coco/FP16/peleenet_coco.bin
         adapter: ssd
 
     datasets:
