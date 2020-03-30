@@ -15,20 +15,6 @@ models:
         weights: public/ssd_resnet50_v1_fpn_coco/FP16/ssd_resnet50_v1_fpn_coco.bin
         adapter: ssd
 
-      - framework: dlsdk
-        tags:
-          - FP32-INT8
-        model:   public/ssd_resnet50_v1_fpn_coco/FP32-INT8/ssd_resnet50_v1_fpn_coco.xml
-        weights: public/ssd_resnet50_v1_fpn_coco/FP32-INT8/ssd_resnet50_v1_fpn_coco.bin
-        adapter: ssd
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   public/ssd_resnet50_v1_fpn_coco/FP16-INT8/ssd_resnet50_v1_fpn_coco.xml
-        weights: public/ssd_resnet50_v1_fpn_coco/FP16-INT8/ssd_resnet50_v1_fpn_coco.bin
-        adapter: ssd
-
     datasets:
       - name: ms_coco_detection_91_classes
 
