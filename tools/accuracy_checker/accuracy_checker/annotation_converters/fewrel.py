@@ -67,7 +67,7 @@ class ERNIEFewrelConverter(BaseFormatConverter):
     @staticmethod
     def _load_examples(file):
         def _is_whitespace(c):
-            if c == " " or c == "\t" or c == "\r" or c == "\n" or ord(c) == 0x202F:
+            if c in [ord(" "), ord("\t"), ord("\r"), ord("\n"), 0x202F]:
                 return True
             return False
 
