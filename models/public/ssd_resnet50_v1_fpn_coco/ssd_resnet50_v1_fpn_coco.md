@@ -5,10 +5,6 @@
 The `ssd_resnet50_v1_fpn_coco` model is a SSD FPN object detection architecture based on Resnet50. The model has been trained from the Common Objects in Context (COCO) image dataset.
 For details see the [repository](https://github.com/tensorflow/models/blob/master/research/object_detection) and [paper](https://arxiv.org/abs/1708.02002).
 
-The model input is a blob that consists of a single image of 1x3x640x640 in RGB order.
-
-The model output is a typical vector containing the tracked object data, as previously described. Note that the "class_id" data is now significant and should be used to determine the classification for any detected object.
-
 ## Example
 
 ## Specification
@@ -52,9 +48,10 @@ Expected color order - `BGR`.
 
 ### Original model
 
-1. Probability, name - `detection_scores`, contains probability of detected bounding boxes.
-2. Detection box, name - `detection_boxes`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are rescaled to input image size.
-3. Detections number, name - `num_detections`, contains the number of predicted detection boxes.
+1. Classifier, name - `detection_classes`, contains predicted bounding boxes classes in range [1, 91]. The model was trained on Microsoft\* COCO dataset version with 90 categories of object.
+2. Probability, name - `detection_scores`, contains probability of detected bounding boxes.
+3. Detection box, name - `detection_boxes`, contains detection boxes coordinates in format `[y_min, x_min, y_max, x_max]`, where (`x_min`, `y_min`)  are coordinates top left corner, (`x_max`, `y_max`) are coordinates right bottom corner. Coordinates are rescaled to input image size.
+4. Detections number, name - `num_detections`, contains the number of predicted detection boxes.
 
 
 ### Converted model
