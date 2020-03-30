@@ -16,7 +16,6 @@ description: >-
   The Pelee is a Real-Time Object Detection System on Mobile Devices. <Pelee> <https://arxiv.org/pdf/1804.06882.pdf>
   network trained on MSCOCO dataset. This model is implemented using the
   Caffe* framework. For details about this model, check out the repository <https://github.com/Robert-JunWang/Pelee>.
-
 task_type: detection
 files:
   - name: pelee_coco.tar.gz

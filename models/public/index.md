@@ -19,7 +19,7 @@ The models can be downloaded via Model Downloader
 | DenseNet 201      | [Caffe\*](./densenet-201/densenet-201.md) | densenet-201 | | 8.673  | 20.001  |
 | EfficientNet B0   | [TensorFlow\*](./efficientnet-b0/efficientnet-b0.md)<br>[PyTorch\*](./efficientnet-b0-pytorch/efficientnet-b0-pytorch.md) | efficientnet-b0<br>efficientnet-b0-pytorch | 75.70/92.76<br>76.91/93.21 | 0.819 | 5.268 |
 | EfficientNet B0 AutoAugment  | [TensorFlow\*](./efficientnet-b0_auto_aug/efficientnet-b0_auto_aug.md) | efficientnet-b0_auto_aug | 76.43/93.04 | 0.819 | 5.268 |
-| EfficientNet B5   | [TensorFlow\*](./efficientnet-b5/efficientnet-b5.md)<br>[PyTorch\*](./efficientnet-b5-pytorch/efficientnet-b5-pytorch.md) | efficientnet-b5<br>efficientnet-b5-pytorch | 83.33/96.67<br>83.69/96.71 | 21.252 | 30.303 | 
+| EfficientNet B5   | [TensorFlow\*](./efficientnet-b5/efficientnet-b5.md)<br>[PyTorch\*](./efficientnet-b5-pytorch/efficientnet-b5-pytorch.md) | efficientnet-b5<br>efficientnet-b5-pytorch | 83.33/96.67<br>83.69/96.71 | 21.252 | 30.303 |
 | EfficientNet B7   | [PyTorch\*](./efficientnet-b7-pytorch/efficientnet-b7-pytorch.md) | efficientnet-b7-pytorch | 84.42/96.91 | 77.618  | 66.193 |
 | EfficientNet B7 AutoAugment  | [TensorFlow\*](./efficientnet-b7_auto_aug/efficientnet-b7_auto_aug.md) | efficientnet-b7_auto_aug | 84.68/97.09 | 77.618  | 66.193 |
 | Inception (GoogleNet) V1 | [Caffe\*](./googlenet-v1/googlenet-v1.md)<br>[TensorFlow\*](./googlenet-v1-tf/googlenet-v1-tf.md) | googlenet-v1<br>googlenet-v1-tf | | 3.016~3.266 | 6.619~6.999 |
@@ -27,7 +27,7 @@ The models can be downloaded via Model Downloader
 | Inception (GoogleNet) V3 | [TensorFlow\*](./googlenet-v3/googlenet-v3.md)<br>[PyTorch\*](./googlenet-v3-pytorch/googlenet-v3-pytorch.md) | googlenet-v3 <br> googlenet-v3-pytorch |  | 11.469 | 23.817 |
 | Inception (GoogleNet) V4 | [TensorFlow\*](./googlenet-v4-tf/googlenet-v4-tf.md) | googlenet-v4-tf | | 24.584 | 42.648 |
 | Inception-ResNet V2      | [TensorFlow\*](./inception-resnet-v2-tf/inception-resnet-v2-tf.md) | inception-resnet-v2-tf | | 22.227 | 30.223 |
-| MobileNet V1 0.25 128 | [Caffe\*](./mobilenet-v1-0.25-128/mobilenet-v1-0.25-128.md) | mobilenet-v1-0.25-128 | | 0.028 | 0.468 | 
+| MobileNet V1 0.25 128 | [Caffe\*](./mobilenet-v1-0.25-128/mobilenet-v1-0.25-128.md) | mobilenet-v1-0.25-128 | | 0.028 | 0.468 |
 | MobileNet V1 0.5 160 | [Caffe\*](./mobilenet-v1-0.50-160/mobilenet-v1-0.50-160.md)  | mobilenet-v1-0.50-160 | | 0.156 | 1.327 |
 | MobileNet V1 0.5 224 | [Caffe\*](./mobilenet-v1-0.50-224/mobilenet-v1-0.50-224.md)  | mobilenet-v1-0.50-224 | | 0.304 | 1.327 |
 | MobileNet V1 1.0 224 | [Caffe\*](./mobilenet-v1-1.0-224/mobilenet-v1-1.0-224.md)<br>[TensorFlow\*](./mobilenet-v1-1.0-224-tf/mobilenet-v1-1.0-224-tf.md) | mobilenet-v1-1.0-224 <br> mobilenet-v1-1.0-224-tf | | 1.148 | 4.221 |
@@ -113,6 +113,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | Faster R-CNN with ResNet 50    | [TensorFlow\*](./faster_rcnn_resnet50_coco/faster_rcnn_resnet50_coco.md) | faster_rcnn_resnet50_coco | 57.203 | 29.162 |
 | Faster R-CNN with ResNet 101   | [TensorFlow\*](./faster_rcnn_resnet101_coco/faster_rcnn_resnet101_coco.md) |faster_rcnn_resnet101_coco | 112.052 | 48.128 |
 | MTCNN                     | Caffe\*: <br>[proposal](./mtcnn-p/mtcnn-p.md) <br>[refine](./mtcnn-r/mtcnn-r.md) <br> [output](./mtcnn-o/mtcnn-o.md) | <br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| | |
+| Pelee                     | [Caffe\*](./pelee_coco/pelee_coco.md) | pelee_coco| | |
 | R-FCN with Resnet-101     | [TensorFlow\*](./rfcn-resnet101-coco-tf/rfcn-resnet101-coco-tf.md) | rfcn-resnet101-coco-tf | 53.462 | 171.85 |
 | SSD 300                   | [Caffe\*](./ssd300/ssd300.md) | ssd300 | 62.815 | 26.285 |
 | SSD 512                   | [Caffe\*](./ssd512/ssd512.md) | ssd512 | 180.611 | 27.189 |
