@@ -33,12 +33,12 @@ Expected color order -  `RGB`.
 
 ### Converted model
 
-Image, name - `image_tensor`, shape - `[1x640x640x3]`, format is `[BxHxWxC]` where:
+Image, name - `image_tensor`, shape - `[1x3x640x640]`, format is `[BxCxHxW]` where:
 
 - `B` - batch size
+- `C` - channel
 - `H` - height
 - `W` - width
-- `C` - channel
 
 Expected color order - `BGR`.
 
