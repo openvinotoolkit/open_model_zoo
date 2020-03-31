@@ -189,6 +189,15 @@ datasets:
     annotation: wider.pickle
     dataset_meta: wider.json
 
+  - name: wider_without_bkgr
+    data_source: WIDER_val/images
+    annotation_conversion:
+      converter: wider
+      annotation_file: wider_face_split/wider_face_val_bbx_gt.txt
+      label_start: 0
+    annotation: wider_0.pickle
+    dataset_meta: wider_0.json
+
   - name: facial_landmarks_35
     data_source: VOCdevkit/VOC2012/JPEGImages
     annotation_conversion:
