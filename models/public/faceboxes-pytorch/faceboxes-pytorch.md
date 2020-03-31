@@ -8,10 +8,12 @@ FaceBoxes: A CPU Real-time Face Detector with High Accuracy. For details see the
 
 ## Specification
 
-| Metric                          | Value                                     |
-|---------------------------------|-------------------------------------------|
+| Metric                          | Value                                    |
+|---------------------------------|------------------------------------------|
 | Type                            | Object detection                         |
-| Source framework                | PyTorch\*                              |
+| GFLOPs                          | 1.8975                                   |
+| MParams                         | 1.0059                                   |
+| Source framework                | PyTorch\*                                |
 
 ## Performance
 
