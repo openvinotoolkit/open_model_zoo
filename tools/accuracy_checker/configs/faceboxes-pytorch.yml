@@ -22,26 +22,6 @@ models:
           boxes_out: "342"
           scores_out: "353"
 
-      - framework: dlsdk
-        tags:
-          - FP32-INT8
-        model:   public/faceboxes-pytorch/FP32-INT8/faceboxes-pytorch.xml
-        weights: public/faceboxes-pytorch/FP32-INT8/faceboxes-pytorch.bin
-        adapter:
-          type: faceboxes
-          boxes_out: "342"
-          scores_out: "353"
-
-      - framework: dlsdk
-        tags:
-          - FP16-INT8
-        model:   public/faceboxes-pytorch/FP16-INT8/faceboxes-pytorch.xml
-        weights: public/faceboxes-pytorch/FP16-INT8/faceboxes-pytorch.bin
-        adapter:
-          type: faceboxes
-          boxes_out: "342"
-          scores_out: "353"
-
     datasets:
       - name: wider
 
