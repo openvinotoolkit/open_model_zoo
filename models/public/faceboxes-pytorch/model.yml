@@ -13,10 +13,8 @@
 # limitations under the License.
 
 description: >-
-    FaceBoxes: A CPU Real-time Face Detector with High Accuracy (https://arxiv.org/pdf/1708.05234.pdf)
-    Model repository: https://github.com/zisianw/FaceBoxes.PyTorch
-    Commit hash: ab8478c22627690899114950cae27f8093424c95
-    Original PyTorch model has been loaded from here: https://drive.google.com/file/d/1tRVwOlu0QtjvADQ2H7vqrRwsWEmaqioI
+    FaceBoxes: A CPU Real-time Face Detector with High Accuracy.
+    For details see the repository <https://github.com/zisianw/FaceBoxes.PyTorch>, paper <https://arxiv.org/pdf/1708.05234.pdf>
 task_type: detection
 files:
   - name: faceboxes.py
