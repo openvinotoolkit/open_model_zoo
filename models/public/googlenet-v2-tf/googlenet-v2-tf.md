@@ -39,8 +39,8 @@ python3 freeze.py --ckpt path/to/inception_v2.ckpt --name inception_v2 --num_cla
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Classification|
-| GFLOPs            | 3.016         |
-| MParams           | 6.619         |
+| GFLOPs            | 4.058         |
+| MParams           | 11.185        |
 | Source framework  | TensorFlow\*  |
 
 ## Accuracy
