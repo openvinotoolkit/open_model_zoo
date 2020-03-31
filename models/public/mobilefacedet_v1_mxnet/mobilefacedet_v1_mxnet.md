@@ -1,0 +1,99 @@
+# mobilefacedet_v1_mxnet
+
+## Use Case and High-Level Description
+
+  MobileFace: LFFD: A Light and Fast Face Detector for Edge Devices.
+  For details see the [repository](https://github.com/becauseofAI/MobileFace) and [paper](https://arxiv.org/pdf/1904.10633.pdf)
+
+## Specification
+
+| Metric            | Value         |
+|-------------------|---------------|
+| Type              | Detection     |
+| Source framework  | MXNet\*       |
+
+## Input
+
+### Original model
+
+Image, name - `data`, shape - `[1x256x256x3]`, format -`[BxHxWxC]` where:
+
+- `B` - batch size
+- `H` - height
+- `W` - width
+- `C` - channel
+
+Expected color order -  `BGR`.
+
+### Converted model
+
+The converted model has the same parameters as the original model.
+
+## Output
+
+### Original model
+
+1. The array of detection summary info, name - `yolov30_slice_axis1`,  shape - `1,18,8,8`. The anchor values are `118,157,  186,248,  285,379`.
+
+2. The array of detection summary info, name - `yolov30_slice_axis2`,  shape - `1,18,16,16`. The anchor values are `43,54,  60,75,  80,106`.
+
+3. The array of detection summary info, name - `yolov30_slice_axis3`,  shape - `1,18,32,32`. The anchor values are `10,12,  16,20,  23,29`.
+
+For each case format is `B,N,Cx,Cy`, where
+    - `B` - batch size
+    - `N` - number of detection boxes for cell
+    - `Cx`, `Cy` - cell index
+
+Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class`], where:
+- (`x`,`y`) - coordinates of box center, relative to cell
+- `h`,`w` - normalized height and width of box
+- `conf` - confidence of detection box
+- `class` - score for class
+
+### Converted model
+
+1. The array of detection summary info, name - `yolov30_yolooutputv30_conv0_fwd/YoloRegion`,  shape - `1,18,8,8`. The anchor values are `118,157,  186,248,  285,379`.
+
+2. The array of detection summary info, name - `yolov30_yolooutputv31_conv0_fwd/YoloRegion`,  shape - `1,18,16,16`. The anchor values are `43,54,  60,75,  80,106`.
+
+3. The array of detection summary info, name - `yolov30_yolooutputv32_conv0_fwd/YoloRegion`,  shape - `1,18,32,32`. The anchor values are `10,12,  16,20,  23,29`.
+
+For each case format is `B,N,Cx,Cy`, where
+    - `B` - batch size
+    - `N` - number of detection boxes for cell
+    - `Cx`, `Cy` - cell index
+
+Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class`], where:
+- (`x`,`y`) - coordinates of box center, relative to cell
+- `h`,`w` - normalized height and width of box
+- `conf` - confidence of detection box
+- `class` - score for class in the [0,1] range
+
+## Legal Information
+
+The original model is distributed under the following
+[license](https://raw.githubusercontent.com/becauseofAI/MobileFace/master/LICENSE):
+
+```
+MIT License
+
+Copyright (c) 2018
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

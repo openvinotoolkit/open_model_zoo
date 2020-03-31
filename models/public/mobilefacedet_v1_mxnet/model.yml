@@ -14,7 +14,7 @@
 
 description: >-
   MobileFace: LFFD: A Light and Fast Face Detector for Edge Devices.
-  For details see the [repository](https://github.com/becauseofAI/MobileFace) and [paper](https://arxiv.org/pdf/1904.10633.pdf)
+  For details see the repository <https://github.com/becauseofAI/MobileFace> and paper <https://arxiv.org/pdf/1904.10633.pdf>
 task_type: detection
 files:
   - name: mobilefacedet_v1_mxnet-symbol.json
