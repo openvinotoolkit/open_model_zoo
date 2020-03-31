@@ -10,6 +10,8 @@
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Detection     |
+| GFLOPs            | 3.5456       |
+| MParams           | 7.6828        |
 | Source framework  | MXNet\*       |
 
 ## Input
