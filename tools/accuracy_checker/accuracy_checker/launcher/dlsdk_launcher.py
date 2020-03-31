@@ -747,6 +747,8 @@ class DLSDKLauncher(Launcher):
             first_input = next(iter(self.exec_network.inputs))
             input_info = self.exec_network.inputs[first_input]
             batch_pos = input_info.layout.find('N')
+            if len(input_info.layout) == 4:
+                self.default_layout = input_info.layout
             self._batch = input_info.shape[batch_pos] if batch_pos != -1 else 1
             return
         if self._weights is None:
