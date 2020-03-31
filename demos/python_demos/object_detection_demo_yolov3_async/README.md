@@ -11,7 +11,7 @@ Other demo objectives are:
 You can copy and paste this code without pulling Open Model Zoo demos helpers into your application
 * Demonstration of the Async API in action. For this, the demo features two modes toggled by the **Tab** key:
     -  Old-style "Sync" way, where the frame captured with OpenCV executes back-to-back with the Detection
-    -  Truly "Async" way, where the detection is performed on a current frame, while OpenCV captures the next frame <-------- change later
+    -  Truly "Async" way, where the detection is performed on a current frame, while OpenCV captures the next frame
 
 ## How It Works
 
