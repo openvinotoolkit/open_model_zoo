@@ -51,6 +51,7 @@ from .detection import (
     RetinaNetAdapter,
     ClassAgnosticDetectionAdapter
 )
+from .retinaface import RetinaFaceAdapter
 from .yolo import TinyYOLOv1Adapter, YoloV2Adapter, YoloV3Adapter
 from .classification import ClassificationAdapter
 from .segmentation import SegmentationAdapter, BrainTumorSegmentationAdapter

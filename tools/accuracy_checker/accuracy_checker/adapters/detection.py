@@ -24,7 +24,7 @@ from ..topology_types import SSD, FasterRCNN
 from ..adapters import Adapter
 from ..config import ConfigValidator, NumberField, StringField, ConfigError, ListField, BoolField
 from ..postprocessor.nms import NMS
-from ..representation import DetectionPrediction, ContainerPrediction, FacialLandmarksPrediction
+from ..representation import DetectionPrediction, ContainerPrediction
 
 
 class SSDAdapter(Adapter):
