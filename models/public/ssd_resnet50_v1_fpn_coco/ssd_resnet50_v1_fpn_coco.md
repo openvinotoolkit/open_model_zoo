@@ -12,6 +12,8 @@ For details see the [repository](https://github.com/tensorflow/models/blob/maste
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Detection     |
+| GFLOPs            | 178.6807      |
+| MParams           | 56.9326       |
 | Source framework  | TensorFlow\*  |
 
 ## Accuracy
