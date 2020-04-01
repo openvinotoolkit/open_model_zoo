@@ -74,8 +74,6 @@ class MaskRCNNAdapter(Adapter):
     def configure(self):
         box_outputs = ['classes_out', 'scores_out', 'boxes_out']
         detection_out = 'detection_out'
-        if contains_all(self.launcher_config, [*box_outputs, detection_out]):
-            raise ConfigError('only detection output or [{}] should be provided'.format(', '.join(box_outputs)))
         self.detection_out = self.get_value_from_config(detection_out)
         if not self.detection_out:
             if not contains_all(self.launcher_config, box_outputs):
