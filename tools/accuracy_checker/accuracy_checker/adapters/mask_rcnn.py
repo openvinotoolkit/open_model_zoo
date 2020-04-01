@@ -24,7 +24,6 @@ from .adapter import Adapter
 from ..config import StringField, ConfigError
 from ..representation import CoCocInstanceSegmentationPrediction, DetectionPrediction, ContainerPrediction
 from ..postprocessor import FRCNNPostprocessingBboxResize
-from ..utils import contains_all
 
 
 class MaskRCNNAdapter(Adapter):
