@@ -71,10 +71,23 @@ class MaskRCNNAdapter(Adapter):
 
         return parameters
 
+    def check_params(self):
+        detection_out = self.get_value_from_config('detection_out')
+        classes_out = self.get_value_from_config('classes_out')
+        scores_out = self.get_value_from_config('scores_out')
+        boxes_out = self.get_value_from_config('boxes_out')
+
+        if detection_out:
+            if classes_out or scores_out or boxes_out:
+                return False
+
+        return True
+
     def configure(self):
         box_outputs = ['classes_out', 'scores_out', 'boxes_out']
-        detection_out = 'detection_out'
-        self.detection_out = self.get_value_from_config(detection_out)
+        if not self.check_params():
+            raise ConfigError('only detection output or [{}] should be provided'.format(', '.join(box_outputs)))
+        self.detection_out = self.get_value_from_config('detection_out')
         if not self.detection_out:
             if not contains_all(self.launcher_config, box_outputs):
                 raise ConfigError('all related outputs should be specified: {}'.format(', '.join(box_outputs)))
