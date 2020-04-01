@@ -107,7 +107,7 @@ def entry_index(w, h, n_coords, n_classes, pos, entry):
     return row * w * h * (n_classes + n_coords + 1) + entry * w * h + col
 
 
-def parse_output(predictions, cells, num, box_size, anchors, processor):
+def parse_output(predictions, cells, num, box_size, anchors, processor, threshold=0.001):
     cells_x, cells_y = cells, cells
 
     labels, scores, x_mins, y_mins, x_maxs, y_maxs = [], [], [], [], [], []
@@ -121,7 +121,7 @@ def parse_output(predictions, cells, num, box_size, anchors, processor):
         raw_bbox = DetectionBox(bbox[0], bbox[1], bbox[2], bbox[3], bbox[4], bbox[5:])
         processed_box = processor(raw_bbox, x, y, anchors[2*n:2*n+2])
 
-        if processed_box.confidence < 0.001:
+        if processed_box.confidence < threshold:
             continue
 
         classes_prob = processed_box.probabilities
@@ -177,6 +177,10 @@ class YoloV2Adapter(Adapter):
             'raw_output': BoolField(
                 optional=True, default=False,
                 description="Indicates, that output is in raw format"
+            ),
+            'output_format': StringField(
+                choices=['BHW', 'HWB'], optional=True, default='BHW',
+                description="Set output layer format"
             )
         })
         return parameters
@@ -191,6 +195,7 @@ class YoloV2Adapter(Adapter):
         self.anchors = get_or_parse_value(self.get_value_from_config('anchors'), YoloV2Adapter.PRECOMPUTED_ANCHORS)
         self.cells = self.get_value_from_config('cells')
         self.raw_output = self.get_value_from_config('raw_output')
+        self.output_format = self.get_value_from_config('output_format')
         if self.raw_output:
             self.processor = YoloOutputProcessor(normalizers=4*[self.cells],
                                                  coord_correct= lambda x: 1./ (1 + np.exp(-x)),
@@ -210,14 +215,15 @@ class YoloV2Adapter(Adapter):
         predictions = self._extract_predictions(raw, frame_meta)[self.output_blob]
 
         result = []
-
+        box_size = self.classes + self.coords + 1
         for identifier, prediction in zip(identifiers, predictions):
-            if len(prediction.shape) == 1:
-                prediction = np.reshape(prediction,
-                                        (self.num * (self.classes + self.coords + 1), self.cells, self.cells))
+            if len(prediction.shape) != 3:
+                new_shape = (self.num * box_size, self.cells, self.cells) if self.output_format == 'BHW' \
+                    else (self.num * box_size, self.cells, self.cells)
+                prediction = np.reshape(prediction,new_shape)
             labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(prediction, self.cells, self.num,
-                                                                          self.coords + 1 + self.classes,
-                                                                          self.anchors, self.processor)
+                                                                          box_size, self.anchors,
+                                                                          self.processor)
 
             result.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
 
@@ -287,6 +293,10 @@ class YoloV3Adapter(Adapter):
             'raw_output': BoolField(
                 optional=True, default=False,
                 description="Indicates, that output is in raw format"
+            ),
+            'output_format': StringField(
+                choices=['BHW', 'HWB'], optional=True, default='BHW',
+                description="Set output layer format"
             )
         })
 
@@ -317,6 +327,7 @@ class YoloV3Adapter(Adapter):
             raise ConfigError('Incorrect number of output layer ({}) or detection grid size ({})'
                               'Must be equal with each other'.format(len(self.outputs), len(self.cells)))
         self.raw_output = self.get_value_from_config('raw_output')
+        self.output_format = self.get_value_from_config('output_format')
         if self.raw_output:
             self.processor = YoloOutputProcessor(coord_correct=lambda x: 1.0 / (1.0 + np.exp(-x)),
                                                  size_correct=lambda x: np.exp(x),
@@ -351,6 +362,7 @@ class YoloV3Adapter(Adapter):
             for b in range(batch):
                 predictions[b].append(raw_outputs[blob][b])
 
+        box_size = self.coords + 1 + self.classes
         for identifier, prediction, meta in zip(identifiers, predictions, frame_meta):
             detections = {'labels': [], 'scores': [], 'x_mins': [], 'y_mins': [], 'x_maxs': [], 'y_maxs': []}
             input_shape = list(meta.get('input_shape', {'data': (1, 3, 416, 416)}).values())[0]
@@ -362,9 +374,13 @@ class YoloV3Adapter(Adapter):
                 num = len(anchors) // 2 if self.masked_anchors else self.num
                 self.processor.x_normalizer = cells
                 self.processor.y_normalizer = cells
+                if len(p.shape) != 3:
+                    new_shape = (self.num * box_size, cells, cells) if self.output_format == 'BHW' \
+                        else (self.num * box_size, cells, cells)
+                    p = np.reshape(p, new_shape)
                 labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num,
-                                                                              self.classes + self.coords + 1,
-                                                                              anchors, self.processor)
+                                                                              box_size, anchors,
+                                                                              self.processor, self.threshold)
                 detections['labels'].extend(labels)
                 detections['scores'].extend(scores)
                 detections['x_mins'].extend(x_mins)
