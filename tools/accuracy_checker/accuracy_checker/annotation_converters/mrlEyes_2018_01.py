@@ -15,8 +15,6 @@ limitations under the License.
 """
 
 import re
-import os
-
 from pathlib import Path
 
 from ..config import PathField
