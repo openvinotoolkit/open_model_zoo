@@ -45,7 +45,7 @@ Channel order is `BGR`.
 ## Output
 
 ### Original model
-model outputs is floating points vectors:
+Model outputs are floating points tensors:
 1. name: `face_rpn_cls_prob_reshape_stride32`, shape: `[1x4x20x20]` - Detection scores for Feature Pyramid Network (FPN) level with stride 32
 2. name: `face_rpn_bbox_stride32`,  shape: `[1x8x20x20]` -  Detection boxes for Feature Pyramid Network (FPN) level with stride 32
 3. name: `face_rpn_landmark_pred_stride32`, shape: `[1x20x20x20]` - Facial Landmarks for Feture Pyramid Network (FPN) level with stride 32
