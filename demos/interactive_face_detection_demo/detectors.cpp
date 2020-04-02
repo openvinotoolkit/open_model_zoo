@@ -337,7 +337,6 @@ CNNNetwork EyeStateDetection::read(const InferenceEngine::Core& ie) {
     return network;
 }
 
-
 AgeGenderDetection::AgeGenderDetection(const std::string &pathToModel,
                                        const std::string &deviceForInference,
                                        int maxBatch, bool isBatchDynamic, bool isAsync, bool doRawOutputMessages)
