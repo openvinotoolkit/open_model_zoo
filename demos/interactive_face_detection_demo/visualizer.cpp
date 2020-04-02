@@ -255,7 +255,6 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
     }
 
 
-
     photoFrameVisualizer->draw(img, f->_location, genderColor);
 
     if (drawEmotionBar) {
