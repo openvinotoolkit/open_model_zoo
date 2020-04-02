@@ -230,7 +230,6 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
         }
 
         if (f->isEyesStateEnable()){
-
             EyeStateDetection::Result r = f->getEyesState();
             
             cv::Point l2 = cv::Point(f->_location.x + f->_location.width * normed_landmarks[0], 
