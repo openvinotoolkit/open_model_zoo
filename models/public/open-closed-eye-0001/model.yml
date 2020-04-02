@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  Fully convolutional network for recognition of eye state ('opened', 'closed').
+  Fully convolutional network for recognition of eye state ('open', 'closed').
 task_type: classification
 files:
   - name: open-closed-eye.onnx
