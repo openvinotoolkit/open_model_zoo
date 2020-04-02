@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-  The [Pelee](https://arxiv.org/pdf/1804.06882.pdf) is a Real-Time Object Detection System on Mobile Devices
+  [Pelee](https://arxiv.org/pdf/1804.06882.pdf) is a Real-Time Object Detection System on Mobile Devices
   based on Single Shot Detection approach. The model is is implemented using the
   Caffe\* framework and trained on MSCOCO\* dataset.
   For details about this model, check out the [repository](https://github.com/Robert-JunWang/Pelee).
