@@ -25,5 +25,5 @@ model_optimizer_args:
   - --mean_values=[127.0, 127.0, 127.0]
   - --scale_values=[255, 255, 255]
   - --output=19
-  - --input_model=$conv_dir/open_closed_eye.onnx
+  - --input_model=$dl_dir/open-closed-eye.onnx
 license: https://raw.githubusercontent.com/opencv/open_model_zoo/master/LICENSE
