@@ -16,6 +16,7 @@ limitations under the License.
 
 import cv2
 import numpy as np
+
 try:
     import pycocotools.mask as mask_util
 except ImportError:
@@ -71,45 +72,37 @@ class MaskRCNNAdapter(Adapter):
         return parameters
 
     def is_detection_out(self):
+        self.detection_out = self.get_value_from_config('detection_out')
         if self.detection_out:
             return True
 
         return False
 
     def is_box_outputs(self):
-        if self.classes_out and self.scores_out and self.boxes_out:
+        if self.get_value_from_config('classes_out') and self.get_value_from_config('scores_out') and \
+            self.get_value_from_config('boxes_out'):
+            self.classes_out = self.get_value_from_config('classes_out')
+            self.scores_out = self.get_value_from_config('scores_out')
+            self.boxes_out = self.get_value_from_config('boxes_out')
             return True
 
         return False
-
-    def is_num_detections_out(self):
-        if self.num_detections_out:
-            return True
-
-        return False
-
-    def set_values_from_config(self):
-        self.detection_out = self.get_value_from_config('detection_out')
-        self.classes_out = self.get_value_from_config('classes_out')
-        self.scores_out = self.get_value_from_config('scores_out')
-        self.boxes_out = self.get_value_from_config('boxes_out')
-        self.num_detections_out = self.get_value_from_config('num_detections_out')
-        self.raw_masks_out = self.get_value_from_config('raw_masks_out')
 
     def configure(self):
         box_outputs = ['classes_out', 'scores_out', 'boxes_out']
-        self.set_values_from_config()
         if self.is_detection_out() and self.is_box_outputs():
             raise ConfigError('only detection output or [{}] should be provided'.format(', '.join(box_outputs)))
-        if not self.is_detection_out():
+        if not self.detection_out:
             if not self.is_box_outputs():
                 raise ConfigError('all related outputs should be specified: {}'.format(', '.join(box_outputs)))
+            self.num_detections_out = self.get_value_from_config('num_detections_out')
 
-        if self.is_detection_out():
+        self.raw_masks_out = self.get_value_from_config('raw_masks_out')
+        if self.detection_out:
             self.realisation = self._process_detection_output
             return
 
-        if self.is_num_detections_out():
+        if self.num_detections_out:
             self.realisation = self._process_tf_obj_detection_api_outputs
             return
 
@@ -129,7 +122,7 @@ class MaskRCNNAdapter(Adapter):
         results = []
 
         for identifier, image_meta, im_num_detections, im_classes, im_boxes, im_scores, im_raw_masks in zip(
-                identifiers, frame_meta, num_detections, classes, boxes, scores, raw_masks
+            identifiers, frame_meta, num_detections, classes, boxes, scores, raw_masks
         ):
             num_valid_detections = int(im_num_detections)
             im_classes = im_classes[:num_valid_detections]
@@ -230,7 +223,7 @@ class MaskRCNNAdapter(Adapter):
             instance_masks = []
             for box, masks in zip(filtered_detections_boxes, filtered_masks):
                 label = box[0]
-                cls_mask = masks[int(label)-1, ...]
+                cls_mask = masks[int(label) - 1, ...]
                 box[2::2] *= coeff_x
                 box[3::2] *= coeff_y
                 cls_mask = self.segm_postprocess(box[2:], cls_mask, *image_size, True, True)
