@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
- Copyright (C) 2018-2019 Intel Corporation
+ Copyright (C) 2018-2020 Intel Corporation
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -217,17 +217,17 @@ def filter_objects(objects, iou_threshold, prob_threshold):
     return objects
 
 
-def async_callback(status, py_data):
-    request_id, exec_net, frames, completed_request_results, empty_request_ids, mode, event = py_data
+def async_callback(status, callback_args):
+    request_id, exec_net, frames_data, completed_request_results, empty_request_ids, mode, event = callback_args
 
     outputs = exec_net.requests[request_id].outputs.copy()
-    frame_id, frame, frame_mode, start_time = frames[request_id]
+    frame_id, frame, frame_mode, start_time = frames_data[request_id]
     completed_request_results[frame_id] = (frame, outputs, start_time)
 
     if mode['current'] == frame_mode:
         empty_request_ids.append(request_id)
 
-    frames[request_id] = None
+    frames_data[request_id] = None
     event.set()
 
 
@@ -337,6 +337,7 @@ def main():
     # shared
     empty_request_ids = deque()
     completed_request_results = {}
+    frames_data = {}
     frame_buffer = deque()
     next_frame_id = 0
     next_shown_frame_id = 0
@@ -347,22 +348,23 @@ def main():
     event = threading.Event()
 
     # user specified
-    frames_user_specified = [None] * args.num_infer_requests
+    frames_data[Mode.USER_SPECIFIED] = [None] * args.num_infer_requests
     if mode['current'] == Mode.USER_SPECIFIED:
         empty_request_ids.extend(range(args.num_infer_requests))
 
     # min latency
-    frames_min_latency = [None]
+    frames_data[Mode.MIN_LATENCY] = [None]
     if mode['current'] == Mode.MIN_LATENCY:
         empty_request_ids.append(0)
 
     for id, req in enumerate(exec_net_user_specified.requests):
         req.set_completion_callback(py_callback=async_callback,
-                                    py_data=(id, exec_net_user_specified, frames_user_specified,
+                                    py_data=(id, exec_net_user_specified, frames_data[Mode.USER_SPECIFIED],
                                              completed_request_results, empty_request_ids, mode, event))
 
     exec_net_min_latency.requests[0].set_completion_callback(py_callback=async_callback,
-                                                             py_data=(0, exec_net_min_latency, frames_min_latency,
+                                                             py_data=(0, exec_net_min_latency,
+                                                                      frames_data[Mode.MIN_LATENCY],
                                                                       completed_request_results, empty_request_ids,
                                                                       mode, event))
 
@@ -448,13 +450,14 @@ def main():
 
             # Start inference
             if mode['current'] == Mode.USER_SPECIFIED:
-                frames_user_specified[request_id] = (frame_id, frame.copy(), mode['current'], time())
+                frames_data[Mode.USER_SPECIFIED][request_id] = (frame_id, frame.copy(), mode['current'], time())
                 exec_net_user_specified.start_async(request_id=request_id, inputs={input_blob: in_frame})
             elif mode['current'] == Mode.MIN_LATENCY:
-                frames_min_latency[request_id] = (frame_id, frame.copy(), mode['current'], time())
+                frames_data[Mode.MIN_LATENCY][request_id] = (frame_id, frame.copy(), mode['current'], time())
                 exec_net_min_latency.start_async(request_id=request_id, inputs={input_blob: in_frame})
     
         while (not next_shown_frame_id in completed_request_results \
+                  # throughput limit
                or (time() - prev_frame_show_time) < avg_frame_show_period * 0.9) \
               and not empty_request_ids:
             event.wait()
@@ -467,16 +470,16 @@ def main():
                 log.info("Waiting for completion of active Inter Requests...")
                 if mode['current'] == Mode.USER_SPECIFIED:
                     for i in range(args.num_infer_requests):
-                        if not frames_user_specified[i] is None:
+                        if not frames_data[Mode.USER_SPECIFIED][i] is None:
                             exec_net_user_specified.requests[i].wait()
-                            frames_user_specified[i] = None
+                            frames_data[Mode.USER_SPECIFIED][i] = None
                     empty_request_ids.clear()
                     empty_request_ids.append(0)
                     prev_frame_show_time = 0
                 elif mode['current'] == Mode.MIN_LATENCY:
-                    if not frames_min_latency[0] is None:
+                    if not frames_data[Mode.MIN_LATENCY][0] is None:
                         exec_net_min_latency.requests[0].wait()
-                        frames_min_latency[0] = None
+                        frames_data[Mode.MIN_LATENCY][0] = None
                     empty_request_ids.clear()
                     empty_request_ids.extend(range(args.num_infer_requests))
 
