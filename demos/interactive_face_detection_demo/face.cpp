@@ -83,7 +83,7 @@ const std::vector<float>& Face::getLandmarks() {
     return _landmarks;
 }
 
-EyeStateDetection::Result Face::getEyesState(){
+EyeStateDetection::Result Face::getEyesState() {
     EyeStateDetection::Result r;
     r.leftEyeState = _leftEyeOpen;
     r.rightEyeState = _rightEyeOpen;
