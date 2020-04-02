@@ -251,7 +251,6 @@ EyeStateDetection::EyeStateDetection(const std::string &pathToModel,
       enquedFaces(0) {
 }
 
-
 void EyeStateDetection::submitRequest()  {
     if (!enquedFaces)
         return;
