@@ -299,16 +299,12 @@ EyeStateDetection::Result EyeStateDetection::operator[] (int idx) const {
     
     bool leftEyeState = eyeStateBlob->buffer().as<float*>()[idx * 4] < eyeStateBlob->buffer().as<float*>()[idx * 4 + 1];
     bool rightEyeState = eyeStateBlob->buffer().as<float*>()[idx * 4 + 2] < eyeStateBlob->buffer().as<float*>()[idx * 4 + 3];
-    EyeStateDetection::Result r;
-    r.leftEyeState = leftEyeState;    
-    r.rightEyeState = rightEyeState;
-
 
     if (doRawOutputMessages) {
-        std::cout << "[" << idx << "] element, left eye = " << r.leftEyeState << ",right eye = " << r.rightEyeState << std::endl;
+        std::cout << "[" << idx << "] element, left eye = " << leftEyeState  << ", right eye = " << rightEyeState  << std::endl;
     }
 
-    return r;
+    return EyeStateDetection::Result{leftEyeState, rightEyeState};
 }
 
 
