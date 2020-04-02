@@ -92,6 +92,7 @@ __all__ = [
     'CTDETAdapter',
     'RetinaNetAdapter',
     'ClassAgnosticDetectionAdapter',
+    'RetinaFaceAdapter',
 
     'SegmentationAdapter',
     'BrainTumorSegmentationAdapter',
