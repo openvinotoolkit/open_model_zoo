@@ -241,7 +241,7 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
             cv::Point r2 = cv::Point(f->_location.x + f->_location.width * normed_landmarks[6], 
                                      f->_location.y + f->_location.height * normed_landmarks[7]);
 
-            cv::Rect leftEye =  cv::Rect(l1.x, l1.y - (l2.x - l1.x) / 2, l2.x - l1.x, l2.x - l1.x );
+            cv::Rect leftEye =  cv::Rect(l1.x, l1.y - (l2.x - l1.x) / 2, l2.x - l1.x, l2.x - l1.x);
             cv::Rect rightEye = cv::Rect(r1.x, r1.y - (r2.x - r1.x) / 2, r2.x - r1.x, r2.x - r1.x); 
             if (r.leftEyeState)
                 rectangle(img, leftEye, cv::Scalar(0,255,0),2);
