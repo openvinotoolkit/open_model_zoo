@@ -97,7 +97,7 @@ struct FaceDetection : BaseDetection {
     void fetchResults();
 };
 
-struct EyeStateDetection : BaseDetection{
+struct EyeStateDetection : BaseDetection {
     struct Result {
         bool leftEyeState;
         bool rightEyeState;
