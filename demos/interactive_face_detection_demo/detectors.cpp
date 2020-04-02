@@ -307,7 +307,6 @@ EyeStateDetection::Result EyeStateDetection::operator[] (int idx) const {
     return EyeStateDetection::Result{leftEyeState, rightEyeState};
 }
 
-
 CNNNetwork EyeStateDetection::read(const InferenceEngine::Core& ie) {
     slog::info << "Loading network files for Eye State Recognition network" << slog::endl;
     // Read network
