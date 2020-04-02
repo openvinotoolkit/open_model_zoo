@@ -332,22 +332,7 @@ CNNNetwork EyeStateDetection::read(const InferenceEngine::Core& ie) {
     if (outputInfo.size() != 1) {
         throw std::logic_error("Eye State Recognition network should have only one output layer");
     }
-    auto it = outputInfo.begin();
-    DataPtr ptrEyeStateOutput = (it++)->second;
-    if (!ptrEyeStateOutput) {
-        throw std::logic_error("Eye State output data pointer is not valid");
-    }
-
-    auto eyeStateCreatorLayer = ptrEyeStateOutput->getCreatorLayer().lock();
-
-    if (!eyeStateCreatorLayer) {
-        throw std::logic_error("Eye State creator layer pointer is not valid");
-    }
-
-    output = ptrEyeStateOutput->getName();
-
-    slog::info << "Age layer: " << eyeStateCreatorLayer->name<< slog::endl;
-    
+    output = outputInfo.begin()->first;
      _enabled = true;
     return network;
 }
