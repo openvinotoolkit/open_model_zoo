@@ -261,7 +261,6 @@ void EyeStateDetection::submitRequest()  {
     enquedFaces = 0;
 }
 
-
 void EyeStateDetection::enqueue(const cv::Mat &face, const std::vector<float> &landmarks) {
     if (!enabled()) {
         return;
