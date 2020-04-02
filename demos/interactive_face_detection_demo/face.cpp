@@ -84,10 +84,7 @@ const std::vector<float>& Face::getLandmarks() {
 }
 
 EyeStateDetection::Result Face::getEyesState() {
-    EyeStateDetection::Result r;
-    r.leftEyeState = _leftEyeOpen;
-    r.rightEyeState = _rightEyeOpen;
-    return r;
+    return EyeStateDetection::Result{_leftEyeOpen, _rightEyeOpen};
 }
 
 size_t Face::getId() {
