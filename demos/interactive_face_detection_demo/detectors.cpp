@@ -292,7 +292,7 @@ void EyeStateDetection::enqueue(const cv::Mat &face, const std::vector<float> &l
     matU8ToBlob<uint8_t>(face(leftEye), inputBlob1, enquedFaces);
     matU8ToBlob<uint8_t>(face(rightEye), inputBlob2, enquedFaces + 1 );
 
-    enquedFaces+=2;
+    enquedFaces += 2;
 }
 
 EyeStateDetection::Result EyeStateDetection::operator[] (int idx) const {
