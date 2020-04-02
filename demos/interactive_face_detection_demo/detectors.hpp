@@ -118,7 +118,6 @@ struct EyeStateDetection : BaseDetection{
 
     void enqueue(const cv::Mat &face, const std::vector<float> &landmarks);
     Result operator[] (int idx) const;
-    
 };
 
 struct AgeGenderDetection : BaseDetection {
