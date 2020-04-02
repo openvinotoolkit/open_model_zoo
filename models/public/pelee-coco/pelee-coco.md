@@ -2,10 +2,10 @@
 
 ## Use Case and High-Level Description
 
-  The [Pelee](https://arxiv.org/pdf/1804.06882.pdf) is a Real-Time Object Detection System on Mobile Devices
-  based on Single Shot Detection approach. The model is is implemented using the
-  Caffe\* framework and trained on MSCOCO\* dataset.
-  For details about this model, check out the [repository](https://github.com/Robert-JunWang/Pelee).
+The [Pelee](https://arxiv.org/pdf/1804.06882.pdf) is a Real-Time Object Detection System on Mobile Devices
+based on Single Shot Detection approach. The model is is implemented using the
+Caffe\* framework and trained on MSCOCO\* dataset.
+For details about this model, check out the [repository](https://github.com/Robert-JunWang/Pelee).
 
 ## Specification
 
@@ -34,8 +34,7 @@ Image, name - ` data`, shape - `1,3,304,304`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `BGR`.
-Mean values - [103.94,116.78,123.68]
-Scale - 58.8235
+Mean values - [103.94,116.78,123.68], Scale - 58.8235.
 
 ### Converted model
 
