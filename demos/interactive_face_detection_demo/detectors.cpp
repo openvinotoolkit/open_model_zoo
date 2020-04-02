@@ -274,7 +274,6 @@ void EyeStateDetection::enqueue(const cv::Mat &face, const std::vector<float> &l
     }
 
 
-
     Blob::Ptr  inputBlob1 = request->GetBlob(input);
     Blob::Ptr  inputBlob2 = request->GetBlob(input);
 
