@@ -246,11 +246,11 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
             if (r.leftEyeState)
                 rectangle(img, leftEye, cv::Scalar(0, 255, 0), 2);
             else
-                rectangle(img, leftEye, cv::Scalar(0, 0, 255),2);         
+                rectangle(img, leftEye, cv::Scalar(0, 0, 255), 2);         
             if (r.rightEyeState)
-                rectangle(img, rightEye, cv::Scalar(0, 255, 0),2);
+                rectangle(img, rightEye, cv::Scalar(0, 255, 0), 2);
             else
-                rectangle(img, rightEye, cv::Scalar(0, 0, 255),2);           
+                rectangle(img, rightEye, cv::Scalar(0, 0, 255), 2);           
         }
     }
 

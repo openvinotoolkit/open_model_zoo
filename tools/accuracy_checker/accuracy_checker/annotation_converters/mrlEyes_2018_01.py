@@ -26,14 +26,12 @@ from ..utils import get_path, read_txt
 from .format_converter import BaseFormatConverter, ConverterReturn
 
 
-class mrlEyes_2018_Converter(BaseFormatConverter):
+class mrlEyes_2018_01_Converter(BaseFormatConverter):
     """
     mrlEyes_2018 dataset converter. 
     """
 
-    # register name for this converter
-    # this name will be used for converter class look up
-    __provider__ = 'mrlEyes_2018'
+    __provider__ = 'mrlEyes_2018_01'
     annotation_types = (ClassificationAnnotation, )
 
     @classmethod
