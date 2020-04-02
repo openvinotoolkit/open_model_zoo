@@ -107,7 +107,6 @@ struct EyeStateDetection : BaseDetection{
     std::string input;
     std::string output;
 
-
     EyeStateDetection(const std::string &pathToModel,
                       const std::string &deviceForInference,
                       int maxBatch, bool isBatchDynamic, bool isAsync,
