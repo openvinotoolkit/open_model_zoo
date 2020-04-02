@@ -1,7 +1,7 @@
 # RetinaFace-ResNet50
 
 ## Use Case and High-Level Description
-## Example
+RetinaFace-R50 is a medium size model with ResNet50 backbone for Face Localisation. It can output face bounding boxes and five facial landmarks in a single forward pass. More details provided in the [paper](https://arxiv.org/abs/1905.00641) and [repository](https://github.com/deepinsight/insightface/tree/master/RetinaFace)
 
 ## Specification
 
@@ -17,7 +17,7 @@ Average Precision (AP) is defined as an area under the
 curve. All numbers were evaluated by taking into account only faces bigger than
 64 x 64 pixels.
 
-Accuracy validation approach different from described in the original repo. 
+Accuracy validation approach different from described in the original repo.
 For details about original WIDER results please see [https://github.com/deepinsight/insightface/tree/master/RetinaFace]()
 
 ## Input
