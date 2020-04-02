@@ -11,8 +11,8 @@ For details about this model, check out the [repository](https://github.com/Robe
 | Metric            | Value         |
 |-------------------|---------------|
 | Type              | Detection     |
-| GFLOPs            |               |
-| MParams           |               |
+| GFLOPs            | 1,290         |
+| MParams           | 5.98          |
 | Source framework  | Caffe\*       |
 
 ## Accuracy

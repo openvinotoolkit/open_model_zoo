@@ -81,7 +81,7 @@ datasets:
     annotation:  mscoco_det_80.pickle
     dataset_meta:  mscoco_det_80.json
 
-  - name: ms_coco_detection_80_class_with_backgound
+  - name: ms_coco_detection_80_class_with_background
     data_source: val2017
     annotation_conversion:
       converter: mscoco_detection
