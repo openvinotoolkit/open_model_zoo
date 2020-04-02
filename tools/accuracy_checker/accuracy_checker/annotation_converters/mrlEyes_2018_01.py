@@ -78,4 +78,3 @@ class mrlEyes_2018_Converter(BaseFormatConverter):
         metadata = {'label_map': label_map}
 
         return ConverterReturn(annotations, metadata, None)
-
