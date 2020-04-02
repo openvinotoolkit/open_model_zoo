@@ -34,7 +34,7 @@ Image, name - ` data`, shape - `1,3,304,304`, format is `B,C,H,W` where:
 - `W` - width
 
 Channel order is `BGR`.
-Mean values - [103.94,116.78,123.68]
+Mean values - [103.94,116.78,123.68].
 Scale - 58.8235
 
 ### Converted model
