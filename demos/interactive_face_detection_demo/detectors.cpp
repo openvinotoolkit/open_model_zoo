@@ -297,7 +297,6 @@ void EyeStateDetection::enqueue(const cv::Mat &face, const std::vector<float> &l
 EyeStateDetection::Result EyeStateDetection::operator[] (int idx) const {
     Blob::Ptr eyeStateBlob = request->GetBlob(output);
     
-
     bool leftEyeState = eyeStateBlob->buffer().as<float*>()[idx * 4] < eyeStateBlob->buffer().as<float*>()[idx * 4 + 1];
     bool rightEyeState = eyeStateBlob->buffer().as<float*>()[idx * 4 + 2] < eyeStateBlob->buffer().as<float*>()[idx * 4 + 3];
     EyeStateDetection::Result r;
