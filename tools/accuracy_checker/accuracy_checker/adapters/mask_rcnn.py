@@ -124,7 +124,7 @@ class MaskRCNNAdapter(Adapter):
         results = []
 
         for identifier, image_meta, im_num_detections, im_classes, im_boxes, im_scores, im_raw_masks in zip(
-            identifiers, frame_meta, num_detections, classes, boxes, scores, raw_masks
+                identifiers, frame_meta, num_detections, classes, boxes, scores, raw_masks
         ):
             num_valid_detections = int(im_num_detections)
             im_classes = im_classes[:num_valid_detections]
