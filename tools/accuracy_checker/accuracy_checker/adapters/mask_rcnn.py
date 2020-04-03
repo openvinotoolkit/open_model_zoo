@@ -71,30 +71,32 @@ class MaskRCNNAdapter(Adapter):
 
         return parameters
 
-    def is_detection_out(self):
-        self.detection_out = self.get_value_from_config('detection_out')
-        if self.detection_out:
+    def configure(self):
+        def is_detection_out(config):
+            if config.get('detection_out'):
+                return True
+
+            return False
+
+        def is_box_outputs(config, box_outputs):
+            for elem in box_outputs:
+                if not config.get(elem):
+                    return False
+
             return True
 
-        return False
+        box_outputs = ['classes_out', 'scores_out', 'boxes_out']
+        if is_detection_out(self.launcher_config) and is_box_outputs(self.launcher_config, box_outputs):
+            raise ConfigError('only detection output or [{}] should be provided'.format(', '.join(box_outputs)))
 
-    def is_box_outputs(self):
-        if self.get_value_from_config('classes_out') and self.get_value_from_config('scores_out') and \
-            self.get_value_from_config('boxes_out'):
+        self.detection_out = self.get_value_from_config('detection_out')
+
+        if not self.detection_out:
+            if not is_box_outputs(self.launcher_config, box_outputs):
+                raise ConfigError('all related outputs should be specified: {}'.format(', '.join(box_outputs)))
             self.classes_out = self.get_value_from_config('classes_out')
             self.scores_out = self.get_value_from_config('scores_out')
             self.boxes_out = self.get_value_from_config('boxes_out')
-            return True
-
-        return False
-
-    def configure(self):
-        box_outputs = ['classes_out', 'scores_out', 'boxes_out']
-        if self.is_detection_out() and self.is_box_outputs():
-            raise ConfigError('only detection output or [{}] should be provided'.format(', '.join(box_outputs)))
-        if not self.detection_out:
-            if not self.is_box_outputs():
-                raise ConfigError('all related outputs should be specified: {}'.format(', '.join(box_outputs)))
             self.num_detections_out = self.get_value_from_config('num_detections_out')
 
         self.raw_masks_out = self.get_value_from_config('raw_masks_out')
