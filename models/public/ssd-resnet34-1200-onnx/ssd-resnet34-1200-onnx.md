@@ -4,10 +4,6 @@
 
 The `ssd-resnet-34-1200-onnx` model is a multiscale SSD based on ResNet-34 backbone network intended to perform object detection. The model has been trained from the Common Objects in Context (COCO) image dataset. This model is pretrained in PyTorch\* framework and converted to ONNX\* format. For additional information refer to [repository](https://github.com/mlperf/inference/tree/master/v0.5/classification_and_detection).
 
-The model input is a blob that consists of a single image of 1x3x1200x1200 in RGB order.
-
-The model output is a typical vector containing the tracked object data, as previously described. Note that the "class_id" data is now significant and should be used to determine the classification for any detected object.
-
 ## Example
 
 ## Specification

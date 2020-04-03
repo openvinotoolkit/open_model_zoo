@@ -72,8 +72,7 @@ class MultipleOutputPostprocessor:
         bboxes = outputs[self.bboxes_layer][0]
         scores = outputs[self.scores_layer][0]
         labels = outputs[self.labels_layer][0]
-        result = [[0, label, score, *bbox] for label, score, bbox in zip(labels, scores, bboxes)]
-        return result
+        return [[0, label, score, *bbox] for label, score, bbox in zip(labels, scores, bboxes)]
 
 
 def get_output_postprocessor(net, bboxes='bboxes', labels='labels', scores='scores'):
@@ -81,14 +80,13 @@ def get_output_postprocessor(net, bboxes='bboxes', labels='labels', scores='scor
         output_blob = next(iter(net.outputs))
         return SingleOutputPostprocessor(output_blob)
     elif len(net.outputs) >= 3:
-        print(*(net.outputs))
         def find_layer(name, output_name, all_outputs):
             suitable_layers = [layer_name for layer_name in all_outputs if name in layer_name]
             if not suitable_layers:
-                raise ValueError('suitable layer for {} output is not found'.format(output_name))
+                raise ValueError('Suitable layer for "{}" output is not found'.format(output_name))
 
             if len(suitable_layers) > 1:
-                raise ValueError('more than 1 layers matched to regular expression, please specify more detailed regex')
+                raise ValueError('More than layers matched to "{}" output'.format(output_name))
 
             return suitable_layers[0]
 
@@ -204,8 +202,7 @@ def main():
             det_time = inf_end - inf_start
 
             # Parse detection results of the current request
-            res = output_postprocessor(exec_net.requests[cur_request_id].outputs)
-            for obj in res:
+            for obj in output_postprocessor(exec_net.requests[cur_request_id].outputs):
                 # Draw only objects when probability more than specified threshold
                 if obj[2] > args.prob_threshold:
                     xmin = int(obj[3] * frame_w)
