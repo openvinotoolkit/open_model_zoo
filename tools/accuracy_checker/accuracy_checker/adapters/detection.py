@@ -748,6 +748,12 @@ class RFCNCaffe(Adapter):
         predicted_proposals = raw_out[self.rois_out]
         x_scale = frame_meta[0]['scale_x']
         y_scale = frame_meta[0]['scale_y']
+        real_det_num = np.argwhere(predicted_proposals[:, 0] == -1)
+        if np.size(real_det_num) != 0:
+            real_det_num = real_det_num[0, 0]
+            predicted_proposals = predicted_proposals[:real_det_num]
+            predicted_deltas = predicted_deltas[:real_det_num]
+            predicted_classes = predicted_classes[:real_det_num]
         predicted_proposals[:, 1::2] /= x_scale
         predicted_proposals[:, 2::2] /= y_scale
         assert len(predicted_classes.shape) == 2
