@@ -1,11 +1,11 @@
 models:
-  - name: mobilefacedet_v1_mxnet
+  - name: mobilefacedet-v1-mxnet
     launchers:
       - framework: dlsdk
         tags:
           - FP32
-        model:   public/mobilefacedet_v1_mxnet/FP32/mobilefacedet_v1_mxnet.xml
-        weights: public/mobilefacedet_v1_mxnet/FP32/mobilefacedet_v1_mxnet.bin
+        model:   public/mobilefacedet-v1-mxnet/FP32/mobilefacedet-v1-mxnet.xml
+        weights: public/mobilefacedet-v1-mxnet/FP32/mobilefacedet-v1-mxnet.bin
         adapter:
           type: yolo_v3
           classes: 1
@@ -23,8 +23,8 @@ models:
       - framework: dlsdk
         tags:
           - FP16
-        model:   public/mobilefacedet_v1_mxnet/FP16/mobilefacedet_v1_mxnet.xml
-        weights: public/mobilefacedet_v1_mxnet/FP16/mobilefacedet_v1_mxnet.bin
+        model:   public/mobilefacedet-v1-mxnet/FP16/mobilefacedet-v1-mxnet.xml
+        weights: public/mobilefacedet-v1-mxnet/FP16/mobilefacedet-v1-mxnet.bin
         adapter:
           type: yolo_v3
           classes: 1

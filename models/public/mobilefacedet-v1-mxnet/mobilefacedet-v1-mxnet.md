@@ -1,9 +1,11 @@
-# mobilefacedet_v1_mxnet
+# mobilefacedet-v1-mxnet
 
 ## Use Case and High-Level Description
 
-  MobileFace Detection V1 is a Light and Fast Face Detector for Edge Devices (LFFD) model based on Yolo V3 architecture and trained with MXNet.
-  For details see the [repository](https://github.com/becauseofAI/MobileFace) and [paper](https://arxiv.org/pdf/1904.10633.pdf)
+  MobileFace Detection V1 is a Light and Fast Face Detector for Edge Devices (LFFD) model
+  based on Yolo V3 architecture and trained with MXNet.
+  For details see the [repository](https://github.com/becauseofAI/MobileFace)
+  and [paper](https://arxiv.org/pdf/1904.10633.pdf)
 
 ## Specification
 
