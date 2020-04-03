@@ -373,13 +373,9 @@ class SSDONNXAdapter(Adapter):
         for identifier, bboxes, scores, labels in zip(
                 identifiers, raw_outputs[self.bboxes_out], raw_outputs[self.scores_out], raw_outputs[self.labels_out]
         ):
-            image_height, image_width, _ = frame_meta[0].get('image_info', [1, 1, 1])
-            original_height = frame_meta[0].get('original_height', 1)
-            original_width = frame_meta[0].get('original_width', 1)
-            bboxes[..., ::2] *= original_width/image_width
-            bboxes[..., 1::2] *= original_height/image_height
             x_mins, y_mins, x_maxs, y_maxs = bboxes.T
-            results.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs))
+            meta = {'image_info': frame_meta[0].get('image_info')}
+            results.append(DetectionPrediction(identifier, labels, scores, x_mins, y_mins, x_maxs, y_maxs, meta))
 
         return results
 

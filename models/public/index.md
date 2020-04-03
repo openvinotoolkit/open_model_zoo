@@ -117,6 +117,7 @@ SSD-based and provide reasonable accuracy/performance trade-offs.
 | MobileFace Detection V1  | [MXNet\*](./mobilefacedet-v1-mxnet/mobilefacedet-v1-mxnet.md) | mobilefacedet-v1-mxnet| 3.5456 | 7.6828 |
 | MTCNN                     | Caffe\*: <br>[proposal](./mtcnn-p/mtcnn-p.md) <br>[refine](./mtcnn-r/mtcnn-r.md) <br> [output](./mtcnn-o/mtcnn-o.md) | <br>mtcnn-p <br>mtcnn-r <br>mtcnn-o| | |
 | Pelee                     | [Caffe\*](./pelee-coco/pelee-coco.md) | pelee-coco | 1.290 | 5.98 |
+| RetinaNet                 | [TensorFlow\*](./retinanet-tf/retinanet-tf.md) | retinanet-tf | | 64.9706 |
 | R-FCN with Resnet-101     | [TensorFlow\*](./rfcn-resnet101-coco-tf/rfcn-resnet101-coco-tf.md) | rfcn-resnet101-coco-tf | 53.462 | 171.85 |
 | SSD 300                   | [Caffe\*](./ssd300/ssd300.md) | ssd300 | 62.815 | 26.285 |
 | SSD 512                   | [Caffe\*](./ssd512/ssd512.md) | ssd512 | 180.611 | 27.189 |
