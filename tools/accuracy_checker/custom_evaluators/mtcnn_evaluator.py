@@ -348,7 +348,7 @@ class DLSDKModelMixin:
                     model_mo_flags.append(launcher_flag)
 
             for launcher_mo_key, launcher_mo_value in launcher_mo_params.items():
-                if launcher_mo_key not in launcher_mo_params:
+                if launcher_mo_key not in model_mo_params:
                     model_mo_params[launcher_mo_key] = launcher_mo_value
 
             model_config['mo_flags'] = model_mo_flags
@@ -356,7 +356,6 @@ class DLSDKModelMixin:
 
         update_mo_params(launcher.config, self.model_info)
         if 'caffe_model' in self.model_info:
-            self.model_info.update(launcher.config)
             model, weights = launcher.convert_model(self.model_info)
         else:
             model, weights = self.auto_model_search(self.model_info)
