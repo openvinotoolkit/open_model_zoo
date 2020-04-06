@@ -70,7 +70,7 @@ PyObject *presenter_drawGraphs(PresenterObject *self, PyObject *args, PyObject *
     if (PyArray_TYPE(npFrame) != NPY_UINT8
             && PyArray_NDIM(npFrame) != 3
             && PyArray_SHAPE(npFrame)[2] != 3) {
-        PyErr_SetString(PyExc_TypeError, "An array must be of type uint8 with 3 dimentions with 3 elements in the last "
+        PyErr_SetString(PyExc_TypeError, "frame must be an array of type uint8 with 3 dimensions with 3 elements in the last "
                 "dimension");
         return nullptr;
     }
@@ -110,10 +110,7 @@ PyObject *presenter_getYPos(PresenterObject *self, void *closure) {
         PyErr_SetString(PyExc_AttributeError, "Underlying C++ presenter is nullptr");
         return nullptr;
     }
-    PyObject * yPos = PyLong_FromLong(self->_presenter->yPos);
-    if (PyErr_Occurred())
-        return nullptr;
-    return yPos;
+    return PyLong_FromLong(self->_presenter->yPos);
 }
 
 int presenter_setYPos(PresenterObject *self, PyObject *value, void *closure) {
