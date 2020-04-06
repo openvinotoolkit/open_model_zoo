@@ -32,4 +32,4 @@ except ImportError:
 
         def drawGraphs(self, frame): pass
 
-        def reportMeans(self): pass
+        def reportMeans(self): return ''

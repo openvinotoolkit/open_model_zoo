@@ -16,7 +16,6 @@ source_group("src" FILES ${SOURCES})
 source_group("include" FILES ${HEADERS})
 
 add_library(monitors STATIC ${SOURCES} ${HEADERS})
-set_property(TARGET monitors PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_include_directories(monitors PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(monitors PRIVATE opencv_core opencv_imgproc)
 if(WIN32)
