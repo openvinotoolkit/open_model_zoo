@@ -22,10 +22,11 @@ from argparse import ArgumentParser, SUPPRESS
 import cv2
 import time
 import logging as log
+from pathlib import Path
 
 from openvino.inference_engine import IENetwork, IECore
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
 import monitors
 sys.path.pop()
 

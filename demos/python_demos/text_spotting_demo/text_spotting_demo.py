@@ -22,6 +22,7 @@ import os
 import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -30,7 +31,7 @@ from openvino.inference_engine import IENetwork, IECore
 from text_spotting_demo.tracker import StaticIOUTracker
 from text_spotting_demo.visualizer import Visualizer
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
 import monitors
 sys.path.pop()
 

@@ -1,14 +1,14 @@
 import argparse
-import os
 import sys
 import cv2
+from pathlib import Path
 
 from openvino.inference_engine import IECore
 
 from detector import Detector
 from estimator import HumanPoseEstimator
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
 import monitors
 sys.path.pop()
 

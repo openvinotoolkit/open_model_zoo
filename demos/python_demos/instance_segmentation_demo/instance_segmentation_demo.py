@@ -19,6 +19,7 @@ from __future__ import print_function
 
 import logging as log
 import os
+from pathlib import Path
 import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
@@ -30,7 +31,7 @@ from openvino.inference_engine import IENetwork, IECore
 from instance_segmentation_demo.tracker import StaticIOUTracker
 from instance_segmentation_demo.visualizer import Visualizer
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
 import monitors
 sys.path.pop()
 

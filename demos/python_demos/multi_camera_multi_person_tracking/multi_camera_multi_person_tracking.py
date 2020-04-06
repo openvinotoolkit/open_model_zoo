@@ -18,6 +18,7 @@ from threading import Thread
 import json
 import logging as log
 import os
+from pathlib import Path
 import random
 import sys
 
@@ -31,7 +32,7 @@ from utils.video import MulticamCapture, NormalizerCLAHE
 from utils.visualization import visualize_multicam_detections, get_target_size
 from openvino.inference_engine import IECore  # pylint: disable=import-error,E0611
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
 import monitors
 sys.path.pop()
 

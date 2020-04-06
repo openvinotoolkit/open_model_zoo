@@ -20,6 +20,7 @@ import os.path as osp
 import sys
 import time
 from argparse import ArgumentParser
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -31,7 +32,7 @@ from face_detector import FaceDetector
 from faces_database import FacesDatabase
 from face_identifier import FaceIdentifier
 
-sys.path.append(osp.dirname(osp.dirname(__file__)))
+sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
 import monitors
 sys.path.pop()
 
