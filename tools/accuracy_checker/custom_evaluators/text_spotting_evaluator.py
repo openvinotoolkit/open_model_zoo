@@ -337,17 +337,17 @@ class SequentialModel:
         self.eos_index = int(network_info['eos_index'])
         self.with_prefix = False
 
-    def predict(self, identifiers, input_data, frame_meta, output_callback):
+    def predict(self, identifiers, input_data, frame_meta, callback):
         assert len(identifiers) == 1
 
         detector_outputs = self.detector.predict(identifiers, input_data)
-        text_features = detector_outputs['text_features']
+        text_features = detector_outputs[self.detector.text_feats_out]
 
         texts = []
         for feature in text_features:
-            encoder_outputs = self.recognizer_encoder.predict(identifiers, {self.recognizer_decoder_inputs: feature})
-            if output_callback:
-                output_callback(encoder_outputs)
+            encoder_outputs = self.recognizer_encoder.predict(identifiers, {self.recognizer_encoder_input: feature})
+            if callback:
+                callback(encoder_outputs)
 
             feature = encoder_outputs[self.recognizer_encoder_output]
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
