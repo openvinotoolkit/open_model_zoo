@@ -547,8 +547,6 @@ class MTCNNEvaluator(BaseEvaluator):
         self.dataset_config = dataset_config
         self.stages = stages
         self.launcher = launcher
-        self.preprocessing_executor = None
-        self.preprocessor = None
         self.dataset = None
         self.postprocessor = None
         self.metric_executor = None
