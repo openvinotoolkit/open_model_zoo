@@ -136,7 +136,7 @@ PyGetSetDef presenter_getsetters[] = {
     {yPosName, reinterpret_cast<getter>(presenter_getYPos)},
     {graphSizeName, reinterpret_cast<getter>(presenter_getGraphSize)},
     {graphPaddingName, reinterpret_cast<getter>(presenter_getGraphPadding)},
-    {}};  // Sentinel
+    {nullptr}};  // Sentinel
 
 char monitors_extension_doc[] = "The module is a wrapper over C++ monitors. It guarantees that C++ and Python "
     "monitors are consistent.";
@@ -147,7 +147,7 @@ PyType_Slot presenterSlots[] = {
     {Py_tp_getset, presenter_getsetters},
     {Py_tp_init, reinterpret_cast<initproc>(presenter_init)},
     {Py_tp_new, PyType_GenericNew},
-    {}};  // Sentinel
+    {nullptr}};  // Sentinel
 
 PyType_Spec presenterSpec{"monitors_extension.Presenter", sizeof(PresenterObject), 0, 0, presenterSlots};
 
