@@ -401,10 +401,6 @@ class SequentialModel:
         self.recognizer_decoder.load_network(network_dict['recognizer_decoder'], launcher)
         self.update_inputs_outputs_info()
 
-        self.recognizer_encoder.load_model(network_dict['recognize_encoder'], launcher)
-        self.recognizer_decoder.load_model(network_dict['recognize_decoder'], launcher)
-        self.update_inputs_outputs_info(self)
-
     def get_network(self):
         return {
             'detector': self.detector.get_network(),
@@ -447,7 +443,6 @@ class DetectorDLSDKModel(BaseModel):
         self.im_info_name = None
         self.im_data_name = None
         self.text_feats_out = 'text_features'
-
 
     def predict(self, identifiers, input_data):
 
