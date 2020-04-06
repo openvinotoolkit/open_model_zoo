@@ -106,6 +106,11 @@ class BaseStage:
         with self.prediction_file.open('wb') as out_file:
             pickle.dump(self._predictions, out_file)
 
+    def update_preprocessing(self, preprocessor):
+        model_specific_preprocessor = PreprocessingExecutor(self.model_info.get('preprocessing', []))
+        model_specific_preprocessor.processors.extend(preprocessor.processors)
+        self.preprocessor = model_specific_preprocessor
+
 
 class ProposalBaseStage(BaseStage):
     default_model_name = 'mtcnn-p'
@@ -543,8 +548,6 @@ class MTCNNEvaluator(BaseEvaluator):
         self.dataset_config = dataset_config
         self.stages = stages
         self.launcher = launcher
-        self.preprocessing_executor = None
-        self.preprocessor = None
         self.dataset = None
         self.postprocessor = None
         self.metric_executor = None
@@ -738,7 +741,9 @@ class MTCNNEvaluator(BaseEvaluator):
         if self.dataset is not None and isinstance(self.dataset_config, list):
             return
         dataset_attributes = create_dataset_attributes(self.dataset_config, dataset_tag)
-        self.dataset, self.metric_executor, self.preprocessor, self.postprocessor = dataset_attributes
+        self.dataset, self.metric_executor, preprocessor, self.postprocessor = dataset_attributes
+        for stage_name, stage in self.stages.items():
+            stage.update_preprocessing(preprocessor)
 
     @staticmethod
     def _create_progress_reporter(check_progress, dataset_size):
