@@ -69,8 +69,7 @@ class TextSpottingEvaluator(BaseEvaluator):
             self._dumped_annotations = []
 
         if self.dataset.batch is None:
-            self.dataset.batch = self.launcher.batch
-        self.preprocessor.input_shapes = self.launcher.inputs_info_for_meta()
+            self.dataset.batch = 1
         if subset is not None:
             self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
         elif num_images is not None:
@@ -80,7 +79,7 @@ class TextSpottingEvaluator(BaseEvaluator):
         )
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
-            _, batch_meta = extract_image_representations(batch_inputs)
+            batch_data, batch_meta = extract_image_representations(batch_inputs)
             temporal_output_callback = None
             if output_callback:
                 temporal_output_callback = partial(output_callback,
@@ -89,7 +88,7 @@ class TextSpottingEvaluator(BaseEvaluator):
                                                    dataset_indices=batch_input_ids)
 
             batch_raw_prediction, batch_prediction = self.model.predict(
-                batch_identifiers, batch_inputs, callback=temporal_output_callback
+                batch_identifiers, batch_data, batch_meta, callback=temporal_output_callback
             )
             metrics_result = None
             if self.metric_executor:
@@ -335,17 +334,17 @@ class SequentialModel:
         self.eos_index = int(network_info['eos_index'])
         self.with_prefix = False
 
-    def predict(self, identifiers, input_data, frame_meta, output_callback):
+    def predict(self, identifiers, input_data, frame_meta, callback):
         assert len(identifiers) == 1
 
         detector_outputs = self.detector.predict(identifiers, input_data)
-        text_features = detector_outputs['text_features']
+        text_features = detector_outputs[self.detector.text_feats_out]
 
         texts = []
         for feature in text_features:
-            encoder_outputs = self.recognizer_encoder.predict(identifiers, {self.recognizer_decoder_inputs: feature})
-            if output_callback:
-                output_callback(encoder_outputs)
+            encoder_outputs = self.recognizer_encoder.predict(identifiers, {self.recognizer_encoder_input: feature})
+            if callback:
+                callback(encoder_outputs)
 
             feature = encoder_outputs[self.recognizer_encoder_output]
             feature = np.reshape(feature, (feature.shape[0], feature.shape[1], -1))
@@ -365,8 +364,8 @@ class SequentialModel:
                     self.recognizer_decoder_inputs['prev_hidden']: hidden,
                     self.recognizer_decoder_inputs['encoder_outputs']: feature}
                 decoder_outputs = self.recognizer_decoder.predict(identifiers, input_to_decoder)
-                if output_callback:
-                    output_callback(decoder_outputs)
+                if callback:
+                    callback(decoder_outputs)
                 coder_output = decoder_outputs[self.recognizer_decoder_outputs['symbols_distribution']]
                 prev_symbol_index = np.argmax(coder_output, axis=1)
                 if prev_symbol_index == self.eos_index:
@@ -388,15 +387,15 @@ class SequentialModel:
 
     def load_model(self, network_dict, launcher):
         self.detector.load_model(network_dict['detector'], launcher)
-        self.recognizer_encoder.load_model(network_dict['recognize_encoder'], launcher)
-        self.recognizer_decoder.load_model(network_dict['recognize_decoder'], launcher)
-        self.update_inputs_outputs_info(self)
+        self.recognizer_encoder.load_model(network_dict['recognizer_encoder'], launcher)
+        self.recognizer_decoder.load_model(network_dict['recognizer_decoder'], launcher)
+        self.update_inputs_outputs_info()
 
     def load_network(self, network_dict, launcher):
         self.detector.load_network(network_dict['detector'], launcher)
-        self.recognizer_encoder.load_network(network_dict['recognize_encoder'], launcher)
-        self.recognizer_decoder.load_network(network_dict['recognize_decoder'], launcher)
-        self.update_inputs_outputs_info(self)
+        self.recognizer_encoder.load_network(network_dict['recognizer_encoder'], launcher)
+        self.recognizer_decoder.load_network(network_dict['recognizer_decoder'], launcher)
+        self.update_inputs_outputs_info()
 
     def get_network(self):
         return {
@@ -411,12 +410,11 @@ class SequentialModel:
 
         with_prefix = isinstance(self.detector.im_data_name, str) and self.detector.im_data_name.startswith('detector_')
         if with_prefix != self.with_prefix:
-            self.detector.im_info_name = generate_name('detector_', with_prefix, self.detector.im_info_name)
-            self.detector.im_data_name = generate_name('detector_', with_prefix, self.detector.im_data_name)
+            self.detector.text_feats_out = generate_name('detector_', with_prefix, self.detector.text_feats_out)
             self.adapter.classes_out = generate_name('detector_', with_prefix, self.adapter.classes_out)
             self.adapter.scores_out = generate_name('detector_', with_prefix, self.adapter.scores_out)
             self.adapter.boxes_out = generate_name('detector_', with_prefix, self.adapter.boxes_out)
-            self.adapter.num_detections_out = generate_name('detector_', with_prefix, self.adapter.num_detections_out)
+           # self.adapter.num_detections_out = generate_name('detector_', with_prefix, self.adapter.num_detections_out)
             self.adapter.raw_masks_out = generate_name('detector_', with_prefix, self.adapter.raw_masks_out)
             self.recognizer_encoder_input = generate_name('recognizer_encoder_', with_prefix, self.recognizer_encoder_input)
             self.recognizer_encoder_output = generate_name('recognizer_encoder_', with_prefix, self.recognizer_encoder_output)
@@ -440,8 +438,10 @@ class DetectorDLSDKModel(BaseModel):
             self.load_model(network_info, launcher)
         self.im_info_name = None
         self.im_data_name = None
+        self.text_feats_out = 'text_features'
 
     def predict(self, identifiers, input_data):
+
         input_data = np.array(input_data)
         assert len(input_data.shape) == 4
         assert input_data.shape[0] == 1
@@ -493,6 +493,6 @@ class RecognizerDLSDKModel(BaseModel):
         model, weights = self.automatic_model_search(network_info)
         if weights is not None:
             self.network = launcher.create_ie_network(str(model), str(weights))
-            self.exec_network = launcher.ie_core.load_network(network, launcher.device)
+            self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
