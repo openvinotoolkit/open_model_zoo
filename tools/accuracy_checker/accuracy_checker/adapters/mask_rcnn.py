@@ -91,7 +91,6 @@ class MaskRCNNAdapter(Adapter):
         if is_detection_out(self.launcher_config):
             self.detection_out = self.get_value_from_config('detection_out')
             self.realisation = self._process_detection_output
-            return
         else:
             if not is_box_outputs(self.launcher_config, box_outputs):
                 raise ConfigError('all related outputs should be specified: {}'.format(', '.join(box_outputs)))
