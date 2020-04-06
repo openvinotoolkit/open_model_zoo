@@ -38,7 +38,7 @@ from ..utils import (
 from .launcher import Launcher, LauncherConfigValidator
 from .model_conversion import convert_model, FrameworkParameters
 from ..logging import print_info
-from .input_feeder import LAYER_LAYOUT_TO_IMAGE_LAYOUT
+from .input_feeder import PRECISION_TO_DTYPE
 try:
     from cpuinfo import get_cpu_info
 except ImportError:
@@ -277,6 +277,7 @@ class DLSDKLauncher(Launcher):
             self.allow_reshape_input = self.get_value_from_config('allow_reshape_input')
         self._do_reshape = False
         self._use_set_blob = False
+        self._target_layout_mapping = {}
 
     @property
     def device(self):
@@ -319,10 +320,9 @@ class DLSDKLauncher(Launcher):
                     tensor_desc = IETensorDesc(
                         self.exec_network.inputs[key].precision,
                         self.exec_network.inputs[key].shape,
-                        self.exec_network.inputs[key].layout
+                        self.exec_network.inputs[key].layout if key not in self._target_layout_mapping else self._target_layout_mapping[key]
                     )
                     self.exec_network.requests[0].set_blob(key, IEBlob(tensor_desc, input_data))
-
             result = self.exec_network.infer(infer_inputs) if not self._use_set_blob else self.exec_network.infer()
             results.append(result)
 
@@ -622,11 +622,14 @@ class DLSDKLauncher(Launcher):
             diff_number = input_batch_size - data_batch_size
             filled_part = [data[-1]] * diff_number
             data = np.concatenate([data, filled_part])
+        precision = self.inputs[input_blob].precsion
+        data = data.astype(PRECISION_TO_DTYPE[precision])
+
         if len(data.shape) == 4 and len(input_shape) == 4:
             data_layout = DIM_IDS_TO_LAYOUT.get(tuple(data_layout))
             input_layout = self.inputs[input_blob].layout
             if input_layout != data_layout and IEBlob is not None:
-                data = data.transpose(LAYER_LAYOUT_TO_IMAGE_LAYOUT[input_layout])
+                self._target_layout_mapping[input_blob] = data_layout
                 self._use_set_blob = True
                 return data
 
