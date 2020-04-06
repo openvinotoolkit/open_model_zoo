@@ -86,9 +86,13 @@ class MaskRCNNAdapter(Adapter):
         if is_detection_out(self.launcher_config) and is_box_outputs(self.launcher_config, box_outputs):
             raise ConfigError('only detection output or [{}] should be provided'.format(', '.join(box_outputs)))
 
-        self.detection_out = self.get_value_from_config('detection_out')
+        self.raw_masks_out = self.get_value_from_config('raw_masks_out')
 
-        if not self.detection_out:
+        if is_detection_out(self.launcher_config):
+            self.detection_out = self.get_value_from_config('detection_out')
+            self.realisation = self._process_detection_output
+            return
+        else:
             if not is_box_outputs(self.launcher_config, box_outputs):
                 raise ConfigError('all related outputs should be specified: {}'.format(', '.join(box_outputs)))
             self.classes_out = self.get_value_from_config('classes_out')
@@ -96,16 +100,11 @@ class MaskRCNNAdapter(Adapter):
             self.boxes_out = self.get_value_from_config('boxes_out')
             self.num_detections_out = self.get_value_from_config('num_detections_out')
 
-        self.raw_masks_out = self.get_value_from_config('raw_masks_out')
-        if self.detection_out:
-            self.realisation = self._process_detection_output
-            return
+            if self.num_detections_out:
+                self.realisation = self._process_tf_obj_detection_api_outputs
+                return
 
-        if self.num_detections_out:
-            self.realisation = self._process_tf_obj_detection_api_outputs
-            return
-
-        self.realisation = self._process_pytorch_outputs
+            self.realisation = self._process_pytorch_outputs
 
     def process(self, raw, identifiers=None, frame_meta=None):
         raw_outputs = self._extract_predictions(raw, frame_meta)
