@@ -105,14 +105,9 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
                     self._predictions.extend(batch_prediction)
 
             if output_callback:
-                if metrics_result is None:
-                    metrics_result = [None] * len(batch_prediction)
-                for raw_prediction, m_result in zip(
-                    batch_raw_prediction, metrics_result,
-                ):
-                    output_callback(
-                        raw_prediction,
-                        metrics_result=m_result,
+                output_callback(
+                    batch_raw_prediction[0],
+                        metrics_result=metrics_result,
                         element_identifiers=batch_identifiers,
                         dataset_indices=batch_input_ids
                     )
