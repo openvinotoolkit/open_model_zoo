@@ -73,10 +73,7 @@ class MaskRCNNAdapter(Adapter):
 
     def configure(self):
         def is_detection_out(config):
-            if config.get('detection_out'):
-                return True
-
-            return False
+            return bool(config.get('detection_out'))
 
         def is_box_outputs(config, box_outputs):
             for elem in box_outputs:
