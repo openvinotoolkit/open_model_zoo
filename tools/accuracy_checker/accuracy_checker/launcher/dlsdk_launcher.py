@@ -623,7 +623,7 @@ class DLSDKLauncher(Launcher):
             diff_number = input_batch_size - data_batch_size
             filled_part = [data[-1]] * diff_number
             data = np.concatenate([data, filled_part])
-        precision = self.inputs[input_blob].precsion
+        precision = self.inputs[input_blob].precision
         data = data.astype(PRECISION_TO_DTYPE[precision])
 
         if len(data.shape) == 4 and len(input_shape) == 4:
