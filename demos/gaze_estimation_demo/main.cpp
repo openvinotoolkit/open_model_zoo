@@ -41,6 +41,7 @@
 #include "base_estimator.hpp"
 #include "head_pose_estimator.hpp"
 #include "landmarks_estimator.hpp"
+#include "eye_state_estimator.hpp"
 #include "gaze_estimator.hpp"
 
 #include "results_marker.hpp"
@@ -76,6 +77,8 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
         throw std::logic_error("Parameter -m_hp is not set");
     if (FLAGS_m_lm.empty())
         throw std::logic_error("Parameter -m_lm is not set");
+    if (FLAGS_m_es.empty())
+        throw std::logic_error("Parameter -m_es is not set");
 
     return true;
 }
@@ -118,12 +121,13 @@ int main(int argc, char *argv[]) {
         }
 
         bool flipImage = false;
-        ResultsMarker resultsMarker(false, false, false, true);
+        ResultsMarker resultsMarker(false, false, false, true, false);
 
         // Loading Inference Engine
         std::vector<std::pair<std::string, std::string>> cmdOptions = {
             {FLAGS_d, FLAGS_m}, {FLAGS_d_fd, FLAGS_m_fd},
-            {FLAGS_d_hp, FLAGS_m_hp}, {FLAGS_d_lm, FLAGS_m_lm}
+            {FLAGS_d_hp, FLAGS_m_hp}, {FLAGS_d_lm, FLAGS_m_lm},
+            {FLAGS_d_es, FLAGS_m_es}
         };
 
         InferenceEngine::Core ie;
@@ -139,11 +143,12 @@ int main(int argc, char *argv[]) {
 
         HeadPoseEstimator headPoseEstimator(ie, FLAGS_m_hp, FLAGS_d_hp);
         LandmarksEstimator landmarksEstimator(ie, FLAGS_m_lm, FLAGS_d_lm);
+        EyeStateEstimator eyeStateEstimator(ie, FLAGS_m_es, FLAGS_d_es);
         GazeEstimator gazeEstimator(ie, FLAGS_m, FLAGS_d);
 
         // Put pointers to all estimators in an array so that they could be processed uniformly in a loop
-        BaseEstimator* estimators[] = {&headPoseEstimator, &landmarksEstimator, &gazeEstimator};
-
+        BaseEstimator* estimators[] = {&headPoseEstimator, &landmarksEstimator, &gazeEstimator, &eyeStateEstimator };
+         
         // Each element of the vector contains inference results on one face
         std::vector<FaceInferenceResults> inferenceResults;
 

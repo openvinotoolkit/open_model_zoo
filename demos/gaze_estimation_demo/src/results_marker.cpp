@@ -19,11 +19,13 @@ namespace gaze_estimation {
 ResultsMarker::ResultsMarker(bool showFaceBoundingBox,
                              bool showHeadPoseAxes,
                              bool showLandmarks,
-                             bool showGaze):
+                             bool showGaze,
+                             bool showEyeState):
                              showFaceBoundingBox(showFaceBoundingBox),
                              showHeadPoseAxes(showHeadPoseAxes),
                              showLandmarks(showLandmarks),
-                             showGaze(showGaze) {
+                             showGaze(showGaze),
+                             showEyeState(showEyeState){
 }
 
 void ResultsMarker::mark(cv::Mat& image,
@@ -124,6 +126,17 @@ void ResultsMarker::mark(cv::Mat& image,
                               static_cast<int>(faceBoundingBox.br().y + 12. * faceBoundingBoxWidth / 100.)),
                     cv::FONT_HERSHEY_PLAIN, scale * 2, cv::Scalar::all(255), 1);
     }
+    if (showEyeState) {
+        if (faceInferenceResults.leftEyeState)
+            cv::rectangle(image, faceInferenceResults.leftEyeBoundingBox, cv::Scalar(0, 255, 0), 1);
+        else
+            cv::rectangle(image, faceInferenceResults.leftEyeBoundingBox, cv::Scalar(0, 0, 255), 1);
+
+        if (faceInferenceResults.rightEyeState)
+            cv::rectangle(image, faceInferenceResults.rightEyeBoundingBox, cv::Scalar(0, 255, 0), 1);
+        else
+            cv::rectangle(image, faceInferenceResults.rightEyeBoundingBox, cv::Scalar(0, 0, 255), 1);
+    }
 }
 
 void ResultsMarker::toggle(char key) {
@@ -145,6 +158,9 @@ void ResultsMarker::toggle(char key) {
         showHeadPoseAxes = false;
         showLandmarks = false;
         showGaze = false;
+    }
+    else if (key == 'e') {
+        showEyeState = !showEyeState;
     }
 }
 }  // namespace gaze_estimation
