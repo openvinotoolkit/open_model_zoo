@@ -202,6 +202,37 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         return coco_data_to_store
 
     @staticmethod
+    def _convert_annotation_to_coco_bbox_format(
+            annotations, map_coco_img_file_name_to_img_id, map_pred_label_id_to_coco_cat_id
+    ):
+        coco_annotation_to_store = []
+        for annotation in annotations:
+            annotation_data_to_store = []
+            cur_name = annotation.identifier
+            cur_name = os.path.basename(cur_name)
+            assert cur_name in map_coco_img_file_name_to_img_id
+            cur_img_id = map_coco_img_file_name_to_img_id[cur_name]
+
+            labels = annotation.labels.tolist()
+            x = annotation.x_mins
+            width = annotation.x_maxs - annotation.x_mins
+            y = annotation.y_mins
+            height = annotation.y_maxs - annotation.y_mins
+
+            coco_cats = [map_pred_label_id_to_coco_cat_id[lbl] for lbl in labels]
+            for cur_cat, x1, y1, w, h  in zip(coco_cats, x, y, width, height):
+                annotation_data_to_store.append({
+                    'image_id': cur_img_id,
+                    'category_id': cur_cat,
+                    '_image_name_from_dataset': cur_name,
+                    'bbox': [x1, y1, w, h]
+                })
+
+            coco_annotation_to_store.extend(annotation_data_to_store)
+
+        return coco_annotation_to_store
+
+    @staticmethod
     def _reload_results_to_coco_class(coco, coco_data_to_store):
         with tempfile.NamedTemporaryFile() as ftmp:
             json_file_to_store = ftmp.name + ".json"
@@ -265,7 +296,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
 
         return res
 
-    def compute_precision_recall(self, predictions):
+    def compute_precision_recall(self, annotations, predictions):
         coco, map_coco_img_file_name_to_img_id, map_pred_label_id_to_coco_cat_id = self._prepare_coco_structures()
 
         coco_data_to_store = self._convert_data_to_coco_format(
@@ -274,12 +305,18 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
 
         coco_res = self._reload_results_to_coco_class(coco, coco_data_to_store)
 
+        coco_annotation_to_store = self._convert_annotation_to_coco_bbox_format(
+            annotations, map_coco_img_file_name_to_img_id, map_pred_label_id_to_coco_cat_id
+        )
+
+        coco_annotation = self._reload_results_to_coco_class(coco, coco_annotation_to_store)
+
         if SHOULD_SHOW_PREDICTIONS:
             data_source = self.dataset.config.get('data_source')
             should_display_debug_images = SHOULD_DISPLAY_DEBUG_IMAGES
             self._debug_printing_and_displaying_predictions(coco, coco_res, data_source, should_display_debug_images)
 
-        res = self._run_coco_evaluation(coco, coco_res, self.iou_type, self.threshold)
+        res = self._run_coco_evaluation(coco_annotation, coco_res, self.iou_type, self.threshold)
         print_info("MSCOCOorigBaseMetric.compute_precision_recall: returning " + str(res))
 
         return res
@@ -292,7 +329,7 @@ class MSCOCOorigAveragePrecision(MSCOCOorigBaseMetric):
     __provider__ = 'coco_orig_precision'
 
     def evaluate(self, annotations, predictions):
-        return self.compute_precision_recall(predictions)[0][0]
+        return self.compute_precision_recall(annotations, predictions)[0][0]
 
 
 class MSCOCOOrigSegmAveragePrecision(MSCOCOorigAveragePrecision):
@@ -307,7 +344,7 @@ class MSCOCOorigRecall(MSCOCOorigBaseMetric):
     __provider__ = 'coco_orig_recall'
 
     def evaluate(self, annotations, predictions):
-        return self.compute_precision_recall(predictions)[1][2]
+        return self.compute_precision_recall(annotations, predictions)[1][2]
 
 
 class MSCOCOorigSegmRecall(MSCOCOorigRecall):
