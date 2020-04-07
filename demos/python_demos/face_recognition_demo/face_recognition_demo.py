@@ -34,7 +34,6 @@ from face_identifier import FaceIdentifier
 
 sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
 import monitors
-sys.path.pop()
 
 
 DEVICE_KINDS = ['CPU', 'GPU', 'FPGA', 'MYRIAD', 'HETERO', 'HDDL']

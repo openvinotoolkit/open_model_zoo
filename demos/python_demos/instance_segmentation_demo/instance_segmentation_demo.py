@@ -33,7 +33,6 @@ from instance_segmentation_demo.visualizer import Visualizer
 
 sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
 import monitors
-sys.path.pop()
 
 
 def build_argparser():

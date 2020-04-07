@@ -29,7 +29,6 @@ from openvino.inference_engine import IENetwork, IECore
 
 sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
 import monitors
-sys.path.pop()
 
 
 logging.basicConfig(format="[ %(levelname)s ] %(message)s", level=logging.INFO, stream=sys.stdout)

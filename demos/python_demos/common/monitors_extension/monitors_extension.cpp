@@ -19,7 +19,9 @@ struct PresenterObject {
 namespace {
 void presenter_dealloc(PresenterObject *self) {
     delete self->_presenter;
-    Py_TYPE(self)->tp_free(self);
+    PyTypeObject *tp = Py_TYPE(self);
+    tp->tp_free(self);
+    Py_DECREF(tp);
 }
 
 char yPosName[] = "yPos", graphSizeName[] = "graphSize";
@@ -165,7 +167,6 @@ PyMODINIT_FUNC PyInit_monitors_extension() {
     PyObject *m = PyModule_Create(&monitors_extension);
     if (m == nullptr) return nullptr;
 
-    Py_INCREF(presenterType);
     if (PyModule_AddObject(m, "Presenter", presenterType) < 0) {
         Py_DECREF(presenterType);
         Py_DECREF(m);

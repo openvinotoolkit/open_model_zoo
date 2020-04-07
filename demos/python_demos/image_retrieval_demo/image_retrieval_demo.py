@@ -30,7 +30,6 @@ from image_retrieval_demo.roi_detector_on_video import RoiDetectorOnVideo
 
 sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
 import monitors
-sys.path.pop()
 
 
 INPUT_SIZE = 224

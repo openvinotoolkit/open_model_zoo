@@ -33,7 +33,6 @@ from text_spotting_demo.visualizer import Visualizer
 
 sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
 import monitors
-sys.path.pop()
 
 
 SOS_INDEX = 0

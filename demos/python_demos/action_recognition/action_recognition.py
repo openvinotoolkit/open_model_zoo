@@ -30,7 +30,6 @@ from os import path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
 import monitors
-sys.path.pop()
 
 
 def video_demo(encoder, decoder, videos, no_show, utilization_monitors, fps=30, labels=None):

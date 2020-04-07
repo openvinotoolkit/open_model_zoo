@@ -36,7 +36,6 @@ from asl_recognition_demo.visualizer import Visualizer
 
 sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
 import monitors
-sys.path.pop()
 
 DETECTOR_OUTPUT_SHAPE = -1, 5
 TRACKER_SCORE_THRESHOLD = 0.4

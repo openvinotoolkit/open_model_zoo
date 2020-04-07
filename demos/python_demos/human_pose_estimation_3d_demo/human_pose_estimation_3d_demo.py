@@ -28,7 +28,6 @@ from modules.parse_poses import parse_poses
 
 sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
 import monitors
-sys.path.pop()
 
 
 def rotate_poses(poses_3d, R, t):
