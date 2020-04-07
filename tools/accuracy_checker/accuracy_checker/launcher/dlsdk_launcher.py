@@ -317,7 +317,7 @@ class DLSDKLauncher(Launcher):
                 self._reshape_input(input_shapes)
             if self._use_set_blob:
                 for key, input_data in infer_inputs.items():
-                    layout =  self._target_layout_mapping.get(key, self.exec_network.inputs[key].layout)
+                    layout = self._target_layout_mapping.get(key, self.exec_network.inputs[key].layout)
                     tensor_desc = IETensorDesc(
                         self.exec_network.inputs[key].precision,
                         self.exec_network.inputs[key].shape,
