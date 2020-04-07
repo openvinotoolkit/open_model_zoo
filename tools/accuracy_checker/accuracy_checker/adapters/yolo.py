@@ -219,7 +219,7 @@ class YoloV2Adapter(Adapter):
         for identifier, prediction in zip(identifiers, predictions):
             if len(prediction.shape) != 3:
                 new_shape = (self.num * box_size, self.cells, self.cells) if self.output_format == 'BHW' \
-                    else (self.num * box_size, self.cells, self.cells)
+                    else (self.cells, self.cells, self.num * box_size)
                 prediction = np.reshape(prediction,new_shape)
             labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(prediction, self.cells, self.num,
                                                                           box_size, self.anchors,
@@ -376,7 +376,7 @@ class YoloV3Adapter(Adapter):
                 self.processor.y_normalizer = cells
                 if len(p.shape) != 3:
                     new_shape = (self.num * box_size, cells, cells) if self.output_format == 'BHW' \
-                        else (self.num * box_size, cells, cells)
+                        else (cells, cells, num * box_size)
                     p = np.reshape(p, new_shape)
                 labels, scores, x_mins, y_mins, x_maxs, y_maxs = parse_output(p, cells, num,
                                                                               box_size, anchors,
