@@ -19,9 +19,8 @@ import logging as log
 import sys
 import time
 import json
-from os.path import exists
+import os
 from argparse import ArgumentParser, SUPPRESS
-from pathlib import Path
 
 import cv2
 import numpy as np
@@ -34,7 +33,7 @@ from asl_recognition_demo.tracker import Tracker
 from asl_recognition_demo.action_recognizer import ActionRecognizer
 from asl_recognition_demo.visualizer import Visualizer
 
-sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
 
 DETECTOR_OUTPUT_SHAPE = -1, 5
@@ -92,7 +91,7 @@ def build_argparser():
 def load_class_map(file_path):
     """ Returns class names map. """
 
-    if file_path is not None and exists(file_path):
+    if file_path is not None and os.path.exists(file_path):
         with open(file_path, 'r') as input_stream:
             data = json.load(input_stream)
             class_map = dict(enumerate(data))
@@ -128,7 +127,7 @@ def main():
     presenter = monitors.Presenter(args.utilization_monitors)
 
     samples_library = None
-    if args.samples_dir is not None and exists(args.samples_dir):
+    if args.samples_dir is not None and os.path.exists(args.samples_dir):
         visualizer.register_window('Gesture library')
         visualizer.start()
 

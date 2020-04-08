@@ -22,7 +22,6 @@ import os
 import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
-from pathlib import Path
 
 import cv2
 import numpy as np
@@ -31,7 +30,7 @@ from openvino.inference_engine import IENetwork, IECore
 from text_spotting_demo.tracker import StaticIOUTracker
 from text_spotting_demo.visualizer import Visualizer
 
-sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
 
 
@@ -229,6 +228,10 @@ def main():
     text_dec_exec_net = ie.load_network(network=text_dec_net, device_name=args.device)
 
     hidden_shape = text_dec_net.inputs[args.trd_input_prev_hidden].shape
+
+    del mask_rcnn_net
+    del text_enc_net
+    del text_dec_net
 
     try:
         input_source = int(args.input_source)

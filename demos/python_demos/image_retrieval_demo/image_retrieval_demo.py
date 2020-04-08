@@ -16,10 +16,10 @@
 """
 
 import logging as log
+import os
 import sys
 import time
 from argparse import ArgumentParser, SUPPRESS
-from pathlib import Path
 
 import numpy as np
 
@@ -28,7 +28,7 @@ from image_retrieval_demo.common import central_crop
 from image_retrieval_demo.visualizer import visualize
 from image_retrieval_demo.roi_detector_on_video import RoiDetectorOnVideo
 
-sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
 
 

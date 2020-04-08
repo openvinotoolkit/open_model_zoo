@@ -19,7 +19,6 @@ from __future__ import print_function
 
 import sys
 from argparse import ArgumentParser, SUPPRESS
-from pathlib import Path
 
 from openvino.inference_engine import IECore
 
@@ -28,7 +27,7 @@ from action_recognition_demo.result_renderer import ResultRenderer
 from action_recognition_demo.steps import run_pipeline
 from os import path
 
-sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
+sys.path.append(path.join(path.dirname(path.dirname(path.abspath(__file__))), 'common'))
 import monitors
 
 

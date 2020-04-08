@@ -165,7 +165,10 @@ PyMODINIT_FUNC PyInit_monitors_extension() {
     if (!presenterType) return nullptr;
 
     PyObject *m = PyModule_Create(&monitors_extension);
-    if (m == nullptr) return nullptr;
+    if (m == nullptr) {
+        Py_DECREF(presenterType);
+        return nullptr;
+    }
 
     if (PyModule_AddObject(m, "Presenter", presenterType) < 0) {
         Py_DECREF(presenterType);

@@ -21,13 +21,12 @@ import os
 import sys
 from argparse import ArgumentParser, SUPPRESS
 from math import exp as exp
-from pathlib import Path
 from time import time
 
 import cv2
 from openvino.inference_engine import IENetwork, IECore
 
-sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
 
 

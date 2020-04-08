@@ -15,7 +15,6 @@
 from argparse import ArgumentParser, SUPPRESS
 import json
 import os
-from pathlib import Path
 import sys
 
 import cv2
@@ -26,7 +25,7 @@ from modules.input_reader import InputReader
 from modules.draw import Plotter3d, draw_poses
 from modules.parse_poses import parse_poses
 
-sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
 
 

@@ -13,18 +13,17 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 """
-
+import os
 import sys
 import cv2
 import numpy as np
 from argparse import ArgumentParser, SUPPRESS
-from pathlib import Path
 
 from openvino.inference_engine import IECore
 
 from detector import Detector
 
-sys.path.append(str(Path(__file__).resolve().parent.parent / 'common'))
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common'))
 import monitors
 
 
