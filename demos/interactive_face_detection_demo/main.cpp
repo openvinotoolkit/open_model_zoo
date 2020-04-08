@@ -25,7 +25,6 @@
 
 #include <inference_engine.hpp>
 
-#include <monitors/presenter.h>
 #include <samples/ocv_common.hpp>
 #include <samples/slog.hpp>
 
@@ -35,6 +34,7 @@
 #include "visualizer.hpp"
 
 #include <ie_iextension.h>
+#include <ext_list.hpp>
 
 using namespace InferenceEngine;
 
@@ -44,7 +44,6 @@ bool ParseAndCheckCommandLine(int argc, char *argv[]) {
     gflags::ParseCommandLineNonHelpFlags(&argc, &argv, true);
     if (FLAGS_h) {
         showUsage();
-        showAvailableDevices();
         return false;
     }
     slog::info << "Parsing input parameters" << slog::endl;
@@ -106,13 +105,12 @@ int main(int argc, char *argv[]) {
         Core ie;
 
         std::set<std::string> loadedDevices;
-        std::pair<std::string, std::string> cmdOptions[] = {
+        std::vector<std::pair<std::string, std::string>> cmdOptions = {
             {FLAGS_d, FLAGS_m},
             {FLAGS_d_ag, FLAGS_m_ag},
             {FLAGS_d_hp, FLAGS_m_hp},
             {FLAGS_d_em, FLAGS_m_em},
-            {FLAGS_d_lm, FLAGS_m_lm},
-            {FLAGS_d_ey, FLAGS_m_ey}
+            {FLAGS_d_lm, FLAGS_m_lm}
         };
         FaceDetection faceDetector(FLAGS_m, FLAGS_d, 1, false, FLAGS_async, FLAGS_t, FLAGS_r,
                                    static_cast<float>(FLAGS_bb_enlarge_coef), static_cast<float>(FLAGS_dx_coef), static_cast<float>(FLAGS_dy_coef));
@@ -120,7 +118,6 @@ int main(int argc, char *argv[]) {
         HeadPoseDetection headPoseDetector(FLAGS_m_hp, FLAGS_d_hp, FLAGS_n_hp, FLAGS_dyn_hp, FLAGS_async, FLAGS_r);
         EmotionsDetection emotionsDetector(FLAGS_m_em, FLAGS_d_em, FLAGS_n_em, FLAGS_dyn_em, FLAGS_async, FLAGS_r);
         FacialLandmarksDetection facialLandmarksDetector(FLAGS_m_lm, FLAGS_d_lm, FLAGS_n_lm, FLAGS_dyn_lm, FLAGS_async, FLAGS_r);
-        EyeStateDetection eyeStateDetector(FLAGS_m_ey, FLAGS_d_ey, FLAGS_n_ey, FLAGS_dyn_ey, FLAGS_async, FLAGS_r);
 
         for (auto && option : cmdOptions) {
             auto deviceName = option.first;
@@ -138,6 +135,7 @@ int main(int argc, char *argv[]) {
 
             /** Loading extensions for the CPU device **/
             if ((deviceName.find("CPU") != std::string::npos)) {
+                ie.AddExtension(std::make_shared<Extensions::Cpu::CpuExtensions>(), "CPU");
 
                 if (!FLAGS_l.empty()) {
                     // CPU(MKLDNN) extensions are loaded as a shared library and passed as a pointer to base extension
@@ -166,7 +164,6 @@ int main(int argc, char *argv[]) {
         Load(headPoseDetector).into(ie, FLAGS_d_hp, FLAGS_dyn_hp);
         Load(emotionsDetector).into(ie, FLAGS_d_em, FLAGS_dyn_em);
         Load(facialLandmarksDetector).into(ie, FLAGS_d_lm, FLAGS_dyn_lm);
-        Load(eyeStateDetector).into(ie, FLAGS_d_ey, FLAGS_dyn_ey);
         // ----------------------------------------------------------------------------------------------------
 
         // --------------------------- 3. Doing inference -----------------------------------------------------
@@ -174,11 +171,12 @@ int main(int argc, char *argv[]) {
         slog::info << "Start inference " << slog::endl;
 
         bool isFaceAnalyticsEnabled = ageGenderDetector.enabled() || headPoseDetector.enabled() ||
-                                      emotionsDetector.enabled() || facialLandmarksDetector.enabled() || 
-                                      eyeStateDetector.enabled();
+                                      emotionsDetector.enabled() || facialLandmarksDetector.enabled();
 
         std::ostringstream out;
         size_t framesCounter = 0;
+        bool frameReadStatus;
+        bool isLastFrame;
         int delay = 1;
         double msrate = -1;
         cv::Mat prev_frame, next_frame;
@@ -204,23 +202,18 @@ int main(int argc, char *argv[]) {
         prev_frame = frame.clone();
 
         // Reading the next frame
-        bool frameReadStatus = cap.read(frame);
+        frameReadStatus = cap.read(frame);
 
         std::cout << "To close the application, press 'CTRL+C' here";
         if (!FLAGS_no_show) {
-            std::cout << " or switch to the output window and press Q or Esc";
+            std::cout << " or switch to the output window and press any key";
         }
         std::cout << std::endl;
-
-        const cv::Point THROUGHPUT_METRIC_POSITION{10, 45};
-
-        cv::Size graphSize{static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH) / 4), 60};
-        Presenter presenter(FLAGS_u, THROUGHPUT_METRIC_POSITION.y + 15, graphSize);
 
         while (true) {
             timer.start("total");
             framesCounter++;
-            bool isLastFrame = !frameReadStatus;
+            isLastFrame = !frameReadStatus;
 
             // Retrieving face detection results for the previous frame
             faceDetector.wait();
@@ -291,7 +284,7 @@ int main(int argc, char *argv[]) {
                     float intensity_mean = calcMean(prev_frame(rect));
 
                     if ((face == nullptr) ||
-                        ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f)) {
+                        ((face != nullptr) && ((std::abs(intensity_mean - face->_intensity_mean) / face->_intensity_mean) > 0.07f))) {
                         face = std::make_shared<Face>(id++, rect);
                     } else {
                         prev_faces.remove(face);
@@ -329,31 +322,15 @@ int main(int argc, char *argv[]) {
                     face->updateLandmarks(facialLandmarksDetector[i]);
                 }
 
-                face->eyesStateEnable(eyeStateDetector.enabled() && facialLandmarksDetector.enabled() && 
-                                       i < facialLandmarksDetector.maxBatch);
-
-                if (isFaceAnalyticsEnabled && facialLandmarksDetector.enabled() &&
-                    eyeStateDetector.enabled()) {
-                    
-                    cv::Mat face_mat = prev_frame(face->_location);
-                    eyeStateDetector.enqueue(face_mat, face->getLandmarks());
-                    eyeStateDetector.submitRequest();
-                    eyeStateDetector.wait();
-                    eyeStateDetector[i];
-                    face->updateEyesState(eyeStateDetector[i]);
-                }
-
                 faces.push_back(face);
             }
-
-            presenter.drawGraphs(prev_frame);
 
             //  Visualizing results
             if (!FLAGS_no_show || !FLAGS_o.empty()) {
                 out.str("");
                 out << "Total image throughput: " << std::fixed << std::setprecision(2)
                     << 1000.f / (timer["total"].getSmoothedDuration()) << " fps";
-                cv::putText(prev_frame, out.str(), THROUGHPUT_METRIC_POSITION, cv::FONT_HERSHEY_TRIPLEX, 1,
+                cv::putText(prev_frame, out.str(), cv::Point2f(10, 45), cv::FONT_HERSHEY_TRIPLEX, 1.2,
                             cv::Scalar(255, 0, 0), 2);
 
                 // drawing faces
@@ -385,12 +362,8 @@ int main(int argc, char *argv[]) {
                     cv::waitKey(0);
                 }
                 break;
-            } else if (!FLAGS_no_show) {
-                int key = cv::waitKey(delay);
-                if (27 == key || 'Q' == key || 'q' == key) {
-                    break;
-                }
-                presenter.handleKey(key);
+            } else if (!FLAGS_no_show && -1 != cv::waitKey(delay)) {
+                break;
             }
         }
 
@@ -399,14 +372,12 @@ int main(int argc, char *argv[]) {
 
         // Showing performance results
         if (FLAGS_pc) {
-            faceDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d));
-            ageGenderDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_ag));
-            headPoseDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_hp));
-            emotionsDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_em));
-            facialLandmarksDetector.printPerformanceCounts(getFullDeviceName(ie, FLAGS_d_lm));
+            faceDetector.printPerformanceCounts();
+            ageGenderDetector.printPerformanceCounts();
+            headPoseDetector.printPerformanceCounts();
+            emotionsDetector.printPerformanceCounts();
+            facialLandmarksDetector.printPerformanceCounts();
         }
-
-        std::cout << presenter.reportMeans() << '\n';
         // ---------------------------------------------------------------------------------------------------
 
         if (!FLAGS_o.empty()) {

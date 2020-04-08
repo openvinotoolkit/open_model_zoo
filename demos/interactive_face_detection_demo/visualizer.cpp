@@ -228,30 +228,6 @@ void Visualizer::drawFace(cv::Mat& img, Face::Ptr f, bool drawEmotionBar) {
             int y_lm = f->_location.y + static_cast<int>(f->_location.height * normed_y);
             cv::circle(img, cv::Point(x_lm, y_lm), 1 + static_cast<int>(0.012 * f->_location.width), cv::Scalar(0, 255, 255), -1);
         }
-
-        if (f->isEyesStateEnable()){
-            EyeStateDetection::Result r = f->getEyesState();
-            
-            cv::Point l2 = cv::Point(f->_location.x + f->_location.width * normed_landmarks[0], 
-                                     f->_location.y + f->_location.height * normed_landmarks[1]);
-            cv::Point l1 = cv::Point(f->_location.x + f->_location.width * normed_landmarks[2], 
-                                     f->_location.y + f->_location.height * normed_landmarks[3]);
-            cv::Point r1 = cv::Point(f->_location.x + f->_location.width * normed_landmarks[4], 
-                                     f->_location.y + f->_location.height * normed_landmarks[5]);
-            cv::Point r2 = cv::Point(f->_location.x + f->_location.width * normed_landmarks[6], 
-                                     f->_location.y + f->_location.height * normed_landmarks[7]);
-
-            cv::Rect leftEye =  cv::Rect(l1.x, l1.y - (l2.x - l1.x) / 2, l2.x - l1.x, l2.x - l1.x);
-            cv::Rect rightEye = cv::Rect(r1.x, r1.y - (r2.x - r1.x) / 2, r2.x - r1.x, r2.x - r1.x);
-            if (r.leftEyeState)
-                rectangle(img, leftEye, cv::Scalar(0, 255, 0), 2);
-            else
-                rectangle(img, leftEye, cv::Scalar(0, 0, 255), 2);         
-            if (r.rightEyeState)
-                rectangle(img, rightEye, cv::Scalar(0, 255, 0), 2);
-            else
-                rectangle(img, rightEye, cv::Scalar(0, 0, 255), 2);           
-        }
     }
 
     photoFrameVisualizer->draw(img, f->_location, genderColor);

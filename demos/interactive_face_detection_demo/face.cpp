@@ -49,12 +49,6 @@ void Face::updateLandmarks(std::vector<float> values) {
     _landmarks = std::move(values);
 }
 
-void Face::updateEyesState(EyeStateDetection::Result values)
-{
-    _leftEyeOpen = values.leftEyeState;
-    _rightEyeOpen = values.rightEyeState;
-}
-
 int Face::getAge() {
     return static_cast<int>(std::floor(_age + 0.5f));
 }
@@ -83,10 +77,6 @@ const std::vector<float>& Face::getLandmarks() {
     return _landmarks;
 }
 
-EyeStateDetection::Result Face::getEyesState() {
-    return EyeStateDetection::Result{_leftEyeOpen, _rightEyeOpen};
-}
-
 size_t Face::getId() {
     return _id;
 }
@@ -103,9 +93,6 @@ void Face::headPoseEnable(bool value) {
 void Face::landmarksEnable(bool value) {
     _isLandmarksEnabled = value;
 }
-void Face::eyesStateEnable(bool value) {
-    _isEyesStateEnable = value;
-}
 
 bool Face::isAgeGenderEnabled() {
     return _isAgeGenderEnabled;
@@ -118,9 +105,6 @@ bool Face::isHeadPoseEnabled() {
 }
 bool Face::isLandmarksEnabled() {
     return _isLandmarksEnabled;
-}
-bool Face::isEyesStateEnable(){
-    return _isEyesStateEnable;
 }
 
 float calcIoU(cv::Rect& src, cv::Rect& dst) {

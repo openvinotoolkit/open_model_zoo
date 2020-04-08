@@ -26,7 +26,6 @@ public:
     void updateEmotions(std::map<std::string, float> values);
     void updateHeadPose(HeadPoseDetection::Results values);
     void updateLandmarks(std::vector<float> values);
-    void updateEyesState(EyeStateDetection::Result values);
 
     int getAge();
     bool isMale();
@@ -34,20 +33,17 @@ public:
     std::pair<std::string, float> getMainEmotion();
     HeadPoseDetection::Results getHeadPose();
     const std::vector<float>& getLandmarks();
-    EyeStateDetection::Result getEyesState();
     size_t getId();
 
     void ageGenderEnable(bool value);
     void emotionsEnable(bool value);
     void headPoseEnable(bool value);
     void landmarksEnable(bool value);
-    void eyesStateEnable(bool value);
 
     bool isAgeGenderEnabled();
     bool isEmotionsEnabled();
     bool isHeadPoseEnabled();
     bool isLandmarksEnabled();
-    bool isEyesStateEnable();
 
 public:
     cv::Rect _location;
@@ -61,14 +57,11 @@ private:
     std::map<std::string, float> _emotions;
     HeadPoseDetection::Results _headPose;
     std::vector<float> _landmarks;
-    bool _leftEyeOpen;
-    bool _rightEyeOpen;
 
     bool _isAgeGenderEnabled;
     bool _isEmotionsEnabled;
     bool _isHeadPoseEnabled;
     bool _isLandmarksEnabled;
-    bool _isEyesStateEnable;
 };
 
 // ----------------------------------- Utils -----------------------------------------------------------------
