@@ -17,6 +17,8 @@
 
 ## Accuracy
 
+See [the original repository](https://github.com/KaimingHe/deep-residual-networks).
+
 ## Performance
 
 ## Input

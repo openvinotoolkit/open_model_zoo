@@ -22,7 +22,7 @@ models, check out the [repository](https://github.com/shicai/DenseNet-Caffe).
 
 ## Accuracy
 
-See [https://github.com/shicai/DenseNet-Caffe]()
+See [the original repository](https://github.com/shicai/DenseNet-Caffe).
 
 ## Performance
 
