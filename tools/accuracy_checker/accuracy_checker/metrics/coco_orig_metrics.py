@@ -109,84 +109,43 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
     def configure(self):
         self.threshold = get_or_parse_value(self.get_value_from_config('threshold'), COCO_THRESHOLDS)
 
-    @staticmethod
-    def generate_map_pred_label_id_to_coco_cat_id(has_background, use_full_label_map):
-        shift = 0 if has_background else 1
-        max_cat = 90 if use_full_label_map else 80
-        max_key = max_cat - shift
-        res_map = {i: i + shift for i in range(0, max_key+1)}
-        assert max(res_map.values()) == max_cat
-        return res_map
-
-    def _prepare_coco_structures(self):
-        annotation_conversion_parameters = self.dataset.config.get('annotation_conversion')
-        if not annotation_conversion_parameters:
-            raise ConfigError('annotation_conversion parameter is not pointed, '
-                              'but it is required for coco original metrics')
-        annotation_file = annotation_conversion_parameters.get('annotation_file')
-        if not annotation_file.is_file():
-            raise ConfigError("annotation file '{}' is not found".format(annotation_file))
-        has_background = annotation_conversion_parameters.get('has_background', False)
-        use_full_label_map = annotation_conversion_parameters.get('use_full_label_map', False)
+    def _prepare_coco_structures(self, annotations):
         if not self.dataset.metadata:
             raise ConfigError('coco orig metrics require dataset_meta'
                               'Please provide dataset meta file or regenerate annotation')
         meta = self.dataset.metadata
 
-        if COCO is None:
-            raise ValueError('pycocotools is not installed, please install it')
-        coco = COCO(str(annotation_file))
-        assert 0 not in coco.cats.keys()
-        coco_cat_name_to_id = {v['name']: k for k, v in coco.cats.items()}
-        if has_background:
-            assert 'background_label' in meta
-            bg_lbl = meta['background_label']
-            bg_name = meta['label_map'][bg_lbl]
-            assert bg_name not in coco_cat_name_to_id
-            coco_cat_name_to_id[bg_name] = bg_lbl
-        else:
-            assert 'background_label' not in meta
         if not meta.get('label_map'):
             raise ConfigError('coco_orig metrics require label_map providing in dataset_meta'
                               'Please provide dataset meta file or regenerated annotation')
 
-        if not use_full_label_map:
-            map_pred_label_id_to_coco_cat_id = {k: coco_cat_name_to_id[v] for k, v in meta['label_map'].items()}
-        else:
-            map_pred_label_id_to_coco_cat_id = self.generate_map_pred_label_id_to_coco_cat_id(has_background,
-                                                                                              use_full_label_map)
-            for k, v in meta['label_map'].items():
-                assert map_pred_label_id_to_coco_cat_id[k] == coco_cat_name_to_id[v], (
-                    "k = {}, v = {}, map_pred_label_id_to_coco_cat_id[k] = {}, coco_cat_name_to_id[v] = {}".format(
-                        k, v, map_pred_label_id_to_coco_cat_id[k], coco_cat_name_to_id[v]))
+        if COCO is None:
+            raise ValueError('pycocotools is not installed, please install it')
+        coco_data_to_store = self._prepare_data_for_annotation_file(
+            annotations, meta.get('label_map'), self.iou_type)
 
-            assert all(map_pred_label_id_to_coco_cat_id[k] == coco_cat_name_to_id[v]
-                       for k, v in meta['label_map'].items())
+        coco_annotation = self._create_json(coco_data_to_store)
+        coco = COCO(str(coco_annotation))
 
-        map_coco_img_file_name_to_img_id = {os.path.basename(v['file_name']): v['id'] for v in coco.dataset['images']}
-        assert len(map_coco_img_file_name_to_img_id) == len(coco.dataset['images']), "Image name duplications"
-
-        return coco, map_coco_img_file_name_to_img_id, map_pred_label_id_to_coco_cat_id
+        return coco
 
     @staticmethod
     def _convert_data_to_coco_format(
-            predictions, map_coco_img_file_name_to_img_id, map_pred_label_id_to_coco_cat_id, iou_type='bbox'
+            predictions, iou_type='bbox'
     ):
         coco_data_to_store = []
         for pred in predictions:
             prediction_data_to_store = []
             cur_name = pred.identifier
             cur_name = os.path.basename(cur_name)
-            assert cur_name in map_coco_img_file_name_to_img_id
-            cur_img_id = map_coco_img_file_name_to_img_id[cur_name]
+            cur_img_id = int(cur_name.split(".")[0])
 
             labels = pred.labels.tolist()
             scores = pred.scores.tolist()
             cur_num = len(labels)
             assert len(scores) == cur_num
 
-            coco_cats = [map_pred_label_id_to_coco_cat_id[lbl] for lbl in labels]
-            for (s, cur_cat) in zip(scores, coco_cats):
+            for (s, cur_cat) in zip(scores, labels):
                 prediction_data_to_store.append({
                     'image_id': cur_img_id,
                     'score': s,
@@ -202,44 +161,82 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         return coco_data_to_store
 
     @staticmethod
-    def _convert_annotation_to_coco_bbox_format(
-            annotations, map_coco_img_file_name_to_img_id, map_pred_label_id_to_coco_cat_id
+    def _calculate_area(data):
+        width = data.x_maxs - data.x_mins + 1
+        height = data.y_maxs - data.y_mins + 1
+        area = width * height
+
+        return area
+
+    def _prepare_data_for_annotation_file(
+            self, annotations, dataset_label_map, iou_type='bbox'
     ):
         coco_annotation_to_store = []
+        coco_category_to_store = []
+        coco_image_to_store = []
+        label_map = set()
+        count = 0
         for annotation in annotations:
             annotation_data_to_store = []
             cur_name = annotation.identifier
             cur_name = os.path.basename(cur_name)
-            assert cur_name in map_coco_img_file_name_to_img_id
-            cur_img_id = map_coco_img_file_name_to_img_id[cur_name]
+            cur_img_id = int(cur_name.split(".")[0])
 
             labels = annotation.labels.tolist()
-            x = annotation.x_mins
-            width = annotation.x_maxs - annotation.x_mins
-            y = annotation.y_mins
-            height = annotation.y_maxs - annotation.y_mins
+            areas = self._calculate_area(annotation).tolist()
+            iscrowds = annotation.metadata.get('iscrowd')
 
-            coco_cats = [map_pred_label_id_to_coco_cat_id[lbl] for lbl in labels]
-            for cur_cat, x1, y1, w, h  in zip(coco_cats, x, y, width, height):
+            for cur_cat, iscrowd, area in zip(
+                labels, iscrowds, areas
+            ):
                 annotation_data_to_store.append({
+                    'id': count,
                     'image_id': cur_img_id,
                     'category_id': cur_cat,
                     '_image_name_from_dataset': cur_name,
-                    'bbox': [x1, y1, w, h]
+                    'iscrowd': iscrowd,
+                    'area': area
                 })
+                count += 1
+                label_map.add(cur_cat)
 
+            iou_specific_converter = iou_specific_processing.get(iou_type)
+            if iou_specific_converter is None:
+                raise ValueError("unknown iou type: '{}'".format(iou_type))
+            annotation_data_to_store = iou_specific_converter(annotation_data_to_store, annotation)
             coco_annotation_to_store.extend(annotation_data_to_store)
 
-        return coco_annotation_to_store
+            coco_image_to_store.append({
+                'id': cur_img_id,
+                'file_name': cur_name
+            })
+
+        for cat in label_map:
+            coco_category_to_store.append({
+                'id': cat,
+                'name': dataset_label_map[cat]
+            })
+
+        coco_data_to_store = {
+            'info': {},
+            'images': coco_image_to_store,
+            'annotations': coco_annotation_to_store,
+            'licenses': [],
+            'categories': coco_category_to_store
+        }
+        return coco_data_to_store
 
     @staticmethod
-    def _reload_results_to_coco_class(coco, coco_data_to_store):
+    def _create_json(coco_data_to_store):
         with tempfile.NamedTemporaryFile() as ftmp:
             json_file_to_store = ftmp.name + ".json"
         with open(json_file_to_store, 'w') as f:
             json.dump(coco_data_to_store, f, indent=4)
 
-        json_file_to_load = json_file_to_store
+        return json_file_to_store
+
+    def _reload_results_to_coco_class(self, coco, coco_data_to_store):
+        json_file_to_load = self._create_json(coco_data_to_store)
         coco_res = coco.loadRes(json_file_to_load)
 
         return coco_res
@@ -297,26 +294,19 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
         return res
 
     def compute_precision_recall(self, annotations, predictions):
-        coco, map_coco_img_file_name_to_img_id, map_pred_label_id_to_coco_cat_id = self._prepare_coco_structures()
-
+        coco = self._prepare_coco_structures(annotations)
         coco_data_to_store = self._convert_data_to_coco_format(
-            predictions, map_coco_img_file_name_to_img_id, map_pred_label_id_to_coco_cat_id, self.iou_type
+            predictions, self.iou_type
         )
 
         coco_res = self._reload_results_to_coco_class(coco, coco_data_to_store)
-
-        coco_annotation_to_store = self._convert_annotation_to_coco_bbox_format(
-            annotations, map_coco_img_file_name_to_img_id, map_pred_label_id_to_coco_cat_id
-        )
-
-        coco_annotation = self._reload_results_to_coco_class(coco, coco_annotation_to_store)
 
         if SHOULD_SHOW_PREDICTIONS:
             data_source = self.dataset.config.get('data_source')
             should_display_debug_images = SHOULD_DISPLAY_DEBUG_IMAGES
             self._debug_printing_and_displaying_predictions(coco, coco_res, data_source, should_display_debug_images)
 
-        res = self._run_coco_evaluation(coco_annotation, coco_res, self.iou_type, self.threshold)
+        res = self._run_coco_evaluation(coco, coco_res, self.iou_type, self.threshold)
         print_info("MSCOCOorigBaseMetric.compute_precision_recall: returning " + str(res))
 
         return res
