@@ -70,7 +70,9 @@ Options:
   -nthreads NUMBER_THREADS, --number_threads NUMBER_THREADS
                         Optional. Number of threads to use for inference on
                         CPU (including HETERO cases)
-  --no_show             Optional. Don't show output
+  -loop_input, --loop_input
+                        Optional. Iterate over input infinitely
+  -no_show, --no_show   Optional. Don't show output
 ```
 
 Running the application with the empty list of options yields the usage message given above and an error message.

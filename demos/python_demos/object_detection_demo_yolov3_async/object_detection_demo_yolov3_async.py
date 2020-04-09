@@ -65,7 +65,9 @@ def build_argparser():
     args.add_argument("-nthreads", "--number_threads",
                       help="Optional. Number of threads to use for inference on CPU (including HETERO cases)",
                       default=None, type=int)
-    args.add_argument("--no_show", help="Optional. Don't show output", action='store_true')
+    args.add_argument("-loop_input", "--loop_input", help="Optional. Iterate over input infinitely",
+                      action='store_true')
+    args.add_argument("-no_show", "--no_show", help="Optional. Don't show output", action='store_true')
     return parser
 
 
@@ -95,12 +97,28 @@ class YoloParams:
             self.isYoloV3 = True # Weak way to determine but the only one.
 
 
-class Mode(Enum):
+class Modes(Enum):
     USER_SPECIFIED = 0
     MIN_LATENCY = 1
 
+
+class Mode():
+    def __init__(self, value):
+        self.current = value
+
     def next(self):
-        return Mode((self.value + 1) if self.value < 1 else 0)
+        if self.current.value + 1 < len(Modes):
+            self.current = Modes(self.current.value + 1)
+        else:
+            self.current = Modes(0)
+
+
+class ModeInfo():
+    def __init__(self):
+        self.last_start_time = time()
+        self.last_end_time = None
+        self.frames_count = 0
+        self.latency_sum = 0
 
 
 def entry_index(side, coord, classes, location, entry):
@@ -181,7 +199,7 @@ def intersection_over_union(box_1, box_2):
     return area_of_overlap / area_of_union
 
 
-def get_preprocessed_in_frame(frame, h, w):
+def preprocess_frame(frame, h, w):
     in_frame = cv2.resize(frame, (w, h))
     in_frame = in_frame.transpose((2, 0, 1))  # Change data layout from HWC to CHW
     in_frame = np.expand_dims(in_frame, axis=0)
@@ -211,24 +229,31 @@ def filter_objects(objects, iou_threshold, prob_threshold):
             if intersection_over_union(objects[i], objects[j]) > iou_threshold:
                 objects[j]['confidence'] = 0
 
-    # Drawing objects with respect to the --prob_threshold CLI parameter
-    objects = [obj for obj in objects if obj['confidence'] >= prob_threshold]
-
-    return objects
+    return tuple(obj for obj in objects if obj['confidence'] >= prob_threshold)
 
 
 def async_callback(status, callback_args):
-    request_id, exec_net, frames_data, completed_request_results, empty_request_ids, mode, event = callback_args
+    request_id, exec_net, frame_id, frame_mode, frame, start_time, raw_frame_shape, completed_request_results, \
+    empty_request_ids, mode, event, callback_exceptions = callback_args
+    
+    try:
+        if status != 0:
+            raise RuntimeError('Infer Request has returned status code {}'.format(status))
+        
+        outputs = exec_net.requests[request_id].outputs.copy()
+        completed_request_results[frame_id] = (frame, outputs, start_time, raw_frame_shape, frame_mode == mode.current)
 
-    outputs = exec_net.requests[request_id].outputs.copy()
-    frame_id, frame, frame_mode, start_time = frames_data[request_id]
-    completed_request_results[frame_id] = (frame, outputs, start_time)
-
-    if mode['current'] == frame_mode:
-        empty_request_ids.append(request_id)
-
-    frames_data[request_id] = None
+        if mode.current == frame_mode:
+            empty_request_ids.append(request_id)
+    except Exception as e:
+        callback_exceptions.append(e)
+    
     event.set()
+
+
+def put_highlighted_text(frame, message, position, font_face, font_scale, color, thickness):
+    cv2.putText(frame, message, position, font_face, font_scale, (255, 255, 255), thickness + 1) # white border
+    cv2.putText(frame, message, position, font_face, font_scale, color, thickness)
 
 
 def await_requests_completion(requests):
@@ -236,52 +261,48 @@ def await_requests_completion(requests):
         request.wait()
 
 
-def put_highlighted_text(args):
-    cv2.putText(*args[:-2], (255, 255, 255), args[-1] + 1)
-    cv2.putText(*args)
-
-
 def main():
     args = build_argparser().parse_args()
-
-    model_xml = args.model
-    model_bin = os.path.splitext(model_xml)[0] + ".bin"
 
     # ------------------------ 1. Load extensions library (if specified), create plugin configs ------------------------
     log.info("Creating Inference Engine...")
     
     ie = IECore()
 
-    config_min_latency = {}
-    config_user_specified = {}
+    config_user_specified = {'CPU': {}, 'GPU': {}}
+    config_min_latency = {'CPU': {}, 'GPU': {}}
+
+    devices_nstreams = {}
+    if args.num_streams:
+        devices_nstreams = {device: args.num_streams for device in ['CPU', 'GPU'] if device in args.device} \
+                           if args.num_streams.isdigit() \
+                           else dict([device.split(':') for device in args.num_streams.split(',')])
 
     if 'CPU' in args.device:
         if args.cpu_extension:
             ie.add_extension(args.cpu_extension, 'CPU')
         if args.number_threads is not None:
-            config_user_specified['CPU_THREADS_NUM'] = str(args.number_threads)
-        config_min_latency['CPU_THROUGHPUT_STREAMS'] = '1'
-        config_user_specified['CPU_BIND_THREAD'] = 'NO'
+            config_user_specified['CPU']['CPU_THREADS_NUM'] = str(args.number_threads)
+        config_user_specified['CPU']['CPU_BIND_THREAD'] = 'NO'
+        if 'CPU' in devices_nstreams:
+            config_user_specified['CPU']['CPU_THROUGHPUT_STREAMS'] = (devices_nstreams['CPU'] \
+                                                                      if int(devices_nstreams['CPU']) > 0 \
+                                                                      else 'CPU_THROUGHPUT_AUTO')
+
+        config_min_latency['CPU']['CPU_THROUGHPUT_STREAMS'] = '1'
 
     if 'GPU' in args.device:
-         config_min_latency['GPU_THROUGHPUT_STREAMS'] = '1'
-
-    if args.num_streams:
-        if args.num_streams.isdigit():
-            devices_nstreams = {device: int(args.num_streams) for device in ['CPU', 'GPU'] if device in args.device}
-        else:
-            devices_nstreams = {device.split(':')[0]: device.split(':')[1] for device in args.num_streams.split(',')}
-        
-        if 'CPU' in devices_nstreams:
-            config_user_specified['CPU_THROUGHPUT_STREAMS'] = (str(devices_nstreams['CPU']) \
-                                                               if int(devices_nstreams['CPU']) > 0 \
-                                                               else 'CPU_THROUGHPUT_AUTO')
         if 'GPU' in devices_nstreams:
-            config_user_specified['GPU_THROUGHPUT_STREAMS'] = (str(devices_nstreams['GPU']) \
-                                                               if int(devices_nstreams['GPU']) > 0 \
-                                                               else 'GPU_THROUGHPUT_AUTO')
+            config_user_specified['GPU']['GPU_THROUGHPUT_STREAMS'] = (devices_nstreams['GPU'] \
+                                                                      if int(devices_nstreams['GPU']) > 0 \
+                                                                      else 'GPU_THROUGHPUT_AUTO')
+
+        config_min_latency['GPU']['GPU_THROUGHPUT_STREAMS'] = '1'
 
     # -------------------- 2. Reading the IR generated by the Model Optimizer (.xml and .bin files) --------------------
+    model_xml = args.model
+    model_bin = os.path.splitext(model_xml)[0] + ".bin"
+    
     log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
     net = IENetwork(model=model_xml, weights=model_bin)
 
@@ -313,73 +334,67 @@ def main():
 
     input_stream = 0 if args.input == "cam" else args.input
 
-    mode = {'current': Mode.USER_SPECIFIED}
+    mode = Mode(Modes.USER_SPECIFIED)
     cap = cv2.VideoCapture(input_stream)
+
     number_input_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    number_input_frames = 1 if number_input_frames != -1 and number_input_frames < 0 else number_input_frames
-
-    wait_key_code = 1
-
-    # Number of frames in picture is 1 and this will be read in cycle. Sync mode is default value for this case
-    if number_input_frames != 1:
-        ret, frame = cap.read()
+    if number_input_frames == 1: # input is image
+        wait_key_time = 0
+        mode.current = Modes.MIN_LATENCY
     else:
-        mode['current'] = Mode.MIN_LATENCY
-        wait_key_code = 0
+        wait_key_time = 1
 
     # ----------------------------------------- 5. Loading model to the plugin -----------------------------------------
     log.info("Loading model to the plugin")
-    exec_net_min_latency = ie.load_network(network=net, device_name=args.device.split(":")[-1].split(",")[0],
-                                           config=config_min_latency, num_requests=1)
-    exec_net_user_specified = ie.load_network(network=net, device_name=args.device,
-                                              config=config_user_specified, num_requests=args.num_infer_requests)
+    exec_nets = {}
+
+    ie.set_config(config_user_specified['CPU'], 'CPU')
+    ie.set_config(config_user_specified['GPU'], 'GPU')
+    exec_nets[Modes.USER_SPECIFIED] = ie.load_network(network=net, device_name=args.device,
+                                                      num_requests=args.num_infer_requests)
+
+    ie.set_config(config_min_latency['CPU'], 'CPU')
+    ie.set_config(config_min_latency['GPU'], 'GPU')
+    exec_nets[Modes.MIN_LATENCY] = ie.load_network(network=net, device_name=args.device.split(":")[-1].split(",")[0],
+                                                   num_requests=1)
 
     # shared
     empty_request_ids = deque()
     completed_request_results = {}
-    frames_data = {}
-    frame_buffer = deque()
     next_frame_id = 0
     next_shown_frame_id = 0
-    raw_frame_shape = None
-    new_frame_shape = None
-    prev_frame_show_time = 0
-    avg_frame_show_period = 0
     event = threading.Event()
+    callback_exceptions = []
 
     # user specified
-    frames_data[Mode.USER_SPECIFIED] = [None] * args.num_infer_requests
-    if mode['current'] == Mode.USER_SPECIFIED:
+    if mode.current == Modes.USER_SPECIFIED:
         empty_request_ids.extend(range(args.num_infer_requests))
 
     # min latency
-    frames_data[Mode.MIN_LATENCY] = [None]
-    if mode['current'] == Mode.MIN_LATENCY:
+    if mode.current == Modes.MIN_LATENCY:
         empty_request_ids.append(0)
-
-    for id, req in enumerate(exec_net_user_specified.requests):
-        req.set_completion_callback(py_callback=async_callback,
-                                    py_data=(id, exec_net_user_specified, frames_data[Mode.USER_SPECIFIED],
-                                             completed_request_results, empty_request_ids, mode, event))
-
-    exec_net_min_latency.requests[0].set_completion_callback(py_callback=async_callback,
-                                                             py_data=(0, exec_net_min_latency,
-                                                                      frames_data[Mode.MIN_LATENCY],
-                                                                      completed_request_results, empty_request_ids,
-                                                                      mode, event))
 
     # ----------------------------------------------- 6. Doing inference -----------------------------------------------
     log.info("Starting inference...")
     print("To close the application, press 'CTRL+C' here or switch to the output window and press ESC key")
     print("To switch between min_latency/user_specified modes, press TAB key in the output window")
 
-    while cap.isOpened():
-        if next_shown_frame_id in completed_request_results:
-            frame, output, start_time = completed_request_results[next_shown_frame_id]
-            del completed_request_results[next_shown_frame_id]
-            next_shown_frame_id += 1
+    mode_info = { mode.current: ModeInfo() }
+    
+    while (cap.isOpened() \
+          or completed_request_results \
+          or len(empty_request_ids) < len(exec_nets[mode.current].requests)) \
+          and not callback_exceptions:
 
-            objects = get_objects(output, net, new_frame_shape, raw_frame_shape, args.prob_threshold)
+        if next_shown_frame_id in completed_request_results:
+            frame, output, start_time, \
+            raw_frame_shape, is_same_mode = completed_request_results.pop(next_shown_frame_id)
+            
+            next_shown_frame_id += 1
+            if is_same_mode:
+                mode_info[mode.current].frames_count += 1
+
+            objects = get_objects(output, net, (h, w), raw_frame_shape, args.prob_threshold)
             objects = filter_objects(objects, args.iou_threshold, args.prob_threshold)
 
             if len(objects) and args.raw_output_message:
@@ -409,89 +424,94 @@ def main():
                             (obj['xmin'], obj['ymin'] - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
 
             # Draw performance stats over frame
-            latency = time() - start_time
-            latency_message = "Latency: {:.3f} ms".format(latency * 1e3)
-            fps_message = "FPS: {:.3f}".format(1 / latency)
-            if mode['current'] == Mode.USER_SPECIFIED:
-                mode_message = "\"User specified\" mode"
-            if mode['current'] == Mode.MIN_LATENCY:
-                mode_message = "\"Min latency\" mode"
+            if mode_info[mode.current].frames_count != 0:
+                fps_message = "FPS: {:.1f}".format(mode_info[mode.current].frames_count / \
+                                                   (time() - mode_info[mode.current].last_start_time))
+                mode_info[mode.current].latency_sum += time() - start_time
+                latency_message = "Latency: {:.1f} ms".format((mode_info[mode.current].latency_sum / \
+                                                              mode_info[mode.current].frames_count) * 1e3)
 
-            put_highlighted_text((frame, latency_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2))
-            put_highlighted_text((frame, fps_message, (15, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2))
-            put_highlighted_text((frame, mode_message, (10, int(origin_im_size[0] - 20)),
-                                  cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2))
+                put_highlighted_text(frame, fps_message, (15, 20), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
+                put_highlighted_text(frame, latency_message, (15, 50), cv2.FONT_HERSHEY_COMPLEX, 0.75, (200, 10, 10), 2)
+            
+            mode_message = "{} mode".format(mode.current.name)
+            put_highlighted_text(frame, mode_message, (10, int(origin_im_size[0] - 20)),
+                                 cv2.FONT_HERSHEY_COMPLEX, 0.75, (10, 10, 200), 2)
 
             if not args.no_show:
                 cv2.imshow("Detection Results", frame)
-                if prev_frame_show_time > 0:
-                    avg_frame_show_period = ((avg_frame_show_period * (next_shown_frame_id - 1)) \
-                        + (time() - prev_frame_show_time)) / next_shown_frame_id
-                prev_frame_show_time = time()
+                key = cv2.waitKey(wait_key_time)
 
-        if empty_request_ids:
-            request_id = empty_request_ids.popleft()
-
-            if not frame_buffer:
-                ret, frame = cap.read()
-                if not ret:
+                if key == 27: # ESC key
                     break
-                
-                raw_frame_shape = frame.shape[:-1]
+                if key == 9: # Tab key
+                    prev_mode = mode.current
+                    mode.next()
+                    
+                    await_requests_completion(exec_nets[prev_mode].requests)
+                    empty_request_ids.clear()
+                    if mode.current == Modes.USER_SPECIFIED:
+                        empty_request_ids.extend(range(args.num_infer_requests))
+                    elif mode.current == Modes.MIN_LATENCY:
+                        empty_request_ids.append(0)
+                    
+                    mode_info[prev_mode].last_end_time = time()
+                    mode_info[mode.current] = ModeInfo()
 
-                frame_id = next_frame_id
-                next_frame_id += 1
-            else:
-                frame_id, frame = frame_buffer.popleft()
+        elif empty_request_ids and cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                if args.loop_input:
+                    cap.open(input_stream)
+                else:
+                    cap.release()
+                continue
+            request_id = empty_request_ids.popleft()
+            
+            raw_frame_shape = frame.shape[:-1]
+
+            frame_id = next_frame_id
+            next_frame_id += 1
 
             # resize input_frame to network size
-            in_frame = get_preprocessed_in_frame(frame.copy(), h, w)
-            new_frame_shape = in_frame.shape[2:]
+            in_frame = preprocess_frame(frame, h, w)
 
             # Start inference
-            if mode['current'] == Mode.USER_SPECIFIED:
-                frames_data[Mode.USER_SPECIFIED][request_id] = (frame_id, frame.copy(), mode['current'], time())
-                exec_net_user_specified.start_async(request_id=request_id, inputs={input_blob: in_frame})
-            elif mode['current'] == Mode.MIN_LATENCY:
-                frames_data[Mode.MIN_LATENCY][request_id] = (frame_id, frame.copy(), mode['current'], time())
-                exec_net_min_latency.start_async(request_id=request_id, inputs={input_blob: in_frame})
+            exec_nets[mode.current].requests[request_id].set_completion_callback(py_callback=async_callback,
+                                                                                 py_data=(request_id,
+                                                                                          exec_nets[mode.current],
+                                                                                          frame_id,
+                                                                                          mode.current,
+                                                                                          frame.copy(),
+                                                                                          time(),
+                                                                                          raw_frame_shape,
+                                                                                          completed_request_results,
+                                                                                          empty_request_ids,
+                                                                                          mode,
+                                                                                          event,
+                                                                                          callback_exceptions))
+            exec_nets[mode.current].start_async(request_id=request_id, inputs={input_blob: in_frame})
     
-        while (not next_shown_frame_id in completed_request_results \
-                  # throughput limit
-               or (time() - prev_frame_show_time) < avg_frame_show_period * 0.9) \
-              and not empty_request_ids:
+        else:
             event.wait()
+    
+    if not callback_exceptions:
+        for mode_value in mode_info.keys():
+            log.info("")
+            log.info("Mode: {}".format(mode_value.name))
 
-        if not args.no_show:
-            key = cv2.waitKey(wait_key_code)
-            if key == 27: # ESC key
-                break
-            if key == 9: # Tab key
-                log.info("Waiting for completion of active Inter Requests...")
-                if mode['current'] == Mode.USER_SPECIFIED:
-                    for i in range(args.num_infer_requests):
-                        if not frames_data[Mode.USER_SPECIFIED][i] is None:
-                            exec_net_user_specified.requests[i].wait()
-                            frames_data[Mode.USER_SPECIFIED][i] = None
-                    empty_request_ids.clear()
-                    empty_request_ids.append(0)
-                    prev_frame_show_time = 0
-                elif mode['current'] == Mode.MIN_LATENCY:
-                    if not frames_data[Mode.MIN_LATENCY][0] is None:
-                        exec_net_min_latency.requests[0].wait()
-                        frames_data[Mode.MIN_LATENCY][0] = None
-                    empty_request_ids.clear()
-                    empty_request_ids.extend(range(args.num_infer_requests))
+            end_time = mode_info[mode_value].last_end_time if mode_value in mode_info \
+                                                              and mode_info[mode_value].last_end_time is not None \
+                                                              else time()
+            log.info("FPS: {:.1f}".format(mode_info[mode_value].frames_count / \
+                                          (end_time - mode_info[mode_value].last_start_time)))
+            log.info("Latency: {:.1f} ms".format((mode_info[mode_value].latency_sum / \
+                                                 mode_info[mode_value].frames_count) * 1e3))
+    else:
+        log.error(callback_exceptions[0])
 
-                mode['current'] = mode['current'].next()
-                log.info("Switched to {} mode".format(mode['current'].name))
-
-    if mode['current'] == Mode.USER_SPECIFIED:
-        await_requests_completion(exec_net_user_specified.requests)
-    elif mode['current'] == Mode.MIN_LATENCY:
-        await_requests_completion(exec_net_min_latency.requests)
-        
-    cv2.destroyAllWindows()
+    for mode_value in Modes:
+        await_requests_completion(exec_nets[mode_value].requests)
 
 
 if __name__ == '__main__':
