@@ -187,7 +187,7 @@ class MSCOCOorigBaseMetric(FullDatasetEvaluationMetric):
             iscrowds = annotation.metadata.get('iscrowd')
 
             for cur_cat, iscrowd, area in zip(
-                labels, iscrowds, areas
+                    labels, iscrowds, areas
             ):
                 annotation_data_to_store.append({
                     'id': count,
