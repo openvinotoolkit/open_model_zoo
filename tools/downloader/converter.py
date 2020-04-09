@@ -165,6 +165,15 @@ def main():
 
     output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
+    def get_model_dir(model):
+        dir = os.getcwd()
+        for i in range(2):
+            parent_dir = dir[:dir.rfind('/')]
+            dir = parent_dir
+        model_dir = os.path.join(dir, 'models',model.subdirectory)
+        return model_dir
+
+
     def convert(context, model):
         if model.mo_args is None:
             context.printf('========= Skipping {} (no conversions defined)', model.name)
@@ -187,7 +196,8 @@ def main():
         expanded_mo_args = [
             string.Template(arg).substitute(dl_dir=args.download_dir / model.subdirectory,
                                             mo_dir=mo_path.parent,
-                                            conv_dir=output_dir / model.subdirectory)
+                                            conv_dir=output_dir / model.subdirectory,
+                                            model_dir=get_model_dir(model))
             for arg in model.mo_args]
 
         for model_precision in sorted(model_precisions):
