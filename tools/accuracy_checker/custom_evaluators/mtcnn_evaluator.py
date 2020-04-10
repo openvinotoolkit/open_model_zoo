@@ -576,9 +576,13 @@ class MTCNNEvaluator(BaseEvaluator):
             self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
         elif num_images is not None:
             self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
-        progress_reporter = None if not check_progress else self._create_progress_reporter(
-            check_progress, self.dataset.size
-        )
+        if 'progress_reporter' in kwargs:
+            _progress_reporter = kwargs['progress_reporter']
+            _progress_reporter.reset(self.dataset.size)
+        else:
+            _progress_reporter = None if not check_progress else self._create_progress_reporter(
+                check_progress, self.dataset.size
+            )
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_prediction = []
             batch_raw_prediction = []
@@ -618,11 +622,11 @@ class MTCNNEvaluator(BaseEvaluator):
                     element_identifiers=batch_identifiers,
                     dataset_indices=batch_input_ids
                 )
-            if progress_reporter:
-                progress_reporter.update(batch_id, len(batch_prediction))
+            if _progress_reporter:
+                _progress_reporter.update(batch_id, len(batch_prediction))
 
-        if progress_reporter:
-            progress_reporter.finish()
+        if _progress_reporter:
+            _progress_reporter.finish()
 
     def compute_metrics(self, print_results=True, ignore_results_formatting=False):
         if self._metrics_results:
@@ -641,7 +645,7 @@ class MTCNNEvaluator(BaseEvaluator):
         if not self._metrics_results:
             self.compute_metrics(False, ignore_results_formatting)
 
-        result_presenters = self.metrics_executor.get_metric_presenters()
+        result_presenters = self.metric_executor.get_metric_presenters()
         extracted_results, extracted_meta = [], []
         for presenter, metric_result in zip(result_presenters, self._metrics_results):
             result, metadata = presenter.extract_result(metric_result)
@@ -688,8 +692,9 @@ class MTCNNEvaluator(BaseEvaluator):
         )
 
     def release(self):
-        for stage in self.stages:
+        for stage_name, stage in self.stages.items():
             stage.release()
+        self.launcher.release()
 
     def reset(self):
         if self.metric_executor:
