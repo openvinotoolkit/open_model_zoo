@@ -111,11 +111,11 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
                         element_identifiers=batch_identifiers,
                         dataset_indices=batch_input_ids
                     )
-            if progress_reporter:
-                progress_reporter.update(batch_id, len(batch_prediction))
+            if _progress_reporter:
+                _progress_reporter.update(batch_id, len(batch_prediction))
 
-        if progress_reporter:
-            progress_reporter.finish()
+        if _progress_reporter:
+            _progress_reporter.finish()
 
         if self.model.store_encoder_predictions:
             self.model.save_encoder_predictions()
