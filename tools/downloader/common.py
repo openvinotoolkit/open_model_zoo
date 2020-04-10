@@ -27,6 +27,7 @@ from pathlib import Path
 import yaml
 
 DOWNLOAD_TIMEOUT = 5 * 60
+MODEL_ROOT = (Path(__file__).resolve().parent / '../../models').resolve()
 
 # make sure to update the documentation if you modify these
 KNOWN_FRAMEWORKS = {
@@ -402,10 +403,8 @@ def load_models(args):
     models = []
     model_names = set()
 
-    model_root = (Path(__file__).resolve().parent / '../../models').resolve()
-
-    for config_path in sorted(model_root.glob('**/model.yml')):
-        subdirectory = config_path.parent.relative_to(model_root)
+    for config_path in sorted(MODEL_ROOT.glob('**/model.yml')):
+        subdirectory = config_path.parent.relative_to(MODEL_ROOT)
 
         with config_path.open('rb') as config_file, \
                 deserialization_context('In config "{}"'.format(config_path)):

@@ -165,12 +165,6 @@ def main():
 
     output_dir = args.download_dir if args.output_dir is None else args.output_dir
 
-    def get_model_dir(model):
-        model_root = (Path(__file__).resolve().parent / '../../models').resolve()
-        model_dir = model_root / model.subdirectory
-        return model_dir
-
-
     def convert(context, model):
         if model.mo_args is None:
             context.printf('========= Skipping {} (no conversions defined)', model.name)
@@ -190,13 +184,11 @@ def main():
                 return False
             model_format = 'onnx'
 
-        model_dir = get_model_dir(model)
-
         expanded_mo_args = [
             string.Template(arg).substitute(dl_dir=args.download_dir / model.subdirectory,
                                             mo_dir=mo_path.parent,
                                             conv_dir=output_dir / model.subdirectory,
-                                            model_dir=model_dir)
+                                            config_dir=common.MODEL_ROOT / model.subdirectory)
             for arg in model.mo_args]
 
         for model_precision in sorted(model_precisions):
