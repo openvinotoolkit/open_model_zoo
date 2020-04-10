@@ -1,63 +1,66 @@
+#!/usr/bin/env python3
+
+"""
+ Copyright (c) 2020 Intel Corporation
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
 import argparse
 import logging
-import os
 import re
 import ruamel.yaml
+import shlex
+
+from pathlib import Path
 from ruamel.yaml.scalarstring import FoldedScalarString
 from sys import exit
 
-REGIMES = [
+MODES = [
     'check',
     'update'
     ]
 
-REGIME = ''
-
-LOG_LEVELS = {
-    'critical': logging.CRITICAL,
-    'error': logging.ERROR,
-    'warning': logging.WARNING,
-    'info': logging.INFO,
-    'debug': logging.DEBUG
-}
-
-
 def parse():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-r', '--readme-dir', type=str, default='models',
-                        help='Path to root directory with models descriptions')
-    parser.add_argument('-c', '--config-dir', type=str,
-                        help='Path to root directory with topologies configs '
-                             '(by default used directory from "--readme-dir" key')
-
-    parser.add_argument('--deprecated_representation', type=bool, default=False,
-                        help="Used for old topology's representation")
-    parser.add_argument('-l', '--list', type=str, default='list_topologies.yml',
-                        help='DEPRECATED: file with topologies list')
-    parser.add_argument('-o', '--out-file', type=str,
-                        help='DEPRECATED: output file with topologies list '
-                             '(by default used original file from --out-file key)')
-
-    parser.add_argument('--regime', type=str, choices=REGIMES, default='check',
-                        help='Script work regime: "check" only finds diffs, "update" - updates values')
-    parser.add_argument('--log-level', choices=LOG_LEVELS.keys(), default='warning',
+    parser.add_argument('-d', '--model-dir', type=str, default='../../models',
+                        help='Path to root directory with models documentation and configuration files')
+    parser.add_argument('--mode', type=str, choices=MODES, default='check',
+                        help='Script work mode: "check" only finds diffs, "update" - updates values')
+    parser.add_argument('--log-level', choices=logging._levelToName.values(), default='WARNING',
                         help='Level of logging')
+    parser.add_argument('--ignored-files', type=str,
+                        help='List of files which will be ignored')
+    parser.add_argument('--ignored-files-list', type=Path,
+                        help='Path to file with ignored files')
     return parser.parse_args()
 
 
 def collect_readme(directory, ignored_files=('index.md',)):
-    if not os.path.isdir(directory):
-        logging.critical("Directory {} does not exist. Please check '--readme-dir' option.".format(os.path.abspath(directory)))
+    if not Path(directory).is_dir():
+        logging.critical("Directory {} does not exist. Please check '--model-dir' option."
+                         .format(directory))
         exit(1)
     files = {}
-    for r, d, f in os.walk(directory):
-        for file in f:
-            if '.md' not in file or file in ignored_files:
-                continue
-            files[file.replace(".md", "")] = os.path.join(r, file)
+    md_files = Path(directory).glob('**/*.md')
+    for file in md_files:
+        if file.name in ignored_files:
+            continue
+        files[file.stem] = file
     logging.info('Collected {} readme files'.format(len(files)))
     if not files:
-        logging.error("No markdown file found in {}. Exceptions - {}. Ensure, that you set right directory.".format(directory, ignored_files))
+        logging.error("No markdown file found in {}. Exceptions - {}. Ensure, that you set right directory."
+                      .format(directory, ignored_files))
         exit(1)
     return files
 
@@ -90,16 +93,16 @@ def collect_descriptions(files):
     for name, file in files.items():
         started = False
         desc = []
-        readme = open(file, "r")
-        for line in readme:
-            if line[0:2] == '##':
-                if not started:
-                    started = True
-                    continue
-                else:
-                    break
-            if started:
-                desc.append(line)
+        with open(file, "r", encoding="utf-8") as readme:
+            for line in readme:
+                if line.startswith('##'):
+                    if not started:
+                        started = True
+                        continue
+                    else:
+                        break
+                if started:
+                    desc.append(line)
         desc = convert(desc).strip('\n')
         if desc != '':
             descriptions[name] = desc
@@ -110,102 +113,83 @@ def collect_descriptions(files):
 
 
 def get_topologies_from_configs(directory):
-    if not os.path.isdir(directory):
-        logging.critical("Directory {} does not exist. Please check '--config-dir' option.".format(os.path.abspath(directory)))
+    if not Path(directory).is_dir():
+        logging.critical("Directory {} does not exist. Please check '--config-dir' option.".
+                         format(directory))
         exit(1)
     yaml = ruamel.yaml.YAML()
     yaml.preserve_quotes = True
     topologies = {}
-    for r, d, f in os.walk(directory):
-        for file in f:
-            if file == 'model.yml':
-                topologies[os.path.join(r, file)] = yaml.load(open(os.path.join(r, file), "r"))
-                topologies[os.path.join(r, file)]['name'] = r.split('/')[-1]
+    models = Path(directory).glob('**/model.yml')
+    for model in models:
+        with open(model, "r") as file:
+            topologies[model.parent.name] = (model, yaml.load(file))
+
     return topologies
 
 
-def get_topologies(file):
-    yaml = ruamel.yaml.YAML()
-    yaml.preserve_quotes = True
-    try:
-        topologies = yaml.load(open(file, 'r'))
-        return topologies
-    except FileNotFoundError as e:
-        logging.error('File with list of topologies {} not found'.format(file))
-        quit(-1)
-
-
-def find_models(topologies, name):
-    models = []
-    for model in topologies:
-        if name == model['name']:
-            models.append(model)
-    return models
-    
-
-def update_topologies(topologies, descriptions, compare=lambda lhs, rhs: rhs == lhs):
+def update_topologies(topologies, descriptions, mode, compare=lambda lhs, rhs: rhs == lhs):
     updated_models_count = 0
     updated_models = []
     for name, desc in descriptions.items():
-        models = find_models(topologies, name)
-        if models is None:
+        model = topologies.get(name, None)
+        if model is None:
             logging.warning('For description file {}.md no model found in topologies list'.format(name))
             continue
-        for model in models:
-            if not compare(model['description'], desc):
-                if REGIME == 'update':
-                    model['description'] = FoldedScalarString(desc)
-                    updated_models.append(model['name'])
-                else:
-                    logging.warning('Found diff for {} model'.format(model['name']))
-                    logging.debug('\n{:12s}{}\n\tvs\n{:12s}{}'
-                                  .format('In config:', model['description'], 'In readme:', desc))
-                updated_models_count += 1
-    if REGIME == 'update':
+        model = model[1]
+        if not compare(model['description'], desc):
+            if mode == 'update':
+                model['description'] = FoldedScalarString(desc)
+                updated_models.append(name)
+            else:
+                logging.warning('Found diff for {} model'.format(name))
+                logging.debug('\n{:12s}{}\n\tvs\n{:12s}{}'
+                              .format('In config:', model['description'], 'In readme:', desc))
+            updated_models_count += 1
+    if mode == 'update':
         logging.info('Description updated for {} models'.format(updated_models_count))
     else:
         logging.info('Description differs for {} models'.format(updated_models_count))
     return updated_models, updated_models_count
 
 
-def update_topologies_list(topologies, description):
-    tops = topologies['topologies']
-    _, diff_count = update_topologies(tops, description)
+def update_topologies_configs(topologies, descriptions, mode):
+    diffs, diff_count = update_topologies(topologies, descriptions, mode)
+    for name, topology in topologies.items():
+        if name in diffs:
+            save_topology(topology[0], topology[1])
     return diff_count
 
 
-def update_topologies_configs(topologies, description):
-    diffs, diff_count = update_topologies(topologies.values(), description)
-    for filename, topology in topologies.items():
-        if topology['name'] in diffs:
-            top = topology.copy()
-            del top['name']
-            save_topologies(filename, top)
-    return diff_count
-
-
-def save_topologies(file, topologies):
+def save_topology(file, topology):
     yaml = ruamel.yaml.YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
     yaml.width = 80
-    yaml.dump(topologies, open(file, 'w'))
+    yaml.dump(topology, open(file, 'w'))
+
+
+def get_ignored_files(args):
+    files_to_ignore = ['index.md']
+    if args.ignored_files_list:
+        if args.ignored_files_list.is_file():
+            with args.ignored_files_list.open() as file:
+                for line in file:
+                    files_to_ignore.extend(shlex.split(line, comments=True))
+        else:
+            logging.error('File {} not exist. Please, recheck "--ignored-files-list" option'
+                          .format(args.ignored_files_list))
+    if args.ignored_files:
+        files_to_ignore.extend(args.ignored_files.split(','))
+    return files_to_ignore
 
 
 def main():
     args = parse()
-    logging.basicConfig(level=LOG_LEVELS[args.log_level], format='%(levelname)s: %(message)s')
-    global REGIME
-    REGIME = args.regime
+    logging.basicConfig(level=getattr(logging, args.log_level.upper()), format='%(levelname)s: %(message)s')
 
-    descriptions = collect_descriptions(collect_readme(args.readme_dir))
-    if not args.deprecated_representation:
-        config_dir = args.config_dir if args.config_dir else args.readme_dir
-        topologies = get_topologies_from_configs(config_dir)
-        diffs = update_topologies_configs(topologies, descriptions)
-    else:
-        topologies = get_topologies(args.list)
-        diffs = update_topologies_list(topologies, descriptions)
-        save_topologies(args.out_file, topologies)
+    descriptions = collect_descriptions(collect_readme(args.model_dir, get_ignored_files(args)))
+    topologies = get_topologies_from_configs(args.model_dir)
+    diffs = update_topologies_configs(topologies, descriptions, args.mode)
 
     return diffs
 
