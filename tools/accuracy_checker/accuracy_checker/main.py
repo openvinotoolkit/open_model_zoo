@@ -266,7 +266,7 @@ def main():
             processing_info = evaluator_class.get_processing_info(config_entry)
             print_processing_info(*processing_info)
             evaluator = evaluator_class.from_configs(config_entry)
-            evaluator.process_dataset(args.stored_predictions, progress_reporter=progress_reporter)
+            evaluator.process_dataset(stored_predictions=args.stored_predictions, progress_reporter=progress_reporter)
             metrics_results, _ = evaluator.extract_metrics_results(
                 print_results=True, ignore_results_formatting=args.ignore_result_formatting
             )
