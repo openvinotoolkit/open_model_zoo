@@ -63,6 +63,7 @@ from .monocular_depth_perception import ReDWebDatasetConverter
 
 from .fashion_mnist import FashionMnistConverter
 from .inpainting import InpaintingConverter
+from ._nlp_common import BertTokenizer, WordPieceTokenizer, BasicTokenizer
 
 __all__ = [
     'BaseFormatConverter',
@@ -117,5 +118,8 @@ __all__ = [
     'MSASLContiniousConverter',
     'ReDWebDatasetConverter',
     'FashionMnistConverter',
-    'InpaintingConverter'
+    'InpaintingConverter',
+    'BertTokenizer',
+    'WordPieceTokenizer',
+    'BasicTokenizer'
 ]

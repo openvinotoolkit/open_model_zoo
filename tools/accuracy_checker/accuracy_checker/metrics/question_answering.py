@@ -17,7 +17,7 @@ limitations under the License.
 import re
 from collections import Counter
 
-from ..representation import QuestionAnsweringAnnotation, QuestionAnsweringPrediction
+from ..representation import QuestionAnsweringAnnotation, QuestionAnsweringPrediction, ExtendedQuestionAnsweringAnnotation
 from .metric import PerImageEvaluationMetric
 
 
@@ -38,7 +38,7 @@ def normalize_answer(s):
 class ScoreF1(PerImageEvaluationMetric):
     __provider__ = 'f1'
 
-    annotation_types = (QuestionAnsweringAnnotation,)
+    annotation_types = (QuestionAnsweringAnnotation,ExtendedQuestionAnsweringAnnotation)
     prediction_types = (QuestionAnsweringPrediction,)
 
     def __init__(self, *args, **kwargs):
@@ -71,7 +71,7 @@ class ScoreF1(PerImageEvaluationMetric):
 class ExactMatchScore(PerImageEvaluationMetric):
     __provider__ = 'exact_match'
 
-    annotation_types = (QuestionAnsweringAnnotation,)
+    annotation_types = (QuestionAnsweringAnnotation,ExtendedQuestionAnsweringAnnotation)
     prediction_types = (QuestionAnsweringPrediction,)
 
     def __init__(self, *args, **kwargs):

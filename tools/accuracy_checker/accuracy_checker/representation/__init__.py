@@ -66,6 +66,7 @@ from .nlp_representation import (
     MachineTranslationAnnotation,
     MachineTranslationPrediction,
     QuestionAnsweringAnnotation,
+    ExtendedQuestionAnsweringAnnotation,
     QuestionAnsweringPrediction,
     TextClassificationAnnotation
 )
@@ -138,6 +139,7 @@ __all__ = [
     'MachineTranslationAnnotation',
     'MachineTranslationPrediction',
     'QuestionAnsweringAnnotation',
+    'ExtendedQuestionAnsweringAnnotation',
     'QuestionAnsweringPrediction',
     'TextClassificationAnnotation',
 

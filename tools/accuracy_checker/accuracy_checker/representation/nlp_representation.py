@@ -34,6 +34,29 @@ class QuestionAnsweringAnnotation(QuestionAnswering):
         self.segment_ids = segment_ids
         self.tokens = tokens
 
+class ExtendedQuestionAnsweringAnnotation(QuestionAnswering):
+    def __init__(self, identifier, unique_id, input_ids, input_mask, segment_ids, cls_index,\
+                 p_mask, answer_text, paragraph_text, doc_tokens, is_impossible, paragraph_len, token_is_max_context, \
+                 tokens, token_to_orig_map, start_position, end_position):
+        super().__init__(identifier)
+        self.unique_id = unique_id
+        self.input_ids = input_ids
+        self.input_mask = input_mask
+        self.segment_ids = segment_ids
+        self.cls_index = cls_index
+        self.p_mask = p_mask
+        self.answer_text = answer_text
+        self.orig_answer_text = answer_text
+        self.doc_tokens = doc_tokens
+        self.is_impossible = is_impossible
+        self.paragraph_text = paragraph_text
+        self.paragraph_len = paragraph_len
+        self.token_is_max_context = token_is_max_context
+        self.tokens = tokens
+        self.token_to_orig_map = token_to_orig_map
+        self.start_position = start_position
+        self.end_position = end_position
+
 
 class QuestionAnsweringPrediction(QuestionAnswering):
     def __init__(self, identifier, start_logits, end_logits, start_index=None, end_index=None, tokens=None):
