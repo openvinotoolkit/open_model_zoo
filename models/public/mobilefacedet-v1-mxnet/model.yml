@@ -31,6 +31,6 @@ model_optimizer_args:
   - --input=data
   - --output=yolov30_yolooutputv30_reshape0,yolov30_yolooutputv31_reshape0,yolov30_yolooutputv32_reshape0
   - --input_model=$dl_dir/mobilefacedet_v1_mxnet-0000.params
-  - --transformations_config=$model_dir/mobileface_det.json
+  - --transformations_config=$config_dir/mobileface_det.json
 framework: mxnet
 license: https://raw.githubusercontent.com/becauseofAI/MobileFace/master/LICENSE
