@@ -75,9 +75,13 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
             self.dataset.make_subset(ids=subset, accept_pairs=allow_pairwise_subset)
         elif num_images is not None:
             self.dataset.make_subset(end=num_images, accept_pairs=allow_pairwise_subset)
-        progress_reporter = None if not check_progress else self._create_progress_reporter(
-            check_progress, self.dataset.size
-        )
+        if 'progress_reporter' in kwargs:
+            _progress_reporter = kwargs['progress_reporter']
+            _progress_reporter.reset(self.dataset.size)
+        else:
+            _progress_reporter = None if not check_progress else self._create_progress_reporter(
+                check_progress, self.dataset.size
+            )
         for batch_id, (batch_input_ids, batch_annotation, batch_inputs, batch_identifiers) in enumerate(self.dataset):
             batch_inputs = self.preprocessor.process(batch_inputs, batch_annotation)
             batch_inputs_extr, batch_meta = extract_image_representations(batch_inputs)
@@ -107,11 +111,11 @@ class SequentialActionRecognitionEvaluator(BaseEvaluator):
                         element_identifiers=batch_identifiers,
                         dataset_indices=batch_input_ids
                     )
-            if progress_reporter:
-                progress_reporter.update(batch_id, len(batch_prediction))
+            if _progress_reporter:
+                _progress_reporter.update(batch_id, len(batch_prediction))
 
-        if progress_reporter:
-            progress_reporter.finish()
+        if _progress_reporter:
+            _progress_reporter.finish()
 
         if self.model.store_encoder_predictions:
             self.model.save_encoder_predictions()
