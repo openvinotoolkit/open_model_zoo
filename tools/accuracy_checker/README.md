@@ -48,7 +48,7 @@ In order to evaluate some models required frameworks have to be installed. Accur
 - [MXNet](https://mxnet.apache.org/).
 - [OpenCV DNN](https://docs.opencv.org/4.1.0/d2/de6/tutorial_py_setup_in_ubuntu.html).
 - [TensorFlow](https://www.tensorflow.org/).
-- [ONNX Runtime](https://github.com/microsoft/onnxruntime/blob/master/README.md).
+- <a href="https://github.com/microsoft/onnxruntime/blob/master/README.md">ONNX Runtime</a>.
 - [PyTorch](https://pytorch.org/)
 
 You can use any of them or several at a time. For correct work, Accuracy Checker requires at least one. You are able postpone installation of other frameworks and install them when they will be necessary.
