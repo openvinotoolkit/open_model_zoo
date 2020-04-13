@@ -1,4 +1,4 @@
-input: `input`
+input: "input"
 input_dim: 1
 input_dim: 3
 input_dim: 72
