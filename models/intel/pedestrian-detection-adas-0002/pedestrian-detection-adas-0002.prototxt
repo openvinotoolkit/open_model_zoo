@@ -1,7 +1,7 @@
 name: "icv-pedestrian-detection-mobilenet-ssd-v2.0"
 layer {
   name: "data"
-  type: "Input"
+  type: `input`
   top: "data"
   input_param { shape: {dim: 1 dim: 3 dim: 384 dim: 672} }
 }

@@ -1,7 +1,7 @@
 name: "PVANet + R-FCN"
 layer {
   name: "data"
-  type: "Input"
+  type: `input`
   top: "data"
   input_param {
     shape {
@@ -14,7 +14,7 @@ layer {
 }
 layer {
   name: "im_info"
-  type: "Input"
+  type: `input`
   top: "im_info"
   input_param {
     shape {

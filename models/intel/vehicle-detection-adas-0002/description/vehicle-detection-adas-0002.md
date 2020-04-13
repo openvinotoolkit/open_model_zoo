@@ -28,7 +28,7 @@ Tested on a challenging internal dataset with 3000 images and 12585 vehicles to 
 
 ## Inputs
 
-1. name: "input" , shape: [1x3x384x672] - An input image in the format [BxCxHxW],
+Name: `input` , shape: [1x3x384x672] - An input image in the format [BxCxHxW],
   where:
     - B - batch size
     - C - number of channels

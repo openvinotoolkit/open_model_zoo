@@ -36,14 +36,14 @@ Image, name: `image_tensor`, shape: [1x640x640x3], format: [BxHxWxC],
 ### Converted Model
 
 Image, name: `image_tensor`, shape: [1x3x640x640], format: [BxCxHxW],
-   where:
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order: BGR.
+Expected color order: BGR.
 
 ## Output
 

@@ -23,7 +23,6 @@ on the input clip.
 | MParams                         | 4.133                                     |
 | Source framework                | PyTorch\*                                 |
 
-
 ## Performance
 
 ## Inputs

@@ -31,7 +31,7 @@ curve. Validation dataset is BIT-Vehicle.
 
 ## Inputs
 
-1. name: "input" , shape: [1x3x300x300] - An input image in the format [BxCxHxW],
+Name: `input` , shape: [1x3x300x300] - An input image in the format [BxCxHxW],
    where:
     - B - batch size
     - C - number of channels

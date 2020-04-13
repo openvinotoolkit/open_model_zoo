@@ -40,7 +40,7 @@ applicable for children since their faces were not in the training set.
 
 ## Inputs
 
-1. name: "input" , shape: [1x3x62x62] - An input image in [1xCxHxW] format. Expected color order is BGR.
+Name: `input` , shape: [1x3x62x62] - An input image in [1xCxHxW] format. Expected color order is BGR.
 
 ## Outputs
 
