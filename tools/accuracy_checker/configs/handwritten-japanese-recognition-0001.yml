@@ -27,7 +27,7 @@ models:
       - name: Kondate_nakayosi
         # In order to be used by model, images must be:
         # 1) Resized to fixed height 96, using AREA interpolation
-        # 2) Padding with edge padding, right padding only
+        # 2) Padded with edge padding, right padding only
         preprocessing:
           - type: bgr_to_gray
           - type: resize
