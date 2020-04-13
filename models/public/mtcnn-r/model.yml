@@ -13,7 +13,7 @@
 # limitations under the License.
 
 description: >-
-  The "mtcnn-r" model is one of the mtcnn <https://arxiv.org/ftp/arxiv/papers/1604/1604.02878.pdf>
+  The "mtcnn-r" model is one of the mtcnn <https://arxiv.org/abs/1604.02878>
   group of models designed to perform face detection. Short for "Multi-task Cascaded
   Convolutional Neural Network", it is implemented using the Caffe* framework. The
   "r" designation indicates that this model is the "refine" network intended to refine

@@ -751,8 +751,7 @@ class DLSDKLauncher(Launcher):
             return
         if self._weights is None:
             self._weights = model_path.parent / (model_path.name.split(model_path.suffix)[0] + '.bin')
-        self.network = ie.IENetwork(model=str(self._model), weights=str(self._weights))
-
+        self.network = self.read_network(self._model, self._weights)
         self.original_outputs = self.network.outputs
         outputs = self.config.get('outputs')
         if outputs:
@@ -796,9 +795,13 @@ class DLSDKLauncher(Launcher):
         self._weights = bin_path
         self.load_network(log=log)
 
-    @staticmethod
-    def create_ie_network(model_xml, model_bin):
-        return ie.IENetwork(model_xml, model_bin)
+    def read_network(self, model, weights):
+        if 'read_network' in ie.IECore.__dict__:
+            network = self.ie_core.read_network(model=str(model), weights=str(weights))
+        else:
+            network = ie.IENetwork(model=str(model), weights=str(weights))
+
+        return network
 
     def inputs_info_for_meta(self):
         return {

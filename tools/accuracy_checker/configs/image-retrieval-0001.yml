@@ -18,9 +18,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model:   intel/image-retrieval-0001/FP32-INT8/image-retrieval-0001.xml
-        weights: intel/image-retrieval-0001/FP32-INT8/image-retrieval-0001.bin
+          - FP16-INT8
+        model:   intel/image-retrieval-0001/FP16-INT8/image-retrieval-0001.xml
+        weights: intel/image-retrieval-0001/FP16-INT8/image-retrieval-0001.bin
         adapter: reid
 
     datasets:

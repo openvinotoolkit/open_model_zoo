@@ -7,15 +7,15 @@ models:
           - FP32
         model:   public/yolo-v2-tiny-tf/yolo-v2-tiny.pb
         adapter:
-            type: yolo_v2
-            anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
-            num: 5
-            coords: 4
-            classes: 80
-            raw_output: True
+          type: yolo_v2
+          anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
+          num: 5
+          coords: 4
+          classes: 80
+          raw_output: True
 
     datasets:
-      - name: ms_coco_detection_80_class_without_backgound
+      - name: ms_coco_detection_80_class_without_background
 
         preprocessing:
           - type: bgr_to_rgb
@@ -53,11 +53,11 @@ models:
         model:   public/yolo-v2-tiny-tf/FP32/yolo-v2-tiny-tf.xml
         weights: public/yolo-v2-tiny-tf/FP32/yolo-v2-tiny-tf.bin
         adapter:
-            type: yolo_v2
-            anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
-            num: 5
-            coords: 4
-            classes: 80
+          type: yolo_v2
+          anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
+          num: 5
+          coords: 4
+          classes: 80
 
       - framework: dlsdk
         tags:
@@ -65,14 +65,14 @@ models:
         model:   public/yolo-v2-tiny-tf/FP16/yolo-v2-tiny-tf.xml
         weights: public/yolo-v2-tiny-tf/FP16/yolo-v2-tiny-tf.bin
         adapter:
-            type: yolo_v2
-            anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
-            num: 5
-            coords: 4
-            classes: 80
+          type: yolo_v2
+          anchors: "0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828"
+          num: 5
+          coords: 4
+          classes: 80
 
     datasets:
-      - name: ms_coco_detection_80_class_without_backgound
+      - name: ms_coco_detection_80_class_without_background
 
         preprocessing:
           - type: resize

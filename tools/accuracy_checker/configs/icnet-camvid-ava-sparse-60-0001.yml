@@ -10,12 +10,6 @@ models:
         adapter: segmentation
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model: intel/icnet-camvid-ava-sparse-60-0001/FP32-INT8/icnet-camvid-ava-sparse-60-0001.xml
-        weights: intel/icnet-camvid-ava-sparse-60-0001/FP32-INT8/icnet-camvid-ava-sparse-60-0001.bin
-        adapter: segmentation
-      - framework: dlsdk
-        tags:
           - FP16
         model: intel/icnet-camvid-ava-sparse-60-0001/FP16/icnet-camvid-ava-sparse-60-0001.xml
         weights: intel/icnet-camvid-ava-sparse-60-0001/FP16/icnet-camvid-ava-sparse-60-0001.bin

@@ -32,9 +32,9 @@ models:
 
       - framework: dlsdk
         tags:
-          - FP32-INT8
-        model:   intel/text-detection-0004/FP32-INT8/text-detection-0004.xml
-        weights: intel/text-detection-0004/FP32-INT8/text-detection-0004.bin
+          - FP16-INT8
+        model:   intel/text-detection-0004/FP16-INT8/text-detection-0004.xml
+        weights: intel/text-detection-0004/FP16-INT8/text-detection-0004.bin
         adapter:
           type: pixel_link_text_detection
           pixel_link_out: model/link_logits_/add

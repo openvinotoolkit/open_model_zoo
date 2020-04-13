@@ -47,18 +47,17 @@ class PersonDetector(IEModel):
 
         return in_frame, initial_h, initial_w, scale_h, scale_w
 
-    @staticmethod
-    def _process_output(result, initial_h, initial_w, scale_h, scale_w, ):
+    def _process_output(self, result, initial_h, initial_w, scale_h, scale_w, ):
         """Converts network output to the internal format"""
 
         if result.shape[-1] == 5:  # format: [xmin, ymin, xmax, ymax, conf]
             return np.array([[scale_w, scale_h, scale_w, scale_h, 1.0]]) * result
         else:  # format: [image_id, label, conf, xmin, ymin, xmax, ymax]
-            scale_w *= initial_w
-            scale_h *= initial_h
+            scale_w *= self.input_width
+            scale_h *= self.input_height
             out = np.array([[1.0, scale_w, scale_h, scale_w, scale_h]]) * result[0, 0, :, 2:]
 
-            return np.concatenate((out[:, 1:], out[:, 1].reshape([-1, 1])), axis=1)
+            return np.concatenate((out[:, 1:], out[:, 0].reshape([-1, 1])), axis=1)
 
     def async_infer(self, frame, req_id):
         """Requests model inference for the specified image"""

@@ -25,7 +25,7 @@ models:
 
 
     datasets:
-      - name: ms_coco_detection_80_class_without_backgound
+      - name: ms_coco_detection_80_class_without_background
         preprocessing:
           - type: centernet_affine_transform
             dst_width: 384

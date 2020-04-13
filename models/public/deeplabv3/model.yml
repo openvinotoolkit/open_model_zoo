@@ -14,7 +14,7 @@
 
 description: >-
   DeepLab is a state-of-art deep learning model for semantic image segmentation. For
-  details see paper <https://arxiv.org/pdf/1706.05587.pdf>.
+  details see paper <https://arxiv.org/abs/1706.05587>.
 task_type: semantic_segmentation
 files:
   - name: deeplabv3.tar.gz

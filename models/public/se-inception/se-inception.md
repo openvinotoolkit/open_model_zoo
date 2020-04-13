@@ -2,7 +2,7 @@
 
 ## Use Case and High-Level Description
 
-[BN-Inception with Squeeze-and-Excitation blocks](https://arxiv.org/pdf/1709.01507.pdf)
+[BN-Inception with Squeeze-and-Excitation blocks](https://arxiv.org/abs/1709.01507)
 
 ## Example
 

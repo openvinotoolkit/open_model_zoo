@@ -68,7 +68,7 @@ CONFIG_SHARED_PARAMETERS = ['bitstream']
 ACCEPTABLE_MODEL = [
     'caffe_model', 'caffe_weights',
     'tf_model', 'tf_meta',
-    'mxnet_model',
+    'mxnet_weights',
     'onnx_model',
     'kaldi_model',
     'model'

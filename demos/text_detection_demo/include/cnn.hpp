@@ -29,7 +29,6 @@ class Cnn {
     const cv::Size& input_size() const {return input_size_;}
 
   private:
-    std::string model_path_;
     bool is_initialized_;
     cv::Size input_size_;
     int channels_;

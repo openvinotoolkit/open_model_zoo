@@ -349,4 +349,5 @@ class ModelEvaluator(BaseEvaluator):
         self.reader.reset()
 
     def release(self):
+        self.input_feeder.release()
         self.launcher.release()
