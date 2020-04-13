@@ -49,10 +49,10 @@ For each case format is `B,N*DB,Cx,Cy`, where
     - `Cx`, `Cy` - cell index
 
 Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class`], where:
-- (`x`,`y`) - coordinates of box center, relative to cell
-- `h`,`w` - normalized height and width of box
-- `conf` - confidence of detection box
-- `class` - score for class
+- (`x`,`y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get coordinates relative to the cell
+- `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get height and width values relative to cell
+- `conf` - confidence of detection box, use [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
+- `class` - probability that detected object belongs to specific class, use [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
 
 ### Converted model
 
@@ -69,10 +69,10 @@ For each case format is `B,N*DB,Cx,Cy`, where
     - `Cx`, `Cy` - cell index
 
 Detection box has format [`x`,`y`,`h`,`w`,`conf`,`class`], where:
-- (`x`,`y`) - coordinates of box center, relative to cell
-- `h`,`w` - normalized height and width of box
-- `conf` - confidence of detection box
-- `class` - score for class in the [0,1] range
+- (`x`,`y`) - raw coordinates of box center, apply [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get coordinates relative to the cell
+- `h`,`w` - raw height and width of box, apply [exponential function](https://en.wikipedia.org/wiki/Exponential_function) and multiply by corresponding anchors to get height and width values relative to cell
+- `conf` - confidence of detection box, use [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
+- `class` - probability that detected object belongs to specific class, use [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function) to get confidence in [0,1] range
 
 ## Legal Information
 
