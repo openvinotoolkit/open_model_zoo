@@ -1,7 +1,7 @@
 name: "0003_EmoNet_ResNet10"
 layer {
   name: "data"
-  type: `input`
+  type: "Input"
   top: "data"
   input_param {
     shape {

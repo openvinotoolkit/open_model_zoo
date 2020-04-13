@@ -7,8 +7,8 @@ input_dim: 72
 layer {
   name: "BatchNorm1"
   type: "BatchNorm"
-  bottom: `input`
-  top: `input`
+  bottom: "input"
+  top: "input"
   batch_norm_param {
     #use_global_stats: true
     moving_average_fraction: 0.9
@@ -17,8 +17,8 @@ layer {
 layer {
   name: "Scale1"
   type: "Scale"
-  bottom: `input`
-  top: `input`
+  bottom: "input"
+  top: "input"
   param {
     lr_mult: 1.0
     decay_mult: 1.0
@@ -34,7 +34,7 @@ layer {
 layer {
   name: "Convolution1"
   type: "Convolution"
-  bottom: `input`
+  bottom: "input"
   top: "Convolution1"
   param {
     name: "Convolution1_w"

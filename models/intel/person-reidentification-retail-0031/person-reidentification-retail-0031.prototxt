@@ -1,6 +1,6 @@
 name: "ICV-RMNet-PD-ReID-Light"
 layer {
-type: `input`
+type: "Input"
 name: "data"
 top: "data"
   input_param {

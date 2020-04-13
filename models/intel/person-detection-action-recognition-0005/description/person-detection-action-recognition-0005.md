@@ -29,7 +29,7 @@ curve.
 
 ## Inputs
 
-Name: `input` , shape: [1x3x400x680] - An input image in the format [BxCxHxW],
+Name: `input`, shape: [1x3x400x680] - An input image in the format [BxCxHxW],
    where:
     - B - batch size
     - C - number of channels

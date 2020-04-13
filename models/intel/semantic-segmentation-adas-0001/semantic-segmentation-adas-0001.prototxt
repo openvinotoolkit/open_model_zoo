@@ -1,7 +1,7 @@
 name: "semantic-segmentation-adas-0001"
 layer {
   name: "data"
-  type: `input`
+  type: "Input"
   top: "data"
   input_param {
     shape {
