@@ -80,23 +80,23 @@ def get_output_postprocessor(net, bboxes='bboxes', labels='labels', scores='scor
         output_blob = next(iter(net.outputs))
         return SingleOutputPostprocessor(output_blob)
     elif len(net.outputs) >= 3:
-        def find_layer(name, output_name, all_outputs):
+        def find_layer(name, all_outputs):
             suitable_layers = [layer_name for layer_name in all_outputs if name in layer_name]
             if not suitable_layers:
-                raise ValueError('Suitable layer for "{}" output is not found'.format(output_name))
+                raise ValueError('Suitable layer for "{}" output is not found'.format(name))
 
             if len(suitable_layers) > 1:
-                raise ValueError('More than layers matched to "{}" output'.format(output_name))
+                raise ValueError('More than 1 layer matched to "{}" output'.format(name))
 
             return suitable_layers[0]
 
-        labels_out = find_layer(labels, 'labels', net.outputs)
-        scores_out = find_layer(scores, 'scores', net.outputs)
-        bboxes_out = find_layer(bboxes, 'bboxes', net.outputs)
+        labels_out = find_layer(labels, net.outputs)
+        scores_out = find_layer(scores, net.outputs)
+        bboxes_out = find_layer(bboxes, net.outputs)
 
         return MultipleOutputPostprocessor(bboxes_out, scores_out, labels_out)
 
-    raise RuntimeError("Unsupported models outputs")
+    raise RuntimeError("Unsupported model outputs")
 
 
 def main():
