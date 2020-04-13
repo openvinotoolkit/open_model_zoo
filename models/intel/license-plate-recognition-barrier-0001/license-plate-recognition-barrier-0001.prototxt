@@ -1,7 +1,7 @@
 name: "LPRNet"
 layer {
   name: "data"
-  type: "Input"
+  type: `input`
   top: "data"
   input_param {
     shape {
@@ -15,7 +15,7 @@ layer {
 
 layer {
   name: "seq_ind"
-  type: "Input"
+  type: `input`
   top: "seq_ind"
   input_param {
     shape {

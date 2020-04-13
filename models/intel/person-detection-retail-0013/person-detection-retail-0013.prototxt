@@ -2,7 +2,7 @@ name: "ResMobNet_v4 (LReLU) with single SSD head"
 
 layer {
   name: "data"
-  type: "Input"
+  type: `input`
   top: "data"
   input_param {
     shape {

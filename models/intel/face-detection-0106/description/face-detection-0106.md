@@ -3,7 +3,7 @@
 ## Use Case and High-Level Description
 
 Face detector based on ResNet152 as a backbone with a
-ATSS head for indoor/outdoor scenes shot by a front-facing camera.
+ATSS head for indoor and outdoor scenes shot by a front-facing camera.
 
 ## Example
 
@@ -27,15 +27,15 @@ curve. All numbers were evaluated by taking into account only faces bigger than
 
 ## Inputs
 
-1. name: "input" , shape: [1x3x640x640] - An input image in the format [BxCxHxW],
-   where:
+1. Name: `input` , shape: [1x3x640x640] - An input image in the format [BxCxHxW],
+where:
 
-    - B - batch size
-    - C - number of channels
-    - H - image height
-    - W - image width
+   - B - batch size
+   - C - number of channels
+   - H - image height
+   - W - image width
 
-   Expected color order - BGR.
+Expected color order: BGR.
 
 ## Outputs
 

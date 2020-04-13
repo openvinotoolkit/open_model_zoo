@@ -53,7 +53,7 @@ Similarly, training dataset has 219,181 images with:
     - H - image height
     - W - image width
 
-   Expected color order - BGR.
+   Expected color order: BGR.
 
 ## Outputs
 

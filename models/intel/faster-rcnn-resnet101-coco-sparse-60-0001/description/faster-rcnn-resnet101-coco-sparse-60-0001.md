@@ -23,7 +23,7 @@ Average Precision metric described in: ["COCO: Common Objects in Context"](http:
 
 ## Inputs
 
-1. name: "input" , shape: [1x3x800x1280] - An input image in the format [BxCxHxW],
+Name: `input` , shape: [1x3x800x1280] - An input image in the format [BxCxHxW],
   where:
     - B - batch size
     - C - number of channels
