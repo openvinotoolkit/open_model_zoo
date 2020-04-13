@@ -6,7 +6,7 @@ You can use the following models with the demo:
 * `colorization-v2`
 * `colorization-v2-norebal`
 
-For more information about pretrained models, refer to the [model documentation](../../../models/public/index.md).
+For more information about the pre-trained models, refer to the [model documentation](../../../models/intel/index.md).
 
 ### How It Works
 
