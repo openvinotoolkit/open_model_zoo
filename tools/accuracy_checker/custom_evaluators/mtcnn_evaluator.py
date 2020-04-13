@@ -399,7 +399,7 @@ class DLSDKModelMixin:
         self.input_feeder = InputFeeder(self.model_info.get('inputs', []), self.inputs, self.fit_to_input)
 
     def load_model(self, network_info, launcher, model_prefix=None):
-        self.network = launcher.create_ie_network(str(network_info['model']), str(network_info['weights']))
+        self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
         self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.update_input_output_info(model_prefix)
@@ -476,7 +476,7 @@ class DLSDKProposalStage(DLSDKModelMixin, ProposalBaseStage):
         self.adapter = create_adapter(pnet_adapter_config)
 
     def load_model(self, network_info, launcher, model_prefix=None):
-        self.network = launcher.create_ie_network(str(network_info['model']), str(network_info['weights']))
+        self.network = launcher.read_network(str(network_info['model']), str(network_info['weights']))
         self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         self.launcher = launcher
         self.update_input_output_info(model_prefix)

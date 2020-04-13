@@ -471,7 +471,7 @@ class DetectorDLSDKModel(BaseModel):
     def load_model(self, network_info, launcher):
         model, weights = self.automatic_model_search(network_info)
         if weights is not None:
-            self.network = launcher.create_ie_network(str(model), str(weights))
+            self.network = launcher.read_network(str(model), str(weights))
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
@@ -496,7 +496,7 @@ class RecognizerDLSDKModel(BaseModel):
     def load_model(self, network_info, launcher):
         model, weights = self.automatic_model_search(network_info)
         if weights is not None:
-            self.network = launcher.create_ie_network(str(model), str(weights))
+            self.network = launcher.read_network(str(model), str(weights))
             self.exec_network = launcher.ie_core.load_network(self.network, launcher.device)
         else:
             self.exec_network = launcher.ie_core.import_network(str(model))
